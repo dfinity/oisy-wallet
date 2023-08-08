@@ -12,3 +12,9 @@ crate-type = ["cdylib"]
 candid = "0.9.3"
 ic-cdk = "0.10.0"
 ic-cdk-macros = "0.7.1"
+ic-cdk-timers = "0.4"
+serde = "1"
+tiny-keccak = { version = "2", features = ["keccak"] }
+k256 = "0.13"
+hex = "0.4"
+getrandom = { version = "0.2", features = ["custom"] }

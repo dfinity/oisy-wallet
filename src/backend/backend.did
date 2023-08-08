@@ -1,1 +1,24 @@
-service : { greet : (text) -> (text) query }
+type Arg = variant {
+    Init : record { ecdsa_key_name : text; chain_id : nat };
+    Upgrade;
+};
+
+service : (Arg) -> {
+    // Computes caller's Ethereum address.
+    caller_eth_address : () -> (text);
+
+    // Encodes and signs an Ethereum transaction.
+    // Returns hex-encoded raw transaction bytes.
+    sign_transaction : (record {
+        // The destination address.
+        to : text;
+        // The amount of gas for the transaction execution.
+        gas : nat;
+        // The max price of gas unit.
+        gas_price : nat;
+        // The value (in Wei) this transaction transfers.
+        value : nat;
+        // The index of this transaction.
+        nonce : nat;
+    }) -> (text);
+}
