@@ -1,0 +1,48 @@
+{
+	"name": "@dfinity/ic_eth_wallet",
+	"version": "0.0.1",
+	"private": true,
+	"license": "SEE LICENSE IN LICENSE.md",
+	"scripts": {
+		"build:compress": "./scripts/build.compress.sh",
+		"build:csp": "node scripts/build.csp.mjs",
+		"build:post-process": "npm run build:csp && npm run build:compress",
+		"dev": "vite dev",
+		"build": "tsc --noEmit && vite build && npm run build:post-process",
+		"preview": "vite preview",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test": "vitest",
+		"lint": "prettier --plugin-search-dir . --check . && eslint .",
+		"format": "prettier --plugin-search-dir . --write .",
+		"prebuild": "npm run generate",
+		"generate": "scripts/did.sh && dfx generate && node scripts/update.types.mjs && npm run format"
+	},
+	"dependencies": {
+		"@dfinity/agent": "^0.18.1",
+		"@dfinity/candid": "^0.18.1",
+		"@dfinity/principal": "^0.18.1"
+	},
+	"devDependencies": {
+		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
+		"@rollup/plugin-inject": "^5.0.3",
+		"@sveltejs/adapter-static": "^2.0.3",
+		"@sveltejs/kit": "^1.20.4",
+		"@typescript-eslint/eslint-plugin": "^5.45.0",
+		"@typescript-eslint/parser": "^5.45.0",
+		"autoprefixer": "^10.4.14",
+		"eslint": "^8.28.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-svelte": "^2.30.0",
+		"prettier": "^2.8.0",
+		"prettier-plugin-svelte": "^2.10.1",
+		"sass": "^1.64.2",
+		"svelte": "^4.0.5",
+		"svelte-check": "^3.4.3",
+		"tslib": "^2.4.1",
+		"typescript": "^5.0.0",
+		"vite": "^4.4.2",
+		"vitest": "^0.33.0"
+	},
+	"type": "module"
+}
