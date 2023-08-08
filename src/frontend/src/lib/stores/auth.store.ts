@@ -8,8 +8,8 @@ import { createAuthClient } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
-import { derived, writable, type Readable } from 'svelte/store';
 import { nonNullish } from '@dfinity/utils';
+import { derived, writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
 	identity: Identity | undefined | null;

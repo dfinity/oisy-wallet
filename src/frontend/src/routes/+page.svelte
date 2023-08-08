@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { authSignedInStore, authStore } from '$lib/stores/auth.store';
+	import { authSignedInStore } from '$lib/stores/auth.store';
+	import { signIn, signOut } from '$lib/services/auth.services';
 </script>
 
 {#if $authSignedInStore}
-	<button on:click={authStore.signOut}>Sign-out</button>
+	<button on:click={signOut}>Sign-out</button>
 {:else}
-	<button on:click={authStore.signIn}>Sign-in</button>
+	<button on:click={signIn}>Sign-in</button>
 {/if}
