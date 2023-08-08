@@ -20,8 +20,11 @@
 	},
 	"dependencies": {
 		"@dfinity/agent": "^0.18.1",
+		"@dfinity/auth-client": "^0.18.1",
 		"@dfinity/candid": "^0.18.1",
-		"@dfinity/principal": "^0.18.1"
+		"@dfinity/principal": "^0.18.1",
+		"@dfinity/utils": "^0.0.19",
+		"buffer": "^6.0.3"
 	},
 	"devDependencies": {
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",

@@ -9,4 +9,4 @@ declare global {
 	}
 }
 
-export {};
+declare const VITE_APP_VERSION: string;

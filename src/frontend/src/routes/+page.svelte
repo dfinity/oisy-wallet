@@ -1,2 +1,9 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<script lang="ts">
+	import { authSignedInStore, authStore } from '$lib/stores/auth.store';
+</script>
+
+{#if $authSignedInStore}
+	<button on:click={authStore.signOut}>Sign-out</button>
+{:else}
+	<button on:click={authStore.signIn}>Sign-in</button>
+{/if}
