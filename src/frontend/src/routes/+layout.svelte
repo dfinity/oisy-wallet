@@ -5,6 +5,8 @@
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { isNullish } from '@dfinity/utils';
 	import { loadEthAddress } from '$lib/services/eth.services';
+	import type { WebSocketListener } from '$lib/sockets/provider.sockets';
+	import { initListener as initListenerSockets } from '$lib/sockets/provider.sockets';
 
 	/**
 	 * Init authentication
@@ -37,6 +39,24 @@
 	};
 
 	$: (async () => initEthAddress($authStore))();
+
+	/**
+	 * Websocket
+	 */
+
+	let listener: WebSocketListener | undefined = undefined;
+
+	const initListener = async ({ identity }: AuthStoreData) => {
+		await listener?.destroy();
+
+		if (isNullish(identity)) {
+			return;
+		}
+
+		listener = initListenerSockets();
+	};
+
+	$: (async () => initListener($authStore))();
 
 	/**
 	 * Workers
