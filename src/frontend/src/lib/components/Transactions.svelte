@@ -13,7 +13,7 @@
 	});
 </script>
 
-{#each transactions as { from, to, value, blockNumber }, blockNumber}
+{#each transactions as { from, to, value, blockNumber }}
 	<hr />
 	<p>From: <output>{from}</output></p>
 	<p>To: <output>{to}</output></p>
