@@ -3,6 +3,12 @@
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
 	import { onMount } from 'svelte';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
+	import { isNullish } from '@dfinity/utils';
+	import { loadEthAddress } from '$lib/services/eth.services';
+
+	/**
+	 * Init authentication
+	 */
 
 	const init = async () => await Promise.all([syncAuthStore()]);
 
@@ -17,6 +23,24 @@
 			console.error(err);
 		}
 	};
+
+	/**
+	 * Init eth address
+	 */
+
+	const initEthAddress = async ({ identity }: AuthStoreData) => {
+		if (isNullish(identity)) {
+			return;
+		}
+
+		await loadEthAddress();
+	};
+
+	$: (async () => initEthAddress($authStore))();
+
+	/**
+	 * Workers
+	 */
 
 	let worker: { syncAuthIdle: (auth: AuthStoreData) => void } | undefined;
 
