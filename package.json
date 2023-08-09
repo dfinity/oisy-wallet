@@ -16,7 +16,8 @@
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write .",
 		"prebuild": "npm run generate",
-		"generate": "scripts/did.sh && dfx generate && node scripts/update.types.mjs && npm run format"
+		"generate": "scripts/did.sh && dfx generate && node scripts/update.types.mjs && npm run format",
+		"deploy": "scripts/deploy.sh"
 	},
 	"dependencies": {
 		"@dfinity/agent": "^0.18.1",
