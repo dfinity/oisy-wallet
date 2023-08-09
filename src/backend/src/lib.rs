@@ -1,7 +1,14 @@
 use candid::{CandidType, Deserialize, Nat, Principal};
+use ethers_core::abi::ethereum_types::{Address, U256, U64};
+use ethers_core::utils::keccak256;
+use ic_cdk::api::management_canister::ecdsa::{
+    ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
+    SignWithEcdsaArgument,
+};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, update};
 use k256::PublicKey;
 use std::cell::RefCell;
+use std::str::FromStr;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
@@ -14,13 +21,11 @@ fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
 #[derive(CandidType, Deserialize)]
 pub struct State {
     pub ecdsa_key_name: String,
-    pub chain_id: Nat,
 }
 
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
     pub ecdsa_key_name: String,
-    pub chain_id: Nat,
 }
 
 #[derive(CandidType, Deserialize)]
@@ -32,15 +37,9 @@ enum Arg {
 #[init]
 fn init(arg: Arg) {
     match arg {
-        Arg::Init(InitArg {
-            ecdsa_key_name,
-            chain_id,
-        }) => STATE.with(|cell| {
-            *cell.borrow_mut() = Some(State {
-                ecdsa_key_name,
-                chain_id,
-            })
-        }),
+        Arg::Init(InitArg { ecdsa_key_name }) => {
+            STATE.with(|cell| *cell.borrow_mut() = Some(State { ecdsa_key_name }))
+        }
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
 }
@@ -66,29 +65,21 @@ fn principal_to_derivation_path(p: &Principal) -> Vec<Vec<u8>> {
 
 fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
     use k256::elliptic_curve::sec1::ToEncodedPoint;
-    use tiny_keccak::Hasher;
 
     let key =
         PublicKey::from_sec1_bytes(pubkey_bytes).expect("failed to parse the public key as SEC1");
     let point = key.to_encoded_point(false);
-    // we re-encode the key to decompress the representation.
+    // we re-encode the key to the decompressed representation.
     let point_bytes = point.as_bytes();
     assert_eq!(point_bytes[0], 0x04);
 
-    let mut output = [0; 32];
-    let mut hasher = tiny_keccak::Keccak::v256();
-    hasher.update(&point_bytes[1..]);
-    hasher.finalize(&mut output);
+    let hash = keccak256(&point_bytes[1..]);
 
-    format!("0x{}", hex::encode(&output[12..32]))
+    ethers_core::utils::to_checksum(&Address::from_slice(&hash[12..32]), None)
 }
 
 #[update]
 async fn caller_eth_address() -> String {
-    use ic_cdk::api::management_canister::ecdsa::{
-        ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
-    };
-
     let caller = ic_cdk::caller();
 
     let name = read_state(|s| s.ecdsa_key_name.clone());
@@ -108,6 +99,7 @@ async fn caller_eth_address() -> String {
 
 #[derive(CandidType, Deserialize)]
 pub struct SignRequest {
+    pub chain_id: Nat,
     pub to: String,
     pub gas: Nat,
     pub gas_price: Nat,
@@ -115,9 +107,70 @@ pub struct SignRequest {
     pub nonce: Nat,
 }
 
+fn nat_to_u256(n: &Nat) -> U256 {
+    let be_bytes = n.0.to_bytes_be();
+    U256::from_big_endian(&be_bytes)
+}
+
+fn nat_to_u64(n: &Nat) -> U64 {
+    let be_bytes = n.0.to_bytes_be();
+    U64::from_big_endian(&be_bytes)
+}
+
 #[update]
-fn sign_transaction() -> String {
-    todo!()
+async fn sign_transaction(req: SignRequest) -> String {
+    use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
+    use ethers_core::types::{Bytes, Signature};
+
+    const EIP1559_TX_ID: u8 = 2;
+
+    let caller = ic_cdk::caller();
+
+    let tx = Eip1559TransactionRequest {
+        chain_id: Some(nat_to_u64(&req.chain_id)),
+        from: None,
+        to: Some(
+            Address::from_str(&req.to)
+                .expect("failed to parse the destination address")
+                .into(),
+        ),
+        gas: Some(nat_to_u256(&req.gas)),
+        value: Some(nat_to_u256(&req.value)),
+        nonce: Some(nat_to_u256(&req.nonce)),
+        data: Some(Bytes::new()),
+        access_list: Default::default(),
+        max_priority_fee_per_gas: Some(1000000000.into()),
+        max_fee_per_gas: Some(nat_to_u256(&req.gas_price)),
+    };
+
+    let mut unsigned_tx_bytes = tx.rlp().to_vec();
+    unsigned_tx_bytes.insert(0, EIP1559_TX_ID);
+
+    let txhash = keccak256(&unsigned_tx_bytes);
+
+    let ecdsa_key_name = read_state(|s| s.ecdsa_key_name.clone());
+
+    let (response,) = sign_with_ecdsa(SignWithEcdsaArgument {
+        message_hash: txhash.to_vec(),
+        derivation_path: principal_to_derivation_path(&caller),
+        key_id: EcdsaKeyId {
+            curve: EcdsaCurve::Secp256k1,
+            name: ecdsa_key_name,
+        },
+    })
+    .await
+    .expect("failed to sign the transaction");
+
+    let signature = Signature {
+        v: (response.signature[63] % 2) as u64,
+        r: U256::from_big_endian(&response.signature[0..32]),
+        s: U256::from_big_endian(&response.signature[32..64]),
+    };
+
+    let mut signed_tx_bytes = tx.rlp_signed(&signature).to_vec();
+    signed_tx_bytes.insert(0, EIP1559_TX_ID);
+
+    format!("0x{}", hex::encode(&signed_tx_bytes))
 }
 
 export_candid!();

@@ -7,4 +7,6 @@
 	<span>Loading eth address...</span>
 {:else}
 	<output>{$ethAddressStore}</output>
+
+	<slot />
 {/if}
