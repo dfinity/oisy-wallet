@@ -7,11 +7,11 @@
 </script>
 
 {#if $authSignedInStore}
-	<EthAddress />
+	<EthAddress>
+		<Balance />
 
-	<Balance />
-
-	<Transactions />
+		<Transactions />
+	</EthAddress>
 
 	<button on:click={signOut}>Sign-out</button>
 {:else}
