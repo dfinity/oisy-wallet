@@ -1,4 +1,4 @@
-import { ECDSA_PUBLIC_KEY } from '$lib/types/eth';
+import type { ECDSA_PUBLIC_KEY } from '$lib/types/eth';
 import { AlchemyWebSocketProvider } from '@ethersproject/providers/lib.esm/alchemy-provider';
 import { Contract } from 'ethers';
 
