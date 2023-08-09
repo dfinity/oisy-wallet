@@ -1,4 +1,4 @@
-use candid::{candid_method, CandidType, Deserialize, Nat, Principal};
+use candid::{CandidType, Deserialize, Nat, Principal};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, update};
 use k256::PublicKey;
 use std::cell::RefCell;
@@ -84,7 +84,6 @@ fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
 }
 
 #[update]
-#[candid_method(update)]
 async fn caller_eth_address() -> String {
     use ic_cdk::api::management_canister::ecdsa::{
         ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
@@ -117,7 +116,6 @@ pub struct SignRequest {
 }
 
 #[update]
-#[candid_method(update)]
 fn sign_transaction() -> String {
     todo!()
 }
