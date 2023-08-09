@@ -74,7 +74,8 @@ fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
     assert_eq!(point_bytes[0], 0x04);
 
     let hash = keccak256(&point_bytes[1..]);
-    format!("0x{}", hex::encode(&hash[12..32]))
+
+    ethers_core::utils::to_checksum(&Address::from_slice(&hash[12..32]), None)
 }
 
 #[update]
