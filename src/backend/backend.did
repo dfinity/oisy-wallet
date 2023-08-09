@@ -1,6 +1,14 @@
 type Arg = variant { Upgrade; Init : InitArg };
-type InitArg = record { ecdsa_key_name : text; chain_id : nat };
+type InitArg = record { ecdsa_key_name : text };
+type SignRequest = record {
+  to : text;
+  gas : nat;
+  value : nat;
+  chain_id : nat;
+  nonce : nat;
+  gas_price : nat;
+};
 service : (Arg) -> {
   caller_eth_address : () -> (text);
-  sign_transaction : () -> (text);
+  sign_transaction : (SignRequest) -> (text);
 }
