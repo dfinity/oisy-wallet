@@ -8,9 +8,10 @@ export interface SignRequest {
 	to: string;
 	gas: bigint;
 	value: bigint;
+	max_priority_fee_per_gas: bigint;
+	max_fee_per_gas: bigint;
 	chain_id: bigint;
 	nonce: bigint;
-	gas_price: bigint;
 }
 export interface _SERVICE {
 	caller_eth_address: ActorMethod<[], string>;
