@@ -4,6 +4,7 @@
 	import EthAddress from '$lib/components/EthAddress.svelte';
 	import Balance from '$lib/components/Balance.svelte';
 	import Transactions from '$lib/components/Transactions.svelte';
+	import Send from '$lib/components/Send.svelte';
 </script>
 
 {#if $authSignedInStore}
@@ -11,6 +12,8 @@
 		<Balance />
 
 		<Transactions />
+
+		<Send />
 	</EthAddress>
 
 	<button on:click={signOut}>Sign-out</button>
