@@ -66,6 +66,7 @@ dependencies = [
  "ic-cdk-timers",
  "k256",
  "serde",
+ "sha3",
 ]
 
 [[package]]

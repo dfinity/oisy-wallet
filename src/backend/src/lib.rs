@@ -78,14 +78,11 @@ fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
     ethers_core::utils::to_checksum(&Address::from_slice(&hash[12..32]), None)
 }
 
-#[update]
-async fn caller_eth_address() -> String {
-    let caller = ic_cdk::caller();
-
+async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
     let name = read_state(|s| s.ecdsa_key_name.clone());
     let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
         canister_id: None,
-        derivation_path: principal_to_derivation_path(&caller),
+        derivation_path: principal_to_derivation_path(&principal),
         key_id: EcdsaKeyId {
             curve: EcdsaCurve::Secp256k1,
             name,
@@ -93,8 +90,12 @@ async fn caller_eth_address() -> String {
     })
     .await
     .expect("failed to get public key");
+    key.public_key
+}
 
-    pubkey_bytes_to_address(&key.public_key)
+#[update]
+async fn caller_eth_address() -> String {
+    pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
 #[derive(CandidType, Deserialize)]
@@ -102,7 +103,8 @@ pub struct SignRequest {
     pub chain_id: Nat,
     pub to: String,
     pub gas: Nat,
-    pub gas_price: Nat,
+    pub max_fee_per_gas: Nat,
+    pub max_priority_fee_per_gas: Nat,
     pub value: Nat,
     pub nonce: Nat,
 }
@@ -126,6 +128,8 @@ async fn sign_transaction(req: SignRequest) -> String {
 
     let caller = ic_cdk::caller();
 
+    let pubkey = ecdsa_pubkey_of(&caller).await;
+
     let tx = Eip1559TransactionRequest {
         chain_id: Some(nat_to_u64(&req.chain_id)),
         from: None,
@@ -139,8 +143,8 @@ async fn sign_transaction(req: SignRequest) -> String {
         nonce: Some(nat_to_u256(&req.nonce)),
         data: Some(Bytes::new()),
         access_list: Default::default(),
-        max_priority_fee_per_gas: Some(1000000000.into()),
-        max_fee_per_gas: Some(nat_to_u256(&req.gas_price)),
+        max_priority_fee_per_gas: Some(nat_to_u256(&req.max_priority_fee_per_gas)),
+        max_fee_per_gas: Some(nat_to_u256(&req.max_fee_per_gas)),
     };
 
     let mut unsigned_tx_bytes = tx.rlp().to_vec();
@@ -162,7 +166,7 @@ async fn sign_transaction(req: SignRequest) -> String {
     .expect("failed to sign the transaction");
 
     let signature = Signature {
-        v: (response.signature[63] % 2) as u64,
+        v: y_parity(&unsigned_tx_bytes, &response.signature, &pubkey),
         r: U256::from_big_endian(&response.signature[0..32]),
         s: U256::from_big_endian(&response.signature[32..64]),
     };
@@ -171,6 +175,29 @@ async fn sign_transaction(req: SignRequest) -> String {
     signed_tx_bytes.insert(0, EIP1559_TX_ID);
 
     format!("0x{}", hex::encode(&signed_tx_bytes))
+}
+
+fn y_parity(msg: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
+    use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
+    use sha3::{Digest, Keccak256};
+
+    let orig_key = VerifyingKey::from_sec1_bytes(pubkey).expect("failed to parse the pubkey");
+    let signature = Signature::try_from(sig).unwrap();
+    for parity in [0u8, 1] {
+        let recid = RecoveryId::try_from(parity).unwrap();
+        let recovered_key =
+            VerifyingKey::recover_from_digest(Keccak256::new_with_prefix(msg), &signature, recid)
+                .expect("failed to recover key");
+        if recovered_key == orig_key {
+            return parity as u64;
+        }
+    }
+
+    panic!(
+        "failed to recover the parity bit from a signature; sig: {}, pubkey: {}",
+        hex::encode(sig),
+        hex::encode(pubkey)
+    )
 }
 
 export_candid!();
