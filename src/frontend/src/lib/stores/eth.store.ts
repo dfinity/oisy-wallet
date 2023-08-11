@@ -1,7 +1,7 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/eth';
 import { writable, type Readable } from 'svelte/store';
 
-type EthAddressData = ECDSA_PUBLIC_KEY | undefined | null;
+export type EthAddressData = ECDSA_PUBLIC_KEY | undefined | null;
 
 export interface EthAddressStore extends Readable<EthAddressData> {
 	set: (ethAddress: ECDSA_PUBLIC_KEY) => void;
