@@ -1,11 +1,10 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/eth';
-import { AlchemyWebSocketProvider } from '@ethersproject/providers/lib.esm/alchemy-provider';
+import { InfuraWebSocketProvider } from '@ethersproject/providers';
 
 export type WebSocketListener = { destroy: () => Promise<void> };
 
-const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
-// wss://eth-goerli.g.alchemy.com/v2/_ITYBl7vV-O04qNMapBFUFQd33lp_VMX
-const wsProvider = new AlchemyWebSocketProvider('goerli', API_KEY);
+const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
+const wsProvider = new InfuraWebSocketProvider('sepolia', API_KEY);
 
 // Optimistic implementation with no-reconnection in case the connectoin is being closed
 export const initListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener => {
@@ -20,7 +19,13 @@ export const initListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener => {
 			return;
 		}
 
-		console.log(transaction);
+		console.log('Pending', transaction);
+
+		const {wait} = transaction;
+
+		await wait();
+
+		console.log('Socket transaction mined');
 	});
 
 	// TODO: improve performance by listening to a single address
