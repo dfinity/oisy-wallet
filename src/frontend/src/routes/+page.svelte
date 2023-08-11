@@ -5,16 +5,19 @@
 	import Balance from '$lib/components/Balance.svelte';
 	import Transactions from '$lib/components/Transactions.svelte';
 	import Send from '$lib/components/Send.svelte';
+	import Sockets from '$lib/components/Sockets.svelte';
 </script>
 
 {#if $authSignedInStore}
-	<EthAddress>
-		<Balance />
+	<Sockets>
+		<EthAddress>
+			<Balance />
 
-		<Transactions />
+			<Transactions />
 
-		<Send />
-	</EthAddress>
+			<Send />
+		</EthAddress>
+	</Sockets>
 
 	<button on:click={signOut}>Sign-out</button>
 {:else}
