@@ -103,7 +103,8 @@ pub struct SignRequest {
     pub chain_id: Nat,
     pub to: String,
     pub gas: Nat,
-    pub gas_price: Nat,
+    pub max_fee_per_gas: Nat,
+    pub max_priority_fee_per_gas: Nat,
     pub value: Nat,
     pub nonce: Nat,
 }
@@ -142,8 +143,8 @@ async fn sign_transaction(req: SignRequest) -> String {
         nonce: Some(nat_to_u256(&req.nonce)),
         data: Some(Bytes::new()),
         access_list: Default::default(),
-        max_priority_fee_per_gas: Some(1000000000.into()),
-        max_fee_per_gas: Some(nat_to_u256(&req.gas_price)),
+        max_priority_fee_per_gas: Some(nat_to_u256(&req.max_priority_fee_per_gas)),
+        max_fee_per_gas: Some(nat_to_u256(&req.max_fee_per_gas)),
     };
 
     let mut unsigned_tx_bytes = tx.rlp().to_vec();

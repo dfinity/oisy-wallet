@@ -4,9 +4,10 @@ type SignRequest = record {
   to : text;
   gas : nat;
   value : nat;
+  max_priority_fee_per_gas : nat;
+  max_fee_per_gas : nat;
   chain_id : nat;
   nonce : nat;
-  gas_price : nat;
 };
 service : (Arg) -> {
   caller_eth_address : () -> (text);
