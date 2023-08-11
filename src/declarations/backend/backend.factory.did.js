@@ -6,9 +6,10 @@ export const idlFactory = ({ IDL }) => {
 		to: IDL.Text,
 		gas: IDL.Nat,
 		value: IDL.Nat,
+		max_priority_fee_per_gas: IDL.Nat,
+		max_fee_per_gas: IDL.Nat,
 		chain_id: IDL.Nat,
-		nonce: IDL.Nat,
-		gas_price: IDL.Nat
+		nonce: IDL.Nat
 	});
 	return IDL.Service({
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
