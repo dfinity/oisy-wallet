@@ -1,8 +1,8 @@
 <script lang="ts">
 	import {
-		initListener as initListenerSockets,
+		initTransactionsListener as initListenerSockets,
 		type WebSocketListener
-	} from '$lib/sockets/provider.sockets';
+	} from '$lib/sockets/transactions.sockets';
 	import { isNullish } from '@dfinity/utils';
 	import { type EthAddressData, ethAddressStore } from '$lib/stores/eth.store';
 	import { onDestroy } from 'svelte';

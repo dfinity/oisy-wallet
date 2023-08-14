@@ -1,33 +1,25 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { transactions as transactionsService } from '$lib/services/provider.services';
-	import type { TransactionResponse } from '@ethersproject/providers';
 	import { utils } from 'ethers';
 	import { ethAddressStore } from '$lib/stores/eth.store';
-	import { pendingTransactionsStore } from '$lib/stores/transactions.store';
+	import { transactionsStore } from '$lib/stores/transactions.store';
+	import { isTransactionPending } from '$lib/utils/transactions.utils';
+	import { loadTransactions } from '$lib/services/transactions.services';
 
-	let transactions: TransactionResponse[] = [];
-
-	onMount(async () => {
-		// TODO: error
-		// TODO: watcher?
-		transactions = await transactionsService($ethAddressStore!);
-	});
+	onMount(async () => await loadTransactions({ address: $ethAddressStore! }));
 </script>
 
-{#each transactions as { from, to, value, blockNumber }, index (blockNumber)}
-	<hr />
-	<p>From: <output>{from}</output></p>
-	<p>To: <output>{to}</output></p>
-	<p>Value: <output>{utils.formatEther(value.toString())}</output></p>
-{/each}
+{#each $transactionsStore as transaction, index (transaction.hash)}
+	{@const { from, to, value } = transaction}
 
-{#each $pendingTransactionsStore as { from, to, value, blockNumber }, index (blockNumber)}
 	<hr />
 	<p>From: <output>{from}</output></p>
 	<p>To: <output>{to}</output></p>
 	<p>Value: <output>{utils.formatEther(value.toString())}</output></p>
-	<p><strong>Pending</strong></p>
+
+	{#if isTransactionPending(transaction)}
+		<p><strong>Pending</strong></p>
+	{/if}
 {/each}
 
 <style lang="scss">

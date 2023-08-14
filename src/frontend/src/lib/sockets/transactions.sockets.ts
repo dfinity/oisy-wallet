@@ -1,4 +1,4 @@
-import { pendingTransactionsStore } from '$lib/stores/transactions.store';
+import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/eth';
 import { InfuraWebSocketProvider } from '@ethersproject/providers';
 
@@ -8,7 +8,7 @@ const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
 const wsProvider = new InfuraWebSocketProvider('sepolia', API_KEY);
 
 // Optimistic implementation with no-reconnection in case the connection is being closed
-export const initListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener => {
+export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener => {
 	// Listen to all pending transactions
 	wsProvider.on('pending', async (tx: string) => {
 		const transaction = await wsProvider.getTransaction(tx);
@@ -19,15 +19,13 @@ export const initListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener => {
 			return;
 		}
 
-		pendingTransactionsStore.add(transaction);
+		transactionsStore.add([transaction]);
 
 		const { wait } = transaction;
 
 		await wait();
 
-		pendingTransactionsStore.remove(transaction);
-
-		console.log('Socket transaction mined');
+		transactionsStore.update(transaction);
 	});
 
 	// TODO: improve performance by listening to a single address
