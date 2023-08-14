@@ -1,27 +1,24 @@
 <script lang="ts">
-	import {
-		initTransactionsListener as initListenerSockets,
-		type WebSocketListener
-	} from '$lib/providers/infura.providers';
 	import { isNullish } from '@dfinity/utils';
 	import { type AddressData, addressStore } from '$lib/stores/address.store';
 	import { onDestroy } from 'svelte';
+	import { initTransactionsListener, type WebSocketListener } from '$lib/providers/alchemy.sockets';
 
 	let listener: WebSocketListener | undefined = undefined;
 
 	const initListener = async (address: AddressData) => {
-		await listener?.destroy();
+		await listener?.removeAllListeners();
 
 		if (isNullish(address)) {
 			return;
 		}
 
-		listener = initListenerSockets(address);
+		listener = initTransactionsListener(address);
 	};
 
 	$: (async () => initListener($addressStore))();
 
-	onDestroy(async () => await listener?.destroy());
+	onDestroy(async () => await listener?.removeAllListeners());
 </script>
 
 <slot />

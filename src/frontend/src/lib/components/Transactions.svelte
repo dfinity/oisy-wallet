@@ -4,7 +4,7 @@
 	import { sortedTransactionsStore } from '$lib/stores/transactions.store';
 	import { isTransactionPending } from '$lib/utils/transactions.utils';
 	import { loadTransactions } from '$lib/services/transactions.services';
-	import { formatEther } from 'ethers';
+	import { Utils } from 'alchemy-sdk';
 
 	onMount(async () => await loadTransactions({ address: $addressStore! }));
 </script>
@@ -16,7 +16,7 @@
 	<p>Block: <output>{blockNumber ?? ''}</output></p>
 	<p>From: <output>{from}</output></p>
 	<p>To: <output>{to}</output></p>
-	<p>Value: <output>{formatEther(value.toString())}</output></p>
+	<p>Value: <output>{Utils.formatEther(value.toString())}</output></p>
 
 	{#if isTransactionPending(transaction)}
 		<p><strong>Pending</strong></p>
