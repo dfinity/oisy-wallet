@@ -19,13 +19,20 @@ export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketLi
 			return;
 		}
 
-		transactionsStore.add([transaction]);
+		transactionsStore.add([
+			{
+				...transaction,
+				pendingTimestamp: Date.now()
+			}
+		]);
 
-		const { wait } = transaction;
+		const { wait, hash } = transaction;
 
 		await wait();
 
-		transactionsStore.update(transaction);
+		const minedTransaction = await wsProvider.getTransaction(hash);
+
+		transactionsStore.update(minedTransaction);
 	});
 
 	// TODO: improve performance by listening to a single address
