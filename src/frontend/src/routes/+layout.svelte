@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { isNullish } from '@dfinity/utils';
-	import { loadEthAddress } from '$lib/services/eth.services';
+	import { loadEthAddress } from '$lib/services/address.services';
 
 	import 'the-new-css-reset/css/reset.css';
 	import '$lib/styles/global.scss';

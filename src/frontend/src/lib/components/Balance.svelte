@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { balance as balanceService } from '$lib/services/provider.services';
+	import { balance as balanceService } from '$lib/providers/etherscan.providers';
 	import { utils } from 'ethers';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { ethAddressStore } from '$lib/stores/eth.store';

@@ -3,7 +3,7 @@
 	import { toasts } from '$lib/stores/toasts.store';
 	import { signTransaction } from '$lib/api/backend.api';
 	import { parseEther } from 'ethers/lib/utils';
-	import { getFeeData, sendTransaction } from '$lib/services/provider.services';
+	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
 	import { isNullish } from '@dfinity/utils';
 
 	const send = async () => {
