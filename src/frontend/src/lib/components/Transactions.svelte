@@ -4,6 +4,7 @@
 	import type { TransactionResponse } from '@ethersproject/providers';
 	import { utils } from 'ethers';
 	import { ethAddressStore } from '$lib/stores/eth.store';
+	import { pendingTransactionsStore } from '$lib/stores/transactions.store';
 
 	let transactions: TransactionResponse[] = [];
 
@@ -14,9 +15,24 @@
 	});
 </script>
 
-{#each transactions as { from, to, value, blockNumber }}
+{#each transactions as { from, to, value, blockNumber }, index (blockNumber)}
 	<hr />
 	<p>From: <output>{from}</output></p>
 	<p>To: <output>{to}</output></p>
 	<p>Value: <output>{utils.formatEther(value.toString())}</output></p>
 {/each}
+
+{#each $pendingTransactionsStore as { from, to, value, blockNumber }, index (blockNumber)}
+	<hr />
+	<p>From: <output>{from}</output></p>
+	<p>To: <output>{to}</output></p>
+	<p>Value: <output>{utils.formatEther(value.toString())}</output></p>
+	<p><strong>Pending</strong></p>
+{/each}
+
+<style lang="scss">
+	hr {
+		width: 100%;
+		border: 1px solid lightseagreen;
+	}
+</style>
