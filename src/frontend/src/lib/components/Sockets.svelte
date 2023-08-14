@@ -2,7 +2,7 @@
 	import {
 		initTransactionsListener as initListenerSockets,
 		type WebSocketListener
-	} from '$lib/sockets/transactions.sockets';
+	} from '$lib/providers/infura.providers';
 	import { isNullish } from '@dfinity/utils';
 	import { type AddressData, addressStore } from '$lib/stores/address.store';
 	import { onDestroy } from 'svelte';
