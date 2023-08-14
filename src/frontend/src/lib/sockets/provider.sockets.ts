@@ -21,7 +21,7 @@ export const initListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener => {
 
 		console.log('Pending', transaction);
 
-		const {wait} = transaction;
+		const { wait } = transaction;
 
 		await wait();
 

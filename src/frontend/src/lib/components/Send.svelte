@@ -21,17 +21,17 @@
 				throw new Error('Cannot get gas fee');
 			}
 
-            const transaction = {
-                to: '0x6D1b7ceAd24FBaf153a3a18f09395Fd2f9C64912',
-                value: parseEther('0.0001').toBigInt(),
-                chain_id: 11155111n,
-                nonce: 1n,
-                gas: gasPrice.toBigInt(),
-                max_fee_per_gas: maxFeePerGas.toBigInt(),
-                max_priority_fee_per_gas: maxPriorityFeePerGas.toBigInt()
-            } as const;
+			const transaction = {
+				to: '0x6D1b7ceAd24FBaf153a3a18f09395Fd2f9C64912',
+				value: parseEther('0.0001').toBigInt(),
+				chain_id: 11155111n,
+				nonce: 1n,
+				gas: gasPrice.toBigInt(),
+				max_fee_per_gas: maxFeePerGas.toBigInt(),
+				max_priority_fee_per_gas: maxPriorityFeePerGas.toBigInt()
+			} as const;
 
-            console.log(transaction);
+			console.log(transaction);
 
 			const rawTransaction = await signTransaction(transaction);
 
@@ -47,7 +47,7 @@
 
 			console.log('Transaction mined.');
 		} catch (err: unknown) {
-            console.error(err);
+			console.error(err);
 
 			toasts.error({
 				text: `Something went wrong while sending the transaction.`,
