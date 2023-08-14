@@ -2,10 +2,15 @@
 	import { busy } from '$lib/stores/busy.store';
 	import { toasts } from '$lib/stores/toasts.store';
 	import { signTransaction } from '$lib/api/backend.api';
-	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
+	import {
+		getFeeData,
+		getTransactionCount,
+		sendTransaction
+	} from '$lib/providers/etherscan.providers';
 	import { isNullish } from '@dfinity/utils';
-	import { parseEther } from 'ethers';
-    import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
+	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
+	import { Utils } from 'alchemy-sdk';
+	import { addressStore } from '$lib/stores/address.store';
 
 	const send = async () => {
 		busy.show();
@@ -13,6 +18,7 @@
 		// Chain ID:
 		// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
 		// Sepolia: 11155111
+		// TODO: env for chain_id
 
 		try {
 			// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
@@ -24,14 +30,16 @@
 				throw new Error('Cannot get max gas fee');
 			}
 
+			const nonce = await getTransactionCount($addressStore!);
+
 			const transaction = {
 				to: '0x6D1b7ceAd24FBaf153a3a18f09395Fd2f9C64912',
-				value: parseEther('0.0001'),
+				value: Utils.parseEther('0.0001').toBigInt(),
 				chain_id: 11155111n,
-				nonce: 1n,
+				nonce: BigInt(nonce),
 				gas: ETH_BASE_FEE,
-				max_fee_per_gas: maxFeePerGas,
-				max_priority_fee_per_gas: maxPriorityFeePerGas
+				max_fee_per_gas: maxFeePerGas.toBigInt(),
+				max_priority_fee_per_gas: maxPriorityFeePerGas.toBigInt()
 			} as const;
 
 			console.log(transaction);
@@ -43,10 +51,6 @@
 			const sentTransaction = await sendTransaction(rawTransaction);
 
 			console.log('Success', sentTransaction);
-
-			await sentTransaction.wait();
-
-			console.log('Transaction mined.');
 		} catch (err: unknown) {
 			console.error(err);
 

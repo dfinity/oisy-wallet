@@ -1,5 +1,5 @@
-import type { TransactionResponseParams } from 'ethers';
+import type { TransactionResponse } from '@ethersproject/abstract-provider';
 
-export interface Transaction extends TransactionResponseParams {
+export interface Transaction extends TransactionResponse {
 	pendingTimestamp?: number;
 }

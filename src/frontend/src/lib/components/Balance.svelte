@@ -2,9 +2,10 @@
 	import { onMount } from 'svelte';
 	import { balance as balanceService } from '$lib/providers/etherscan.providers';
 	import { addressStore } from '$lib/stores/address.store';
-	import { formatEther } from 'ethers';
+	import type { BigNumber } from 'alchemy-sdk';
+	import { Utils } from 'alchemy-sdk';
 
-	let balance: bigint | undefined;
+	let balance: BigNumber | undefined;
 
 	onMount(async () => {
 		// TODO: error
@@ -13,4 +14,4 @@
 	});
 </script>
 
-<p>Balance: <output>{formatEther(`${balance ?? 0n}`)} ({`${balance ?? 0n}`}})</output></p>
+<p>Balance: <output>{Utils.formatEther(`${balance ?? 0n}`)} ({`${balance ?? 0n}`}})</output></p>
