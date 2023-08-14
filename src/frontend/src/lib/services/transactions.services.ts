@@ -1,7 +1,7 @@
 import { transactions as transactionsProviders } from '$lib/providers/etherscan.providers';
 import { toasts } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/eth';
+import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import { get } from 'svelte/store';
 
 export const loadTransactions = async ({ address }: { address: ECDSA_PUBLIC_KEY }) => {

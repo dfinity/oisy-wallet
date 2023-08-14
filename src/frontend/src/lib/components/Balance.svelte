@@ -3,14 +3,14 @@
 	import { balance as balanceService } from '$lib/providers/etherscan.providers';
 	import { utils } from 'ethers';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { ethAddressStore } from '$lib/stores/eth.store';
+	import { addressStore } from '$lib/stores/address.store';
 
 	let balance: BigNumber | undefined;
 
 	onMount(async () => {
 		// TODO: error
 		// TODO: watcher?
-		balance = await balanceService($ethAddressStore!);
+		balance = await balanceService($addressStore!);
 	});
 </script>
 

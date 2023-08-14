@@ -1,4 +1,4 @@
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/eth';
+import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { BigNumber } from '@ethersproject/bignumber';
 import {
 	EtherscanProvider,

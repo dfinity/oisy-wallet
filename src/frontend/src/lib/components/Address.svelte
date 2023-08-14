@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { ethAddressStore } from '$lib/stores/eth.store';
+	import { addressStore } from '$lib/stores/address.store';
 	import { isNullish } from '@dfinity/utils';
 </script>
 
-{#if isNullish($ethAddressStore)}
+{#if isNullish($addressStore)}
 	<span>Loading eth address...</span>
 {:else}
-	<output>{$ethAddressStore}</output>
+	<output>{$addressStore}</output>
 
 	<slot />
 {/if}
