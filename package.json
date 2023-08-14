@@ -25,9 +25,8 @@
 		"@dfinity/candid": "^0.18.1",
 		"@dfinity/principal": "^0.18.1",
 		"@dfinity/utils": "^0.0.19",
-		"@ethersproject/providers": "^5.7.2",
 		"buffer": "^6.0.3",
-		"ethers": "^5.7.2",
+		"ethers": "^6.7.0",
 		"the-new-css-reset": "^1.9.0"
 	},
 	"devDependencies": {

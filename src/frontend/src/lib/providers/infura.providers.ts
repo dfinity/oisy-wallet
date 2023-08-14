@@ -1,6 +1,7 @@
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
-import { InfuraWebSocketProvider } from '@ethersproject/providers';
+import { isNullish } from '@dfinity/utils';
+import { InfuraWebSocketProvider } from 'ethers';
 
 export type WebSocketListener = { destroy: () => Promise<void> };
 
@@ -13,7 +14,11 @@ export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketLi
 	wsProvider.on('pending', async (tx: string) => {
 		// const transaction = await wsProvider.getTransaction(tx);
 		//
-		// const { from, to } = transaction ?? { from: undefined, to: undefined };
+		// if (isNullish(transaction)) {
+		// 	return;
+		// }
+		//
+		// const { from, to } = transaction;
 		//
 		// if (![from, to].includes(address)) {
 		// 	return;
@@ -26,11 +31,14 @@ export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketLi
 		// 	}
 		// ]);
 		//
-		// const { wait, hash } = transaction;
+		// await transaction.wait();
 		//
-		// await wait();
+		// const minedTransaction = await wsProvider.getTransaction(transaction.hash);
 		//
-		// const minedTransaction = await wsProvider.getTransaction(hash);
+		// if (isNullish(minedTransaction)) {
+		// 	// TODO: handle issue
+		// 	return;
+		// }
 		//
 		// transactionsStore.update(minedTransaction);
 	});

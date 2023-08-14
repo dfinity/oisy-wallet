@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { utils } from 'ethers';
 	import { addressStore } from '$lib/stores/address.store';
 	import { sortedTransactionsStore } from '$lib/stores/transactions.store';
 	import { isTransactionPending } from '$lib/utils/transactions.utils';
 	import { loadTransactions } from '$lib/services/transactions.services';
+	import { formatEther } from 'ethers';
 
 	onMount(async () => await loadTransactions({ address: $addressStore! }));
-
-	$: console.log($sortedTransactionsStore);
 </script>
 
 {#each $sortedTransactionsStore as transaction, index (transaction.hash)}
@@ -18,7 +16,7 @@
 	<p>Block: <output>{blockNumber ?? ''}</output></p>
 	<p>From: <output>{from}</output></p>
 	<p>To: <output>{to}</output></p>
-	<p>Value: <output>{utils.formatEther(value.toString())}</output></p>
+	<p>Value: <output>{formatEther(value.toString())}</output></p>
 
 	{#if isTransactionPending(transaction)}
 		<p><strong>Pending</strong></p>

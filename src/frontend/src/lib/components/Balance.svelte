@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { balance as balanceService } from '$lib/providers/etherscan.providers';
-	import { utils } from 'ethers';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import { addressStore } from '$lib/stores/address.store';
+	import { formatEther } from 'ethers';
 
-	let balance: BigNumber | undefined;
+	let balance: bigint | undefined;
 
 	onMount(async () => {
 		// TODO: error
@@ -14,4 +13,4 @@
 	});
 </script>
 
-<p>Balance: <output>{utils.formatEther(`${balance ?? 0n}`)} ({`${balance ?? 0n}`}})</output></p>
+<p>Balance: <output>{formatEther(`${balance ?? 0n}`)} ({`${balance ?? 0n}`}})</output></p>
