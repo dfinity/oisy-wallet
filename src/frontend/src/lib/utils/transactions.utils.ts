@@ -1,5 +1,5 @@
+import type { Transaction } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
 
-export const isTransactionPending = ({ blockNumber }: TransactionResponse): boolean =>
+export const isTransactionPending = ({ blockNumber }: Transaction): boolean =>
 	isNullish(blockNumber);

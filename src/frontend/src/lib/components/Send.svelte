@@ -2,9 +2,9 @@
 	import { busy } from '$lib/stores/busy.store';
 	import { toasts } from '$lib/stores/toasts.store';
 	import { signTransaction } from '$lib/api/backend.api';
-	import { parseEther } from 'ethers/lib/utils';
 	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
 	import { isNullish } from '@dfinity/utils';
+	import { parseEther } from 'ethers';
 
 	const send = async () => {
 		busy.show();
@@ -23,12 +23,12 @@
 
 			const transaction = {
 				to: '0x6D1b7ceAd24FBaf153a3a18f09395Fd2f9C64912',
-				value: parseEther('0.0001').toBigInt(),
+				value: parseEther('0.0001'),
 				chain_id: 11155111n,
 				nonce: 1n,
-				gas: gasPrice.toBigInt(),
-				max_fee_per_gas: maxFeePerGas.toBigInt(),
-				max_priority_fee_per_gas: maxPriorityFeePerGas.toBigInt()
+				gas: gasPrice,
+				max_fee_per_gas: maxFeePerGas,
+				max_priority_fee_per_gas: maxPriorityFeePerGas
 			} as const;
 
 			console.log(transaction);
