@@ -6,6 +6,9 @@
 	import { isNullish } from '@dfinity/utils';
 	import { loadEthAddress } from '$lib/services/eth.services';
 
+	import 'the-new-css-reset/css/reset.css';
+	import '$lib/styles/global.scss';
+
 	/**
 	 * Init authentication
 	 */

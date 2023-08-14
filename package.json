@@ -27,7 +27,8 @@
 		"@dfinity/utils": "^0.0.19",
 		"@ethersproject/providers": "^5.7.2",
 		"buffer": "^6.0.3",
-		"ethers": "^5.7.2"
+		"ethers": "^5.7.2",
+		"the-new-css-reset": "^1.9.0"
 	},
 	"devDependencies": {
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
