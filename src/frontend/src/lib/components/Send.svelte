@@ -5,6 +5,7 @@
 	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
 	import { isNullish } from '@dfinity/utils';
 	import { parseEther } from 'ethers';
+    import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
 
 	const send = async () => {
 		busy.show();
@@ -15,10 +16,12 @@
 
 		try {
 			// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-			const { gasPrice, maxFeePerGas, maxPriorityFeePerGas } = await getFeeData();
+			const { maxFeePerGas, maxPriorityFeePerGas } = await getFeeData();
 
-			if (isNullish(gasPrice) || isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
-				throw new Error('Cannot get gas fee');
+			// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
+			// exceeds block gas limit
+			if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
+				throw new Error('Cannot get max gas fee');
 			}
 
 			const transaction = {
@@ -26,7 +29,7 @@
 				value: parseEther('0.0001'),
 				chain_id: 11155111n,
 				nonce: 1n,
-				gas: gasPrice,
+				gas: ETH_BASE_FEE,
 				max_fee_per_gas: maxFeePerGas,
 				max_priority_fee_per_gas: maxPriorityFeePerGas
 			} as const;
