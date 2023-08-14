@@ -12,35 +12,35 @@ const wsProvider = new InfuraWebSocketProvider('sepolia', API_KEY);
 export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener => {
 	// Listen to all pending transactions
 	wsProvider.on('pending', async (tx: string) => {
-		const transaction = await wsProvider.getTransaction(tx);
-
-		if (isNullish(transaction)) {
-			return;
-		}
-
-		const { from, to } = transaction;
-
-		if (![from, to].includes(address)) {
-			return;
-		}
-
-		transactionsStore.add([
-			{
-				...transaction,
-				pendingTimestamp: Date.now()
-			}
-		]);
-
-		await transaction.wait();
-
-		const minedTransaction = await wsProvider.getTransaction(transaction.hash);
-
-		if (isNullish(minedTransaction)) {
-			// TODO: handle issue
-			return;
-		}
-
-		transactionsStore.update(minedTransaction);
+		// const transaction = await wsProvider.getTransaction(tx);
+		//
+		// if (isNullish(transaction)) {
+		// 	return;
+		// }
+		//
+		// const { from, to } = transaction;
+		//
+		// if (![from, to].includes(address)) {
+		// 	return;
+		// }
+		//
+		// transactionsStore.add([
+		// 	{
+		// 		...transaction,
+		// 		pendingTimestamp: Date.now()
+		// 	}
+		// ]);
+		//
+		// await transaction.wait();
+		//
+		// const minedTransaction = await wsProvider.getTransaction(transaction.hash);
+		//
+		// if (isNullish(minedTransaction)) {
+		// 	// TODO: handle issue
+		// 	return;
+		// }
+		//
+		// transactionsStore.update(minedTransaction);
 	});
 
 	// TODO: improve performance by listening to a single address
