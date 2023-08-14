@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { isNullish } from '@dfinity/utils';
-	import { loadEthAddress } from '$lib/services/address.services';
+	import { loadAddress } from '$lib/services/address.services';
 
 	import 'the-new-css-reset/css/reset.css';
 	import '$lib/styles/global.scss';
@@ -31,15 +31,15 @@
 	 * Init eth address
 	 */
 
-	const initEthAddress = async ({ identity }: AuthStoreData) => {
+	const initAddress = async ({ identity }: AuthStoreData) => {
 		if (isNullish(identity)) {
 			return;
 		}
 
-		await loadEthAddress();
+		await loadAddress();
 	};
 
-	$: (async () => initEthAddress($authStore))();
+	$: (async () => initAddress($authStore))();
 
 	/**
 	 * Workers

@@ -1,5 +1,5 @@
 import { transactionsStore } from '$lib/stores/transactions.store';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/eth';
+import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import { InfuraWebSocketProvider } from '@ethersproject/providers';
 
 export type WebSocketListener = { destroy: () => Promise<void> };

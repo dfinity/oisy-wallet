@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { utils } from 'ethers';
-	import { ethAddressStore } from '$lib/stores/eth.store';
+	import { addressStore } from '$lib/stores/address.store';
 	import { sortedTransactionsStore } from '$lib/stores/transactions.store';
 	import { isTransactionPending } from '$lib/utils/transactions.utils';
 	import { loadTransactions } from '$lib/services/transactions.services';
 
-	onMount(async () => await loadTransactions({ address: $ethAddressStore! }));
+	onMount(async () => await loadTransactions({ address: $addressStore! }));
 
 	$: console.log($sortedTransactionsStore);
 </script>
