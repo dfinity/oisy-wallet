@@ -33,11 +33,9 @@ export const initListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener => {
 	// const contract = new Contract(address, abi, wsProvider);
 	// contract.on('pending', (tx) => console.log('Tx', tx));
 
-	console.log(wsProvider.websocket);
-
 	wsProvider.websocket.onerror = (err: unknown) => console.log('Websocket error', err);
 
 	return {
-		destroy: wsProvider.destroy
+		destroy: async () => await wsProvider.destroy()
 	};
 };
