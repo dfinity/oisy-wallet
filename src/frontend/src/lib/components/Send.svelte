@@ -40,13 +40,11 @@
 
 			console.log(rawTransaction);
 
-			const result = await sendTransaction(rawTransaction);
+			const sentTransaction = await sendTransaction(rawTransaction);
 
-			console.log('Success', result);
+			console.log('Success', sentTransaction);
 
-			const { wait } = result;
-
-			await wait();
+			await sentTransaction.wait();
 
 			console.log('Transaction mined.');
 		} catch (err: unknown) {
