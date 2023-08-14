@@ -74,7 +74,6 @@ const config: UserConfig = {
 							'frontend/src/lib/api',
 							'frontend/src/lib/providers',
 							'frontend/src/lib/services',
-							'frontend/src/lib/sockets',
 							'frontend/src/lib/stores',
 							'frontend/src/lib/workers'
 						].find((module) => folder.includes(module)) !== undefined
