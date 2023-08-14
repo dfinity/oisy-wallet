@@ -3,7 +3,7 @@ import {
 	AUTH_POPUP_HEIGHT,
 	AUTH_POPUP_WIDTH,
 	localIdentityCanisterId
-} from '$lib/constants/constants';
+} from '$lib/constants/app.constants';
 import { createAuthClient } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
