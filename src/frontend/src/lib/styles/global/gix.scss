@@ -14,3 +14,10 @@
 	--progress-color-contrast: var(--color-white);
 	--progress-color-rgb: 59, 0, 185;
 }
+
+article.gix {
+	button.icon-only {
+		color: inherit;
+		cursor: pointer;
+	}
+}

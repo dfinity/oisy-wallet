@@ -2,7 +2,7 @@
 	import IcLogo from '$lib/components/icons/IcLogo.svelte';
 </script>
 
-<button on:click>
+<button on:click class="primary">
 	<IcLogo />
 	<span>
 		<span><slot name="action" /></span>
