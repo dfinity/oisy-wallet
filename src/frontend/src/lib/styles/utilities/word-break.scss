@@ -1,0 +1,3 @@
+@use '../mixins/utilities';
+
+@include utilities.generate(break-words, overflow-wrap, break-word);

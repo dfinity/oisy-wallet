@@ -1,10 +1,17 @@
 <script lang="ts">
-	import { Utils } from 'alchemy-sdk';
+	import { BigNumber } from 'alchemy-sdk';
 	import { balanceStore } from '$lib/stores/balance.store';
+	import { formatEtherShort } from '$lib/utils/format.utils';
+
+	$: console.log(($balanceStore?.toBigInt() ?? 0n) === 0n);
 </script>
 
-<p>
-	Balance: <output
-		>{Utils.formatEther(`${$balanceStore ?? 0n}`)} ({`${$balanceStore ?? 0n}`})</output
+<span class="text-ghost-white mt">
+	<output
+		class={`break-words ${($balanceStore?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'}`}
+		style="font-size: calc(2 * var(--font-size-h1)); line-height: 0.95;"
 	>
-</p>
+		{formatEtherShort($balanceStore ?? BigNumber.from(0n))}
+	</output>
+	<span class="opacity-100">SepoliaETH</span>
+</span>
