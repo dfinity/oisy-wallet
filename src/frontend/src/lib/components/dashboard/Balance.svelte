@@ -2,8 +2,6 @@
 	import { BigNumber } from 'alchemy-sdk';
 	import { balanceStore } from '$lib/stores/balance.store';
 	import { formatEtherShort } from '$lib/utils/format.utils';
-
-	$: console.log(($balanceStore?.toBigInt() ?? 0n) === 0n);
 </script>
 
 <span class="text-ghost-white mt">

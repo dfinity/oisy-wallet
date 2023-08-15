@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ETHIcon from '$lib/components/icons/ETHIcon.svelte';
+	import IconETH from '$lib/components/icons/IconETH.svelte';
 	import Address from '$lib/components/dashboard/Address.svelte';
 	import Balance from '$lib/components/dashboard/Balance.svelte';
 </script>
@@ -9,7 +9,7 @@
 	style="min-height: 260px"
 >
 	<div class="absolute" style="top: -3rem; left: 1rem;">
-		<ETHIcon />
+		<IconETH />
 	</div>
 
 	<Address />
