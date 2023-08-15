@@ -54,12 +54,12 @@
 
 <svelte:window on:storage={syncAuthStore} />
 
-<main>
-	{#await init()}
-		Loading...
-	{:then _}
-		<Header />
+{#await init()}
+	Loading...
+{:then _}
+	<Header />
 
+	<main>
 		<slot />
-	{/await}
-</main>
+	</main>
+{/await}

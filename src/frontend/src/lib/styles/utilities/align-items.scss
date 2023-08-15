@@ -1,0 +1,7 @@
+@use '../mixins/utilities';
+
+$property: align-items;
+
+@include utilities.generate(items-start, $property, flex-start);
+@include utilities.generate(items-end, $property, flex-end);
+@include utilities.generate(items-center, $property, center);
