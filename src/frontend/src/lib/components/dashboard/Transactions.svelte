@@ -21,6 +21,7 @@
 <style lang="scss">
 	hr {
 		width: 100%;
+		display: block;
 		border: 1px solid lightseagreen;
 	}
 </style>

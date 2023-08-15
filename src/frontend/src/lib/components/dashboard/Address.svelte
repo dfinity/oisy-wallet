@@ -5,10 +5,10 @@
 	import { nonNullish } from '@dfinity/utils';
 </script>
 
-<div class="text-ghost-white mt-8 flex gap-1">
+<div class="text-ghost-white mt-8 flex gap-1 opacity-50" style="min-height: 30px">
 	{#if nonNullish($addressStore)}
 		<output>{shortenWithMiddleEllipsis($addressStore ?? '')}</output><Copy
-			value={shortenWithMiddleEllipsis($addressStore ?? '')}
+			value={$addressStore ?? ''}
 		/>
 	{/if}
 </div>

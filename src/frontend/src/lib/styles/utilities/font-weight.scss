@@ -1,0 +1,6 @@
+@use '../mixins/utilities';
+
+$property: font-weight;
+
+@include utilities.generate(font-normal, $property, 400);
+@include utilities.generate(font-bold, $property, var(--font-weight-bold));

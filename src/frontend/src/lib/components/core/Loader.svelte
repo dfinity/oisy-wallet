@@ -60,7 +60,7 @@
 {#if progressStep !== LoaderStep.DONE}
 	<InProgress {progressStep} {steps} />
 {:else}
-	<div transition:fade>
+	<div in:fade>
 		<slot />
 	</div>
 {/if}

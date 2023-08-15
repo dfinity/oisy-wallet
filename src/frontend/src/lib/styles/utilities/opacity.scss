@@ -1,0 +1,7 @@
+@use '../mixins/utilities';
+
+$property: opacity;
+
+@include utilities.generate(opacity-0, $property, 0);
+@include utilities.generate(opacity-50, $property, 0.5);
+@include utilities.generate(opacity-100, $property, 1);
