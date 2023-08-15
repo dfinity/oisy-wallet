@@ -1,0 +1,16 @@
+:root {
+	--positive-emphasis: #30af91;
+	--positive-emphasis-rgb: 48, 175, 145;
+
+	--tertiary: var(--color-deep-violet);
+
+	--value-color: var(--color-vampire-black);
+
+	--border-radius-0_5x: calc(0.5 * var(--border-radius-sm));
+
+	--animation-time-normal: 0.2s;
+
+	--progress-color: var(--color-interdimensional-blue);
+	--progress-color-contrast: var(--color-white);
+	--progress-color-rgb: 59, 0, 185;
+}

@@ -1,26 +1,29 @@
 <script lang="ts">
 	import { authSignedInStore } from '$lib/stores/auth.store';
 	import { signOut } from '$lib/services/auth.services';
-	import Address from '$lib/components/Address.svelte';
-	import Balance from '$lib/components/Balance.svelte';
-	import Transactions from '$lib/components/Transactions.svelte';
-	import Send from '$lib/components/Send.svelte';
-	import Sockets from '$lib/components/Sockets.svelte';
+	import Address from '$lib/components/dashboard/Address.svelte';
+	import Balance from '$lib/components/dashboard/Balance.svelte';
+	import Transactions from '$lib/components/dashboard/Transactions.svelte';
+	import Send from '$lib/components/dashboard/Send.svelte';
+	import Sockets from '$lib/components/core/Sockets.svelte';
 	import SignIn from '$lib/components/core/SignIn.svelte';
 	import Hero from '$lib/components/core/Hero.svelte';
+	import Loader from '$lib/components/core/Loader.svelte';
 </script>
 
 {#if $authSignedInStore}
 	<Sockets>
 		<Hero />
 
-		<Address>
+		<Loader>
+			<Address />
+
 			<Balance />
 
 			<Transactions />
 
 			<Send />
-		</Address>
+		</Loader>
 	</Sockets>
 
 	<button on:click={signOut}>Sign-out</button>

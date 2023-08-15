@@ -3,8 +3,6 @@
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
 	import { onMount } from 'svelte';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
-	import { isNullish } from '@dfinity/utils';
-	import { loadAddress } from '$lib/services/address.services';
 	import Header from '$lib/components/layout/Header.svelte';
 
 	import '$lib/styles/global.scss';
@@ -26,20 +24,6 @@
 			console.error(err);
 		}
 	};
-
-	/**
-	 * Init eth address
-	 */
-
-	const initAddress = async ({ identity }: AuthStoreData) => {
-		if (isNullish(identity)) {
-			return;
-		}
-
-		await loadAddress();
-	};
-
-	$: (async () => initAddress($authStore))();
 
 	/**
 	 * Workers
