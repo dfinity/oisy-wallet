@@ -1,8 +1,10 @@
-main {
-	width: 100vw;
-	height: 100svh;
+@use '../mixins/media';
 
-	padding: var(--padding);
+main {
+	max-width: media.$breakpoint-xsmall;
+
+	margin: 0 auto;
+	padding: 0 var(--padding-2x);
 }
 
 header {
