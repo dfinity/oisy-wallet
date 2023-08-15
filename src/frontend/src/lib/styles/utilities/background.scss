@@ -1,0 +1,13 @@
+@use '../mixins/utilities';
+
+$property: background;
+
+@include utilities.generate(bg-inherit, $property, inherit);
+@include utilities.generate(bg-vampire-black, $property, var(--color-vampire-black));
+@include utilities.generate(bg-ghost-white, $property, var(--color-ghost-white));
+@include utilities.generate(
+	bg-interdimensional-blue,
+	$property,
+	var(--color-interdimensional-blue)
+);
+@include utilities.generate(bg-deep-violet, $property, var(--color-deep-violet));

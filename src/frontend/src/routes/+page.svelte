@@ -7,10 +7,13 @@
 	import Send from '$lib/components/Send.svelte';
 	import Sockets from '$lib/components/Sockets.svelte';
 	import SignIn from '$lib/components/core/SignIn.svelte';
+	import Hero from '$lib/components/core/Hero.svelte';
 </script>
 
 {#if $authSignedInStore}
 	<Sockets>
+		<Hero />
+
 		<Address>
 			<Balance />
 
