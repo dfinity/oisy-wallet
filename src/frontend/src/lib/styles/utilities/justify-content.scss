@@ -1,0 +1,7 @@
+@use '../mixins/utilities';
+
+$property: justify-content;
+
+@include utilities.generate(justify-start, $property, flex-start);
+@include utilities.generate(justify-end, $property, flex-end);
+@include utilities.generate(justify-center, $property, center);

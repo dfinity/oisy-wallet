@@ -1,0 +1,7 @@
+@use '../mixins/utilities';
+
+$property: text-align;
+
+@include utilities.generate(text-left, $property, left);
+@include utilities.generate(text-center, $property, center);
+@include utilities.generate(text-right, $property, right);
