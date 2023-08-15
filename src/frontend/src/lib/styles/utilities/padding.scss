@@ -43,3 +43,9 @@ $property: padding;
 @include utilities.generate(px-4, #{$property}-right, var(--padding-4x));
 @include utilities.generate(py-4, #{$property}-top, var(--padding-4x));
 @include utilities.generate(py-4, #{$property}-bottom, var(--padding-4x));
+
+@include utilities.generate(p-8, $property, var(--padding-8x));
+@include utilities.generate(px-8, #{$property}-left, var(--padding-8x));
+@include utilities.generate(px-8, #{$property}-right, var(--padding-8x));
+@include utilities.generate(py-8, #{$property}-top, var(--padding-8x));
+@include utilities.generate(py-8, #{$property}-bottom, var(--padding-8x));
