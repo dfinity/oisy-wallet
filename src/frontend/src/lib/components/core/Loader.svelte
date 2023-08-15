@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type ProgressStep, ProgressSteps } from '@dfinity/gix-components';
+	import { type ProgressStep } from '@dfinity/gix-components';
 	import { LoaderStep } from '$lib/enums/loader';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
@@ -7,7 +7,7 @@
 	import { toasts } from '$lib/stores/toasts.store';
 	import { loadBalance } from '$lib/services/balance.services';
 	import { loadTransactions } from '$lib/services/transactions.services';
-	import { addressStore } from '$lib/stores/address.store';
+	import { fade } from 'svelte/transition';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 	let steps: [ProgressStep, ...ProgressStep[]] = [
@@ -60,5 +60,7 @@
 {#if progressStep !== LoaderStep.DONE}
 	<InProgress {progressStep} {steps} />
 {:else}
-	<slot />
+	<div transition:fade>
+		<slot />
+	</div>
 {/if}
