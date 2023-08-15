@@ -1,0 +1,11 @@
+@use '../mixins/utilities';
+
+$property: color;
+
+@include utilities.generate(text-inherit, $property, inherit);
+@include utilities.generate(text-vampire-black, $property, var(--color-vampire-black));
+@include utilities.generate(
+	text-interdimensional-blue,
+	$property,
+	var(--color-interdimensional-blue)
+);

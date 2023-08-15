@@ -1,10 +1,12 @@
 @use '../mixins/media';
 
 main {
-	max-width: media.$breakpoint-xsmall;
-
 	margin: 0 auto;
 	padding: 0 var(--padding-2x);
+
+	@include media.min-width(small) {
+		max-width: media.$breakpoint-xsmall;
+	}
 }
 
 header {

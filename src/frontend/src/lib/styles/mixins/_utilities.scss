@@ -7,25 +7,35 @@
 		}
 	}
 
-	.sm\:#{$selector} {
+	.sm\:#{$selector},
+	.sm\:#{$selector}[class*='xs\:'] {
 		@include media.min-width(small) {
 			#{$property}: $value;
 		}
 	}
 
-	.md\:#{$selector} {
+	.md\:#{$selector},
+	.md\:#{$selector}[class*='xs\:'],
+	.md\:#{$selector}[class*='sm\:'] {
 		@include media.min-width(medium) {
 			#{$property}: $value;
 		}
 	}
 
-	.lg\:#{$selector} {
+	.lg\:#{$selector},
+	.lg\:#{$selector}[class*='xs\:'],
+	.lg\:#{$selector}[class*='sm\:'],
+	.lg\:#{$selector}[class*='md\:'] {
 		@include media.min-width(large) {
 			#{$property}: $value;
 		}
 	}
 
-	.xl\:#{$selector} {
+	.xl\:#{$selector},
+	.xl\:#{$selector}[class*='xs\:'],
+	.xl\:#{$selector}[class*='sm\:'],
+	.xl\:#{$selector}[class*='md\:'],
+	.xl\:#{$selector}[class*='lg\:'] {
 		@include media.min-width(xlarge) {
 			#{$property}: $value;
 		}
