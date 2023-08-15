@@ -11,7 +11,7 @@
 		Fully on-chain ETH Wallet built on the Internet Computer
 	</h1>
 
-	<IcButton on:click={signIn}>
+	<IcButton on:click={async () => await signIn({})}>
 		<svelte:fragment slot="action">Connect with</svelte:fragment>
 		Internet Identity
 	</IcButton>
