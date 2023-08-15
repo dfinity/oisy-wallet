@@ -1,14 +1,15 @@
 import { transactions as transactionsProviders } from '$lib/providers/etherscan.providers';
+import { addressStore } from '$lib/stores/address.store';
 import { toasts } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadTransactions = async ({ address }: { address: ECDSA_PUBLIC_KEY }) => {
-	const currentTransactionsStore = get(transactionsStore);
+export const loadTransactions = async () => {
+	const address = get(addressStore);
 
-	// We load the transactions once per session
-	if (currentTransactionsStore.length > 0) {
+	if (isNullish(address)) {
+		// TODO: throw error?
 		return;
 	}
 

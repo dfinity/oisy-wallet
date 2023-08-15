@@ -1,0 +1,29 @@
+<script lang="ts">
+	import { ProgressSteps, type ProgressStep } from '@dfinity/gix-components';
+	import { LoaderStep } from '$lib/enums/loader';
+
+	export let progressStep: string;
+	export let steps: [ProgressStep, ...ProgressStep[]];
+
+	let dynamicSteps: [ProgressStep, ...ProgressStep[]] = [...steps];
+
+	const updateSteps = () => {
+		const progressIndex = dynamicSteps.findIndex(({ step }) => step === progressStep);
+
+		dynamicSteps = dynamicSteps.map((step, index) =>
+			step.step === progressStep
+				? {
+						...step,
+						state: 'in_progress'
+				  }
+				: {
+						...step,
+						state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
+				  }
+		) as [ProgressStep, ...ProgressStep[]];
+	};
+
+	$: progressStep, updateSteps();
+</script>
+
+<ProgressSteps steps={dynamicSteps} />
