@@ -1,0 +1,4 @@
+@use '../mixins/utilities';
+
+@include utilities.generate(rounded-sm, border-radius, var(--border-radius-sm));
+@include utilities.generate(rounded-lg, border-radius, var(--border-radius-lg));
