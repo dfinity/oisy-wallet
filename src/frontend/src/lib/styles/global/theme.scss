@@ -1,0 +1,142 @@
+html {
+	-ms-text-size-adjust: 100%;
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+
+	box-sizing: border-box;
+	overflow: hidden;
+}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+main,
+menu,
+nav,
+section,
+summary {
+	display: block;
+}
+audio,
+canvas,
+progress,
+video {
+	display: inline-block;
+}
+audio:not([controls]) {
+	display: none;
+	height: 0;
+}
+progress {
+	vertical-align: baseline;
+}
+[hidden],
+template {
+	display: none;
+}
+
+a,
+input,
+button,
+select,
+textarea {
+	font-family: inherit;
+	color: inherit;
+}
+a {
+	color: inherit;
+	background-color: transparent;
+	-webkit-text-decoration-skip: objects;
+	text-decoration: underline;
+	cursor: pointer;
+	word-break: break-word;
+}
+a:active,
+a:hover {
+	color: var(--color-interdimensional-blue);
+	outline-width: 0;
+}
+a:hover,
+a:focus {
+	text-decoration: underline;
+}
+a:focus,
+a:focus-visible {
+	outline: none;
+}
+b,
+strong {
+	font-weight: var(--font-weight-bold);
+}
+img {
+	border-style: none;
+	max-width: 100%;
+	padding: 0;
+	margin: 0;
+}
+svg:not(:root) {
+	overflow: hidden;
+}
+code,
+kbd,
+pre,
+samp {
+	font-family: monospace, monospace;
+	font-size: 1em;
+	margin: 0;
+	white-space: pre-wrap;
+}
+textarea {
+	overflow: auto;
+}
+form {
+	padding: 0;
+	margin: 0 0 1.45rem;
+}
+ul {
+	list-style-type: square;
+}
+p {
+	padding: 0;
+	margin: 0 0 var(--padding-2_5x);
+}
+figure {
+	padding: 0;
+}
+figcaption {
+	margin: 0.45rem 0.75rem;
+	text-align: center;
+	outline: none;
+}
+
+::selection {
+	background: var(--color-interdimensional-blue);
+	color: var(--color-ghost-white);
+}
+
+::-moz-selection {
+	background: var(--color-interdimensional-blue);
+	color: var(--color-ghost-white);
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 0;
+	background-color: var(--color-interdimensional-blue);
+}
+
+::-webkit-scrollbar-track {
+	border-radius: 0;
+	background: none;
+}
+
+::-webkit-scrollbar {
+	width: 0.45rem;
+}

@@ -1,0 +1,37 @@
+@use 'media';
+
+@mixin generate($selector, $property, $value) {
+	.xs\:#{$selector} {
+		@include media.min-width(xsmall) {
+			#{$property}: $value;
+		}
+	}
+
+	.sm\:#{$selector} {
+		@include media.min-width(small) {
+			#{$property}: $value;
+		}
+	}
+
+	.md\:#{$selector} {
+		@include media.min-width(medium) {
+			#{$property}: $value;
+		}
+	}
+
+	.lg\:#{$selector} {
+		@include media.min-width(large) {
+			#{$property}: $value;
+		}
+	}
+
+	.xl\:#{$selector} {
+		@include media.min-width(xlarge) {
+			#{$property}: $value;
+		}
+	}
+
+	.#{$selector} {
+		#{$property}: $value;
+	}
+}
