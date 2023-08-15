@@ -1,12 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { addressStore } from '$lib/stores/address.store';
 	import { sortedTransactionsStore } from '$lib/stores/transactions.store';
 	import { isTransactionPending } from '$lib/utils/transactions.utils';
-	import { loadTransactions } from '$lib/services/transactions.services';
 	import { Utils } from 'alchemy-sdk';
-
-	onMount(async () => await loadTransactions({ address: $addressStore! }));
 </script>
 
 {#each $sortedTransactionsStore as transaction, index (transaction.hash)}
