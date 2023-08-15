@@ -16,8 +16,6 @@
 		<Hero />
 
 		<Loader>
-			<Address />
-
 			<Balance />
 
 			<Transactions />
