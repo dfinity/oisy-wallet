@@ -5,8 +5,8 @@
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { isNullish } from '@dfinity/utils';
 	import { loadAddress } from '$lib/services/address.services';
+	import Header from '$lib/components/layout/Header.svelte';
 
-	import 'the-new-css-reset/css/reset.css';
 	import '$lib/styles/global.scss';
 
 	/**
@@ -54,8 +54,12 @@
 
 <svelte:window on:storage={syncAuthStore} />
 
-{#await init()}
-	Loading...
-{:then _}
-	<slot />
-{/await}
+<main>
+	{#await init()}
+		Loading...
+	{:then _}
+		<Header />
+
+		<slot />
+	{/await}
+</main>
