@@ -1,0 +1,7 @@
+@use '../mixins/utilities';
+
+$property: line-height;
+
+@include utilities.generate(leading-small, $property, var(--line-height-small));
+@include utilities.generate(leading-title, $property, var(--line-height-title));
+@include utilities.generate(leading-normal, $property, var(--line-height-standard));
