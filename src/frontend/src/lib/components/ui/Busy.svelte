@@ -11,8 +11,6 @@
 
 		busy.stop();
 	};
-
-	$: console.log($busy);
 </script>
 
 {#if nonNullish($busy)}

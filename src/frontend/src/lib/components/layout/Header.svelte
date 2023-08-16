@@ -1,7 +1,7 @@
 <script lang="ts">
 	import InternetComputerLogo from '$lib/components/icons/InternetComputerLogo.svelte';
 	import { authSignedInStore } from '$lib/stores/auth.store';
-	import SignOutButton from '$lib/components/core/SignOutButton.svelte';
+	import UserPrincipal from '$lib/components/core/UserPrincipal.svelte';
 </script>
 
 <header class="flex justify-between">
@@ -11,7 +11,7 @@
 
 	{#if $authSignedInStore}
 		<div style="margin-left: auto">
-			<SignOutButton />
+			<UserPrincipal/>
 		</div>
 	{/if}
 </header>
