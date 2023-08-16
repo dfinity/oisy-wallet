@@ -11,6 +11,7 @@
 	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { Utils } from 'alchemy-sdk';
 	import { addressStore } from '$lib/stores/address.store';
+	import IconSend from '$lib/components/icons/IconSend.svelte';
 
 	const send = async () => {
 		busy.start();
@@ -57,5 +58,7 @@
 	};
 </script>
 
-<hr />
-<button on:click={send}>Send</button>
+<button class="flex-1 secondary" on:click={send}>
+	<IconSend size="28" />
+	<span>Send</span></button
+>

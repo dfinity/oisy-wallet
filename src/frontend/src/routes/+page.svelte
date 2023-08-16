@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { authSignedInStore } from '$lib/stores/auth.store';
 	import Transactions from '$lib/components/dashboard/Transactions.svelte';
-	import Send from '$lib/components/dashboard/Send.svelte';
 	import Sockets from '$lib/components/core/Sockets.svelte';
 	import SignIn from '$lib/components/core/SignIn.svelte';
 	import Hero from '$lib/components/dashboard/Hero.svelte';
@@ -14,8 +13,6 @@
 
 		<Loader>
 			<Transactions />
-
-			<Send />
 		</Loader>
 	</Sockets>
 {:else}
