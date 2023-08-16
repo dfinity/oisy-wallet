@@ -132,10 +132,12 @@ const updateCSP = (indexHtml) => {
 		indexHashes.push(`'sha256-${createHash('sha256').update(content).digest('base64')}'`);
 	}
 
+	const ethProviders = 'https://api-sepolia.etherscan.io';
+
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io;
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethProviders};
         img-src 'self' data:;
         child-src 'self';
         manifest-src 'self';
