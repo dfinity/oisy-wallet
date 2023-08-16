@@ -1,7 +1,6 @@
 import { isNullish } from '@dfinity/utils';
 import type { BigNumber } from 'alchemy-sdk';
-import { writable, type Readable } from 'svelte/store';
-import { derived } from 'svelte/store';
+import { derived, writable, type Readable } from 'svelte/store';
 
 export type BalanceData = BigNumber | undefined | null;
 

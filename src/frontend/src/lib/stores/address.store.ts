@@ -1,7 +1,6 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
-import { writable, type Readable } from 'svelte/store';
-import { derived } from 'svelte/store';
+import { derived, writable, type Readable } from 'svelte/store';
 
 export type AddressData = ECDSA_PUBLIC_KEY | undefined | null;
 
