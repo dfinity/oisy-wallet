@@ -19,8 +19,6 @@
 			<Send />
 		</Loader>
 	</Sockets>
-
-	<button class="mt-8" on:click={signOut}>Sign-out</button>
 {:else}
 	<SignIn />
 {/if}

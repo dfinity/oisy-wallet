@@ -11,10 +11,12 @@
 
 		busy.stop();
 	};
+
+	$: console.log($busy);
 </script>
 
 {#if nonNullish($busy)}
-	<div in:fade out:fade={{ duration: 200 }} on:click={close} class:close={$busy.close}>
+	<div in:fade out:fade={{ duration: 200 }} on:click={close} class:close={$busy.close} class="busy">
 		<div class="content">
 			{#if $busy.spinner}
 				<div class="spinner text-ghost-white">
@@ -32,7 +34,7 @@
 {/if}
 
 <style lang="scss">
-	div {
+	.busy {
 		z-index: calc(var(--z-index) + 1000);
 
 		position: fixed;
