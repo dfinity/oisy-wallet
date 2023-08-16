@@ -9,6 +9,7 @@
 	import Busy from '$lib/components/ui/Busy.svelte';
 
 	import '$lib/styles/global.scss';
+	import Footer from "$lib/components/layout/Footer.svelte";
 
 	/**
 	 * Init authentication
@@ -51,6 +52,8 @@
 	<main>
 		<slot />
 	</main>
+
+	<Footer />
 {/await}
 
 <Toasts />
