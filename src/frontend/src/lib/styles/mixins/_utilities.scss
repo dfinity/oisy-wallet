@@ -8,6 +8,7 @@
 	}
 
 	.sm\:#{$selector},
+	.sm\:#{$selector}[class*='-'],
 	.sm\:#{$selector}[class*='xs\:'] {
 		@include media.min-width(small) {
 			#{$property}: $value;
@@ -15,6 +16,7 @@
 	}
 
 	.md\:#{$selector},
+	.md\:#{$selector}[class*='-'],
 	.md\:#{$selector}[class*='xs\:'],
 	.md\:#{$selector}[class*='sm\:'] {
 		@include media.min-width(medium) {
@@ -23,6 +25,7 @@
 	}
 
 	.lg\:#{$selector},
+	.lb\:#{$selector}[class*='-'],
 	.lg\:#{$selector}[class*='xs\:'],
 	.lg\:#{$selector}[class*='sm\:'],
 	.lg\:#{$selector}[class*='md\:'] {
@@ -32,6 +35,7 @@
 	}
 
 	.xl\:#{$selector},
+	.xl\:#{$selector}[class*='-'],
 	.xl\:#{$selector}[class*='xs\:'],
 	.xl\:#{$selector}[class*='sm\:'],
 	.xl\:#{$selector}[class*='md\:'],

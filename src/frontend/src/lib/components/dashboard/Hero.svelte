@@ -5,7 +5,7 @@
 </script>
 
 <article
-	class="gix bg-deep-violet text-ghost-white rounded-lg py-8 px-4 my-4 relative"
+	class="gix bg-deep-violet text-ghost-white rounded-lg py-8 px-4 my-8 md:mt-4 relative"
 	style="min-height: 260px"
 >
 	<div class="absolute" style="top: -3rem; left: 1rem;">
