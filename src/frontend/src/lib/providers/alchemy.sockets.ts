@@ -29,16 +29,25 @@ export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketLi
 			}
 		]);
 
-		await transaction.wait();
+		const { wait, hash: transactionHash } = transaction;
 
-		const minedTransaction = await provider.core.getTransaction(transaction.hash);
+		await wait();
+
+		const minedTransaction = await provider.core.getTransaction(transactionHash);
 
 		if (isNullish(minedTransaction)) {
 			// TODO: handle issue
 			return;
 		}
 
-		transactionsStore.update(minedTransaction);
+		// At least on Sepolia network we noticed that the timestamp was not provided when getting the transaction in this hook.
+		// Therefore, as the transaction has just been mined and for simplicity reason, we display now timestamp if undefined.
+		const { timestamp, ...rest } = minedTransaction;
+
+		transactionsStore.update({
+			...rest,
+			timestamp: timestamp ?? Date.now() / 1000
+		});
 	};
 
 	provider.ws.on(

@@ -13,7 +13,7 @@
 	import { addressStore } from '$lib/stores/address.store';
 
 	const send = async () => {
-		busy.show();
+		busy.start();
 
 		// Chain ID:
 		// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md

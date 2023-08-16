@@ -13,3 +13,4 @@ $property: color;
 @include utilities.generate(text-deep-violet, $property, var(--color-deep-violet));
 @include utilities.generate(text-cetacean-blue, $property, var(--color-cetacean-blue));
 @include utilities.generate(text-dark-slate-blue, $property, var(--color-dark-slate-blue));
+@include utilities.generate(text-goldenrod, $property, var(--color-goldenrod));
