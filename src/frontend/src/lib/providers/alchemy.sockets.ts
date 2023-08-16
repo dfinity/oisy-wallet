@@ -1,3 +1,4 @@
+import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
@@ -36,7 +37,9 @@ export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketLi
 		const minedTransaction = await provider.core.getTransaction(transactionHash);
 
 		if (isNullish(minedTransaction)) {
-			// TODO: handle issue
+			toastsError({
+				msg: { text: `Failed to load the mined transaction. Please reload the wallet dapp.` }
+			});
 			return;
 		}
 
