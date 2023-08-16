@@ -1,0 +1,23 @@
+{
+	"name": "Oisy wallet",
+	"short_name": "Oisy wallet",
+	"start_url": ".",
+	"display": "standalone",
+	"theme_color": "#51347b",
+	"background_color": "#51347b",
+	"description": "An Ethereum demo wallet hosted on the IC",
+	"orientation": "portrait-primary",
+	"prefer_related_applications": false,
+	"icons": [
+		{
+			"src": "https://tewsx-xaaaa-aaaad-aadia-cai.raw.icp0.io/favicons/icon-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "https://tewsx-xaaaa-aaaad-aadia-cai.raw.icp0.io/favicons/icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	]
+}
