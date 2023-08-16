@@ -4,6 +4,9 @@
 	import { onMount } from 'svelte';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import Header from '$lib/components/layout/Header.svelte';
+	import { fade } from 'svelte/transition';
+	import { Spinner } from '@dfinity/gix-components';
+	import Busy from '$lib/components/ui/Busy.svelte';
 
 	import '$lib/styles/global.scss';
 
@@ -39,7 +42,9 @@
 <svelte:window on:storage={syncAuthStore} />
 
 {#await init()}
-	Loading...
+	<div in:fade>
+		<Spinner />
+	</div>
 {:then _}
 	<Header />
 
@@ -47,3 +52,5 @@
 		<slot />
 	</main>
 {/await}
+
+<Busy />

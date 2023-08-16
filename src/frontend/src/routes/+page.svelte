@@ -5,7 +5,7 @@
 	import Send from '$lib/components/dashboard/Send.svelte';
 	import Sockets from '$lib/components/core/Sockets.svelte';
 	import SignIn from '$lib/components/core/SignIn.svelte';
-	import Hero from '$lib/components/core/Hero.svelte';
+	import Hero from '$lib/components/dashboard/Hero.svelte';
 	import Loader from '$lib/components/core/Loader.svelte';
 </script>
 

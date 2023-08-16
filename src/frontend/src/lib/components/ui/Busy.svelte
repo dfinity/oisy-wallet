@@ -1,0 +1,73 @@
+<script lang="ts">
+	import { fade } from 'svelte/transition';
+	import { busy } from '$lib/stores/busy.store';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { Spinner } from '@dfinity/gix-components';
+
+	const close = () => {
+		if (isNullish($busy) || !$busy.close) {
+			return;
+		}
+
+		busy.stop();
+	};
+</script>
+
+{#if nonNullish($busy)}
+	<div in:fade out:fade={{ duration: 200 }} on:click={close} class:close={$busy.close}>
+		<div class="content">
+			{#if $busy.spinner}
+				<div class="spinner text-ghost-white">
+					<Spinner />
+				</div>
+			{/if}
+
+			{#if $busy.close}
+				<button on:click|stopPropagation={close} aria-label="Close" class="text-ghost-white"
+					>Cancel</button
+				>
+			{/if}
+		</div>
+	</div>
+{/if}
+
+<style lang="scss">
+	div {
+		z-index: calc(var(--z-index) + 1000);
+
+		position: fixed;
+
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+
+		background: rgba(0, 0, 0, 0.85);
+	}
+
+	.content {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+
+		width: fit-content;
+
+		background: transparent;
+	}
+
+	.spinner {
+		position: relative;
+		height: 30px;
+		margin: 1.45rem;
+	}
+
+	.close {
+		align-self: flex-end;
+	}
+</style>
