@@ -63,7 +63,9 @@ const config: UserConfig = {
 					const folder = dirname(id);
 
 					if (
-						['@sveltejs', 'svelte'].find((lib) => folder.includes(lib)) === undefined &&
+						['@sveltejs', 'svelte', '@dfinity/gix-components'].find((lib) =>
+							folder.includes(lib)
+						) === undefined &&
 						folder.includes('node_modules')
 					) {
 						return 'vendor';
@@ -72,10 +74,13 @@ const config: UserConfig = {
 					if (
 						[
 							'frontend/src/lib/api',
+							'frontend/src/lib/constants',
+							'frontend/src/lib/enums',
 							'frontend/src/lib/providers',
 							'frontend/src/lib/services',
 							'frontend/src/lib/stores',
-							'frontend/src/lib/workers'
+							'frontend/src/lib/workers',
+							'frontend/src/lib/utils'
 						].find((module) => folder.includes(module)) !== undefined
 					) {
 						return 'dapp';
