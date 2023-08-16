@@ -2,7 +2,7 @@ import { addressStore } from '$lib/stores/address.store';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { balanceStore } from '$lib/stores/balance.store';
 import { busy } from '$lib/stores/busy.store';
-import { toasts } from '$lib/stores/toasts.store';
+import { toasts, toastsShow } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 
 const clearDataStores = () => {
@@ -46,7 +46,7 @@ export const signOut = async () => {
 export const idleSignOut = async () => {
 	await signOut();
 
-	toasts.show({
+	toastsShow({
 		text: 'You have been logged out because your session has expired.',
 		level: 'warn'
 	});

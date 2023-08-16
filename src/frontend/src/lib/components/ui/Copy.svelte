@@ -7,7 +7,6 @@
 	const copyToClipboard = async () => {
 		await navigator.clipboard.writeText(value);
 		toastsShow({
-			id: Symbol('copy'),
 			text: 'Address copied to clipboard.',
 			level: 'success',
 			duration: 2000

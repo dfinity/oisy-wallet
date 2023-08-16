@@ -1,6 +1,6 @@
-import type { ToastMsg } from '$lib/types/toast';
+import type { ToastMsg, ToastMsgUIUI } from '$lib/types/toast';
 import { errorDetailToString } from '$lib/utils/error.utils';
-import { toastsStore, type ToastMsg as ToastMsgUI } from '@dfinity/gix-components';
+import { toastsStore } from '@dfinity/gix-components';
 import { writable } from 'svelte/store';
 
 const initToastsStore = () => {
@@ -37,4 +37,4 @@ const initToastsStore = () => {
 
 export const toasts = initToastsStore();
 
-export const toastsShow = (msg: ToastMsgUI): symbol => toastsStore.show(msg);
+export const toastsShow = (msg: ToastMsgUIUI): symbol => toastsStore.show(msg);
