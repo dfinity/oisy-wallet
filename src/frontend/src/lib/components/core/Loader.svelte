@@ -13,7 +13,7 @@
 	let steps: [ProgressStep, ...ProgressStep[]] = [
 		{
 			step: LoaderStep.INITIALIZATION,
-			text: 'Connected with Internet Identity - a decentralized castody solution',
+			text: 'Connected with Internet Identity - a decentralized custody solution',
 			state: 'completed'
 		} as ProgressStep,
 		{
