@@ -7,12 +7,16 @@
 	--value-color: var(--color-vampire-black);
 
 	--border-radius-0_5x: calc(0.5 * var(--border-radius-sm));
+	--border-radius: var(--border-radius-sm);
 
 	--animation-time-normal: 0.2s;
 
 	--progress-color: var(--color-interdimensional-blue);
 	--progress-color-contrast: var(--color-white);
 	--progress-color-rgb: 59, 0, 185;
+
+	--overlay-background: var(--color-ghost-white);
+	--overlay-background-contrast: var(--color-vampire-black);
 }
 
 article.gix {
