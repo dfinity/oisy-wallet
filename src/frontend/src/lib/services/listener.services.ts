@@ -3,11 +3,11 @@ import {
 	getTransaction,
 	initTransactionsListener as initTransactionsListenerProvider
 } from '$lib/providers/alchemy.providers';
+import { loadBalance } from '$lib/services/balance.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
-import {loadBalance} from "$lib/services/balance.services";
 
 const processTransaction = async ({ hash }: { hash: string }) => {
 	const transaction = await getTransaction(hash);
