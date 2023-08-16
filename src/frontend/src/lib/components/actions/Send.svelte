@@ -30,7 +30,7 @@
 			const nonce = await getTransactionCount($addressStore!);
 
 			const transaction = {
-				to: '0x6D1b7ceAd24FBaf153a3a18f09395Fd2f9C64912',
+				to: '0xb68e27A58133c90c6d60c5374D801B9F95e76419',
 				value: Utils.parseEther('0.0001').toBigInt(),
 				chain_id: CHAIN_ID,
 				nonce: BigInt(nonce),
