@@ -127,7 +127,8 @@ figcaption {
 }
 
 ::-webkit-scrollbar-thumb {
-	border-radius: 0;
+	border-radius: 0.5em;
+	-webkit-border-radius: 0.5em;
 	background-color: var(--color-interdimensional-blue);
 }
 
