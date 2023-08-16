@@ -1,0 +1,6 @@
+[
+  {
+    "match": "**/favicons/**/*",
+    "allow_raw_access": true
+  }
+]
