@@ -2,7 +2,8 @@
 	import { isNullish } from '@dfinity/utils';
 	import { type AddressData, addressStore } from '$lib/stores/address.store';
 	import { onDestroy } from 'svelte';
-	import { initTransactionsListener, type WebSocketListener } from '$lib/providers/alchemy.sockets';
+	import { type WebSocketListener } from '$lib/providers/alchemy.providers';
+	import { initTransactionsListener } from '$lib/services/listener.services';
 
 	let listener: WebSocketListener | undefined = undefined;
 
