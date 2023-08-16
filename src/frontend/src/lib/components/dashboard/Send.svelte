@@ -8,17 +8,12 @@
 		sendTransaction
 	} from '$lib/providers/etherscan.providers';
 	import { isNullish } from '@dfinity/utils';
-	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
+	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { Utils } from 'alchemy-sdk';
 	import { addressStore } from '$lib/stores/address.store';
 
 	const send = async () => {
 		busy.start();
-
-		// Chain ID:
-		// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
-		// Sepolia: 11155111
-		// TODO: env for chain_id
 
 		try {
 			// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
@@ -35,7 +30,7 @@
 			const transaction = {
 				to: '0x6D1b7ceAd24FBaf153a3a18f09395Fd2f9C64912',
 				value: Utils.parseEther('0.0001').toBigInt(),
-				chain_id: 11155111n,
+				chain_id: CHAIN_ID,
 				nonce: BigInt(nonce),
 				gas: ETH_BASE_FEE,
 				max_fee_per_gas: maxFeePerGas.toBigInt(),

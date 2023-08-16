@@ -6,8 +6,10 @@ import {
 	type TransactionResponse
 } from '@ethersproject/providers';
 
-const API_KEY = import.meta.env.VITE_EHTERSCAN_API_KEY;
-const provider = new EtherscanProvider('sepolia', API_KEY);
+const API_KEY = import.meta.env.VITE_ETHERSCAN_API_KEY;
+const NETWORK = import.meta.env.VITE_ETHERSCAN_NETWORK;
+
+const provider = new EtherscanProvider(NETWORK, API_KEY);
 
 export const balance = (address: ECDSA_PUBLIC_KEY): Promise<BigNumber> =>
 	provider.getBalance(address);

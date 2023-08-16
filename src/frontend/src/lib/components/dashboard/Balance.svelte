@@ -2,6 +2,7 @@
 	import { BigNumber } from 'alchemy-sdk';
 	import { balanceStore } from '$lib/stores/balance.store';
 	import { formatEtherShort } from '$lib/utils/format.utils';
+	import { CURRENCY_SYMBOL } from '$lib/constants/eth.constants';
 </script>
 
 <span class="text-ghost-white mt">
@@ -11,5 +12,5 @@
 	>
 		{formatEtherShort($balanceStore ?? BigNumber.from(0n))}
 	</output>
-	<span class="opacity-100">SepoliaETH</span>
+	<span class="opacity-100">{CURRENCY_SYMBOL}</span>
 </span>
