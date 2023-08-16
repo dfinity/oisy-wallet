@@ -23,7 +23,7 @@ export const loadBalance = async (): Promise<{ success: boolean }> => {
 		balanceStore.reset();
 
 		toastsError({
-			msg: { text: 'Error while loading the ETH balance' },
+			msg: { text: 'Error while loading the ETH balance.' },
 			err
 		});
 

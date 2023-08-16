@@ -23,7 +23,7 @@ export const loadTransactions = async (): Promise<{ success: boolean }> => {
 		transactionsStore.reset();
 
 		toastsError({
-			msg: { text: 'Error while loading the transactions' },
+			msg: { text: 'Error while loading the transactions.' },
 			err
 		});
 		return { success: false };
