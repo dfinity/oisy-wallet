@@ -39,25 +39,4 @@ export interface BusyWizardStore extends Readable<boolean> {
 	stop: () => void;
 }
 
-const initWizardBusyStore = (): BusyWizardStore => {
-	const { subscribe, set } = writable<boolean>(false);
-
-	return {
-		subscribe,
-
-		start() {
-			set(true);
-		},
-
-		stop() {
-			set(false);
-		}
-	};
-};
-
-export const wizardBusy = initWizardBusyStore();
-
-export const isBusy: Readable<boolean> = derived(
-	[busy, wizardBusy],
-	([$busy, $wizardBusy]) => nonNullish($busy) || $wizardBusy
-);
+export const isBusy: Readable<boolean> = derived([busy], ([$busy]) => nonNullish($busy));
