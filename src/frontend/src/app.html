@@ -8,22 +8,57 @@
 
 		<title>Oisy wallet</title>
 		<link href="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io" rel="canonical" />
-		<meta
-				content="An Ethereum demo wallet hosted on the IC."
-				name="description"
-		/>
+		<meta content="An Ethereum demo wallet hosted on the IC" name="description" />
 		<meta content="Oisy wallet" property="og:title" />
 		<meta content="An Ethereum demo wallet hosted on the IC" property="og:description" />
 		<meta content="website" property="og:type" />
 		<meta content="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io" property="og:url" />
-		<meta content="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io/images/meta-share.jpg" property="og:image" />
+		<meta
+			content="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io/images/meta-share.jpg"
+			property="og:image"
+		/>
 		<meta content="summary_large_image" name="twitter:card" />
 		<meta content="Oisy wallet" name="twitter:title" />
 		<meta content="An Ethereum demo wallet hosted on the IC" name="twitter:description" />
-		<meta content="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io/images/meta-share.jpg" name="twitter:image" />
+		<meta
+			content="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io/images/meta-share.jpg"
+			name="twitter:image"
+		/>
 		<meta content="@dfinity" name="twitter:creator" />
 
-		%sveltekit.head%
+		<link crossorigin="anonymous" href="/manifest.webmanifest" rel="manifest" />
+
+		<!-- Favicon -->
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="%sveltekit.assets%/favicons/favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="%sveltekit.assets%/favicons/favicon-16x16.png"
+		/>
+		<link rel="shortcut icon" href="%sveltekit.assets%/favicon.ico" />
+
+		<!-- iOS meta tags & icons -->
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="#51347b" />
+		<meta name="apple-mobile-web-app-title" content="Oisy wallet" />
+		<link rel="apple-touch-icon" href="%sveltekit.assets%/favicons/apple-touch-icon.png" />
+		<link
+			rel="mask-icon"
+			href="%sveltekit.assets%/favicons/safari-pinned-tab.svg"
+			color="#51347b"
+		/>
+
+		<!-- MS -->
+		<meta name="msapplication-TileColor" content="#51347b" />
+		<meta name="msapplication-config" content="%sveltekit.assets%/favicons/browserconfig.xml" />
+
+		<meta content=#51347b" name="theme-color" /> %sveltekit.head%
 
 		<meta name="robots" content="noindex" />
 
