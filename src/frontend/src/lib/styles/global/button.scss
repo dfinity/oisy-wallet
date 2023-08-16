@@ -8,7 +8,7 @@ button {
 
 	border-radius: var(--border-radius-sm);
 
-	padding: var(--padding) var(--padding-3x);
+	transition: color 0.25s ease-out, background 0.25s ease-out, opacity 0.25s ease-out;
 
 	&.primary {
 		justify-content: flex-start;
@@ -16,6 +16,8 @@ button {
 		background: var(--color-white);
 
 		border: 1px solid var(--color-interdimensional-blue);
+
+		padding: var(--padding) var(--padding-3x);
 	}
 
 	&.labelled {
@@ -38,5 +40,7 @@ button {
 		justify-content: center;
 
 		background: var(--color-ghost-white);
+
+		padding: var(--padding-1_5x) var(--padding-3x);
 	}
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { busy } from '$lib/stores/busy.store';
+	import { busy, isBusy } from '$lib/stores/busy.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { signTransaction } from '$lib/api/backend.api';
 	import {
@@ -12,6 +12,7 @@
 	import { Utils } from 'alchemy-sdk';
 	import { addressStore } from '$lib/stores/address.store';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import { balanceStoreEmpty } from '$lib/stores/balance.store';
 
 	const send = async () => {
 		busy.start();
@@ -56,9 +57,12 @@
 
 		busy.stop();
 	};
+
+	let disabled;
+	$: disabled = $balanceStoreEmpty || $isBusy;
 </script>
 
-<button class="flex-1 secondary" on:click={send}>
+<button class="flex-1 secondary" on:click={send} {disabled} class:opacity-50={disabled}>
 	<IconSend size="28" />
 	<span>Send</span></button
 >
