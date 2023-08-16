@@ -5,10 +5,12 @@ import { busy } from '$lib/stores/busy.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 
-const clearDataStores = () => {
+const resetStores = () => {
 	addressStore.reset();
 	balanceStore.reset();
 	transactionsStore.reset();
+
+	busy.stop();
 };
 
 export const signIn = async (
@@ -40,7 +42,7 @@ export const signIn = async (
 export const signOut = async () => {
 	await authStore.signOut();
 
-	clearDataStores();
+	resetStores();
 };
 
 export const idleSignOut = async () => {

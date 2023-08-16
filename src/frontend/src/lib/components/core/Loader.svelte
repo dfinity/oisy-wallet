@@ -7,6 +7,7 @@
 	import { loadBalance } from '$lib/services/balance.services';
 	import { loadTransactions } from '$lib/services/transactions.services';
 	import { fade } from 'svelte/transition';
+	import { signOut } from '$lib/services/auth.services';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 	let steps: [ProgressStep, ...ProgressStep[]] = [
@@ -33,21 +34,32 @@
 	];
 
 	onMount(async () => {
-		try {
-			await loadAddress();
+		const { success: addressSuccess } = await loadAddress();
 
-			progressStep = LoaderStep.BALANCE;
-
-			await loadBalance();
-
-			progressStep = LoaderStep.TRANSACTIONS;
-
-			await loadTransactions();
-
-			progressStep = LoaderStep.DONE;
-		} catch (err: unknown) {
-			// TODO: signout and clear stores
+		if (!addressSuccess) {
+			await signOut();
+			return;
 		}
+
+		progressStep = LoaderStep.BALANCE;
+
+		const { success: balanceSuccess } = await loadBalance();
+
+		if (!balanceSuccess) {
+			await signOut();
+			return;
+		}
+
+		progressStep = LoaderStep.TRANSACTIONS;
+
+		const { success: transactionsSuccess } = await loadTransactions();
+
+		if (!transactionsSuccess) {
+			await signOut();
+			return;
+		}
+
+		progressStep = LoaderStep.DONE;
 	});
 </script>
 
