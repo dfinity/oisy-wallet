@@ -138,7 +138,7 @@ const updateCSP = (indexHtml) => {
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
         connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethProviders};
-        img-src 'self' data:;
+        img-src 'self' data: https://tewsx-xaaaa-aaaad-aadia-cai.raw.icp0.io;
         child-src 'self';
         manifest-src 'self';
         script-src 'unsafe-eval' 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
