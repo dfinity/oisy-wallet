@@ -1,6 +1,6 @@
 import { getEthAddress } from '$lib/api/backend.api';
 import { addressStore } from '$lib/stores/address.store';
-import { toasts } from '$lib/stores/toasts.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -18,9 +18,9 @@ export const loadAddress = async () => {
 	} catch (err: unknown) {
 		addressStore.reset();
 
-		toasts.error({
-			text: 'Error while loading the eth address',
-			detail: err
+		toastsError({
+			msg: { text: 'Error while loading the ETH address.' },
+			err
 		});
 	}
 };
