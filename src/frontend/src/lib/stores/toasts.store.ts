@@ -1,37 +1,21 @@
 import type { ToastMsg } from '$lib/types/toast';
 import { errorDetailToString } from '$lib/utils/error.utils';
-import { writable } from 'svelte/store';
+import { toastsStore } from '@dfinity/gix-components';
 
-const initToastsStore = () => {
-	const { subscribe, update } = writable<ToastMsg[]>([]);
+export const toastsShow = (msg: ToastMsg): symbol => toastsStore.show(msg);
 
-	return {
-		subscribe,
+export const toastsError = ({
+	msg: { text, ...rest },
+	err
+}: {
+	msg: Omit<ToastMsg, 'level'>;
+	err: unknown;
+}): symbol => {
+	console.error(err);
 
-		error({ text, detail }: { text: string; detail?: unknown }) {
-			console.error(text, detail);
-			update((messages: ToastMsg[]) => [
-				...messages,
-				{ text, level: 'error', detail: errorDetailToString(detail) }
-			]);
-		},
-
-		show(msg: ToastMsg) {
-			update((messages: ToastMsg[]) => [...messages, msg]);
-		},
-
-		success(text: string) {
-			this.show({
-				text,
-				level: 'info',
-				duration: 2000
-			});
-		},
-
-		hide() {
-			update((messages: ToastMsg[]) => messages.slice(1));
-		}
-	};
+	return toastsStore.show({
+		text: `${text} / ${errorDetailToString(err)}`,
+		...rest,
+		level: 'error'
+	});
 };
-
-export const toasts = initToastsStore();

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { busy } from '$lib/stores/busy.store';
-	import { toasts } from '$lib/stores/toasts.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import { signTransaction } from '$lib/api/backend.api';
 	import {
 		getFeeData,
@@ -52,11 +52,9 @@
 
 			console.log('Success', sentTransaction);
 		} catch (err: unknown) {
-			console.error(err);
-
-			toasts.error({
-				text: `Something went wrong while sending the transaction.`,
-				detail: err
+			toastsError({
+				msg: { text: `Something went wrong while sending the transaction.` },
+				err
 			});
 		}
 
