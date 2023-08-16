@@ -14,7 +14,7 @@ export const toastsError = ({
 	console.error(err);
 
 	return toastsStore.show({
-		text: `${text} | ${errorDetailToString(err)}`,
+		text: `${text} / ${errorDetailToString(err)}`,
 		...rest,
 		level: 'error'
 	});
