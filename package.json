@@ -1,5 +1,5 @@
 {
-	"name": "@dfinity/ic_eth_wallet",
+	"name": "@dfinity/ic-eth-wallet",
 	"version": "0.0.1",
 	"private": true,
 	"license": "SEE LICENSE IN LICENSE.md",
