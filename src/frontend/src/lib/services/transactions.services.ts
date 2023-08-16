@@ -5,12 +5,15 @@ import { transactionsStore } from '$lib/stores/transactions.store';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadTransactions = async () => {
+export const loadTransactions = async (): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
-		// TODO: throw error?
-		return;
+		toastsError({
+			msg: { text: 'ETH address is unknown.' }
+		});
+
+		return { success: false };
 	}
 
 	try {
@@ -23,5 +26,8 @@ export const loadTransactions = async () => {
 			msg: { text: 'Error while loading the transactions' },
 			err
 		});
+		return { success: false };
 	}
+
+	return { success: true };
 };
