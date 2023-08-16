@@ -3,6 +3,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export interface TransactionsStore extends Readable<Transaction[]> {
+	set: (transactions: Transaction[]) => void;
 	add: (transactions: Transaction[]) => void;
 	update: (transaction: Transaction) => void;
 	reset: () => void;
@@ -14,6 +15,7 @@ const initTransactionsStore = (): TransactionsStore => {
 	const { subscribe, update, set } = writable<Transaction[]>(INITIAL);
 
 	return {
+		set: (transactions: Transaction[]) => set(transactions),
 		add: (transactions: Transaction[]) => update((state) => [...state, ...transactions]),
 		update: (transaction: Transaction) =>
 			update((state) => [...state.filter(({ hash }) => hash !== transaction.hash), transaction]),

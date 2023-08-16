@@ -11,7 +11,7 @@
 
 	{#if $authSignedInStore}
 		<div style="margin-left: auto">
-			<UserPrincipal/>
+			<UserPrincipal />
 		</div>
 	{/if}
 </header>

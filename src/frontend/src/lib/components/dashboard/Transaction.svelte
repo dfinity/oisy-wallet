@@ -43,7 +43,7 @@
 </div>
 
 {#if isTransactionPending(transaction)}
-	<p><strong>Pending</strong></p>
+	<p><strong>Pending (TODO styling)</strong></p>
 {/if}
 
 <hr class="bg-deep-violet opacity-15 my-3" style="width: 100%; border: 0.05rem solid" />
