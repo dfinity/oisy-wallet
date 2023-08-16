@@ -42,7 +42,7 @@
 		bottom: 0;
 		left: 0;
 
-		background: rgba(0, 0, 0, 0.85);
+		background: var(--backdrop);
 	}
 
 	.content {
