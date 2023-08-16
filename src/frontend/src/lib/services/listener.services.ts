@@ -7,6 +7,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
+import {loadBalance} from "$lib/services/balance.services";
 
 const processTransaction = async ({ hash }: { hash: string }) => {
 	const transaction = await getTransaction(hash);
@@ -43,6 +44,9 @@ const processTransaction = async ({ hash }: { hash: string }) => {
 		...rest,
 		timestamp: timestamp ?? Date.now() / 1000
 	});
+
+	// Reload balance as a transaction has been mined
+	await loadBalance();
 };
 
 export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener =>
