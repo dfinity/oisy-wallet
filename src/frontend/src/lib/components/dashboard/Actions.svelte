@@ -1,13 +1,10 @@
-<script>
-	import IconReceive from '$lib/components/icons/IconReceive.svelte';
+<script lang="ts">
 	import Send from '$lib/components/actions/Send.svelte';
+	import Receive from "$lib/components/actions/Receive.svelte";
 </script>
 
 <div role="toolbar" class="flex gap-2 text-deep-violet font-bold pt-8">
-	<button class="flex-1 secondary">
-		<IconReceive size="28" />
-		<span>Receive</span></button
-	>
+	<Receive />
 
 	<Send />
 </div>

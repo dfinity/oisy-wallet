@@ -10,7 +10,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { Utils } from 'alchemy-sdk';
-	import { addressStore } from '$lib/stores/address.store';
+	import { addressStore, addressStoreNotLoaded } from '$lib/stores/address.store';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { balanceStoreEmpty } from '$lib/stores/balance.store';
 
@@ -59,7 +59,7 @@
 	};
 
 	let disabled;
-	$: disabled = $balanceStoreEmpty || $isBusy;
+	$: disabled = $addressStoreNotLoaded || $balanceStoreEmpty || $isBusy;
 </script>
 
 <button class="flex-1 secondary" on:click={send} {disabled} class:opacity-50={disabled}>
