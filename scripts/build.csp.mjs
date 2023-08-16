@@ -132,7 +132,8 @@ const updateCSP = (indexHtml) => {
 		indexHashes.push(`'sha256-${createHash('sha256').update(content).digest('base64')}'`);
 	}
 
-	const ethProviders = 'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com';
+	const ethProviders =
+		'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
 
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
