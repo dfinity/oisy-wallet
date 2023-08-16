@@ -15,7 +15,7 @@ export const loadTransactions = async () => {
 
 	try {
 		const transactions = await transactionsProviders(address);
-		transactionsStore.add(transactions);
+		transactionsStore.set(transactions);
 	} catch (err: unknown) {
 		transactionsStore.reset();
 

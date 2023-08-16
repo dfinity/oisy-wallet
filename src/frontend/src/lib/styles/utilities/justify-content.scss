@@ -5,3 +5,4 @@ $property: justify-content;
 @include utilities.generate(justify-start, $property, flex-start);
 @include utilities.generate(justify-end, $property, flex-end);
 @include utilities.generate(justify-center, $property, center);
+@include utilities.generate(justify-between, $property, space-between);

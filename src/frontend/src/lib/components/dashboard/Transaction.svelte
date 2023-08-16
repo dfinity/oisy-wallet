@@ -38,12 +38,12 @@
 			<span>{`${type === 'send' ? 'Send' : 'Receive'}`}</span>
 			<span class="flex-1 text-right">{Utils.formatEther(amount.toString())}</span>
 		</div>
-		<p class="color-deep-violet opacity-75">Aug 8, 2023 15:21</p>
+		<p class="text-cetacean-blue opacity-50">Aug 8, 2023 15:21 (TODO)</p>
 	</div>
 </div>
 
 {#if isTransactionPending(transaction)}
-	<p><strong>Pending</strong></p>
+	<p><strong>Pending (TODO styling)</strong></p>
 {/if}
 
 <hr class="bg-deep-violet opacity-15 my-3" style="width: 100%; border: 0.05rem solid" />

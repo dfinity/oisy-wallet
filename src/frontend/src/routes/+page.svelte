@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { authSignedInStore } from '$lib/stores/auth.store';
-	import { signOut } from '$lib/services/auth.services';
 	import Transactions from '$lib/components/dashboard/Transactions.svelte';
 	import Send from '$lib/components/dashboard/Send.svelte';
 	import Sockets from '$lib/components/core/Sockets.svelte';
@@ -19,8 +18,6 @@
 			<Send />
 		</Loader>
 	</Sockets>
-
-	<button class="mt-8" on:click={signOut}>Sign-out</button>
 {:else}
 	<SignIn />
 {/if}
