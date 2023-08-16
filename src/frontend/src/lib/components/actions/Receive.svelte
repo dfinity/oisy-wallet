@@ -2,8 +2,9 @@
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import { addressStore, addressStoreNotLoaded } from '$lib/stores/address.store';
 	import { isBusy } from '$lib/stores/busy.store';
-	import { Copy, Modal, QRCode } from '@dfinity/gix-components';
+	import { Modal, QRCode } from '@dfinity/gix-components';
 	import IconETHQRCode from '$lib/components/icons/IconETHQRCode.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
 
 	let disabled;
 	$: disabled = $addressStoreNotLoaded || $isBusy;

@@ -27,6 +27,8 @@
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
+	--toast-info-z-index: calc(var(--overlay-z-index) + 4);
+	--toast-error-z-index: calc(var(--overlay-z-index) + 5);
 
 	--overlay-box-shadow: 0px 0px 8px rgba(var(--box-shadow-color-rgb), 0.2);
 
