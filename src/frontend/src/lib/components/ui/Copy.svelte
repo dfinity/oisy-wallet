@@ -14,14 +14,11 @@
 	};
 </script>
 
-<button on:click|preventDefault|stopPropagation={copyToClipboard} aria-label={`Copy: ${value}`}>
+<button
+	on:click|preventDefault|stopPropagation={copyToClipboard}
+	aria-label={`Copy: ${value}`}
+	class="pb-1"
+	style="height: var(--padding-4x); width: var(--padding-4x); min-width: var(--padding-4x);"
+>
 	<IconCopy />
 </button>
-
-<style lang="scss">
-	button {
-		height: var(--padding-4x);
-		width: var(--padding-4x);
-		min-width: var(--padding-4x);
-	}
-</style>
