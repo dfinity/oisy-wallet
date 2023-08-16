@@ -1,15 +1,16 @@
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
-import { Alchemy, AlchemySubscription, Network } from 'alchemy-sdk';
+import { Alchemy, AlchemySubscription, type Network } from 'alchemy-sdk';
 
 export type WebSocketListener = { removeAllListeners: () => void };
 
 const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
+const NETWORK = import.meta.env.VITE_ALCHEMY_NETWORK;
 
 const config = {
 	apiKey: API_KEY,
-	network: Network.ETH_SEPOLIA
+	network: NETWORK as Network
 };
 
 export const provider = new Alchemy(config);
