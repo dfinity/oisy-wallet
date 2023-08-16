@@ -2,7 +2,7 @@
   <h1>Oisy wallet</h1>
 
   <a href="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io/">
-    <img src="./src/frontend/static/favicons/icon-512x512.png" width="180px" alt="NNS Dapp logo" role="presentation"/>
+    <img src="./src/frontend/static/images/meta-share.jpg" width="180px" alt="NNS Dapp logo" role="presentation"/>
   </a>
 
 <br/>
