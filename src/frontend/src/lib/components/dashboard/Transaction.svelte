@@ -7,6 +7,8 @@
 	import { SvelteComponent } from 'svelte';
 	import { addressStore } from '$lib/stores/address.store';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { formatToDate } from '$lib/utils/date.utils';
 
 	export let transaction: Transaction;
 
@@ -14,8 +16,9 @@
 	let from: string;
 	let to: string | undefined;
 	let value: BigNumber;
+	let timestamp: number | undefined;
 
-	$: ({ blockNumber, from, to, value } = transaction);
+	$: ({ blockNumber, from, to, value, timestamp } = transaction);
 
 	let type: 'send' | 'receive';
 	$: type = from === $addressStore ? 'send' : 'receive';
@@ -25,6 +28,8 @@
 
 	let amount: BigNumber;
 	$: amount = type == 'send' ? value.mul(BigNumber.from(-1)) : value;
+
+	$: console.log(transaction);
 </script>
 
 <div class="flex gap-2 mb-2">
@@ -38,12 +43,16 @@
 			<span>{`${type === 'send' ? 'Send' : 'Receive'}`}</span>
 			<span class="flex-1 text-right">{Utils.formatEther(amount.toString())}</span>
 		</div>
-		<p class="text-cetacean-blue opacity-50">Aug 8, 2023 15:21 (TODO)</p>
+		<p class="text-cetacean-blue opacity-50">
+			{#if nonNullish(timestamp)}
+				{formatToDate(timestamp)}
+			{/if}
+
+			{#if isTransactionPending(transaction)}
+				<strong>Pending (TODO styling)</strong>
+			{/if}
+		</p>
 	</div>
 </div>
-
-{#if isTransactionPending(transaction)}
-	<p><strong>Pending (TODO styling)</strong></p>
-{/if}
 
 <hr class="bg-deep-violet opacity-15 my-3" style="width: 100%; border: 0.05rem solid" />
