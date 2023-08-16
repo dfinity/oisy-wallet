@@ -1,12 +1,3 @@
-import type { ToastMsg as ToastMsgUI } from "@dfinity/gix-components";
+import type { ToastMsg as ToastMsgUI } from '@dfinity/gix-components';
 
-export type ToastLevel = 'info' | 'warn' | 'error';
-
-export interface ToastMsg {
-	text: string;
-	level: ToastLevel;
-	detail?: string;
-	duration?: number;
-}
-
-export type ToastMsgUIUI = Omit<ToastMsgUI, "id">;
+export type ToastMsg = Omit<ToastMsgUI, 'id'>;
