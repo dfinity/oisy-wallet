@@ -13,7 +13,7 @@ const config = {
 	network: NETWORK as Network
 };
 
-export const provider = new Alchemy(config);
+const provider = new Alchemy(config);
 
 export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener => {
 	const processTransaction = async ({ hash }: { hash: string }) => {
