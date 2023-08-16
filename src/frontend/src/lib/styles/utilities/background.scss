@@ -13,3 +13,4 @@ $property: background;
 @include utilities.generate(bg-deep-violet, $property, var(--color-deep-violet));
 @include utilities.generate(bg-cetacean-blue, $property, var(--color-cetacean-blue));
 @include utilities.generate(bg-dark-slate-blue, $property, var(--color-dark-slate-blue));
+@include utilities.generate(bg-goldenrod, $property, var(--color-goldenrod));

@@ -29,13 +29,14 @@
 	let amount: BigNumber;
 	$: amount = type == 'send' ? value.mul(BigNumber.from(-1)) : value;
 
-	$: console.log(transaction);
+	let pending: boolean;
+	$: pending = isTransactionPending(transaction);
 </script>
 
 <div class="flex gap-2 mb-2">
 	<div class="relative">
 		<div class="rounded-50 bg-deep-violet opacity-15" style="width: 3rem; aspect-ratio: 1/1" />
-		<svelte:component this={icon} styleClass="inset-center" />
+		<svelte:component this={icon} styleClass={`inset-center ${pending ? 'opacity-15' : ''}`} />
 	</div>
 
 	<div class="flex-1 flex flex-col justify-center">
@@ -43,13 +44,13 @@
 			<span>{`${type === 'send' ? 'Send' : 'Receive'}`}</span>
 			<span class="flex-1 text-right">{Utils.formatEther(amount.toString())}</span>
 		</div>
-		<p class="text-cetacean-blue opacity-50">
+		<p class="text-cetacean-blue" class:text-goldenrod={pending} class:opacity-50={!pending}>
 			{#if nonNullish(timestamp)}
 				{formatToDate(timestamp)}
 			{/if}
 
-			{#if isTransactionPending(transaction)}
-				<strong>Pending (TODO styling)</strong>
+			{#if pending}
+				Pending...
 			{/if}
 		</p>
 	</div>
