@@ -26,6 +26,14 @@ $property: padding;
 @include utilities.generate(pt-1, #{$property}-top, var(--padding));
 @include utilities.generate(pb-1, #{$property}-bottom, var(--padding));
 
+@include utilities.generate(p-1\.25, $property, var(--padding-1_25x));
+@include utilities.generate(px-1\.25, #{$property}-left, var(--padding-1_25x));
+@include utilities.generate(px-1\.25, #{$property}-right, var(--padding-1_25x));
+@include utilities.generate(py-1\.25, #{$property}-top, var(--padding-1_25x));
+@include utilities.generate(py-1\.25, #{$property}-bottom, var(--padding-1_25x));
+@include utilities.generate(pt-1\.25, #{$property}-top, var(--padding-1_25x));
+@include utilities.generate(pb-1\.25, #{$property}-bottom, var(--padding-1_25x));
+
 @include utilities.generate(p-1\.5, $property, var(--padding-1_5x));
 @include utilities.generate(px-1\.5, #{$property}-left, var(--padding-1_5x));
 @include utilities.generate(px-1\.5, #{$property}-right, var(--padding-1_5x));
