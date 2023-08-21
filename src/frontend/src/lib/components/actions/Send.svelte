@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { busy, isBusy } from '$lib/stores/busy.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { signTransaction } from '$lib/api/backend.api';
 	import {
@@ -17,6 +16,10 @@
 	import SendForm from '$lib/components/actions/SendForm.svelte';
 	import SendReview from '$lib/components/actions/SendReview.svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
+	import SendProgress from '$lib/components/actions/SendProgress.svelte';
+	import { SendStep } from '$lib/enums/send';
+
+	let sendProgressStep: string = SendStep.INITIALIZATION;
 
 	const send = async () => {
 		if (invalidDestination(destination)) {
@@ -33,7 +36,7 @@
 			return;
 		}
 
-		busy.start();
+		modal.next();
 
 		try {
 			// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
@@ -57,27 +60,28 @@
 				max_priority_fee_per_gas: maxPriorityFeePerGas.toBigInt()
 			} as const;
 
-			console.log(transaction);
+			sendProgressStep = SendStep.SIGN;
 
 			const rawTransaction = await signTransaction(transaction);
 
-			console.log(rawTransaction);
+			sendProgressStep = SendStep.SEND;
 
-			const sentTransaction = await sendTransaction(rawTransaction);
+			await sendTransaction(rawTransaction);
 
-			console.log('Success', sentTransaction);
+			sendProgressStep = SendStep.DONE;
+
+			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: `Something went wrong while sending the transaction.` },
 				err
 			});
 		}
-
-		busy.stop();
 	};
 
 	let disabled: boolean;
-	$: disabled = $addressStoreNotLoaded || $balanceStoreEmpty || $isBusy;
+	$: disabled =
+		$addressStoreNotLoaded || $balanceStoreEmpty || sendProgressStep !== SendStep.INITIALIZATION;
 
 	let visible = false;
 
@@ -107,6 +111,8 @@
 
 		destination = '';
 		amount = undefined;
+
+		sendProgressStep = SendStep.INITIALIZATION;
 	};
 </script>
 
@@ -126,6 +132,8 @@
 
 		{#if currentStep?.name === 'Review'}
 			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
+		{:else if currentStep?.name === 'Sending'}
+			<SendProgress progressStep={sendProgressStep} />
 		{:else}
 			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
 		{/if}
