@@ -13,7 +13,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<form on:submit={() => dispatch('icNext')}>
+<form on:submit={() => dispatch('icNext')} method="post">
 	<label for="destination" class="font-bold px-1.25">Destination:</label>
 	<Input
 		name="destination"
