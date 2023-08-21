@@ -8,17 +8,23 @@
 		sendTransaction
 	} from '$lib/providers/etherscan.providers';
 	import { isNullish } from '@dfinity/utils';
-	import { CHAIN_ID, CURRENCY_SYMBOL, ETH_BASE_FEE } from '$lib/constants/eth.constants';
-	import { BigNumber, Utils } from 'alchemy-sdk';
+	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
+	import { Utils } from 'alchemy-sdk';
 	import { addressStore, addressStoreNotLoaded } from '$lib/stores/address.store';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import { balanceStore, balanceStoreEmpty } from '$lib/stores/balance.store';
+	import { balanceStoreEmpty } from '$lib/stores/balance.store';
 	import { type WizardStep, type WizardSteps, WizardModal, Input } from '@dfinity/gix-components';
-	import { formatEtherShort } from '$lib/utils/format.utils';
 	import SendSource from '$lib/components/actions/SendSource.svelte';
 	import SendDestination from '$lib/components/actions/SendDestination.svelte';
 
 	const send = async () => {
+		if (invalid) {
+			toastsError({
+				msg: { text: `Amount or destination address are invalid.` }
+			});
+			return;
+		}
+
 		busy.start();
 
 		try {
@@ -34,8 +40,8 @@
 			const nonce = await getTransactionCount($addressStore!);
 
 			const transaction = {
-				to: '0xb68e27A58133c90c6d60c5374D801B9F95e76419',
-				value: Utils.parseEther('0.0001').toBigInt(),
+				to: destination!,
+				value: Utils.parseEther(`${amount!}`).toBigInt(),
 				chain_id: CHAIN_ID,
 				nonce: BigInt(nonce),
 				gas: ETH_BASE_FEE,
@@ -88,8 +94,8 @@
 	let destination = '';
 	let amount: number | undefined = undefined;
 
-	let disableNext = true;
-	$: disableNext = isNullish(destination) || destination === '' || isNullish(amount) || amount <= 0;
+	let invalid = true;
+	$: invalid = isNullish(destination) || destination === '' || isNullish(amount) || amount <= 0;
 
 	const close = () => {
 		visible = false;
@@ -114,40 +120,41 @@
 		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 		{#if currentStep?.name === 'Review'}
-			<SendDestination {destination} {amount} />
+			<form on:submit={send}>
+				<SendDestination {destination} {amount} />
 
-			<SendSource />
+				<SendSource />
 
-			<div class="flex justify-end gap-1">
-				<button class="primary" on:click={modal.back}>Back</button>
-				<button class="primary" on:click={modal.next}> Send </button>
-			</div>
+				<div class="flex justify-end gap-1">
+					<button type="button" class="primary" on:click={modal.back}>Back</button>
+					<button type="submit" class="primary" disabled={invalid} class:opacity-15={invalid}>
+						Send
+					</button>
+				</div>
+			</form>
 		{:else}
-			<label for="destination" class="font-bold px-1.25">Destination:</label>
-			<Input
-				name="destination"
-				inputType="text"
-				required
-				bind:value={destination}
-				placeholder="Enter public address (0x)"
-			/>
+			<form on:submit={modal.next}>
+				<label for="destination" class="font-bold px-1.25">Destination:</label>
+				<Input
+					name="destination"
+					inputType="text"
+					required
+					bind:value={destination}
+					placeholder="Enter public address (0x)"
+				/>
 
-			<label for="amount" class="font-bold px-1.25">Amount:</label>
-			<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
+				<label for="amount" class="font-bold px-1.25">Amount:</label>
+				<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
-			<SendSource />
+				<SendSource />
 
-			<div class="flex justify-end gap-1">
-				<button class="primary" on:click={close}>Cancel</button>
-				<button
-					class="primary"
-					on:click={modal.next}
-					disabled={disableNext}
-					class:opacity-15={disableNext}
-				>
-					Next
-				</button>
-			</div>
+				<div class="flex justify-end gap-1">
+					<button type="button" class="primary" on:click={close}>Cancel</button>
+					<button class="primary" type="submit" disabled={invalid} class:opacity-15={invalid}>
+						Next
+					</button>
+				</div>
+			</form>
 		{/if}
 	</WizardModal>
 {/if}
