@@ -14,13 +14,21 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { balanceStoreEmpty } from '$lib/stores/balance.store';
 	import { type WizardStep, type WizardSteps, WizardModal, Input } from '@dfinity/gix-components';
-	import SendSource from '$lib/components/actions/SendSource.svelte';
-	import SendDestination from '$lib/components/actions/SendDestination.svelte';
+	import SendForm from '$lib/components/actions/SendForm.svelte';
+	import SendReview from '$lib/components/actions/SendReview.svelte';
+	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
 
 	const send = async () => {
-		if (invalid) {
+		if (invalidDestination(destination)) {
 			toastsError({
-				msg: { text: `Amount or destination address are invalid.` }
+				msg: { text: `Destination address is invalid.` }
+			});
+			return;
+		}
+
+		if (invalidAmount(amount)) {
+			toastsError({
+				msg: { text: `Amount is invalid.` }
 			});
 			return;
 		}
@@ -94,9 +102,6 @@
 	let destination = '';
 	let amount: number | undefined = undefined;
 
-	let invalid = true;
-	$: invalid = isNullish(destination) || destination === '' || isNullish(amount) || amount <= 0;
-
 	const close = () => {
 		visible = false;
 
@@ -120,41 +125,9 @@
 		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 		{#if currentStep?.name === 'Review'}
-			<form on:submit={send}>
-				<SendDestination {destination} {amount} />
-
-				<SendSource />
-
-				<div class="flex justify-end gap-1">
-					<button type="button" class="primary" on:click={modal.back}>Back</button>
-					<button type="submit" class="primary" disabled={invalid} class:opacity-15={invalid}>
-						Send
-					</button>
-				</div>
-			</form>
+			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
 		{:else}
-			<form on:submit={modal.next}>
-				<label for="destination" class="font-bold px-1.25">Destination:</label>
-				<Input
-					name="destination"
-					inputType="text"
-					required
-					bind:value={destination}
-					placeholder="Enter public address (0x)"
-				/>
-
-				<label for="amount" class="font-bold px-1.25">Amount:</label>
-				<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
-
-				<SendSource />
-
-				<div class="flex justify-end gap-1">
-					<button type="button" class="primary" on:click={close}>Cancel</button>
-					<button class="primary" type="submit" disabled={invalid} class:opacity-15={invalid}>
-						Next
-					</button>
-				</div>
-			</form>
+			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
 		{/if}
 	</WizardModal>
 {/if}
