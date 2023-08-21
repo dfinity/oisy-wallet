@@ -6,7 +6,7 @@
 	import IconETHQRCode from '$lib/components/icons/IconETHQRCode.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 
-	let disabled;
+	let disabled: boolean;
 	$: disabled = $addressStoreNotLoaded || $isBusy;
 
 	let visible = false;
