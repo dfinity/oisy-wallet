@@ -14,6 +14,20 @@ const config = {
 
 const provider = new Alchemy(config);
 
+export const initBlockListener = ({ listener }: { listener: Listener }): WebSocketListener => {
+	provider.ws.on(
+		{
+			method: AlchemySubscription.MINED_TRANSACTIONS,
+			hashesOnly: true
+		},
+		listener
+	);
+
+	return {
+		removeAllListeners: () => provider.ws.removeAllListeners()
+	};
+};
+
 export const initTransactionsListener = ({
 	address,
 	listener
@@ -24,7 +38,8 @@ export const initTransactionsListener = ({
 	provider.ws.on(
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
-			fromAddress: address
+			fromAddress: address,
+			hashesOnly: true
 		},
 		listener
 	);
@@ -32,7 +47,8 @@ export const initTransactionsListener = ({
 	provider.ws.on(
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
-			toAddress: address
+			toAddress: address,
+			hashesOnly: true
 		},
 		listener
 	);

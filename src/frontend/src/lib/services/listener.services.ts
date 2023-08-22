@@ -1,6 +1,7 @@
 import type { WebSocketListener } from '$lib/providers/alchemy.providers';
 import {
 	getTransaction,
+	initBlockListener as initBlockListenerProvider,
 	initTransactionsListener as initTransactionsListenerProvider
 } from '$lib/providers/alchemy.providers';
 import { loadBalance } from '$lib/services/balance.services';
@@ -9,7 +10,7 @@ import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
 
-const processTransaction = async ({ hash }: { hash: string }) => {
+const processTransaction = async (hash: string) => {
 	const transaction = await getTransaction(hash);
 
 	if (isNullish(transaction)) {
@@ -52,5 +53,12 @@ const processTransaction = async ({ hash }: { hash: string }) => {
 export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener =>
 	initTransactionsListenerProvider({
 		address,
-		listener: async (tx: { hash: string }) => await processTransaction(tx)
+		listener: async (hash: string) => await processTransaction(hash)
+	});
+
+export const initBlockListener = (
+	callback: (tx: { removed: boolean; transaction: { has: string } }) => Promise<void>
+): WebSocketListener =>
+	initBlockListenerProvider({
+		listener: callback
 	});
