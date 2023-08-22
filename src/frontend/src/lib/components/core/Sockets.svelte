@@ -3,7 +3,7 @@
 	import { type AddressData, addressStore } from '$lib/stores/address.store';
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$lib/providers/alchemy.providers';
-	import { initTransactionsListener } from '$lib/services/listener.services';
+	import { initPendingTransactionsListener } from '$lib/services/listener.services';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -14,7 +14,7 @@
 			return;
 		}
 
-		listener = initTransactionsListener(address);
+		listener = initPendingTransactionsListener(address);
 	};
 
 	$: (async () => initListener($addressStore))();
