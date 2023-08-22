@@ -20,7 +20,7 @@
 	import { SendStep } from '$lib/enums/send';
 	import type { WebSocketListener } from '$lib/providers/alchemy.providers';
 	import { onDestroy } from 'svelte';
-	import { initBlockListener } from '$lib/services/listener.services';
+	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import type { FeeData } from '@ethersproject/providers';
 
 	/**
@@ -51,7 +51,7 @@
 		}
 
 		await updateFeeData();
-		listener = initBlockListener(async () => debounceUpdateFeeData());
+		listener = initMinedTransactionsListener(async () => debounceUpdateFeeData());
 	};
 	onDestroy(() => listener?.removeAllListeners());
 
