@@ -1,8 +1,8 @@
 import type { WebSocketListener } from '$lib/providers/alchemy.providers';
 import {
 	getTransaction,
-	initMinedTransactionsListener as initBlockListenerProvider,
-	initPendingTransactionsListener as initTransactionsListenerProvider
+	initMinedTransactionsListener as initMinedTransactionsListenerProvider,
+	initPendingTransactionsListener as initPendingTransactionsListenerProvider
 } from '$lib/providers/alchemy.providers';
 import { loadBalance } from '$lib/services/balance.services';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -50,15 +50,15 @@ const processTransaction = async (hash: string) => {
 	await loadBalance();
 };
 
-export const initTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener =>
-	initTransactionsListenerProvider({
+export const initPendingTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener =>
+	initPendingTransactionsListenerProvider({
 		address,
 		listener: async (hash: string) => await processTransaction(hash)
 	});
 
-export const initBlockListener = (
+export const initMinedTransactionsListener = (
 	callback: (tx: { removed: boolean; transaction: { has: string } }) => Promise<void>
 ): WebSocketListener =>
-	initBlockListenerProvider({
+	initMinedTransactionsListenerProvider({
 		listener: callback
 	});
