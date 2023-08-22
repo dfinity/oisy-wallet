@@ -1,20 +1,22 @@
+import type { WebSocketListener } from '$lib/types/listener';
 import { Core } from '@walletconnect/core';
+import { getSdkError } from '@walletconnect/utils';
 import { Web3Wallet } from '@walletconnect/web3wallet';
-import type {WebSocketListener} from "$lib/types/listener";
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
-export const initWalletConnect = async (): Promise<WebSocketListener> => {
+export const initWalletConnect = async (uri: string): Promise<WebSocketListener> => {
 	const core = new Core({
 		projectId: PROJECT_ID
 	});
 
+	// TODO: this can throw an error
 	const web3wallet = await Web3Wallet.init({
 		core,
 		metadata: {
 			name: 'Demo app',
 			description: 'Demo Client as Wallet/Peer',
-			url: 'www.walletconnect.com',
+			url: 'http://localhost:5173/',
 			icons: []
 		}
 	});
@@ -37,9 +39,7 @@ export const initWalletConnect = async (): Promise<WebSocketListener> => {
 		// })
 	});
 
-	// TODO: pairing
-	// The pair method initiates a WalletConnect pairing process with a dapp using the given uri (QR code from the dapps).
-	// await web3wallet.core.pairing.pair({ uri })
+	await web3wallet.core.pairing.pair({ uri });
 
 	// TODO: sign on request
 	// web3wallet.on('session_request', async event => {
@@ -65,11 +65,18 @@ export const initWalletConnect = async (): Promise<WebSocketListener> => {
 
 	return {
 		disconnect: async () => {
-			// TODO: disconnect but which topic?
-			// await web3wallet.disconnectSession({
-			// 	topic,
-			// 	reason: getSdkError('USER_DISCONNECTED')
-			// })
+			const pairings = web3wallet.engine.signClient.core.pairing.pairings.values;
+
+			console.log(pairings);
+
+			for (const pairing of pairings) {
+				const { topic } = pairing;
+
+				await web3wallet.disconnectSession({
+					topic,
+					reason: getSdkError('USER_DISCONNECTED')
+				});
+			}
 		}
 	};
 };
