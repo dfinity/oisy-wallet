@@ -6,7 +6,7 @@
 		getTransactionCount,
 		sendTransaction
 	} from '$lib/providers/etherscan.providers';
-	import { isNullish } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { Utils } from 'alchemy-sdk';
 	import { addressStore, addressStoreNotLoaded } from '$lib/stores/address.store';
@@ -18,6 +18,42 @@
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
 	import SendProgress from '$lib/components/actions/SendProgress.svelte';
 	import { SendStep } from '$lib/enums/send';
+	import type { WebSocketListener } from '$lib/providers/alchemy.providers';
+	import { onDestroy } from 'svelte';
+	import { initBlockListener } from '$lib/services/listener.services';
+	import type { FeeData } from '@ethersproject/providers';
+
+	/**
+	 * Fee data
+	 */
+
+	let feeData: FeeData | undefined;
+	let listener: WebSocketListener | undefined = undefined;
+
+	const updateFeeData = async () => {
+		feeData = await getFeeData();
+		console.log('Update fee data', feeData);
+	};
+
+	const debounceUpdateFeeData = debounce(updateFeeData);
+
+	const initFeeData = async (modalOpen: boolean) => {
+		listener?.removeAllListeners();
+
+		if (!modalOpen) {
+			return;
+		}
+
+		await updateFeeData();
+		listener = initBlockListener(async () => debounceUpdateFeeData());
+	};
+	onDestroy(() => listener?.removeAllListeners());
+
+	$: initFeeData(visible);
+
+	/**
+	 * Send
+	 */
 
 	let sendProgressStep: string = SendStep.INITIALIZATION;
 
