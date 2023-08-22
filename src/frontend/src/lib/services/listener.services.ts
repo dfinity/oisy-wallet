@@ -1,8 +1,8 @@
 import type { WebSocketListener } from '$lib/providers/alchemy.providers';
 import {
 	getTransaction,
-	initBlockListener as initBlockListenerProvider,
-	initTransactionsListener as initTransactionsListenerProvider
+	initMinedTransactionsListener as initBlockListenerProvider,
+	initPendingTransactionsListener as initTransactionsListenerProvider
 } from '$lib/providers/alchemy.providers';
 import { loadBalance } from '$lib/services/balance.services';
 import { toastsError } from '$lib/stores/toasts.store';

@@ -14,7 +14,11 @@ const config = {
 
 const provider = new Alchemy(config);
 
-export const initBlockListener = ({ listener }: { listener: Listener }): WebSocketListener => {
+export const initMinedTransactionsListener = ({
+	listener
+}: {
+	listener: Listener;
+}): WebSocketListener => {
 	provider.ws.on(
 		{
 			method: AlchemySubscription.MINED_TRANSACTIONS,
@@ -28,7 +32,7 @@ export const initBlockListener = ({ listener }: { listener: Listener }): WebSock
 	};
 };
 
-export const initTransactionsListener = ({
+export const initPendingTransactionsListener = ({
 	address,
 	listener
 }: {
