@@ -1,11 +1,10 @@
 import { Core } from '@walletconnect/core';
 import { Web3Wallet } from '@walletconnect/web3wallet';
-
-export type WalletConnectDisconnect = { disconnect: () => Promise<void> };
+import type {WebSocketListener} from "$lib/types/listener";
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
-export const initWalletConnect = async (): Promise<WalletConnectDisconnect> => {
+export const initWalletConnect = async (): Promise<WebSocketListener> => {
 	const core = new Core({
 		projectId: PROJECT_ID
 	});
