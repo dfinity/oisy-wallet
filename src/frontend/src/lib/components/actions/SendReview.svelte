@@ -5,13 +5,14 @@
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
 	import SendFee from '$lib/components/actions/SendFee.svelte';
 	import type { FeeData } from '@ethersproject/providers';
+	import { isNullish } from '@dfinity/utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let feeData: FeeData | undefined;
 
 	let invalid = true;
-	$: invalid = invalidDestination(destination) || invalidAmount(amount);
+	$: invalid = invalidDestination(destination) || invalidAmount(amount) || isNullish(feeData);
 
 	const dispatch = createEventDispatcher();
 </script>

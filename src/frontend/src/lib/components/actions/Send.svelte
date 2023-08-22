@@ -30,7 +30,16 @@
 	let feeData: FeeData | undefined;
 	let listener: WebSocketListener | undefined = undefined;
 
-	const updateFeeData = async () => (feeData = await getFeeData());
+	const updateFeeData = async () => {
+		try {
+			feeData = await getFeeData();
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: `Cannot fetch gas fee.` },
+				err
+			});
+		}
+	};
 
 	const debounceUpdateFeeData = debounce(updateFeeData);
 
@@ -69,18 +78,28 @@
 			return;
 		}
 
+		if (isNullish(feeData)) {
+			toastsError({
+				msg: { text: `Gas fees are not defined.` }
+			});
+			return;
+		}
+
+		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
+		const { maxFeePerGas, maxPriorityFeePerGas } = feeData;
+
+		// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
+		// exceeds block gas limit
+		if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
+			toastsError({
+				msg: { text: `Max fee per gas or max priority fee per gas is undefined.` }
+			});
+			return;
+		}
+
 		modal.next();
 
 		try {
-			// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-			const { maxFeePerGas, maxPriorityFeePerGas } = await getFeeData();
-
-			// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
-			// exceeds block gas limit
-			if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
-				throw new Error('Cannot get max gas fee');
-			}
-
 			const nonce = await getTransactionCount($addressStore!);
 
 			const transaction = {
@@ -144,6 +163,8 @@
 
 		destination = '';
 		amount = undefined;
+
+		feeData = undefined;
 
 		sendProgressStep = SendStep.INITIALIZATION;
 	};
