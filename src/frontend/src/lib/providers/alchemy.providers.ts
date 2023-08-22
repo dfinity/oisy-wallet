@@ -18,7 +18,7 @@ export const initBlockListener = ({ listener }: { listener: Listener }): WebSock
 	provider.ws.on(
 		{
 			method: AlchemySubscription.MINED_TRANSACTIONS,
-			hashesOnly: true,
+			hashesOnly: true
 		},
 		listener
 	);
@@ -39,7 +39,7 @@ export const initTransactionsListener = ({
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
 			fromAddress: address,
-			hashesOnly: true,
+			hashesOnly: true
 		},
 		listener
 	);
@@ -48,7 +48,7 @@ export const initTransactionsListener = ({
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
 			toAddress: address,
-			hashesOnly: true,
+			hashesOnly: true
 		},
 		listener
 	);
