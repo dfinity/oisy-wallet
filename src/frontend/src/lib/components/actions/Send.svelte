@@ -6,7 +6,7 @@
 		getTransactionCount,
 		sendTransaction
 	} from '$lib/providers/etherscan.providers';
-	import { isNullish } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { Utils } from 'alchemy-sdk';
 	import { addressStore, addressStoreNotLoaded } from '$lib/stores/address.store';
@@ -18,6 +18,48 @@
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
 	import SendProgress from '$lib/components/actions/SendProgress.svelte';
 	import { SendStep } from '$lib/enums/send';
+	import type { WebSocketListener } from '$lib/providers/alchemy.providers';
+	import { onDestroy } from 'svelte';
+	import { initBlockListener } from '$lib/services/listener.services';
+	import type { FeeData } from '@ethersproject/providers';
+
+	/**
+	 * Fee data
+	 */
+
+	let feeData: FeeData | undefined;
+	let listener: WebSocketListener | undefined = undefined;
+
+	const updateFeeData = async () => {
+		try {
+			feeData = await getFeeData();
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: `Cannot fetch gas fee.` },
+				err
+			});
+		}
+	};
+
+	const debounceUpdateFeeData = debounce(updateFeeData);
+
+	const initFeeData = async (modalOpen: boolean) => {
+		listener?.removeAllListeners();
+
+		if (!modalOpen) {
+			return;
+		}
+
+		await updateFeeData();
+		listener = initBlockListener(async () => debounceUpdateFeeData());
+	};
+	onDestroy(() => listener?.removeAllListeners());
+
+	$: initFeeData(visible);
+
+	/**
+	 * Send
+	 */
 
 	let sendProgressStep: string = SendStep.INITIALIZATION;
 
@@ -36,18 +78,28 @@
 			return;
 		}
 
+		if (isNullish(feeData)) {
+			toastsError({
+				msg: { text: `Gas fees are not defined.` }
+			});
+			return;
+		}
+
+		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
+		const { maxFeePerGas, maxPriorityFeePerGas } = feeData;
+
+		// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
+		// exceeds block gas limit
+		if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
+			toastsError({
+				msg: { text: `Max fee per gas or max priority fee per gas is undefined.` }
+			});
+			return;
+		}
+
 		modal.next();
 
 		try {
-			// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-			const { maxFeePerGas, maxPriorityFeePerGas } = await getFeeData();
-
-			// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
-			// exceeds block gas limit
-			if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
-				throw new Error('Cannot get max gas fee');
-			}
-
 			const nonce = await getTransactionCount($addressStore!);
 
 			const transaction = {
@@ -112,6 +164,8 @@
 		destination = '';
 		amount = undefined;
 
+		feeData = undefined;
+
 		sendProgressStep = SendStep.INITIALIZATION;
 	};
 </script>
@@ -131,11 +185,11 @@
 		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 		{#if currentStep?.name === 'Review'}
-			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
+			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount {feeData} />
 		{:else if currentStep?.name === 'Sending'}
 			<SendProgress progressStep={sendProgressStep} />
 		{:else}
-			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
+			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount {feeData} />
 		{/if}
 	</WizardModal>
 {/if}

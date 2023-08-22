@@ -2,13 +2,13 @@
 	import { isNullish } from '@dfinity/utils';
 	import { type AddressData, addressStore } from '$lib/stores/address.store';
 	import { onDestroy } from 'svelte';
-	import { type WebSocketListener } from '$lib/providers/alchemy.providers';
+	import type { WebSocketListener } from '$lib/providers/alchemy.providers';
 	import { initTransactionsListener } from '$lib/services/listener.services';
 
 	let listener: WebSocketListener | undefined = undefined;
 
 	const initListener = async (address: AddressData) => {
-		await listener?.removeAllListeners();
+		listener?.removeAllListeners();
 
 		if (isNullish(address)) {
 			return;
@@ -19,7 +19,7 @@
 
 	$: (async () => initListener($addressStore))();
 
-	onDestroy(async () => await listener?.removeAllListeners());
+	onDestroy(() => listener?.removeAllListeners());
 </script>
 
 <slot />
