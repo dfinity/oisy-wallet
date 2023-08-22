@@ -3,9 +3,12 @@
 	import SendDestination from '$lib/components/actions/SendDestination.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
+	import SendFee from '$lib/components/actions/SendFee.svelte';
+	import type { FeeData } from '@ethersproject/providers';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
+	export let feeData: FeeData | undefined;
 
 	let invalid = true;
 	$: invalid = invalidDestination(destination) || invalidAmount(amount);
@@ -16,6 +19,8 @@
 <SendDestination {destination} {amount} />
 
 <SendSource />
+
+<SendFee {feeData} />
 
 <div class="flex justify-end gap-1">
 	<button class="primary" on:click={() => dispatch('icBack')}>Back</button>

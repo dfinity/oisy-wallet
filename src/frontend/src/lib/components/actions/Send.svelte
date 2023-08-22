@@ -30,10 +30,7 @@
 	let feeData: FeeData | undefined;
 	let listener: WebSocketListener | undefined = undefined;
 
-	const updateFeeData = async () => {
-		feeData = await getFeeData();
-		console.log('Update fee data', feeData);
-	};
+	const updateFeeData = async () => (feeData = await getFeeData());
 
 	const debounceUpdateFeeData = debounce(updateFeeData);
 
@@ -167,11 +164,11 @@
 		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 		{#if currentStep?.name === 'Review'}
-			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
+			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount {feeData} />
 		{:else if currentStep?.name === 'Sending'}
 			<SendProgress progressStep={sendProgressStep} />
 		{:else}
-			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
+			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount {feeData} />
 		{/if}
 	</WizardModal>
 {/if}
