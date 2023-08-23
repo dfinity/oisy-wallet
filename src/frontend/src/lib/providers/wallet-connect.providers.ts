@@ -1,11 +1,18 @@
+import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import { Core } from '@walletconnect/core';
-import { getSdkError } from '@walletconnect/utils';
+import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { Web3Wallet } from '@walletconnect/web3wallet';
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
-export const initWalletConnect = async (uri: string): Promise<WebSocketListener> => {
+export const initWalletConnect = async ({
+	uri,
+	address
+}: {
+	uri: string;
+	address: ECDSA_PUBLIC_KEY;
+}): Promise<WebSocketListener> => {
 	const core = new Core({
 		projectId: PROJECT_ID
 	});
@@ -22,15 +29,30 @@ export const initWalletConnect = async (uri: string): Promise<WebSocketListener>
 	});
 
 	web3wallet.on('session_proposal', async (proposal) => {
-		console.log('session_proposal', proposal);
+		const { id, params } = proposal;
 
-		// TODO: prompt user to approve session
+		console.log(id, params);
 
-		// TODO: approve session and approvedNamespaces
-		// const session = await web3wallet.approveSession({
-		//     id: proposal.id,
-		//     namespaces,
-		// });
+		// TODO: ask user to approve or decline
+
+		const namespaces = buildApprovedNamespaces({
+			proposal: params,
+			supportedNamespaces: {
+				eip155: {
+					chains: ['eip155:1', 'eip155:11155111'],
+					methods: ['eth_sendTransaction', 'personal_sign'],
+					events: ['accountsChanged', 'chainChanged'],
+					accounts: [`eip155:1:${address}`, `eip155:11155111:${address}`]
+				}
+			}
+		});
+
+		const session = await web3wallet.approveSession({
+			id: proposal.id,
+			namespaces
+		});
+
+		console.log(session);
 
 		// or decline session
 		// const session = await web3wallet.rejectSession({

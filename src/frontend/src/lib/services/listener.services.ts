@@ -64,5 +64,7 @@ export const initMinedTransactionsListener = (
 		listener: callback
 	});
 
-export const initWalletConnectListener = async (uri: string): Promise<WebSocketListener> =>
-	initWalletConnect(uri);
+export const initWalletConnectListener = async (params: {
+	uri: string;
+	address: ECDSA_PUBLIC_KEY;
+}): Promise<WebSocketListener> => initWalletConnect(params);

@@ -5,6 +5,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import { initWalletConnectListener } from '$lib/services/listener.services';
+	import { addressStore } from '$lib/stores/address.store';
 
 	let visible = false;
 	let renderQRCodeReader = false;
@@ -27,7 +28,8 @@
 
 		await listener?.disconnect();
 
-		listener = await initWalletConnectListener(uri);
+		// TODO: for test only
+		listener = await initWalletConnectListener({ uri, address: $addressStore! });
 	};
 
 	onDestroy(async () => await listener?.disconnect());
