@@ -25,7 +25,7 @@
 >
 <div id="balance" class="font-normal px-1.25 mb-2 break-words" style="min-height: 24px">
 	{#if nonNullish(maxFeePerGas)}
-		<div transition:fade>
+		<div in:fade>
 			{maxFeePerGas.toString()}
 		</div>
 	{/if}
