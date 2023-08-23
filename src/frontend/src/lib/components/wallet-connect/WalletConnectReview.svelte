@@ -7,6 +7,7 @@
 	import { EIP155_CHAINS } from '$lib/constants/chains';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import {createEventDispatcher} from "svelte";
+	import {isBusy} from "$lib/stores/busy.store";
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -52,8 +53,8 @@
 		{/each}
 
 		<div class="flex justify-end gap-1 mt-4">
-			<button class="primary" on:click={() => dispatch("icReject")}>Reject</button>
-			<button class="primary" on:click={() => dispatch("icApprove")}> Approve </button>
+			<button class="primary" on:click={() => dispatch("icReject")} disabled={$isBusy}>Reject</button>
+			<button class="primary" on:click={() => dispatch("icApprove")} disabled={$isBusy}> Approve </button>
 		</div>
 	</div>
 {:else}

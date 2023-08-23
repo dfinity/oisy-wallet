@@ -9,6 +9,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
+	import {busy} from "$lib/stores/busy.store";
 
 	const steps: WizardSteps = [
 		{
@@ -116,21 +117,22 @@
 			return;
 		}
 
+		busy.start();
+
 		try {
 			await callback(proposal);
 
 			toast?.();
-
-			close();
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: `Unexpected error while communicating with WalletConnect.` },
 				err
 			});
-
-			close();
-			return;
 		}
+
+		busy.stop();
+
+		close();
 	};
 </script>
 
