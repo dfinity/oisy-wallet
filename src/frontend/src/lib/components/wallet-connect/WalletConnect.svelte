@@ -29,7 +29,7 @@
 		await listener?.disconnect();
 
 		try {
-			// TODO: for test only
+			// TODO: component should not be enabled unless address is loaded
 			listener = await initWalletConnectListener({ uri, address: $addressStore! });
 
 			await listener.pair();
