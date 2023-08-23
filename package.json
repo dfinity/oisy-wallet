@@ -26,6 +26,7 @@
 		"@dfinity/gix-components": "^2.6.0",
 		"@dfinity/principal": "^0.18.1",
 		"@dfinity/utils": "^0.0.19",
+		"@walletconnect/web3wallet": "^1.9.0",
 		"alchemy-sdk": "^2.9.2",
 		"buffer": "^6.0.3",
 		"the-new-css-reset": "^1.9.0"

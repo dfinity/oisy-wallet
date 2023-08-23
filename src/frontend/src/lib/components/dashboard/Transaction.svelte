@@ -9,6 +9,7 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatToDate } from '$lib/utils/date.utils';
+	import Hr from '$lib/components/ui/Hr.svelte';
 
 	export let transaction: Transaction;
 
@@ -56,4 +57,4 @@
 	</div>
 </div>
 
-<hr class="bg-deep-violet opacity-15 my-3" style="width: 100%; border: 0.05rem solid" />
+<Hr />

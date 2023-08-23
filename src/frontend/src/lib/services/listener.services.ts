@@ -1,13 +1,14 @@
-import type { WebSocketListener } from '$lib/providers/alchemy.providers';
 import {
 	getTransaction,
 	initMinedTransactionsListener as initMinedTransactionsListenerProvider,
 	initPendingTransactionsListener as initPendingTransactionsListenerProvider
 } from '$lib/providers/alchemy.providers';
+import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
 import { loadBalance } from '$lib/services/balance.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { WebSocketListener } from '$lib/types/listener';
 import { isNullish } from '@dfinity/utils';
 
 const processTransaction = async (hash: string) => {
@@ -62,3 +63,8 @@ export const initMinedTransactionsListener = (
 	initMinedTransactionsListenerProvider({
 		listener: callback
 	});
+
+export const initWalletConnectListener = async (params: {
+	uri: string;
+	address: ECDSA_PUBLIC_KEY;
+}): Promise<WebSocketListener> => initWalletConnect(params);
