@@ -1,8 +1,7 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { WebSocketListener } from '$lib/types/listener';
 import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
 import { Alchemy, AlchemySubscription, type Network } from 'alchemy-sdk';
-
-export type WebSocketListener = { removeAllListeners: () => void };
 
 const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
 const NETWORK = import.meta.env.VITE_ALCHEMY_NETWORK;
@@ -28,7 +27,9 @@ export const initMinedTransactionsListener = ({
 	);
 
 	return {
-		removeAllListeners: () => provider.ws.removeAllListeners()
+		disconnect: async () => {
+			provider.ws.removeAllListeners();
+		}
 	};
 };
 
@@ -58,7 +59,9 @@ export const initPendingTransactionsListener = ({
 	);
 
 	return {
-		removeAllListeners: () => provider.ws.removeAllListeners()
+		disconnect: async () => {
+			provider.ws.removeAllListeners();
+		}
 	};
 };
 

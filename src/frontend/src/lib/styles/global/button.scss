@@ -43,4 +43,16 @@ button {
 
 		padding: var(--padding-1_5x) var(--padding-3x);
 	}
+
+	&.tertiary {
+		justify-content: center;
+
+		background: var(--color-interdimensional-blue);
+		color: var(--color-ghost-white);
+
+		padding: var(--padding-1_5x) var(--padding-3x);
+
+		max-width: calc(100% - var(--padding-8x));
+		width: 100%;
+	}
 }

@@ -18,10 +18,10 @@
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
 	import SendProgress from '$lib/components/actions/SendProgress.svelte';
 	import { SendStep } from '$lib/enums/send';
-	import type { WebSocketListener } from '$lib/providers/alchemy.providers';
 	import { onDestroy } from 'svelte';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import type { FeeData } from '@ethersproject/providers';
+	import type { WebSocketListener } from '$lib/types/listener';
 
 	/**
 	 * Fee data
@@ -44,7 +44,7 @@
 	const debounceUpdateFeeData = debounce(updateFeeData);
 
 	const initFeeData = async (modalOpen: boolean) => {
-		listener?.removeAllListeners();
+		await listener?.disconnect();
 
 		if (!modalOpen) {
 			return;
@@ -53,7 +53,7 @@
 		await updateFeeData();
 		listener = initMinedTransactionsListener(async () => debounceUpdateFeeData());
 	};
-	onDestroy(() => listener?.removeAllListeners());
+	onDestroy(() => listener?.disconnect());
 
 	$: initFeeData(visible);
 
