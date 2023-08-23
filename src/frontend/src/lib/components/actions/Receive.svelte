@@ -32,7 +32,7 @@
 
 	<div
 		class="p-4 rounded-sm"
-		style="border: 1px solid var(--color-vampire-black); max-width: 360px; margin: 0 auto;"
+		style="border: 1px dashed var(--color-vampire-black); max-width: 360px; margin: 0 auto;"
 	>
 		<QRCode value={$addressStore}>
 			<div
