@@ -26,12 +26,19 @@
 	let listener: WebSocketListener | undefined = undefined;
 
 	const initListener = async (uri: string) => {
-		close();
-
 		await listener?.disconnect();
 
-		// TODO: for test only
-		listener = await initWalletConnectListener({ uri, address: $addressStore! });
+		try {
+			// TODO: for test only
+			listener = await initWalletConnectListener({ uri, address: $addressStore! });
+
+			await listener.pair();
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: `An unexpected error happened while trying to connect the wallet.` },
+				err
+			});
+		}
 	};
 
 	onDestroy(async () => await listener?.disconnect());

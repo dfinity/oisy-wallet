@@ -1,5 +1,5 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
-import type { WebSocketListener } from '$lib/types/listener';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { Web3Wallet } from '@walletconnect/web3wallet';
@@ -12,7 +12,7 @@ export const initWalletConnect = async ({
 }: {
 	uri: string;
 	address: ECDSA_PUBLIC_KEY;
-}): Promise<WebSocketListener> => {
+}): Promise<WalletConnectListener> => {
 	const core = new Core({
 		projectId: PROJECT_ID
 	});
@@ -61,8 +61,6 @@ export const initWalletConnect = async ({
 		// })
 	});
 
-	await web3wallet.core.pairing.pair({ uri });
-
 	// TODO: sign on request
 	// web3wallet.on('session_request', async event => {
 	// 	const { topic, params, id } = event
@@ -86,10 +84,9 @@ export const initWalletConnect = async ({
 	});
 
 	return {
+		pair: () => web3wallet.core.pairing.pair({ uri }),
 		disconnect: async () => {
 			const pairings = web3wallet.engine.signClient.core.pairing.pairings.values;
-
-			console.log(pairings);
 
 			for (const pairing of pairings) {
 				const { topic } = pairing;
