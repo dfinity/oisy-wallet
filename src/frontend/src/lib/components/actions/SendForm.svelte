@@ -16,7 +16,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="post">
+<form on:submit={() => dispatch('icNext')} method="POST">
 	<label for="destination" class="font-bold px-1.25">Destination:</label>
 	<Input
 		name="destination"
