@@ -5,7 +5,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 </script>
 
-<button class="primary m-2" on:click={signOut}>
+<button class="primary" on:click={signOut}>
 	<IconIcLogo />
 	<span class="text-dark-slate-blue font-bold text-xs"
 		>{shortenWithMiddleEllipsis($authStore?.identity?.getPrincipal().toText() ?? '')}</span

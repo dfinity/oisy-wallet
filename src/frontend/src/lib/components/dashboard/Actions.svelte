@@ -9,5 +9,3 @@
 
 	<Send />
 </div>
-
-<WalletConnect />

@@ -9,7 +9,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
-	import {busy} from "$lib/stores/busy.store";
+	import { busy } from '$lib/stores/busy.store';
 
 	const steps: WizardSteps = [
 		{
@@ -136,9 +136,7 @@
 	};
 </script>
 
-<button on:click={() => (visible = true)} class="secondary text-deep-violet mt-2">
-	WalletConnect
-</button>
+<button on:click={() => (visible = true)} class="primary"> WalletConnect </button>
 
 {#if visible}
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
