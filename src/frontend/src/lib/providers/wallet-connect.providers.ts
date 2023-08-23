@@ -30,7 +30,7 @@ export const initWalletConnect = async ({
 
 	const sessionProposal = (callback: (proposal: Web3WalletTypes.SessionProposal) => void) => {
 		web3wallet.on('session_proposal', callback);
-	}
+	};
 
 	// TODO: sign on request
 	// web3wallet.on('session_request', async event => {

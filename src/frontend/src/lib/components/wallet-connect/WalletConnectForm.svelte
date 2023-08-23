@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input, QRCodeReader } from '@dfinity/gix-components';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import {createEventDispatcher} from "svelte";
+	import { createEventDispatcher } from 'svelte';
 
 	let renderQRCodeReader = false;
 
@@ -18,18 +18,18 @@
 	let invalid = true;
 	$: invalid = !uri;
 
-    const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher();
 
-    const connect = () => {
-        if (!uri) {
-            toastsError({
-                msg: { text: `An uri to connect to should be provided.` }
-            });
-            return;
-        }
+	const connect = () => {
+		if (!uri) {
+			toastsError({
+				msg: { text: `An uri to connect to should be provided.` }
+			});
+			return;
+		}
 
-        dispatch("icConnect", uri);
-    }
+		dispatch('icConnect', uri);
+	};
 </script>
 
 <div class="rounded-lg qr-code">
@@ -38,10 +38,8 @@
 	{/if}
 
 	{#if !renderQRCodeReader}
-		<button
-			type="button"
-			class="tertiary inset-center"
-			on:click={() => (renderQRCodeReader = true)}>Scan QR code</button
+		<button type="button" class="tertiary inset-center" on:click={() => (renderQRCodeReader = true)}
+			>Scan QR code</button
 		>
 	{/if}
 </div>

@@ -1,25 +1,23 @@
 <script lang="ts">
-	import { Spinner, WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import { onDestroy } from 'svelte';
 	import { initWalletConnectListener } from '$lib/services/listener.services';
 	import { addressStore } from '$lib/stores/address.store';
 	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 
 	const steps: WizardSteps = [
 		{
 			name: 'Connect',
-			title: 'Connect'
-		},
-		{
-			name: 'Loading',
-			title: 'Loading'
+			title: 'WalletConnect'
 		},
 		{
 			name: 'Review',
-			title: 'Review'
+			title: 'Session Proposal'
 		}
 	];
 
@@ -30,10 +28,17 @@
 
 	const close = () => (visible = false);
 
-	let listener: WebSocketListener | undefined = undefined;
+	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
+	let listener: WebSocketListener | undefined | null;
+
+	const resetListener = async () => {
+		await listener?.disconnect();
+		listener = undefined;
+		proposal = null;
+	};
 
 	const initListener = async (uri: string) => {
-		await listener?.disconnect();
+		await resetListener();
 
 		try {
 			// TODO: component should not be enabled unless address is loaded
@@ -46,7 +51,7 @@
 		}
 	};
 
-	onDestroy(async () => await listener?.disconnect());
+	onDestroy(async () => await resetListener());
 
 	const connect = async ({ detail: uri }: CustomEvent<string>) => {
 		modal.next();
@@ -58,11 +63,8 @@
 			return;
 		}
 
-		listener.sessionProposal((proposal) => {
-			modal.next();
-
-			// TODO:
-			console.log(proposal);
+		listener.sessionProposal((sessionProposal) => {
+			proposal = sessionProposal;
 		});
 
 		try {
@@ -84,17 +86,16 @@
 
 {#if visible}
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
-		<svelte:fragment slot="title">WalletConnect</svelte:fragment>
+		<svelte:fragment slot="title">
+			{`${
+				currentStep?.name === 'Review' && nonNullish(proposal)
+					? 'Session Proposal'
+					: 'WalletConnect'
+			}`}
+		</svelte:fragment>
 
 		{#if currentStep?.name === 'Review'}
-			Approve or decline
-		{:else if currentStep?.name === 'Loading'}
-			<div class="flex flex-col items-center justify-center">
-				<div>
-					<Spinner inline />
-				</div>
-				<p>Connecting...</p>
-			</div>
+			<WalletConnectReview {proposal} />
 		{:else}
 			<WalletConnectForm on:icConnect={connect} />
 		{/if}
