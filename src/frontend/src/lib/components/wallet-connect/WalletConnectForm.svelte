@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Input, QRCodeReader } from '@dfinity/gix-components';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { fade } from 'svelte/transition';
-    import {createEventDispatcher} from "svelte";
+	import {createEventDispatcher} from "svelte";
 
 	let renderQRCodeReader = false;
 
@@ -42,7 +41,6 @@
 		<button
 			type="button"
 			class="tertiary inset-center"
-			out:fade
 			on:click={() => (renderQRCodeReader = true)}>Scan QR code</button
 		>
 	{/if}
