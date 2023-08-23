@@ -6,6 +6,7 @@
 	import type { ProposalTypes } from '@walletconnect/types';
 	import { EIP155_CHAINS } from '$lib/constants/chains';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import {createEventDispatcher} from "svelte";
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -16,6 +17,8 @@
 		params,
 		params?.requiredNamespaces !== undefined ? Object.entries(params.requiredNamespaces) : undefined
 	);
+
+	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
@@ -47,6 +50,11 @@
 				</article>
 			{/each}
 		{/each}
+
+		<div class="flex justify-end gap-1 mt-4">
+			<button class="primary" on:click={() => dispatch("icReject")}>Reject</button>
+			<button class="primary" on:click={() => dispatch("icApprove")}> Approve </button>
+		</div>
 	</div>
 {:else}
 	<div class="flex flex-col items-center justify-center">

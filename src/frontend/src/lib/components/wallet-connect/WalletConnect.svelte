@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import { onDestroy } from 'svelte';
 	import { initWalletConnectListener } from '$lib/services/listener.services';
@@ -78,6 +78,60 @@
 			close();
 		}
 	};
+
+	const reject = async () => await answer({ callback: listener?.reject });
+	const approve = async () =>
+		await answer({
+			callback: listener?.approve,
+			toast: () =>
+				toastsShow({
+					text: 'WalletConnect connected.',
+					level: 'success',
+					duration: 2000
+				})
+		});
+
+	const answer = async ({
+		callback,
+		toast
+	}: {
+		callback: (proposal: Web3WalletTypes.SessionProposal) => Promise<void>;
+		toast?: () => void;
+	}) => {
+		if (isNullish(listener)) {
+			toastsError({
+				msg: { text: `Unexpected error: No connection opened.` }
+			});
+
+			close();
+			return;
+		}
+
+		if (isNullish(proposal)) {
+			toastsError({
+				msg: { text: `Unexpected error: No session proposal available.` }
+			});
+
+			close();
+			return;
+		}
+
+		try {
+			await callback(proposal);
+
+			toast?.();
+
+			close();
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: `Unexpected error while communicating with WalletConnect.` },
+				err
+			});
+
+			close();
+			return;
+		}
+	};
 </script>
 
 <button on:click={() => (visible = true)} class="secondary text-deep-violet mt-2">
@@ -95,7 +149,7 @@
 		</svelte:fragment>
 
 		{#if currentStep?.name === 'Review'}
-			<WalletConnectReview {proposal} />
+			<WalletConnectReview {proposal} on:icReject={reject} on:icApprove={approve} />
 		{:else}
 			<WalletConnectForm on:icConnect={connect} />
 		{/if}
