@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import type { WebSocketListener } from '$lib/types/listener';
 	import { onDestroy } from 'svelte';
 	import { initWalletConnectListener } from '$lib/services/listener.services';
 	import { addressStore } from '$lib/stores/address.store';
@@ -10,6 +9,7 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { busy } from '$lib/stores/busy.store';
+	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 
 	const steps: WizardSteps = [
 		{
@@ -30,7 +30,7 @@
 	const close = () => (visible = false);
 
 	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
-	let listener: WebSocketListener | undefined | null;
+	let listener: WalletConnectListener | undefined | null;
 
 	const resetListener = async () => {
 		await listener?.disconnect();

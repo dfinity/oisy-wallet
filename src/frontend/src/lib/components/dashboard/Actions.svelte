@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Send from '$lib/components/actions/Send.svelte';
+	import Send from '$lib/components/send/Send.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 </script>
