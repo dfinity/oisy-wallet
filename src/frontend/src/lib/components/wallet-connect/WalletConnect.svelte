@@ -32,14 +32,28 @@
 	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 	let listener: WalletConnectListener | undefined | null;
 
-	const resetListener = async () => {
+	const disconnect = async () => {
+		await disconnectListener();
+
+		toastsShow({
+			text: 'WalletConnect disconnected.',
+			level: 'info',
+			duration: 2000
+		});
+	}
+
+	const disconnectListener = async () => {
 		await listener?.disconnect();
+		resetListener();
+	};
+
+	const resetListener = () => {
 		listener = undefined;
 		proposal = null;
 	};
 
 	const initListener = async (uri: string) => {
-		await resetListener();
+		await disconnectListener();
 
 		try {
 			// TODO: component should not be enabled unless address is loaded
@@ -52,7 +66,7 @@
 		}
 	};
 
-	onDestroy(async () => await resetListener());
+	onDestroy(async () => await disconnectListener());
 
 	const connect = async ({ detail: uri }: CustomEvent<string>) => {
 		modal.next();
@@ -66,6 +80,16 @@
 
 		listener.sessionProposal((sessionProposal) => {
 			proposal = sessionProposal;
+		});
+
+		listener.sessionDelete(() => {
+			resetListener();
+
+			toastsShow({
+				text: 'WalletConnect session was ended.',
+				level: 'info',
+				duration: 2000
+			});
 		});
 
 		try {
@@ -136,7 +160,11 @@
 	};
 </script>
 
-<button on:click={() => (visible = true)} class="primary"> WalletConnect </button>
+{#if isNullish(listener)}
+	<button on:click={() => (visible = true)} class="primary"> WalletConnect (in) </button>
+{:else}
+	<button on:click={disconnect} class="primary"> WalletConnect (out) </button>
+{/if}
 
 {#if visible}
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
