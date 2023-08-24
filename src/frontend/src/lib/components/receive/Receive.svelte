@@ -34,7 +34,7 @@
 		class="p-4 rounded-sm"
 		style="border: 1px dashed var(--color-vampire-black); max-width: 360px; margin: 0 auto;"
 	>
-		<QRCode value={$addressStore}>
+		<QRCode value={$addressStore ?? ''}>
 			<div
 				class="p-1.5 rounded-sm bg-ghost-white flex flex-col items-center justify-center"
 				slot="logo"

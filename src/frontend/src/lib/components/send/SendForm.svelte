@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import SendSource from '$lib/components/actions/SendSource.svelte';
+	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { invalidDestination, invalidAmount } from '$lib/utils/send.utils';
 	import { createEventDispatcher } from 'svelte';
 	import type { FeeData } from '@ethersproject/providers';
-	import SendFee from '$lib/components/actions/SendFee.svelte';
+	import SendFee from '$lib/components/send/SendFee.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
