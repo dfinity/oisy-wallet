@@ -96,10 +96,10 @@
 		callback,
 		toast
 	}: {
-		callback: (proposal: Web3WalletTypes.SessionProposal) => Promise<void>;
+		callback: ((proposal: Web3WalletTypes.SessionProposal) => Promise<void>) | undefined;
 		toast?: () => void;
 	}) => {
-		if (isNullish(listener)) {
+		if (isNullish(listener) || isNullish(callback)) {
 			toastsError({
 				msg: { text: `Unexpected error: No connection opened.` }
 			});
