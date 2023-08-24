@@ -5,7 +5,7 @@
 	import { Modal, QRCode } from '@dfinity/gix-components';
 	import IconETHQRCode from '$lib/components/icons/IconETHQRCode.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalReceive, modalStore } from '$lib/stores/modal.store';
 
 	let disabled: boolean;
 	$: disabled = $addressStoreNotLoaded || $isBusy;
@@ -21,7 +21,7 @@
 	<span>Receive</span></button
 >
 
-<Modal visible={$modalStore === 'receive'} on:nnsClose={modalStore.close}>
+<Modal visible={$modalReceive} on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">Receive ETH</svelte:fragment>
 
 	<p class="font-bold">Wallet address</p>
