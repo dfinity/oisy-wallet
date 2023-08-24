@@ -10,8 +10,10 @@
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { busy } from '$lib/stores/busy.store';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { SESSION_REQUEST_SUPPORTED_METHODS } from '$lib/constants/wallet-connect.constants';
+	import { modalStore, modalWalletConnectAuth } from '$lib/stores/modal.store';
+	import { SESSION_REQUEST_SIGN } from '$lib/constants/wallet-connect.constants';
+
+	export let listener: WalletConnectListener | undefined | null;
 
 	const steps: WizardSteps = [
 		{
@@ -30,7 +32,6 @@
 	const close = () => modalStore.close();
 
 	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
-	let listener: WalletConnectListener | undefined | null;
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -112,22 +113,19 @@
 				}
 			} = sessionRequest;
 
-			if (!SESSION_REQUEST_SUPPORTED_METHODS.includes(method)) {
-				await listener?.rejectRequest({ topic, id });
+			switch (method) {
+				case SESSION_REQUEST_SIGN: {
+					modalStore.openWalletConnectSign(sessionRequest);
+					return;
+				}
+				default: {
+					await listener?.rejectRequest({ topic, id });
 
-				toastsError({
-					msg: { text: `Requested method "${method}" is not supported.` }
-				});
-
-				return;
+					toastsError({
+						msg: { text: `Requested method "${method}" is not supported.` }
+					});
+				}
 			}
-
-			// TODO: reject transaction if not supported
-
-			// "eth sendTransaction"
-
-			// personal_sign
-			// modalStore.openWalletConnectSign;
 		});
 
 		try {
@@ -204,7 +202,7 @@
 	<button on:click={disconnect} class="primary"> WalletConnect (out) </button>
 {/if}
 
-{#if $modalStore === 'wallet-connect-auth'}
+{#if $modalWalletConnectAuth}
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 		<svelte:fragment slot="title">
 			{`${

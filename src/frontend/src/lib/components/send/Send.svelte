@@ -22,7 +22,7 @@
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import type { FeeData } from '@ethersproject/providers';
 	import type { WebSocketListener } from '$lib/types/listener';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalSend, modalStore } from '$lib/stores/modal.store';
 
 	/**
 	 * Fee data
@@ -56,7 +56,7 @@
 	};
 	onDestroy(() => listener?.disconnect());
 
-	$: initFeeData($modalStore === 'send');
+	$: initFeeData($modalSend);
 
 	/**
 	 * Send
@@ -179,7 +179,7 @@
 	<span>Send</span></button
 >
 
-{#if $modalStore === 'send'}
+{#if $modalSend}
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
