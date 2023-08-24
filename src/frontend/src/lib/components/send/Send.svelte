@@ -22,6 +22,7 @@
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import type { FeeData } from '@ethersproject/providers';
 	import type { WebSocketListener } from '$lib/types/listener';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	/**
 	 * Fee data
@@ -55,7 +56,7 @@
 	};
 	onDestroy(() => listener?.disconnect());
 
-	$: initFeeData(visible);
+	$: initFeeData($modalStore === 'send');
 
 	/**
 	 * Send
@@ -135,8 +136,6 @@
 	$: disabled =
 		$addressStoreNotLoaded || $balanceStoreEmpty || sendProgressStep !== SendStep.INITIALIZATION;
 
-	let visible = false;
-
 	const steps: WizardSteps = [
 		{
 			name: 'Send',
@@ -159,7 +158,7 @@
 	let amount: number | undefined = undefined;
 
 	const close = () => {
-		visible = false;
+		modalStore.close();
 
 		destination = '';
 		amount = undefined;
@@ -172,7 +171,7 @@
 
 <button
 	class="flex-1 secondary"
-	on:click={() => (visible = true)}
+	on:click={modalStore.openSend}
 	{disabled}
 	class:opacity-50={disabled}
 >
@@ -180,7 +179,7 @@
 	<span>Send</span></button
 >
 
-{#if visible}
+{#if $modalStore === 'send'}
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
