@@ -15,5 +15,6 @@ export interface SignRequest {
 }
 export interface _SERVICE {
 	caller_eth_address: ActorMethod<[], string>;
+	personal_sign: ActorMethod<[Uint8Array | number[]], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }

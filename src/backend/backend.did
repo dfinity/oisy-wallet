@@ -11,5 +11,6 @@ type SignRequest = record {
 };
 service : (Arg) -> {
   caller_eth_address : () -> (text);
+  personal_sign : (vec nat8) -> (text);
   sign_transaction : (SignRequest) -> (text);
 }

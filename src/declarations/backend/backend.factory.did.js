@@ -13,6 +13,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
+		personal_sign: IDL.Func([IDL.Vec(IDL.Nat8)], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
 	});
 };

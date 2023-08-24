@@ -177,6 +177,38 @@ async fn sign_transaction(req: SignRequest) -> String {
     format!("0x{}", hex::encode(&signed_tx_bytes))
 }
 
+#[update]
+async fn personal_sign(plaintext: Vec<u8>) -> String {
+    let caller = ic_cdk::caller();
+
+    let pubkey = ecdsa_pubkey_of(&caller).await;
+
+    let message = [
+        b"\x19Ethereum Signed Message:\n",
+        plaintext.len().to_string().as_bytes(),
+        plaintext.as_ref(),
+    ]
+    .concat();
+
+    let msg_hash = keccak256(&message);
+    let ecdsa_key_name = read_state(|s| s.ecdsa_key_name.clone());
+
+    let (response,) = sign_with_ecdsa(SignWithEcdsaArgument {
+        message_hash: msg_hash.to_vec(),
+        derivation_path: principal_to_derivation_path(&caller),
+        key_id: EcdsaKeyId {
+            curve: EcdsaCurve::Secp256k1,
+            name: ecdsa_key_name,
+        },
+    })
+    .await
+    .expect("failed to sign the message");
+    let v = y_parity(&message, &response.signature, &pubkey);
+    let mut sig = response.signature;
+    sig.push(v as u8);
+    hex::encode(&sig)
+}
+
 fn y_parity(msg: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
     use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
     use sha3::{Digest, Keccak256};
