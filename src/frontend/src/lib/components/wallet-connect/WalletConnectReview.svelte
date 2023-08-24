@@ -35,9 +35,11 @@
 			{@const allMethods = value.methods}
 			{@const allEvents = value.events}
 
-			{#each value.chains as chainId}
+			{#each value.chains ?? [] as chainId}
+				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
+
 				<p class="font-bold mt-2">
-					Review {EIP155_CHAINS[chainId]?.name ?? ''} ({key}) permissions:
+					Review {chainName} ({key}) permissions:
 				</p>
 
 				<article class="bg-deep-violet text-ghost-white rounded-sm p-2 mt-2">

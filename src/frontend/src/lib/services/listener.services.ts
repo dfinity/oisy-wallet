@@ -9,6 +9,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { isNullish } from '@dfinity/utils';
 
 const processTransaction = async (hash: string) => {
@@ -67,4 +68,4 @@ export const initMinedTransactionsListener = (
 export const initWalletConnectListener = async (params: {
 	uri: string;
 	address: ECDSA_PUBLIC_KEY;
-}): Promise<WebSocketListener> => initWalletConnect(params);
+}): Promise<WalletConnectListener> => initWalletConnect(params);

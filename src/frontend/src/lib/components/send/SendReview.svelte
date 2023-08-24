@@ -1,9 +1,9 @@
 <script lang="ts">
-	import SendSource from '$lib/components/actions/SendSource.svelte';
-	import SendDestination from '$lib/components/actions/SendDestination.svelte';
+	import SendSource from '$lib/components/send/SendSource.svelte';
+	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
-	import SendFee from '$lib/components/actions/SendFee.svelte';
+	import SendFee from '$lib/components/send/SendFee.svelte';
 	import type { FeeData } from '@ethersproject/providers';
 	import { isNullish } from '@dfinity/utils';
 

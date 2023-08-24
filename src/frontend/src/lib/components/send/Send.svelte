@@ -13,10 +13,10 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { balanceStoreEmpty } from '$lib/stores/balance.store';
 	import { type WizardStep, type WizardSteps, WizardModal, Input } from '@dfinity/gix-components';
-	import SendForm from '$lib/components/actions/SendForm.svelte';
-	import SendReview from '$lib/components/actions/SendReview.svelte';
+	import SendForm from '$lib/components/send/SendForm.svelte';
+	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
-	import SendProgress from '$lib/components/actions/SendProgress.svelte';
+	import SendProgress from '$lib/components/send/SendProgress.svelte';
 	import { SendStep } from '$lib/enums/send';
 	import { onDestroy } from 'svelte';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
