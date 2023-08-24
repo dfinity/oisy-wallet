@@ -36,6 +36,17 @@ export const initWalletConnect = async ({
 		web3wallet.on('session_delete', callback);
 	};
 
+	const sessionRequest = (callback: (request: Web3WalletTypes.SessionRequest) => void) => {
+		web3wallet.on('session_request', callback);
+	};
+
+	// web3wallet.on('session_request', async event => {
+	// 	const {topic, params, id} = event
+	// 	const {request} = params
+	//
+	// 	console.log('session_request', params, event)
+	// });
+
 	// TODO: sign on request
 	// web3wallet.on('session_request', async event => {
 	// 	const { topic, params, id } = event
@@ -89,6 +100,7 @@ export const initWalletConnect = async ({
 		reject,
 		sessionProposal,
 		sessionDelete,
+		sessionRequest,
 		disconnect: async () => {
 			const pairings = web3wallet.engine.signClient.core.pairing.pairings.values;
 
