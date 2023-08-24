@@ -10,6 +10,7 @@
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { busy } from '$lib/stores/busy.store';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	const steps: WizardSteps = [
 		{
@@ -25,9 +26,7 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	let visible = false;
-
-	const close = () => (visible = false);
+	const close = () => modalStore.close();
 
 	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 	let listener: WalletConnectListener | undefined | null;
@@ -40,7 +39,7 @@
 			level: 'info',
 			duration: 2000
 		});
-	}
+	};
 
 	const disconnectListener = async () => {
 		await listener?.disconnect();
@@ -161,12 +160,12 @@
 </script>
 
 {#if isNullish(listener)}
-	<button on:click={() => (visible = true)} class="primary"> WalletConnect (in) </button>
+	<button on:click={modalStore.openWalletConnectAuth} class="primary"> WalletConnect (in) </button>
 {:else}
 	<button on:click={disconnect} class="primary"> WalletConnect (out) </button>
 {/if}
 
-{#if visible}
+{#if $modalStore === 'wallet-connect-auth'}
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 		<svelte:fragment slot="title">
 			{`${
