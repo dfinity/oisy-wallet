@@ -32,6 +32,16 @@
 	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 	let listener: WalletConnectListener | undefined | null;
 
+	const disconnect = async () => {
+		await disconnectListener();
+
+		toastsShow({
+			text: 'WalletConnect disconnected.',
+			level: 'info',
+			duration: 2000
+		});
+	}
+
 	const disconnectListener = async () => {
 		await listener?.disconnect();
 		resetListener();
@@ -74,6 +84,12 @@
 
 		listener.sessionDelete(() => {
 			resetListener();
+
+			toastsShow({
+				text: 'WalletConnect session was ended.',
+				level: 'info',
+				duration: 2000
+			});
 		});
 
 		try {
@@ -147,7 +163,7 @@
 {#if isNullish(listener)}
 	<button on:click={() => (visible = true)} class="primary"> WalletConnect (in) </button>
 {:else}
-	<button on:click={disconnectListener} class="primary"> WalletConnect (out) </button>
+	<button on:click={disconnect} class="primary"> WalletConnect (out) </button>
 {/if}
 
 {#if visible}
