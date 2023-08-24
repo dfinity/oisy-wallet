@@ -13,6 +13,8 @@
 	import { modalStore, modalWalletConnectAuth } from '$lib/stores/modal.store';
 	import { SESSION_REQUEST_SIGN } from '$lib/constants/wallet-connect.constants';
 
+	export let listener: WalletConnectListener | undefined | null;
+
 	const steps: WizardSteps = [
 		{
 			name: 'Connect',
@@ -30,7 +32,6 @@
 	const close = () => modalStore.close();
 
 	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
-	let listener: WalletConnectListener | undefined | null;
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -112,15 +113,9 @@
 				}
 			} = sessionRequest;
 
-			console.log('SESSION REQUEST', sessionRequest, (sessionRequest as any).peer);
-
 			switch (method) {
 				case SESSION_REQUEST_SIGN: {
 					modalStore.openWalletConnectSign(sessionRequest);
-
-					// TODO: just for the time being
-					await listener?.rejectRequest({ topic, id });
-
 					return;
 				}
 				default: {
