@@ -32,6 +32,10 @@ export const initWalletConnect = async ({
 		web3wallet.on('session_proposal', callback);
 	};
 
+	const sessionDelete = (callback: () => void) => {
+		web3wallet.on('session_delete', callback);
+	};
+
 	// TODO: sign on request
 	// web3wallet.on('session_request', async event => {
 	// 	const { topic, params, id } = event
@@ -48,11 +52,6 @@ export const initWalletConnect = async ({
 	//
 	// 	await web3wallet.respondSessionRequest({ topic, response })
 	// })
-
-	web3wallet.on('session_delete', (data) => {
-		// TODO: should we logout or just display an error when the session is over?
-		console.log('delete', data);
-	});
 
 	const approve = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { params } = proposal;
@@ -89,6 +88,7 @@ export const initWalletConnect = async ({
 		approve,
 		reject,
 		sessionProposal,
+		sessionDelete,
 		disconnect: async () => {
 			const pairings = web3wallet.engine.signClient.core.pairing.pairings.values;
 

@@ -14,11 +14,6 @@
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;
 
-	$: console.log(
-		params,
-		params?.requiredNamespaces !== undefined ? Object.entries(params.requiredNamespaces) : undefined
-	);
-
 	const dispatch = createEventDispatcher();
 </script>
 
