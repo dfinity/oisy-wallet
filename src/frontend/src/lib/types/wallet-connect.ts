@@ -7,4 +7,5 @@ export interface WalletConnectListener extends WebSocketListener {
 	approve: (proposal: Web3WalletTypes.SessionProposal) => Promise<void>;
 	reject: (proposal: Web3WalletTypes.SessionProposal) => Promise<void>;
 	sessionProposal: (callback: (proposal: Web3WalletTypes.SessionProposal) => void) => void;
+	sessionDelete: (callback: () => void) => void;
 }
