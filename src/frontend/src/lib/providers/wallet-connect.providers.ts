@@ -1,6 +1,7 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
+import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { Web3Wallet, type Web3WalletTypes } from '@walletconnect/web3wallet';
 
@@ -36,6 +37,17 @@ export const initWalletConnect = async ({
 		web3wallet.on('session_delete', callback);
 	};
 
+	const sessionRequest = (callback: (request: Web3WalletTypes.SessionRequest) => Promise<void>) => {
+		web3wallet.on('session_request', callback);
+	};
+
+	// web3wallet.on('session_request', async event => {
+	// 	const {topic, params, id} = event
+	// 	const {request} = params
+	//
+	// 	console.log('session_request', params, event)
+	// });
+
 	// TODO: sign on request
 	// web3wallet.on('session_request', async event => {
 	// 	const { topic, params, id } = event
@@ -53,7 +65,7 @@ export const initWalletConnect = async ({
 	// 	await web3wallet.respondSessionRequest({ topic, response })
 	// })
 
-	const approve = async (proposal: Web3WalletTypes.SessionProposal) => {
+	const approveSession = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { params } = proposal;
 
 		const namespaces = buildApprovedNamespaces({
@@ -74,7 +86,7 @@ export const initWalletConnect = async ({
 		});
 	};
 
-	const reject = async (proposal: Web3WalletTypes.SessionProposal) => {
+	const rejectSession = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { id } = proposal;
 
 		const session = await web3wallet.rejectSession({
@@ -83,12 +95,30 @@ export const initWalletConnect = async ({
 		});
 	};
 
+	const respond = async ({ topic, response }: { topic: string; response: JsonRpcResponse }) =>
+		await web3wallet.respondSessionRequest({ topic, response });
+
+	const rejectRequest = async ({ id, topic }: { id: number; topic: string }) =>
+		await respond({
+			topic,
+			response: {
+				id,
+				jsonrpc: '2.0',
+				error: {
+					code: 5000,
+					message: 'User rejected.'
+				}
+			}
+		});
+
 	return {
 		pair: () => web3wallet.core.pairing.pair({ uri }),
-		approve,
-		reject,
+		approveSession,
+		rejectSession,
+		rejectRequest,
 		sessionProposal,
 		sessionDelete,
+		sessionRequest,
 		disconnect: async () => {
 			const pairings = web3wallet.engine.signClient.core.pairing.pairings.values;
 
