@@ -41,23 +41,6 @@ export const initWalletConnect = async ({
 		web3wallet.on('session_request', callback);
 	};
 
-	// TODO: sign on request
-	// web3wallet.on('session_request', async event => {
-	// 	const { topic, params, id } = event
-	// 	const { request } = params
-	// 	const requestParamsMessage = request.params[0]
-	//
-	// 	// convert `requestParamsMessage` by using a method like hexToUtf8
-	// 	const message = hexToUtf8(requestParamsMessage)
-	//
-	// 	// sign the message
-	// 	const signedMessage = await wallet.signMessage(message)
-	//
-	// 	const response = { id, result: signedMessage, jsonrpc: '2.0' }
-	//
-	// 	await web3wallet.respondSessionRequest({ topic, response })
-	// })
-
 	const approveSession = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { params } = proposal;
 
@@ -104,11 +87,26 @@ export const initWalletConnect = async ({
 			}
 		});
 
+	const approveRequest = async ({
+		id,
+		topic,
+		message
+	}: {
+		id: number;
+		topic: string;
+		message: string;
+	}) =>
+		await respond({
+			topic,
+			response: { id, result: message, jsonrpc: '2.0' }
+		});
+
 	return {
 		pair: () => web3wallet.core.pairing.pair({ uri }),
 		approveSession,
 		rejectSession,
 		rejectRequest,
+		approveRequest,
 		sessionProposal,
 		sessionDelete,
 		sessionRequest,

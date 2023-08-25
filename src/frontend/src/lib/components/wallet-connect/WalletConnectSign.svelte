@@ -2,11 +2,12 @@
 	import { modalStore, modalWalletConnectSign } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { convertHexToUtf8, getSignParamsMessage } from '$lib/utils/wallet-connect.utils';
+	import { hexStringToUint8Array, isNullish, nonNullish } from '@dfinity/utils';
+	import { getSignParamsMessage } from '$lib/utils/wallet-connect.utils';
 	import { busy, isBusy } from '$lib/stores/busy.store';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { signMessage } from '$lib/api/backend.api';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -41,15 +42,11 @@
 					}
 				} = request;
 
-				const message = convertHexToUtf8(params);
+				const message = getSignParamsMessage(params);
 
-				// TODO: sign message
-				// const signedMessage = await wallet.signMessage(message)
+				const signedMessage = await signMessage(hexStringToUint8Array(message));
 
-				// TODO: approve request
-
-				// TODO: to be removed
-				await listener.rejectRequest({ topic, id });
+				await listener.approveRequest({ topic, id, message: `0x${signedMessage}` });
 			},
 			toastMsg: 'WalletConnect request approved.'
 		});
