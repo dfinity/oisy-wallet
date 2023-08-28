@@ -1,4 +1,5 @@
 import { balance as balanceService } from '$lib/providers/etherscan.providers';
+import { testUSDC } from '$lib/providers/usdc.providers';
 import { addressStore } from '$lib/stores/address.store';
 import { balanceStore } from '$lib/stores/balance.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -17,6 +18,7 @@ export const loadBalance = async (): Promise<{ success: boolean }> => {
 	}
 
 	try {
+		await testUSDC(address);
 		const balance = await balanceService(address);
 		balanceStore.set(balance);
 	} catch (err: unknown) {
