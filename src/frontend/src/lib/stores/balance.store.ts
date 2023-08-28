@@ -1,4 +1,4 @@
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from 'alchemy-sdk';
 import { derived, writable, type Readable } from 'svelte/store';
 
@@ -24,4 +24,9 @@ export const balanceStore = initBalanceStore();
 export const balanceStoreEmpty: Readable<boolean> = derived(
 	[balanceStore],
 	([$balanceStore]) => isNullish($balanceStore) || $balanceStore.isZero()
+);
+
+export const balanceStoreZero: Readable<boolean> = derived(
+	[balanceStore],
+	([$balanceStore]) => nonNullish($balanceStore) && $balanceStore.isZero()
 );

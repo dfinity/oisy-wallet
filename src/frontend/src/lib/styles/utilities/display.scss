@@ -4,3 +4,4 @@ $property: display;
 
 @include utilities.generate(hidden, $property, none);
 @include utilities.generate(block, $property, block);
+@include utilities.generate(flex, $property, flex);

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import IconETH from '$lib/components/icons/IconETH.svelte';
-	import Address from '$lib/components/dashboard/Address.svelte';
+	import Address from '$lib/components/address/Address.svelte';
 	import Balance from '$lib/components/dashboard/Balance.svelte';
 	import Actions from '$lib/components/dashboard/Actions.svelte';
+	import AddressBalanceZeroQRCode from '$lib/components/address/AddressBalanceZeroQRCode.svelte';
 </script>
 
 <article
@@ -13,9 +14,15 @@
 		<IconETH />
 	</div>
 
-	<Address />
+	<div class="flex items-end gap-1">
+		<div style="min-width: 60%">
+			<Address />
 
-	<Balance />
+			<Balance />
+		</div>
+
+		<AddressBalanceZeroQRCode />
+	</div>
 
 	<Actions />
 </article>
