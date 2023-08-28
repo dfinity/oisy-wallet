@@ -133,7 +133,7 @@ const updateCSP = (indexHtml) => {
 	}
 
 	const ethProviders =
-		'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
+		'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com wss://relay.walletconnect.com';
 
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
