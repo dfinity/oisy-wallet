@@ -104,11 +104,26 @@ export const initWalletConnect = async ({
 			}
 		});
 
+	const approveRequest = async ({
+		id,
+		topic,
+		message
+	}: {
+		id: number;
+		topic: string;
+		message: string;
+	}) =>
+		await respond({
+			topic,
+			response: { id, result: message, jsonrpc: '2.0' }
+		});
+
 	return {
 		pair: () => web3wallet.core.pairing.pair({ uri }),
 		approveSession,
 		rejectSession,
 		rejectRequest,
+		approveRequest,
 		sessionProposal,
 		sessionDelete,
 		sessionRequest,
