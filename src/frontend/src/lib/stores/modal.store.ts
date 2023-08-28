@@ -2,7 +2,7 @@ import type { Readable } from 'svelte/store';
 import { derived, writable } from 'svelte/store';
 
 export interface Modal<T> {
-	type: 'receive' | 'send' | 'wallet-connect-auth' | 'wallet-connect-sign';
+	type: 'receive' | 'send' | 'wallet-connect-auth' | 'wallet-connect-sign' | 'wallet-connect-send';
 	data?: T;
 }
 
@@ -13,6 +13,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openSend: () => void;
 	openWalletConnectAuth: () => void;
 	openWalletConnectSign: <D extends T>(data: D) => void;
+	openWalletConnectSend: <D extends T>(data: D) => void;
 	close: () => void;
 }
 
@@ -24,6 +25,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openSend: () => set({ type: 'send' }),
 		openWalletConnectAuth: () => set({ type: 'wallet-connect-auth' }),
 		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),
+		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),
 		close: () => set(null),
 		subscribe
 	};
@@ -49,4 +51,9 @@ export const modalWalletConnectAuth: Readable<boolean> = derived(
 export const modalWalletConnectSign: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'wallet-connect-sign'
+);
+
+export const modalWalletConnectSend: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'wallet-connect-send'
 );

@@ -11,7 +11,10 @@
 	import { busy } from '$lib/stores/busy.store';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 	import { modalStore, modalWalletConnectAuth } from '$lib/stores/modal.store';
-	import { SESSION_REQUEST_SIGN } from '$lib/constants/wallet-connect.constants';
+	import {
+		SESSION_REQUEST_SEND_TRANSACTION,
+		SESSION_REQUEST_SIGN
+	} from '$lib/constants/wallet-connect.constants';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -116,6 +119,10 @@
 			switch (method) {
 				case SESSION_REQUEST_SIGN: {
 					modalStore.openWalletConnectSign(sessionRequest);
+					return;
+				}
+				case SESSION_REQUEST_SEND_TRANSACTION: {
+					modalStore.openWalletConnectSend(sessionRequest);
 					return;
 				}
 				default: {
