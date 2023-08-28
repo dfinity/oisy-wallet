@@ -2,10 +2,10 @@
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import { addressStore, addressStoreNotLoaded } from '$lib/stores/address.store';
 	import { isBusy } from '$lib/stores/busy.store';
-	import { Modal, QRCode } from '@dfinity/gix-components';
-	import IconETHQRCode from '$lib/components/icons/IconETHQRCode.svelte';
+	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { modalReceive, modalStore } from '$lib/stores/modal.store';
+	import AddressQRCode from '$lib/components/address/AddressQRCode.svelte';
 
 	let disabled: boolean;
 	$: disabled = $addressStoreNotLoaded || $isBusy;
@@ -29,17 +29,5 @@
 		<output class="break-words">{$addressStore ?? ''}</output><Copy value={$addressStore ?? ''} />
 	</p>
 
-	<div
-		class="p-4 rounded-sm"
-		style="border: 1px dashed var(--color-vampire-black); max-width: 360px; margin: 0 auto;"
-	>
-		<QRCode value={$addressStore ?? ''}>
-			<div
-				class="p-1.5 rounded-sm bg-ghost-white flex flex-col items-center justify-center"
-				slot="logo"
-			>
-				<IconETHQRCode />
-			</div>
-		</QRCode>
-	</div>
+	<AddressQRCode />
 </Modal>
