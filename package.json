@@ -20,12 +20,12 @@
 		"deploy": "scripts/deploy.sh"
 	},
 	"dependencies": {
-		"@dfinity/agent": "^0.18.1",
-		"@dfinity/auth-client": "^0.18.1",
-		"@dfinity/candid": "^0.18.1",
+		"@dfinity/agent": "^0.19.2",
+		"@dfinity/auth-client": "^0.19.2",
+		"@dfinity/candid": "^0.19.2",
 		"@dfinity/gix-components": "^2.6.0",
-		"@dfinity/principal": "^0.18.1",
-		"@dfinity/utils": "^0.0.19",
+		"@dfinity/principal": "^0.19.2",
+		"@dfinity/utils": "^0.0.20",
 		"@walletconnect/web3wallet": "^1.9.0",
 		"alchemy-sdk": "^2.9.2",
 		"buffer": "^6.0.3",
