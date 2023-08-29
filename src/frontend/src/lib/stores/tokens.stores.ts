@@ -6,7 +6,7 @@ export type TokensData = Token;
 
 export interface TokensStore extends Readable<TokensData> {
 	select: (token: Token) => void;
-    reset: () => void;
+	reset: () => void;
 }
 
 const initTokensStore = (): TokensStore => {
@@ -14,7 +14,7 @@ const initTokensStore = (): TokensStore => {
 
 	return {
 		select: (token: Token) => set(token),
-        reset: () => set(Token.ETHEREUM),
+		reset: () => set(Token.ETHEREUM),
 		subscribe
 	};
 };

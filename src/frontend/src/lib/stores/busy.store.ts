@@ -1,5 +1,4 @@
-import { nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export interface Busy {
 	spinner: boolean;
@@ -33,10 +32,3 @@ const initBusyStore = (): BusyStore => {
 };
 
 export const busy = initBusyStore();
-
-export interface BusyWizardStore extends Readable<boolean> {
-	start: () => void;
-	stop: () => void;
-}
-
-export const isBusy: Readable<boolean> = derived([busy], ([$busy]) => nonNullish($busy));

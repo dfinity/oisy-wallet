@@ -2,7 +2,7 @@
 	import { formatEtherShort } from '$lib/utils/format.utils';
 	import { CURRENCY_SYMBOL } from '$lib/constants/eth.constants';
 	import { nonNullish } from '@dfinity/utils';
-	import {balance, balanceZero} from "$lib/derived/balances.derived";
+	import { balance, balanceZero } from '$lib/derived/balances.derived';
 </script>
 
 <span class="text-ghost-white mt">
