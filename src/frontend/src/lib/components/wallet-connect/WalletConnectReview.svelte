@@ -7,7 +7,8 @@
 	import { EIP155_CHAINS } from '$lib/constants/chains';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import { isBusy } from '$lib/stores/busy.store';
+
+    import {isBusy} from "$lib/derived/busy.derived";
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 

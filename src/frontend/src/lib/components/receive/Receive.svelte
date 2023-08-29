@@ -1,12 +1,12 @@
 <script lang="ts">
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import { addressStore } from '$lib/stores/address.store';
-	import { isBusy } from '$lib/stores/busy.store';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { modalReceive, modalStore } from '$lib/stores/modal.store';
 	import AddressQRCode from '$lib/components/address/AddressQRCode.svelte';
     import {addressNotLoaded} from "$lib/derived/address.derived";
+    import {isBusy} from "$lib/derived/busy.derived";
 
 	let disabled: boolean;
 	$: disabled = $addressNotLoaded || $isBusy;
