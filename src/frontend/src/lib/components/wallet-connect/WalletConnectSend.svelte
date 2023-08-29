@@ -82,7 +82,7 @@
 						return;
 					}
 
-					const { value, nonce, to, gasPrice } = firstTransaction;
+					const { value, nonce, to, gasPrice } = firstParam;
 
 					const transaction = {
 						to,
@@ -177,7 +177,7 @@
 
 		<p class="font-bold">Value</p>
 		<p class="mb-2 font-normal">
-			{BigInt(firstTransaction.value).toString() ?? '0'}
+			{BigInt(firstTransaction?.value ?? '0').toString()}
 		</p>
 
 		{#if nonNullish(firstTransaction.gasLimit)}
