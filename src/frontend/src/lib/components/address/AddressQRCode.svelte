@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { addressStore } from '$lib/stores/address.store';
 	import { QRCode } from '@dfinity/gix-components';
-	import IconETHQRCode from '$lib/components/icons/IconETHQRCode.svelte';
+	import eth from '$lib/assets/eth.svg';
 	import { debounce } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import Img from '$lib/components/ui/Img.svelte';
 
 	export let size: 'small' | 'big' = 'big';
 
@@ -28,7 +29,7 @@
 			<svelte:fragment slot="logo">
 				{#if size === 'big'}
 					<div class="p-1.5 rounded-sm bg-ghost-white flex flex-col items-center justify-center">
-						<IconETHQRCode />
+						<Img src={eth} />
 					</div>
 				{/if}
 			</svelte:fragment>

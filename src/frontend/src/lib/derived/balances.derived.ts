@@ -1,26 +1,26 @@
 import { balancesStore } from '$lib/stores/balances.store';
-import { tokensStore } from '$lib/stores/tokens.stores';
+import { tokenIdStore } from '$lib/stores/token-id.stores';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from 'alchemy-sdk';
 import { derived, type Readable } from 'svelte/store';
 
 export const balance: Readable<BigNumber | undefined | null> = derived(
-	[balancesStore, tokensStore],
-	([$balanceStore, $tokensStore]) => $balanceStore?.[$tokensStore]
+	[balancesStore, tokenIdStore],
+	([$balanceStore, $tokenIdStore]) => $balanceStore?.[$tokenIdStore]
 );
 
 export const balanceEmpty: Readable<boolean> = derived(
-	[balancesStore, tokensStore],
-	([$balanceStore, $tokensStore]) =>
+	[balancesStore, tokenIdStore],
+	([$balanceStore, $tokenIdStore]) =>
 		isNullish($balanceStore) ||
-		isNullish($balanceStore?.[$tokensStore]) ||
-		$balanceStore[$tokensStore].isZero()
+		isNullish($balanceStore?.[$tokenIdStore]) ||
+		$balanceStore[$tokenIdStore].isZero()
 );
 
 export const balanceZero: Readable<boolean> = derived(
-	[balancesStore, tokensStore],
-	([$balanceStore, $tokensStore]) =>
+	[balancesStore, tokenIdStore],
+	([$balanceStore, $tokenIdStore]) =>
 		nonNullish($balanceStore) &&
-		nonNullish($balanceStore?.[$tokensStore]) &&
-		$balanceStore[$tokensStore].isZero()
+		nonNullish($balanceStore?.[$tokenIdStore]) &&
+		$balanceStore[$tokenIdStore].isZero()
 );

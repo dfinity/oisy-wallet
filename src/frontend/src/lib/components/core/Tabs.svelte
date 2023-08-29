@@ -12,7 +12,7 @@
 		},
 		{
 			id: Symbol('2'),
-			labelKey: 'Activity'
+			labelKey: 'Transactions'
 		}
 	];
 
@@ -36,14 +36,14 @@
 		style={`border-bottom: 3px solid ${
 			$store.tabId === tabs[0].id ? 'var(--color-deep-violet)' : 'transparent'
 		}`}
-		on:click={() => store.select(tabs[0].id)}>Tokens</button
+		on:click={() => store.select(tabs[0].id)}>{tabs[0].labelKey}</button
 	>
 	<button
 		class="flex-1 tab"
 		style={`border-bottom: 3px solid ${
 			$store.tabId === tabs[1].id ? 'var(--color-deep-violet)' : 'transparent'
 		}`}
-		on:click={() => store.select(tabs[1].id)}>Activity</button
+		on:click={() => store.select(tabs[1].id)}>{tabs[1].labelKey}</button
 	>
 </div>
 

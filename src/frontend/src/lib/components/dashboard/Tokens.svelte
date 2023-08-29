@@ -6,7 +6,7 @@
 	import { TABS_CONTEXT_KEY } from '$lib/stores/tabs.store';
 	import { getContext } from 'svelte';
 	import { balance } from '$lib/derived/balances.derived';
-	import { tokensStore } from '$lib/stores/tokens.stores';
+	import { tokenIdStore } from '$lib/stores/token-id.stores';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { erc20TokensStore } from '$lib/stores/erc20.store';
@@ -16,7 +16,7 @@
 	const { store: tabsStore }: TabsContext = getContext<TabsContext>(TABS_CONTEXT_KEY);
 
 	const select = (tokenId: TokenId) => {
-		tokensStore.select(tokenId);
+		tokenIdStore.select(tokenId);
 		tabsStore.select($tabsStore.tabs[1].id);
 	};
 

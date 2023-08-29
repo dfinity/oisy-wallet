@@ -4,14 +4,14 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { busy } from '$lib/stores/busy.store';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-import { tokensStore } from '$lib/stores/tokens.stores';
+import { tokenIdStore } from '$lib/stores/token-id.stores';
 import { transactionsStore } from '$lib/stores/transactions.store';
 
 const resetStores = () => {
 	addressStore.reset();
 	balancesStore.reset();
 	transactionsStore.reset();
-	tokensStore.reset();
+	tokenIdStore.reset();
 	erc20TokensStore.reset();
 
 	busy.stop();

@@ -3,12 +3,12 @@ import type { TokenId } from '$lib/types/token';
 import type { Readable } from 'svelte/store';
 import { writable } from 'svelte/store';
 
-export interface TokensStore extends Readable<TokenId> {
+export interface TokenIdStore extends Readable<TokenId> {
 	select: (id: TokenId) => void;
 	reset: () => void;
 }
 
-const initTokensStore = (): TokensStore => {
+const initTokenIdStore = (): TokenIdStore => {
 	const INITIAL: TokenId = ETHEREUM_TOKEN_ID;
 
 	const { subscribe, set } = writable<TokenId>(INITIAL);
@@ -20,4 +20,4 @@ const initTokensStore = (): TokensStore => {
 	};
 };
 
-export const tokensStore = initTokensStore();
+export const tokenIdStore = initTokenIdStore();
