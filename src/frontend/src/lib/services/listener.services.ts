@@ -1,3 +1,4 @@
+import { Token } from '$lib/enums/token';
 import {
 	getTransaction,
 	initMinedTransactionsListener as initMinedTransactionsListenerProvider,
@@ -19,12 +20,15 @@ const processTransaction = async (hash: string) => {
 		return;
 	}
 
-	transactionsStore.add([
-		{
-			...transaction,
-			pendingTimestamp: Date.now()
-		}
-	]);
+	transactionsStore.add({
+		token: Token.ETHEREUM,
+		transactions: [
+			{
+				...transaction,
+				pendingTimestamp: Date.now()
+			}
+		]
+	});
 
 	const { wait, hash: transactionHash } = transaction;
 
@@ -44,8 +48,11 @@ const processTransaction = async (hash: string) => {
 	const { timestamp, ...rest } = minedTransaction;
 
 	transactionsStore.update({
-		...rest,
-		timestamp: timestamp ?? Date.now() / 1000
+		token: Token.ETHEREUM,
+		transaction: {
+			...rest,
+			timestamp: timestamp ?? Date.now() / 1000
+		}
 	});
 
 	// Reload balance as a transaction has been mined
