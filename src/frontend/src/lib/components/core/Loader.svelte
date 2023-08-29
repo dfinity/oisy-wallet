@@ -8,7 +8,7 @@
 	import { loadTransactions } from '$lib/services/transactions.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
-	import {loadErc20Contracts} from "$lib/services/erc20.services";
+	import { loadErc20Contracts } from '$lib/services/erc20.services';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 	let steps: [ProgressStep, ...ProgressStep[]] = [
