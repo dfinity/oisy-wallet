@@ -6,7 +6,7 @@
 	import Hero from '$lib/components/dashboard/Hero.svelte';
 	import Loader from '$lib/components/core/Loader.svelte';
 	import Tabs from '$lib/components/core/Tabs.svelte';
-	import Tokens from "$lib/components/dashboard/Tokens.svelte";
+	import Tokens from '$lib/components/dashboard/Tokens.svelte';
 </script>
 
 {#if $authSignedInStore}
