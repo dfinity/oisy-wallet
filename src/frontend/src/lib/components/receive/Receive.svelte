@@ -1,14 +1,16 @@
 <script lang="ts">
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import { addressStore, addressStoreNotLoaded } from '$lib/stores/address.store';
-	import { isBusy } from '$lib/stores/busy.store';
+	import { addressStore } from '$lib/stores/address.store';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { modalReceive, modalStore } from '$lib/stores/modal.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import AddressQRCode from '$lib/components/address/AddressQRCode.svelte';
+	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { modalReceive } from '$lib/derived/modal.derived';
 
 	let disabled: boolean;
-	$: disabled = $addressStoreNotLoaded || $isBusy;
+	$: disabled = $addressNotLoaded || $isBusy;
 </script>
 
 <button

@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { modalStore, modalWalletConnectSend } from '$lib/stores/modal.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { busy, isBusy } from '$lib/stores/busy.store';
+	import { busy } from '$lib/stores/busy.store';
 	import type {
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
@@ -12,6 +12,8 @@
 	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
 	import { signTransaction } from '$lib/api/backend.api';
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 
 	export let listener: WalletConnectListener | undefined | null;
 

@@ -1,5 +1,5 @@
 import type { Readable } from 'svelte/store';
-import { derived, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 
 export interface Modal<T> {
 	type: 'receive' | 'send' | 'wallet-connect-auth' | 'wallet-connect-sign' | 'wallet-connect-send';
@@ -32,28 +32,3 @@ const initModalStore = <T>(): ModalStore<T> => {
 };
 
 export const modalStore = initModalStore();
-
-export const modalReceive: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'receive'
-);
-
-export const modalSend: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'send'
-);
-
-export const modalWalletConnectAuth: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'wallet-connect-auth'
-);
-
-export const modalWalletConnectSign: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'wallet-connect-sign'
-);
-
-export const modalWalletConnectSend: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'wallet-connect-send'
-);
