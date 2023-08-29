@@ -9,7 +9,7 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatToDate } from '$lib/utils/date.utils';
-	import Hr from '$lib/components/ui/Hr.svelte';
+	import Card from '$lib/components/ui/Card.svelte';
 
 	export let transaction: Transaction;
 
@@ -34,27 +34,18 @@
 	$: pending = isTransactionPending(transaction);
 </script>
 
-<div class="flex gap-2 mb-2">
-	<div class="relative">
+<Card {pending}>
+	{`${type === 'send' ? 'Send' : 'Receive'}`}
+
+	<div class="relative" slot="icon">
 		<div class="rounded-50 bg-deep-violet opacity-15" style="width: 3rem; aspect-ratio: 1/1" />
 		<svelte:component this={icon} styleClass={`inset-center ${pending ? 'opacity-15' : ''}`} />
 	</div>
 
-	<div class="flex-1 flex flex-col justify-center">
-		<div class="flex font-bold">
-			<span>{`${type === 'send' ? 'Send' : 'Receive'}`}</span>
-			<span class="flex-1 text-right">{Utils.formatEther(amount.toString())}</span>
-		</div>
-		<p class="text-cetacean-blue" class:text-goldenrod={pending} class:opacity-50={!pending}>
-			{#if nonNullish(timestamp)}
-				{formatToDate(timestamp)}
-			{/if}
-
-			{#if pending}
-				Pending...
-			{/if}
-		</p>
-	</div>
-</div>
-
-<Hr />
+	<svelte:fragment slot="amount">{Utils.formatEther(amount.toString())}</svelte:fragment>
+	<svelte:fragment slot="description">
+		{#if nonNullish(timestamp)}
+			{formatToDate(timestamp)}
+		{/if}
+	</svelte:fragment>
+</Card>

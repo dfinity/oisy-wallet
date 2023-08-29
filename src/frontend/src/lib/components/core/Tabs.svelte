@@ -27,11 +27,11 @@
 </div>
 
 {#if tab === 'tokens'}
-	<div transition:fade>
+	<div in:fade>
 		<slot name="tokens" />
 	</div>
 {:else}
-	<div transition:fade>
+	<div in:fade>
 		<slot name="transactions" />
 	</div>
 {/if}
