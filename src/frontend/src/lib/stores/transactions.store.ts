@@ -1,56 +1,44 @@
+import type { Token } from '$lib/enums/token';
 import type { Transaction } from '$lib/types/transaction';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable } from 'svelte/store';
+import { nonNullish } from '@dfinity/utils';
+import { writable, type Readable } from 'svelte/store';
 
-export interface TransactionsStore extends Readable<Transaction[]> {
-	set: (transactions: Transaction[]) => void;
-	add: (transactions: Transaction[]) => void;
-	update: (transaction: Transaction) => void;
+export type TransactionsData = Record<Token, Transaction[]>;
+
+export interface TransactionsStore extends Readable<TransactionsData> {
+	set: (params: { token: Token; transactions: Transaction[] }) => void;
+	add: (params: { token: Token; transactions: Transaction[] }) => void;
+	update: (params: { token: Token; transaction: Transaction }) => void;
 	reset: () => void;
 }
 
 const initTransactionsStore = (): TransactionsStore => {
-	const INITIAL: Transaction[] = [];
+	const INITIAL: TransactionsData = {} as Record<Token, Transaction[]>;
 
-	const { subscribe, update, set } = writable<Transaction[]>(INITIAL);
+	const { subscribe, update, set } = writable<TransactionsData>(INITIAL);
 
 	return {
-		set: (transactions: Transaction[]) => set(transactions),
-		add: (transactions: Transaction[]) => update((state) => [...state, ...transactions]),
-		update: (transaction: Transaction) =>
-			update((state) => [...state.filter(({ hash }) => hash !== transaction.hash), transaction]),
+		set: ({ token, transactions }: { token: Token; transactions: Transaction[] }) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[token]: transactions
+			})),
+		add: ({ token, transactions }: { token: Token; transactions: Transaction[] }) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[token]: [...(state[token] ?? []), ...transactions]
+			})),
+		update: ({ token, transaction }: { token: Token; transaction: Transaction }) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[token]: [
+					...(state[token] ?? []).filter(({ hash }) => hash !== transaction.hash),
+					transaction
+				]
+			})),
 		reset: () => set(INITIAL),
 		subscribe
 	};
 };
 
 export const transactionsStore = initTransactionsStore();
-
-export const sortedTransactionsStore: Readable<Transaction[]> = derived(
-	[transactionsStore],
-	([$transactionsStore]) =>
-		$transactionsStore.sort(
-			(
-				{ blockNumber: blockNumberA, pendingTimestamp: pendingTimestampA },
-				{ blockNumber: blockNumberB, pendingTimestamp: pendingTimestampB }
-			) => {
-				if (isNullish(blockNumberA) && isNullish(pendingTimestampA)) {
-					return -1;
-				}
-
-				if (isNullish(blockNumberB) && isNullish(pendingTimestampB)) {
-					return -1;
-				}
-
-				if (nonNullish(blockNumberA) && nonNullish(blockNumberB)) {
-					return blockNumberB - blockNumberA;
-				}
-
-				if (nonNullish(pendingTimestampA) && nonNullish(pendingTimestampB)) {
-					return pendingTimestampB - pendingTimestampA;
-				}
-
-				return nonNullish(pendingTimestampA) ? -1 : 1;
-			}
-		)
-);
