@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { addressStoreNotLoaded } from '$lib/stores/address.store';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import AddressQRCode from '$lib/components/address/AddressQRCode.svelte';
 	import { nonNullish } from '@dfinity/utils';
-	import {balanceZero} from "$lib/derived/balances.derived";
+	import {balance, balanceZero} from "$lib/derived/balances.derived";
 </script>
 
 <div
 	class="relative"
-	class:hidden={!$addressStoreNotLoaded && nonNullish($balancesStore) && !$balanceZero}
+	class:hidden={!$addressStoreNotLoaded && nonNullish($balance) && !$balanceZero}
 >
 	{#if !$addressStoreNotLoaded && $balanceZero}
 		<div class="absolute qrcode-container">

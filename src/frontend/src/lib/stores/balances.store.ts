@@ -16,7 +16,7 @@ const initBalancesStore = (): BalancesStore => {
 	return {
 		set: ({ token, balance }: { token: Token; balance: BigNumber }) =>
 			update((state) => ({
-				...(nonNullish(state) && { state }),
+				...(nonNullish(state) && state),
 				[token]: balance
 			})),
 		reset: () => set(null),
