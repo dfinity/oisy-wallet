@@ -1,5 +1,5 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
-import type { Erc20Contract, Erc20ContractAddress, Erc20Metadata } from '$lib/types/erc20';
+import type { Erc20ContractAddress, Erc20Metadata, Erc20Token } from '$lib/types/erc20';
 import { InfuraProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 
@@ -46,7 +46,7 @@ export const transactions = async ({
 	contract
 }: {
 	address: ECDSA_PUBLIC_KEY;
-	contract: Erc20Contract;
+	contract: Erc20Token;
 }) => {
 	const erc20Contract = new ethers.Contract(contract.address, abiERC20, provider);
 

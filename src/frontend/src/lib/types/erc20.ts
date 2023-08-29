@@ -1,11 +1,8 @@
+import type { Token, TokenMetadata } from '$lib/types/token';
 import type { BaseContract } from '@ethersproject/contracts/src.ts';
 
-export type Erc20Contract = Erc20ContractAddress & Erc20Metadata;
+export type Erc20Token = Erc20ContractAddress & Token;
 
 export type Erc20ContractAddress = Pick<BaseContract, 'address'>;
 
-export interface Erc20Metadata {
-    name: string;
-    symbol: string;
-    decimals: number;
-}
+export type Erc20Metadata = TokenMetadata;

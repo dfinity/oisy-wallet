@@ -1,18 +1,24 @@
-import { ERC20_CONTRACTS } from '$lib/constants/erc20.constants';
+import { ERC20_CONTRACTS_ADDRESSES } from '$lib/constants/erc20.constants';
 import { metadata } from '$lib/providers/erc20.providers';
 import { balancesStore } from '$lib/stores/balances.store';
-import { erc20ContractsStore } from '$lib/stores/erc20-contracts.store';
+import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
 
 export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 	try {
 		const contracts = await Promise.all(
-			ERC20_CONTRACTS.map(async (contract) => ({
+			ERC20_CONTRACTS_ADDRESSES.map(async (contract) => ({
 				...contract,
 				...(await metadata(contract))
 			}))
 		);
-		erc20ContractsStore.set(contracts);
+		erc20TokensStore.set(
+			contracts.map(({ symbol, ...rest }) => ({
+				id: Symbol(symbol),
+				symbol,
+				...rest
+			}))
+		);
 	} catch (err: unknown) {
 		balancesStore.reset();
 

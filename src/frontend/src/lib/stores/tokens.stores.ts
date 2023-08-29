@@ -1,20 +1,21 @@
-import { Token } from '$lib/enums/token';
+import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import type { TokenId } from '$lib/types/token';
 import type { Readable } from 'svelte/store';
 import { writable } from 'svelte/store';
 
-export type TokensData = Token;
-
-export interface TokensStore extends Readable<TokensData> {
-	select: (token: Token) => void;
+export interface TokensStore extends Readable<TokenId> {
+	select: (id: TokenId) => void;
 	reset: () => void;
 }
 
 const initTokensStore = (): TokensStore => {
-	const { subscribe, set } = writable<TokensData>(Token.ETHEREUM);
+	const INITIAL: TokenId = ETHEREUM_TOKEN_ID;
+
+	const { subscribe, set } = writable<TokenId>(INITIAL);
 
 	return {
-		select: (token: Token) => set(token),
-		reset: () => set(Token.ETHEREUM),
+		select: (id: TokenId) => set(id),
+		reset: () => set(INITIAL),
 		subscribe
 	};
 };

@@ -1,38 +1,38 @@
-import type { Token } from '$lib/enums/token';
+import type { TokenId } from '$lib/types/token';
 import type { Transaction } from '$lib/types/transaction';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type TransactionsData = Record<Token, Transaction[]>;
+export type TransactionsData = Record<TokenId, Transaction[]>;
 
 export interface TransactionsStore extends Readable<TransactionsData> {
-	set: (params: { token: Token; transactions: Transaction[] }) => void;
-	add: (params: { token: Token; transactions: Transaction[] }) => void;
-	update: (params: { token: Token; transaction: Transaction }) => void;
+	set: (params: { tokenId: TokenId; transactions: Transaction[] }) => void;
+	add: (params: { tokenId: TokenId; transactions: Transaction[] }) => void;
+	update: (params: { tokenId: TokenId; transaction: Transaction }) => void;
 	reset: () => void;
 }
 
 const initTransactionsStore = (): TransactionsStore => {
-	const INITIAL: TransactionsData = {} as Record<Token, Transaction[]>;
+	const INITIAL: TransactionsData = {} as Record<TokenId, Transaction[]>;
 
 	const { subscribe, update, set } = writable<TransactionsData>(INITIAL);
 
 	return {
-		set: ({ token, transactions }: { token: Token; transactions: Transaction[] }) =>
+		set: ({ tokenId, transactions }: { tokenId: TokenId; transactions: Transaction[] }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
-				[token]: transactions
+				[tokenId]: transactions
 			})),
-		add: ({ token, transactions }: { token: Token; transactions: Transaction[] }) =>
+		add: ({ tokenId, transactions }: { tokenId: TokenId; transactions: Transaction[] }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
-				[token]: [...(state[token] ?? []), ...transactions]
+				[tokenId]: [...(state[tokenId] ?? []), ...transactions]
 			})),
-		update: ({ token, transaction }: { token: Token; transaction: Transaction }) =>
+		update: ({ tokenId, transaction }: { tokenId: TokenId; transaction: Transaction }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
-				[token]: [
-					...(state[token] ?? []).filter(({ hash }) => hash !== transaction.hash),
+				[tokenId]: [
+					...(state[tokenId] ?? []).filter(({ hash }) => hash !== transaction.hash),
 					transaction
 				]
 			})),

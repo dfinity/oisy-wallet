@@ -1,4 +1,4 @@
-import { Token } from '$lib/enums/token';
+import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { balance as balanceService } from '$lib/providers/etherscan.providers';
 import { addressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -19,7 +19,7 @@ export const loadBalance = async (): Promise<{ success: boolean }> => {
 
 	try {
 		const balance = await balanceService(address);
-		balancesStore.set({ token: Token.ETHEREUM, balance });
+		balancesStore.set({ tokenId: ETHEREUM_TOKEN_ID, balance });
 	} catch (err: unknown) {
 		balancesStore.reset();
 

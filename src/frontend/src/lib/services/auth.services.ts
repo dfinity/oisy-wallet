@@ -2,7 +2,7 @@ import { addressStore } from '$lib/stores/address.store';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { busy } from '$lib/stores/busy.store';
-import { erc20ContractsStore } from '$lib/stores/erc20-contracts.store';
+import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { tokensStore } from '$lib/stores/tokens.stores';
 import { transactionsStore } from '$lib/stores/transactions.store';
@@ -12,7 +12,7 @@ const resetStores = () => {
 	balancesStore.reset();
 	transactionsStore.reset();
 	tokensStore.reset();
-	erc20ContractsStore.reset();
+	erc20TokensStore.reset();
 
 	busy.stop();
 };
