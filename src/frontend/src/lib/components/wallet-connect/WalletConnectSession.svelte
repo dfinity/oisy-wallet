@@ -15,7 +15,7 @@
 		SESSION_REQUEST_SEND_TRANSACTION,
 		SESSION_REQUEST_SIGN
 	} from '$lib/constants/wallet-connect.constants';
-    import {modalWalletConnectAuth} from "$lib/derived/modal.derived";
+	import { modalWalletConnectAuth } from '$lib/derived/modal.derived';
 
 	export let listener: WalletConnectListener | undefined | null;
 

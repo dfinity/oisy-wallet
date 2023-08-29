@@ -7,8 +7,8 @@
 	import { busy } from '$lib/stores/busy.store';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-    import {isBusy} from "$lib/derived/busy.derived";
-	import {modalWalletConnectSign} from "$lib/derived/modal.derived";
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 
 	export let listener: WalletConnectListener | undefined | null;
 

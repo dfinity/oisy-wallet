@@ -12,8 +12,8 @@
 	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
 	import { signTransaction } from '$lib/api/backend.api';
-	import {isBusy} from "$lib/derived/busy.derived";
-	import {modalWalletConnectSend} from "$lib/derived/modal.derived";
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 
 	export let listener: WalletConnectListener | undefined | null;
 

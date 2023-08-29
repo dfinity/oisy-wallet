@@ -22,9 +22,9 @@
 	import type { FeeData } from '@ethersproject/providers';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {balanceEmpty} from "$lib/derived/balances.derived";
-    import {addressNotLoaded} from "$lib/derived/address.derived";
-    import {modalSend} from "$lib/derived/modal.derived";
+	import { balanceEmpty } from '$lib/derived/balances.derived';
+	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { modalSend } from '$lib/derived/modal.derived';
 
 	/**
 	 * Fee data
@@ -135,8 +135,7 @@
 	};
 
 	let disabled: boolean;
-	$: disabled =
-		$addressNotLoaded || $balanceEmpty || sendProgressStep !== SendStep.INITIALIZATION;
+	$: disabled = $addressNotLoaded || $balanceEmpty || sendProgressStep !== SendStep.INITIALIZATION;
 
 	const steps: WizardSteps = [
 		{

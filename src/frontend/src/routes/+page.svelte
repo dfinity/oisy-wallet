@@ -6,7 +6,7 @@
 	import Loader from '$lib/components/core/Loader.svelte';
 	import Tabs from '$lib/components/core/Tabs.svelte';
 	import Tokens from '$lib/components/dashboard/Tokens.svelte';
-	import {authSignedInStore} from "$lib/derived/auth.derived";
+	import { authSignedInStore } from '$lib/derived/auth.derived';
 </script>
 
 {#if $authSignedInStore}

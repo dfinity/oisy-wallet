@@ -5,9 +5,9 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import AddressQRCode from '$lib/components/address/AddressQRCode.svelte';
-    import {addressNotLoaded} from "$lib/derived/address.derived";
-    import {isBusy} from "$lib/derived/busy.derived";
-	import {modalReceive} from "$lib/derived/modal.derived";
+	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { modalReceive } from '$lib/derived/modal.derived';
 
 	let disabled: boolean;
 	$: disabled = $addressNotLoaded || $isBusy;
