@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { modalStore, modalWalletConnectSend } from '$lib/stores/modal.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { busy, isBusy } from '$lib/stores/busy.store';
+	import { busy } from '$lib/stores/busy.store';
 	import type {
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
@@ -12,6 +12,8 @@
 	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
 	import { signTransaction } from '$lib/api/backend.api';
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -82,7 +84,7 @@
 						return;
 					}
 
-					const { value, nonce, to, gasPrice } = firstTransaction;
+					const { value, nonce, to, gasPrice } = firstParam;
 
 					const transaction = {
 						to,
@@ -177,7 +179,7 @@
 
 		<p class="font-bold">Value</p>
 		<p class="mb-2 font-normal">
-			{BigInt(firstTransaction.value).toString() ?? '0'}
+			{BigInt(firstTransaction?.value ?? '0').toString()}
 		</p>
 
 		{#if nonNullish(firstTransaction.gasLimit)}

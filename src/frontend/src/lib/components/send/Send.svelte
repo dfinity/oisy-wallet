@@ -9,9 +9,8 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { Utils } from 'alchemy-sdk';
-	import { addressStore, addressStoreNotLoaded } from '$lib/stores/address.store';
+	import { addressStore } from '$lib/stores/address.store';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import { balanceStoreEmpty } from '$lib/stores/balance.store';
 	import { type WizardStep, type WizardSteps, WizardModal, Input } from '@dfinity/gix-components';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
@@ -22,7 +21,10 @@
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import type { FeeData } from '@ethersproject/providers';
 	import type { WebSocketListener } from '$lib/types/listener';
-	import { modalSend, modalStore } from '$lib/stores/modal.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { balanceEmpty } from '$lib/derived/balances.derived';
+	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { modalSend } from '$lib/derived/modal.derived';
 
 	/**
 	 * Fee data
@@ -133,8 +135,7 @@
 	};
 
 	let disabled: boolean;
-	$: disabled =
-		$addressStoreNotLoaded || $balanceStoreEmpty || sendProgressStep !== SendStep.INITIALIZATION;
+	$: disabled = $addressNotLoaded || $balanceEmpty || sendProgressStep !== SendStep.INITIALIZATION;
 
 	const steps: WizardSteps = [
 		{

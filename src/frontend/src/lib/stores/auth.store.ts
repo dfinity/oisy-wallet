@@ -9,7 +9,7 @@ import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
 import { nonNullish } from '@dfinity/utils';
-import { derived, writable, type Readable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
 	identity: Identity | undefined | null;
@@ -86,8 +86,3 @@ const initAuthStore = (): AuthStore => {
 };
 
 export const authStore = initAuthStore();
-
-export const authSignedInStore: Readable<boolean> = derived(
-	authStore,
-	({ identity }) => identity !== null && identity !== undefined
-);
