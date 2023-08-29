@@ -1,17 +1,17 @@
 <script lang="ts">
 	import Card from '$lib/components/ui/Card.svelte';
-	import IconETHQRCode from '$lib/components/icons/IconETHQRCode.svelte';
 	import { formatEtherShort } from '$lib/utils/format.utils';
 	import { BigNumber } from 'alchemy-sdk';
-	import { CURRENCY_SYMBOL } from '$lib/constants/eth.constants';
 	import type { TabsContext } from '$lib/stores/tabs.store';
 	import { TABS_CONTEXT_KEY } from '$lib/stores/tabs.store';
 	import { getContext } from 'svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { tokensStore } from '$lib/stores/tokens.stores';
-	import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { erc20TokensStore } from '$lib/stores/erc20.store';
+	import oisy from '$lib/assets/oisy.svg';
+	import Img from '$lib/components/ui/Img.svelte';
 
 	const { store: tabsStore }: TabsContext = getContext<TabsContext>(TABS_CONTEXT_KEY);
 
@@ -29,11 +29,11 @@
 		<Card>
 			{token.name}
 
-			<IconETHQRCode slot="icon" />
+			<Img src={token.icon ?? oisy} slot="icon" />
 
 			<div class="font-normal break-words" slot="description">
 				{formatEtherShort($balance ?? BigNumber.from(0n))}
-				{CURRENCY_SYMBOL}
+				{token.symbol}
 			</div>
 		</Card>
 	</button>

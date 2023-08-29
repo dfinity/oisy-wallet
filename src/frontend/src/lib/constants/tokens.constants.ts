@@ -1,3 +1,4 @@
+import eth from '$lib/assets/eth.svg';
 import type { Token } from '$lib/types/token';
 
 const SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
@@ -8,5 +9,6 @@ export const ETHEREUM_TOKEN: Token = {
 	id: ETHEREUM_TOKEN_ID,
 	name: 'Ethereum',
 	symbol: SYMBOL,
-	decimals: 18
+	decimals: 18,
+	icon: eth
 };
