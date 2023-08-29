@@ -21,9 +21,10 @@
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import type { FeeData } from '@ethersproject/providers';
 	import type { WebSocketListener } from '$lib/types/listener';
-	import { modalSend, modalStore } from '$lib/stores/modal.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import {balanceEmpty} from "$lib/derived/balances.derived";
     import {addressNotLoaded} from "$lib/derived/address.derived";
+    import {modalSend} from "$lib/derived/modal.derived";
 
 	/**
 	 * Fee data

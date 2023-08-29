@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { modalStore, modalWalletConnectSign } from '$lib/stores/modal.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { isNullish, nonNullish } from '@dfinity/utils';
@@ -8,6 +8,7 @@
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
     import {isBusy} from "$lib/derived/busy.derived";
+	import {modalWalletConnectSign} from "$lib/derived/modal.derived";
 
 	export let listener: WalletConnectListener | undefined | null;
 
