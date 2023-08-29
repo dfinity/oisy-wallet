@@ -1,14 +1,16 @@
 import { addressStore } from '$lib/stores/address.store';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
-import { balanceStore } from '$lib/stores/balance.store';
+import { balancesStore } from '$lib/stores/balances.store';
 import { busy } from '$lib/stores/busy.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+import { tokensStore } from '$lib/stores/tokens.stores';
 import { transactionsStore } from '$lib/stores/transactions.store';
 
 const resetStores = () => {
 	addressStore.reset();
-	balanceStore.reset();
+	balancesStore.reset();
 	transactionsStore.reset();
+	tokensStore.reset;
 
 	busy.stop();
 };

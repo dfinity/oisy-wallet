@@ -1,6 +1,7 @@
+import { Token } from '$lib/enums/token';
 import { balance as balanceService } from '$lib/providers/etherscan.providers';
 import { addressStore } from '$lib/stores/address.store';
-import { balanceStore } from '$lib/stores/balance.store';
+import { balancesStore } from '$lib/stores/balances.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -18,9 +19,9 @@ export const loadBalance = async (): Promise<{ success: boolean }> => {
 
 	try {
 		const balance = await balanceService(address);
-		balanceStore.set(balance);
+		balancesStore.set({ token: Token.ETHEREUM, balance });
 	} catch (err: unknown) {
-		balanceStore.reset();
+		balancesStore.reset();
 
 		toastsError({
 			msg: { text: 'Error while loading the ETH balance.' },
