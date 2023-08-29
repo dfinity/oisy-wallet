@@ -1,3 +1,4 @@
+import { Token } from '$lib/enums/token';
 import { transactions as transactionsProviders } from '$lib/providers/etherscan.providers';
 import { addressStore } from '$lib/stores/address.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -18,7 +19,7 @@ export const loadTransactions = async (): Promise<{ success: boolean }> => {
 
 	try {
 		const transactions = await transactionsProviders(address);
-		transactionsStore.set(transactions);
+		transactionsStore.set({ token: Token.ETHEREUM, transactions });
 	} catch (err: unknown) {
 		transactionsStore.reset();
 

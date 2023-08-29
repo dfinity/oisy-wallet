@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { sortedTransactionsStore } from '$lib/stores/transactions.store';
 	import { fade } from 'svelte/transition';
 	import type { Tab, TabsContext } from '$lib/stores/tabs.store';
 	import { setContext } from 'svelte';
 	import { initTabsStore, TABS_CONTEXT_KEY } from '$lib/stores/tabs.store';
+	import { sortedTransactions } from '$lib/derived/transactions.derived';
 
 	const tabs: Tab[] = [
 		{
@@ -28,7 +28,7 @@
 
 <div
 	class="font-bold flex"
-	class:mb-4={$sortedTransactionsStore.length > 0}
+	class:mb-4={$sortedTransactions.length > 0}
 	style="border-bottom: 1px solid var(--color-deep-violet)"
 >
 	<button
