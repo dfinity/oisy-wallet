@@ -6,8 +6,6 @@
 	import oisy from '$lib/assets/oisy.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { token } from '$lib/derived/token.derived';
-
-	$: console.log($token);
 </script>
 
 <article
