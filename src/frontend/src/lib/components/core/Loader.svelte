@@ -8,6 +8,7 @@
 	import { loadTransactions } from '$lib/services/transactions.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
+	import {loadErc20Contracts} from "$lib/services/erc20.services";
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 	let steps: [ProgressStep, ...ProgressStep[]] = [
@@ -20,6 +21,11 @@
 			step: LoaderStep.ETH_ADDRESS,
 			text: 'Loading ETH address...',
 			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: LoaderStep.ERC20_CONTRACTS,
+			text: 'Initializing ERC20 metadata...',
+			state: 'next'
 		} as ProgressStep,
 		{
 			step: LoaderStep.BALANCE,
@@ -40,6 +46,10 @@
 			await signOut();
 			return;
 		}
+
+		progressStep = LoaderStep.ERC20_CONTRACTS;
+
+		await loadErc20Contracts();
 
 		progressStep = LoaderStep.BALANCE;
 

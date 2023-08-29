@@ -1,3 +1,5 @@
+import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { Erc20Contract, Erc20ContractAddress, Erc20Metadata } from '$lib/types/erc20';
 import { InfuraProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 
@@ -21,25 +23,38 @@ const abiERC20 = [
 	'event Approval(address indexed _owner, address indexed _spender, uint256 _value)'
 ];
 
-export const testUSDC = async (address: string) => {
-	const USDTContract = new ethers.Contract(
-		// Testnets: https://developers.circle.com/developer/docs/usdc-on-testnet
-		// Sepolia address https://sepolia.etherscan.io/token/0x40d348b2601a2c5504a29aeac9d072f4ec7d78b7
-		'0x40d348b2601A2c5504a29AeAc9d072f4eC7d78b7',
-		abiERC20,
-		provider
-	);
-	console.log(
-		await USDTContract.balanceOf('0x66d20c6Aa53e7F2B1BDb539f12BeD20EAaCDa79F'),
-		await USDTContract.totalSupply()
-	);
+export const metadata = async ({ address }: Erc20ContractAddress): Promise<Erc20Metadata> => {
+	const erc20Contract = new ethers.Contract(address, abiERC20, provider);
+
+	const [name, symbol, decimals] = await Promise.all([
+		erc20Contract.name(),
+		erc20Contract.symbol(),
+		erc20Contract.decimals()
+	]);
+
+	return {
+		name,
+		symbol,
+		decimals
+	};
+};
+
+// Transaction send: https://ethereum.stackexchange.com/a/131944
+
+export const transactions = async ({
+	address,
+	contract
+}: {
+	address: ECDSA_PUBLIC_KEY;
+	contract: Erc20Contract;
+}) => {
+	const erc20Contract = new ethers.Contract(contract.address, abiERC20, provider);
+
+	// TODO: fetch from and to, merge and sort
 
 	// https://github.com/ethers-io/ethers.js/discussions/2029#discussioncomment-1342944
-	const filterAddressTo = USDTContract.filters.Transfer(
-		null,
-		'0x66d20c6Aa53e7F2B1BDb539f12BeD20EAaCDa79F'
-	);
-	// const ctrResults = await USDTContract.queryFilter(filterAddressTo, -100000, 'latest');
+	const filterAddressTo = erc20Contract.filters.Transfer(null, address);
 
-	// console.log(ctrResults);
+	const ctrResults = await erc20Contract.queryFilter(filterAddressTo, 0, 'latest');
+	console.log('ERC20 transactions', ctrResults);
 };

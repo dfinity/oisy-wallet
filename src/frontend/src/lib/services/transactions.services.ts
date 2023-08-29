@@ -29,15 +29,7 @@ export const loadTransactions = async (): Promise<{ success: boolean }> => {
 		// );
 
 		// https://sepolia.etherscan.io/address/0x40d348b2601a2c5504a29aeac9d072f4ec7d78b7
-		console.log(
-			'yolo',
-			(await transactionsProviders('0x40d348b2601A2c5504a29AeAc9d072f4eC7d78b7')).filter(
-				({ from, to, hash }) => {
-					console.log(hash);
-					return from.toLowerCase() === '0xCc03CD10f93Fd9570f1DF6A71E9157A10f282eD2'.toLowerCase();
-				}
-			)
-		);
+
 
 		transactionsStore.set({ token: Token.ETHEREUM, transactions });
 	} catch (err: unknown) {
