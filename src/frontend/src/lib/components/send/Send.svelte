@@ -20,6 +20,7 @@
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { addressStore } from '$lib/stores/address.store';
 	import { tokenIdStore } from '$lib/stores/token-id.stores';
+	import { token } from '$lib/derived/token.derived';
 
 	/**
 	 * Fee data
@@ -102,7 +103,7 @@
 				from: $addressStore!,
 				to: destination!,
 				progress: (step: SendStep) => (sendProgressStep = step),
-				tokenId: $tokenIdStore,
+				token: $token,
 				amount: amount!,
 				maxFeePerGas: maxFeePerGas.toBigInt(),
 				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()

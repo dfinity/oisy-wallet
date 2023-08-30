@@ -55,3 +55,17 @@ export const balance = async ({
 // Transaction send:
 // - https://ethereum.stackexchange.com/a/131944
 // - https://github.com/ethers-io/ethers.js/issues/183
+// https://medium.com/@mehmetegemenalbayrak/send-erc20-tokens-with-javascript-and-ethers-js-a063df896f99
+
+export const transfer = async ({
+	contract: { address: contractAddress },
+	address,
+	amount
+}: {
+	contract: Erc20ContractAddress;
+	address: ECDSA_PUBLIC_KEY;
+	amount: BigNumber;
+}): Promise<BigNumber> => {
+	const erc20Contract = new ethers.Contract(contractAddress, abiERC20, provider);
+	return erc20Contract.transfer(address, amount);
+};
