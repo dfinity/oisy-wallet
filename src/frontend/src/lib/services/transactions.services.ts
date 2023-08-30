@@ -5,12 +5,26 @@ import { addressStore } from '$lib/stores/address.store';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { TokenId } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadTransactions = async (tokenId: TokenId): Promise<{ success: boolean }> => {
+	const existingTransactions = get(transactionsStore)[tokenId];
+
+	// We load only once
+	if (nonNullish(existingTransactions)) {
+		return { success: true };
+	}
+
+	if (tokenId === ETHEREUM_TOKEN_ID) {
+		return loadEthTransactions();
+	}
+
+	return loadErc20Transactions({ tokenId });
+};
+
+export const loadEthTransactions = async (): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
@@ -21,25 +35,6 @@ export const loadTransactions = async (tokenId: TokenId): Promise<{ success: boo
 		return { success: false };
 	}
 
-	const existingTransactions = get(transactionsStore)[tokenId];
-
-	// We load only once
-	if (nonNullish(existingTransactions)) {
-		return { success: true };
-	}
-
-	if (tokenId === ETHEREUM_TOKEN_ID) {
-		return loadEthTransactions({ address });
-	}
-
-	return loadErc20Transactions({ address, tokenId });
-};
-
-export const loadEthTransactions = async ({
-	address
-}: {
-	address: ECDSA_PUBLIC_KEY;
-}): Promise<{ success: boolean }> => {
 	try {
 		const transactions = await transactionsProviders(address);
 		transactionsStore.set({ tokenId: ETHEREUM_TOKEN_ID, transactions });
@@ -57,12 +52,20 @@ export const loadEthTransactions = async ({
 };
 
 export const loadErc20Transactions = async ({
-	tokenId,
-	address
+	tokenId
 }: {
 	tokenId: TokenId;
-	address: ECDSA_PUBLIC_KEY;
 }): Promise<{ success: boolean }> => {
+	const address = get(addressStore);
+
+	if (isNullish(address)) {
+		toastsError({
+			msg: { text: 'Address is unknown.' }
+		});
+
+		return { success: false };
+	}
+
 	const tokens = get(erc20TokensStore);
 	const token = tokens.find(({ id }) => id === tokenId);
 

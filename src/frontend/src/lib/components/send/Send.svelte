@@ -1,15 +1,8 @@
 <script lang="ts">
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { signTransaction } from '$lib/api/backend.api';
-	import {
-		getFeeData,
-		getTransactionCount,
-		sendTransaction
-	} from '$lib/providers/etherscan.providers';
+	import { getFeeData } from '$lib/providers/etherscan.providers';
+	import { send as executeSend } from '$lib/services/send.services';
 	import { debounce, isNullish } from '@dfinity/utils';
-	import { ETH_NETWORK_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
-	import { Utils } from 'alchemy-sdk';
-	import { addressStore } from '$lib/stores/address.store';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { type WizardStep, type WizardSteps, WizardModal, Input } from '@dfinity/gix-components';
 	import SendForm from '$lib/components/send/SendForm.svelte';
@@ -25,6 +18,9 @@
 	import { balanceEmpty } from '$lib/derived/balances.derived';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { modalSend } from '$lib/derived/modal.derived';
+	import { addressStore } from '$lib/stores/address.store';
+	import { tokenIdStore } from '$lib/stores/token-id.stores';
+	import { token } from '$lib/derived/token.derived';
 
 	/**
 	 * Fee data
@@ -103,27 +99,15 @@
 		modal.next();
 
 		try {
-			const nonce = await getTransactionCount($addressStore!);
-
-			const transaction = {
+			await executeSend({
+				from: $addressStore!,
 				to: destination!,
-				value: Utils.parseEther(`${amount!}`).toBigInt(),
-				chain_id: ETH_NETWORK_ID,
-				nonce: BigInt(nonce),
-				gas: ETH_BASE_FEE,
-				max_fee_per_gas: maxFeePerGas.toBigInt(),
-				max_priority_fee_per_gas: maxPriorityFeePerGas.toBigInt()
-			} as const;
-
-			sendProgressStep = SendStep.SIGN;
-
-			const rawTransaction = await signTransaction(transaction);
-
-			sendProgressStep = SendStep.SEND;
-
-			await sendTransaction(rawTransaction);
-
-			sendProgressStep = SendStep.DONE;
+				progress: (step: SendStep) => (sendProgressStep = step),
+				token: $token,
+				amount: amount!,
+				maxFeePerGas: maxFeePerGas.toBigInt(),
+				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
+			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {

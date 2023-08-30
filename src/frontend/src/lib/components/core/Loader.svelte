@@ -8,6 +8,7 @@
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Contracts } from '$lib/services/erc20.services';
+	import { loadEthTransactions } from '$lib/services/transactions.services';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 	let steps: [ProgressStep, ...ProgressStep[]] = [
@@ -30,6 +31,11 @@
 			step: LoaderStep.BALANCE,
 			text: 'Loading your wallet balance...',
 			state: 'next'
+		} as ProgressStep,
+		{
+			step: LoaderStep.TRANSACTIONS,
+			text: 'And the ETH transactions...',
+			state: 'next'
 		} as ProgressStep
 	];
 
@@ -50,6 +56,15 @@
 		const { success: balanceSuccess } = await loadBalances();
 
 		if (!balanceSuccess) {
+			await signOut();
+			return;
+		}
+
+		progressStep = LoaderStep.TRANSACTIONS;
+
+		const { success: transactionsSuccess } = await loadEthTransactions();
+
+		if (!transactionsSuccess) {
 			await signOut();
 			return;
 		}
