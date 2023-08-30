@@ -1,4 +1,4 @@
-import type { BigNumber } from 'alchemy-sdk';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
 export const formatEtherShort = (value: BigNumber): string => {

@@ -1,4 +1,4 @@
-import { tokensStore } from '$lib/stores/tokens.stores';
+import { tokenIdStore } from '$lib/stores/token-id.stores';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -6,9 +6,9 @@ import type { Readable } from 'svelte/store';
 import { derived } from 'svelte/store';
 
 export const sortedTransactions: Readable<Transaction[]> = derived(
-	[transactionsStore, tokensStore],
-	([$transactionsStore, $tokensStore]) =>
-		($transactionsStore?.[$tokensStore] ?? []).sort(
+	[transactionsStore, tokenIdStore],
+	([$transactionsStore, $tokenIdStore]) =>
+		($transactionsStore?.[$tokenIdStore] ?? []).sort(
 			(
 				{ blockNumber: blockNumberA, pendingTimestamp: pendingTimestampA },
 				{ blockNumber: blockNumberB, pendingTimestamp: pendingTimestampB }

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { BigNumber } from 'alchemy-sdk';
+	import type { BigNumber } from '@ethersproject/bignumber';
 	import type { FeeData } from '@ethersproject/providers';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
