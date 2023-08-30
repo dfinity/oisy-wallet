@@ -5,7 +5,6 @@
 	import { onMount } from 'svelte';
 	import { loadAddress } from '$lib/services/address.services';
 	import { loadBalances } from '$lib/services/balance.services';
-	import { loadTransactions } from '$lib/services/transactions.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Contracts } from '$lib/services/erc20.services';
@@ -31,11 +30,6 @@
 			step: LoaderStep.BALANCE,
 			text: 'Loading your wallet balance...',
 			state: 'next'
-		} as ProgressStep,
-		{
-			step: LoaderStep.TRANSACTIONS,
-			text: 'And its transactions...',
-			state: 'next'
 		} as ProgressStep
 	];
 
@@ -56,15 +50,6 @@
 		const { success: balanceSuccess } = await loadBalances();
 
 		if (!balanceSuccess) {
-			await signOut();
-			return;
-		}
-
-		progressStep = LoaderStep.TRANSACTIONS;
-
-		const { success: transactionsSuccess } = await loadTransactions();
-
-		if (!transactionsSuccess) {
 			await signOut();
 			return;
 		}

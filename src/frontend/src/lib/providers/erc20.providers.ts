@@ -56,18 +56,21 @@ export const balance = async ({
 
 export const transactions = async ({
 	address,
-	contract
+	contract,
+	target
 }: {
 	address: ECDSA_PUBLIC_KEY;
 	contract: Erc20Token;
+	target: 'from' | 'to';
 }) => {
 	const erc20Contract = new ethers.Contract(contract.address, abiERC20, provider);
 
-	// TODO: fetch from and to, merge and sort
-
 	// https://github.com/ethers-io/ethers.js/discussions/2029#discussioncomment-1342944
-	const filterAddressTo = erc20Contract.filters.Transfer(null, address);
+	const filterAddress = erc20Contract.filters.Transfer(
+		target === 'from' ? address : null,
+		target === 'to' ? address : null
+	);
 
-	const ctrResults = await erc20Contract.queryFilter(filterAddressTo, 0, 'latest');
+	const ctrResults = await erc20Contract.queryFilter(filterAddress, 0, 'latest');
 	console.log('ERC20 transactions', ctrResults);
 };
