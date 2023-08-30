@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formatEtherShort } from '$lib/utils/format.utils';
-	import { CURRENCY_SYMBOL } from '$lib/constants/eth.constants';
 	import { nonNullish } from '@dfinity/utils';
 	import { balance, balanceZero } from '$lib/derived/balances.derived';
+	import { tokenSymbol } from '$lib/derived/token.derived';
 </script>
 
 <span class="text-ghost-white mt">
@@ -12,5 +12,5 @@
 	>
 		{nonNullish($balance) && !$balanceZero ? formatEtherShort($balance) : '0'}
 	</output>
-	<span class="opacity-100">{CURRENCY_SYMBOL}</span>
+	<span class="opacity-100">{$tokenSymbol}</span>
 </span>
