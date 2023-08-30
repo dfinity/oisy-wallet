@@ -7,7 +7,7 @@ import { populateTransaction } from '$lib/providers/etherscan-erc20.providers';
 import { getTransactionCount, sendTransaction } from '$lib/providers/etherscan.providers';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Token } from '$lib/types/token';
-import { isNullish } from '@dfinity/utils';
+import { hexStringToUint8Array, isNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
 
 export interface TransferParams {
@@ -61,7 +61,7 @@ const erc20PrepareTransaction = async ({
 		max_fee_per_gas,
 		max_priority_fee_per_gas,
 		value: 0n,
-		data: [data]
+		data: [hexStringToUint8Array(data)]
 	};
 };
 

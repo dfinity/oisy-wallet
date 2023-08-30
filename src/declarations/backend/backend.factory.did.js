@@ -7,7 +7,7 @@ export const idlFactory = ({ IDL }) => {
 		gas: IDL.Nat,
 		value: IDL.Nat,
 		max_priority_fee_per_gas: IDL.Nat,
-		data: IDL.Opt(IDL.Text),
+		data: IDL.Opt(IDL.Vec(IDL.Nat8)),
 		max_fee_per_gas: IDL.Nat,
 		chain_id: IDL.Nat,
 		nonce: IDL.Nat

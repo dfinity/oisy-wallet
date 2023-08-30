@@ -5,7 +5,7 @@ type SignRequest = record {
   gas : nat;
   value : nat;
   max_priority_fee_per_gas : nat;
-  data : opt text;
+  data : opt vec nat8;
   max_fee_per_gas : nat;
   chain_id : nat;
   nonce : nat;

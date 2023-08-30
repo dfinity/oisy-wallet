@@ -9,7 +9,7 @@ export interface SignRequest {
 	gas: bigint;
 	value: bigint;
 	max_priority_fee_per_gas: bigint;
-	data: [] | [string];
+	data: [] | [Uint8Array | number[]];
 	max_fee_per_gas: bigint;
 	chain_id: bigint;
 	nonce: bigint;
