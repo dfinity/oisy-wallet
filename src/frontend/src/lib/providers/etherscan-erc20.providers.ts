@@ -1,9 +1,9 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { Erc20ContractAddress, Erc20Metadata } from '$lib/types/erc20';
 import type { BigNumber } from '@ethersproject/bignumber';
+import type { PopulatedTransaction } from '@ethersproject/contracts';
 import { EtherscanProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
-import type {PopulatedTransaction} from "@ethersproject/contracts";
 
 const API_KEY = import.meta.env.VITE_ETHERSCAN_API_KEY;
 const NETWORK = import.meta.env.VITE_ETHERSCAN_NETWORK;
