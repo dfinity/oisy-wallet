@@ -1,5 +1,6 @@
 use candid::{CandidType, Deserialize, Nat, Principal};
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
+use ethers_core::abi::AbiDecode;
 use ethers_core::utils::keccak256;
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
@@ -107,6 +108,7 @@ pub struct SignRequest {
     pub max_priority_fee_per_gas: Nat,
     pub value: Nat,
     pub nonce: Nat,
+    pub data: Option<String>,
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
@@ -141,7 +143,10 @@ async fn sign_transaction(req: SignRequest) -> String {
         gas: Some(nat_to_u256(&req.gas)),
         value: Some(nat_to_u256(&req.value)),
         nonce: Some(nat_to_u256(&req.nonce)),
-        data: Some(Bytes::new()),
+        data: req
+            .data
+            .as_ref()
+            .map(|data| Bytes::decode_hex(data).expect("failed to decode data")),
         access_list: Default::default(),
         max_priority_fee_per_gas: Some(nat_to_u256(&req.max_priority_fee_per_gas)),
         max_fee_per_gas: Some(nat_to_u256(&req.max_fee_per_gas)),
