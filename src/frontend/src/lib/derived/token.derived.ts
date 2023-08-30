@@ -9,3 +9,5 @@ export const token: Readable<Token> = derived(
 	([$tokenIdStore, $erc20TokensStore]) =>
 		$erc20TokensStore.find(({ id }) => id === $tokenIdStore) ?? ETHEREUM_TOKEN
 );
+
+export const tokenSymbol: Readable<string> = derived([token], ([$token]) => $token.symbol);

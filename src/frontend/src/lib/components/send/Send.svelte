@@ -7,7 +7,7 @@
 		sendTransaction
 	} from '$lib/providers/etherscan.providers';
 	import { debounce, isNullish } from '@dfinity/utils';
-	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
+	import { ETH_NETWORK_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { Utils } from 'alchemy-sdk';
 	import { addressStore } from '$lib/stores/address.store';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
@@ -108,7 +108,7 @@
 			const transaction = {
 				to: destination!,
 				value: Utils.parseEther(`${amount!}`).toBigInt(),
-				chain_id: CHAIN_ID,
+				chain_id: ETH_NETWORK_ID,
 				nonce: BigInt(nonce),
 				gas: ETH_BASE_FEE,
 				max_fee_per_gas: maxFeePerGas.toBigInt(),

@@ -9,7 +9,7 @@
 		WalletConnectListener
 	} from '$lib/types/wallet-connect';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { CHAIN_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
+	import { ETH_NETWORK_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
 	import { signTransaction } from '$lib/api/backend.api';
 	import { isBusy } from '$lib/derived/busy.derived';
@@ -89,7 +89,7 @@
 					const transaction = {
 						to,
 						value: BigInt(value),
-						chain_id: CHAIN_ID,
+						chain_id: ETH_NETWORK_ID,
 						nonce: BigInt(nonce),
 						gas: nonNullish(gasPrice) ? BigInt(gasPrice) : ETH_BASE_FEE,
 						max_fee_per_gas: maxFeePerGas.toBigInt(),
