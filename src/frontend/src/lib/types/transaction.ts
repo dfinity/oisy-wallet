@@ -1,5 +1,7 @@
+import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { Transaction as EthTransaction } from '@ethersproject/transactions';
 
-export interface Transaction extends Omit<EthTransaction, 'data' | 'value'> {
-	pendingTimestamp?: number;
-}
+export type Transaction = Omit<EthTransaction, 'data'> &
+	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
+		pendingTimestamp?: number;
+	};

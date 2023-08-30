@@ -1,5 +1,5 @@
 import type { Token, TokenMetadata } from '$lib/types/token';
-import type { BaseContract } from '@ethersproject/contracts/src.ts';
+import type {BaseContract} from "ethers";
 
 export type Erc20Token = Erc20ContractAddress & Token;
 

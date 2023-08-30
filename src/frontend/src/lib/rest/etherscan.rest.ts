@@ -13,7 +13,7 @@ export const transactions = async ({
 }: {
 	address: ECDSA_PUBLIC_KEY;
 	contract: Erc20Token;
-}): Promise<Omit<Transaction, 'data' | 'value'>[]> => {
+}): Promise<Transaction[]> => {
 	const url = new URL(API_URL);
 	url.searchParams.set('module', 'account');
 	url.searchParams.set('action', 'tokentx');
@@ -57,7 +57,7 @@ export const transactions = async ({
 			nonce: parseInt(nonce),
 			gasLimit: BigNumber.from(gas),
 			gasPrice: BigNumber.from(gasPrice),
-			value,
+			value: BigNumber.from(value),
 			// Chain ID is not delivered by the Etherscan API so, we naively set 0
 			chainId: 0
 		})
