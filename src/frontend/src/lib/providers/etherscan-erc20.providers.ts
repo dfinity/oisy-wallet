@@ -3,6 +3,7 @@ import type { Erc20ContractAddress, Erc20Metadata } from '$lib/types/erc20';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { EtherscanProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
+import type {PopulatedTransaction} from "@ethersproject/contracts";
 
 const API_KEY = import.meta.env.VITE_ETHERSCAN_API_KEY;
 const NETWORK = import.meta.env.VITE_ETHERSCAN_NETWORK;
@@ -57,7 +58,7 @@ export const balance = async ({
 // - https://github.com/ethers-io/ethers.js/issues/183
 // https://medium.com/@mehmetegemenalbayrak/send-erc20-tokens-with-javascript-and-ethers-js-a063df896f99
 
-export const transfer = async ({
+export const populateTransaction = async ({
 	contract: { address: contractAddress },
 	address,
 	amount
@@ -65,7 +66,7 @@ export const transfer = async ({
 	contract: Erc20ContractAddress;
 	address: ECDSA_PUBLIC_KEY;
 	amount: BigNumber;
-}): Promise<BigNumber> => {
+}): Promise<PopulatedTransaction> => {
 	const erc20Contract = new ethers.Contract(contractAddress, abiERC20, provider);
-	return erc20Contract.transfer(address, amount);
+	return erc20Contract.populateTransaction.approve(address, amount);
 };
