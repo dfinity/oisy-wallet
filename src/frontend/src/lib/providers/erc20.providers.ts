@@ -1,7 +1,7 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
-import type { Erc20ContractAddress, Erc20Metadata, Erc20Token } from '$lib/types/erc20';
+import type { Erc20ContractAddress, Erc20Metadata } from '$lib/types/erc20';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { InfuraProvider } from '@ethersproject/providers';
-import type { BigNumber } from 'alchemy-sdk';
 import { ethers } from 'ethers';
 
 const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
@@ -52,25 +52,6 @@ export const balance = async ({
 	return erc20Contract.balanceOf(address);
 };
 
-// Transaction send: https://ethereum.stackexchange.com/a/131944
-
-export const transactions = async ({
-	address,
-	contract,
-	target
-}: {
-	address: ECDSA_PUBLIC_KEY;
-	contract: Erc20Token;
-	target: 'from' | 'to';
-}) => {
-	const erc20Contract = new ethers.Contract(contract.address, abiERC20, provider);
-
-	// https://github.com/ethers-io/ethers.js/discussions/2029#discussioncomment-1342944
-	const filterAddress = erc20Contract.filters.Transfer(
-		target === 'from' ? address : null,
-		target === 'to' ? address : null
-	);
-
-	const ctrResults = await erc20Contract.queryFilter(filterAddress, 0, 'latest');
-	console.log('ERC20 transactions', ctrResults);
-};
+// Transaction send:
+// - https://ethereum.stackexchange.com/a/131944
+// - https://github.com/ethers-io/ethers.js/issues/183

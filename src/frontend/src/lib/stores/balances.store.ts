@@ -1,6 +1,6 @@
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
-import type { BigNumber } from 'alchemy-sdk';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { writable, type Readable } from 'svelte/store';
 
 export type BalancesData = Record<TokenId, BigNumber> | undefined | null;

@@ -1,5 +1,5 @@
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
+import type { Transaction as EthTransaction } from '@ethersproject/transactions';
 
-export interface Transaction extends TransactionResponse {
+export interface Transaction extends Omit<EthTransaction, 'data' | 'value'> {
 	pendingTimestamp?: number;
 }

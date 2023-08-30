@@ -1,7 +1,7 @@
 import { balancesStore } from '$lib/stores/balances.store';
 import { tokenIdStore } from '$lib/stores/token-id.stores';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { BigNumber } from 'alchemy-sdk';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
 
 export const balance: Readable<BigNumber | undefined | null> = derived(

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Card from '$lib/components/ui/Card.svelte';
 	import { formatEtherShort } from '$lib/utils/format.utils';
-	import { BigNumber } from 'alchemy-sdk';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import type { TabsContext } from '$lib/stores/tabs.store';
 	import { TABS_CONTEXT_KEY } from '$lib/stores/tabs.store';
 	import { getContext } from 'svelte';

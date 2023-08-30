@@ -1,6 +1,6 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { transactions as transactionsErc20Providers } from '$lib/providers/erc20.providers';
 import { transactions as transactionsProviders } from '$lib/providers/etherscan.providers';
+import { transactions as transactionsRest } from '$lib/rest/etherscan.rest';
 import { addressStore } from '$lib/stores/address.store';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -75,11 +75,8 @@ export const loadErc20Transactions = async ({
 	}
 
 	try {
-		const transactions = await Promise.all([
-			transactionsErc20Providers({ contract: token, address, target: 'from' }),
-			transactionsErc20Providers({ contract: token, address, target: 'to' })
-		]);
-		transactionsStore.set({ tokenId, transactions: [] });
+		const transactions = await transactionsRest({ contract: token, address });
+		transactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
 		transactionsStore.reset();
 
