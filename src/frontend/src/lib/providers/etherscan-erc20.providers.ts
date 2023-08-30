@@ -1,13 +1,13 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { Erc20ContractAddress, Erc20Metadata } from '$lib/types/erc20';
 import type { BigNumber } from '@ethersproject/bignumber';
-import { InfuraProvider } from '@ethersproject/providers';
+import { EtherscanProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
 
-const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
-const NETWORK = import.meta.env.VITE_INFURA_NETWORK;
+const API_KEY = import.meta.env.VITE_ETHERSCAN_API_KEY;
+const NETWORK = import.meta.env.VITE_ETHERSCAN_NETWORK;
 
-const provider = new InfuraProvider(NETWORK, API_KEY);
+const provider = new EtherscanProvider(NETWORK, API_KEY);
 
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
 const abiERC20 = [

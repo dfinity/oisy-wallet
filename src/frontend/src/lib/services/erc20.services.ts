@@ -1,5 +1,5 @@
 import { ERC20_CONTRACTS_ADDRESSES } from '$lib/constants/erc20.constants';
-import { metadata } from '$lib/providers/erc20.providers';
+import { metadata } from '$lib/providers/etherscan-erc20.providers';
 import { balancesStore } from '$lib/stores/balances.store';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';

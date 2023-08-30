@@ -1,5 +1,5 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { balance as balanceErc20Service } from '$lib/providers/erc20.providers';
+import { balance as balanceErc20Service } from '$lib/providers/etherscan-erc20.providers';
 import { balance as balanceService } from '$lib/providers/etherscan.providers';
 import { addressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
