@@ -31,7 +31,8 @@ const ethPrepareTransaction = async ({
 	nonce: BigInt(nonce),
 	gas: ETH_BASE_FEE,
 	max_fee_per_gas,
-	max_priority_fee_per_gas
+	max_priority_fee_per_gas,
+	data: []
 });
 
 const erc20PrepareTransaction = async ({
@@ -42,27 +43,25 @@ const erc20PrepareTransaction = async ({
 	nonce,
 	token
 }: TransferParams & { nonce: number; token: Token }): Promise<SignRequest> => {
-	const { value, ...rest } = await populateTransaction({
+	const { data } = await populateTransaction({
 		contract: token as Erc20Token,
 		address: to,
 		amount: Utils.parseEther(`${amount}`)
 	});
 
-	console.log(value, rest);
-
-	if (isNullish(value)) {
-		throw new Error('Transaction value cannot be undefined or null');
+	if (isNullish(data)) {
+		throw new Error('Erc20 transaction Data cannot be undefined or null.');
 	}
 
 	return {
-		...rest,
-		value: value.toBigInt(),
 		to,
 		chain_id: ETH_NETWORK_ID,
 		nonce: BigInt(nonce),
 		gas: ETH_BASE_FEE,
 		max_fee_per_gas,
-		max_priority_fee_per_gas
+		max_priority_fee_per_gas,
+		value: 0n,
+		data: [data]
 	};
 };
 
