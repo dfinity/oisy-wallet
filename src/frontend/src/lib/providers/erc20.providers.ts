@@ -1,6 +1,7 @@
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { Erc20ContractAddress, Erc20Metadata, Erc20Token } from '$lib/types/erc20';
 import { InfuraProvider } from '@ethersproject/providers';
+import type { BigNumber } from 'alchemy-sdk';
 import { ethers } from 'ethers';
 
 const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
@@ -37,6 +38,18 @@ export const metadata = async ({ address }: Erc20ContractAddress): Promise<Erc20
 		symbol,
 		decimals
 	};
+};
+
+export const balance = async ({
+	contract: { address: contractAddress },
+	address
+}: {
+	contract: Erc20ContractAddress;
+	address: ECDSA_PUBLIC_KEY;
+}): Promise<BigNumber> => {
+	const erc20Contract = new ethers.Contract(contractAddress, abiERC20, provider);
+
+	return erc20Contract.balanceOf(address);
 };
 
 // Transaction send: https://ethereum.stackexchange.com/a/131944

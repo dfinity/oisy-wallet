@@ -4,7 +4,7 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
 	import { loadAddress } from '$lib/services/address.services';
-	import { loadBalance } from '$lib/services/balance.services';
+	import { loadBalances } from '$lib/services/balance.services';
 	import { loadTransactions } from '$lib/services/transactions.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
@@ -53,7 +53,7 @@
 
 		progressStep = LoaderStep.BALANCE;
 
-		const { success: balanceSuccess } = await loadBalance();
+		const { success: balanceSuccess } = await loadBalances();
 
 		if (!balanceSuccess) {
 			await signOut();

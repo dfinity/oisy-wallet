@@ -5,13 +5,13 @@
 	import type { TabsContext } from '$lib/stores/tabs.store';
 	import { TABS_CONTEXT_KEY } from '$lib/stores/tabs.store';
 	import { getContext } from 'svelte';
-	import { balance } from '$lib/derived/balances.derived';
 	import { tokenIdStore } from '$lib/stores/token-id.stores';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { erc20TokensStore } from '$lib/stores/erc20.store';
 	import oisy from '$lib/assets/oisy.svg';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { balancesStore } from '$lib/stores/balances.store';
 
 	const { store: tabsStore }: TabsContext = getContext<TabsContext>(TABS_CONTEXT_KEY);
 
@@ -32,7 +32,7 @@
 			<Img src={token.icon ?? oisy} slot="icon" />
 
 			<div class="font-normal break-words" slot="description">
-				{formatEtherShort($balance ?? BigNumber.from(0n))}
+				{formatEtherShort($balancesStore?.[token.id] ?? BigNumber.from(0n))}
 				{token.symbol}
 			</div>
 		</Card>

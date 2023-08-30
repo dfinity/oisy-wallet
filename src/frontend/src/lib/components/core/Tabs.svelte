@@ -3,7 +3,6 @@
 	import type { Tab, TabsContext } from '$lib/stores/tabs.store';
 	import { setContext } from 'svelte';
 	import { initTabsStore, TABS_CONTEXT_KEY } from '$lib/stores/tabs.store';
-	import { sortedTransactions } from '$lib/derived/transactions.derived';
 
 	const tabs: Tab[] = [
 		{
@@ -26,11 +25,7 @@
 	});
 </script>
 
-<div
-	class="font-bold flex"
-	class:mb-4={$sortedTransactions.length > 0}
-	style="border-bottom: 1px solid var(--color-deep-violet)"
->
+<div class="font-bold flex mb-3" style="border-bottom: 1px solid var(--color-deep-violet)">
 	<button
 		class="flex-1 tab"
 		style={`border-bottom: 3px solid ${
