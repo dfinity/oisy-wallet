@@ -1,4 +1,4 @@
-import { Token } from '$lib/enums/token';
+import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import {
 	getTransaction,
 	initMinedTransactionsListener as initMinedTransactionsListenerProvider,
@@ -21,7 +21,7 @@ const processTransaction = async (hash: string) => {
 	}
 
 	transactionsStore.add({
-		token: Token.ETHEREUM,
+		tokenId: ETHEREUM_TOKEN_ID,
 		transactions: [
 			{
 				...transaction,
@@ -48,7 +48,7 @@ const processTransaction = async (hash: string) => {
 	const { timestamp, ...rest } = minedTransaction;
 
 	transactionsStore.update({
-		token: Token.ETHEREUM,
+		tokenId: ETHEREUM_TOKEN_ID,
 		transaction: {
 			...rest,
 			timestamp: timestamp ?? Date.now() / 1000

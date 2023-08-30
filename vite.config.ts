@@ -78,6 +78,7 @@ const config: UserConfig = {
 							'frontend/src/lib/derived',
 							'frontend/src/lib/enums',
 							'frontend/src/lib/providers',
+							'frontend/src/lib/rest',
 							'frontend/src/lib/services',
 							'frontend/src/lib/stores',
 							'frontend/src/lib/utils',

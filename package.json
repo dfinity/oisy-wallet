@@ -29,6 +29,7 @@
 		"@walletconnect/web3wallet": "^1.9.0",
 		"alchemy-sdk": "^2.9.2",
 		"buffer": "^6.0.3",
+		"ethers": "^5.7.0",
 		"the-new-css-reset": "^1.9.0"
 	},
 	"devDependencies": {

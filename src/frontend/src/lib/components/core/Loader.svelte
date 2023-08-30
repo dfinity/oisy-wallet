@@ -4,10 +4,10 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
 	import { loadAddress } from '$lib/services/address.services';
-	import { loadBalance } from '$lib/services/balance.services';
-	import { loadTransactions } from '$lib/services/transactions.services';
+	import { loadBalances } from '$lib/services/balance.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
+	import { loadErc20Contracts } from '$lib/services/erc20.services';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 	let steps: [ProgressStep, ...ProgressStep[]] = [
@@ -22,13 +22,13 @@
 			state: 'in_progress'
 		} as ProgressStep,
 		{
-			step: LoaderStep.BALANCE,
-			text: 'Loading your wallet balance...',
+			step: LoaderStep.ERC20_CONTRACTS,
+			text: 'Initializing ERC20 metadata...',
 			state: 'next'
 		} as ProgressStep,
 		{
-			step: LoaderStep.TRANSACTIONS,
-			text: 'And its transactions...',
+			step: LoaderStep.BALANCE,
+			text: 'Loading your wallet balance...',
 			state: 'next'
 		} as ProgressStep
 	];
@@ -41,20 +41,15 @@
 			return;
 		}
 
+		progressStep = LoaderStep.ERC20_CONTRACTS;
+
+		await loadErc20Contracts();
+
 		progressStep = LoaderStep.BALANCE;
 
-		const { success: balanceSuccess } = await loadBalance();
+		const { success: balanceSuccess } = await loadBalances();
 
 		if (!balanceSuccess) {
-			await signOut();
-			return;
-		}
-
-		progressStep = LoaderStep.TRANSACTIONS;
-
-		const { success: transactionsSuccess } = await loadTransactions();
-
-		if (!transactionsSuccess) {
 			await signOut();
 			return;
 		}
