@@ -44,7 +44,7 @@
 	{/if}
 </div>
 
-<p class="text-center p-2 text-xs">or use walletconnect uri</p>
+<p class="text-center p-2 text-base">or use walletconnect uri</p>
 
 <Input
 	name="uri"
