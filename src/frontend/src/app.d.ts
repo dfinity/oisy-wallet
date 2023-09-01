@@ -10,3 +10,7 @@ declare global {
 }
 
 declare const VITE_APP_VERSION: string;
+
+interface Window {
+	ethereum: any;
+}
