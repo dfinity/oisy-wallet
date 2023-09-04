@@ -1,7 +1,7 @@
 import type { AddressData } from '$lib/stores/address.store';
 import { metamaskStore } from '$lib/stores/metamask.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import detectEthereumProvider from '@metamask/detect-provider';
 
 export const initMetamaskSupport = async () => {
@@ -15,11 +15,17 @@ export const initMetamaskSupport = async () => {
 export const openMetamaskTransaction = async (
 	address: AddressData
 ): Promise<{ success: 'ok' | 'error'; err?: unknown }> => {
+	if (isNullish(address)) {
+		toastsError({
+			msg: { text: 'ETH destination address is unknown.' }
+		});
+		return { success: 'error' };
+	}
+
 	let accounts: string[] | undefined;
 
 	try {
-		// TODO: create proper types
-		accounts = await window.ethereum.request?.({ method: 'eth_requestAccounts' });
+		accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
 	} catch (err: unknown) {
 		toastsError({
 			msg: { text: 'Cannot get your accounts. Is your Metamask open and already connected?' }
@@ -39,13 +45,12 @@ export const openMetamaskTransaction = async (
 	}
 
 	try {
-		// TODO: create declaration types. It returns string which is the hash of the transaction.
-		await window.ethereum.request?.({
+		await window.ethereum.request({
 			method: 'eth_sendTransaction',
 			params: [
 				{
 					from,
-					...(nonNullish(address) && { to: address })
+					to: address
 				}
 			]
 		});
