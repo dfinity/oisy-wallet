@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { getFeeData } from '$lib/providers/etherscan.providers';
+	import { getFeeData as getErc20FeeData } from '$lib/providers/etherscan-erc20.providers';
 	import { send as executeSend } from '$lib/services/send.services';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
@@ -12,26 +13,48 @@
 	import { SendStep } from '$lib/enums/send';
 	import { onDestroy } from 'svelte';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
-	import type { FeeData } from '@ethersproject/providers';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { balanceEmpty } from '$lib/derived/balances.derived';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { addressStore } from '$lib/stores/address.store';
-	import { tokenIdStore } from '$lib/stores/token-id.stores';
 	import { token } from '$lib/derived/token.derived';
+	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import type { Erc20Token } from '$lib/types/erc20';
+	import type { TransactionFeeData } from '$lib/types/transaction';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
+	import { Utils } from 'alchemy-sdk';
+
+	let destination = '';
+	let amount: number | undefined = undefined;
 
 	/**
 	 * Fee data
 	 */
 
-	let feeData: FeeData | undefined;
+	let feeData: TransactionFeeData | undefined;
 	let listener: WebSocketListener | undefined = undefined;
 
 	const updateFeeData = async () => {
 		try {
-			feeData = await getFeeData();
+			if ($token.id === ETHEREUM_TOKEN_ID) {
+				feeData = {
+					...(await getFeeData()),
+					gas: BigNumber.from(ETH_BASE_FEE)
+				};
+				return;
+			}
+
+			feeData = {
+				...(await getFeeData()),
+				gas: await getErc20FeeData({
+					contract: $token as Erc20Token,
+					address: destination !== '' ? destination : $addressStore!,
+					amount: Utils.parseEther(`${amount ?? '1'}`)
+				})
+			};
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: `Cannot fetch gas fee.` },
@@ -52,9 +75,20 @@
 		await updateFeeData();
 		listener = initMinedTransactionsListener(async () => debounceUpdateFeeData());
 	};
+
 	onDestroy(() => listener?.disconnect());
 
 	$: initFeeData($modalSend);
+
+	$: amount,
+		destination,
+		(() => {
+			if ($token.id === ETHEREUM_TOKEN_ID) {
+				return;
+			}
+
+			debounceUpdateFeeData();
+		})();
 
 	/**
 	 * Send
@@ -85,7 +119,7 @@
 		}
 
 		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-		const { maxFeePerGas, maxPriorityFeePerGas } = feeData;
+		const { maxFeePerGas, maxPriorityFeePerGas, gas } = feeData;
 
 		// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
 		// exceeds block gas limit
@@ -98,6 +132,8 @@
 
 		modal.next();
 
+		// TODO: display maxFeePerGas * gas (21_000 or value I found for ERC20)
+
 		try {
 			await executeSend({
 				from: $addressStore!,
@@ -105,8 +141,9 @@
 				progress: (step: SendStep) => (sendProgressStep = step),
 				token: $token,
 				amount: amount!,
-				maxFeePerGas: maxFeePerGas.toBigInt(),
-				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
+				maxFeePerGas,
+				maxPriorityFeePerGas,
+				gas
 			});
 
 			setTimeout(() => close(), 750);
@@ -140,9 +177,6 @@
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
-
-	let destination = '';
-	let amount: number | undefined = undefined;
 
 	const close = () => {
 		modalStore.close();

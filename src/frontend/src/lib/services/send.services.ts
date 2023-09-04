@@ -7,7 +7,9 @@ import { populateTransaction } from '$lib/providers/etherscan-erc20.providers';
 import { getTransactionCount, sendTransaction } from '$lib/providers/etherscan.providers';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Token } from '$lib/types/token';
+import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
 export interface TransferParams {
@@ -41,8 +43,9 @@ const erc20PrepareTransaction = async ({
 	maxPriorityFeePerGas: max_priority_fee_per_gas,
 	maxFeePerGas: max_fee_per_gas,
 	nonce,
-	token
-}: TransferParams & { nonce: number; token: Token }): Promise<SignRequest> => {
+	token,
+	gas
+}: TransferParams & { nonce: number; token: Token; gas: bigint }): Promise<SignRequest> => {
 	const { data } = await populateTransaction({
 		contract: token as Erc20Token,
 		address: to,
@@ -53,11 +56,13 @@ const erc20PrepareTransaction = async ({
 		throw new Error('Erc20 transaction Data cannot be undefined or null.');
 	}
 
+	const { address: contractAddress } = token as Erc20Token;
+
 	return {
-		to,
+		to: contractAddress,
 		chain_id: ETH_NETWORK_ID,
 		nonce: BigInt(nonce),
-		gas: ETH_BASE_FEE,
+		gas,
 		max_fee_per_gas,
 		max_priority_fee_per_gas,
 		value: 0n,
@@ -69,8 +74,17 @@ export const send = async ({
 	progress,
 	token,
 	from,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	gas,
 	...rest
-}: TransferParams & { progress: (step: SendStep) => void; token: Token }) => {
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
+	progress: (step: SendStep) => void;
+	token: Token;
+} & Pick<TransactionFeeData, 'gas'> & {
+		maxFeePerGas: BigNumber;
+		maxPriorityFeePerGas: BigNumber;
+	}) => {
 	progress(SendStep.INITIALIZATION);
 
 	const nonce = await getTransactionCount(from);
@@ -79,13 +93,18 @@ export const send = async ({
 		? ethPrepareTransaction({
 				...rest,
 				from,
-				nonce
+				nonce,
+				maxFeePerGas: maxFeePerGas.toBigInt(),
+				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
 		  })
 		: erc20PrepareTransaction({
 				...rest,
 				from,
 				token,
-				nonce
+				nonce,
+				gas: gas.toBigInt(),
+				maxFeePerGas: maxFeePerGas.toBigInt(),
+				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
 		  }));
 
 	progress(SendStep.SIGN);
