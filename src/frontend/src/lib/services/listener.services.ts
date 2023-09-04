@@ -1,15 +1,18 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { initPendingTransactionsListener as initErc20PendingTransactionsListenerProvider } from '$lib/providers/alchemy-erc20.providers';
 import {
 	getTransaction,
-	initMinedTransactionsListener as initMinedTransactionsListenerProvider,
-	initPendingTransactionsListener as initPendingTransactionsListenerProvider
+	initPendingTransactionsListener as initEthPendingTransactionsListenerProvider,
+	initMinedTransactionsListener as initMinedTransactionsListenerProvider
 } from '$lib/providers/alchemy.providers';
 import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
 import { loadBalance } from '$lib/services/balance.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { Erc20Token } from '$lib/types/erc20';
 import type { WebSocketListener } from '$lib/types/listener';
+import type { Token } from '$lib/types/token';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { isNullish } from '@dfinity/utils';
 
@@ -59,11 +62,28 @@ const processTransaction = async (hash: string) => {
 	await loadBalance();
 };
 
-export const initPendingTransactionsListener = (address: ECDSA_PUBLIC_KEY): WebSocketListener =>
-	initPendingTransactionsListenerProvider({
+export const initPendingTransactionsListener = ({
+	token,
+	address
+}: {
+	token: Token;
+	address: ECDSA_PUBLIC_KEY;
+}): WebSocketListener => {
+	const listener = async (hash: string) => await processTransaction(hash);
+
+	if (token.id === ETHEREUM_TOKEN_ID) {
+		return initEthPendingTransactionsListenerProvider({
+			address,
+			listener
+		});
+	}
+
+	return initErc20PendingTransactionsListenerProvider({
 		address,
-		listener: async (hash: string) => await processTransaction(hash)
+		listener,
+		contract: token as Erc20Token
 	});
+};
 
 export const initMinedTransactionsListener = (
 	callback: (tx: { removed: boolean; transaction: { has: string } }) => Promise<void>
