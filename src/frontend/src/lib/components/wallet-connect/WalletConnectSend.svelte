@@ -14,6 +14,7 @@
 	import { signTransaction } from '$lib/api/backend.api';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
+	import type { SignRequest } from '$declarations/backend/backend.did';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -86,15 +87,16 @@
 
 					const { value, nonce, to, gasPrice } = firstParam;
 
-					const transaction = {
+					const transaction: SignRequest = {
 						to,
 						value: BigInt(value),
 						chain_id: ETH_NETWORK_ID,
 						nonce: BigInt(nonce),
 						gas: nonNullish(gasPrice) ? BigInt(gasPrice) : ETH_BASE_FEE,
 						max_fee_per_gas: maxFeePerGas.toBigInt(),
-						max_priority_fee_per_gas: maxPriorityFeePerGas.toBigInt()
-					} as const;
+						max_priority_fee_per_gas: maxPriorityFeePerGas.toBigInt(),
+						data: []
+					};
 
 					const rawTransaction = await signTransaction(transaction);
 
