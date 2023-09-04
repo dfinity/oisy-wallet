@@ -5,15 +5,16 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { onMount } from 'svelte';
-	import { initMetamaskSupport } from '$lib/services/metamask.services';
+	import { initMetamaskSupport, openMetamaskTransaction } from '$lib/services/metamask.services';
 	import { metamaskAvailable, metamaskNotInitialized } from '$lib/derived/metamask.derived';
+	import { addressStore } from '$lib/stores/address.store';
 
 	let disabled: boolean;
 	$: disabled = $addressNotLoaded || $isBusy || $metamaskNotInitialized;
 
 	const receive = async () => {
 		if ($metamaskAvailable) {
-			// TODO
+			await openMetamaskTransaction($addressStore);
 			return;
 		}
 

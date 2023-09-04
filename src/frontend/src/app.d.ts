@@ -1,3 +1,5 @@
+import type { ExternalProvider } from '@ethersproject/providers';
+
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 declare global {
@@ -6,6 +8,10 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}
+	}
+
+	declare interface Window {
+		ethereum: ExternalProvider;
 	}
 }
 
