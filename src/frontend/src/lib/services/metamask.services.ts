@@ -45,9 +45,7 @@ export const openMetamaskTransaction = async (
 			params: [
 				{
 					from,
-					...(nonNullish(address) && { to: address }),
-					// TODO: a value is required?
-					value: '0x' + (50000000000000000).toString(16)
+					...(nonNullish(address) && { to: address })
 				}
 			]
 		});
