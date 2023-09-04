@@ -1,5 +1,3 @@
-// Adapted from ExternalProvider in '@ethersproject/providers'
-
 export type MetamaskAccounts = string[];
 export type MetamaskTransactionHash = string;
 
@@ -7,14 +5,14 @@ export type MetamaskAccountsRequest = {
 	method: 'eth_requestAccounts';
 };
 
+export type MetamaskSendTransactionRequestParams = {
+	from: string;
+	to: string;
+};
+
 export type MetamaskSendTransactionRequest = {
 	method: 'eth_sendTransaction';
-	params: [
-		{
-			from: string;
-			to: string;
-		}
-	];
+	params: [MetamaskSendTransactionRequestParams];
 };
 
 export interface MetamaskProvider {

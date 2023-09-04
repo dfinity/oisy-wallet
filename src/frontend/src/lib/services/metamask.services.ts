@@ -1,3 +1,4 @@
+import { metamaskAccounts, sendMetamaskTransaction } from '$lib/providers/metamask.providers';
 import type { AddressData } from '$lib/stores/address.store';
 import { metamaskStore } from '$lib/stores/metamask.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -25,7 +26,7 @@ export const openMetamaskTransaction = async (
 	let accounts: string[] | undefined;
 
 	try {
-		accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+		accounts = await metamaskAccounts();
 	} catch (err: unknown) {
 		toastsError({
 			msg: { text: 'Cannot get your accounts. Is your Metamask open and already connected?' }
@@ -45,15 +46,7 @@ export const openMetamaskTransaction = async (
 	}
 
 	try {
-		await window.ethereum.request({
-			method: 'eth_sendTransaction',
-			params: [
-				{
-					from,
-					to: address
-				}
-			]
-		});
+		await sendMetamaskTransaction({ from, to: address });
 
 		return { success: 'ok' };
 	} catch (err: unknown) {
