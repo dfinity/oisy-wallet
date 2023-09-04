@@ -75,6 +75,8 @@ export const send = async ({
 
 	const nonce = await getTransactionCount(from);
 
+	// TODO: gas price 21_000 for eth or gas for USDC
+
 	const transaction = await (token.id === ETHEREUM_TOKEN_ID
 		? ethPrepareTransaction({
 				...rest,

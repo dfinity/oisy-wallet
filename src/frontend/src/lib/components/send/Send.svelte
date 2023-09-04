@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { getFeeData } from '$lib/providers/etherscan.providers';
+	import { getFeeData as getErc20FeeData } from '$lib/providers/etherscan-erc20.providers';
 	import { send as executeSend } from '$lib/services/send.services';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
@@ -19,8 +20,9 @@
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { addressStore } from '$lib/stores/address.store';
-	import { tokenIdStore } from '$lib/stores/token-id.stores';
 	import { token } from '$lib/derived/token.derived';
+	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import type { Erc20Token } from '$lib/types/erc20';
 
 	/**
 	 * Fee data
@@ -31,7 +33,18 @@
 
 	const updateFeeData = async () => {
 		try {
-			feeData = await getFeeData();
+			if ($token.id === ETHEREUM_TOKEN_ID) {
+				feeData = await getFeeData();
+				return;
+			}
+
+			// TODO: destination address and value
+			const fee = await getErc20FeeData({
+				contract: $token as Erc20Token,
+				address: $addressStore!
+			});
+
+			console.log(fee, fee.toString());
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: `Cannot fetch gas fee.` },
@@ -97,6 +110,8 @@
 		}
 
 		modal.next();
+
+		// TODO: display maxFeePerGas * gas (21_000 or value I found for ERC20)
 
 		try {
 			await executeSend({

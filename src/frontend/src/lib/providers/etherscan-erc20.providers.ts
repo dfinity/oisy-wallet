@@ -53,19 +53,17 @@ export const balance = async ({
 	return erc20Contract.balanceOf(address);
 };
 
-// TODO
 export const getFeeData = async ({
 	contract: { address: contractAddress },
 	address
 }: {
 	contract: Erc20ContractAddress;
 	address: ECDSA_PUBLIC_KEY;
-}) => {
+}): Promise<BigNumber> => {
 	const erc20Contract = new ethers.Contract(contractAddress, abiERC20, provider);
-
-	const estimatedGasLimit = await erc20Contract.estimateGas.approve(address, '1000000'); // approves 1 USDT
-
-	console.log(estimatedGasLimit.toString());
+	// TODO: real value
+	// TODO: transfer?
+	return erc20Contract.estimateGas.approve(address, '1000000'); // approves 1 USDT
 };
 
 // Transaction send:
@@ -83,5 +81,6 @@ export const populateTransaction = async ({
 	amount: BigNumber;
 }): Promise<PopulatedTransaction> => {
 	const erc20Contract = new ethers.Contract(contractAddress, abiERC20, provider);
+	// TODO: transfer?
 	return erc20Contract.populateTransaction.approve(address, amount);
 };

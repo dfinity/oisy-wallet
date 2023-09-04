@@ -1,9 +1,9 @@
 import type { BigNumber } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
-export const formatEtherShort = (value: BigNumber): string => {
+export const formatEtherShort = (value: BigNumber, decimal = 4): string => {
 	const res = Utils.formatEther(value);
-	return (+res).toFixed(4);
+	return (+res).toFixed(decimal);
 };
 
 /**
