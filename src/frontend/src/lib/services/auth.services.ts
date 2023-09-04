@@ -14,7 +14,7 @@ const resetStores = () => {
 	transactionsStore.reset();
 	tokenIdStore.reset();
 	erc20TokensStore.reset();
-	metamaskStore.reset;
+	metamaskStore.reset();
 
 	busy.stop();
 };
