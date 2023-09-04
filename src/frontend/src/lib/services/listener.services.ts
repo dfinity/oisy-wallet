@@ -6,7 +6,7 @@ import {
 	initMinedTransactionsListener as initMinedTransactionsListenerProvider
 } from '$lib/providers/alchemy.providers';
 import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
-import { loadBalance } from '$lib/services/balance.services';
+import { reloadBalance } from '$lib/services/balance.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
@@ -16,7 +16,7 @@ import type { Token } from '$lib/types/token';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { isNullish } from '@dfinity/utils';
 
-const processTransaction = async (hash: string) => {
+const processTransaction = async ({ hash, token }: { token: Token; hash: string }) => {
 	const transaction = await getTransaction(hash);
 
 	if (isNullish(transaction)) {
@@ -24,7 +24,7 @@ const processTransaction = async (hash: string) => {
 	}
 
 	transactionsStore.add({
-		tokenId: ETHEREUM_TOKEN_ID,
+		tokenId: token.id,
 		transactions: [
 			{
 				...transaction,
@@ -51,7 +51,7 @@ const processTransaction = async (hash: string) => {
 	const { timestamp, ...rest } = minedTransaction;
 
 	transactionsStore.update({
-		tokenId: ETHEREUM_TOKEN_ID,
+		tokenId: token.id,
 		transaction: {
 			...rest,
 			timestamp: timestamp ?? Date.now() / 1000
@@ -59,7 +59,7 @@ const processTransaction = async (hash: string) => {
 	});
 
 	// Reload balance as a transaction has been mined
-	await loadBalance();
+	await reloadBalance(token);
 };
 
 export const initPendingTransactionsListener = ({
@@ -69,7 +69,7 @@ export const initPendingTransactionsListener = ({
 	token: Token;
 	address: ECDSA_PUBLIC_KEY;
 }): WebSocketListener => {
-	const listener = async (hash: string) => await processTransaction(hash);
+	const listener = async (hash: string) => await processTransaction({ hash, token });
 
 	if (token.id === ETHEREUM_TOKEN_ID) {
 		return initEthPendingTransactionsListenerProvider({

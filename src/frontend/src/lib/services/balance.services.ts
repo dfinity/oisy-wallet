@@ -6,8 +6,17 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Erc20Token } from '$lib/types/erc20';
+import type { Token } from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+export const reloadBalance = async (token: Token): Promise<{ success: boolean }> => {
+	if (token.id === ETHEREUM_TOKEN_ID) {
+		return loadBalance();
+	}
+
+	return loadErc20Balance(token as Erc20Token);
+};
 
 export const loadBalance = async (): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
