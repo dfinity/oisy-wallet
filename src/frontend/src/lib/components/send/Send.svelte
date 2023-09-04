@@ -115,6 +115,8 @@
 				msg: { text: `Something went wrong while sending the transaction.` },
 				err
 			});
+
+			modal.back();
 		}
 	};
 

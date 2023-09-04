@@ -1,6 +1,5 @@
 use candid::{CandidType, Deserialize, Nat, Principal};
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
-use ethers_core::abi::AbiDecode;
 use ethers_core::utils::keccak256;
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
@@ -132,6 +131,10 @@ async fn sign_transaction(req: SignRequest) -> String {
 
     let pubkey = ecdsa_pubkey_of(&caller).await;
 
+    let data = req.data.as_ref().map(|data| {
+        Bytes::from(hex::decode(data.trim_start_matches("0x")).expect("failed to decode data"))
+    });
+
     let tx = Eip1559TransactionRequest {
         chain_id: Some(nat_to_u64(&req.chain_id)),
         from: None,
@@ -143,10 +146,7 @@ async fn sign_transaction(req: SignRequest) -> String {
         gas: Some(nat_to_u256(&req.gas)),
         value: Some(nat_to_u256(&req.value)),
         nonce: Some(nat_to_u256(&req.nonce)),
-        data: req
-            .data
-            .as_ref()
-            .map(|data| Bytes::decode_hex(data).expect("failed to decode data")),
+        data,
         access_list: Default::default(),
         max_priority_fee_per_gas: Some(nat_to_u256(&req.max_priority_fee_per_gas)),
         max_fee_per_gas: Some(nat_to_u256(&req.max_fee_per_gas)),
