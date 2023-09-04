@@ -119,7 +119,7 @@
 		}
 
 		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-		const { maxFeePerGas, maxPriorityFeePerGas } = feeData;
+		const { maxFeePerGas, maxPriorityFeePerGas, gas } = feeData;
 
 		// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
 		// exceeds block gas limit
@@ -141,7 +141,9 @@
 				progress: (step: SendStep) => (sendProgressStep = step),
 				token: $token,
 				amount: amount!,
-				...feeData
+				maxFeePerGas,
+				maxPriorityFeePerGas,
+				gas
 			});
 
 			setTimeout(() => close(), 750);
