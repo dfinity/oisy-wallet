@@ -8,4 +8,6 @@ export type Transaction = Omit<EthTransaction, 'data'> &
 		pendingTimestamp?: number;
 	};
 
-export type TransactionFeeData = FeeData & { gas: BigNumber };
+export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
+	gas: BigNumber;
+};

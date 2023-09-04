@@ -141,8 +141,7 @@
 				progress: (step: SendStep) => (sendProgressStep = step),
 				token: $token,
 				amount: amount!,
-				maxFeePerGas: maxFeePerGas.toBigInt(),
-				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
+				...feeData
 			});
 
 			setTimeout(() => close(), 750);
