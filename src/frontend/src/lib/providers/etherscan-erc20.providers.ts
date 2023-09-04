@@ -55,15 +55,16 @@ export const balance = async ({
 
 export const getFeeData = async ({
 	contract: { address: contractAddress },
-	address
+	address,
+	amount
 }: {
 	contract: Erc20ContractAddress;
 	address: ECDSA_PUBLIC_KEY;
+	amount: BigNumber;
 }): Promise<BigNumber> => {
 	const erc20Contract = new ethers.Contract(contractAddress, abiERC20, provider);
-	// TODO: real value
 	// TODO: transfer?
-	return erc20Contract.estimateGas.approve(address, '1000000'); // approves 1 USDT
+	return erc20Contract.estimateGas.approve(address, amount);
 };
 
 // Transaction send:

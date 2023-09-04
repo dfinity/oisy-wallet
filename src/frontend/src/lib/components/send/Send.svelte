@@ -25,6 +25,10 @@
 	import type { TransactionFeeData } from '$lib/types/transaction';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
+	import { Utils } from 'alchemy-sdk';
+
+	let destination = '';
+	let amount: number | undefined = undefined;
 
 	/**
 	 * Fee data
@@ -43,12 +47,12 @@
 				return;
 			}
 
-			// TODO: destination address and value
 			feeData = {
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
 					contract: $token as Erc20Token,
-					address: $addressStore!
+					address: destination !== '' ? destination : $addressStore!,
+					amount: Utils.parseEther(`${amount ?? '1'}`)
 				})
 			};
 		} catch (err: unknown) {
@@ -71,9 +75,20 @@
 		await updateFeeData();
 		listener = initMinedTransactionsListener(async () => debounceUpdateFeeData());
 	};
+
 	onDestroy(() => listener?.disconnect());
 
 	$: initFeeData($modalSend);
+
+	$: amount,
+		destination,
+		(() => {
+			if ($token.id === ETHEREUM_TOKEN_ID) {
+				return;
+			}
+
+			debounceUpdateFeeData();
+		})();
 
 	/**
 	 * Send
@@ -161,9 +176,6 @@
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
-
-	let destination = '';
-	let amount: number | undefined = undefined;
 
 	const close = () => {
 		modalStore.close();
