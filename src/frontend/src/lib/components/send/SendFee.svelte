@@ -1,32 +1,52 @@
 <script lang="ts">
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import type { FeeData } from '@ethersproject/providers';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { onDestroy } from 'svelte';
+	import { formatEtherShort } from '$lib/utils/format.utils';
+	import type { TransactionFeeData } from '$lib/types/transaction';
 
-	export let feeData: FeeData | undefined;
+	export let feeData: TransactionFeeData | undefined;
 
-	let maxFeePerGas: BigNumber | undefined | null = undefined;
+	let fee: BigNumber | undefined | null = undefined;
+
+	let timer: NodeJS.Timeout | undefined;
 
 	$: feeData,
 		(() => {
-			maxFeePerGas = undefined;
+			fee = undefined;
 
-			if (isNullish(feeData)) {
+			if (isNullish(feeData) || isNullish(feeData?.maxFeePerGas)) {
 				return;
 			}
 
-			setTimeout(() => (maxFeePerGas = feeData?.maxFeePerGas), 500);
+			const calculateFee = () => {
+				if (isNullish(feeData) || isNullish(feeData?.maxFeePerGas)) {
+					return;
+				}
+
+				fee = feeData.maxFeePerGas.mul(feeData.gas);
+			};
+
+			timer = setTimeout(calculateFee, 500);
 		})();
+
+	onDestroy(() => {
+		if (isNullish(timer)) {
+			return;
+		}
+
+		clearInterval(timer);
+	});
 </script>
 
 <label for="balance" class="font-bold px-1.25"
 	>Max fee <small>(likely in &lt; 30 seconds)</small>:</label
 >
 <div id="balance" class="font-normal px-1.25 mb-2 break-words" style="min-height: 24px">
-	{#if nonNullish(maxFeePerGas)}
+	{#if nonNullish(fee)}
 		<div in:fade>
-			{maxFeePerGas.toString()}
+			{formatEtherShort(fee, 8)}
 		</div>
 	{/if}
 </div>
