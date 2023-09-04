@@ -1,16 +1,14 @@
 <script lang="ts">
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import { addressStore } from '$lib/stores/address.store';
-	import { Modal } from '@dfinity/gix-components';
-	import Copy from '$lib/components/ui/Copy.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import AddressQRCode from '$lib/components/address/AddressQRCode.svelte';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
-	import { modalReceive } from '$lib/derived/modal.derived';
+	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
+	import { isNullish } from '@dfinity/utils';
+	import { metamaskStore } from '$lib/stores/metamask.store';
 
 	let disabled: boolean;
-	$: disabled = $addressNotLoaded || $isBusy;
+	$: disabled = $addressNotLoaded || $isBusy || isNullish($metamaskStore);
 </script>
 
 <button
@@ -23,13 +21,4 @@
 	<span>Receive</span></button
 >
 
-<Modal visible={$modalReceive} on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">Receive ETH</svelte:fragment>
-
-	<p class="font-bold">Wallet address</p>
-	<p class="flex gap-1 mb-2 font-normal sm:items-center">
-		<output class="break-words">{$addressStore ?? ''}</output><Copy value={$addressStore ?? ''} />
-	</p>
-
-	<AddressQRCode />
-</Modal>
+<ReceiveModal />

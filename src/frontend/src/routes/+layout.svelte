@@ -10,12 +10,13 @@
 
 	import '$lib/styles/global.scss';
 	import Footer from '$lib/components/layout/Footer.svelte';
+	import { initMetamaskSupport } from '$lib/services/metamask.services';
 
 	/**
 	 * Init authentication
 	 */
 
-	const init = async () => await Promise.all([syncAuthStore()]);
+	const init = async () => await Promise.all([syncAuthStore(), initMetamaskSupport()]);
 
 	const syncAuthStore = async () => {
 		if (!browser) {
