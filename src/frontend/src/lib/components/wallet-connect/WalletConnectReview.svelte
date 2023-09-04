@@ -4,7 +4,7 @@
 	import { Spinner } from '@dfinity/gix-components';
 	import { fade } from 'svelte/transition';
 	import type { ProposalTypes } from '@walletconnect/types';
-	import { EIP155_CHAINS } from '$lib/constants/chains';
+	import { EIP155_CHAINS } from '$lib/constants/eip155-chains.constants';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher } from 'svelte';
 
