@@ -56,8 +56,10 @@ const erc20PrepareTransaction = async ({
 		throw new Error('Erc20 transaction Data cannot be undefined or null.');
 	}
 
+	const { address: contractAddress } = token as Erc20Token;
+
 	return {
-		to,
+		to: contractAddress,
 		chain_id: ETH_NETWORK_ID,
 		nonce: BigInt(nonce),
 		gas,
