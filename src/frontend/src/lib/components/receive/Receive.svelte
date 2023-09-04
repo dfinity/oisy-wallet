@@ -4,11 +4,14 @@
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
-	import { isNullish } from '@dfinity/utils';
-	import { metamaskStore } from '$lib/stores/metamask.store';
+	import { onMount } from 'svelte';
+	import { initMetamaskSupport } from '$lib/services/metamask.services';
+	import { metamaskInitialized } from '$lib/derived/metamask.derived';
 
 	let disabled: boolean;
-	$: disabled = $addressNotLoaded || $isBusy || isNullish($metamaskStore);
+	$: disabled = $addressNotLoaded || $isBusy || $metamaskInitialized;
+
+	onMount(initMetamaskSupport);
 </script>
 
 <button
