@@ -13,7 +13,6 @@
 	import { SendStep } from '$lib/enums/send';
 	import { onDestroy } from 'svelte';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
-	import type { FeeData } from '@ethersproject/providers';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { balanceEmpty } from '$lib/derived/balances.derived';
@@ -23,28 +22,35 @@
 	import { token } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import type { Erc20Token } from '$lib/types/erc20';
+	import type { TransactionFeeData } from '$lib/types/transaction';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
 
 	/**
 	 * Fee data
 	 */
 
-	let feeData: FeeData | undefined;
+	let feeData: TransactionFeeData | undefined;
 	let listener: WebSocketListener | undefined = undefined;
 
 	const updateFeeData = async () => {
 		try {
 			if ($token.id === ETHEREUM_TOKEN_ID) {
-				feeData = await getFeeData();
+				feeData = {
+					...(await getFeeData()),
+					gas: BigNumber.from(ETH_BASE_FEE)
+				};
 				return;
 			}
 
 			// TODO: destination address and value
-			const fee = await getErc20FeeData({
-				contract: $token as Erc20Token,
-				address: $addressStore!
-			});
-
-			console.log(fee, fee.toString());
+			feeData = {
+				...(await getFeeData()),
+				gas: await getErc20FeeData({
+					contract: $token as Erc20Token,
+					address: $addressStore!
+				})
+			};
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: `Cannot fetch gas fee.` },

@@ -1,14 +1,12 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
-	import type { FeeData } from '@ethersproject/providers';
+	import type { BigNumber } from '@ethersproject/bignumber';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import { onDestroy } from 'svelte';
 	import { formatEtherShort } from '$lib/utils/format.utils';
-	import { formatEther } from 'ethers/src.ts/utils';
+	import type { TransactionFeeData } from '$lib/types/transaction';
 
-	export let feeData: FeeData | undefined;
+	export let feeData: TransactionFeeData | undefined;
 
 	let fee: BigNumber | undefined | null = undefined;
 
@@ -27,8 +25,7 @@
 					return;
 				}
 
-				// TODO: gas as param
-				fee = feeData.maxFeePerGas.mul(BigNumber.from(`${ETH_BASE_FEE}`));
+				fee = feeData.maxFeePerGas.mul(feeData.gas);
 			};
 
 			timer = setTimeout(calculateFee, 500);

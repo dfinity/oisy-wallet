@@ -3,12 +3,12 @@
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { invalidDestination, invalidAmount } from '$lib/utils/send.utils';
 	import { createEventDispatcher } from 'svelte';
-	import type { FeeData } from '@ethersproject/providers';
 	import SendFee from '$lib/components/send/SendFee.svelte';
+	import type { TransactionFeeData } from '$lib/types/transaction';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
-	export let feeData: FeeData | undefined;
+	export let feeData: TransactionFeeData | undefined;
 
 	let invalid = true;
 	$: invalid = invalidDestination(destination) || invalidAmount(amount);
