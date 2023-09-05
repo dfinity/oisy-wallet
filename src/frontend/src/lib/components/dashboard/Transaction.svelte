@@ -22,7 +22,7 @@
 	$: ({ blockNumber, from, to, value, timestamp } = transaction);
 
 	let type: 'send' | 'receive';
-	$: type = from === $addressStore ? 'send' : 'receive';
+	$: type = from?.toLowerCase() === $addressStore?.toLowerCase() ? 'send' : 'receive';
 
 	let icon: typeof SvelteComponent;
 	$: icon = type === 'send' ? IconSend : IconReceive;

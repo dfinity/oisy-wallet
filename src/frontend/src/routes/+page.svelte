@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Transactions from '$lib/components/dashboard/Transactions.svelte';
-	import Sockets from '$lib/components/core/Sockets.svelte';
+	import Listener from '$lib/components/core/Listener.svelte';
 	import SignIn from '$lib/components/core/SignIn.svelte';
 	import Hero from '$lib/components/dashboard/Hero.svelte';
 	import Loader from '$lib/components/core/Loader.svelte';
@@ -10,7 +10,7 @@
 </script>
 
 {#if $authSignedInStore}
-	<Sockets>
+	<Listener>
 		<Hero />
 
 		<Loader>
@@ -19,7 +19,7 @@
 				<Transactions slot="transactions" />
 			</Tabs>
 		</Loader>
-	</Sockets>
+	</Listener>
 {:else}
 	<SignIn />
 {/if}
