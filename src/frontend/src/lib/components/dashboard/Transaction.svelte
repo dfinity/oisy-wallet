@@ -8,8 +8,8 @@
 	import { addressStore } from '$lib/stores/address.store';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatToDate } from '$lib/utils/date.utils';
 	import Card from '$lib/components/ui/Card.svelte';
+	import { formatToDate } from '$lib/utils/format.utils';
 
 	export let transaction: Transaction;
 
