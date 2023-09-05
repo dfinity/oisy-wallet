@@ -12,6 +12,6 @@
 
 <label for="amount" class="font-bold px-1.25">Amount:</label>
 <div id="amount" class="font-normal px-1.25 mb-2 break-words">
-	{formatEtherShort(Utils.parseEther(`${amount ?? 0}`))}
+	{formatEtherShort(Utils.parseEther(`${amount ?? 0}`), 8)}
 	{$tokenSymbol}
 </div>
