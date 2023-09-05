@@ -135,7 +135,7 @@ const updateCSP = (indexHtml) => {
 	const ethConnectSrc =
 		'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com wss://relay.walletconnect.com https://verify.walletconnect.com';
 
-	const ethFrameSrc = 'https://verify.walletconnect.com/';
+	const ethFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
