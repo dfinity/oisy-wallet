@@ -82,7 +82,7 @@ export const initWalletConnect = async ({
 	const rejectSession = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { id } = proposal;
 
-		const session = await web3wallet.rejectSession({
+		await web3wallet.rejectSession({
 			id,
 			reason: getSdkError('USER_REJECTED_METHODS')
 		});
