@@ -11,13 +11,13 @@ const config = {
 	network: NETWORK as Network
 };
 
-const provider = new Alchemy(config);
-
 export const initMinedTransactionsListener = ({
 	listener
 }: {
 	listener: Listener;
 }): WebSocketListener => {
+	let provider: Alchemy | null = new Alchemy(config);
+
 	provider.ws.on(
 		{
 			method: AlchemySubscription.MINED_TRANSACTIONS,
@@ -28,7 +28,8 @@ export const initMinedTransactionsListener = ({
 
 	return {
 		disconnect: async () => {
-			provider.ws.removeAllListeners();
+			provider?.ws.removeAllListeners();
+			provider = null;
 		}
 	};
 };
@@ -40,6 +41,8 @@ export const initPendingTransactionsListener = ({
 	address: ECDSA_PUBLIC_KEY;
 	listener: Listener;
 }): WebSocketListener => {
+	let provider: Alchemy | null = new Alchemy(config);
+
 	provider.ws.on(
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
@@ -60,10 +63,14 @@ export const initPendingTransactionsListener = ({
 
 	return {
 		disconnect: async () => {
-			provider.ws.removeAllListeners();
+			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have for effect to double the triggers. That's why we reset it to null.
+			provider?.ws.removeAllListeners();
+			provider = null;
 		}
 	};
 };
 
-export const getTransaction = (hash: string): Promise<TransactionResponse | null> =>
-	provider.core.getTransaction(hash);
+export const getTransaction = (hash: string): Promise<TransactionResponse | null> => {
+	const provider = new Alchemy(config);
+	return provider.core.getTransaction(hash);
+};
