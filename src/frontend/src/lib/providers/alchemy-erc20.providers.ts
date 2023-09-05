@@ -20,7 +20,7 @@ export const initMinedTransactionsListener = ({
 }: {
 	contract: Erc20Token;
 	address: ECDSA_PUBLIC_KEY;
-	listener: (transaction: Erc20Transaction) => Promise<void>;
+	listener: (params: { hash: string; value: BigNumber }) => Promise<void>;
 }): WebSocketListener => {
 	const erc20Contract = new ethers.Contract(contract.address, ERC20_ABI, provider);
 
@@ -29,17 +29,17 @@ export const initMinedTransactionsListener = ({
 		_address: string,
 		_value: BigNumber,
 		transaction: Erc20Transaction
-	) => await listener(transaction);
-
-	const filterFromAddress = erc20Contract.filters.Transfer(address, null);
-	erc20Contract.on(filterFromAddress, filterListener);
+	) => {
+		const { transactionHash: hash, args } = transaction;
+		const [_from_, _to_, value] = args;
+		await listener({ hash, value });
+	};
 
 	const filterToAddress = erc20Contract.filters.Transfer(null, address);
 	erc20Contract.on(filterToAddress, filterListener);
 
 	return {
 		disconnect: async () => {
-			erc20Contract.off(filterFromAddress, filterListener);
 			erc20Contract.off(filterToAddress, filterListener);
 		}
 	};
