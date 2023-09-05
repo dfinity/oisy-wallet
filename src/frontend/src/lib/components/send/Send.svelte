@@ -132,8 +132,6 @@
 
 		modal.next();
 
-		// TODO: display maxFeePerGas * gas (21_000 or value I found for ERC20)
-
 		try {
 			await executeSend({
 				from: $addressStore!,
