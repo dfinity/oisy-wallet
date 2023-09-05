@@ -46,15 +46,6 @@ export const initPendingTransactionsListener = ({
 	provider.ws.on(
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
-			fromAddress: address,
-			hashesOnly: true
-		},
-		listener
-	);
-
-	provider.ws.on(
-		{
-			method: AlchemySubscription.PENDING_TRANSACTIONS,
 			toAddress: address,
 			hashesOnly: true
 		},

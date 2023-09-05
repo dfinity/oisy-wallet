@@ -5,6 +5,7 @@ import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { SendStep } from '$lib/enums/send';
 import { populateTransaction } from '$lib/providers/etherscan-erc20.providers';
 import { getTransactionCount, sendTransaction } from '$lib/providers/etherscan.providers';
+import { processTransactionSent } from '$lib/services/transaction.services';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Token } from '$lib/types/token';
 import type { TransactionFeeData } from '$lib/types/transaction';
@@ -113,7 +114,10 @@ export const send = async ({
 
 	progress(SendStep.SEND);
 
-	await sendTransaction(rawTransaction);
+	const transactionSent = await sendTransaction(rawTransaction);
+
+	// Explicitly do not await to proceed in the background and allow the UI to continue
+	processTransactionSent({ token, transaction: transactionSent });
 
 	progress(SendStep.DONE);
 };
