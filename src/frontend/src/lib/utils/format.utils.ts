@@ -3,7 +3,7 @@ import { Utils } from 'alchemy-sdk';
 
 export const formatEtherShort = (value: BigNumber, decimals = 4): string => {
 	const res = Utils.formatEther(value);
-	return (+res).toFixed(decimals).replace(/0*$/, '');
+	return (+res).toFixed(decimals).replace(/(\.0+|0+)$/, '');
 };
 
 /**
