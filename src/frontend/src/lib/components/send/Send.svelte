@@ -5,7 +5,7 @@
 	import { send as executeSend } from '$lib/services/send.services';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import { type WizardStep, type WizardSteps, WizardModal, Input } from '@dfinity/gix-components';
+	import { type WizardStep, type WizardSteps, WizardModal } from '@dfinity/gix-components';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';

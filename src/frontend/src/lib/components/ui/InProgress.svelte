@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { ProgressSteps, type ProgressStep } from '@dfinity/gix-components';
-	import { LoaderStep } from '$lib/enums/loader';
 
 	export let progressStep: string;
 	export let steps: [ProgressStep, ...ProgressStep[]];

@@ -13,7 +13,7 @@
 		});
 	};
 
-	let uri: string = '';
+	let uri = '';
 
 	let invalid = true;
 	$: invalid = !uri;

@@ -20,7 +20,7 @@
 {#if loading}
 	<p class="mt-1 text-cetacean-blue opacity-50">Loading...</p>
 {:else}
-	{#each $sortedTransactions as transaction, index (transaction.hash)}
+	{#each $sortedTransactions as transaction, _index (transaction.hash)}
 		<Transaction {transaction} />
 	{/each}
 

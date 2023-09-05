@@ -43,7 +43,7 @@
 					}
 				} = request;
 
-				const message = convertHexToUtf8(params);
+				convertHexToUtf8(params);
 
 				// TODO: sign message
 				// const signedMessage = await wallet.signMessage(message)
