@@ -47,9 +47,6 @@ const readCanisterIds = ({ prefix }: { prefix?: string }): Record<string, string
 
 const config: UserConfig = {
 	plugins: [sveltekit()],
-	test: {
-		include: ['src/**/*.{test,spec}.{js,ts}']
-	},
 	resolve: {
 		alias: {
 			$declarations: resolve('./src/declarations')
@@ -117,7 +114,6 @@ const config: UserConfig = {
 				global: 'globalThis'
 			},
 			plugins: [
-				// @ts-ignore
 				NodeModulesPolyfillPlugin(),
 				{
 					name: 'fix-node-globals-polyfill',

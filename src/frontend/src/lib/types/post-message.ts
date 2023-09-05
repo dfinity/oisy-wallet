@@ -1,7 +1,7 @@
 export type PostMessageRequest = 'startIdleTimer' | 'stopIdleTimer';
 
-export type PostMessageDataRequest = {};
-export type PostMessageDataResponse = {};
+export type PostMessageDataRequest = never;
+export type PostMessageDataResponse = never;
 
 export type PostMessageResponse = 'signOutIdleTimer';
 

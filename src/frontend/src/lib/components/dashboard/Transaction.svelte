@@ -13,13 +13,11 @@
 
 	export let transaction: Transaction;
 
-	let blockNumber: number | undefined;
 	let from: string;
-	let to: string | undefined;
 	let value: BigNumber;
 	let timestamp: number | undefined;
 
-	$: ({ blockNumber, from, to, value, timestamp } = transaction);
+	$: ({ from, value, timestamp } = transaction);
 
 	let type: 'send' | 'receive';
 	$: type = from?.toLowerCase() === $addressStore?.toLowerCase() ? 'send' : 'receive';
