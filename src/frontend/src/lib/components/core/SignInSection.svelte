@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { signIn } from '$lib/services/auth.services';
-	import IcButton from '$lib/components/ui/IcButton.svelte';
+	import ButtonIC from '$lib/components/ui/ButtonIC.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 </script>
 
@@ -12,8 +12,8 @@
 		Internet Computer
 	</h1>
 
-	<IcButton on:click={async () => await signIn({})}>
+	<ButtonIC on:click={async () => await signIn({})}>
 		<svelte:fragment slot="action">Connect with</svelte:fragment>
 		Internet Identity
-	</IcButton>
+	</ButtonIC>
 </section>
