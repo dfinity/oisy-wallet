@@ -2,7 +2,7 @@ button {
 	display: flex;
 	align-items: center;
 
-	gap: var(--padding);
+	gap: var(--padding-1_5x);
 
 	cursor: pointer;
 
@@ -26,12 +26,14 @@ button {
 			line-height: var(--line-height-small);
 
 			span:first-child {
+				font-size: var(--font-size-small);
 				color: var(--color-blue);
 			}
 
 			span:last-child {
 				font-weight: var(--font-weight-bold);
 				font-size: var(--font-size-h5);
+				color: var(--color-dark-blue);
 			}
 		}
 	}

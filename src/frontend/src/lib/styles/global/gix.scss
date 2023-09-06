@@ -11,7 +11,7 @@
 	--primary: var(--color-blue);
 	--tertiary: var(--color-deep-violet);
 
-	--value-color: var(--color-vampire-black);
+	--value-color: var(--color-dark);
 
 	--border-radius-2x: var(--border-radius-lg);
 	--border-radius-0_5x: calc(0.5 * var(--border-radius-sm));
@@ -81,7 +81,7 @@
 		--dialog-min-height: 554.25px;
 	}
 
-	--backdrop-contrast: var(--color-vampire-black);
+	--backdrop-contrast: var(--color-dark);
 	--backdrop-filter: blur(4px);
 }
 

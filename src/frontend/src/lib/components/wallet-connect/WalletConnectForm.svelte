@@ -66,7 +66,7 @@
 	.qr-code {
 		position: relative;
 
-		border: 1px dashed var(--color-vampire-black);
+		border: 1px dashed var(--color-dark);
 
 		margin: 0 auto;
 
