@@ -10,6 +10,7 @@
 
 	import '$lib/styles/global.scss';
 	import Footer from '$lib/components/layout/Footer.svelte';
+	import { authSignedInStore } from '$lib/derived/auth.derived';
 
 	/**
 	 * Init authentication
@@ -49,7 +50,7 @@
 {:then _}
 	<Header />
 
-	<main>
+	<main class:in={$authSignedInStore}>
 		<slot />
 	</main>
 
