@@ -7,6 +7,7 @@
 	import Tabs from '$lib/components/core/Tabs.svelte';
 	import Tokens from '$lib/components/dashboard/Tokens.svelte';
 	import { authSignedInStore } from '$lib/derived/auth.derived';
+	import SignInBackground from '$lib/components/core/SignInBackground.svelte';
 </script>
 
 {#if $authSignedInStore}
@@ -22,4 +23,6 @@
 	</Listener>
 {:else}
 	<SignIn />
+
+	<SignInBackground />
 {/if}

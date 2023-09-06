@@ -66,6 +66,14 @@ $property: padding;
 @include utilities.generate(pt-4, #{$property}-top, var(--padding-4x));
 @include utilities.generate(pb-4, #{$property}-bottom, var(--padding-4x));
 
+@include utilities.generate(p-6, $property, var(--padding-6x));
+@include utilities.generate(px-6, #{$property}-left, var(--padding-6x));
+@include utilities.generate(px-6, #{$property}-right, var(--padding-6x));
+@include utilities.generate(py-6, #{$property}-top, var(--padding-6x));
+@include utilities.generate(py-6, #{$property}-bottom, var(--padding-6x));
+@include utilities.generate(pt-6, #{$property}-top, var(--padding-6x));
+@include utilities.generate(pb-6, #{$property}-bottom, var(--padding-6x));
+
 @include utilities.generate(p-8, $property, var(--padding-8x));
 @include utilities.generate(px-8, #{$property}-left, var(--padding-8x));
 @include utilities.generate(px-8, #{$property}-right, var(--padding-8x));

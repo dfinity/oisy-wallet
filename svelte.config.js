@@ -13,6 +13,7 @@ const filesPath = (path) => `src/frontend/${path}`;
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	preprocess: vitePreprocess({
+		scss: {},
 		postcss: {
 			plugins: [autoprefixer]
 		}
