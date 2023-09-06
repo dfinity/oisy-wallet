@@ -22,3 +22,5 @@ export const toastsError = ({
 		level: 'error'
 	});
 };
+
+export const toastsClean = () => toastsStore.reset(['success', 'warn', 'info']);
