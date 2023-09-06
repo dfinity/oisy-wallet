@@ -15,15 +15,11 @@
 	.qrcode-container {
 		bottom: 0;
 
-		--size: 110px;
+		--size: 160px;
 
 		width: var(--size);
 		max-height: var(--size);
 		--qrcode-max-width: var(--size);
 		--qrcode-height: var(--size);
-
-		@include media.min-width(small) {
-			--size: 160px;
-		}
 	}
 </style>
