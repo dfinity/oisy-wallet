@@ -48,11 +48,7 @@
 		<Spinner />
 	</div>
 {:then _}
-	<Header />
-
-	<main class:in={$authSignedInStore}>
-		<slot />
-	</main>
+	<slot />
 
 	<Footer />
 {/await}

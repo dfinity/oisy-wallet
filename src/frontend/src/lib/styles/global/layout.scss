@@ -1,6 +1,7 @@
 @use '../mixins/media';
 
-main {
+main,
+.main {
 	margin: 0 auto;
 	padding: 0 var(--padding-2x);
 

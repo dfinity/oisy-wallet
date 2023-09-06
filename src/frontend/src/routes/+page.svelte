@@ -8,20 +8,25 @@
 	import Tokens from '$lib/components/dashboard/Tokens.svelte';
 	import { authSignedInStore } from '$lib/derived/auth.derived';
 	import SignInBackground from '$lib/components/core/SignInBackground.svelte';
+	import Header from '$lib/components/layout/Header.svelte';
 </script>
 
 {#if $authSignedInStore}
 	<Listener>
 		<Hero />
 
-		<Loader>
-			<Tabs>
-				<Tokens slot="tokens" />
-				<Transactions slot="transactions" />
-			</Tabs>
-		</Loader>
+		<main>
+			<Loader>
+				<Tabs>
+					<Tokens slot="tokens" />
+					<Transactions slot="transactions" />
+				</Tabs>
+			</Loader>
+		</main>
 	</Listener>
 {:else}
+	<Header />
+
 	<SignIn />
 
 	<SignInBackground />
