@@ -2,4 +2,4 @@
 	import Tokens from '$lib/components/list/Tokens.svelte';
 </script>
 
-<Tokens slot="tokens" />
+<Tokens />
