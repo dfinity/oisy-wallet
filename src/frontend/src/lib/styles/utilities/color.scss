@@ -5,6 +5,7 @@ $property: color;
 @include utilities.generate(text-inherit, $property, inherit);
 @include utilities.generate(text-vampire-black, $property, var(--color-vampire-black));
 @include utilities.generate(text-ghost-white, $property, var(--color-ghost-white));
+@include utilities.generate(text-white, $property, var(--color-white));
 @include utilities.generate(
 	text-interdimensional-blue,
 	$property,

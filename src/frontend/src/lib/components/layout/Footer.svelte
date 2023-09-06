@@ -12,8 +12,7 @@
 		href="https://github.com/dfinity/ic-eth-wallet"
 		rel="external noopener noreferrer"
 		target="_blank"
-		class="flex gap-1 items-center text-interdimensional-blue font-bold"
-		style="text-decoration: none"
+		class="flex gap-1 items-center text-interdimensional-blue font-bold no-underline"
 	>
 		<IconGitHub /> Source code on GitHub
 	</a>

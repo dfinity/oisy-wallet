@@ -1,0 +1,11 @@
+@use '../mixins/utilities';
+
+$property: text-decoration;
+
+@include utilities.generate(underline, $property, underline);
+@include utilities.generate(no-underline, $property, none);
+
+*:hover {
+  @include utilities.generate(underline, $property, underline);
+  @include utilities.generate(no-underline, $property, none);
+}
