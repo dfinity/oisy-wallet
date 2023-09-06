@@ -7,7 +7,7 @@
 </script>
 
 <header
-	class="flex md:px-2"
+	class="flex md:px-2 relative z-1"
 	style="min-height: 75px"
 	class:justify-between={$authSignedInStore}
 	class:justify-center={!$authSignedInStore}

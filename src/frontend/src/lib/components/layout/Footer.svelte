@@ -3,7 +3,7 @@
 	import Alpha from '$lib/components/core/Alpha.svelte';
 </script>
 
-<footer class="flex flex-col justify-center items-center mt-8 pt-8 pb-4 px-2 gap-3">
+<footer class="flex flex-col justify-center items-center mt-8 pt-8 pb-4 px-2 gap-3 z-1">
 	<div class="alpha">
 		<Alpha />
 	</div>
