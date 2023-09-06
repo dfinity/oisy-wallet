@@ -16,7 +16,7 @@
 		SESSION_REQUEST_SIGN
 	} from '$lib/constants/wallet-connect.constants';
 	import { modalWalletConnectAuth } from '$lib/derived/modal.derived';
-	import ButtonWalletConnect from "$lib/components/ui/ButtonWalletConnect.svelte";
+	import ButtonWalletConnect from '$lib/components/ui/ButtonWalletConnect.svelte';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -206,13 +206,9 @@
 </script>
 
 {#if isNullish(listener)}
-	<ButtonWalletConnect on:click={modalStore.openWalletConnectAuth}>
-		Connect
-	</ButtonWalletConnect>
+	<ButtonWalletConnect on:click={modalStore.openWalletConnectAuth}>Connect</ButtonWalletConnect>
 {:else}
-	<ButtonWalletConnect on:click={disconnect}>
-		Disconnect
-	</ButtonWalletConnect>
+	<ButtonWalletConnect on:click={disconnect}>Disconnect</ButtonWalletConnect>
 {/if}
 
 {#if $modalWalletConnectAuth}

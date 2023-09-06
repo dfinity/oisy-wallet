@@ -73,7 +73,8 @@ button {
 		padding: var(--button-padding);
 	}
 
-	&.primary, &.wallet-connect {
+	&.primary,
+	&.wallet-connect {
 		&.icon {
 			padding: 0;
 			border-radius: 50%;
