@@ -103,13 +103,15 @@
 </script>
 
 {#if inProgress}
-	<Modal>
-		<Img width="100%" src={banner} />
+	<div in:fade={{ delay: 0, duration: 250 }}>
+		<Modal>
+			<Img width="100%" src={banner} />
 
-		<h3 class="my-3">Setting up your wallet with Chain-Key Cryptography...</h3>
+			<h3 class="my-3">Setting up your wallet with Chain-Key Cryptography...</h3>
 
-		<InProgress {progressStep} {steps} />
-	</Modal>
+			<InProgress {progressStep} {steps} />
+		</Modal>
+	</div>
 {:else}
 	<div in:fade>
 		<slot />
