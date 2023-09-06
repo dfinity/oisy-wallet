@@ -6,6 +6,7 @@ $property: background;
 @include utilities.generate(bg-vampire-black, $property, var(--color-vampire-black));
 @include utilities.generate(bg-ghost-white, $property, var(--color-ghost-white));
 @include utilities.generate(bg-white, $property, var(--color-white));
+@include utilities.generate(bg-grey, $property, var(--color-grey));
 @include utilities.generate(
 	bg-interdimensional-blue,
 	$property,

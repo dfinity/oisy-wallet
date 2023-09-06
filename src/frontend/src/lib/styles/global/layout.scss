@@ -5,13 +5,5 @@ main,
 	margin: 0 auto;
 	padding: 0 var(--padding-2x);
 
-	@include media.min-width(small) {
-		max-width: media.$breakpoint-medium;
-	}
-
-	&.in {
-		@include media.min-width(small) {
-			max-width: media.$breakpoint-small;
-		}
-	}
+	max-width: media.$breakpoint-small;
 }

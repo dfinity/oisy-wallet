@@ -55,13 +55,4 @@ button {
 		max-width: calc(100% - var(--padding-8x));
 		width: 100%;
 	}
-
-	&.tab {
-		justify-content: center;
-		border-radius: 0;
-
-		background: var(--color-ghost-white);
-
-		padding: var(--padding-1_5x) var(--padding-3x);
-	}
 }
