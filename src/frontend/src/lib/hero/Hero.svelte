@@ -24,7 +24,7 @@
 			<Alpha />
 		</div>
 
-		<div class="icon flex items-center" class:tokens={route === "tokens"}>
+		<div class="icon flex items-center" class:tokens={route === 'tokens'}>
 			{#if route === 'tokens'}
 				<div in:fade style="margin: auto 0">
 					<Img src={$token.icon ?? oisy} width="auto" height="96px" />
@@ -32,7 +32,10 @@
 			{/if}
 		</div>
 
-		<div class="flex flex-col md:flex-row md:items-end justify-between gap-1 balance" class:tokens={route === "tokens"}>
+		<div
+			class="flex flex-col md:flex-row md:items-end justify-between gap-1 balance"
+			class:tokens={route === 'tokens'}
+		>
 			<div>
 				<Address />
 
