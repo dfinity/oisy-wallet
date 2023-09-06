@@ -1,3 +1,5 @@
+@use '../mixins/media';
+
 button {
 	display: flex;
 	align-items: center;
@@ -6,9 +8,14 @@ button {
 
 	cursor: pointer;
 
-	border-radius: var(--border-radius-sm);
+	--button-border-radius: var(--border-radius-sm);
+	border-radius: var(--button-border-radius);
 
 	transition: color 0.25s ease-out, background 0.25s ease-out, opacity 0.25s ease-out;
+
+	border: 1px solid transparent;
+
+	--button-padding: var(--padding-0_5x) var(--padding-3x);
 
 	&.primary {
 		justify-content: flex-start;
@@ -17,7 +24,7 @@ button {
 
 		border: 1px solid var(--color-blue);
 
-		padding: var(--padding) var(--padding-3x);
+		padding: var(--button-padding);
 	}
 
 	&.labelled {
@@ -57,5 +64,42 @@ button {
 
 		max-width: calc(100% - var(--padding-8x));
 		width: 100%;
+	}
+
+	&.wallet-connect {
+		background: var(--color-wallet-connect);
+		border: 1px solid var(--color-wallet-connect);
+
+		padding: var(--button-padding);
+	}
+
+	&.primary, &.wallet-connect {
+		&.icon {
+			padding: 0;
+			border-radius: 50%;
+
+			width: var(--padding-6x);
+			height: var(--padding-6x);
+
+			display: flex;
+			justify-content: center;
+			align-items: center;
+
+			span {
+				display: none;
+			}
+
+			@include media.min-width(medium) {
+				padding: var(--button-padding);
+				border-radius: var(--button-border-radius);
+
+				width: inherit;
+				height: inherit;
+
+				span {
+					display: block;
+				}
+			}
+		}
 	}
 }
