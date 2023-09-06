@@ -1,7 +1,7 @@
 import type { Erc20Token } from '$lib/types/erc20';
 import { writable, type Readable } from 'svelte/store';
 
-export type Ecr20TokensData = Erc20Token[];
+export type Ecr20TokensData = Erc20Token[] | undefined;
 
 export interface Ecr20TokensStore extends Readable<Ecr20TokensData> {
 	set: (tokens: Ecr20TokensData) => void;
@@ -9,7 +9,7 @@ export interface Ecr20TokensStore extends Readable<Ecr20TokensData> {
 }
 
 const initEcr20TokensStore = (): Ecr20TokensStore => {
-	const INITIAL: Ecr20TokensData = [];
+	const INITIAL: Ecr20TokensData = undefined;
 
 	const { subscribe, set } = writable<Ecr20TokensData>(INITIAL);
 

@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { balance, balanceZero } from '$lib/derived/balances.derived';
 	import { tokenSymbol } from '$lib/derived/token.derived';
+	import { erc20TokensInitialized } from '$lib/derived/erc20.derived';
 </script>
 
 <span class="text-off-white mt">
@@ -12,5 +13,7 @@
 	>
 		{nonNullish($balance) && !$balanceZero ? formatEtherShort($balance) : '0'}
 	</output>
-	<span class="opacity-100">{$tokenSymbol}</span>
+	{#if $erc20TokensInitialized}
+		<span class="opacity-100">{$tokenSymbol}</span>
+	{/if}
 </span>

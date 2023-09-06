@@ -1,9 +1,9 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { balance as balanceErc20Service } from '$lib/providers/etherscan-erc20.providers';
 import { balance as balanceService } from '$lib/providers/etherscan.providers';
 import { addressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
-import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Token } from '$lib/types/token';
@@ -85,7 +85,7 @@ export const loadBalances = async (): Promise<{ success: boolean }> => {
 		return { success: false };
 	}
 
-	const contracts = get(erc20TokensStore);
+	const contracts = get(erc20Tokens);
 
 	const results = await Promise.all([
 		loadBalance(),

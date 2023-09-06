@@ -14,27 +14,22 @@
 	let steps: [ProgressStep, ...ProgressStep[]] = [
 		{
 			step: LoaderStep.INITIALIZATION,
-			text: 'Connected with Internet Identity - a decentralized custody solution',
+			text: 'Connected with a decentralised custody solution - Internet Identity',
 			state: 'completed'
 		} as ProgressStep,
 		{
 			step: LoaderStep.ETH_ADDRESS,
-			text: 'Loading ETH address...',
+			text: 'Getting ETH address from the canister',
 			state: 'in_progress'
 		} as ProgressStep,
 		{
 			step: LoaderStep.ERC20_CONTRACTS,
-			text: 'Initializing ERC20 metadata...',
+			text: 'Initialising ERC20 metadata',
 			state: 'next'
 		} as ProgressStep,
 		{
 			step: LoaderStep.BALANCE,
-			text: 'Loading your wallet balance...',
-			state: 'next'
-		} as ProgressStep,
-		{
-			step: LoaderStep.TRANSACTIONS,
-			text: 'And the ETH transactions...',
+			text: 'Loading your wallet balance',
 			state: 'next'
 		} as ProgressStep
 	];
@@ -56,15 +51,6 @@
 		const { success: balanceSuccess } = await loadBalances();
 
 		if (!balanceSuccess) {
-			await signOut();
-			return;
-		}
-
-		progressStep = LoaderStep.TRANSACTIONS;
-
-		const { success: transactionsSuccess } = await loadEthTransactions();
-
-		if (!transactionsSuccess) {
 			await signOut();
 			return;
 		}

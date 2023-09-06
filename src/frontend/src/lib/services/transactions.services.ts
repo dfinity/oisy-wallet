@@ -1,8 +1,8 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { transactions as transactionsProviders } from '$lib/providers/etherscan.providers';
 import { transactions as transactionsRest } from '$lib/rest/etherscan.rest';
 import { addressStore } from '$lib/stores/address.store';
-import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { TokenId } from '$lib/types/token';
@@ -66,7 +66,7 @@ export const loadErc20Transactions = async ({
 		return { success: false };
 	}
 
-	const tokens = get(erc20TokensStore);
+	const tokens = get(erc20Tokens);
 	const token = tokens.find(({ id }) => id === tokenId);
 
 	if (isNullish(token)) {
