@@ -4,9 +4,7 @@
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 </script>
 
-<header
-	class="flex justify-between md:px-2 relative z-1"
->
+<header class="flex justify-between md:px-2 relative z-1">
 	<div class="hidden md:flex md:p-2 items-center text-off-white">
 		<OisyWalletLogo />
 	</div>
