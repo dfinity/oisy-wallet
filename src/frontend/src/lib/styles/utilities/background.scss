@@ -8,12 +8,12 @@ $property: background;
 @include utilities.generate(bg-white, $property, var(--color-white));
 @include utilities.generate(bg-grey, $property, var(--color-grey));
 @include utilities.generate(
-	bg-interdimensional-blue,
+	bg-blue,
 	$property,
-	var(--color-interdimensional-blue)
+	var(--color-blue)
 );
 @include utilities.generate(bg-deep-violet, $property, var(--color-deep-violet));
-@include utilities.generate(bg-cetacean-blue, $property, var(--color-cetacean-blue));
+@include utilities.generate(bg-dark, $property, var(--color-dark));
 @include utilities.generate(bg-dark-slate-blue, $property, var(--color-dark-slate-blue));
 @include utilities.generate(bg-misty-rose, $property, var(--color-misty-rose));
 @include utilities.generate(bg-goldenrod, $property, var(--color-goldenrod));

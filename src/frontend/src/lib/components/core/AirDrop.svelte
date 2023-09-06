@@ -7,7 +7,7 @@
 	<span class="px-0.5"
 		>Participate in $100K ICP ERC-20 Airdrop by solving a quiz about the Internet Computer</span
 	>
-	<a class="text-interdimensional-blue font-bold no-underline">Claim Airdrop</a>
+	<a class="text-blue font-bold no-underline">Claim Airdrop</a>
 </p>
 
 <style lang="scss">
