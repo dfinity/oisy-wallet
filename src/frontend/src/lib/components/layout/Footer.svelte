@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 </script>
