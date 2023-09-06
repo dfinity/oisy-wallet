@@ -4,7 +4,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { busy } from '$lib/stores/busy.store';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { metamaskStore } from '$lib/stores/metamask.store';
-import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 
 const resetStores = () => {
@@ -24,6 +24,9 @@ export const signIn = async (
 
 	try {
 		await authStore.signIn(params);
+
+		// We clean previous messages in case user was signed out automatically before sign-in again.
+		toastsClean();
 
 		return { success: 'ok' };
 	} catch (err: unknown) {
