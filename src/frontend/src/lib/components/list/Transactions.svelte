@@ -27,6 +27,6 @@
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<p class="mt-1 text-dark opacity-50">You have no transactions yet.</p>
+		<p class="mt-1 text-dark opacity-50">You have no transactions.</p>
 	{/if}
 {/if}
