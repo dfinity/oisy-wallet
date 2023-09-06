@@ -4,9 +4,10 @@
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { page } from '$app/stores';
 	import Back from '$lib/components/core/Back.svelte';
+	import { isRouteTransactions } from '$lib/utils/nav.utils';
 
 	let back = false;
-	$: back = $page.route.id === '/(app)/transactions';
+	$: back = isRouteTransactions($page);
 </script>
 
 <header class="flex justify-between md:px-2 relative z-1">
