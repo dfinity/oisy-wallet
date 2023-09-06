@@ -7,15 +7,15 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import HeaderHero from '$lib/components/layout/HeaderHero.svelte';
+	import Alpha from '$lib/components/core/Alpha.svelte';
 </script>
 
-<div style="background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);">
+<div class="hero">
 	<HeaderHero />
 
-	<article
-		class="text-off-white rounded-lg pt-8 pb-4 px-4 my-8 md:mt-4 relative main"
-		style="min-height: 260px"
-	>
+	<article class="text-off-white rounded-lg pt-8 pb-4 px-4 my-8 md:mt-4 relative main">
+		<Alpha />
+
 		<div class="absolute" style="top: -3rem; left: 2rem;">
 			<Img src={$token.icon ?? oisy} width="109" height="142" />
 		</div>
@@ -33,3 +33,19 @@
 		<Actions />
 	</article>
 </div>
+
+<style lang="scss">
+	@use '../../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/media';
+
+	.hero {
+		background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
+
+		--alpha-color: var(--color-grey);
+
+		@include media.min-width(xlarge) {
+			article {
+				margin-top: -116px;
+			}
+		}
+	}
+</style>
