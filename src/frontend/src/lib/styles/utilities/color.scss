@@ -4,15 +4,15 @@ $property: color;
 
 @include utilities.generate(text-inherit, $property, inherit);
 @include utilities.generate(text-vampire-black, $property, var(--color-vampire-black));
-@include utilities.generate(text-ghost-white, $property, var(--color-ghost-white));
+@include utilities.generate(text-off-white, $property, var(--color-off-white));
 @include utilities.generate(text-white, $property, var(--color-white));
 @include utilities.generate(
-	text-interdimensional-blue,
+	text-blue,
 	$property,
-	var(--color-interdimensional-blue)
+	var(--color-blue)
 );
 @include utilities.generate(text-deep-violet, $property, var(--color-deep-violet));
-@include utilities.generate(text-cetacean-blue, $property, var(--color-cetacean-blue));
+@include utilities.generate(text-dark, $property, var(--color-dark));
 @include utilities.generate(text-dark-slate-blue, $property, var(--color-dark-slate-blue));
 @include utilities.generate(text-misty-rose, $property, var(--color-misty-rose));
 @include utilities.generate(text-goldenrod, $property, var(--color-goldenrod));

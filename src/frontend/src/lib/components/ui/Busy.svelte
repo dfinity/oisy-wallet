@@ -32,13 +32,13 @@
 	>
 		<div class="content">
 			{#if $busy.spinner}
-				<div class="spinner text-ghost-white">
+				<div class="spinner text-off-white">
 					<Spinner />
 				</div>
 			{/if}
 
 			{#if $busy.close}
-				<button on:click|stopPropagation={close} aria-label="Close" class="text-ghost-white"
+				<button on:click|stopPropagation={close} aria-label="Close" class="text-off-white"
 					>Cancel</button
 				>
 			{/if}

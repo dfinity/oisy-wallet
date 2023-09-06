@@ -12,7 +12,7 @@
 			<span><slot /></span>
 			<span class="flex-1 text-right"><slot name="amount" /></span>
 		</div>
-		<p class="text-cetacean-blue" class:text-goldenrod={pending} class:opacity-50={!pending}>
+		<p class="text-dark" class:text-goldenrod={pending} class:opacity-50={!pending}>
 			<slot name="description" />
 
 			{#if pending}

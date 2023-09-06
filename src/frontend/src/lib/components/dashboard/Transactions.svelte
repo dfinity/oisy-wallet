@@ -18,13 +18,13 @@
 </script>
 
 {#if loading}
-	<p class="mt-1 text-cetacean-blue opacity-50">Loading...</p>
+	<p class="mt-1 text-dark opacity-50">Loading...</p>
 {:else}
 	{#each $sortedTransactions as transaction, _index (transaction.hash)}
 		<Transaction {transaction} />
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<p class="mt-1 text-cetacean-blue opacity-50">You have no transactions yet.</p>
+		<p class="mt-1 text-dark opacity-50">You have no transactions yet.</p>
 	{/if}
 {/if}

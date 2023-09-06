@@ -29,7 +29,7 @@
 	onDestroy(() => confirmToCloseBrowser(false));
 </script>
 
-<div class="bg-interdimensional-blue text-ghost-white rounded-lg p-4 mb-4 flex gap-2">
+<div class="bg-blue text-off-white rounded-lg p-4 mb-4 flex gap-2">
 	<IconWarning size="44px" />
 	<div>
 		<p class="value">This may take a few seconds.</p>

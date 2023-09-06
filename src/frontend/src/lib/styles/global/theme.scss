@@ -60,7 +60,7 @@ a {
 }
 a:active,
 a:hover {
-	color: var(--color-interdimensional-blue);
+	color: var(--color-blue);
 	outline-width: 0;
 }
 a:hover,
@@ -117,19 +117,19 @@ figcaption {
 }
 
 ::selection {
-	background: var(--color-interdimensional-blue);
-	color: var(--color-ghost-white);
+	background: var(--color-blue);
+	color: var(--color-off-white);
 }
 
 ::-moz-selection {
-	background: var(--color-interdimensional-blue);
-	color: var(--color-ghost-white);
+	background: var(--color-blue);
+	color: var(--color-off-white);
 }
 
 ::-webkit-scrollbar-thumb {
 	border-radius: 0.5em;
 	-webkit-border-radius: 0.5em;
-	background-color: var(--color-interdimensional-blue);
+	background-color: var(--color-blue);
 }
 
 ::-webkit-scrollbar-track {
