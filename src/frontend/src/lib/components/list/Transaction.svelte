@@ -36,7 +36,7 @@
 	{`${type === 'send' ? 'Send' : 'Receive'}`}
 
 	<div class="relative" slot="icon">
-		<div class="rounded-50 bg-deep-violet opacity-15" style="width: 3rem; aspect-ratio: 1/1" />
+		<div class="rounded-50 bg-dark-blue opacity-15" style="width: 3rem; aspect-ratio: 1/1" />
 		<svelte:component this={icon} styleClass={`inset-center ${pending ? 'opacity-15' : ''}`} />
 	</div>
 
