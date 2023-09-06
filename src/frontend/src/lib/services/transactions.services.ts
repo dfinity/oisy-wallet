@@ -24,7 +24,7 @@ export const loadTransactions = async (tokenId: TokenId): Promise<{ success: boo
 	return loadErc20Transactions({ tokenId });
 };
 
-export const loadEthTransactions = async (): Promise<{ success: boolean }> => {
+const loadEthTransactions = async (): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
