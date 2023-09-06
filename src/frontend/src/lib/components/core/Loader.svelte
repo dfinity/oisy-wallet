@@ -11,6 +11,10 @@
 	import banner from '$lib/assets/banner.svg';
 	import { Modal } from '@dfinity/gix-components';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { page } from '$app/stores';
+	import { tokenId } from '$lib/derived/token.derived';
+	import { loadTransactions as loadTransactionsServices } from '$lib/services/transactions.services';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 	let steps: [ProgressStep, ...ProgressStep[]] = [
@@ -36,6 +40,22 @@
 		} as ProgressStep
 	];
 
+	let loadTransactions = false;
+	$: loadTransactions = isRouteTransactions($page);
+
+	$: steps = [
+		...steps,
+		...(loadTransactions
+			? [
+					{
+						step: LoaderStep.TRANSACTIONS,
+						text: 'And transactions',
+						state: 'next'
+					} as ProgressStep
+			  ]
+			: [])
+	];
+
 	onMount(async () => {
 		const { success: addressSuccess } = await loadAddress();
 
@@ -55,6 +75,17 @@
 		if (!balanceSuccess) {
 			await signOut();
 			return;
+		}
+
+		if (loadTransactions) {
+			progressStep = LoaderStep.TRANSACTIONS;
+
+			const { success: transactionsSuccess } = await loadTransactionsServices($tokenId);
+
+			if (!transactionsSuccess) {
+				await signOut();
+				return;
+			}
 		}
 
 		progressStep = LoaderStep.DONE;
