@@ -3,18 +3,12 @@
 $property: background;
 
 @include utilities.generate(bg-inherit, $property, inherit);
-@include utilities.generate(bg-vampire-black, $property, var(--color-vampire-black));
 @include utilities.generate(bg-off-white, $property, var(--color-off-white));
 @include utilities.generate(bg-white, $property, var(--color-white));
 @include utilities.generate(bg-grey, $property, var(--color-grey));
-@include utilities.generate(
-	bg-blue,
-	$property,
-	var(--color-blue)
-);
-@include utilities.generate(bg-deep-violet, $property, var(--color-deep-violet));
+@include utilities.generate(bg-blue, $property, var(--color-blue));
 @include utilities.generate(bg-dark, $property, var(--color-dark));
-@include utilities.generate(bg-dark-slate-blue, $property, var(--color-dark-slate-blue));
+@include utilities.generate(bg-dark-blue, $property, var(--color-dark-blue));
 @include utilities.generate(bg-misty-rose, $property, var(--color-misty-rose));
 @include utilities.generate(bg-goldenrod, $property, var(--color-goldenrod));
 @include utilities.generate(bg-cyclamen, $property, var(--color-cyclamen));

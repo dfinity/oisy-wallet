@@ -22,7 +22,7 @@
 	transition:fade
 	class="p-2 rounded-sm bg-off-white"
 	class:opacity-0={!render}
-	style={`border: 1px dashed var(--color-vampire-black); max-width: var(--qrcode-max-width, 360px); margin: 0 auto; height: var(--qrcode-height);`}
+	style={`border: 1px dashed var(--color-dark); max-width: var(--qrcode-max-width, 360px); margin: 0 auto; height: var(--qrcode-height);`}
 >
 	{#if render}
 		<QRCode value={$addressStore ?? ''}>
