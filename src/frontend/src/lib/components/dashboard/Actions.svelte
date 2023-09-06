@@ -3,7 +3,7 @@
 	import Receive from '$lib/components/receive/Receive.svelte';
 </script>
 
-<div role="toolbar" class="flex gap-2 text-deep-violet font-bold pt-8">
+<div role="toolbar" class="flex gap-2 text-deep-violet font-bold py-4">
 	<Receive />
 
 	<Send />

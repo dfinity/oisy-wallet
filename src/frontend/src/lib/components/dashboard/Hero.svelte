@@ -13,11 +13,13 @@
 <div class="hero">
 	<HeaderHero />
 
-	<article class="text-off-white rounded-lg pt-8 pb-4 px-4 my-8 md:mt-4 relative main">
-		<Alpha />
+	<article class="text-off-white rounded-lg pt-2 pb-4 px-4 mb-8 relative main">
+		<div class="mb-6">
+			<Alpha />
+		</div>
 
-		<div class="absolute" style="top: -3rem; left: 2rem;">
-			<Img src={$token.icon ?? oisy} width="109" height="142" />
+		<div>
+			<Img src={$token.icon ?? oisy} width="auto" height="64" />
 		</div>
 
 		<div class="flex items-end gap-1">
@@ -44,7 +46,7 @@
 
 		@include media.min-width(xlarge) {
 			article {
-				margin-top: -116px;
+				margin-top: -72px;
 			}
 		}
 	}
