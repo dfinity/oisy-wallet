@@ -8,7 +8,9 @@
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Contracts } from '$lib/services/erc20.services';
-	import { loadEthTransactions } from '$lib/services/transactions.services';
+	import banner from '$lib/assets/banner.svg';
+	import { Modal } from '@dfinity/gix-components';
+	import Img from '$lib/components/ui/Img.svelte';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 	let steps: [ProgressStep, ...ProgressStep[]] = [
@@ -60,7 +62,13 @@
 </script>
 
 {#if progressStep !== LoaderStep.DONE}
-	<InProgress {progressStep} {steps} />
+	<Modal>
+		<Img width="100%" src={banner} />
+
+		<h3 class="my-3">Setting up your wallet with Chain-Key Cryptography...</h3>
+
+		<InProgress {progressStep} {steps} />
+	</Modal>
 {:else}
 	<div in:fade>
 		<slot />
