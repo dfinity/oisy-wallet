@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
 import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import type { LoadEvent } from '@sveltejs/kit';
@@ -14,6 +15,15 @@ const tokenUrl = ({
 	token: Token;
 	path: 'transactions/' | '/';
 }): string => `${path}?token=${encodeURIComponent(name)}`;
+
+export const back = async (pop: boolean) => {
+	if (!pop) {
+		await goto('/');
+		return;
+	}
+
+	history.back();
+};
 
 export type RouteToken = { token: string | null | undefined };
 
