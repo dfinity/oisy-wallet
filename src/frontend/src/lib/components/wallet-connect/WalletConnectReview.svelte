@@ -38,7 +38,7 @@
 					Review {chainName} ({key}) permissions:
 				</p>
 
-				<article class="bg-deep-violet text-off-white rounded-sm p-2 mt-2">
+				<article class="bg-dark-blue text-off-white rounded-sm p-2 mt-2">
 					<p class="font-bold">Methods:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
