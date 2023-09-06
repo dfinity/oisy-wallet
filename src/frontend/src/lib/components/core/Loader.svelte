@@ -56,6 +56,16 @@
 			: [])
 	];
 
+	let inProgress = true;
+	$: (() => {
+		if (progressStep !== LoaderStep.DONE) {
+			return;
+		}
+
+		// A small delay for display animation purpose.
+		setTimeout(() => (inProgress = false), 1000);
+	})();
+
 	onMount(async () => {
 		const { success: addressSuccess } = await loadAddress();
 
@@ -92,7 +102,7 @@
 	});
 </script>
 
-{#if progressStep !== LoaderStep.DONE}
+{#if inProgress}
 	<Modal>
 		<Img width="100%" src={banner} />
 
