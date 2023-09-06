@@ -2,11 +2,12 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
-import type { LoadEvent } from '@sveltejs/kit';
+import type { LoadEvent, Page } from '@sveltejs/kit';
 
 export const transactionsUrl = (token: Token): string => tokenUrl({ path: 'transactions/', token });
 
-export const rootsUrl = (token: Token): string => tokenUrl({ path: '/', token });
+export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
+	id === '/(app)/transactions';
 
 const tokenUrl = ({
 	token: { name },
