@@ -9,7 +9,7 @@
 	--negative-emphasis: var(--color-cyclamen);
 
 	--primary: var(--color-blue);
-	--tertiary: var(--color-deep-violet);
+	--tertiary: var(--color-dark);
 
 	--value-color: var(--color-dark);
 
@@ -102,4 +102,8 @@ div.input-field input[id] {
 
 div.input-field input[id]::placeholder {
 	color: rgba(0, 0, 0, 0.4);
+}
+
+div.modal {
+	color: var(--color-dark);
 }
