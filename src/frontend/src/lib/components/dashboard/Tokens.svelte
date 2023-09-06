@@ -8,6 +8,7 @@
 	import oisy from '$lib/assets/oisy.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { transactionsUrl } from '$lib/utils/nav.utils';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20TokensStore];
@@ -16,7 +17,9 @@
 <h2 class="text-base mb-3 pb-0.5">Tokens</h2>
 
 {#each tokens as token}
-	<a class="no-underline">
+	{@const url = transactionsUrl(token)}
+
+	<a class="no-underline" href={url} title={`Open token ${token.name} transactions`}>
 		<Card>
 			{token.name}
 

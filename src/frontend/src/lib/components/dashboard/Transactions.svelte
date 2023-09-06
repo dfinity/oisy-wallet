@@ -3,15 +3,15 @@
 	import { sortedTransactions } from '$lib/derived/transactions.derived';
 	import { loadTransactions } from '$lib/services/transactions.services';
 	import type { TokenId } from '$lib/types/token';
-	import { tokenIdStore } from '$lib/stores/token-id.stores';
 	import { onMount } from 'svelte';
+	import { tokenId } from '$lib/derived/token.derived';
 
 	let loading = true;
 
 	const load = async (tokenId: TokenId) => await loadTransactions(tokenId);
 
 	onMount(async () => {
-		await load($tokenIdStore);
+		await load($tokenId);
 
 		loading = false;
 	});
