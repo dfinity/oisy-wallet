@@ -8,7 +8,6 @@
 	import Busy from '$lib/components/ui/Busy.svelte';
 
 	import '$lib/styles/global.scss';
-	import Footer from '$lib/components/layout/Footer.svelte';
 	import { authSignedInStore } from '$lib/derived/auth.derived';
 	import SignIn from '$lib/components/pages/SignIn.svelte';
 
@@ -53,8 +52,6 @@
 	{:else}
 		<SignIn />
 	{/if}
-
-	<Footer />
 {/await}
 
 <Toasts />

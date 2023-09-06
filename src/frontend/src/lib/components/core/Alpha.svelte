@@ -3,8 +3,8 @@
 </script>
 
 <p
-	class="text-misty-rose flex gap-1 items-center justify-center text-center px-3 sm:px-8 py-1 font-bold"
-	style="border-radius: 30px; border: 2px solid var(--color-misty-rose)"
+	class="flex gap-1 items-center justify-center text-center px-3 sm:px-8 py-1 font-bold"
+	style="border-radius: 30px; border: 2px solid var(--color-misty-rose); color: var(--alpha-color, var(--color-misty-rose))"
 >
 	<IconWarning /> This is Alpha version. Use at your own risk!
 </p>
