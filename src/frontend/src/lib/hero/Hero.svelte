@@ -11,9 +11,13 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { erc20TokensInitialized } from '$lib/derived/erc20.derived';
 
 	let route: 'tokens' | 'dashboard' = 'dashboard';
 	$: route = isRouteTransactions($page) ? 'tokens' : 'dashboard';
+
+	let displayTokens = false;
+	$: displayTokens = route === 'tokens' && $erc20TokensInitialized;
 </script>
 
 <div class="hero">
@@ -25,7 +29,7 @@
 		</div>
 
 		<div class="icon flex items-center" class:tokens={route === 'tokens'}>
-			{#if route === 'tokens'}
+			{#if displayTokens}
 				<div in:fade style="margin: auto 0">
 					<Img src={$token.icon ?? oisy} width="auto" height="96px" />
 				</div>
