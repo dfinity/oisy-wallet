@@ -2,30 +2,24 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import { formatEtherShort } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import type { TabsContext } from '$lib/stores/tabs.store';
-	import { TABS_CONTEXT_KEY } from '$lib/stores/tabs.store';
-	import { getContext } from 'svelte';
-	import { tokenIdStore } from '$lib/stores/token-id.stores';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-	import type { Token, TokenId } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import { erc20TokensStore } from '$lib/stores/erc20.store';
 	import oisy from '$lib/assets/oisy.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { balancesStore } from '$lib/stores/balances.store';
-
-	const { store: tabsStore }: TabsContext = getContext<TabsContext>(TABS_CONTEXT_KEY);
-
-	const select = (tokenId: TokenId) => {
-		tokenIdStore.select(tokenId);
-		tabsStore.select($tabsStore.tabs[1].id);
-	};
+	import { transactionsUrl } from '$lib/utils/nav.utils';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20TokensStore];
 </script>
 
+<h2 class="text-base mb-3 pb-0.5">Tokens</h2>
+
 {#each tokens as token}
-	<button class="block" on:click={() => select(token.id)} style="width: 100%">
+	{@const url = transactionsUrl(token)}
+
+	<a class="no-underline" href={url} title={`Open token ${token.name} transactions`}>
 		<Card>
 			{token.name}
 
@@ -36,5 +30,5 @@
 				{token.symbol}
 			</div>
 		</Card>
-	</button>
+	</a>
 {/each}

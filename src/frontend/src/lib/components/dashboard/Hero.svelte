@@ -6,25 +6,30 @@
 	import oisy from '$lib/assets/oisy.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { token } from '$lib/derived/token.derived';
+	import HeaderHero from '$lib/components/layout/HeaderHero.svelte';
 </script>
 
-<article
-	class="bg-deep-violet text-off-white rounded-lg pt-8 pb-4 px-4 my-8 md:mt-4 relative"
-	style="min-height: 260px"
->
-	<div class="absolute" style="top: -3rem; left: 2rem;">
-		<Img src={$token.icon ?? oisy} width="109" height="142" />
-	</div>
+<div style="background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);">
+	<HeaderHero />
 
-	<div class="flex items-end gap-1">
-		<div style="min-width: 60%">
-			<Address />
-
-			<Balance />
+	<article
+		class="text-off-white rounded-lg pt-8 pb-4 px-4 my-8 md:mt-4 relative main"
+		style="min-height: 260px"
+	>
+		<div class="absolute" style="top: -3rem; left: 2rem;">
+			<Img src={$token.icon ?? oisy} width="109" height="142" />
 		</div>
 
-		<AddressBalanceZeroQRCode />
-	</div>
+		<div class="flex items-end gap-1">
+			<div style="min-width: 60%">
+				<Address />
 
-	<Actions />
-</article>
+				<Balance />
+			</div>
+
+			<AddressBalanceZeroQRCode />
+		</div>
+
+		<Actions />
+	</article>
+</div>

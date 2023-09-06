@@ -5,14 +5,12 @@ import { busy } from '$lib/stores/busy.store';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { metamaskStore } from '$lib/stores/metamask.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-import { tokenIdStore } from '$lib/stores/token-id.stores';
 import { transactionsStore } from '$lib/stores/transactions.store';
 
 const resetStores = () => {
 	addressStore.reset();
 	balancesStore.reset();
 	transactionsStore.reset();
-	tokenIdStore.reset();
 	erc20TokensStore.reset();
 	metamaskStore.reset();
 

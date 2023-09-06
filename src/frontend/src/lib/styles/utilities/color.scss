@@ -6,6 +6,7 @@ $property: color;
 @include utilities.generate(text-vampire-black, $property, var(--color-vampire-black));
 @include utilities.generate(text-off-white, $property, var(--color-off-white));
 @include utilities.generate(text-white, $property, var(--color-white));
+@include utilities.generate(text-grey, $property, var(--color-grey));
 @include utilities.generate(
 	text-blue,
 	$property,

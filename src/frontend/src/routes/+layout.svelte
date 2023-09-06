@@ -3,7 +3,6 @@
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
 	import { onMount } from 'svelte';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
-	import Header from '$lib/components/layout/Header.svelte';
 	import { fade } from 'svelte/transition';
 	import { Spinner, Toasts } from '@dfinity/gix-components';
 	import Busy from '$lib/components/ui/Busy.svelte';
@@ -11,6 +10,7 @@
 	import '$lib/styles/global.scss';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import { authSignedInStore } from '$lib/derived/auth.derived';
+	import SignIn from '$lib/components/pages/SignIn.svelte';
 
 	/**
 	 * Init authentication
@@ -48,11 +48,11 @@
 		<Spinner />
 	</div>
 {:then _}
-	<Header />
-
-	<main class:in={$authSignedInStore}>
+	{#if $authSignedInStore}
 		<slot />
-	</main>
+	{:else}
+		<SignIn />
+	{/if}
 
 	<Footer />
 {/await}
