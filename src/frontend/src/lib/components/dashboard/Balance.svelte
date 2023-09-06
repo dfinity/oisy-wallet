@@ -5,7 +5,7 @@
 	import { tokenSymbol } from '$lib/derived/token.derived';
 </script>
 
-<span class="text-ghost-white mt">
+<span class="text-off-white mt">
 	<output
 		class={`break-words ${($balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'}`}
 		style="font-size: calc(2 * var(--font-size-h1)); line-height: 0.95;"
