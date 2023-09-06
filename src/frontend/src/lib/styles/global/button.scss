@@ -15,7 +15,7 @@ button {
 
 		background: var(--color-white);
 
-		border: 1px solid var(--color-interdimensional-blue);
+		border: 1px solid var(--color-blue);
 
 		padding: var(--padding) var(--padding-3x);
 	}
@@ -26,7 +26,7 @@ button {
 			line-height: var(--line-height-small);
 
 			span:first-child {
-				color: var(--color-interdimensional-blue);
+				color: var(--color-blue);
 			}
 
 			span:last-child {
@@ -39,7 +39,7 @@ button {
 	&.secondary {
 		justify-content: center;
 
-		background: var(--color-ghost-white);
+		background: var(--color-off-white);
 
 		padding: var(--padding-1_5x) var(--padding-3x);
 	}
@@ -47,8 +47,8 @@ button {
 	&.tertiary {
 		justify-content: center;
 
-		background: var(--color-interdimensional-blue);
-		color: var(--color-ghost-white);
+		background: var(--color-blue);
+		color: var(--color-off-white);
 
 		padding: var(--padding-1_5x) var(--padding-3x);
 
@@ -60,7 +60,7 @@ button {
 		justify-content: center;
 		border-radius: 0;
 
-		background: var(--color-ghost-white);
+		background: var(--color-off-white);
 
 		padding: var(--padding-1_5x) var(--padding-3x);
 	}

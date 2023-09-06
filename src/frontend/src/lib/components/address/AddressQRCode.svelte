@@ -20,7 +20,7 @@
 
 <div
 	transition:fade
-	class="p-2 rounded-sm bg-ghost-white"
+	class="p-2 rounded-sm bg-off-white"
 	class:opacity-0={!render}
 	style={`border: 1px dashed var(--color-vampire-black); max-width: var(--qrcode-max-width, 360px); margin: 0 auto; height: var(--qrcode-height);`}
 >
@@ -28,7 +28,7 @@
 		<QRCode value={$addressStore ?? ''}>
 			<svelte:fragment slot="logo">
 				{#if size === 'big'}
-					<div class="p-1.5 rounded-sm bg-ghost-white flex flex-col items-center justify-center">
+					<div class="p-1.5 rounded-sm bg-off-white flex flex-col items-center justify-center">
 						<Img src={eth} />
 					</div>
 				{/if}

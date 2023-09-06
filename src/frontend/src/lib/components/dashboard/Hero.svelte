@@ -9,7 +9,7 @@
 </script>
 
 <article
-	class="bg-deep-violet text-ghost-white rounded-lg pt-8 pb-4 px-4 my-8 md:mt-4 relative"
+	class="bg-deep-violet text-off-white rounded-lg pt-8 pb-4 px-4 my-8 md:mt-4 relative"
 	style="min-height: 260px"
 >
 	<div class="absolute" style="top: -3rem; left: 2rem;">
