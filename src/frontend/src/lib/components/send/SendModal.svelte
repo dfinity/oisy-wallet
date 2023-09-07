@@ -9,7 +9,6 @@
 	import SendProgress from '$lib/components/send/SendProgress.svelte';
 	import { SendStep } from '$lib/enums/send';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { modalSend } from '$lib/derived/modal.derived';
 	import { addressStore } from '$lib/stores/address.store';
 	import { token } from '$lib/derived/token.derived';
 	import {
@@ -133,7 +132,7 @@
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<FeeContext {amount} {destination} observe={$modalSend && currentStep?.name !== 'Sending'}>
+	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'}>
 		{#if currentStep?.name === 'Review'}
 			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
 		{:else if currentStep?.name === 'Sending'}
