@@ -22,7 +22,6 @@ export const initFeeStore = (): FeeStore => {
 
 export interface FeeContext {
 	store: FeeStore;
-	observeFee: (watch: boolean) => Promise<void>;
 }
 
 export const FEE_CONTEXT_KEY = Symbol('fee');

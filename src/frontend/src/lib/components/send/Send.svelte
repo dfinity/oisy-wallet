@@ -9,23 +9,36 @@
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
 	import SendProgress from '$lib/components/send/SendProgress.svelte';
 	import { SendStep } from '$lib/enums/send';
-	import { getContext } from 'svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { balanceEmpty } from '$lib/derived/balances.derived';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { addressStore } from '$lib/stores/address.store';
 	import { token } from '$lib/derived/token.derived';
-	import { FEE_CONTEXT_KEY, type FeeContext as FeeContextType } from '$lib/stores/fee.store';
+	import {
+		FEE_CONTEXT_KEY,
+		type FeeContext as FeeContextType,
+		initFeeStore
+	} from '$lib/stores/fee.store';
+	import { setContext } from 'svelte';
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
+
+	/**
+	 * Fee context store
+	 */
+
+	let storeFeeData = initFeeStore();
+
+	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
+		store: storeFeeData
+	});
+
+	/**
+	 * Props
+	 */
 
 	let destination = '';
 	let amount: number | undefined = undefined;
-
-	const { obverseFee, store: storeFeeData }: FeeContextType =
-		getContext<FeeContextType>(FEE_CONTEXT_KEY);
-
-	$: obverseFee($modalSend);
 
 	/**
 	 * Send
@@ -137,7 +150,7 @@
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-		<FeeContext {amount} {destination}>
+		<FeeContext {amount} {destination} observe={$modalSend}>
 			{#if currentStep?.name === 'Review'}
 				<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
 			{:else if currentStep?.name === 'Sending'}

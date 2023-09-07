@@ -12,11 +12,14 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
-	import { onDestroy, setContext } from 'svelte';
-	import { FEE_CONTEXT_KEY, type FeeContext, initFeeStore } from '$lib/stores/fee.store';
+	import { getContext, onDestroy } from 'svelte';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 
+	export let observe: boolean;
 	export let destination = '';
 	export let amount: number | undefined = undefined;
+
+	const { store }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee
@@ -66,19 +69,10 @@
 	onDestroy(() => listener?.disconnect());
 
 	/**
-	 * Context store
-	 */
-
-	let store = initFeeStore();
-
-	setContext<FeeContext>(FEE_CONTEXT_KEY, {
-		store,
-		observeFee: obverseFeeData
-	});
-
-	/**
 	 * Observe input properties for erc20
 	 */
+
+	$: obverseFeeData(observe);
 
 	$: amount,
 		destination,
