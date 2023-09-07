@@ -74,6 +74,8 @@
 
 	onDestroy(async () => await disconnectListener());
 
+	const goToFirstStep = () => modal.set(0);
+
 	const connect = async ({ detail: uri }: CustomEvent<string>) => {
 		modal.next();
 
@@ -96,6 +98,8 @@
 				level: 'info',
 				duration: 2000
 			});
+
+			goToFirstStep();
 		});
 
 		listener.sessionRequest(async (sessionRequest: Web3WalletTypes.SessionRequest) => {
@@ -107,6 +111,9 @@
 						text: 'Skipping the WalletConnect request as another action is currently in progress through an overlay.'
 					}
 				});
+
+				goToFirstStep();
+
 				return;
 			}
 
@@ -133,6 +140,8 @@
 					toastsError({
 						msg: { text: `Requested method "${method}" is not supported.` }
 					});
+
+					close();
 				}
 			}
 		});
@@ -140,6 +149,8 @@
 		try {
 			await listener.pair();
 		} catch (err: unknown) {
+			resetListener();
+
 			toastsError({
 				msg: { text: `An unexpected error happened while trying to pair the wallet.` },
 				err

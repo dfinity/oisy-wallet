@@ -10,11 +10,12 @@
 	} from '$lib/types/wallet-connect';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { ETH_NETWORK_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
-	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
+	import {getFeeData, getTransactionCount, sendTransaction} from '$lib/providers/etherscan.providers';
 	import { signTransaction } from '$lib/api/backend.api';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import type { SignRequest } from '$declarations/backend/backend.did';
+	import {addressStore} from "$lib/stores/address.store";
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -59,6 +60,7 @@
 					return;
 				}
 
+				// TODO: nonce
 				if (isNullish(firstParam.nonce)) {
 					toastsError({
 						msg: { text: `Unknown nonce.` }
@@ -86,6 +88,9 @@
 					}
 
 					const { value, nonce, to, gasPrice } = firstParam;
+
+					// TODO: send
+					// const nonce = await getTransactionCount(from);
 
 					const transaction: SignRequest = {
 						to,
