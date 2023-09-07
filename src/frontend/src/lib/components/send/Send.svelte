@@ -150,7 +150,7 @@
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-		<FeeContext {amount} {destination} observe={$modalSend}>
+		<FeeContext {amount} {destination} observe={$modalSend && currentStep?.name !== 'Sending'}>
 			{#if currentStep?.name === 'Review'}
 				<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
 			{:else if currentStep?.name === 'Sending'}
