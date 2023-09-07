@@ -5,8 +5,11 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { IconWarning } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let progressStep: string = SendStep.INITIALIZATION;
+	export let additionalSteps: ProgressStep[] | undefined = undefined;
+
 	let steps: [ProgressStep, ...ProgressStep[]] = [
 		{
 			step: SendStep.INITIALIZATION,
@@ -22,7 +25,8 @@
 			step: SendStep.SEND,
 			text: 'Sending...',
 			state: 'next'
-		} as ProgressStep
+		} as ProgressStep,
+		...(nonNullish(additionalSteps) ? additionalSteps : [])
 	];
 
 	onMount(() => confirmToCloseBrowser(true));

@@ -1,11 +1,9 @@
 <script lang="ts">
-	import SendSource from '$lib/components/send/SendSource.svelte';
-	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
-	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { isNullish } from '@dfinity/utils';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
+	import SendData from '$lib/components/send/SendData.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -18,11 +16,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<SendDestination {destination} {amount} />
-
-<SendSource />
-
-<FeeDisplay />
+<SendData {amount} {destination} />
 
 <div class="flex justify-end gap-1">
 	<button class="primary" on:click={() => dispatch('icBack')}>Back</button>

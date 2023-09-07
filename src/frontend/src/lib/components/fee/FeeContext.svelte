@@ -17,7 +17,7 @@
 
 	export let observe: boolean;
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 
 	const { store }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
