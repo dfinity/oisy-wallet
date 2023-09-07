@@ -11,12 +11,11 @@ import type { Token } from '$lib/types/token';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
-import { Utils } from 'alchemy-sdk';
 
 export interface TransferParams {
 	from: string;
 	to: string;
-	amount: number;
+	amount: BigNumber;
 	maxPriorityFeePerGas: bigint;
 	maxFeePerGas: bigint;
 }
@@ -29,7 +28,7 @@ const ethPrepareTransaction = async ({
 	nonce
 }: TransferParams & { nonce: number }): Promise<SignRequest> => ({
 	to,
-	value: Utils.parseEther(`${amount}`).toBigInt(),
+	value: amount.toBigInt(),
 	chain_id: ETH_NETWORK_ID,
 	nonce: BigInt(nonce),
 	gas: ETH_BASE_FEE,
@@ -50,7 +49,7 @@ const erc20PrepareTransaction = async ({
 	const { data } = await populateTransaction({
 		contract: token as Erc20Token,
 		address: to,
-		amount: Utils.parseEther(`${amount}`)
+		amount
 	});
 
 	if (isNullish(data)) {
@@ -73,6 +72,7 @@ const erc20PrepareTransaction = async ({
 
 export const send = async ({
 	progress,
+	lastProgressStep = SendStep.DONE,
 	token,
 	from,
 	maxFeePerGas,
@@ -81,11 +81,12 @@ export const send = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
 	progress: (step: SendStep) => void;
+	lastProgressStep?: SendStep;
 	token: Token;
 } & Pick<TransactionFeeData, 'gas'> & {
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
-	}) => {
+	}): Promise<{ hash: string }> => {
 	progress(SendStep.INITIALIZATION);
 
 	const nonce = await getTransactionCount(from);
@@ -119,5 +120,7 @@ export const send = async ({
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	processTransactionSent({ token, transaction: transactionSent });
 
-	progress(SendStep.DONE);
+	progress(lastProgressStep);
+
+	return { hash: transactionSent.hash };
 };

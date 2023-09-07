@@ -4,7 +4,7 @@
 	import { tokenSymbol } from '$lib/derived/token.derived';
 
 	export let destination: string;
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 </script>
 
 <label for="destination" class="font-bold px-1.25">Destination:</label>
