@@ -9,20 +9,21 @@
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
 	import SendProgress from '$lib/components/send/SendProgress.svelte';
 	import { SendStep } from '$lib/enums/send';
-	import {getContext} from 'svelte';
+	import { getContext } from 'svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { balanceEmpty } from '$lib/derived/balances.derived';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { addressStore } from '$lib/stores/address.store';
 	import { token } from '$lib/derived/token.derived';
-	import {FEE_CONTEXT_KEY, type FeeContext as FeeContextType} from "$lib/stores/fee.store";
-	import FeeContext from "$lib/components/fee/FeeContext.svelte";
+	import { FEE_CONTEXT_KEY, type FeeContext as FeeContextType } from '$lib/stores/fee.store';
+	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 
 	let destination = '';
 	let amount: number | undefined = undefined;
 
-	const { obverseFee, store: storeFeeData }: FeeContextType = getContext<FeeContextType>(FEE_CONTEXT_KEY);
+	const { obverseFee, store: storeFeeData }: FeeContextType =
+		getContext<FeeContextType>(FEE_CONTEXT_KEY);
 
 	$: obverseFee($modalSend);
 

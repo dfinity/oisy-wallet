@@ -2,10 +2,10 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import {getContext, onDestroy} from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import { formatEtherShort } from '$lib/utils/format.utils';
-	import type {FeeContext} from "$lib/stores/fee.store";
-	import {FEE_CONTEXT_KEY} from "$lib/stores/fee.store";
+	import type { FeeContext } from '$lib/stores/fee.store';
+	import { FEE_CONTEXT_KEY } from '$lib/stores/fee.store';
 
 	const { store: feeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
