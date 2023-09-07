@@ -168,6 +168,7 @@
 					return;
 				}
 
+				// TODO: we have gas issue. should we use the gas and gasLimit provided by WalletConnect?
 				const { to } = firstParam;
 
 				modal.next();
