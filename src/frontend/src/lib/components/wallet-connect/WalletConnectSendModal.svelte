@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import { Modal } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { busy } from '$lib/stores/busy.store';
@@ -21,6 +21,10 @@
 		type FeeContext as FeeContextType,
 		initFeeStore
 	} from '$lib/stores/fee.store';
+	import { addressStore } from '$lib/stores/address.store';
+	import SendData from '$lib/components/send/SendData.svelte';
+	import {BigNumber} from "@ethersproject/bignumber";
+	import {formatEtherShort} from "$lib/utils/format.utils";
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -35,18 +39,38 @@
 		store: storeFeeData
 	});
 
-	// WalletConnect
+	/**
+	 * Modal
+	 */
 
-	export let listener: WalletConnectListener | undefined | null;
+	const steps: WizardSteps = [
+		{
+			name: 'Review',
+			title: 'Review'
+		},
+		{
+			name: 'Sending',
+			title: 'Sending...'
+		}
+	];
+
+	let currentStep: WizardStep | undefined;
+	let modal: WizardModal;
 
 	const close = () => modalStore.close();
+
+	/**
+	 * WalletConnect
+	 */
+
+	export let listener: WalletConnectListener | undefined | null;
 
 	type CallBackParams = {
 		request: Web3WalletTypes.SessionRequest;
 		listener: WalletConnectListener;
 	};
 
-	const reject = async () =>
+	const reject = async () => {
 		await execute({
 			callback: async ({ request, listener }: CallBackParams) => {
 				const { id, topic } = request;
@@ -55,6 +79,9 @@
 			},
 			toastMsg: 'WalletConnect request rejected.'
 		});
+
+		close();
+	};
 
 	const send = async () =>
 		await execute({
@@ -66,6 +93,15 @@
 				if (isNullish(firstParam)) {
 					toastsError({
 						msg: { text: `Unknown parameter.` }
+					});
+					return;
+				}
+
+				if (firstParam.from !== $addressStore) {
+					toastsError({
+						msg: {
+							text: `From address requested for the transaction is not the address of this wallet.`
+						}
 					});
 					return;
 				}
@@ -182,29 +218,14 @@
 	};
 </script>
 
-<Modal on:nnsClose={reject}>
+<WizardModal {steps} bind:currentStep on:nnsClose={reject}>
 	<svelte:fragment slot="title">Send</svelte:fragment>
 
-	{@const amount = BigInt(firstTransaction?.value ?? '0')}
+	{@const amount = BigNumber.from(firstTransaction?.value ?? '0')}
 	{@const destination = firstTransaction.to ?? ''}
 
-	<FeeContext amount={Number(amount)} {destination} observe={false}>
-		<p class="font-bold">From</p>
-		<p class="mb-2 font-normal">
-			<output class="break-words">{firstTransaction.from}</output>
-		</p>
-
-		{#if nonNullish(destination)}
-			<p class="font-bold">To</p>
-			<p class="mb-2 font-normal">
-				{firstTransaction.to}
-			</p>
-		{/if}
-
-		<p class="font-bold">Value</p>
-		<p class="mb-2 font-normal">
-			{BigInt(firstTransaction?.value ?? '0').toString()}
-		</p>
+	<FeeContext amount={Number(amount)} {destination} observe={currentStep?.name !== 'Sending'}>
+		<SendData amount={formatEtherShort(amount)} {destination} />
 
 		{#if nonNullish(firstTransaction.gasLimit)}
 			<p class="font-bold">Gas limit</p>
@@ -225,4 +246,4 @@
 			<button class="primary" on:click={send} disabled={$isBusy}> Approve </button>
 		</div>
 	</FeeContext>
-</Modal>
+</WizardModal>

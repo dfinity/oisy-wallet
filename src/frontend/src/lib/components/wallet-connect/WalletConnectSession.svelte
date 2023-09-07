@@ -74,7 +74,7 @@
 
 	onDestroy(async () => await disconnectListener());
 
-	const goToFirstStep = () => modal?.set(0);
+	const goToFirstStep = () => modal?.set?.(0);
 
 	const connect = async ({ detail: uri }: CustomEvent<string>) => {
 		modal.next();

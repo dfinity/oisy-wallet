@@ -4,7 +4,7 @@
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
+	export let amount: string | number | undefined = undefined;
 </script>
 
 <SendDestination {destination} {amount} />
