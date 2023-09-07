@@ -2,30 +2,31 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { onDestroy } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import { formatEtherShort } from '$lib/utils/format.utils';
-	import type { TransactionFeeData } from '$lib/types/transaction';
+	import type { FeeContext } from '$lib/stores/fee.store';
+	import { FEE_CONTEXT_KEY } from '$lib/stores/fee.store';
 
-	export let feeData: TransactionFeeData | undefined;
+	const { store: feeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let fee: BigNumber | undefined | null = undefined;
 
 	let timer: NodeJS.Timeout | undefined;
 
-	$: feeData,
+	$: $feeData,
 		(() => {
 			fee = undefined;
 
-			if (isNullish(feeData) || isNullish(feeData?.maxFeePerGas)) {
+			if (isNullish($feeData) || isNullish($feeData?.maxFeePerGas)) {
 				return;
 			}
 
 			const calculateFee = () => {
-				if (isNullish(feeData) || isNullish(feeData?.maxFeePerGas)) {
+				if (isNullish($feeData) || isNullish($feeData?.maxFeePerGas)) {
 					return;
 				}
 
-				fee = feeData.maxFeePerGas.mul(feeData.gas);
+				fee = $feeData.maxFeePerGas.mul($feeData.gas);
 			};
 
 			timer = setTimeout(calculateFee, 500);

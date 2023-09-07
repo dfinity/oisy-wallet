@@ -3,12 +3,10 @@
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { invalidDestination, invalidAmount } from '$lib/utils/send.utils';
 	import { createEventDispatcher } from 'svelte';
-	import SendFee from '$lib/components/send/SendFee.svelte';
-	import type { TransactionFeeData } from '$lib/types/transaction';
+	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
-	export let feeData: TransactionFeeData | undefined;
 
 	let invalid = true;
 	$: invalid = invalidDestination(destination) || invalidAmount(amount);
@@ -31,7 +29,7 @@
 
 	<SendSource />
 
-	<SendFee {feeData} />
+	<FeeDisplay />
 
 	<div class="flex justify-end gap-1">
 		<button type="button" class="primary" on:click={() => dispatch('icClose')}>Cancel</button>
