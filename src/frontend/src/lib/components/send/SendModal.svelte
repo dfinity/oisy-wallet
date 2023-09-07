@@ -18,6 +18,7 @@
 	} from '$lib/stores/fee.store';
 	import { setContext } from 'svelte';
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
+	import {Utils} from "alchemy-sdk";
 
 	/**
 	 * Fee context store
@@ -84,7 +85,7 @@
 				to: destination!,
 				progress: (step: SendStep) => (sendProgressStep = step),
 				token: $token,
-				amount: amount!,
+				amount: Utils.parseEther(`${amount!}`),
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas

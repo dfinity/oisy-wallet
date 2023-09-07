@@ -172,8 +172,6 @@
 
 				modal.next();
 
-				console.log(gas, amount.toString());
-
 				try {
 					const { hash } = await executeSend({
 						from: $addressStore,
@@ -181,7 +179,7 @@
 						progress: (step: SendStep) => (sendProgressStep = step),
 						lastProgressStep: SendStep.APPROVE,
 						token: $token,
-						amount: amount.toString(),
+						amount,
 						maxFeePerGas,
 						maxPriorityFeePerGas,
 						gas
