@@ -7,7 +7,7 @@
 		type WizardSteps
 	} from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import { isNullish } from '@dfinity/utils';
+	import {isNullish, nonNullish} from '@dfinity/utils';
 	import { busy } from '$lib/stores/busy.store';
 	import type {
 		WalletConnectEthSendTransactionParams,
@@ -254,7 +254,6 @@
 			<SendProgress progressStep={sendProgressStep} additionalSteps={[STEP_APPROVING]} />
 		{:else}
 			<WalletConnectSendReview
-				{firstTransaction}
 				{amount}
 				{destination}
 				on:icApprove={send}
