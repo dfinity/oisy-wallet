@@ -16,7 +16,7 @@ import { Utils } from 'alchemy-sdk';
 export interface TransferParams {
 	from: string;
 	to: string;
-	amount: number;
+	amount: string | number;
 	maxPriorityFeePerGas: bigint;
 	maxFeePerGas: bigint;
 }
@@ -73,6 +73,7 @@ const erc20PrepareTransaction = async ({
 
 export const send = async ({
 	progress,
+	lastProgressStep = SendStep.DONE,
 	token,
 	from,
 	maxFeePerGas,
@@ -81,11 +82,12 @@ export const send = async ({
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
 	progress: (step: SendStep) => void;
+	lastProgressStep?: SendStep;
 	token: Token;
 } & Pick<TransactionFeeData, 'gas'> & {
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
-	}) => {
+	}): Promise<{ hash: string }> => {
 	progress(SendStep.INITIALIZATION);
 
 	const nonce = await getTransactionCount(from);
@@ -119,5 +121,7 @@ export const send = async ({
 	// Explicitly do not await to proceed in the background and allow the UI to continue
 	processTransactionSent({ token, transaction: transactionSent });
 
-	progress(SendStep.DONE);
+	progress(lastProgressStep);
+
+	return { hash: transactionSent.hash };
 };

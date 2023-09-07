@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import {
+		type ProgressStep,
+		WizardModal,
+		type WizardStep,
+		type WizardSteps
+	} from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { busy } from '$lib/stores/busy.store';
 	import type {
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
 	} from '$lib/types/wallet-connect';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { ETH_NETWORK_ID, ETH_BASE_FEE } from '$lib/constants/eth.constants';
-	import { getFeeData, sendTransaction } from '$lib/providers/etherscan.providers';
-	import { signTransaction } from '$lib/api/backend.api';
-	import { isBusy } from '$lib/derived/busy.derived';
-	import type { SignRequest } from '$declarations/backend/backend.did';
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 	import { setContext } from 'svelte';
 	import {
@@ -22,9 +22,12 @@
 		initFeeStore
 	} from '$lib/stores/fee.store';
 	import { addressStore } from '$lib/stores/address.store';
-	import SendData from '$lib/components/send/SendData.svelte';
-	import {BigNumber} from "@ethersproject/bignumber";
-	import {formatEtherShort} from "$lib/utils/format.utils";
+	import { BigNumber } from '@ethersproject/bignumber';
+	import WalletConnectSendReview from '$lib/components/wallet-connect/WalletConnectSendReview.svelte';
+	import { SendStep } from '$lib/enums/send';
+	import SendProgress from '$lib/components/send/SendProgress.svelte';
+	import { send as executeSend } from '$lib/services/send.services';
+	import { token } from '$lib/derived/token.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -70,18 +73,40 @@
 		listener: WalletConnectListener;
 	};
 
-	const reject = async () => {
+	/**
+	 * Reject a transaction
+	 */
+
+	const reject = async () =>
 		await execute({
 			callback: async ({ request, listener }: CallBackParams) => {
+				busy.start();
+
 				const { id, topic } = request;
 
-				await listener.rejectRequest({ topic, id });
+				try {
+					await listener.rejectRequest({ topic, id });
+				} finally {
+					busy.stop();
+				}
 			},
 			toastMsg: 'WalletConnect request rejected.'
 		});
 
-		close();
-	};
+	/**
+	 * Send and approve
+	 */
+
+	let sendProgressStep: string = SendStep.INITIALIZATION;
+
+	const STEP_APPROVING: ProgressStep = {
+		step: SendStep.APPROVE,
+		text: 'Approving...',
+		state: 'next'
+	} as const;
+
+	let amount: BigNumber;
+	$: amount = BigNumber.from(firstTransaction?.value ?? '0');
 
 	const send = async () =>
 		await execute({
@@ -97,7 +122,14 @@
 					return;
 				}
 
-				if (firstParam.from !== $addressStore) {
+				if (isNullish($addressStore)) {
+					toastsError({
+						msg: { text: `Unexpected error. Your wallet address is not initialized.` }
+					});
+					return;
+				}
+
+				if (firstParam.from?.toLowerCase() !== $addressStore.toLowerCase()) {
 					toastsError({
 						msg: {
 							text: `From address requested for the transaction is not the address of this wallet.`
@@ -113,55 +145,55 @@
 					return;
 				}
 
-				// TODO: nonce
-				if (isNullish(firstParam.nonce)) {
-					toastsError({
-						msg: { text: `Unknown nonce.` }
-					});
-					return;
-				}
-
 				if (isNullish(firstParam.value)) {
 					toastsError({
-						msg: { text: `Value not defined.` }
+						msg: { text: `Amount is not defined.` }
 					});
 					return;
 				}
 
+				if (isNullish($storeFeeData)) {
+					toastsError({
+						msg: { text: `Gas fees are not defined.` }
+					});
+					return;
+				}
+
+				const { maxFeePerGas, maxPriorityFeePerGas, gas } = $storeFeeData;
+
+				if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
+					toastsError({
+						msg: { text: `Max fee per gas or max priority fee per gas is undefined.` }
+					});
+					return;
+				}
+
+				const { to } = firstParam;
+
+				modal.next();
+
+				console.log(gas, amount.toString());
+
 				try {
-					const feeData = await getFeeData();
-
-					const { maxFeePerGas, maxPriorityFeePerGas } = feeData;
-
-					if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
-						toastsError({
-							msg: { text: `Max fee per gas or max priority fee per gas is undefined.` }
-						});
-						return;
-					}
-
-					const { value, nonce, to, gasPrice } = firstParam;
-
-					// TODO: send
-					// const nonce = await getTransactionCount(from);
-
-					const transaction: SignRequest = {
+					const { hash } = await executeSend({
+						from: $addressStore,
 						to,
-						value: BigInt(value),
-						chain_id: ETH_NETWORK_ID,
-						nonce: BigInt(nonce),
-						gas: nonNullish(gasPrice) ? BigInt(gasPrice) : ETH_BASE_FEE,
-						max_fee_per_gas: maxFeePerGas.toBigInt(),
-						max_priority_fee_per_gas: maxPriorityFeePerGas.toBigInt(),
-						data: []
-					};
-
-					const rawTransaction = await signTransaction(transaction);
-
-					const { hash } = await sendTransaction(rawTransaction);
+						progress: (step: SendStep) => (sendProgressStep = step),
+						lastProgressStep: SendStep.APPROVE,
+						token: $token,
+						amount: amount.toString(),
+						maxFeePerGas,
+						maxPriorityFeePerGas,
+						gas
+					});
 
 					await listener.approveRequest({ id, topic, message: hash });
+
+					sendProgressStep = SendStep.DONE;
+
+					setTimeout(() => close(), 750);
 				} catch (err: unknown) {
+					// TODO: better error rejection
 					await listener.rejectRequest({ topic, id });
 
 					throw err;
@@ -195,8 +227,6 @@
 			return;
 		}
 
-		busy.start();
-
 		try {
 			await callback({ request, listener });
 
@@ -212,38 +242,26 @@
 			});
 		}
 
-		busy.stop();
-
 		close();
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep on:nnsClose={reject}>
+<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
 	<svelte:fragment slot="title">Send</svelte:fragment>
 
-	{@const amount = BigNumber.from(firstTransaction?.value ?? '0')}
 	{@const destination = firstTransaction.to ?? ''}
 
-	<FeeContext amount={Number(amount)} {destination} observe={currentStep?.name !== 'Sending'}>
-		<SendData amount={formatEtherShort(amount)} {destination} />
-
-		{#if nonNullish(firstTransaction.gasLimit)}
-			<p class="font-bold">Gas limit</p>
-			<p class="mb-2 font-normal">
-				{BigInt(firstTransaction.gasLimit).toString()}
-			</p>
+	<FeeContext amount={amount.toString()} {destination} observe={currentStep?.name !== 'Sending'}>
+		{#if currentStep?.name === 'Sending'}
+			<SendProgress progressStep={sendProgressStep} additionalSteps={[STEP_APPROVING]} />
+		{:else}
+			<WalletConnectSendReview
+				{firstTransaction}
+				{amount}
+				{destination}
+				on:icApprove={send}
+				on:icReject={reject}
+			/>
 		{/if}
-
-		{#if nonNullish(firstTransaction.gasPrice)}
-			<p class="font-bold">Gas price</p>
-			<p class="mb-2 font-normal">
-				{BigInt(firstTransaction.gasPrice).toString()}
-			</p>
-		{/if}
-
-		<div class="flex justify-end gap-1 mt-4">
-			<button class="primary" on:click={reject} disabled={$isBusy}>Reject</button>
-			<button class="primary" on:click={send} disabled={$isBusy}> Approve </button>
-		</div>
 	</FeeContext>
 </WizardModal>
