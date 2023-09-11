@@ -18,7 +18,7 @@
 		} as ProgressStep,
 		{
 			step: SendStep.SIGN,
-			text: 'Sign-in transaction...',
+			text: 'Signing transaction...',
 			state: 'next'
 		} as ProgressStep,
 		{
