@@ -1,9 +1,9 @@
-import type { BigNumber } from 'alchemy-sdk';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
-export const formatEtherShort = (value: BigNumber): string => {
+export const formatEtherShort = (value: BigNumber, decimals = 4): string => {
 	const res = Utils.formatEther(value);
-	return (+res).toFixed(4);
+	return (+res).toFixed(decimals).replace(/(\.0+|0+)$/, '');
 };
 
 /**
@@ -18,4 +18,18 @@ export const shortenWithMiddleEllipsis = (text: string, splitLength = 7): string
 	return text.length > minLength
 		? `${text.slice(0, splitLength)}...${text.slice(-1 * splitLength)}`
 		: text;
+};
+
+export const formatToDate = (seconds: number): string => {
+	const options: Intl.DateTimeFormatOptions = {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false
+	};
+
+	const date = new Date(seconds * 1000);
+	return date.toLocaleDateString('en', options);
 };

@@ -107,6 +107,7 @@ pub struct SignRequest {
     pub max_priority_fee_per_gas: Nat,
     pub value: Nat,
     pub nonce: Nat,
+    pub data: Option<String>,
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
@@ -130,6 +131,10 @@ async fn sign_transaction(req: SignRequest) -> String {
 
     let pubkey = ecdsa_pubkey_of(&caller).await;
 
+    let data = req.data.as_ref().map(|data| {
+        Bytes::from(hex::decode(data.trim_start_matches("0x")).expect("failed to decode data"))
+    });
+
     let tx = Eip1559TransactionRequest {
         chain_id: Some(nat_to_u64(&req.chain_id)),
         from: None,
@@ -141,7 +146,7 @@ async fn sign_transaction(req: SignRequest) -> String {
         gas: Some(nat_to_u256(&req.gas)),
         value: Some(nat_to_u256(&req.value)),
         nonce: Some(nat_to_u256(&req.nonce)),
-        data: Some(Bytes::new()),
+        data,
         access_list: Default::default(),
         max_priority_fee_per_gas: Some(nat_to_u256(&req.max_priority_fee_per_gas)),
         max_fee_per_gas: Some(nat_to_u256(&req.max_fee_per_gas)),

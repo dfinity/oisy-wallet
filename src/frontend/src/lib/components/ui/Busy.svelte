@@ -11,19 +11,34 @@
 
 		busy.stop();
 	};
+
+	const keyboardClose = ({ key }: KeyboardEvent) => {
+		if (key !== 'Escape') {
+			return;
+		}
+
+		close();
+	};
 </script>
 
 {#if nonNullish($busy)}
-	<div in:fade out:fade={{ duration: 200 }} on:click={close} class:close={$busy.close} class="busy">
+	<div
+		in:fade
+		out:fade={{ duration: 200 }}
+		on:click={close}
+		on:keydown={keyboardClose}
+		class:close={$busy.close}
+		class="busy"
+	>
 		<div class="content">
 			{#if $busy.spinner}
-				<div class="spinner text-ghost-white">
+				<div class="spinner text-off-white">
 					<Spinner />
 				</div>
 			{/if}
 
 			{#if $busy.close}
-				<button on:click|stopPropagation={close} aria-label="Close" class="text-ghost-white"
+				<button on:click|stopPropagation={close} aria-label="Close" class="text-off-white"
 					>Cancel</button
 				>
 			{/if}

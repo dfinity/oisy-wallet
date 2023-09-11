@@ -13,7 +13,7 @@
 		});
 	};
 
-	let uri: string = '';
+	let uri = '';
 
 	let invalid = true;
 	$: invalid = !uri;
@@ -44,7 +44,7 @@
 	{/if}
 </div>
 
-<p class="text-center p-2 text-xs">or use walletconnect uri</p>
+<p class="text-center pt-4 pb-2">or use WalletConnect uri</p>
 
 <Input
 	name="uri"
@@ -66,7 +66,10 @@
 	.qr-code {
 		position: relative;
 
-		border: 1px dashed var(--color-vampire-black);
+		outline-offset: var(--padding-0_25x);
+		outline: var(--color-dark) dashed var(--padding-0_5x);
+		--primary-rgb: 59, 0, 185;
+		overflow: hidden;
 
 		margin: 0 auto;
 

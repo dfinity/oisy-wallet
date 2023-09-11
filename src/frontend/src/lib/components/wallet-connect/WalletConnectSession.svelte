@@ -10,8 +10,13 @@
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { busy } from '$lib/stores/busy.store';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
-	import { modalStore, modalWalletConnectAuth } from '$lib/stores/modal.store';
-	import { SESSION_REQUEST_SIGN } from '$lib/constants/wallet-connect.constants';
+	import { modalStore } from '$lib/stores/modal.store';
+	import {
+		SESSION_REQUEST_SEND_TRANSACTION,
+		SESSION_REQUEST_SIGN
+	} from '$lib/constants/wallet-connect.constants';
+	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import ButtonWalletConnect from '$lib/components/ui/ButtonWalletConnect.svelte';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -69,6 +74,8 @@
 
 	onDestroy(async () => await disconnectListener());
 
+	const goToFirstStep = () => modal?.set?.(0);
+
 	const connect = async ({ detail: uri }: CustomEvent<string>) => {
 		modal.next();
 
@@ -91,12 +98,13 @@
 				level: 'info',
 				duration: 2000
 			});
+
+			goToFirstStep();
 		});
 
 		listener.sessionRequest(async (sessionRequest: Web3WalletTypes.SessionRequest) => {
-			console.log('REQUEST', sessionRequest.params.request.method);
-
-			if (nonNullish($modalStore)) {
+			// Another modal, like Send or Receive, is already in progress
+			if (nonNullish($modalStore) && !$modalWalletConnect) {
 				toastsError({
 					msg: {
 						text: 'Skipping the WalletConnect request as another action is currently in progress through an overlay.'
@@ -118,12 +126,18 @@
 					modalStore.openWalletConnectSign(sessionRequest);
 					return;
 				}
+				case SESSION_REQUEST_SEND_TRANSACTION: {
+					modalStore.openWalletConnectSend(sessionRequest);
+					return;
+				}
 				default: {
 					await listener?.rejectRequest({ topic, id });
 
 					toastsError({
 						msg: { text: `Requested method "${method}" is not supported.` }
 					});
+
+					close();
 				}
 			}
 		});
@@ -131,6 +145,8 @@
 		try {
 			await listener.pair();
 		} catch (err: unknown) {
+			resetListener();
+
 			toastsError({
 				msg: { text: `An unexpected error happened while trying to pair the wallet.` },
 				err
@@ -197,9 +213,9 @@
 </script>
 
 {#if isNullish(listener)}
-	<button on:click={modalStore.openWalletConnectAuth} class="primary"> WalletConnect (in) </button>
+	<ButtonWalletConnect on:click={modalStore.openWalletConnectAuth}>Connect</ButtonWalletConnect>
 {:else}
-	<button on:click={disconnect} class="primary"> WalletConnect (out) </button>
+	<ButtonWalletConnect on:click={disconnect}>Disconnect</ButtonWalletConnect>
 {/if}
 
 {#if $modalWalletConnectAuth}

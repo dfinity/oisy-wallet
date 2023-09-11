@@ -1,12 +1,14 @@
 <script lang="ts">
-	import { modalStore, modalWalletConnectSign } from '$lib/stores/modal.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { convertHexToUtf8, getSignParamsMessage } from '$lib/utils/wallet-connect.utils';
-	import { busy, isBusy } from '$lib/stores/busy.store';
+	import { busy } from '$lib/stores/busy.store';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -41,7 +43,7 @@
 					}
 				} = request;
 
-				const message = convertHexToUtf8(params);
+				convertHexToUtf8(params);
 
 				// TODO: sign message
 				// const signedMessage = await wallet.signMessage(message)

@@ -2,6 +2,7 @@ import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';
+import { formatJsonRpcResult } from '@walletconnect/jsonrpc-utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { Web3Wallet, type Web3WalletTypes } from '@walletconnect/web3wallet';
 
@@ -66,7 +67,7 @@ export const initWalletConnect = async ({
 			supportedNamespaces: {
 				eip155: {
 					chains: ['eip155:1', 'eip155:11155111'],
-					methods: ['eth_sendTransaction', 'personal_sign'],
+					methods: ['eth_sendTransaction', 'eth_sign', 'personal_sign'],
 					events: ['accountsChanged', 'chainChanged'],
 					accounts: [`eip155:1:${address}`, `eip155:11155111:${address}`]
 				}
@@ -82,7 +83,7 @@ export const initWalletConnect = async ({
 	const rejectSession = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { id } = proposal;
 
-		const session = await web3wallet.rejectSession({
+		await web3wallet.rejectSession({
 			id,
 			reason: getSdkError('USER_REJECTED_METHODS')
 		});
@@ -104,11 +105,26 @@ export const initWalletConnect = async ({
 			}
 		});
 
+	const approveRequest = async ({
+		id,
+		topic,
+		message
+	}: {
+		id: number;
+		topic: string;
+		message: string;
+	}) =>
+		await respond({
+			topic,
+			response: formatJsonRpcResult(id, message)
+		});
+
 	return {
 		pair: () => web3wallet.core.pairing.pair({ uri }),
 		approveSession,
 		rejectSession,
 		rejectRequest,
+		approveRequest,
 		sessionProposal,
 		sessionDelete,
 		sessionRequest,

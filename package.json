@@ -9,6 +9,7 @@
 		"build:post-process": "npm run build:csp && npm run build:compress",
 		"dev": "vite dev",
 		"build": "tsc --noEmit && vite build && npm run build:post-process",
+		"build:staging": "tsc --noEmit && vite build --mode staging && npm run build:post-process",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -20,15 +21,17 @@
 		"deploy": "scripts/deploy.sh"
 	},
 	"dependencies": {
-		"@dfinity/agent": "^0.18.1",
-		"@dfinity/auth-client": "^0.18.1",
-		"@dfinity/candid": "^0.18.1",
+		"@dfinity/agent": "^0.19.2",
+		"@dfinity/auth-client": "^0.19.2",
+		"@dfinity/candid": "^0.19.2",
 		"@dfinity/gix-components": "^2.6.0",
-		"@dfinity/principal": "^0.18.1",
-		"@dfinity/utils": "^0.0.19",
+		"@dfinity/principal": "^0.19.2",
+		"@dfinity/utils": "^0.0.20",
+		"@metamask/detect-provider": "^2.0.0",
 		"@walletconnect/web3wallet": "^1.9.0",
 		"alchemy-sdk": "^2.9.2",
 		"buffer": "^6.0.3",
+		"ethers": "^5.7.0",
 		"the-new-css-reset": "^1.9.0"
 	},
 	"devDependencies": {
