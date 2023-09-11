@@ -9,7 +9,7 @@ import { processTransactionSent } from '$lib/services/transaction.services';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Token } from '$lib/types/token';
 import type { TransactionFeeData } from '$lib/types/transaction';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 export interface TransferParams {
@@ -18,6 +18,7 @@ export interface TransferParams {
 	amount: BigNumber;
 	maxPriorityFeePerGas: bigint;
 	maxFeePerGas: bigint;
+	data?: string;
 }
 
 const ethPrepareTransaction = async ({
@@ -25,16 +26,18 @@ const ethPrepareTransaction = async ({
 	amount,
 	maxPriorityFeePerGas: max_priority_fee_per_gas,
 	maxFeePerGas: max_fee_per_gas,
-	nonce
-}: TransferParams & { nonce: number }): Promise<SignRequest> => ({
+	nonce,
+	gas,
+	data
+}: TransferParams & { nonce: number } & { gas: bigint | undefined }): Promise<SignRequest> => ({
 	to,
 	value: amount.toBigInt(),
 	chain_id: ETH_NETWORK_ID,
 	nonce: BigInt(nonce),
-	gas: ETH_BASE_FEE,
+	gas: gas ?? ETH_BASE_FEE,
 	max_fee_per_gas,
 	max_priority_fee_per_gas,
-	data: []
+	data: toNullable(data)
 });
 
 const erc20PrepareTransaction = async ({
@@ -96,6 +99,7 @@ export const send = async ({
 				...rest,
 				from,
 				nonce,
+				gas: gas?.toBigInt(),
 				maxFeePerGas: maxFeePerGas.toBigInt(),
 				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
 		  })
