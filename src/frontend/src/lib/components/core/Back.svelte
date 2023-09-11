@@ -12,6 +12,7 @@
 	});
 </script>
 
-<button class="flex gap-0.5 text-white font-bold" on:click={async () => back(nonNullish(fromRoute))}
-	><Back /> Back to Wallet</button
+<button
+	class="flex gap-0.5 text-white font-bold pointer-events-all"
+	on:click={async () => back(nonNullish(fromRoute))}><Back /> Back to Wallet</button
 >
