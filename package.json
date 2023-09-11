@@ -9,6 +9,7 @@
 		"build:post-process": "npm run build:csp && npm run build:compress",
 		"dev": "vite dev",
 		"build": "tsc --noEmit && vite build && npm run build:post-process",
+		"build:staging": "tsc --noEmit && vite build --mode staging && npm run build:post-process",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
