@@ -67,7 +67,7 @@ export const initWalletConnect = async ({
 			supportedNamespaces: {
 				eip155: {
 					chains: ['eip155:1', 'eip155:11155111'],
-					methods: ['eth_sendTransaction', 'personal_sign'],
+					methods: ['eth_sendTransaction', 'eth_sign', 'personal_sign'],
 					events: ['accountsChanged', 'chainChanged'],
 					accounts: [`eip155:1:${address}`, `eip155:11155111:${address}`]
 				}
