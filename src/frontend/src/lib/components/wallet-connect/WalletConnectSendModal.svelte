@@ -145,13 +145,6 @@
 					return;
 				}
 
-				if (isNullish(firstParam.value)) {
-					toastsError({
-						msg: { text: `Amount is not defined.` }
-					});
-					return;
-				}
-
 				if (isNullish($storeFeeData)) {
 					toastsError({
 						msg: { text: `Gas fees are not defined.` }
