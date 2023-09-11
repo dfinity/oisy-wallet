@@ -55,7 +55,7 @@
 	--dialog-height: 100vh;
 	--dialog-border-radius: 0;
 	--dialog-padding-y: var(--padding-4x);
-	--dialog-padding-x: var(--padding-2x);
+	--dialog-padding-x: 0;
 
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
 	--dialog-header-height: 74px;
@@ -74,7 +74,7 @@
 		--dialog-height: initial;
 		--dialog-max-height: var(--alert-max-height);
 		--dialog-border-radius: var(--alert-border-radius);
-		--dialog-padding-x: var(--padding-4x);
+		--dialog-padding-x: var(--padding-3x);
 	}
 
 	@media (min-width: 768px) and (min-height: 560px) {
