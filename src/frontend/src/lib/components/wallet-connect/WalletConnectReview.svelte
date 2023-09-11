@@ -5,7 +5,6 @@
 	import { fade } from 'svelte/transition';
 	import type { ProposalTypes } from '@walletconnect/types';
 	import { EIP155_CHAINS } from '$lib/constants/eip155-chains.constants';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	import { isBusy } from '$lib/derived/busy.derived';
@@ -25,8 +24,6 @@
 			>{params.proposer.metadata.url}</a
 		>
 
-		<Hr />
-
 		{#each Object.entries(params.requiredNamespaces) as [key, value]}
 			{@const allMethods = value.methods}
 			{@const allEvents = value.events}
@@ -38,7 +35,7 @@
 					Review {chainName} ({key}) permissions:
 				</p>
 
-				<article class="bg-dark-blue text-off-white rounded-sm p-2 mt-2">
+				<article class="bg-blue text-off-white rounded-sm p-2 mt-2">
 					<p class="font-bold">Methods:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
