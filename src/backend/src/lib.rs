@@ -212,7 +212,7 @@ async fn personal_sign(plaintext: String) -> String {
     let v = y_parity(&message, &response.signature, &pubkey);
     let mut sig = response.signature;
     sig.push(v as u8);
-    hex::encode(&sig)
+    format!("0x{}", hex::encode(&sig))
 }
 
 fn y_parity(msg: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
