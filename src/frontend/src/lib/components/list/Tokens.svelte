@@ -25,7 +25,7 @@
 
 			<Img src={token.icon ?? oisy} slot="icon" />
 
-			<div class="font-normal break-words" slot="description">
+			<div class="break-words" slot="amount">
 				{formatEtherShort($balancesStore?.[token.id] ?? BigNumber.from(0n))}
 				{token.symbol}
 			</div>
