@@ -23,7 +23,7 @@
 		<Card>
 			{token.name}
 
-			<Img src={token.icon ?? oisy} slot="icon" />
+			<Img src={token.icon ?? oisy} slot="icon" alt={`${token.name} logo`} />
 
 			<div class="break-words" slot="amount">
 				{formatEtherShort($balancesStore?.[token.id] ?? BigNumber.from(0n))}
