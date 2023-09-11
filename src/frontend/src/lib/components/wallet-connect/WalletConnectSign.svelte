@@ -3,12 +3,14 @@
 	import { Modal } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { convertHexToUtf8, getSignParamsMessage } from '$lib/utils/wallet-connect.utils';
+	import { getSignParamsMessageHex } from '$lib/utils/wallet-connect.utils';
 	import { busy } from '$lib/stores/busy.store';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
+	import { signMessage } from '$lib/api/backend.api';
+	import { isAddress } from '@ethersproject/address';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -43,15 +45,11 @@
 					}
 				} = request;
 
-				convertHexToUtf8(params);
+				const message = getSignParamsMessageHex(params);
 
-				// TODO: sign message
-				// const signedMessage = await wallet.signMessage(message)
+				const signedMessage = await signMessage(message);
 
-				// TODO: approve request
-
-				// TODO: to be removed
-				await listener.rejectRequest({ topic, id });
+				await listener.approveRequest({ topic, id, message: signedMessage });
 			},
 			toastMsg: 'WalletConnect request approved.'
 		});
@@ -110,7 +108,7 @@
 
 		<p class="font-bold">Message</p>
 		<p class="mb-2 font-normal">
-			<output class="break-words">{getSignParamsMessage(request.params.request.params)}</output>
+			<output class="break-words">{getSignParamsMessageHex(request.params.request.params)}</output>
 		</p>
 
 		<p class="font-bold">Method</p>
