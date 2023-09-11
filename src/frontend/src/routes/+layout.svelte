@@ -10,6 +10,7 @@
 	import '$lib/styles/global.scss';
 	import { authSignedInStore } from '$lib/derived/auth.derived';
 	import SignIn from '$lib/components/pages/SignIn.svelte';
+	import Banner from '$lib/components/core/Banner.svelte';
 
 	/**
 	 * Init authentication
@@ -74,5 +75,6 @@
 	{/if}
 {/await}
 
+<Banner />
 <Toasts />
 <Busy />
