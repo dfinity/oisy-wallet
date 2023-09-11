@@ -32,7 +32,12 @@ export const transactions = async ({
 		throw new Error(`Fetching transactions with Etherscan API failed.`);
 	}
 
-	const { result }: { result: EtherscanRestTransaction[] } = await response.json();
+	const { result }: { result: EtherscanRestTransaction[] | string } = await response.json();
+
+	if (typeof result === 'string') {
+		throw new Error(result);
+	}
+
 	return result.map(
 		({
 			nonce,
