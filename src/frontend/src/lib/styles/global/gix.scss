@@ -31,7 +31,7 @@
 	--toast-info-z-index: calc(var(--overlay-z-index) + 4);
 	--toast-error-z-index: calc(var(--overlay-z-index) + 5);
 
-	--overlay-box-shadow: 0px 0px 8px rgba(var(--box-shadow-color-rgb), 0.2);
+	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
 	// Input
 	--input-background: var(--color-white);
@@ -107,4 +107,13 @@ div.input-field input[id]::placeholder {
 div.modal {
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
+}
+
+div.popover {
+	--background: var(--overlay-background);
+	--background-contrast: var(--overlay-background-contrast);
+
+	.wrapper {
+		padding: var(--padding-1_5x);
+	}
 }
