@@ -1,5 +1,6 @@
 use candid::{CandidType, Deserialize, Nat, Principal};
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
+use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
@@ -123,7 +124,7 @@ fn nat_to_u64(n: &Nat) -> U64 {
 #[update]
 async fn sign_transaction(req: SignRequest) -> String {
     use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
-    use ethers_core::types::{Bytes, Signature};
+    use ethers_core::types::Signature;
 
     const EIP1559_TX_ID: u8 = 2;
 
@@ -131,9 +132,7 @@ async fn sign_transaction(req: SignRequest) -> String {
 
     let pubkey = ecdsa_pubkey_of(&caller).await;
 
-    let data = req.data.as_ref().map(|data| {
-        Bytes::from(hex::decode(data.trim_start_matches("0x")).expect("failed to decode data"))
-    });
+    let data = req.data.as_ref().map(|s| decode_hex(&s));
 
     let tx = Eip1559TransactionRequest {
         chain_id: Some(nat_to_u64(&req.chain_id)),
@@ -183,15 +182,17 @@ async fn sign_transaction(req: SignRequest) -> String {
 }
 
 #[update]
-async fn personal_sign(plaintext: Vec<u8>) -> String {
+async fn personal_sign(plaintext: String) -> String {
     let caller = ic_cdk::caller();
 
     let pubkey = ecdsa_pubkey_of(&caller).await;
 
+    let bytes = decode_hex(&plaintext);
+
     let message = [
         b"\x19Ethereum Signed Message:\n",
-        plaintext.len().to_string().as_bytes(),
-        plaintext.as_ref(),
+        bytes.len().to_string().as_bytes(),
+        bytes.as_ref(),
     ]
     .concat();
 
@@ -235,6 +236,10 @@ fn y_parity(msg: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
         hex::encode(sig),
         hex::encode(pubkey)
     )
+}
+
+fn decode_hex(hex: &str) -> Bytes {
+    Bytes::from(hex::decode(hex.trim_start_matches("0x")).expect("failed to decode hex"))
 }
 
 export_candid!();
