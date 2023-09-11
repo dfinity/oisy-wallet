@@ -159,7 +159,7 @@
 					return;
 				}
 
-				const { maxFeePerGas, maxPriorityFeePerGas, gas } = $storeFeeData;
+				const { maxFeePerGas, maxPriorityFeePerGas } = $storeFeeData;
 
 				if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
 					toastsError({
@@ -168,8 +168,7 @@
 					return;
 				}
 
-				// TODO: we have gas issue. should we use the gas and gasLimit provided by WalletConnect?
-				const { to } = firstParam;
+				const { to, gas: gasWC, data } = firstParam;
 
 				modal.next();
 
@@ -183,7 +182,8 @@
 						amount,
 						maxFeePerGas,
 						maxPriorityFeePerGas,
-						gas
+						gas: BigNumber.from(gasWC),
+						data
 					});
 
 					await listener.approveRequest({ id, topic, message: hash });
