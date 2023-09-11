@@ -10,7 +10,7 @@
 	$: back = isRouteTransactions($page);
 </script>
 
-<header class="flex justify-between md:px-2 relative z-1">
+<header class="flex justify-between md:px-2 relative z-1 pointer-events-none">
 	{#if back}
 		<Back />
 	{:else}
@@ -19,7 +19,7 @@
 		</div>
 	{/if}
 
-	<div class="flex m-2 gap-2" style="margin-left: auto">
+	<div class="flex m-2 gap-2 pointer-events-all" style="margin-left: auto">
 		<WalletConnect />
 		<UserPrincipal />
 	</div>
