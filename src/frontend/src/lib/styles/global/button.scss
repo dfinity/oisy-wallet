@@ -66,6 +66,13 @@ button {
 		width: 100%;
 	}
 
+	&.text {
+		&:hover,
+		&:active {
+			color: var(--color-blue);
+		}
+	}
+
 	&.wallet-connect {
 		background: var(--color-wallet-connect);
 		border: 1px solid var(--color-wallet-connect);
