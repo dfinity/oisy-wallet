@@ -1,45 +1,32 @@
 <script lang="ts">
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import { addressStore, addressStoreNotLoaded } from '$lib/stores/address.store';
-	import { isBusy } from '$lib/stores/busy.store';
-	import { Modal, QRCode } from '@dfinity/gix-components';
-	import IconETHQRCode from '$lib/components/icons/IconETHQRCode.svelte';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import { modalReceive, modalStore } from '$lib/stores/modal.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { isBusy } from '$lib/derived/busy.derived';
+	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
+	import { onMount } from 'svelte';
+	import { initMetamaskSupport, openMetamaskTransaction } from '$lib/services/metamask.services';
+	import { metamaskAvailable, metamaskNotInitialized } from '$lib/derived/metamask.derived';
+	import { addressStore } from '$lib/stores/address.store';
 
 	let disabled: boolean;
-	$: disabled = $addressStoreNotLoaded || $isBusy;
+	$: disabled = $addressNotLoaded || $isBusy || $metamaskNotInitialized;
+
+	const receive = async () => {
+		if ($metamaskAvailable) {
+			await openMetamaskTransaction($addressStore);
+			return;
+		}
+
+		modalStore.openReceive();
+	};
+
+	onMount(initMetamaskSupport);
 </script>
 
-<button
-	class="flex-1 secondary"
-	{disabled}
-	class:opacity-50={disabled}
-	on:click={modalStore.openReceive}
->
+<button class="flex-1 secondary" {disabled} class:opacity-50={disabled} on:click={receive}>
 	<IconReceive size="28" />
 	<span>Receive</span></button
 >
 
-<Modal visible={$modalReceive} on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">Receive ETH</svelte:fragment>
-
-	<p class="font-bold">Wallet address</p>
-	<p class="flex gap-1 mb-2 font-normal sm:items-center">
-		<output class="break-words">{$addressStore ?? ''}</output><Copy value={$addressStore ?? ''} />
-	</p>
-
-	<div
-		class="p-4 rounded-sm"
-		style="border: 1px dashed var(--color-vampire-black); max-width: 360px; margin: 0 auto;"
-	>
-		<QRCode value={$addressStore ?? ''}>
-			<div
-				class="p-1.5 rounded-sm bg-ghost-white flex flex-col items-center justify-center"
-				slot="logo"
-			>
-				<IconETHQRCode />
-			</div>
-		</QRCode>
-	</div>
-</Modal>
+<ReceiveModal />

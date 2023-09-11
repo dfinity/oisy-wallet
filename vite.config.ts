@@ -47,9 +47,6 @@ const readCanisterIds = ({ prefix }: { prefix?: string }): Record<string, string
 
 const config: UserConfig = {
 	plugins: [sveltekit()],
-	test: {
-		include: ['src/**/*.{test,spec}.{js,ts}']
-	},
 	resolve: {
 		alias: {
 			$declarations: resolve('./src/declarations')
@@ -75,12 +72,14 @@ const config: UserConfig = {
 						[
 							'frontend/src/lib/api',
 							'frontend/src/lib/constants',
+							'frontend/src/lib/derived',
 							'frontend/src/lib/enums',
 							'frontend/src/lib/providers',
+							'frontend/src/lib/rest',
 							'frontend/src/lib/services',
 							'frontend/src/lib/stores',
-							'frontend/src/lib/workers',
-							'frontend/src/lib/utils'
+							'frontend/src/lib/utils',
+							'frontend/src/lib/workers'
 						].find((module) => folder.includes(module)) !== undefined
 					) {
 						return 'dapp';
@@ -115,7 +114,6 @@ const config: UserConfig = {
 				global: 'globalThis'
 			},
 			plugins: [
-				// @ts-ignore
 				NodeModulesPolyfillPlugin(),
 				{
 					name: 'fix-node-globals-polyfill',

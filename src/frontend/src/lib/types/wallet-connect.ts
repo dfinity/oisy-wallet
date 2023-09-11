@@ -12,3 +12,13 @@ export interface WalletConnectListener extends WebSocketListener {
 	rejectRequest: (params: { id: number; topic: string }) => Promise<void>;
 	approveRequest: (params: { id: number; topic: string; message: string }) => Promise<void>;
 }
+
+export interface WalletConnectEthSendTransactionParams {
+	from: string;
+	to?: string;
+	data: string;
+	gasPrice?: string;
+	gasLimit?: string;
+	value?: string;
+	nonce?: string;
+}

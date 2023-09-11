@@ -1,27 +1,22 @@
 <script lang="ts">
-	import SendSource from '$lib/components/send/SendSource.svelte';
-	import SendDestination from '$lib/components/send/SendDestination.svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
-	import SendFee from '$lib/components/send/SendFee.svelte';
-	import type { FeeData } from '@ethersproject/providers';
 	import { isNullish } from '@dfinity/utils';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
+	import SendData from '$lib/components/send/SendData.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
-	export let feeData: FeeData | undefined;
+
+	const { store: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let invalid = true;
-	$: invalid = invalidDestination(destination) || invalidAmount(amount) || isNullish(feeData);
+	$: invalid = invalidDestination(destination) || invalidAmount(amount) || isNullish($storeFeeData);
 
 	const dispatch = createEventDispatcher();
 </script>
 
-<SendDestination {destination} {amount} />
-
-<SendSource />
-
-<SendFee {feeData} />
+<SendData {amount} {destination} />
 
 <div class="flex justify-end gap-1">
 	<button class="primary" on:click={() => dispatch('icBack')}>Back</button>

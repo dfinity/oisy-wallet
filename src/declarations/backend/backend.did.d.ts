@@ -9,12 +9,13 @@ export interface SignRequest {
 	gas: bigint;
 	value: bigint;
 	max_priority_fee_per_gas: bigint;
+	data: [] | [string];
 	max_fee_per_gas: bigint;
 	chain_id: bigint;
 	nonce: bigint;
 }
 export interface _SERVICE {
 	caller_eth_address: ActorMethod<[], string>;
-	personal_sign: ActorMethod<[Uint8Array | number[]], string>;
+	personal_sign: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }

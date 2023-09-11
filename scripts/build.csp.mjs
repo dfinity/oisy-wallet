@@ -132,15 +132,17 @@ const updateCSP = (indexHtml) => {
 		indexHashes.push(`'sha256-${createHash('sha256').update(content).digest('base64')}'`);
 	}
 
-	const ethProviders =
-		'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
+	const ethConnectSrc =
+		'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com wss://relay.walletconnect.com https://verify.walletconnect.com';
+
+	const ethFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethProviders};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethConnectSrc};
         img-src 'self' data: https://tewsx-xaaaa-aaaad-aadia-cai.raw.icp0.io;
-        child-src 'self';
+        frame-src 'self' ${ethFrameSrc};
         manifest-src 'self';
         script-src 'unsafe-eval' 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
         base-uri 'self';

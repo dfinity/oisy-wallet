@@ -7,13 +7,14 @@ export const idlFactory = ({ IDL }) => {
 		gas: IDL.Nat,
 		value: IDL.Nat,
 		max_priority_fee_per_gas: IDL.Nat,
+		data: IDL.Opt(IDL.Text),
 		max_fee_per_gas: IDL.Nat,
 		chain_id: IDL.Nat,
 		nonce: IDL.Nat
 	});
 	return IDL.Service({
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
-		personal_sign: IDL.Func([IDL.Vec(IDL.Nat8)], [IDL.Text], []),
+		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
 	});
 };

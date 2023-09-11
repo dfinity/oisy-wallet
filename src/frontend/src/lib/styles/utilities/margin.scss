@@ -58,6 +58,14 @@ $property: margin;
 @include utilities.generate(mt-4, #{$property}-top, var(--padding-4x));
 @include utilities.generate(mb-4, #{$property}-bottom, var(--padding-4x));
 
+@include utilities.generate(m-6, $property, var(--padding-6x));
+@include utilities.generate(mx-6, #{$property}-left, var(--padding-6x));
+@include utilities.generate(mx-6, #{$property}-right, var(--padding-6x));
+@include utilities.generate(my-6, #{$property}-top, var(--padding-6x));
+@include utilities.generate(my-6, #{$property}-bottom, var(--padding-6x));
+@include utilities.generate(mt-6, #{$property}-top, var(--padding-6x));
+@include utilities.generate(mb-6, #{$property}-bottom, var(--padding-6x));
+
 @include utilities.generate(m-8, $property, var(--padding-8x));
 @include utilities.generate(mx-8, #{$property}-left, var(--padding-8x));
 @include utilities.generate(mx-8, #{$property}-right, var(--padding-8x));

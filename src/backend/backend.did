@@ -5,12 +5,13 @@ type SignRequest = record {
   gas : nat;
   value : nat;
   max_priority_fee_per_gas : nat;
+  data : opt text;
   max_fee_per_gas : nat;
   chain_id : nat;
   nonce : nat;
 };
 service : (Arg) -> {
   caller_eth_address : () -> (text);
-  personal_sign : (vec nat8) -> (text);
+  personal_sign : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
 }

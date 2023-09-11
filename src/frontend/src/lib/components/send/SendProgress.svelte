@@ -5,8 +5,11 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { IconWarning } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let progressStep: string = SendStep.INITIALIZATION;
+	export let additionalSteps: ProgressStep[] | undefined = undefined;
+
 	let steps: [ProgressStep, ...ProgressStep[]] = [
 		{
 			step: SendStep.INITIALIZATION,
@@ -15,21 +18,22 @@
 		} as ProgressStep,
 		{
 			step: SendStep.SIGN,
-			text: 'Sign-in transaction...',
+			text: 'Signing transaction...',
 			state: 'next'
 		} as ProgressStep,
 		{
 			step: SendStep.SEND,
 			text: 'Sending...',
 			state: 'next'
-		} as ProgressStep
+		} as ProgressStep,
+		...(nonNullish(additionalSteps) ? additionalSteps : [])
 	];
 
 	onMount(() => confirmToCloseBrowser(true));
 	onDestroy(() => confirmToCloseBrowser(false));
 </script>
 
-<div class="bg-interdimensional-blue text-ghost-white rounded-lg p-4 mb-4 flex gap-2">
+<div class="bg-blue text-off-white rounded-lg p-4 mb-4 flex gap-2">
 	<IconWarning size="44px" />
 	<div>
 		<p class="value">This may take a few seconds.</p>

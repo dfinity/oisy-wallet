@@ -8,10 +8,10 @@
 
 	--negative-emphasis: var(--color-cyclamen);
 
-	--primary: var(--color-interdimensional-blue);
-	--tertiary: var(--color-deep-violet);
+	--primary: var(--color-blue);
+	--tertiary: var(--color-dark);
 
-	--value-color: var(--color-vampire-black);
+	--value-color: var(--color-dark);
 
 	--border-radius-2x: var(--border-radius-lg);
 	--border-radius-0_5x: calc(0.5 * var(--border-radius-sm));
@@ -19,11 +19,11 @@
 
 	--animation-time-normal: 0.2s;
 
-	--progress-color: var(--color-interdimensional-blue);
+	--progress-color: var(--color-blue);
 	--progress-color-contrast: var(--color-white);
 	--progress-color-rgb: 59, 0, 185;
 
-	--overlay-background: var(--color-ghost-white);
+	--overlay-background: var(--color-off-white);
 	--overlay-background-contrast: var(--color-vampire-black);
 
 	--overlay-z-index: calc(var(--z-index) + 1);
@@ -31,7 +31,7 @@
 	--toast-info-z-index: calc(var(--overlay-z-index) + 4);
 	--toast-error-z-index: calc(var(--overlay-z-index) + 5);
 
-	--overlay-box-shadow: 0px 0px 8px rgba(var(--box-shadow-color-rgb), 0.2);
+	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
 	// Input
 	--input-background: var(--color-white);
@@ -39,7 +39,7 @@
 	--input-border-color: #e9e7e3;
 	--input-border-size: 1px;
 	--animation-time-short: 0.2s;
-	--secondary: var(--color-dark-slate-blue);
+	--secondary: var(--color-dark-blue);
 
 	// Modal
 
@@ -55,7 +55,7 @@
 	--dialog-height: 100vh;
 	--dialog-border-radius: 0;
 	--dialog-padding-y: var(--padding-4x);
-	--dialog-padding-x: var(--padding-2x);
+	--dialog-padding-x: 0;
 
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
 	--dialog-header-height: 74px;
@@ -74,14 +74,14 @@
 		--dialog-height: initial;
 		--dialog-max-height: var(--alert-max-height);
 		--dialog-border-radius: var(--alert-border-radius);
-		--dialog-padding-x: var(--padding-4x);
+		--dialog-padding-x: var(--padding-3x);
 	}
 
 	@media (min-width: 768px) and (min-height: 560px) {
 		--dialog-min-height: 554.25px;
 	}
 
-	--backdrop-contrast: var(--color-vampire-black);
+	--backdrop-contrast: var(--color-dark);
 	--backdrop-filter: blur(4px);
 }
 
@@ -102,4 +102,19 @@ div.input-field input[id] {
 
 div.input-field input[id]::placeholder {
 	color: rgba(0, 0, 0, 0.4);
+}
+
+div.modal {
+	color: var(--color-dark);
+	font-weight: var(--font-weight-normal);
+}
+
+div.popover {
+	--background: var(--overlay-background);
+	--background-contrast: var(--overlay-background-contrast);
+
+	.wrapper {
+		padding: var(--padding-1_5x);
+		--padding: var(--padding-1_5x);
+	}
 }
