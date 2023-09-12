@@ -6,11 +6,11 @@
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
 
-    export let token: Token;
+	export let token: Token;
 
 	let listener: WebSocketListener | undefined = undefined;
 
-	const initListener = async ({ address }: { address: AddressData; }) => {
+	const initListener = async ({ address }: { address: AddressData }) => {
 		await listener?.disconnect();
 
 		if (isNullish(address)) {
