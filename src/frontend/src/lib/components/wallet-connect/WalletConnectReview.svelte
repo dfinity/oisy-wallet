@@ -6,8 +6,7 @@
 	import type { ProposalTypes } from '@walletconnect/types';
 	import { EIP155_CHAINS } from '$lib/constants/eip155-chains.constants';
 	import { createEventDispatcher } from 'svelte';
-
-	import { isBusy } from '$lib/derived/busy.derived';
+	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -47,14 +46,7 @@
 			{/each}
 		{/each}
 
-		<div class="flex justify-end gap-1 mt-4">
-			<button class="primary" on:click={() => dispatch('icReject')} disabled={$isBusy}
-				>Reject</button
-			>
-			<button class="primary" on:click={() => dispatch('icApprove')} disabled={$isBusy}>
-				Approve
-			</button>
-		</div>
+		<WalletConnectActions on:icApprove on:icReject />
 	</div>
 {:else}
 	<div class="flex flex-col items-center justify-center">
