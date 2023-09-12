@@ -1,5 +1,8 @@
 <script lang="ts">
-	import { getSignParamsMessage, getSignParamsMessageHex } from '$lib/utils/wallet-connect.utils';
+	import {
+		getSignParamsMessageUtf8,
+		getSignParamsMessageHex
+	} from '$lib/utils/wallet-connect.utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { nonNullish } from '@dfinity/utils';
@@ -32,7 +35,7 @@
 	</div>
 {:else}
 	<p class="mb-2 font-normal">
-		<output class="break-words">{getSignParamsMessage(request.params.request.params)}</output>
+		<output class="break-words">{getSignParamsMessageUtf8(request.params.request.params)}</output>
 	</p>
 {/if}
 

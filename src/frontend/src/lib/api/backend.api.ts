@@ -15,3 +15,8 @@ export const signMessage = async (message: string): Promise<string> => {
 	const actor = await getBackendActor();
 	return actor.personal_sign(message);
 };
+
+export const signPrehash = async (hash: string): Promise<string> => {
+	const actor = await getBackendActor();
+	return actor.sign_prehash(hash);
+};

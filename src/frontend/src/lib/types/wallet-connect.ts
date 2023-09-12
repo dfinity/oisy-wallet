@@ -1,6 +1,7 @@
 import type { WebSocketListener } from '$lib/types/listener';
 import type { PairingTypes } from '@walletconnect/types';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+import type { TypedDataDomain, TypedDataField } from 'ethers';
 
 export interface WalletConnectListener extends WebSocketListener {
 	pair: () => Promise<PairingTypes.Struct>;
@@ -21,4 +22,11 @@ export interface WalletConnectEthSendTransactionParams {
 	gasLimit?: string;
 	value?: string;
 	nonce?: string;
+}
+
+export interface WalletConnectEthSignTypedDataV4 {
+	domain: TypedDataDomain;
+	types: Record<string, Array<TypedDataField>>;
+	message: Record<string, unknown>;
+	primaryType: string;
 }
