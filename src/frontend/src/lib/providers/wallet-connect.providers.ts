@@ -8,7 +8,7 @@ import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';
-import { formatJsonRpcResult } from '@walletconnect/jsonrpc-utils';
+import { formatJsonRpcResult, type ErrorResponse } from '@walletconnect/jsonrpc-utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { Web3Wallet, type Web3WalletTypes } from '@walletconnect/web3wallet';
 
@@ -101,16 +101,21 @@ export const initWalletConnect = async ({
 	const respond = async ({ topic, response }: { topic: string; response: JsonRpcResponse }) =>
 		await web3wallet.respondSessionRequest({ topic, response });
 
-	const rejectRequest = async ({ id, topic }: { id: number; topic: string }) =>
+	const rejectRequest = async ({
+		id,
+		topic,
+		error
+	}: {
+		id: number;
+		topic: string;
+		error: ErrorResponse;
+	}) =>
 		await respond({
 			topic,
 			response: {
 				id,
 				jsonrpc: '2.0',
-				error: {
-					code: 5000,
-					message: 'User rejected.'
-				}
+				error
 			}
 		});
 
