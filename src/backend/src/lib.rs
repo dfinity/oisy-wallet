@@ -209,6 +209,19 @@ async fn personal_sign(plaintext: String) -> String {
     format!("0x{}", hex::encode(&signature))
 }
 
+#[update]
+async fn sign_prehash(prehash: String) -> String {
+    let caller = ic_cdk::caller();
+
+    let hash_bytes = decode_hex(&prehash);
+
+    let (pubkey, mut signature) = pubkey_and_signature(&caller, hash_bytes.to_vec()).await;
+
+    let v = y_parity(&hash_bytes, &signature, &pubkey);
+    signature.push(v as u8);
+    format!("0x{}", hex::encode(&signature))
+}
+
 fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
     use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
 

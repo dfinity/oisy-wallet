@@ -17,5 +17,6 @@ export interface SignRequest {
 export interface _SERVICE {
 	caller_eth_address: ActorMethod<[], string>;
 	personal_sign: ActorMethod<[string], string>;
+	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }
