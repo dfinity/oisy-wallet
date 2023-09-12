@@ -9,7 +9,11 @@ export type CallBackParams = {
 	listener: WalletConnectListener;
 };
 
-export const reject = (params: CallBackParams): Promise<{ success: boolean; err?: unknown }> =>
+export type RejectParams = Pick<CallBackParams, 'request'> & {
+	listener: WalletConnectListener | null | undefined;
+};
+
+export const reject = (params: RejectParams): Promise<{ success: boolean; err?: unknown }> =>
 	execute({
 		params,
 		callback: async ({ request, listener }: CallBackParams) => {
@@ -31,7 +35,7 @@ export const execute = async ({
 	callback,
 	toastMsg
 }: {
-	params: CallBackParams;
+	params: RejectParams;
 	callback: (params: CallBackParams) => Promise<void>;
 	toastMsg: string;
 }): Promise<{ success: boolean; err?: unknown }> => {
