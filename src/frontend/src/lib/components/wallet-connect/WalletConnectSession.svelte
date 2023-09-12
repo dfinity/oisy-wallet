@@ -191,7 +191,17 @@
 		}
 	};
 
-	const reject = async () => await answer({ callback: listener?.rejectSession });
+	const reject = async () =>
+		await answer({
+			callback: async () => {
+				if (nonNullish(proposal)) {
+					await listener?.rejectSession(proposal);
+				}
+
+				resetAndClose();
+			}
+		});
+
 	const approve = async () =>
 		await answer({
 			callback: listener?.approveSession,
