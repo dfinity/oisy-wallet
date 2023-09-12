@@ -2,7 +2,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type {
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
@@ -133,7 +133,7 @@
 					return;
 				}
 
-				const { maxFeePerGas, maxPriorityFeePerGas } = $storeFeeData;
+				const { maxFeePerGas, maxPriorityFeePerGas, gas } = $storeFeeData;
 
 				if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
 					toastsError({
@@ -156,7 +156,7 @@
 						amount,
 						maxFeePerGas,
 						maxPriorityFeePerGas,
-						gas: BigNumber.from(gasWC),
+						gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
 						data
 					});
 
