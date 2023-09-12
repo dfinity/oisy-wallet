@@ -136,7 +136,7 @@
 					class="tertiary"
 					style="margin: var(--padding-4x) auto 0;"
 					disabled={disabledConfirm}
-					class:opacity-5={disabledConfirm}>Let's go!</button
+					class:opacity-0={disabledConfirm}>Let's go!</button
 				>
 			{/if}
 		</Modal>
