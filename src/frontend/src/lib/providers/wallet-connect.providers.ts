@@ -1,3 +1,8 @@
+import {
+	SESSION_REQUEST_ETH_SIGN,
+	SESSION_REQUEST_PERSONAL_SIGN,
+	SESSION_REQUEST_SEND_TRANSACTION
+} from '$lib/constants/wallet-connect.constants';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
@@ -50,7 +55,11 @@ export const initWalletConnect = async ({
 			supportedNamespaces: {
 				eip155: {
 					chains: ['eip155:1', 'eip155:11155111'],
-					methods: ['eth_sendTransaction', 'eth_sign', 'personal_sign'],
+					methods: [
+						SESSION_REQUEST_SEND_TRANSACTION,
+						SESSION_REQUEST_ETH_SIGN,
+						SESSION_REQUEST_PERSONAL_SIGN
+					],
 					events: ['accountsChanged', 'chainChanged'],
 					accounts: [`eip155:1:${address}`, `eip155:11155111:${address}`]
 				}

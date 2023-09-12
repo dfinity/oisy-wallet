@@ -1,10 +1,12 @@
-import { SendStep } from '$lib/enums/steps';
+import { signMessage as signMessageApi } from '$lib/api/backend.api';
+import { SendStep, SignStep } from '$lib/enums/steps';
 import { send as executeSend, type SendParams } from '$lib/services/send.services';
 import type { AddressData } from '$lib/stores/address.store';
 import { busy } from '$lib/stores/busy.store';
 import type { FeeStoreData } from '$lib/stores/fee.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import { getSignParamsMessageHex } from '$lib/utils/wallet-connect.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
@@ -25,6 +27,12 @@ export type WalletConnectSendParams = WalletConnectExecuteParams & {
 	modalNext: () => void;
 	amount: BigNumber;
 } & SendParams;
+
+export type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
+	listener: WalletConnectListener | null | undefined;
+	modalNext: () => void;
+	progress: (step: SignStep) => void;
+};
 
 export const reject = (
 	params: WalletConnectExecuteParams
@@ -149,7 +157,52 @@ export const send = ({
 		toastMsg: 'WalletConnect eth_sendTransaction request executed.'
 	});
 
-export const execute = async ({
+export const signMessage = ({
+	modalNext,
+	progress,
+	...params
+}: WalletConnectSignMessageParams): Promise<{ success: boolean; err?: unknown }> =>
+	execute({
+		params,
+		callback: async ({
+			request,
+			listener
+		}: WalletConnectCallBackParams): Promise<{ success: boolean; err?: unknown }> => {
+			const {
+				id,
+				topic,
+				params: {
+					request: { params }
+				}
+			} = request;
+
+			modalNext();
+
+			try {
+				progress(SignStep.SIGN);
+
+				const message = getSignParamsMessageHex(params);
+
+				const signedMessage = await signMessageApi(message);
+
+				progress(SignStep.APPROVE);
+
+				await listener.approveRequest({ topic, id, message: signedMessage });
+
+				progress(SignStep.DONE);
+
+				return { success: true };
+			} catch (err: unknown) {
+				// TODO: better error rejection
+				await listener.rejectRequest({ topic, id });
+
+				throw err;
+			}
+		},
+		toastMsg: `WalletConnect sign request executed.`
+	});
+
+const execute = async ({
 	params: { request, listener },
 	callback,
 	toastMsg

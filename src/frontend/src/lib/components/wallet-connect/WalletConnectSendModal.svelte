@@ -64,11 +64,6 @@
 
 	export let listener: WalletConnectListener | undefined | null;
 
-	type CallBackParams = {
-		request: Web3WalletTypes.SessionRequest;
-		listener: WalletConnectListener;
-	};
-
 	/**
 	 * Reject a transaction
 	 */
