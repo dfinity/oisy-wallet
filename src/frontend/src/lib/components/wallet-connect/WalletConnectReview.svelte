@@ -5,20 +5,18 @@
 	import { fade } from 'svelte/transition';
 	import type { ProposalTypes } from '@walletconnect/types';
 	import { EIP155_CHAINS } from '$lib/constants/eip155-chains.constants';
-	import { createEventDispatcher } from 'svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;
-
-	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
 	<div in:fade>
 		<p class="font-bold">{params.proposer.metadata.name}</p>
+		<p>{params.proposer.metadata.description}</p>
 		<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
 			>{params.proposer.metadata.url}</a
 		>
@@ -30,11 +28,11 @@
 			{#each value.chains ?? [] as chainId}
 				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
 
-				<p class="font-bold mt-2">
-					Review {chainName} ({key}) permissions:
+				<p class="font-bold mt-3">
+					Review {chainName} ({key}) required permissions:
 				</p>
 
-				<article class="bg-blue text-off-white rounded-sm p-2 mt-2">
+				<article class="bg-blue text-off-white rounded-sm p-2 mt-1">
 					<p class="font-bold">Methods:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
