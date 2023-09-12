@@ -1,4 +1,4 @@
-import { signMessage as signMessageApi } from '$lib/api/backend.api';
+import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
 import { SendStep, SignStep } from '$lib/enums/steps';
 import { send as executeSend, type SendParams } from '$lib/services/send.services';
 import type { AddressData } from '$lib/stores/address.store';
@@ -6,7 +6,10 @@ import { busy } from '$lib/stores/busy.store';
 import type { FeeStoreData } from '$lib/stores/fee.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
-import { getSignParamsMessageHex } from '$lib/utils/wallet-connect.utils';
+import {
+	getSignParamsMessageHex,
+	getSignParamsMessageTypedDataV4Hash
+} from '$lib/utils/wallet-connect.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
@@ -181,9 +184,20 @@ export const signMessage = ({
 			try {
 				progress(SignStep.SIGN);
 
-				const message = getSignParamsMessageHex(params);
+				const sign = (params: string[]): Promise<string> => {
+					try {
+						const hash = getSignParamsMessageTypedDataV4Hash(params);
+						return signPrehash(hash);
+					} catch (err: unknown) {
+						// If the above failed, it's because JSON.parse throw an exception.
+						// We are assuming that it did so because it tried to parse a string that does not represent an object.
+						// Therefore, we continue with a message as hex string.
+						const message = getSignParamsMessageHex(params);
+						return signMessageApi(message);
+					}
+				};
 
-				const signedMessage = await signMessageApi(message);
+				const signedMessage = await sign(params);
 
 				progress(SignStep.APPROVE);
 
