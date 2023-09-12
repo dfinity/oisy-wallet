@@ -50,7 +50,17 @@
 	};
 
 	const disconnectListener = async () => {
-		await listener?.disconnect();
+		try {
+			await listener?.disconnect();
+		} catch (err: unknown) {
+			toastsError({
+				msg: {
+					text: `An unexpected error happened while disconnecting the wallet. Resetting the connection anyway.`
+				},
+				err
+			});
+		}
+
 		resetListener();
 	};
 
