@@ -19,6 +19,7 @@
 	} from '$lib/constants/wallet-connect.constants';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import ButtonWalletConnect from '$lib/components/ui/ButtonWalletConnect.svelte';
+	import { getSdkError } from '@walletconnect/utils';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -166,7 +167,7 @@
 					return;
 				}
 				default: {
-					await listener?.rejectRequest({ topic, id });
+					await listener?.rejectRequest({ topic, id, error: getSdkError('UNSUPPORTED_METHODS') });
 
 					toastsError({
 						msg: { text: `Requested method "${method}" is not supported.` }

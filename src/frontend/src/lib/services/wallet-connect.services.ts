@@ -1,4 +1,5 @@
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
+import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { SendStep, SignStep } from '$lib/enums/steps';
 import { send as executeSend, type SendParams } from '$lib/services/send.services';
 import type { AddressData } from '$lib/stores/address.store';
@@ -12,6 +13,7 @@ import {
 } from '$lib/utils/wallet-connect.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
+import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 
 export type WalletConnectCallBackParams = {
@@ -51,7 +53,7 @@ export const reject = (
 			const { id, topic } = request;
 
 			try {
-				await listener.rejectRequest({ topic, id });
+				await listener.rejectRequest({ topic, id, error: getSdkError('USER_REJECTED') });
 
 				return { success: true };
 			} finally {
@@ -151,8 +153,7 @@ export const send = ({
 
 				return { success: true };
 			} catch (err: unknown) {
-				// TODO: better error rejection
-				await listener.rejectRequest({ topic, id });
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 
 				throw err;
 			}
@@ -207,8 +208,7 @@ export const signMessage = ({
 
 				return { success: true };
 			} catch (err: unknown) {
-				// TODO: better error rejection
-				await listener.rejectRequest({ topic, id });
+				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 
 				throw err;
 			}
