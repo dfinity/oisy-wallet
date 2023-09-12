@@ -6,7 +6,7 @@
 	import { formatEtherShort } from '$lib/utils/format.utils';
 	import type { FeeContext } from '$lib/stores/fee.store';
 	import { FEE_CONTEXT_KEY } from '$lib/stores/fee.store';
-	import { tokenSymbol } from '$lib/derived/token.derived';
+	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 
 	const { store: feeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -49,7 +49,7 @@
 	{#if nonNullish(fee)}
 		<div in:fade>
 			{formatEtherShort(fee, 8)}
-			{$tokenSymbol}
+			{ETHEREUM_TOKEN.symbol}
 		</div>
 	{/if}
 </div>
