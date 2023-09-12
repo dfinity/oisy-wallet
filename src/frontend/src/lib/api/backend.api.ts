@@ -11,7 +11,7 @@ export const signTransaction = async (transaction: SignRequest): Promise<string>
 	return actor.sign_transaction(transaction);
 };
 
-export const signMessage = async (message: Uint8Array | number[]): Promise<string> => {
+export const signMessage = async (message: string): Promise<string> => {
 	const actor = await getBackendActor();
 	return actor.personal_sign(message);
 };

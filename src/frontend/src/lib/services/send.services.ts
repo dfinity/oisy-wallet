@@ -2,7 +2,7 @@ import type { SignRequest } from '$declarations/backend/backend.did';
 import { signTransaction } from '$lib/api/backend.api';
 import { ETH_BASE_FEE, ETH_NETWORK_ID } from '$lib/constants/eth.constants';
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { SendStep } from '$lib/enums/send';
+import { SendStep } from '$lib/enums/steps';
 import { populateTransaction } from '$lib/providers/etherscan-erc20.providers';
 import { getTransactionCount, sendTransaction } from '$lib/providers/etherscan.providers';
 import { processTransactionSent } from '$lib/services/transaction.services';

@@ -1,33 +1,13 @@
 <script lang="ts">
 	import type { ProgressStep } from '@dfinity/gix-components';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
-	import { SendStep } from '$lib/enums/send';
+	import { SendStep } from '$lib/enums/steps';
 	import { onDestroy, onMount } from 'svelte';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 	import { IconWarning } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
 
 	export let progressStep: string = SendStep.INITIALIZATION;
-	export let additionalSteps: ProgressStep[] | undefined = undefined;
-
-	let steps: [ProgressStep, ...ProgressStep[]] = [
-		{
-			step: SendStep.INITIALIZATION,
-			text: 'Initializing transaction...',
-			state: 'in_progress'
-		} as ProgressStep,
-		{
-			step: SendStep.SIGN,
-			text: 'Signing transaction...',
-			state: 'next'
-		} as ProgressStep,
-		{
-			step: SendStep.SEND,
-			text: 'Sending...',
-			state: 'next'
-		} as ProgressStep,
-		...(nonNullish(additionalSteps) ? additionalSteps : [])
-	];
+	export let steps: [ProgressStep, ...ProgressStep[]];
 
 	onMount(() => confirmToCloseBrowser(true));
 	onDestroy(() => confirmToCloseBrowser(false));
