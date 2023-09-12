@@ -10,9 +10,13 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { erc20Tokens } from '$lib/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import IconPlus from '$lib/components/icons/IconPlus.svelte';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
+
+	const icon = IconPlus;
 </script>
 
 <h2 class="text-base mb-3 pb-0.5">Tokens</h2>
@@ -35,3 +39,9 @@
 		</a>
 	</Listener>
 {/each}
+
+<Card>
+	<span class="text-grey">Add new token (Coming soon)</span>
+
+	<RoundedIcon slot="icon" {icon} backgroundStyleClass="bg-dust" />
+</Card>
