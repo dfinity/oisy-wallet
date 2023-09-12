@@ -1,5 +1,5 @@
 import { isAddress } from '@ethersproject/address';
-import {Utils} from "alchemy-sdk";
+import { Utils } from 'alchemy-sdk';
 
 export const getSignParamsMessageHex = (params: string[]): string =>
 	params.filter((p) => !isAddress(p))[0];
