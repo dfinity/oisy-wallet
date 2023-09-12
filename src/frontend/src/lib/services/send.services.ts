@@ -21,6 +21,12 @@ export interface TransferParams {
 	data?: string;
 }
 
+export interface SendParams {
+	progress: (step: SendStep) => void;
+	lastProgressStep?: SendStep;
+	token: Token;
+}
+
 const ethPrepareTransaction = async ({
 	to,
 	amount,
@@ -82,11 +88,9 @@ export const send = async ({
 	maxPriorityFeePerGas,
 	gas,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
-	progress: (step: SendStep) => void;
-	lastProgressStep?: SendStep;
-	token: Token;
-} & Pick<TransactionFeeData, 'gas'> & {
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
+	SendParams &
+	Pick<TransactionFeeData, 'gas'> & {
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
 	}): Promise<{ hash: string }> => {
