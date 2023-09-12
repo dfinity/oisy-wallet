@@ -36,6 +36,10 @@
 	let modal: WizardModal;
 
 	const close = () => modalStore.close();
+	const resetAndClose = () => {
+		resetListener();
+		close();
+	};
 
 	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -248,7 +252,7 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
+	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={resetAndClose}>
 		<svelte:fragment slot="title">
 			{`${
 				currentStep?.name === 'Review' && nonNullish(proposal)
