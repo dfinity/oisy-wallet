@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import {
-		WizardModal,
-		type WizardStep,
-		type WizardSteps
-	} from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { isNullish } from '@dfinity/utils';
 	import type {
