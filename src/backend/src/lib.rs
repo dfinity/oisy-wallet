@@ -47,7 +47,7 @@ fn init(arg: Arg) {
 
 #[pre_upgrade]
 fn pre_upgrade() {
-    read_state(|s| ic_cdk::storage::stable_save((s,))).expect("failed to encode ledger state");
+    read_state(|s| ic_cdk::storage::stable_save((s,))).expect("failed to encode the state");
 }
 
 #[post_upgrade]
@@ -121,6 +121,25 @@ fn nat_to_u64(n: &Nat) -> U64 {
     U64::from_big_endian(&be_bytes)
 }
 
+async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec<u8>, Vec<u8>) {
+    // Fetch the pubkey and the signature concurrently to reduce latency.
+    let (pubkey, response) = futures::join!(
+        ecdsa_pubkey_of(caller),
+        sign_with_ecdsa(SignWithEcdsaArgument {
+            message_hash,
+            derivation_path: principal_to_derivation_path(&caller),
+            key_id: EcdsaKeyId {
+                curve: EcdsaCurve::Secp256k1,
+                name: read_state(|s| s.ecdsa_key_name.clone()),
+            },
+        })
+    );
+    (
+        pubkey,
+        response.expect("failed to sign the message").0.signature,
+    )
+}
+
 #[update]
 async fn sign_transaction(req: SignRequest) -> String {
     use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
@@ -129,8 +148,6 @@ async fn sign_transaction(req: SignRequest) -> String {
     const EIP1559_TX_ID: u8 = 2;
 
     let caller = ic_cdk::caller();
-
-    let pubkey = ecdsa_pubkey_of(&caller).await;
 
     let data = req.data.as_ref().map(|s| decode_hex(&s));
 
@@ -156,23 +173,12 @@ async fn sign_transaction(req: SignRequest) -> String {
 
     let txhash = keccak256(&unsigned_tx_bytes);
 
-    let ecdsa_key_name = read_state(|s| s.ecdsa_key_name.clone());
-
-    let (response,) = sign_with_ecdsa(SignWithEcdsaArgument {
-        message_hash: txhash.to_vec(),
-        derivation_path: principal_to_derivation_path(&caller),
-        key_id: EcdsaKeyId {
-            curve: EcdsaCurve::Secp256k1,
-            name: ecdsa_key_name,
-        },
-    })
-    .await
-    .expect("failed to sign the transaction");
+    let (pubkey, signature) = pubkey_and_signature(&caller, txhash.to_vec()).await;
 
     let signature = Signature {
-        v: y_parity(&unsigned_tx_bytes, &response.signature, &pubkey),
-        r: U256::from_big_endian(&response.signature[0..32]),
-        s: U256::from_big_endian(&response.signature[32..64]),
+        v: y_parity(&txhash, &signature, &pubkey),
+        r: U256::from_big_endian(&signature[0..32]),
+        s: U256::from_big_endian(&signature[32..64]),
     };
 
     let mut signed_tx_bytes = tx.rlp_signed(&signature).to_vec();
@@ -185,8 +191,6 @@ async fn sign_transaction(req: SignRequest) -> String {
 async fn personal_sign(plaintext: String) -> String {
     let caller = ic_cdk::caller();
 
-    let pubkey = ecdsa_pubkey_of(&caller).await;
-
     let bytes = decode_hex(&plaintext);
 
     let message = [
@@ -197,35 +201,23 @@ async fn personal_sign(plaintext: String) -> String {
     .concat();
 
     let msg_hash = keccak256(&message);
-    let ecdsa_key_name = read_state(|s| s.ecdsa_key_name.clone());
 
-    let (response,) = sign_with_ecdsa(SignWithEcdsaArgument {
-        message_hash: msg_hash.to_vec(),
-        derivation_path: principal_to_derivation_path(&caller),
-        key_id: EcdsaKeyId {
-            curve: EcdsaCurve::Secp256k1,
-            name: ecdsa_key_name,
-        },
-    })
-    .await
-    .expect("failed to sign the message");
-    let v = y_parity(&message, &response.signature, &pubkey);
-    let mut sig = response.signature;
-    sig.push(v as u8);
-    format!("0x{}", hex::encode(&sig))
+    let (pubkey, mut signature) = pubkey_and_signature(&caller, msg_hash.to_vec()).await;
+
+    let v = y_parity(&msg_hash, &signature, &pubkey);
+    signature.push(v as u8);
+    format!("0x{}", hex::encode(&signature))
 }
 
-fn y_parity(msg: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
+fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
     use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
-    use sha3::{Digest, Keccak256};
 
     let orig_key = VerifyingKey::from_sec1_bytes(pubkey).expect("failed to parse the pubkey");
     let signature = Signature::try_from(sig).unwrap();
     for parity in [0u8, 1] {
         let recid = RecoveryId::try_from(parity).unwrap();
-        let recovered_key =
-            VerifyingKey::recover_from_digest(Keccak256::new_with_prefix(msg), &signature, recid)
-                .expect("failed to recover key");
+        let recovered_key = VerifyingKey::recover_from_prehash(prehash, &signature, recid)
+            .expect("failed to recover key");
         if recovered_key == orig_key {
             return parity as u64;
         }
