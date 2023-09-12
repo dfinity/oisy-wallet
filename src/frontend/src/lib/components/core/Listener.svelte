@@ -5,11 +5,12 @@
 	import { initTransactionsListener } from '$lib/services/listener.services';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
-	import { token } from '$lib/derived/token.derived';
+
+    export let token: Token;
 
 	let listener: WebSocketListener | undefined = undefined;
 
-	const initListener = async ({ address, token }: { address: AddressData; token: Token }) => {
+	const initListener = async ({ address }: { address: AddressData; }) => {
 		await listener?.disconnect();
 
 		if (isNullish(address)) {
@@ -19,7 +20,7 @@
 		listener = initTransactionsListener({ address, token });
 	};
 
-	$: (async () => initListener({ address: $addressStore, token: $token }))();
+	$: (async () => initListener({ address: $addressStore }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>

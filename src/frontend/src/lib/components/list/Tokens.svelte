@@ -9,6 +9,7 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { erc20Tokens } from '$lib/derived/erc20.derived';
+	import Listener from '$lib/components/core/Listener.svelte';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
@@ -19,16 +20,18 @@
 {#each tokens as token}
 	{@const url = transactionsUrl(token)}
 
-	<a class="no-underline" href={url} title={`Open token ${token.name} transactions`}>
-		<Card>
-			{token.name}
+	<Listener {token}>
+		<a class="no-underline" href={url} title={`Open token ${token.name} transactions`}>
+			<Card>
+				{token.name}
 
-			<Img src={token.icon ?? oisy} slot="icon" alt={`${token.name} logo`} />
+				<Img src={token.icon ?? oisy} slot="icon" alt={`${token.name} logo`} />
 
-			<div class="break-words" slot="amount">
-				{formatEtherShort($balancesStore?.[token.id] ?? BigNumber.from(0n))}
-				{token.symbol}
-			</div>
-		</Card>
-	</a>
+				<div class="break-words" slot="amount">
+					{formatEtherShort($balancesStore?.[token.id] ?? BigNumber.from(0n))}
+					{token.symbol}
+				</div>
+			</Card>
+		</a>
+	</Listener>
 {/each}

@@ -20,13 +20,11 @@ export const initWalletConnect = async ({
 	uri: string;
 	address: ECDSA_PUBLIC_KEY;
 }): Promise<WalletConnectListener> => {
-	const core = new Core({
-		projectId: PROJECT_ID
-	});
-
 	// TODO: replace metadata with effective values
 	const web3wallet = await Web3Wallet.init({
-		core,
+		core: new Core({
+			projectId: PROJECT_ID
+		}),
 		metadata: {
 			name: 'Demo app',
 			description: 'Demo Client as Wallet/Peer',
@@ -34,6 +32,23 @@ export const initWalletConnect = async ({
 			icons: []
 		}
 	});
+
+	const disconnectActiveSessions = async () => {
+		const disconnectExistingSessions = async ([_key, session]: [string, { topic: string }]) => {
+			const { topic } = session;
+
+			await web3wallet.disconnectSession({
+				topic,
+				reason: getSdkError('USER_DISCONNECTED')
+			});
+		};
+
+		const promises = Object.entries(web3wallet.getActiveSessions()).map(disconnectExistingSessions);
+		await Promise.all(promises);
+	};
+
+	// Some previous sessions might have not been properly closed, so we disconnect those to have a clean state.
+	await disconnectActiveSessions();
 
 	const sessionProposal = (callback: (proposal: Web3WalletTypes.SessionProposal) => void) => {
 		web3wallet.on('session_proposal', callback);
@@ -121,16 +136,23 @@ export const initWalletConnect = async ({
 		sessionDelete,
 		sessionRequest,
 		disconnect: async () => {
-			const pairings = web3wallet.engine.signClient.core.pairing.pairings.values;
+			const disconnectPairings = async () => {
+				const pairings = web3wallet.engine.signClient.core.pairing.pairings.values;
 
-			for (const pairing of pairings) {
-				const { topic } = pairing;
+				for (const pairing of pairings) {
+					const { topic } = pairing;
 
-				await web3wallet.disconnectSession({
-					topic,
-					reason: getSdkError('USER_DISCONNECTED')
-				});
-			}
+					await web3wallet.disconnectSession({
+						topic,
+						reason: getSdkError('USER_DISCONNECTED')
+					});
+				}
+			};
+
+			await disconnectActiveSessions();
+
+			// Clean-up in case other pairings are still open.
+			await disconnectPairings();
 		}
 	};
 };
