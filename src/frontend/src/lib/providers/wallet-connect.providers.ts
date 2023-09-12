@@ -33,6 +33,19 @@ export const initWalletConnect = async ({
 		}
 	});
 
+	// Some session might have not been properly closed
+	const disconnectExistingSessions = async ([_key, session]: [string, {topic: string}]) => {
+		const {topic} = session;
+
+		await web3wallet.disconnectSession({
+			topic,
+			reason: getSdkError('USER_DISCONNECTED')
+		});
+	}
+
+	const promises = Object.entries(web3wallet.getActiveSessions()).map(disconnectExistingSessions);
+	await Promise.all(promises);
+
 	const sessionProposal = (callback: (proposal: Web3WalletTypes.SessionProposal) => void) => {
 		web3wallet.on('session_proposal', callback);
 	};
