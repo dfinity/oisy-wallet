@@ -15,6 +15,8 @@
 	import { page } from '$app/stores';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { loadTransactions as loadTransactionsServices } from '$lib/services/transactions.services';
+	import { browser } from '$app/environment';
+	import { isNullish } from '@dfinity/utils';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 	let steps: [ProgressStep, ...ProgressStep[]] = [
@@ -62,9 +64,21 @@
 			return;
 		}
 
+		if (confirm) {
+			return;
+		}
+
 		// A small delay for display animation purpose.
 		setTimeout(() => (inProgress = false), 1000);
 	})();
+
+	const { oisy_introduction }: Storage = browser
+		? localStorage
+		: ({ oisy_introduction: null } as unknown as Storage);
+	const confirm = isNullish(oisy_introduction);
+
+	let disabledConfirm = true;
+	$: disabledConfirm = progressStep !== LoaderStep.DONE;
 
 	onMount(async () => {
 		const { success: addressSuccess } = await loadAddress();
@@ -100,6 +114,11 @@
 
 		progressStep = LoaderStep.DONE;
 	});
+
+	const confirmIntroduction = () => {
+		localStorage.setItem('oisy_introduction', 'done');
+		inProgress = false;
+	};
 </script>
 
 {#if inProgress}
@@ -110,6 +129,16 @@
 			<h3 class="my-3">Setting up your wallet with Chain-Key Cryptography...</h3>
 
 			<InProgress {progressStep} {steps} />
+
+			{#if confirm}
+				<button
+					on:click={confirmIntroduction}
+					class="tertiary"
+					style="margin: var(--padding-4x) auto 0;"
+					disabled={disabledConfirm}
+					class:opacity-5={disabledConfirm}>Let's go!</button
+				>
+			{/if}
 		</Modal>
 	</div>
 {:else}
