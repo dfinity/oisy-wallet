@@ -12,6 +12,7 @@
 	import { page } from '$app/stores';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { erc20TokensInitialized } from '$lib/derived/erc20.derived';
+	import BorderedImg from '$lib/components/ui/BorderedImg.svelte';
 
 	let route: 'tokens' | 'dashboard' = 'dashboard';
 	$: route = isRouteTransactions($page) ? 'tokens' : 'dashboard';
@@ -31,7 +32,13 @@
 		<div class="icon flex items-center" class:tokens={route === 'tokens'}>
 			{#if displayTokens}
 				<div in:fade style="margin: auto 0">
-					<Img src={$token.icon ?? oisy} width="auto" height="96px" alt={`${$token.name} logo`} />
+					<BorderedImg
+						src={$token.icon ?? oisy}
+						width="auto"
+						height="96px"
+						alt={`${$token.name} logo`}
+						borderColor="off-white"
+					/>
 				</div>
 			{/if}
 		</div>
