@@ -1,28 +1,56 @@
+import { signMessage as signMessageApi } from '$lib/api/backend.api';
+import { SendStep, SignStep } from '$lib/enums/steps';
+import { send as executeSend, type SendParams } from '$lib/services/send.services';
+import type { AddressData } from '$lib/stores/address.store';
 import { busy } from '$lib/stores/busy.store';
+import type { FeeStoreData } from '$lib/stores/fee.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
-import { isNullish } from '@dfinity/utils';
+import { getSignParamsMessageHex } from '$lib/utils/wallet-connect.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 
-export type CallBackParams = {
+export type WalletConnectCallBackParams = {
 	request: Web3WalletTypes.SessionRequest;
 	listener: WalletConnectListener;
 };
 
-export type RejectParams = Pick<CallBackParams, 'request'> & {
+export type WalletConnectExecuteParams = Pick<WalletConnectCallBackParams, 'request'> & {
 	listener: WalletConnectListener | null | undefined;
 };
 
-export const reject = (params: RejectParams): Promise<{ success: boolean; err?: unknown }> =>
+export type WalletConnectSendParams = WalletConnectExecuteParams & {
+	listener: WalletConnectListener | null | undefined;
+	address: AddressData;
+	fee: FeeStoreData;
+	modalNext: () => void;
+	amount: BigNumber;
+} & SendParams;
+
+export type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
+	listener: WalletConnectListener | null | undefined;
+	modalNext: () => void;
+	progress: (step: SignStep) => void;
+};
+
+export const reject = (
+	params: WalletConnectExecuteParams
+): Promise<{ success: boolean; err?: unknown }> =>
 	execute({
 		params,
-		callback: async ({ request, listener }: CallBackParams) => {
+		callback: async ({
+			request,
+			listener
+		}: WalletConnectCallBackParams): Promise<{ success: boolean; err?: unknown }> => {
 			busy.start();
 
 			const { id, topic } = request;
 
 			try {
 				await listener.rejectRequest({ topic, id });
+
+				return { success: true };
 			} finally {
 				busy.stop();
 			}
@@ -30,13 +58,157 @@ export const reject = (params: RejectParams): Promise<{ success: boolean; err?: 
 		toastMsg: 'WalletConnect request rejected.'
 	});
 
-export const execute = async ({
+export const send = ({
+	address,
+	fee,
+	modalNext,
+	token,
+	progress,
+	amount,
+	lastProgressStep = SendStep.DONE,
+	...params
+}: WalletConnectSendParams): Promise<{ success: boolean; err?: unknown }> =>
+	execute({
+		params,
+		callback: async ({
+			request,
+			listener
+		}: WalletConnectCallBackParams): Promise<{ success: boolean; err?: unknown }> => {
+			const { id, topic } = request;
+
+			const firstParam = request?.params.request.params?.[0];
+
+			if (isNullish(firstParam)) {
+				toastsError({
+					msg: { text: `Unknown parameter.` }
+				});
+				return { success: false };
+			}
+
+			if (isNullish(address)) {
+				toastsError({
+					msg: { text: `Unexpected error. Your wallet address is not initialized.` }
+				});
+				return { success: false };
+			}
+
+			if (firstParam.from?.toLowerCase() !== address.toLowerCase()) {
+				toastsError({
+					msg: {
+						text: `From address requested for the transaction is not the address of this wallet.`
+					}
+				});
+				return { success: false };
+			}
+
+			if (isNullish(firstParam.to)) {
+				toastsError({
+					msg: { text: `Unknown destination address.` }
+				});
+				return { success: false };
+			}
+
+			if (isNullish(fee)) {
+				toastsError({
+					msg: { text: `Gas fees are not defined.` }
+				});
+				return { success: false };
+			}
+
+			const { maxFeePerGas, maxPriorityFeePerGas, gas } = fee;
+
+			if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
+				toastsError({
+					msg: { text: `Max fee per gas or max priority fee per gas is undefined.` }
+				});
+				return { success: false };
+			}
+
+			const { to, gas: gasWC, data } = firstParam;
+
+			modalNext();
+
+			try {
+				const { hash } = await executeSend({
+					from: address,
+					to,
+					progress,
+					lastProgressStep: SendStep.APPROVE,
+					token,
+					amount,
+					maxFeePerGas,
+					maxPriorityFeePerGas,
+					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
+					data
+				});
+
+				await listener.approveRequest({ id, topic, message: hash });
+
+				progress(lastProgressStep);
+
+				return { success: true };
+			} catch (err: unknown) {
+				// TODO: better error rejection
+				await listener.rejectRequest({ topic, id });
+
+				throw err;
+			}
+		},
+		toastMsg: 'WalletConnect eth_sendTransaction request executed.'
+	});
+
+export const signMessage = ({
+	modalNext,
+	progress,
+	...params
+}: WalletConnectSignMessageParams): Promise<{ success: boolean; err?: unknown }> =>
+	execute({
+		params,
+		callback: async ({
+			request,
+			listener
+		}: WalletConnectCallBackParams): Promise<{ success: boolean; err?: unknown }> => {
+			const {
+				id,
+				topic,
+				params: {
+					request: { params }
+				}
+			} = request;
+
+			modalNext();
+
+			try {
+				progress(SignStep.SIGN);
+
+				const message = getSignParamsMessageHex(params);
+
+				const signedMessage = await signMessageApi(message);
+
+				progress(SignStep.APPROVE);
+
+				await listener.approveRequest({ topic, id, message: signedMessage });
+
+				progress(SignStep.DONE);
+
+				return { success: true };
+			} catch (err: unknown) {
+				// TODO: better error rejection
+				await listener.rejectRequest({ topic, id });
+
+				throw err;
+			}
+		},
+		toastMsg: `WalletConnect sign request executed.`
+	});
+
+const execute = async ({
 	params: { request, listener },
 	callback,
 	toastMsg
 }: {
-	params: RejectParams;
-	callback: (params: CallBackParams) => Promise<void>;
+	params: WalletConnectExecuteParams;
+	callback: (params: WalletConnectCallBackParams) => Promise<{ success: boolean; err?: unknown }>;
 	toastMsg: string;
 }): Promise<{ success: boolean; err?: unknown }> => {
 	if (isNullish(listener)) {
@@ -54,7 +226,11 @@ export const execute = async ({
 	}
 
 	try {
-		await callback({ request, listener });
+		const { success, err } = await callback({ request, listener });
+
+		if (!success) {
+			return { success, err };
+		}
 
 		toastsShow({
 			text: toastMsg,
