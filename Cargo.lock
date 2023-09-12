@@ -59,6 +59,7 @@ version = "0.1.0"
 dependencies = [
  "candid",
  "ethers-core",
+ "futures",
  "getrandom",
  "hex",
  "ic-cdk",
@@ -66,7 +67,6 @@ dependencies = [
  "ic-cdk-timers",
  "k256",
  "serde",
- "sha3",
 ]
 
 [[package]]
