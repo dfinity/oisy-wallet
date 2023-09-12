@@ -1,5 +1,6 @@
 import {
 	SESSION_REQUEST_ETH_SIGN,
+	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN,
 	SESSION_REQUEST_SEND_TRANSACTION
 } from '$lib/constants/wallet-connect.constants';
@@ -73,7 +74,8 @@ export const initWalletConnect = async ({
 					methods: [
 						SESSION_REQUEST_SEND_TRANSACTION,
 						SESSION_REQUEST_ETH_SIGN,
-						SESSION_REQUEST_PERSONAL_SIGN
+						SESSION_REQUEST_PERSONAL_SIGN,
+						SESSION_REQUEST_ETH_SIGN_V4
 					],
 					events: ['accountsChanged', 'chainChanged'],
 					accounts: [`eip155:1:${address}`, `eip155:11155111:${address}`]

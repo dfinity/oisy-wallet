@@ -14,7 +14,8 @@
 	import {
 		SESSION_REQUEST_SEND_TRANSACTION,
 		SESSION_REQUEST_PERSONAL_SIGN,
-		SESSION_REQUEST_ETH_SIGN
+		SESSION_REQUEST_ETH_SIGN,
+		SESSION_REQUEST_ETH_SIGN_V4
 	} from '$lib/constants/wallet-connect.constants';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import ButtonWalletConnect from '$lib/components/ui/ButtonWalletConnect.svelte';
@@ -154,6 +155,7 @@
 			} = sessionRequest;
 
 			switch (method) {
+				case SESSION_REQUEST_ETH_SIGN_V4:
 				case SESSION_REQUEST_ETH_SIGN:
 				case SESSION_REQUEST_PERSONAL_SIGN: {
 					modalStore.openWalletConnectSign(sessionRequest);
