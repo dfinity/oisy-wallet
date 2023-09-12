@@ -2,7 +2,7 @@
 	import IconIcLogo from '$lib/components/icons/IconIcLogo.svelte';
 	import { authStore } from '$lib/stores/auth.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { IconGitHub, Popover } from '@dfinity/gix-components';
+	import { IconGitHub, IconNorthEast, Popover } from '@dfinity/gix-components';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 
@@ -37,7 +37,7 @@
 			>
 				<IconIcLogo />
 			</div>
-			Internet Computer
+			Internet Computer <IconNorthEast size="12" />
 		</a>
 
 		<a
@@ -47,7 +47,7 @@
 			class="flex gap-1 items-center no-underline"
 			aria-label="Source code on GitHub"
 		>
-			<IconGitHub /> Source code
+			<IconGitHub /> Source code <IconNorthEast size="12" />
 		</a>
 
 		<Hr />
