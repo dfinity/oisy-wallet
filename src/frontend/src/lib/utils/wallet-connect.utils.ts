@@ -11,7 +11,12 @@ export const getSignParamsMessage = (params: string[]): string => {
 
 export const convertHexToUtf8 = (value: string): string => {
 	if (Utils.isHexString(value)) {
-		return Utils.toUtf8String(value);
+		try {
+			return Utils.toUtf8String(value);
+		} catch (err: unknown) {
+			// We ignore the issue and display the encoded value for now.
+			console.error(err);
+		}
 	}
 
 	return value;
