@@ -36,6 +36,10 @@
 	let modal: WizardModal;
 
 	const close = () => modalStore.close();
+	const resetAndClose = () => {
+		resetListener();
+		close();
+	};
 
 	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -80,6 +84,8 @@
 				msg: { text: `An unexpected error happened while trying to connect the wallet.` },
 				err
 			});
+
+			resetListener();
 		}
 	};
 
@@ -98,10 +104,20 @@
 		}
 
 		listener.sessionProposal((sessionProposal) => {
+			// Prevent race condition
+			if (isNullish(listener)) {
+				return;
+			}
+
 			proposal = sessionProposal;
 		});
 
 		listener.sessionDelete(() => {
+			// Prevent race condition
+			if (isNullish(listener)) {
+				return;
+			}
+
 			resetListener();
 
 			toastsShow({
@@ -114,6 +130,11 @@
 		});
 
 		listener.sessionRequest(async (sessionRequest: Web3WalletTypes.SessionRequest) => {
+			// Prevent race condition
+			if (isNullish(listener)) {
+				return;
+			}
+
 			// Another modal, like Send or Receive, is already in progress
 			if (nonNullish($modalStore) && !$modalWalletConnect) {
 				toastsError({
@@ -231,7 +252,7 @@
 {/if}
 
 {#if $modalWalletConnectAuth}
-	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
+	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={resetAndClose}>
 		<svelte:fragment slot="title">
 			{`${
 				currentStep?.name === 'Review' && nonNullish(proposal)

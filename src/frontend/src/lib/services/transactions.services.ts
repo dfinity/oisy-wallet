@@ -6,17 +6,10 @@ import { addressStore } from '$lib/stores/address.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { TokenId } from '$lib/types/token';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadTransactions = async (tokenId: TokenId): Promise<{ success: boolean }> => {
-	const existingTransactions = get(transactionsStore)[tokenId];
-
-	// We load only once
-	if (nonNullish(existingTransactions)) {
-		return { success: true };
-	}
-
 	if (tokenId === ETHEREUM_TOKEN_ID) {
 		return loadEthTransactions();
 	}
