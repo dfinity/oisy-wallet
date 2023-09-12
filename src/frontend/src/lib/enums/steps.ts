@@ -5,3 +5,10 @@ export enum SendStep {
 	APPROVE = 'approve',
 	DONE = 'done'
 }
+
+export enum SignStep {
+	INITIALIZATION = 'initialization',
+	SIGN = 'sign',
+	APPROVE = 'approve',
+	DONE = 'done'
+}

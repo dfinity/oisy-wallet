@@ -1,19 +1,17 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
-		type ProgressStep,
 		WizardModal,
 		type WizardStep,
 		type WizardSteps
 	} from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { busy } from '$lib/stores/busy.store';
+	import { isNullish } from '@dfinity/utils';
 	import type {
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
 	} from '$lib/types/wallet-connect';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 	import { setContext } from 'svelte';
 	import {
@@ -24,10 +22,12 @@
 	import { addressStore } from '$lib/stores/address.store';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectSendReview from '$lib/components/wallet-connect/WalletConnectSendReview.svelte';
-	import { SendStep } from '$lib/enums/send';
-	import SendProgress from '$lib/components/send/SendProgress.svelte';
+	import { SendStep } from '$lib/enums/steps';
+	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { send as executeSend } from '$lib/services/send.services';
 	import { token } from '$lib/derived/token.derived';
+	import { WALLET_CONNECT_SEND_STEPS } from '$lib/constants/steps.constants';
+	import { execute, reject as rejectServices } from '$lib/services/wallet-connect.services';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -77,21 +77,11 @@
 	 * Reject a transaction
 	 */
 
-	const reject = async () =>
-		await execute({
-			callback: async ({ request, listener }: CallBackParams) => {
-				busy.start();
+	const reject = async () => {
+		await rejectServices({ listener, request });
 
-				const { id, topic } = request;
-
-				try {
-					await listener.rejectRequest({ topic, id });
-				} finally {
-					busy.stop();
-				}
-			},
-			toastMsg: 'WalletConnect request rejected.'
-		});
+		close();
+	};
 
 	/**
 	 * Send and approve
@@ -99,17 +89,12 @@
 
 	let sendProgressStep: string = SendStep.INITIALIZATION;
 
-	const STEP_APPROVING: ProgressStep = {
-		step: SendStep.APPROVE,
-		text: 'Approving...',
-		state: 'next'
-	} as const;
-
 	let amount: BigNumber;
 	$: amount = BigNumber.from(firstTransaction?.value ?? '0');
 
-	const send = async () =>
-		await execute({
+	const send = async () => {
+		const { success } = await execute({
+			params: { request, listener },
 			callback: async ({ request, listener }: CallBackParams) => {
 				const { id, topic } = request;
 
@@ -182,8 +167,6 @@
 					await listener.approveRequest({ id, topic, message: hash });
 
 					sendProgressStep = SendStep.DONE;
-
-					setTimeout(() => close(), 750);
 				} catch (err: unknown) {
 					// TODO: better error rejection
 					await listener.rejectRequest({ topic, id });
@@ -194,47 +177,7 @@
 			toastMsg: 'WalletConnect eth_sendTransaction request executed.'
 		});
 
-	const execute = async ({
-		callback,
-		toastMsg
-	}: {
-		callback: (params: CallBackParams) => Promise<void>;
-		toastMsg: string;
-	}) => {
-		if (isNullish(listener)) {
-			toastsError({
-				msg: { text: `Unexpected error: No connection opened.` }
-			});
-
-			close();
-			return;
-		}
-
-		if (isNullish(request)) {
-			toastsError({
-				msg: { text: `Unexpected error: Request is not defined therefore cannot be processed.` }
-			});
-
-			close();
-			return;
-		}
-
-		try {
-			await callback({ request, listener });
-
-			toastsShow({
-				text: toastMsg,
-				level: 'info',
-				duration: 2000
-			});
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: `Unexpected error while processing the request with WalletConnect.` },
-				err
-			});
-		}
-
-		close();
+		setTimeout(() => close(), success ? 750 : 0);
 	};
 </script>
 
@@ -245,7 +188,7 @@
 
 	<FeeContext amount={amount.toString()} {destination} observe={currentStep?.name !== 'Sending'}>
 		{#if currentStep?.name === 'Sending'}
-			<SendProgress progressStep={sendProgressStep} additionalSteps={[STEP_APPROVING]} />
+			<SendProgress progressStep={sendProgressStep} steps={WALLET_CONNECT_SEND_STEPS} />
 		{:else}
 			<WalletConnectSendReview {amount} {destination} on:icApprove={send} on:icReject={reject} />
 		{/if}

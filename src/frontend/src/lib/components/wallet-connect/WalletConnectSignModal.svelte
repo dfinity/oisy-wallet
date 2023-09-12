@@ -1,37 +1,59 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import { Modal } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import { isNullish } from '@dfinity/utils';
-	import { getSignParamsMessage, getSignParamsMessageHex } from '$lib/utils/wallet-connect.utils';
-	import { busy } from '$lib/stores/busy.store';
+	import { getSignParamsMessageHex } from '$lib/utils/wallet-connect.utils';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { isBusy } from '$lib/derived/busy.derived';
 	import { signMessage } from '$lib/api/backend.api';
+	import { SignStep } from '$lib/enums/steps';
+	import WalletConnectSignReview from '$lib/components/wallet-connect/WalletConnectSignReview.svelte';
+	import { WALLET_CONNECT_SIGN_STEPS } from '$lib/constants/steps.constants';
+	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
+	import { execute, reject as rejectServices } from '$lib/services/wallet-connect.services';
 
 	export let listener: WalletConnectListener | undefined | null;
 	export let request: Web3WalletTypes.SessionRequest;
 
 	const close = () => modalStore.close();
 
+	/**
+	 * Modal
+	 */
+
+	const steps: WizardSteps = [
+		{
+			name: 'Review',
+			title: 'Review'
+		},
+		{
+			name: 'Signing',
+			title: 'Signing...'
+		}
+	];
+
+	let currentStep: WizardStep | undefined;
+	let modal: WizardModal;
+
+	let signProgressStep: string = SignStep.INITIALIZATION;
+
 	type CallBackParams = {
 		request: Web3WalletTypes.SessionRequest;
 		listener: WalletConnectListener;
 	};
 
-	const reject = async () =>
-		await execute({
-			callback: async ({ request, listener }: CallBackParams) => {
-				const { id, topic } = request;
+	/**
+	 * Reject a message
+	 */
 
-				await listener.rejectRequest({ topic, id });
-			},
-			toastMsg: 'WalletConnect request rejected.'
-		});
+	const reject = async () => {
+		await rejectServices({ listener, request });
 
-	const approve = async () =>
-		await execute({
+		close();
+	};
+
+	const approve = async () => {
+		const { success } = await execute({
+			params: { request, listener },
 			callback: async ({ request, listener }: CallBackParams) => {
 				const {
 					id,
@@ -41,78 +63,42 @@
 					}
 				} = request;
 
-				const message = getSignParamsMessageHex(params);
+				modal.next();
 
-				const signedMessage = await signMessage(message);
+				try {
+					signProgressStep = SignStep.SIGN;
 
-				await listener.approveRequest({ topic, id, message: signedMessage });
+					const message = getSignParamsMessageHex(params);
+
+					const signedMessage = await signMessage(message);
+
+					signProgressStep = SignStep.APPROVE;
+
+					await listener.approveRequest({ topic, id, message: signedMessage });
+
+					signProgressStep = SignStep.DONE;
+
+					setTimeout(() => close(), 750);
+				} catch (err: unknown) {
+					// TODO: better error rejection
+					await listener.rejectRequest({ topic, id });
+
+					throw err;
+				}
 			},
 			toastMsg: 'WalletConnect request approved.'
 		});
 
-	const execute = async ({
-		callback,
-		toastMsg
-	}: {
-		callback: (params: CallBackParams) => Promise<void>;
-		toastMsg: string;
-	}) => {
-		if (isNullish(listener)) {
-			toastsError({
-				msg: { text: `Unexpected error: No connection opened.` }
-			});
-
-			close();
-			return;
-		}
-
-		if (isNullish(request)) {
-			toastsError({
-				msg: { text: `Unexpected error: Request is not defined therefore cannot be processed.` }
-			});
-
-			close();
-			return;
-		}
-
-		busy.start();
-
-		try {
-			await callback({ request, listener });
-
-			toastsShow({
-				text: toastMsg,
-				level: 'info',
-				duration: 2000
-			});
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: `Unexpected error while processing the request with WalletConnect.` },
-				err
-			});
-		}
-
-		busy.stop();
-
-		close();
+		setTimeout(() => close(), success ? 750 : 0);
 	};
 </script>
 
-<Modal on:nnsClose={reject}>
+<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
 	<svelte:fragment slot="title">Sign Message</svelte:fragment>
 
-	<p class="font-bold">Message</p>
-	<p class="mb-2 font-normal">
-		<output class="break-words">{getSignParamsMessage(request.params.request.params)}</output>
-	</p>
-
-	<p class="font-bold">Method</p>
-	<p class="mb-2 font-normal">
-		{request.params.request.method}
-	</p>
-
-	<div class="flex justify-end gap-1 mt-4">
-		<button class="primary" on:click={reject} disabled={$isBusy}>Reject</button>
-		<button class="primary" on:click={approve} disabled={$isBusy}> Approve </button>
-	</div>
-</Modal>
+	{#if currentStep?.name === 'Signing'}
+		<SendProgress progressStep={signProgressStep} steps={WALLET_CONNECT_SIGN_STEPS} />
+	{:else}
+		<WalletConnectSignReview {request} on:icApprove={approve} on:icReject={reject} />
+	{/if}
+</WizardModal>

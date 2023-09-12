@@ -6,8 +6,8 @@
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
-	import SendProgress from '$lib/components/send/SendProgress.svelte';
-	import { SendStep } from '$lib/enums/send';
+	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
+	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { addressStore } from '$lib/stores/address.store';
 	import { token } from '$lib/derived/token.derived';
@@ -19,6 +19,7 @@
 	import { setContext } from 'svelte';
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 	import { Utils } from 'alchemy-sdk';
+	import { SEND_STEPS } from '$lib/constants/steps.constants';
 
 	/**
 	 * Fee context store
@@ -137,7 +138,7 @@
 		{#if currentStep?.name === 'Review'}
 			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
 		{:else if currentStep?.name === 'Sending'}
-			<SendProgress progressStep={sendProgressStep} />
+			<SendProgress progressStep={sendProgressStep} steps={SEND_STEPS} />
 		{:else}
 			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
 		{/if}
