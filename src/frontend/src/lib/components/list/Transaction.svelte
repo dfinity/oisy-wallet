@@ -10,6 +10,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Card from '$lib/components/ui/Card.svelte';
 	import { formatToDate } from '$lib/utils/format.utils';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 
 	export let transaction: Transaction;
 
@@ -35,10 +36,7 @@
 <Card {pending}>
 	{`${type === 'send' ? 'Send' : 'Receive'}`}
 
-	<div class="relative" slot="icon">
-		<div class="rounded-50 bg-dark-blue opacity-15" style="width: 3rem; aspect-ratio: 1/1" />
-		<svelte:component this={icon} styleClass={`inset-center ${pending ? 'opacity-15' : ''}`} />
-	</div>
+	<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-15' : ''} />
 
 	<svelte:fragment slot="amount">{Utils.formatEther(amount.toString())}</svelte:fragment>
 	<svelte:fragment slot="description">
