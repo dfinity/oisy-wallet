@@ -20,13 +20,11 @@ export const initWalletConnect = async ({
 	uri: string;
 	address: ECDSA_PUBLIC_KEY;
 }): Promise<WalletConnectListener> => {
-	const core = new Core({
-		projectId: PROJECT_ID
-	});
-
 	// TODO: replace metadata with effective values
 	const web3wallet = await Web3Wallet.init({
-		core,
+		core: new Core({
+			projectId: PROJECT_ID
+		}),
 		metadata: {
 			name: 'Demo app',
 			description: 'Demo Client as Wallet/Peer',
