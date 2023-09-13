@@ -1,8 +1,8 @@
 {
 	"backend": {
-		"ic": "tdxud-2yaaa-aaaad-aadiq-cai"
+		"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
 	},
 	"frontend": {
-		"ic": "tewsx-xaaaa-aaaad-aadia-cai"
+		"staging": "tewsx-xaaaa-aaaad-aadia-cai"
 	}
 }

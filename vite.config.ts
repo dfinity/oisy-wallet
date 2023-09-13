@@ -15,17 +15,18 @@ const { version } = JSON.parse(json);
 // npm run build = local
 // dfx deploy = local
 // dfx deploy --network ic = ic
+// dfx deploy --network staging = staging
 const network = process.env.DFX_NETWORK ?? 'local';
 
 const readCanisterIds = ({ prefix }: { prefix?: string }): Record<string, string> => {
-	const canisterIdsJsonFile =
-		network === 'ic'
-			? join(process.cwd(), 'canister_ids.json')
-			: join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
+	const canisterIdsJsonFile = ['ic', 'staging'].includes(network)
+		? join(process.cwd(), 'canister_ids.json')
+		: join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
 
 	try {
 		type Details = {
 			ic?: string;
+			staging?: string;
 			local?: string;
 		};
 
