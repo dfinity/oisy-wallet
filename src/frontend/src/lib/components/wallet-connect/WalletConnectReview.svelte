@@ -32,7 +32,7 @@
 					Review {chainName} ({key}) required permissions:
 				</p>
 
-				<article class="bg-blue text-off-white rounded-sm p-2 mt-1">
+				<article class="bg-dust rounded-sm p-2 mt-1">
 					<p class="font-bold">Methods:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
