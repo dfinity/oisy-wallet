@@ -20,6 +20,7 @@
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import ButtonWalletConnect from '$lib/components/ui/ButtonWalletConnect.svelte';
 	import { getSdkError } from '@walletconnect/utils';
+	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -266,13 +267,13 @@
 
 {#if $modalWalletConnectAuth}
 	<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={resetAndClose}>
-		<svelte:fragment slot="title">
+		<WalletConnectModalTitle slot="title">
 			{`${
 				currentStep?.name === 'Review' && nonNullish(proposal)
 					? 'Session Proposal'
 					: 'WalletConnect'
 			}`}
-		</svelte:fragment>
+		</WalletConnectModalTitle>
 
 		{#if currentStep?.name === 'Review'}
 			<WalletConnectReview {proposal} on:icReject={reject} on:icApprove={approve} />

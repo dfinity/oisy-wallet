@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconWalletConnectLogo from '$lib/components/icons/IconWalletConnectLogo.svelte';
+	import IconWalletConnectWhite from '$lib/components/icons/IconWalletConnectWhite.svelte';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 </script>
 
@@ -9,6 +9,6 @@
 	disabled={$addressNotLoaded}
 	class:opacity-50={$addressNotLoaded}
 >
-	<IconWalletConnectLogo />
+	<IconWalletConnectWhite />
 	<span class="text-white font-bold text-xs"><slot /></span>
 </button>
