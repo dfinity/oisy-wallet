@@ -229,6 +229,7 @@ async fn sign_prehash(prehash: String) -> String {
     format!("0x{}", hex::encode(&signature))
 }
 
+/// Computes the parity bit allowing to recover the public key from the signature.
 fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
     use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
 

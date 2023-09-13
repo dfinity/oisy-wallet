@@ -13,5 +13,6 @@ type SignRequest = record {
 service : (Arg) -> {
   caller_eth_address : () -> (text);
   personal_sign : (text) -> (text);
+  sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
 }
