@@ -18,7 +18,7 @@
 		SESSION_REQUEST_ETH_SIGN_V4
 	} from '$lib/constants/wallet-connect.constants';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
-	import ButtonWalletConnect from '$lib/components/ui/ButtonWalletConnect.svelte';
+	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
 	import { getSdkError } from '@walletconnect/utils';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 
@@ -260,9 +260,9 @@
 </script>
 
 {#if isNullish(listener)}
-	<ButtonWalletConnect on:click={modalStore.openWalletConnectAuth}>Connect</ButtonWalletConnect>
+	<WalletConnectButton on:click={modalStore.openWalletConnectAuth}>Connect</WalletConnectButton>
 {:else}
-	<ButtonWalletConnect on:click={disconnect}>Disconnect</ButtonWalletConnect>
+	<WalletConnectButton on:click={disconnect}>Disconnect</WalletConnectButton>
 {/if}
 
 {#if $modalWalletConnectAuth}
