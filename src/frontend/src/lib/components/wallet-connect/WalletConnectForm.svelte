@@ -38,8 +38,11 @@
 	{/if}
 
 	{#if !renderQRCodeReader}
-		<button type="button" class="tertiary inset-center" on:click={() => (renderQRCodeReader = true)}
-			>Scan QR code</button
+		<button
+			type="button"
+			class="wallet-connect inset-center text-white font-bold"
+			style="padding: var(--padding) var(--padding-3x)"
+			on:click={() => (renderQRCodeReader = true)}>Scan QR code</button
 		>
 	{/if}
 </div>
@@ -74,9 +77,11 @@
 		margin: 0 auto;
 
 		width: 100%;
+		max-width: calc(100% - var(--padding-3x));
 
 		@include media.min-width(small) {
 			width: calc(var(--dialog-width) - (4 * var(--padding-8x)));
+			max-width: inherit;
 		}
 
 		@media only screen and (hover: none) and (pointer: coarse) {
