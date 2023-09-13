@@ -64,6 +64,7 @@ fn principal_to_derivation_path(p: &Principal) -> Vec<Vec<u8>> {
     vec![vec![SCHEMA], p.as_slice().to_vec()]
 }
 
+/// Converts the public key bytes to an Ethereum address with a checksum.
 fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
     use k256::elliptic_curve::sec1::ToEncodedPoint;
 
@@ -79,6 +80,7 @@ fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
     ethers_core::utils::to_checksum(&Address::from_slice(&hash[12..32]), None)
 }
 
+/// Computes the public key of the specified principal.
 async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
     let name = read_state(|s| s.ecdsa_key_name.clone());
     let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
@@ -94,6 +96,7 @@ async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
     key.public_key
 }
 
+/// Returns the Ethereum address of the caller.
 #[update]
 async fn caller_eth_address() -> String {
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
@@ -121,6 +124,7 @@ fn nat_to_u64(n: &Nat) -> U64 {
     U64::from_big_endian(&be_bytes)
 }
 
+/// Returns the public key and a message signature for the specified principal.
 async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec<u8>, Vec<u8>) {
     // Fetch the pubkey and the signature concurrently to reduce latency.
     let (pubkey, response) = futures::join!(
@@ -140,6 +144,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
     )
 }
 
+/// Computes a signature for an [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) transaction.
 #[update]
 async fn sign_transaction(req: SignRequest) -> String {
     use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
@@ -187,6 +192,7 @@ async fn sign_transaction(req: SignRequest) -> String {
     format!("0x{}", hex::encode(&signed_tx_bytes))
 }
 
+/// Computes a signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
 #[update]
 async fn personal_sign(plaintext: String) -> String {
     let caller = ic_cdk::caller();
@@ -205,6 +211,20 @@ async fn personal_sign(plaintext: String) -> String {
     let (pubkey, mut signature) = pubkey_and_signature(&caller, msg_hash.to_vec()).await;
 
     let v = y_parity(&msg_hash, &signature, &pubkey);
+    signature.push(v as u8);
+    format!("0x{}", hex::encode(&signature))
+}
+
+/// Computes a signature for a precomputed hash.
+#[update]
+async fn sign_prehash(prehash: String) -> String {
+    let caller = ic_cdk::caller();
+
+    let hash_bytes = decode_hex(&prehash);
+
+    let (pubkey, mut signature) = pubkey_and_signature(&caller, hash_bytes.to_vec()).await;
+
+    let v = y_parity(&hash_bytes, &signature, &pubkey);
     signature.push(v as u8);
     format!("0x{}", hex::encode(&signature))
 }
