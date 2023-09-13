@@ -42,5 +42,11 @@
 			"packtool": ""
 		}
 	},
-	"version": 1
+	"version": 1,
+	"networks": {
+		"staging": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		}
+	}
 }
