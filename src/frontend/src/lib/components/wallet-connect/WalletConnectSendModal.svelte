@@ -25,9 +25,13 @@
 		reject as rejectServices
 	} from '$lib/services/wallet-connect.services';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import { isErc20TransactionApprove } from '$lib/utils/transactions.utils';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
+
+	let transactionApprove = false;
+	$: transactionApprove = isErc20TransactionApprove(firstTransaction.data);
 
 	/**
 	 * Fee context store
@@ -101,15 +105,25 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	<WalletConnectModalTitle slot="title">Send</WalletConnectModalTitle>
-
 	{@const destination = firstTransaction.to ?? ''}
+	{@const data = firstTransaction.data}
+
+	<WalletConnectModalTitle slot="title"
+		>{transactionApprove ? 'Approve' : 'Send'}</WalletConnectModalTitle
+	>
 
 	<FeeContext amount={amount.toString()} {destination} observe={currentStep?.name !== 'Sending'}>
 		{#if currentStep?.name === 'Sending'}
 			<SendProgress progressStep={sendProgressStep} steps={WALLET_CONNECT_SEND_STEPS} />
 		{:else}
-			<WalletConnectSendReview {amount} {destination} on:icApprove={send} on:icReject={reject} />
+			<WalletConnectSendReview
+				{amount}
+				{destination}
+				{data}
+				{transactionApprove}
+				on:icApprove={send}
+				on:icReject={reject}
+			/>
 		{/if}
 	</FeeContext>
 </WizardModal>
