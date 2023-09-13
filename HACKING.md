@@ -23,5 +23,5 @@ ENV=staging ./scripts/deploy.backend.sh
 
 ```bash
 ENV=ic dfx deploy frontend --network staging --wallet yit3i-lyaaa-aaaan-qeavq-cai
-ENV=staging ./scripts/deploy.backend.sh
+ENV=ic ./scripts/deploy.backend.sh
 ```
