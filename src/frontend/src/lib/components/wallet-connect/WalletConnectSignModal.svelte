@@ -8,6 +8,7 @@
 	import { WALLET_CONNECT_SIGN_STEPS } from '$lib/constants/steps.constants';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { signMessage, reject as rejectServices } from '$lib/services/wallet-connect.services';
+	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 
 	export let listener: WalletConnectListener | undefined | null;
 	export let request: Web3WalletTypes.SessionRequest;
@@ -61,7 +62,7 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	<svelte:fragment slot="title">Sign Message</svelte:fragment>
+	<WalletConnectModalTitle slot="title">Sign Message</WalletConnectModalTitle>
 
 	{#if currentStep?.name === 'Signing'}
 		<SendProgress progressStep={signProgressStep} steps={WALLET_CONNECT_SIGN_STEPS} />

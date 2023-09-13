@@ -30,7 +30,7 @@
 
 <p class="font-bold">Message</p>
 {#if nonNullish(json)}
-	<div class="bg-blue text-off-white rounded-sm p-2 mt-1">
+	<div class="bg-dust rounded-sm p-2 mt-1">
 		<Json {json} _collapsed={true} />
 	</div>
 {:else}

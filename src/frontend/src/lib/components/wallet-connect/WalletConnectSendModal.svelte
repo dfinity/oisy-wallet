@@ -24,6 +24,7 @@
 		send as sendServices,
 		reject as rejectServices
 	} from '$lib/services/wallet-connect.services';
+	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -100,7 +101,7 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	<svelte:fragment slot="title">Send</svelte:fragment>
+	<WalletConnectModalTitle slot="title">Send</WalletConnectModalTitle>
 
 	{@const destination = firstTransaction.to ?? ''}
 
