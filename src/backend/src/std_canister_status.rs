@@ -1,4 +1,4 @@
-//! Support for the standard `CanisterStatusResultV2`.
+//! Support for the standard `get_canister_status` method returning a `CanisterStatusResultV2`.
 //!
 //! Note: This API is used my many canisters but the code is not packaged up in a portable way and implementations typically use old APIs to get the data.
 //!
