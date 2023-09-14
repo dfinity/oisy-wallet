@@ -30,8 +30,8 @@
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
 
-	let transactionApprove = false;
-	$: transactionApprove = isErc20TransactionApprove(firstTransaction.data);
+	let erc20Approve = false;
+	$: erc20Approve = isErc20TransactionApprove(firstTransaction.data);
 
 	/**
 	 * Fee context store
@@ -108,8 +108,7 @@
 	{@const destination = firstTransaction.to ?? ''}
 	{@const data = firstTransaction.data}
 
-	<WalletConnectModalTitle slot="title"
-		>{transactionApprove ? 'Approve' : 'Send'}</WalletConnectModalTitle
+	<WalletConnectModalTitle slot="title">{erc20Approve ? 'Approve' : 'Send'}</WalletConnectModalTitle
 	>
 
 	<FeeContext amount={amount.toString()} {destination} observe={currentStep?.name !== 'Sending'}>
@@ -120,7 +119,7 @@
 				{amount}
 				{destination}
 				{data}
-				{transactionApprove}
+				{erc20Approve}
 				on:icApprove={send}
 				on:icReject={reject}
 			/>

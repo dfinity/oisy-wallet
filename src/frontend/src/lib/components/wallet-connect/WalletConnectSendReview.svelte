@@ -8,10 +8,10 @@
 	export let amount: BigNumber;
 	export let destination: string;
 	export let data: string;
-	export let transactionApprove: boolean;
+	export let erc20Approve: boolean;
 
 	let amountDisplay: BigNumber;
-	$: amountDisplay = transactionApprove ? decodeErc20AbiDataValue(data) : amount;
+	$: amountDisplay = erc20Approve ? decodeErc20AbiDataValue(data) : amount;
 </script>
 
 <SendData amount={formatEtherShort(amountDisplay)} {destination} />
