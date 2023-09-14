@@ -232,6 +232,7 @@ async fn sign_prehash(prehash: String) -> String {
 /// API method to get cycle balance and burn rate.
 #[update]
 async fn get_canister_status() -> () /*ic_ic00_types::CanisterStatusResultV2*/ {
+    let _own_canister_id = ic_cdk::api::id();
 /*
     let own_canister_id = dfn_core::api::id();
     let result = ic_nervous_system_common::get_canister_status(own_canister_id.get()).await;
