@@ -2,17 +2,17 @@ use candid::{CandidType, Deserialize, Nat, Principal};
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
+use http::{HttpRequest, HttpResponse};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
-use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, update, query};
+use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use k256::PublicKey;
+use metrics::get_metrics;
+use serde_bytes::ByteBuf;
 use std::cell::RefCell;
 use std::str::FromStr;
-use metrics::get_metrics;
-use http::{HttpResponse, HttpRequest};
-use serde_bytes::ByteBuf;
 
 pub mod http;
 mod metrics;

@@ -1,9 +1,9 @@
 //! The data structure for HTTP requests and responses as supported natively by the replica.
-//! 
+//!
 //! Note: I do not see these types in the SDK, which I find a bit surprising.
 
-use serde_bytes::ByteBuf;
 use candid::{CandidType, Deserialize};
+use serde_bytes::ByteBuf;
 
 #[derive(Clone, Debug, CandidType, Deserialize)]
 pub struct HttpRequest {

@@ -1,16 +1,15 @@
 //! Canister health metrics.
 
-use ic_metrics_encoder::MetricsEncoder;
-use serde_bytes::ByteBuf;
 use crate::http::HttpResponse;
 #[cfg(target_arch = "wasm32")]
 use core::arch::wasm32::memory_size as wasm_memory_size;
 #[cfg(target_arch = "wasm32")]
 use ic_cdk::api::stable::stable64_size;
+use ic_metrics_encoder::MetricsEncoder;
+use serde_bytes::ByteBuf;
 #[cfg(target_arch = "wasm32")]
 const WASM_PAGE_SIZE: u64 = 65536;
 const GIBIBYTE: u64 = 1 << 30;
-
 
 /// Returns the metrics in the Prometheus format.
 pub fn get_metrics() -> HttpResponse {
@@ -41,7 +40,7 @@ pub fn get_metrics() -> HttpResponse {
 
 /// Encodes the metrics in the Prometheus format.
 fn encode_metrics(w: &mut MetricsEncoder<Vec<u8>>) -> std::io::Result<()> {
-	w.encode_gauge(
+    w.encode_gauge(
         "ic_eth_wallet_stable_memory_size_gib",
         gibibytes(stable_memory_size_bytes()),
         "Amount of stable memory used by this canister, in GiB",
@@ -51,11 +50,11 @@ fn encode_metrics(w: &mut MetricsEncoder<Vec<u8>>) -> std::io::Result<()> {
         gibibytes(wasm_memory_size_bytes()),
         "Amount of wasm memory used by this canister, in GiB",
     )?;
-	Ok(())
+    Ok(())
 }
 
 /// The stable memory size in bytes
-pub fn stable_memory_size_bytes() -> u64 {
+fn stable_memory_size_bytes() -> u64 {
     #[cfg(target_arch = "wasm32")]
     {
         stable64_size() * WASM_PAGE_SIZE
@@ -67,7 +66,7 @@ pub fn stable_memory_size_bytes() -> u64 {
 }
 
 /// The WASM memory size in bytes
-pub fn wasm_memory_size_bytes() -> u64 {
+fn wasm_memory_size_bytes() -> u64 {
     #[cfg(target_arch = "wasm32")]
     {
         (wasm_memory_size(0) as u64) * WASM_PAGE_SIZE
@@ -81,6 +80,6 @@ pub fn wasm_memory_size_bytes() -> u64 {
 }
 
 /// Convert bytes to binary gigabytes
-pub fn gibibytes(bytes: u64) -> f64 {
+fn gibibytes(bytes: u64) -> f64 {
     (bytes as f64) / (GIBIBYTE as f64)
 }
