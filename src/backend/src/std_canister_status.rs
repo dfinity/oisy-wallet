@@ -1,13 +1,18 @@
-//! Standard canister status.
+//! Support for the standard CanisterStatusResultV2.
 //! 
-//! Note: This API is used my many canisters but the code is not packaged up in a portable way, so this is a copy.
-//! Perhaps this module can be added to something like cdk-rs.  Probably not cdk-rs itself but something like that.
-//! It could also be a small, standalone library.
+//! Note: This API is used my many canisters but the code is not packaged up in a portable way and typically uses old APIs to get the data.
+//! 
+//! The `ic_cdk` has a method called [`canister_status`](https://docs.rs/ic-cdk/0.10.0/ic_cdk/api/management_canister/main/fn.canister_status.html)
+//! with all the same data.  Perhaps the cycle management canister could support that.  In the meantime we convert the type used in the 
+//! current `ic_cdk` into the currently requested `CanisterStatusResultV2`.
 
 use candid::{CandidType, Deserialize, Principal};
+use ic_cdk::api::management_canister::main::CanisterStatusResponse;
 use ic_cdk::api::management_canister::main::CanisterStatusType;
 use ic_cdk::api::management_canister::main::CanisterIdRecord;
+use ic_cdk::api::management_canister::main::DefiniteCanisterSettings;
 
+/// Copy of the synonymous Rosetta type.
 #[derive(CandidType, Debug, Deserialize, Eq, PartialEq)]
 pub struct CanisterStatusResultV2 {
     status: CanisterStatusType,
@@ -19,6 +24,33 @@ pub struct CanisterStatusResultV2 {
     // this is for compat with Spec 0.12/0.13
     balance: Vec<(Vec<u8>, candid::Nat)>,
     freezing_threshold: candid::Nat,
+}
+
+impl From<CanisterStatusResponse> for CanisterStatusResultV2 {
+    fn from(value: CanisterStatusResponse) -> Self {
+        let CanisterStatusResponse {
+            status,
+            module_hash,
+            settings,
+            memory_size,
+            cycles,
+            ..
+        } = value;
+
+        let controller = settings.controllers.get(0).expect("This canister has not even one controller").clone();
+        let balance = vec![(vec![0], cycles.clone())];
+        let freezing_threshold = settings.freezing_threshold.clone();
+        Self {
+            status,
+            module_hash,
+            controller,
+            settings: settings.into(),
+            memory_size,
+            cycles,
+            balance,
+            freezing_threshold,
+        }
+    }
 }
 
 /// Struct used for encoding/decoding
@@ -36,13 +68,32 @@ pub struct DefiniteCanisterSettingsArgs {
     freezing_threshold: candid::Nat,
 }
 
+impl From<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
+    fn from(value: DefiniteCanisterSettings) -> Self {
+        let DefiniteCanisterSettings {
+            controllers,
+            compute_allocation,
+            memory_allocation,
+            freezing_threshold,
+        } = value;
+        Self {
+            controller: controllers.get(0).expect("This canister has not even one controller").clone(),
+            controllers,
+            compute_allocation,
+            memory_allocation,
+            freezing_threshold,
+        }
+    }
+}
+
 pub async fn get_canister_status_v2() -> CanisterStatusResultV2 {
     let canister_id = ic_cdk::api::id(); // Own canister ID.
-    let _canister_status = ic_cdk::api::management_canister::main::canister_status(CanisterIdRecord{canister_id}).await;
-/*
-    let own_canister_id = dfn_core::api::id();
-    let result = ic_nervous_system_common::get_canister_status(own_canister_id.get()).await;
-    result.unwrap_or_else(|err| panic!("Couldn't get canister_status of {}. Err: {:#?}", own_canister_id, err))
-*/
-    unimplemented!()
+    ic_cdk::api::management_canister::main::canister_status(CanisterIdRecord{canister_id}).await
+    .map(|(canister_status_response,)|CanisterStatusResultV2::from(canister_status_response))
+    .unwrap_or_else(|err| {
+        panic!(
+            "Couldn't get canister_status of {}. Err: {:#?}",
+            canister_id, err
+        )
+    })
 }
