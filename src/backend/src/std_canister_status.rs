@@ -1,9 +1,9 @@
-//! Support for the standard CanisterStatusResultV2.
+//! Support for the standard `CanisterStatusResultV2`.
 //!
 //! Note: This API is used my many canisters but the code is not packaged up in a portable way and implementations typically use old APIs to get the data.
 //!
 //! The `ic_cdk` has a method called [`canister_status`](https://docs.rs/ic-cdk/0.10.0/ic_cdk/api/management_canister/main/fn.canister_status.html)
-//! with all the same data.  Consumers such as teh cycle management canister should consider supporting that.  In the meantime we convert the type used in the
+//! with all the same data.  Consumers such as the cycle management canister should consider supporting that.  In the meantime we convert the type used in the
 //! current `ic_cdk` into the currently requested `CanisterStatusResultV2`.
 
 use candid::{CandidType, Deserialize, Principal};
@@ -58,7 +58,7 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
     }
 }
 
-/// Struct used for encoding/decoding
+/// Structure used for encoding/decoding
 /// `(record {
 ///     controller : principal;
 ///     compute_allocation: nat;
