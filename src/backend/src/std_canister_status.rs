@@ -68,21 +68,22 @@ pub struct DefiniteCanisterSettingsArgs {
     freezing_threshold: candid::Nat,
 }
 
-impl From<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
-    fn from(value: DefiniteCanisterSettings) -> Self {
+impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
+    type Error = &'static str;
+    fn from(value: DefiniteCanisterSettings) -> Result<Self, Self::Error> {
         let DefiniteCanisterSettings {
             controllers,
             compute_allocation,
             memory_allocation,
             freezing_threshold,
         } = value;
-        Self {
-            controller: controllers.get(0).expect("This canister has not even one controller").clone(),
+        Ok(Self {
+            controller: controllers.get(0).ok_or("This canister has not even one controller")?.clone(),
             controllers,
             compute_allocation,
             memory_allocation,
             freezing_threshold,
-        }
+        })
     }
 }
 
