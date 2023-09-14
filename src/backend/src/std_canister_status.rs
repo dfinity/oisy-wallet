@@ -6,11 +6,11 @@
 //! with all the same data.  Consumers such as the cycle management canister should consider supporting that.  In the meantime we convert the type used in the
 //! current `ic_cdk` into the currently requested `CanisterStatusResultV2`.
 
-use candid::{CandidType, Deserialize, Principal};
-use ic_cdk::api::management_canister::main::CanisterIdRecord;
-use ic_cdk::api::management_canister::main::CanisterStatusResponse;
-use ic_cdk::api::management_canister::main::CanisterStatusType;
-use ic_cdk::api::management_canister::main::DefiniteCanisterSettings;
+use candid::{CandidType, Deserialize, Nat, Principal};
+use ic_cdk::api::management_canister::main::{
+    canister_status, CanisterIdRecord, CanisterStatusResponse, CanisterStatusType,
+    DefiniteCanisterSettings,
+};
 
 /// Copy of the synonymous Rosetta type.
 #[derive(CandidType, Debug, Deserialize, Eq, PartialEq)]
@@ -19,12 +19,12 @@ pub struct CanisterStatusResultV2 {
     module_hash: Option<Vec<u8>>,
     controller: candid::Principal,
     settings: DefiniteCanisterSettingsArgs,
-    memory_size: candid::Nat,
-    cycles: candid::Nat,
+    memory_size: Nat,
+    cycles: Nat,
     // this is for compat with Spec 0.12/0.13
-    balance: Vec<(Vec<u8>, candid::Nat)>,
-    freezing_threshold: candid::Nat,
-    idle_cycles_burned_per_day: candid::Nat,
+    balance: Vec<(Vec<u8>, Nat)>,
+    freezing_threshold: Nat,
+    idle_cycles_burned_per_day: Nat,
 }
 
 impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
@@ -65,9 +65,9 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
 pub struct DefiniteCanisterSettingsArgs {
     controller: Principal,
     controllers: Vec<Principal>,
-    compute_allocation: candid::Nat,
-    memory_allocation: candid::Nat,
-    freezing_threshold: candid::Nat,
+    compute_allocation: Nat,
+    memory_allocation: Nat,
+    freezing_threshold: Nat,
 }
 
 impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
@@ -93,7 +93,7 @@ impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
 
 pub async fn get_canister_status_v2() -> CanisterStatusResultV2 {
     let canister_id = ic_cdk::api::id(); // Own canister ID.
-    ic_cdk::api::management_canister::main::canister_status(CanisterIdRecord { canister_id })
+    canister_status(CanisterIdRecord { canister_id })
         .await
         .map_err(|err| format!("Failed to get status: {:#?}", err))
         .and_then(|(canister_status_response,)| {
