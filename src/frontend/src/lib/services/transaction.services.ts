@@ -4,10 +4,10 @@ import { reloadBalance } from '$lib/services/balance.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { Token } from '$lib/types/token';
+import { decodeErc20AbiDataValue } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
-import { ethers } from 'ethers';
 
 export const processTransactionSent = async ({
 	token,
@@ -22,10 +22,7 @@ export const processTransactionSent = async ({
 	}
 
 	// We adapt the value for display purpose because the transaction we get has an ETH value of 0x00
-	const [_to, value] = ethers.utils.defaultAbiCoder.decode(
-		['address', 'uint256'],
-		ethers.utils.hexDataSlice(transaction.data, 4)
-	);
+	const value = decodeErc20AbiDataValue(transaction.data);
 
 	await processErc20Transaction({ hash: transaction.hash, value, token, type: 'pending' });
 };
