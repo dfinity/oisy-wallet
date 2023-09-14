@@ -23,3 +23,7 @@ export const ERC20_ABI = [
 	'event Transfer(address indexed _from, address indexed _to, uint256 _value)',
 	'event Approval(address indexed _owner, address indexed _spender, uint256 _value)'
 ];
+
+// We assumed that ERC20 approve contract function prefix is 0x095ea7b3
+// https://sepolia.etherscan.io/address/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984#writeContract#F1
+export const ERC20_APPROVE_HASH = '0x095ea7b3';

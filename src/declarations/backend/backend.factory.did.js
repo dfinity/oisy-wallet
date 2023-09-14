@@ -2,6 +2,29 @@
 export const idlFactory = ({ IDL }) => {
 	const InitArg = IDL.Record({ ecdsa_key_name: IDL.Text });
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
+	const CanisterStatusType = IDL.Variant({
+		stopped: IDL.Null,
+		stopping: IDL.Null,
+		running: IDL.Null
+	});
+	const DefiniteCanisterSettingsArgs = IDL.Record({
+		controller: IDL.Principal,
+		freezing_threshold: IDL.Nat,
+		controllers: IDL.Vec(IDL.Principal),
+		memory_allocation: IDL.Nat,
+		compute_allocation: IDL.Nat
+	});
+	const CanisterStatusResultV2 = IDL.Record({
+		controller: IDL.Principal,
+		status: CanisterStatusType,
+		freezing_threshold: IDL.Nat,
+		balance: IDL.Vec(IDL.Tuple(IDL.Vec(IDL.Nat8), IDL.Nat)),
+		memory_size: IDL.Nat,
+		cycles: IDL.Nat,
+		settings: DefiniteCanisterSettingsArgs,
+		idle_cycles_burned_per_day: IDL.Nat,
+		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
 	const SignRequest = IDL.Record({
 		to: IDL.Text,
 		gas: IDL.Nat,
@@ -14,6 +37,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
+		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])

@@ -14,8 +14,9 @@ use metrics::get_metrics;
 use http::{HttpResponse, HttpRequest};
 use serde_bytes::ByteBuf;
 
-mod metrics;
 pub mod http;
+mod metrics;
+mod std_canister_status;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
@@ -105,7 +106,7 @@ async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
     let name = read_state(|s| s.ecdsa_key_name.clone());
     let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
         canister_id: None,
-        derivation_path: principal_to_derivation_path(&principal),
+        derivation_path: principal_to_derivation_path(principal),
         key_id: EcdsaKeyId {
             curve: EcdsaCurve::Secp256k1,
             name,
@@ -151,7 +152,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
         ecdsa_pubkey_of(caller),
         sign_with_ecdsa(SignWithEcdsaArgument {
             message_hash,
-            derivation_path: principal_to_derivation_path(&caller),
+            derivation_path: principal_to_derivation_path(caller),
             key_id: EcdsaKeyId {
                 curve: EcdsaCurve::Secp256k1,
                 name: read_state(|s| s.ecdsa_key_name.clone()),
@@ -174,7 +175,7 @@ async fn sign_transaction(req: SignRequest) -> String {
 
     let caller = ic_cdk::caller();
 
-    let data = req.data.as_ref().map(|s| decode_hex(&s));
+    let data = req.data.as_ref().map(|s| decode_hex(s));
 
     let tx = Eip1559TransactionRequest {
         chain_id: Some(nat_to_u64(&req.chain_id)),
@@ -247,6 +248,12 @@ async fn sign_prehash(prehash: String) -> String {
     let v = y_parity(&hash_bytes, &signature, &pubkey);
     signature.push(v as u8);
     format!("0x{}", hex::encode(&signature))
+}
+
+/// API method to get cycle balance and burn rate.
+#[update]
+async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
+    std_canister_status::get_canister_status_v2().await
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
