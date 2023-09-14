@@ -21,6 +21,17 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+export interface HttpRequest {
+	url: string;
+	method: string;
+	body: Uint8Array | number[];
+	headers: Array<[string, string]>;
+}
+export interface HttpResponse {
+	body: Uint8Array | number[];
+	headers: Array<[string, string]>;
+	status_code: number;
+}
 export interface InitArg {
 	ecdsa_key_name: string;
 }
@@ -37,6 +48,7 @@ export interface SignRequest {
 export interface _SERVICE {
 	caller_eth_address: ActorMethod<[], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
+	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	personal_sign: ActorMethod<[string], string>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
