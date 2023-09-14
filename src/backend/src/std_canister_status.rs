@@ -68,7 +68,7 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
 /// })`
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq)]
 pub struct DefiniteCanisterSettingsArgs {
-    controller: Principal, // TODO: Upstream uses PrincipalId, bit cdk-rs uses Principal.  TODO: Confirm that these are identical on the wire.
+    controller: Principal,
     controllers: Vec<Principal>,
     compute_allocation: candid::Nat,
     memory_allocation: candid::Nat,
