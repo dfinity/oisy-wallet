@@ -19,3 +19,4 @@ serde = "1"
 k256 = "0.13"
 hex = "0.4"
 getrandom = { version = "0.2", features = ["custom"] }
+

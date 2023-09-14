@@ -10,6 +10,7 @@ use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, update};
 use k256::PublicKey;
 use std::cell::RefCell;
 use std::str::FromStr;
+mod std_canister_status;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
@@ -231,13 +232,8 @@ async fn sign_prehash(prehash: String) -> String {
 
 /// API method to get cycle balance and burn rate.
 #[update]
-async fn get_canister_status() -> () /*ic_ic00_types::CanisterStatusResultV2*/ {
-    let _own_canister_id = ic_cdk::api::id();
-/*
-    let own_canister_id = dfn_core::api::id();
-    let result = ic_nervous_system_common::get_canister_status(own_canister_id.get()).await;
-    result.unwrap_or_else(|err| panic!("Couldn't get canister_status of {}. Err: {:#?}", own_canister_id, err))
-*/
+async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
+    std_canister_status::get_canister_status_v2().await
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
