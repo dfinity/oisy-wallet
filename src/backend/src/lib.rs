@@ -86,7 +86,7 @@ async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
     let name = read_state(|s| s.ecdsa_key_name.clone());
     let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
         canister_id: None,
-        derivation_path: principal_to_derivation_path(&principal),
+        derivation_path: principal_to_derivation_path(principal),
         key_id: EcdsaKeyId {
             curve: EcdsaCurve::Secp256k1,
             name,
@@ -132,7 +132,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
         ecdsa_pubkey_of(caller),
         sign_with_ecdsa(SignWithEcdsaArgument {
             message_hash,
-            derivation_path: principal_to_derivation_path(&caller),
+            derivation_path: principal_to_derivation_path(caller),
             key_id: EcdsaKeyId {
                 curve: EcdsaCurve::Secp256k1,
                 name: read_state(|s| s.ecdsa_key_name.clone()),
@@ -155,7 +155,7 @@ async fn sign_transaction(req: SignRequest) -> String {
 
     let caller = ic_cdk::caller();
 
-    let data = req.data.as_ref().map(|s| decode_hex(&s));
+    let data = req.data.as_ref().map(|s| decode_hex(s));
 
     let tx = Eip1559TransactionRequest {
         chain_id: Some(nat_to_u64(&req.chain_id)),
