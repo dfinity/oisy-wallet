@@ -6,10 +6,16 @@ use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
-use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, update};
+use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, update, query};
 use k256::PublicKey;
 use std::cell::RefCell;
 use std::str::FromStr;
+use metrics::get_metrics;
+use http::{HttpResponse, HttpRequest};
+use serde_bytes::ByteBuf;
+
+mod metrics;
+pub mod http;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
@@ -56,6 +62,20 @@ fn post_upgrade() {
         let (s,) = ic_cdk::storage::stable_restore().expect("failed to decode state");
         *cell.borrow_mut() = s;
     });
+}
+
+/// Processes external HTTP requests.
+#[query]
+pub fn http_request(request: HttpRequest) -> HttpResponse {
+    let parts: Vec<&str> = request.url.split('?').collect();
+    match parts[0] {
+        "/metrics" => get_metrics(),
+        _ => HttpResponse {
+            status_code: 404,
+            headers: vec![],
+            body: ByteBuf::from(String::from("Not found.")),
+        },
+    }
 }
 
 fn principal_to_derivation_path(p: &Principal) -> Vec<Vec<u8>> {
