@@ -1,4 +1,23 @@
 type Arg = variant { Upgrade; Init : InitArg };
+type CanisterStatusResultV2 = record {
+  controller : principal;
+  status : CanisterStatusType;
+  freezing_threshold : nat;
+  balance : vec record { vec nat8; nat };
+  memory_size : nat;
+  cycles : nat;
+  settings : DefiniteCanisterSettingsArgs;
+  idle_cycles_burned_per_day : nat;
+  module_hash : opt vec nat8;
+};
+type CanisterStatusType = variant { stopped; stopping; running };
+type DefiniteCanisterSettingsArgs = record {
+  controller : principal;
+  freezing_threshold : nat;
+  controllers : vec principal;
+  memory_allocation : nat;
+  compute_allocation : nat;
+};
 type InitArg = record { ecdsa_key_name : text };
 type SignRequest = record {
   to : text;
@@ -12,6 +31,7 @@ type SignRequest = record {
 };
 service : (Arg) -> {
   caller_eth_address : () -> (text);
+  get_canister_status : () -> (CanisterStatusResultV2);
   personal_sign : (text) -> (text);
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
