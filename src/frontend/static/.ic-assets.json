@@ -2,5 +2,9 @@
 	{
 		"match": "**/favicons/**/*",
 		"allow_raw_access": true
+	},
+	{
+		"match": ".well-known",
+		"ignore": false
 	}
 ]
