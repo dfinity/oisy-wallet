@@ -5,7 +5,7 @@
 	import AddressQRCodeHero from '$lib/components/address/AddressQRCodeHero.svelte';
 	import oisy from '$lib/assets/oisy.svg';
 	import { token } from '$lib/derived/token.derived';
-	import Header from '$lib/components/layout/Header.svelte';
+	import HeaderHero from '$lib/components/layout/HeaderHero.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
@@ -21,7 +21,7 @@
 </script>
 
 <div class="hero">
-	<Header />
+	<HeaderHero />
 
 	<article class="text-off-white rounded-lg pt-2 pb-4 px-4 mb-8 relative main">
 		<div class="mb-6">
