@@ -25,6 +25,17 @@ export const idlFactory = ({ IDL }) => {
 		idle_cycles_burned_per_day: IDL.Nat,
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
+	const HttpRequest = IDL.Record({
+		url: IDL.Text,
+		method: IDL.Text,
+		body: IDL.Vec(IDL.Nat8),
+		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text))
+	});
+	const HttpResponse = IDL.Record({
+		body: IDL.Vec(IDL.Nat8),
+		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
+		status_code: IDL.Nat16
+	});
 	const SignRequest = IDL.Record({
 		to: IDL.Text,
 		gas: IDL.Nat,
@@ -38,6 +49,7 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
+		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
