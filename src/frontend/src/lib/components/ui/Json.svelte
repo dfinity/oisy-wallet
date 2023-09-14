@@ -63,6 +63,7 @@
 
 {#if isExpandable && hasChildren}
 	{#if collapsed}
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<span
 			data-tid={testId}
 			class="key"
@@ -78,7 +79,7 @@
 			<span class="bracket">{openBracket} ... {closeBracket}</span>
 		</span>
 	{:else}
-		<!-- key -->
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<span
 			data-tid={testId}
 			class="key"

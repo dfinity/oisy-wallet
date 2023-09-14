@@ -7,6 +7,7 @@
 	<span class="px-0.5"
 		>Participate in $100K ICP ERC-20 Airdrop by solving a quiz about the Internet Computer</span
 	>
+	<!-- svelte-ignore a11y-invalid-attribute -->
 	<a
 		href=""
 		rel="external noopener noreferrer"
