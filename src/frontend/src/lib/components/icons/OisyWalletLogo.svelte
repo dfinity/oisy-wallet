@@ -2,7 +2,7 @@
 	export let size = '46';
 </script>
 
-<svg width="100%" height={size} viewBox="0 0 199 67" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="auto" height={size} viewBox="0 0 199 67" fill="none" xmlns="http://www.w3.org/2000/svg">
 	<g clip-path="url(#clip0_229_3919)">
 		<rect y="1.19409" width="64" height="64" rx="32" fill="#1E005D" />
 		<g filter="url(#filter0_f_229_3919)">
