@@ -9,6 +9,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import Balance from '$lib/components/hero/Balance.svelte';
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
+	import TotalBalance from './TotalBalance.svelte';
 
 	export let summary = false;
 	export let actions = true;
@@ -37,6 +38,8 @@
 
 				<Balance />
 			</div>
+		{:else}
+			<TotalBalance/>		
 		{/if}
 
 		{#if actions}

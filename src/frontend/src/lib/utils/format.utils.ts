@@ -40,6 +40,18 @@ export const formatTokenDetailed = ({
 		.replace(/(\.0+|0+)$/, '');
 };
 
+export const formatNumberAsCurrency = ({
+	value,
+	displayDecimals = 2
+}: {
+	value: number;
+	displayDecimals?: number;
+}): string => {
+	return new Intl.NumberFormat('en-US', { minimumFractionDigits: displayDecimals })
+		.format(value)
+		.replace(/(\.0+|0+)$/, '');
+};
+
 /**
  * Shortens the text from the middle. Ex: "12345678901234567890" -> "1234567...5678901"
  * @param text

@@ -12,3 +12,5 @@ export const ETHEREUM_TOKEN: Token = {
 	decimals: 18,
 	icon: eth
 };
+
+export const DEFAULT_CURRENCY = 'usd';

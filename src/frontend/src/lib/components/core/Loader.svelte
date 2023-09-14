@@ -6,6 +6,7 @@
 	import { loadAddress } from '$lib/services/address.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
+	import { loadFiatBalance } from '$lib/services/fiat.services';
 	import { loadErc20Contracts } from '$lib/services/erc20.services';
 	import banner from '$lib/assets/banner.svg';
 	import { Modal } from '@dfinity/gix-components';
@@ -83,6 +84,11 @@
 			loadEthData({ loadTransactions, tokenId: $tokenId }),
 			...(AIRDROP ? [initAirdrop()] : [])
 		]);
+
+		const { success: fiatBalanceSuccess } = await loadFiatBalance();
+		if (!fiatBalanceSuccess) {
+			console.log('Could not load portfolio total balance in fiat');
+		}
 
 		progressStep = LoaderStep.DONE;
 	});
