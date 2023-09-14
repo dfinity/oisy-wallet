@@ -2,14 +2,21 @@ use candid::{CandidType, Deserialize, Nat, Principal};
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
+use http::{HttpRequest, HttpResponse};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
-use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, update};
+use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use k256::PublicKey;
+use metrics::get_metrics;
+use serde_bytes::ByteBuf;
 use std::cell::RefCell;
 use std::str::FromStr;
+
+pub mod http;
+mod metrics;
+mod std_canister_status;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
@@ -58,6 +65,20 @@ fn post_upgrade() {
     });
 }
 
+/// Processes external HTTP requests.
+#[query]
+pub fn http_request(request: HttpRequest) -> HttpResponse {
+    let parts: Vec<&str> = request.url.split('?').collect();
+    match parts[0] {
+        "/metrics" => get_metrics(),
+        _ => HttpResponse {
+            status_code: 404,
+            headers: vec![],
+            body: ByteBuf::from(String::from("Not found.")),
+        },
+    }
+}
+
 fn principal_to_derivation_path(p: &Principal) -> Vec<Vec<u8>> {
     const SCHEMA: u8 = 1;
 
@@ -85,7 +106,7 @@ async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
     let name = read_state(|s| s.ecdsa_key_name.clone());
     let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
         canister_id: None,
-        derivation_path: principal_to_derivation_path(&principal),
+        derivation_path: principal_to_derivation_path(principal),
         key_id: EcdsaKeyId {
             curve: EcdsaCurve::Secp256k1,
             name,
@@ -131,7 +152,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
         ecdsa_pubkey_of(caller),
         sign_with_ecdsa(SignWithEcdsaArgument {
             message_hash,
-            derivation_path: principal_to_derivation_path(&caller),
+            derivation_path: principal_to_derivation_path(caller),
             key_id: EcdsaKeyId {
                 curve: EcdsaCurve::Secp256k1,
                 name: read_state(|s| s.ecdsa_key_name.clone()),
@@ -154,7 +175,7 @@ async fn sign_transaction(req: SignRequest) -> String {
 
     let caller = ic_cdk::caller();
 
-    let data = req.data.as_ref().map(|s| decode_hex(&s));
+    let data = req.data.as_ref().map(|s| decode_hex(s));
 
     let tx = Eip1559TransactionRequest {
         chain_id: Some(nat_to_u64(&req.chain_id)),
@@ -227,6 +248,12 @@ async fn sign_prehash(prehash: String) -> String {
     let v = y_parity(&hash_bytes, &signature, &pubkey);
     signature.push(v as u8);
     format!("0x{}", hex::encode(&signature))
+}
+
+/// API method to get cycle balance and burn rate.
+#[update]
+async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
+    std_canister_status::get_canister_status_v2().await
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
