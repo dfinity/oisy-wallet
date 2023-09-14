@@ -1,15 +1,4 @@
 type Arg = variant { Upgrade; Init : InitArg };
-type InitArg = record { ecdsa_key_name : text };
-type SignRequest = record {
-  to : text;
-  gas : nat;
-  value : nat;
-  max_priority_fee_per_gas : nat;
-  data : opt text;
-  max_fee_per_gas : nat;
-  chain_id : nat;
-  nonce : nat;
-};
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -29,9 +18,20 @@ type DefiniteCanisterSettingsArgs = record {
   memory_allocation : nat;
   compute_allocation : nat;
 };
+type InitArg = record { ecdsa_key_name : text };
+type SignRequest = record {
+  to : text;
+  gas : nat;
+  value : nat;
+  max_priority_fee_per_gas : nat;
+  data : opt text;
+  max_fee_per_gas : nat;
+  chain_id : nat;
+  nonce : nat;
+};
 service : (Arg) -> {
-  get_canister_status : () -> (CanisterStatusResultV2);
   caller_eth_address : () -> (text);
+  get_canister_status : () -> (CanisterStatusResultV2);
   personal_sign : (text) -> (text);
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
