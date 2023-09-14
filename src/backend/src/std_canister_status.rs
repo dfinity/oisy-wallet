@@ -60,12 +60,7 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
     }
 }
 
-/// Structure used for encoding/decoding
-/// `(record {
-///     controller : principal;
-///     compute_allocation: nat;
-///     memory_allocation: opt nat;
-/// })`
+/// Copy of synonymous Rosetta type.
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq)]
 pub struct DefiniteCanisterSettingsArgs {
     controller: Principal,
