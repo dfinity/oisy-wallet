@@ -2,6 +2,14 @@
 
 $property: margin;
 
+@include utilities.generate(m-0, $property, 0);
+@include utilities.generate(mx-0, #{$property}-left, 0);
+@include utilities.generate(mx-0, #{$property}-right, 0);
+@include utilities.generate(my-0, #{$property}-top, 0);
+@include utilities.generate(my-0, #{$property}-bottom, 0);
+@include utilities.generate(mt-0, #{$property}-top, 0);
+@include utilities.generate(mb-0, #{$property}-bottom, 0);
+
 @include utilities.generate(m-0\.25, $property, var(--padding-0_25x));
 @include utilities.generate(mx-0\.25, #{$property}-left, var(--padding-0_25x));
 @include utilities.generate(mx-0\.25, #{$property}-right, var(--padding-0_25x));

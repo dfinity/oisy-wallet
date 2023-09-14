@@ -2,7 +2,10 @@
 	import SignInSection from '$lib/components/core/SignInSection.svelte';
 	import SignInBackground from '$lib/components/core/SignInBackground.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
+	import HeaderSignIn from '$lib/components/layout/HeaderSignIn.svelte';
 </script>
+
+<HeaderSignIn />
 
 <SignInSection />
 
