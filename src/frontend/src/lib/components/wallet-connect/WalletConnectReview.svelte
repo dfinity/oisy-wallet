@@ -6,20 +6,33 @@
 	import type { ProposalTypes } from '@walletconnect/types';
 	import { EIP155_CHAINS } from '$lib/constants/eip155-chains.constants';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
+	import type { Verify } from '@walletconnect/types';
+	import { verifyContextStatus } from '$lib/utils/wallet-connect.utils';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;
+
+	let context: Verify.Context | undefined = undefined;
+	$: context = proposal?.verifyContext;
+
+	let contextVerification: string;
+	$: contextVerification = verifyContextStatus(context);
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
 	<div in:fade>
-		<p class="font-bold">{params.proposer.metadata.name}</p>
+		<p class="font-bold">Proposer: {params.proposer.metadata.name}</p>
 		<p>{params.proposer.metadata.description}</p>
 		<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
 			>{params.proposer.metadata.url}</a
 		>
+
+		<div class="mt-3">
+			<label for="verification" class="font-bold">Domain Verification:</label>
+			<div id="verification" class="font-normal mb-2 break-words">{contextVerification}</div>
+		</div>
 
 		{#each Object.entries(params.requiredNamespaces) as [key, value]}
 			{@const allMethods = value.methods}
