@@ -229,6 +229,16 @@ async fn sign_prehash(prehash: String) -> String {
     format!("0x{}", hex::encode(&signature))
 }
 
+/// API method to get cycle balance and burn rate.
+#[update]
+async fn get_canister_status() -> () /*ic_ic00_types::CanisterStatusResultV2*/ {
+/*
+    let own_canister_id = dfn_core::api::id();
+    let result = ic_nervous_system_common::get_canister_status(own_canister_id.get()).await;
+    result.unwrap_or_else(|err| panic!("Couldn't get canister_status of {}. Err: {:#?}", own_canister_id, err))
+*/
+}
+
 /// Computes the parity bit allowing to recover the public key from the signature.
 fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
     use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
