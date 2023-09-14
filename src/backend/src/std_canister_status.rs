@@ -39,11 +39,10 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
             idle_cycles_burned_per_day,
         } = value;
 
-        let controller = settings
+        let controller = *settings
             .controllers
             .get(0)
-            .ok_or("This canister has not even one controller")?
-            .clone();
+            .ok_or("This canister has not even one controller")?;
         let balance = vec![(vec![0], cycles.clone())];
         let freezing_threshold = settings.freezing_threshold.clone();
         Ok(Self {
@@ -85,10 +84,9 @@ impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
             freezing_threshold,
         } = value;
         Ok(Self {
-            controller: controllers
+            controller: *controllers
                 .get(0)
-                .ok_or("This canister has not even one controller")?
-                .clone(),
+                .ok_or("This canister has not even one controller")?,
             controllers,
             compute_allocation,
             memory_allocation,
