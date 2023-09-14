@@ -19,3 +19,5 @@ serde = "1"
 k256 = "0.13"
 hex = "0.4"
 getrandom = { version = "0.2", features = ["custom"] }
+ic-metrics-encoder = "1.1.0"
+serde_bytes = "0.11"
