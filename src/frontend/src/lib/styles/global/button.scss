@@ -15,7 +15,7 @@ button {
 
 	border: 1px solid transparent;
 
-	--button-padding: var(--padding-0_5x) var(--padding-3x);
+	--button-padding: var(--padding) var(--padding-3x);
 
 	&.primary {
 		justify-content: flex-start;
