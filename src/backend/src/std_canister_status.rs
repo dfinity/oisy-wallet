@@ -45,6 +45,7 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
             .ok_or("This canister has not even one controller")?;
         let balance = vec![(vec![0], cycles.clone())];
         let freezing_threshold = settings.freezing_threshold.clone();
+
         Ok(Self {
             status,
             module_hash,
