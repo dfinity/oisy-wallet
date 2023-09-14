@@ -24,6 +24,7 @@ pub struct CanisterStatusResultV2 {
     // this is for compat with Spec 0.12/0.13
     balance: Vec<(Vec<u8>, candid::Nat)>,
     freezing_threshold: candid::Nat,
+    idle_cycles_burned_per_day: candid::Nat,
 }
 
 impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
@@ -35,7 +36,7 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
             settings,
             memory_size,
             cycles,
-            ..
+            idle_cycles_burned_per_day,
         } = value;
 
         let controller = settings
@@ -54,6 +55,7 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
             cycles,
             balance,
             freezing_threshold,
+            idle_cycles_burned_per_day,
         })
     }
 }
