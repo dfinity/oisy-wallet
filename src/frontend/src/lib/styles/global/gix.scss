@@ -24,8 +24,10 @@
 	--progress-color-contrast: var(--color-white);
 	--progress-color-rgb: 59, 0, 185;
 
-	--overlay-background: var(--color-off-white);
+	--overlay-background: var(--color-light-blue);
 	--overlay-background-contrast: var(--color-vampire-black);
+	--overlay-content-background: var(--color-white);
+	--overlay-content-background-contrast: var(--color-vampire-black);
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
@@ -56,7 +58,7 @@
 	--dialog-height: 100vh;
 	--dialog-border-radius: 0;
 	--dialog-padding-y: var(--padding-4x);
-	--dialog-padding-x: 0;
+	--dialog-padding-x: var(--padding-2x);
 
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
 	--dialog-header-height: 74px;

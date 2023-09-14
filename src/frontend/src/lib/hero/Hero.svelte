@@ -4,7 +4,6 @@
 	import Actions from '$lib/hero/Actions.svelte';
 	import AddressQRCodeHero from '$lib/components/address/AddressQRCodeHero.svelte';
 	import oisy from '$lib/assets/oisy.svg';
-	import Img from '$lib/components/ui/Img.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import HeaderHero from '$lib/components/layout/HeaderHero.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';

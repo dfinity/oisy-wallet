@@ -15,19 +15,21 @@ button {
 
 	border: 1px solid transparent;
 
-	--button-padding: var(--padding-0_5x) var(--padding-3x);
+	--button-padding: var(--padding) var(--padding-3x);
 
 	&.primary {
 		justify-content: flex-start;
 
 		background: var(--color-white);
 
-		border: 1px solid var(--color-blue);
+		border: 2px solid var(--color-blue);
 
 		padding: var(--button-padding);
 	}
 
 	&.labelled {
+		padding: var(--padding) var(--padding-4x) var(--padding) var(--padding-2x);
+
 		span {
 			display: block;
 			line-height: var(--line-height-small);
@@ -38,7 +40,6 @@ button {
 			}
 
 			span:last-child {
-				font-weight: var(--font-weight-bold);
 				font-size: var(--font-size-h5);
 				color: var(--color-dark-blue);
 			}
@@ -62,7 +63,6 @@ button {
 
 		padding: var(--padding-1_5x) var(--padding-3x);
 
-		max-width: calc(100% - var(--padding-8x));
 		width: 100%;
 	}
 

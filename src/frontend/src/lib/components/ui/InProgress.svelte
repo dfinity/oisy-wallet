@@ -25,4 +25,6 @@
 	$: progressStep, updateSteps();
 </script>
 
-<ProgressSteps steps={dynamicSteps} />
+<div class="px-1">
+	<ProgressSteps steps={dynamicSteps} />
+</div>
