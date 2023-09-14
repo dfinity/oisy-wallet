@@ -5,6 +5,16 @@
 
 	export let destination: string;
 	export let amount: string | number | undefined = undefined;
+
+	let amountDisplay: string;
+	$: (() => {
+		try {
+			amountDisplay = formatEtherShort(Utils.parseEther(`${amount ?? 0}`), 8);
+		} catch (err: unknown) {
+			// Infinite amount e.g. 1.157920892373162e+59 will fail parsing
+			amountDisplay = `${amount ?? 0}`;
+		}
+	})();
 </script>
 
 <label for="destination" class="font-bold px-1.25">Destination:</label>
@@ -12,6 +22,6 @@
 
 <label for="amount" class="font-bold px-1.25">Amount:</label>
 <div id="amount" class="font-normal px-1.25 mb-2 break-words">
-	{formatEtherShort(Utils.parseEther(`${amount ?? 0}`), 8)}
+	{amountDisplay}
 	{$tokenSymbol}
 </div>
