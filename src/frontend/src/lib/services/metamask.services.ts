@@ -4,6 +4,7 @@ import { metamaskStore } from '$lib/stores/metamask.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { isNullish } from '@dfinity/utils';
 import detectEthereumProvider from '@metamask/detect-provider';
+import { utils } from 'ethers';
 
 export const initMetamaskSupport = async () => {
 	const provider = await detectEthereumProvider({
@@ -46,7 +47,7 @@ export const openMetamaskTransaction = async (
 	}
 
 	try {
-		await sendMetamaskTransaction({ from, to: address });
+		await sendMetamaskTransaction({ from, to: address, value: utils.hexlify(utils.parseUnits("0.05","ether")) });
 
 		return { success: 'ok' };
 	} catch (err: unknown) {
