@@ -42,7 +42,8 @@ const readCanisterIds = ({ prefix }: { prefix?: string }): Record<string, string
 			};
 		}, {});
 	} catch (e) {
-		throw Error(`Could not get canister ID from ${canisterIdsJsonFile}: ${e}`);
+		console.warn(`Could not get canister ID from ${canisterIdsJsonFile}: ${e}`);
+		return {};
 	}
 };
 
