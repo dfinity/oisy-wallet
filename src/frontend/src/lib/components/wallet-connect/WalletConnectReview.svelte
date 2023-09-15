@@ -47,7 +47,7 @@
 			{/each}
 		{/each}
 
-		<WalletConnectActions on:icApprove on:icReject />
+		<WalletConnectActions {proposal} on:icApprove on:icReject />
 	</div>
 {:else}
 	<div class="flex flex-col items-center justify-center">

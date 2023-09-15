@@ -1,5 +1,7 @@
 import type { WalletConnectEthSignTypedDataV4 } from '$lib/types/wallet-connect';
+import { isNullish } from '@dfinity/utils';
 import { isAddress } from '@ethersproject/address';
+import type { Verify } from '@walletconnect/types';
 import { Utils } from 'alchemy-sdk';
 import { utils } from 'ethers';
 
@@ -36,3 +38,6 @@ export const convertHexToUtf8 = (value: string): string => {
 
 	return value;
 };
+
+export const acceptedContext = (context: Verify.Context | undefined): boolean =>
+	isNullish(context) || context.verified.validation.toUpperCase() !== 'ISSCAM';
