@@ -1,0 +1,28 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { initMetamaskSupport, openMetamaskTransaction } from '$lib/services/metamask.services';
+	import { metamaskAvailable } from '$lib/derived/metamask.derived';
+	import { addressStore } from '$lib/stores/address.store';
+	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
+	import { toastsError } from '$lib/stores/toasts.store';
+
+	const receiveModal = async () => {
+		if (!$metamaskAvailable) {
+			toastsError({
+				msg: { text: `Metamask is not available.` }
+			});
+			return;
+		}
+
+		await openMetamaskTransaction($addressStore);
+	};
+
+	onMount(initMetamaskSupport);
+</script>
+
+{#if $metamaskAvailable}
+	<button class="user icon my-4" on:click={receiveModal} style="width: 100%">
+		<IconMetamask />
+		<span class="text-dark-slate-blue font-bold">Receive from Metamask</span>
+	</button>
+{/if}
