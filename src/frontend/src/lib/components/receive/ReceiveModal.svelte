@@ -2,7 +2,7 @@
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { addressStore } from '$lib/stores/address.store';
-	import AddressQRCode from '$lib/components/address/AddressQRCode.svelte';
+	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 </script>
@@ -15,5 +15,5 @@
 		<output class="break-words">{$addressStore ?? ''}</output><Copy value={$addressStore ?? ''} />
 	</p>
 
-	<AddressQRCode />
+	<ReceiveQRCode />
 </Modal>
