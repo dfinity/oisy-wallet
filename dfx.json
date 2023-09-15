@@ -9,6 +9,16 @@
 			},
 			"optimize": "cycles"
 		},
+		"airdrop": {
+			"candid": "src/airdrop/airdrop.did",
+			"package": "airdrop",
+			"type": "rust",
+			"declarations": {
+				"node_compatibility": true
+			},
+			"optimize": "cycles"
+		},
+
 		"frontend": {
 			"frontend": {
 				"entrypoint": "build/index.html"

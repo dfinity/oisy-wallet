@@ -13,7 +13,7 @@ function generate_did() {
   wasmtime "target/wasm32-unknown-unknown/release/$canister.wasm" > "$canister_root/$canister.did"
 }
 
-CANISTERS=backend
+CANISTERS=backend,airdrop
 
 for canister in $(echo $CANISTERS | sed "s/,/ /g")
 do
