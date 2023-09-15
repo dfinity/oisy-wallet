@@ -1,3 +1,4 @@
+<!-- source: https://walletconnect.com/brand -->
 <svg fill="none" height="18" viewBox="0 0 400 400" width="18" xmlns="http://www.w3.org/2000/svg"
 	><clipPath id="a"><path d="m0 0h400v400h-400z" /></clipPath><g clip-path="url(#a)"
 		><circle cx="200" cy="200" fill="#3396ff" r="199.5" stroke="#66b1ff" /><path

@@ -1,3 +1,4 @@
+<!-- source: DFINITY foundation -->
 <svg
 	width="20"
 	style="min-width: 20px"
