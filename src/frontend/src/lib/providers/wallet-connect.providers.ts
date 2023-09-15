@@ -2,7 +2,8 @@ import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN,
-	SESSION_REQUEST_SEND_TRANSACTION
+	SESSION_REQUEST_SEND_TRANSACTION,
+	WALLET_CONNECT_METADATA
 } from '$lib/constants/wallet-connect.constants';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
@@ -21,17 +22,11 @@ export const initWalletConnect = async ({
 	uri: string;
 	address: ECDSA_PUBLIC_KEY;
 }): Promise<WalletConnectListener> => {
-	// TODO: replace metadata with effective values
 	const web3wallet = await Web3Wallet.init({
 		core: new Core({
 			projectId: PROJECT_ID
 		}),
-		metadata: {
-			name: 'Demo app',
-			description: 'Demo Client as Wallet/Peer',
-			url: 'http://localhost:5173/',
-			icons: []
-		}
+		metadata: WALLET_CONNECT_METADATA
 	});
 
 	const disconnectActiveSessions = async () => {
