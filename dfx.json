@@ -18,14 +18,12 @@
 			},
 			"optimize": "cycles"
 		},
-
 		"frontend": {
 			"frontend": {
 				"entrypoint": "build/index.html"
 			},
 			"source": ["build/"],
 			"type": "assets",
-			"build": "./scripts/build.sh",
 			"declarations": {
 				"node_compatibility": true
 			}

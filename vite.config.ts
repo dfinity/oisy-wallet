@@ -128,11 +128,14 @@ const config: UserConfig = {
 	}
 };
 
-export default defineConfig(({ mode }: UserConfig): UserConfig => {
+export default defineConfig((): UserConfig => {
 	// Expand environment - .env files - with canister IDs
 	process.env = {
 		...process.env,
-		...loadEnv(mode ?? 'development', process.cwd()),
+		...loadEnv(
+			network === 'ic' ? 'production' : network === 'staging' ? 'staging' : 'development',
+			process.cwd()
+		),
 		...readCanisterIds({ prefix: 'VITE_' })
 	};
 

@@ -139,6 +139,7 @@ const updateCSP = (indexHtml) => {
 			ethConnectSrc =
 				'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com';
 			break;
+		case undefined:
 		case 'development':
 		case 'staging':
 			ethConnectSrc =
@@ -155,13 +156,15 @@ const updateCSP = (indexHtml) => {
 
 	// Raw is useful when the dapp get added to iOS home screen because otherwise Apple is not able to fetch the app icons.
 	const readCanisterId = () => {
-		const jsonFile = ['ic', 'staging'].includes(process.env.ENV)
+		const mainnet = ['ic', 'staging'].includes(process.env.ENV);
+
+		const jsonFile = mainnet
 			? join(process.cwd(), 'canister_ids.json')
 			: join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
 
 		const { frontend } = JSON.parse(readFileSync(jsonFile, 'utf-8'));
 
-		const canisterId = frontend[process.env.ENV];
+		const canisterId = frontend[mainnet ? process.env.ENV : 'local'];
 
 		if (canisterId === undefined) {
 			throw new Error('Cannot find canister ID to parse the CSP.');
