@@ -91,7 +91,7 @@
 		aspect-ratio: 4 / 3;
 
 		:global(article.reader) {
-			position: absolute;
+			position: absolute !important;
 			top: 50%;
 			left: 50%;
 		}
