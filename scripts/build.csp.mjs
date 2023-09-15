@@ -135,7 +135,7 @@ const updateCSP = (indexHtml) => {
 	let ethConnectSrc = undefined;
 
 	switch (process.env.ENV) {
-		case 'production':
+		case 'ic':
 			ethConnectSrc =
 				'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com';
 			break;
