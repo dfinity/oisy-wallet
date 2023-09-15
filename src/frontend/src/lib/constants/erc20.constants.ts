@@ -24,17 +24,13 @@ export const ERC20_CONTRACTS_ADDRESSES_PRODUCTION: Erc20ContractAddress[] = [
 	{
 		// DAI
 		address: '0x6B175474E89094C44Da98b954EedeAC495271d0F'
-	},
-	{
-		// Uniswap
-		address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
 	}
 ];
 
 export const ERC20_CONTRACTS_ADDRESSES: Erc20ContractAddress[] =
 	import.meta.env.MODE === 'production'
 		? ERC20_CONTRACTS_ADDRESSES_PRODUCTION
-		: ERC20_CONTRACTS_ADDRESSES_DEVELOPMENT;
+		: ERC20_CONTRACTS_ADDRESSES_PRODUCTION;
 
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
 export const ERC20_ABI = [
