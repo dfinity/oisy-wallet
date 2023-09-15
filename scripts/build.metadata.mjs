@@ -44,20 +44,20 @@ const buildMetadata = (htmlFile) => {
 	writeFileSync(htmlFile, indexHtml);
 };
 
-const buildSitemap = () => {
-	const sitemapFile = join(process.cwd(), 'build', 'sitemap.xml');
-	let sitemap = readFileSync(sitemapFile, 'utf-8');
+const buildUrl = (filePath) => {
+	let content = readFileSync(filePath, 'utf-8');
 
-	sitemap = replaceEnv({
-		html: sitemap,
+	content = replaceEnv({
+		html: content,
 		pattern: `https:\/\/oisy\.com`,
 		value: process.env.VITE_OISY_URL
 	});
 
-	writeFileSync(sitemapFile, sitemap);
+	writeFileSync(filePath, content);
 };
 
 const htmlFiles = findHtmlFiles();
 htmlFiles.forEach((htmlFile) => buildMetadata(htmlFile));
 
-buildSitemap();
+buildUrl(join(process.cwd(), 'build', 'sitemap.xml'));
+buildUrl(join(process.cwd(), 'build', 'manifest.webmanifest'));
