@@ -18,7 +18,7 @@
 </script>
 
 {#if $metamaskAvailable}
-	<button class="user icon my-4" on:click={receiveModal} style="width: 100%">
+	<button class="secondary full center my-4" on:click={receiveModal}>
 		<IconMetamask />
 		<span class="text-dark-slate-blue font-bold">Receive from Metamask</span>
 	</button>

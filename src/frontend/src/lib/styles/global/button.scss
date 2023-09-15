@@ -78,7 +78,7 @@ button {
 		font-weight: var(--font-weight-bold);
 	}
 
-	&.primary {
+	&.primary, &.secondary {
 		&.full {
 			width: 100%;
 		}
