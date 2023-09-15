@@ -5,6 +5,11 @@
 	import { page } from '$app/stores';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { erc20TokensInitialized } from '$lib/derived/erc20.derived';
+	import { fade } from 'svelte/transition';
+	import BorderedImg from '$lib/components/ui/BorderedImg.svelte';
+	import { token } from '$lib/derived/token.derived';
+	import oisy from '$lib/assets/oisy.svg';
+	import Balance from '$lib/hero/Balance.svelte';
 
 	let route: 'tokens' | 'dashboard' = 'dashboard';
 	$: route = isRouteTransactions($page) ? 'tokens' : 'dashboard';
@@ -18,6 +23,24 @@
 
 	<article class="text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-4 mb-8 relative main">
 		<Alpha />
+
+		{#if route === 'tokens'}
+			<div class="icon flex flex-col items-start pt-2">
+				{#if displayTokens}
+					<div in:fade>
+						<BorderedImg
+							src={$token.icon ?? oisy}
+							width="auto"
+							height="64px"
+							alt={`${$token.name} logo`}
+							borderColor="off-white"
+						/>
+					</div>
+				{/if}
+			</div>
+
+			<Balance />
+		{/if}
 
 		<Actions send={route === 'tokens'} />
 	</article>
@@ -39,22 +62,6 @@
 	}
 
 	.icon {
-		@include media.min-width(small) {
-			min-height: 70px;
-
-			&.tokens {
-				min-height: 122px;
-			}
-		}
-	}
-
-	.balance {
-		@include media.min-width(small) {
-			min-height: 160px;
-
-			&.tokens {
-				min-height: 108px;
-			}
-		}
+		min-height: calc(64px + var(--padding-4x));
 	}
 </style>
