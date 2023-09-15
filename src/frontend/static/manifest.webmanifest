@@ -1,6 +1,6 @@
 {
-	"name": "Oisy",
-	"short_name": "Oisy",
+	"name": "Oisy wallet",
+	"short_name": "Oisy wallet",
 	"start_url": ".",
 	"display": "standalone",
 	"theme_color": "#51347b",
