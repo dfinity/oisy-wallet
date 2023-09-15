@@ -1,3 +1,4 @@
+<!-- source: DFINITY foundation -->
 <script lang="ts">
 	export let styleClass: string | undefined = undefined;
 	export let size = '14';
