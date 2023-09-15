@@ -24,10 +24,8 @@
 	--progress-color-contrast: var(--color-white);
 	--progress-color-rgb: 59, 0, 185;
 
-	--overlay-background: var(--color-light-blue);
+	--overlay-background: var(--color-off-white);
 	--overlay-background-contrast: var(--color-vampire-black);
-	--overlay-content-background: var(--color-white);
-	--overlay-content-background-contrast: var(--color-vampire-black);
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
@@ -108,13 +106,18 @@ div.input-field input[id]::placeholder {
 }
 
 div.modal {
+	--overlay-background: var(--color-light-blue);
+	--overlay-background-contrast: var(--color-vampire-black);
+	--overlay-content-background: var(--color-white);
+	--overlay-content-background-contrast: var(--color-vampire-black);
+
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
 }
 
 div.popover {
-	--background: var(--color-off-white);
-	--background-contrast: var(--color-vampire-black);
+	--background: var(--overlay-background);
+	--background-contrast: var(--overlay-background-contrast);
 
 	.wrapper {
 		padding: var(--padding-1_5x);
