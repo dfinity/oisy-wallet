@@ -30,7 +30,7 @@ export const ERC20_CONTRACTS_ADDRESSES_PRODUCTION: Erc20ContractAddress[] = [
 export const ERC20_CONTRACTS_ADDRESSES: Erc20ContractAddress[] =
 	import.meta.env.MODE === 'production'
 		? ERC20_CONTRACTS_ADDRESSES_PRODUCTION
-		: ERC20_CONTRACTS_ADDRESSES_PRODUCTION;
+		: ERC20_CONTRACTS_ADDRESSES_DEVELOPMENT;
 
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
 export const ERC20_ABI = [
