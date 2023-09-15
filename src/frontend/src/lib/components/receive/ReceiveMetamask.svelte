@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { initMetamaskSupport, openMetamaskTransaction } from '$lib/services/metamask.services';
+	import { openMetamaskTransaction } from '$lib/services/metamask.services';
 	import { metamaskAvailable } from '$lib/derived/metamask.derived';
 	import { addressStore } from '$lib/stores/address.store';
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
@@ -16,8 +15,6 @@
 
 		await openMetamaskTransaction($addressStore);
 	};
-
-	onMount(initMetamaskSupport);
 </script>
 
 {#if $metamaskAvailable}

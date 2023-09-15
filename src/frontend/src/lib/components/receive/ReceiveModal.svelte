@@ -24,8 +24,7 @@
 	<ReceiveMetamask />
 
 	<button
-		class="primary flex justify-center text-center mt-6 mb-3"
-		style="width: 100%"
+		class="primary full center text-center mt-6 mb-3"
 		on:click={modalStore.close}>Done</button
 	>
 </Modal>
