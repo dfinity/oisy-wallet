@@ -30,6 +30,6 @@ ENV=staging ./scripts/deploy.backend.sh
 > To perform production development, you'll need a `.env` or `.env.production` file.
 
 ```bash
-ENV=ic dfx deploy frontend --network staging --wallet yit3i-lyaaa-aaaan-qeavq-cai
+ENV=ic dfx deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
 ENV=ic ./scripts/deploy.backend.sh
 ```
