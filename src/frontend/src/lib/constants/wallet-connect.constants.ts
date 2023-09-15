@@ -3,7 +3,7 @@ import type { ErrorResponse } from '@walletconnect/jsonrpc-utils';
 
 export const WALLET_CONNECT_METADATA: AuthClientTypes.Metadata = {
 	name: import.meta.env.VITE_OISY_NAME,
-	description: import.meta.env.VITE_OISY_DESCIRPTION,
+	description: import.meta.env.VITE_OISY_DESCRIPTION,
 	url: import.meta.env.VITE_OISY_URL,
 	icons: [import.meta.env.VITE_OISY_ICON]
 };
