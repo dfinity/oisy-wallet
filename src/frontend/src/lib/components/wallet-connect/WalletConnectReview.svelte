@@ -6,19 +6,12 @@
 	import type { ProposalTypes } from '@walletconnect/types';
 	import { EIP155_CHAINS } from '$lib/constants/eip155-chains.constants';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
-	import type { Verify } from '@walletconnect/types';
-	import { verifyContextStatus } from '$lib/utils/wallet-connect.utils';
+	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;
-
-	let context: Verify.Context | undefined = undefined;
-	$: context = proposal?.verifyContext;
-
-	let contextVerification: string;
-	$: contextVerification = verifyContextStatus(context);
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
@@ -29,10 +22,7 @@
 			>{params.proposer.metadata.url}</a
 		>
 
-		<div class="mt-3">
-			<label for="verification" class="font-bold">Domain Verification:</label>
-			<div id="verification" class="font-normal mb-2 break-words">{contextVerification}</div>
-		</div>
+		<WalletConnectDomainVerification {proposal} />
 
 		{#each Object.entries(params.requiredNamespaces) as [key, value]}
 			{@const allMethods = value.methods}
@@ -57,7 +47,7 @@
 			{/each}
 		{/each}
 
-		<WalletConnectActions on:icApprove on:icReject />
+		<WalletConnectActions {proposal} on:icApprove on:icReject />
 	</div>
 {:else}
 	<div class="flex flex-col items-center justify-center">
