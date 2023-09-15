@@ -3,7 +3,8 @@
 	import HeaderHero from '$lib/components/layout/HeaderHero.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import { erc20TokensInitialized } from '$lib/derived/erc20.derived';
-	import { fade } from 'svelte/transition';
+	import { fade, slide } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
 	import BorderedImg from '$lib/components/ui/BorderedImg.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import oisy from '$lib/assets/oisy.svg';
@@ -23,21 +24,23 @@
 		<Alpha />
 
 		{#if summary}
-			<div class="icon flex flex-col items-start pt-2">
-				{#if displayTokenSymbol}
-					<div in:fade>
-						<BorderedImg
-							src={$token.icon ?? oisy}
-							width="auto"
-							height="64px"
-							alt={`${$token.name} logo`}
-							borderColor="off-white"
-						/>
-					</div>
-				{/if}
-			</div>
+			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
+				<div class="icon flex flex-col items-start pt-2">
+					{#if displayTokenSymbol}
+						<div in:fade>
+							<BorderedImg
+								src={$token.icon ?? oisy}
+								width="auto"
+								height="64px"
+								alt={`${$token.name} logo`}
+								borderColor="off-white"
+							/>
+						</div>
+					{/if}
+				</div>
 
-			<Balance />
+				<Balance />
+			</div>
 		{/if}
 
 		<Actions {send} />
