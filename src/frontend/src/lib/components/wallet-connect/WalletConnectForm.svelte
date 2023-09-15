@@ -40,7 +40,7 @@
 	{#if !renderQRCodeReader}
 		<button
 			type="button"
-			class="wallet-connect inset-center text-white font-bold"
+			class="wallet-connect inset-center text-white font-bold text-center"
 			style="padding: var(--padding) var(--padding-3x)"
 			on:click={() => (renderQRCodeReader = true)}>Scan QR code</button
 		>

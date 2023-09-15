@@ -19,7 +19,7 @@
 <SendData {amount} {destination} />
 
 <div class="flex justify-end gap-1">
-	<button class="primary" on:click={() => dispatch('icBack')}>Back</button>
+	<button class="secondary" on:click={() => dispatch('icBack')}>Back</button>
 	<button
 		class="primary"
 		disabled={invalid}
