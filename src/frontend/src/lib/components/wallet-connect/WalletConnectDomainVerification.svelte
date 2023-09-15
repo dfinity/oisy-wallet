@@ -7,7 +7,7 @@
 	let context: Verify.Context | undefined = undefined;
 	$: context = proposal?.verifyContext;
 
-	let validation: 'UNKNOWN' | 'VALID' | 'INVALID' | undefined;
+	let validation: 'UNKNOWN' | 'VALID' | 'INVALID' | string | undefined;
 	$: validation = context?.verified.validation;
 </script>
 
@@ -18,6 +18,8 @@
 			Valid ✅
 		{:else if validation === 'INVALID'}
 			Invalid ❌
+		{:else if validation?.toUpperCase() === 'ISSCAM'}
+			Security risk ⚠️
 		{:else}
 			Unknown ❓
 		{/if}</label
@@ -27,6 +29,8 @@
 			Domain validation passed.
 		{:else if validation === 'INVALID'}
 			This website has a domain that does not match the sender of the request.
+		{:else if validation?.toUpperCase() === 'ISSCAM'}
+			This website is flagged as unsafe.
 		{:else}
 			This domain cannot be verified.
 		{/if}
