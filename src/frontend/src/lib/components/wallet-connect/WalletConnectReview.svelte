@@ -7,11 +7,15 @@
 	import { EIP155_CHAINS } from '$lib/constants/eip155-chains.constants';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
+	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;
+
+	let approve = true;
+	$: approve = acceptedContext(proposal?.verifyContext);
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
@@ -47,7 +51,7 @@
 			{/each}
 		{/each}
 
-		<WalletConnectActions {proposal} on:icApprove on:icReject />
+		<WalletConnectActions {approve} on:icApprove on:icReject />
 	</div>
 {:else}
 	<div class="flex flex-col items-center justify-center">
