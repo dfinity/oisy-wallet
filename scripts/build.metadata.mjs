@@ -4,7 +4,14 @@ import { config } from 'dotenv';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { findHtmlFiles } from './build.utils.mjs';
 
-config({ path: `.env.${process.env.ENV ?? 'development'}` });
+const ENV =
+	process.env.ENV === 'ic'
+		? 'production'
+		: process.env.ENV === 'staging'
+		? 'staging'
+		: 'development';
+
+config({ path: `.env.${ENV}` });
 
 const buildMetadata = (htmlFile) => {
 	let indexHtml = readFileSync(htmlFile, 'utf-8');

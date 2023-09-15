@@ -139,13 +139,14 @@ const updateCSP = (indexHtml) => {
 			ethConnectSrc =
 				'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com';
 			break;
+		case 'development':
 		case 'staging':
 			ethConnectSrc =
 				'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
 			break;
 		default:
 			throw new Error(
-				`No environment set (process.env.ENV === ${process.env.ENV}) to parse the CSP.`
+				`Unknown environment (process.env.ENV === ${process.env.ENV}) to parse the CSP.`
 			);
 	}
 
@@ -154,9 +155,11 @@ const updateCSP = (indexHtml) => {
 
 	// Raw is useful when the dapp get added to iOS home screen because otherwise Apple is not able to fetch the app icons.
 	const readCanisterId = () => {
-		const { frontend } = JSON.parse(
-			readFileSync(join(process.cwd(), 'canister_ids.json'), 'utf-8')
-		);
+		const jsonFile = ['ic', 'staging'].includes(process.env.ENV)
+			? join(process.cwd(), 'canister_ids.json')
+			: join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
+
+		const { frontend } = JSON.parse(readFileSync(jsonFile, 'utf-8'));
 
 		const canisterId = frontend[process.env.ENV];
 
