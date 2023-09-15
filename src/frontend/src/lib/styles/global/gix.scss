@@ -49,7 +49,7 @@
 	--alert-width: calc(100% - var(--padding-8x));
 	--alert-max-width: calc(100vw - var(--padding-4x));
 	--alert-max-height: calc(100vh - var(--padding-4x));
-	--alert-border-radius: var(--border-radius-2x);
+	--alert-border-radius: var(--border-radius-sm);
 	--alert-padding-y: var(--padding-4x);
 	--alert-padding-x: var(--padding-2x);
 
@@ -69,9 +69,9 @@
 	}
 
 	@include media.min-width(medium) {
-		--alert-width: 500px;
+		--alert-width: 480px;
 
-		--dialog-width: 600px;
+		--dialog-width: 480px;
 		--dialog-max-width: var(--alert-max-width);
 		--dialog-min-height: calc(100vh - var(--padding-8x));
 		--dialog-height: initial;
