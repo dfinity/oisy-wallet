@@ -19,43 +19,27 @@
 	import { isNullish } from '@dfinity/utils';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
-	let steps: [ProgressStep, ...ProgressStep[]] = [
-		{
-			step: LoaderStep.INITIALIZATION,
-			text: 'Connected with a decentralised custody solution - Internet Identity',
-			state: 'completed'
-		} as ProgressStep,
-		{
-			step: LoaderStep.ETH_ADDRESS,
-			text: 'Getting ETH address from the canister',
-			state: 'in_progress'
-		} as ProgressStep,
-		{
-			step: LoaderStep.ERC20_CONTRACTS,
-			text: 'Initialising ERC20 metadata',
-			state: 'next'
-		} as ProgressStep,
-		{
-			step: LoaderStep.BALANCE,
-			text: 'Loading your wallet balance',
-			state: 'next'
-		} as ProgressStep
-	];
 
 	let loadTransactions = false;
 	$: loadTransactions = isRouteTransactions($page);
 
+	let steps: [ProgressStep, ...ProgressStep[]]
 	$: steps = [
-		...steps,
-		...(loadTransactions
-			? [
-					{
-						step: LoaderStep.TRANSACTIONS,
-						text: 'And transactions',
-						state: 'next'
-					} as ProgressStep
-			  ]
-			: [])
+		{
+			step: LoaderStep.INITIALIZATION,
+			text: 'Creating a secure session with Internet Identity',
+			state: 'completed'
+		} as ProgressStep,
+		{
+			step: LoaderStep.ETH_ADDRESS,
+			text: 'Setting up Ethereum <> Internet Computer communication',
+			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: LoaderStep.ETH_DATA,
+			text: `Fetching token balances${loadTransactions ? " and transactions" : ""}`,
+			state: 'next'
+		} as ProgressStep
 	];
 
 	let inProgress = true;
@@ -88,11 +72,9 @@
 			return;
 		}
 
-		progressStep = LoaderStep.ERC20_CONTRACTS;
+		progressStep = LoaderStep.ETH_DATA;
 
 		await loadErc20Contracts();
-
-		progressStep = LoaderStep.BALANCE;
 
 		const { success: balanceSuccess } = await loadBalances();
 
@@ -102,8 +84,6 @@
 		}
 
 		if (loadTransactions) {
-			progressStep = LoaderStep.TRANSACTIONS;
-
 			const { success: transactionsSuccess } = await loadTransactionsServices($tokenId);
 
 			if (!transactionsSuccess) {
@@ -126,7 +106,7 @@
 		<Modal>
 			<Img width="100%" src={banner} />
 
-			<h3 class="my-3">Setting up your wallet with Chain-Key Cryptography...</h3>
+			<h3 class="my-3">Initializing the wallet with Chain-Key cryptography...</h3>
 
 			<InProgress {progressStep} {steps} />
 
