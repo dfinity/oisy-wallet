@@ -16,7 +16,7 @@
 <div class="hero">
 	<HeaderHero />
 
-	<article class="text-off-white rounded-lg pt-1 sm:pt-3 pb-4 px-4 mb-8 relative main">
+	<article class="text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-4 mb-8 relative main">
 		<Alpha />
 
 		<Actions send={route === 'tokens'} />
