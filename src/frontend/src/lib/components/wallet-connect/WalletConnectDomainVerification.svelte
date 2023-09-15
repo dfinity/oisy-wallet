@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Verify } from '@walletconnect/types';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -18,7 +19,7 @@
 			Valid ✅
 		{:else if validation === 'INVALID'}
 			Invalid ❌
-		{:else if validation?.toUpperCase() === 'ISSCAM'}
+		{:else if validation?.toUpperCase() === CONTEXT_VALIDATION_ISSCAM}
 			Security risk ⚠️
 		{:else}
 			Unknown ❓
@@ -29,7 +30,7 @@
 			Domain validation passed.
 		{:else if validation === 'INVALID'}
 			This website has a domain that does not match the sender of the request.
-		{:else if validation?.toUpperCase() === 'ISSCAM'}
+		{:else if validation?.toUpperCase() === CONTEXT_VALIDATION_ISSCAM}
 			This website is flagged as unsafe.
 		{:else}
 			This domain cannot be verified.

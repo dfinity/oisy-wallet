@@ -9,3 +9,5 @@ export const UNEXPECTED_ERROR: ErrorResponse = {
 	code: 20001,
 	message: 'Unexpected error.'
 };
+
+export const CONTEXT_VALIDATION_ISSCAM = 'ISSCAM';

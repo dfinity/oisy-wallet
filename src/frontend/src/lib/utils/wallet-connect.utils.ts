@@ -1,3 +1,4 @@
+import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 import type { WalletConnectEthSignTypedDataV4 } from '$lib/types/wallet-connect';
 import { isNullish } from '@dfinity/utils';
 import { isAddress } from '@ethersproject/address';
@@ -40,4 +41,4 @@ export const convertHexToUtf8 = (value: string): string => {
 };
 
 export const acceptedContext = (context: Verify.Context | undefined): boolean =>
-	isNullish(context) || context.verified.validation.toUpperCase() !== 'ISSCAM';
+	isNullish(context) || context.verified.validation.toUpperCase() !== CONTEXT_VALIDATION_ISSCAM;
