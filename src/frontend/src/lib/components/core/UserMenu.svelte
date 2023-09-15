@@ -11,7 +11,7 @@
 </script>
 
 <button
-	class="primary icon"
+	class="user icon"
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label="Sign-out"

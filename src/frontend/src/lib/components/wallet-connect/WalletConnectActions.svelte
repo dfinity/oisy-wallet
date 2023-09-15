@@ -8,7 +8,7 @@
 </script>
 
 <div class="flex justify-end gap-1 mt-4">
-	<button class="primary" on:click={() => dispatch('icReject')} disabled={$isBusy}>Reject</button>
+	<button class="secondary" on:click={() => dispatch('icReject')} disabled={$isBusy}>Reject</button>
 
 	{#if approve}
 		<button class="primary" on:click={() => dispatch('icApprove')} disabled={$isBusy}>

@@ -12,7 +12,7 @@
 </script>
 
 <button
-	class="flex-1 secondary"
+	class="flex-1 hero"
 	on:click={modalStore.openSend}
 	{disabled}
 	class:opacity-50={disabled}
