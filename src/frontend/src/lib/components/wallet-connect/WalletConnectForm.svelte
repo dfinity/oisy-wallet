@@ -74,7 +74,7 @@
 		--primary-rgb: 59, 0, 185;
 		overflow: hidden;
 
-		margin: 0 auto;
+		margin: var(--padding-4x) auto 0;
 
 		width: 100%;
 		max-width: calc(100% - var(--padding-3x));
