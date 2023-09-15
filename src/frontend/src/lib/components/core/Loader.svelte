@@ -113,8 +113,7 @@
 			{#if confirm}
 				<button
 					on:click={confirmIntroduction}
-					class="tertiary"
-					style="margin: var(--padding-4x) auto 0;"
+					class="primary full center mt-3"
 					disabled={disabledConfirm}
 					class:opacity-0={disabledConfirm}>Let's go!</button
 				>

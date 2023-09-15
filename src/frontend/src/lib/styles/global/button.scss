@@ -78,15 +78,15 @@ button {
 		font-weight: var(--font-weight-bold);
 	}
 
-	&.tertiary {
-		justify-content: center;
+	&.primary,
+	&.secondary {
+		&.full {
+			width: 100%;
+		}
 
-		background: var(--color-blue);
-		color: var(--color-off-white);
-
-		padding: var(--padding-1_5x) var(--padding-3x);
-
-		width: 100%;
+		&.center {
+			justify-content: center;
+		}
 	}
 
 	&.text {
