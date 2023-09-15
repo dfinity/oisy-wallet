@@ -1,3 +1,4 @@
+import { METAMASK_DEFAULT_TRANSFER_AMOUNT } from '$lib/constants/metamask.constants';
 import { metamaskAccounts, sendMetamaskTransaction } from '$lib/providers/metamask.providers';
 import type { AddressData } from '$lib/stores/address.store';
 import { metamaskStore } from '$lib/stores/metamask.store';
@@ -46,7 +47,7 @@ export const openMetamaskTransaction = async (
 	}
 
 	try {
-		await sendMetamaskTransaction({ from, to: address });
+		await sendMetamaskTransaction({ from, to: address, value: METAMASK_DEFAULT_TRANSFER_AMOUNT });
 
 		return { success: 'ok' };
 	} catch (err: unknown) {
