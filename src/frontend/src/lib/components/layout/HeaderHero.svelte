@@ -10,7 +10,7 @@
 	$: back = isRouteTransactions($page);
 </script>
 
-<header class="flex justify-between md:px-2 relative z-1 pointer-events-none">
+<header class="flex justify-between md:px-2 relative z-1 pointer-events-none" style="min-height: 76px">
 	{#if back}
 		<Back />
 	{:else}
