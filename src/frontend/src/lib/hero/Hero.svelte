@@ -2,15 +2,19 @@
 	import Actions from '$lib/hero/Actions.svelte';
 	import HeaderHero from '$lib/components/layout/HeaderHero.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
-	import { page } from '$app/stores';
-	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { erc20TokensInitialized } from '$lib/derived/erc20.derived';
+	import { fade, slide } from 'svelte/transition';
+	import { quintOut } from 'svelte/easing';
+	import BorderedImg from '$lib/components/ui/BorderedImg.svelte';
+	import { token } from '$lib/derived/token.derived';
+	import oisy from '$lib/assets/oisy.svg';
+	import Balance from '$lib/hero/Balance.svelte';
 
-	let route: 'tokens' | 'dashboard' = 'dashboard';
-	$: route = isRouteTransactions($page) ? 'tokens' : 'dashboard';
+	export let summary = false;
+	export let send = false;
 
-	let displayTokens = false;
-	$: displayTokens = route === 'tokens' && $erc20TokensInitialized;
+	let displayTokenSymbol = false;
+	$: displayTokenSymbol = summary && $erc20TokensInitialized;
 </script>
 
 <div class="hero">
@@ -19,7 +23,27 @@
 	<article class="text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-4 mb-8 relative main">
 		<Alpha />
 
-		<Actions send={route === 'tokens'} />
+		{#if summary}
+			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
+				<div class="icon flex flex-col items-start pt-2">
+					{#if displayTokenSymbol}
+						<div in:fade>
+							<BorderedImg
+								src={$token.icon ?? oisy}
+								width="auto"
+								height="64px"
+								alt={`${$token.name} logo`}
+								borderColor="off-white"
+							/>
+						</div>
+					{/if}
+				</div>
+
+				<Balance />
+			</div>
+		{/if}
+
+		<Actions {send} />
 	</article>
 </div>
 
@@ -39,22 +63,6 @@
 	}
 
 	.icon {
-		@include media.min-width(small) {
-			min-height: 70px;
-
-			&.tokens {
-				min-height: 122px;
-			}
-		}
-	}
-
-	.balance {
-		@include media.min-width(small) {
-			min-height: 160px;
-
-			&.tokens {
-				min-height: 108px;
-			}
-		}
+		min-height: calc(64px + var(--padding-4x));
 	}
 </style>
