@@ -24,7 +24,7 @@
 	onMount(initMetamaskSupport);
 </script>
 
-<button class="flex-1 hero" {disabled} class:opacity-50={disabled} on:click={receive}>
+<button class="flex-1 hero" {disabled} class:opacity-0={disabled} on:click={receive}>
 	<IconReceive size="28" />
 	<span>Receive</span></button
 >

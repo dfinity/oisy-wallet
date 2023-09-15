@@ -15,7 +15,7 @@
 	class="flex-1 hero"
 	on:click={modalStore.openSend}
 	{disabled}
-	class:opacity-50={disabled}
+	class:opacity-0={disabled}
 >
 	<IconSend size="28" />
 	<span>Send</span></button

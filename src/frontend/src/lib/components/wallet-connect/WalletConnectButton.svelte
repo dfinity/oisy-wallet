@@ -7,7 +7,7 @@
 	on:click
 	class="wallet-connect icon"
 	disabled={$addressNotLoaded}
-	class:opacity-50={$addressNotLoaded}
+	class:opacity-0={$addressNotLoaded}
 >
 	<IconWalletConnectWhite />
 	<span class="text-white font-bold text-xs"><slot /></span>
