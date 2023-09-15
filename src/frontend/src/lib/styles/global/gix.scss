@@ -113,8 +113,8 @@ div.modal {
 }
 
 div.popover {
-	--background: var(--overlay-background);
-	--background-contrast: var(--overlay-background-contrast);
+	--background: var(--color-off-white);
+	--background-contrast: var(--color-vampire-black);
 
 	.wrapper {
 		padding: var(--padding-1_5x);
