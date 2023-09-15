@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { config } from 'dotenv';
-import {readFileSync, writeFileSync} from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { findHtmlFiles } from './build.utils.mjs';
 
 config({ path: `.env.${process.env.ENV ?? 'development'}` });
@@ -9,9 +9,9 @@ config({ path: `.env.${process.env.ENV ?? 'development'}` });
 const buildMetadata = (htmlFile) => {
 	let indexHtml = readFileSync(htmlFile, 'utf-8');
 
-	const replaceEnv = ({ html, key }) => {
-		const regex = new RegExp(`/{{${key}}/gm`);
-		return html.replace(regex, process.env[key]);
+	const replaceEnv = ({ html, pattern, value }) => {
+		const regex = new RegExp(pattern, 'g');
+		return html.replace(regex, value);
 	};
 
 	const METADATA_KEYS = [
@@ -21,7 +21,17 @@ const buildMetadata = (htmlFile) => {
 		'VITE_OISY_ICON'
 	];
 
-	METADATA_KEYS.forEach((key) => (indexHtml = replaceEnv({ html: indexHtml, key })));
+	METADATA_KEYS.forEach(
+		(key) =>
+			(indexHtml = replaceEnv({ html: indexHtml, pattern: `{{${key}}}`, value: process.env[key] }))
+	);
+
+	// Special use case. We need to build the dapp with a real URL within app.html other build fails.
+	indexHtml = replaceEnv({
+		html: indexHtml,
+		pattern: `https:\/\/oisy\.com`,
+		value: process.env.VITE_OISY_URL
+	});
 
 	writeFileSync(htmlFile, indexHtml);
 };
