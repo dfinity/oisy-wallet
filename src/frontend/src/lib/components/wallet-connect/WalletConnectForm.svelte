@@ -89,5 +89,19 @@
 		}
 
 		aspect-ratio: 4 / 3;
+
+		:global(article.reader) {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+		}
+
+		:global(article.reader:not(.mirror)) {
+			transform: translate(-50%, -50%);
+		}
+
+		:global(article.reader.mirror) {
+			transform: translate(-50%, -50%) scaleX(-1);
+		}
 	}
 </style>
