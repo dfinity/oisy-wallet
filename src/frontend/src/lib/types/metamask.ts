@@ -8,6 +8,7 @@ export type MetamaskAccountsRequest = {
 export type MetamaskSendTransactionRequestParams = {
 	from: string;
 	to: string;
+	value: string; // expected: BigNumber.toString() representation
 };
 
 export type MetamaskSendTransactionRequest = {
