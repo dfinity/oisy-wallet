@@ -10,16 +10,14 @@ import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
 
 const mapErc20Icon = (tokenName: string): string => {
-	console.log('Token:', tokenName);
-
 	switch (tokenName.toLowerCase()) {
 		case 'uniswap':
 			return uniswap;
-		case 'usdc':
+		case 'usd coin':
 			return usdc;
-		case 'usdt':
+		case 'tether usd':
 			return usdt;
-		case 'dai':
+		case 'dai stablecoin':
 			return dai;
 		default:
 			return oisy;
