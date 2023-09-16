@@ -3,11 +3,12 @@
 	import { toastsShow } from '$lib/stores/toasts.store';
 
 	export let value: string;
+	export let text: string;
 
 	const copyToClipboard = async () => {
 		await navigator.clipboard.writeText(value);
 		toastsShow({
-			text: 'Address copied to clipboard.',
+			text,
 			level: 'success',
 			duration: 2000
 		});

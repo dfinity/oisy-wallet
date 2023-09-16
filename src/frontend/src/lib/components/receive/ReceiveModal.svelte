@@ -15,7 +15,7 @@
 	<p class="font-bold text-center">Wallet address:</p>
 	<p class="flex gap-1 mb-2 font-normal sm:items-center justify-center">
 		<output class="break-words">{shortenWithMiddleEllipsis($addressStore ?? '')}</output><Copy
-			value={$addressStore ?? ''}
+			value={$addressStore ?? ''} text="Address copied to clipboard."
 		/>
 	</p>
 

@@ -18,7 +18,7 @@ export interface WalletConnectListener extends WebSocketListener {
 export interface WalletConnectEthSendTransactionParams {
 	from: string;
 	to?: string;
-	data: string;
+	data?: string;
 	gasPrice?: string;
 	gasLimit?: string;
 	value?: string;

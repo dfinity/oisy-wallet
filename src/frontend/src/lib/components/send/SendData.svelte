@@ -9,6 +9,8 @@
 
 <SendDestination {destination} {amount} />
 
+<slot />
+
 <SendSource />
 
 <FeeDisplay />
