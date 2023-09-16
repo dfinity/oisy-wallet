@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatEtherShort, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { formatEtherShort } from '$lib/utils/format.utils';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
