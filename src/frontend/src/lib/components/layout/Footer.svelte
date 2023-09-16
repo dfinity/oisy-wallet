@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
-	import Alpha from '$lib/components/core/Alpha.svelte';
 </script>
 
 <footer class="flex flex-col justify-center items-center pt-8 mt-3 pb-4 px-2 gap-3 z-1">

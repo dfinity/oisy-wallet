@@ -4,8 +4,6 @@
 	import { debounce } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 
-	export let size: 'small' | 'big' = 'big';
-
 	let render = true;
 
 	const rerender = debounce(() => {

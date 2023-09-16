@@ -17,7 +17,7 @@ const tokenUrl = ({
 	path: 'transactions/' | '/';
 }): string =>
 	`${path}?token=${encodeURIComponent(
-		name.replace(/\p{Emoji}/gu, (m, idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
+		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
 	)}`;
 
 export const back = async (pop: boolean) => {
