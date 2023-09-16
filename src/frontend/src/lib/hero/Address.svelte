@@ -8,7 +8,7 @@
 <div class="text-off-white mt-3 flex gap-1 opacity-50" style="min-height: 30px">
 	{#if nonNullish($addressStore)}
 		<output class="break-words">{shortenWithMiddleEllipsis($addressStore ?? '')}</output><Copy
-			value={$addressStore ?? ''}
+			value={$addressStore ?? ''} text="Address copied to clipboard."
 		/>
 	{/if}
 </div>
