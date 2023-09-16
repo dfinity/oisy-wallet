@@ -20,9 +20,9 @@
 
 *The project is still work in progress, see the [disclaimer below](#status).*
 
-## What is Oisy
+## What is the Oisy wallet
 
-Oisy is a technology demonstrator with the goal to develop a novel Ethereum wallet that is secure, simple to use, and makes as few assumptions about the user's operating environment as possible. It is secure because it relies on [Threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/) and introduces the novel concept of `networked-custody`. It is simple to use because it uses [Internet Identity](https://internetcomputer.org/internet-identity) to authenticate the user. It strives to reach the widest possible audience by being browser-based and unencumbered by licensing restriction from the various app stores. It is originally built by DFINITY and licensed under an [open source license](LICENSE).
+The Oisy wallet is a technology demonstrator with the goal to develop a novel Ethereum wallet that is secure, simple to use, and makes as few assumptions about the user's operating environment as possible. It is secure because it relies on [Threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/) and introduces the novel concept of `networked-custody`. It is simple to use because it uses [Internet Identity](https://internetcomputer.org/internet-identity) to authenticate the user. It strives to reach the widest possible audience by being browser-based and unencumbered by licensing restriction from the various app stores. It is originally built by DFINITY and licensed under an [open source license](LICENSE).
 
 ## Goals
 
@@ -38,13 +38,20 @@ More concretely, Oisy goals are:
 
 4. **free to use and develop** Oisy is open-source software and licensed under the INTERNET COMPUTER COMMUNITY SOURCE LICENSE
 
+## Status
+
+The project is **not ready for production use**.
+
+We appreciate your patience until we get there. Until then, we are happy to answer questions if they are raised as issues in this github repo.
+
+
 ## Prerequisites
--   [x] Download and [install the IC SDK](https://internetcomputer.org/docs/current/developer-docs/setup/index.md) if you do not already have it.
+-   [x] Install the [IC SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install/index.mdx).
 
 
 ## Start the local replica
 
-Open a new terminal window _in the project directory_, and run the following command to start the local replica. The replica will not start unless `dfx.json` exists in the current directory.
+Open a new terminal window _in the project directory_, and run the following command to start the local replica. The replica will not start unless [dfx.json](dfx.json) exists in the current directory.
 
 ```
 dfx start --background
@@ -65,10 +72,10 @@ Make sure you switch back to the project root directory.
 First, install the frontend dependencies by running
 
 ```
-npm install
+npm ci
 ```
 
-To build and deploy the project, run
+To build and deploy the project locally, run
 ```
 npm run deploy
 ```
@@ -85,12 +92,21 @@ URLs:
     internet_identity: http://127.0.0.1:4943/?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai&id=be2us-64aaa-aaaaa-qaabq-cai
 ```
 
-Click on the `Frontend canister via browser` URL to access the Oisy wallet running locally.
+Click on the __frontend__ URL to access the Oisy wallet that is running locally.
 
 
 ## Local development
 
-You can serve the frontend in development mode like you normally develop a svelte app using the command
+### Backend
+The backend is written in Rust and you can find it under the [backend folder](src/backend/). It uses the [tECDSA API](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/t-ecdsa-how-it-works) provided by IC. To find out more about tECDSA, you can read the [Eurocrypt 2022 paper](https://eprint.iacr.org/2021/1330.pdf).
+
+If you want to locally deploy the backend only, you use the following command
+```
+./scripts/deploy.backend.sh
+```
+
+### Frontend
+The frontend is written entirely in Svelte. You can serve the frontend in development mode like you normally develop a svelte app using the command
 
 ```
 npm run dev
