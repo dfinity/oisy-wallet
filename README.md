@@ -18,7 +18,7 @@
 
 **A novel Ethereum wallet that is hosted on the Internet Computer, is browser-based, fully on-chain and secured by chain-key cryptography and Internet Identity.**
 
-*The project is still work in progress, see the [disclaimer below](#status).*
+_The project is still work in progress, see the [disclaimer below](#status)._
 
 ## What is the Oisy wallet
 
@@ -44,10 +44,9 @@ The project is **not ready for production use**.
 
 We appreciate your patience until we get there. Until then, we are happy to answer questions if they are raised as issues in this github repo.
 
-
 ## Prerequisites
--   [x] Install the [IC SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install/index.mdx).
 
+- [x] Install the [IC SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install/index.mdx).
 
 ## Start the local replica
 
@@ -76,11 +75,13 @@ npm ci
 ```
 
 To build and deploy the project locally, first create a `.env.development` file by copying the [.env.example](.env.example) file. Once you've correctly set the api keys for all the different services that Oisy needs, then run:
+
 ```
 npm run deploy
 ```
 
 It should output something like the following
+
 ```
 ...
 Deployed canisters.
@@ -92,22 +93,24 @@ URLs:
     internet_identity: http://127.0.0.1:4943/?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai&id=be2us-64aaa-aaaaa-qaabq-cai
 ```
 
-Click on the __frontend__ URL to access the Oisy wallet that is running locally.
-
+Click on the **frontend** URL to access the Oisy wallet that is running locally.
 
 ## Local development
 
 See [HACKING](HACKING.md)
 
 ### Backend
+
 The backend is written in Rust and you can find it under the [backend folder](src/backend/). It uses the [tECDSA API](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/t-ecdsa-how-it-works) provided by IC. To find out more about tECDSA, you can read the [Eurocrypt 2022 paper](https://eprint.iacr.org/2021/1330.pdf).
 
 If you want to locally deploy the backend only, you use the following command
+
 ```
 ./scripts/deploy.backend.sh
 ```
 
 ### Frontend
+
 The frontend is written entirely in Svelte. You can serve the frontend in development mode like you normally develop a svelte app using the command
 
 ```
