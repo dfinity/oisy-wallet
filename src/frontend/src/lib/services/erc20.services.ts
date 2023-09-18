@@ -41,7 +41,7 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 			}))
 		);
 	} catch (err: unknown) {
-		balancesStore.reset();
+		erc20TokensStore.reset();
 
 		toastsError({
 			msg: { text: 'Error while loading the ERC20 contracts.' },
