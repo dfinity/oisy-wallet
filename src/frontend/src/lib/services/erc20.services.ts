@@ -4,7 +4,6 @@ import usdc from '$lib/assets/usdc.svg';
 import usdt from '$lib/assets/usdt.svg';
 import { ERC20_CONTRACTS_ADDRESSES } from '$lib/constants/erc20.constants';
 import { metadata } from '$lib/providers/etherscan-erc20.providers';
-import { balancesStore } from '$lib/stores/balances.store';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
 
@@ -41,7 +40,7 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 			}))
 		);
 	} catch (err: unknown) {
-		balancesStore.reset();
+		erc20TokensStore.reset();
 
 		toastsError({
 			msg: { text: 'Error while loading the ERC20 contracts.' },
