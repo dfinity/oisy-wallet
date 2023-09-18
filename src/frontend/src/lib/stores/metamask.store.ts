@@ -15,7 +15,7 @@ const initMetamaskStore = (): MetamaskStore => {
 
 	return {
 		set: (available: boolean) => set({ available }),
-		reset: () => set({ available: null }),
+		reset: () => set(INITIAL),
 		subscribe
 	};
 };
