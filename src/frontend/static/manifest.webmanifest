@@ -1,11 +1,11 @@
 {
-	"name": "Oisy wallet",
-	"short_name": "Oisy wallet",
+	"name": "{{VITE_OISY_NAME}}",
+	"short_name": "{{VITE_OISY_NAME}}",
 	"start_url": ".",
 	"display": "standalone",
 	"theme_color": "#51347b",
 	"background_color": "#51347b",
-	"description": "An Ethereum demo wallet hosted on the IC",
+	"description": "{{VITE_OISY_DESCRIPTION}}",
 	"orientation": "portrait-primary",
 	"prefer_related_applications": false,
 	"icons": [
