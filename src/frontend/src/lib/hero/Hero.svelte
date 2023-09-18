@@ -7,7 +7,6 @@
 	import { quintOut } from 'svelte/easing';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { token } from '$lib/derived/token.derived';
-	import oisy from '$lib/assets/oisy.svg';
 	import Balance from '$lib/hero/Balance.svelte';
 
 	export let summary = false;
@@ -29,9 +28,8 @@
 					{#if displayTokenSymbol}
 						<div in:fade>
 							<Logo
-								src={$token.icon ?? oisy}
-								width="64px"
-								height="64px"
+								src={$token.icon}
+								size="64px"
 								alt={`${$token.name} logo`}
 								color="off-white"
 							/>

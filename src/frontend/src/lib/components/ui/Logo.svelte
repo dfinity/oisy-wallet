@@ -1,13 +1,14 @@
 <script lang="ts">
 	import Img from '$lib/components/ui/Img.svelte';
+	import {isNullish, nonNullish} from '@dfinity/utils';
+	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 
-	export let src: string;
+	export let src: string | undefined;
 	export let alt = '';
-	export let width: string;
-	export let height: string;
+	export let size: string;
 	export let color: 'dust' | 'off-white' = 'dust';
 
-	let loaded = false;
+	let loaded = isNullish(src);
 </script>
 
 <div
@@ -15,7 +16,11 @@
 	class:bg-dust={color === 'dust'}
 	class:bg-off-white={color === 'off-white'}
 	class:opacity-15={!loaded}
-	style={`border: 1px solid var(--color-${color}); width: calc(${width} + 2px); height: calc(${height} + 2px); transition: opacity 0.15s ease-in;`}
+	style={`border: 1px solid var(--color-${color}); width: calc(${size} + 2px); height: calc(${size} + 2px); transition: opacity 0.15s ease-in;`}
 >
-	<Img {src} {alt} {width} {height} on:load={() => (loaded = true)} />
+	{#if nonNullish(src)}
+		<Img {src} {alt} width={size} height={size} on:load={() => (loaded = true)} />
+	{:else}
+		<IconRandom {size} text={alt} />
+	{/if}
 </div>
