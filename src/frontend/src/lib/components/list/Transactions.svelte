@@ -5,6 +5,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { onMount } from 'svelte';
 	import { tokenId } from '$lib/derived/token.derived';
+	import { AIRDROP } from '$lib/constants/airdrop.constants';
 
 	let loading = true;
 
@@ -17,7 +18,7 @@
 	});
 </script>
 
-<h2 class="text-base mb-3 pb-0.5">Transactions</h2>
+<h2 class="text-base mb-3 pb-0.5" class:mt-6={AIRDROP} class:mt-8={!AIRDROP}>Transactions</h2>
 
 {#if loading}
 	<p class="mt-1 text-dark opacity-50">Transactions will appear here. Loading...</p>

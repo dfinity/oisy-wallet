@@ -78,8 +78,19 @@ button {
 		font-weight: var(--font-weight-bold);
 	}
 
+	&.airdrop {
+		border-radius: var(--border-radius-lg);
+
+		box-shadow: 0 2px 12px 0 rgba(51, 21, 106, 0.25);
+
+		padding: var(--padding-1_5x) var(--padding-3x);
+
+		font-weight: var(--font-weight-bold);
+	}
+
 	&.primary,
-	&.secondary {
+	&.secondary,
+	&.airdrop {
 		&.full {
 			width: 100%;
 		}
