@@ -29,12 +29,13 @@ export const back = async (pop: boolean) => {
 	history.back();
 };
 
-export type RouteToken = { token: string | null | undefined };
+export type RouteParams = { token: string | null | undefined; airdrop: string | null | undefined };
 
-export const loadRouteToken = ($event: LoadEvent): RouteToken => {
+export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	if (!browser) {
 		return {
-			token: undefined
+			token: undefined,
+			airdrop: undefined
 		};
 	}
 
@@ -55,6 +56,7 @@ export const loadRouteToken = ($event: LoadEvent): RouteToken => {
 	};
 
 	return {
-		token: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null
+		token: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
+		airdrop: searchParams?.get('airdrop')
 	};
 };

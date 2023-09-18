@@ -1,4 +1,5 @@
 import { addressStore } from '$lib/stores/address.store';
+import { airdropStore } from '$lib/stores/airdrop.store';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { busy } from '$lib/stores/busy.store';
@@ -13,6 +14,7 @@ const resetStores = () => {
 	transactionsStore.reset();
 	erc20TokensStore.reset();
 	metamaskStore.reset();
+	airdropStore.reset;
 
 	busy.stop();
 };

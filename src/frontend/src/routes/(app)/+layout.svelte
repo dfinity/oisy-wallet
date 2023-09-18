@@ -3,6 +3,7 @@
 	import Hero from '$lib/hero/Hero.svelte';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
+	import AirdropButton from '$lib/components/airdrop/AirdropButton.svelte';
 
 	let route: 'transactions' | 'tokens' = 'tokens';
 	$: route = isRouteTransactions($page) ? 'transactions' : 'tokens';
@@ -12,6 +13,8 @@
 
 <main>
 	<Loader>
+		<AirdropButton />
+
 		<slot />
 	</Loader>
 </main>
