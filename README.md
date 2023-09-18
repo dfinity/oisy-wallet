@@ -1,7 +1,7 @@
 <div align="center" style="display:flex;flex-direction:column;">
-  <h1>Oisy wallet</h1>
+  <h1>Oisy Wallet</h1>
 
-  <a href="https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io/">
+  <a href="https://oisy.com/">
     <img src="./src/frontend/static/images/meta-share.jpg" alt="NNS Dapp logo" role="presentation"/>
   </a>
 
@@ -20,9 +20,9 @@
 
 _The project is still work in progress, see the [disclaimer below](#status)._
 
-## What is the Oisy wallet
+## What is the Oisy Wallet
 
-The Oisy wallet is a technology demonstrator with the goal to develop a novel Ethereum wallet that is secure, simple to use, and makes as few assumptions about the user's operating environment as possible. It is secure because it relies on [Threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/) and introduces the novel concept of `networked-custody`. It is simple to use because it uses [Internet Identity](https://internetcomputer.org/internet-identity) to authenticate the user. It strives to reach the widest possible audience by being browser-based and unencumbered by licensing restriction from the various app stores. It is originally built by DFINITY and licensed under an [open source license](LICENSE).
+The Oisy Wallet is a technology demonstrator with the goal to develop a novel Ethereum wallet that is secure, simple to use, and makes as few assumptions about the user's operating environment as possible. It is secure because it relies on [Threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/) and introduces the novel concept of `networked-custody`. It is simple to use because it uses [Internet Identity](https://internetcomputer.org/internet-identity) to authenticate the user. It strives to reach the widest possible audience by being browser-based and unencumbered by licensing restriction from the various app stores. It is originally built by DFINITY and licensed under an [open source license](LICENSE).
 
 ## Goals
 
@@ -93,7 +93,7 @@ URLs:
     internet_identity: http://127.0.0.1:4943/?canisterId=bd3sg-teaaa-aaaaa-qaaba-cai&id=be2us-64aaa-aaaaa-qaabq-cai
 ```
 
-Click on the **frontend** URL to access the Oisy wallet that is running locally.
+Click on the **frontend** URL to access the Oisy Wallet that is running locally.
 
 ## Local development
 
