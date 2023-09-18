@@ -23,7 +23,7 @@
 	let loadTransactions = false;
 	$: loadTransactions = isRouteTransactions($page);
 
-	let steps: [ProgressStep, ...ProgressStep[]]
+	let steps: [ProgressStep, ...ProgressStep[]];
 	$: steps = [
 		{
 			step: LoaderStep.INITIALIZATION,
@@ -37,7 +37,7 @@
 		} as ProgressStep,
 		{
 			step: LoaderStep.ETH_DATA,
-			text: `Fetching token balances${loadTransactions ? " and transactions" : ""}`,
+			text: `Fetching token balances${loadTransactions ? ' and transactions' : ''}`,
 			state: 'next'
 		} as ProgressStep
 	];
@@ -104,7 +104,9 @@
 {#if inProgress}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<Modal>
-			<Img width="100%" src={banner} />
+			<div style="min-height: 19vh;">
+				<Img width="100%" src={banner} />
+			</div>
 
 			<h3 class="my-3">Initializing the wallet with Chain-Key cryptography...</h3>
 

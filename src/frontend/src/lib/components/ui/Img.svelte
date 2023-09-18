@@ -7,4 +7,4 @@
 	export let height: string | undefined = undefined;
 </script>
 
-<img {src} {role} {alt} {loading} {width} {height} decoding="async" />
+<img {src} {role} {alt} {loading} {width} {height} decoding="async" on:load />
