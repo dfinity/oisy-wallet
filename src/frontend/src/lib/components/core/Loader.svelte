@@ -16,6 +16,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { initAirdrop } from '$lib/services/airdrop.services';
 	import { loadEthData } from '$lib/services/loader.services';
+	import {tokenId} from "$lib/derived/token.derived";
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
@@ -77,7 +78,7 @@
 		await loadErc20Contracts();
 
 		// In case of error we want to display the dapp anyway and not get stuck on the loader
-		await Promise.allSettled([loadEthData({ loadTransactions }), initAirdrop()]);
+		await Promise.allSettled([loadEthData({ loadTransactions, tokenId: $tokenId }), initAirdrop()]);
 
 		progressStep = LoaderStep.DONE;
 	});

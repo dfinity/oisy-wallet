@@ -1,13 +1,19 @@
 import { loadBalances } from '$lib/services/balance.services';
 import { loadTransactions as loadTransactionsServices } from '$lib/services/transactions.services';
+import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
 export const loadEthData = async ({
-	loadTransactions
+	loadTransactions,
+	tokenId
 }: {
 	loadTransactions: boolean;
+	tokenId: TokenId;
 }): Promise<{ success: boolean }> => {
-	const promises = [loadBalances(), ...(loadTransactions ? [loadTransactionsServices()] : [])];
+	const promises = [
+		loadBalances(),
+		...(loadTransactions ? [loadTransactionsServices(tokenId)] : [])
+	];
 
 	const results = await Promise.allSettled(promises);
 
