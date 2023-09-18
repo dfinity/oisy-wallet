@@ -147,7 +147,8 @@ export default defineConfig((): UserConfig => {
 				...readCanisterIds({}),
 				DFX_NETWORK: network
 			},
-			VITE_APP_VERSION: JSON.stringify(version)
+			VITE_APP_VERSION: JSON.stringify(version),
+			VITE_DFX_NETWORK: JSON.stringify(network)
 		}
 	};
 });

@@ -10,3 +10,4 @@ declare global {
 }
 
 declare const VITE_APP_VERSION: string;
+declare const VITE_DFX_NETWORK: string;
