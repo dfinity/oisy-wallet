@@ -19,11 +19,12 @@ const replaceEnv = ({ html, pattern, value }) => {
 	return html.replace(regex, value);
 };
 
-const buildMetadata = (htmlFile) => {
-	let indexHtml = readFileSync(htmlFile, 'utf-8');
+const parseMetadata = (targetFile) => {
+	let content = readFileSync(targetFile, 'utf-8');
 
 	const METADATA_KEYS = [
 		'VITE_OISY_NAME',
+		'VITE_OISY_ONELINER',
 		'VITE_OISY_DESCRIPTION',
 		'VITE_OISY_URL',
 		'VITE_OISY_ICON'
@@ -31,20 +32,20 @@ const buildMetadata = (htmlFile) => {
 
 	METADATA_KEYS.forEach(
 		(key) =>
-			(indexHtml = replaceEnv({ html: indexHtml, pattern: `{{${key}}}`, value: process.env[key] }))
+			(content = replaceEnv({ html: content, pattern: `{{${key}}}`, value: process.env[key] }))
 	);
 
 	// Special use case. We need to build the dapp with a real URL within app.html other build fails.
-	indexHtml = replaceEnv({
-		html: indexHtml,
+	content = replaceEnv({
+		html: content,
 		pattern: `https:\/\/oisy\.com`,
 		value: process.env.VITE_OISY_URL
 	});
 
-	writeFileSync(htmlFile, indexHtml);
+	writeFileSync(targetFile, content);
 };
 
-const buildUrl = (filePath) => {
+const parseUrl = (filePath) => {
 	let content = readFileSync(filePath, 'utf-8');
 
 	content = replaceEnv({
@@ -57,7 +58,7 @@ const buildUrl = (filePath) => {
 };
 
 const htmlFiles = findHtmlFiles();
-htmlFiles.forEach((htmlFile) => buildMetadata(htmlFile));
+htmlFiles.forEach((htmlFile) => parseMetadata(htmlFile));
 
-buildUrl(join(process.cwd(), 'build', 'sitemap.xml'));
-buildUrl(join(process.cwd(), 'build', 'manifest.webmanifest'));
+parseUrl(join(process.cwd(), 'build', 'sitemap.xml'));
+parseMetadata(join(process.cwd(), 'build', 'manifest.webmanifest'));
