@@ -11,6 +11,7 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import IconPlus from '$lib/components/icons/IconPlus.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import {AIRDROP} from "$lib/constants/airdrop.constants";
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
@@ -18,7 +19,7 @@
 	const icon = IconPlus;
 </script>
 
-<h2 class="text-base mb-3 pb-0.5">Tokens</h2>
+<h2 class="text-base mb-3 pb-0.5" class:mt-6={AIRDROP} class:mt-8={!AIRDROP}>Tokens</h2>
 
 {#each tokens as token}
 	{@const url = transactionsUrl(token)}
