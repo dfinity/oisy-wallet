@@ -5,7 +5,7 @@
 	"display": "standalone",
 	"theme_color": "#51347b",
 	"background_color": "#51347b",
-	"description": "{{VITE_OISY_DESCRIPTION}}",
+	"description": "{{VITE_OISY_ONELINER}}",
 	"orientation": "portrait-primary",
 	"prefer_related_applications": false,
 	"icons": [
