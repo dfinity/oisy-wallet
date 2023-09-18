@@ -63,28 +63,6 @@ If you are hosting frontend code somewhere without using DFX, you may need to ma
 
 # Airdrop
 
-## Useful commands
-
-```sh
-dfx canister create --all
-
-rustup target add wasm32-unknown-unknown
-
-dfx canister install airdrop_backend
-
-dfx canister call airdrop_backend generate_codes_seed '(123456, 5)'
-dfx canister call airdrop_backend redeem_code '(record { ii = "ii"; code = "CODE-1"; eth_address = "eth_address" })'
-dfx canister call airdrop_backend get_children_codes_for_ii '("ii")'
-dfx canister call airdrop_backend get_eth_addresses_and_amounts
-
-# check that we cannot redeem code more than once
-dfx canister call airdrop_backend redeem_code '(record { ii = "ii"; code = "CODE-1"; eth_address = "eth_address" })'
-
-# check we get the same children everytime
-dfx canister call your_canister_name get_children_codes_for_ii '("ii")'
-
-```
-
 ## Ethereum
 
 you need to import metamask private keys into local geth in order to interact with the account
@@ -126,13 +104,7 @@ var contractInstance = simpleStorageContract.new({from: eth.accounts[0], data: b
 
 ### Implement and deploy simplest contract first
 
-### Re-implement part of the contract below and deploy it
-
 https://github.com/benjizhai/ckicp-ethereum-contracts/blob/main/src/Airdrop.sol
-
-## Gelato
-
-Rate limiting - 5req/min
 
 https://docs.gelato.network/developer-services/relay/non-erc-2771/sponsoredcall
 
