@@ -23,7 +23,7 @@ export const getSignParamsMessageTypedDataV4 = (
 
 export const getSignParamsMessageTypedDataV4Hash = (params: string[]): string => {
 	const { domain, types, message } = getSignParamsMessageTypedDataV4(params);
-	const { EIP712Domain, ...rest } = types;
+	const { EIP712Domain: _, ...rest } = types;
 	return utils._TypedDataEncoder.hash(domain, { ...rest }, message);
 };
 

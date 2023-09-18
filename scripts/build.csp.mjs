@@ -132,17 +132,55 @@ const updateCSP = (indexHtml) => {
 		indexHashes.push(`'sha256-${createHash('sha256').update(content).digest('base64')}'`);
 	}
 
-	const ethConnectSrc =
-		'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com wss://relay.walletconnect.com https://verify.walletconnect.com';
+	let ethConnectSrc = undefined;
 
-	const ethFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
+	switch (process.env.ENV) {
+		case 'ic':
+			ethConnectSrc =
+				'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com';
+			break;
+		case undefined:
+		case 'development':
+		case 'staging':
+			ethConnectSrc =
+				'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
+			break;
+		default:
+			throw new Error(
+				`Unknown environment (process.env.ENV === ${process.env.ENV}) to parse the CSP.`
+			);
+	}
+
+	const walletConnectSrc = 'wss://relay.walletconnect.com https://verify.walletconnect.com';
+	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
+
+	// Raw is useful when the dapp get added to iOS home screen because otherwise Apple is not able to fetch the app icons.
+	const readCanisterId = () => {
+		const mainnet = ['ic', 'staging'].includes(process.env.ENV);
+
+		const jsonFile = mainnet
+			? join(process.cwd(), 'canister_ids.json')
+			: join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
+
+		const { frontend } = JSON.parse(readFileSync(jsonFile, 'utf-8'));
+
+		const canisterId = frontend[mainnet ? process.env.ENV : 'local'];
+
+		if (canisterId === undefined) {
+			throw new Error('Cannot find canister ID to parse the CSP.');
+		}
+
+		return canisterId;
+	};
+
+	const canisterId = readCanisterId();
 
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethConnectSrc};
-        img-src 'self' data: https://tewsx-xaaaa-aaaad-aadia-cai.raw.icp0.io;
-        frame-src 'self' ${ethFrameSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethConnectSrc} ${walletConnectSrc};
+        img-src 'self' data: https://${canisterId}.raw.icp0.io;
+        frame-src 'self' ${walletConnectFrameSrc};
         manifest-src 'self';
         script-src 'unsafe-eval' 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
         base-uri 'self';

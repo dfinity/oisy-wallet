@@ -55,7 +55,7 @@
 	--dialog-max-width: 100vw;
 	--dialog-height: 100vh;
 	--dialog-border-radius: 0;
-	--dialog-padding-y: var(--padding-4x);
+	--dialog-padding-y: var(--padding-1_5x);
 	--dialog-padding-x: var(--padding-2x);
 
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
@@ -67,9 +67,9 @@
 	}
 
 	@include media.min-width(medium) {
-		--alert-width: 480px;
+		--alert-width: 500px;
 
-		--dialog-width: 480px;
+		--dialog-width: 500px;
 		--dialog-max-width: var(--alert-max-width);
 		--dialog-min-height: calc(100vh - var(--padding-8x));
 		--dialog-height: initial;
@@ -113,6 +113,10 @@ div.modal {
 
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
+
+	div.content > div {
+		padding: var(--padding-1_5x) 0 0;
+	}
 }
 
 div.popover {

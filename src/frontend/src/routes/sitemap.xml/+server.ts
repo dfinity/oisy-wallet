@@ -1,4 +1,4 @@
-const url = 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io/';
+const url = 'https://oisy.com/';
 
 const staticPages: string[] = [];
 

@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { IconClose } from '@dfinity/gix-components';
+	import { STAGING } from '$lib/constants/app.constants';
 
 	let visible = true;
 
-	const banner = import.meta.env.MODE === 'staging';
+	const banner = STAGING;
 
 	const close = () => (visible = false);
 </script>

@@ -4,14 +4,13 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import type { Token } from '$lib/types/token';
-	import oisy from '$lib/assets/oisy.svg';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { erc20Tokens } from '$lib/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import IconPlus from '$lib/components/icons/IconPlus.svelte';
-	import BorderedImg from '$lib/components/ui/BorderedImg.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
@@ -29,7 +28,12 @@
 			<Card>
 				{token.name}
 
-				<BorderedImg src={token.icon ?? oisy} slot="icon" alt={`${token.name} logo`} />
+				<Logo
+					src={token.icon}
+					slot="icon"
+					alt={`${token.name} logo`}
+					size="46px"
+				/>
 
 				<div class="break-words" slot="amount">
 					{formatEtherShort($balancesStore?.[token.id] ?? BigNumber.from(0n))}
