@@ -24,6 +24,9 @@ static AUTHORISED_PRINCIPALS: [&str; 5] = [
     "tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe",
     "2vxsx-fae",
 ];
+static NUMBER_FRIENDS: u64 = 3;
+static TOKENS: u64 = 100;
+static TOTAL_TOKENS: u64 = 100_000;
 
 thread_local! {
     static PRINCIPAL_STATE: RefCell<HashMap<Principal, PrincipalState>> = RefCell::new(HashMap::new());
@@ -186,6 +189,8 @@ pub fn generate_code() -> Result<Code> {
 pub fn redeem_code(code: Code, eth_address: String) -> Result<Info> {
     check_if_killed()?;
 
+    // check if we have enough token left
+
     let caller_principal = ic_cdk::api::caller();
 
     // Check if the given principal has redeemed any code yet
@@ -259,7 +264,7 @@ pub fn redeem_code(code: Code, eth_address: String) -> Result<Info> {
                 .sum();
 
             // TODO remove the magic constant 3
-            let children_code: Vec<u64> = (seed..seed + 3).collect();
+            let children_code: Vec<u64> = (seed..seed + NUMBER_FRIENDS).collect();
 
             for child_code in children_code {
                 let child_code = Code(format!("CODE-{child_code}"));
@@ -288,7 +293,7 @@ pub fn redeem_code(code: Code, eth_address: String) -> Result<Info> {
         // TODO remove magic constant 100
         AIRDROP_REWARD.with(|airdrop_reward| {
             let mut airdrop_reward = airdrop_reward.borrow_mut();
-            airdrop_reward.insert(eth_address.clone(), 100);
+            airdrop_reward.insert(eth_address.clone(), TOKENS);
         });
 
         // return Info
