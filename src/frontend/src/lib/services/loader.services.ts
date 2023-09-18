@@ -1,22 +1,13 @@
-import { AIRDROP } from '$lib/constants/airdrop.constants';
-import { loadAirdrop } from '$lib/services/airdrop.services';
 import { loadBalances } from '$lib/services/balance.services';
 import { loadTransactions as loadTransactionsServices } from '$lib/services/transactions.services';
-import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
 export const loadEthData = async ({
-	loadTransactions,
-	tokenId
+	loadTransactions
 }: {
 	loadTransactions: boolean;
-	tokenId: TokenId;
 }): Promise<{ success: boolean }> => {
-	const promises = [
-		loadBalances(),
-		...(loadTransactions ? [loadTransactionsServices(tokenId)] : []),
-		...(AIRDROP ? [loadAirdrop()] : [])
-	];
+	const promises = [loadBalances(), ...(loadTransactions ? [loadTransactionsServices()] : [])];
 
 	const results = await Promise.allSettled(promises);
 

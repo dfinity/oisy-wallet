@@ -4,7 +4,6 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
 	import { loadAddress } from '$lib/services/address.services';
-	import { loadBalances } from '$lib/services/balance.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Contracts } from '$lib/services/erc20.services';
@@ -13,13 +12,10 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
-	import { tokenId } from '$lib/derived/token.derived';
-	import { loadTransactions as loadTransactionsServices } from '$lib/services/transactions.services';
 	import { browser } from '$app/environment';
 	import { isNullish } from '@dfinity/utils';
-	import {AIRDROP} from "$lib/constants/airdrop.constants";
-	import {loadAirdrop} from "$lib/services/airdrop.services";
-	import {loadEthData} from "$lib/services/loader.services";
+	import { initAirdrop } from '$lib/services/airdrop.services';
+	import { loadEthData } from '$lib/services/loader.services';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
@@ -81,7 +77,7 @@
 		await loadErc20Contracts();
 
 		// In case of error we want to display the dapp anyway and not get stuck on the loader
-		await loadEthData({loadTransactions, tokenId: $tokenId});
+		await Promise.allSettled([loadEthData({ loadTransactions }), initAirdrop()]);
 
 		progressStep = LoaderStep.DONE;
 	});
