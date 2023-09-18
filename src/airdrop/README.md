@@ -179,46 +179,6 @@ https://docs.gelato.network/developer-services/relay/non-erc-2771/sponsoredcall
 
 ## Implementation
 
-## Airdrop cannister
-
-1. **Generate codes from a seed**: Given a number, this function returns a list of codes.
-
-   - we store that list of code in cannister state and mark each of those as parent codes - we need to track if each of those have been redeemed
-
-2. Redeem code - given a user II, code and ethereum address this endponit will
-
-   - generate three more friend code while increasing the depth in the tree
-   - add the ethereum address to the list in the batch
-   - save the user ii, ethereum address, and code that code generated from here
-
-3. **Generate codes non-seed**: Based on an Identity Identifier (II), it will produce a set number of new codes. This should be executed once per II.
-
-   1. we check if the code has already been redeemed
-   2. **should we hard code the number of codes**
-
-4. **Get codes non-seed**: Retrieve the codes generated for a given II.
-5. **Has redeemed?**: Check if a particular code has been redeemed.
-
-- code generated on stage depth of 1/2
-
-- code on the card should have at least 3/4
-
--> encode total amount of identities = and total depth = 3
-
-- do function if we run out of code
-
-- hard kill function from the outside - in case something goes wrong
-
-### Airdrop cannister offline
-
-1. we will generate the QR code offline with those codes to embed them into an URL and then QR code.
-   !!! Do we want one code that can be reedemed multiple time
-
-### Christian Meeting 14th Sept
-
-- Ask Paul to redeploy both contract to Gorli
-- Enzo to work out gelato calls to ethereum network
-
 ### David's call
 
 useful commands
@@ -228,17 +188,17 @@ nmp deploy
 npm ci
 ```
 
--   first do the candid interface
-  -   `npm run generate`
+- first do the candid interface
+- `npm run generate`
 
--   redo the way we get the principal of the person
--   we can implement a guard instead of calling check_if_killed()? everytime #[query(guard = "caller_is_admin_controller")]
--   bundle up everything needed by frontend in as few fonctions as possible
-  -   `redeem_code()`--> only if the url contains https://oisy.com?code=XXXX-XXX-XXX
-  -   `get_code()` (instead of has_redeemed) --> called otherwise - returns the children code
-    -   caller() -> to get the principal
-    -   Result<Optional<Info>>
-      -   None if hasn't redeemed or anything
+- redo the way we get the principal of the person
+- we can implement a guard instead of calling check_if_killed()? everytime #[query(guard = "caller_is_admin_controller")]
+- bundle up everything needed by frontend in as few fonctions as possible
+- `redeem_code()`--> only if the url contains https://oisy.com?code=XXXX-XXX-XXX
+- `get_code()` (instead of has_redeemed) --> called otherwise - returns the children code
+- caller() -> to get the principal
+- Result<Optional<Info>>
+- None if hasn't redeemed or anything
 
 ```rust
 struct Info {
@@ -249,7 +209,8 @@ struct Info {
 ```
 
 QR Code generator
--   icp hubs - login
--   authorize a few principals
--   individually generate_code() -> seed will be generated from their principal
--   ideally generate button
+
+- icp hubs - login
+- authorize a few principals
+- individually generate_code() -> seed will be generated from their principal
+- ideally generate button

@@ -3,22 +3,24 @@ type CanisterError = variant {
   CannotRegisterMultipleTimes;
   CanisterKilled;
   GeneralError : text;
-  Unauthorized;
+  Unauthorized : text;
   CodeAlreadyRedeemed;
   CodeNotFound;
   NoCodeForII;
 };
-type EthAddressAmount = record { eth_address : text; amount : nat64 };
-type RedeemInput = record { ii : text; code : text; eth_address : text };
-type Result = variant { Ok : vec text; Err : CanisterError };
-type Result_1 = variant { Ok : vec EthAddressAmount; Err : CanisterError };
-type Result_2 = variant { Ok : bool; Err : CanisterError };
-type Result_3 = variant { Ok; Err : CanisterError };
-service : {
-  generate_codes_seed : (nat64, nat64) -> (Result);
-  get_children_codes_for_ii : (text) -> (Result) query;
-  get_eth_addresses_and_amounts : () -> (Result_1) query;
-  has_redeemed : (text) -> (Result_2) query;
-  kill_canister : (principal) -> (Result_3);
-  redeem_code : (RedeemInput) -> (Result_3);
+type Info = record {
+  "principal" : principal;
+  code : text;
+  ethereum_address : text;
+  children : opt vec record { text; bool };
+};
+type Result = variant { Ok; Err : CanisterError };
+type Result_1 = variant { Ok : text; Err : CanisterError };
+type Result_2 = variant { Ok : Info; Err : CanisterError };
+service : () -> {
+  bring_caninster_back_to_life : () -> (Result);
+  generate_code : () -> (Result_1);
+  get_code : () -> (Result_2) query;
+  kill_canister : () -> (Result);
+  redeem_code : (text, text) -> (Result_2);
 }
