@@ -65,7 +65,7 @@ dfx stop
 
 from the project directory will stop the local replica.
 
-## Build & run the dapp
+## Build & run the dapp locally
 
 Make sure you switch back to the project root directory.
 
@@ -75,7 +75,7 @@ First, install the frontend dependencies by running
 npm ci
 ```
 
-To build and deploy the project locally, run
+To build and deploy the project locally, first create a `.env.development` file by copying the [.env.example](.env.example) file. Once you've correctly set the api keys for all the different services that Oisy needs, then run:
 ```
 npm run deploy
 ```
@@ -96,6 +96,8 @@ Click on the __frontend__ URL to access the Oisy wallet that is running locally.
 
 
 ## Local development
+
+See [HACKING](HACKING.md)
 
 ### Backend
 The backend is written in Rust and you can find it under the [backend folder](src/backend/). It uses the [tECDSA API](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/t-ecdsa-how-it-works) provided by IC. To find out more about tECDSA, you can read the [Eurocrypt 2022 paper](https://eprint.iacr.org/2021/1330.pdf).
