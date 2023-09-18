@@ -2,7 +2,7 @@
 	"name": "@dfinity/ic-eth-wallet",
 	"version": "0.0.1",
 	"private": true,
-	"license": "SEE LICENSE IN LICENSE.md",
+	"license": "Apache-2.0",
 	"scripts": {
 		"build:compress": "./scripts/build.compress.sh",
 		"build:csp": "node scripts/build.csp.mjs",
