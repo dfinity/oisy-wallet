@@ -5,7 +5,7 @@
 	import { erc20TokensInitialized } from '$lib/derived/erc20.derived';
 	import { fade, slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import BorderedImg from '$lib/components/ui/BorderedImg.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import oisy from '$lib/assets/oisy.svg';
 	import Balance from '$lib/hero/Balance.svelte';
@@ -28,12 +28,12 @@
 				<div class="icon flex flex-col items-start pt-2">
 					{#if displayTokenSymbol}
 						<div in:fade>
-							<BorderedImg
+							<Logo
 								src={$token.icon ?? oisy}
-								width="auto"
+								width="64px"
 								height="64px"
 								alt={`${$token.name} logo`}
-								borderColor="off-white"
+								color="off-white"
 							/>
 						</div>
 					{/if}
