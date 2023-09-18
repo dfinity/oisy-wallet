@@ -1,4 +1,5 @@
 import type { _SERVICE as AirdropActor } from '$declarations/airdrop/airdrop.did';
+import { idlFactory as idlFactorAirdrop } from '$declarations/airdrop/airdrop.factory.did';
 import type { _SERVICE as BackendActor } from '$declarations/backend/backend.did';
 import { idlFactory as idlFactorBackend } from '$declarations/backend/backend.factory.did';
 import { authStore } from '$lib/stores/auth.store';
@@ -32,7 +33,7 @@ export const getAirdropActor = async (): Promise<AirdropActor> => {
 
 	return createActor({
 		canisterId,
-		idlFactory: idlFactorBackend,
+		idlFactory: idlFactorAirdrop,
 		identity
 	});
 };

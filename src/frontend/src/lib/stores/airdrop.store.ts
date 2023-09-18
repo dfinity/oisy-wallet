@@ -1,5 +1,5 @@
 import type { Info } from '$declarations/airdrop/airdrop.did';
-import { writable, type Readable } from 'svelte/types/runtime/store';
+import { writable, type Readable } from 'svelte/store';
 
 export type AirdropData = Info | undefined | null;
 
