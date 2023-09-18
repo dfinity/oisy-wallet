@@ -1,3 +1,4 @@
+import { PROD } from '$lib/constants/app.constants';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 
 // TODO: extract environment file(s)?
@@ -27,10 +28,9 @@ export const ERC20_CONTRACTS_ADDRESSES_PRODUCTION: Erc20ContractAddress[] = [
 	}
 ];
 
-export const ERC20_CONTRACTS_ADDRESSES: Erc20ContractAddress[] =
-	import.meta.env.MODE === 'production'
-		? ERC20_CONTRACTS_ADDRESSES_PRODUCTION
-		: ERC20_CONTRACTS_ADDRESSES_DEVELOPMENT;
+export const ERC20_CONTRACTS_ADDRESSES: Erc20ContractAddress[] = PROD
+	? ERC20_CONTRACTS_ADDRESSES_PRODUCTION
+	: ERC20_CONTRACTS_ADDRESSES_DEVELOPMENT;
 
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
 export const ERC20_ABI = [
