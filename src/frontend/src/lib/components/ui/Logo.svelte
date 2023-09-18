@@ -17,5 +17,5 @@
 	class:opacity-15={!loaded}
 	style={`border: 1px solid var(--color-${color}); width: calc(${width} + 2px); height: calc(${height} + 2px); transition: opacity 0.15s ease-in;`}
 >
-	<Img {src} {alt} {width} {height} />
+	<Img {src} {alt} {width} {height} on:load={() => (loaded = true)} />
 </div>
