@@ -1,3 +1,4 @@
+<!-- source: DFINITY foundation -->
 <script lang="ts">
 	export let size = '46';
 	export let text: string;

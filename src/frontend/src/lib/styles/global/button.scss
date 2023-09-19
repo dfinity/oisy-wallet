@@ -6,7 +6,9 @@ button {
 
 	gap: var(--padding-1_5x);
 
-	cursor: pointer;
+	&:not([disabled]) {
+		cursor: pointer;
+	}
 
 	--button-border-radius: var(--border-radius-sm);
 	border-radius: var(--button-border-radius);

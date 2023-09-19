@@ -4,6 +4,7 @@
 	import { isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import AirdropButton from '$lib/components/airdrop/AirdropButton.svelte';
+	import { airdropAvailable } from '$lib/derived/airdrop.derived';
 
 	let route: 'transactions' | 'tokens' = 'tokens';
 	$: route = isRouteTransactions($page) ? 'transactions' : 'tokens';
@@ -13,7 +14,9 @@
 
 <main>
 	<Loader>
-		<AirdropButton />
+		{#if $airdropAvailable}
+			<AirdropButton />
+		{/if}
 
 		<slot />
 	</Loader>
