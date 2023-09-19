@@ -13,10 +13,12 @@ use metrics::get_metrics;
 use serde_bytes::ByteBuf;
 use std::cell::RefCell;
 use std::str::FromStr;
+use crate::guards::caller_is_not_anonymous;
 
 pub mod http;
 mod metrics;
 mod std_canister_status;
+mod guards;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
@@ -166,7 +168,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
 }
 
 /// Computes a signature for an [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) transaction.
-#[update]
+#[update(guard = "caller_is_not_anonymous")]
 async fn sign_transaction(req: SignRequest) -> String {
     use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
     use ethers_core::types::Signature;
@@ -214,7 +216,7 @@ async fn sign_transaction(req: SignRequest) -> String {
 }
 
 /// Computes a signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
-#[update]
+#[update(guard = "caller_is_not_anonymous")]
 async fn personal_sign(plaintext: String) -> String {
     let caller = ic_cdk::caller();
 
@@ -237,7 +239,7 @@ async fn personal_sign(plaintext: String) -> String {
 }
 
 /// Computes a signature for a precomputed hash.
-#[update]
+#[update(guard = "caller_is_not_anonymous")]
 async fn sign_prehash(prehash: String) -> String {
     let caller = ic_cdk::caller();
 
@@ -251,7 +253,7 @@ async fn sign_prehash(prehash: String) -> String {
 }
 
 /// API method to get cycle balance and burn rate.
-#[update]
+#[update(guard = "caller_is_not_anonymous")]
 async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
 }
