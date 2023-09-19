@@ -32,5 +32,5 @@
 <Modal visible={$modalAirdrop} on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">AirDrop status</svelte:fragment>
 
-	<InProgress {progressStep} {steps} type="static" />
+	<div class="my-2"><InProgress {progressStep} {steps} type="static" /></div>
 </Modal>
