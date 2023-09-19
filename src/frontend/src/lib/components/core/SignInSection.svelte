@@ -2,6 +2,7 @@
 	import { signIn } from '$lib/services/auth.services';
 	import ButtonIC from '$lib/components/ui/ButtonIC.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
+	import { OISY_NAME } from '$lib/constants/oisy.constants';
 </script>
 
 <section class="flex flex-col justify-center items-center sm:pt-0 sm:pb-8 relative z-1">
@@ -12,9 +13,9 @@
 	</h1>
 
 	<p class="text-center pb-4 xs:px-3 sm:px-4 mb-0.25" style="max-width: 600px">
-		OISY provides a seamless on-chain experience to manage your Ethereum assets. Using native web
-		technologies and advanced cryptography, OISY eliminates the need for browser extensions or
-		mobile apps.
+		{OISY_NAME} provides a seamless on-chain experience to manage your Ethereum assets. Using native
+		web technologies and advanced cryptography, {OISY_NAME} eliminates the need for browser extensions
+		or mobile apps.
 	</p>
 
 	<ButtonIC on:click={async () => await signIn({})}>
