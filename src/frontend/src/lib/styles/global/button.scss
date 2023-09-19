@@ -134,14 +134,16 @@ button {
 			}
 
 			@include media.min-width(medium) {
-				padding: var(--button-padding);
-				border-radius: var(--button-border-radius);
+				&.desktop-wide {
+					padding: var(--button-padding);
+					border-radius: var(--button-border-radius);
 
-				width: inherit;
-				height: inherit;
+					width: inherit;
+					height: inherit;
 
-				span {
-					display: block;
+					span {
+						display: block;
+					}
 				}
 			}
 		}

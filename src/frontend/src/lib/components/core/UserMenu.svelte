@@ -20,12 +20,9 @@
 	class="user icon"
 	bind:this={button}
 	on:click={() => (visible = true)}
-	aria-label="Sign-out"
+	aria-label="Settings, sign-out and external links"
 >
 	<IconIcLogo />
-	<span class="text-dark-slate-blue font-bold text-xs"
-		>{shortenWithMiddleEllipsis($authStore?.identity?.getPrincipal().toText() ?? '')}</span
-	>
 </button>
 
 <Popover bind:visible anchor={button} direction="rtl">
