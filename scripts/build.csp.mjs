@@ -167,7 +167,7 @@ const updateCSP = (indexHtml) => {
 
 		const { frontend } = JSON.parse(readFileSync(jsonFile, 'utf-8'));
 
-        // Here we want the key ".ic", ".staging" or ".local" - not the environment name
+		// Here we want the key ".ic", ".staging" or ".local" - not the environment name
 		const canisterId = frontend[mainnet ? process.env.ENV : 'local'];
 
 		if (canisterId === undefined) {
