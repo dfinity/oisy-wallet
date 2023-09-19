@@ -2,18 +2,32 @@ import { PROD } from '$lib/constants/app.constants';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 
 // TODO: extract environment file(s)?
-export const ERC20_CONTRACTS_ADDRESSES_DEVELOPMENT: Erc20ContractAddress[] = [
+const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20ContractAddress = {
+	// Uniswap
+	address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
+};
+
+const ERC20_CONTRACTS_ADDRESSES_SEPOLIA: Erc20ContractAddress[] = [
 	{
 		// Weenus
 		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9'
 	},
-	{
-		// Uniswap
-		address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
-	}
+	ERC20_CONTRACT_ADDRESS_UNISWAP
 ];
 
-export const ERC20_CONTRACTS_ADDRESSES_PRODUCTION: Erc20ContractAddress[] = [
+const ERC20_CONTRACTS_ADDRESSES_GOERLI: Erc20ContractAddress[] = [
+	{
+		// Internet Computer
+		address: '0x8c283B98Edeb405816FD1D321005dF4d3AA956ba'
+	},
+	{
+		// Weenus
+		address: '0xaFF4481D10270F50f203E0763e2597776068CBc5'
+	},
+	ERC20_CONTRACT_ADDRESS_UNISWAP
+];
+
+const ERC20_CONTRACTS_ADDRESSES_PRODUCTION: Erc20ContractAddress[] = [
 	{
 		// USDC
 		address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -28,9 +42,13 @@ export const ERC20_CONTRACTS_ADDRESSES_PRODUCTION: Erc20ContractAddress[] = [
 	}
 ];
 
+const NETWORK = import.meta.env.VITE_ETHERSCAN_NETWORK;
+
 export const ERC20_CONTRACTS_ADDRESSES: Erc20ContractAddress[] = PROD
 	? ERC20_CONTRACTS_ADDRESSES_PRODUCTION
-	: ERC20_CONTRACTS_ADDRESSES_DEVELOPMENT;
+	: NETWORK === 'goerli'
+	? ERC20_CONTRACTS_ADDRESSES_GOERLI
+	: ERC20_CONTRACTS_ADDRESSES_SEPOLIA;
 
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
 export const ERC20_ABI = [
