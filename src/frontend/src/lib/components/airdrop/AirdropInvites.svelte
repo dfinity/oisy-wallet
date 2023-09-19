@@ -8,8 +8,6 @@
 
 	let children: [CodeText, boolean][] = [];
 	$: children = fromNullable(airdrop.children) ?? [];
-
-	$: console.log(children);
 </script>
 
 {#each children as [code, state], i}
