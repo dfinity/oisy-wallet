@@ -6,7 +6,7 @@
 	export let steps: [StaticStep, ...StaticStep[]];
 </script>
 
-{#each steps as { step, text, state, stateLabel }, i}
+{#each steps as { text, state, stateLabel }, i}
 	{@const last = i === steps.length - 1}
 	<div class={`step ${state} ${last ? 'last' : ''}`}>
 		{#if state === 'completed'}
