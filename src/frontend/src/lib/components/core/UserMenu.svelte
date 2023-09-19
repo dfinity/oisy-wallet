@@ -2,12 +2,18 @@
 	import IconIcLogo from '$lib/components/icons/IconIcLogo.svelte';
 	import { authStore } from '$lib/stores/auth.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { IconGitHub, IconNorthEast, Popover } from '@dfinity/gix-components';
+	import { IconGitHub, IconNorthEast, IconSettings, Popover } from '@dfinity/gix-components';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { goto } from '$app/navigation';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
+
+	const gotoSettings = async () => {
+		visible = false;
+		await goto('/settings');
+	};
 </script>
 
 <button
@@ -51,6 +57,14 @@
 		</a>
 
 		<Hr />
+
+		<button
+			class="flex gap-1 items-center no-underline"
+			aria-label="More settings"
+			on:click={gotoSettings}
+		>
+			<IconSettings /> Settings
+		</button>
 
 		<SignOut on:icLogoutTriggered={() => (visible = false)} />
 	</div>
