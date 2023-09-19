@@ -5,6 +5,10 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { AirdropStep } from '$lib/enums/airdrop';
 	import type { StaticStep } from '$lib/types/steps';
+	import AirdropInvites from '$lib/components/airdrop/AirdropInvites.svelte';
+	import type { Info } from '$declarations/airdrop/airdrop.did';
+
+	export let airdrop: Info;
 
 	let progressStep: string = AirdropStep.AIRDROP;
 
@@ -33,4 +37,6 @@
 	<svelte:fragment slot="title">AirDrop status</svelte:fragment>
 
 	<div class="my-2"><InProgress {progressStep} {steps} type="static" /></div>
+
+	<AirdropInvites {airdrop} />
 </Modal>

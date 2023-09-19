@@ -114,7 +114,7 @@ div.modal {
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
 
-	div.content > div {
+	div.content > div:first-of-type {
 		padding: var(--padding-1_5x) 0 0;
 	}
 }
