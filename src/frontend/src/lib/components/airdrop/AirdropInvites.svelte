@@ -7,7 +7,7 @@
 	export let airdrop: Info;
 
 	let children: [CodeText, boolean][] = [];
-	$: children = fromNullable(airdrop.children);
+	$: children = fromNullable(airdrop.children) ?? [];
 
 	$: console.log(children);
 </script>
