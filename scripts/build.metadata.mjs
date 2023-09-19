@@ -3,14 +3,7 @@
 import { config } from 'dotenv';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { findHtmlFiles } from './build.utils.mjs';
-
-const ENV =
-	process.env.ENV === 'ic'
-		? 'production'
-		: process.env.ENV === 'staging'
-		? 'staging'
-		: 'development';
+import { ENV, findHtmlFiles } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
 
