@@ -2,6 +2,7 @@
 	import type { Info } from '$declarations/airdrop/airdrop.did';
 	import type { CodeText } from '$lib/types/airdrop';
 	import { fromNullable } from '@dfinity/utils';
+	import IconShare from "$lib/components/icons/IconShare.svelte";
 
 	export let airdrop: Info;
 
@@ -26,7 +27,7 @@
 		<div class="font-bold p-2" style="border-right: 1px solid var(--color-platinum); width: var(--padding-6x)">
 			<span class:opacity-15={state}>{i}</span>
 		</div>
-		<div class:state class="flex justify-between items-center px-2 gap-2" style="width: calc(100% - var(--padding-6x))">
+		<div class:state class="flex justify-between items-center px-2 gap-4" style="width: calc(100% - var(--padding-6x))">
 			<div class="flex gap-1 truncate">
 				<span class="font-bold truncate" class:opacity-15={state}>{code}</span>
 
@@ -35,7 +36,7 @@
 				{/if}
 			</div>
 
-			<button disabled={state}>Share</button>
+			<button class:opacity-15={state} disabled={state} class="flex gap-0.5 font-bold text-blue text-sm"><IconShare /> Share</button>
 		</div>
 	</div>
 {/each}
