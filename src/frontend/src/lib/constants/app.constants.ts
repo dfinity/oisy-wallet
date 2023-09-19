@@ -16,3 +16,8 @@ export const AUTH_POPUP_HEIGHT = 625;
 
 // Workers
 export const AUTH_TIMER_INTERVAL = 1000;
+
+export const SECONDS_IN_MINUTE = 60;
+export const MINUTES_IN_HOUR = 60;
+export const HOURS_IN_DAY = 24;
+export const DAYS_IN_NON_LEAP_YEAR = 365;
