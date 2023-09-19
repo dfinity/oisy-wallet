@@ -27,7 +27,7 @@
 		} as StaticStep,
 		{
 			step: AirdropStep.INVITE_FRIENDS,
-			text: `Earn an extra 2 ICP for every friend invited!`,
+			text: `Earn up to X ICP by inviting friends!`,
 			state: 'next'
 		} as StaticStep
 	];
