@@ -8,6 +8,7 @@ $property: background;
 @include utilities.generate(bg-dust, $property, var(--color-dust));
 @include utilities.generate(bg-grey, $property, var(--color-grey));
 @include utilities.generate(bg-light-blue, $property, var(--color-light-blue));
+@include utilities.generate(bg-blue, $property, var(--color-blue));
 @include utilities.generate(bg-dark, $property, var(--color-dark));
 @include utilities.generate(bg-dark-blue, $property, var(--color-dark-blue));
 @include utilities.generate(bg-misty-rose, $property, var(--color-misty-rose));
