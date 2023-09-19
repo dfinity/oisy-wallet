@@ -16,3 +16,4 @@ $property: color;
 @include utilities.generate(text-cyclamen, $property, var(--color-cyclamen));
 @include utilities.generate(text-medium-purple, $property, var(--color-medium-purple));
 @include utilities.generate(text-platinum, $property, var(--color-platinum));
+@include utilities.generate(text-mountain-meadow, $property, var(--color-mountain-meadow));

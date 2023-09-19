@@ -15,3 +15,4 @@ $property: background;
 @include utilities.generate(bg-cyclamen, $property, var(--color-cyclamen));
 @include utilities.generate(bg-medium-purple, $property, var(--color-medium-purple));
 @include utilities.generate(bg-platinum, $property, var(--color-platinum));
+@include utilities.generate(bg-mountain-meadow, $property, var(--color-mountain-meadow));

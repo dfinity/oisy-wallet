@@ -1,7 +1,7 @@
 @use '../mixins/media';
 
 :root {
-	--positive-emphasis: #30af91;
+	--positive-emphasis: var(--color-mountain-meadow);
 	--positive-emphasis-rgb: 48, 175, 145;
 
 	--warning-emphasis-shade: var(--color-goldenrod);

@@ -23,9 +23,18 @@
 		class:rounded-bl-sm={last}
 		class:rounded-br-sm={last}
 	>
-		<span class="font-bold p-2" style="border-right: 1px solid var(--color-platinum); width: var(--padding-6x)">{i}</span>
-		<div class:state class="flex justify-between items-center px-2 gap-1" style="width: calc(100% - var(--padding-6x))">
-			<span class="font-bold truncate">{code}</span>
+		<div class="font-bold p-2" style="border-right: 1px solid var(--color-platinum); width: var(--padding-6x)">
+			<span class:opacity-15={state}>{i}</span>
+		</div>
+		<div class:state class="flex justify-between items-center px-2 gap-2" style="width: calc(100% - var(--padding-6x))">
+			<div class="flex gap-1 truncate">
+				<span class="font-bold truncate" class:opacity-15={state}>{code}</span>
+
+				{#if state}
+					<span class="font-bold text-mountain-meadow">+2 ICP</span>
+				{/if}
+			</div>
+
 			<button disabled={state}>Share</button>
 		</div>
 	</div>
