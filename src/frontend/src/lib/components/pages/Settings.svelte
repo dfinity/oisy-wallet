@@ -3,20 +3,25 @@
 	import { KeyValuePairInfo } from '@dfinity/gix-components';
 	import { addressStore } from '$lib/stores/address.store';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { authRemainingTimeStore } from '$lib/stores/auth.store';
+	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '$lib/utils/date.utils';
-	import Admin from "$lib/components/admin/Admin.svelte";
+	import Admin from '$lib/components/admin/Admin.svelte';
+	import type { Principal } from '@dfinity/principal';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
+
+	let principal: Principal | undefined | null;
+	$: principal = $authStore?.identity?.getPrincipal();
 </script>
 
 <KeyValuePairInfo>
 	<svelte:fragment slot="key"><span class="font-bold">Your Principal:</span></svelte:fragment>
 	<svelte:fragment slot="value"
-		><output class="break-words">{shortenWithMiddleEllipsis($addressStore ?? '')}</output><Copy
-			value={$addressStore ?? ''}
+		><output class="break-words">{shortenWithMiddleEllipsis(principal?.toText() ?? '')}</output
+		><Copy
+			value={principal?.toText() ?? ''}
 			text="Principal copied to clipboard."
 		/></svelte:fragment
 	>
