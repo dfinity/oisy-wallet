@@ -4,13 +4,16 @@
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { page } from '$app/stores';
 	import Back from '$lib/components/core/Back.svelte';
-	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isSubRoute } from '$lib/utils/nav.utils';
 
 	let back = false;
-	$: back = isRouteTransactions($page);
+	$: back = isSubRoute($page);
 </script>
 
-<header class="flex justify-between md:px-2 relative z-1 pointer-events-none" style="min-height: 76px">
+<header
+	class="flex justify-between md:px-2 relative z-1 pointer-events-none"
+	style="min-height: 76px"
+>
 	{#if back}
 		<Back />
 	{:else}

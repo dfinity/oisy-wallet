@@ -1,16 +1,24 @@
 <script lang="ts">
 	import Loader from '$lib/components/core/Loader.svelte';
 	import Hero from '$lib/hero/Hero.svelte';
-	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import AirdropButton from '$lib/components/airdrop/AirdropButton.svelte';
 	import { airdropAvailable } from '$lib/derived/airdrop.derived';
 
-	let route: 'transactions' | 'tokens' = 'tokens';
-	$: route = isRouteTransactions($page) ? 'transactions' : 'tokens';
+	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
+	$: route = isRouteSettings($page)
+		? 'settings'
+		: isRouteTransactions($page)
+		? 'transactions'
+		: 'tokens';
 </script>
 
-<Hero summary={route === 'transactions'} send={route === 'transactions'} />
+<Hero
+	summary={route === 'transactions'}
+	send={route === 'transactions'}
+	actions={route !== 'settings'}
+/>
 
 <main>
 	<Loader>

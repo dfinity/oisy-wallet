@@ -9,6 +9,11 @@ export const transactionsUrl = (token: Token): string => tokenUrl({ path: 'trans
 export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
 	id === '/(app)/transactions';
 
+export const isRouteSettings = ({ route: { id } }: Page): boolean => id === '/(app)/settings';
+
+export const isSubRoute = (page: Page): boolean =>
+	isRouteTransactions(page) || isRouteSettings(page);
+
 const tokenUrl = ({
 	token: { name },
 	path

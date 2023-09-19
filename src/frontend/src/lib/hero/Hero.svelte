@@ -10,6 +10,7 @@
 	import Balance from '$lib/hero/Balance.svelte';
 
 	export let summary = false;
+	export let actions = true;
 	export let send = false;
 
 	let displayTokenSymbol = false;
@@ -41,7 +42,11 @@
 			</div>
 		{/if}
 
-		<Actions {send} />
+		{#if actions}
+			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
+				<Actions {send} />
+			</div>
+		{/if}
 	</article>
 </div>
 
