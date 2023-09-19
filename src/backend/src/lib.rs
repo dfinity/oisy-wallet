@@ -1,3 +1,4 @@
+use crate::guards::caller_is_not_anonymous;
 use candid::{CandidType, Deserialize, Nat, Principal};
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
 use ethers_core::types::Bytes;
@@ -13,12 +14,11 @@ use metrics::get_metrics;
 use serde_bytes::ByteBuf;
 use std::cell::RefCell;
 use std::str::FromStr;
-use crate::guards::caller_is_not_anonymous;
 
+mod guards;
 pub mod http;
 mod metrics;
 mod std_canister_status;
-mod guards;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
