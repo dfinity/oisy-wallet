@@ -8,12 +8,13 @@
 	<OisyWalletLogo size="66" />
 
 	<h1 class="text-center py-4 xs:px-3 sm:px-4 mb-0.25" style="max-width: 600px">
-		Non-custodial, Browser-based Wallet, Internet Computer Secured
+		Non-custodial, browser-based wallet, Internet Computer secured
 	</h1>
 
 	<p class="text-center pb-4 xs:px-3 sm:px-4 mb-0.25" style="max-width: 600px">
-		Merging Ethereum and the Internet Computer, OISY provides a seamless on-chain experience,
-		eliminating the need for browser-extensions or mobile apps; it's passkey-enabled.
+		OISY provides a seamless on-chain experience to manage your Ethereum assets. Using native web
+		technologies and advanced cryptography, OISY eliminates the need for browser extensions or
+		mobile apps.
 	</p>
 
 	<ButtonIC on:click={async () => await signIn({})}>
