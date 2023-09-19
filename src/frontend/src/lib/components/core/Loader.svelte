@@ -96,7 +96,9 @@
 {#if inProgress}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<Modal>
-			<div style="min-height: 19vh;">
+			<div
+				style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
+			>
 				<Img width="100%" src={banner} />
 			</div>
 
