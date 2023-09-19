@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
+import { config } from 'dotenv';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { findHtmlFiles } from './build.utils.mjs';
+import { ENV, findHtmlFiles } from './build.utils.mjs';
+
+config({ path: `.env.${ENV}` });
 
 const buildCsp = (htmlFile) => {
 	// 1. We extract the start script parsed by SvelteKit into the html file
@@ -134,21 +137,21 @@ const updateCSP = (indexHtml) => {
 
 	let ethConnectSrc = undefined;
 
-	switch (process.env.ENV) {
-		case 'ic':
+	switch (ENV) {
+		case 'production':
 			ethConnectSrc =
 				'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com';
 			break;
 		case undefined:
 		case 'development':
 		case 'staging':
-			ethConnectSrc =
-				'https://api-sepolia.etherscan.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
+			const etherscanNetwork = process.env.VITE_ETHERSCAN_NETWORK ?? 'sepolia';
+			const alchemyNetwork = process.env.VITE_ALCHEMY_NETWORK ?? 'eth-sepolia';
+
+			ethConnectSrc = `https://api-${etherscanNetwork}.etherscan.io wss://${alchemyNetwork}.g.alchemy.com https://${alchemyNetwork}.g.alchemy.com`;
 			break;
 		default:
-			throw new Error(
-				`Unknown environment (process.env.ENV === ${process.env.ENV}) to parse the CSP.`
-			);
+			throw new Error(`Unknown environment (${ENV}) to parse the CSP.`);
 	}
 
 	const walletConnectSrc = 'wss://relay.walletconnect.com https://verify.walletconnect.com';
@@ -156,7 +159,7 @@ const updateCSP = (indexHtml) => {
 
 	// Raw is useful when the dapp get added to iOS home screen because otherwise Apple is not able to fetch the app icons.
 	const readCanisterId = () => {
-		const mainnet = ['ic', 'staging'].includes(process.env.ENV);
+		const mainnet = ['production', 'staging'].includes(ENV);
 
 		const jsonFile = mainnet
 			? join(process.cwd(), 'canister_ids.json')
@@ -164,6 +167,7 @@ const updateCSP = (indexHtml) => {
 
 		const { frontend } = JSON.parse(readFileSync(jsonFile, 'utf-8'));
 
+        // Here we want the key ".ic", ".staging" or ".local" - not the environment name
 		const canisterId = frontend[mainnet ? process.env.ENV : 'local'];
 
 		if (canisterId === undefined) {

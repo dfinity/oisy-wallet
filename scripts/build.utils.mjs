@@ -18,3 +18,10 @@ export const findHtmlFiles = (dir = join(process.cwd(), 'build')) => {
 
 	return files.filter((entry) => ['.html'].includes(extname(entry)));
 };
+
+export const ENV =
+	process.env.ENV === 'ic'
+		? 'production'
+		: process.env.ENV === 'staging'
+		? 'staging'
+		: 'development';
