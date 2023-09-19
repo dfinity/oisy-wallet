@@ -6,6 +6,7 @@
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '$lib/utils/date.utils';
+	import Admin from "$lib/components/admin/Admin.svelte";
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -43,3 +44,5 @@
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
+
+<Admin />
