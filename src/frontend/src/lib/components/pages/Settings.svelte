@@ -17,7 +17,7 @@
 	<svelte:fragment slot="value"
 		><output class="break-words">{shortenWithMiddleEllipsis($addressStore ?? '')}</output><Copy
 			value={$addressStore ?? ''}
-			text="Address copied to clipboard."
+			text="Principal copied to clipboard."
 		/></svelte:fragment
 	>
 	<svelte:fragment slot="info">
