@@ -28,12 +28,12 @@
 	$: steps = [
 		{
 			step: LoaderStep.INITIALIZATION,
-			text: 'Creating a secure session with Internet Identity',
+			text: 'Securing session with Internet Identity',
 			state: 'completed'
 		} as ProgressStep,
 		{
 			step: LoaderStep.ETH_ADDRESS,
-			text: 'Setting up Ethereum <> Internet Computer communication',
+			text: 'Retrieving your Ethereum public key',
 			state: 'in_progress'
 		} as ProgressStep,
 		{
@@ -100,7 +100,7 @@
 				<Img width="100%" src={banner} />
 			</div>
 
-			<h3 class="my-3">Initializing the wallet with Chain-Key cryptography...</h3>
+			<h3 class="my-3">Initializing your wallet</h3>
 
 			<InProgress {progressStep} {steps} />
 

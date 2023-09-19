@@ -10,9 +10,9 @@
 </script>
 
 <Modal visible={$modalReceive} on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">Receive ETH</svelte:fragment>
+	<svelte:fragment slot="title">Receive</svelte:fragment>
 
-	<p class="font-bold text-center">Wallet address:</p>
+	<p class="font-bold text-center">Address:</p>
 	<p class="flex gap-1 mb-2 font-normal sm:items-center justify-center">
 		<output class="break-words">{shortenWithMiddleEllipsis($addressStore ?? '')}</output><Copy
 			value={$addressStore ?? ''} text="Address copied to clipboard."
