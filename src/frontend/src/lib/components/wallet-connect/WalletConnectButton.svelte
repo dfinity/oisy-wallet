@@ -5,7 +5,7 @@
 
 <button
 	on:click
-	class="wallet-connect icon"
+	class="wallet-connect icon desktop-wide"
 	disabled={$addressNotLoaded}
 	class:opacity-0={$addressNotLoaded}
 >
