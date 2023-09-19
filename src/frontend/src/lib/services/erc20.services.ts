@@ -1,4 +1,5 @@
 import dai from '$lib/assets/dai.svg';
+import icp from '$lib/assets/icp.svg';
 import uniswap from '$lib/assets/uniswap.svg';
 import usdc from '$lib/assets/usdc.svg';
 import usdt from '$lib/assets/usdt.svg';
@@ -7,16 +8,18 @@ import { metadata } from '$lib/providers/etherscan-erc20.providers';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
 
-const mapErc20Icon = (tokenName: string): string | undefined => {
-	switch (tokenName.toLowerCase()) {
-		case 'uniswap':
+const mapErc20Icon = (symbol: string): string | undefined => {
+	switch (symbol.toLowerCase()) {
+		case 'uni':
 			return uniswap;
-		case 'usd coin':
+		case 'usdc':
 			return usdc;
-		case 'tether usd':
+		case 'usdt':
 			return usdt;
-		case 'dai stablecoin':
+		case 'dai':
 			return dai;
+		case 'ckicp':
+			return icp;
 		default:
 			return undefined;
 	}
@@ -35,7 +38,7 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 				id: Symbol(symbol),
 				name,
 				symbol,
-				icon: mapErc20Icon(name),
+				icon: mapErc20Icon(symbol),
 				...rest
 			}))
 		);
