@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import IconCelebrate from '$lib/components/icons/IconCelebrate.svelte';
-	import { airdropAvailable } from '$lib/derived/airdrop.derived';
 	import { fade } from 'svelte/transition';
 	import { modalStore } from '$lib/stores/modal.store';
 	import AirdropModal from '$lib/components/airdrop/AirdropModal.svelte';

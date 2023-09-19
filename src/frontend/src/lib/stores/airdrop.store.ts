@@ -12,7 +12,7 @@ const initAirdropStore = (): AirdropStore => {
 	const { subscribe, set } = writable<AirdropData>(undefined);
 
 	return {
-		set: (info: Info | null) => setTimeout(() => set(info), 2000),
+		set: (info: Info | null) => set(info),
 		reset: () => set(undefined),
 		subscribe
 	};
