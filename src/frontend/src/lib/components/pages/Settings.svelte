@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { KeyValuePairInfo } from '@dfinity/gix-components';
-	import { addressStore } from '$lib/stores/address.store';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '$lib/utils/date.utils';
 	import Admin from '$lib/components/admin/Admin.svelte';
 	import type { Principal } from '@dfinity/principal';
+	import { AIRDROP } from '$lib/constants/airdrop.constants';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -50,4 +50,6 @@
 	</KeyValuePairInfo>
 </div>
 
-<Admin />
+{#if AIRDROP}
+	<Admin />
+{/if}
