@@ -9,7 +9,7 @@
 	import IconShare from '$lib/components/icons/IconShare.svelte';
 	import { generateAirdropCode } from '$lib/api/airdrop.api';
 	import type { CodeInfo } from '$declarations/airdrop/airdrop.did';
-	import { OISY_URL } from '$lib/constants/oisy.constants';
+	import { airdropCodeUrl } from '$lib/utils/airdrop.utils';
 
 	let codeInfo: CodeInfo | undefined;
 	let busy = false;
@@ -18,7 +18,7 @@
 	$: code = codeInfo?.code;
 
 	let codeUrl: string;
-	$: codeUrl = `${OISY_URL}/?code=${code ?? ''}`;
+	$: codeUrl = airdropCodeUrl(code);
 
 	const generate = async () => {
 		busy = true;
