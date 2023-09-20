@@ -7,11 +7,10 @@
 ///  - add logging
 /// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
+use ic_cdk::api::call;
 use ic_cdk_macros::{init, update};
 
 use ic_cdk_macros::{export_candid, query};
-use rand::{Rng, SeedableRng};
-use rand_chacha::ChaCha20Rng;
 use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
@@ -33,6 +32,12 @@ thread_local! {
     // User principals - map Principal to (Code, Eth Address)
     static PRINCIPALS_USER_ETH: RefCell<HashMap<Principal, (Code, EthereumAddress)>> = RefCell::new(HashMap::new());
 
+    // pre-generated codes
+    static PRE_GENERATED_CODES: RefCell<PreGeneratedCodes> = RefCell::new(PreGeneratedCodes {
+        codes: Vec::new(),
+        counter: 0,
+    });
+
     /// Map a Code to it's parent principal, the depth, whether it has been redeemed
     static CODES: RefCell<HashMap<Code, CodeState>> = RefCell::new(HashMap::new());
    // id (the index) mapped to the (EthAddress, AirdropAmount)
@@ -41,8 +46,12 @@ thread_local! {
     static KILLED: RefCell<bool> = RefCell::new(false);
     // total number of tokens
     static TOTAL_TOKENS: RefCell<u64> = RefCell::new(INITIAL_TOKENS);
-    // Random Number Generator
-    static RNG: RefCell<Option<ChaCha20Rng>> = RefCell::new(None);
+}
+
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
+pub struct PreGeneratedCodes {
+    pub codes: Vec<Code>,
+    pub counter: u64,
 }
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
@@ -52,7 +61,7 @@ pub struct PrincipalState {
     pub codes_redeemed: u64,
 }
 
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
+#[derive(Serialize, Deserialize, Debug, Clone, Hash, PartialEq, Eq, CandidType)]
 pub struct Code(String);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Hash, PartialEq, Eq, CandidType, Default)]
@@ -129,9 +138,36 @@ fn init(principals: Vec<String>) {
     });
 }
 
+/// Add codes generated offline
+#[update]
+pub fn add_codes(codes: Vec<String>) -> Result<()> {
+    // check caller is part of the admin principals
+    let caller_principal = ic_cdk::api::caller();
+
+    PRINCIPALS_ADMIN.with(|admin_principals| {
+        let admin_principals = admin_principals.borrow();
+        if !admin_principals.contains(&ic_cdk::api::caller()) {
+            return Err(CanisterError::Unauthorized(caller_principal.to_string()));
+        } else {
+            Ok(())
+        }
+    })?;
+
+    // genarate non activated codes
+    PRE_GENERATED_CODES.with(|saved_codes| {
+        let mut state = saved_codes.borrow_mut();
+        for code in codes {
+            let code = Code(code);
+            state.codes.push(code.clone());
+        }
+    });
+
+    Ok(())
+}
+
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
 #[update]
-pub async fn add_admin(principal: String, name: String) -> Result<()> {
+pub fn add_admin(principal: String, name: String) -> Result<()> {
     let caller_principal = ic_cdk::api::caller();
 
     // check caller is part of the admin principals
@@ -187,12 +223,8 @@ pub fn generate_code() -> Result<CodeInfo> {
         };
 
         // generate a new code
-        let code = generate_random_number();
+        let code = get_pre_codes();
         principal_state.codes_generated += 1;
-
-        // Do we need the `CODE-` prefix?
-        let code_str = format!("CODE-{code:x}");
-        let code = Code(code_str);
 
         CODES.with(|saved_codes| {
             let mut state = saved_codes.borrow_mut();
@@ -305,13 +337,10 @@ pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> Result<Info> {
             let mut codes = codes.borrow_mut();
 
             // generate children codes only if we haven't reached the maximum allowed depth
-            let children_code: Vec<u64> = (0..NUMBERS_OF_CHILDREN)
-                .map(|_x| generate_random_number())
-                .collect();
+            let children_code: Vec<Code> = (0..NUMBERS_OF_CHILDREN).map(|_x| get_pre_codes()).collect();
             let mut children = Vec::default();
 
             for child_code in children_code {
-                let child_code = Code(format!("CODE-{child_code}"));
 
                 children.push((child_code.clone(), false));
 
@@ -504,71 +533,16 @@ fn add_user_to_airdrop_reward(eth_address: EthereumAddress, amount: AirdropAmoun
     });
 }
 
-/// TODO called upon start up but not from init as init needs to be sync
-#[update]
-pub async fn seed_rng() -> Result<()> {
-
-    // check if user calling is admin
-    let caller_principal = ic_cdk::api::caller();
-    PRINCIPALS_ADMIN.with(|admin_principals| {
-        let admin_principals = admin_principals.borrow();
-        if !admin_principals.contains(&caller_principal) {
-            return Err(CanisterError::Unauthorized(caller_principal.to_string()));
-        } else {
-            Ok(())
-        }
-    })?;
-
-    if RNG.with(|option_rng| option_rng.borrow().is_none()) {
-        let (raw_rand,): (Vec<u8>,) = ic_cdk::api::management_canister::main::raw_rand()
-            .await
-            .unwrap_or_else(|_e| ic_cdk::trap("call to raw_rand failed"));
-        let raw_rand_32_bytes: [u8; 32] = raw_rand
-            .try_into()
-            .unwrap_or_else(|_e| panic!("raw_rand not 32 bytes"));
-        let rng = ChaCha20Rng::from_seed(raw_rand_32_bytes);
-
-        RNG.with(|option_rng| {
-            option_rng.borrow_mut().get_or_insert(rng);
-        });
-        ic_cdk::println!("RNG initialized");
-    }
-
-    Ok(())
-}
-
-fn generate_random_number() -> u64 {
-    // Seed RNG at startup
-   RNG.with(|option_rng| {
-        let mut tmp_rng = option_rng.borrow_mut();
-        let rng = tmp_rng.as_mut().expect("RNG not initialised");
-
-        let code = rng.gen::<u64>();
-        code
+// "generate" codes
+fn get_pre_codes() -> Code {
+    PRE_GENERATED_CODES.with(|pre_generated_codes| {
+        let mut pre_generated_codes = pre_generated_codes.borrow_mut();
+        let codes = pre_generated_codes.codes.clone();
+        let counter = pre_generated_codes.counter;
+        pre_generated_codes.counter += 1;
+        codes.get(counter as usize).unwrap().clone()
     })
 }
 
 // automatically generates the candid file
 export_candid!();
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::str::FromStr;
-
-    fn _mock_caller(principal: &str) -> Principal {
-        Principal::from_str(principal).unwrap()
-    }
-
-    #[test]
-    fn test_my_function() {
-        // Set mock environment
-        ic_cdk::setup();
-
-        // Set the caller
-        // ic_cdk::set_caller(mock_caller("some_principal_in_text_representation"));
-
-        // Now, calls to `ic_cdk::api::caller()` within your canister's logic will return the mock Principal
-        // ... Your test logic here ...
-    }
-}

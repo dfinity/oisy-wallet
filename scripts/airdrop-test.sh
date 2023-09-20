@@ -35,7 +35,6 @@ done
 # check the list of principals
 dfx identity use default
 dfx deploy airdrop --argument "(vec {\"$(dfx identity get-principal)\"})"
-dfx canister call airdrop seed_rng
 
 # switch to the first identity
 dfx identity use "${identities[0]}"
