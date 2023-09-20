@@ -4,9 +4,16 @@ type CanisterError = variant {
   CanisterKilled;
   GeneralError : text;
   Unauthorized : text;
+  NoMoreCodes;
+  MaximumDepthReached;
   CodeAlreadyRedeemed;
   CodeNotFound;
   NoCodeForII;
+};
+type CodeInfo = record {
+  codes_generated : nat64;
+  code : text;
+  codes_redeemed : nat64;
 };
 type Info = record {
   "principal" : principal;
@@ -14,10 +21,19 @@ type Info = record {
   ethereum_address : text;
   children : opt vec record { text; bool };
 };
-type Result = variant { Ok : text; Err : CanisterError };
-type Result_1 = variant { Ok : Info; Err : CanisterError };
-service : {
-  generate_code : () -> (Result);
-  get_code : () -> (Result_1) query;
-  redeem_code : (text, text) -> (Result_1);
+type Result = variant { Ok; Err : CanisterError };
+type Result_1 = variant { Ok : CodeInfo; Err : CanisterError };
+type Result_2 = variant { Ok : Info; Err : CanisterError };
+type Result_3 = variant { Ok : nat64; Err : CanisterError };
+service : (vec principal) -> {
+  add_admin : (principal, text) -> (Result);
+  add_codes : (vec text) -> (Result);
+  bring_caninster_back_to_life : () -> (Result);
+  generate_code : () -> (Result_1);
+  get_code : () -> (Result_2) query;
+  get_total_code_issued : () -> (Result_3) query;
+  get_total_code_redeemed : () -> (Result_3) query;
+  is_admin : () -> (bool) query;
+  kill_canister : () -> (Result);
+  redeem_code : (text, text) -> (Result_2);
 }
