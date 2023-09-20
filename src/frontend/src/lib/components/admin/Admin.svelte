@@ -7,26 +7,47 @@
 	import { canShare, shareFile } from '$lib/utils/share.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import IconShare from '$lib/components/icons/IconShare.svelte';
-	import { onMount } from 'svelte';
-	import { isAirdropManager } from '$lib/api/airdrop.api';
+	import { generateAirdropCode } from '$lib/api/airdrop.api';
+	import type { CodeInfo } from '$declarations/airdrop/airdrop.did';
 
-	let code: string | undefined;
+	let codeInfo: CodeInfo | undefined;
 	let busy = false;
 
-	const generate = () => {
+	const generate = async () => {
 		busy = true;
 
-		code = undefined;
+		codeInfo = undefined;
 
-		setTimeout(() => {
-			code = 'yolo';
+		try {
+			const result = await generateAirdropCode();
 
-			busy = false;
-		}, 2000);
+			if ('Err' in result) {
+				const { Err } = result;
+
+				toastsError({
+					msg: { text: 'Unable to generate an Airdrop code.' },
+					err: JSON.stringify(Err)
+				});
+
+				busy = false;
+
+				return;
+			}
+
+			const { Ok } = result;
+			codeInfo = Ok;
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: 'Unexpected error while generating an Airdrop code.' },
+				err
+			});
+		}
+
+		busy = false;
 	};
 
 	const share = async () => {
-		if (isNullish(code)) {
+		if (isNullish(codeInfo)) {
 			toastsError({
 				msg: { text: 'No code was generated.' }
 			});
@@ -56,7 +77,7 @@
 				type: 'image/png',
 				lastModified: new Date().getTime()
 			}),
-			text: `AirDrop code: ${code}`
+			text: `AirDrop code: ${codeInfo}`
 		});
 	};
 
@@ -70,12 +91,16 @@
 		>Generate a new AirDrop code</button
 	>
 
-	{#if nonNullish(code) && shareAvailable}
+	{#if nonNullish(codeInfo) && shareAvailable}
 		<button class="secondary" on:click={share}><IconShare /> Share</button>
 	{/if}
 </div>
 
-{#if nonNullish(code)}
+{#if nonNullish(codeInfo)}
+	{@const code = codeInfo.code}
+	{@const generated = codeInfo.codes_generated}
+	{@const redeemed = codeInfo.codes_redeemed}
+
 	<div in:fade>
 		<div
 			class="p-2 rounded-sm bg-off-white mb-3 airdrop-qrcode"
@@ -85,11 +110,21 @@
 		</div>
 
 		<label for="code" class="font-bold">Code:</label>
-		<p id="code" class="flex gap-1 items-center">
+		<p id="code" class="flex gap-1 items-center mb-2">
 			<output class="font-normal break-words">{code}</output><Copy
 				value={code}
 				text="Code copied to clipboard."
 			/>
+		</p>
+
+		<label for="generated" class="font-bold">Number of generated codes:</label>
+		<p id="generated" class="flex gap-1 items-center mb-2">
+			<output class="font-normal break-words">{generated}</output>
+		</p>
+
+		<label for="redeemed" class="font-bold">Number of redeemed codes:</label>
+		<p id="redeemed" class="flex gap-1 items-center">
+			<output class="font-normal break-words">{redeemed}</output>
 		</p>
 	</div>
 {:else if busy}
