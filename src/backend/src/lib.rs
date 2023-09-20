@@ -1,3 +1,4 @@
+use crate::guards::caller_is_not_anonymous;
 use candid::{CandidType, Deserialize, Nat, Principal};
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
 use ethers_core::types::Bytes;
@@ -14,6 +15,7 @@ use serde_bytes::ByteBuf;
 use std::cell::RefCell;
 use std::str::FromStr;
 
+mod guards;
 pub mod http;
 mod metrics;
 mod std_canister_status;
@@ -118,7 +120,7 @@ async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
 }
 
 /// Returns the Ethereum address of the caller.
-#[update]
+#[update(guard = "caller_is_not_anonymous")]
 async fn caller_eth_address() -> String {
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
@@ -166,7 +168,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
 }
 
 /// Computes a signature for an [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) transaction.
-#[update]
+#[update(guard = "caller_is_not_anonymous")]
 async fn sign_transaction(req: SignRequest) -> String {
     use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
     use ethers_core::types::Signature;
@@ -214,7 +216,7 @@ async fn sign_transaction(req: SignRequest) -> String {
 }
 
 /// Computes a signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
-#[update]
+#[update(guard = "caller_is_not_anonymous")]
 async fn personal_sign(plaintext: String) -> String {
     let caller = ic_cdk::caller();
 
@@ -237,7 +239,7 @@ async fn personal_sign(plaintext: String) -> String {
 }
 
 /// Computes a signature for a precomputed hash.
-#[update]
+#[update(guard = "caller_is_not_anonymous")]
 async fn sign_prehash(prehash: String) -> String {
     let caller = ic_cdk::caller();
 
