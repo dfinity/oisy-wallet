@@ -146,9 +146,19 @@ pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     Ok(())
 }
 
+#[update(guard = "caller_is_admin")]
+pub fn add_admin(principal: Principal) -> CustomResult<()> {
+    PRINCIPALS_ADMIN.with(|principal_state| {
+        let mut state = principal_state.borrow_mut();
+        state.insert(principal);
+    });
+
+    Ok(())
+}
+
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
 #[update(guard = "caller_is_admin")]
-pub fn add_admin(principal: Principal, name: String) -> CustomResult<()> {
+pub fn add_manager(principal: Principal, name: String) -> CustomResult<()> {
     PRINCIPALS_MANAGERS.with(|principal_state| {
         let mut state = principal_state.borrow_mut();
         let principal_state = PrincipalState {
@@ -164,13 +174,10 @@ pub fn add_admin(principal: Principal, name: String) -> CustomResult<()> {
 
 /// check whether a given principal is authorised to generate codes
 #[query]
-pub fn is_admin() -> bool {
+pub fn is_manager() -> bool {
     let caller_principal = caller();
 
-    PRINCIPALS_ADMIN.with(|admin_principals| {
-        let admin_principals = admin_principals.borrow();
-        admin_principals.contains(&caller_principal)
-    })
+    PRINCIPALS_MANAGERS.with(|managers| managers.borrow().contains_key(&caller_principal))
 }
 
 /// Returns one code if the given principal is authorized to generate codes
