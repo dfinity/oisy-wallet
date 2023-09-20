@@ -26,7 +26,7 @@
 			state: 'in_progress',
 			stateLabel: 'In progress, may take a while'
 		} as StaticStep,
-		...(fromNullable(airdrop?.children)?.length > 0
+		...(fromNullable(airdrop?.children)?.length ?? 0 > 0
 			? [
 					{
 						step: AirdropStep.INVITE_FRIENDS,
