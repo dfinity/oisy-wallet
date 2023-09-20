@@ -36,7 +36,7 @@ More concretely, Oisy goals are:
 
 3. **browser-based** No matter your browser and operating system preference, you should be able to transact with the Ethereum network as simply as when you use a custodial wallet.
 
-4. **free to use and develop** Oisy is open-source software and licensed under the INTERNET COMPUTER COMMUNITY SOURCE LICENSE
+4. **free to use and develop** Oisy is open-source software and licensed under Apache 2.0.
 
 ## Status
 
