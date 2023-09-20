@@ -1,9 +1,8 @@
 import { getAirdropCode, redeemAirdropCode } from '$lib/api/airdrop.api';
 import { airdropCode } from '$lib/derived/airdrop.derived';
-import { addressStore } from '$lib/stores/address.store';
 import { airdropStore } from '$lib/stores/airdrop.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const initAirdrop = (): Promise<{ success: boolean }> => {
@@ -17,18 +16,8 @@ export const initAirdrop = (): Promise<{ success: boolean }> => {
 };
 
 const redeemCode = async (code: string): Promise<{ success: boolean }> => {
-	const address = get(addressStore);
-
-	if (isNullish(address)) {
-		toastsError({
-			msg: { text: 'Address is unknown.' }
-		});
-
-		return { success: false };
-	}
-
 	try {
-		const result = await redeemAirdropCode({ code, address });
+		const result = await redeemAirdropCode({ code });
 
 		if ('Err' in result) {
 			const { Err } = result;
