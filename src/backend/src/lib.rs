@@ -253,7 +253,7 @@ async fn sign_prehash(prehash: String) -> String {
 }
 
 /// API method to get cycle balance and burn rate.
-#[update(guard = "caller_is_not_anonymous")]
+#[update]
 async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
 }
