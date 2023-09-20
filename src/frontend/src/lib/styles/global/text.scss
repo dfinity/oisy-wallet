@@ -3,3 +3,7 @@
 .truncate {
 	@include text.truncate;
 }
+
+.clamp-2 {
+	@include text.clamp(2);
+}
