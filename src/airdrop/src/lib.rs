@@ -1,4 +1,5 @@
 use crate::guards::{caller_is_admin, caller_is_manager};
+use crate::utils::get_eth_address;
 ///! Airdrop backend canister
 ///! This canister is responsible for generating codes and redeeming them.
 ///! It also stores the mapping between II and Ethereum address.
@@ -18,6 +19,7 @@ use std::{
 };
 
 mod guards;
+mod utils;
 
 type CustomResult<T> = Result<T, CanisterError>;
 
@@ -109,6 +111,7 @@ pub enum CanisterError {
     NoCodeForII,
     MaximumDepthReached,
     NoMoreCodes,
+    UnknownOisyWalletAddress,
 }
 
 #[derive(Clone, Debug, PartialEq, Default, CandidType, Deserialize)]
@@ -216,7 +219,7 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
 /// The ETH address of the user
 /// TODO: to be reviewed
 #[update]
-pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> CustomResult<Info> {
+pub async fn redeem_code(code: Code) -> CustomResult<Info> {
     check_if_killed()?;
 
     let caller_principal = caller();
@@ -230,6 +233,8 @@ pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> CustomResult<Inf
             Ok(())
         }
     })?;
+
+    let eth_address = get_eth_address().await?;
 
     let (depth, code) = CODES.with(|codes| {
         let mut codes = codes.borrow_mut();
