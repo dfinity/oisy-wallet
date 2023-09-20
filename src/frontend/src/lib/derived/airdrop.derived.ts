@@ -8,10 +8,10 @@ import { derived, type Readable } from 'svelte/store';
 
 export const airdropCode: Readable<CodeText | null | undefined> = derived([page], ([$page]) => {
 	const {
-		data: { airdrop }
+		data: { airdropCode }
 	} = $page;
 
-	return airdrop;
+	return airdropCode;
 });
 
 export const airdropAvailable: Readable<boolean> = derived(
