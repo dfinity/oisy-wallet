@@ -33,10 +33,7 @@ thread_local! {
     static PRINCIPALS_USER_ETH: RefCell<HashMap<Principal, (Code, EthereumAddress)>> = RefCell::new(HashMap::new());
 
     // pre-generated codes
-    static PRE_GENERATED_CODES: RefCell<PreGeneratedCodes> = RefCell::new(PreGeneratedCodes {
-        codes: Vec::new(),
-        counter: 0,
-    });
+    static PRE_GENERATED_CODES: RefCell<Vec<Code>> = RefCell::new(Vec::new());
 
     /// Map a Code to it's parent principal, the depth, whether it has been redeemed
     static CODES: RefCell<HashMap<Code, CodeState>> = RefCell::new(HashMap::new());
@@ -46,12 +43,6 @@ thread_local! {
     static KILLED: RefCell<bool> = RefCell::new(false);
     // total number of tokens
     static TOTAL_TOKENS: RefCell<u64> = RefCell::new(INITIAL_TOKENS);
-}
-
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
-pub struct PreGeneratedCodes {
-    pub codes: Vec<Code>,
-    pub counter: u64,
 }
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
@@ -105,7 +96,7 @@ struct CodeState {
     redeemed: bool,
 }
 
-#[derive(Serialize, Deserialize, Clone, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Debug, CandidType)]
 pub enum CanisterError {
     Unauthorized(String),
     GeneralError(String),
@@ -116,6 +107,7 @@ pub enum CanisterError {
     NoChildrenForCode,
     NoCodeForII,
     MaximumDepthReached,
+    NoMoreCodes,
 }
 
 #[derive(Clone, Debug, PartialEq, Default, CandidType, Deserialize)]
@@ -125,15 +117,12 @@ pub struct EthAddressAmount {
 }
 
 #[init]
-fn init(principals: Vec<String>) {
+fn init(principals: Vec<Principal>) {
     // add principals to admin principals
     PRINCIPALS_ADMIN.with(|admin_principals| {
         let mut admin_principals = admin_principals.borrow_mut();
         for principal in principals {
-            admin_principals.insert(
-                Principal::from_text(principal)
-                    .expect("Invalid principal - should be a text representation of a principal"),
-            );
+            admin_principals.insert(principal);
         }
     });
 }
@@ -158,7 +147,7 @@ pub fn add_codes(codes: Vec<String>) -> Result<()> {
         let mut state = saved_codes.borrow_mut();
         for code in codes {
             let code = Code(code);
-            state.codes.push(code.clone());
+            state.push(code.clone());
         }
     });
 
@@ -167,7 +156,7 @@ pub fn add_codes(codes: Vec<String>) -> Result<()> {
 
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
 #[update]
-pub fn add_admin(principal: String, name: String) -> Result<()> {
+pub fn add_admin(principal: Principal, name: String) -> Result<()> {
     let caller_principal = ic_cdk::api::caller();
 
     // check caller is part of the admin principals
@@ -182,7 +171,6 @@ pub fn add_admin(principal: String, name: String) -> Result<()> {
 
     PRINCIPALS_MANAGERS.with(|principal_state| {
         let mut state = principal_state.borrow_mut();
-        let principal = Principal::from_text(principal).unwrap();
         let principal_state = PrincipalState {
             name,
             codes_generated: 0,
@@ -223,7 +211,7 @@ pub fn generate_code() -> Result<CodeInfo> {
         };
 
         // generate a new code
-        let code = get_pre_codes();
+        let code = get_pre_codes()?;
         principal_state.codes_generated += 1;
 
         CODES.with(|saved_codes| {
@@ -251,6 +239,7 @@ pub fn generate_code() -> Result<CodeInfo> {
 /// Function to be called when the user has a code
 /// The code the user wants to redeem
 /// The ETH address of the user
+/// TODO: to be reviewed
 #[update]
 pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> Result<Info> {
     check_if_killed()?;
@@ -275,9 +264,6 @@ pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> Result<Info> {
             // Check if code is already redeemed
             if code_state.redeemed {
                 return Err(CanisterError::CodeAlreadyRedeemed);
-            } else {
-                // Mark code as redeemed
-                code_state.redeemed = true;
             }
 
             if code_state.depth < MAXIMUM_DEPTH {
@@ -325,6 +311,9 @@ pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> Result<Info> {
                 eth_address.clone(),
             );
 
+            // Mark code as redeemed
+            code_state.redeemed = true;
+
             Ok((code_state.depth, code.clone()))
         } else {
             Err(CanisterError::CodeNotFound)
@@ -337,11 +326,11 @@ pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> Result<Info> {
             let mut codes = codes.borrow_mut();
 
             // generate children codes only if we haven't reached the maximum allowed depth
-            let children_code: Vec<Code> = (0..NUMBERS_OF_CHILDREN).map(|_x| get_pre_codes()).collect();
+            let children_code: Vec<Code> =
+                (0..NUMBERS_OF_CHILDREN).map(|_x| get_pre_codes().unwrap()).collect();
             let mut children = Vec::default();
 
             for child_code in children_code {
-
                 children.push((child_code.clone(), false));
 
                 // Associate child code with parent principal/depth/redeemed
@@ -377,19 +366,13 @@ pub fn get_code() -> Result<Info> {
     CODES.with(|saved_codes| {
         let saved_codes_ref = saved_codes.borrow();
         let caller_principal = ic_cdk::api::caller();
-        let code = saved_codes_ref
-            .iter()
-            .find(|(_, code_state)| code_state.parent_principal == caller_principal)
-            .map(|(code, _)| code.clone())
-            .ok_or(CanisterError::CodeNotFound)?;
-
-        let eth_address = PRINCIPALS_USER_ETH.with(|principal_eth| {
+        let (code, eth_address) = PRINCIPALS_USER_ETH.with(|principal_eth| {
             let principal_eth = principal_eth.borrow();
-            principal_eth
+                principal_eth
                 .get(&caller_principal)
-                .map(|(_, eth_address)| eth_address.clone())
+                .map(|x| x.clone())
                 .ok_or(CanisterError::GeneralError(
-                    "No ETH address associated with principal".to_string(),
+                    "No ETH address/Code associated with principal".to_string(),
                 ))
         })?;
 
@@ -534,13 +517,13 @@ fn add_user_to_airdrop_reward(eth_address: EthereumAddress, amount: AirdropAmoun
 }
 
 // "generate" codes
-fn get_pre_codes() -> Code {
+fn get_pre_codes() -> Result<Code> {
     PRE_GENERATED_CODES.with(|pre_generated_codes| {
         let mut pre_generated_codes = pre_generated_codes.borrow_mut();
-        let codes = pre_generated_codes.codes.clone();
-        let counter = pre_generated_codes.counter;
-        pre_generated_codes.counter += 1;
-        codes.get(counter as usize).unwrap().clone()
+        match pre_generated_codes.pop() {
+            Some(code) => Ok(code),
+            None => Err(CanisterError::NoMoreCodes),
+        }
     })
 }
 
