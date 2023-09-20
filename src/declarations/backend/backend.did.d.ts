@@ -47,6 +47,7 @@ export interface SignRequest {
 }
 export interface _SERVICE {
 	caller_eth_address: ActorMethod<[], string>;
+	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	personal_sign: ActorMethod<[string], string>;
