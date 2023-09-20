@@ -10,4 +10,5 @@ export const shareText = (text: string): Promise<void> =>
 
 export const copyText = (text: string): Promise<void> => navigator.clipboard.writeText(text);
 
-export const shareFile = (file: File): Promise<void> => navigator.share({ files: [file] });
+export const shareFile = ({ file, text }: { file: File; text: string }): Promise<void> =>
+	navigator.share({ text, files: [file] });

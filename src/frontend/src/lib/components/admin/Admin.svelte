@@ -1,10 +1,13 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { QRCode, Spinner } from '@dfinity/gix-components';
+	import { canvasToBlob } from '$lib/utils/canvas.utils';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import { shareFile } from '$lib/utils/share.utils';
 
 	let code: string | undefined;
-    let busy = false;
+	let busy = false;
 
 	const generate = () => {
 		busy = true;
@@ -17,18 +20,59 @@
 			busy = false;
 		}, 2000);
 	};
+
+	const share = async () => {
+		if (isNullish(code)) {
+			toastsError({
+				msg: { text: 'No code was generated.' }
+			});
+			return;
+		}
+
+		const canvas: HTMLCanvasElement | null = document.querySelector('.airdrop-qrcode canvas');
+
+		if (isNullish(canvas)) {
+			toastsError({
+				msg: { text: 'No QR code to transform to an image found in the page.' }
+			});
+			return;
+		}
+
+		const blob = await canvasToBlob({ canvas, type: 'image/png' });
+
+		if (isNullish(blob)) {
+			toastsError({
+				msg: { text: 'Cannot convert QR code to an image.' }
+			});
+			return;
+		}
+
+		await shareFile({
+			file: new File([blob], `AirDrop code ${new Date().toLocaleString()}.png`, {
+				type: 'image/png',
+				lastModified: new Date().getTime()
+			}),
+			text: code
+		});
+	};
 </script>
 
 <h2 class="text-base mt-8 mb-2 pb-0.5">Admin</h2>
 
-<button class="primary mb-3" on:click={generate} disabled={busy} class:opacity-50={busy}
-	>Generate a new Airdrop code</button
->
+<div class="flex gap-2 mb-3" style="flex-wrap: wrap;">
+	<button class="primary" on:click={generate} disabled={busy} class:opacity-50={busy}
+		>Generate a new Airdrop code</button
+	>
+
+	{#if nonNullish(code)}
+		<button class="secondary" on:click={share}>Share</button>
+	{/if}
+</div>
 
 {#if nonNullish(code)}
 	<div in:fade>
 		<div
-			class="p-2 rounded-sm bg-off-white mb-3"
+			class="p-2 rounded-sm bg-off-white mb-3 airdrop-qrcode"
 			style={`border: 1px dashed var(--color-dark); max-width: var(--qrcode-max-width, 360px); height: var(--qrcode-height);`}
 		>
 			<QRCode value={code} />
