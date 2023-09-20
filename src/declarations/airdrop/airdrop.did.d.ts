@@ -6,7 +6,6 @@ export type CanisterError =
 	| { CannotRegisterMultipleTimes: null }
 	| { CanisterKilled: null }
 	| { GeneralError: string }
-	| { Unauthorized: string }
 	| { NoMoreCodes: null }
 	| { MaximumDepthReached: null }
 	| { CodeAlreadyRedeemed: null }

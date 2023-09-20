@@ -5,7 +5,6 @@ export const idlFactory = ({ IDL }) => {
 		CannotRegisterMultipleTimes: IDL.Null,
 		CanisterKilled: IDL.Null,
 		GeneralError: IDL.Text,
-		Unauthorized: IDL.Text,
 		NoMoreCodes: IDL.Null,
 		MaximumDepthReached: IDL.Null,
 		CodeAlreadyRedeemed: IDL.Null,
