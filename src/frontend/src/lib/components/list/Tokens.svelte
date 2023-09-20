@@ -36,10 +36,10 @@
 					size="46px"
 				/>
 
-				<div class="break-words" slot="amount">
+				<output class="break-words" slot="amount">
 					{formatEtherShort($balancesStore?.[token.id] ?? BigNumber.from(0n))}
 					{token.symbol}
-				</div>
+				</output>
 			</Card>
 		</a>
 	</Listener>
