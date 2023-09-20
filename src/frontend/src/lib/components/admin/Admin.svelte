@@ -4,7 +4,8 @@
 	import { QRCode, Spinner } from '@dfinity/gix-components';
 	import { canvasToBlob } from '$lib/utils/canvas.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { shareFile } from '$lib/utils/share.utils';
+	import { canShare, shareFile } from '$lib/utils/share.utils';
+	import Copy from '$lib/components/ui/Copy.svelte';
 
 	let code: string | undefined;
 	let busy = false;
@@ -55,6 +56,8 @@
 			text: code
 		});
 	};
+
+	const shareAvailable = canShare();
 </script>
 
 <h2 class="text-base mt-8 mb-2 pb-0.5">Admin</h2>
@@ -64,7 +67,7 @@
 		>Generate a new Airdrop code</button
 	>
 
-	{#if nonNullish(code)}
+	{#if nonNullish(code) && shareAvailable}
 		<button class="secondary" on:click={share}>Share</button>
 	{/if}
 </div>
@@ -79,7 +82,12 @@
 		</div>
 
 		<label for="code" class="font-bold">Code:</label>
-		<p id="code" class="font-normal break-words">{code}</p>
+		<p id="code" class="flex gap-1 items-center">
+			<output class="font-normal break-words">{code}</output><Copy
+				value={code}
+				text="Code copied to clipboard."
+			/>
+		</p>
 	</div>
 {:else if busy}
 	<div
