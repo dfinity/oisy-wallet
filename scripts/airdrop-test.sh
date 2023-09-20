@@ -32,18 +32,13 @@ do
     principals+=("$(dfx identity get-principal)")
 done
 
-canister_init_args="(vec {\"$(echo "${principals[@]}" | sed 's/ /"; "/g')\"})"
-
 # check the list of principals
-echo "full list of authorised principals --- ${canister_init_args}"
-
 dfx identity use default
-dfx deploy airdrop --argument "$canister_init_args"
+dfx deploy airdrop --argument "(vec {\"$(dfx identity get-principal)\"})"
+dfx canister call airdrop seed_rng
 
 # switch to the first identity
 dfx identity use "${identities[0]}"
-
-dfx canister call airdrop seed_rng
 
 root_level_code=()
 # check that we can generate 10 codes
