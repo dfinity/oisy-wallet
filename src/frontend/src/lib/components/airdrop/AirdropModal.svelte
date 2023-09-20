@@ -22,7 +22,7 @@
 		} as StaticStep,
 		{
 			step: AirdropStep.AIRDROP,
-			text: 'Airdropped 1 ICP for you',
+			text: 'Airdropped 2 ICP for you',
 			state: 'in_progress',
 			stateLabel: 'In progress, may take a while'
 		} as StaticStep,
