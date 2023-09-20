@@ -6,6 +6,7 @@ export type CanisterError =
 	| { CannotRegisterMultipleTimes: null }
 	| { CanisterKilled: null }
 	| { GeneralError: string }
+	| { UnknownOisyWalletAddress: null }
 	| { NoMoreCodes: null }
 	| { MaximumDepthReached: null }
 	| { CodeAlreadyRedeemed: null }
@@ -36,5 +37,5 @@ export interface _SERVICE {
 	get_total_code_redeemed: ActorMethod<[], Result_3>;
 	is_admin: ActorMethod<[], boolean>;
 	kill_canister: ActorMethod<[], Result>;
-	redeem_code: ActorMethod<[string, string], Result_2>;
+	redeem_code: ActorMethod<[string], Result_2>;
 }

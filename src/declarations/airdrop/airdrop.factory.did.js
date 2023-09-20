@@ -5,6 +5,7 @@ export const idlFactory = ({ IDL }) => {
 		CannotRegisterMultipleTimes: IDL.Null,
 		CanisterKilled: IDL.Null,
 		GeneralError: IDL.Text,
+		UnknownOisyWalletAddress: IDL.Null,
 		NoMoreCodes: IDL.Null,
 		MaximumDepthReached: IDL.Null,
 		CodeAlreadyRedeemed: IDL.Null,
@@ -36,7 +37,7 @@ export const idlFactory = ({ IDL }) => {
 		get_total_code_redeemed: IDL.Func([], [Result_3], ['query']),
 		is_admin: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
-		redeem_code: IDL.Func([IDL.Text, IDL.Text], [Result_2], [])
+		redeem_code: IDL.Func([IDL.Text], [Result_2], [])
 	});
 };
 // @ts-ignore

@@ -3,6 +3,7 @@ type CanisterError = variant {
   CannotRegisterMultipleTimes;
   CanisterKilled;
   GeneralError : text;
+  UnknownOisyWalletAddress;
   NoMoreCodes;
   MaximumDepthReached;
   CodeAlreadyRedeemed;
@@ -34,5 +35,5 @@ service : (vec principal) -> {
   get_total_code_redeemed : () -> (Result_3) query;
   is_admin : () -> (bool) query;
   kill_canister : () -> (Result);
-  redeem_code : (text, text) -> (Result_2);
+  redeem_code : (text) -> (Result_2);
 }

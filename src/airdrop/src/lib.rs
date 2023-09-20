@@ -9,7 +9,7 @@ use crate::utils::get_eth_address;
 ///  - add logging
 /// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
-use ic_cdk::caller;
+use ic_cdk::{caller};
 use ic_cdk_macros::{export_candid, query};
 use ic_cdk_macros::{init, update};
 use serde::{Deserialize, Serialize};
