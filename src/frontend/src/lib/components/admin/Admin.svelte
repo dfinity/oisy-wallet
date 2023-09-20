@@ -9,7 +9,7 @@
 	import IconShare from '$lib/components/icons/IconShare.svelte';
 	import { generateAirdropCode } from '$lib/api/airdrop.api';
 	import type { CodeInfo } from '$declarations/airdrop/airdrop.did';
-	import { OISY_URL } from '$lib/constants/oisy.constants';
+	import { airdropCodeUrl } from '$lib/utils/airdrop.utils';
 
 	let codeInfo: CodeInfo | undefined;
 	let busy = false;
@@ -18,7 +18,7 @@
 	$: code = codeInfo?.code;
 
 	let codeUrl: string;
-	$: codeUrl = `${OISY_URL}/?code=${code ?? ''}`;
+	$: codeUrl = airdropCodeUrl(code);
 
 	const generate = async () => {
 		busy = true;
@@ -123,6 +123,16 @@
 				text="Code copied to clipboard."
 			/>
 		</p>
+
+		<label for="codeUrl" class="font-bold">URL to use code:</label>
+		<a
+			id="codeUrl"
+			class="flex gap-1 items-center mb-2"
+			href={codeUrl}
+			aria-label="URL to use the airdrop code"
+		>
+			{codeUrl}
+		</a>
 
 		<label for="generated" class="font-bold">Number of generated codes:</label>
 		<p id="generated" class="flex gap-1 items-center mb-2">
