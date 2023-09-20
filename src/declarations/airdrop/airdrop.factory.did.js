@@ -28,14 +28,15 @@ export const idlFactory = ({ IDL }) => {
 	const Result_2 = IDL.Variant({ Ok: Info, Err: CanisterError });
 	const Result_3 = IDL.Variant({ Ok: IDL.Nat64, Err: CanisterError });
 	return IDL.Service({
-		add_admin: IDL.Func([IDL.Principal, IDL.Text], [Result], []),
+		add_admin: IDL.Func([IDL.Principal], [Result], []),
 		add_codes: IDL.Func([IDL.Vec(IDL.Text)], [Result], []),
+		add_manager: IDL.Func([IDL.Principal, IDL.Text], [Result], []),
 		bring_caninster_back_to_life: IDL.Func([], [Result], []),
 		generate_code: IDL.Func([], [Result_1], []),
 		get_code: IDL.Func([], [Result_2], ['query']),
 		get_total_code_issued: IDL.Func([], [Result_3], ['query']),
 		get_total_code_redeemed: IDL.Func([], [Result_3], ['query']),
-		is_admin: IDL.Func([], [IDL.Bool], ['query']),
+		is_manager: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
 		redeem_code: IDL.Func([IDL.Text], [Result_2], [])
 	});

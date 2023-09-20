@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 DFX_PRINCIPAL=$(dfx identity get-principal)
 
 if [ -n "${ENV+1}" ]; then

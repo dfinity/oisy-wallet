@@ -7,6 +7,8 @@
 	import { canShare, shareFile } from '$lib/utils/share.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import IconShare from '$lib/components/icons/IconShare.svelte';
+	import { onMount } from 'svelte';
+	import { isAirdropManager } from '$lib/api/airdrop.api';
 
 	let code: string | undefined;
 	let busy = false;
