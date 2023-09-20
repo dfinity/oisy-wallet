@@ -43,6 +43,8 @@ dfx deploy airdrop --argument "$canister_init_args"
 # switch to the first identity
 dfx identity use "${identities[0]}"
 
+dfx canister call airdrop seed_rng
+
 root_level_code=()
 # check that we can generate 10 codes
 for i in {1..10}

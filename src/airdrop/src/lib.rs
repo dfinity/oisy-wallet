@@ -10,7 +10,7 @@ use candid::{types::principal::Principal, CandidType};
 use ic_cdk_macros::{init, update};
 
 use ic_cdk_macros::{export_candid, query};
-use rand::{SeedableRng, Rng};
+use rand::{Rng, SeedableRng};
 use rand_chacha::ChaCha20Rng;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -116,28 +116,7 @@ pub struct EthAddressAmount {
 }
 
 #[init]
-async fn init(principals: Vec<String>) {
-    // Seed RNG at startup
-    let (raw_rand,): (Vec<u8>,) = ic_cdk::api::management_canister::main::raw_rand()
-        .await
-        .unwrap_or_else(|_e| ic_cdk::trap("call to raw_rand failed"));
-    let raw_rand_32_bytes: [u8; 32] = raw_rand
-        .try_into()
-        .unwrap_or_else(|_e| panic!("raw_rand not 32 bytes"));
-    let rng = ChaCha20Rng::from_seed(raw_rand_32_bytes);
-    RNG.with(|option_rng| {
-        // Initialize the RNG only if it wasn't initialized before.
-        // Note that this is necessary because the RNG state is accessed
-        // both before (read) and after (write) the async inter-canister
-        // call to raw_rand, which leads to the code being executed in
-        // different messages. See
-        // https://internetcomputer.org/docs/current/developer-docs/security/
-        // for more details regarding _canister development security best
-        // practices_.
-        option_rng.borrow_mut().get_or_insert(rng);
-    });
-    ic_cdk::println!("RNG initialized");
-
+fn init(principals: Vec<String>) {
     // add principals to admin principals
     PRINCIPALS_ADMIN.with(|admin_principals| {
         let mut admin_principals = admin_principals.borrow_mut();
@@ -326,7 +305,9 @@ pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> Result<Info> {
             let mut codes = codes.borrow_mut();
 
             // generate children codes only if we haven't reached the maximum allowed depth
-            let children_code: Vec<u64> = (0..NUMBERS_OF_CHILDREN).map(|_x| generate_random_number()).collect();
+            let children_code: Vec<u64> = (0..NUMBERS_OF_CHILDREN)
+                .map(|_x| generate_random_number())
+                .collect();
             let mut children = Vec::default();
 
             for child_code in children_code {
@@ -523,8 +504,42 @@ fn add_user_to_airdrop_reward(eth_address: EthereumAddress, amount: AirdropAmoun
     });
 }
 
+/// TODO called upon start up but not from init as init needs to be sync
+#[update]
+pub async fn seed_rng() -> Result<()> {
+
+    // check if user calling is admin
+    let caller_principal = ic_cdk::api::caller();
+    PRINCIPALS_ADMIN.with(|admin_principals| {
+        let admin_principals = admin_principals.borrow();
+        if !admin_principals.contains(&caller_principal) {
+            return Err(CanisterError::Unauthorized(caller_principal.to_string()));
+        } else {
+            Ok(())
+        }
+    })?;
+
+    if RNG.with(|option_rng| option_rng.borrow().is_none()) {
+        let (raw_rand,): (Vec<u8>,) = ic_cdk::api::management_canister::main::raw_rand()
+            .await
+            .unwrap_or_else(|_e| ic_cdk::trap("call to raw_rand failed"));
+        let raw_rand_32_bytes: [u8; 32] = raw_rand
+            .try_into()
+            .unwrap_or_else(|_e| panic!("raw_rand not 32 bytes"));
+        let rng = ChaCha20Rng::from_seed(raw_rand_32_bytes);
+
+        RNG.with(|option_rng| {
+            option_rng.borrow_mut().get_or_insert(rng);
+        });
+        ic_cdk::println!("RNG initialized");
+    }
+
+    Ok(())
+}
+
 fn generate_random_number() -> u64 {
-    RNG.with(|option_rng| {
+    // Seed RNG at startup
+   RNG.with(|option_rng| {
         let mut tmp_rng = option_rng.borrow_mut();
         let rng = tmp_rng.as_mut().expect("RNG not initialised");
 
