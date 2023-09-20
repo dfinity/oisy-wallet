@@ -124,6 +124,16 @@
 			/>
 		</p>
 
+		<label for="codeUrl" class="font-bold">URL to use code:</label>
+		<a
+			id="codeUrl"
+			class="flex gap-1 items-center mb-2"
+			href={codeUrl}
+			aria-label="URL to use the airdrop code"
+		>
+			{codeUrl}
+		</a>
+
 		<label for="generated" class="font-bold">Number of generated codes:</label>
 		<p id="generated" class="flex gap-1 items-center mb-2">
 			<output class="font-normal break-words">{generated}</output>
