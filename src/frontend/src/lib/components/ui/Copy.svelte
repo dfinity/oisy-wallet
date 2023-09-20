@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { IconCopy } from '@dfinity/gix-components';
 	import { toastsShow } from '$lib/stores/toasts.store';
+	import { copyText } from '$lib/utils/share.utils';
 
 	export let value: string;
 	export let text: string;
 
 	const copyToClipboard = async () => {
-		await navigator.clipboard.writeText(value);
+		await copyText(value);
+
 		toastsShow({
 			text,
 			level: 'success',

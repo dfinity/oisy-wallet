@@ -2,12 +2,29 @@
 	import type { Info } from '$declarations/airdrop/airdrop.did';
 	import type { CodeText } from '$lib/types/airdrop';
 	import { fromNullable } from '@dfinity/utils';
-	import IconShare from "$lib/components/icons/IconShare.svelte";
+	import IconShare from '$lib/components/icons/IconShare.svelte';
+	import { canShare, copyText, shareText } from '$lib/utils/share.utils';
+	import {toastsShow} from "$lib/stores/toasts.store";
 
 	export let airdrop: Info;
 
 	let children: [CodeText, boolean][] = [];
 	$: children = fromNullable(airdrop.children) ?? [];
+
+	const share = async (code: string) => {
+		if (canShare()) {
+			await shareText(code);
+			return;
+		}
+
+		await copyText(code);
+
+		toastsShow({
+			text: "Code copied to clipboard.",
+			level: 'success',
+			duration: 2000
+		});
+	};
 </script>
 
 {#each children as [code, state], i}
@@ -22,10 +39,17 @@
 		class:rounded-bl-sm={last}
 		class:rounded-br-sm={last}
 	>
-		<div class="font-bold p-2" style="border-right: 1px solid var(--color-platinum); width: var(--padding-6x)">
+		<div
+			class="font-bold p-2"
+			style="border-right: 1px solid var(--color-platinum); width: var(--padding-6x)"
+		>
 			<span class:opacity-15={state}>{i}</span>
 		</div>
-		<div class:state class="flex justify-between items-center px-2 gap-4" style="width: calc(100% - var(--padding-6x))">
+		<div
+			class:state
+			class="flex justify-between items-center px-2 gap-4"
+			style="width: calc(100% - var(--padding-6x))"
+		>
 			<div class="flex gap-1 truncate">
 				<span class="font-bold truncate" class:opacity-15={state}>{code}</span>
 
@@ -34,7 +58,12 @@
 				{/if}
 			</div>
 
-			<button class:opacity-15={state} disabled={state} class="flex gap-0.5 font-bold text-blue text-sm"><IconShare /> Share</button>
+			<button
+				class:opacity-15={state}
+				disabled={state}
+				on:click={async () => await share(code)}
+				class="flex gap-0.5 font-bold text-blue text-sm"><IconShare /> Share</button
+			>
 		</div>
 	</div>
 {/each}
