@@ -4,23 +4,24 @@
 	import { fromNullable } from '@dfinity/utils';
 	import IconShare from '$lib/components/icons/IconShare.svelte';
 	import { canShare, copyText, shareText } from '$lib/utils/share.utils';
-	import {toastsShow} from "$lib/stores/toasts.store";
+	import { toastsShow } from '$lib/stores/toasts.store';
+	import { airdropCodeUrl } from '$lib/utils/airdrop.utils';
 
 	export let airdrop: Info;
 
 	let children: [CodeText, boolean][] = [];
 	$: children = fromNullable(airdrop.children) ?? [];
 
-	const share = async (code: string) => {
+	const share = async (codeUrl: string) => {
 		if (canShare()) {
-			await shareText(code);
+			await shareText(codeUrl);
 			return;
 		}
 
-		await copyText(code);
+		await copyText(codeUrl);
 
 		toastsShow({
-			text: "Code copied to clipboard.",
+			text: 'Code copied to clipboard.',
 			level: 'success',
 			duration: 2000
 		});
@@ -29,6 +30,8 @@
 
 {#each children as [code, state], i}
 	{@const last = i === children.length - 1}
+	{@const codeUrl = airdropCodeUrl(code)}
+
 	<div
 		class="flex ml-6"
 		style={`border-left: 1px solid var(--color-platinum); border-top: 1px solid var(--color-platinum); border-right: 1px solid var(--color-platinum); ${
@@ -61,7 +64,7 @@
 			<button
 				class:opacity-15={state}
 				disabled={state}
-				on:click={async () => await share(code)}
+				on:click={async () => await share(codeUrl)}
 				class="flex gap-0.5 font-bold text-blue text-sm"><IconShare /> Share</button
 			>
 		</div>
