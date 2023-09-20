@@ -1,3 +1,4 @@
+use crate::guards::{caller_is_admin, caller_is_manager};
 ///! Airdrop backend canister
 ///! This canister is responsible for generating codes and redeeming them.
 ///! It also stores the mapping between II and Ethereum address.
@@ -7,17 +8,18 @@
 ///  - add logging
 /// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
-use ic_cdk::api::call;
-use ic_cdk_macros::{init, update};
-
+use ic_cdk::caller;
 use ic_cdk_macros::{export_candid, query};
+use ic_cdk_macros::{init, update};
 use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
 };
 
-type Result<T> = ::core::result::Result<T, CanisterError>;
+mod guards;
+
+type CustomResult<T> = Result<T, CanisterError>;
 
 static TOKEN_PER_PERSON: u64 = 400;
 static MAXIMUM_DEPTH: u64 = 2;
@@ -26,7 +28,7 @@ static INITIAL_TOKENS: u64 = 100_000;
 
 thread_local! {
     // Admin principals - the principals that can add new principals that can generate codes and get the list of airdrop to do
-    static PRINCIPALS_ADMIN: RefCell<HashSet<Principal>> = RefCell::new(HashSet::new());
+    pub static PRINCIPALS_ADMIN: RefCell<HashSet<Principal>> = RefCell::new(HashSet::new());
     /// Manager principals - for principals allowed to generate codes
     static PRINCIPALS_MANAGERS: RefCell<HashMap<Principal, PrincipalState>> = RefCell::new(HashMap::new());
     // User principals - map Principal to (Code, Eth Address)
@@ -98,7 +100,6 @@ struct CodeState {
 
 #[derive(Serialize, Deserialize, Clone, Debug, CandidType)]
 pub enum CanisterError {
-    Unauthorized(String),
     GeneralError(String),
     CanisterKilled,
     CodeNotFound,
@@ -128,21 +129,9 @@ fn init(principals: Vec<Principal>) {
 }
 
 /// Add codes generated offline
-#[update]
-pub fn add_codes(codes: Vec<String>) -> Result<()> {
-    // check caller is part of the admin principals
-    let caller_principal = ic_cdk::api::caller();
-
-    PRINCIPALS_ADMIN.with(|admin_principals| {
-        let admin_principals = admin_principals.borrow();
-        if !admin_principals.contains(&ic_cdk::api::caller()) {
-            return Err(CanisterError::Unauthorized(caller_principal.to_string()));
-        } else {
-            Ok(())
-        }
-    })?;
-
-    // genarate non activated codes
+#[update(guard = "caller_is_admin")]
+pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
+    // generate non activated codes
     PRE_GENERATED_CODES.with(|saved_codes| {
         let mut state = saved_codes.borrow_mut();
         for code in codes {
@@ -155,20 +144,8 @@ pub fn add_codes(codes: Vec<String>) -> Result<()> {
 }
 
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
-#[update]
-pub fn add_admin(principal: Principal, name: String) -> Result<()> {
-    let caller_principal = ic_cdk::api::caller();
-
-    // check caller is part of the admin principals
-    PRINCIPALS_ADMIN.with(|admin_principals| {
-        let admin_principals = admin_principals.borrow();
-        if !admin_principals.contains(&ic_cdk::api::caller()) {
-            return Err(CanisterError::Unauthorized(caller_principal.to_string()));
-        } else {
-            Ok(())
-        }
-    })?;
-
+#[update(guard = "caller_is_admin")]
+pub fn add_admin(principal: Principal, name: String) -> CustomResult<()> {
     PRINCIPALS_MANAGERS.with(|principal_state| {
         let mut state = principal_state.borrow_mut();
         let principal_state = PrincipalState {
@@ -185,7 +162,7 @@ pub fn add_admin(principal: Principal, name: String) -> Result<()> {
 /// check whether a given principal is authorised to generate codes
 #[query]
 pub fn is_admin() -> bool {
-    let caller_principal = ic_cdk::api::caller();
+    let caller_principal = caller();
 
     PRINCIPALS_ADMIN.with(|admin_principals| {
         let admin_principals = admin_principals.borrow();
@@ -194,21 +171,19 @@ pub fn is_admin() -> bool {
 }
 
 /// Returns one code if the given principal is authorized to generate codes
-#[ic_cdk_macros::update]
-pub fn generate_code() -> Result<CodeInfo> {
+#[update(guard = "caller_is_manager")]
+pub fn generate_code() -> CustomResult<CodeInfo> {
     check_if_killed()?;
 
-    let caller_principal = ic_cdk::api::caller();
+    let caller_principal = caller();
 
     // check if principal is authorised to perform action
     PRINCIPALS_MANAGERS.with(|authorized| {
         let mut authorized = authorized.borrow_mut();
 
         // check the caller is allowed to generate codes
-        let principal_state = match authorized.get_mut(&caller_principal) {
-            Some(principal_state) => principal_state,
-            None => return Err(CanisterError::Unauthorized(caller_principal.to_string())),
-        };
+        // the caller_is_manager guard makes it safe to unwrap
+        let principal_state = authorized.get_mut(&caller_principal).unwrap();
 
         // generate a new code
         let code = get_pre_codes()?;
@@ -241,10 +216,10 @@ pub fn generate_code() -> Result<CodeInfo> {
 /// The ETH address of the user
 /// TODO: to be reviewed
 #[update]
-pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> Result<Info> {
+pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> CustomResult<Info> {
     check_if_killed()?;
 
-    let caller_principal = ic_cdk::api::caller();
+    let caller_principal = caller();
 
     // Check if the given principal has redeemed any code yet
     PRINCIPALS_USER_ETH.with(|principal_state| {
@@ -326,8 +301,9 @@ pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> Result<Info> {
             let mut codes = codes.borrow_mut();
 
             // generate children codes only if we haven't reached the maximum allowed depth
-            let children_code: Vec<Code> =
-                (0..NUMBERS_OF_CHILDREN).map(|_x| get_pre_codes().unwrap()).collect();
+            let children_code: Vec<Code> = (0..NUMBERS_OF_CHILDREN)
+                .map(|_x| get_pre_codes().unwrap())
+                .collect();
             let mut children = Vec::default();
 
             for child_code in children_code {
@@ -361,14 +337,14 @@ pub fn redeem_code(code: Code, eth_address: EthereumAddress) -> Result<Info> {
 
 /// Return all the information about a given Principal's code
 #[query]
-pub fn get_code() -> Result<Info> {
+pub fn get_code() -> CustomResult<Info> {
     check_if_killed()?;
     CODES.with(|saved_codes| {
         let saved_codes_ref = saved_codes.borrow();
-        let caller_principal = ic_cdk::api::caller();
+        let caller_principal = caller();
         let (code, eth_address) = PRINCIPALS_USER_ETH.with(|principal_eth| {
             let principal_eth = principal_eth.borrow();
-                principal_eth
+            principal_eth
                 .get(&caller_principal)
                 .map(|x| x.clone())
                 .ok_or(CanisterError::GeneralError(
@@ -402,7 +378,7 @@ pub fn get_code() -> Result<Info> {
 
 /// Get the total number of code issued
 #[query]
-pub fn get_total_code_issued() -> Result<u64> {
+pub fn get_total_code_issued() -> CustomResult<u64> {
     check_if_killed()?;
     PRINCIPALS_MANAGERS.with(|principal_state| {
         let principal_state = principal_state.borrow();
@@ -416,7 +392,7 @@ pub fn get_total_code_issued() -> Result<u64> {
 
 /// Get the total number of code redeemed
 #[query]
-pub fn get_total_code_redeemed() -> Result<u64> {
+pub fn get_total_code_redeemed() -> CustomResult<u64> {
     check_if_killed()?;
     PRINCIPALS_MANAGERS.with(|principal_state| {
         let principal_state = principal_state.borrow();
@@ -430,8 +406,8 @@ pub fn get_total_code_redeemed() -> Result<u64> {
 
 /// TODO have this in guard
 #[update]
-fn kill_canister() -> Result<()> {
-    let caller_principal = ic_cdk::api::caller();
+fn kill_canister() -> CustomResult<()> {
+    let caller_principal = caller();
 
     // TODO hard code the principal
     if caller_principal
@@ -450,8 +426,8 @@ fn kill_canister() -> Result<()> {
 }
 
 #[update]
-fn bring_caninster_back_to_life() -> Result<()> {
-    let caller_principal = ic_cdk::api::caller();
+fn bring_caninster_back_to_life() -> CustomResult<()> {
+    let caller_principal = caller();
 
     // TODO hard code the principal
     if caller_principal
@@ -470,7 +446,7 @@ fn bring_caninster_back_to_life() -> Result<()> {
 }
 
 /// Helper function to check if the cannister is still alive
-fn check_if_killed() -> Result<()> {
+fn check_if_killed() -> CustomResult<()> {
     KILLED.with(|killed| {
         let killed = killed.borrow();
         if *killed {
@@ -482,7 +458,7 @@ fn check_if_killed() -> Result<()> {
 }
 
 /// Deduct token
-fn deduct_tokens(amount: u64) -> Result<()> {
+fn deduct_tokens(amount: u64) -> CustomResult<()> {
     TOTAL_TOKENS.with(|total_tokens| {
         let mut total_tokens = total_tokens.borrow_mut();
         if *total_tokens < amount {
@@ -517,7 +493,7 @@ fn add_user_to_airdrop_reward(eth_address: EthereumAddress, amount: AirdropAmoun
 }
 
 // "generate" codes
-fn get_pre_codes() -> Result<Code> {
+fn get_pre_codes() -> CustomResult<Code> {
     PRE_GENERATED_CODES.with(|pre_generated_codes| {
         let mut pre_generated_codes = pre_generated_codes.borrow_mut();
         match pre_generated_codes.pop() {
