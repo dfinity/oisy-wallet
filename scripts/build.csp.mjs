@@ -140,15 +140,16 @@ const updateCSP = (indexHtml) => {
 	switch (ENV) {
 		case 'production':
 			ethConnectSrc =
-				'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com';
+				'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com https://mainnet.infura.io';
 			break;
 		case undefined:
 		case 'development':
 		case 'staging':
 			const etherscanNetwork = process.env.VITE_ETHERSCAN_NETWORK ?? 'sepolia';
+			const infuraNetwork = process.env.VITE_INFURA_NETWORK ?? 'sepolia';
 			const alchemyNetwork = process.env.VITE_ALCHEMY_NETWORK ?? 'eth-sepolia';
 
-			ethConnectSrc = `https://api-${etherscanNetwork}.etherscan.io wss://${alchemyNetwork}.g.alchemy.com https://${alchemyNetwork}.g.alchemy.com`;
+			ethConnectSrc = `https://api-${etherscanNetwork}.etherscan.io https://${infuraNetwork}.infura.io wss://${alchemyNetwork}.g.alchemy.com https://${alchemyNetwork}.g.alchemy.com`;
 			break;
 		default:
 			throw new Error(`Unknown environment (${ENV}) to parse the CSP.`);
