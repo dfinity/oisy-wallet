@@ -14,6 +14,7 @@
 			"$lib/*": ["./src/frontend/src/lib/*"],
 			"$declarations": ["./src/declarations"],
 			"$declarations/*": ["./src/declarations/*"]
-		}
+		},
+		"types": ["node"]
 	}
 }
