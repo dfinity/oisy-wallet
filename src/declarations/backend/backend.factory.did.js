@@ -48,6 +48,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
+		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
