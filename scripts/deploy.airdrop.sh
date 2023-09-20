@@ -7,5 +7,5 @@ if [ -n "${ENV+1}" ]; then
 else
     dfx deploy airdrop --argument '(vec {principal"'${DFX_PRINCIPAL}'"})' --mode reinstall
 
-    dfx canister call airdrop add_codes '(vec {"AAAAA"; "BBBBB"; "CCCCC"; "DDDDDD"})'
+    "$(git rev-parse --show-toplevel)/scripts/generate-codes.sh" 20 1000
 fi

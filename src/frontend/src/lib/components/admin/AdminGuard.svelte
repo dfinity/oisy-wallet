@@ -10,7 +10,7 @@
 			manager = await isAirdropManager();
 		} catch (err: unknown) {
 			toastsError({
-				msg: 'Cannot fetch the manager status of the user.',
+				msg: {text: 'Cannot fetch the manager status of the user.'},
 				err
 			});
 		}
