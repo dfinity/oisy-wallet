@@ -120,7 +120,7 @@ async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
 }
 
 /// Returns the Ethereum address of the caller.
-#[update]
+#[update(guard = "caller_is_not_anonymous")]
 async fn caller_eth_address() -> String {
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
