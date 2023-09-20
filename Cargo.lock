@@ -20,6 +20,8 @@ dependencies = [
  "ic-cdk-macros",
  "ic-cdk-timers",
  "ic-metrics-encoder",
+ "rand",
+ "rand_chacha",
  "serde",
  "serde_bytes",
 ]
