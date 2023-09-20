@@ -6,6 +6,7 @@ export const idlFactory = ({ IDL }) => {
 		CanisterKilled: IDL.Null,
 		GeneralError: IDL.Text,
 		Unauthorized: IDL.Text,
+		NoMoreCodes: IDL.Null,
 		MaximumDepthReached: IDL.Null,
 		CodeAlreadyRedeemed: IDL.Null,
 		CodeNotFound: IDL.Null,
@@ -27,7 +28,7 @@ export const idlFactory = ({ IDL }) => {
 	const Result_2 = IDL.Variant({ Ok: Info, Err: CanisterError });
 	const Result_3 = IDL.Variant({ Ok: IDL.Nat64, Err: CanisterError });
 	return IDL.Service({
-		add_admin: IDL.Func([IDL.Text, IDL.Text], [Result], []),
+		add_admin: IDL.Func([IDL.Principal, IDL.Text], [Result], []),
 		add_codes: IDL.Func([IDL.Vec(IDL.Text)], [Result], []),
 		bring_caninster_back_to_life: IDL.Func([], [Result], []),
 		generate_code: IDL.Func([], [Result_1], []),
@@ -41,5 +42,5 @@ export const idlFactory = ({ IDL }) => {
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
-	return [IDL.Vec(IDL.Text)];
+	return [IDL.Vec(IDL.Principal)];
 };

@@ -7,6 +7,7 @@ export type CanisterError =
 	| { CanisterKilled: null }
 	| { GeneralError: string }
 	| { Unauthorized: string }
+	| { NoMoreCodes: null }
 	| { MaximumDepthReached: null }
 	| { CodeAlreadyRedeemed: null }
 	| { CodeNotFound: null }
@@ -27,7 +28,7 @@ export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };
 export type Result_2 = { Ok: Info } | { Err: CanisterError };
 export type Result_3 = { Ok: bigint } | { Err: CanisterError };
 export interface _SERVICE {
-	add_admin: ActorMethod<[string, string], Result>;
+	add_admin: ActorMethod<[Principal, string], Result>;
 	add_codes: ActorMethod<[Array<string>], Result>;
 	bring_caninster_back_to_life: ActorMethod<[], Result>;
 	generate_code: ActorMethod<[], Result_1>;
