@@ -125,6 +125,15 @@ async fn caller_eth_address() -> String {
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
+/// Returns the Ethereum address of the specified .
+#[update]
+async fn eth_address_of(p: Principal) -> String {
+    if p == Principal::anonymous() {
+        ic_cdk::trap("Anonymous principal is not authorized");
+    }
+    pubkey_bytes_to_address(&ecdsa_pubkey_of(&p).await)
+}
+
 #[derive(CandidType, Deserialize)]
 pub struct SignRequest {
     pub chain_id: Nat,

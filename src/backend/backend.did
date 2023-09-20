@@ -42,6 +42,7 @@ type SignRequest = record {
 };
 service : (Arg) -> {
   caller_eth_address : () -> (text);
+  eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
   http_request : (HttpRequest) -> (HttpResponse) query;
   personal_sign : (text) -> (text);
