@@ -29,3 +29,5 @@ vite.config.ts.timestamp-*
 
 internet_identity.wasm
 internet_identity.did
+
+codes.txt
