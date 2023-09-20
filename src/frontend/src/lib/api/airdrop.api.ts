@@ -7,6 +7,11 @@ export const getAirdropCode = async (): Promise<Result_2> => {
 	return actor.get_code();
 };
 
+export const isAirdropManager = async (): Promise<boolean> => {
+	const actor = await getAirdropActor();
+	return actor.is_manager();
+};
+
 export const redeemAirdropCode = async ({
 	code,
 	address

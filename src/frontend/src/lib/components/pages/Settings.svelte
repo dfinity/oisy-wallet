@@ -8,6 +8,7 @@
 	import Admin from '$lib/components/admin/Admin.svelte';
 	import type { Principal } from '@dfinity/principal';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
+	import AdminGuard from '$lib/components/admin/AdminGuard.svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -51,5 +52,7 @@
 </div>
 
 {#if AIRDROP}
-	<Admin />
+	<AdminGuard>
+		<Admin />
+	</AdminGuard>
 {/if}
