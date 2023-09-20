@@ -8,7 +8,7 @@
 </script>
 
 <button class="airdrop full center mt-3" in:fade on:click={modalStore.openAirdrop}
-	><IconCelebrate /> Airdrop status <span class="text-blue">Check</span></button
+	><IconCelebrate /> AirDrop status <span class="text-blue">Check</span></button
 >
 
 {#if nonNullish($airdropStore)}

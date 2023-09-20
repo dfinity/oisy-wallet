@@ -6,6 +6,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { canShare, shareFile } from '$lib/utils/share.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
+	import IconShare from '$lib/components/icons/IconShare.svelte';
 
 	let code: string | undefined;
 	let busy = false;
@@ -53,7 +54,7 @@
 				type: 'image/png',
 				lastModified: new Date().getTime()
 			}),
-			text: code
+			text: `AirDrop code: ${code}`
 		});
 	};
 
@@ -64,11 +65,11 @@
 
 <div class="flex gap-2 mb-3" style="flex-wrap: wrap;">
 	<button class="primary" on:click={generate} disabled={busy} class:opacity-50={busy}
-		>Generate a new Airdrop code</button
+		>Generate a new AirDrop code</button
 	>
 
 	{#if nonNullish(code) && shareAvailable}
-		<button class="secondary" on:click={share}>Share</button>
+		<button class="secondary" on:click={share}><IconShare /> Share</button>
 	{/if}
 </div>
 
