@@ -7,6 +7,7 @@
 	import type { StaticStep } from '$lib/types/steps';
 	import AirdropInvites from '$lib/components/airdrop/AirdropInvites.svelte';
 	import type { Info } from '$declarations/airdrop/airdrop.did';
+	import { fromNullable } from '@dfinity/utils';
 
 	export let airdrop: Info;
 
@@ -25,11 +26,15 @@
 			state: 'in_progress',
 			stateLabel: 'In progress, may take a while'
 		} as StaticStep,
-		{
-			step: AirdropStep.INVITE_FRIENDS,
-			text: `Earn up to X ICP by inviting friends!`,
-			state: 'next'
-		} as StaticStep
+		...(fromNullable(airdrop?.children)?.length ?? 0 > 0
+			? [
+					{
+						step: AirdropStep.INVITE_FRIENDS,
+						text: `Earn up to X ICP by inviting friends!`,
+						state: 'next'
+					} as StaticStep
+			  ]
+			: [])
 	];
 </script>
 
