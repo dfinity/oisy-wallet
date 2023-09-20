@@ -38,7 +38,7 @@ dfx deploy airdrop --argument "(vec {\"$(dfx identity get-principal)\"})"
 
 # TODO generate a list of codes
 
-dfx canister call airdrop add_codes '(vec {"AAAAA"; "BBBBB"; "CCCCC"; "DDDDDD"})'
+dfx canister call airdrop add_codes '(vec {"AAAAA"; "BBBBB"; "CCCCC"; "DDDDDD", "oaenut", "oenuth", "oaesnuth", "oesunth", "aosneuth"})'
 
 # switch to the first identity
 dfx identity use "${identities[0]}"
