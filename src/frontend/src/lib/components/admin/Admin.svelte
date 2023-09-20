@@ -9,9 +9,16 @@
 	import IconShare from '$lib/components/icons/IconShare.svelte';
 	import { generateAirdropCode } from '$lib/api/airdrop.api';
 	import type { CodeInfo } from '$declarations/airdrop/airdrop.did';
+	import { OISY_URL } from '$lib/constants/oisy.constants';
 
 	let codeInfo: CodeInfo | undefined;
 	let busy = false;
+
+	let code: string | undefined;
+	$: code = codeInfo?.code;
+
+	let codeUrl: string;
+	$: codeUrl = `${OISY_URL}/?code=${code ?? ''}`;
 
 	const generate = async () => {
 		busy = true;
@@ -47,7 +54,7 @@
 	};
 
 	const share = async () => {
-		if (isNullish(codeInfo)) {
+		if (isNullish(codeInfo) || isNullish(codeUrl)) {
 			toastsError({
 				msg: { text: 'No code was generated.' }
 			});
@@ -77,7 +84,7 @@
 				type: 'image/png',
 				lastModified: new Date().getTime()
 			}),
-			text: `AirDrop code: ${codeInfo}`
+			text: codeUrl
 		});
 	};
 
@@ -106,7 +113,7 @@
 			class="p-2 rounded-sm bg-off-white mb-3 airdrop-qrcode"
 			style={`border: 1px dashed var(--color-dark); max-width: var(--qrcode-max-width, 360px); height: var(--qrcode-height);`}
 		>
-			<QRCode value={code} />
+			<QRCode value={codeUrl} />
 		</div>
 
 		<label for="code" class="font-bold">Code:</label>
