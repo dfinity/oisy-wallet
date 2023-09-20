@@ -2,10 +2,10 @@
 	import type { WebSocketListener } from '$lib/types/listener';
 	import { token } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-	import { getFeeData } from '$lib/providers/etherscan.providers';
+	import { getFeeData } from '$lib/providers/infura.providers';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
-	import { getFeeData as getErc20FeeData } from '$lib/providers/etherscan-erc20.providers';
+	import { getFeeData as getErc20FeeData } from '$lib/providers/infura-erc20.providers';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { addressStore } from '$lib/stores/address.store';
 	import { Utils } from 'alchemy-sdk';
