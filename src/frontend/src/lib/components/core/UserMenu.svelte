@@ -1,7 +1,5 @@
 <script lang="ts">
 	import IconIcLogo from '$lib/components/icons/IconIcLogo.svelte';
-	import { authStore } from '$lib/stores/auth.store';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { IconGitHub, IconNorthEast, IconSettings, Popover } from '@dfinity/gix-components';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
