@@ -14,6 +14,13 @@ case $ENV in
     ;;
 esac
 
+if [ -n "${ENV+1}" ]; then
+  # We create automatically the airdrop canister only locally
+  true
+else
+  dfx canister create airdrop
+fi
+
 AIRDROP_ID=$(dfx canister id airdrop)
 
 if [ -n "${ENV+1}" ]; then
