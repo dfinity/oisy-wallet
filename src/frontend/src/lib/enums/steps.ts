@@ -12,3 +12,9 @@ export enum SignStep {
 	APPROVE = 'approve',
 	DONE = 'done'
 }
+
+export enum BurnStep {
+	INITIALIZATION = 'initialization',
+	BURN = 'burn',
+	DONE = 'done'
+}

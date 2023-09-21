@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { invalidDestination, invalidAmount } from '$lib/utils/send.utils';
 	import { createEventDispatcher } from 'svelte';
-	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
-	import { token } from '$lib/derived/token.derived';
 	import SendFormActions from '$lib/components/send/SendFormActions.svelte';
 
 	export let destination = '';
@@ -23,15 +20,11 @@
 		inputType="text"
 		required
 		bind:value={destination}
-		placeholder="Enter public address (0x)"
+		placeholder="Enter ICP account identifier"
 	/>
 
 	<label for="amount" class="font-bold px-1.25">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
-
-	<SendSource token={$token} />
-
-	<FeeDisplay />
 
 	<SendFormActions on:icClose {invalid} />
 </form>

@@ -8,7 +8,8 @@ export interface Modal<T> {
 		| 'wallet-connect-auth'
 		| 'wallet-connect-sign'
 		| 'wallet-connect-send'
-		| 'airdrop';
+		| 'airdrop'
+		| 'burn';
 	data?: T;
 }
 
@@ -21,6 +22,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openWalletConnectSign: <D extends T>(data: D) => void;
 	openWalletConnectSend: <D extends T>(data: D) => void;
 	openAirdrop: () => void;
+	openBurn: () => void;
 	close: () => void;
 }
 
@@ -34,6 +36,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),
 		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),
 		openAirdrop: () => set({ type: 'airdrop' }),
+		openBurn: () => set({ type: 'burn' }),
 		close: () => set(null),
 		subscribe
 	};

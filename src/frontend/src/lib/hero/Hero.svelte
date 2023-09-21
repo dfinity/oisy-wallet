@@ -12,6 +12,7 @@
 	export let summary = false;
 	export let actions = true;
 	export let send = false;
+	export let burn = false;
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20TokensInitialized;
@@ -44,7 +45,7 @@
 
 		{#if actions}
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-				<Actions {send} />
+				<Actions {send} {burn} />
 			</div>
 		{/if}
 	</article>
