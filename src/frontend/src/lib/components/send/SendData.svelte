@@ -9,10 +9,10 @@
     export let token: Token;
 </script>
 
-<SendDestination {destination} {amount} />
+<SendDestination {destination} {amount} {token} />
 
 <slot />
 
-<SendSource />
+<SendSource {token} />
 
 <FeeDisplay />

@@ -18,7 +18,6 @@
 	} from '$lib/stores/fee.store';
 	import { setContext } from 'svelte';
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
-	import { Utils } from 'alchemy-sdk';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
 

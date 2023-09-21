@@ -4,6 +4,7 @@
 	import { invalidDestination, invalidAmount } from '$lib/utils/send.utils';
 	import { createEventDispatcher } from 'svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
+	import { token } from '$lib/derived/token.derived';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -27,7 +28,7 @@
 	<label for="amount" class="font-bold px-1.25">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
-	<SendSource />
+	<SendSource token={$token} />
 
 	<FeeDisplay />
 
