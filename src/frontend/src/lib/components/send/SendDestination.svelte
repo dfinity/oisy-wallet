@@ -1,15 +1,24 @@
 <script lang="ts">
-	import { formatEtherShort } from '$lib/utils/format.utils';
-	import { Utils } from 'alchemy-sdk';
+	import { formatTokenShort } from '$lib/utils/format.utils';
 	import { tokenSymbol } from '$lib/derived/token.derived';
+	import type { Token } from '$lib/types/token';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let destination: string;
 	export let amount: string | number | undefined = undefined;
+	export let token: Token;
 
 	let amountDisplay: string;
 	$: (() => {
 		try {
-			amountDisplay = formatEtherShort(Utils.parseEther(`${amount ?? 0}`), 8);
+			amountDisplay = formatTokenShort({
+				value: parseToken({
+					value: `${amount ?? 0}`,
+					unitName: token.decimals
+				}),
+				unitName: token.decimals,
+				displayDecimals: 8
+			});
 		} catch (err: unknown) {
 			// Infinite amount e.g. 1.157920892373162e+59 will fail parsing
 			amountDisplay = `${amount ?? 0}`;
