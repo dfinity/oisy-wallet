@@ -329,6 +329,8 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
             );
 
             // Mark code as redeemed
+            add_user_to_airdrop_reward(eth_address.clone(), AirdropAmount(TOKEN_PER_PERSON / 4));
+
             code_state.redeemed = true;
 
             Ok((code_state.depth, code.clone()))
