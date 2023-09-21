@@ -1,6 +1,5 @@
 use crate::guards::{caller_is_admin, caller_is_manager};
 use crate::utils::get_eth_address;
-use candid::candid_method;
 ///! Airdrop backend canister
 ///! This canister is responsible for generating codes and redeeming them.
 ///! It also stores the mapping between II and Ethereum address.
@@ -11,7 +10,7 @@ use candid::candid_method;
 /// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
 use ic_cdk::caller;
-use ic_cdk_macros::{export_candid, query};
+use ic_cdk_macros::{export_candid, query, init};
 use ic_cdk_macros::{update};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -128,7 +127,7 @@ pub struct EthAddressAmount {
     pub amount: u64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, CandidType, Deserialize)]
+#[derive(CandidType, Deserialize)]
 pub struct InitArg {
     /// The backend canister id
     pub backend_canister_id: Principal,
@@ -136,8 +135,7 @@ pub struct InitArg {
     pub admin_principals: Vec<Principal>,
 }
 
-#[ic_cdk_macros::init]
-#[candid_method(init)]
+#[init]
 fn init(init: InitArg) {
     // set backend canister id
     BACKEND_CANISTER.with(|backend_canister| {
