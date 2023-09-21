@@ -11,7 +11,13 @@ case $ENV in
     ;;
 esac
 
-BACKEND_ID=$(dfx canister id backend)
+if [ -n "${ENV+1}" ]; then
+  # We create automatically the airdrop canister only locally
+  BACKEND_ID=$(dfx canister id backend --network "$ENV")
+else
+  dfx canister create airdrop
+  BACKEND_ID=$(dfx canister id backend)
+fi
 
 if [ -n "${ENV+1}" ]; then
   dfx deploy airdrop --argument "(variant {
@@ -27,4 +33,4 @@ else
   })"
 fi
 
-"$(git rev-parse --show-toplevel)/scripts/generate-codes.sh" 20 1000
+"$(git rev-parse --show-toplevel)/scripts/airdrop.generate-codes.sh" 20 1000
