@@ -18,12 +18,12 @@ pub struct State {
     pub codes: HashMap<Code, CodeState>,
     // id (the index) mapped to the (EthAddress, AirdropAmount)
     pub airdrop_reward: Vec<(EthereumAddress, AirdropAmount)>,
-    // has the cannister been killed
+    // has the canister been killed
     pub killed: bool,
     // total number of tokens
     pub total_tokens: u64,
     // backend canister id
-    pub backend_canister: Principal,
+    pub backend_canister_id: Principal,
 }
 
 impl Default for State {
@@ -37,7 +37,7 @@ impl Default for State {
             airdrop_reward: Vec::new(),
             killed: false,
             total_tokens: INITIAL_TOKENS,
-            backend_canister: Principal::anonymous(),
+            backend_canister_id: Principal::anonymous(),
         }
     }
 }

@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::collections::HashSet;
 
 /// Airdrop backend canister
 /// This canister is responsible for generating codes and redeeming them.
@@ -9,8 +10,8 @@ use std::cell::RefCell;
 /// - add logging
 /// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
-use ic_cdk::caller;
 use ic_cdk::storage::{stable_restore, stable_save};
+use ic_cdk::{caller, trap};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
 use state::{AirdropAmount, Arg, Code, CodeInfo, Info, InitArg, PrincipalState};
@@ -64,22 +65,19 @@ pub enum CanisterError {
 }
 
 #[init]
-fn initialise(arg: Arg) {
-    mutate_state(|state| {
-        match arg {
-            Arg::Init(InitArg {
+fn init(arg: Arg) {
+    match arg {
+        Arg::Init(InitArg {
+            backend_canister_id,
+        }) => STATE.with(|cell| {
+            *cell.borrow_mut() = Some(State {
                 backend_canister_id,
-            }) => {
-                // set backend canister id
-                state.backend_canister = backend_canister_id;
-            }
-            Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
-        }
-
-        // add caller principals to admin principals
-        let caller_principal = caller();
-        state.principals_admin.insert(caller_principal);
-    })
+                principals_admin: HashSet::from([caller()]),
+                ..State::default()
+            })
+        }),
+        Arg::Upgrade => trap("upgrade args in init"),
+    }
 }
 
 #[pre_upgrade]
@@ -137,11 +135,7 @@ pub fn add_manager(principal: Principal, name: String) -> CustomResult<()> {
 pub fn is_manager() -> bool {
     let caller_principal = caller();
 
-    read_state(|state| {
-        state
-            .principals_managers
-            .contains_key(&caller_principal)
-    })
+    read_state(|state| state.principals_managers.contains_key(&caller_principal))
 }
 
 /// Returns one code if the given principal is authorized to generate codes

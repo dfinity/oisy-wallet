@@ -8,7 +8,7 @@ use crate::{mutate_state, read_state};
 use crate::{AirdropAmount, Code, CustomResult};
 
 pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
-    let backend_canister = read_state(|state| state.backend_canister);
+    let backend_canister = read_state(|state| state.backend_canister_id);
     let args = caller();
 
     let result: CallResult<(String,)> = call(backend_canister, "eth_address_of", (args,)).await;
