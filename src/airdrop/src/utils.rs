@@ -4,11 +4,11 @@ use ic_cdk::{call, caller};
 
 use crate::state::EthereumAddress;
 use crate::CanisterError::{CanisterKilled, GeneralError, NoMoreCodes, UnknownOisyWalletAddress};
-use crate::STATE;
+use crate::{mutate_state, read_state};
 use crate::{AirdropAmount, Code, CustomResult};
 
 pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
-    let backend_canister = STATE.with(|state| state.borrow().backend_canister);
+    let backend_canister = read_state(|state| state.backend_canister_id);
     let args = caller();
 
     let result: CallResult<(String,)> = call(backend_canister, "eth_address_of", (args,)).await;
@@ -21,8 +21,8 @@ pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
 
 /// Helper function to check if the cannister is still alive
 pub fn check_if_killed() -> CustomResult<()> {
-    STATE.with(|state| {
-        if state.borrow().killed {
+    read_state(|state| {
+        if state.killed {
             Err(CanisterKilled)
         } else {
             Ok(())
@@ -32,8 +32,7 @@ pub fn check_if_killed() -> CustomResult<()> {
 
 /// Deduct token
 pub fn deduct_tokens(amount: u64) -> CustomResult<()> {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
+    mutate_state(|state| {
         if state.total_tokens < amount {
             Err(GeneralError("Not enough tokens left".to_string()))
         } else {
@@ -49,8 +48,7 @@ pub fn register_principal_with_eth_address(
     code: Code,
     eth_address: EthereumAddress,
 ) {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
+    mutate_state(|state| {
         state
             .principals_user_eth
             .insert(principal, (code, eth_address));
@@ -59,19 +57,15 @@ pub fn register_principal_with_eth_address(
 
 /// Add user to the list of users to send tokens to
 pub fn add_user_to_airdrop_reward(eth_address: EthereumAddress, amount: AirdropAmount) {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
+    mutate_state(|state| {
         state.airdrop_reward.push((eth_address, amount));
     });
 }
 
 // "generate" codes
 pub fn get_pre_codes() -> CustomResult<Code> {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
-        match state.pre_generated_codes.pop() {
-            Some(code) => Ok(code),
-            None => Err(NoMoreCodes),
-        }
+    mutate_state(|state| match state.pre_generated_codes.pop() {
+        Some(code) => Ok(code),
+        None => Err(NoMoreCodes),
     })
 }

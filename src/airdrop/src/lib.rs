@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::collections::HashSet;
 
 /// Airdrop backend canister
 /// This canister is responsible for generating codes and redeeming them.
@@ -9,8 +10,9 @@ use std::cell::RefCell;
 /// - add logging
 /// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
-use ic_cdk::caller;
-use ic_cdk_macros::{export_candid, init, query, update};
+use ic_cdk::storage::{stable_restore, stable_save};
+use ic_cdk::{caller, trap};
+use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
 use state::{AirdropAmount, Arg, Code, CodeInfo, Info, InitArg, PrincipalState};
 
@@ -18,7 +20,7 @@ mod guards;
 mod state;
 mod utils;
 use crate::guards::{caller_is_admin, caller_is_manager};
-use crate::state::{CodeState, StableState};
+use crate::state::{CodeState, State};
 use crate::utils::get_eth_address;
 use crate::utils::{
     add_user_to_airdrop_reward, check_if_killed, deduct_tokens, get_pre_codes,
@@ -34,7 +36,18 @@ static NUMBERS_OF_CHILDREN: u64 = 3;
 static INITIAL_TOKENS: u64 = 100_000;
 
 thread_local! {
-    pub static STATE: RefCell<StableState> = RefCell::default();
+    static STATE: RefCell<Option<State>> = RefCell::default();
+}
+
+pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
+    STATE.with(|cell| f(cell.borrow().as_ref().expect("state not initialized")))
+}
+
+pub fn mutate_state<F, R>(f: F) -> R
+where
+    F: FnOnce(&mut State) -> R,
+{
+    STATE.with(|s| f(s.borrow_mut().as_mut().expect("state is not initialized")))
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, CandidType)]
@@ -52,31 +65,39 @@ pub enum CanisterError {
 }
 
 #[init]
-fn initialise(arg: Arg) {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
-        match arg {
-            Arg::Init(InitArg {
+fn init(arg: Arg) {
+    match arg {
+        Arg::Init(InitArg {
+            backend_canister_id,
+        }) => STATE.with(|cell| {
+            *cell.borrow_mut() = Some(State {
                 backend_canister_id,
-            }) => {
-                // set backend canister id
-                state.backend_canister = backend_canister_id;
-            }
-            Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
-        }
+                principals_admin: HashSet::from([caller()]),
+                ..State::default()
+            })
+        }),
+        Arg::Upgrade => trap("upgrade args in init"),
+    }
+}
 
-        // add caller principals to admin principals
-        let caller_principal = caller();
-        state.principals_admin.insert(caller_principal);
-    })
+#[pre_upgrade]
+fn pre_upgrade() {
+    read_state(|s| stable_save((s,))).expect("failed to encode the state");
+}
+
+#[post_upgrade]
+fn post_upgrade() {
+    STATE.with(|cell| {
+        let (s,) = stable_restore().expect("failed to decode state");
+        *cell.borrow_mut() = s;
+    });
 }
 
 /// Add codes generated offline
 #[update(guard = "caller_is_admin")]
 pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     // generate non activated codes
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
+    mutate_state(|state| {
         for code in codes {
             let code = Code(code);
             state.pre_generated_codes.push(code.clone());
@@ -87,8 +108,7 @@ pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
 
 #[update(guard = "caller_is_admin")]
 pub fn add_admin(principal: Principal) -> CustomResult<()> {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
+    mutate_state(|state| {
         state.principals_admin.insert(principal);
 
         Ok(())
@@ -98,8 +118,7 @@ pub fn add_admin(principal: Principal) -> CustomResult<()> {
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
 #[update(guard = "caller_is_admin")]
 pub fn add_manager(principal: Principal, name: String) -> CustomResult<()> {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
+    mutate_state(|state| {
         let principal_state = PrincipalState {
             name,
             codes_generated: 0,
@@ -116,12 +135,7 @@ pub fn add_manager(principal: Principal, name: String) -> CustomResult<()> {
 pub fn is_manager() -> bool {
     let caller_principal = caller();
 
-    STATE.with(|state| {
-        state
-            .borrow()
-            .principals_managers
-            .contains_key(&caller_principal)
-    })
+    read_state(|state| state.principals_managers.contains_key(&caller_principal))
 }
 
 /// Returns one code if the given principal is authorized to generate codes
@@ -131,8 +145,7 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
 
     let caller_principal = caller();
 
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
+    mutate_state(|state| {
         // generate a new code
         let code = utils::get_pre_codes()?;
 
@@ -168,9 +181,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
     let caller_principal = caller();
     let eth_address = get_eth_address().await?;
 
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
-
+    mutate_state(|state| {
         // Check if the given principal has redeemed any code yet
         if state.principals_user_eth.contains_key(&caller_principal) {
             return Err(CanisterError::CannotRegisterMultipleTimes);
@@ -266,9 +277,7 @@ pub fn get_code() -> CustomResult<Info> {
     check_if_killed()?;
     let caller_principal = caller();
 
-    STATE.with(|state| {
-        let state = state.borrow();
-
+    read_state(|state| {
         // get the code and eth_address associated with the principal
         let (code, eth_address) = state
             .principals_user_eth
@@ -299,8 +308,7 @@ pub fn get_code() -> CustomResult<Info> {
 
 #[update(guard = "caller_is_admin")]
 fn kill_canister() -> CustomResult<()> {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
+    mutate_state(|state| {
         state.killed = true;
     });
 
@@ -309,8 +317,7 @@ fn kill_canister() -> CustomResult<()> {
 
 #[update(guard = "caller_is_admin")]
 fn bring_caninster_back_to_life() -> CustomResult<()> {
-    STATE.with(|state| {
-        let mut state = state.borrow_mut();
+    mutate_state(|state| {
         state.killed = false;
     });
 

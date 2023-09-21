@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 use crate::INITIAL_TOKENS;
 
 #[derive(Serialize, Deserialize, Clone, CandidType)]
-pub struct StableState {
+pub struct State {
     // Admin principals - the principals that can add new principals that can generate codes and get the list of airdrop to do
     pub principals_admin: HashSet<Principal>,
     /// Manager principals - for principals allowed to generate codes
@@ -18,17 +18,17 @@ pub struct StableState {
     pub codes: HashMap<Code, CodeState>,
     // id (the index) mapped to the (EthAddress, AirdropAmount)
     pub airdrop_reward: Vec<(EthereumAddress, AirdropAmount)>,
-    // has the cannister been killed
+    // has the canister been killed
     pub killed: bool,
     // total number of tokens
     pub total_tokens: u64,
     // backend canister id
-    pub backend_canister: Principal,
+    pub backend_canister_id: Principal,
 }
 
-impl Default for StableState {
+impl Default for State {
     fn default() -> Self {
-        StableState {
+        State {
             principals_admin: HashSet::new(),
             principals_managers: HashMap::new(),
             principals_user_eth: HashMap::new(),
@@ -37,7 +37,7 @@ impl Default for StableState {
             airdrop_reward: Vec::new(),
             killed: false,
             total_tokens: INITIAL_TOKENS,
-            backend_canister: Principal::anonymous(),
+            backend_canister_id: Principal::anonymous(),
         }
     }
 }
