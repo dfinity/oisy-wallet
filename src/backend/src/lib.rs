@@ -1,4 +1,4 @@
-use crate::guards::caller_is_not_anonymous;
+use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
 use ethers_core::types::Bytes;
@@ -24,18 +24,21 @@ thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
 }
 
-fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
+pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(cell.borrow().as_ref().expect("state not initialized")))
 }
 
 #[derive(CandidType, Deserialize)]
 pub struct State {
     pub ecdsa_key_name: String,
+    // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
+    pub allowed_callers: Vec<Principal>,
 }
 
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
     pub ecdsa_key_name: String,
+    pub allowed_callers: Vec<Principal>,
 }
 
 #[derive(CandidType, Deserialize)]
@@ -47,9 +50,15 @@ enum Arg {
 #[init]
 fn init(arg: Arg) {
     match arg {
-        Arg::Init(InitArg { ecdsa_key_name }) => {
-            STATE.with(|cell| *cell.borrow_mut() = Some(State { ecdsa_key_name }))
-        }
+        Arg::Init(InitArg {
+            ecdsa_key_name,
+            allowed_callers,
+        }) => STATE.with(|cell| {
+            *cell.borrow_mut() = Some(State {
+                ecdsa_key_name,
+                allowed_callers,
+            })
+        }),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
 }
@@ -126,7 +135,7 @@ async fn caller_eth_address() -> String {
 }
 
 /// Returns the Ethereum address of the specified .
-#[update]
+#[update(guard = "caller_is_allowed")]
 async fn eth_address_of(p: Principal) -> String {
     if p == Principal::anonymous() {
         ic_cdk::trap("Anonymous principal is not authorized");
