@@ -9,6 +9,7 @@
 	import type { Principal } from '@dfinity/principal';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import AdminGuard from '$lib/components/admin/AdminGuard.svelte';
+	import TokensMetadata from "$lib/components/list/TokensMetadata.svelte";
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -50,6 +51,8 @@
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
+
+<TokensMetadata />
 
 {#if AIRDROP}
 	<AdminGuard>
