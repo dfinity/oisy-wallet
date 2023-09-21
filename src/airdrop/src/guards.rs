@@ -1,11 +1,10 @@
-use crate::STATE;
+use crate::read_state;
 use ic_cdk::caller;
 
 pub fn caller_is_admin() -> Result<(), String> {
     let caller = caller();
 
-    STATE.with(|state| {
-        let state = state.borrow();
+    read_state(|state| {
         if state.principals_admin.contains(&caller) {
             Ok(())
         } else {
@@ -17,8 +16,7 @@ pub fn caller_is_admin() -> Result<(), String> {
 pub fn caller_is_manager() -> Result<(), String> {
     let caller = caller();
 
-    STATE.with(|state| {
-        let state = state.borrow();
+    read_state(|state| {
         if state.principals_managers.contains_key(&caller) {
             Ok(())
         } else {
