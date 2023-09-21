@@ -21,6 +21,8 @@ use std::{
 mod guards;
 mod utils;
 
+use utils::{check_if_killed, deduct_tokens, register_principal_with_eth_address, add_user_to_airdrop_reward, get_pre_codes};
+
 type CustomResult<T> = Result<T, CanisterError>;
 
 static TOKEN_PER_PERSON: u64 = 400;
@@ -196,7 +198,7 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
         let principal_state = authorized.get_mut(&caller_principal).unwrap();
 
         // generate a new code
-        let code = get_pre_codes()?;
+        let code = utils::get_pre_codes()?;
         principal_state.codes_generated += 1;
 
         CODES.with(|saved_codes| {
@@ -453,64 +455,6 @@ fn bring_caninster_back_to_life() -> CustomResult<()> {
     });
 
     Ok(())
-}
-
-/// Helper function to check if the cannister is still alive
-fn check_if_killed() -> CustomResult<()> {
-    KILLED.with(|killed| {
-        let killed = killed.borrow();
-        if *killed {
-            Err(CanisterError::CanisterKilled)
-        } else {
-            Ok(())
-        }
-    })
-}
-
-/// Deduct token
-fn deduct_tokens(amount: u64) -> CustomResult<()> {
-    TOTAL_TOKENS.with(|total_tokens| {
-        let mut total_tokens = total_tokens.borrow_mut();
-        if *total_tokens < amount {
-            Err(CanisterError::GeneralError(
-                "Not enough tokens left".to_string(),
-            ))
-        } else {
-            *total_tokens -= amount;
-            Ok(())
-        }
-    })
-}
-
-/// Register a principal with an ethereum address
-fn register_principal_with_eth_address(
-    principal: Principal,
-    code: Code,
-    eth_address: EthereumAddress,
-) {
-    PRINCIPALS_USER_ETH.with(|principal_eth| {
-        let mut principal_eth = principal_eth.borrow_mut();
-        principal_eth.insert(principal, (code, eth_address));
-    });
-}
-
-/// Add user to the list of users to send tokens to
-fn add_user_to_airdrop_reward(eth_address: EthereumAddress, amount: AirdropAmount) {
-    AIRDROP_REWARD.with(|airdrop_reward| {
-        let mut airdrop_reward = airdrop_reward.borrow_mut();
-        airdrop_reward.push((eth_address, amount));
-    });
-}
-
-// "generate" codes
-fn get_pre_codes() -> CustomResult<Code> {
-    PRE_GENERATED_CODES.with(|pre_generated_codes| {
-        let mut pre_generated_codes = pre_generated_codes.borrow_mut();
-        match pre_generated_codes.pop() {
-            Some(code) => Ok(code),
-            None => Err(CanisterError::NoMoreCodes),
-        }
-    })
 }
 
 // automatically generates the candid file
