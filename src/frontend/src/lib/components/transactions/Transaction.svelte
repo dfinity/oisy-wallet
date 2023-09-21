@@ -11,6 +11,8 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import { formatToDate } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import {modalTransaction} from "$lib/derived/modal.derived";
 
 	export let transaction: Transaction;
 
@@ -33,15 +35,17 @@
 	$: pending = isTransactionPending(transaction);
 </script>
 
-<Card {pending}>
-	{`${type === 'send' ? 'Send' : 'Receive'}`}
+<button on:click={() => modalStore.openTransaction(transaction)} class="contents">
+	<Card {pending}>
+		{`${type === 'send' ? 'Send' : 'Receive'}`}
 
-	<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-15' : ''} />
+		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-15' : ''} />
 
-	<svelte:fragment slot="amount">{Utils.formatEther(amount.toString())}</svelte:fragment>
-	<svelte:fragment slot="description">
-		{#if nonNullish(timestamp)}
-			{formatToDate(timestamp)}
-		{/if}
-	</svelte:fragment>
-</Card>
+		<svelte:fragment slot="amount">{Utils.formatEther(amount.toString())}</svelte:fragment>
+		<svelte:fragment slot="description">
+			{#if nonNullish(timestamp)}
+				{formatToDate(timestamp)}
+			{/if}
+		</svelte:fragment>
+	</Card>
+</button>

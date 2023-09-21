@@ -6,6 +6,11 @@
 	import { onMount } from 'svelte';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
+	import { modalTransaction } from '$lib/derived/modal.derived';
+	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { nonNullish } from '@dfinity/utils';
+	import type { Transaction as TransactionType } from '$lib/types/transaction';
 
 	let loading = true;
 
@@ -16,6 +21,11 @@
 
 		loading = false;
 	});
+
+	let selectedTransaction: TransactionType | undefined;
+	$: selectedTransaction = $modalTransaction
+		? ($modalStore?.data as TransactionType | undefined)
+		: undefined;
 </script>
 
 <h2 class="text-base mb-3 pb-0.5" class:mt-6={AIRDROP} class:mt-8={!AIRDROP}>Transactions</h2>
@@ -30,4 +40,8 @@
 	{#if $sortedTransactions.length === 0}
 		<p class="mt-1 text-dark opacity-50">You have no transactions.</p>
 	{/if}
+{/if}
+
+{#if $modalTransaction && nonNullish(selectedTransaction)}
+	<TransactionModal transaction={selectedTransaction} />
 {/if}
