@@ -1,24 +1,22 @@
-use crate::CanisterError::{UnknownOisyWalletAddress, CanisterKilled, GeneralError, NoMoreCodes};
-use crate::{CustomResult, EthereumAddress, Code, AirdropAmount};
+use crate::CanisterError::{CanisterKilled, GeneralError, NoMoreCodes, UnknownOisyWalletAddress};
+use crate::{AirdropAmount, Code, CustomResult, EthereumAddress};
 use candid::Principal;
 use ic_cdk::api::call::CallResult;
 use ic_cdk::{call, caller};
 
-use crate::{KILLED, TOTAL_TOKENS, PRINCIPALS_USER_ETH, AIRDROP_REWARD, PRE_GENERATED_CODES};
-
-
-// TODO: add to initial parameters
-static BACKEND: &str = "a3shf-5eaaa-aaaaa-qaafa-cai";
+use crate::{
+    AIRDROP_REWARD, BACKEND_CANISTER, KILLED, PRE_GENERATED_CODES, PRINCIPALS_USER_ETH,
+    TOTAL_TOKENS,
+};
 
 pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
+    let backend_canister = BACKEND_CANISTER.with(|backend_canister| {
+        let backend_canister = backend_canister.borrow();
+        backend_canister.clone()
+    });
     let args = caller();
 
-    let result: CallResult<(String,)> = call(
-        Principal::from_text(BACKEND).unwrap(),
-        "eth_address_of",
-        (args,),
-    )
-    .await;
+    let result: CallResult<(String,)> = call(backend_canister, "eth_address_of", (args,)).await;
 
     match result {
         Err((_, _message)) => Err(UnknownOisyWalletAddress),
@@ -43,9 +41,7 @@ pub fn deduct_tokens(amount: u64) -> CustomResult<()> {
     TOTAL_TOKENS.with(|total_tokens| {
         let mut total_tokens = total_tokens.borrow_mut();
         if *total_tokens < amount {
-            Err(GeneralError(
-                "Not enough tokens left".to_string(),
-            ))
+            Err(GeneralError("Not enough tokens left".to_string()))
         } else {
             *total_tokens -= amount;
             Ok(())
@@ -83,4 +79,3 @@ pub fn get_pre_codes() -> CustomResult<Code> {
         }
     })
 }
-

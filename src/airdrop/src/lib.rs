@@ -10,8 +10,7 @@ use crate::utils::get_eth_address;
 /// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
 use ic_cdk::caller;
-use ic_cdk_macros::{export_candid, query};
-use ic_cdk_macros::{init, update};
+use ic_cdk_macros::{export_candid, init, query, update};
 use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
@@ -21,7 +20,10 @@ use std::{
 mod guards;
 mod utils;
 
-use utils::{check_if_killed, deduct_tokens, register_principal_with_eth_address, add_user_to_airdrop_reward, get_pre_codes};
+use utils::{
+    add_user_to_airdrop_reward, check_if_killed, deduct_tokens, get_pre_codes,
+    register_principal_with_eth_address,
+};
 
 type CustomResult<T> = Result<T, CanisterError>;
 
@@ -49,6 +51,8 @@ thread_local! {
     static KILLED: RefCell<bool> = RefCell::new(false);
     // total number of tokens
     static TOTAL_TOKENS: RefCell<u64> = RefCell::new(INITIAL_TOKENS);
+    // backend canister id
+    static BACKEND_CANISTER: RefCell<Principal> = RefCell::new(Principal::anonymous());
 }
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
@@ -122,14 +126,38 @@ pub struct EthAddressAmount {
     pub amount: u64,
 }
 
+#[derive(CandidType, Deserialize)]
+pub struct InitArg {
+    /// The backend canister id
+    pub backend_canister_id: Principal,
+}
+
+#[derive(CandidType, Deserialize)]
+enum Arg {
+    Init(InitArg),
+    Upgrade,
+}
+
 #[init]
-fn init(principals: Vec<Principal>) {
-    // add principals to admin principals
+fn initialise(arg: Arg) {
+    match arg {
+        Arg::Init(InitArg {
+            backend_canister_id,
+        }) => {
+            // set backend canister id
+            BACKEND_CANISTER.with(|backend_canister| {
+                let mut backend_canister = backend_canister.borrow_mut();
+                *backend_canister = backend_canister_id;
+            });
+        }
+        Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
+    }
+
+    // add caller principals to admin principals
     PRINCIPALS_ADMIN.with(|admin_principals| {
         let mut admin_principals = admin_principals.borrow_mut();
-        for principal in principals {
-            admin_principals.insert(principal);
-        }
+        let caller_principal = caller();
+        admin_principals.insert(caller_principal);
     });
 }
 
