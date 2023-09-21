@@ -29,7 +29,10 @@ type HttpResponse = record {
   headers : vec record { text; text };
   status_code : nat16;
 };
-type InitArg = record { ecdsa_key_name : text };
+type InitArg = record {
+  ecdsa_key_name : text;
+  allowed_callers : vec principal;
+};
 type SignRequest = record {
   to : text;
   gas : nat;
