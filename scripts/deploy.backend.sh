@@ -16,12 +16,11 @@ esac
 
 if [ -n "${ENV+1}" ]; then
   # We create automatically the airdrop canister only locally
-  true
+  AIRDROP_ID=$(dfx canister id airdrop --network "$ENV")
 else
   dfx canister create airdrop
+  AIRDROP_ID=$(dfx canister id airdrop)
 fi
-
-AIRDROP_ID=$(dfx canister id airdrop)
 
 if [ -n "${ENV+1}" ]; then
   dfx deploy backend --argument "(variant {
