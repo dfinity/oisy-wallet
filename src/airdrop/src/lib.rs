@@ -14,7 +14,7 @@ use ic_cdk::storage::{stable_restore, stable_save};
 use ic_cdk::{caller, trap};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
-use state::{AirdropAmount, Arg, Code, CodeInfo, Info, InitArg, PrincipalState, EthereumAddress, EthAddressAmount, Index};
+use state::{AirdropAmount, Arg, Code, CodeInfo, Info, InitArg, PrincipalState, EthAddressAmount, Index};
 
 mod guards;
 mod state;
@@ -361,6 +361,32 @@ pub fn put_airdrop(index: Index, eth_address_amount: EthAddressAmount) -> Custom
     });
 
     Ok(())
+}
+
+
+/// For a given principal check if the original airdrop amount has been redeemed
+#[query]
+pub fn has_redeemed() -> CustomResult<bool> {
+    check_if_killed()?;
+
+    let caller_principal = caller();
+
+    read_state(|state| {
+        // get the code and eth_address associated with the principal
+        let (_, eth_address) = state
+            .principals_user_eth
+            .get(&caller_principal)
+            .cloned()
+            .ok_or(CanisterError::CodeNotFound)?;
+
+        // check if the eth address has been redeemed
+        let has_redeemed = state
+            .airdrop_reward
+            .iter()
+            .any(|eth_address_amount| eth_address_amount.eth_address == eth_address);
+
+        Ok(has_redeemed)
+    })
 }
 
 // automatically generates the candid file
