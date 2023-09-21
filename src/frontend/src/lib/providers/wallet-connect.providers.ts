@@ -1,3 +1,4 @@
+import { ETH_CHAIN_ID } from '$lib/constants/eth.constants';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_V4,
@@ -65,7 +66,7 @@ export const initWalletConnect = async ({
 			proposal: params,
 			supportedNamespaces: {
 				eip155: {
-					chains: ['eip155:1', 'eip155:11155111'],
+					chains: [`eip155:1`, ...(ETH_CHAIN_ID !== 1n ? [`eip155:${ETH_CHAIN_ID}`] : [])],
 					methods: [
 						SESSION_REQUEST_SEND_TRANSACTION,
 						SESSION_REQUEST_ETH_SIGN,
@@ -73,7 +74,10 @@ export const initWalletConnect = async ({
 						SESSION_REQUEST_ETH_SIGN_V4
 					],
 					events: ['accountsChanged', 'chainChanged'],
-					accounts: [`eip155:1:${address}`, `eip155:11155111:${address}`]
+					accounts: [
+						`eip155:1:${address}`,
+						...(ETH_CHAIN_ID !== 1n ? [`eip155:${ETH_CHAIN_ID}:${address}`] : [])
+					]
 				}
 			}
 		});
