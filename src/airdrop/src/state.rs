@@ -2,6 +2,8 @@ use candid::{types::principal::Principal, CandidType};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
+use crate::INITIAL_TOKENS;
+
 #[derive(Serialize, Deserialize, Clone, CandidType)]
 pub struct StableState {
     // Admin principals - the principals that can add new principals that can generate codes and get the list of airdrop to do
@@ -27,8 +29,15 @@ pub struct StableState {
 impl Default for StableState {
     fn default() -> Self {
         StableState {
+            principals_admin: HashSet::new(),
+            principals_managers: HashMap::new(),
+            principals_user_eth: HashMap::new(),
+            pre_generated_codes: Vec::new(),
+            codes: HashMap::new(),
+            airdrop_reward: Vec::new(),
+            killed: false,
+            total_tokens: INITIAL_TOKENS,
             backend_canister: Principal::anonymous(),
-            ..Default::default()
         }
     }
 }

@@ -30,6 +30,7 @@ type CustomResult<T> = Result<T, CanisterError>;
 static TOKEN_PER_PERSON: u64 = 400;
 static MAXIMUM_DEPTH: u64 = 2;
 static NUMBERS_OF_CHILDREN: u64 = 3;
+// TODO set during init
 static INITIAL_TOKENS: u64 = 100_000;
 
 thread_local! {
@@ -132,6 +133,13 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
 
     STATE.with(|state| {
         let mut state = state.borrow_mut();
+        // generate a new code
+        let code = utils::get_pre_codes()?;
+
+        // insert the newly fetched code
+        state
+            .codes
+            .insert(code.clone(), CodeState::new(caller_principal, 0, false));
 
         // the caller_is_manager guard makes it safe to unwrap
         let principal_state = state
@@ -139,13 +147,7 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
             .get_mut(&caller_principal)
             .unwrap();
 
-        // generate a new code
-        let code = utils::get_pre_codes()?;
         principal_state.codes_generated += 1;
-
-        state
-            .codes
-            .insert(code.clone(), CodeState::new(caller_principal, 0, false));
 
         Ok(CodeInfo::new(
             code,
@@ -175,68 +177,63 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         }
 
         // Check if code exists
-        let depth = if let Some(code_state) = state.codes.get_mut(&code) {
-            // Check if code is already redeemed
-            if code_state.redeemed {
-                return Err(CanisterError::CodeAlreadyRedeemed);
-            }
-
-            if code_state.depth < MAXIMUM_DEPTH {
-                // When you have redeemed your code and you are not at the last
-                // layer you should be able to get the full amount.  We do not
-                // want a case where the amount of token is not enough while you
-                // are waiting on friends to redeem their code
-                deduct_tokens(TOKEN_PER_PERSON)?;
-            } else {
-                // We will redeem 1/4 of the amount as if the code depth == MAXIMUM_DEPTH
-                deduct_tokens(TOKEN_PER_PERSON / 4)?;
-            }
-
-            // check the parent is not part of the original authorised principals
-            if state
-                .principals_managers
-                .contains_key(&code_state.parent_principal)
-            {
-                // Add parent eth address to the list of eth addresses to send tokens to
-                if let Some((_, parent_eth_address)) =
-                    state.principals_user_eth.get(&code_state.parent_principal)
-                {
-                    add_user_to_airdrop_reward(
-                        parent_eth_address.clone(),
-                        AirdropAmount(TOKEN_PER_PERSON / 4),
-                    )
-                }
-            } else {
-                // Increment the number of codes redeemed for the original authorised principal
-                let parent_principal_state = state
-                    .principals_managers
-                    .get_mut(&code_state.parent_principal)
-                    .unwrap();
-
-                parent_principal_state.codes_redeemed += 1;
-            }
-
-            // Associate code with principal and Ethereum address
-            register_principal_with_eth_address(
-                caller_principal.clone(),
-                code.clone(),
-                eth_address.clone(),
-            );
-
-            // Mark code as redeemed
-            add_user_to_airdrop_reward(eth_address.clone(), AirdropAmount(TOKEN_PER_PERSON / 4));
-
-            code_state.redeemed = true;
-
-            code_state.depth
-        } else {
+        if !state.codes.contains_key(&code) {
             return Err(CanisterError::CodeNotFound);
-        };
+        }
+
+        // Check if code is already redeemed - unwrap is safe as we have checked the code exists
+        if state.codes.get(&code).unwrap().redeemed {
+            return Err(CanisterError::CodeAlreadyRedeemed);
+        }
+
+        // Deduct the expected full amount redeemable by the user
+        if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
+            deduct_tokens(TOKEN_PER_PERSON)?;
+        } else {
+            // We will redeem 1/4 of the amount as if the code depth == MAXIMUM_DEPTH
+            deduct_tokens(TOKEN_PER_PERSON / 4)?;
+        }
+
+        let parent_principal = state.codes.get(&code).unwrap().parent_principal.clone();
+
+        // if code parent is one of the managers we increment the number of redeemed codes
+        if state.principals_managers.contains_key(&parent_principal) {
+            state
+                .principals_managers
+                .get_mut(&parent_principal)
+                .unwrap()
+                .codes_redeemed += 1;
+        } else {
+            // TODO in this current configuration managers do not get the airdrop
+            // add parent eth address to the list of eth addresses to send tokens to
+            if let Some((_, parent_eth_address)) = state.principals_user_eth.get(&parent_principal)
+            {
+                add_user_to_airdrop_reward(
+                    parent_eth_address.clone(),
+                    AirdropAmount(TOKEN_PER_PERSON / 4),
+                )
+            }
+        }
+
+        // Link code with principal and Ethereum address
+        register_principal_with_eth_address(
+            caller_principal.clone(),
+            code.clone(),
+            eth_address.clone(),
+        );
+
+        // Mark code as redeemed
+        state.codes.get_mut(&code).unwrap().redeemed = true;
+
+        // add user to the airdrop
+        add_user_to_airdrop_reward(eth_address.clone(), AirdropAmount(TOKEN_PER_PERSON / 4));
+
+        let depth = state.codes.get(&code).unwrap().depth;
 
         // Generate children codes only if we are below the maximum depth
-        let children_codes = if depth < MAXIMUM_DEPTH {
-            // generate children codes only if we haven't reached the maximum allowed depth
+        let children_codes = if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
             let children_code: Vec<Code> = (0..NUMBERS_OF_CHILDREN)
+                // TODO proper error returned
                 .map(|_x| get_pre_codes().unwrap())
                 .collect();
             let mut children = Vec::default();
@@ -247,11 +244,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
                 // Associate child code with parent principal/depth/redeemed
                 state.codes.insert(
                     child_code.clone(),
-                    CodeState {
-                        parent_principal: caller_principal.clone(),
-                        depth: depth + 1,
-                        redeemed: false,
-                    },
+                    CodeState::new(caller_principal.clone(), depth + 1, false),
                 );
             }
 
@@ -278,7 +271,7 @@ pub fn get_code() -> CustomResult<Info> {
     let caller_principal = caller();
 
     STATE.with(|state| {
-        let mut state = state.borrow_mut();
+        let state = state.borrow();
 
         // get the code and eth_address associated with the principal
         let (code, eth_address) = state
@@ -308,18 +301,8 @@ pub fn get_code() -> CustomResult<Info> {
     })
 }
 
-#[update]
+#[update(guard = "caller_is_admin")]
 fn kill_canister() -> CustomResult<()> {
-    let caller_principal = caller();
-
-    // TODO hard code the principal
-    if caller_principal
-        != Principal::from_text("x4vfd-jmrw4-tmcei-ufucn-lhhtk-gfoei-724ky-fz6b7-tefuy-4sewq-sae")
-            .unwrap()
-    {
-        return Err(CanisterError::GeneralError("Unauthorized".to_string()));
-    }
-
     STATE.with(|state| {
         let mut state = state.borrow_mut();
         state.killed = true;
@@ -328,17 +311,8 @@ fn kill_canister() -> CustomResult<()> {
     Ok(())
 }
 
-#[update]
+#[update(guard = "caller_is_admin")]
 fn bring_caninster_back_to_life() -> CustomResult<()> {
-    let caller_principal = caller();
-
-    // TODO hard code the principal
-    if caller_principal
-        != Principal::from_text("x4vfd-jmrw4-tmcei-ufucn-lhhtk-gfoei-724ky-fz6b7-tefuy-4sewq-sae")
-            .unwrap()
-    {
-        return Err(CanisterError::GeneralError("Unauthorized".to_string()));
-    }
     STATE.with(|state| {
         let mut state = state.borrow_mut();
         state.killed = false;
