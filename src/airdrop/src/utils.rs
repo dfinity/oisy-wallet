@@ -8,7 +8,7 @@ use crate::STATE;
 use crate::{AirdropAmount, Code, CustomResult};
 
 pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
-    let backend_canister = STATE.with(|state| state.borrow().backend_canister.clone());
+    let backend_canister = STATE.with(|state| state.borrow().backend_canister);
     let args = caller();
 
     let result: CallResult<(String,)> = call(backend_canister, "eth_address_of", (args,)).await;
@@ -51,7 +51,9 @@ pub fn register_principal_with_eth_address(
 ) {
     STATE.with(|state| {
         let mut state = state.borrow_mut();
-        state.principals_user_eth.insert(principal, (code, eth_address));
+        state
+            .principals_user_eth
+            .insert(principal, (code, eth_address));
     });
 }
 

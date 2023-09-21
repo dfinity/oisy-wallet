@@ -1,12 +1,12 @@
 use std::cell::RefCell;
 
-///! Airdrop backend canister
-///! This canister is responsible for generating codes and redeeming them.
-///! It also stores the mapping between II and Ethereum address.
+/// Airdrop backend canister
+/// This canister is responsible for generating codes and redeeming them.
+/// It also stores the mapping between II and Ethereum address.
 ///
-/// we add a type for everything as it is easier to reason with
-///! TODO
-///  - add logging
+/// We add a type for everything as it is easier to reason with
+/// TODO:
+/// - add logging
 /// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
 use ic_cdk::caller;
@@ -194,7 +194,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
             deduct_tokens(TOKEN_PER_PERSON / 4)?;
         }
 
-        let parent_principal = state.codes.get(&code).unwrap().parent_principal.clone();
+        let parent_principal = state.codes.get(&code).unwrap().parent_principal;
 
         // if code parent is one of the managers we increment the number of redeemed codes
         if state.principals_managers.contains_key(&parent_principal) {
@@ -216,11 +216,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         }
 
         // Link code with principal and Ethereum address
-        register_principal_with_eth_address(
-            caller_principal.clone(),
-            code.clone(),
-            eth_address.clone(),
-        );
+        register_principal_with_eth_address(caller_principal, code.clone(), eth_address.clone());
 
         // Mark code as redeemed
         state.codes.get_mut(&code).unwrap().redeemed = true;
@@ -244,7 +240,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
                 // Associate child code with parent principal/depth/redeemed
                 state.codes.insert(
                     child_code.clone(),
-                    CodeState::new(caller_principal.clone(), depth + 1, false),
+                    CodeState::new(caller_principal, depth + 1, false),
                 );
             }
 
@@ -277,7 +273,7 @@ pub fn get_code() -> CustomResult<Info> {
         let (code, eth_address) = state
             .principals_user_eth
             .get(&caller_principal)
-            .map(|x| x.clone())
+            .cloned()
             .ok_or(CanisterError::CodeNotFound)?;
 
         // get the children associated with a given principal
