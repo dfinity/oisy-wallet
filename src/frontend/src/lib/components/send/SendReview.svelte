@@ -4,6 +4,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import SendData from '$lib/components/send/SendData.svelte';
+	import { token } from '$lib/derived/token.derived';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -16,7 +17,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<SendData {amount} {destination} />
+<SendData {amount} {destination} token={$token} />
 
 <div class="flex justify-end gap-1">
 	<button class="secondary" on:click={() => dispatch('icBack')}>Back</button>

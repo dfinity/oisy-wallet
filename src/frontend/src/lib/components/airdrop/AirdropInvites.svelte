@@ -35,7 +35,7 @@
 	<div
 		class="flex ml-6"
 		style={`border-left: 1px solid var(--color-platinum); border-top: 1px solid var(--color-platinum); border-right: 1px solid var(--color-platinum); ${
-			i > 0 ? 'border-bottom: 1px solid var(--color-platinum);' : ''
+			last ? 'border-bottom: 1px solid var(--color-platinum);' : ''
 		}`}
 		class:rounded-tl-sm={i === 0}
 		class:rounded-tr-sm={i === 0}
