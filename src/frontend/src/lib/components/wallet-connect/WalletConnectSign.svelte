@@ -9,7 +9,9 @@
 	export let listener: WalletConnectListener | undefined | null;
 
 	let request: Web3WalletTypes.SessionRequest | undefined;
-	$: request = $modalStore?.data as Web3WalletTypes.SessionRequest | undefined;
+	$: request = $modalWalletConnectSign
+		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
+		: undefined;
 </script>
 
 {#if $modalWalletConnectSign && nonNullish(request)}
