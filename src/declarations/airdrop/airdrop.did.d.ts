@@ -1,6 +1,7 @@
 import type { ActorMethod } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
 
+export type Arg = { Upgrade: null } | { Init: InitArg };
 export type CanisterError =
 	| { NoChildrenForCode: null }
 	| { CannotRegisterMultipleTimes: null }
@@ -22,6 +23,9 @@ export interface Info {
 	code: string;
 	ethereum_address: string;
 	children: [] | [Array<[string, boolean]>];
+}
+export interface InitArg {
+	backend_canister_id: Principal;
 }
 export type Result = { Ok: null } | { Err: CanisterError };
 export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };

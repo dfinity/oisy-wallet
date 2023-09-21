@@ -1,5 +1,7 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
+	const InitArg = IDL.Record({ backend_canister_id: IDL.Principal });
+	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const CanisterError = IDL.Variant({
 		NoChildrenForCode: IDL.Null,
 		CannotRegisterMultipleTimes: IDL.Null,
@@ -43,5 +45,7 @@ export const idlFactory = ({ IDL }) => {
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
-	return [IDL.Vec(IDL.Principal)];
+	const InitArg = IDL.Record({ backend_canister_id: IDL.Principal });
+	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
+	return [Arg];
 };

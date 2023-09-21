@@ -10,8 +10,7 @@ use crate::utils::get_eth_address;
 /// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
 use ic_cdk::caller;
-use ic_cdk_macros::{export_candid, query, init};
-use ic_cdk_macros::{update};
+use ic_cdk_macros::{export_candid, init, query, update};
 use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
@@ -131,24 +130,34 @@ pub struct EthAddressAmount {
 pub struct InitArg {
     /// The backend canister id
     pub backend_canister_id: Principal,
-    /// The mode in which this canister runs.
-    pub admin_principals: Vec<Principal>,
+}
+
+#[derive(CandidType, Deserialize)]
+enum Arg {
+    Init(InitArg),
+    Upgrade,
 }
 
 #[init]
-fn init(init: InitArg) {
-    // set backend canister id
-    BACKEND_CANISTER.with(|backend_canister| {
-        let mut backend_canister = backend_canister.borrow_mut();
-        *backend_canister = init.backend_canister_id;
-    });
+fn initialise(arg: Arg) {
+    match arg {
+        Arg::Init(InitArg {
+            backend_canister_id,
+        }) => {
+            // set backend canister id
+            BACKEND_CANISTER.with(|backend_canister| {
+                let mut backend_canister = backend_canister.borrow_mut();
+                *backend_canister = backend_canister_id;
+            });
+        }
+        Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
+    }
 
-    // add principals to admin principals
+    // add caller principals to admin principals
     PRINCIPALS_ADMIN.with(|admin_principals| {
         let mut admin_principals = admin_principals.borrow_mut();
-        for principal in init.admin_principals {
-            admin_principals.insert(principal);
-        }
+        let caller_principal = caller();
+        admin_principals.insert(caller_principal);
     });
 }
 
