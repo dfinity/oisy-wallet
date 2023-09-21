@@ -22,7 +22,9 @@ npm run deploy
 
 ```bash
 ENV=staging dfx deploy frontend --network staging --wallet cvthj-wyaaa-aaaad-aaaaq-cai
+# The airdrop canister should have been manually created before deploying the backend.
 ENV=staging ./scripts/deploy.backend.sh
+ENV=staging ./scripts/deploy.airdrop.sh
 ```
 
 ### IC
@@ -31,5 +33,7 @@ ENV=staging ./scripts/deploy.backend.sh
 
 ```bash
 ENV=ic dfx deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
+# The airdrop canister should have been manually created before deploying the backend.
 ENV=ic ./scripts/deploy.backend.sh
+ENV=ic ./scripts/deploy.airdrop.sh
 ```
