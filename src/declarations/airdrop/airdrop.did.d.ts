@@ -30,7 +30,6 @@ export interface InitArg {
 export type Result = { Ok: null } | { Err: CanisterError };
 export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };
 export type Result_2 = { Ok: Info } | { Err: CanisterError };
-export type Result_3 = { Ok: bigint } | { Err: CanisterError };
 export interface _SERVICE {
 	add_admin: ActorMethod<[Principal], Result>;
 	add_codes: ActorMethod<[Array<string>], Result>;
@@ -38,8 +37,6 @@ export interface _SERVICE {
 	bring_caninster_back_to_life: ActorMethod<[], Result>;
 	generate_code: ActorMethod<[], Result_1>;
 	get_code: ActorMethod<[], Result_2>;
-	get_total_code_issued: ActorMethod<[], Result_3>;
-	get_total_code_redeemed: ActorMethod<[], Result_3>;
 	is_manager: ActorMethod<[], boolean>;
 	kill_canister: ActorMethod<[], Result>;
 	redeem_code: ActorMethod<[string], Result_2>;
