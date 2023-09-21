@@ -1,5 +1,5 @@
-use crate::guards::{caller_is_admin, caller_is_manager};
-use crate::utils::get_eth_address;
+use std::cell::RefCell;
+
 ///! Airdrop backend canister
 ///! This canister is responsible for generating codes and redeeming them.
 ///! It also stores the mapping between II and Ethereum address.
@@ -12,15 +12,15 @@ use candid::{types::principal::Principal, CandidType};
 use ic_cdk::caller;
 use ic_cdk_macros::{export_candid, init, query, update};
 use serde::{Deserialize, Serialize};
-use std::{
-    cell::RefCell,
-    collections::{HashMap, HashSet},
-};
+use state::{Arg, Code, CodeInfo, InitArg, PrincipalState};
 
 mod guards;
+mod state;
 mod utils;
-
-use utils::{
+use crate::guards::{caller_is_admin, caller_is_manager};
+use crate::state::StableState;
+use crate::utils::get_eth_address;
+use crate::utils::{
     add_user_to_airdrop_reward, check_if_killed, deduct_tokens, get_pre_codes,
     register_principal_with_eth_address,
 };
@@ -33,77 +33,7 @@ static NUMBERS_OF_CHILDREN: u64 = 3;
 static INITIAL_TOKENS: u64 = 100_000;
 
 thread_local! {
-    // Admin principals - the principals that can add new principals that can generate codes and get the list of airdrop to do
-    pub static PRINCIPALS_ADMIN: RefCell<HashSet<Principal>> = RefCell::new(HashSet::new());
-    /// Manager principals - for principals allowed to generate codes
-    static PRINCIPALS_MANAGERS: RefCell<HashMap<Principal, PrincipalState>> = RefCell::new(HashMap::new());
-    // User principals - map Principal to (Code, Eth Address)
-    static PRINCIPALS_USER_ETH: RefCell<HashMap<Principal, (Code, EthereumAddress)>> = RefCell::new(HashMap::new());
-
-    // pre-generated codes
-    static PRE_GENERATED_CODES: RefCell<Vec<Code>> = RefCell::new(Vec::new());
-
-    /// Map a Code to it's parent principal, the depth, whether it has been redeemed
-    static CODES: RefCell<HashMap<Code, CodeState>> = RefCell::new(HashMap::new());
-   // id (the index) mapped to the (EthAddress, AirdropAmount)
-    static AIRDROP_REWARD: RefCell<Vec<(EthereumAddress, AirdropAmount)>> = RefCell::new(Vec::new());
-    // has the cannister been killed
-    static KILLED: RefCell<bool> = RefCell::new(false);
-    // total number of tokens
-    static TOTAL_TOKENS: RefCell<u64> = RefCell::new(INITIAL_TOKENS);
-    // backend canister id
-    static BACKEND_CANISTER: RefCell<Principal> = RefCell::new(Principal::anonymous());
-}
-
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
-pub struct PrincipalState {
-    pub name: String,
-    pub codes_generated: u64,
-    pub codes_redeemed: u64,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, Hash, PartialEq, Eq, CandidType)]
-pub struct Code(String);
-
-#[derive(Serialize, Deserialize, Debug, Clone, Hash, PartialEq, Eq, CandidType, Default)]
-pub struct EthereumAddress(String);
-
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
-pub struct AirdropAmount(u64);
-
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
-pub struct CodeInfo {
-    code: Code,
-    codes_generated: u64,
-    codes_redeemed: u64,
-}
-
-impl CodeInfo {
-    fn new(code: Code, codes_generated: u64, codes_redeemed: u64) -> Self {
-        Self {
-            code,
-            codes_generated,
-            codes_redeemed,
-        }
-    }
-}
-
-/// Returned when front-end is asking for information
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
-pub struct Info {
-    /// Next three fields should all be unique per user
-    code: Code,
-    principal: Principal,
-    ethereum_address: EthereumAddress,
-    /// Maps a Code to whether it has been redeemed
-    children: Option<Vec<(Code, bool)>>,
-}
-
-#[derive(Serialize, Deserialize, Clone, CandidType)]
-struct CodeState {
-    parent_principal: Principal,
-    depth: u64,
-    redeemed: bool,
+    pub static STATE: RefCell<StableState> = RefCell::default();
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, CandidType)]
@@ -120,86 +50,64 @@ pub enum CanisterError {
     UnknownOisyWalletAddress,
 }
 
-#[derive(Clone, Debug, PartialEq, Default, CandidType, Deserialize)]
-pub struct EthAddressAmount {
-    pub eth_address: EthereumAddress,
-    pub amount: u64,
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct InitArg {
-    /// The backend canister id
-    pub backend_canister_id: Principal,
-}
-
-#[derive(CandidType, Deserialize)]
-enum Arg {
-    Init(InitArg),
-    Upgrade,
-}
-
 #[init]
 fn initialise(arg: Arg) {
-    match arg {
-        Arg::Init(InitArg {
-            backend_canister_id,
-        }) => {
-            // set backend canister id
-            BACKEND_CANISTER.with(|backend_canister| {
-                let mut backend_canister = backend_canister.borrow_mut();
-                *backend_canister = backend_canister_id;
-            });
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
+        match arg {
+            Arg::Init(InitArg {
+                backend_canister_id,
+            }) => {
+                // set backend canister id
+                state.backend_canister = backend_canister_id;
+            }
+            Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
         }
-        Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
-    }
 
-    // add caller principals to admin principals
-    PRINCIPALS_ADMIN.with(|admin_principals| {
-        let mut admin_principals = admin_principals.borrow_mut();
+        // add caller principals to admin principals
         let caller_principal = caller();
-        admin_principals.insert(caller_principal);
-    });
+        state.principals_admin.insert(caller_principal);
+    })
 }
 
 /// Add codes generated offline
 #[update(guard = "caller_is_admin")]
 pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     // generate non activated codes
-    PRE_GENERATED_CODES.with(|saved_codes| {
-        let mut state = saved_codes.borrow_mut();
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
         for code in codes {
             let code = Code(code);
-            state.push(code.clone());
+            state.pre_generated_codes.push(code.clone());
         }
-    });
-
-    Ok(())
+        Ok(())
+    })
 }
 
 #[update(guard = "caller_is_admin")]
 pub fn add_admin(principal: Principal) -> CustomResult<()> {
-    PRINCIPALS_ADMIN.with(|principal_state| {
-        let mut state = principal_state.borrow_mut();
-        state.insert(principal);
-    });
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
+        state.principals_admin.insert(principal);
 
-    Ok(())
+        Ok(())
+    })
 }
 
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
 #[update(guard = "caller_is_admin")]
 pub fn add_manager(principal: Principal, name: String) -> CustomResult<()> {
-    PRINCIPALS_MANAGERS.with(|principal_state| {
-        let mut state = principal_state.borrow_mut();
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
         let principal_state = PrincipalState {
             name,
             codes_generated: 0,
             codes_redeemed: 0,
         };
-        state.insert(principal, principal_state);
-    });
+        state.principals_managers.insert(principal, principal_state);
 
-    Ok(())
+        Ok(())
+    })
 }
 
 /// check whether a given principal is authorised to generate codes
@@ -207,7 +115,12 @@ pub fn add_manager(principal: Principal, name: String) -> CustomResult<()> {
 pub fn is_manager() -> bool {
     let caller_principal = caller();
 
-    PRINCIPALS_MANAGERS.with(|managers| managers.borrow().contains_key(&caller_principal))
+    STATE.with(|state| {
+        state
+            .borrow()
+            .principals_managers
+            .contains_key(&caller_principal)
+    })
 }
 
 /// Returns one code if the given principal is authorized to generate codes
@@ -217,21 +130,17 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
 
     let caller_principal = caller();
 
-    // check if principal is authorised to perform action
-    PRINCIPALS_MANAGERS.with(|authorized| {
-        let mut authorized = authorized.borrow_mut();
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
 
-        // check the caller is allowed to generate codes
         // the caller_is_manager guard makes it safe to unwrap
-        let principal_state = authorized.get_mut(&caller_principal).unwrap();
+        let principal_state = state.principals_managers.get_mut(&caller_principal).unwrap();
 
         // generate a new code
         let code = utils::get_pre_codes()?;
         principal_state.codes_generated += 1;
 
-        CODES.with(|saved_codes| {
-            let mut state = saved_codes.borrow_mut();
-            state.insert(
+            state.codes.insert(
                 code.clone(),
                 CodeState {
                     parent_principal: caller_principal,
