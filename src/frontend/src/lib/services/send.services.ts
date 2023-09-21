@@ -1,6 +1,6 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
 import { signTransaction } from '$lib/api/backend.api';
-import { ETH_BASE_FEE, ETH_NETWORK_ID } from '$lib/constants/eth.constants';
+import { ETH_BASE_FEE, ETH_CHAIN_ID } from '$lib/constants/eth.constants';
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { SendStep } from '$lib/enums/steps';
 import { populateTransaction } from '$lib/providers/infura-erc20.providers';
@@ -38,7 +38,7 @@ const ethPrepareTransaction = async ({
 }: TransferParams & { nonce: number } & { gas: bigint | undefined }): Promise<SignRequest> => ({
 	to,
 	value: amount.toBigInt(),
-	chain_id: ETH_NETWORK_ID,
+	chain_id: ETH_CHAIN_ID,
 	nonce: BigInt(nonce),
 	gas: gas ?? ETH_BASE_FEE,
 	max_fee_per_gas,
@@ -69,7 +69,7 @@ const erc20PrepareTransaction = async ({
 
 	return {
 		to: contractAddress,
-		chain_id: ETH_NETWORK_ID,
+		chain_id: ETH_CHAIN_ID,
 		nonce: BigInt(nonce),
 		gas,
 		max_fee_per_gas,
