@@ -14,7 +14,9 @@ use ic_cdk::storage::{stable_restore, stable_save};
 use ic_cdk::{caller, trap};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
-use state::{AirdropAmount, Arg, Code, CodeInfo, Info, InitArg, PrincipalState, EthAddressAmount, Index};
+use state::{
+    AirdropAmount, Arg, Code, CodeInfo, EthAddressAmount, Index, Info, InitArg, PrincipalState,
+};
 
 mod guards;
 mod state;
@@ -43,7 +45,7 @@ pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(cell.borrow().as_ref().expect("state not initialized")))
 }
 
-pub fn mutate_state<F, R>(f: F) -> R
+fn mutate_state<F, R>(f: F) -> R
 where
     F: FnOnce(&mut State) -> R,
 {
@@ -147,7 +149,7 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
 
     mutate_state(|state| {
         // generate a new code
-        let code = get_pre_codes()?;
+        let code = get_pre_codes(state)?;
 
         // insert the newly fetched code
         state
@@ -199,10 +201,10 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
         // Deduct the expected full amount redeemable by the user
         if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
-            deduct_tokens(TOKEN_PER_PERSON)?;
+            deduct_tokens(state, TOKEN_PER_PERSON)?;
         } else {
             // We will redeem 1/4 of the amount as if the code depth == MAXIMUM_DEPTH
-            deduct_tokens(TOKEN_PER_PERSON / 4)?;
+            deduct_tokens(state, TOKEN_PER_PERSON / 4)?;
         }
 
         let parent_principal = state.codes.get(&code).unwrap().parent_principal;
@@ -220,6 +222,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
             if let Some((_, parent_eth_address)) = state.principals_user_eth.get(&parent_principal)
             {
                 add_user_to_airdrop_reward(
+                    state,
                     parent_eth_address.clone(),
                     AirdropAmount(TOKEN_PER_PERSON / 4),
                 )
@@ -228,6 +231,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
         // Link code with principal and Ethereum address
         register_principal_with_eth_address(
+            state,
             caller_principal,
             code.clone(),
             eth_address.clone(),
@@ -238,6 +242,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
         // add user to the airdrop
         add_user_to_airdrop_reward(
+            state,
             eth_address.clone(),
             AirdropAmount(TOKEN_PER_PERSON / 4),
         );
@@ -248,7 +253,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         let children_codes = if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
             let children_code: Vec<Code> = (0..NUMBERS_OF_CHILDREN)
                 // TODO proper error returned
-                .map(|_x| get_pre_codes().unwrap())
+                .map(|_x| get_pre_codes(state).unwrap())
                 .collect();
             let mut children = Vec::default();
 
@@ -331,7 +336,6 @@ fn bring_caninster_back_to_life() -> CustomResult<()> {
     Ok(())
 }
 
-
 /// Returns all the eth addresses with how much is meant to be sent to each one of them
 #[update(guard = "caller_is_admin")]
 pub fn get_airdrop(mut index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)> {
@@ -364,12 +368,10 @@ pub fn put_airdrop(index: Index, eth_address_amount: EthAddressAmount) -> Custom
                 state.airdrop_reward[i as usize].transferred = true;
             }
         }
-
     });
 
     Ok(())
 }
-
 
 /// For a given principal check if the original airdrop amount has been redeemed
 #[query]

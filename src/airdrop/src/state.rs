@@ -131,7 +131,7 @@ impl EthAddressAmount {
         Self {
             eth_address,
             amount,
-            transferred
+            transferred,
         }
     }
 }
@@ -147,7 +147,6 @@ pub enum Arg {
     Init(InitArg),
     Upgrade,
 }
-
 
 #[derive(CandidType, Deserialize)]
 pub struct Index(pub u64);
