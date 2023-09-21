@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Back } from '@dfinity/gix-components';
+	import { IconBack } from '@dfinity/gix-components';
 	import { back } from '$lib/utils/nav.utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
@@ -14,5 +14,5 @@
 
 <button
 	class="flex gap-0.5 text-white font-bold pointer-events-all"
-	on:click={async () => back(nonNullish(fromRoute))}><Back /> Back to Wallet</button
+	on:click={async () => back(nonNullish(fromRoute))}><IconBack /> Back to Wallet</button
 >
