@@ -29,5 +29,5 @@ else
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = (vec {principal \"$AIRDROP_ID\"});
      }
-  })" --mode reinstall
+  })"
 fi
