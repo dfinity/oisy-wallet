@@ -14,7 +14,7 @@ use ic_cdk::storage::{stable_restore, stable_save};
 use ic_cdk::{caller, trap};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
-use state::{AirdropAmount, Arg, Code, CodeInfo, Info, InitArg, PrincipalState};
+use state::{AirdropAmount, Arg, Code, CodeInfo, Info, InitArg, PrincipalState, EthereumAddress, EthAddressAmount, Index};
 
 mod guards;
 mod state;
@@ -319,6 +319,45 @@ fn kill_canister() -> CustomResult<()> {
 fn bring_caninster_back_to_life() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = false;
+    });
+
+    Ok(())
+}
+
+
+/// Returns all the eth addresses with how much is meant to be sent to each one of them
+#[update(guard = "caller_is_admin")]
+pub fn get_airdrop(mut index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)> {
+    check_if_killed()?;
+
+    read_state(|state| {
+        let mut airdrop = Vec::default();
+
+        // TODO: dangerous casting from u64 to usize?
+        for idx in (index.0 as usize)..state.airdrop_reward.len() {
+            if !state.airdrop_reward[idx].transferred {
+                airdrop.push(state.airdrop_reward[idx].clone());
+                index = Index(idx as u64);
+            }
+        }
+
+        Ok((index, airdrop))
+    })
+}
+
+/// Pushes the new state of who was transferred money
+#[update(guard = "caller_is_admin")]
+pub fn put_airdrop(index: Index, eth_address_amount: EthAddressAmount) -> CustomResult<()> {
+    check_if_killed()?;
+
+    mutate_state(|state| {
+        // for the index to the end of the list update the state
+        for i in index.0..state.airdrop_reward.len() as u64 {
+            if state.airdrop_reward[i as usize].eth_address == eth_address_amount.eth_address {
+                state.airdrop_reward[i as usize].transferred = true;
+            }
+        }
+
     });
 
     Ok(())

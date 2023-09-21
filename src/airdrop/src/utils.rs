@@ -2,7 +2,7 @@ use candid::Principal;
 use ic_cdk::api::call::CallResult;
 use ic_cdk::{call, caller};
 
-use crate::state::EthereumAddress;
+use crate::state::{EthereumAddress, EthAddressAmount};
 use crate::CanisterError::{CanisterKilled, GeneralError, NoMoreCodes, UnknownOisyWalletAddress};
 use crate::{mutate_state, read_state};
 use crate::{AirdropAmount, Code, CustomResult};
@@ -58,7 +58,7 @@ pub fn register_principal_with_eth_address(
 /// Add user to the list of users to send tokens to
 pub fn add_user_to_airdrop_reward(eth_address: EthereumAddress, amount: AirdropAmount) {
     mutate_state(|state| {
-        state.airdrop_reward.push((eth_address, amount));
+        state.airdrop_reward.push(EthAddressAmount::new(eth_address, amount, false));
     });
 }
 

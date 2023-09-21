@@ -17,7 +17,7 @@ pub struct State {
     /// Map a Code to it's parent principal, the depth, whether it has been redeemed
     pub codes: HashMap<Code, CodeState>,
     // id (the index) mapped to the (EthAddress, AirdropAmount)
-    pub airdrop_reward: Vec<(EthereumAddress, AirdropAmount)>,
+    pub airdrop_reward: Vec<EthAddressAmount>,
     // has the canister been killed
     pub killed: bool,
     // total number of tokens
@@ -55,7 +55,7 @@ pub struct Code(pub String);
 #[derive(Serialize, Deserialize, Debug, Clone, Hash, PartialEq, Eq, CandidType, Default)]
 pub struct EthereumAddress(pub String);
 
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug, Default)]
 pub struct AirdropAmount(pub u64);
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
@@ -119,10 +119,21 @@ impl CodeState {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Default, CandidType, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Default, CandidType)]
 pub struct EthAddressAmount {
     pub eth_address: EthereumAddress,
-    pub amount: u64,
+    pub amount: AirdropAmount,
+    pub transferred: bool,
+}
+
+impl EthAddressAmount {
+    pub fn new(eth_address: EthereumAddress, amount: AirdropAmount, transferred: bool) -> Self {
+        Self {
+            eth_address,
+            amount,
+            transferred
+        }
+    }
 }
 
 #[derive(CandidType, Deserialize)]
@@ -136,3 +147,7 @@ pub enum Arg {
     Init(InitArg),
     Upgrade,
 }
+
+
+#[derive(CandidType, Deserialize)]
+pub struct Index(pub u64);
