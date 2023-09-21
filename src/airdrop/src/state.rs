@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 use crate::INITIAL_TOKENS;
 
 #[derive(Serialize, Deserialize, Clone, CandidType)]
-pub struct StableState {
+pub struct State {
     // Admin principals - the principals that can add new principals that can generate codes and get the list of airdrop to do
     pub principals_admin: HashSet<Principal>,
     /// Manager principals - for principals allowed to generate codes
@@ -26,9 +26,9 @@ pub struct StableState {
     pub backend_canister: Principal,
 }
 
-impl Default for StableState {
+impl Default for State {
     fn default() -> Self {
-        StableState {
+        State {
             principals_admin: HashSet::new(),
             principals_managers: HashMap::new(),
             principals_user_eth: HashMap::new(),
