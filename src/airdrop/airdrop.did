@@ -1,3 +1,4 @@
+type Arg = variant { Upgrade; Init : InitArg };
 type CanisterError = variant {
   NoChildrenForCode;
   CannotRegisterMultipleTimes;
@@ -21,11 +22,12 @@ type Info = record {
   ethereum_address : text;
   children : opt vec record { text; bool };
 };
+type InitArg = record { backend_canister_id : principal };
 type Result = variant { Ok; Err : CanisterError };
 type Result_1 = variant { Ok : CodeInfo; Err : CanisterError };
 type Result_2 = variant { Ok : Info; Err : CanisterError };
 type Result_3 = variant { Ok : nat64; Err : CanisterError };
-service : (vec principal) -> {
+service : (Arg) -> {
   add_admin : (principal) -> (Result);
   add_codes : (vec text) -> (Result);
   add_manager : (principal, text) -> (Result);
