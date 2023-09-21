@@ -47,7 +47,7 @@ pub struct Code(pub String);
 pub struct EthereumAddress(String);
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
-pub struct AirdropAmount(u64);
+pub struct AirdropAmount(pub u64);
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
 pub struct CodeInfo {
@@ -77,11 +77,37 @@ pub struct Info {
     children: Option<Vec<(Code, bool)>>,
 }
 
+impl Info {
+    pub fn new(
+        code: Code,
+        principal: Principal,
+        ethereum_address: EthereumAddress,
+        children: Option<Vec<(Code, bool)>>,
+    ) -> Self {
+        Self {
+            code,
+            principal,
+            ethereum_address,
+            children,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, CandidType)]
 pub struct CodeState {
-    parent_principal: Principal,
-    depth: u64,
-    redeemed: bool,
+    pub parent_principal: Principal,
+    pub depth: u64,
+    pub redeemed: bool,
+}
+
+impl CodeState {
+    pub fn new(parent_principal: Principal, depth: u64, redeemed: bool) -> Self {
+        Self {
+            parent_principal,
+            depth,
+            redeemed,
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Default, CandidType, Deserialize)]

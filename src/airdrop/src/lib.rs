@@ -12,13 +12,13 @@ use candid::{types::principal::Principal, CandidType};
 use ic_cdk::caller;
 use ic_cdk_macros::{export_candid, init, query, update};
 use serde::{Deserialize, Serialize};
-use state::{Arg, Code, CodeInfo, InitArg, PrincipalState};
+use state::{AirdropAmount, Arg, Code, CodeInfo, Info, InitArg, PrincipalState};
 
 mod guards;
 mod state;
 mod utils;
 use crate::guards::{caller_is_admin, caller_is_manager};
-use crate::state::StableState;
+use crate::state::{CodeState, StableState};
 use crate::utils::get_eth_address;
 use crate::utils::{
     add_user_to_airdrop_reward, check_if_killed, deduct_tokens, get_pre_codes,
@@ -134,23 +134,18 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
         let mut state = state.borrow_mut();
 
         // the caller_is_manager guard makes it safe to unwrap
-        let principal_state = state.principals_managers.get_mut(&caller_principal).unwrap();
+        let principal_state = state
+            .principals_managers
+            .get_mut(&caller_principal)
+            .unwrap();
 
         // generate a new code
         let code = utils::get_pre_codes()?;
         principal_state.codes_generated += 1;
 
-            state.codes.insert(
-                code.clone(),
-                CodeState {
-                    parent_principal: caller_principal,
-                    depth: 0,
-                    redeemed: false,
-                },
-            );
-        });
-
-        ic_cdk::println!("generate - {:?}", &CODES);
+        state
+            .codes
+            .insert(code.clone(), CodeState::new(caller_principal, 0, false));
 
         Ok(CodeInfo::new(
             code,
@@ -169,24 +164,18 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
     check_if_killed()?;
 
     let caller_principal = caller();
-
-    // Check if the given principal has redeemed any code yet
-    PRINCIPALS_USER_ETH.with(|principal_state| {
-        let principal_eth = principal_state.borrow_mut();
-        if principal_eth.contains_key(&caller_principal) {
-            Err(CanisterError::CannotRegisterMultipleTimes)
-        } else {
-            Ok(())
-        }
-    })?;
-
     let eth_address = get_eth_address().await?;
 
-    let (depth, code) = CODES.with(|codes| {
-        let mut codes = codes.borrow_mut();
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
+
+        // Check if the given principal has redeemed any code yet
+        if state.principals_user_eth.contains_key(&caller_principal) {
+            return Err(CanisterError::CannotRegisterMultipleTimes);
+        }
 
         // Check if code exists
-        if let Some(code_state) = codes.get_mut(&code) {
+        let depth = if let Some(code_state) = state.codes.get_mut(&code) {
             // Check if code is already redeemed
             if code_state.redeemed {
                 return Err(CanisterError::CodeAlreadyRedeemed);
@@ -204,30 +193,27 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
             }
 
             // check the parent is not part of the original authorised principals
-            if !PRINCIPALS_MANAGERS.with(|x| x.borrow().contains_key(&code_state.parent_principal))
+            if state
+                .principals_managers
+                .contains_key(&code_state.parent_principal)
             {
                 // Add parent eth address to the list of eth addresses to send tokens to
-                PRINCIPALS_USER_ETH.with(|principal_eth| {
-                    let principal_eth = principal_eth.borrow_mut();
-                    if let Some((_, parent_eth_address)) =
-                        principal_eth.get(&code_state.parent_principal)
-                    {
-                        add_user_to_airdrop_reward(
-                            parent_eth_address.clone(),
-                            AirdropAmount(TOKEN_PER_PERSON / 4),
-                        )
-                    }
-                });
+                if let Some((_, parent_eth_address)) =
+                    state.principals_user_eth.get(&code_state.parent_principal)
+                {
+                    add_user_to_airdrop_reward(
+                        parent_eth_address.clone(),
+                        AirdropAmount(TOKEN_PER_PERSON / 4),
+                    )
+                }
             } else {
                 // Increment the number of codes redeemed for the original authorised principal
-                PRINCIPALS_MANAGERS.with(|principal_state| {
-                    let mut principal_state = principal_state.borrow_mut();
-                    let parent_principal_state = principal_state
-                        .get_mut(&code_state.parent_principal)
-                        .unwrap();
+                let parent_principal_state = state
+                    .principals_managers
+                    .get_mut(&code_state.parent_principal)
+                    .unwrap();
 
-                    parent_principal_state.codes_redeemed += 1;
-                });
+                parent_principal_state.codes_redeemed += 1;
             }
 
             // Associate code with principal and Ethereum address
@@ -242,17 +228,13 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
             code_state.redeemed = true;
 
-            Ok((code_state.depth, code.clone()))
+            code_state.depth
         } else {
-            Err(CanisterError::CodeNotFound)
-        }
-    })?;
+            return Err(CanisterError::CodeNotFound);
+        };
 
-    // Generate children codes only if we are below the maximum depth
-    let children_codes: Option<Vec<(Code, bool)>> = if depth < MAXIMUM_DEPTH {
-        CODES.with(|codes| {
-            let mut codes = codes.borrow_mut();
-
+        // Generate children codes only if we are below the maximum depth
+        let children_codes = if depth < MAXIMUM_DEPTH {
             // generate children codes only if we haven't reached the maximum allowed depth
             let children_code: Vec<Code> = (0..NUMBERS_OF_CHILDREN)
                 .map(|_x| get_pre_codes().unwrap())
@@ -263,7 +245,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
                 children.push((child_code.clone(), false));
 
                 // Associate child code with parent principal/depth/redeemed
-                codes.insert(
+                state.codes.insert(
                     child_code.clone(),
                     CodeState {
                         parent_principal: caller_principal.clone(),
@@ -275,16 +257,17 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
             // children code and whether they have been redeemed
             Some(children)
-        })
-    } else {
-        None
-    };
-    // return Info
-    Ok(Info {
-        code: code.clone(),
-        principal: caller_principal,
-        ethereum_address: eth_address,
-        children: children_codes,
+        } else {
+            None
+        };
+
+        // return Info
+        Ok(Info::new(
+            code.clone(),
+            caller_principal,
+            eth_address,
+            children_codes,
+        ))
     })
 }
 
@@ -292,18 +275,21 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 #[query]
 pub fn get_code() -> CustomResult<Info> {
     check_if_killed()?;
-    CODES.with(|saved_codes| {
-        let saved_codes_ref = saved_codes.borrow();
-        let caller_principal = caller();
-        let (code, eth_address) = PRINCIPALS_USER_ETH.with(|principal_eth| {
-            let principal_eth = principal_eth.borrow();
-            principal_eth
-                .get(&caller_principal)
-                .map(|x| x.clone())
-                .ok_or(CanisterError::CodeNotFound)
-        })?;
+    let caller_principal = caller();
 
-        let children: Vec<(Code, bool)> = saved_codes_ref
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
+
+        // get the code and eth_address associated with the principal
+        let (code, eth_address) = state
+            .principals_user_eth
+            .get(&caller_principal)
+            .map(|x| x.clone())
+            .ok_or(CanisterError::CodeNotFound)?;
+
+        // get the children associated with a given principal
+        let children: Vec<(Code, bool)> = state
+            .codes
             .iter()
             .filter(|(_, code_state)| code_state.parent_principal == caller_principal)
             .map(|(code, code_state)| {
@@ -318,44 +304,10 @@ pub fn get_code() -> CustomResult<Info> {
             Some(children)
         };
 
-        Ok(Info {
-            code: code.clone(),
-            principal: caller_principal,
-            ethereum_address: eth_address,
-            children,
-        })
+        Ok(Info::new(code, caller_principal, eth_address, children))
     })
 }
 
-/// Get the total number of code issued
-#[query]
-pub fn get_total_code_issued() -> CustomResult<u64> {
-    check_if_killed()?;
-    PRINCIPALS_MANAGERS.with(|principal_state| {
-        let principal_state = principal_state.borrow();
-        let total_code_issued = principal_state
-            .iter()
-            .map(|(_, principal_state)| principal_state.codes_generated)
-            .sum();
-        Ok(total_code_issued)
-    })
-}
-
-/// Get the total number of code redeemed
-#[query]
-pub fn get_total_code_redeemed() -> CustomResult<u64> {
-    check_if_killed()?;
-    PRINCIPALS_MANAGERS.with(|principal_state| {
-        let principal_state = principal_state.borrow();
-        let total_code_redeemed = principal_state
-            .iter()
-            .map(|(_, principal_state)| principal_state.codes_redeemed)
-            .sum();
-        Ok(total_code_redeemed)
-    })
-}
-
-/// TODO have this in guard
 #[update]
 fn kill_canister() -> CustomResult<()> {
     let caller_principal = caller();
@@ -368,9 +320,9 @@ fn kill_canister() -> CustomResult<()> {
         return Err(CanisterError::GeneralError("Unauthorized".to_string()));
     }
 
-    KILLED.with(|killed| {
-        let mut killed = killed.borrow_mut();
-        *killed = true;
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
+        state.killed = true;
     });
 
     Ok(())
@@ -387,10 +339,9 @@ fn bring_caninster_back_to_life() -> CustomResult<()> {
     {
         return Err(CanisterError::GeneralError("Unauthorized".to_string()));
     }
-
-    KILLED.with(|killed| {
-        let mut killed = killed.borrow_mut();
-        *killed = false;
+    STATE.with(|state| {
+        let mut state = state.borrow_mut();
+        state.killed = false;
     });
 
     Ok(())
