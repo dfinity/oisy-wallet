@@ -36,6 +36,7 @@ export type Result = { Ok: null } | { Err: CanisterError };
 export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };
 export type Result_2 = { Ok: [bigint, Array<EthAddressAmount>] } | { Err: CanisterError };
 export type Result_3 = { Ok: Info } | { Err: CanisterError };
+export type Result_4 = { Ok: boolean } | { Err: CanisterError };
 export interface _SERVICE {
 	add_admin: ActorMethod<[Principal], Result>;
 	add_codes: ActorMethod<[Array<string>], Result>;
@@ -44,6 +45,7 @@ export interface _SERVICE {
 	generate_code: ActorMethod<[], Result_1>;
 	get_airdrop: ActorMethod<[bigint], Result_2>;
 	get_code: ActorMethod<[], Result_3>;
+	has_redeemed: ActorMethod<[], Result_4>;
 	is_manager: ActorMethod<[], boolean>;
 	kill_canister: ActorMethod<[], Result>;
 	put_airdrop: ActorMethod<[bigint, EthAddressAmount], Result>;

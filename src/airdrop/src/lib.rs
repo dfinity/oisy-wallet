@@ -147,7 +147,7 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
 
     mutate_state(|state| {
         // generate a new code
-        let code = get_pre_codes(state)?;
+        let code = get_pre_codes()?;
 
         // insert the newly fetched code
         state
@@ -199,10 +199,10 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
         // Deduct the expected full amount redeemable by the user
         if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
-            deduct_tokens(state, TOKEN_PER_PERSON)?;
+            deduct_tokens(TOKEN_PER_PERSON)?;
         } else {
             // We will redeem 1/4 of the amount as if the code depth == MAXIMUM_DEPTH
-            deduct_tokens(state, TOKEN_PER_PERSON / 4)?;
+            deduct_tokens(TOKEN_PER_PERSON / 4)?;
         }
 
         let parent_principal = state.codes.get(&code).unwrap().parent_principal;
@@ -220,7 +220,6 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
             if let Some((_, parent_eth_address)) = state.principals_user_eth.get(&parent_principal)
             {
                 add_user_to_airdrop_reward(
-                    state,
                     parent_eth_address.clone(),
                     AirdropAmount(TOKEN_PER_PERSON / 4),
                 )
@@ -229,7 +228,6 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
         // Link code with principal and Ethereum address
         register_principal_with_eth_address(
-            state,
             caller_principal,
             code.clone(),
             eth_address.clone(),
@@ -240,7 +238,6 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
         // add user to the airdrop
         add_user_to_airdrop_reward(
-            state,
             eth_address.clone(),
             AirdropAmount(TOKEN_PER_PERSON / 4),
         );
@@ -251,7 +248,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         let children_codes = if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
             let children_code: Vec<Code> = (0..NUMBERS_OF_CHILDREN)
                 // TODO proper error returned
-                .map(|_x| get_pre_codes(state).unwrap())
+                .map(|_x| get_pre_codes().unwrap())
                 .collect();
             let mut children = Vec::default();
 
