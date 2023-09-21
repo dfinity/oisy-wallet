@@ -10,7 +10,7 @@
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { addressStore } from '$lib/stores/address.store';
-	import { token } from '$lib/derived/token.derived';
+	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
@@ -20,6 +20,7 @@
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 	import { Utils } from 'alchemy-sdk';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	/**
 	 * Fee context store
@@ -86,7 +87,10 @@
 				to: destination!,
 				progress: (step: SendStep) => (sendProgressStep = step),
 				token: $token,
-				amount: Utils.parseEther(`${amount!}`),
+				amount: parseToken({
+					value: `${amount!}`,
+					unitName: $tokenDecimals
+				}),
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas

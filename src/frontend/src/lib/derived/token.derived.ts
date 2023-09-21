@@ -18,3 +18,5 @@ export const token: Readable<Token> = derived([page, erc20Tokens], ([$page, $erc
 export const tokenId: Readable<TokenId> = derived([token], ([{ id }]) => id);
 
 export const tokenSymbol: Readable<string> = derived([token], ([$token]) => $token.symbol);
+
+export const tokenDecimals: Readable<number> = derived([token], ([$token]) => $token.decimals);
