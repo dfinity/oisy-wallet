@@ -44,7 +44,7 @@ pub struct PrincipalState {
 pub struct Code(pub String);
 
 #[derive(Serialize, Deserialize, Debug, Clone, Hash, PartialEq, Eq, CandidType, Default)]
-pub struct EthereumAddress(String);
+pub struct EthereumAddress(pub String);
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
 pub struct AirdropAmount(pub u64);
