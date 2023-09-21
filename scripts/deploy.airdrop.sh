@@ -27,4 +27,4 @@ else
   })"
 fi
 
-"$(git rev-parse --show-toplevel)/scripts/generate-codes.sh" 20 1000
+"$(git rev-parse --show-toplevel)/scripts/airdrop.generate-codes.sh" 20 1000
