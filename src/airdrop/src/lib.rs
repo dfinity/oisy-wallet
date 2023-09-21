@@ -1,5 +1,6 @@
 use crate::guards::{caller_is_admin, caller_is_manager};
 use crate::utils::get_eth_address;
+use candid::candid_method;
 ///! Airdrop backend canister
 ///! This canister is responsible for generating codes and redeeming them.
 ///! It also stores the mapping between II and Ethereum address.
@@ -11,7 +12,7 @@ use crate::utils::get_eth_address;
 use candid::{types::principal::Principal, CandidType};
 use ic_cdk::caller;
 use ic_cdk_macros::{export_candid, query};
-use ic_cdk_macros::{init, update};
+use ic_cdk_macros::{update};
 use serde::{Deserialize, Serialize};
 use std::{
     cell::RefCell,
@@ -21,7 +22,10 @@ use std::{
 mod guards;
 mod utils;
 
-use utils::{check_if_killed, deduct_tokens, register_principal_with_eth_address, add_user_to_airdrop_reward, get_pre_codes};
+use utils::{
+    add_user_to_airdrop_reward, check_if_killed, deduct_tokens, get_pre_codes,
+    register_principal_with_eth_address,
+};
 
 type CustomResult<T> = Result<T, CanisterError>;
 
@@ -49,6 +53,8 @@ thread_local! {
     static KILLED: RefCell<bool> = RefCell::new(false);
     // total number of tokens
     static TOTAL_TOKENS: RefCell<u64> = RefCell::new(INITIAL_TOKENS);
+    // backend canister id
+    static BACKEND_CANISTER: RefCell<Principal> = RefCell::new(Principal::anonymous());
 }
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
@@ -122,12 +128,27 @@ pub struct EthAddressAmount {
     pub amount: u64,
 }
 
-#[init]
-fn init(principals: Vec<Principal>) {
+#[derive(Debug, Clone, PartialEq, Eq, CandidType, Deserialize)]
+pub struct InitArg {
+    /// The backend canister id
+    pub backend_canister_id: Principal,
+    /// The mode in which this canister runs.
+    pub admin_principals: Vec<Principal>,
+}
+
+#[ic_cdk_macros::init]
+#[candid_method(init)]
+fn init(init: InitArg) {
+    // set backend canister id
+    BACKEND_CANISTER.with(|backend_canister| {
+        let mut backend_canister = backend_canister.borrow_mut();
+        *backend_canister = init.backend_canister_id;
+    });
+
     // add principals to admin principals
     PRINCIPALS_ADMIN.with(|admin_principals| {
         let mut admin_principals = admin_principals.borrow_mut();
-        for principal in principals {
+        for principal in init.admin_principals {
             admin_principals.insert(principal);
         }
     });
