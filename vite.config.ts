@@ -51,7 +51,7 @@ const config: UserConfig = {
 	plugins: [sveltekit()],
 	resolve: {
 		alias: {
-			$declarations: resolve('./src/declarations')
+			$declarations: resolve('./src/declarations'),
 		}
 	},
 	build: {
