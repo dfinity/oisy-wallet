@@ -12,6 +12,7 @@
 	import { isErc20Icp } from '$lib/utils/token.utils';
 	import BurnReview from '$lib/components/burn/BurnReview.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Erc20Token } from '$lib/types/erc20';
 
 	/**
 	 * Modal
@@ -85,7 +86,7 @@
 			burnProgressStep = BurnStep.BURN;
 
 			await burnToICP({
-				contract: $token,
+				contract: $token as Erc20Token,
 				to: destination,
 				amount: parseToken({
 					value: `${amount!}`,
