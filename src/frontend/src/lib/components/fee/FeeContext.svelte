@@ -8,12 +8,12 @@
 	import { getFeeData as getErc20FeeData } from '$lib/providers/infura-erc20.providers';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { addressStore } from '$lib/stores/address.store';
-	import { Utils } from 'alchemy-sdk';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -42,7 +42,7 @@
 				gas: await getErc20FeeData({
 					contract: $token as Erc20Token,
 					address: destination !== '' ? destination : $addressStore!,
-					amount: Utils.parseEther(`${amount ?? '1'}`)
+					amount: parseToken({ value: `${amount ?? '1'}` })
 				})
 			});
 		} catch (err: unknown) {

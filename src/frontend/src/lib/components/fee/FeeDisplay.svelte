@@ -3,7 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { getContext, onDestroy } from 'svelte';
-	import { formatEtherShort } from '$lib/utils/format.utils';
+	import { formatTokenShort } from '$lib/utils/format.utils';
 	import type { FeeContext } from '$lib/stores/fee.store';
 	import { FEE_CONTEXT_KEY } from '$lib/stores/fee.store';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
@@ -48,7 +48,10 @@
 <div id="balance" class="font-normal px-1.25 mb-2 break-words" style="min-height: 24px">
 	{#if nonNullish(fee)}
 		<div in:fade>
-			{formatEtherShort(fee, 8)}
+			{formatTokenShort({
+				value: fee,
+				displayDecimals: 8
+			})}
 			{ETHEREUM_TOKEN.symbol}
 		</div>
 	{/if}

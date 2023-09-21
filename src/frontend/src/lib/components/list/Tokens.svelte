@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Card from '$lib/components/ui/Card.svelte';
-	import { formatEtherShort } from '$lib/utils/format.utils';
+	import { formatTokenShort } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import type { Token } from '$lib/types/token';
@@ -11,7 +11,7 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import IconPlus from '$lib/components/icons/IconPlus.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import {AIRDROP} from "$lib/constants/airdrop.constants";
+	import { AIRDROP } from '$lib/constants/airdrop.constants';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
@@ -29,15 +29,13 @@
 			<Card>
 				{token.name}
 
-				<Logo
-					src={token.icon}
-					slot="icon"
-					alt={`${token.name} logo`}
-					size="46px"
-				/>
+				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" />
 
 				<output class="break-words" slot="amount">
-					{formatEtherShort($balancesStore?.[token.id] ?? BigNumber.from(0n))}
+					{formatTokenShort({
+						value: $balancesStore?.[token.id] ?? BigNumber.from(0n),
+						unitName: token.decimals
+					})}
 					{token.symbol}
 				</output>
 			</Card>

@@ -1,9 +1,17 @@
-import type { BigNumber } from '@ethersproject/bignumber';
+import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
-export const formatEtherShort = (value: BigNumber, decimals = 4): string => {
-	const res = Utils.formatEther(value);
-	return (+res).toFixed(decimals).replace(/(\.0+|0+)$/, '');
+export const formatTokenShort = ({
+	value,
+	unitName = 18,
+	displayDecimals = 4
+}: {
+	value: BigNumber;
+	unitName?: string | BigNumberish;
+	displayDecimals?: number;
+}): string => {
+	const res = Utils.formatUnits(value, unitName);
+	return (+res).toFixed(displayDecimals).replace(/(\.0+|0+)$/, '');
 };
 
 /**
