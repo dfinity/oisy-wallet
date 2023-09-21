@@ -14,16 +14,20 @@ case $ENV in
     ;;
 esac
 
+AIRDROP_ID=$(dfx canister id airdrop)
+
 if [ -n "${ENV+1}" ]; then
   dfx deploy backend --argument "(variant {
     Init = record {
-         ecdsa_key_name = \"$ECDSA_KEY_NAME\"
+         ecdsa_key_name = \"$ECDSA_KEY_NAME\";
+         allowed_callers = (vec {principal \"$AIRDROP_ID\"});
      }
   })" --network "$ENV" --wallet $WALLET
 else
   dfx deploy backend --argument "(variant {
     Init = record {
-         ecdsa_key_name = \"$ECDSA_KEY_NAME\"
+         ecdsa_key_name = \"$ECDSA_KEY_NAME\";
+         allowed_callers = (vec {principal \"$AIRDROP_ID\"});
      }
   })"
 fi

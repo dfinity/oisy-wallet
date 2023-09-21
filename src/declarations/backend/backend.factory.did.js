@@ -1,6 +1,9 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
-	const InitArg = IDL.Record({ ecdsa_key_name: IDL.Text });
+	const InitArg = IDL.Record({
+		ecdsa_key_name: IDL.Text,
+		allowed_callers: IDL.Vec(IDL.Principal)
+	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const CanisterStatusType = IDL.Variant({
 		stopped: IDL.Null,
@@ -58,7 +61,10 @@ export const idlFactory = ({ IDL }) => {
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
-	const InitArg = IDL.Record({ ecdsa_key_name: IDL.Text });
+	const InitArg = IDL.Record({
+		ecdsa_key_name: IDL.Text,
+		allowed_callers: IDL.Vec(IDL.Principal)
+	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	return [Arg];
 };
