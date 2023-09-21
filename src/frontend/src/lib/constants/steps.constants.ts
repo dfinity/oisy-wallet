@@ -49,12 +49,12 @@ export const WALLET_CONNECT_SIGN_STEPS: [ProgressStep, ...ProgressStep[]] = [
 export const BURN_STEPS: [ProgressStep, ...ProgressStep[]] = [
 	{
 		step: BurnStep.INITIALIZATION,
-		text: 'Initializing burn...',
+		text: 'Initializing...',
 		state: 'in_progress'
 	} as ProgressStep,
 	{
 		step: BurnStep.BURN,
-		text: 'Burning...',
+		text: 'Converting to native ICP...',
 		state: 'next'
 	} as ProgressStep
 ];

@@ -5,7 +5,7 @@
 	import BurnForm from '$lib/components/burn/BurnForm.svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { BurnStep, SendStep } from '$lib/enums/steps';
+	import { BurnStep } from '$lib/enums/steps';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { burnToICP } from '$lib/providers/infura-icp-erc20.providers';
@@ -21,7 +21,7 @@
 	const steps: WizardSteps = [
 		{
 			name: 'Burn',
-			title: 'Burn'
+			title: 'Convert to native ICP'
 		},
 		{
 			name: 'Review',
@@ -29,7 +29,7 @@
 		},
 		{
 			name: 'Burning',
-			title: 'Burning...'
+			title: 'Converting...'
 		}
 	];
 
@@ -56,7 +56,7 @@
 	 * Burn
 	 */
 
-	let burnProgressStep: string = SendStep.INITIALIZATION;
+	let burnProgressStep: string = BurnStep.INITIALIZATION;
 
 	const burn = async () => {
 		if (invalidDestination(destination)) {
