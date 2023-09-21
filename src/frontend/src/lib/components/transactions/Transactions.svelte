@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Transaction from '$lib/components/list/Transaction.svelte';
+	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { sortedTransactions } from '$lib/derived/transactions.derived';
 	import { loadTransactions } from '$lib/services/transactions.services';
 	import type { TokenId } from '$lib/types/token';

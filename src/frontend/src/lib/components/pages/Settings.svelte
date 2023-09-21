@@ -9,7 +9,7 @@
 	import type { Principal } from '@dfinity/principal';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import AdminGuard from '$lib/components/admin/AdminGuard.svelte';
-	import TokensMetadata from "$lib/components/list/TokensMetadata.svelte";
+	import TokensMetadata from "$lib/components/tokens/TokensMetadata.svelte";
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
