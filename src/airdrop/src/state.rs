@@ -50,7 +50,6 @@ impl Default for State {
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
 pub struct PrincipalState {
-    pub name: String,
     pub codes_generated: u64,
     pub codes_redeemed: u64,
 }
