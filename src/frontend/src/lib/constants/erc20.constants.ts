@@ -69,3 +69,7 @@ export const ERC20_ABI = [
 // We assumed that ERC20 approve contract function prefix is 0x095ea7b3
 // https://sepolia.etherscan.io/address/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984#writeContract#F1
 export const ERC20_APPROVE_HASH = '0x095ea7b3';
+
+// Use when UNPREDICTABLE_GAS_LIMIT error are thrown while fetching the fee data.
+// See: https://docs.ethers.org/v5/troubleshooting/errors/#help-UNPREDICTABLE_GAS_LIMIT
+export const ERC20_FALLBACK_FEE = 500_000n;
