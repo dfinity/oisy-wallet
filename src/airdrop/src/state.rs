@@ -1,6 +1,7 @@
+use std::collections::{HashMap, HashSet};
+
 use candid::{types::principal::Principal, CandidType};
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize, Deserialize, Clone, CandidType)]
 pub struct State {
@@ -31,7 +32,7 @@ pub struct State {
 
 impl Default for State {
     fn default() -> Self {
-        State {
+        Self {
             principals_admins: HashSet::new(),
             principals_managers: HashMap::new(),
             principals_users: HashMap::new(),
@@ -136,12 +137,17 @@ pub struct EthereumTransaction {
 }
 
 impl EthereumTransaction {
-    pub fn new(eth_address: EthereumAddress, amount: AirdropAmount, transferred: bool, reward_type: RewardType) -> Self {
+    pub fn new(
+        eth_address: EthereumAddress,
+        amount: AirdropAmount,
+        transferred: bool,
+        reward_type: RewardType,
+    ) -> Self {
         Self {
             eth_address,
             amount,
             transferred,
-            reward_type
+            reward_type,
         }
     }
 }
@@ -169,7 +175,7 @@ pub enum Arg {
 #[derive(CandidType, Clone, Deserialize)]
 pub struct Index(pub u64);
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, CandidType)]
 pub enum RewardType {
     Airdrop,
     Referral,
