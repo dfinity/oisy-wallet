@@ -46,6 +46,7 @@ export interface _SERVICE {
 	add_codes: ActorMethod<[Array<string>], Result>;
 	add_manager: ActorMethod<[Principal], Result>;
 	bring_caninster_back_to_life: ActorMethod<[], Result>;
+	change_total_tokens: ActorMethod<[bigint], Result>;
 	generate_code: ActorMethod<[], Result_1>;
 	get_airdrop: ActorMethod<[bigint], Result_2>;
 	get_code: ActorMethod<[], Result_3>;

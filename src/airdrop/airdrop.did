@@ -47,6 +47,7 @@ service : (Arg) -> {
   add_codes : (vec text) -> (Result);
   add_manager : (principal) -> (Result);
   bring_caninster_back_to_life : () -> (Result);
+  change_total_tokens : (nat64) -> (Result);
   generate_code : () -> (Result_1);
   get_airdrop : (nat64) -> (Result_2);
   get_code : () -> (Result_3) query;
