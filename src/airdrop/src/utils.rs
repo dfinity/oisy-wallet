@@ -58,6 +58,9 @@ pub fn add_user_to_airdrop_reward(
     eth_address: EthereumAddress,
     amount: AirdropAmount,
 ) {
+
+    state.total_tokens -= amount.0;
+
     state
         .airdrop_reward
         .push(EthAddressAmount::new(eth_address, amount, false));

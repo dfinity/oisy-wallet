@@ -201,14 +201,6 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
             return Err(CanisterError::CodeAlreadyRedeemed);
         }
 
-        // Deduct the expected full amount redeemable by the user
-        if state.codes.get(&code).unwrap().depth < state.maximum_depth {
-            deduct_tokens(state, state.token_per_person)?;
-        } else {
-            // We will redeem 1/4 of the amount as if the code depth == MAXIMUM_DEPTH
-            deduct_tokens(state, state.token_per_person / 4)?;
-        }
-
         let parent_principal = state.codes.get(&code).unwrap().parent_principal;
 
         // if code parent is one of the managers we increment the number of redeemed codes
