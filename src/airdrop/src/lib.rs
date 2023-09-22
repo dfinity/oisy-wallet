@@ -15,7 +15,7 @@ use ic_cdk::{caller, trap};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
 use state::{
-    AirdropAmount, Arg, Code, CodeInfo, Index, Info, InitArg, PrincipalState, EthereumAddress,
+    AirdropAmount, Arg, Code, CodeInfo, Index, Info, InitArg, PrincipalState, EthereumAddress, RewardType,
 };
 
 mod guards;
@@ -25,7 +25,7 @@ use crate::guards::{caller_is_admin, caller_is_manager};
 use crate::state::{CodeState, State};
 use crate::utils::get_eth_address;
 use crate::utils::{
-    add_user_to_airdrop_reward, check_if_killed, deduct_tokens, get_pre_codes,
+    add_user_to_airdrop_reward, check_if_killed, get_pre_codes,
     register_principal_with_eth_address,
 };
 
@@ -219,6 +219,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
                     state,
                     parent_eth_address.clone(),
                     AirdropAmount(state.token_per_person / 4),
+                    state::RewardType::Referral
                 )
             }
         }
@@ -239,6 +240,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
             state,
             eth_address.clone(),
             AirdropAmount(state.token_per_person / 4),
+            state::RewardType::Airdrop
         );
 
         let depth = state.codes.get(&code).unwrap().depth;
@@ -313,7 +315,7 @@ pub fn get_code() -> CustomResult<Info> {
         let tokens_transferred = state
             .airdrop_reward
             .iter()
-            .any(|eth_address_amount| eth_address_amount.eth_address == eth_address);
+            .any(|eth_address_amount| eth_address_amount.eth_address == eth_address && eth_address_amount.reward_type == RewardType::Airdrop);
 
         Ok(Info::new(
             code,
