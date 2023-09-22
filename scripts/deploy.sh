@@ -37,7 +37,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 case $ENV in
-  "staging")
+  "staging"|"")
     TOTAL_TOKENS_AIRDROP=100000
     MAXIMUM_DEPTH=2
     TOKENS_PER_PERSON=40
