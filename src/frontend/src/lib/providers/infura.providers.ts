@@ -17,3 +17,5 @@ export const sendTransaction = (signedTransaction: string): Promise<TransactionR
 
 export const getTransactionCount = (address: ECDSA_PUBLIC_KEY): Promise<number> =>
 	provider.getTransactionCount(address, 'pending');
+
+export const getBlockNumber = (): Promise<number> => provider.getBlockNumber();

@@ -6,6 +6,7 @@ import type { Transaction as EthTransaction } from '@ethersproject/transactions'
 export type Transaction = Omit<EthTransaction, 'data'> &
 	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
 		pendingTimestamp?: number;
+		displayTimestamp?: number;
 	};
 
 export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {

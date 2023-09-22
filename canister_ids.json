@@ -4,7 +4,8 @@
 		"staging": "t7tos-nyaaa-aaaad-aadkq-cai"
 	},
 	"backend": {
-		"ic": "cab24-4qaaa-aaaan-qecca-cai",
+		"ic": "grghe-syaaa-aaaar-qabyq-cai",
+		"old-backend": "cab24-4qaaa-aaaan-qecca-cai",
 		"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
 	},
 	"frontend": {

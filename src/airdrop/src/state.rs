@@ -2,8 +2,6 @@ use candid::{types::principal::Principal, CandidType};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-use crate::INITIAL_TOKENS;
-
 #[derive(Serialize, Deserialize, Clone, CandidType)]
 pub struct State {
     // Admin principals - the principals that can add new principals that can generate codes and get the list of airdrop to do
@@ -17,13 +15,18 @@ pub struct State {
     /// Map a Code to it's parent principal, the depth, whether it has been redeemed
     pub codes: HashMap<Code, CodeState>,
     // id (the index) mapped to the (EthAddress, AirdropAmount)
-    pub airdrop_reward: Vec<(EthereumAddress, AirdropAmount)>,
+    pub airdrop_reward: Vec<EthAddressAmount>,
     // has the canister been killed
     pub killed: bool,
     // total number of tokens
     pub total_tokens: u64,
     // backend canister id
     pub backend_canister_id: Principal,
+    pub token_per_person: u64,
+    // maximum depth of our "familiy tree" of codes
+    pub maximum_depth: u64,
+    // number of children per code
+    pub numbers_of_children: u64,
 }
 
 impl Default for State {
@@ -36,15 +39,17 @@ impl Default for State {
             codes: HashMap::new(),
             airdrop_reward: Vec::new(),
             killed: false,
-            total_tokens: INITIAL_TOKENS,
+            total_tokens: 0,
             backend_canister_id: Principal::anonymous(),
+            token_per_person: 0,
+            maximum_depth: 0,
+            numbers_of_children: 0,
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
 pub struct PrincipalState {
-    pub name: String,
     pub codes_generated: u64,
     pub codes_redeemed: u64,
 }
@@ -55,7 +60,7 @@ pub struct Code(pub String);
 #[derive(Serialize, Deserialize, Debug, Clone, Hash, PartialEq, Eq, CandidType, Default)]
 pub struct EthereumAddress(pub String);
 
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug, Default)]
 pub struct AirdropAmount(pub u64);
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
@@ -80,6 +85,7 @@ impl CodeInfo {
 pub struct Info {
     /// Next three fields should all be unique per user
     code: Code,
+    tokens_transferred: bool,
     principal: Principal,
     ethereum_address: EthereumAddress,
     /// Maps a Code to whether it has been redeemed
@@ -89,12 +95,14 @@ pub struct Info {
 impl Info {
     pub fn new(
         code: Code,
+        tokens_transferred: bool,
         principal: Principal,
         ethereum_address: EthereumAddress,
         children: Option<Vec<(Code, bool)>>,
     ) -> Self {
         Self {
             code,
+            tokens_transferred,
             principal,
             ethereum_address,
             children,
@@ -119,16 +127,35 @@ impl CodeState {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Default, CandidType, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Default, CandidType)]
 pub struct EthAddressAmount {
     pub eth_address: EthereumAddress,
-    pub amount: u64,
+    pub amount: AirdropAmount,
+    pub transferred: bool,
+}
+
+impl EthAddressAmount {
+    pub fn new(eth_address: EthereumAddress, amount: AirdropAmount, transferred: bool) -> Self {
+        Self {
+            eth_address,
+            amount,
+            transferred,
+        }
+    }
 }
 
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
     /// The backend canister id
     pub backend_canister_id: Principal,
+    /// total amount of tokens
+    pub total_tokens: u64,
+    /// number of tokens per person
+    pub token_per_person: u64,
+    /// maximum depth of our "familiy tree" of codes
+    pub maximum_depth: u64,
+    /// number of children per code
+    pub numbers_of_children: u64,
 }
 
 #[derive(CandidType, Deserialize)]
@@ -136,3 +163,6 @@ pub enum Arg {
     Init(InitArg),
     Upgrade,
 }
+
+#[derive(CandidType, Deserialize)]
+pub struct Index(pub u64);

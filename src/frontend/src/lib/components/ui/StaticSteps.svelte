@@ -6,7 +6,7 @@
 	export let steps: [StaticStep, ...StaticStep[]];
 </script>
 
-{#each steps as { text, state, stateLabel }, i}
+{#each steps as { text, state, progressLabel }, i}
 	{@const last = i === steps.length - 1}
 	<div class={`step ${state} ${last ? 'last' : ''}`}>
 		{#if state === 'completed'}
@@ -19,8 +19,8 @@
 
 		<div class:line={!last} />
 
-		{#if nonNullish(stateLabel)}
-			<span class="state">{stateLabel}</span>
+		{#if nonNullish(progressLabel) && state === 'in_progress'}
+			<span class="state">{progressLabel}</span>
 		{/if}
 	</div>
 {/each}

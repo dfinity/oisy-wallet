@@ -16,24 +16,42 @@ type CodeInfo = record {
   code : text;
   codes_redeemed : nat64;
 };
+type EthAddressAmount = record {
+  transferred : bool;
+  eth_address : text;
+  amount : nat64;
+};
 type Info = record {
   "principal" : principal;
   code : text;
   ethereum_address : text;
   children : opt vec record { text; bool };
+  tokens_transferred : bool;
 };
-type InitArg = record { backend_canister_id : principal };
+type InitArg = record {
+  backend_canister_id : principal;
+  token_per_person : nat64;
+  maximum_depth : nat64;
+  total_tokens : nat64;
+  numbers_of_children : nat64;
+};
 type Result = variant { Ok; Err : CanisterError };
 type Result_1 = variant { Ok : CodeInfo; Err : CanisterError };
-type Result_2 = variant { Ok : Info; Err : CanisterError };
+type Result_2 = variant {
+  Ok : record { nat64; vec EthAddressAmount };
+  Err : CanisterError;
+};
+type Result_3 = variant { Ok : Info; Err : CanisterError };
 service : (Arg) -> {
   add_admin : (principal) -> (Result);
   add_codes : (vec text) -> (Result);
-  add_manager : (principal, text) -> (Result);
+  add_manager : (principal) -> (Result);
   bring_caninster_back_to_life : () -> (Result);
   generate_code : () -> (Result_1);
-  get_code : () -> (Result_2) query;
+  get_airdrop : (nat64) -> (Result_2);
+  get_code : () -> (Result_3) query;
   is_manager : () -> (bool) query;
   kill_canister : () -> (Result);
-  redeem_code : (text) -> (Result_2);
+  put_airdrop : (nat64, EthAddressAmount) -> (Result);
+  redeem_code : (text) -> (Result_3);
 }

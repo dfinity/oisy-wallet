@@ -14,7 +14,9 @@ use ic_cdk::storage::{stable_restore, stable_save};
 use ic_cdk::{caller, trap};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
-use state::{AirdropAmount, Arg, Code, CodeInfo, Info, InitArg, PrincipalState};
+use state::{
+    AirdropAmount, Arg, Code, CodeInfo, EthAddressAmount, Index, Info, InitArg, PrincipalState,
+};
 
 mod guards;
 mod state;
@@ -29,11 +31,6 @@ use crate::utils::{
 
 type CustomResult<T> = Result<T, CanisterError>;
 
-static TOKEN_PER_PERSON: u64 = 400;
-static MAXIMUM_DEPTH: u64 = 2;
-static NUMBERS_OF_CHILDREN: u64 = 3;
-// TODO set during init
-static INITIAL_TOKENS: u64 = 100_000;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
@@ -43,7 +40,7 @@ pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(cell.borrow().as_ref().expect("state not initialized")))
 }
 
-pub fn mutate_state<F, R>(f: F) -> R
+fn mutate_state<F, R>(f: F) -> R
 where
     F: FnOnce(&mut State) -> R,
 {
@@ -68,10 +65,14 @@ pub enum CanisterError {
 fn init(arg: Arg) {
     match arg {
         Arg::Init(InitArg {
-            backend_canister_id,
+            backend_canister_id, token_per_person, maximum_depth, numbers_of_children, total_tokens
         }) => STATE.with(|cell| {
             *cell.borrow_mut() = Some(State {
                 backend_canister_id,
+                token_per_person,
+                maximum_depth,
+                numbers_of_children,
+                total_tokens,
                 principals_admin: HashSet::from([caller()]),
                 ..State::default()
             })
@@ -117,10 +118,9 @@ pub fn add_admin(principal: Principal) -> CustomResult<()> {
 
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
 #[update(guard = "caller_is_admin")]
-pub fn add_manager(principal: Principal, name: String) -> CustomResult<()> {
+pub fn add_manager(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         let principal_state = PrincipalState {
-            name,
             codes_generated: 0,
             codes_redeemed: 0,
         };
@@ -198,11 +198,11 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         }
 
         // Deduct the expected full amount redeemable by the user
-        if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
-            deduct_tokens(state, TOKEN_PER_PERSON)?;
+        if state.codes.get(&code).unwrap().depth < state.maximum_depth {
+            deduct_tokens(state, state.token_per_person)?;
         } else {
             // We will redeem 1/4 of the amount as if the code depth == MAXIMUM_DEPTH
-            deduct_tokens(state, TOKEN_PER_PERSON / 4)?;
+            deduct_tokens(state, state.token_per_person / 4)?;
         }
 
         let parent_principal = state.codes.get(&code).unwrap().parent_principal;
@@ -222,7 +222,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
                 add_user_to_airdrop_reward(
                     state,
                     parent_eth_address.clone(),
-                    AirdropAmount(TOKEN_PER_PERSON / 4),
+                    AirdropAmount(state.token_per_person / 4),
                 )
             }
         }
@@ -242,14 +242,14 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         add_user_to_airdrop_reward(
             state,
             eth_address.clone(),
-            AirdropAmount(TOKEN_PER_PERSON / 4),
+            AirdropAmount(state.token_per_person / 4),
         );
 
         let depth = state.codes.get(&code).unwrap().depth;
 
         // Generate children codes only if we are below the maximum depth
-        let children_codes = if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
-            let children_code: Vec<Code> = (0..NUMBERS_OF_CHILDREN)
+        let children_codes = if state.codes.get(&code).unwrap().depth < state.maximum_depth {
+            let children_code: Vec<Code> = (0..state.numbers_of_children)
                 // TODO proper error returned
                 .map(|_x| get_pre_codes(state).unwrap())
                 .collect();
@@ -274,6 +274,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         // return Info
         Ok(Info::new(
             code.clone(),
+            false,
             caller_principal,
             eth_address,
             children_codes,
@@ -312,7 +313,13 @@ pub fn get_code() -> CustomResult<Info> {
             Some(children)
         };
 
-        Ok(Info::new(code, caller_principal, eth_address, children))
+        // check if the eth address has been transferred wrapped tokens
+        let tokens_transferred = state
+            .airdrop_reward
+            .iter()
+            .any(|eth_address_amount| eth_address_amount.eth_address == eth_address);
+
+        Ok(Info::new(code, tokens_transferred, caller_principal, eth_address, children))
     })
 }
 
@@ -329,6 +336,48 @@ fn kill_canister() -> CustomResult<()> {
 fn bring_caninster_back_to_life() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = false;
+    });
+
+    Ok(())
+}
+
+/// Returns all the eth addresses with how much is meant to be sent to each one of them
+#[update(guard = "caller_is_admin")]
+pub fn get_airdrop(index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)> {
+    check_if_killed()?;
+
+    let mut last_index = index;
+
+    read_state(|state| {
+        let airdrop_collected: Vec<_> = state
+            .airdrop_reward
+            .iter()
+            .enumerate()
+            .skip(last_index.0 as usize)
+            .filter(|&(_, reward)| !reward.transferred)
+            .map(|(idx, reward)| {
+                last_index = Index(idx as u64);
+                reward.clone()
+            })
+            .collect();
+
+        Ok((last_index, airdrop_collected))
+    })
+}
+
+/// Pushes the new state of who was transferred money
+#[update(guard = "caller_is_admin")]
+pub fn put_airdrop(index: Index, eth_address_amount: EthAddressAmount) -> CustomResult<()> {
+    check_if_killed()?;
+
+    mutate_state(|state| {
+        // for the index to the end of the list update the state
+        state
+            .airdrop_reward
+            .iter_mut()
+            .skip(index.0 as usize)
+            .filter(|reward| reward.eth_address == eth_address_amount.eth_address)
+            .for_each(|reward| reward.transferred = true);
     });
 
     Ok(())

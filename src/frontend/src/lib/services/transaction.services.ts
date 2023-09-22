@@ -105,15 +105,17 @@ const processMinedTransaction = async ({
 		return;
 	}
 
-	// At least on Sepolia network we noticed that the timestamp was not provided when getting the transaction in this hook.
-	// Therefore, as the transaction has just been mined and for simplicity reason, we display now timestamp if undefined.
+	// We noticed that the timestamp was not provided when retrieving the transaction at this stage, i.e., after transaction.wait().
+	// Therefore, because the transaction has just been mined and as the UI displays a transaction date in the list of transactions, we display now timestamp if undefined.
+	// This is for simplicity reasons and because it allows us to avoid making an additional call to getTransaction.
 	const { timestamp, ...rest } = minedTransaction;
 
 	transactionsStore.update({
 		tokenId: token.id,
 		transaction: {
 			...rest,
-			timestamp: timestamp ?? Date.now() / 1000,
+			timestamp,
+			displayTimestamp: timestamp ?? Date.now() / 1000,
 			...(nonNullish(value) && { value })
 		}
 	});
