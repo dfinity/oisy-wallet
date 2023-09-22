@@ -5,9 +5,10 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { formatToDate } from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { Utils } from 'alchemy-sdk';
+	import TransactionStatus from '$lib/components/transactions/TransactionStatus.svelte';
 
 	export let transaction: Transaction;
 
@@ -44,6 +45,8 @@
 			<p id="block-number" class="font-normal mb-2 px-1.25 break-words">
 				<output>{blockNumber}</output>
 			</p>
+
+			<TransactionStatus {blockNumber} />
 		{/if}
 
 		{#if nonNullish(timestamp)}
