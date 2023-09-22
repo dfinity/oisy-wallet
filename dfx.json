@@ -52,6 +52,10 @@
 	},
 	"version": 1,
 	"networks": {
+		"old-backend": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
 		"staging": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
