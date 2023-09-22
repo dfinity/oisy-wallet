@@ -13,7 +13,7 @@
 	<svelte:fragment slot="title">Receive</svelte:fragment>
 
 	<p class="font-bold text-center">Address:</p>
-	<p class="mb-2 font-normal sm:items-center justify-center">
+	<p class="mb-2 font-normal text-center">
 		<output class="break-words">{$addressStore ?? ''}</output><Copy
 			inline
 			value={$addressStore ?? ''}
