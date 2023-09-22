@@ -4,6 +4,7 @@ import type {
 	MetamaskTransactionHash
 } from '$lib/types/metamask';
 import type { BigNumber } from '@ethersproject/bignumber';
+import { Utils } from 'alchemy-sdk';
 
 // Documentation: https://docs.metamask.io/wallet/how-to/send-transactions/
 
@@ -21,7 +22,7 @@ export const sendMetamaskTransaction = ({
 		params: [
 			{
 				...rest,
-				value: value.toString()
+				value: Utils.hexlify(value).toString()
 			}
 		]
 	});
