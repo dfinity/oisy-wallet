@@ -15,7 +15,8 @@ use ic_cdk::{caller, trap};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
 use state::{
-    AirdropAmount, Arg, Code, CodeInfo, Index, Info, InitArg, PrincipalState, EthereumAddress, RewardType,
+    AirdropAmount, Arg, Code, CodeInfo, EthereumAddress, Index, Info, InitArg, PrincipalState,
+    RewardType,
 };
 
 mod guards;
@@ -25,8 +26,7 @@ use crate::guards::{caller_is_admin, caller_is_manager};
 use crate::state::{CodeState, State};
 use crate::utils::get_eth_address;
 use crate::utils::{
-    add_user_to_airdrop_reward, check_if_killed, get_pre_codes,
-    register_principal_with_eth_address,
+    add_user_to_airdrop_reward, check_if_killed, get_pre_codes, register_principal_with_eth_address,
 };
 
 type CustomResult<T> = Result<T, CanisterError>;
@@ -219,7 +219,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
                     state,
                     parent_eth_address.clone(),
                     AirdropAmount(state.token_per_person / 4),
-                    state::RewardType::Referral
+                    state::RewardType::Referral,
                 )
             }
         }
@@ -240,7 +240,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
             state,
             eth_address.clone(),
             AirdropAmount(state.token_per_person / 4),
-            state::RewardType::Airdrop
+            state::RewardType::Airdrop,
         );
 
         let depth = state.codes.get(&code).unwrap().depth;
@@ -312,10 +312,11 @@ pub fn get_code() -> CustomResult<Info> {
         };
 
         // check if the eth address has been transferred wrapped tokens
-        let tokens_transferred = state
-            .airdrop_reward
-            .iter()
-            .any(|eth_address_amount| eth_address_amount.eth_address == eth_address && eth_address_amount.reward_type == RewardType::Airdrop);
+        let tokens_transferred = state.airdrop_reward.iter().any(|eth_address_amount| {
+            eth_address_amount.eth_address == eth_address
+                && eth_address_amount.reward_type == RewardType::Airdrop
+                && eth_address_amount.transferred
+        });
 
         Ok(Info::new(
             code,
@@ -361,7 +362,11 @@ pub fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, Ai
             .skip(last_index.0 as usize)
             .map(|(idx, reward)| {
                 last_index = Index(idx as u64);
-                (last_index.clone(), reward.eth_address.clone(), reward.amount.clone())
+                (
+                    last_index.clone(),
+                    reward.eth_address.clone(),
+                    reward.amount.clone(),
+                )
             })
             .collect();
 
