@@ -60,6 +60,6 @@
 	<AirdropInvites {airdrop} />
 
 	<p class="mt-4 mb-2">
-		<small>Tokens are claimable by friends as long as the Airdrop isn’t exhausted!</small>
+		<small>Tokens are claimable as long as the airdrop is not exhausted!</small>
 	</p>
 </Modal>
