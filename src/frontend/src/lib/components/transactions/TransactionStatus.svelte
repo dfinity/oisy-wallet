@@ -36,7 +36,7 @@
 	onMount(async () => {
 		await loadCurrentBlockNumber();
 
-		timer = setInterval(loadCurrentBlockNumber, 30000);
+		timer = setInterval(loadCurrentBlockNumber, 60000);
 	});
 
 	onDestroy(clearTimer);
