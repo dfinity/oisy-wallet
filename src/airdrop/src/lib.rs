@@ -77,7 +77,7 @@ fn init(arg: Arg) {
                 maximum_depth,
                 numbers_of_children,
                 total_tokens,
-                principals_admin: HashSet::from([caller()]),
+                principals_admins: HashSet::from([caller()]),
                 ..State::default()
             })
         }),
@@ -114,7 +114,7 @@ pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
 #[update(guard = "caller_is_admin")]
 pub fn add_admin(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
-        state.principals_admin.insert(principal);
+        state.principals_admins.insert(principal);
 
         Ok(())
     })
@@ -175,9 +175,6 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
 }
 
 /// Function to be called when the user has a code
-/// The code the user wants to redeem
-/// The ETH address of the user
-/// TODO: to be reviewed
 #[update]
 pub async fn redeem_code(code: Code) -> CustomResult<Info> {
     check_if_killed()?;
@@ -187,7 +184,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
     mutate_state(|state| {
         // Check if the given principal has redeemed any code yet
-        if state.principals_user_eth.contains_key(&caller_principal) {
+        if state.principals_users.contains_key(&caller_principal) {
             return Err(CanisterError::CannotRegisterMultipleTimes);
         }
 
@@ -213,7 +210,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         } else {
             // TODO in this current configuration managers do not get the airdrop
             // add parent eth address to the list of eth addresses to send tokens to
-            if let Some((_, parent_eth_address)) = state.principals_user_eth.get(&parent_principal)
+            if let Some((_, parent_eth_address)) = state.principals_users.get(&parent_principal)
             {
                 add_user_to_airdrop_reward(
                     state,
@@ -289,7 +286,7 @@ pub fn get_code() -> CustomResult<Info> {
     read_state(|state| {
         // get the code and eth_address associated with the principal
         let (code, eth_address) = state
-            .principals_user_eth
+            .principals_users
             .get(&caller_principal)
             .cloned()
             .ok_or(CanisterError::CodeNotFound)?;
