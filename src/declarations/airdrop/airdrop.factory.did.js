@@ -17,6 +17,7 @@ export const idlFactory = ({ IDL }) => {
 		NoMoreCodes: IDL.Null,
 		MaximumDepthReached: IDL.Null,
 		CodeAlreadyRedeemed: IDL.Null,
+		TransactionUnkown: IDL.Null,
 		CodeNotFound: IDL.Null,
 		NoCodeForII: IDL.Null
 	});
@@ -27,13 +28,8 @@ export const idlFactory = ({ IDL }) => {
 		codes_redeemed: IDL.Nat64
 	});
 	const Result_1 = IDL.Variant({ Ok: CodeInfo, Err: CanisterError });
-	const EthAddressAmount = IDL.Record({
-		transferred: IDL.Bool,
-		eth_address: IDL.Text,
-		amount: IDL.Nat64
-	});
 	const Result_2 = IDL.Variant({
-		Ok: IDL.Tuple(IDL.Nat64, IDL.Vec(EthAddressAmount)),
+		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Text, IDL.Nat64)),
 		Err: CanisterError
 	});
 	const Info = IDL.Record({
@@ -54,7 +50,7 @@ export const idlFactory = ({ IDL }) => {
 		get_code: IDL.Func([], [Result_3], ['query']),
 		is_manager: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
-		put_airdrop: IDL.Func([IDL.Nat64, EthAddressAmount], [Result], []),
+		put_airdrop: IDL.Func([IDL.Nat64], [Result], []),
 		redeem_code: IDL.Func([IDL.Text], [Result_3], [])
 	});
 };
