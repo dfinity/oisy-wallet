@@ -20,6 +20,8 @@ USERS=(
     "p2qa7-2gf5p-ytm2e-y6kzz-wjrt5-kdqim-jmmsb-6oh53-juvjm-3qc36-wqe"
     "p5nqc-422x6-4oegv-jgk53-mu3tn-atrxz-snmrl-yor4c-oejin-a4dsc-xqe"
     "3y5uj-oyiwp-f5vbw-cxna2-jscer-bcreg-w3q4v-l467g-fs7lc-sou5y-tqe"
+    "z7lvn-zff37-ngtmx-6ivd2-dkwgm-7jvzc-5f4au-q6zzv-chfar-xthok-3ae"
+    "myzmi-vv6he-vkpx7-kqccd-fu5np-k7d6o-g5gji-ryq3v-r6ogh-ymlby-tqe"
 )
 
 for USER in "${USERS[@]}"; do
