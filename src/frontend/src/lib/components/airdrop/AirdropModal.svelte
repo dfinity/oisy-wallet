@@ -11,10 +11,7 @@
 
 	export let airdrop: Info;
 
-	let progressStep: string = AirdropStep.AIRDROP;
-
-	let steps: [ProgressStep, ...ProgressStep[]];
-	$: steps = [
+	let steps: [ProgressStep, ...ProgressStep[]] = [
 		{
 			step: AirdropStep.INITIALIZATION,
 			text: 'You’ve created a wallet',
@@ -24,9 +21,9 @@
 			step: AirdropStep.AIRDROP,
 			text: 'Airdropped 2 ICP for you',
 			state: 'in_progress',
-			stateLabel: 'In progress, may take a while'
+			progressLabel: 'In progress, may take a while'
 		} as StaticStep,
-		...(fromNullable(airdrop?.children)?.length ?? 0 > 0
+		...((fromNullable(airdrop?.children)?.length ?? 0) > 0
 			? [
 					{
 						step: AirdropStep.INVITE_FRIENDS,
@@ -36,6 +33,21 @@
 			  ]
 			: [])
 	];
+
+	let hasInvites = false;
+	$: hasInvites = (fromNullable(airdrop?.children)?.length ?? 0) > 0;
+
+	let allInvitesRedeemed = false;
+	$: allInvitesRedeemed =
+		hasInvites &&
+		(fromNullable(airdrop?.children) ?? []).find(([_, state]) => !state) === undefined;
+
+	let progressStep: string = AirdropStep.AIRDROP;
+	$: progressStep = airdrop?.tokens_transferred
+		? allInvitesRedeemed
+			? AirdropStep.DONE
+			: AirdropStep.INVITE_FRIENDS
+		: AirdropStep.AIRDROP;
 </script>
 
 <Modal visible={$modalAirdrop} on:nnsClose={modalStore.close}>
