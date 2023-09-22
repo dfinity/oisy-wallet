@@ -1,6 +1,12 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
-	const InitArg = IDL.Record({ backend_canister_id: IDL.Principal });
+	const InitArg = IDL.Record({
+		backend_canister_id: IDL.Principal,
+		token_per_person: IDL.Nat64,
+		maximum_depth: IDL.Nat64,
+		total_tokens: IDL.Nat64,
+		numbers_of_children: IDL.Nat64
+	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const CanisterError = IDL.Variant({
 		NoChildrenForCode: IDL.Null,
@@ -54,7 +60,13 @@ export const idlFactory = ({ IDL }) => {
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
-	const InitArg = IDL.Record({ backend_canister_id: IDL.Principal });
+	const InitArg = IDL.Record({
+		backend_canister_id: IDL.Principal,
+		token_per_person: IDL.Nat64,
+		maximum_depth: IDL.Nat64,
+		total_tokens: IDL.Nat64,
+		numbers_of_children: IDL.Nat64
+	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	return [Arg];
 };

@@ -31,11 +31,6 @@ use crate::utils::{
 
 type CustomResult<T> = Result<T, CanisterError>;
 
-static TOKEN_PER_PERSON: u64 = 400;
-static MAXIMUM_DEPTH: u64 = 2;
-static NUMBERS_OF_CHILDREN: u64 = 3;
-// TODO set during init
-static INITIAL_TOKENS: u64 = 100_000;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
@@ -70,10 +65,14 @@ pub enum CanisterError {
 fn init(arg: Arg) {
     match arg {
         Arg::Init(InitArg {
-            backend_canister_id,
+            backend_canister_id, token_per_person, maximum_depth, numbers_of_children, total_tokens
         }) => STATE.with(|cell| {
             *cell.borrow_mut() = Some(State {
                 backend_canister_id,
+                token_per_person,
+                maximum_depth,
+                numbers_of_children,
+                total_tokens,
                 principals_admin: HashSet::from([caller()]),
                 ..State::default()
             })
@@ -200,11 +199,11 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         }
 
         // Deduct the expected full amount redeemable by the user
-        if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
-            deduct_tokens(state, TOKEN_PER_PERSON)?;
+        if state.codes.get(&code).unwrap().depth < state.maximum_depth {
+            deduct_tokens(state, state.token_per_person)?;
         } else {
             // We will redeem 1/4 of the amount as if the code depth == MAXIMUM_DEPTH
-            deduct_tokens(state, TOKEN_PER_PERSON / 4)?;
+            deduct_tokens(state, state.token_per_person / 4)?;
         }
 
         let parent_principal = state.codes.get(&code).unwrap().parent_principal;
@@ -224,7 +223,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
                 add_user_to_airdrop_reward(
                     state,
                     parent_eth_address.clone(),
-                    AirdropAmount(TOKEN_PER_PERSON / 4),
+                    AirdropAmount(state.token_per_person / 4),
                 )
             }
         }
@@ -244,14 +243,14 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         add_user_to_airdrop_reward(
             state,
             eth_address.clone(),
-            AirdropAmount(TOKEN_PER_PERSON / 4),
+            AirdropAmount(state.token_per_person / 4),
         );
 
         let depth = state.codes.get(&code).unwrap().depth;
 
         // Generate children codes only if we are below the maximum depth
-        let children_codes = if state.codes.get(&code).unwrap().depth < MAXIMUM_DEPTH {
-            let children_code: Vec<Code> = (0..NUMBERS_OF_CHILDREN)
+        let children_codes = if state.codes.get(&code).unwrap().depth < state.maximum_depth {
+            let children_code: Vec<Code> = (0..state.numbers_of_children)
                 // TODO proper error returned
                 .map(|_x| get_pre_codes(state).unwrap())
                 .collect();

@@ -2,8 +2,6 @@ use candid::{types::principal::Principal, CandidType};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-use crate::INITIAL_TOKENS;
-
 #[derive(Serialize, Deserialize, Clone, CandidType)]
 pub struct State {
     // Admin principals - the principals that can add new principals that can generate codes and get the list of airdrop to do
@@ -24,6 +22,11 @@ pub struct State {
     pub total_tokens: u64,
     // backend canister id
     pub backend_canister_id: Principal,
+    pub token_per_person: u64,
+    // maximum depth of our "familiy tree" of codes
+    pub maximum_depth: u64,
+    // number of children per code
+    pub numbers_of_children: u64,
 }
 
 impl Default for State {
@@ -36,8 +39,11 @@ impl Default for State {
             codes: HashMap::new(),
             airdrop_reward: Vec::new(),
             killed: false,
-            total_tokens: INITIAL_TOKENS,
+            total_tokens: 0,
             backend_canister_id: Principal::anonymous(),
+            token_per_person: 0,
+            maximum_depth: 0,
+            numbers_of_children: 0,
         }
     }
 }
@@ -143,6 +149,14 @@ impl EthAddressAmount {
 pub struct InitArg {
     /// The backend canister id
     pub backend_canister_id: Principal,
+    /// total amount of tokens
+    pub total_tokens: u64,
+    /// number of tokens per person
+    pub token_per_person: u64,
+    /// maximum depth of our "familiy tree" of codes
+    pub maximum_depth: u64,
+    /// number of children per code
+    pub numbers_of_children: u64,
 }
 
 #[derive(CandidType, Deserialize)]
