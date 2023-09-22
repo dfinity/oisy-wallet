@@ -127,19 +127,21 @@ impl CodeState {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Default, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, CandidType)]
 pub struct EthereumTransaction {
     pub eth_address: EthereumAddress,
     pub amount: AirdropAmount,
     pub transferred: bool,
+    pub reward_type: RewardType,
 }
 
 impl EthereumTransaction {
-    pub fn new(eth_address: EthereumAddress, amount: AirdropAmount, transferred: bool) -> Self {
+    pub fn new(eth_address: EthereumAddress, amount: AirdropAmount, transferred: bool, reward_type: RewardType) -> Self {
         Self {
             eth_address,
             amount,
             transferred,
+            reward_type
         }
     }
 }
@@ -166,3 +168,9 @@ pub enum Arg {
 
 #[derive(CandidType, Clone, Deserialize)]
 pub struct Index(pub u64);
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, CandidType)]
+pub enum RewardType {
+    Airdrop,
+    Referral,
+}
