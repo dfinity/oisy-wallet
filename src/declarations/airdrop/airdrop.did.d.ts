@@ -32,6 +32,10 @@ export interface Info {
 }
 export interface InitArg {
 	backend_canister_id: Principal;
+	token_per_person: bigint;
+	maximum_depth: bigint;
+	total_tokens: bigint;
+	numbers_of_children: bigint;
 }
 export type Result = { Ok: null } | { Err: CanisterError };
 export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };

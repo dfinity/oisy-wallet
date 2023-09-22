@@ -28,7 +28,13 @@ type Info = record {
   children : opt vec record { text; bool };
   tokens_transferred : bool;
 };
-type InitArg = record { backend_canister_id : principal };
+type InitArg = record {
+  backend_canister_id : principal;
+  token_per_person : nat64;
+  maximum_depth : nat64;
+  total_tokens : nat64;
+  numbers_of_children : nat64;
+};
 type Result = variant { Ok; Err : CanisterError };
 type Result_1 = variant { Ok : CodeInfo; Err : CanisterError };
 type Result_2 = variant {
