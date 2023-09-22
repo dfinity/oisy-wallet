@@ -3,7 +3,7 @@ import icp from '$lib/assets/icp.svg';
 import uniswap from '$lib/assets/uniswap.svg';
 import usdc from '$lib/assets/usdc.svg';
 import usdt from '$lib/assets/usdt.svg';
-import {ERC20_CONTRACTS_ADDRESSES, ERC20_FALLBACK_FEE} from '$lib/constants/erc20.constants';
+import { ERC20_CONTRACTS_ADDRESSES, ERC20_FALLBACK_FEE } from '$lib/constants/erc20.constants';
 import { getFeeData, metadata } from '$lib/providers/infura-erc20.providers';
 import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
