@@ -27,7 +27,7 @@
 			? [
 					{
 						step: AirdropStep.INVITE_FRIENDS,
-						text: `Earn up to X ICP by inviting friends!*`,
+						text: `Earn up to X ICP by inviting friends!`,
 						state: 'next'
 					} as StaticStep
 			  ]
@@ -59,5 +59,7 @@
 
 	<AirdropInvites {airdrop} />
 
-	<p class="mt-3"><small>* Claimable until airdrop exhausted</small></p>
+	<p class="mt-4 mb-2">
+		<small>Tokens are claimable by friends as long as the Airdrop isn’t exhausted!</small>
+	</p>
 </Modal>
