@@ -31,17 +31,16 @@ use ic_cdk::{
 };
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
-use state::{
-    AirdropAmount, Arg, Code, CodeInfo, EthereumAddress, Index, Info, InitArg, PrincipalState,
-    RewardType,
-};
 
 mod guards;
 mod state;
 mod utils;
 use crate::{
     guards::{caller_is_admin, caller_is_manager},
-    state::{CodeState, State},
+    state::{
+        AirdropAmount, Arg, Code, CodeInfo, CodeState, EthereumAddress, Index, Info, InitArg,
+        PrincipalState, RewardType, State,
+    },
     utils::{
         add_user_to_airdrop_reward, check_if_killed, get_eth_address, get_pre_codes,
         register_principal_with_eth_address,
