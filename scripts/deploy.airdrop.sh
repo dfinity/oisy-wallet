@@ -1,15 +1,36 @@
 #!/usr/bin/env bash
 
-if [ "$#" -ne 4 ]; then
-    echo "Usage: $0 <total_tokens_airdrop> <maximum_depth> <tokens_per_person> <numbers_of_children>"
+print_usage_and_exit() {
+    echo "Error: $1"
+    echo "Usage: $0 --total-tokens-airdrop=<value> --maximum-depth=<value> --tokens-per-person=<value> --numbers-of-children=<value>"
     exit 1
-fi
+}
 
-# assign the arguments
-TOTAL_TOKENS_AIRDROP=$1
-MAXIMUM_DEPTH=$2
-TOKENS_PER_PERSON=$3
-NUMBERS_OF_CHILDREN=$4
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --total-tokens-airdrop=*)
+            TOTAL_TOKENS_AIRDROP="${1#*=}"
+            ;;
+        --maximum-depth=*)
+            MAXIMUM_DEPTH="${1#*=}"
+            ;;
+        --tokens-per-person=*)
+            TOKENS_PER_PERSON="${1#*=}"
+            ;;
+        --numbers-of-children=*)
+            NUMBERS_OF_CHILDREN="${1#*=}"
+            ;;
+        *)
+            print_usage_and_exit "Invalid argument"
+            ;;
+    esac
+    shift
+done
+
+# Check if all arguments are set
+if [ -z "$TOTAL_TOKENS_AIRDROP" ] || [ -z "$MAXIMUM_DEPTH" ] || [ -z "$TOKENS_PER_PERSON" ] || [ -z "$NUMBERS_OF_CHILDREN" ]; then
+  print_usage_and_exit "Missing arguments"
+fi
 
 case $ENV in
   "staging")
@@ -34,20 +55,20 @@ if [ -n "${ENV+1}" ]; then
   dfx deploy airdrop --argument "(variant {
     Init = record {
       backend_canister_id = principal \"$BACKEND_ID\";
-      token_per_person : \"$TOTAL_TOKENS_AIRDROP\";
-      maximum_depth : \"$MAXIMUM_DEPTH\";
-      total_tokens : \"$TOKENS_PER_PERSON\";
-      numbers_of_children : \"$NUMBERS_OF_CHILDREN\";
+      token_per_person = \"$TOTAL_TOKENS_AIRDROP\";
+      maximum_depth = \"$MAXIMUM_DEPTH\";
+      total_tokens = \"$TOKENS_PER_PERSON\";
+      numbers_of_children = \"$NUMBERS_OF_CHILDREN\";
     }
   })" --network "$ENV" --wallet "$WALLET"
 else
   dfx deploy airdrop --argument "(variant {
     Init = record {
       backend_canister_id = principal \"$BACKEND_ID\"
-      token_per_person : \"$TOTAL_TOKENS_AIRDROP\";
-      maximum_depth : \"$MAXIMUM_DEPTH\";
-      total_tokens : \"$TOKENS_PER_PERSON\";
-      numbers_of_children : \"$NUMBERS_OF_CHILDREN\";
+      token_per_person = \"$TOTAL_TOKENS_AIRDROP\";
+      maximum_depth = \"$MAXIMUM_DEPTH\";
+      total_tokens = \"$TOKENS_PER_PERSON\";
+      numbers_of_children = \"$NUMBERS_OF_CHILDREN\";
     }
   })"
 fi
