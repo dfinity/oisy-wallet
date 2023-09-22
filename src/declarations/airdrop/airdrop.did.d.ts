@@ -19,11 +19,6 @@ export interface CodeInfo {
 	code: string;
 	codes_redeemed: bigint;
 }
-export interface EthAddressAmount {
-	transferred: boolean;
-	eth_address: string;
-	amount: bigint;
-}
 export interface Info {
 	principal: Principal;
 	code: string;
@@ -40,7 +35,7 @@ export interface InitArg {
 }
 export type Result = { Ok: null } | { Err: CanisterError };
 export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };
-export type Result_2 = { Ok: Array<[bigint, EthAddressAmount]> } | { Err: CanisterError };
+export type Result_2 = { Ok: Array<[bigint, string, bigint]> } | { Err: CanisterError };
 export type Result_3 = { Ok: Info } | { Err: CanisterError };
 export interface _SERVICE {
 	add_admin: ActorMethod<[Principal], Result>;

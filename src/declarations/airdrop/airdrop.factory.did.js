@@ -28,13 +28,8 @@ export const idlFactory = ({ IDL }) => {
 		codes_redeemed: IDL.Nat64
 	});
 	const Result_1 = IDL.Variant({ Ok: CodeInfo, Err: CanisterError });
-	const EthAddressAmount = IDL.Record({
-		transferred: IDL.Bool,
-		eth_address: IDL.Text,
-		amount: IDL.Nat64
-	});
 	const Result_2 = IDL.Variant({
-		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, EthAddressAmount)),
+		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Text, IDL.Nat64)),
 		Err: CanisterError
 	});
 	const Info = IDL.Record({
