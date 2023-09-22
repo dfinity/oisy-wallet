@@ -24,7 +24,8 @@ npm run deploy
 ENV=staging dfx deploy frontend --network staging --wallet cvthj-wyaaa-aaaad-aaaaq-cai
 # The airdrop canister should have been manually created before deploying the backend.
 ENV=staging ./scripts/deploy.backend.sh
-ENV=staging ./scripts/deploy.airdrop.sh
+# Replace arguments ABCDEF with effective parameters
+ENV=staging ./scripts/deploy.airdrop.sh --total-tokens-airdrop=A --maximum-depth=B --tokens-per-person=C --numbers-of-children=D --number-of-codes-to-generate=E --number-of-characters-per-code=F
 ```
 
 ### IC
@@ -35,5 +36,6 @@ ENV=staging ./scripts/deploy.airdrop.sh
 ENV=ic dfx deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
 # The airdrop canister should have been manually created before deploying the backend.
 ENV=ic ./scripts/deploy.backend.sh
-ENV=ic ./scripts/deploy.airdrop.sh
+# Replace arguments ABCDEF with effective parameters
+ENV=ic ./scripts/deploy.airdrop.sh --total-tokens-airdrop=A --maximum-depth=B --tokens-per-person=C --numbers-of-children=D --number-of-codes-to-generate=E --number-of-characters-per-code=F
 ```
