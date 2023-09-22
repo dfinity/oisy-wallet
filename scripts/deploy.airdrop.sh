@@ -27,7 +27,7 @@ while [ "$#" -gt 0 ]; do
             NUMBER_OF_CHARACTERS_PER_CODE="${1#*=}"
             ;;
         *)
-            print_usage_and_exit "Invalid argument"
+            print_usage_and_exit "Invalid argument - $1"
             ;;
     esac
     shift
@@ -61,9 +61,9 @@ if [ -n "${ENV+1}" ]; then
   dfx deploy airdrop --argument "(variant {
     Init = record {
       backend_canister_id = principal \"$BACKEND_ID\";
-      token_per_person = $TOTAL_TOKENS_AIRDROP;
+      token_per_person = $TOKENS_PER_PERSON;
       maximum_depth = $MAXIMUM_DEPTH;
-      total_tokens = $TOKENS_PER_PERSON;
+      total_tokens = $TOTAL_TOKENS_AIRDROP;
       numbers_of_children = $NUMBERS_OF_CHILDREN;
     }
   })" --network "$ENV" --wallet "$WALLET"
@@ -71,9 +71,9 @@ else
   dfx deploy airdrop --argument "(variant {
     Init = record {
       backend_canister_id = principal \"$BACKEND_ID\";
-      token_per_person = $TOTAL_TOKENS_AIRDROP;
+      token_per_person = $TOKENS_PER_PERSON;
       maximum_depth = $MAXIMUM_DEPTH;
-      total_tokens = $TOKENS_PER_PERSON;
+      total_tokens = $TOTAL_TOKENS_AIRDROP;
       numbers_of_children = $NUMBERS_OF_CHILDREN;
     }
   })"
