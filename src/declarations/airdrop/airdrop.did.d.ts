@@ -11,6 +11,7 @@ export type CanisterError =
 	| { NoMoreCodes: null }
 	| { MaximumDepthReached: null }
 	| { CodeAlreadyRedeemed: null }
+	| { TransactionUnkown: null }
 	| { CodeNotFound: null }
 	| { NoCodeForII: null };
 export interface CodeInfo {
@@ -51,6 +52,6 @@ export interface _SERVICE {
 	get_code: ActorMethod<[], Result_3>;
 	is_manager: ActorMethod<[], boolean>;
 	kill_canister: ActorMethod<[], Result>;
-	put_airdrop: ActorMethod<[bigint, EthAddressAmount], Result>;
+	put_airdrop: ActorMethod<[bigint], Result>;
 	redeem_code: ActorMethod<[string], Result_3>;
 }

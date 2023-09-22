@@ -8,6 +8,7 @@ type CanisterError = variant {
   NoMoreCodes;
   MaximumDepthReached;
   CodeAlreadyRedeemed;
+  TransactionUnkown;
   CodeNotFound;
   NoCodeForII;
 };
@@ -52,6 +53,6 @@ service : (Arg) -> {
   get_code : () -> (Result_3) query;
   is_manager : () -> (bool) query;
   kill_canister : () -> (Result);
-  put_airdrop : (nat64, EthAddressAmount) -> (Result);
+  put_airdrop : (nat64) -> (Result);
   redeem_code : (text) -> (Result_3);
 }

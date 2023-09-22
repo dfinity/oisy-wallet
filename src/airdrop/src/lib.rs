@@ -31,7 +31,6 @@ use crate::utils::{
 
 type CustomResult<T> = Result<T, CanisterError>;
 
-
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
 }
@@ -59,13 +58,18 @@ pub enum CanisterError {
     MaximumDepthReached,
     NoMoreCodes,
     UnknownOisyWalletAddress,
+    TransactionUnkown,
 }
 
 #[init]
 fn init(arg: Arg) {
     match arg {
         Arg::Init(InitArg {
-            backend_canister_id, token_per_person, maximum_depth, numbers_of_children, total_tokens
+            backend_canister_id,
+            token_per_person,
+            maximum_depth,
+            numbers_of_children,
+            total_tokens,
         }) => STATE.with(|cell| {
             *cell.borrow_mut() = Some(State {
                 backend_canister_id,
@@ -319,7 +323,13 @@ pub fn get_code() -> CustomResult<Info> {
             .iter()
             .any(|eth_address_amount| eth_address_amount.eth_address == eth_address);
 
-        Ok(Info::new(code, tokens_transferred, caller_principal, eth_address, children))
+        Ok(Info::new(
+            code,
+            tokens_transferred,
+            caller_principal,
+            eth_address,
+            children,
+        ))
     })
 }
 
@@ -353,8 +363,8 @@ pub fn get_airdrop(index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)>
             .airdrop_reward
             .iter()
             .enumerate()
+            // we only start from the index we received
             .skip(last_index.0 as usize)
-            .filter(|&(_, reward)| !reward.transferred)
             .map(|(idx, reward)| {
                 last_index = Index(idx as u64);
                 reward.clone()
@@ -367,20 +377,19 @@ pub fn get_airdrop(index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)>
 
 /// Pushes the new state of who was transferred money
 #[update(guard = "caller_is_admin")]
-pub fn put_airdrop(index: Index, eth_address_amount: EthAddressAmount) -> CustomResult<()> {
+pub fn put_airdrop(index: Index) -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
         // for the index to the end of the list update the state
-        state
-            .airdrop_reward
-            .iter_mut()
-            .skip(index.0 as usize)
-            .filter(|reward| reward.eth_address == eth_address_amount.eth_address)
-            .for_each(|reward| reward.transferred = true);
-    });
-
-    Ok(())
+        match state.airdrop_reward.get_mut(index.0 as usize) {
+            Some(tx) => {
+                tx.transferred = true;
+                Ok(())
+            }
+            None => return Err(CanisterError::TransactionUnkown),
+        }
+    })
 }
 
 // automatically generates the candid file

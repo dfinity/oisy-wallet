@@ -17,6 +17,7 @@ export const idlFactory = ({ IDL }) => {
 		NoMoreCodes: IDL.Null,
 		MaximumDepthReached: IDL.Null,
 		CodeAlreadyRedeemed: IDL.Null,
+		TransactionUnkown: IDL.Null,
 		CodeNotFound: IDL.Null,
 		NoCodeForII: IDL.Null
 	});
@@ -54,7 +55,7 @@ export const idlFactory = ({ IDL }) => {
 		get_code: IDL.Func([], [Result_3], ['query']),
 		is_manager: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
-		put_airdrop: IDL.Func([IDL.Nat64, EthAddressAmount], [Result], []),
+		put_airdrop: IDL.Func([IDL.Nat64], [Result], []),
 		redeem_code: IDL.Func([IDL.Text], [Result_3], [])
 	});
 };
