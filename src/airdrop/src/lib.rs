@@ -345,8 +345,10 @@ fn bring_caninster_back_to_life() -> CustomResult<()> {
 
 /// Returns all the eth addresses with how much is meant to be sent to each one of them
 #[update(guard = "caller_is_admin")]
-pub fn get_airdrop(mut index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)> {
+pub fn get_airdrop(index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)> {
     check_if_killed()?;
+
+    let mut index = index;
 
     read_state(|state| {
         let airdrop_collected: Vec<_> = state
