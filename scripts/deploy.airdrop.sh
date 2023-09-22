@@ -64,7 +64,7 @@ if [ -n "${ENV+1}" ]; then
 else
   dfx deploy airdrop --argument "(variant {
     Init = record {
-      backend_canister_id = principal \"$BACKEND_ID\"
+      backend_canister_id = principal \"$BACKEND_ID\";
       token_per_person = \"$TOTAL_TOKENS_AIRDROP\";
       maximum_depth = \"$MAXIMUM_DEPTH\";
       total_tokens = \"$TOKENS_PER_PERSON\";
