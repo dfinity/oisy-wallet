@@ -11,8 +11,7 @@
 
 	export let airdrop: Info;
 
-	let steps: [ProgressStep, ...ProgressStep[]];
-	$: steps = [
+	let steps: [ProgressStep, ...ProgressStep[]] = [
 		{
 			step: AirdropStep.INITIALIZATION,
 			text: 'You’ve created a wallet',
@@ -21,15 +20,15 @@
 		{
 			step: AirdropStep.AIRDROP,
 			text: 'Airdropped 2 ICP for you',
-			state: airdrop?.tokens_transferred === true ? 'completed' : 'in_progress',
-			...(airdrop?.tokens_transferred !== true && { stateLabel: 'In progress, may take a while' })
+			state: 'in_progress',
+			progressLabel: 'In progress, may take a while'
 		} as StaticStep,
-		...(hasInvites
+		...((fromNullable(airdrop?.children)?.length ?? 0) > 0
 			? [
 					{
 						step: AirdropStep.INVITE_FRIENDS,
 						text: `Earn up to X ICP by inviting friends!`,
-						state: allInvitesRedeemed ? 'completed' : 'next'
+						state: 'next'
 					} as StaticStep
 			  ]
 			: [])
