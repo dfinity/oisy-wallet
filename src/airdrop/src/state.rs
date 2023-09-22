@@ -80,6 +80,7 @@ impl CodeInfo {
 pub struct Info {
     /// Next three fields should all be unique per user
     code: Code,
+    tokens_transferred: bool,
     principal: Principal,
     ethereum_address: EthereumAddress,
     /// Maps a Code to whether it has been redeemed
@@ -89,12 +90,14 @@ pub struct Info {
 impl Info {
     pub fn new(
         code: Code,
+        tokens_transferred: bool,
         principal: Principal,
         ethereum_address: EthereumAddress,
         children: Option<Vec<(Code, bool)>>,
     ) -> Self {
         Self {
             code,
+            tokens_transferred,
             principal,
             ethereum_address,
             children,

@@ -34,10 +34,10 @@ export const idlFactory = ({ IDL }) => {
 		principal: IDL.Principal,
 		code: IDL.Text,
 		ethereum_address: IDL.Text,
-		children: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, IDL.Bool)))
+		children: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, IDL.Bool))),
+		tokens_transferred: IDL.Bool
 	});
 	const Result_3 = IDL.Variant({ Ok: Info, Err: CanisterError });
-	const Result_4 = IDL.Variant({ Ok: IDL.Bool, Err: CanisterError });
 	return IDL.Service({
 		add_admin: IDL.Func([IDL.Principal], [Result], []),
 		add_codes: IDL.Func([IDL.Vec(IDL.Text)], [Result], []),
@@ -46,7 +46,6 @@ export const idlFactory = ({ IDL }) => {
 		generate_code: IDL.Func([], [Result_1], []),
 		get_airdrop: IDL.Func([IDL.Nat64], [Result_2], []),
 		get_code: IDL.Func([], [Result_3], ['query']),
-		has_redeemed: IDL.Func([], [Result_4], ['query']),
 		is_manager: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
 		put_airdrop: IDL.Func([IDL.Nat64, EthAddressAmount], [Result], []),

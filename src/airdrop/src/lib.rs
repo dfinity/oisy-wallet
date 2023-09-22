@@ -276,6 +276,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
         // return Info
         Ok(Info::new(
             code.clone(),
+            false,
             caller_principal,
             eth_address,
             children_codes,
@@ -314,7 +315,13 @@ pub fn get_code() -> CustomResult<Info> {
             Some(children)
         };
 
-        Ok(Info::new(code, caller_principal, eth_address, children))
+        // check if the eth address has been transferred wrapped tokens
+        let tokens_transferred = state
+            .airdrop_reward
+            .iter()
+            .any(|eth_address_amount| eth_address_amount.eth_address == eth_address);
+
+        Ok(Info::new(code, tokens_transferred, caller_principal, eth_address, children))
     })
 }
 
@@ -374,31 +381,6 @@ pub fn put_airdrop(index: Index, eth_address_amount: EthAddressAmount) -> Custom
     });
 
     Ok(())
-}
-
-/// For a given principal check if the original airdrop amount has been redeemed
-#[query]
-pub fn has_redeemed() -> CustomResult<bool> {
-    check_if_killed()?;
-
-    let caller_principal = caller();
-
-    read_state(|state| {
-        // get the code and eth_address associated with the principal
-        let (_, eth_address) = state
-            .principals_user_eth
-            .get(&caller_principal)
-            .cloned()
-            .ok_or(CanisterError::CodeNotFound)?;
-
-        // check if the eth address has been redeemed
-        let has_redeemed = state
-            .airdrop_reward
-            .iter()
-            .any(|eth_address_amount| eth_address_amount.eth_address == eth_address);
-
-        Ok(has_redeemed)
-    })
 }
 
 // automatically generates the candid file

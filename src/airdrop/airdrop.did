@@ -26,6 +26,7 @@ type Info = record {
   code : text;
   ethereum_address : text;
   children : opt vec record { text; bool };
+  tokens_transferred : bool;
 };
 type InitArg = record { backend_canister_id : principal };
 type Result = variant { Ok; Err : CanisterError };
@@ -35,7 +36,6 @@ type Result_2 = variant {
   Err : CanisterError;
 };
 type Result_3 = variant { Ok : Info; Err : CanisterError };
-type Result_4 = variant { Ok : bool; Err : CanisterError };
 service : (Arg) -> {
   add_admin : (principal) -> (Result);
   add_codes : (vec text) -> (Result);
@@ -44,7 +44,6 @@ service : (Arg) -> {
   generate_code : () -> (Result_1);
   get_airdrop : (nat64) -> (Result_2);
   get_code : () -> (Result_3) query;
-  has_redeemed : () -> (Result_4) query;
   is_manager : () -> (bool) query;
   kill_canister : () -> (Result);
   put_airdrop : (nat64, EthAddressAmount) -> (Result);
