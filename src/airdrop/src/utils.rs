@@ -4,7 +4,7 @@ use ic_cdk::{call, caller};
 
 use crate::read_state;
 use crate::state::{EthereumTransaction, EthereumAddress, State, RewardType};
-use crate::CanisterError::{CanisterKilled, GeneralError, NoMoreCodes, UnknownOisyWalletAddress};
+use crate::CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress};
 use crate::{AirdropAmount, Code, CustomResult};
 
 pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
@@ -28,16 +28,6 @@ pub fn check_if_killed() -> CustomResult<()> {
             Ok(())
         }
     })
-}
-
-/// Deduct token
-pub fn deduct_tokens(state: &mut State, amount: u64) -> CustomResult<()> {
-    if state.total_tokens < amount {
-        Err(GeneralError("Not enough tokens left".to_string()))
-    } else {
-        state.total_tokens -= amount;
-        Ok(())
-    }
 }
 
 /// Register a principal with an ethereum address

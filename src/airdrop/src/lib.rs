@@ -1,14 +1,28 @@
+#![deny(clippy::all, clippy::pedantic, clippy::nursery)]
+#![deny(rust_2018_idioms, missing_docs)]
+// lint suggested by the clippy::restriction wich we cannot enable for all, as some of the lints are unidiomatic
+#![allow(clippy::implicit_return)]
+#![allow(clippy::missing_docs_in_private_items)]
+#![allow(clippy::print_stderr)]
+#![allow(clippy::std_instead_of_alloc)]
+#![allow(clippy::expect_used)]
+#![allow(clippy::std_instead_of_core)]
+#![allow(clippy::arithmetic_side_effects)]
+// we should break down the functions, but that's for future me
+#![allow(clippy::cognitive_complexity)]
+// we like our mod.rs file the way they are
+#![allow(clippy::mod_module_files)]
+#![allow(clippy::missing_docs_in_private_items)]
+
+//! Airdrop backend canister
+//! This canister is responsible for generating codes and redeeming them.
+//! Linting:
+//! ```bash
+//! cargo clippy -p airdrop  -- -W clippy::all -W clippy::pedantic -W clippy::restriction -W clippy::nursery -W rust_2018_idioms
+//! ```
+
 use std::cell::RefCell;
 use std::collections::HashSet;
-
-/// Airdrop backend canister
-/// This canister is responsible for generating codes and redeeming them.
-/// It also stores the mapping between II and Ethereum address.
-///
-/// We add a type for everything as it is easier to reason with
-/// TODO:
-/// - add logging
-/// - should we not allow the same eth wallet to get added multiple time? For bot preventation
 use candid::{types::principal::Principal, CandidType};
 use ic_cdk::storage::{stable_restore, stable_save};
 use ic_cdk::{caller, trap};
@@ -35,7 +49,7 @@ thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();
 }
 
-pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
+fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(cell.borrow().as_ref().expect("state not initialized")))
 }
 
@@ -46,18 +60,30 @@ where
     STATE.with(|s| f(s.borrow_mut().as_mut().expect("state is not initialized")))
 }
 
+/// Our catch all error type
 #[derive(Serialize, Deserialize, Clone, Debug, CandidType)]
 pub enum CanisterError {
+    /// Our catch all error type
     GeneralError(String),
+    /// Canister is in a killed state
     CanisterKilled,
+    /// Code not found
     CodeNotFound,
+    /// Code already redeemed
     CodeAlreadyRedeemed,
+    /// Cannot register multiple times
     CannotRegisterMultipleTimes,
+    /// This code does not have any children assicated with it
     NoChildrenForCode,
+    /// This principal does not have any code associated with it
     NoCodeForII,
+    /// Maximum depth reached
     MaximumDepthReached,
+    /// No more codes left
     NoMoreCodes,
+    /// Unknown oisy wallet address
     UnknownOisyWalletAddress,
+    /// Transaction unknown
     TransactionUnkown,
 }
 
@@ -100,7 +126,7 @@ fn post_upgrade() {
 
 /// Add codes generated offline
 #[update(guard = "caller_is_admin")]
-pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
+fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     // generate non activated codes
     mutate_state(|state| {
         for code in codes {
@@ -112,7 +138,7 @@ pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
 }
 
 #[update(guard = "caller_is_admin")]
-pub fn add_admin(principal: Principal) -> CustomResult<()> {
+fn add_admin(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         state.principals_admins.insert(principal);
 
@@ -122,7 +148,7 @@ pub fn add_admin(principal: Principal) -> CustomResult<()> {
 
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
 #[update(guard = "caller_is_admin")]
-pub fn add_manager(principal: Principal) -> CustomResult<()> {
+fn add_manager(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         let principal_state = PrincipalState {
             codes_generated: 0,
@@ -136,7 +162,7 @@ pub fn add_manager(principal: Principal) -> CustomResult<()> {
 
 /// check whether a given principal is authorised to generate codes
 #[query]
-pub fn is_manager() -> bool {
+fn is_manager() -> bool {
     let caller_principal = caller();
 
     read_state(|state| state.principals_managers.contains_key(&caller_principal))
@@ -144,7 +170,7 @@ pub fn is_manager() -> bool {
 
 /// Returns one code if the given principal is authorized to generate codes
 #[update(guard = "caller_is_manager")]
-pub fn generate_code() -> CustomResult<CodeInfo> {
+fn generate_code() -> CustomResult<CodeInfo> {
     check_if_killed()?;
 
     let caller_principal = caller();
@@ -176,7 +202,7 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
 
 /// Function to be called when the user has a code
 #[update]
-pub async fn redeem_code(code: Code) -> CustomResult<Info> {
+async fn redeem_code(code: Code) -> CustomResult<Info> {
     check_if_killed()?;
 
     let caller_principal = caller();
@@ -279,7 +305,7 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 
 /// Return all the information about a given Principal's code
 #[query]
-pub fn get_code() -> CustomResult<Info> {
+fn get_code() -> CustomResult<Info> {
     check_if_killed()?;
     let caller_principal = caller();
 
@@ -326,26 +352,22 @@ pub fn get_code() -> CustomResult<Info> {
 }
 
 #[update(guard = "caller_is_admin")]
-fn kill_canister() -> CustomResult<()> {
+fn kill_canister() {
     mutate_state(|state| {
         state.killed = true;
-    });
-
-    Ok(())
+    })
 }
 
 #[update(guard = "caller_is_admin")]
-fn bring_caninster_back_to_life() -> CustomResult<()> {
+fn bring_caninster_back_to_life() {
     mutate_state(|state| {
         state.killed = false;
-    });
-
-    Ok(())
+    })
 }
 
 /// Returns all the eth addresses with how much is meant to be sent to each one of them
 #[update(guard = "caller_is_admin")]
-pub fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, AirdropAmount)>> {
+fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, AirdropAmount)>> {
     check_if_killed()?;
 
     let mut last_index = index;
@@ -373,7 +395,7 @@ pub fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, Ai
 
 /// Pushes the new state of who was transferred money
 #[update(guard = "caller_is_admin")]
-pub fn put_airdrop(index: Index) -> CustomResult<()> {
+fn put_airdrop(index: Index) -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
@@ -383,7 +405,7 @@ pub fn put_airdrop(index: Index) -> CustomResult<()> {
                 tx.transferred = true;
                 Ok(())
             }
-            None => return Err(CanisterError::TransactionUnkown),
+            None => Err(CanisterError::TransactionUnkown),
         }
     })
 }

@@ -31,7 +31,7 @@ pub struct State {
 
 impl Default for State {
     fn default() -> Self {
-        State {
+        Self {
             principals_admins: HashSet::new(),
             principals_managers: HashMap::new(),
             principals_users: HashMap::new(),
