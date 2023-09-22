@@ -3,7 +3,7 @@ use ic_cdk::api::call::CallResult;
 use ic_cdk::{call, caller};
 
 use crate::read_state;
-use crate::state::{EthereumAddress, State};
+use crate::state::{EthAddressAmount, EthereumAddress, State};
 use crate::CanisterError::{CanisterKilled, GeneralError, NoMoreCodes, UnknownOisyWalletAddress};
 use crate::{AirdropAmount, Code, CustomResult};
 
@@ -58,7 +58,9 @@ pub fn add_user_to_airdrop_reward(
     eth_address: EthereumAddress,
     amount: AirdropAmount,
 ) {
-    state.airdrop_reward.push((eth_address, amount));
+    state
+        .airdrop_reward
+        .push(EthAddressAmount::new(eth_address, amount, false));
 }
 
 // "generate" codes
