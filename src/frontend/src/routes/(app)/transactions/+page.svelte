@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Transactions from '$lib/components/list/Transactions.svelte';
+	import Transactions from '$lib/components/transactions/Transactions.svelte';
 </script>
 
 <Transactions />

@@ -15,15 +15,25 @@ case $ENV in
 esac
 
 if [ -n "${ENV+1}" ]; then
+  # We create automatically the airdrop canister only locally
+  AIRDROP_ID=$(dfx canister id airdrop --network "$ENV")
+else
+  dfx canister create airdrop
+  AIRDROP_ID=$(dfx canister id airdrop)
+fi
+
+if [ -n "${ENV+1}" ]; then
   dfx deploy backend --argument "(variant {
     Init = record {
-         ecdsa_key_name = \"$ECDSA_KEY_NAME\"
+         ecdsa_key_name = \"$ECDSA_KEY_NAME\";
+         allowed_callers = (vec {principal \"$AIRDROP_ID\"});
      }
   })" --network "$ENV" --wallet $WALLET
 else
   dfx deploy backend --argument "(variant {
     Init = record {
-         ecdsa_key_name = \"$ECDSA_KEY_NAME\"
+         ecdsa_key_name = \"$ECDSA_KEY_NAME\";
+         allowed_callers = (vec {principal \"$AIRDROP_ID\"});
      }
   })"
 fi

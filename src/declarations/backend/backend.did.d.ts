@@ -34,6 +34,7 @@ export interface HttpResponse {
 }
 export interface InitArg {
 	ecdsa_key_name: string;
+	allowed_callers: Array<Principal>;
 }
 export interface SignRequest {
 	to: string;

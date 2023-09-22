@@ -25,6 +25,10 @@ export const modalAirdrop: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'airdrop'
 );
+export const modalTransaction: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'transaction'
+);
 export const modalBurn: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'burn'

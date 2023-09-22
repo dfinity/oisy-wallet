@@ -1,20 +1,36 @@
 #!/usr/bin/env bash
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <backend_canister_id>"
-    exit 1
-fi
-
-BACKEND_CANISTER_ID=$1
+case $ENV in
+  "staging")
+    WALLET="cvthj-wyaaa-aaaad-aaaaq-cai"
+    ;;
+  "ic")
+    WALLET="yit3i-lyaaa-aaaan-qeavq-cai"
+    ;;
+  *)
+    ;;
+esac
 
 if [ -n "${ENV+1}" ]; then
-  echo "TODO: to be implemented"
+  # We create automatically the airdrop canister only locally
+  BACKEND_ID=$(dfx canister id backend --network "$ENV")
 else
-    dfx deploy airdrop --argument "(variant {
-      Init = record {
-        backend_canister_id = principal \"$BACKEND_CANISTER_ID\"
-      }
-    })" --mode reinstall
-
-    "$(git rev-parse --show-toplevel)/scripts/generate-codes.sh" 20 1000
+  dfx canister create airdrop
+  BACKEND_ID=$(dfx canister id backend)
 fi
+
+if [ -n "${ENV+1}" ]; then
+  dfx deploy airdrop --argument "(variant {
+    Init = record {
+      backend_canister_id = principal \"$BACKEND_ID\"
+    }
+  })" --network "$ENV" --wallet $WALLET
+else
+  dfx deploy airdrop --argument "(variant {
+    Init = record {
+      backend_canister_id = principal \"$BACKEND_ID\"
+    }
+  })"
+fi
+
+"$(git rev-parse --show-toplevel)/scripts/airdrop.generate-codes.sh" 20 1000

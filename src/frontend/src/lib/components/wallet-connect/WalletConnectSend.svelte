@@ -10,7 +10,9 @@
 	export let listener: WalletConnectListener | undefined | null;
 
 	let request: Web3WalletTypes.SessionRequest | undefined;
-	$: request = $modalStore?.data as Web3WalletTypes.SessionRequest | undefined;
+	$: request = $modalWalletConnectSend
+		? ($modalStore?.data as Web3WalletTypes.SessionRequest | undefined)
+		: undefined;
 
 	let firstTransaction: WalletConnectEthSendTransactionParams | undefined;
 	$: firstTransaction = request?.params.request.params?.[0];
