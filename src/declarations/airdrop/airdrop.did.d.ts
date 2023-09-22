@@ -11,17 +11,13 @@ export type CanisterError =
 	| { NoMoreCodes: null }
 	| { MaximumDepthReached: null }
 	| { CodeAlreadyRedeemed: null }
+	| { TransactionUnkown: null }
 	| { CodeNotFound: null }
 	| { NoCodeForII: null };
 export interface CodeInfo {
 	codes_generated: bigint;
 	code: string;
 	codes_redeemed: bigint;
-}
-export interface EthAddressAmount {
-	transferred: boolean;
-	eth_address: string;
-	amount: bigint;
 }
 export interface Info {
 	principal: Principal;
@@ -39,7 +35,7 @@ export interface InitArg {
 }
 export type Result = { Ok: null } | { Err: CanisterError };
 export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };
-export type Result_2 = { Ok: [bigint, Array<EthAddressAmount>] } | { Err: CanisterError };
+export type Result_2 = { Ok: Array<[bigint, string, bigint]> } | { Err: CanisterError };
 export type Result_3 = { Ok: Info } | { Err: CanisterError };
 export interface _SERVICE {
 	add_admin: ActorMethod<[Principal], Result>;
@@ -51,6 +47,6 @@ export interface _SERVICE {
 	get_code: ActorMethod<[], Result_3>;
 	is_manager: ActorMethod<[], boolean>;
 	kill_canister: ActorMethod<[], Result>;
-	put_airdrop: ActorMethod<[bigint, EthAddressAmount], Result>;
+	put_airdrop: ActorMethod<[bigint], Result>;
 	redeem_code: ActorMethod<[string], Result_3>;
 }
