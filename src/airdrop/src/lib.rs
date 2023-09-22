@@ -383,16 +383,16 @@ pub fn put_airdrop(index: Index, eth_address_amount: EthAddressAmount) -> Custom
     Ok(())
 }
 
-/// Changes the amount of total available tokens
+/// Add the amount of total available tokens
 #[update(guard = "caller_is_admin")]
-pub fn change_total_tokens(new_total_tokens: u64) -> CustomResult<()> {
+pub fn add_tokens_to_total(tokens_to_add: u64) -> CustomResult<AirdropAmount> {
     check_if_killed()?;
 
     mutate_state(|state| {
-        state.total_tokens = new_total_tokens;
-    });
+        state.total_tokens += tokens_to_add;
+        Ok(AirdropAmount(state.total_tokens))
+    })
 
-    Ok(())
 }
 
 // automatically generates the candid file

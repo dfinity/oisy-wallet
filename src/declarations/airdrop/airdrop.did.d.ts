@@ -38,20 +38,21 @@ export interface InitArg {
 	numbers_of_children: bigint;
 }
 export type Result = { Ok: null } | { Err: CanisterError };
-export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };
-export type Result_2 = { Ok: [bigint, Array<EthAddressAmount>] } | { Err: CanisterError };
-export type Result_3 = { Ok: Info } | { Err: CanisterError };
+export type Result_1 = { Ok: bigint } | { Err: CanisterError };
+export type Result_2 = { Ok: CodeInfo } | { Err: CanisterError };
+export type Result_3 = { Ok: [bigint, Array<EthAddressAmount>] } | { Err: CanisterError };
+export type Result_4 = { Ok: Info } | { Err: CanisterError };
 export interface _SERVICE {
 	add_admin: ActorMethod<[Principal], Result>;
 	add_codes: ActorMethod<[Array<string>], Result>;
 	add_manager: ActorMethod<[Principal], Result>;
+	add_tokens_to_total: ActorMethod<[bigint], Result_1>;
 	bring_caninster_back_to_life: ActorMethod<[], Result>;
-	change_total_tokens: ActorMethod<[bigint], Result>;
-	generate_code: ActorMethod<[], Result_1>;
-	get_airdrop: ActorMethod<[bigint], Result_2>;
-	get_code: ActorMethod<[], Result_3>;
+	generate_code: ActorMethod<[], Result_2>;
+	get_airdrop: ActorMethod<[bigint], Result_3>;
+	get_code: ActorMethod<[], Result_4>;
 	is_manager: ActorMethod<[], boolean>;
 	kill_canister: ActorMethod<[], Result>;
 	put_airdrop: ActorMethod<[bigint, EthAddressAmount], Result>;
-	redeem_code: ActorMethod<[string], Result_3>;
+	redeem_code: ActorMethod<[string], Result_4>;
 }

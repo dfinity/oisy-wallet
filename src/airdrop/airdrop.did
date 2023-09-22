@@ -36,23 +36,24 @@ type InitArg = record {
   numbers_of_children : nat64;
 };
 type Result = variant { Ok; Err : CanisterError };
-type Result_1 = variant { Ok : CodeInfo; Err : CanisterError };
-type Result_2 = variant {
+type Result_1 = variant { Ok : nat64; Err : CanisterError };
+type Result_2 = variant { Ok : CodeInfo; Err : CanisterError };
+type Result_3 = variant {
   Ok : record { nat64; vec EthAddressAmount };
   Err : CanisterError;
 };
-type Result_3 = variant { Ok : Info; Err : CanisterError };
+type Result_4 = variant { Ok : Info; Err : CanisterError };
 service : (Arg) -> {
   add_admin : (principal) -> (Result);
   add_codes : (vec text) -> (Result);
   add_manager : (principal) -> (Result);
+  add_tokens_to_total : (nat64) -> (Result_1);
   bring_caninster_back_to_life : () -> (Result);
-  change_total_tokens : (nat64) -> (Result);
-  generate_code : () -> (Result_1);
-  get_airdrop : (nat64) -> (Result_2);
-  get_code : () -> (Result_3) query;
+  generate_code : () -> (Result_2);
+  get_airdrop : (nat64) -> (Result_3);
+  get_code : () -> (Result_4) query;
   is_manager : () -> (bool) query;
   kill_canister : () -> (Result);
   put_airdrop : (nat64, EthAddressAmount) -> (Result);
-  redeem_code : (text) -> (Result_3);
+  redeem_code : (text) -> (Result_4);
 }
