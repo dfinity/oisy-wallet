@@ -34,7 +34,7 @@
 		{#if nonNullish(hash)}
 			<label for="hash" class="font-bold px-1.25">Transaction Hash:</label>
 			<p id="hash" class="font-normal mb-2 px-1.25 break-words">
-				{shortenWithMiddleEllipsis(hash)}
+				<output>{hash}</output>
 				<Copy value={hash} text="Transaction hash copied to clipboard." inline />
 			</p>
 		{/if}
@@ -42,14 +42,14 @@
 		{#if nonNullish(blockNumber)}
 			<label for="block-number" class="font-bold px-1.25">Block:</label>
 			<p id="block-number" class="font-normal mb-2 px-1.25 break-words">
-				{blockNumber}
+				<output>{blockNumber}</output>
 			</p>
 		{/if}
 
 		{#if nonNullish(timestamp)}
 			<label for="timestamp" class="font-bold px-1.25">Timestamp:</label>
 			<p id="timestamp" class="font-normal mb-2 px-1.25 break-words">
-				{formatToDate(timestamp)}
+				<output>{formatToDate(timestamp)}</output>
 			</p>
 		{/if}
 
@@ -60,21 +60,21 @@
 
 		<label for="from" class="font-bold px-1.25">From:</label>
 		<p id="from" class="font-normal mb-2 px-1.25 break-words">
-			{shortenWithMiddleEllipsis(from)}
+			<output>{from}</output>
 			<Copy value={from} text="From address copied to clipboard." inline />
 		</p>
 
 		{#if nonNullish(to)}
 			<label for="to" class="font-bold px-1.25">Interacted With (To):</label>
 			<p id="to" class="font-normal mb-2 px-1.25 break-words">
-				{shortenWithMiddleEllipsis(to)}
+				<output>{to}</output>
 				<Copy value={to} text="To address copied to clipboard." inline />
 			</p>
 		{/if}
 
 		<label for="amount" class="font-bold px-1.25">Value:</label>
 		<p id="amount" class="font-normal mb-2 px-1.25 break-words">
-			{Utils.formatEther(amount.toString())}
+			<output>{Utils.formatEther(amount.toString())}</output>
 		</p>
 
 		<button
