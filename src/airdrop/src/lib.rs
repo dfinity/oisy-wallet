@@ -1,5 +1,5 @@
 #![deny(clippy::all, clippy::pedantic, clippy::nursery)]
-#![deny(rust_2018_idioms, missing_docs)]
+#![deny(rust_2018_idioms)]
 // lint suggested by the clippy::restriction wich we cannot enable for all, as some of the lints are unidiomatic
 #![allow(clippy::implicit_return)]
 #![allow(clippy::missing_docs_in_private_items)]
@@ -21,11 +21,14 @@
 //! cargo clippy -p airdrop  -- -W clippy::all -W clippy::pedantic -W clippy::restriction -W clippy::nursery -W rust_2018_idioms
 //! ```
 
-use std::cell::RefCell;
-use std::collections::HashSet;
+use std::{cell::RefCell, collections::HashSet};
+
 use candid::{types::principal::Principal, CandidType};
-use ic_cdk::storage::{stable_restore, stable_save};
-use ic_cdk::{caller, trap};
+use ic_cdk::{
+    caller,
+    storage::{stable_restore, stable_save},
+    trap,
+};
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
 use state::{
@@ -36,11 +39,13 @@ use state::{
 mod guards;
 mod state;
 mod utils;
-use crate::guards::{caller_is_admin, caller_is_manager};
-use crate::state::{CodeState, State};
-use crate::utils::get_eth_address;
-use crate::utils::{
-    add_user_to_airdrop_reward, check_if_killed, get_pre_codes, register_principal_with_eth_address,
+use crate::{
+    guards::{caller_is_admin, caller_is_manager},
+    state::{CodeState, State},
+    utils::{
+        add_user_to_airdrop_reward, check_if_killed, get_eth_address, get_pre_codes,
+        register_principal_with_eth_address,
+    },
 };
 
 type CustomResult<T> = Result<T, CanisterError>;
@@ -97,6 +102,11 @@ fn init(arg: Arg) {
             numbers_of_children,
             total_tokens,
         }) => STATE.with(|cell| {
+            // check the number of tokens per user is divisible by 4
+            if token_per_person % 4 != 0 {
+                trap("token_per_person must be divisible by 4");
+            }
+
             *cell.borrow_mut() = Some(State {
                 backend_canister_id,
                 token_per_person,
@@ -105,7 +115,7 @@ fn init(arg: Arg) {
                 total_tokens,
                 principals_admins: HashSet::from([caller()]),
                 ..State::default()
-            })
+            });
         }),
         Arg::Upgrade => trap("upgrade args in init"),
     }
@@ -130,8 +140,7 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     // generate non activated codes
     mutate_state(|state| {
         for code in codes {
-            let code = Code(code);
-            state.pre_generated_codes.push(code.clone());
+            state.pre_generated_codes.push(Code(code));
         }
         Ok(())
     })
@@ -220,14 +229,14 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
         }
 
         // Check if code is already redeemed - unwrap is safe as we have checked the code exists
-        if state.codes.get(&code).unwrap().redeemed {
+        if state.codes[&code].redeemed {
             return Err(CanisterError::CodeAlreadyRedeemed);
         }
 
-        let parent_principal = state.codes.get(&code).unwrap().parent_principal;
+        let parent_principal = &state.codes[&code].parent_principal;
 
         // if code parent is one of the managers we increment the number of redeemed codes
-        if state.principals_managers.contains_key(&parent_principal) {
+        if state.principals_managers.contains_key(parent_principal) {
             state
                 .principals_managers
                 .get_mut(&parent_principal)
@@ -236,14 +245,13 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
         } else {
             // TODO in this current configuration managers do not get the airdrop
             // add parent eth address to the list of eth addresses to send tokens to
-            if let Some((_, parent_eth_address)) = state.principals_users.get(&parent_principal)
-            {
+            if let Some((_, parent_eth_address)) = state.principals_users.get(parent_principal) {
                 add_user_to_airdrop_reward(
                     state,
                     parent_eth_address.clone(),
                     AirdropAmount(state.token_per_person / 4),
                     state::RewardType::Referral,
-                )
+                );
             }
         }
 
@@ -352,17 +360,20 @@ fn get_code() -> CustomResult<Info> {
 }
 
 #[update(guard = "caller_is_admin")]
-fn kill_canister() {
+fn kill_canister() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = true;
-    })
+    });
+
+    Ok(())
 }
 
 #[update(guard = "caller_is_admin")]
-fn bring_caninster_back_to_life() {
+fn bring_caninster_back_to_life() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = false;
-    })
+    });
+    Ok(())
 }
 
 /// Returns all the eth addresses with how much is meant to be sent to each one of them

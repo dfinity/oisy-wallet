@@ -1,11 +1,13 @@
 use candid::Principal;
-use ic_cdk::api::call::CallResult;
-use ic_cdk::{call, caller};
+use ic_cdk::{api::call::CallResult, call, caller};
 
-use crate::read_state;
-use crate::state::{EthereumTransaction, EthereumAddress, State, RewardType};
-use crate::CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress};
-use crate::{AirdropAmount, Code, CustomResult};
+use crate::{
+    read_state,
+    state::{EthereumAddress, EthereumTransaction, RewardType, State},
+    AirdropAmount,
+    CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress},
+    Code, CustomResult,
+};
 
 pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
     let backend_canister = read_state(|state| state.backend_canister_id);
@@ -49,12 +51,14 @@ pub fn add_user_to_airdrop_reward(
     amount: AirdropAmount,
     reward_type: RewardType,
 ) {
-
     state.total_tokens -= amount.0;
 
-    state
-        .airdrop_reward
-        .push(EthereumTransaction::new(eth_address, amount, false, reward_type));
+    state.airdrop_reward.push(EthereumTransaction::new(
+        eth_address,
+        amount,
+        false,
+        reward_type,
+    ));
 }
 
 // "generate" codes

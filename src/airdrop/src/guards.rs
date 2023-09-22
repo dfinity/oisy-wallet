@@ -1,5 +1,6 @@
-use crate::read_state;
 use ic_cdk::caller;
+
+use crate::read_state;
 
 pub fn caller_is_admin() -> Result<(), String> {
     let caller = caller();
