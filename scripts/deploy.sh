@@ -36,6 +36,17 @@ while [ "$#" -gt 0 ]; do
     shift
 done
 
+case $ENV in
+  "staging")
+    TOTAL_TOKENS_AIRDROP=100000
+    MAXIMUM_DEPTH=2
+    TOKENS_PER_PERSON=40
+    NUMBERS_OF_CHILDREN=3
+    NUMBER_OF_CODES_TO_GENERATE=1000
+    NUMBER_OF_CHARACTERS_PER_CODE=10
+    ;;
+esac
+
 # Check if all arguments are set
 if [ -z "$TOTAL_TOKENS_AIRDROP" ] || [ -z "$MAXIMUM_DEPTH" ] || [ -z "$TOKENS_PER_PERSON" ] || [ -z "$NUMBERS_OF_CHILDREN" ] || [ -z  "$NUMBER_OF_CODES_TO_GENERATE" ] || [ -z "$NUMBER_OF_CHARACTERS_PER_CODE" ] ; then
   print_usage_and_exit "Missing arguments"
