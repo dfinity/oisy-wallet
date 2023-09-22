@@ -53,7 +53,7 @@ if [ -z "$TOTAL_TOKENS_AIRDROP" ] || [ -z "$MAXIMUM_DEPTH" ] || [ -z "$TOKENS_PE
 fi
 
 ./scripts/deploy.backend.sh
-./scripts/deploy.airdrop.sh --total-tokens-airdrop="$TOTAL_TOKENS_AIRDROP" --maximum-deph="$MAXIMUM_DEPTH" --tokens-per-person="$TOKENS_PER_PERSON" \
+./scripts/deploy.airdrop.sh --total-tokens-airdrop="$TOTAL_TOKENS_AIRDROP" --maximum-depth="$MAXIMUM_DEPTH" --tokens-per-person="$TOKENS_PER_PERSON" \
     --numbers-of-children="$NUMBERS_OF_CHILDREN" --number-of-codes-to-generate="$NUMBER_OF_CODES_TO_GENERATE"  \
     --number-of-characters-per-code="$NUMBER_OF_CHARACTERS_PER_CODE"
 dfx deploy internet_identity
