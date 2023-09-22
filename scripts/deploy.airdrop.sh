@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -eExo pipefail
-
 print_usage_and_exit() {
     echo "Error: $1"
     echo "Usage: $0 --total-tokens-airdrop=<value> --maximum-depth=<value> --tokens-per-person=<value> --numbers-of-children=<value> --number-of-codes-to-generate=<value> --number-of-characters-per-code=<value>"

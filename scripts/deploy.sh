@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -eExo pipefail
-
 
 print_usage_and_exit() {
     echo "Error: $1"
