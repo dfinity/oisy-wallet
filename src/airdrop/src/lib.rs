@@ -348,22 +348,22 @@ fn bring_caninster_back_to_life() -> CustomResult<()> {
 pub fn get_airdrop(index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)> {
     check_if_killed()?;
 
-    let mut index = index;
+    let mut last_index = index;
 
     read_state(|state| {
         let airdrop_collected: Vec<_> = state
             .airdrop_reward
             .iter()
             .enumerate()
-            .skip(index.0 as usize)
+            .skip(last_index.0 as usize)
             .filter(|&(_, reward)| !reward.transferred)
             .map(|(idx, reward)| {
-                index = Index(idx as u64);
+                last_index = Index(idx as u64);
                 reward.clone()
             })
             .collect();
 
-        Ok((index, airdrop_collected))
+        Ok((last_index, airdrop_collected))
     })
 }
 
