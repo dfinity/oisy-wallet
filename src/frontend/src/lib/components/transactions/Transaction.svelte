@@ -12,15 +12,15 @@
 	import { formatToDate } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import {modalTransaction} from "$lib/derived/modal.derived";
 
 	export let transaction: Transaction;
 
 	let from: string;
 	let value: BigNumber;
 	let timestamp: number | undefined;
+	let displayTimestamp: number | undefined;
 
-	$: ({ from, value, timestamp } = transaction);
+	$: ({ from, value, timestamp, displayTimestamp } = transaction);
 
 	let type: 'send' | 'receive';
 	$: type = from?.toLowerCase() === $addressStore?.toLowerCase() ? 'send' : 'receive';
@@ -33,6 +33,9 @@
 
 	let pending: boolean;
 	$: pending = isTransactionPending(transaction);
+
+	let transactionDate: number | undefined;
+	$: transactionDate = timestamp ?? displayTimestamp;
 </script>
 
 <button on:click={() => modalStore.openTransaction(transaction)} class="contents">
@@ -43,8 +46,8 @@
 
 		<svelte:fragment slot="amount">{Utils.formatEther(amount.toString())}</svelte:fragment>
 		<svelte:fragment slot="description">
-			{#if nonNullish(timestamp)}
-				{formatToDate(timestamp)}
+			{#if nonNullish(transactionDate)}
+				{formatToDate(transactionDate)}
 			{/if}
 		</svelte:fragment>
 	</Card>
