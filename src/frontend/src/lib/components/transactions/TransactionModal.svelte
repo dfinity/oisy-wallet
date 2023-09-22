@@ -5,10 +5,11 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatToDate } from '$lib/utils/format.utils';
+	import { formatToDate, formatTokenShort } from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { Utils } from 'alchemy-sdk';
 	import TransactionStatus from '$lib/components/transactions/TransactionStatus.svelte';
+	import { token } from '$lib/derived/token.derived';
 
 	export let transaction: Transaction;
 
@@ -23,9 +24,6 @@
 
 	let type: 'send' | 'receive';
 	$: type = from?.toLowerCase() === $addressStore?.toLowerCase() ? 'send' : 'receive';
-
-	let amount: BigNumber;
-	$: amount = type == 'send' ? value.mul(BigNumber.from(-1)) : value;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -77,12 +75,14 @@
 
 		<label for="amount" class="font-bold px-1.25">Value:</label>
 		<p id="amount" class="font-normal mb-2 px-1.25 break-words">
-			<output>{Utils.formatEther(amount.toString())}</output>
+			<output>
+				{formatTokenShort({
+					value,
+					unitName: $token.decimals
+				})}
+			</output>
 		</p>
 
-		<button
-				class="primary full center text-center my-3"
-				on:click={modalStore.close}>Close</button
-		>
+		<button class="primary full center text-center my-3" on:click={modalStore.close}>Close</button>
 	</div>
 </Modal>
