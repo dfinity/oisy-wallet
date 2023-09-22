@@ -22,6 +22,7 @@ USERS=(
     "3y5uj-oyiwp-f5vbw-cxna2-jscer-bcreg-w3q4v-l467g-fs7lc-sou5y-tqe"
     "z7lvn-zff37-ngtmx-6ivd2-dkwgm-7jvzc-5f4au-q6zzv-chfar-xthok-3ae"
     "myzmi-vv6he-vkpx7-kqccd-fu5np-k7d6o-g5gji-ryq3v-r6ogh-ymlby-tqe"
+    "6njbb-dcozo-h42ey-omju4-zjpzz-utlqa-pop5b-6boty-cfejh-dbaai-3qe"
 )
 
 for USER in "${USERS[@]}"; do
