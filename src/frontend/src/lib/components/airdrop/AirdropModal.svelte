@@ -27,7 +27,7 @@
 			? [
 					{
 						step: AirdropStep.INVITE_FRIENDS,
-						text: `Earn up to X ICP by inviting friends!`,
+						text: `Earn up to X ICP by inviting friends!*`,
 						state: 'next'
 					} as StaticStep
 			  ]
@@ -58,4 +58,6 @@
 	<div class="my-2"><InProgress {progressStep} {steps} type="static" /></div>
 
 	<AirdropInvites {airdrop} />
+
+	<p class="mt-3"><small>* Claimable until airdrop exhausted</small></p>
 </Modal>
