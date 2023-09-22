@@ -365,11 +365,12 @@ pub fn put_airdrop(index: Index, eth_address_amount: EthAddressAmount) -> Custom
 
     mutate_state(|state| {
         // for the index to the end of the list update the state
-        for i in index.0..state.airdrop_reward.len() as u64 {
-            if state.airdrop_reward[i as usize].eth_address == eth_address_amount.eth_address {
-                state.airdrop_reward[i as usize].transferred = true;
-            }
-        }
+        state
+            .airdrop_reward
+            .iter_mut()
+            .skip(index.0 as usize)
+            .filter(|reward| reward.eth_address == eth_address_amount.eth_address)
+            .for_each(|reward| reward.transferred = true);
     });
 
     Ok(())
