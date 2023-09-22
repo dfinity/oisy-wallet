@@ -1,13 +1,12 @@
 <script lang="ts">
 	import type { Transaction } from '$lib/types/transaction';
-	import { BigNumber } from '@ethersproject/bignumber';
+	import type { BigNumber } from '@ethersproject/bignumber';
 	import { addressStore } from '$lib/stores/address.store';
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatToDate, formatTokenShort } from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { Utils } from 'alchemy-sdk';
 	import TransactionStatus from '$lib/components/transactions/TransactionStatus.svelte';
 	import { token } from '$lib/derived/token.derived';
 
