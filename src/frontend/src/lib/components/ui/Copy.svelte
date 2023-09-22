@@ -21,7 +21,7 @@
 <button
 	on:click|preventDefault|stopPropagation={copyToClipboard}
 	aria-label={`Copy: ${value}`}
-	class="py-1"
+	class:py-1={!inline}
 	class:inline-block={inline}
 	style={`height: var(--padding-4x); width: var(--padding-4x); min-width: var(--padding-4x); ${inline ? "vertical-align: sub;" : ""}`}
 >
