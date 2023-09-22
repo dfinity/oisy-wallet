@@ -44,7 +44,7 @@ export type Result_3 = { Ok: Info } | { Err: CanisterError };
 export interface _SERVICE {
 	add_admin: ActorMethod<[Principal], Result>;
 	add_codes: ActorMethod<[Array<string>], Result>;
-	add_manager: ActorMethod<[Principal, string], Result>;
+	add_manager: ActorMethod<[Principal], Result>;
 	bring_caninster_back_to_life: ActorMethod<[], Result>;
 	generate_code: ActorMethod<[], Result_1>;
 	get_airdrop: ActorMethod<[bigint], Result_2>;

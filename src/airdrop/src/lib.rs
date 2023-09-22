@@ -118,10 +118,9 @@ pub fn add_admin(principal: Principal) -> CustomResult<()> {
 
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
 #[update(guard = "caller_is_admin")]
-pub fn add_manager(principal: Principal, name: String) -> CustomResult<()> {
+pub fn add_manager(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         let principal_state = PrincipalState {
-            name,
             codes_generated: 0,
             codes_redeemed: 0,
         };

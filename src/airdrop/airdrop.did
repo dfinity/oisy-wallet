@@ -45,7 +45,7 @@ type Result_3 = variant { Ok : Info; Err : CanisterError };
 service : (Arg) -> {
   add_admin : (principal) -> (Result);
   add_codes : (vec text) -> (Result);
-  add_manager : (principal, text) -> (Result);
+  add_manager : (principal) -> (Result);
   bring_caninster_back_to_life : () -> (Result);
   generate_code : () -> (Result_1);
   get_airdrop : (nat64) -> (Result_2);
