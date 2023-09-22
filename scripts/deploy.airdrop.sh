@@ -55,20 +55,20 @@ if [ -n "${ENV+1}" ]; then
   dfx deploy airdrop --argument "(variant {
     Init = record {
       backend_canister_id = principal \"$BACKEND_ID\";
-      token_per_person = \"$TOTAL_TOKENS_AIRDROP\";
-      maximum_depth = \"$MAXIMUM_DEPTH\";
-      total_tokens = \"$TOKENS_PER_PERSON\";
-      numbers_of_children = \"$NUMBERS_OF_CHILDREN\";
+      token_per_person = $TOTAL_TOKENS_AIRDROP;
+      maximum_depth = $MAXIMUM_DEPTH;
+      total_tokens = $TOKENS_PER_PERSON;
+      numbers_of_children = $NUMBERS_OF_CHILDREN;
     }
   })" --network "$ENV" --wallet "$WALLET"
 else
   dfx deploy airdrop --argument "(variant {
     Init = record {
       backend_canister_id = principal \"$BACKEND_ID\";
-      token_per_person = \"$TOTAL_TOKENS_AIRDROP\";
-      maximum_depth = \"$MAXIMUM_DEPTH\";
-      total_tokens = \"$TOKENS_PER_PERSON\";
-      numbers_of_children = \"$NUMBERS_OF_CHILDREN\";
+      token_per_person = $TOTAL_TOKENS_AIRDROP;
+      maximum_depth = $MAXIMUM_DEPTH;
+      total_tokens = $TOKENS_PER_PERSON;
+      numbers_of_children = $NUMBERS_OF_CHILDREN;
     }
   })"
 fi
