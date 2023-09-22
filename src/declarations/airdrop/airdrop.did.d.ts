@@ -40,7 +40,7 @@ export interface InitArg {
 }
 export type Result = { Ok: null } | { Err: CanisterError };
 export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };
-export type Result_2 = { Ok: [bigint, Array<EthAddressAmount>] } | { Err: CanisterError };
+export type Result_2 = { Ok: Array<[bigint, EthAddressAmount]> } | { Err: CanisterError };
 export type Result_3 = { Ok: Info } | { Err: CanisterError };
 export interface _SERVICE {
 	add_admin: ActorMethod<[Principal], Result>;

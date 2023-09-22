@@ -353,7 +353,7 @@ fn bring_caninster_back_to_life() -> CustomResult<()> {
 
 /// Returns all the eth addresses with how much is meant to be sent to each one of them
 #[update(guard = "caller_is_admin")]
-pub fn get_airdrop(index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)> {
+pub fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthAddressAmount)>> {
     check_if_killed()?;
 
     let mut last_index = index;
@@ -367,11 +367,11 @@ pub fn get_airdrop(index: Index) -> CustomResult<(Index, Vec<EthAddressAmount>)>
             .skip(last_index.0 as usize)
             .map(|(idx, reward)| {
                 last_index = Index(idx as u64);
-                reward.clone()
+                (last_index.clone(), reward.clone())
             })
             .collect();
 
-        Ok((last_index, airdrop_collected))
+        Ok(airdrop_collected)
     })
 }
 

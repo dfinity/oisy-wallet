@@ -164,5 +164,5 @@ pub enum Arg {
     Upgrade,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Clone, Deserialize)]
 pub struct Index(pub u64);

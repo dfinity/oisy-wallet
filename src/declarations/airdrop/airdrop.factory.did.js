@@ -34,7 +34,7 @@ export const idlFactory = ({ IDL }) => {
 		amount: IDL.Nat64
 	});
 	const Result_2 = IDL.Variant({
-		Ok: IDL.Tuple(IDL.Nat64, IDL.Vec(EthAddressAmount)),
+		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, EthAddressAmount)),
 		Err: CanisterError
 	});
 	const Info = IDL.Record({
