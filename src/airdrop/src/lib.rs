@@ -342,17 +342,19 @@ pub fn get_airdrop(mut index: Index) -> CustomResult<(Index, Vec<EthAddressAmoun
     check_if_killed()?;
 
     read_state(|state| {
-        let mut airdrop = Vec::default();
-
-        // TODO: dangerous casting from u64 to usize?
-        for idx in (index.0 as usize)..state.airdrop_reward.len() {
-            if !state.airdrop_reward[idx].transferred {
-                airdrop.push(state.airdrop_reward[idx].clone());
+        let airdrop_collected: Vec<_> = state
+            .airdrop_reward
+            .iter()
+            .enumerate()
+            .skip(index.0 as usize)
+            .filter(|&(_, reward)| !reward.transferred)
+            .map(|(idx, reward)| {
                 index = Index(idx as u64);
-            }
-        }
+                reward.clone()
+            })
+            .collect();
 
-        Ok((index, airdrop))
+        Ok((index, airdrop_collected))
     })
 }
 
