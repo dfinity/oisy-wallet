@@ -34,6 +34,8 @@
 			: [])
 	];
 
+	// TODO: Claimable until airdrop exhausted
+
 	let hasInvites = false;
 	$: hasInvites = (fromNullable(airdrop?.children)?.length ?? 0) > 0;
 
