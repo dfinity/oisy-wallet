@@ -405,18 +405,19 @@ fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, Airdro
 
 /// Pushes the new state of who was transferred money
 #[update(guard = "caller_is_admin")]
-fn put_airdrop(index: Index) -> CustomResult<()> {
+fn put_airdrop(indexes: Vec<Index>) -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
-        // for the index to the end of the list update the state
-        match state.airdrop_reward.get_mut(index.0 as usize) {
-            Some(tx) => {
-                tx.transferred = true;
-                Ok(())
+        for index in indexes {
+            match state.airdrop_reward.get_mut(index.0 as usize) {
+                Some(tx) => {
+                    tx.transferred = true;
+                }
+                None => return Err(CanisterError::TransactionUnkown),
             }
-            None => Err(CanisterError::TransactionUnkown),
         }
+        Ok(())
     })
 }
 
