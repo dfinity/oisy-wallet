@@ -433,5 +433,23 @@ fn put_airdrop(indexes: Vec<Index>) -> CustomResult<()> {
     })
 }
 
+/// Removes duplicates codes and managers
+#[update(guard = "caller_is_admin")]
+fn clean_up() -> CustomResult<()> {
+    check_if_killed()?;
+
+    mutate_state(|state| {
+        // remove duplicate codes
+        let mut codes = HashSet::new();
+        state.pre_generated_codes.retain(|code| codes.insert(code.clone()));
+
+        // remove duplicate managers
+        let mut managers = HashSet::new();
+        state.principals_managers.retain(|principal, _| managers.insert(principal.clone()));
+
+        Ok(())
+    })
+}
+
 // automatically generates the candid file
 export_candid!();
