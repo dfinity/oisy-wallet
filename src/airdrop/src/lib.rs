@@ -31,6 +31,8 @@ use ic_cdk::{
 };
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
+use state::AirdropAmountERC20;
+use utils::convert_to_erc20;
 
 mod guards;
 mod state;
@@ -387,7 +389,7 @@ fn bring_caninster_back_to_life() -> CustomResult<()> {
 
 /// Returns all the eth addresses with how much is meant to be sent to each one of them
 #[update(guard = "caller_is_admin")]
-fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, AirdropAmount)>> {
+fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, AirdropAmountERC20)>> {
     check_if_killed()?;
 
     let mut last_index = index;
@@ -404,7 +406,7 @@ fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, Airdro
                 (
                     last_index.clone(),
                     reward.eth_address.clone(),
-                    reward.amount.clone(),
+                    convert_to_erc20(reward.amount.clone()),
                 )
             })
             .collect();
