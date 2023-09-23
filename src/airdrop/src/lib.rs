@@ -142,9 +142,7 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     mutate_state(|state| {
         for code in codes {
             // only add the code if it does not already exist
-            if state.codes.contains_key(&Code(code.clone())) {
-                return Err(CanisterError::DuplicateKey(code.clone()));
-            } else {
+            if !state.codes.contains_key(&Code(code.clone())) {
                 state.pre_generated_codes.push(Code(code));
             }
         }
