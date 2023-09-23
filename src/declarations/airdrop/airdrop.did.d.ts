@@ -14,7 +14,8 @@ export type CanisterError =
 	| { TransactionUnkown: null }
 	| { CodeNotFound: null }
 	| { DuplicateKey: string }
-	| { NoCodeForII: null };
+	| { NoCodeForII: null }
+	| { ManagersCannotParticipateInTheAirdrop: null };
 export interface CodeInfo {
 	codes_generated: bigint;
 	code: string;

@@ -93,6 +93,8 @@ pub enum CanisterError {
     TransactionUnkown,
     /// Duplicate key
     DuplicateKey(String),
+    /// Managers cannot participate in the airdrop
+    ManagersCannotParticipateInTheAirdrop,
 }
 
 #[init]
@@ -244,6 +246,11 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
             return Err(CanisterError::CodeAlreadyRedeemed);
         }
 
+        // Check if redeemer is a manager
+        if state.principals_managers.contains_key(&caller_principal) {
+            return Err(CanisterError::ManagersCannotParticipateInTheAirdrop);
+        }
+
         let parent_principal = &state.codes[&code].parent_principal;
 
         // if code parent is one of the managers we increment the number of redeemed codes
@@ -254,7 +261,6 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
                 .unwrap()
                 .codes_redeemed += 1;
         } else {
-            // TODO in this current configuration managers do not get the airdrop
             // add parent eth address to the list of eth addresses to send tokens to
             if let Some((_, parent_eth_address)) = state.principals_users.get(parent_principal) {
                 add_user_to_airdrop_reward(
