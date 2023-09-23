@@ -26,5 +26,9 @@ USERS=(
 )
 
 for USER in "${USERS[@]}"; do
-    dfx canister call airdrop add_manager '(principal"'$USER'")'
+    if [ -n "${ENV+1}" ]; then
+        dfx canister call airdrop add_manager '(principal"'$USER'")' --network "$ENV" --wallet "$WALLET"
+    else
+        dfx canister call airdrop add_manager '(principal"'$USER'")'
+    fi
 done
