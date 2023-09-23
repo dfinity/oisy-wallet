@@ -20,7 +20,8 @@ export const idlFactory = ({ IDL }) => {
 		TransactionUnkown: IDL.Null,
 		CodeNotFound: IDL.Null,
 		DuplicateKey: IDL.Text,
-		NoCodeForII: IDL.Null
+		NoCodeForII: IDL.Null,
+		ManagersCannotParticipateInTheAirdrop: IDL.Null
 	});
 	const Result = IDL.Variant({ Ok: IDL.Null, Err: CanisterError });
 	const CodeInfo = IDL.Record({
