@@ -13,6 +13,7 @@ export type CanisterError =
 	| { CodeAlreadyRedeemed: null }
 	| { TransactionUnkown: null }
 	| { CodeNotFound: null }
+	| { DuplicateKey: string }
 	| { NoCodeForII: null };
 export interface CodeInfo {
 	codes_generated: bigint;
