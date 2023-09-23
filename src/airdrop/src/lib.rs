@@ -451,5 +451,33 @@ fn clean_up() -> CustomResult<()> {
     })
 }
 
+/// Removes managers from the list of managers
+#[update(guard = "caller_is_admin")]
+fn remove_manager(principals: Vec<Principal>) -> CustomResult<()> {
+    check_if_killed()?;
+
+    mutate_state(|state| {
+        for principal in principals {
+            state.principals_managers.remove(&principal);
+        }
+
+        Ok(())
+    })
+}
+
+/// Remove admins from the list of admins
+#[update(guard = "caller_is_admin")]
+fn remove_admin(principals: Vec<Principal>) -> CustomResult<()> {
+    check_if_killed()?;
+
+    mutate_state(|state| {
+        for principal in principals {
+            state.principals_admins.remove(&principal);
+        }
+
+        Ok(())
+    })
+}
+
 // automatically generates the candid file
 export_candid!();

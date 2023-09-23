@@ -53,7 +53,9 @@ export const idlFactory = ({ IDL }) => {
 		is_manager: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
 		put_airdrop: IDL.Func([IDL.Vec(IDL.Nat64)], [Result], []),
-		redeem_code: IDL.Func([IDL.Text], [Result_3], [])
+		redeem_code: IDL.Func([IDL.Text], [Result_3], []),
+		remove_admin: IDL.Func([IDL.Vec(IDL.Principal)], [Result], []),
+		remove_manager: IDL.Func([IDL.Vec(IDL.Principal)], [Result], [])
 	});
 };
 // @ts-ignore
