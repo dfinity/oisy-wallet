@@ -453,7 +453,7 @@ fn clean_up() -> CustomResult<()> {
 
 /// Removes managers from the list of managers
 #[update(guard = "caller_is_admin")]
-fn remove_manager(principals: Vec<Principal>) -> CustomResult<()> {
+fn remove_managers(principals: Vec<Principal>) -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
@@ -467,7 +467,7 @@ fn remove_manager(principals: Vec<Principal>) -> CustomResult<()> {
 
 /// Remove admins from the list of admins
 #[update(guard = "caller_is_admin")]
-fn remove_admin(principals: Vec<Principal>) -> CustomResult<()> {
+fn remove_admins(principals: Vec<Principal>) -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
