@@ -10,6 +10,7 @@ type CanisterError = variant {
   CodeAlreadyRedeemed;
   TransactionUnkown;
   CodeNotFound;
+  DuplicateKey : text;
   NoCodeForII;
 };
 type CodeInfo = record {
