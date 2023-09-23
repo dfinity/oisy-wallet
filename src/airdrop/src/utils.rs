@@ -71,5 +71,5 @@ pub fn get_pre_codes(state: &mut State) -> CustomResult<Code> {
 
 /// Make the conversion to ERC-20 amount
 pub fn convert_to_erc20(amount: AirdropAmount) -> AirdropAmountERC20 {
-    AirdropAmountERC20(amount.0 as u128 * 10u128.pow(10))
+    AirdropAmountERC20(amount.0 as u128 * 10u128.pow(8))
 }
