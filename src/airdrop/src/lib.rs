@@ -143,8 +143,7 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
         for code in codes {
             // only add the code if it does not already exist
             if state.codes.contains_key(&Code(code.clone())) {
-                return Err(CanisterError::DuplicateKey(code.clone())
-                );
+                return Err(CanisterError::DuplicateKey(code.clone()));
             } else {
                 state.pre_generated_codes.push(Code(code));
             }
@@ -156,16 +155,9 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
 #[update(guard = "caller_is_admin")]
 fn add_admin(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
-        // only add the admin if they do not already exist
-        if state.principals_admins.contains(&principal) {
-            return Err(CanisterError::DuplicateKey(
-                principal.to_string()
-            ));
-        } else {
-            state.principals_admins.insert(principal);
+        state.principals_admins.insert(principal);
 
-            Ok(())
-        }
+        Ok(())
     })
 }
 
@@ -175,9 +167,7 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         // only add the manager if they do not already exist
         if state.principals_managers.contains_key(&principal) {
-            return Err(CanisterError::DuplicateKey(
-                principal.to_string()
-            ));
+            return Err(CanisterError::DuplicateKey(principal.to_string()));
         } else {
             let principal_state = PrincipalState {
                 codes_generated: 0,
