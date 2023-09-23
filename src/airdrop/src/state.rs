@@ -64,6 +64,9 @@ pub struct EthereumAddress(pub String);
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug, Default)]
 pub struct AirdropAmount(pub u64);
 
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug, Default)]
+pub struct AirdropAmountERC20(pub u128);
+
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
 pub struct CodeInfo {
     code: Code,
