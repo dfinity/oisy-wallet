@@ -30,7 +30,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Result_1 = IDL.Variant({ Ok: CodeInfo, Err: CanisterError });
 	const Result_2 = IDL.Variant({
-		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Text, IDL.Nat64)),
+		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Text, IDL.Nat)),
 		Err: CanisterError
 	});
 	const Info = IDL.Record({

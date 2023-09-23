@@ -35,7 +35,7 @@ type InitArg = record {
 type Result = variant { Ok; Err : CanisterError };
 type Result_1 = variant { Ok : CodeInfo; Err : CanisterError };
 type Result_2 = variant {
-  Ok : vec record { nat64; text; nat64 };
+  Ok : vec record { nat64; text; nat };
   Err : CanisterError;
 };
 type Result_3 = variant { Ok : Info; Err : CanisterError };
