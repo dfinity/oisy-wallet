@@ -89,6 +89,8 @@ pub enum CanisterError {
     UnknownOisyWalletAddress,
     /// Transaction unknown
     TransactionUnkown,
+    /// Duplicate key
+    DuplicateKey(String),
 }
 
 #[init]
@@ -139,7 +141,10 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     // generate non activated codes
     mutate_state(|state| {
         for code in codes {
-            state.pre_generated_codes.push(Code(code));
+            // only add the code if it does not already exist
+            if !state.codes.contains_key(&Code(code.clone())) {
+                state.pre_generated_codes.push(Code(code));
+            }
         }
         Ok(())
     })
@@ -158,13 +163,18 @@ fn add_admin(principal: Principal) -> CustomResult<()> {
 #[update(guard = "caller_is_admin")]
 fn add_manager(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
-        let principal_state = PrincipalState {
-            codes_generated: 0,
-            codes_redeemed: 0,
-        };
-        state.principals_managers.insert(principal, principal_state);
+        // only add the manager if they do not already exist
+        if state.principals_managers.contains_key(&principal) {
+            return Err(CanisterError::DuplicateKey(principal.to_string()));
+        } else {
+            let principal_state = PrincipalState {
+                codes_generated: 0,
+                codes_redeemed: 0,
+            };
+            state.principals_managers.insert(principal, principal_state);
 
-        Ok(())
+            Ok(())
+        }
     })
 }
 

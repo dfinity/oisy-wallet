@@ -19,6 +19,7 @@ export const idlFactory = ({ IDL }) => {
 		CodeAlreadyRedeemed: IDL.Null,
 		TransactionUnkown: IDL.Null,
 		CodeNotFound: IDL.Null,
+		DuplicateKey: IDL.Text,
 		NoCodeForII: IDL.Null
 	});
 	const Result = IDL.Variant({ Ok: IDL.Null, Err: CanisterError });
