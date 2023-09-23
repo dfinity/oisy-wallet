@@ -46,6 +46,7 @@ export const idlFactory = ({ IDL }) => {
 		add_codes: IDL.Func([IDL.Vec(IDL.Text)], [Result], []),
 		add_manager: IDL.Func([IDL.Principal], [Result], []),
 		bring_caninster_back_to_life: IDL.Func([], [Result], []),
+		clean_up: IDL.Func([], [Result], []),
 		generate_code: IDL.Func([], [Result_1], []),
 		get_airdrop: IDL.Func([IDL.Nat64], [Result_2], []),
 		get_code: IDL.Func([], [Result_3], ['query']),
