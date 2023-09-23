@@ -12,6 +12,7 @@ type CanisterError = variant {
   CodeNotFound;
   DuplicateKey : text;
   NoCodeForII;
+  ManagersCannotParticipateInTheAirdrop;
 };
 type CodeInfo = record {
   codes_generated : nat64;
