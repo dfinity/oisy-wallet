@@ -51,4 +51,6 @@ export interface _SERVICE {
 	kill_canister: ActorMethod<[], Result>;
 	put_airdrop: ActorMethod<[BigUint64Array | bigint[]], Result>;
 	redeem_code: ActorMethod<[string], Result_3>;
+	remove_admin: ActorMethod<[Array<Principal>], Result>;
+	remove_manager: ActorMethod<[Array<Principal>], Result>;
 }
