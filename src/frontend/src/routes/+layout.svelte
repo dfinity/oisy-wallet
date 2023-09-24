@@ -11,6 +11,8 @@
 	import { authSignedInStore } from '$lib/derived/auth.derived';
 	import SignIn from '$lib/components/pages/SignIn.svelte';
 	import Banner from '$lib/components/core/Banner.svelte';
+	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	/**
 	 * Init authentication
@@ -26,8 +28,13 @@
 		try {
 			await authStore.sync();
 		} catch (err: unknown) {
-			console.error(err);
+			toastsError({
+				msg: { text: 'Unexpected issue while syncing the status of your authentication.' },
+				err: JSON.stringify(Err)
+			});
 		}
+
+		displayAndCleanLogoutMsg();
 	};
 
 	/**
