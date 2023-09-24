@@ -80,8 +80,15 @@
 		await disconnectListener();
 
 		try {
-			// TODO: component should not be enabled unless address is loaded
-			listener = await initWalletConnectListener({ uri, address: $addressStore! });
+			// Connect and disconnect buttons are disabled until the address is loaded therefore this should never happens.
+			if (isNullish($addressStore)) {
+				toastsError({
+					msg: { text: 'Address is unknown.' }
+				});
+				return;
+			}
+
+			listener = await initWalletConnectListener({ uri, address: $addressStore });
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: `An unexpected error happened while trying to connect the wallet.` },
