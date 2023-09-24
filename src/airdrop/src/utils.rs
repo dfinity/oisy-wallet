@@ -1,11 +1,13 @@
 use candid::Principal;
-use ic_cdk::api::call::CallResult;
-use ic_cdk::{call, caller};
+use ic_cdk::{api::call::CallResult, call, caller};
 
-use crate::read_state;
-use crate::state::{EthAddressAmount, EthereumAddress, State};
-use crate::CanisterError::{CanisterKilled, GeneralError, NoMoreCodes, UnknownOisyWalletAddress};
-use crate::{AirdropAmount, Code, CustomResult};
+use crate::{
+    read_state,
+    state::{EthereumAddress, EthereumTransaction, RewardType, State, AirdropAmountERC20},
+    AirdropAmount,
+    CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress},
+    Code, CustomResult,
+};
 
 pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
     let backend_canister = read_state(|state| state.backend_canister_id);
@@ -30,16 +32,6 @@ pub fn check_if_killed() -> CustomResult<()> {
     })
 }
 
-/// Deduct token
-pub fn deduct_tokens(state: &mut State, amount: u64) -> CustomResult<()> {
-    if state.total_tokens < amount {
-        Err(GeneralError("Not enough tokens left".to_string()))
-    } else {
-        state.total_tokens -= amount;
-        Ok(())
-    }
-}
-
 /// Register a principal with an ethereum address
 pub fn register_principal_with_eth_address(
     state: &mut State,
@@ -48,7 +40,7 @@ pub fn register_principal_with_eth_address(
     eth_address: EthereumAddress,
 ) {
     state
-        .principals_user_eth
+        .principals_users
         .insert(principal, (code, eth_address));
 }
 
@@ -57,10 +49,16 @@ pub fn add_user_to_airdrop_reward(
     state: &mut State,
     eth_address: EthereumAddress,
     amount: AirdropAmount,
+    reward_type: RewardType,
 ) {
-    state
-        .airdrop_reward
-        .push(EthAddressAmount::new(eth_address, amount, false));
+    state.total_tokens -= amount.0;
+
+    state.airdrop_reward.push(EthereumTransaction::new(
+        eth_address,
+        amount,
+        false,
+        reward_type,
+    ));
 }
 
 // "generate" codes
@@ -69,4 +67,9 @@ pub fn get_pre_codes(state: &mut State) -> CustomResult<Code> {
         Some(code) => Ok(code),
         None => Err(NoMoreCodes),
     }
+}
+
+/// Make the conversion to ERC-20 amount
+pub fn convert_to_erc20(amount: AirdropAmount) -> AirdropAmountERC20 {
+    AirdropAmountERC20(amount.0 as u128 * 10u128.pow(8))
 }

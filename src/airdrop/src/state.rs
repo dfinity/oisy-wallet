@@ -1,21 +1,22 @@
+use std::collections::{HashMap, HashSet};
+
 use candid::{types::principal::Principal, CandidType};
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
 
 #[derive(Serialize, Deserialize, Clone, CandidType)]
 pub struct State {
     // Admin principals - the principals that can add new principals that can generate codes and get the list of airdrop to do
-    pub principals_admin: HashSet<Principal>,
+    pub principals_admins: HashSet<Principal>,
     /// Manager principals - for principals allowed to generate codes
     pub principals_managers: HashMap<Principal, PrincipalState>,
     // User principals - map Principal to (Code, Eth Address)
-    pub principals_user_eth: HashMap<Principal, (Code, EthereumAddress)>,
+    pub principals_users: HashMap<Principal, (Code, EthereumAddress)>,
     // pre-generated codes
     pub pre_generated_codes: Vec<Code>,
     /// Map a Code to it's parent principal, the depth, whether it has been redeemed
     pub codes: HashMap<Code, CodeState>,
     // id (the index) mapped to the (EthAddress, AirdropAmount)
-    pub airdrop_reward: Vec<EthAddressAmount>,
+    pub airdrop_reward: Vec<EthereumTransaction>,
     // has the canister been killed
     pub killed: bool,
     // total number of tokens
@@ -31,10 +32,10 @@ pub struct State {
 
 impl Default for State {
     fn default() -> Self {
-        State {
-            principals_admin: HashSet::new(),
+        Self {
+            principals_admins: HashSet::new(),
             principals_managers: HashMap::new(),
-            principals_user_eth: HashMap::new(),
+            principals_users: HashMap::new(),
             pre_generated_codes: Vec::new(),
             codes: HashMap::new(),
             airdrop_reward: Vec::new(),
@@ -62,6 +63,9 @@ pub struct EthereumAddress(pub String);
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug, Default)]
 pub struct AirdropAmount(pub u64);
+
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug, Default)]
+pub struct AirdropAmountERC20(pub u128);
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
 pub struct CodeInfo {
@@ -127,19 +131,26 @@ impl CodeState {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Default, CandidType)]
-pub struct EthAddressAmount {
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, CandidType)]
+pub struct EthereumTransaction {
     pub eth_address: EthereumAddress,
     pub amount: AirdropAmount,
     pub transferred: bool,
+    pub reward_type: RewardType,
 }
 
-impl EthAddressAmount {
-    pub fn new(eth_address: EthereumAddress, amount: AirdropAmount, transferred: bool) -> Self {
+impl EthereumTransaction {
+    pub fn new(
+        eth_address: EthereumAddress,
+        amount: AirdropAmount,
+        transferred: bool,
+        reward_type: RewardType,
+    ) -> Self {
         Self {
             eth_address,
             amount,
             transferred,
+            reward_type,
         }
     }
 }
@@ -164,5 +175,11 @@ pub enum Arg {
     Upgrade,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Clone, Deserialize)]
 pub struct Index(pub u64);
+
+#[derive(Serialize, Deserialize, Clone, Debug, Eq, PartialEq, CandidType)]
+pub enum RewardType {
+    Airdrop,
+    Referral,
+}

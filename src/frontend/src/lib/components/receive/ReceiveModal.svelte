@@ -5,7 +5,6 @@
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import ReceiveMetamask from '$lib/components/receive/ReceiveMetamask.svelte';
 </script>
 

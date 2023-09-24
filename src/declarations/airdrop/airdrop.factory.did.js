@@ -17,8 +17,11 @@ export const idlFactory = ({ IDL }) => {
 		NoMoreCodes: IDL.Null,
 		MaximumDepthReached: IDL.Null,
 		CodeAlreadyRedeemed: IDL.Null,
+		TransactionUnkown: IDL.Null,
 		CodeNotFound: IDL.Null,
-		NoCodeForII: IDL.Null
+		DuplicateKey: IDL.Text,
+		NoCodeForII: IDL.Null,
+		ManagersCannotParticipateInTheAirdrop: IDL.Null
 	});
 	const Result = IDL.Variant({ Ok: IDL.Null, Err: CanisterError });
 	const CodeInfo = IDL.Record({
@@ -27,13 +30,8 @@ export const idlFactory = ({ IDL }) => {
 		codes_redeemed: IDL.Nat64
 	});
 	const Result_1 = IDL.Variant({ Ok: CodeInfo, Err: CanisterError });
-	const EthAddressAmount = IDL.Record({
-		transferred: IDL.Bool,
-		eth_address: IDL.Text,
-		amount: IDL.Nat64
-	});
 	const Result_2 = IDL.Variant({
-		Ok: IDL.Tuple(IDL.Nat64, IDL.Vec(EthAddressAmount)),
+		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Text, IDL.Nat)),
 		Err: CanisterError
 	});
 	const Info = IDL.Record({
@@ -49,13 +47,16 @@ export const idlFactory = ({ IDL }) => {
 		add_codes: IDL.Func([IDL.Vec(IDL.Text)], [Result], []),
 		add_manager: IDL.Func([IDL.Principal], [Result], []),
 		bring_caninster_back_to_life: IDL.Func([], [Result], []),
+		clean_up: IDL.Func([], [Result], []),
 		generate_code: IDL.Func([], [Result_1], []),
 		get_airdrop: IDL.Func([IDL.Nat64], [Result_2], []),
 		get_code: IDL.Func([], [Result_3], ['query']),
 		is_manager: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
-		put_airdrop: IDL.Func([IDL.Nat64, EthAddressAmount], [Result], []),
-		redeem_code: IDL.Func([IDL.Text], [Result_3], [])
+		put_airdrop: IDL.Func([IDL.Vec(IDL.Nat64)], [Result], []),
+		redeem_code: IDL.Func([IDL.Text], [Result_3], []),
+		remove_admins: IDL.Func([IDL.Vec(IDL.Principal)], [Result], []),
+		remove_managers: IDL.Func([IDL.Vec(IDL.Principal)], [Result], [])
 	});
 };
 // @ts-ignore

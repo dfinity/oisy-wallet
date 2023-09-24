@@ -22,8 +22,25 @@ USERS=(
     "3y5uj-oyiwp-f5vbw-cxna2-jscer-bcreg-w3q4v-l467g-fs7lc-sou5y-tqe"
     "z7lvn-zff37-ngtmx-6ivd2-dkwgm-7jvzc-5f4au-q6zzv-chfar-xthok-3ae"
     "myzmi-vv6he-vkpx7-kqccd-fu5np-k7d6o-g5gji-ryq3v-r6ogh-ymlby-tqe"
+    "6njbb-dcozo-h42ey-omju4-zjpzz-utlqa-pop5b-6boty-cfejh-dbaai-3qe"
+    "moadj-5cc4w-zmzpn-pzcbv-h2miy-zimrb-uydgo-spdgq-3oceb-2tllm-rae"
 )
 
+case $ENV in
+  "staging")
+    WALLET="cvthj-wyaaa-aaaad-aaaaq-cai"
+    ;;
+  "ic")
+    WALLET="yit3i-lyaaa-aaaan-qeavq-cai"
+    ;;
+  *)
+    ;;
+esac
+
 for USER in "${USERS[@]}"; do
-    dfx canister call airdrop add_manager '(principal"'$USER'")'
+    if [ -n "${ENV+1}" ]; then
+        dfx canister call airdrop add_manager '(principal"'$USER'")' --network "$ENV" --wallet "$WALLET"
+    else
+        dfx canister call airdrop add_manager '(principal"'$USER'")'
+    fi
 done
