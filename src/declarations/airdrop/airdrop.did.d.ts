@@ -74,6 +74,6 @@ export interface _SERVICE {
 	put_airdrop: ActorMethod<[BigUint64Array | bigint[]], Result>;
 	redeem_code: ActorMethod<[string], Result_3>;
 	remove_admins: ActorMethod<[Array<Principal>], Result>;
-	remove_manager: ActorMethod<[Principal], Result>;
 	remove_managers: ActorMethod<[Array<Principal>], Result>;
+	remove_principal_airdrop: ActorMethod<[Principal], Result>;
 }
