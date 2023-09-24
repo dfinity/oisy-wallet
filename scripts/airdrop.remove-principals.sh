@@ -2,7 +2,7 @@
 
 # Get list of principals to remove from the airdrop
 
-set -eExuo pipefail
+set -x
 
 principals=()
 
