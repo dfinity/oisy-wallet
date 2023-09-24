@@ -14,41 +14,59 @@
 
 </div>
 
----
-
-**A novel Ethereum wallet that is hosted on the Internet Computer, is browser-based, fully on-chain and secured by chain-key cryptography and Internet Identity.**
-
-_The project is still work in progress, see the [disclaimer below](#status)._
-
 ## What is the Oisy Wallet
 
-The Oisy Wallet is a technology demonstrator with the goal to develop a novel Ethereum wallet that is secure, simple to use, and makes as few assumptions about the user's operating environment as possible. It is secure because it relies on [Threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/) and introduces the novel concept of `networked-custody`. It is simple to use because it uses [Internet Identity](https://internetcomputer.org/internet-identity) to authenticate the user. It strives to reach the widest possible audience by being browser-based and unencumbered by licensing restriction from the various app stores. It is originally built by DFINITY and licensed under an [open source license](LICENSE).
+The Oisy Wallet is a technology demonstrator that shows how one can build a multichain wallet using Internet Computer Protocol (ICP) technology. For now, it demonstrates how to manage Ethereum and ERC20 assets, but its architecture and the underlying ICP technology is extendable to also control [Bitcoin](https://internetcomputer.org/bitcoin-integration) and [IC-native tokens](https://internetcomputer.org/docs/current/developer-docs/integrations/icrc-1/deploy-new-token). The name _OISy_ derives from _Open Internet Services_.
 
-## Goals
+We invite you to take Oisy for a test drive at [oisy.com](https://oisy.com) and to explore the code in this repository. At this point, the project is still work in progress and not recommended for managing assets of significant value, see the [disclaimer below](#status).
 
-Oisy is designed to run natively on the Internet Computer, while at the same time holding native ETH and ERC-20 tokens and interacting with Ethereum smart contracts. Current features include sending and receiving ETH and a small list of ERC-20 tokens, receiving directly from Metamask and integration with Wallet Connect.
+## Features
 
-More concretely, Oisy goals are:
+The Oisy Wallet provides a convenient user experience known from custodial wallets but without their strong trust assumptions. In contrast, it provides trust assumptions comparable to self-custody solutions. Different to self-custody wallets though, Oisy requires no browser extensions or additional mobile app, a standard off-the-shelf web browser is sufficient. In conclusion, Oisy provides a an attractive user experience, i.e. a low entry barrier, yet weak trust assumptions.
 
-1. **fully on-chain** Internet Computer makes it possible to natively host any n-tiered dApp and gives users strong cryptographic guarantees that the content they load, static or dynamic, has not been tampered with. These guarantees are ideal for wallets, which require end-to-end security guarantees.
+<div align="center" style="display:flex;flex-direction:column;">
+  <img src="./oisy-comparison.svg" alt="Oisy feature comparison" style="max-width:500px"/>
+</div>
 
-2. **networked-custody** When it comes to wallets, Ethereum users face the following choices, easy-to-use, custodial, browser-based wallets vis-a-vis cumbersome, non-custodial, app-based or browser-plugin-based wallets. Oisy uses [Threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/) to offer **networked-custody** as a third choice, where you neither have to trust institutions with your private keys, nor are you encumbered by password-based access for personal safeguarding of your private keys. With **networked-custody**, your private key is split across network nodes offering you ease of use and security.
+In more detail, Oisy is:
 
-3. **browser-based** No matter your browser and operating system preference, you should be able to transact with the Ethereum network as simply as when you use a custodial wallet.
+- **Browser-based:** No matter your browser and operating system preferences, Oisy allows you to receive, hold, and send native ETH and ERC-20 tokens on Ethereum. Currently, the list of ERC-20 tokens is hardcoded but it can easily be extended.
 
-4. **free to use and develop** Oisy is open-source software and licensed under Apache 2.0.
+- **Networked-custody:** The key controlling your multichain assets is not controlled by a single entity. Shares of the key are distributed among many ICP replica nodes and signatures are created using [threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/).
+
+- **Fully on-chain:** Not only the keys but also the web assets are hosted on chain. Therefore the entire wallet is based on a decentralized trust model and guarantees that the entire wallet has not been tampered with.
+
+- **Interoperable:** Oisy integrates with [WalletConnect](https://walletconnect.com/) allowing you to use Oisy as a wallet for many established web3 services, such as Uniswap. Moreover, a Metamask integration demonstrates how other wallets can transfer assets to the Oisy wallet.
+
+- **Free to use and develop:** Oisy is open-source software and licensed under [Apache 2.0](LICENSE). Feel free to fork it or propose improvements.
+
+## ICP building blocks used
+
+What are the technical building blocks enabling the creation of Oisy?
+
+- **Chain-key signatures:** A novel threshold ECDSA signature protocol suite available on ICP enables smart contracts to perform cryptographic signatures without a single entity having full access to the private key. Read more about [chain-key cryptography](https://internetcomputer.org/how-it-works/chain-key-technology/) or start building based on [chain-key signature sample code](https://internetcomputer.org/docs/current/samples/t-ecdsa-sample).
+
+- **HTTP outcalls:** Smart contracts on ICP can call standard HTTP endpoints in the Web 2.0 world using [HTTP outcalls](https://internetcomputer.org/https-outcalls). Check out the [HTTP outcalls sample code](https://internetcomputer.org/docs/current/developer-docs/integrations/https-outcalls/https-outcalls-how-to-use) to connect Web 3.0 with Web 2.0 yourself.
+
+- **Internet Identity (II):** Based on ICP's threshold signature schemes, Internet Identity (II) is an authentication and key management system with strong privacy and security guarantees. Using [WebAuthn](https://www.w3.org/TR/webauthn-3) users can conveniently create secure sessions using their fingerprint or other biometric identifiers. Read more about [Internet Identity technology](https://internetcomputer.org/internet-identity) or [start integrating II](https://internetcomputer.org/docs/current/developer-docs/integrations/internet-identity/integrate-identity) into your canister smart contract.
+
+- **Web assets served from chain:** ICP is not only designed to run _backends_, such as ledgers, on chain, its low storage cost and low latency allows to serve _frontends_, such as HTML files and images, from chain, too. Read more about [smart contracts serving web assets](https://internetcomputer.org/how-it-works/smart-contracts-serve-the-web/) or directly start [building your first decentralized web frontend](https://internetcomputer.org/docs/current/developer-docs/frontend/).
+
+## Related projects
+
+While Oisy is intended as showcase, there are other projects who provide Oisy-like wallets in product quality. For example, check out the [Me Wallet](https://astrox.me/) by [AstroX](https://astrox.network).
 
 ## Status
 
-The project is **not ready for production use**.
+This project is **not ready for production use** and for now meant to serve as technology demonstrator. We are happy to answer questions if they are raised as issues in this github repo.
 
-We appreciate your patience until we get there. Until then, we are happy to answer questions if they are raised as issues in this github repo.
+## Build an run yourself
 
-## Prerequisites
+### Prerequisites
 
 - [x] Install the [IC SDK](https://internetcomputer.org/docs/current/developer-docs/setup/install/index.mdx).
 
-## Start the local replica
+### Start the local replica
 
 Open a new terminal window _in the project directory_, and run the following command to start the local replica. The replica will not start unless [dfx.json](dfx.json) exists in the current directory.
 
@@ -64,7 +82,7 @@ dfx stop
 
 from the project directory will stop the local replica.
 
-## Build & run the dapp locally
+### Run Oisy locally
 
 Make sure you switch back to the project root directory.
 
@@ -95,11 +113,11 @@ URLs:
 
 Click on the **frontend** URL to access the Oisy Wallet that is running locally.
 
-## Local development
+### Local development
 
 See [HACKING](HACKING.md)
 
-### Backend
+#### Backend
 
 The backend is written in Rust and you can find it under the [backend folder](src/backend/). It uses the [tECDSA API](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/t-ecdsa-how-it-works) provided by IC. To find out more about tECDSA, you can read the [Eurocrypt 2022 paper](https://eprint.iacr.org/2021/1330.pdf).
 
