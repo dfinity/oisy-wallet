@@ -190,8 +190,8 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
 
 /// Remove a given principal from the airdrop
 #[update(guard = "caller_is_admin")]
-fn remove_manager(principal: Principal) -> CustomResult<()> {
-    mutate_state(|state| match state.principals_managers.remove(&principal) {
+fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
+    mutate_state(|state| match state.principals_users.remove(&principal) {
         Some(_) => Ok(()),
         None => Err(CanisterError::PrincipalNotParticipatingInAirdrop),
     })
