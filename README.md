@@ -17,14 +17,14 @@
 
 ## What is the Oisy Wallet
 
-The Oisy Wallet is a technology demonstrator that shows how one can build a multichain wallet using Internet Computer Protocol (ICP) technology. For now, it demonstrates how to manage Ethereum and ERC20 assets, but its architecture and the underlying ICP technology is extendable to control Bitcoin and IC-native tokens too. The name *OISy* derives from *Open Internet Services*. 
+The Oisy Wallet is a technology demonstrator that shows how one can build a multichain wallet using Internet Computer Protocol (ICP) technology. For now, it demonstrates how to manage Ethereum and ERC20 assets, but its architecture and the underlying ICP technology is extendable to also control [Bitcoin](https://internetcomputer.org/bitcoin-integration) and [IC-native tokens](https://internetcomputer.org/docs/current/developer-docs/integrations/icrc-1/deploy-new-token). The name *OISy* derives from *Open Internet Services*. 
 
 We invite you to take Oisy for a test drive at [oisy.com](https://oisy.com) and to explore the code in this repository. At this point, the project is still work in progress and not recommended for managing assets of significant value, see the [disclaimer below](#status).
 
 
 ## Features
 
-The Oisy Wallet provides a convenient user experience known from custodial wallets without their strong trust assumptions. In contrast, it provides trust assumptions comparable to self-custody solutions. Different to self-custody wallets though, Oisy requires no browser extensions or additional mobile app, a standard off-the-shelf web browser is sufficient. In conclusion, Oisy provides a low entry barrier without the need for strong trust assumptions.
+The Oisy Wallet provides a convenient user experience known from custodial wallets but without their strong trust assumptions. In contrast, it provides trust assumptions comparable to self-custody solutions. Different to self-custody wallets though, Oisy requires no browser extensions or additional mobile app, a standard off-the-shelf web browser is sufficient. In conclusion, Oisy provides a an attractive user experience, i.e. a low entry barrier, yet weak trust assumptions.
 
 <div align="center" style="display:flex;flex-direction:column;">
   <img src="./oisy-comparison.svg" alt="Oisy feature comparison" style="max-width:500px"/>
@@ -34,7 +34,7 @@ In more detail, Oisy is:
 
 * **Browser-based:** No matter your browser and operating system preferences, Oisy allows you to receive, hold, and send native ETH and ERC-20 tokens on Ethereum. Currently, the list of ERC-20 tokens is hardcoded but it can easily be extended.
 
-* **Networked-custody:** The key controlling your multichain assets is not controlled by a single entity. Shares of the key are distributed among many ICP replica nodes and signatures are created using [Threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/).
+* **Networked-custody:** The key controlling your multichain assets is not controlled by a single entity. Shares of the key are distributed among many ICP replica nodes and signatures are created using [threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/).
 
 * **Fully on-chain:** Not only the keys but also the web assets are hosted on chain. Therefore the entire wallet is based on a decentralized trust model and guarantees that the entire wallet has not been tampered with. 
 
@@ -51,7 +51,7 @@ What are the technical building blocks enabling the creation of Oisy?
 
 * **HTTP outcalls:** Smart contracts on ICP can call standard HTTP endpoints in the Web 2.0 world using [HTTP outcalls](https://internetcomputer.org/https-outcalls). Check out the [HTTP outcalls sample code](https://internetcomputer.org/docs/current/developer-docs/integrations/https-outcalls/https-outcalls-how-to-use) to connect Web 3.0 with Web 2.0 yourself. 
 
-* **Internet Identity (II):** Based on ICP's threshold signature schemes, Internet Identity (II) is an authentication and key management system with strong privacy and security guarantees. Using [WebAuthn](https://www.w3.org/TR/webauthn-3) users can conveniently create secure sessions using their fingerprint or other biometric sensors. Read more about [Internet Identity technology](https://internetcomputer.org/internet-identity) or [start integrating II](https://internetcomputer.org/docs/current/developer-docs/integrations/internet-identity/integrate-identity) into your canister smart contract. 
+* **Internet Identity (II):** Based on ICP's threshold signature schemes, Internet Identity (II) is an authentication and key management system with strong privacy and security guarantees. Using [WebAuthn](https://www.w3.org/TR/webauthn-3) users can conveniently create secure sessions using their fingerprint or other biometric identifiers. Read more about [Internet Identity technology](https://internetcomputer.org/internet-identity) or [start integrating II](https://internetcomputer.org/docs/current/developer-docs/integrations/internet-identity/integrate-identity) into your canister smart contract. 
 
 * **Web assets served from chain:** ICP is not only designed to run *backends*, such as ledgers, on chain, its low storage cost and low latency allows to serve *frontends*, such as HTML files and images, from chain, too. Read more about [smart contracts serving web assets](https://internetcomputer.org/how-it-works/smart-contracts-serve-the-web/) or directly start [building your first decentralized web frontend](https://internetcomputer.org/docs/current/developer-docs/frontend/).
 
