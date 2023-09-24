@@ -53,10 +53,11 @@ pub fn add_user_to_airdrop_reward(
 ) -> CustomResult<()>{
 
     // check that we have enough tokens left
-    if state.total_tokens < amount.0 {
+    if state.total_tokens <= amount.0 {
         return Err(NoTokensLeft);
     }
 
+    // Substraction to unsigned total amount of tokens cannot go below 0 because of previous check
     state.total_tokens -= amount.0;
 
     state.airdrop_reward.push(EthereumTransaction::new(
