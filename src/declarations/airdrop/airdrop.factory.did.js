@@ -9,6 +9,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const CanisterError = IDL.Variant({
+		PrincipalNotParticipatingInAirdrop: IDL.Null,
 		NoChildrenForCode: IDL.Null,
 		CannotRegisterMultipleTimes: IDL.Null,
 		NoTokensLeft: IDL.Null,
@@ -91,6 +92,7 @@ export const idlFactory = ({ IDL }) => {
 		put_airdrop: IDL.Func([IDL.Vec(IDL.Nat64)], [Result], []),
 		redeem_code: IDL.Func([IDL.Text], [Result_3], []),
 		remove_admins: IDL.Func([IDL.Vec(IDL.Principal)], [Result], []),
+		remove_manager: IDL.Func([IDL.Principal], [Result], []),
 		remove_managers: IDL.Func([IDL.Vec(IDL.Principal)], [Result], [])
 	});
 };
