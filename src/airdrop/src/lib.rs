@@ -21,7 +21,7 @@
 //! cargo clippy -p airdrop  -- -W clippy::all -W clippy::pedantic -W clippy::restriction -W clippy::nursery -W rust_2018_idioms
 //! ```
 
-use std::{cell::RefCell, collections::HashSet};
+use std::{cell::RefCell, collections::{HashSet, HashMap}};
 
 use candid::{types::principal::Principal, CandidType};
 use ic_cdk::{
@@ -31,7 +31,7 @@ use ic_cdk::{
 };
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
-use state::AirdropAmountERC20;
+use state::{AirdropAmountERC20, EthereumTransaction};
 
 mod guards;
 mod state;
@@ -448,11 +448,15 @@ fn clean_up() -> CustomResult<()> {
     mutate_state(|state| {
         // remove duplicate codes
         let mut codes = HashSet::new();
-        state.pre_generated_codes.retain(|code| codes.insert(code.clone()));
+        state
+            .pre_generated_codes
+            .retain(|code| codes.insert(code.clone()));
 
         // remove duplicate managers
         let mut managers = HashSet::new();
-        state.principals_managers.retain(|principal, _| managers.insert(principal.clone()));
+        state
+            .principals_managers
+            .retain(|principal, _| managers.insert(principal.clone()));
 
         Ok(())
     })
@@ -484,6 +488,45 @@ fn remove_admins(principals: Vec<Principal>) -> CustomResult<()> {
 
         Ok(())
     })
+}
+
+/// Get the aidrop status - the actual state and whether tokens have been transferred
+#[query(guard = "caller_is_admin")]
+fn get_state_rewards() -> CustomResult<Vec<EthereumTransaction>> {
+    check_if_killed()?;
+
+    read_state(|state| Ok(state.airdrop_reward.clone()))
+}
+
+/// Get the parameters of the airdrop
+#[query(guard = "caller_is_admin")]
+fn get_state_parameters() -> CustomResult<(u64, u64, u64, u64)> {
+    check_if_killed()?;
+
+    read_state(|state| {
+        Ok((
+            state.token_per_person,
+            state.maximum_depth,
+            state.numbers_of_children,
+            state.total_tokens,
+        ))
+    })
+}
+
+/// Get the state of the admins list
+#[query(guard = "caller_is_admin")]
+fn get_state_admins() -> CustomResult<HashSet<Principal>> {
+    check_if_killed()?;
+
+    read_state(|state| Ok(state.principals_admins.clone()))
+}
+
+/// Get the state of the managers list
+#[query(guard = "caller_is_admin")]
+fn get_state_managers() -> CustomResult<HashMap<Principal, PrincipalState>> {
+    check_if_killed()?;
+
+    read_state(|state| Ok(state.principals_managers.clone()))
 }
 
 // automatically generates the candid file

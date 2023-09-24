@@ -22,6 +22,12 @@ export interface CodeInfo {
 	code: string;
 	codes_redeemed: bigint;
 }
+export interface EthereumTransaction {
+	transferred: boolean;
+	reward_type: RewardType;
+	eth_address: string;
+	amount: bigint;
+}
 export interface Info {
 	principal: Principal;
 	code: string;
@@ -36,10 +42,19 @@ export interface InitArg {
 	total_tokens: bigint;
 	numbers_of_children: bigint;
 }
+export interface PrincipalState {
+	codes_generated: bigint;
+	codes_redeemed: bigint;
+}
 export type Result = { Ok: null } | { Err: CanisterError };
 export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };
 export type Result_2 = { Ok: Array<[bigint, string, bigint]> } | { Err: CanisterError };
 export type Result_3 = { Ok: Info } | { Err: CanisterError };
+export type Result_4 = { Ok: Array<Principal> } | { Err: CanisterError };
+export type Result_5 = { Ok: Array<[Principal, PrincipalState]> } | { Err: CanisterError };
+export type Result_6 = { Ok: [bigint, bigint, bigint, bigint] } | { Err: CanisterError };
+export type Result_7 = { Ok: Array<EthereumTransaction> } | { Err: CanisterError };
+export type RewardType = { Airdrop: null } | { Referral: null };
 export interface _SERVICE {
 	add_admin: ActorMethod<[Principal], Result>;
 	add_codes: ActorMethod<[Array<string>], Result>;
@@ -49,6 +64,10 @@ export interface _SERVICE {
 	generate_code: ActorMethod<[], Result_1>;
 	get_airdrop: ActorMethod<[bigint], Result_2>;
 	get_code: ActorMethod<[], Result_3>;
+	get_state_admins: ActorMethod<[], Result_4>;
+	get_state_managers: ActorMethod<[], Result_5>;
+	get_state_parameters: ActorMethod<[], Result_6>;
+	get_state_rewards: ActorMethod<[], Result_7>;
 	is_manager: ActorMethod<[], boolean>;
 	kill_canister: ActorMethod<[], Result>;
 	put_airdrop: ActorMethod<[BigUint64Array | bigint[]], Result>;
