@@ -30,7 +30,7 @@
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: 'Unexpected issue while syncing the status of your authentication.' },
-				err: JSON.stringify(Err)
+				err
 			});
 		}
 
