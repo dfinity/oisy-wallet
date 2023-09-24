@@ -7,7 +7,7 @@
 	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { addressStore } from '$lib/stores/address.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import { getContext, onDestroy } from 'svelte';
@@ -30,6 +30,8 @@
 
 	let listener: WebSocketListener | undefined = undefined;
 
+	const errorMsgs: symbol[] = [];
+
 	const updateFeeData = async () => {
 		try {
 			if ($token.id === ETHEREUM_TOKEN_ID) {
@@ -50,10 +52,14 @@
 				})
 			});
 		} catch (err: unknown) {
-			toastsError({
-				msg: { text: `Cannot fetch gas fee.` },
-				err
-			});
+			toastsHide(errorMsgs);
+
+			errorMsgs.push(
+				toastsError({
+					msg: { text: `Cannot fetch gas fee.` },
+					err
+				})
+			);
 		}
 	};
 
