@@ -3,7 +3,7 @@
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { token } from '$lib/derived/token.derived';
-	import { invalidIcpAddress } from '$lib/utils/burn.utils';
+	import { invalidIcpAddress } from '$lib/utils/icp.utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
