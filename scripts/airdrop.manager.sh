@@ -26,6 +26,17 @@ USERS=(
     "moadj-5cc4w-zmzpn-pzcbv-h2miy-zimrb-uydgo-spdgq-3oceb-2tllm-rae"
 )
 
+case $ENV in
+  "staging")
+    WALLET="cvthj-wyaaa-aaaad-aaaaq-cai"
+    ;;
+  "ic")
+    WALLET="yit3i-lyaaa-aaaan-qeavq-cai"
+    ;;
+  *)
+    ;;
+esac
+
 for USER in "${USERS[@]}"; do
     if [ -n "${ENV+1}" ]; then
         dfx canister call airdrop add_manager '(principal"'$USER'")' --network "$ENV" --wallet "$WALLET"
