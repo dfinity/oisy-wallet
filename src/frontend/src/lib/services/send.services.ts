@@ -29,7 +29,7 @@ export interface SendParams {
 	progress: (step: SendStep) => void;
 	lastProgressStep?: SendStep;
 	token: Token;
-	network: TargetNetwork | undefined;
+	network?: TargetNetwork | undefined;
 }
 
 const ethPrepareTransaction = async ({
