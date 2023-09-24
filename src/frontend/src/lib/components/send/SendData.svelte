@@ -1,7 +1,7 @@
 <script lang="ts">
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
-	import SendDestination from '$lib/components/send/SendDestination.svelte';
+	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
     import type {Token} from "$lib/types/token";
 
 	export let destination = '';
@@ -9,7 +9,7 @@
     export let token: Token;
 </script>
 
-<SendDestination {destination} {amount} {token} />
+<SendDataDestination {destination} {amount} {token} />
 
 <slot />
 
