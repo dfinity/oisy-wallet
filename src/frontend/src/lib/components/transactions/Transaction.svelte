@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Transaction } from '$lib/types/transaction';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { Utils } from 'alchemy-sdk';
 	import { isTransactionPending } from '$lib/utils/transactions.utils';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import type { SvelteComponent } from 'svelte';
