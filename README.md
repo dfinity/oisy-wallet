@@ -14,13 +14,11 @@
 
 </div>
 
-
 ## What is the Oisy Wallet
 
-The Oisy Wallet is a technology demonstrator that shows how one can build a multichain wallet using Internet Computer Protocol (ICP) technology. For now, it demonstrates how to manage Ethereum and ERC20 assets, but its architecture and the underlying ICP technology is extendable to also control [Bitcoin](https://internetcomputer.org/bitcoin-integration) and [IC-native tokens](https://internetcomputer.org/docs/current/developer-docs/integrations/icrc-1/deploy-new-token). The name *OISy* derives from *Open Internet Services*. 
+The Oisy Wallet is a technology demonstrator that shows how one can build a multichain wallet using Internet Computer Protocol (ICP) technology. For now, it demonstrates how to manage Ethereum and ERC20 assets, but its architecture and the underlying ICP technology is extendable to also control [Bitcoin](https://internetcomputer.org/bitcoin-integration) and [IC-native tokens](https://internetcomputer.org/docs/current/developer-docs/integrations/icrc-1/deploy-new-token). The name _OISy_ derives from _Open Internet Services_.
 
 We invite you to take Oisy for a test drive at [oisy.com](https://oisy.com) and to explore the code in this repository. At this point, the project is still work in progress and not recommended for managing assets of significant value, see the [disclaimer below](#status).
-
 
 ## Features
 
@@ -30,36 +28,33 @@ The Oisy Wallet provides a convenient user experience known from custodial walle
   <img src="./oisy-comparison.svg" alt="Oisy feature comparison" style="max-width:500px"/>
 </div>
 
-In more detail, Oisy is: 
+In more detail, Oisy is:
 
-* **Browser-based:** No matter your browser and operating system preferences, Oisy allows you to receive, hold, and send native ETH and ERC-20 tokens on Ethereum. Currently, the list of ERC-20 tokens is hardcoded but it can easily be extended.
+- **Browser-based:** No matter your browser and operating system preferences, Oisy allows you to receive, hold, and send native ETH and ERC-20 tokens on Ethereum. Currently, the list of ERC-20 tokens is hardcoded but it can easily be extended.
 
-* **Networked-custody:** The key controlling your multichain assets is not controlled by a single entity. Shares of the key are distributed among many ICP replica nodes and signatures are created using [threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/).
+- **Networked-custody:** The key controlling your multichain assets is not controlled by a single entity. Shares of the key are distributed among many ICP replica nodes and signatures are created using [threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/).
 
-* **Fully on-chain:** Not only the keys but also the web assets are hosted on chain. Therefore the entire wallet is based on a decentralized trust model and guarantees that the entire wallet has not been tampered with. 
+- **Fully on-chain:** Not only the keys but also the web assets are hosted on chain. Therefore the entire wallet is based on a decentralized trust model and guarantees that the entire wallet has not been tampered with.
 
-* **Interoperable:** Oisy integrates with [WalletConnect](https://walletconnect.com/) allowing you to use Oisy as a wallet for many established web3 services, such as Uniswap. Moreover, a Metamask integration demonstrates how other wallets can transfer assets to the Oisy wallet.
+- **Interoperable:** Oisy integrates with [WalletConnect](https://walletconnect.com/) allowing you to use Oisy as a wallet for many established web3 services, such as Uniswap. Moreover, a Metamask integration demonstrates how other wallets can transfer assets to the Oisy wallet.
 
-* **Free to use and develop:** Oisy is open-source software and licensed under [Apache 2.0](LICENSE). Feel free to fork it or propose improvements. 
-
+- **Free to use and develop:** Oisy is open-source software and licensed under [Apache 2.0](LICENSE). Feel free to fork it or propose improvements.
 
 ## ICP building blocks used
 
-What are the technical building blocks enabling the creation of Oisy? 
+What are the technical building blocks enabling the creation of Oisy?
 
-* **Chain-key signatures:** A novel threshold ECDSA signature protocol suite available on ICP enables smart contracts to perform cryptographic signatures without a single entity having full access to the private key. Read more about [chain-key cryptography](https://internetcomputer.org/how-it-works/chain-key-technology/) or start building based on [chain-key signature sample code](https://internetcomputer.org/docs/current/samples/t-ecdsa-sample).
+- **Chain-key signatures:** A novel threshold ECDSA signature protocol suite available on ICP enables smart contracts to perform cryptographic signatures without a single entity having full access to the private key. Read more about [chain-key cryptography](https://internetcomputer.org/how-it-works/chain-key-technology/) or start building based on [chain-key signature sample code](https://internetcomputer.org/docs/current/samples/t-ecdsa-sample).
 
-* **HTTP outcalls:** Smart contracts on ICP can call standard HTTP endpoints in the Web 2.0 world using [HTTP outcalls](https://internetcomputer.org/https-outcalls). Check out the [HTTP outcalls sample code](https://internetcomputer.org/docs/current/developer-docs/integrations/https-outcalls/https-outcalls-how-to-use) to connect Web 3.0 with Web 2.0 yourself. 
+- **HTTP outcalls:** Smart contracts on ICP can call standard HTTP endpoints in the Web 2.0 world using [HTTP outcalls](https://internetcomputer.org/https-outcalls). Check out the [HTTP outcalls sample code](https://internetcomputer.org/docs/current/developer-docs/integrations/https-outcalls/https-outcalls-how-to-use) to connect Web 3.0 with Web 2.0 yourself.
 
-* **Internet Identity (II):** Based on ICP's threshold signature schemes, Internet Identity (II) is an authentication and key management system with strong privacy and security guarantees. Using [WebAuthn](https://www.w3.org/TR/webauthn-3) users can conveniently create secure sessions using their fingerprint or other biometric identifiers. Read more about [Internet Identity technology](https://internetcomputer.org/internet-identity) or [start integrating II](https://internetcomputer.org/docs/current/developer-docs/integrations/internet-identity/integrate-identity) into your canister smart contract. 
+- **Internet Identity (II):** Based on ICP's threshold signature schemes, Internet Identity (II) is an authentication and key management system with strong privacy and security guarantees. Using [WebAuthn](https://www.w3.org/TR/webauthn-3) users can conveniently create secure sessions using their fingerprint or other biometric identifiers. Read more about [Internet Identity technology](https://internetcomputer.org/internet-identity) or [start integrating II](https://internetcomputer.org/docs/current/developer-docs/integrations/internet-identity/integrate-identity) into your canister smart contract.
 
-* **Web assets served from chain:** ICP is not only designed to run *backends*, such as ledgers, on chain, its low storage cost and low latency allows to serve *frontends*, such as HTML files and images, from chain, too. Read more about [smart contracts serving web assets](https://internetcomputer.org/how-it-works/smart-contracts-serve-the-web/) or directly start [building your first decentralized web frontend](https://internetcomputer.org/docs/current/developer-docs/frontend/).
-
+- **Web assets served from chain:** ICP is not only designed to run _backends_, such as ledgers, on chain, its low storage cost and low latency allows to serve _frontends_, such as HTML files and images, from chain, too. Read more about [smart contracts serving web assets](https://internetcomputer.org/how-it-works/smart-contracts-serve-the-web/) or directly start [building your first decentralized web frontend](https://internetcomputer.org/docs/current/developer-docs/frontend/).
 
 ## Related projects
 
 While Oisy is intended as showcase, there are other projects who provide Oisy-like wallets in product quality. For example, check out the [Me Wallet](https://astrox.me/) by [AstroX](https://astrox.network).
-
 
 ## Status
 
