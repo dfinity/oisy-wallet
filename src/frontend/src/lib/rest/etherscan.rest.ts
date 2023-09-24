@@ -1,4 +1,4 @@
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { EtherscanRestTransaction } from '$lib/types/etherscan-transaction';
 import type { Transaction } from '$lib/types/transaction';
@@ -11,7 +11,7 @@ export const transactions = async ({
 	address,
 	contract: { address: contractAddress }
 }: {
-	address: ECDSA_PUBLIC_KEY;
+	address: ETH_ADDRESS;
 	contract: Erc20Token;
 }): Promise<Transaction[]> => {
 	const url = new URL(API_URL);

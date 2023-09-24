@@ -1,5 +1,5 @@
 import { ERC20_ABI } from '$lib/constants/erc20.constants';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Erc20Transaction } from '$lib/types/erc20-transaction';
 import type { WebSocketListener } from '$lib/types/listener';
@@ -19,7 +19,7 @@ export const initMinedTransactionsListener = ({
 	listener
 }: {
 	contract: Erc20Token;
-	address: ECDSA_PUBLIC_KEY;
+	address: ETH_ADDRESS;
 	listener: (params: { hash: string; value: BigNumber }) => Promise<void>;
 }): WebSocketListener => {
 	const erc20Contract = new ethers.Contract(contract.address, ERC20_ABI, provider);
