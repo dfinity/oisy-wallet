@@ -1,4 +1,4 @@
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
 import { Alchemy, AlchemySubscription, type Network } from 'alchemy-sdk';
@@ -38,7 +38,7 @@ export const initPendingTransactionsListener = ({
 	address,
 	listener
 }: {
-	address: ECDSA_PUBLIC_KEY;
+	address: ETH_ADDRESS;
 	listener: Listener;
 }): WebSocketListener => {
 	let provider: Alchemy | null = new Alchemy(config);
