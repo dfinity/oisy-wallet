@@ -3,6 +3,7 @@ import type { Principal } from '@dfinity/principal';
 
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type CanisterError =
+	| { PrincipalNotParticipatingInAirdrop: null }
 	| { NoChildrenForCode: null }
 	| { CannotRegisterMultipleTimes: null }
 	| { NoTokensLeft: null }
@@ -73,5 +74,6 @@ export interface _SERVICE {
 	put_airdrop: ActorMethod<[BigUint64Array | bigint[]], Result>;
 	redeem_code: ActorMethod<[string], Result_3>;
 	remove_admins: ActorMethod<[Array<Principal>], Result>;
+	remove_manager: ActorMethod<[Principal], Result>;
 	remove_managers: ActorMethod<[Array<Principal>], Result>;
 }
