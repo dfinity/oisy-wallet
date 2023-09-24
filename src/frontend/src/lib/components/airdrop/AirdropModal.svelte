@@ -56,8 +56,4 @@
 	<div class="my-2"><InProgress {progressStep} {steps} type="static" /></div>
 
 	<AirdropInvites {airdrop} />
-
-	<p class="mt-4 mb-2">
-		<small>Tokens are claimable as long as the airdrop is not exhausted!</small>
-	</p>
 </Modal>
