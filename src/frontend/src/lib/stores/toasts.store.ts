@@ -24,3 +24,5 @@ export const toastsError = ({
 };
 
 export const toastsClean = () => toastsStore.reset(['success', 'warn', 'info']);
+
+export const toastsHide = (ids: symbol[]) => ids.forEach(id => toastsStore.hide(id));
