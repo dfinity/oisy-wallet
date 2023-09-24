@@ -5,6 +5,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { token } from '$lib/derived/token.derived';
+	import SendDestination from "$lib/components/send/SendDestination.svelte";
 	import SendFormActions from '$lib/components/send/SendFormActions.svelte';
 
 	export let destination = '';
@@ -17,14 +18,7 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<label for="destination" class="font-bold px-1.25">Destination:</label>
-	<Input
-		name="destination"
-		inputType="text"
-		required
-		bind:value={destination}
-		placeholder="Enter public address (0x)"
-	/>
+	<SendDestination bind:destination />
 
 	<label for="amount" class="font-bold px-1.25">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
