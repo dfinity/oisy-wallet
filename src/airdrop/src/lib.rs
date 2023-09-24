@@ -32,7 +32,6 @@ use ic_cdk::{
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
 use state::AirdropAmountERC20;
-use utils::convert_to_erc20;
 
 mod guards;
 mod state;
@@ -95,6 +94,8 @@ pub enum CanisterError {
     DuplicateKey(String),
     /// Managers cannot participate in the airdrop
     ManagersCannotParticipateInTheAirdrop,
+    /// No tokens left
+    NoTokensLeft,
 }
 
 #[init]
@@ -268,7 +269,7 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
                     parent_eth_address.clone(),
                     AirdropAmount(state.token_per_person / 4),
                     state::RewardType::Referral,
-                );
+                )?;
             }
         }
 
@@ -289,7 +290,7 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
             eth_address.clone(),
             AirdropAmount(state.token_per_person / 4),
             state::RewardType::Airdrop,
-        );
+        )?;
 
         let depth = state.codes.get(&code).unwrap().depth;
 
@@ -412,7 +413,7 @@ fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, Airdro
                 (
                     last_index.clone(),
                     reward.eth_address.clone(),
-                    convert_to_erc20(reward.amount.clone()),
+                    reward.amount.clone().into(),
                 )
             })
             .collect();
