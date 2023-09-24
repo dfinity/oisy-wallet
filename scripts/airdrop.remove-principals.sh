@@ -2,8 +2,6 @@
 
 # Get list of principals to remove from the airdrop
 
-set -x
-
 principals=()
 
 print_usage_and_exit() {
@@ -11,6 +9,11 @@ print_usage_and_exit() {
     echo "Usage: $0 --principals=value1,value2"
     exit 1
 }
+
+# if no arguments are passed
+if [ $# -eq 0 ]; then
+    print_usage_and_exit "Missing arguments"
+fi
 
 # Parse named arguments
 while [ "$#" -gt 0 ]; do
@@ -35,6 +38,8 @@ case $ENV in
   *)
     ;;
 esac
+
+set -x
 
 # Principals
 for principal in "${principals[@]}"; do
