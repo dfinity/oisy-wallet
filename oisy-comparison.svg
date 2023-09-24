@@ -19,9 +19,10 @@
 </tspan>
       <tspan x="0" y="38" style="font-weight:400;">entry barrier</tspan>
     </text>
-    <text id="Text Copy 1" style="fill:#662c91;font-family:Helvetica;font-size:18;" transform="matrix(1,0,0,1,269.019,111.923)">
-      <tspan x="0" y="17">Custodial web-</tspan>
-      <tspan x="0" y="38">based wallets</tspan>
+    <text id="Text Copy 1" style="fill:#662c91;font-family:Helvetica;font-size:18;" transform="matrix(1,0,0,1,255.997,112.65)">
+      <tspan x="0" y="17">Custodial
+</tspan>
+      <tspan x="0" y="38">web-based wallets</tspan>
     </text>
     <text id="Text Copy 1" style="fill:#9f9f9f;font-family:Helvetica;font-size:18;font-weight:700;" transform="matrix(1,0,0,1,442.211,406.901)">
       <tspan x="0" y="17">High
@@ -33,9 +34,12 @@
       <tspan x="51.7061" y="17" style="font-weight:400;">trust </tspan>
       <tspan x="0" y="38" style="font-weight:400;">assumptions</tspan>
     </text>
-    <path id="Path" style="fill:#662d91;fill-opacity:1;fill-rule:evenodd;opacity:1;stroke:none;" d="M255.997,96.5969 C261.261,96.5969,265.529,100.864,265.529,106.129 C265.529,111.393,261.261,115.66,255.997,115.66 C250.733,115.66,246.465,111.393,246.465,106.129 C246.465,100.864,250.733,96.5969,255.997,96.5969 z"/>
-    <text id="Text Copy 2" style="fill:#ed257a;font-family:Helvetica;font-size:18;" transform="matrix(1,0,0,1,532.188,139.547)">
+    <path id="Path" style="fill:#662d91;fill-opacity:1;fill-rule:evenodd;opacity:1;stroke:none;" d="M242.974,97.3243 C248.239,97.3243,252.506,101.592,252.506,106.856 C252.506,112.12,248.239,116.388,242.974,116.388 C237.71,116.388,233.443,112.12,233.443,106.856 C233.443,101.592,237.71,97.3243,242.974,97.3243 z"/>
+    <text id="Text Copy 2" style="fill:#ed257a;font-family:Helvetica;font-size:18;font-weight:700;" transform="matrix(1,0,0,1,532.188,139.547)">
       <tspan x="0" y="17">Oisy Wallet</tspan>
+      <tspan x="96.3721" y="17" style="font-weight:400;">
+</tspan>
+      <tspan x="0" y="38" style="font-weight:400;">(Networked-custodial)</tspan>
     </text>
     <path id="Path Copy" style="fill:#ee257b;fill-opacity:1;fill-rule:evenodd;opacity:1;stroke:none;" d="M519.165,124.221 C524.429,124.221,528.697,128.488,528.697,133.753 C528.697,139.017,524.429,143.284,519.165,143.284 C513.901,143.284,509.633,139.017,509.633,133.753 C509.633,128.488,513.901,124.221,519.165,124.221 z"/>
     <text id="Text Copy 2" style="fill:#0071ba;font-family:Helvetica;font-size:18;" transform="matrix(1,0,0,1,599.523,368.541)">
