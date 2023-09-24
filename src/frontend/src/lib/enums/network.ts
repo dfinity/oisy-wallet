@@ -1,4 +1,4 @@
 export enum TargetNetwork {
-	ETHEREUM = 'ethereum',
-	ICP = 'icp'
+	ETHEREUM = 'Ethereum',
+	ICP = 'ICP'
 }

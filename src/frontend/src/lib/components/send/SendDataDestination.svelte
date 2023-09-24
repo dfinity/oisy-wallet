@@ -3,10 +3,13 @@
 	import { tokenSymbol } from '$lib/derived/token.derived';
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { nonNullish } from '@dfinity/utils';
+	import type { TargetNetwork } from '$lib/enums/network';
 
 	export let destination: string;
 	export let amount: string | number | undefined = undefined;
 	export let token: Token;
+	export let network: TargetNetwork | undefined;
 
 	let amountDisplay: string;
 	$: (() => {
@@ -28,6 +31,11 @@
 
 <label for="destination" class="font-bold px-1.25">Destination:</label>
 <div id="destination" class="font-normal mb-2 px-1.25 break-words">{destination}</div>
+
+{#if nonNullish(network)}
+	<label for="network" class="font-bold px-1.25">Network:</label>
+	<div id="network" class="font-normal mb-2 px-1.25 break-words">{network}</div>
+{/if}
 
 <label for="amount" class="font-bold px-1.25">Amount:</label>
 <div id="amount" class="font-normal px-1.25 mb-2 break-words">
