@@ -83,6 +83,8 @@
 		modal.next();
 
 		try {
+			// TODO: burn
+
 			await executeSend({
 				from: $addressStore!,
 				to: destination!,
