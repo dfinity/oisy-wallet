@@ -14,7 +14,7 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
-	import { TargetNetwork } from '$lib/enums/network';
+	import type { TargetNetwork } from '$lib/enums/network';
 	import { getErc20FeeData } from '$lib/services/fee.services';
 
 	export let observe: boolean;
