@@ -11,6 +11,7 @@ export const idlFactory = ({ IDL }) => {
 	const CanisterError = IDL.Variant({
 		NoChildrenForCode: IDL.Null,
 		CannotRegisterMultipleTimes: IDL.Null,
+		NoTokensLeft: IDL.Null,
 		CanisterKilled: IDL.Null,
 		GeneralError: IDL.Text,
 		UnknownOisyWalletAddress: IDL.Null,

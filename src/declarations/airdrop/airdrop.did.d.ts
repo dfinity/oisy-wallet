@@ -5,6 +5,7 @@ export type Arg = { Upgrade: null } | { Init: InitArg };
 export type CanisterError =
 	| { NoChildrenForCode: null }
 	| { CannotRegisterMultipleTimes: null }
+	| { NoTokensLeft: null }
 	| { CanisterKilled: null }
 	| { GeneralError: string }
 	| { UnknownOisyWalletAddress: null }

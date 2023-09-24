@@ -2,6 +2,7 @@ type Arg = variant { Upgrade; Init : InitArg };
 type CanisterError = variant {
   NoChildrenForCode;
   CannotRegisterMultipleTimes;
+  NoTokensLeft;
   CanisterKilled;
   GeneralError : text;
   UnknownOisyWalletAddress;
