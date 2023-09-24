@@ -2,7 +2,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { send as executeSend } from '$lib/services/send.services';
 	import { isNullish } from '@dfinity/utils';
-	import { type WizardStep, type WizardSteps, WizardModal } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
@@ -83,8 +83,6 @@
 		modal.next();
 
 		try {
-			// TODO: burn
-
 			await executeSend({
 				from: $addressStore!,
 				to: destination!,
@@ -96,7 +94,8 @@
 				}),
 				maxFeePerGas,
 				maxPriorityFeePerGas,
-				gas
+				gas,
+				network
 			});
 
 			setTimeout(() => close(), 750);
