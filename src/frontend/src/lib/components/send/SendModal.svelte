@@ -20,7 +20,7 @@
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import {TargetNetwork} from "$lib/enums/network";
+	import { TargetNetwork } from '$lib/enums/network';
 
 	/**
 	 * Fee context store
@@ -141,11 +141,17 @@
 
 	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
 		{#if currentStep?.name === 'Review'}
-			<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} />
+			<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {network} />
 		{:else if currentStep?.name === 'Sending'}
 			<SendProgress progressStep={sendProgressStep} steps={SEND_STEPS} />
 		{:else}
-			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount bind:network />
+			<SendForm
+				on:icNext={modal.next}
+				on:icClose={close}
+				bind:destination
+				bind:amount
+				bind:network
+			/>
 		{/if}
 	</FeeContext>
 </WizardModal>

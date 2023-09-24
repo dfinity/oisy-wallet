@@ -5,9 +5,11 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import { token } from '$lib/derived/token.derived';
+	import {TargetNetwork} from "$lib/enums/network";
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
+	export let network: TargetNetwork | undefined = undefined;
 
 	const { store: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -17,7 +19,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<SendData {amount} {destination} token={$token} />
+<SendData {amount} {destination} token={$token} {network} />
 
 <div class="flex justify-end gap-1">
 	<button class="secondary" on:click={() => dispatch('icBack')}>Back</button>
