@@ -30,7 +30,7 @@
 
 	let listener: WebSocketListener | undefined = undefined;
 
-	let errorMsgs: symbol[] = [];
+	const errorMsgs: symbol[] = [];
 
 	const updateFeeData = async () => {
 		try {
