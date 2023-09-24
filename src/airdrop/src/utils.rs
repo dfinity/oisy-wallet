@@ -5,7 +5,7 @@ use crate::{
     read_state,
     state::{EthereumAddress, EthereumTransaction, RewardType, State, AirdropAmountERC20},
     AirdropAmount,
-    CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress},
+    CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress, NoTokensLeft},
     Code, CustomResult,
 };
 
@@ -50,7 +50,13 @@ pub fn add_user_to_airdrop_reward(
     eth_address: EthereumAddress,
     amount: AirdropAmount,
     reward_type: RewardType,
-) {
+) -> CustomResult<()>{
+
+    // check that we have enough tokens left
+    if state.total_tokens < amount.0 {
+        return Err(NoTokensLeft);
+    }
+
     state.total_tokens -= amount.0;
 
     state.airdrop_reward.push(EthereumTransaction::new(
@@ -59,6 +65,8 @@ pub fn add_user_to_airdrop_reward(
         false,
         reward_type,
     ));
+
+    Ok(())
 }
 
 // "generate" codes

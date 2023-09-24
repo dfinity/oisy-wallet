@@ -95,6 +95,8 @@ pub enum CanisterError {
     DuplicateKey(String),
     /// Managers cannot participate in the airdrop
     ManagersCannotParticipateInTheAirdrop,
+    /// No tokens left
+    NoTokensLeft,
 }
 
 #[init]
@@ -268,7 +270,7 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
                     parent_eth_address.clone(),
                     AirdropAmount(state.token_per_person / 4),
                     state::RewardType::Referral,
-                );
+                )?;
             }
         }
 
@@ -289,7 +291,7 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
             eth_address.clone(),
             AirdropAmount(state.token_per_person / 4),
             state::RewardType::Airdrop,
-        );
+        )?;
 
         let depth = state.codes.get(&code).unwrap().depth;
 
