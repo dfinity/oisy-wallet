@@ -20,6 +20,7 @@
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import type { TargetNetwork } from '$lib/enums/network';
 
 	/**
 	 * Fee context store
@@ -37,6 +38,7 @@
 
 	let destination = '';
 	let amount: number | undefined = undefined;
+	let network: TargetNetwork | undefined = undefined;
 
 	/**
 	 * Send
@@ -81,6 +83,8 @@
 		modal.next();
 
 		try {
+			// TODO: burn
+
 			await executeSend({
 				from: $addressStore!,
 				to: destination!,
@@ -137,13 +141,19 @@
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'}>
+	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
 		{#if currentStep?.name === 'Review'}
-			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
+			<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {network} />
 		{:else if currentStep?.name === 'Sending'}
 			<SendProgress progressStep={sendProgressStep} steps={SEND_STEPS} />
 		{:else}
-			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
+			<SendForm
+				on:icNext={modal.next}
+				on:icClose={close}
+				bind:destination
+				bind:amount
+				bind:network
+			/>
 		{/if}
 	</FeeContext>
 </WizardModal>
