@@ -43,11 +43,12 @@
 		(fromNullable(airdrop?.children) ?? []).find(([_, state]) => !state) === undefined;
 
 	let progressStep: string = AirdropStep.AIRDROP;
-	$: progressStep = airdrop?.tokens_transferred
-		? allInvitesRedeemed
-			? AirdropStep.DONE
-			: AirdropStep.INVITE_FRIENDS
-		: AirdropStep.AIRDROP;
+	$: progressStep =
+		airdrop?.tokens_transferred === true
+			? allInvitesRedeemed || !hasInvites
+				? AirdropStep.DONE
+				: AirdropStep.INVITE_FRIENDS
+			: AirdropStep.AIRDROP;
 </script>
 
 <Modal visible={$modalAirdrop} on:nnsClose={modalStore.close}>
