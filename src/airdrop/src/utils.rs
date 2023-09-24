@@ -3,7 +3,7 @@ use ic_cdk::{api::call::CallResult, call, caller};
 
 use crate::{
     read_state,
-    state::{EthereumAddress, EthereumTransaction, RewardType, State, AirdropAmountERC20},
+    state::{EthereumAddress, EthereumTransaction, RewardType, State},
     AirdropAmount,
     CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress, NoTokensLeft},
     Code, CustomResult,
@@ -58,7 +58,7 @@ pub fn add_user_to_airdrop_reward(
     }
 
     // Substraction to unsigned total amount of tokens cannot go below 0 because of previous check
-    state.total_tokens -= amount.0;
+    state.total_tokens -= *amount;
 
     state.airdrop_reward.push(EthereumTransaction::new(
         eth_address,
@@ -76,9 +76,4 @@ pub fn get_pre_codes(state: &mut State) -> CustomResult<Code> {
         Some(code) => Ok(code),
         None => Err(NoMoreCodes),
     }
-}
-
-/// Make the conversion to ERC-20 amount
-pub fn convert_to_erc20(amount: AirdropAmount) -> AirdropAmountERC20 {
-    AirdropAmountERC20(amount.0 as u128 * 10u128.pow(8))
 }

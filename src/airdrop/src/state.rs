@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::{collections::{HashMap, HashSet}, ops::Deref};
 
 use candid::{types::principal::Principal, CandidType};
 use serde::{Deserialize, Serialize};
@@ -64,8 +64,37 @@ pub struct EthereumAddress(pub String);
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug, Default)]
 pub struct AirdropAmount(pub u64);
 
+impl Deref for AirdropAmount {
+    type Target = u64;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+
+impl From<AirdropAmount> for AirdropAmountERC20 {
+    fn from(amount: AirdropAmount) -> Self {
+        Self(amount.0 as u128 * 10u128.pow(8))
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug, Default)]
 pub struct AirdropAmountERC20(pub u128);
+
+impl From<AirdropAmountERC20> for AirdropAmount {
+    fn from(amount: AirdropAmountERC20) -> Self {
+        Self((amount.0 / 10u128.pow(8)) as u64)
+    }
+}
+
+impl Deref for AirdropAmountERC20 {
+    type Target = u128;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
 pub struct CodeInfo {
