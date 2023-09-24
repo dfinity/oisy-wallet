@@ -21,7 +21,10 @@
 //! cargo clippy -p airdrop  -- -W clippy::all -W clippy::pedantic -W clippy::restriction -W clippy::nursery -W rust_2018_idioms
 //! ```
 
-use std::{cell::RefCell, collections::{HashSet, HashMap}};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+};
 
 use candid::{types::principal::Principal, CandidType};
 use ic_cdk::{
@@ -96,6 +99,8 @@ pub enum CanisterError {
     ManagersCannotParticipateInTheAirdrop,
     /// No tokens left
     NoTokensLeft,
+    /// Principal not participating in airdrop
+    PrincipalNotParticipatingInAirdrop,
 }
 
 #[init]
@@ -180,6 +185,15 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
 
             Ok(())
         }
+    })
+}
+
+/// Remove a given principal from the airdrop
+#[update(guard = "caller_is_admin")]
+fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
+    mutate_state(|state| match state.principals_users.remove(&principal) {
+        Some(_) => Ok(()),
+        None => Err(CanisterError::PrincipalNotParticipatingInAirdrop),
     })
 }
 
