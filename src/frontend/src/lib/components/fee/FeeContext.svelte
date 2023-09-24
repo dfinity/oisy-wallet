@@ -5,7 +5,6 @@
 	import { getFeeData } from '$lib/providers/infura.providers';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
-	import { getErc20FeeData } from '$lib/services/erc20.services';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { addressStore } from '$lib/stores/address.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -14,10 +13,14 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
+	import { TargetNetwork } from '$lib/enums/network';
+	import { getErc20FeeData } from '$lib/services/fee.services';
 
 	export let observe: boolean;
 	export let destination = '';
 	export let amount: string | number | undefined = undefined;
+	export let network: TargetNetwork | undefined = undefined;
 
 	const { store }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -41,8 +44,9 @@
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
 					contract: $token as Erc20Token,
-					address: destination !== '' ? destination : $addressStore!,
-					amount: parseToken({ value: `${amount ?? '1'}` })
+					address: mapAddressStartsWith0x(destination !== '' ? destination : $addressStore!),
+					amount: parseToken({ value: `${amount ?? '1'}` }),
+					network
 				})
 			});
 		} catch (err: unknown) {
