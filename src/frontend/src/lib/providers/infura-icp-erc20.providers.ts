@@ -20,5 +20,5 @@ export const burnToICP = async ({
 	to: ICP_ACCOUNT_IDENTIFIER;
 }): Promise<BigNumber> => {
 	const erc20Contract = new ethers.Contract(contractAddress, ICP_ERC20_ABI, provider);
-	return erc20Contract.burnToAccountId(amount, `0x${to}`);
+	return erc20Contract.burnToAccountId(amount, to);
 };
