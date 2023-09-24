@@ -1,5 +1,5 @@
 import { ERC20_ABI } from '$lib/constants/erc20.constants';
-import type { ECDSA_PUBLIC_KEY, ETH_ADDRESS } from '$lib/types/address';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20ContractAddress, Erc20Metadata } from '$lib/types/erc20';
 import type { Erc20PopulateTransaction } from '$lib/types/erc20-providers';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -33,7 +33,7 @@ export const balance = async ({
 	address
 }: {
 	contract: Erc20ContractAddress;
-	address: ECDSA_PUBLIC_KEY;
+	address: ETH_ADDRESS;
 }): Promise<BigNumber> => {
 	const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
 
@@ -46,7 +46,7 @@ export const getFeeData = async ({
 	amount
 }: {
 	contract: Erc20ContractAddress;
-	address: ECDSA_PUBLIC_KEY;
+	address: ETH_ADDRESS;
 	amount: BigNumber;
 }): Promise<BigNumber> => {
 	const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, provider);
