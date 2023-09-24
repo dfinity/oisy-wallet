@@ -7,7 +7,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import SendNetworkICP from "$lib/components/send/SendNetworkICP.svelte";
 	import SendDestination from "$lib/components/send/SendDestination.svelte";
-	import {TargetNetwork} from "$lib/enums/network";
+	import type {TargetNetwork} from "$lib/enums/network";
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;

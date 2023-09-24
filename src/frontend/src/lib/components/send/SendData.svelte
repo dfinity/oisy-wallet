@@ -3,7 +3,7 @@
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import type { Token } from '$lib/types/token';
-	import { TargetNetwork } from '$lib/enums/network';
+	import type { TargetNetwork } from '$lib/enums/network';
 
 	export let destination = '';
 	export let amount: string | number | undefined = undefined;

@@ -20,7 +20,7 @@
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { TargetNetwork } from '$lib/enums/network';
+	import type { TargetNetwork } from '$lib/enums/network';
 
 	/**
 	 * Fee context store

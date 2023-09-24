@@ -5,7 +5,7 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import { token } from '$lib/derived/token.derived';
-	import {TargetNetwork} from "$lib/enums/network";
+	import type {TargetNetwork} from "$lib/enums/network";
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;

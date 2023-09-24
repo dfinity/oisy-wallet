@@ -8,7 +8,7 @@
 	export let network: TargetNetwork | undefined = undefined;
 	export let destination: string | undefined = undefined;
 
-	const onDestinationAddressInput = debounce(() => {
+	const onDestinationAddressInput = debounce(async () => {
 		if (nonNullish(network)) {
 			// A network was already manually selected
 			return;
@@ -23,7 +23,7 @@
 			return;
 		}
 
-		if (isIcpAccountIdentifier(destination)) {
+		if (await isIcpAccountIdentifier(destination)) {
 			network = TargetNetwork.ICP;
 		}
 	});

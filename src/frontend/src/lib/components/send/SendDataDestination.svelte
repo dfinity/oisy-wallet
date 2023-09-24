@@ -4,7 +4,7 @@
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { nonNullish } from '@dfinity/utils';
-	import { TargetNetwork } from '$lib/enums/network';
+	import type { TargetNetwork } from '$lib/enums/network';
 
 	export let destination: string;
 	export let amount: string | number | undefined = undefined;
