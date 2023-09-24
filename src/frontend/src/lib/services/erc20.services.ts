@@ -21,9 +21,8 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return usdt;
 		case 'dai':
 			return dai;
-		// ICP in production
+		// ICP in production. ckICP was used on staging because the definitive name and symbol had not been decided.
 		case 'icp':
-		// ckICP was used on staging because the definitive name and symbol had not been decided
 		case 'ckicp':
 			return icp;
 		default:
