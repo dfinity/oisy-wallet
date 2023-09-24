@@ -70,3 +70,9 @@
 		</div>
 	</div>
 {/each}
+
+{#if children.length > 0}
+	<p class="mt-4 mb-2">
+		<small>Tokens are claimable as long as the airdrop is not exhausted!</small>
+	</p>
+{/if}
