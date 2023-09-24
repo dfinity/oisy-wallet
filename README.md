@@ -45,14 +45,14 @@ Building on ICP, Oisy achieves a very unique set of features:
 ## ICP building blocks used
 
 What are the unique ICP technical building blocks enabling the creation of Oisy?
-
 - **Chain-key signatures:** the world's best threshold ECDSA signature [protocol suite](https://eprint.iacr.org/2022/506) (only available on ICP) enables smart contracts to perform cryptographic signatures without a single entity having full access to the private key. Read more about [chain-key cryptography](https://internetcomputer.org/how-it-works/chain-key-technology/) or start building based on [chain-key signature sample code](https://internetcomputer.org/docs/current/samples/t-ecdsa-sample).
 
 - **Internet Identity (II):** based on ICP's threshold BLS signature schemes and WebAuthn, Internet Identity (II) is an authentication and key management system with strong privacy and security guarantees. Using [WebAuthn](https://www.w3.org/TR/webauthn-3), users can conveniently create secure sessions with their fingerprint or other biometric identifiers. Read more about [Internet Identity technology](https://internetcomputer.org/internet-identity) or [start integrating II](https://internetcomputer.org/docs/current/developer-docs/integrations/internet-identity/integrate-identity) into your canister smart contract.
+- **HTTP outcalls:** Smart contracts on ICP can call standard HTTP endpoints in the Web 2.0 world using [HTTP outcalls](https://internetcomputer.org/https-outcalls). Check out the [HTTP outcalls sample code](https://internetcomputer.org/docs/current/developer-docs/integrations/https-outcalls/https-outcalls-how-to-use) to connect Web 3.0 with Web 2.0 yourself.
 
 - **Web applications served from chain:** ICP is not only designed to run _backends_, such as ledgers, on chain, its low storage cost and low latency allows it to serve _frontends_, such as HTML files and images, from chain, too. Read more about [smart contracts serving web applications](https://internetcomputer.org/how-it-works/smart-contracts-serve-the-web/) or directly start [building your first decentralized web frontend](https://internetcomputer.org/docs/current/developer-docs/frontend/).
-
 - (Upcoming) **HTTP outcalls:** for now, Oisy calls centralized Ethereum endpoints such as Infura or Alchemy from the frontend. In the future, Oisy might be improved to use [HTTP outcalls](https://internetcomputer.org/https-outcalls) to call these endpoints in a decentralized fashion. Check out the [HTTP outcalls sample code](https://internetcomputer.org/docs/current/developer-docs/integrations/https-outcalls/https-outcalls-how-to-use) to explore how to use Web 2.0 services on ICP.
+- **Web assets served from chain:** ICP is not only designed to run _backends_, such as ledgers, on chain, its low storage cost and low latency allows to serve _frontends_, such as HTML files and images, from chain, too. Read more about [smart contracts serving web assets](https://internetcomputer.org/how-it-works/smart-contracts-serve-the-web/) or directly start [building your first decentralized web frontend](https://internetcomputer.org/docs/current/developer-docs/frontend/).
 
 ## Related projects
 
@@ -62,7 +62,7 @@ While Oisy is intended as showcase of what the ICP technology is capably of, a n
 
 This project is **not ready for production use** and for now meant to serve as technology demonstrator. We are happy to answer questions if they are raised as issues in this github repo.
 
-## Build an run yourself
+## Build and run Oisy yourself
 
 ### Prerequisites
 
@@ -84,7 +84,7 @@ dfx stop
 
 from the project directory will stop the local replica.
 
-### Run Oisy locally
+### Run locally
 
 Make sure you switch back to the project root directory.
 
