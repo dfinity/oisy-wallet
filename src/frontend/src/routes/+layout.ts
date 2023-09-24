@@ -6,5 +6,6 @@ export const trailingSlash = 'always';
 // The / in buffer/ is mandatory here.
 // More workaround: https://github.com/vitejs/vite/discussions/2785
 import { Buffer } from 'buffer/';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore Polyfill Buffer for development purpose
 globalThis.Buffer = Buffer;
