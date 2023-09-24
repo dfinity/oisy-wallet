@@ -81,6 +81,6 @@ service : (Arg) -> {
   put_airdrop : (vec nat64) -> (Result);
   redeem_code : (text) -> (Result_3);
   remove_admins : (vec principal) -> (Result);
-  remove_manager : (principal) -> (Result);
   remove_managers : (vec principal) -> (Result);
+  remove_principal_airdrop : (principal) -> (Result);
 }
