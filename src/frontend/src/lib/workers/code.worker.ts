@@ -32,7 +32,7 @@ const stopCodeTimer = () => {
 const startCodeTimer = async () => {
 	const sync = async () => await syncCode();
 
-	// We sync the cycles now but also schedule the update afterwards
+	// We sync the codes now but also schedule the update afterwards
 	await sync();
 
 	timer = setInterval(sync, CODE_TIMER_INTERVAL);
@@ -57,11 +57,6 @@ const syncCode = async () => {
 
 	try {
 		const airdrop = await getAirdropCode(identity);
-
-		if (isNullish(timer)) {
-			// Do not post message if the timer was stopped by the window.
-			return;
-		}
 
 		postMessage({
 			msg: 'syncAirdropCode',
