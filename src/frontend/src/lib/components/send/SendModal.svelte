@@ -5,7 +5,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
-	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
+	import { invalidAmount, invalidDestination, mapAddressStartsWith0x } from '$lib/utils/send.utils';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -54,7 +54,7 @@
 			return;
 		}
 
-		if (invalidAmount(amount)) {
+		if (invalidAmount(amount) || isNullish(amount)) {
 			toastsError({
 				msg: { text: `Amount is invalid.` }
 			});
@@ -80,16 +80,31 @@
 			return;
 		}
 
+		// Unexpected errors
+		if (isNullish($addressStore)) {
+			toastsError({
+				msg: { text: 'Address is unknown.' }
+			});
+			return;
+		}
+
+		if (isNullish(destination)) {
+			toastsError({
+				msg: { text: 'Destination address is unknown.' }
+			});
+			return;
+		}
+
 		modal.next();
 
 		try {
 			await executeSend({
-				from: $addressStore!,
-				to: destination!,
+				from: $addressStore,
+				to: mapAddressStartsWith0x(destination),
 				progress: (step: SendStep) => (sendProgressStep = step),
 				token: $token,
 				amount: parseToken({
-					value: `${amount!}`,
+					value: `${amount}`,
 					unitName: $tokenDecimals
 				}),
 				maxFeePerGas,
