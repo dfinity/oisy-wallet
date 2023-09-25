@@ -1,5 +1,6 @@
 use candid::Principal;
 use ic_cdk::{api::call::CallResult, call, caller};
+use time::{OffsetDateTime, Duration, format_description};
 
 use crate::{
     read_state,
@@ -76,4 +77,17 @@ pub fn get_pre_codes(state: &mut State) -> CustomResult<Code> {
         Some(code) => Ok(code),
         None => Err(NoMoreCodes),
     }
+}
+
+/// https://forum.dfinity.org/t/day-number-of-the-year-from-timestamps-ic-cdk-time-datetime/22817
+pub fn format_timestamp_to_gmt(timestamp: &u64) -> String {
+    let nanoseconds = *timestamp as i64;
+    let seconds = nanoseconds / 1_000_000_000;
+    let nanos_remainder = nanoseconds % 1_000_000_000;
+
+    let date = OffsetDateTime::from_unix_timestamp(seconds).unwrap() + Duration::nanoseconds(nanos_remainder as i64);
+
+    // Format the date to GMT
+    let format = format_description::parse("[year]/[month]/[day] [hour]:[minute]:[second].[subsecond:3]").unwrap();
+    date.format(&format).unwrap()
 }

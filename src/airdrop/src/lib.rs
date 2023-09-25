@@ -153,6 +153,7 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
         for code in codes {
             // only add the code if it does not already exist
             if !state.codes.contains_key(&Code(code.clone())) {
+                state.logs.add(stringify!(add_codes), line!(), format!("generated {}", &code));
                 state.pre_generated_codes.push(Code(code));
             }
         }
