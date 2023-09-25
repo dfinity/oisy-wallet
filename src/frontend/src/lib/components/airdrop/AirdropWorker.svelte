@@ -5,6 +5,7 @@
 	import { isAirdropOver } from '$lib/utils/airdrop.utils';
 	import type { PostMessage, PostMessageDataResponseAirdropCode } from '$lib/types/post-message';
 	import { airdropStore } from '$lib/stores/airdrop.store';
+    import {toastsShow} from "$lib/stores/toasts.store";
 
 	export let worker: Worker | undefined = undefined;
 
@@ -21,6 +22,17 @@
 			const { Ok } = airdrop;
 
 			airdropStore.set(Ok);
+
+            if (Ok.tokens_transferred === true && !transferred) {
+                // A local state use to display once and only once a toast to inform that the airdrop has been received if the state is fetched with the cronjob.
+                transferred = true;
+
+                toastsShow({
+                    text: 'Your received your Airdrop 🥳.',
+                    level: 'success',
+                    duration: 3500
+                });
+            }
 
 			if (!isAirdropOver(Ok)) {
 				// We continue to poll until code is redeemed and all children are also redeemed.
@@ -42,6 +54,8 @@
 	};
 
 	const stopTimer = () => worker?.postMessage({ msg: 'stopCodeTimer' });
+
+    let transferred = $airdropStore?.tokens_transferred;
 
 	onMount(async () => {
 		if (!$airdropAvailable) {
