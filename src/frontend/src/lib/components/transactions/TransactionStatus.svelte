@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getBlockNumber } from '$lib/providers/infura.providers';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { fade } from 'svelte/transition';
 
 	export let blockNumber: number;
 
@@ -67,9 +68,12 @@
 	})();
 </script>
 
-{#if nonNullish(status)}
-	<label for="to" class="font-bold px-1.25">Status:</label>
-	<p id="to" class="font-normal mb-2 px-1.25 break-words" style="text-transform: capitalize;">
-		{status}
-	</p>
-{/if}
+<label for="to" class="font-bold px-1.25">Status:</label>
+
+<p id="to" class="font-normal mb-2 px-1.25 break-words" style="text-transform: capitalize;">
+	{#if nonNullish(status)}
+		<span in:fade>{status}</span>
+	{:else}
+		<span style="visibility: hidden; opacity: 0">&nbsp;</span>
+	{/if}
+</p>
