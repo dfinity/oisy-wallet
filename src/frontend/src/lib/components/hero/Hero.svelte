@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Actions from '$lib/hero/Actions.svelte';
+	import Actions from '$lib/components/hero/Actions.svelte';
 	import HeaderHero from '$lib/components/layout/HeaderHero.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import { erc20TokensInitialized } from '$lib/derived/erc20.derived';
@@ -7,7 +7,7 @@
 	import { quintOut } from 'svelte/easing';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { token } from '$lib/derived/token.derived';
-	import Balance from '$lib/hero/Balance.svelte';
+	import Balance from '$lib/components/hero/Balance.svelte';
 
 	export let summary = false;
 	export let actions = true;
@@ -51,7 +51,7 @@
 </div>
 
 <style lang="scss">
-	@use '../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/media';
+	@use '../../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/media';
 
 	.hero {
 		background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
