@@ -56,7 +56,14 @@ const syncCode = async () => {
 	syncing = true;
 
 	try {
-		console.log(await getAirdropCode(identity));
+		const airdrop = await getAirdropCode(identity);
+
+		postMessage({
+			msg: 'syncAirdropCode',
+			data: {
+				airdrop
+			}
+		});
 	} catch (err: unknown) {
 		console.error(err);
 		stopCodeTimer();
