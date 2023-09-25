@@ -55,7 +55,7 @@
 
 	const stopTimer = () => worker?.postMessage({ msg: 'stopCodeTimer' });
 
-    let transferred = $airdropStore?.tokens_transferred;
+    let transferred = $airdropStore?.tokens_transferred === true;
 
 	onMount(async () => {
 		if (!$airdropAvailable) {
