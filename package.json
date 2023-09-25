@@ -1,8 +1,15 @@
 {
-	"name": "@dfinity/ic-eth-wallet",
+	"name": "@dfinity/oisy-wallet",
 	"version": "0.0.1",
 	"private": true,
 	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dfinity/oisy-wallet.git"
+	},
+	"bugs": {
+		"url": "https://github.com/dfinity/oisy-wallet"
+	},
 	"scripts": {
 		"build:compress": "./scripts/build.compress.sh",
 		"build:csp": "node scripts/build.csp.mjs",
