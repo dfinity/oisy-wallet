@@ -76,4 +76,5 @@ export interface _SERVICE {
 	remove_admins: ActorMethod<[Array<Principal>], Result>;
 	remove_managers: ActorMethod<[Array<Principal>], Result>;
 	remove_principal_airdrop: ActorMethod<[Principal], Result>;
+	set_total_tokens: ActorMethod<[bigint], Result>;
 }
