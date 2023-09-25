@@ -212,3 +212,13 @@ pub enum RewardType {
     Airdrop,
     Referral,
 }
+
+pub trait ToCode {
+    fn to_code(&self) -> Code;
+}
+
+impl ToCode for String {
+    fn to_code(&self) -> Code {
+        Code(self.clone())
+    }
+}

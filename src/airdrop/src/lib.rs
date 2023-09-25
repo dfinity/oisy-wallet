@@ -38,8 +38,10 @@ mod error;
 mod guards;
 mod logic;
 mod state;
-mod test;
 mod utils;
+
+#[cfg(test)]
+mod tests;
 
 use crate::{
     error::CustomResult,
