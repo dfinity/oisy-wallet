@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getBlockNumber } from '$lib/providers/infura.providers';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { fade } from 'svelte/transition';
+	import type { WebSocketListener } from '$lib/types/listener';
+	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 
 	export let blockNumber: number;
 
-	let timer: NodeJS.Timeout | undefined;
+	let listener: WebSocketListener | undefined = undefined;
 
 	let currentBlockNumber: number | undefined;
 
@@ -15,7 +17,7 @@
 		try {
 			currentBlockNumber = await getBlockNumber();
 		} catch (err: unknown) {
-			clearTimer();
+			disconnect();
 			currentBlockNumber = undefined;
 
 			toastsError({
@@ -25,22 +27,20 @@
 		}
 	};
 
-	const clearTimer = () => {
-		if (isNullish(timer)) {
-			return;
-		}
-
-		clearInterval(timer);
-		timer = undefined;
+	const disconnect = () => {
+		listener?.disconnect();
+		listener = undefined;
 	};
+
+	const debounceLoadCurrentBlockNumber = debounce(loadCurrentBlockNumber);
 
 	onMount(async () => {
 		await loadCurrentBlockNumber();
 
-		timer = setInterval(loadCurrentBlockNumber, 60000);
+		listener = initMinedTransactionsListener(async () => debounceLoadCurrentBlockNumber());
 	});
 
-	onDestroy(clearTimer);
+	onDestroy(disconnect);
 
 	let status: 'included' | 'safe' | 'finalised' | undefined;
 
@@ -64,7 +64,7 @@
 
 		status = 'finalised';
 
-		clearTimer();
+		disconnect();
 	})();
 </script>
 
