@@ -25,15 +25,10 @@
 
 		{#if summary}
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-				<div class="icon flex flex-col items-start pt-2">
+				<div class="icon flex flex-col items-start mt-3 md:mt-6 mb-0.5 pt-2">
 					{#if displayTokenSymbol}
 						<div in:fade>
-							<Logo
-								src={$token.icon}
-								size="64px"
-								alt={`${$token.name} logo`}
-								color="off-white"
-							/>
+							<Logo src={$token.icon} size="64px" alt={`${$token.name} logo`} color="off-white" />
 						</div>
 					{/if}
 				</div>
