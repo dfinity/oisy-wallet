@@ -221,6 +221,14 @@ async fn test_redeem_code_with_new_principal() {
         "A code can only be redeemed once"
     );
 
+    // Try redeeming a code that does not exist
+    let code = "this-code-does-not-exist".to_string().to_code();
+    assert_eq!(
+        redeem_code(code.clone(), user_principal).await,
+        Err(CanisterError::CodeNotFound),
+        "Code should not be found"
+    );
+
     // Check the code has been added to the list of airdrops
 }
 
