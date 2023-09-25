@@ -1,6 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
-    ops::Deref, time::{UNIX_EPOCH, SystemTime},
+    ops::Deref, fmt::{Display, Formatter}
 };
 
 use candid::{types::principal::Principal, CandidType};
@@ -259,4 +259,13 @@ pub struct Index(pub u64);
 pub enum RewardType {
     Airdrop,
     Referral,
+}
+
+impl Display for RewardType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RewardType::Airdrop => write!(f, "Airdrop"),
+            RewardType::Referral => write!(f, "Referral"),
+        }
+    }
 }
