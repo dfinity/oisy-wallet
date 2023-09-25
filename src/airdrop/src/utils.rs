@@ -8,11 +8,11 @@ use crate::{
     Code, error::CustomResult, STATE,
 };
 
-fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
+pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
     STATE.with(|cell| f(cell.borrow().as_ref().expect("state not initialized")))
 }
 
-fn mutate_state<F, R>(f: F) -> R
+pub fn mutate_state<F, R>(f: F) -> R
 where
     F: FnOnce(&mut State) -> R,
 {

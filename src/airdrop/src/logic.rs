@@ -1,36 +1,62 @@
-use std::{
-    cell::RefCell,
-    collections::{HashMap, HashSet},
-};
+use std::
+    collections::{HashMap, HashSet}
+;
 
-use candid::{types::principal::Principal, CandidType};
+use candid::types::principal::Principal;
 use ic_cdk::{
     caller,
-    storage::{stable_restore, stable_save},
-    trap,
 };
-use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
-use serde::{Deserialize, Serialize};
-use state::{AirdropAmountERC20, EthereumTransaction};
 
-mod guards;
-mod state;
-mod utils;
 use crate::{
-    guards::{caller_is_admin, caller_is_manager},
     state::{
         AirdropAmount, Arg, Code, CodeInfo, CodeState, EthereumAddress, Index, Info, InitArg,
-        PrincipalState, RewardType, State,
+        PrincipalState, RewardType, State, AirdropAmountERC20, EthereumTransaction
     },
     utils::{
         add_user_to_airdrop_reward, check_if_killed, get_eth_address, get_pre_codes,
-        register_principal_with_eth_address,
-    },
+        register_principal_with_eth_address, mutate_state, read_state,
+    }, error::{CustomResult, CanisterError},
+    STATE
 };
 
+pub fn init(arg: Arg) -> CustomResult<()> {
+    match arg {
+        Arg::Init(InitArg {
+            backend_canister_id,
+            token_per_person,
+            maximum_depth,
+            numbers_of_children,
+            total_tokens,
+        }) => STATE.with(|cell| {
+            // check the number of tokens per user is divisible by 4
+            if token_per_person % 4 != 0 {
+                return Err(CanisterError::GeneralError("token_per_person must be divisible by 4".to_owned()));
+            }
+
+            // if it's a test we do not use caller()
+            #[cfg(not(test))]
+            let caller = caller();
+            #[cfg(test)]
+            let caller = Principal::anonymous();
+
+            *cell.borrow_mut() = Some(State {
+                backend_canister_id,
+                token_per_person,
+                maximum_depth,
+                numbers_of_children,
+                total_tokens,
+                principals_admins: HashSet::from([caller]),
+                ..State::default()
+            });
+
+            Ok(())
+        }),
+        Arg::Upgrade => Err(CanisterError::GeneralError("upgrade args in init".to_owned())),
+    }
+}
 
 /// Add codes generated offline
-fn add_codes(codes: Vec<String>) -> CustomResult<()> {
+pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     // generate non activated codes
     mutate_state(|state| {
         for code in codes {
@@ -43,7 +69,7 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     })
 }
 
-fn add_admin(principal: Principal) -> CustomResult<()> {
+pub fn add_admin(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         state.principals_admins.insert(principal);
 
@@ -52,7 +78,7 @@ fn add_admin(principal: Principal) -> CustomResult<()> {
 }
 
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
-fn add_manager(principal: Principal) -> CustomResult<()> {
+pub fn add_manager(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         // only add the manager if they do not already exist
         if state.principals_managers.contains_key(&principal) {
@@ -70,7 +96,7 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
 }
 
 /// Remove a given principal from the airdrop
-fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
+pub fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| match state.principals_users.remove(&principal) {
         Some(_) => Ok(()),
         None => Err(CanisterError::PrincipalNotParticipatingInAirdrop),
@@ -78,14 +104,14 @@ fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
 }
 
 /// check whether a given principal is authorised to generate codes
-fn is_manager() -> bool {
+pub fn is_manager() -> bool {
     let caller_principal = caller();
 
     read_state(|state| state.principals_managers.contains_key(&caller_principal))
 }
 
 /// Returns one code if the given principal is authorized to generate codes
-fn generate_code() -> CustomResult<CodeInfo> {
+pub fn generate_code() -> CustomResult<CodeInfo> {
     check_if_killed()?;
 
     let caller_principal = caller();
@@ -116,7 +142,7 @@ fn generate_code() -> CustomResult<CodeInfo> {
 }
 
 /// Function to be called when the user has a code
-async fn redeem_code(code: Code) -> CustomResult<Info> {
+pub async fn redeem_code(code: Code) -> CustomResult<Info> {
     check_if_killed()?;
 
     let caller_principal = caller();
@@ -159,7 +185,7 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
                     state,
                     parent_eth_address.clone(),
                     AirdropAmount(state.token_per_person / 4),
-                    state::RewardType::Referral,
+                    RewardType::Referral,
                 )?;
             }
         }
@@ -180,7 +206,7 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
             state,
             eth_address.clone(),
             AirdropAmount(state.token_per_person / 4),
-            state::RewardType::Airdrop,
+            RewardType::Airdrop,
         )?;
 
         let depth = state.codes.get(&code).unwrap().depth;
@@ -221,7 +247,7 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
 }
 
 /// Return all the information about a given Principal's code
-fn get_code() -> CustomResult<Info> {
+pub fn get_code() -> CustomResult<Info> {
     check_if_killed()?;
     let caller_principal = caller();
 
@@ -267,7 +293,7 @@ fn get_code() -> CustomResult<Info> {
     })
 }
 
-fn kill_canister() -> CustomResult<()> {
+pub fn kill_canister() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = true;
     });
@@ -275,7 +301,7 @@ fn kill_canister() -> CustomResult<()> {
     Ok(())
 }
 
-fn bring_caninster_back_to_life() -> CustomResult<()> {
+pub fn bring_caninster_back_to_life() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = false;
     });
@@ -283,7 +309,7 @@ fn bring_caninster_back_to_life() -> CustomResult<()> {
 }
 
 /// Returns all the eth addresses with how much is meant to be sent to each one of them
-fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, AirdropAmountERC20)>> {
+pub fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, AirdropAmountERC20)>> {
     check_if_killed()?;
 
     let mut last_index = index;
@@ -310,7 +336,7 @@ fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, Airdro
 }
 
 /// Pushes the new state of who was transferred money
-fn put_airdrop(indexes: Vec<Index>) -> CustomResult<()> {
+pub fn put_airdrop(indexes: Vec<Index>) -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
@@ -327,7 +353,7 @@ fn put_airdrop(indexes: Vec<Index>) -> CustomResult<()> {
 }
 
 /// Removes duplicates codes and managers
-fn clean_up() -> CustomResult<()> {
+pub fn clean_up() -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
@@ -348,7 +374,7 @@ fn clean_up() -> CustomResult<()> {
 }
 
 /// Removes managers from the list of managers
-fn remove_managers(principals: Vec<Principal>) -> CustomResult<()> {
+pub fn remove_managers(principals: Vec<Principal>) -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
@@ -361,7 +387,7 @@ fn remove_managers(principals: Vec<Principal>) -> CustomResult<()> {
 }
 
 /// Remove admins from the list of admins
-fn remove_admins(principals: Vec<Principal>) -> CustomResult<()> {
+pub fn remove_admins(principals: Vec<Principal>) -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
@@ -374,14 +400,14 @@ fn remove_admins(principals: Vec<Principal>) -> CustomResult<()> {
 }
 
 /// Get the aidrop status - the actual state and whether tokens have been transferred
-fn get_state_rewards() -> CustomResult<Vec<EthereumTransaction>> {
+pub fn get_state_rewards() -> CustomResult<Vec<EthereumTransaction>> {
     check_if_killed()?;
 
     read_state(|state| Ok(state.airdrop_reward.clone()))
 }
 
 /// Get the parameters of the airdrop
-fn get_state_parameters() -> CustomResult<(u64, u64, u64, u64)> {
+pub fn get_state_parameters() -> CustomResult<(u64, u64, u64, u64)> {
     check_if_killed()?;
 
     read_state(|state| {
@@ -395,14 +421,14 @@ fn get_state_parameters() -> CustomResult<(u64, u64, u64, u64)> {
 }
 
 /// Get the state of the admins list
-fn get_state_admins() -> CustomResult<HashSet<Principal>> {
+pub fn get_state_admins() -> CustomResult<HashSet<Principal>> {
     check_if_killed()?;
 
     read_state(|state| Ok(state.principals_admins.clone()))
 }
 
 /// Get the state of the managers list
-fn get_state_managers() -> CustomResult<HashMap<Principal, PrincipalState>> {
+pub fn get_state_managers() -> CustomResult<HashMap<Principal, PrincipalState>> {
     check_if_killed()?;
 
     read_state(|state| Ok(state.principals_managers.clone()))

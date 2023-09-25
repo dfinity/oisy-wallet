@@ -1,5 +1,8 @@
+use candid::CandidType;
+use serde::{Serialize, Deserialize};
+use std::fmt;
 
-type CustomResult<T> = Result<T, CanisterError>;
+pub type CustomResult<T> = Result<T, CanisterError>;
 
 /// Our catch all error type
 #[derive(Serialize, Deserialize, Clone, Debug, CandidType)]
@@ -34,4 +37,26 @@ pub enum CanisterError {
     NoTokensLeft,
     /// Principal not participating in airdrop
     PrincipalNotParticipatingInAirdrop,
+}
+
+impl fmt::Display for CanisterError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            CanisterError::GeneralError(s) => write!(f, "{}", s),
+            CanisterError::CanisterKilled => write!(f, "Canister is in a killed state"),
+            CanisterError::CodeNotFound => write!(f, "Code not found"),
+            CanisterError::CodeAlreadyRedeemed => write!(f, "Code already redeemed"),
+            CanisterError::CannotRegisterMultipleTimes => write!(f, "Cannot register multiple times"),
+            CanisterError::NoChildrenForCode => write!(f, "This code does not have any children assicated with it"),
+            CanisterError::NoCodeForII => write!(f, "This principal does not have any code associated with it"),
+            CanisterError::MaximumDepthReached => write!(f, "Maximum depth reached"),
+            CanisterError::NoMoreCodes => write!(f, "No more codes left"),
+            CanisterError::UnknownOisyWalletAddress => write!(f, "Unknown oisy wallet address"),
+            CanisterError::TransactionUnkown => write!(f, "Transaction unknown"),
+            CanisterError::DuplicateKey(s) => write!(f, "Duplicate key: {}", s),
+            CanisterError::ManagersCannotParticipateInTheAirdrop => write!(f, "Managers cannot participate in the airdrop"),
+            CanisterError::NoTokensLeft => write!(f, "No tokens left"),
+            CanisterError::PrincipalNotParticipatingInAirdrop => write!(f, "Principal not participating in airdrop"),
+        }
+    }
 }
