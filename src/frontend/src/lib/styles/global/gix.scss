@@ -25,7 +25,7 @@
 	--progress-color-rgb: 137, 105, 213;
 
 	--overlay-background: var(--color-off-white);
-	--overlay-background-contrast: var(--color-vampire-black);
+	--overlay-background-contrast: var(--color-dark);
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
@@ -107,9 +107,9 @@ div.input-field input[id]::placeholder {
 
 div.modal {
 	--overlay-background: var(--color-light-blue);
-	--overlay-background-contrast: var(--color-vampire-black);
+	--overlay-background-contrast: var(--color-dark);
 	--overlay-content-background: var(--color-white);
-	--overlay-content-background-contrast: var(--color-vampire-black);
+	--overlay-content-background-contrast: var(--color-dark);
 
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
