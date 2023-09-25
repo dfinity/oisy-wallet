@@ -4,7 +4,7 @@
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { nonNullish } from '@dfinity/utils';
-	import type { TargetNetwork } from '$lib/enums/network';
+	import { TargetNetwork } from '$lib/enums/network';
 
 	export let destination: string;
 	export let amount: string | number | undefined = undefined;
@@ -19,8 +19,7 @@
 					value: `${amount ?? 0}`,
 					unitName: token.decimals
 				}),
-				unitName: token.decimals,
-				displayDecimals: 8
+				unitName: token.decimals
 			});
 		} catch (err: unknown) {
 			// Infinite amount e.g. 1.157920892373162e+59 will fail parsing
@@ -34,7 +33,13 @@
 
 {#if nonNullish(network)}
 	<label for="network" class="font-bold px-1.25">Network:</label>
-	<div id="network" class="font-normal mb-2 px-1.25 break-words">{network}</div>
+	<div id="network" class="font-normal mb-2 px-1.25 break-words">
+		{#if network === TargetNetwork.ICP}
+			Convert to native ICP
+		{:else}
+			Ethereum
+		{/if}
+	</div>
 {/if}
 
 <label for="amount" class="font-bold px-1.25">Amount:</label>

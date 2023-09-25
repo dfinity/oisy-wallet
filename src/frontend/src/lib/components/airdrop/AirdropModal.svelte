@@ -8,6 +8,11 @@
 	import AirdropInvites from '$lib/components/airdrop/AirdropInvites.svelte';
 	import type { Info } from '$declarations/airdrop/airdrop.did';
 	import { fromNullable } from '@dfinity/utils';
+	import {
+		allAirdropInvitesRedeemed,
+		hasAirdropInvites,
+		isAirdropTransferred
+	} from '$lib/utils/airdrop.utils';
 
 	export let airdrop: Info;
 
@@ -27,7 +32,7 @@
 			? [
 					{
 						step: AirdropStep.INVITE_FRIENDS,
-						text: `Earn up to X ICP by inviting friends!`,
+						text: `Earn up to 6 ICP by inviting friends!`,
 						state: 'next'
 					} as StaticStep
 			  ]
@@ -35,20 +40,17 @@
 	];
 
 	let hasInvites = false;
-	$: hasInvites = (fromNullable(airdrop?.children)?.length ?? 0) > 0;
+	$: hasInvites = hasAirdropInvites(airdrop);
 
 	let allInvitesRedeemed = false;
-	$: allInvitesRedeemed =
-		hasInvites &&
-		(fromNullable(airdrop?.children) ?? []).find(([_, state]) => !state) === undefined;
+	$: allInvitesRedeemed = allAirdropInvitesRedeemed(airdrop);
 
 	let progressStep: string = AirdropStep.AIRDROP;
-	$: progressStep =
-		airdrop?.tokens_transferred === true
-			? allInvitesRedeemed || !hasInvites
-				? AirdropStep.DONE
-				: AirdropStep.INVITE_FRIENDS
-			: AirdropStep.AIRDROP;
+	$: progressStep = isAirdropTransferred(airdrop)
+		? allInvitesRedeemed || !hasInvites
+			? AirdropStep.DONE
+			: AirdropStep.INVITE_FRIENDS
+		: AirdropStep.AIRDROP;
 </script>
 
 <Modal visible={$modalAirdrop} on:nnsClose={modalStore.close}>
