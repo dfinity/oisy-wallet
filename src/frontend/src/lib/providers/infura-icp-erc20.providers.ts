@@ -1,4 +1,4 @@
-import { ICP_ERC20_ABI } from '$lib/constants/icp-erc20.constants';
+import { ERC20_ICP_ABI } from '$lib/constants/erc20-icp.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 import type { Erc20PopulateTransaction } from '$lib/types/erc20-providers';
@@ -21,7 +21,7 @@ export const getFeeData = async ({
 	address: ETH_ADDRESS;
 	amount: BigNumber;
 }): Promise<BigNumber> => {
-	const erc20Contract = new ethers.Contract(contractAddress, ICP_ERC20_ABI, provider);
+	const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, provider);
 	return erc20Contract.estimateGas.burnToAccountId(amount, address);
 };
 
@@ -34,6 +34,6 @@ export const populateBurnTransaction: Erc20PopulateTransaction = async ({
 	to: ETH_ADDRESS;
 	amount: BigNumber;
 }): Promise<PopulatedTransaction> => {
-	const erc20Contract = new ethers.Contract(contractAddress, ICP_ERC20_ABI, provider);
+	const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, provider);
 	return erc20Contract.populateTransaction.burnToAccountId(amount, to);
 };
