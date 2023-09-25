@@ -6,10 +6,10 @@ import { Actor, type ActorMethod, type ActorSubclass } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
+// TODO: this duplicate codes of airdrop.api.ts only because building the HttpAgent with ESM to create the actor leads to an error.
+
 const getAirdropActor = async (identity: Identity): Promise<AirdropActor> => {
 	const canisterId = import.meta.env.VITE_AIRDROP_CANISTER_ID;
-
-	console.log(canisterId)
 
 	return createActor({
 		canisterId,
