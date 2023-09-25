@@ -20,7 +20,7 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<SendDestination bind:destination />
+	<SendDestination bind:destination {network} />
 
 	<SendNetworkICP token={$token} bind:destination bind:network />
 
