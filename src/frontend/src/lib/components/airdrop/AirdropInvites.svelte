@@ -46,7 +46,7 @@
 			class="font-bold p-2"
 			style="border-right: 1px solid var(--color-platinum); width: var(--padding-6x)"
 		>
-			<span class:opacity-15={state}>{i}</span>
+			<span class:opacity-15={state}>{i + 1}</span>
 		</div>
 		<div
 			class:state
