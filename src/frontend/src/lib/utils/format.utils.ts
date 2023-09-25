@@ -11,7 +11,13 @@ export const formatTokenShort = ({
 	displayDecimals?: number;
 }): string => {
 	const res = Utils.formatUnits(value, unitName);
-	return (+res).toFixed(displayDecimals).replace(/(\.0+|0+)$/, '');
+	return new Intl.NumberFormat('en-US', {
+		minimumFractionDigits: displayDecimals,
+		maximumFractionDigits:
+			displayDecimals ?? typeof unitName === 'number' ? (unitName as number) : 18
+	})
+		.format(+res)
+		.replace(/(\.0+|0+)$/, '');
 };
 
 /**
