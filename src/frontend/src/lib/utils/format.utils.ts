@@ -1,20 +1,27 @@
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
+const ETHEREUM_DEFAULT_DECIMALS = 18;
+
 export const formatTokenShort = ({
 	value,
-	unitName = 18,
-	displayDecimals = 4
+	unitName = ETHEREUM_DEFAULT_DECIMALS,
+	displayDecimals
 }: {
 	value: BigNumber;
 	unitName?: string | BigNumberish;
 	displayDecimals?: number;
 }): string => {
 	const res = Utils.formatUnits(value, unitName);
+
+	const minimumFractionDigits = displayDecimals ?? 4;
+	const maximumFractionDigits =
+		displayDecimals ??
+		(typeof unitName === 'number' ? (unitName as number) : ETHEREUM_DEFAULT_DECIMALS);
+
 	return new Intl.NumberFormat('en-US', {
-		minimumFractionDigits: displayDecimals,
-		maximumFractionDigits:
-			displayDecimals ?? typeof unitName === 'number' ? (unitName as number) : 18
+		minimumFractionDigits,
+		...(maximumFractionDigits > minimumFractionDigits && { maximumFractionDigits })
 	})
 		.format(+res)
 		.replace(/(\.0+|0+)$/, '');
