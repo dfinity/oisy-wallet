@@ -1,4 +1,8 @@
-export type PostMessageRequest = 'startIdleTimer' | 'stopIdleTimer';
+export type PostMessageRequest =
+	| 'startIdleTimer'
+	| 'stopIdleTimer'
+	| 'startCodeTimer'
+	| 'stopCodeTimer';
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;
