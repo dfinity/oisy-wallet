@@ -1,4 +1,4 @@
-import { ICP_ERC20_SYMBOL } from '$lib/constants/icp-erc20.constants';
+import { ERC20_ICP_SYMBOL } from '$lib/constants/erc20-icp.constants';
 import type { Token } from '$lib/types/token';
 
-export const isErc20Icp = ({ symbol }: Token): boolean => symbol === ICP_ERC20_SYMBOL;
+export const isErc20Icp = ({ symbol }: Token): boolean => symbol === ERC20_ICP_SYMBOL;
