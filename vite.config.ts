@@ -54,6 +54,16 @@ const config: UserConfig = {
 			$declarations: resolve('./src/declarations')
 		}
 	},
+	css: {
+		preprocessorOptions: {
+			scss: {
+				additionalData: `
+          @use "./node_modules/@dfinity/gix-components/dist/styles/mixins/media";
+          @use "./node_modules/@dfinity/gix-components/dist/styles/mixins/text";
+        `
+			}
+		}
+	},
 	build: {
 		target: 'es2020',
 		rollupOptions: {
