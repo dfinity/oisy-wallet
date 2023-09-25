@@ -90,6 +90,12 @@ impl Logs {
 
         self.logs.push(log);
     }
+
+
+    /// Return the logs
+    pub fn get_logs(&self) -> Vec<String> {
+        self.logs.clone()
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]

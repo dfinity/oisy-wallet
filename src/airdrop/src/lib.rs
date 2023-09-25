@@ -153,7 +153,11 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
         for code in codes {
             // only add the code if it does not already exist
             if !state.codes.contains_key(&Code(code.clone())) {
-                state.logs.add(stringify!(add_codes), line!(), format!("generated {}", &code));
+                state.logs.add(
+                    stringify!(add_codes),
+                    line!(),
+                    format!("generated {}", &code),
+                );
                 state.pre_generated_codes.push(Code(code));
             }
         }
@@ -165,6 +169,11 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
 fn add_admin(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         state.principals_admins.insert(principal);
+        state.logs.add(
+            stringify!(add_admin),
+            line!(),
+            format!("added admin {}", &principal.to_string()),
+        );
 
         Ok(())
     })
@@ -183,6 +192,11 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
                 codes_redeemed: 0,
             };
             state.principals_managers.insert(principal, principal_state);
+            state.logs.add(
+                stringify!(add_manager),
+                line!(),
+                format!("added manager {}", &principal.to_string()),
+            );
 
             Ok(())
         }
@@ -193,8 +207,24 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
 #[update(guard = "caller_is_admin")]
 fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| match state.principals_users.remove(&principal) {
-        Some(_) => Ok(()),
-        None => Err(CanisterError::PrincipalNotParticipatingInAirdrop),
+        Some(_) => {
+            state.logs.add(
+                stringify!(add_codes),
+                line!(),
+                format!("removed principal {}", &principal.to_string()),
+            );
+
+            Ok(())
+        }
+        None => {
+            state.logs.add(
+                stringify!(remove_principal_airdrop),
+                line!(),
+                format!("principal {} not found", &principal.to_string()),
+            );
+
+            Err(CanisterError::PrincipalNotParticipatingInAirdrop)
+        }
     })
 }
 
@@ -229,6 +259,13 @@ fn generate_code() -> CustomResult<CodeInfo> {
             .unwrap();
 
         principal_state.codes_generated += 1;
+
+        state.logs.add(
+            stringify!(generate_code),
+            line!(),
+            format!("{} generated {}", &caller_principal.to_string(), &code.0),
+        );
+
 
         Ok(CodeInfo::new(
             code,
@@ -553,6 +590,14 @@ fn set_total_tokens(total_tokens: u64) -> CustomResult<()> {
         state.total_tokens = total_tokens;
         Ok(())
     })
+}
+
+/// Get the logs
+#[query(guard = "caller_is_admin")]
+fn get_logs() -> CustomResult<Vec<String>> {
+    check_if_killed()?;
+
+    read_state(|state| Ok(state.logs.get_logs()))
 }
 
 // automatically generates the candid file
