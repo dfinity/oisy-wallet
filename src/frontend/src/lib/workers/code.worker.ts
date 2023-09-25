@@ -58,6 +58,11 @@ const syncCode = async () => {
 	try {
 		const airdrop = await getAirdropCode(identity);
 
+		if (isNullish(timer)) {
+			// Do not post message if the timer was stopped by the window.
+			return;
+		}
+
 		postMessage({
 			msg: 'syncAirdropCode',
 			data: {
