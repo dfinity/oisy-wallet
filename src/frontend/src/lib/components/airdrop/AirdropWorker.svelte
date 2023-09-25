@@ -23,7 +23,7 @@
 
 			airdropStore.set(Ok);
 
-            if (Ok.tokens_transferred === true && !transferred) {
+            if (Ok.tokens_transferred && !transferred) {
                 // A local state use to display once and only once a toast to inform that the airdrop has been received if the state is fetched with the cronjob.
                 transferred = true;
 
