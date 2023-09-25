@@ -2,7 +2,7 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
-import type { LoadEvent, Page } from '@sveltejs/kit';
+import type { LoadEvent,Page } from '@sveltejs/kit';
 
 export const transactionsUrl = (token: Token): string => tokenUrl({ path: 'transactions/', token });
 
@@ -10,6 +10,8 @@ export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
 	id === '/(app)/transactions';
 
 export const isRouteSettings = ({ route: { id } }: Page): boolean => id === '/(app)/settings';
+
+export const isRouteTokens = ({ route: { id } }: Page): boolean => id === '/(app)';
 
 export const isSubRoute = (page: Page): boolean =>
 	isRouteTransactions(page) || isRouteSettings(page);
