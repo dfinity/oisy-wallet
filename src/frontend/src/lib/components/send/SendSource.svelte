@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { addressStore } from '$lib/stores/address.store';
-	import { formatTokenShort } from '$lib/utils/format.utils';
+	import { formatTokenDetailed } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { Token } from '$lib/types/token';
@@ -13,7 +13,7 @@
 
 <label for="balance" class="font-bold px-1.25">Balance:</label>
 <div id="balance" class="font-normal px-1.25 mb-2 break-words">
-	{formatTokenShort({
+	{formatTokenDetailed({
 		value: $balance ?? BigNumber.from(0n),
 		unitName: token.decimals
 	})}

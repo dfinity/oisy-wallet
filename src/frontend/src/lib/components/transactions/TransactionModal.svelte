@@ -5,7 +5,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatToDate, formatTokenShort } from '$lib/utils/format.utils';
+	import {formatToDate, formatTokenDetailed } from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import TransactionStatus from '$lib/components/transactions/TransactionStatus.svelte';
 	import { token } from '$lib/derived/token.derived';
@@ -75,7 +75,7 @@
 		<label for="amount" class="font-bold px-1.25">Value:</label>
 		<p id="amount" class="font-normal mb-2 px-1.25 break-words">
 			<output>
-				{formatTokenShort({
+				{formatTokenDetailed({
 					value,
 					unitName: $token.decimals
 				})}

@@ -6,6 +6,19 @@ const ETHEREUM_DEFAULT_DECIMALS = 18;
 export const formatTokenShort = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
+	displayDecimals = 4
+}: {
+	value: BigNumber;
+	unitName?: string | BigNumberish;
+	displayDecimals?: number;
+}): string => {
+	const res = Utils.formatUnits(value, unitName);
+	return (+res).toFixed(displayDecimals).replace(/(\.0+|0+)$/, '');
+};
+
+export const formatTokenDetailed = ({
+	value,
+	unitName = ETHEREUM_DEFAULT_DECIMALS,
 	displayDecimals
 }: {
 	value: BigNumber;
