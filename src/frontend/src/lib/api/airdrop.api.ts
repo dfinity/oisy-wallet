@@ -1,9 +1,8 @@
 import type { Result_1, Result_3 } from '$declarations/airdrop/airdrop.did';
 import { getAirdropActor } from '$lib/utils/actor.utils';
-import type { Identity } from '@dfinity/agent';
 
-export const getAirdropCode = async (identity?: Identity): Promise<Result_3> => {
-	const actor = await getAirdropActor(identity);
+export const getAirdropCode = async (): Promise<Result_3> => {
+	const actor = await getAirdropActor();
 	return actor.get_code();
 };
 
