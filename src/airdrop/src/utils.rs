@@ -2,13 +2,22 @@ use candid::Principal;
 use ic_cdk::{api::call::CallResult, call, caller};
 
 use crate::{
-    read_state,
     state::{EthereumAddress, EthereumTransaction, RewardType, State},
     AirdropAmount,
-    CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress, NoTokensLeft},
-    Code, CustomResult,
+    error::CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress, NoTokensLeft},
+    Code, error::CustomResult, STATE,
 };
 
+fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
+    STATE.with(|cell| f(cell.borrow().as_ref().expect("state not initialized")))
+}
+
+fn mutate_state<F, R>(f: F) -> R
+where
+    F: FnOnce(&mut State) -> R,
+{
+    STATE.with(|s| f(s.borrow_mut().as_mut().expect("state is not initialized")))
+}
 pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
     let backend_canister = read_state(|state| state.backend_canister_id);
     let args = caller();

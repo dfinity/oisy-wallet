@@ -1,26 +1,3 @@
-#![deny(clippy::all, clippy::pedantic, clippy::nursery)]
-#![deny(rust_2018_idioms)]
-// lint suggested by the clippy::restriction wich we cannot enable for all, as some of the lints are unidiomatic
-#![allow(clippy::implicit_return)]
-#![allow(clippy::missing_docs_in_private_items)]
-#![allow(clippy::print_stderr)]
-#![allow(clippy::std_instead_of_alloc)]
-#![allow(clippy::expect_used)]
-#![allow(clippy::std_instead_of_core)]
-#![allow(clippy::arithmetic_side_effects)]
-// we should break down the functions, but that's for future me
-#![allow(clippy::cognitive_complexity)]
-// we like our mod.rs file the way they are
-#![allow(clippy::mod_module_files)]
-#![allow(clippy::missing_docs_in_private_items)]
-
-//! Airdrop backend canister
-//! This canister is responsible for generating codes and redeeming them.
-//! Linting:
-//! ```bash
-//! cargo clippy -p airdrop  -- -W clippy::all -W clippy::pedantic -W clippy::restriction -W clippy::nursery -W rust_2018_idioms
-//! ```
-
 use std::{
     cell::RefCell,
     collections::{HashMap, HashSet},
@@ -39,11 +16,6 @@ use state::{AirdropAmountERC20, EthereumTransaction};
 mod guards;
 mod state;
 mod utils;
-mod error;
-mod logic;
-mod test;
-
-
 use crate::{
     guards::{caller_is_admin, caller_is_manager},
     state::{
@@ -56,55 +28,8 @@ use crate::{
     },
 };
 
-thread_local! {
-    pub static STATE: RefCell<Option<State>> = RefCell::default();
-}
-
-
-#[init]
-fn init(arg: Arg) {
-    match arg {
-        Arg::Init(InitArg {
-            backend_canister_id,
-            token_per_person,
-            maximum_depth,
-            numbers_of_children,
-            total_tokens,
-        }) => STATE.with(|cell| {
-            // check the number of tokens per user is divisible by 4
-            if token_per_person % 4 != 0 {
-                trap("token_per_person must be divisible by 4");
-            }
-
-            *cell.borrow_mut() = Some(State {
-                backend_canister_id,
-                token_per_person,
-                maximum_depth,
-                numbers_of_children,
-                total_tokens,
-                principals_admins: HashSet::from([caller()]),
-                ..State::default()
-            });
-        }),
-        Arg::Upgrade => trap("upgrade args in init"),
-    }
-}
-
-#[pre_upgrade]
-fn pre_upgrade() {
-    read_state(|s| stable_save((s,))).expect("failed to encode the state");
-}
-
-#[post_upgrade]
-fn post_upgrade() {
-    STATE.with(|cell| {
-        let (s,) = stable_restore().expect("failed to decode state");
-        *cell.borrow_mut() = s;
-    });
-}
 
 /// Add codes generated offline
-#[update(guard = "caller_is_admin")]
 fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     // generate non activated codes
     mutate_state(|state| {
@@ -118,7 +43,6 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
     })
 }
 
-#[update(guard = "caller_is_admin")]
 fn add_admin(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         state.principals_admins.insert(principal);
@@ -128,7 +52,6 @@ fn add_admin(principal: Principal) -> CustomResult<()> {
 }
 
 /// Add a given principal to the list of authorised principals - i.e. the list of principals that can generate codes
-#[update(guard = "caller_is_admin")]
 fn add_manager(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         // only add the manager if they do not already exist
@@ -147,7 +70,6 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
 }
 
 /// Remove a given principal from the airdrop
-#[update(guard = "caller_is_admin")]
 fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| match state.principals_users.remove(&principal) {
         Some(_) => Ok(()),
@@ -156,7 +78,6 @@ fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
 }
 
 /// check whether a given principal is authorised to generate codes
-#[query]
 fn is_manager() -> bool {
     let caller_principal = caller();
 
@@ -164,7 +85,6 @@ fn is_manager() -> bool {
 }
 
 /// Returns one code if the given principal is authorized to generate codes
-#[update(guard = "caller_is_manager")]
 fn generate_code() -> CustomResult<CodeInfo> {
     check_if_killed()?;
 
@@ -196,7 +116,6 @@ fn generate_code() -> CustomResult<CodeInfo> {
 }
 
 /// Function to be called when the user has a code
-#[update]
 async fn redeem_code(code: Code) -> CustomResult<Info> {
     check_if_killed()?;
 
@@ -302,7 +221,6 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
 }
 
 /// Return all the information about a given Principal's code
-#[query]
 fn get_code() -> CustomResult<Info> {
     check_if_killed()?;
     let caller_principal = caller();
@@ -349,7 +267,6 @@ fn get_code() -> CustomResult<Info> {
     })
 }
 
-#[update(guard = "caller_is_admin")]
 fn kill_canister() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = true;
@@ -358,7 +275,6 @@ fn kill_canister() -> CustomResult<()> {
     Ok(())
 }
 
-#[update(guard = "caller_is_admin")]
 fn bring_caninster_back_to_life() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = false;
@@ -367,7 +283,6 @@ fn bring_caninster_back_to_life() -> CustomResult<()> {
 }
 
 /// Returns all the eth addresses with how much is meant to be sent to each one of them
-#[update(guard = "caller_is_admin")]
 fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, AirdropAmountERC20)>> {
     check_if_killed()?;
 
@@ -395,7 +310,6 @@ fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, Airdro
 }
 
 /// Pushes the new state of who was transferred money
-#[update(guard = "caller_is_admin")]
 fn put_airdrop(indexes: Vec<Index>) -> CustomResult<()> {
     check_if_killed()?;
 
@@ -413,7 +327,6 @@ fn put_airdrop(indexes: Vec<Index>) -> CustomResult<()> {
 }
 
 /// Removes duplicates codes and managers
-#[update(guard = "caller_is_admin")]
 fn clean_up() -> CustomResult<()> {
     check_if_killed()?;
 
@@ -435,7 +348,6 @@ fn clean_up() -> CustomResult<()> {
 }
 
 /// Removes managers from the list of managers
-#[update(guard = "caller_is_admin")]
 fn remove_managers(principals: Vec<Principal>) -> CustomResult<()> {
     check_if_killed()?;
 
@@ -449,7 +361,6 @@ fn remove_managers(principals: Vec<Principal>) -> CustomResult<()> {
 }
 
 /// Remove admins from the list of admins
-#[update(guard = "caller_is_admin")]
 fn remove_admins(principals: Vec<Principal>) -> CustomResult<()> {
     check_if_killed()?;
 
@@ -463,7 +374,6 @@ fn remove_admins(principals: Vec<Principal>) -> CustomResult<()> {
 }
 
 /// Get the aidrop status - the actual state and whether tokens have been transferred
-#[query(guard = "caller_is_admin")]
 fn get_state_rewards() -> CustomResult<Vec<EthereumTransaction>> {
     check_if_killed()?;
 
@@ -471,7 +381,6 @@ fn get_state_rewards() -> CustomResult<Vec<EthereumTransaction>> {
 }
 
 /// Get the parameters of the airdrop
-#[query(guard = "caller_is_admin")]
 fn get_state_parameters() -> CustomResult<(u64, u64, u64, u64)> {
     check_if_killed()?;
 
@@ -486,7 +395,6 @@ fn get_state_parameters() -> CustomResult<(u64, u64, u64, u64)> {
 }
 
 /// Get the state of the admins list
-#[query(guard = "caller_is_admin")]
 fn get_state_admins() -> CustomResult<HashSet<Principal>> {
     check_if_killed()?;
 
@@ -494,12 +402,8 @@ fn get_state_admins() -> CustomResult<HashSet<Principal>> {
 }
 
 /// Get the state of the managers list
-#[query(guard = "caller_is_admin")]
 fn get_state_managers() -> CustomResult<HashMap<Principal, PrincipalState>> {
     check_if_killed()?;
 
     read_state(|state| Ok(state.principals_managers.clone()))
 }
-
-// automatically generates the candid file
-export_candid!();
