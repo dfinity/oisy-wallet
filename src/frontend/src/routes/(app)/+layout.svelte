@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Loader from '$lib/components/core/Loader.svelte';
-	import Hero from '$lib/hero/Hero.svelte';
+	import Hero from '$lib/components/hero/Hero.svelte';
 	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import AirdropButton from '$lib/components/airdrop/AirdropButton.svelte';
