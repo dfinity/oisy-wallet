@@ -28,43 +28,39 @@ use std::{
 
 use candid::types::principal::Principal;
 use ic_cdk::{
-    caller,
     storage::{stable_restore, stable_save},
-    trap,
+    trap, caller,
 };
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use state::{AirdropAmountERC20, EthereumTransaction};
 
-mod guards;
-mod state;
-mod utils;
 mod error;
+mod guards;
 mod logic;
+mod state;
 mod test;
-
+mod utils;
 
 use crate::{
+    error::CustomResult,
     guards::{caller_is_admin, caller_is_manager},
     state::{
-        AirdropAmount, Arg, Code, CodeInfo, EthereumAddress, Index, Info, InitArg,
-        PrincipalState, State,
+        AirdropAmount, Arg, Code, CodeInfo, EthereumAddress, Index, Info, PrincipalState,
+        State,
     },
-    utils::{
-        add_user_to_airdrop_reward, check_if_killed, get_eth_address, get_pre_codes,
-        register_principal_with_eth_address, read_state, mutate_state
-    },
-    error::{CanisterError, CustomResult},
+    utils::read_state,
 };
 
 thread_local! {
     pub static STATE: RefCell<Option<State>> = RefCell::default();
 }
 
-
 #[init]
 fn init(arg: Arg) {
-    match logic::init(arg) {
-        Ok(()) => {},
+    let caller_principal = caller();
+
+    match logic::init(arg, caller_principal) {
+        Ok(()) => {}
         Err(e) => trap(&e.to_string()),
     }
 }
@@ -108,25 +104,29 @@ fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
 /// check whether a given principal is authorised to generate codes
 #[query]
 fn is_manager() -> bool {
-    logic::is_manager()
+    let caller_principal = caller();
+    logic::is_manager(caller_principal)
 }
 
 /// Returns one code if the given principal is authorized to generate codes
 #[update(guard = "caller_is_manager")]
 fn generate_code() -> CustomResult<CodeInfo> {
-    logic::generate_code()
+    let caller_principal = caller();
+    logic::generate_code(caller_principal)
 }
 
 /// Function to be called when the user has a code
 #[update]
 async fn redeem_code(code: Code) -> CustomResult<Info> {
-    logic::redeem_code(code).await
+    let caller_principal = caller();
+    logic::redeem_code(code, caller_principal).await
 }
 
 /// Return all the information about a given Principal's code
 #[query]
 fn get_code() -> CustomResult<Info> {
-    logic::get_code()
+    let caller_principal = caller();
+    logic::get_code(caller_principal)
 }
 
 #[update(guard = "caller_is_admin")]

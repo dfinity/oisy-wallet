@@ -1,25 +1,21 @@
-use std::
-    collections::{HashMap, HashSet}
-;
+use std::collections::{HashMap, HashSet};
 
 use candid::types::principal::Principal;
-use ic_cdk::{
-    caller,
-};
 
 use crate::{
+    error::{CanisterError, CustomResult},
     state::{
-        AirdropAmount, Arg, Code, CodeInfo, CodeState, EthereumAddress, Index, Info, InitArg,
-        PrincipalState, RewardType, State, AirdropAmountERC20, EthereumTransaction
+        AirdropAmount, AirdropAmountERC20, Arg, Code, CodeInfo, CodeState, EthereumAddress,
+        EthereumTransaction, Index, Info, InitArg, PrincipalState, RewardType, State,
     },
     utils::{
-        add_user_to_airdrop_reward, check_if_killed, get_eth_address, get_pre_codes,
-        register_principal_with_eth_address, mutate_state, read_state,
-    }, error::{CustomResult, CanisterError},
-    STATE
+        add_user_to_airdrop_reward, check_if_killed, get_eth_address, get_pre_codes, mutate_state,
+        read_state, register_principal_with_eth_address,
+    },
+    STATE,
 };
 
-pub fn init(arg: Arg) -> CustomResult<()> {
+pub fn init(arg: Arg, caller: Principal) -> CustomResult<()> {
     match arg {
         Arg::Init(InitArg {
             backend_canister_id,
@@ -30,14 +26,10 @@ pub fn init(arg: Arg) -> CustomResult<()> {
         }) => STATE.with(|cell| {
             // check the number of tokens per user is divisible by 4
             if token_per_person % 4 != 0 {
-                return Err(CanisterError::GeneralError("token_per_person must be divisible by 4".to_owned()));
+                return Err(CanisterError::GeneralError(
+                    "token_per_person must be divisible by 4".to_owned(),
+                ));
             }
-
-            // if it's a test we do not use caller()
-            #[cfg(not(test))]
-            let caller = caller();
-            #[cfg(test)]
-            let caller = Principal::anonymous();
 
             *cell.borrow_mut() = Some(State {
                 backend_canister_id,
@@ -51,7 +43,9 @@ pub fn init(arg: Arg) -> CustomResult<()> {
 
             Ok(())
         }),
-        Arg::Upgrade => Err(CanisterError::GeneralError("upgrade args in init".to_owned())),
+        Arg::Upgrade => Err(CanisterError::GeneralError(
+            "upgrade args in init".to_owned(),
+        )),
     }
 }
 
@@ -104,17 +98,14 @@ pub fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
 }
 
 /// check whether a given principal is authorised to generate codes
-pub fn is_manager() -> bool {
-    let caller_principal = caller();
+pub fn is_manager(caller_principal: Principal) -> bool {
 
     read_state(|state| state.principals_managers.contains_key(&caller_principal))
 }
 
 /// Returns one code if the given principal is authorized to generate codes
-pub fn generate_code() -> CustomResult<CodeInfo> {
+pub fn generate_code(caller_principal: Principal) -> CustomResult<CodeInfo> {
     check_if_killed()?;
-
-    let caller_principal = caller();
 
     mutate_state(|state| {
         // generate a new code
@@ -142,10 +133,9 @@ pub fn generate_code() -> CustomResult<CodeInfo> {
 }
 
 /// Function to be called when the user has a code
-pub async fn redeem_code(code: Code) -> CustomResult<Info> {
+pub async fn redeem_code(code: Code, caller_principal: Principal) -> CustomResult<Info> {
     check_if_killed()?;
 
-    let caller_principal = caller();
     let eth_address = get_eth_address().await?;
 
     mutate_state(|state| {
@@ -247,9 +237,8 @@ pub async fn redeem_code(code: Code) -> CustomResult<Info> {
 }
 
 /// Return all the information about a given Principal's code
-pub fn get_code() -> CustomResult<Info> {
+pub fn get_code(caller_principal: Principal) -> CustomResult<Info> {
     check_if_killed()?;
-    let caller_principal = caller();
 
     read_state(|state| {
         // get the code and eth_address associated with the principal
@@ -309,7 +298,9 @@ pub fn bring_caninster_back_to_life() -> CustomResult<()> {
 }
 
 /// Returns all the eth addresses with how much is meant to be sent to each one of them
-pub fn get_airdrop(index: Index) -> CustomResult<Vec<(Index, EthereumAddress, AirdropAmountERC20)>> {
+pub fn get_airdrop(
+    index: Index,
+) -> CustomResult<Vec<(Index, EthereumAddress, AirdropAmountERC20)>> {
     check_if_killed()?;
 
     let mut last_index = index;
