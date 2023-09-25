@@ -20,7 +20,7 @@
 <div class="hero">
 	<HeaderHero />
 
-	<article class="text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-4 relative main">
+	<article class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-4 relative main">
 		<Alpha />
 
 		{#if summary}
