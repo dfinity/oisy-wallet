@@ -12,14 +12,12 @@
 
 {#if banner && visible}
 	<div>
-		<h3>For testing purposes on <strong>{NETWORK.toUpperCase()}</strong> only.</h3>
+		<h3 class="clamp-2">For testing purposes on <strong>{NETWORK.toUpperCase()}</strong> only.</h3>
 		<button on:click={close} aria-label="Close"><IconClose /></button>
 	</div>
 {/if}
 
 <style lang="scss">
-	@use '../../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/text';
-
 	div {
 		position: fixed;
 		top: 0;
@@ -48,8 +46,6 @@
 	}
 
 	h3 {
-		@include text.clamp(2);
-
 		margin: 0;
 
 		grid-column-start: 2;

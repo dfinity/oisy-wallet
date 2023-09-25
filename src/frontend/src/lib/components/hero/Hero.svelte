@@ -51,8 +51,6 @@
 </div>
 
 <style lang="scss">
-	@use '../../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/media';
-
 	.hero {
 		background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
 

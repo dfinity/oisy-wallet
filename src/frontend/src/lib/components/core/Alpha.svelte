@@ -14,8 +14,6 @@
 </a>
 
 <style lang="scss">
-	@use '../../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/media';
-
 	a {
 		color: var(--alpha-color, var(--color-misty-rose));
 		max-width: 300px;

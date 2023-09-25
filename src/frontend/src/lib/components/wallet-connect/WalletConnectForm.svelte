@@ -64,8 +64,6 @@
 </div>
 
 <style lang="scss">
-	@use '../../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/media';
-
 	.qr-code {
 		position: relative;
 

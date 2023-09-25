@@ -26,8 +26,6 @@
 {/each}
 
 <style lang="scss">
-	@use '../../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/fonts';
-
 	.step {
 		display: grid;
 		grid-template-columns: max-content auto;
@@ -83,7 +81,8 @@
 		display: inline-flex;
 		gap: var(--padding-0_5x);
 
-		@include fonts.small;
+		font-size: var(--font-size-small);
+		line-height: var(--line-height-small);
 
 		color: var(--positive-emphasis);
 		background: rgba(var(--positive-emphasis-rgb), 0.3);
@@ -108,7 +107,8 @@
 	}
 
 	.checkmark {
-		@include fonts.small;
+		font-size: var(--font-size-small);
+		line-height: var(--line-height-small);
 
 		color: var(--progress-color);
 		--checkmark-color: var(--progress-color);
