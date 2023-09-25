@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
+	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 </script>
 
 <footer class="flex flex-col justify-center items-center pt-8 mt-3 pb-4 px-2 gap-3 z-1">
 	<a
-		href="https://github.com/dfinity/ic-eth-wallet"
+		href={OISY_REPO_URL}
 		rel="external noopener noreferrer"
 		target="_blank"
 		class="flex gap-1 items-center text-blue font-bold no-underline"

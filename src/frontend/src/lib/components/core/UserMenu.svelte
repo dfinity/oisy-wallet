@@ -4,6 +4,7 @@
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { goto } from '$app/navigation';
+	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -42,7 +43,7 @@
 		</a>
 
 		<a
-			href="https://github.com/dfinity/ic-eth-wallet"
+			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
 			class="flex gap-1 items-center no-underline"

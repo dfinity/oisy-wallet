@@ -1,9 +1,10 @@
 <script lang="ts">
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
+	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 </script>
 
 <a
-	href="https://github.com/dfinity/ic-eth-wallet"
+	href={OISY_REPO_URL}
 	rel="external noopener noreferrer"
 	target="_blank"
 	class="no-underline inline-block text-center px-3 py-1 font-bold text-xs md:text-base"
