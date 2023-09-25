@@ -6,7 +6,7 @@ import {
 } from '$lib/providers/alchemy.providers';
 import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
 import { processErc20Transaction, processEthTransaction } from '$lib/services/transaction.services';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { Token } from '$lib/types/token';
@@ -18,7 +18,7 @@ export const initTransactionsListener = ({
 	address
 }: {
 	token: Token;
-	address: ECDSA_PUBLIC_KEY;
+	address: ETH_ADDRESS;
 }): WebSocketListener => {
 	if (token.id === ETHEREUM_TOKEN_ID) {
 		return initEthPendingTransactionsListenerProvider({
@@ -44,5 +44,5 @@ export const initMinedTransactionsListener = (
 
 export const initWalletConnectListener = async (params: {
 	uri: string;
-	address: ECDSA_PUBLIC_KEY;
+	address: ETH_ADDRESS;
 }): Promise<WalletConnectListener> => initWalletConnect(params);

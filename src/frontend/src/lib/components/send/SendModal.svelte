@@ -2,10 +2,10 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { send as executeSend } from '$lib/services/send.services';
 	import { isNullish } from '@dfinity/utils';
-	import { type WizardStep, type WizardSteps, WizardModal } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
-	import { invalidAmount, invalidDestination } from '$lib/utils/send.utils';
+	import { invalidAmount, invalidDestination, mapAddressStartsWith0x } from '$lib/utils/send.utils';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -20,6 +20,7 @@
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import type { TargetNetwork } from '$lib/enums/network';
 
 	/**
 	 * Fee context store
@@ -37,6 +38,7 @@
 
 	let destination = '';
 	let amount: number | undefined = undefined;
+	let network: TargetNetwork | undefined = undefined;
 
 	/**
 	 * Send
@@ -52,7 +54,7 @@
 			return;
 		}
 
-		if (invalidAmount(amount)) {
+		if (invalidAmount(amount) || isNullish(amount)) {
 			toastsError({
 				msg: { text: `Amount is invalid.` }
 			});
@@ -78,21 +80,37 @@
 			return;
 		}
 
+		// Unexpected errors
+		if (isNullish($addressStore)) {
+			toastsError({
+				msg: { text: 'Address is unknown.' }
+			});
+			return;
+		}
+
+		if (isNullish(destination)) {
+			toastsError({
+				msg: { text: 'Destination address is unknown.' }
+			});
+			return;
+		}
+
 		modal.next();
 
 		try {
 			await executeSend({
-				from: $addressStore!,
-				to: destination!,
+				from: $addressStore,
+				to: mapAddressStartsWith0x(destination),
 				progress: (step: SendStep) => (sendProgressStep = step),
 				token: $token,
 				amount: parseToken({
-					value: `${amount!}`,
+					value: `${amount}`,
 					unitName: $tokenDecimals
 				}),
 				maxFeePerGas,
 				maxPriorityFeePerGas,
-				gas
+				gas,
+				network
 			});
 
 			setTimeout(() => close(), 750);
@@ -137,13 +155,19 @@
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'}>
+	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
 		{#if currentStep?.name === 'Review'}
-			<SendReview on:icBack={modal.back} on:icSend={send} bind:destination bind:amount />
+			<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {network} />
 		{:else if currentStep?.name === 'Sending'}
 			<SendProgress progressStep={sendProgressStep} steps={SEND_STEPS} />
 		{:else}
-			<SendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
+			<SendForm
+				on:icNext={modal.next}
+				on:icClose={close}
+				bind:destination
+				bind:amount
+				bind:network
+			/>
 		{/if}
 	</FeeContext>
 </WizardModal>

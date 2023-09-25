@@ -1,5 +1,6 @@
 type Arg = variant { Upgrade; Init : InitArg };
 type CanisterError = variant {
+  PrincipalNotParticipatingInAirdrop;
   NoChildrenForCode;
   CannotRegisterMultipleTimes;
   NoTokensLeft;
@@ -81,4 +82,6 @@ service : (Arg) -> {
   redeem_code : (text) -> (Result_3);
   remove_admins : (vec principal) -> (Result);
   remove_managers : (vec principal) -> (Result);
+  remove_principal_airdrop : (principal) -> (Result);
+  set_total_tokens : (nat64) -> (Result);
 }

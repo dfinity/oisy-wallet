@@ -6,7 +6,7 @@ import {
 	SESSION_REQUEST_SEND_TRANSACTION,
 	WALLET_CONNECT_METADATA
 } from '$lib/constants/wallet-connect.constants';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';
@@ -21,7 +21,7 @@ export const initWalletConnect = async ({
 	address
 }: {
 	uri: string;
-	address: ECDSA_PUBLIC_KEY;
+	address: ETH_ADDRESS;
 }): Promise<WalletConnectListener> => {
 	const web3wallet = await Web3Wallet.init({
 		core: new Core({

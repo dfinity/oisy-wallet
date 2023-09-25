@@ -46,7 +46,7 @@
 			class="font-bold p-2"
 			style="border-right: 1px solid var(--color-platinum); width: var(--padding-6x)"
 		>
-			<span class:opacity-15={state}>{i}</span>
+			<span class:opacity-15={state}>{i + 1}</span>
 		</div>
 		<div
 			class:state
@@ -70,3 +70,9 @@
 		</div>
 	</div>
 {/each}
+
+{#if children.length > 0}
+	<p class="mt-4 mb-2">
+		<small>Tokens are claimable as long as the airdrop is not exhausted!</small>
+	</p>
+{/if}

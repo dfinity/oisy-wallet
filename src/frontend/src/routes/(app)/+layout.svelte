@@ -1,10 +1,11 @@
 <script lang="ts">
 	import Loader from '$lib/components/core/Loader.svelte';
-	import Hero from '$lib/hero/Hero.svelte';
+	import Hero from '$lib/components/hero/Hero.svelte';
 	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import AirdropButton from '$lib/components/airdrop/AirdropButton.svelte';
 	import { airdropAvailable } from '$lib/derived/airdrop.derived';
+	import AirdropWorker from '$lib/components/airdrop/AirdropWorker.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -22,10 +23,12 @@
 
 <main>
 	<Loader>
-		{#if $airdropAvailable}
-			<AirdropButton />
-		{/if}
+		<AirdropWorker>
+			{#if $airdropAvailable}
+				<AirdropButton />
+			{/if}
 
-		<slot />
+			<slot />
+		</AirdropWorker>
 	</Loader>
 </main>

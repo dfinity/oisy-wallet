@@ -54,6 +54,16 @@ const config: UserConfig = {
 			$declarations: resolve('./src/declarations')
 		}
 	},
+	css: {
+		preprocessorOptions: {
+			scss: {
+				additionalData: `
+          @use "./node_modules/@dfinity/gix-components/dist/styles/mixins/media";
+          @use "./node_modules/@dfinity/gix-components/dist/styles/mixins/text";
+        `
+			}
+		}
+	},
 	build: {
 		target: 'es2020',
 		rollupOptions: {
@@ -61,8 +71,10 @@ const config: UserConfig = {
 				manualChunks: (id) => {
 					const folder = dirname(id);
 
+					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
+
 					if (
-						['@sveltejs', 'svelte', '@dfinity/gix-components'].find((lib) =>
+						['@sveltejs', 'svelte', '@dfinity/gix-components', ...lazy].find((lib) =>
 							folder.includes(lib)
 						) === undefined &&
 						folder.includes('node_modules')
@@ -71,29 +83,13 @@ const config: UserConfig = {
 					}
 
 					if (
-						[
-							'frontend/src/lib/api',
-							'frontend/src/lib/constants',
-							'frontend/src/lib/derived',
-							'frontend/src/lib/enums',
-							'frontend/src/lib/providers',
-							'frontend/src/lib/rest',
-							'frontend/src/lib/services',
-							'frontend/src/lib/stores',
-							'frontend/src/lib/utils',
-							'frontend/src/lib/workers'
-						].find((module) => folder.includes(module)) !== undefined
+						lazy.find((lib) => folder.includes(lib)) !== undefined &&
+						folder.includes('node_modules')
 					) {
-						return 'dapp';
+						return 'lazy';
 					}
 
-					if (
-						['frontend/src/lib/components/ui', 'frontend/src/lib/components/icons'].find((module) =>
-							folder.includes(module)
-						) !== undefined
-					) {
-						return 'ui';
-					}
+					return 'index';
 				}
 			},
 			// Polyfill Buffer for production build

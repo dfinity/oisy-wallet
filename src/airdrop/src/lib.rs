@@ -21,7 +21,10 @@
 //! cargo clippy -p airdrop  -- -W clippy::all -W clippy::pedantic -W clippy::restriction -W clippy::nursery -W rust_2018_idioms
 //! ```
 
-use std::{cell::RefCell, collections::{HashSet, HashMap}};
+use std::{
+    cell::RefCell,
+    collections::{HashMap, HashSet},
+};
 
 use candid::{types::principal::Principal, CandidType};
 use ic_cdk::{
@@ -96,6 +99,8 @@ pub enum CanisterError {
     ManagersCannotParticipateInTheAirdrop,
     /// No tokens left
     NoTokensLeft,
+    /// Principal not participating in airdrop
+    PrincipalNotParticipatingInAirdrop,
 }
 
 #[init]
@@ -180,6 +185,15 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
 
             Ok(())
         }
+    })
+}
+
+/// Remove a given principal from the airdrop
+#[update(guard = "caller_is_admin")]
+fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
+    mutate_state(|state| match state.principals_users.remove(&principal) {
+        Some(_) => Ok(()),
+        None => Err(CanisterError::PrincipalNotParticipatingInAirdrop),
     })
 }
 
@@ -527,6 +541,17 @@ fn get_state_managers() -> CustomResult<HashMap<Principal, PrincipalState>> {
     check_if_killed()?;
 
     read_state(|state| Ok(state.principals_managers.clone()))
+}
+
+/// Set total amount of tokens available
+#[update(guard = "caller_is_admin")]
+fn set_total_tokens(total_tokens: u64) -> CustomResult<()> {
+    check_if_killed()?;
+
+    mutate_state(|state| {
+        state.total_tokens = total_tokens;
+        Ok(())
+    })
 }
 
 // automatically generates the candid file

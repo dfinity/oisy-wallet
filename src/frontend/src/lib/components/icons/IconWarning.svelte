@@ -1,7 +1,11 @@
 <!-- source: DFINITY foundation -->
+<script lang="ts">
+	export let inline = false;
+</script>
+
 <svg
 	width="20"
-	style="min-width: 20px"
+	style={`min-width: 20px; ${inline ? 'vertical-align: sub;' : ''}`}
 	height="18"
 	viewBox="0 0 20 18"
 	fill="none"

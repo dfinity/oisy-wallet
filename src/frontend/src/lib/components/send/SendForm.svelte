@@ -5,9 +5,13 @@
 	import { createEventDispatcher } from 'svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { token } from '$lib/derived/token.derived';
+	import SendNetworkICP from "$lib/components/send/SendNetworkICP.svelte";
+	import SendDestination from "$lib/components/send/SendDestination.svelte";
+	import type {TargetNetwork} from "$lib/enums/network";
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
+	export let network: TargetNetwork | undefined = undefined;
 
 	let invalid = true;
 	$: invalid = invalidDestination(destination) || invalidAmount(amount);
@@ -16,14 +20,9 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<label for="destination" class="font-bold px-1.25">Destination:</label>
-	<Input
-		name="destination"
-		inputType="text"
-		required
-		bind:value={destination}
-		placeholder="Enter public address (0x)"
-	/>
+	<SendDestination bind:destination {network} />
+
+	<SendNetworkICP token={$token} bind:destination bind:network />
 
 	<label for="amount" class="font-bold px-1.25">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />

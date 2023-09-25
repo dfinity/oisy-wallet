@@ -5,7 +5,8 @@ $property: text-decoration;
 @include utilities.generate(underline, $property, underline);
 @include utilities.generate(no-underline, $property, none);
 
-*:hover {
+*:hover,
+*:focus {
 	@include utilities.generate(underline, $property, underline);
 	@include utilities.generate(no-underline, $property, none);
 }
