@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getBlockNumber } from '$lib/providers/infura.providers';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { fade } from 'svelte/transition';
@@ -32,10 +32,12 @@
 		listener = undefined;
 	};
 
+	const debounceLoadCurrentBlockNumber = debounce(loadCurrentBlockNumber);
+
 	onMount(async () => {
 		await loadCurrentBlockNumber();
 
-		listener = initMinedTransactionsListener(loadCurrentBlockNumber);
+		listener = initMinedTransactionsListener(async () => debounceLoadCurrentBlockNumber());
 	});
 
 	onDestroy(disconnect);
