@@ -1,7 +1,13 @@
 # Airdrop
 
 Canister that manages the airdrop of invite codes and tokens to new oisy wallet user.
+## Flow
+![flow](Untitled-2023-02-21-1414.excalidraw.svg)
 
+
+Original User
+
+## Permissions
 Three different level of permissions:
 
 - Admins
@@ -16,5 +22,3 @@ Three different level of permissions:
     -   scan the base QR code
     -   share the newly created invite codes with other users
 
-## Flow
-[flow](Untitled-2023-02-21-1414.excalidraw.svg)
