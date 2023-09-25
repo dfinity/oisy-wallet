@@ -83,4 +83,5 @@ service : (Arg) -> {
   remove_admins : (vec principal) -> (Result);
   remove_managers : (vec principal) -> (Result);
   remove_principal_airdrop : (principal) -> (Result);
+  set_total_tokens : (nat64) -> (Result);
 }
