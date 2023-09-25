@@ -19,8 +19,7 @@
 					value: `${amount ?? 0}`,
 					unitName: token.decimals
 				}),
-				unitName: token.decimals,
-				displayDecimals: 8
+				unitName: token.decimals
 			});
 		} catch (err: unknown) {
 			// Infinite amount e.g. 1.157920892373162e+59 will fail parsing
