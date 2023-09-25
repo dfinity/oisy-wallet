@@ -424,3 +424,12 @@ pub fn get_state_managers() -> CustomResult<HashMap<Principal, PrincipalState>> 
 
     read_state(|state| Ok(state.principals_managers.clone()))
 }
+
+pub fn set_total_tokens(total_tokens: u64) -> CustomResult<()> {
+    check_if_killed()?;
+
+    mutate_state(|state| {
+        state.total_tokens = total_tokens;
+        Ok(())
+    })
+}

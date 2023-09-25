@@ -198,12 +198,7 @@ fn get_state_managers() -> CustomResult<HashMap<Principal, PrincipalState>> {
 /// Set total amount of tokens available
 #[update(guard = "caller_is_admin")]
 fn set_total_tokens(total_tokens: u64) -> CustomResult<()> {
-    check_if_killed()?;
-
-    mutate_state(|state| {
-        state.total_tokens = total_tokens;
-        Ok(())
-    })
+    logic::set_total_tokens(total_tokens)
 }
 
 // automatically generates the candid file
