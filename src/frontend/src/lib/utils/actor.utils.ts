@@ -24,17 +24,17 @@ export const getBackendActor = async (): Promise<BackendActor> => {
 	});
 };
 
-export const getAirdropActor = async (): Promise<AirdropActor> => {
-	const identity: Identity | undefined | null = get(authStore).identity;
+export const getAirdropActor = async (identity?: Identity): Promise<AirdropActor> => {
+	const actorIdentity: Identity | undefined | null = identity ?? get(authStore).identity;
 
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(actorIdentity, 'No internet identity.');
 
 	const canisterId = import.meta.env.VITE_AIRDROP_CANISTER_ID;
 
 	return createActor({
 		canisterId,
 		idlFactory: idlFactorAirdrop,
-		identity
+		identity: actorIdentity
 	});
 };
 
