@@ -5,7 +5,7 @@ use std::fmt;
 pub type CustomResult<T> = Result<T, CanisterError>;
 
 /// Our catch all error type
-#[derive(Serialize, Deserialize, Clone, Debug, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Debug, CandidType, Eq, PartialEq)]
 pub enum CanisterError {
     /// Our catch all error type
     GeneralError(String),

@@ -114,7 +114,7 @@ impl CodeInfo {
 }
 
 /// Returned when front-end is asking for information
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
 pub struct Info {
     /// Next three fields should all be unique per user
     code: Code,

@@ -3,7 +3,8 @@ use std::path::Path;
 use candid::types::principal::Principal;
 
 use crate::{
-    logic::{add_admin, add_codes, add_manager, init, redeem_code},
+    error::CanisterError,
+    logic::{add_admin, add_codes, add_manager, init, redeem_code, kill_canister, bring_caninster_back_to_life},
     state::{Arg, InitArg, ToCode},
     utils::read_state,
 };
@@ -195,10 +196,54 @@ async fn test_redeem_code_with_new_principal() {
     let code = test_state.pick_code().to_code();
 
     let user_principal = test_state.pick_user_principal();
+    let another_user_principal = test_state.pick_user_principal();
 
-    redeem_code(code, user_principal).await.unwrap();
+    redeem_code(code.clone(), user_principal).await.unwrap();
 
     // check the code has been redeemed
+    read_state(|state| {
+        assert_eq!(state.codes.get(&code).unwrap().redeemed, true);
+    });
+
+    // try registering multiple times with the same principal and a different code should fail
+    let another_code = test_state.pick_code().to_code();
+
+    assert_eq!(
+        redeem_code(another_code.clone(), user_principal).await,
+        Err(CanisterError::CannotRegisterMultipleTimes),
+        "Should not be able to register multiple times with the same principal"
+    );
+
+    // try registering with the same code again
+    assert_eq!(
+        redeem_code(another_code.clone(), user_principal).await,
+        Err(CanisterError::CodeAlreadyRedeemed),
+        "A code can only be redeemed once"
+    );
 
     // Check the code has been added to the list of airdrops
+}
+
+
+// Test killing canister and bring it back to life
+#[test]
+fn test_kill_canister() {
+    let mut test_state = TestState::new();
+    test_state.set_default_state();
+
+    // kill canister
+    kill_canister().unwrap();
+
+    // check that the canister has been killed
+    read_state(|state| {
+        assert_eq!(state.killed, true);
+    });
+
+    // bring canister back to life
+    bring_caninster_back_to_life().unwrap();
+
+    // check that the canister has been brought back to life
+    read_state(|state| {
+        assert_eq!(state.killed, false);
+    });
 }
