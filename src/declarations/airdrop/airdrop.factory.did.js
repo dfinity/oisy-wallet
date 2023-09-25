@@ -93,7 +93,8 @@ export const idlFactory = ({ IDL }) => {
 		redeem_code: IDL.Func([IDL.Text], [Result_3], []),
 		remove_admins: IDL.Func([IDL.Vec(IDL.Principal)], [Result], []),
 		remove_managers: IDL.Func([IDL.Vec(IDL.Principal)], [Result], []),
-		remove_principal_airdrop: IDL.Func([IDL.Principal], [Result], [])
+		remove_principal_airdrop: IDL.Func([IDL.Principal], [Result], []),
+		set_total_tokens: IDL.Func([IDL.Nat64], [Result], [])
 	});
 };
 // @ts-ignore
