@@ -32,7 +32,7 @@
 			? [
 					{
 						step: AirdropStep.INVITE_FRIENDS,
-						text: `Earn up to X ICP by inviting friends!`,
+						text: `Earn up to 6 ICP by inviting friends!`,
 						state: 'next'
 					} as StaticStep
 			  ]
