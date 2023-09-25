@@ -99,7 +99,6 @@ pub fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
 
 /// check whether a given principal is authorised to generate codes
 pub fn is_manager(caller_principal: Principal) -> bool {
-
     read_state(|state| state.principals_managers.contains_key(&caller_principal))
 }
 
@@ -132,11 +131,8 @@ pub fn generate_code(caller_principal: Principal) -> CustomResult<CodeInfo> {
     })
 }
 
-/// Function to be called when the user has a code
-pub async fn redeem_code(code: Code, caller_principal: Principal) -> CustomResult<Info> {
+pub fn _redeem_code(code: Code, caller_principal: Principal, eth_address: EthereumAddress) -> CustomResult<Info> {
     check_if_killed()?;
-
-    let eth_address = get_eth_address().await?;
 
     mutate_state(|state| {
         // Check if the given principal has redeemed any code yet
@@ -234,6 +230,13 @@ pub async fn redeem_code(code: Code, caller_principal: Principal) -> CustomResul
             children_codes,
         ))
     })
+}
+
+/// Function to be called when the user has a code
+pub async fn redeem_code(code: Code, caller_principal: Principal) -> CustomResult<Info> {
+    let eth_address = get_eth_address().await?;
+
+    _redeem_code(code, caller_principal, eth_address)
 }
 
 /// Return all the information about a given Principal's code

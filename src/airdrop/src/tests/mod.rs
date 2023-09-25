@@ -1,15 +1,18 @@
-use std::path::Path;
+use std::{path::Path, process::Command};
 
 use candid::types::principal::Principal;
 
 use crate::{
     error::CanisterError,
-    logic::{add_admin, add_codes, add_manager, init, redeem_code, kill_canister, bring_caninster_back_to_life},
-    state::{Arg, InitArg, ToCode},
-    utils::read_state,
+    logic::{
+        add_admin, add_codes, add_manager, bring_caninster_back_to_life, init, kill_canister,
+        redeem_code, _redeem_code,
+    },
+    state::{Arg, InitArg, ToCode, EthereumAddress, Code},
+    utils::read_state, generate_code,
 };
 
-static PATH_PREFIX: &str = "src/airdrop/src/tests/";
+static PATH_PREFIX: &str = "src/tests";
 
 /// Our test state struct that helps us interacting the canister logic
 struct TestState {
@@ -19,34 +22,27 @@ struct TestState {
     codes: Vec<String>,
 }
 
+fn read_principals_from_file(path: &str) -> Vec<Principal> {
+    let p = std::fs::read_to_string(Path::new(PATH_PREFIX).join("admins.txt")).unwrap();
+    p.split("\n")
+        .filter_map(|s| Principal::from_text(s).ok())
+        .collect()
+}
+
 impl TestState {
     /// Init variables
     fn new() -> Self {
-        // Read codes from codes.txt
         let codes = std::fs::read_to_string(Path::new(PATH_PREFIX).join("code.txt")).unwrap();
         let codes: Vec<String> = codes.split("\n").map(|s| s.to_string()).collect();
 
         // Read admins from file
-        let admins = std::fs::read_to_string(Path::new(PATH_PREFIX).join("admins.txt")).unwrap();
-        let principal_admins: Vec<Principal> = admins
-            .split("\n")
-            .map(|s| Principal::from_text(s).unwrap())
-            .collect();
+        let principal_admins = read_principals_from_file("admins.txt");
 
         // Read managers from file
-        let managers =
-            std::fs::read_to_string(Path::new(PATH_PREFIX).join("managers.txt")).unwrap();
-        let principal_managers: Vec<Principal> = managers
-            .split("\n")
-            .map(|s| Principal::from_text(s).unwrap())
-            .collect();
+        let principal_managers = read_principals_from_file("managers.txt");
 
         // Read users from file
-        let users = std::fs::read_to_string(Path::new(PATH_PREFIX).join("users.txt")).unwrap();
-        let principal_users: Vec<Principal> = users
-            .split("\n")
-            .map(|s| Principal::from_text(s).unwrap())
-            .collect();
+         let principal_users = read_principals_from_file("users.txt");
 
         Self {
             principal_admins,
@@ -121,10 +117,10 @@ fn test_init() {
         assert_eq!(state.maximum_depth, 3);
         assert_eq!(state.numbers_of_children, 2);
         assert_eq!(state.total_tokens, 1000);
-        assert_eq!(state.principals_admins.len(), 1);
-        assert_eq!(state.principals_managers.len(), 0);
+        assert_eq!(state.principals_admins.len(), 3);
+        assert_eq!(state.principals_managers.len(), 3);
         assert_eq!(state.codes.len(), 0);
-        assert_eq!(state.pre_generated_codes.len(), 0);
+        assert_eq!(state.pre_generated_codes.len(), 1001);
         assert_eq!(state.principals_users.len(), 0);
         assert_eq!(state.airdrop_reward.len(), 0);
         assert_eq!(state.killed, false);
@@ -143,9 +139,9 @@ fn test_add_codes() {
 
     // check that the codes have been added
     read_state(|state| {
-        assert_eq!(state.pre_generated_codes.len(), 2);
-        assert_eq!(state.pre_generated_codes[0].0, "code1");
-        assert_eq!(state.pre_generated_codes[1].0, "code2");
+        assert_eq!(state.pre_generated_codes.len(), 1003);
+        assert_eq!(state.pre_generated_codes.pop(),  Some("code2".to_code()));
+        assert_eq!(state.pre_generated_codes.pop(), Some("code1".to_code()));
     });
 }
 
@@ -163,7 +159,7 @@ fn test_add_admin() {
 
     // check that the admin has been added
     read_state(|state| {
-        assert_eq!(state.principals_admins.len(), 2);
+        assert_eq!(state.principals_admins.len(), 4);
         assert!(state.principals_admins.contains(&principal));
     });
 }
@@ -182,41 +178,46 @@ fn test_add_manager() {
 
     // check that the manager has been added
     read_state(|state| {
-        assert_eq!(state.principals_managers.len(), 1);
+        assert_eq!(state.principals_managers.len(), 4);
         assert!(state.principals_managers.contains_key(&principal));
     })
 }
 
 // Test redeeming a code with a new principal
-#[tokio::test]
-async fn test_redeem_code_with_new_principal() {
+#[test]
+fn test_redeem_code_with_new_principal() {
     let mut test_state = TestState::new();
     test_state.set_default_state();
 
-    let code = test_state.pick_code().to_code();
+    // let code = test_state.pick_code().to_code();
+
+    // generate code
+    let code_info = generate_code().unwrap();
 
     let user_principal = test_state.pick_user_principal();
     let another_user_principal = test_state.pick_user_principal();
 
-    redeem_code(code.clone(), user_principal).await.unwrap();
+    let eth_address = EthereumAddress("Ox0934093434".to_string());
+
+    _redeem_code(code_info.code.clone(), user_principal, eth_address.clone()).unwrap();
 
     // check the code has been redeemed
     read_state(|state| {
-        assert_eq!(state.codes.get(&code).unwrap().redeemed, true);
+        assert_eq!(state.codes.get(&code_info.code).unwrap().redeemed, true);
     });
 
     // try registering multiple times with the same principal and a different code should fail
     let another_code = test_state.pick_code().to_code();
 
     assert_eq!(
-        redeem_code(another_code.clone(), user_principal).await,
+        _redeem_code(another_code.clone(), user_principal, eth_address.clone()),
         Err(CanisterError::CannotRegisterMultipleTimes),
         "Should not be able to register multiple times with the same principal"
     );
 
     // try registering with the same code again
     assert_eq!(
-        redeem_code(another_code.clone(), user_principal).await,
+        _redeem_code(another_code.clone(), user_principal, eth_address.clone()),
         Err(CanisterError::CodeAlreadyRedeemed),
         "A code can only be redeemed once"
     );
@@ -224,14 +225,11 @@ async fn test_redeem_code_with_new_principal() {
     // Try redeeming a code that does not exist
     let code = "this-code-does-not-exist".to_string().to_code();
     assert_eq!(
-        redeem_code(code.clone(), user_principal).await,
+        _redeem_code(code.clone(), user_principal, eth_address),
         Err(CanisterError::CodeNotFound),
         "Code should not be found"
     );
-
-    // Check the code has been added to the list of airdrops
 }
-
 
 // Test killing canister and bring it back to life
 #[test]
