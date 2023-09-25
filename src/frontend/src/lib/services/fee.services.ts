@@ -19,10 +19,11 @@ export const getErc20FeeData = async ({
 		const fn = network === TargetNetwork.ICP ? getBurnFeeData : getFeeData;
 		return await fn(rest);
 	} catch (err: unknown) {
-		if (err instanceof Object && 'code' in err && err.code === 'UNPREDICTABLE_GAS_LIMIT') {
-			return BigNumber.from(ERC20_FALLBACK_FEE);
-		}
+		// We silence the error on purpose.
+		// The queries above often produce errors on mainnet, even when all parameters are correctly set.
+		// Additionally, it's possible that the queries are executed with inaccurate parameters, such as when a user enters an incorrect address or an address that is not supported by the selected function (e.g., an ICP account identifier on the Ethereum network rather than for the burn contract).
+		console.error(err);
 
-		throw err;
+		return BigNumber.from(ERC20_FALLBACK_FEE);
 	}
 };
