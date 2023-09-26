@@ -1,11 +1,12 @@
 use std::{
     collections::{HashMap, HashSet},
-    ops::Deref, fmt::{Display, Formatter}
+    fmt::{Display, Formatter},
+    ops::Deref,
 };
 
+use crate::utils::format_timestamp_to_gmt;
 use candid::{types::principal::Principal, CandidType};
 use serde::{Deserialize, Serialize};
-use crate::utils::format_timestamp_to_gmt;
 
 #[derive(Serialize, Deserialize, Clone, CandidType)]
 pub struct State {
@@ -80,21 +81,13 @@ impl Logs {
         let datetime = format_timestamp_to_gmt(&now);
 
         // convert now to date time
-        let log = format!(
-            "{} - {}()#{} - {}",
-            datetime,
-            function_name,
-            line,
-            message
-        );
+        let log = format!("{} - {}()#{} - {}", datetime, function_name, line, message);
 
         self.logs.push(log);
     }
 
-
     /// Return the logs
     pub fn get_logs(&self, index: u64) -> Vec<(usize, String)> {
-
         // make sure we don't go out of bounds
         if index >= self.logs.len() as u64 {
             // TODO this should really return an error

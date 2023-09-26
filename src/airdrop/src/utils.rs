@@ -49,7 +49,9 @@ pub fn register_principal_with_eth_address(
         line!(),
         format!(
             "Registered principal {} with code {:?} and eth address {:?}",
-            principal.to_string(), code, eth_address
+            principal.to_string(),
+            code,
+            eth_address
         ),
     );
 }
@@ -113,7 +115,6 @@ pub fn format_timestamp_to_gmt(timestamp: &u64) -> String {
 
     // Format the date to GMT
     let format =
-        format_description::parse("[year]/[month]/[day] [hour]:[minute]:[second]")
-            .unwrap();
+        format_description::parse("[year]/[month]/[day] [hour]:[minute]:[second]").unwrap();
     date.format(&format).unwrap()
 }
