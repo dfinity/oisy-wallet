@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconCheckCircle } from '@dfinity/gix-components';
+	import {IconCheckCircle, IconInfo} from '@dfinity/gix-components';
 	import type { StaticStep } from '$lib/types/steps';
 	import { nonNullish } from '@dfinity/utils';
 
@@ -11,6 +11,8 @@
 	<div class={`step ${state} ${last ? 'last' : ''}`}>
 		{#if state === 'completed'}
 			<IconCheckCircle />
+		{:else if state === 'skipped'}
+			<IconInfo size="27px" />
 		{:else}
 			<span class="checkmark round">{i + 1}</span>
 		{/if}

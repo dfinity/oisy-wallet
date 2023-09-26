@@ -1,15 +1,14 @@
 <script lang="ts">
 	import type { Info } from '$declarations/airdrop/airdrop.did';
-	import type { ProgressStep } from '@dfinity/gix-components';
 	import { AirdropStep } from '$lib/enums/airdrop';
 	import type { StaticStep } from '$lib/types/steps';
-	import { fromNullable } from '@dfinity/utils';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { countAirdropInvitesRedeemed } from '$lib/utils/airdrop.utils';
+	import StaticSteps from "$lib/components/ui/StaticSteps.svelte";
 
 	export let airdrop: Info;
 
-	let steps: [ProgressStep, ...ProgressStep[]];
+	let steps: [StaticStep, ...StaticStep[]];
 	$: steps = [
 		{
 			step: AirdropStep.INITIALIZATION,
@@ -22,6 +21,15 @@
 						step: AirdropStep.AIRDROP,
 						text: 'Airdropped 2 ICP for you',
 						state: 'completed'
+					} as StaticStep
+			  ]
+			: []),
+		...(!airdrop.tokens_transferred && countInvitesRedeemed === 0
+			? [
+					{
+						step: AirdropStep.AIRDROP,
+						text: 'Airdrop is unfortunately completed',
+						state: 'skipped'
 					} as StaticStep
 			  ]
 			: []),
@@ -38,11 +46,9 @@
 
 	let countInvitesRedeemed = 0;
 	$: countInvitesRedeemed = countAirdropInvitesRedeemed(airdrop);
-
-	const progressStep: string = AirdropStep.DONE;
 </script>
 
-<div class="my-2"><InProgress {progressStep} {steps} type="static" /></div>
+<div class="my-2"><StaticSteps {steps} /></div>
 
 <p class="mt-4 mb-2">
 	<small>The airdrop is completed. All rewards have been distributed.</small>
