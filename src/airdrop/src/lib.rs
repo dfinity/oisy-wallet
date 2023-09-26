@@ -672,7 +672,6 @@ fn set_total_tokens(total_tokens: u64) -> CustomResult<()> {
             format!("set total tokens to {}", total_tokens),
         );
 
-
         Ok(())
     })
 }
@@ -683,6 +682,57 @@ fn get_logs() -> CustomResult<Vec<String>> {
     check_if_killed()?;
 
     read_state(|state| Ok(state.logs.get_logs()))
+}
+
+/// Get the total amount of code generated, the total amount of code redeemed,
+/// the total amount of code left, the total amount of token left, the total amount of transaction done,
+/// and the number of airdrop transaction waiting to happen
+#[query(guard = "caller_is_admin")]
+fn get_stats() -> CustomResult<String> {
+    check_if_killed()?;
+
+    read_state(|state| {
+        let total_code_generated = state
+            .principals_managers
+            .iter()
+            .map(|(_, principal_state)| principal_state.codes_generated)
+            .sum::<u64>();
+
+        let total_code_redeemed = state
+            .principals_managers
+            .iter()
+            .map(|(_, principal_state)| principal_state.codes_redeemed)
+            .sum::<u64>();
+
+        let total_code_left = total_code_generated - total_code_redeemed;
+
+        let total_tokens_left = state.total_tokens - state.airdrop_reward.len() as u64;
+
+        let total_transaction_done = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| eth_address_amount.transferred)
+            .count() as u64;
+
+        let total_airdrop_transaction_waiting = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| !eth_address_amount.transferred)
+            .count() as u64;
+
+        // Format the response as a string
+        let resp = format!(
+                "total_code_generated: {}, total_code_redeemed: {}, total_code_left: {}, total_tokens_left: {}, total_transaction_done: {}, total_airdrop_transaction_waiting: {}",
+                total_code_generated,
+                total_code_redeemed,
+                total_code_left,
+                total_tokens_left,
+                total_transaction_done,
+                total_airdrop_transaction_waiting,
+            );
+
+        Ok(resp)
+    })
 }
 
 // automatically generates the candid file
