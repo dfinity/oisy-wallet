@@ -2,17 +2,14 @@ import type { _SERVICE as AirdropActor } from '$declarations/airdrop/airdrop.did
 import { idlFactory as idlFactorAirdrop } from '$declarations/airdrop/airdrop.factory.did';
 import type { _SERVICE as BackendActor } from '$declarations/backend/backend.did';
 import { idlFactory as idlFactorBackend } from '$declarations/backend/backend.factory.did';
-import { authStore } from '$lib/stores/auth.store';
+import type { OptionIdentity } from '$lib/types/identity';
 import { getAgent } from '$lib/utils/agent.utils';
 import { Actor, type ActorMethod, type ActorSubclass, type Identity } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
-export const getBackendActor = async (): Promise<BackendActor> => {
-	const identity: Identity | undefined | null = get(authStore).identity;
-
+export const getBackendActor = (identity: OptionIdentity): Promise<BackendActor> => {
 	assertNonNullish(identity, 'No internet identity.');
 
 	const canisterId = import.meta.env.VITE_BACKEND_CANISTER_ID;
@@ -24,9 +21,7 @@ export const getBackendActor = async (): Promise<BackendActor> => {
 	});
 };
 
-export const getAirdropActor = async (): Promise<AirdropActor> => {
-	const identity: Identity | undefined | null = get(authStore).identity;
-
+export const getAirdropActor = (identity: OptionIdentity): Promise<AirdropActor> => {
 	assertNonNullish(identity, 'No internet identity.');
 
 	const canisterId = import.meta.env.VITE_AIRDROP_CANISTER_ID;

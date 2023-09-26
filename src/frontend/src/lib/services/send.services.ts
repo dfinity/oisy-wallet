@@ -8,6 +8,7 @@ import { populateBurnTransaction } from '$lib/providers/infura-erc20-icp.provide
 import { populateTransaction } from '$lib/providers/infura-erc20.providers';
 import { getTransactionCount, sendTransaction } from '$lib/providers/infura.providers';
 import { processTransactionSent } from '$lib/services/transaction.services';
+import { authStore } from '$lib/stores/auth.store';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Erc20PopulateTransaction } from '$lib/types/erc20-providers';
 import type { Token } from '$lib/types/token';
@@ -15,6 +16,7 @@ import type { TransactionFeeData } from '$lib/types/transaction';
 import { isErc20Icp } from '$lib/utils/token.utils';
 import { isNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+import { get } from 'svelte/store';
 
 export interface TransferParams {
 	from: string;
@@ -133,7 +135,8 @@ export const send = async ({
 
 	progress(SendStep.SIGN);
 
-	const rawTransaction = await signTransaction(transaction);
+	const { identity } = get(authStore);
+	const rawTransaction = await signTransaction({ identity, transaction });
 
 	progress(SendStep.SEND);
 
