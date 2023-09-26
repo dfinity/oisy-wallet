@@ -63,6 +63,7 @@ type Result_7 = variant {
   Err : CanisterError;
 };
 type Result_8 = variant { Ok : vec EthereumTransaction; Err : CanisterError };
+type Result_9 = variant { Ok : text; Err : CanisterError };
 type RewardType = variant { Airdrop; Referral };
 service : (Arg) -> {
   add_admin : (principal) -> (Result);
@@ -78,6 +79,7 @@ service : (Arg) -> {
   get_state_managers : () -> (Result_6) query;
   get_state_parameters : () -> (Result_7) query;
   get_state_rewards : () -> (Result_8) query;
+  get_stats : () -> (Result_9) query;
   is_manager : () -> (bool) query;
   kill_canister : () -> (Result);
   put_airdrop : (vec nat64) -> (Result);

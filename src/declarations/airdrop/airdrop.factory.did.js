@@ -78,6 +78,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(EthereumTransaction),
 		Err: CanisterError
 	});
+	const Result_9 = IDL.Variant({ Ok: IDL.Text, Err: CanisterError });
 	return IDL.Service({
 		add_admin: IDL.Func([IDL.Principal], [Result], []),
 		add_codes: IDL.Func([IDL.Vec(IDL.Text)], [Result], []),
@@ -92,6 +93,7 @@ export const idlFactory = ({ IDL }) => {
 		get_state_managers: IDL.Func([], [Result_6], ['query']),
 		get_state_parameters: IDL.Func([], [Result_7], ['query']),
 		get_state_rewards: IDL.Func([], [Result_8], ['query']),
+		get_stats: IDL.Func([], [Result_9], ['query']),
 		is_manager: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
 		put_airdrop: IDL.Func([IDL.Vec(IDL.Nat64)], [Result], []),
