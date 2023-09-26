@@ -21,19 +21,22 @@
 	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
 	import { getSdkError } from '@walletconnect/utils';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import { walletConnectUri } from '$lib/derived/wallet-connect.derived';
+	import {loading} from "$lib/stores/loader.store";
 
 	export let listener: WalletConnectListener | undefined | null;
 
-	const steps: WizardSteps = [
-		{
-			name: 'Connect',
-			title: 'WalletConnect'
-		},
-		{
-			name: 'Review',
-			title: 'Session Proposal'
-		}
-	];
+	const STEP_CONNECT: WizardStep = {
+		name: 'Connect',
+		title: 'WalletConnect'
+	};
+
+	const STEP_REVIEW: WizardStep = {
+		name: 'Review',
+		title: 'Session Proposal'
+	};
+
+	let steps: WizardSteps = [STEP_CONNECT, STEP_REVIEW];
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -103,14 +106,60 @@
 
 	const goToFirstStep = () => modal?.set?.(0);
 
-	const connect = async ({ detail: uri }: CustomEvent<string>) => {
+	// One try to manually sign-in by entering the URL manually or scanning a QR code
+	const userConnect = async ({ detail: uri }: CustomEvent<string>) => {
 		modal.next();
 
+		const { result } = await connect(uri);
+
+		if (result === 'error') {
+			modal.back();
+		}
+	};
+
+	// One try to sign-in using the Oisy Wallet listed in the WalletConnect app and the sign-in occurs through URL
+	const uriConnect = async () => {
+		if (isNullish($walletConnectUri)) {
+			return;
+		}
+
+		// We are still loading ETH address and other data. Boot screen load.
+		if ($loading) {
+			return;
+		}
+
+		// Address is not defined. We need it.
+		if (isNullish($addressStore)) {
+			return;
+		}
+
+		// For simplicity reason we just display an error for now if user has already opened the WalletConnect modal.
+		// Technically we could potentially check which steps is in progress and eventually jump or not but, let's keep it simple for now.
+		if ($modalWalletConnectAuth) {
+			toastsError({
+				msg: { text: `Please finalize the manual workflow that has already been initiated by opening the WalletConnect modal.` }
+			});
+			return;
+		}
+
+		// No step connect here
+		steps = [STEP_REVIEW];
+
+		// We jump to review step
+		modalStore.openWalletConnectAuth();
+
+		console.log($walletConnectUri, $addressStore)
+
+		await connect($walletConnectUri);
+	};
+
+	$: $addressStore, $walletConnectUri, $loading, (async () => await uriConnect())();
+
+	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);
 
 		if (isNullish(listener)) {
-			modal.back();
-			return;
+			return { result: 'error' };
 		}
 
 		listener.sessionProposal((sessionProposal) => {
@@ -197,7 +246,11 @@
 			});
 
 			close();
+
+			return { result: 'critical' };
 		}
+
+		return { result: 'success' };
 	};
 
 	const reject = async () =>
@@ -285,7 +338,7 @@
 		{#if currentStep?.name === 'Review'}
 			<WalletConnectReview {proposal} on:icReject={reject} on:icApprove={approve} />
 		{:else}
-			<WalletConnectForm on:icConnect={connect} />
+			<WalletConnectForm on:icConnect={userConnect} />
 		{/if}
 	</WizardModal>
 {/if}
