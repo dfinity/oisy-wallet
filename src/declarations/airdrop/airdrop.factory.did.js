@@ -45,6 +45,10 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Result_3 = IDL.Variant({ Ok: Info, Err: CanisterError });
 	const Result_4 = IDL.Variant({
+		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Text)),
+		Err: CanisterError
+	});
+	const Result_5 = IDL.Variant({
 		Ok: IDL.Vec(IDL.Principal),
 		Err: CanisterError
 	});
@@ -52,11 +56,11 @@ export const idlFactory = ({ IDL }) => {
 		codes_generated: IDL.Nat64,
 		codes_redeemed: IDL.Nat64
 	});
-	const Result_5 = IDL.Variant({
+	const Result_6 = IDL.Variant({
 		Ok: IDL.Vec(IDL.Tuple(IDL.Principal, PrincipalState)),
 		Err: CanisterError
 	});
-	const Result_6 = IDL.Variant({
+	const Result_7 = IDL.Variant({
 		Ok: IDL.Tuple(IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64),
 		Err: CanisterError
 	});
@@ -70,10 +74,11 @@ export const idlFactory = ({ IDL }) => {
 		eth_address: IDL.Text,
 		amount: IDL.Nat64
 	});
-	const Result_7 = IDL.Variant({
+	const Result_8 = IDL.Variant({
 		Ok: IDL.Vec(EthereumTransaction),
 		Err: CanisterError
 	});
+	const Result_9 = IDL.Variant({ Ok: IDL.Text, Err: CanisterError });
 	return IDL.Service({
 		add_admin: IDL.Func([IDL.Principal], [Result], []),
 		add_codes: IDL.Func([IDL.Vec(IDL.Text)], [Result], []),
@@ -83,10 +88,12 @@ export const idlFactory = ({ IDL }) => {
 		generate_code: IDL.Func([], [Result_1], []),
 		get_airdrop: IDL.Func([IDL.Nat64], [Result_2], []),
 		get_code: IDL.Func([], [Result_3], ['query']),
-		get_state_admins: IDL.Func([], [Result_4], ['query']),
-		get_state_managers: IDL.Func([], [Result_5], ['query']),
-		get_state_parameters: IDL.Func([], [Result_6], ['query']),
-		get_state_rewards: IDL.Func([], [Result_7], ['query']),
+		get_logs: IDL.Func([IDL.Nat64], [Result_4], ['query']),
+		get_state_admins: IDL.Func([], [Result_5], ['query']),
+		get_state_managers: IDL.Func([], [Result_6], ['query']),
+		get_state_parameters: IDL.Func([], [Result_7], ['query']),
+		get_state_rewards: IDL.Func([], [Result_8], ['query']),
+		get_stats: IDL.Func([], [Result_9], ['query']),
 		is_manager: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
 		put_airdrop: IDL.Func([IDL.Vec(IDL.Nat64)], [Result], []),

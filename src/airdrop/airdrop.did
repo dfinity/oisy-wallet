@@ -52,16 +52,21 @@ type Result_2 = variant {
   Err : CanisterError;
 };
 type Result_3 = variant { Ok : Info; Err : CanisterError };
-type Result_4 = variant { Ok : vec principal; Err : CanisterError };
-type Result_5 = variant {
+type Result_4 = variant {
+  Ok : vec record { nat64; text };
+  Err : CanisterError;
+};
+type Result_5 = variant { Ok : vec principal; Err : CanisterError };
+type Result_6 = variant {
   Ok : vec record { principal; PrincipalState };
   Err : CanisterError;
 };
-type Result_6 = variant {
+type Result_7 = variant {
   Ok : record { nat64; nat64; nat64; nat64 };
   Err : CanisterError;
 };
-type Result_7 = variant { Ok : vec EthereumTransaction; Err : CanisterError };
+type Result_8 = variant { Ok : vec EthereumTransaction; Err : CanisterError };
+type Result_9 = variant { Ok : text; Err : CanisterError };
 type RewardType = variant { Airdrop; Referral };
 service : (Arg) -> {
   add_admin : (principal) -> (Result);
@@ -72,10 +77,12 @@ service : (Arg) -> {
   generate_code : () -> (Result_1);
   get_airdrop : (nat64) -> (Result_2);
   get_code : () -> (Result_3) query;
-  get_state_admins : () -> (Result_4) query;
-  get_state_managers : () -> (Result_5) query;
-  get_state_parameters : () -> (Result_6) query;
-  get_state_rewards : () -> (Result_7) query;
+  get_logs : (nat64) -> (Result_4) query;
+  get_state_admins : () -> (Result_5) query;
+  get_state_managers : () -> (Result_6) query;
+  get_state_parameters : () -> (Result_7) query;
+  get_state_rewards : () -> (Result_8) query;
+  get_stats : () -> (Result_9) query;
   is_manager : () -> (bool) query;
   kill_canister : () -> (Result);
   put_airdrop : (vec nat64) -> (Result);

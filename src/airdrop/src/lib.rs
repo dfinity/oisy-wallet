@@ -153,6 +153,11 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
         for code in codes {
             // only add the code if it does not already exist
             if !state.codes.contains_key(&Code(code.clone())) {
+                state.logs.add(
+                    stringify!(add_codes),
+                    line!(),
+                    format!("generated {}", &code),
+                );
                 state.pre_generated_codes.push(Code(code));
             }
         }
@@ -164,6 +169,11 @@ fn add_codes(codes: Vec<String>) -> CustomResult<()> {
 fn add_admin(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         state.principals_admins.insert(principal);
+        state.logs.add(
+            stringify!(add_admin),
+            line!(),
+            format!("added admin {}", &principal.to_string()),
+        );
 
         Ok(())
     })
@@ -182,6 +192,11 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
                 codes_redeemed: 0,
             };
             state.principals_managers.insert(principal, principal_state);
+            state.logs.add(
+                stringify!(add_manager),
+                line!(),
+                format!("added manager {}", &principal.to_string()),
+            );
 
             Ok(())
         }
@@ -192,8 +207,24 @@ fn add_manager(principal: Principal) -> CustomResult<()> {
 #[update(guard = "caller_is_admin")]
 fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| match state.principals_users.remove(&principal) {
-        Some(_) => Ok(()),
-        None => Err(CanisterError::PrincipalNotParticipatingInAirdrop),
+        Some(_) => {
+            state.logs.add(
+                stringify!(remove_principal_airdrop),
+                line!(),
+                format!("removed principal {}", &principal.to_string()),
+            );
+
+            Ok(())
+        }
+        None => {
+            state.logs.add(
+                stringify!(remove_principal_airdrop),
+                line!(),
+                format!("principal {} not found", &principal.to_string()),
+            );
+
+            Err(CanisterError::PrincipalNotParticipatingInAirdrop)
+        }
     })
 }
 
@@ -229,6 +260,12 @@ fn generate_code() -> CustomResult<CodeInfo> {
 
         principal_state.codes_generated += 1;
 
+        state.logs.add(
+            stringify!(generate_code),
+            line!(),
+            format!("{} generated {}", &caller_principal.to_string(), &code.0),
+        );
+
         Ok(CodeInfo::new(
             code,
             principal_state.codes_generated,
@@ -248,21 +285,47 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
     mutate_state(|state| {
         // Check if the given principal has redeemed any code yet
         if state.principals_users.contains_key(&caller_principal) {
+            state.logs.add(
+                stringify!(redeem_code),
+                line!(),
+                format!("{} already redeemed a code", &caller_principal.to_string()),
+            );
+
             return Err(CanisterError::CannotRegisterMultipleTimes);
         }
 
         // Check if code exists
         if !state.codes.contains_key(&code) {
+            state.logs.add(
+                stringify!(redeem_code),
+                line!(),
+                format!("{} code not found", &code.0),
+            );
             return Err(CanisterError::CodeNotFound);
         }
 
         // Check if code is already redeemed - unwrap is safe as we have checked the code exists
         if state.codes[&code].redeemed {
+            state.logs.add(
+                stringify!(redeem_code),
+                line!(),
+                format!("{} code already redeemed", &code.0),
+            );
+
             return Err(CanisterError::CodeAlreadyRedeemed);
         }
 
         // Check if redeemer is a manager
         if state.principals_managers.contains_key(&caller_principal) {
+            state.logs.add(
+                stringify!(redeem_code),
+                line!(),
+                format!(
+                    "{} managers cannot participate in the airdrop",
+                    &caller_principal.to_string()
+                ),
+            );
+
             return Err(CanisterError::ManagersCannotParticipateInTheAirdrop);
         }
 
@@ -307,6 +370,16 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
         )?;
 
         let depth = state.codes.get(&code).unwrap().depth;
+        state.logs.add(
+            stringify!(redeem_code),
+            line!(),
+            format!(
+                "{} redeemed {} at depth {}",
+                &caller_principal.to_string(),
+                &code.0,
+                depth.clone()
+            ),
+        );
 
         // Generate children codes only if we are below the maximum depth
         let children_codes = if state.codes.get(&code).unwrap().depth < state.maximum_depth {
@@ -331,6 +404,16 @@ async fn redeem_code(code: Code) -> CustomResult<Info> {
         } else {
             None
         };
+
+        state.logs.add(
+            stringify!(redeem_code),
+            line!(),
+            format!(
+                "{} generated children codes - children: {:?}",
+                &caller_principal.to_string(),
+                children_codes
+            ),
+        );
 
         // return Info
         Ok(Info::new(
@@ -394,6 +477,12 @@ fn get_code() -> CustomResult<Info> {
 #[update(guard = "caller_is_admin")]
 fn kill_canister() -> CustomResult<()> {
     mutate_state(|state| {
+        state.logs.add(
+            stringify!(kill_canister),
+            line!(),
+            format!("killed canister"),
+        );
+
         state.killed = true;
     });
 
@@ -403,6 +492,12 @@ fn kill_canister() -> CustomResult<()> {
 #[update(guard = "caller_is_admin")]
 fn bring_caninster_back_to_life() -> CustomResult<()> {
     mutate_state(|state| {
+        state.logs.add(
+            stringify!(bring_caninster_back_to_life),
+            line!(),
+            format!("brought canister back to life"),
+        );
+
         state.killed = false;
     });
     Ok(())
@@ -445,6 +540,12 @@ fn put_airdrop(indexes: Vec<Index>) -> CustomResult<()> {
         for index in indexes {
             match state.airdrop_reward.get_mut(index.0 as usize) {
                 Some(tx) => {
+                    state.logs.add(
+                        stringify!(put_airdrop),
+                        line!(),
+                        format!("marked airdrop as transferred for {}", &tx.eth_address.0),
+                    );
+
                     tx.transferred = true;
                 }
                 None => return Err(CanisterError::TransactionUnkown),
@@ -460,6 +561,10 @@ fn clean_up() -> CustomResult<()> {
     check_if_killed()?;
 
     mutate_state(|state| {
+        state
+            .logs
+            .add(stringify!(clean_up), line!(), format!("cleaned up"));
+
         // remove duplicate codes
         let mut codes = HashSet::new();
         state
@@ -484,6 +589,11 @@ fn remove_managers(principals: Vec<Principal>) -> CustomResult<()> {
     mutate_state(|state| {
         for principal in principals {
             state.principals_managers.remove(&principal);
+            state.logs.add(
+                stringify!(remove_managers),
+                line!(),
+                format!("removed manager {}", &principal.to_string()),
+            );
         }
 
         Ok(())
@@ -498,6 +608,11 @@ fn remove_admins(principals: Vec<Principal>) -> CustomResult<()> {
     mutate_state(|state| {
         for principal in principals {
             state.principals_admins.remove(&principal);
+            state.logs.add(
+                stringify!(remove_admins),
+                line!(),
+                format!("removed admin {}", &principal.to_string()),
+            );
         }
 
         Ok(())
@@ -550,7 +665,75 @@ fn set_total_tokens(total_tokens: u64) -> CustomResult<()> {
 
     mutate_state(|state| {
         state.total_tokens = total_tokens;
+
+        state.logs.add(
+            stringify!(set_total_tokens),
+            line!(),
+            format!("set total tokens to {}", total_tokens),
+        );
+
         Ok(())
+    })
+}
+
+/// Get the logs starting from a specific index
+#[query(guard = "caller_is_admin")]
+fn get_logs(index: u64) -> CustomResult<Vec<(usize, String)>> {
+    check_if_killed()?;
+
+    read_state(|state| Ok(state.logs.get_logs(index)))
+}
+
+/// Get the total amount of code generated, the total amount of code redeemed,
+/// the total amount of code left, the total amount of token left, the total amount of transaction done,
+/// and the number of airdrop transaction waiting to happen
+#[query(guard = "caller_is_admin")]
+fn get_stats() -> CustomResult<String> {
+    check_if_killed()?;
+
+    read_state(|state| {
+        let total_code_generated = state
+            .principals_managers
+            .iter()
+            .map(|(_, principal_state)| principal_state.codes_generated)
+            .sum::<u64>();
+
+        // get number of redeemed codes by counting the airdrop references in the eth transactions
+        let total_code_redeemed = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| eth_address_amount.reward_type == RewardType::Airdrop)
+            .count() as u64;
+
+        let total_referral = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| eth_address_amount.reward_type == RewardType::Referral)
+            .count() as u64;
+
+        let total_code_left = state.pre_generated_codes.len() as u64;
+
+        // compute the amount of tokens distributed in the airdrop
+        let total_tokens_left = state.total_tokens;
+
+        let total_transaction_done = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| eth_address_amount.transferred)
+            .count() as u64;
+
+        let total_airdrop_transaction_waiting = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| !eth_address_amount.transferred)
+            .count() as u64;
+
+        // Format the response as a string
+        let resp = format!(
+                "total_code_generated: {total_code_generated}, total airdrop code redeemed: {total_code_redeemed}, total referral: {total_referral}, total_code_left: {total_code_left}, total_tokens_left: {total_tokens_left}, total_transaction_done: {total_transaction_done}, total_airdrop_transaction_waiting: {total_airdrop_transaction_waiting}",
+            );
+
+        Ok(resp)
     })
 }
 
