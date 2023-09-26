@@ -145,10 +145,8 @@
 		// No step connect here
 		steps = [STEP_REVIEW];
 
-		// We jump to review step
+		// We open the WalletConnect auth modal on the review step
 		modalStore.openWalletConnectAuth();
-
-		console.log($walletConnectUri, $addressStore)
 
 		await connect($walletConnectUri);
 	};
