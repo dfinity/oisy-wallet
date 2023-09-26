@@ -12,11 +12,11 @@ use k256::PublicKey;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
+use shared::std_canister_status;
 use std::cell::RefCell;
 use std::str::FromStr;
 
 mod guards;
-mod std_canister_status;
 
 thread_local! {
     static STATE: RefCell<Option<State>> = RefCell::default();

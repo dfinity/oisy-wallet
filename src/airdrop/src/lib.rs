@@ -50,6 +50,10 @@ use crate::{
         register_principal_with_eth_address,
     },
 };
+use serde_bytes::ByteBuf;
+use shared::http::{HttpRequest, HttpResponse};
+use shared::metrics::get_metrics;
+use shared::std_canister_status;
 
 type CustomResult<T> = Result<T, CanisterError>;
 
@@ -143,6 +147,26 @@ fn post_upgrade() {
         let (s,) = stable_restore().expect("failed to decode state");
         *cell.borrow_mut() = s;
     });
+}
+
+/// Processes external HTTP requests.
+#[query]
+pub fn http_request(request: HttpRequest) -> HttpResponse {
+    let parts: Vec<&str> = request.url.split('?').collect();
+    match parts[0] {
+        "/metrics" => get_metrics(),
+        _ => HttpResponse {
+            status_code: 404,
+            headers: vec![],
+            body: ByteBuf::from(String::from("Not found.")),
+        },
+    }
+}
+
+/// API method to get cycle balance and burn rate.
+#[update]
+async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
+    std_canister_status::get_canister_status_v2().await
 }
 
 /// Add codes generated offline
