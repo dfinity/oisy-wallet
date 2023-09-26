@@ -1,6 +1,6 @@
+import { getAirdropCode } from '$lib/api/airdrop.api';
 import { CODE_TIMER_INTERVAL } from '$lib/constants/app.constants';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
-import { getAirdropCode } from '$lib/worker-api/airdrop.worker-api';
 import type { Identity } from '@dfinity/agent';
 import { AuthClient } from '@dfinity/auth-client';
 import { isNullish } from '@dfinity/utils';

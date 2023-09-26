@@ -1,6 +1,7 @@
 import { getAirdropCode, redeemAirdropCode } from '$lib/api/airdrop.api';
 import { airdropCode } from '$lib/derived/airdrop.derived';
 import { airdropStore } from '$lib/stores/airdrop.store';
+import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -17,7 +18,9 @@ export const initAirdrop = (): Promise<{ success: boolean }> => {
 
 const redeemCode = async (code: string): Promise<{ success: boolean }> => {
 	try {
-		const result = await redeemAirdropCode({ code });
+		const { identity } = get(authStore);
+
+		const result = await redeemAirdropCode({ code, identity });
 
 		if ('Err' in result) {
 			const { Err } = result;
@@ -49,7 +52,9 @@ const redeemCode = async (code: string): Promise<{ success: boolean }> => {
 
 const loadAirdrop = async (): Promise<{ success: boolean }> => {
 	try {
-		const result = await getAirdropCode();
+		const { identity } = get(authStore);
+
+		const result = await getAirdropCode(identity);
 
 		if ('Err' in result) {
 			const { Err } = result;
