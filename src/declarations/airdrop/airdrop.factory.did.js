@@ -45,7 +45,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Result_3 = IDL.Variant({ Ok: Info, Err: CanisterError });
 	const Result_4 = IDL.Variant({
-		Ok: IDL.Vec(IDL.Text),
+		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Text)),
 		Err: CanisterError
 	});
 	const Result_5 = IDL.Variant({
@@ -88,7 +88,7 @@ export const idlFactory = ({ IDL }) => {
 		generate_code: IDL.Func([], [Result_1], []),
 		get_airdrop: IDL.Func([IDL.Nat64], [Result_2], []),
 		get_code: IDL.Func([], [Result_3], ['query']),
-		get_logs: IDL.Func([], [Result_4], ['query']),
+		get_logs: IDL.Func([IDL.Nat64], [Result_4], ['query']),
 		get_state_admins: IDL.Func([], [Result_5], ['query']),
 		get_state_managers: IDL.Func([], [Result_6], ['query']),
 		get_state_parameters: IDL.Func([], [Result_7], ['query']),
