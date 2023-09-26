@@ -93,8 +93,22 @@ impl Logs {
 
 
     /// Return the logs
-    pub fn get_logs(&self) -> Vec<String> {
-        self.logs.clone()
+    pub fn get_logs(&self, index: u64) -> Vec<(usize, String)> {
+
+        // make sure we don't go out of bounds
+        if index >= self.logs.len() as u64 {
+            // TODO this should really return an error
+            return Vec::new();
+        }
+
+        // return (index, log)
+        self.logs
+            .iter()
+            .enumerate()
+            // we do not use skip because we want to keep the index
+            .filter(|(i, _)| *i >= index as usize)
+            .map(|(i, log)| (i, log.clone()))
+            .collect()
     }
 }
 

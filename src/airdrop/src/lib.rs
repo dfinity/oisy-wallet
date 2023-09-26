@@ -676,12 +676,12 @@ fn set_total_tokens(total_tokens: u64) -> CustomResult<()> {
     })
 }
 
-/// Get the logs
+/// Get the logs starting from a specific index
 #[query(guard = "caller_is_admin")]
-fn get_logs() -> CustomResult<Vec<String>> {
+fn get_logs(index: u64) -> CustomResult<Vec<(usize, String)>> {
     check_if_killed()?;
 
-    read_state(|state| Ok(state.logs.get_logs()))
+    read_state(|state| Ok(state.logs.get_logs(index)))
 }
 
 /// Get the total amount of code generated, the total amount of code redeemed,
