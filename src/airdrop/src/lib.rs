@@ -704,9 +704,17 @@ fn get_stats() -> CustomResult<String> {
             .map(|(_, principal_state)| principal_state.codes_redeemed)
             .sum::<u64>();
 
-        let total_code_left = total_code_generated - total_code_redeemed;
+        let total_code_left = state.pre_generated_codes.len() as u64;
 
-        let total_tokens_left = state.total_tokens - state.airdrop_reward.len() as u64;
+        // compute the total amount of tokens distributed in the airdrop
+        let total_tokens_distributed = state
+            .airdrop_reward
+            .iter()
+            .map(|eth_address_amount| eth_address_amount.amount.0)
+            .sum::<u64>();
+
+        // compute the amount of tokens distributed in the airdrop
+        let total_tokens_left = state.total_tokens - total_tokens_distributed;
 
         let total_transaction_done = state
             .airdrop_reward

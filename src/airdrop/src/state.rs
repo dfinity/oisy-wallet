@@ -81,7 +81,7 @@ impl Logs {
 
         // convert now to date time
         let log = format!(
-            "{}()#{} - {} - {}",
+            "{} - {}()#{} - {}",
             datetime,
             function_name,
             line,
