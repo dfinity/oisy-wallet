@@ -2,7 +2,6 @@
 	import type { Info } from '$declarations/airdrop/airdrop.did';
 	import { AirdropStep } from '$lib/enums/airdrop';
 	import type { StaticStep } from '$lib/types/steps';
-	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { countAirdropInvitesRedeemed } from '$lib/utils/airdrop.utils';
 	import StaticSteps from "$lib/components/ui/StaticSteps.svelte";
 

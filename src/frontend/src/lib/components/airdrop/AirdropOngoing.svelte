@@ -2,7 +2,6 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import AirdropInvites from '$lib/components/airdrop/AirdropInvites.svelte';
 	import type { Info } from '$declarations/airdrop/airdrop.did';
-	import type { ProgressStep } from '@dfinity/gix-components';
 	import { AirdropStep } from '$lib/enums/airdrop';
 	import type { StaticStep } from '$lib/types/steps';
 	import { fromNullable } from '@dfinity/utils';
@@ -14,7 +13,7 @@
 
 	export let airdrop: Info;
 
-	let steps: [ProgressStep, ...ProgressStep[]] = [
+	let steps: [StaticStep, ...StaticStep[]] = [
 		{
 			step: AirdropStep.INITIALIZATION,
 			text: 'You’ve created a wallet',
