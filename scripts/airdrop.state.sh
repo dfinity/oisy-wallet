@@ -15,3 +15,6 @@ dfx canister call airdrop get_state_admins --network ic
 
 # Get managers
 dfx canister call airdrop get_state_managers --network ic
+
+# Get stats
+dfx canister call airdrop get_stats --network ic

@@ -56,6 +56,7 @@ export type Result_5 = { Ok: Array<Principal> } | { Err: CanisterError };
 export type Result_6 = { Ok: Array<[Principal, PrincipalState]> } | { Err: CanisterError };
 export type Result_7 = { Ok: [bigint, bigint, bigint, bigint] } | { Err: CanisterError };
 export type Result_8 = { Ok: Array<EthereumTransaction> } | { Err: CanisterError };
+export type Result_9 = { Ok: string } | { Err: CanisterError };
 export type RewardType = { Airdrop: null } | { Referral: null };
 export interface _SERVICE {
 	add_admin: ActorMethod<[Principal], Result>;
@@ -71,6 +72,7 @@ export interface _SERVICE {
 	get_state_managers: ActorMethod<[], Result_6>;
 	get_state_parameters: ActorMethod<[], Result_7>;
 	get_state_rewards: ActorMethod<[], Result_8>;
+	get_stats: ActorMethod<[], Result_9>;
 	is_manager: ActorMethod<[], boolean>;
 	kill_canister: ActorMethod<[], Result>;
 	put_airdrop: ActorMethod<[BigUint64Array | bigint[]], Result>;
