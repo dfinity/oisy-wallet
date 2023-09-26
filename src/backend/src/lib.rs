@@ -3,21 +3,19 @@ use candid::{CandidType, Deserialize, Nat, Principal};
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
-use http::{HttpRequest, HttpResponse};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
 use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
 use k256::PublicKey;
-use metrics::get_metrics;
 use serde_bytes::ByteBuf;
+use shared::http::{HttpRequest, HttpResponse};
+use shared::metrics::get_metrics;
 use std::cell::RefCell;
 use std::str::FromStr;
 
 mod guards;
-pub mod http;
-mod metrics;
 mod std_canister_status;
 
 thread_local! {
