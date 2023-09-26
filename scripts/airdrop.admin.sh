@@ -6,6 +6,7 @@ case $ENV in
         "teoen-w34dv-esqk7-5gxen-m57gg-433w3-5obhr-xnkcp-ofeq3-shc75-hae"
         "y5mgz-ye6pv-bg3mu-purwq-cowuz-gkva5-hdsrv-leuqd-53hfi-kyjr4-oae"
         "moadj-5cc4w-zmzpn-pzcbv-h2miy-zimrb-uydgo-spdgq-3oceb-2tllm-rae"
+        "yf2e5-4m4id-bjzhm-fsned-hvvmk-gkqpb-ljw6h-6azcu-jkud7-nlqky-bqe"
     )
     WALLET="cvthj-wyaaa-aaaad-aaaaq-cai"
     ;;
@@ -13,6 +14,7 @@ case $ENV in
     PRINCIPALS=(
         "teoen-w34dv-esqk7-5gxen-m57gg-433w3-5obhr-xnkcp-ofeq3-shc75-hae"
         "moadj-5cc4w-zmzpn-pzcbv-h2miy-zimrb-uydgo-spdgq-3oceb-2tllm-rae"
+        "yf2e5-4m4id-bjzhm-fsned-hvvmk-gkqpb-ljw6h-6azcu-jkud7-nlqky-bqe"
     )
     WALLET="yit3i-lyaaa-aaaan-qeavq-cai"
     ;;
