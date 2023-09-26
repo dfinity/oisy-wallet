@@ -698,11 +698,18 @@ fn get_stats() -> CustomResult<String> {
             .map(|(_, principal_state)| principal_state.codes_generated)
             .sum::<u64>();
 
+        // get number of redeemed codes by counting the airdrop references in the eth transactions
         let total_code_redeemed = state
-            .principals_managers
+            .airdrop_reward
             .iter()
-            .map(|(_, principal_state)| principal_state.codes_redeemed)
-            .sum::<u64>();
+            .filter(|eth_address_amount| eth_address_amount.reward_type == RewardType::Airdrop)
+            .count() as u64;
+
+        let total_referral = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| eth_address_amount.reward_type == RewardType::Referral)
+            .count() as u64;
 
         let total_code_left = state.pre_generated_codes.len() as u64;
 
@@ -730,13 +737,7 @@ fn get_stats() -> CustomResult<String> {
 
         // Format the response as a string
         let resp = format!(
-                "total_code_generated: {}, total_code_redeemed: {}, total_code_left: {}, total_tokens_left: {}, total_transaction_done: {}, total_airdrop_transaction_waiting: {}",
-                total_code_generated,
-                total_code_redeemed,
-                total_code_left,
-                total_tokens_left,
-                total_transaction_done,
-                total_airdrop_transaction_waiting,
+                "total_code_generated: {total_code_generated}, total airdrop code redeemed: {total_code_redeemed}, total referral: {total_referral}, total_code_left: {total_code_left}, total_tokens_left: {total_tokens_left}, total_transaction_done: {total_transaction_done}, total_airdrop_transaction_waiting: {total_airdrop_transaction_waiting}",
             );
 
         Ok(resp)

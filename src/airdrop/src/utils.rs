@@ -48,8 +48,8 @@ pub fn register_principal_with_eth_address(
         stringify!(register_principal_with_eth_address),
         line!(),
         format!(
-            "Registered principal {:?} with code {:?} and eth address {:?}",
-            principal, code, eth_address
+            "Registered principal {} with code {:?} and eth address {:?}",
+            principal.to_string(), code, eth_address
         ),
     );
 }
