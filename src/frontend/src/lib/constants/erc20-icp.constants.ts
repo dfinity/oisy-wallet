@@ -8,3 +8,5 @@ const ERC20_ICP_BURN_API = 'function burnToAccountId(uint256 _amount, bytes32 _t
 export const ERC20_ICP_ABI = [...ERC20_ABI, ERC20_ICP_BURN_API];
 
 export const ERC20_ICP_SYMBOL = import.meta.env.VITE_ERC20_ICP_SYMBOL;
+
+export const ERC20_ICP_REPO_URL = import.meta.env.VITE_ERC20_ICP_REPO_URL;
