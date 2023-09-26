@@ -121,6 +121,9 @@ const config: UserConfig = {
 				}
 			]
 		}
+	},
+	worker: {
+		format: 'es'
 	}
 };
 
