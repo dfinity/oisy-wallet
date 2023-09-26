@@ -22,6 +22,7 @@ dependencies = [
  "ic-metrics-encoder",
  "serde",
  "serde_bytes",
+ "shared",
  "time",
 ]
 
