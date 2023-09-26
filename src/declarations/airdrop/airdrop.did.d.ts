@@ -51,7 +51,7 @@ export type Result = { Ok: null } | { Err: CanisterError };
 export type Result_1 = { Ok: CodeInfo } | { Err: CanisterError };
 export type Result_2 = { Ok: Array<[bigint, string, bigint]> } | { Err: CanisterError };
 export type Result_3 = { Ok: Info } | { Err: CanisterError };
-export type Result_4 = { Ok: Array<string> } | { Err: CanisterError };
+export type Result_4 = { Ok: Array<[bigint, string]> } | { Err: CanisterError };
 export type Result_5 = { Ok: Array<Principal> } | { Err: CanisterError };
 export type Result_6 = { Ok: Array<[Principal, PrincipalState]> } | { Err: CanisterError };
 export type Result_7 = { Ok: [bigint, bigint, bigint, bigint] } | { Err: CanisterError };
@@ -67,7 +67,7 @@ export interface _SERVICE {
 	generate_code: ActorMethod<[], Result_1>;
 	get_airdrop: ActorMethod<[bigint], Result_2>;
 	get_code: ActorMethod<[], Result_3>;
-	get_logs: ActorMethod<[], Result_4>;
+	get_logs: ActorMethod<[bigint], Result_4>;
 	get_state_admins: ActorMethod<[], Result_5>;
 	get_state_managers: ActorMethod<[], Result_6>;
 	get_state_parameters: ActorMethod<[], Result_7>;
