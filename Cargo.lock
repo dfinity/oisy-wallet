@@ -1339,7 +1339,6 @@ dependencies = [
  "candid",
  "ic-cdk",
  "ic-cdk-macros",
- "ic-cdk-timers",
  "ic-metrics-encoder",
  "serde",
  "serde_bytes",
