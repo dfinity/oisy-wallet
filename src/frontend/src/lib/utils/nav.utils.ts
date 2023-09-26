@@ -39,13 +39,16 @@ export const back = async (pop: boolean) => {
 export type RouteParams = {
 	token: string | null | undefined;
 	airdropCode: string | null | undefined;
+	// WalletConnect URI parameter
+	uri: string | null | undefined;
 };
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	if (!browser) {
 		return {
 			token: undefined,
-			airdropCode: undefined
+			airdropCode: undefined,
+			uri: undefined
 		};
 	}
 
@@ -65,8 +68,11 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 		);
 	};
 
+	const uri = searchParams?.get('uri');
+
 	return {
 		token: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
-		airdropCode: searchParams?.get('code')
+		airdropCode: searchParams?.get('code'),
+		uri: nonNullish(uri) ? decodeURIComponent(uri) : null
 	};
 };
