@@ -6,6 +6,8 @@
 	import AirdropButton from '$lib/components/airdrop/AirdropButton.svelte';
 	import { airdropAvailable } from '$lib/derived/airdrop.derived';
 	import AirdropWorker from '$lib/components/airdrop/AirdropWorker.svelte';
+	import { isErc20Icp } from '$lib/utils/token.utils';
+	import { token } from '$lib/derived/token.derived';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -19,6 +21,7 @@
 	summary={route === 'transactions'}
 	send={route === 'transactions'}
 	actions={route !== 'settings'}
+	erc20IcpLink={isErc20Icp($token)}
 />
 
 <main>

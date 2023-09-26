@@ -8,10 +8,12 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import Balance from '$lib/components/hero/Balance.svelte';
+	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
 
 	export let summary = false;
 	export let actions = true;
 	export let send = false;
+	export let erc20IcpLink = false;
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20TokensInitialized;
@@ -41,6 +43,10 @@
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
 				<Actions {send} />
 			</div>
+		{/if}
+
+		{#if erc20IcpLink}
+			<Erc20Icp />
 		{/if}
 	</article>
 </div>
