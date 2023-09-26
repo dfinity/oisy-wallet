@@ -16,16 +16,46 @@ type CanisterError = variant {
   NoCodeForII;
   ManagersCannotParticipateInTheAirdrop;
 };
+type CanisterStatusResultV2 = record {
+  controller : principal;
+  status : CanisterStatusType;
+  freezing_threshold : nat;
+  balance : vec record { vec nat8; nat };
+  memory_size : nat;
+  cycles : nat;
+  settings : DefiniteCanisterSettingsArgs;
+  idle_cycles_burned_per_day : nat;
+  module_hash : opt vec nat8;
+};
+type CanisterStatusType = variant { stopped; stopping; running };
 type CodeInfo = record {
   codes_generated : nat64;
   code : text;
   codes_redeemed : nat64;
+};
+type DefiniteCanisterSettingsArgs = record {
+  controller : principal;
+  freezing_threshold : nat;
+  controllers : vec principal;
+  memory_allocation : nat;
+  compute_allocation : nat;
 };
 type EthereumTransaction = record {
   transferred : bool;
   reward_type : RewardType;
   eth_address : text;
   amount : nat64;
+};
+type HttpRequest = record {
+  url : text;
+  method : text;
+  body : vec nat8;
+  headers : vec record { text; text };
+};
+type HttpResponse = record {
+  body : vec nat8;
+  headers : vec record { text; text };
+  status_code : nat16;
 };
 type Info = record {
   "principal" : principal;
@@ -76,6 +106,7 @@ service : (Arg) -> {
   clean_up : () -> (Result);
   generate_code : () -> (Result_1);
   get_airdrop : (nat64) -> (Result_2);
+  get_canister_status : () -> (CanisterStatusResultV2);
   get_code : () -> (Result_3) query;
   get_logs : (nat64) -> (Result_4) query;
   get_state_admins : () -> (Result_5) query;
@@ -83,6 +114,7 @@ service : (Arg) -> {
   get_state_parameters : () -> (Result_7) query;
   get_state_rewards : () -> (Result_8) query;
   get_stats : () -> (Result_9) query;
+  http_request : (HttpRequest) -> (HttpResponse) query;
   is_manager : () -> (bool) query;
   kill_canister : () -> (Result);
   put_airdrop : (vec nat64) -> (Result);
