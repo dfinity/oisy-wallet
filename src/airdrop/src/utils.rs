@@ -63,6 +63,12 @@ pub fn add_user_to_airdrop_reward(
 ) -> CustomResult<()> {
     // check that we have enough tokens left
     if state.total_tokens <= amount.0 {
+        state.logs.add(
+            stringify!(add_user_to_airdrop_reward),
+            line!(),
+            format!("Not enough tokens left to add {:?} to the airdrop list - {} WIPC - reward type - {}", eth_address, amount.0, reward_type),
+        );
+
         return Err(NoTokensLeft);
     }
 
@@ -107,7 +113,7 @@ pub fn format_timestamp_to_gmt(timestamp: &u64) -> String {
 
     // Format the date to GMT
     let format =
-        format_description::parse("[year]/[month]/[day] [hour]:[minute]:[second].[subsecond:3]")
+        format_description::parse("[year]/[month]/[day] [hour]:[minute]:[second]")
             .unwrap();
     date.format(&format).unwrap()
 }
