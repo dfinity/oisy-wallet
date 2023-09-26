@@ -36,6 +36,29 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Text, IDL.Nat)),
 		Err: CanisterError
 	});
+	const CanisterStatusType = IDL.Variant({
+		stopped: IDL.Null,
+		stopping: IDL.Null,
+		running: IDL.Null
+	});
+	const DefiniteCanisterSettingsArgs = IDL.Record({
+		controller: IDL.Principal,
+		freezing_threshold: IDL.Nat,
+		controllers: IDL.Vec(IDL.Principal),
+		memory_allocation: IDL.Nat,
+		compute_allocation: IDL.Nat
+	});
+	const CanisterStatusResultV2 = IDL.Record({
+		controller: IDL.Principal,
+		status: CanisterStatusType,
+		freezing_threshold: IDL.Nat,
+		balance: IDL.Vec(IDL.Tuple(IDL.Vec(IDL.Nat8), IDL.Nat)),
+		memory_size: IDL.Nat,
+		cycles: IDL.Nat,
+		settings: DefiniteCanisterSettingsArgs,
+		idle_cycles_burned_per_day: IDL.Nat,
+		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
 	const Info = IDL.Record({
 		principal: IDL.Principal,
 		code: IDL.Text,
@@ -79,6 +102,17 @@ export const idlFactory = ({ IDL }) => {
 		Err: CanisterError
 	});
 	const Result_9 = IDL.Variant({ Ok: IDL.Text, Err: CanisterError });
+	const HttpRequest = IDL.Record({
+		url: IDL.Text,
+		method: IDL.Text,
+		body: IDL.Vec(IDL.Nat8),
+		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text))
+	});
+	const HttpResponse = IDL.Record({
+		body: IDL.Vec(IDL.Nat8),
+		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
+		status_code: IDL.Nat16
+	});
 	return IDL.Service({
 		add_admin: IDL.Func([IDL.Principal], [Result], []),
 		add_codes: IDL.Func([IDL.Vec(IDL.Text)], [Result], []),
@@ -87,6 +121,7 @@ export const idlFactory = ({ IDL }) => {
 		clean_up: IDL.Func([], [Result], []),
 		generate_code: IDL.Func([], [Result_1], []),
 		get_airdrop: IDL.Func([IDL.Nat64], [Result_2], []),
+		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_code: IDL.Func([], [Result_3], ['query']),
 		get_logs: IDL.Func([IDL.Nat64], [Result_4], ['query']),
 		get_state_admins: IDL.Func([], [Result_5], ['query']),
@@ -94,6 +129,7 @@ export const idlFactory = ({ IDL }) => {
 		get_state_parameters: IDL.Func([], [Result_7], ['query']),
 		get_state_rewards: IDL.Func([], [Result_8], ['query']),
 		get_stats: IDL.Func([], [Result_9], ['query']),
+		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		is_manager: IDL.Func([], [IDL.Bool], ['query']),
 		kill_canister: IDL.Func([], [Result], []),
 		put_airdrop: IDL.Func([IDL.Vec(IDL.Nat64)], [Result], []),
