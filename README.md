@@ -8,8 +8,8 @@
 <br/>
 <br/>
 
+[![Internet Computer portal](https://img.shields.io/badge/Internet-Computer-grey?logo=internet%20computer)](https://internetcomputer.org)
 [![GitHub Frontend Checks Workflow Status](https://img.shields.io/github/actions/workflow/status/dfinity/oisy-wallet/checks.yml?logo=github&label=Frontend%20checks)](https://github.com/dfinity/oisy-wallet/actions/workflows/checks.yml)
-<a href="https://github.com/dfinity/oisy-wallet/releases"><img src="https://img.shields.io/github/downloads/dfinity/oisy-wallet/total?label=downloads&logo=github" alt="GitHub all releases"></a>
 [![Chat on Discord](https://img.shields.io/badge/chat-Discord-lightgrey?logo=Discord&style=flat-square)](https://discord.gg/E9FxceAg2j)
 
 </div>
