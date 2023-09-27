@@ -4,7 +4,8 @@ import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import type { LoadEvent, Page } from '@sveltejs/kit';
 
-export const transactionsUrl = (token: Token): string => tokenUrl({ path: 'transactions/', token });
+export const transactionsUrl = (token: Token): string =>
+	tokenUrl({ path: '/transactions/', token });
 
 export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
 	id === '/(app)/transactions';
@@ -21,7 +22,7 @@ const tokenUrl = ({
 	path
 }: {
 	token: Token;
-	path: 'transactions/' | '/';
+	path: '/transactions/' | '/';
 }): string =>
 	`${path}?token=${encodeURIComponent(
 		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
