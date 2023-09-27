@@ -74,7 +74,7 @@
 		<WalletConnectActions {approve} on:icApprove on:icReject />
 	</div>
 {:else}
-	<div class="flex flex-col items-center justify-center">
+	<div class="flex flex-col items-center justify-center my-2">
 		<div>
 			<Spinner inline />
 		</div>
