@@ -7,9 +7,9 @@
 	import { secondsToDuration } from '$lib/utils/date.utils';
 	import Admin from '$lib/components/admin/Admin.svelte';
 	import type { Principal } from '@dfinity/principal';
-	import { AIRDROP } from '$lib/constants/airdrop.constants';
+	import { AIRDROP, AIRDROP_COMPLETED } from '$lib/constants/airdrop.constants';
 	import AdminGuard from '$lib/components/admin/AdminGuard.svelte';
-	import TokensMetadata from "$lib/components/tokens/TokensMetadata.svelte";
+	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -54,7 +54,7 @@
 
 <TokensMetadata />
 
-{#if AIRDROP}
+{#if AIRDROP && !AIRDROP_COMPLETED}
 	<AdminGuard>
 		<Admin />
 	</AdminGuard>
