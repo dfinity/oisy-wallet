@@ -22,7 +22,7 @@
 	import { getSdkError } from '@walletconnect/utils';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import { walletConnectUri } from '$lib/derived/wallet-connect.derived';
-	import {loading} from "$lib/stores/loader.store";
+	import { loading } from '$lib/stores/loader.store';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -137,7 +137,9 @@
 		// Technically we could potentially check which steps is in progress and eventually jump or not but, let's keep it simple for now.
 		if ($modalWalletConnectAuth) {
 			toastsError({
-				msg: { text: `Please finalize the manual workflow that has already been initiated by opening the WalletConnect modal.` }
+				msg: {
+					text: `Please finalize the manual workflow that has already been initiated by opening the WalletConnect modal.`
+				}
 			});
 			return;
 		}
@@ -309,6 +311,8 @@
 				msg: { text: `Unexpected error while communicating with WalletConnect.` },
 				err
 			});
+
+			resetListener();
 		}
 
 		busy.stop();
