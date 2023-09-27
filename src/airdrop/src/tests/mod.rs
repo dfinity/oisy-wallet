@@ -1,4 +1,4 @@
-use std::{path::Path, process::Command};
+use std::{collections::HashSet, path::Path, process::Command};
 
 use candid::types::principal::Principal;
 
@@ -17,9 +17,13 @@ static PATH_PREFIX: &str = "src/tests";
 /// Our test state struct that helps us interacting the canister logic
 struct TestState {
     principal_admins: Vec<Principal>,
+    principal_admins_seen: HashSet<Principal>,
     principal_managers: Vec<Principal>,
+    principal_managers_seen: HashSet<Principal>,
     principal_users: Vec<Principal>,
+    principal_users_seen: HashSet<Principal>,
     codes: Vec<String>,
+    codes_seen: HashSet<String>,
 }
 
 fn read_principals_from_file(path: &str) -> Vec<Principal> {
@@ -58,6 +62,10 @@ impl TestState {
             principal_managers,
             principal_users,
             codes,
+            principal_admins_seen: HashSet::new(),
+            principal_managers_seen: HashSet::new(),
+            principal_users_seen: HashSet::new(),
+            codes_seen: HashSet::new(),
         }
     }
 
@@ -89,29 +97,40 @@ impl TestState {
 
     /// Pick a user principal at random
     fn pick_user_principal(&mut self) -> Principal {
-        let index = rand::random::<usize>() % self.principal_users.len();
-        dbg!(self.principal_users[index].clone().to_string());
-
-        self.principal_users[index].clone()
+        pick_at_random(&mut self.principal_users, &mut self.principal_users_seen)
     }
 
-    /// Pick a code at random
+    /// Pick a code at random that as not been used before
     fn pick_code(&mut self) -> String {
-        let index = rand::random::<usize>() % self.codes.len();
-        // remove the code
-        self.codes[index].clone()
+        pick_at_random(&mut self.codes, &mut self.codes_seen)
     }
 
-    /// Pick a manager at random
+    /// Pick a manager at random that has not been used before
     fn pick_manager(&mut self) -> Principal {
-        let index = rand::random::<usize>() % self.principal_managers.len();
-        self.principal_managers[index].clone()
+        pick_at_random(
+            &mut self.principal_managers,
+            &mut self.principal_managers_seen,
+        )
     }
 
-    /// Pic an admin at random
+    /// Pick an admin at random that has not been used before
     fn pick_admin(&mut self) -> Principal {
-        let index = rand::random::<usize>() % self.principal_admins.len();
-        self.principal_admins[index].clone()
+        pick_at_random(&mut self.principal_admins, &mut self.principal_admins_seen)
+    }
+}
+
+fn pick_at_random<T>(vec: &mut Vec<T>, seen: &mut HashSet<T>) -> T
+where
+    T: Clone + Eq + PartialEq + std::hash::Hash,
+{
+    let index = rand::random::<usize>() % vec.len();
+    let principal = vec[index].clone();
+
+    if seen.contains(&principal) {
+        pick_at_random(vec, seen)
+    } else {
+        seen.insert(principal.clone());
+        principal
     }
 }
 
@@ -215,14 +234,22 @@ fn test_redeem_code_with_new_principal() {
     _redeem_code(code_info.code.clone(), user_principal, eth_address.clone()).unwrap();
 
     read_state(|state| {
-        assert_eq!(state.codes.get(&code_info.code).unwrap().redeemed, true, "Check code has been redeemed");
+        assert_eq!(
+            state.codes.get(&code_info.code).unwrap().redeemed,
+            true,
+            "Check code has been redeemed"
+        );
     });
 
     // try registering multiple times with the same principal and a different code should fail
     let another_code = generate_code(manager_principal).unwrap();
 
     assert_eq!(
-        _redeem_code(another_code.code.clone(), user_principal, eth_address.clone()),
+        _redeem_code(
+            another_code.code.clone(),
+            user_principal,
+            eth_address.clone()
+        ),
         Err(CanisterError::CannotRegisterMultipleTimes),
         "Should not be able to register multiple times with the same principal"
     );
@@ -268,4 +295,62 @@ fn test_kill_canister() {
     read_state(|state| {
         assert_eq!(state.killed, false);
     });
+}
+
+// Test redeeming the limit of tokens - emptying the bank
+#[test]
+fn test_no_tokens_left() {
+    let mut test_state = TestState::new();
+    test_state.set_default_state();
+
+    // let code = test_state.pick_code().to_code();
+
+    let manager_principal = test_state.pick_manager();
+
+    // we do not need t ouse different eth address as we trust the backend canister to return us different eth addresses
+    let eth_address = EthereumAddress("Ox0934093434".to_string());
+
+    // total amout of tokens
+    let total_tokens = read_state(|state| state.total_tokens);
+
+    // reward per user
+    let reward_per_user = read_state(|state| state.token_per_person);
+
+    // rewards available
+    let rewards_available = total_tokens / (reward_per_user / 4);
+
+    // assert the number of users is higher than the number of rewards available
+    assert!(
+        test_state.principal_users.len() > rewards_available as usize,
+        "We need more users than rewards available"
+    );
+
+    // for each user - we will generate a code and then promptly redeem it
+    for i in 0..rewards_available {
+        // generate code
+        let code_info = generate_code(manager_principal).unwrap();
+
+        // log the run number and the number of tokens left
+        let tokens_left = read_state(|state| state.total_tokens);
+        println!("Run number #{} - tokens left {}", i, tokens_left);
+
+        _redeem_code(
+            code_info.code.clone(),
+            test_state.pick_user_principal(),
+            eth_address.clone(),
+        )
+        .unwrap();
+    }
+
+    // This should fail as there are no more tokens left
+    let code_info = generate_code(manager_principal).unwrap();
+    assert_eq!(
+        _redeem_code(
+            code_info.code.clone(),
+            test_state.pick_user_principal(),
+            eth_address.clone()
+        ),
+        Err(CanisterError::NoTokensLeft),
+        "Should not be able to redeem a code when there are no tokens left"
+    );
 }

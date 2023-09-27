@@ -7,12 +7,12 @@ FILE="src/airdrop/src/tests/users.txt"
 rm "$FILE"
 touch "$FILE"
 
-for i in {1..100}; do
+for i in {1..1010}; do
     dfx identity new "temp$i" || echo "identity already exists"
 done
 
 # Get the list of principals
-for i in {1..100}; do
+for i in {1..1010}; do
     dfx identity use "temp$i"
     dfx identity get-principal >> "$FILE"
 done

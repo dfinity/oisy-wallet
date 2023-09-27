@@ -73,7 +73,7 @@ pub fn add_user_to_airdrop_reward(
     reward_type: RewardType,
 ) -> CustomResult<()> {
     // check that we have enough tokens left
-    if state.total_tokens <= amount.0 {
+    if state.total_tokens < amount.0 {
         state.logs.add(
             stringify!(add_user_to_airdrop_reward),
             line!(),
