@@ -264,6 +264,11 @@
 			}
 		});
 
+	const cancel = () => {
+		resetListener();
+		modal.back();
+	};
+
 	const approve = async () =>
 		await answer({
 			callback: listener?.approveSession,
@@ -338,7 +343,12 @@
 		</WalletConnectModalTitle>
 
 		{#if currentStep?.name === 'Review'}
-			<WalletConnectReview {proposal} on:icReject={reject} on:icApprove={approve} />
+			<WalletConnectReview
+				{proposal}
+				on:icReject={reject}
+				on:icApprove={approve}
+				on:icCancel={cancel}
+			/>
 		{:else}
 			<WalletConnectForm on:icConnect={userConnect} />
 		{/if}
