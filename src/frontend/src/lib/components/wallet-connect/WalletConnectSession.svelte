@@ -338,7 +338,7 @@
 		</WalletConnectModalTitle>
 
 		{#if currentStep?.name === 'Review'}
-			<WalletConnectReview {proposal} on:icReject={reject} on:icApprove={approve} />
+			<WalletConnectReview {proposal} on:icReject={reject} on:icApprove={approve} on:icCancel={() => modal?.back()} />
 		{:else}
 			<WalletConnectForm on:icConnect={userConnect} />
 		{/if}

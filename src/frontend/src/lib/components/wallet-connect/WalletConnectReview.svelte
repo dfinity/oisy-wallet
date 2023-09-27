@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { Spinner } from '@dfinity/gix-components';
 	import { fade } from 'svelte/transition';
 	import type { ProposalTypes } from '@walletconnect/types';
@@ -8,6 +8,8 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -16,6 +18,24 @@
 
 	let approve = true;
 	$: approve = acceptedContext(proposal?.verifyContext);
+
+	const dispatch = createEventDispatcher();
+
+	// Display a cancel button after a while if the WalletConnect initialization never resolves
+
+	let timer: NodeJS.Timeout | undefined;
+	let displayCancel = false;
+
+	onMount(() => (timer = setTimeout(() => (displayCancel = true), 2000)));
+
+    onDestroy(() => {
+		if (isNullish(timer)) {
+			return;
+		}
+
+		clearInterval(timer);
+		timer = undefined;
+	});
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
@@ -59,5 +79,13 @@
 			<Spinner inline />
 		</div>
 		<p>Connecting...</p>
+
+		{#if displayCancel}
+			<div class="flex justify-end gap-1 mt-4" in:fade>
+				<button class="secondary" on:click={() => dispatch('icCancel')} disabled={$isBusy}
+					>Cancel</button
+				>
+			</div>
+		{/if}
 	</div>
 {/if}
