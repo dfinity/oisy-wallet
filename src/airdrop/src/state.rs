@@ -176,12 +176,12 @@ impl CodeInfo {
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
 pub struct Info {
     /// Next three fields should all be unique per user
-    code: Code,
-    tokens_transferred: bool,
-    principal: Principal,
-    ethereum_address: EthereumAddress,
+    pub code: Code,
+    pub tokens_transferred: bool,
+    pub principal: Principal,
+    pub ethereum_address: EthereumAddress,
     /// Maps a Code to whether it has been redeemed
-    children: Option<Vec<(Code, bool)>>,
+    pub children: Option<Vec<(Code, bool)>>,
 }
 
 impl Info {
