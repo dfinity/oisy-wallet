@@ -19,6 +19,8 @@ where
 {
     STATE.with(|s| f(s.borrow_mut().as_mut().expect("state is not initialized")))
 }
+
+// TODO abstract away so we can test this function
 pub async fn get_eth_address() -> CustomResult<EthereumAddress> {
     let backend_canister = read_state(|state| state.backend_canister_id);
     let args = caller();
