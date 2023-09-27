@@ -6,6 +6,7 @@
 	import type { PostMessage, PostMessageDataResponseAirdropCode } from '$lib/types/post-message';
 	import { airdropStore } from '$lib/stores/airdrop.store';
     import {toastsShow} from "$lib/stores/toasts.store";
+    import {AIRDROP_COMPLETED} from "$lib/constants/airdrop.constants";
 
 	export let worker: Worker | undefined = undefined;
 
@@ -61,6 +62,10 @@
 		if (!$airdropAvailable) {
 			return;
 		}
+
+        if (AIRDROP_COMPLETED) {
+            return;
+        }
 
 		if (isNullish($airdropStore)) {
 			return;
