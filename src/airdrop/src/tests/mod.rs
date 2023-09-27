@@ -129,9 +129,9 @@ fn test_init() {
         assert_eq!(state.numbers_of_children, 2);
         assert_eq!(state.total_tokens, 1000);
         assert_eq!(state.principals_admins.len(), 3);
-        assert_eq!(state.principals_managers.len(), 3);
+        assert_eq!(state.principals_managers.len(), 26);
         assert_eq!(state.codes.len(), 0);
-        assert_eq!(state.pre_generated_codes.len(), 1001);
+        assert_eq!(state.pre_generated_codes.len(), 1000);
         assert_eq!(state.principals_users.len(), 0);
         assert_eq!(state.airdrop_reward.len(), 0);
         assert_eq!(state.killed, false);
@@ -150,7 +150,7 @@ fn test_add_codes() {
 
     // check that the codes have been added
     mutate_state(|state| {
-        assert_eq!(state.pre_generated_codes.len(), 1003);
+        assert_eq!(state.pre_generated_codes.len(), 1002);
         assert_eq!(state.pre_generated_codes.pop(), Some("code2".to_code()));
         assert_eq!(state.pre_generated_codes.pop(), Some("code1".to_code()));
     });
@@ -189,7 +189,7 @@ fn test_add_manager() {
 
     // check that the manager has been added
     read_state(|state| {
-        assert_eq!(state.principals_managers.len(), 4);
+        assert_eq!(state.principals_managers.len(), 27);
         assert!(state.principals_managers.contains_key(&principal));
     })
 }
@@ -214,16 +214,15 @@ fn test_redeem_code_with_new_principal() {
 
     _redeem_code(code_info.code.clone(), user_principal, eth_address.clone()).unwrap();
 
-    // check the code has been redeemed
     read_state(|state| {
-        assert_eq!(state.codes.get(&code_info.code).unwrap().redeemed, true);
+        assert_eq!(state.codes.get(&code_info.code).unwrap().redeemed, true, "Check code has been redeemed");
     });
 
     // try registering multiple times with the same principal and a different code should fail
-    let another_code = test_state.pick_code().to_code();
+    let another_code = generate_code(manager_principal).unwrap();
 
     assert_eq!(
-        _redeem_code(another_code.clone(), user_principal, eth_address.clone()),
+        _redeem_code(another_code.code.clone(), user_principal, eth_address.clone()),
         Err(CanisterError::CannotRegisterMultipleTimes),
         "Should not be able to register multiple times with the same principal"
     );
@@ -231,7 +230,7 @@ fn test_redeem_code_with_new_principal() {
     // try registering with the same code again
     assert_eq!(
         _redeem_code(
-            another_code.clone(),
+            code_info.code.clone(),
             another_user_principal,
             eth_address.clone()
         ),
@@ -242,7 +241,7 @@ fn test_redeem_code_with_new_principal() {
     // Try redeeming a code that does not exist
     let code = "this-code-does-not-exist".to_string().to_code();
     assert_eq!(
-        _redeem_code(code.clone(), user_principal, eth_address),
+        _redeem_code(code.clone(), another_user_principal, eth_address),
         Err(CanisterError::CodeNotFound),
         "Code should not be found"
     );
