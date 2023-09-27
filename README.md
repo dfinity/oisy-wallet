@@ -8,11 +8,13 @@
 <br/>
 <br/>
 
-[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/dfinity/ic-eth-wallet/build.yml?logo=github&label=Build%20and%20test)](https://github.com/dfinity/ic-eth-wallet/actions/workflows/build.yml)
-<a href="https://github.com/dfinity/ic-eth-wallet/releases"><img src="https://img.shields.io/github/downloads/dfinity/ic-eth-wallet/total?label=downloads&logo=github" alt="GitHub all releases"></a>
+[![Internet Computer portal](https://img.shields.io/badge/Internet-Computer-grey?logo=internet%20computer)](https://internetcomputer.org)
+[![GitHub Frontend Checks Workflow Status](https://img.shields.io/github/actions/workflow/status/dfinity/oisy-wallet/checks.yml?logo=github&label=Frontend%20checks)](https://github.com/dfinity/oisy-wallet/actions/workflows/checks.yml)
 [![Chat on Discord](https://img.shields.io/badge/chat-Discord-lightgrey?logo=Discord&style=flat-square)](https://discord.gg/E9FxceAg2j)
 
 </div>
+
+---
 
 ## What is the Oisy Wallet
 

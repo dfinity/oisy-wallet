@@ -52,6 +52,12 @@ use crate::{
     },
     utils::read_state,
 };
+use serde_bytes::ByteBuf;
+use shared::http::{HttpRequest, HttpResponse};
+use shared::metrics::get_metrics;
+use shared::std_canister_status;
+
+type CustomResult<T> = Result<T, CanisterError>;
 
 thread_local! {
     pub static STATE: RefCell<Option<State>> = RefCell::default();
@@ -78,6 +84,26 @@ fn post_upgrade() {
         let (s,) = stable_restore().expect("failed to decode state");
         *cell.borrow_mut() = s;
     });
+}
+
+/// Processes external HTTP requests.
+#[query]
+pub fn http_request(request: HttpRequest) -> HttpResponse {
+    let parts: Vec<&str> = request.url.split('?').collect();
+    match parts[0] {
+        "/metrics" => get_metrics(),
+        _ => HttpResponse {
+            status_code: 404,
+            headers: vec![],
+            body: ByteBuf::from(String::from("Not found.")),
+        },
+    }
+}
+
+/// API method to get cycle balance and burn rate.
+#[update]
+async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
+    std_canister_status::get_canister_status_v2().await
 }
 
 /// Add codes generated offline
@@ -199,6 +225,67 @@ fn get_state_managers() -> CustomResult<HashMap<Principal, PrincipalState>> {
 #[update(guard = "caller_is_admin")]
 fn set_total_tokens(total_tokens: u64) -> CustomResult<()> {
     logic::set_total_tokens(total_tokens)
+}
+
+/// Get the logs starting from a specific index
+#[query(guard = "caller_is_admin")]
+fn get_logs(index: u64) -> CustomResult<Vec<(usize, String)>> {
+    check_if_killed()?;
+
+    read_state(|state| Ok(state.logs.get_logs(index)))
+}
+
+/// Get the total amount of code generated, the total amount of code redeemed,
+/// the total amount of code left, the total amount of token left, the total amount of transaction done,
+/// and the number of airdrop transaction waiting to happen
+#[query(guard = "caller_is_admin")]
+fn get_stats() -> CustomResult<String> {
+    check_if_killed()?;
+
+    read_state(|state| {
+        let total_code_generated = state
+            .principals_managers
+            .iter()
+            .map(|(_, principal_state)| principal_state.codes_generated)
+            .sum::<u64>();
+
+        // get number of redeemed codes by counting the airdrop references in the eth transactions
+        let total_code_redeemed = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| eth_address_amount.reward_type == RewardType::Airdrop)
+            .count() as u64;
+
+        let total_referral = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| eth_address_amount.reward_type == RewardType::Referral)
+            .count() as u64;
+
+        let total_code_left = state.pre_generated_codes.len() as u64;
+
+        // compute the amount of tokens distributed in the airdrop
+        let total_tokens_left = state.total_tokens;
+
+        let total_transaction_done = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| eth_address_amount.transferred)
+            .count() as u64;
+
+        let total_airdrop_transaction_waiting = state
+            .airdrop_reward
+            .iter()
+            .filter(|eth_address_amount| !eth_address_amount.transferred)
+            .count() as u64;
+
+        // Format the response as a string
+        let resp = format!(
+                "total_code_generated: {total_code_generated}, total airdrop code redeemed: {total_code_redeemed}, total referral: {total_referral}, total_code_left: {total_code_left}, total_tokens_left: {total_tokens_left}, total_transaction_done: {total_transaction_done}, total_airdrop_transaction_waiting: {total_airdrop_transaction_waiting}",
+            );
+
+        Ok(resp)
+    })
 }
 
 // automatically generates the candid file

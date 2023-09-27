@@ -11,7 +11,10 @@ dfx canister call airdrop get_state_parameters --network ic
 dfx canister call airdrop get_state_rewards --network ic
 
 # Get admins
-dfx canister call airdrop get_state_admins --network ic
+dfx canister call airdrop get_state_admins --network ic  | sed 's/"; "/"\n"/g' | sed 's/^.*vec { "//' | sed 's/";.*$//'
 
 # Get managers
-dfx canister call airdrop get_state_managers --network ic
+dfx canister call airdrop get_state_managers --network ic | sed 's/"; "/"\n"/g' | sed 's/^.*vec { "//' | sed 's/";.*$//'
+
+# Get stats
+dfx canister call airdrop get_stats --network ic

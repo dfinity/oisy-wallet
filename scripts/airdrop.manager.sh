@@ -28,6 +28,13 @@ USERS=(
     "uekbi-m7qsr-3zuav-taupw-e53m2-lpxws-qjhld-dorr5-asqve-zuuzd-rqe"
     "r2p3m-ky6ga-o2vxt-cdopl-spoof-nurjr-xf5yj-3t5cp-ogpap-ca3ur-gae"
     "6ojwf-vtptf-nfq3o-keopb-z5kow-sn74y-wdlgl-ulr7s-vnpgs-m2sls-pqe"
+    "5rw7j-sdrkn-tnihn-3sbec-ry3rg-ctupb-idlle-wvmix-lilyd-cw34i-qqe"
+    "ywsjp-vv2sv-x2c56-aiz3h-n32yq-4xieg-kcrsc-fkvnk-tfnyd-uisfy-hae"
+    "mxc4i-5e5bk-ixse6-2ps76-guy27-3t5tn-oa66r-tyval-pgw5m-krgn2-3ae"
+    "p2qa7-2gf5p-ytm2e-y6kzz-wjrt5-kdqim-jmmsb-6oh53-juvjm-3qc36-wqe"
+    "qx7h4-rswaz-hr5h5-ghuwq-ymili-nfzat-5kdpq-h5xsf-m7j7i-eap2a-mqe"
+    "c44p3-dg4uz-wrmox-w23mt-ivrqj-szelc-ow2oj-tycht-jnblo-alqhf-aae"
+    "gunpy-gpv7l-7bvnj-djpvd-6dc37-tb4cr-qod3w-cuinm-ng77a-dgrqj-2qe"
 )
 
 case $ENV in

@@ -1,5 +1,10 @@
-use std::{collections::{HashMap, HashSet}, ops::Deref};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::{Display, Formatter},
+    ops::Deref,
+};
 
+use crate::utils::format_timestamp_to_gmt;
 use candid::{types::principal::Principal, CandidType};
 use serde::{Deserialize, Serialize};
 
@@ -28,6 +33,8 @@ pub struct State {
     pub maximum_depth: u64,
     // number of children per code
     pub numbers_of_children: u64,
+    // our simple logs
+    pub logs: Logs,
 }
 
 impl Default for State {
@@ -45,7 +52,56 @@ impl Default for State {
             token_per_person: 0,
             maximum_depth: 0,
             numbers_of_children: 0,
+            logs: Logs::new(),
         }
+    }
+}
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
+pub struct Logs {
+    logs: Vec<String>,
+}
+
+impl Logs {
+    pub fn new() -> Self {
+        Self { logs: Vec::new() }
+    }
+
+    /// Given the function name, the line number and the message will append to our "log" datastructure
+    pub fn add(&mut self, function_name: &str, line: u32, message: String) {
+        // record time
+
+        // Get time in nanoseconds from IC
+        #[cfg(not(test))]
+        let now = ic_cdk::api::time();
+
+        // Get time in nanoseconds from system
+        #[cfg(test)]
+        let now = time::OffsetDateTime::now_utc().unix_timestamp_nanos() as u64;
+
+        let datetime = format_timestamp_to_gmt(&now);
+
+        // convert now to date time
+        let log = format!("{} - {}()#{} - {}", datetime, function_name, line, message);
+
+        self.logs.push(log);
+    }
+
+    /// Return the logs
+    pub fn get_logs(&self, index: u64) -> Vec<(usize, String)> {
+        // make sure we don't go out of bounds
+        if index >= self.logs.len() as u64 {
+            // TODO this should really return an error
+            return Vec::new();
+        }
+
+        // return (index, log)
+        self.logs
+            .iter()
+            .enumerate()
+            // we do not use skip because we want to keep the index
+            .filter(|(i, _)| *i >= index as usize)
+            .map(|(i, log)| (i, log.clone()))
+            .collect()
     }
 }
 
@@ -71,7 +127,6 @@ impl Deref for AirdropAmount {
         &self.0
     }
 }
-
 
 impl From<AirdropAmount> for AirdropAmountERC20 {
     fn from(amount: AirdropAmount) -> Self {
@@ -220,5 +275,14 @@ pub trait ToCode {
 impl ToCode for String {
     fn to_code(&self) -> Code {
         Code(self.clone())
+    }
+}
+
+impl Display for RewardType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RewardType::Airdrop => write!(f, "Airdrop"),
+            RewardType::Referral => write!(f, "Referral"),
+        }
     }
 }

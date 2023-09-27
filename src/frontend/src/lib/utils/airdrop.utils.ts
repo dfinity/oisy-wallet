@@ -12,6 +12,14 @@ export const allAirdropInvitesRedeemed = (airdrop: Info | undefined): boolean =>
 	hasAirdropInvites(airdrop) &&
 	(fromNullable(airdrop?.children ?? []) ?? []).find(([_, state]) => !state) === undefined;
 
+export const countAirdropInvitesRedeemed = (airdrop: Info | undefined): number =>
+	hasAirdropInvites(airdrop)
+		? (fromNullable(airdrop?.children ?? []) ?? []).reduce(
+				(count, [_, state]) => count + (state ? 1 : 0),
+				0
+		  )
+		: 0;
+
 export const isAirdropTransferred = (airdrop: Info | undefined): boolean =>
 	airdrop?.tokens_transferred === true;
 

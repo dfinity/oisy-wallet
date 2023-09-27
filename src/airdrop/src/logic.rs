@@ -57,6 +57,12 @@ pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
             // only add the code if it does not already exist
             if !state.codes.contains_key(&Code(code.clone())) {
                 state.pre_generated_codes.push(Code(code));
+
+                state.logs.add(
+                    stringify!(add_codes),
+                    line!(),
+                    format!("generated {}", &code),
+                );
             }
         }
         Ok(())
@@ -66,6 +72,12 @@ pub fn add_codes(codes: Vec<String>) -> CustomResult<()> {
 pub fn add_admin(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| {
         state.principals_admins.insert(principal);
+
+        state.logs.add(
+            stringify!(add_admin),
+            line!(),
+            format!("added admin {}", &principal.to_string()),
+        );
 
         Ok(())
     })
@@ -84,6 +96,12 @@ pub fn add_manager(principal: Principal) -> CustomResult<()> {
             };
             state.principals_managers.insert(principal, principal_state);
 
+            state.logs.add(
+                stringify!(add_manager),
+                line!(),
+                format!("added manager {}", &principal.to_string()),
+            );
+
             Ok(())
         }
     })
@@ -92,8 +110,24 @@ pub fn add_manager(principal: Principal) -> CustomResult<()> {
 /// Remove a given principal from the airdrop
 pub fn remove_principal_airdrop(principal: Principal) -> CustomResult<()> {
     mutate_state(|state| match state.principals_users.remove(&principal) {
-        Some(_) => Ok(()),
-        None => Err(CanisterError::PrincipalNotParticipatingInAirdrop),
+        Some(_) => {
+            state.logs.add(
+                stringify!(remove_principal_airdrop),
+                line!(),
+                format!("removed principal {}", &principal.to_string()),
+            );
+
+            Ok(())
+        }
+        None => {
+            state.logs.add(
+                stringify!(remove_principal_airdrop),
+                line!(),
+                format!("principal {} not found", &principal.to_string()),
+            );
+
+            Err(CanisterError::PrincipalNotParticipatingInAirdrop)
+        }
     })
 }
 
@@ -123,6 +157,12 @@ pub fn generate_code(caller_principal: Principal) -> CustomResult<CodeInfo> {
 
         principal_state.codes_generated += 1;
 
+        state.logs.add(
+            stringify!(generate_code),
+            line!(),
+            format!("{} generated {}", &caller_principal.to_string(), &code.0),
+        );
+
         Ok(CodeInfo::new(
             code,
             principal_state.codes_generated,
@@ -131,27 +171,57 @@ pub fn generate_code(caller_principal: Principal) -> CustomResult<CodeInfo> {
     })
 }
 
-pub fn _redeem_code(code: Code, caller_principal: Principal, eth_address: EthereumAddress) -> CustomResult<Info> {
+pub fn _redeem_code(
+    code: Code,
+    caller_principal: Principal,
+    eth_address: EthereumAddress,
+) -> CustomResult<Info> {
     check_if_killed()?;
 
     mutate_state(|state| {
         // Check if the given principal has redeemed any code yet
         if state.principals_users.contains_key(&caller_principal) {
+            state.logs.add(
+                stringify!(redeem_code),
+                line!(),
+                format!("{} already redeemed a code", &caller_principal.to_string()),
+            );
+
             return Err(CanisterError::CannotRegisterMultipleTimes);
         }
 
         // Check if code exists
         if !state.codes.contains_key(&code) {
+            state.logs.add(
+                stringify!(redeem_code),
+                line!(),
+                format!("{} code not found", &code.0),
+            );
             return Err(CanisterError::CodeNotFound);
         }
 
         // Check if code is already redeemed - unwrap is safe as we have checked the code exists
         if state.codes[&code].redeemed {
+            state.logs.add(
+                stringify!(redeem_code),
+                line!(),
+                format!("{} code already redeemed", &code.0),
+            );
+
             return Err(CanisterError::CodeAlreadyRedeemed);
         }
 
         // Check if redeemer is a manager
         if state.principals_managers.contains_key(&caller_principal) {
+            state.logs.add(
+                stringify!(redeem_code),
+                line!(),
+                format!(
+                    "{} managers cannot participate in the airdrop",
+                    &caller_principal.to_string()
+                ),
+            );
+
             return Err(CanisterError::ManagersCannotParticipateInTheAirdrop);
         }
 
@@ -171,7 +241,7 @@ pub fn _redeem_code(code: Code, caller_principal: Principal, eth_address: Ethere
                     state,
                     parent_eth_address.clone(),
                     AirdropAmount(state.token_per_person / 4),
-                    RewardType::Referral,
+                    state::RewardType::Referral,
                 )?;
             }
         }
@@ -192,10 +262,20 @@ pub fn _redeem_code(code: Code, caller_principal: Principal, eth_address: Ethere
             state,
             eth_address.clone(),
             AirdropAmount(state.token_per_person / 4),
-            RewardType::Airdrop,
+            state::RewardType::Airdrop,
         )?;
 
         let depth = state.codes.get(&code).unwrap().depth;
+        state.logs.add(
+            stringify!(redeem_code),
+            line!(),
+            format!(
+                "{} redeemed {} at depth {}",
+                &caller_principal.to_string(),
+                &code.0,
+                depth.clone()
+            ),
+        );
 
         // Generate children codes only if we are below the maximum depth
         let children_codes = if state.codes.get(&code).unwrap().depth < state.maximum_depth {
@@ -220,6 +300,16 @@ pub fn _redeem_code(code: Code, caller_principal: Principal, eth_address: Ethere
         } else {
             None
         };
+
+        state.logs.add(
+            stringify!(redeem_code),
+            line!(),
+            format!(
+                "{} generated children codes - children: {:?}",
+                &caller_principal.to_string(),
+                children_codes
+            ),
+        );
 
         // return Info
         Ok(Info::new(
@@ -288,6 +378,12 @@ pub fn get_code(caller_principal: Principal) -> CustomResult<Info> {
 pub fn kill_canister() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = true;
+
+        state.logs.add(
+            stringify!(kill_canister),
+            line!(),
+            format!("killed canister"),
+        );
     });
 
     Ok(())
@@ -296,6 +392,12 @@ pub fn kill_canister() -> CustomResult<()> {
 pub fn bring_caninster_back_to_life() -> CustomResult<()> {
     mutate_state(|state| {
         state.killed = false;
+
+        state.logs.add(
+            stringify!(bring_caninster_back_to_life),
+            line!(),
+            format!("brought canister back to life"),
+        );
     });
     Ok(())
 }
@@ -338,6 +440,12 @@ pub fn put_airdrop(indexes: Vec<Index>) -> CustomResult<()> {
             match state.airdrop_reward.get_mut(index.0 as usize) {
                 Some(tx) => {
                     tx.transferred = true;
+
+                    state.logs.add(
+                        stringify!(put_airdrop),
+                        line!(),
+                        format!("marked airdrop as transferred for {}", &tx.eth_address.0),
+                    );
                 }
                 None => return Err(CanisterError::TransactionUnkown),
             }
@@ -363,6 +471,10 @@ pub fn clean_up() -> CustomResult<()> {
             .principals_managers
             .retain(|principal, _| managers.insert(principal.clone()));
 
+        state
+            .logs
+            .add(stringify!(clean_up), line!(), format!("cleaned up"));
+
         Ok(())
     })
 }
@@ -374,6 +486,12 @@ pub fn remove_managers(principals: Vec<Principal>) -> CustomResult<()> {
     mutate_state(|state| {
         for principal in principals {
             state.principals_managers.remove(&principal);
+
+            state.logs.add(
+                stringify!(remove_managers),
+                line!(),
+                format!("removed manager {}", &principal.to_string()),
+            );
         }
 
         Ok(())
@@ -387,6 +505,12 @@ pub fn remove_admins(principals: Vec<Principal>) -> CustomResult<()> {
     mutate_state(|state| {
         for principal in principals {
             state.principals_admins.remove(&principal);
+
+            state.logs.add(
+                stringify!(remove_admins),
+                line!(),
+                format!("removed admin {}", &principal.to_string()),
+            );
         }
 
         Ok(())
@@ -433,6 +557,13 @@ pub fn set_total_tokens(total_tokens: u64) -> CustomResult<()> {
 
     mutate_state(|state| {
         state.total_tokens = total_tokens;
+
+        state.logs.add(
+            stringify!(set_total_tokens),
+            line!(),
+            format!("set total tokens to {}", total_tokens),
+        );
+
         Ok(())
     })
 }

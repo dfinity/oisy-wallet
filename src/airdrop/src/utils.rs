@@ -1,11 +1,14 @@
 use candid::Principal;
 use ic_cdk::{api::call::CallResult, call, caller};
+use time::{format_description, Duration, OffsetDateTime};
 
 use crate::{
     state::{EthereumAddress, EthereumTransaction, RewardType, State},
     AirdropAmount,
     error::CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress, NoTokensLeft},
     Code, error::CustomResult, STATE,
+    CanisterError::{CanisterKilled, NoMoreCodes, NoTokensLeft, UnknownOisyWalletAddress},
+    Code, CustomResult,
 };
 
 pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
@@ -50,7 +53,18 @@ pub fn register_principal_with_eth_address(
 ) {
     state
         .principals_users
-        .insert(principal, (code, eth_address));
+        .insert(principal, (code.clone(), eth_address.clone()));
+
+    state.logs.add(
+        stringify!(register_principal_with_eth_address),
+        line!(),
+        format!(
+            "Registered principal {} with code {:?} and eth address {:?}",
+            principal.to_string(),
+            code,
+            eth_address
+        ),
+    );
 }
 
 /// Add user to the list of users to send tokens to
@@ -59,10 +73,15 @@ pub fn add_user_to_airdrop_reward(
     eth_address: EthereumAddress,
     amount: AirdropAmount,
     reward_type: RewardType,
-) -> CustomResult<()>{
-
+) -> CustomResult<()> {
     // check that we have enough tokens left
     if state.total_tokens <= amount.0 {
+        state.logs.add(
+            stringify!(add_user_to_airdrop_reward),
+            line!(),
+            format!("Not enough tokens left to add {:?} to the airdrop list - {} WIPC - reward type - {}", eth_address, amount.0, reward_type),
+        );
+
         return Err(NoTokensLeft);
     }
 
@@ -70,11 +89,20 @@ pub fn add_user_to_airdrop_reward(
     state.total_tokens -= *amount;
 
     state.airdrop_reward.push(EthereumTransaction::new(
-        eth_address,
-        amount,
+        eth_address.clone(),
+        amount.clone(),
         false,
-        reward_type,
+        reward_type.clone(),
     ));
+
+    state.logs.add(
+        stringify!(add_codes),
+        line!(),
+        format!(
+            "Added {:?} to the airdrop list - {} WIPC - reward type - {}",
+            eth_address, amount.0, reward_type
+        ),
+    );
 
     Ok(())
 }
@@ -85,4 +113,19 @@ pub fn get_pre_codes(state: &mut State) -> CustomResult<Code> {
         Some(code) => Ok(code),
         None => Err(NoMoreCodes),
     }
+}
+
+/// https://forum.dfinity.org/t/day-number-of-the-year-from-timestamps-ic-cdk-time-datetime/22817
+pub fn format_timestamp_to_gmt(timestamp: &u64) -> String {
+    let nanoseconds = *timestamp as i64;
+    let seconds = nanoseconds / 1_000_000_000;
+    let nanos_remainder = nanoseconds % 1_000_000_000;
+
+    let date = OffsetDateTime::from_unix_timestamp(seconds).unwrap()
+        + Duration::nanoseconds(nanos_remainder as i64);
+
+    // Format the date to GMT
+    let format =
+        format_description::parse("[year]/[month]/[day] [hour]:[minute]:[second]").unwrap();
+    date.format(&format).unwrap()
 }
