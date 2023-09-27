@@ -79,6 +79,6 @@ else
   })"
 fi
 
-#"$(git rev-parse --show-toplevel)/scripts/airdrop.generate-codes.sh" --code-length="$NUMBER_OF_CHARACTERS_PER_CODE" --number-of-codes="$NUMBER_OF_CODES_TO_GENERATE"
-#"$(git rev-parse --show-toplevel)/scripts/airdrop.manager.sh"
-#"$(git rev-parse --show-toplevel)/scripts/airdrop.admin.sh"
+"$(git rev-parse --show-toplevel)/scripts/airdrop.generate-codes.sh" --code-length="$NUMBER_OF_CHARACTERS_PER_CODE" --number-of-codes="$NUMBER_OF_CODES_TO_GENERATE"
+"$(git rev-parse --show-toplevel)/scripts/airdrop.manager.sh"
+"$(git rev-parse --show-toplevel)/scripts/airdrop.admin.sh"
