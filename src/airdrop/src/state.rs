@@ -155,7 +155,7 @@ impl Deref for AirdropAmountERC20 {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
 pub struct CodeInfo {
     pub code: Code,
     codes_generated: u64,

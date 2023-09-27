@@ -1,4 +1,4 @@
-use std::{collections::HashSet, path::Path, process::Command};
+use std::{collections::HashSet, path::Path};
 
 use candid::types::principal::Principal;
 
@@ -6,9 +6,9 @@ use crate::{
     error::CanisterError,
     logic::{
         _redeem_code, add_admin, add_codes, add_manager, bring_caninster_back_to_life,
-        generate_code, init, kill_canister,
+        generate_code, init, kill_canister, put_airdrop, remove_principal_airdrop,
     },
-    state::{Arg, Code, EthereumAddress, InitArg, ToCode},
+    state::{Arg, Code, EthereumAddress, InitArg, ToCode, Index},
     utils::{mutate_state, read_state},
 };
 
@@ -268,9 +268,36 @@ fn test_redeem_code_with_new_principal() {
     // Try redeeming a code that does not exist
     let code = "this-code-does-not-exist".to_string().to_code();
     assert_eq!(
-        _redeem_code(code.clone(), another_user_principal, eth_address),
+        _redeem_code(code.clone(), another_user_principal, eth_address.clone()),
         Err(CanisterError::CodeNotFound),
         "Code should not be found"
+    );
+
+    // Test a user cannot register multiple times
+    let code_info = generate_code(manager_principal).unwrap();
+    // generate a new user
+    let user_principal = test_state.pick_user_principal();
+    _redeem_code(code_info.code.clone(), user_principal, eth_address.clone()).unwrap();
+    assert_eq!(
+        _redeem_code(code_info.code.clone(), user_principal, eth_address.clone()),
+        Err(CanisterError::CannotRegisterMultipleTimes),
+        "A user cannot register multiple times"
+    );
+
+    // Test managers cannot participate in the airdrop
+    let code_info = generate_code(manager_principal).unwrap();
+    assert_eq!(
+        _redeem_code(code_info.code.clone(), manager_principal, eth_address.clone()),
+        Err(CanisterError::ManagersCannotParticipateInTheAirdrop),
+        "Managers cannot participate in the airdrop"
+    );
+
+    // Test principal not participating in airdrop
+    let user_principal = Principal::anonymous();
+    assert_eq!(
+        remove_principal_airdrop(user_principal),
+        Err(CanisterError::PrincipalNotParticipatingInAirdrop),
+        "Principal not participating in airdrop"
     );
 }
 
@@ -287,6 +314,14 @@ fn test_kill_canister() {
     read_state(|state| {
         assert_eq!(state.killed, true);
     });
+
+    // make sure we get returned the error type
+    assert_eq!(
+        generate_code(test_state.pick_manager()),
+        Err(CanisterError::CanisterKilled),
+        "Should not be able to generate a code when the canister is killed"
+    );
+
 
     // bring canister back to life
     bring_caninster_back_to_life().unwrap();
@@ -353,4 +388,69 @@ fn test_no_tokens_left() {
         Err(CanisterError::NoTokensLeft),
         "Should not be able to redeem a code when there are no tokens left"
     );
+}
+
+// Test we actually return no more codes when we run out of codes
+// TODO  test the same thing happens when  generated children codes
+#[test]
+fn test_no_more_codes() {
+    let mut test_state = TestState::new();
+    test_state.set_default_state();
+
+    let manager_principal = test_state.pick_manager();
+
+    let total_tokens = read_state(|state| state.total_tokens);
+
+    let reward_per_user = read_state(|state| state.token_per_person);
+
+    let rewards_available = total_tokens / (reward_per_user / 4);
+
+    // print how much rewards possible we currently have
+    println!("Rewards available {}", rewards_available);
+
+    // truncate our list of pre-generated codes to be less than the number of rewards available
+    mutate_state(|state| {
+        let pre_generated_codes_len = state.pre_generated_codes.len() - rewards_available as usize;
+
+        // print how much pre generated codes we have
+        println!("Pre generated codes {}", state.pre_generated_codes.len());
+
+        let _ = state
+            .pre_generated_codes
+            .drain(0..pre_generated_codes_len);
+
+        println!("Pre generated codes {} - after trunkation", state.pre_generated_codes.len());
+
+    });
+
+    // generate enough code to reach rewards available
+    for _ in 0..rewards_available {
+        generate_code(manager_principal).unwrap();
+    }
+
+    // this one should return no more codes available
+    assert_eq!(
+        generate_code(manager_principal),
+        Err(CanisterError::NoMoreCodes),
+        "Should not be able to generate a code when there are no more codes available"
+    );
+}
+
+// Test the interaction from the script that fills in the airdrop amount
+#[test]
+fn test_script_airdrop_transactions() {
+    let mut test_state = TestState::new();
+    test_state.set_default_state();
+
+
+    // put airdrop that does not exist
+    let indicies = vec![Index(1), Index(2), Index(3), Index(4), Index(5)];
+
+    assert_eq!(
+        put_airdrop(indicies),
+        // TODO should we return the actual indices that caused the issue?
+        Err(CanisterError::TransactionUnkown),
+        "Should not be able to put airdrop that does not exist"
+    );
+
 }
