@@ -6,10 +6,10 @@ use crate::{
     error::CanisterError,
     logic::{
         add_admin, add_codes, add_manager, bring_caninster_back_to_life, init, kill_canister,
-        _redeem_code,
+        _redeem_code, generate_code
     },
     state::{Arg, InitArg, ToCode, EthereumAddress, Code, },
-    utils::{read_state, mutate_state}, generate_code,
+    utils::{read_state, mutate_state}
 };
 
 static PATH_PREFIX: &str = "src/tests";
@@ -191,11 +191,12 @@ fn test_redeem_code_with_new_principal() {
 
     // let code = test_state.pick_code().to_code();
 
-    // generate code
-    let code_info = generate_code().unwrap();
-
     let user_principal = test_state.pick_user_principal();
     let another_user_principal = test_state.pick_user_principal();
+
+    // generate code
+    let code_info = generate_code(user_principal).unwrap();
+
 
     let eth_address = EthereumAddress("Ox0934093434".to_string());
 
