@@ -5,11 +5,11 @@ use candid::types::principal::Principal;
 use crate::{
     error::CanisterError,
     logic::{
-        add_admin, add_codes, add_manager, bring_caninster_back_to_life, init, kill_canister,
-        _redeem_code, generate_code
+        _redeem_code, add_admin, add_codes, add_manager, bring_caninster_back_to_life,
+        generate_code, init, kill_canister,
     },
-    state::{Arg, InitArg, ToCode, EthereumAddress, Code, },
-    utils::{read_state, mutate_state}
+    state::{Arg, Code, EthereumAddress, InitArg, ToCode},
+    utils::{mutate_state, read_state},
 };
 
 static PATH_PREFIX: &str = "src/tests";
@@ -23,7 +23,7 @@ struct TestState {
 }
 
 fn read_principals_from_file(path: &str) -> Vec<Principal> {
-    let p = std::fs::read_to_string(Path::new(PATH_PREFIX).join("admins.txt")).unwrap();
+    let p = std::fs::read_to_string(Path::new(PATH_PREFIX).join(path)).unwrap();
     p.split("\n")
         .filter_map(|s| Principal::from_text(s).ok())
         .collect()
@@ -33,7 +33,16 @@ impl TestState {
     /// Init variables
     fn new() -> Self {
         let codes = std::fs::read_to_string(Path::new(PATH_PREFIX).join("code.txt")).unwrap();
-        let codes: Vec<String> = codes.split("\n").map(|s| s.to_string()).collect();
+        let codes: Vec<String> = codes
+            .split("\n")
+            .filter_map(|s| {
+                if s.is_empty() {
+                    None
+                } else {
+                    Some(s.to_string())
+                }
+            })
+            .collect();
 
         // Read admins from file
         let principal_admins = read_principals_from_file("admins.txt");
@@ -42,7 +51,7 @@ impl TestState {
         let principal_managers = read_principals_from_file("managers.txt");
 
         // Read users from file
-         let principal_users = read_principals_from_file("users.txt");
+        let principal_users = read_principals_from_file("users.txt");
 
         Self {
             principal_admins,
@@ -81,6 +90,8 @@ impl TestState {
     /// Pick a user principal at random
     fn pick_user_principal(&mut self) -> Principal {
         let index = rand::random::<usize>() % self.principal_users.len();
+        dbg!(self.principal_users[index].clone().to_string());
+
         self.principal_users[index].clone()
     }
 
@@ -140,7 +151,7 @@ fn test_add_codes() {
     // check that the codes have been added
     mutate_state(|state| {
         assert_eq!(state.pre_generated_codes.len(), 1003);
-        assert_eq!(state.pre_generated_codes.pop(),  Some("code2".to_code()));
+        assert_eq!(state.pre_generated_codes.pop(), Some("code2".to_code()));
         assert_eq!(state.pre_generated_codes.pop(), Some("code1".to_code()));
     });
 }
@@ -191,12 +202,13 @@ fn test_redeem_code_with_new_principal() {
 
     // let code = test_state.pick_code().to_code();
 
+    let manager_principal = test_state.pick_manager();
+
     let user_principal = test_state.pick_user_principal();
     let another_user_principal = test_state.pick_user_principal();
 
     // generate code
-    let code_info = generate_code(user_principal).unwrap();
-
+    let code_info = generate_code(manager_principal).unwrap();
 
     let eth_address = EthereumAddress("Ox0934093434".to_string());
 
@@ -218,7 +230,11 @@ fn test_redeem_code_with_new_principal() {
 
     // try registering with the same code again
     assert_eq!(
-        _redeem_code(another_code.clone(), user_principal, eth_address.clone()),
+        _redeem_code(
+            another_code.clone(),
+            another_user_principal,
+            eth_address.clone()
+        ),
         Err(CanisterError::CodeAlreadyRedeemed),
         "A code can only be redeemed once"
     );

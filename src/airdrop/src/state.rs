@@ -83,6 +83,10 @@ impl Logs {
         // convert now to date time
         let log = format!("{} - {}()#{} - {}", datetime, function_name, line, message);
 
+        // if this a test we print the logs
+        #[cfg(test)]
+        println!("{}", log);
+
         self.logs.push(log);
     }
 
