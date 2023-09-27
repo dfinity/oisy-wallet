@@ -278,6 +278,12 @@ impl ToCode for String {
     }
 }
 
+impl ToCode for &str {
+    fn to_code(&self) -> Code {
+        Code(self.to_string())
+    }
+}
+
 impl Display for RewardType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {

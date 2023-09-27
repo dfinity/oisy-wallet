@@ -7,8 +7,6 @@ use crate::{
     AirdropAmount,
     error::CanisterError::{CanisterKilled, NoMoreCodes, UnknownOisyWalletAddress, NoTokensLeft},
     Code, error::CustomResult, STATE,
-    CanisterError::{CanisterKilled, NoMoreCodes, NoTokensLeft, UnknownOisyWalletAddress},
-    Code, CustomResult,
 };
 
 pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
@@ -129,3 +127,4 @@ pub fn format_timestamp_to_gmt(timestamp: &u64) -> String {
         format_description::parse("[year]/[month]/[day] [hour]:[minute]:[second]").unwrap();
     date.format(&format).unwrap()
 }
+

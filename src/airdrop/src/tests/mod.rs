@@ -6,10 +6,10 @@ use crate::{
     error::CanisterError,
     logic::{
         add_admin, add_codes, add_manager, bring_caninster_back_to_life, init, kill_canister,
-        redeem_code, _redeem_code,
+        _redeem_code,
     },
-    state::{Arg, InitArg, ToCode, EthereumAddress, Code},
-    utils::read_state, generate_code,
+    state::{Arg, InitArg, ToCode, EthereumAddress, Code, },
+    utils::{read_state, mutate_state}, generate_code,
 };
 
 static PATH_PREFIX: &str = "src/tests";
@@ -138,7 +138,7 @@ fn test_add_codes() {
     add_codes(codes).unwrap();
 
     // check that the codes have been added
-    read_state(|state| {
+    mutate_state(|state| {
         assert_eq!(state.pre_generated_codes.len(), 1003);
         assert_eq!(state.pre_generated_codes.pop(),  Some("code2".to_code()));
         assert_eq!(state.pre_generated_codes.pop(), Some("code1".to_code()));
