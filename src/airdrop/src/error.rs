@@ -17,8 +17,6 @@ pub enum CanisterError {
     CodeAlreadyRedeemed,
     /// Cannot register multiple times
     CannotRegisterMultipleTimes,
-    /// This code does not have any children assicated with it
-    NoChildrenForCode,
     /// This principal does not have any code associated with it
     NoCodeForII,
     /// Maximum depth reached
@@ -47,7 +45,6 @@ impl fmt::Display for CanisterError {
             CanisterError::CodeNotFound => write!(f, "Code not found"),
             CanisterError::CodeAlreadyRedeemed => write!(f, "Code already redeemed"),
             CanisterError::CannotRegisterMultipleTimes => write!(f, "Cannot register multiple times"),
-            CanisterError::NoChildrenForCode => write!(f, "This code does not have any children assicated with it"),
             CanisterError::NoCodeForII => write!(f, "This principal does not have any code associated with it"),
             CanisterError::MaximumDepthReached => write!(f, "Maximum depth reached"),
             CanisterError::NoMoreCodes => write!(f, "No more codes left"),

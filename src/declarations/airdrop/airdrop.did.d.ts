@@ -4,7 +4,6 @@ import type { Principal } from '@dfinity/principal';
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type CanisterError =
 	| { PrincipalNotParticipatingInAirdrop: null }
-	| { NoChildrenForCode: null }
 	| { CannotRegisterMultipleTimes: null }
 	| { NoTokensLeft: null }
 	| { CanisterKilled: null }
