@@ -27,13 +27,13 @@
 	>
 	<div id="verification" class="font-normal mb-2 break-words">
 		{#if validation === 'VALID'}
-			Domain validation passed.
+			The validation of the proposer's domain passed.
 		{:else if validation === 'INVALID'}
-			This website has a domain that does not match the sender of the request.
+			The domain of the proposer's website does not match the sender of the request.
 		{:else if validation?.toUpperCase() === CONTEXT_VALIDATION_ISSCAM}
-			This website is flagged as unsafe.
+			The proposer's website is flagged as unsafe.
 		{:else}
-			This domain cannot be verified.
+			The domain of the proposer cannot be verified.
 		{/if}
 	</div>
 </div>
