@@ -34,6 +34,7 @@ USERS=(
     "qx7h4-rswaz-hr5h5-ghuwq-ymili-nfzat-5kdpq-h5xsf-m7j7i-eap2a-mqe"
     "c44p3-dg4uz-wrmox-w23mt-ivrqj-szelc-ow2oj-tycht-jnblo-alqhf-aae"
     "gunpy-gpv7l-7bvnj-djpvd-6dc37-tb4cr-qod3w-cuinm-ng77a-dgrqj-2qe"
+    "qu5ro-tt322-qgnun-go2hb-pfamm-65bh2-qq73q-c7xpm-gh7ki-2ztrz-cae"
 )
 
 case $ENV in
