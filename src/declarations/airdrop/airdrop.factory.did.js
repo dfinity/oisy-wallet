@@ -10,7 +10,6 @@ export const idlFactory = ({ IDL }) => {
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const CanisterError = IDL.Variant({
 		PrincipalNotParticipatingInAirdrop: IDL.Null,
-		NoChildrenForCode: IDL.Null,
 		CannotRegisterMultipleTimes: IDL.Null,
 		NoTokensLeft: IDL.Null,
 		CanisterKilled: IDL.Null,

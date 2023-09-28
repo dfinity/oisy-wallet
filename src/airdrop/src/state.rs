@@ -83,6 +83,10 @@ impl Logs {
         // convert now to date time
         let log = format!("{} - {}()#{} - {}", datetime, function_name, line, message);
 
+        // if this a test we print the logs
+        #[cfg(test)]
+        println!("{}", log);
+
         self.logs.push(log);
     }
 
@@ -151,9 +155,9 @@ impl Deref for AirdropAmountERC20 {
     }
 }
 
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
 pub struct CodeInfo {
-    code: Code,
+    pub code: Code,
     codes_generated: u64,
     codes_redeemed: u64,
 }
@@ -169,15 +173,15 @@ impl CodeInfo {
 }
 
 /// Returned when front-end is asking for information
-#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType)]
+#[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, CandidType, Debug)]
 pub struct Info {
     /// Next three fields should all be unique per user
-    code: Code,
-    tokens_transferred: bool,
-    principal: Principal,
-    ethereum_address: EthereumAddress,
+    pub code: Code,
+    pub tokens_transferred: bool,
+    pub principal: Principal,
+    pub ethereum_address: EthereumAddress,
     /// Maps a Code to whether it has been redeemed
-    children: Option<Vec<(Code, bool)>>,
+    pub children: Option<Vec<(Code, bool)>>,
 }
 
 impl Info {
@@ -266,6 +270,22 @@ pub struct Index(pub u64);
 pub enum RewardType {
     Airdrop,
     Referral,
+}
+
+pub trait ToCode {
+    fn to_code(&self) -> Code;
+}
+
+impl ToCode for String {
+    fn to_code(&self) -> Code {
+        Code(self.clone())
+    }
+}
+
+impl ToCode for &str {
+    fn to_code(&self) -> Code {
+        Code(self.to_string())
+    }
 }
 
 impl Display for RewardType {
