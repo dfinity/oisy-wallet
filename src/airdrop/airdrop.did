@@ -1,7 +1,6 @@
 type Arg = variant { Upgrade; Init : InitArg };
 type CanisterError = variant {
   PrincipalNotParticipatingInAirdrop;
-  NoChildrenForCode;
   CannotRegisterMultipleTimes;
   NoTokensLeft;
   CanisterKilled;
