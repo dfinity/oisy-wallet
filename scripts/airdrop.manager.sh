@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 USERS=(
+    "4psgo-ivgoy-uagvy-jvdaa-zah65-qi3la-xhpfp-5zyap-rxg7s-bzt4w-kae"
     "uekbi-m7qsr-3zuav-taupw-e53m2-lpxws-qjhld-dorr5-asqve-zuuzd-rqe"
     "wxqbs-yoaxo-zw4of-lvh62-uyn6s-k6a4l-shx5f-vwxss-p7m6h-4gapv-bqe"
     "53sme-q5aha-avmvx-kh36v-fnh4o-2ej5m-dznms-uuhup-cqrqc-obtri-dqe"
