@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 USERS=(
+    "4psgo-ivgoy-uagvy-jvdaa-zah65-qi3la-xhpfp-5zyap-rxg7s-bzt4w-kae"
     "uekbi-m7qsr-3zuav-taupw-e53m2-lpxws-qjhld-dorr5-asqve-zuuzd-rqe"
     "wxqbs-yoaxo-zw4of-lvh62-uyn6s-k6a4l-shx5f-vwxss-p7m6h-4gapv-bqe"
     "53sme-q5aha-avmvx-kh36v-fnh4o-2ej5m-dznms-uuhup-cqrqc-obtri-dqe"
@@ -25,7 +26,6 @@ USERS=(
     "6njbb-dcozo-h42ey-omju4-zjpzz-utlqa-pop5b-6boty-cfejh-dbaai-3qe"
     "moadj-5cc4w-zmzpn-pzcbv-h2miy-zimrb-uydgo-spdgq-3oceb-2tllm-rae"
     "6w6xi-olnij-4cavj-q5di3-k4u45-ph4ix-lak3t-mco2m-6y2w7-ugb2n-uqe"
-    "uekbi-m7qsr-3zuav-taupw-e53m2-lpxws-qjhld-dorr5-asqve-zuuzd-rqe"
     "r2p3m-ky6ga-o2vxt-cdopl-spoof-nurjr-xf5yj-3t5cp-ogpap-ca3ur-gae"
     "6ojwf-vtptf-nfq3o-keopb-z5kow-sn74y-wdlgl-ulr7s-vnpgs-m2sls-pqe"
     "5rw7j-sdrkn-tnihn-3sbec-ry3rg-ctupb-idlle-wvmix-lilyd-cw34i-qqe"
@@ -35,6 +35,7 @@ USERS=(
     "qx7h4-rswaz-hr5h5-ghuwq-ymili-nfzat-5kdpq-h5xsf-m7j7i-eap2a-mqe"
     "c44p3-dg4uz-wrmox-w23mt-ivrqj-szelc-ow2oj-tycht-jnblo-alqhf-aae"
     "gunpy-gpv7l-7bvnj-djpvd-6dc37-tb4cr-qod3w-cuinm-ng77a-dgrqj-2qe"
+    "qu5ro-tt322-qgnun-go2hb-pfamm-65bh2-qq73q-c7xpm-gh7ki-2ztrz-cae"
 )
 
 case $ENV in
