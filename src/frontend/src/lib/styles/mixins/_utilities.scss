@@ -25,7 +25,7 @@
 	}
 
 	.lg\:#{$selector},
-	.lb\:#{$selector}[class*='-'],
+	.lg\:#{$selector}[class*='-'],
 	.lg\:#{$selector}[class*='xs\:'],
 	.lg\:#{$selector}[class*='sm\:'],
 	.lg\:#{$selector}[class*='md\:'] {
