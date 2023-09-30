@@ -9,7 +9,7 @@
 	<OisyWalletLogo size="66" />
 
 	<h1 class="text-center py-4 xs:px-3 sm:px-4 mb-0.25" style="max-width: 600px">
-		Non-custodial, browser-based wallet, Internet Computer secured
+		A browser-based Ethereum wallet secured by the Internet Computer and supporting networked-custody
 	</h1>
 
 	<p class="text-center pb-4 xs:px-3 sm:px-4 mb-0.25" style="max-width: 600px">
