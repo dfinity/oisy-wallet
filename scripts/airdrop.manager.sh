@@ -36,6 +36,8 @@ USERS=(
     "c44p3-dg4uz-wrmox-w23mt-ivrqj-szelc-ow2oj-tycht-jnblo-alqhf-aae"
     "gunpy-gpv7l-7bvnj-djpvd-6dc37-tb4cr-qod3w-cuinm-ng77a-dgrqj-2qe"
     "qu5ro-tt322-qgnun-go2hb-pfamm-65bh2-qq73q-c7xpm-gh7ki-2ztrz-cae"
+    "ahpyl-ltr37-ygwmv-yjot6-v4snp-obcnt-aiicn-d7rxe-7277l-3ar6j-7ae"
+    "qxcoc-35k6m-5xinx-thcxc-chwf6-5lpoh-ub2uf-7z54n-ag3yz-hpttv-gae"
 )
 
 case $ENV in
