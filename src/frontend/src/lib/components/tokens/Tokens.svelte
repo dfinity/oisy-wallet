@@ -29,7 +29,7 @@
 			<Card>
 				{token.name}
 
-				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" />
+				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" color="white" />
 
 				<output class="break-words" slot="amount">
 					{formatTokenShort({
