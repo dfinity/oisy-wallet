@@ -14,7 +14,7 @@
 		<svelte:fragment slot="key"><span class="font-bold">Tokens:</span></svelte:fragment>
 
 		<svelte:fragment slot="info">
-            The list of tokens currently supported by Oisy Wallet.
+			The list of tokens currently supported by Oisy Wallet.
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
@@ -33,7 +33,7 @@
 		class:rounded-br-sm={last}
 	>
 		<div class="flex items-center justify-center pl-2 pr-1">
-			<Logo src={token.icon} alt={`${token.name} logo`} size="32" />
+			<Logo src={token.icon} alt={`${token.name} logo`} size="32" color="white" />
 		</div>
 
 		<div class="py-2">
