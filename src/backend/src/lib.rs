@@ -1,7 +1,7 @@
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use core::ops::Deref;
-use ethers_core::abi::ethereum_types::{Address, U256, U64};
+use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
 use ic_cdk::api::management_canister::ecdsa::{
@@ -369,8 +369,8 @@ async fn sign_prehash(prehash: String) -> String {
 #[update(guard = "caller_is_not_anonymous")]
 fn add_user_token(token: Token) {
     fn eth_address(t: &Token) -> [u8; 20] {
-        match ethers_core::utils::parse_checksummed(&t.contract_address, None) {
-            Ok(addr) => addr.0,
+        match t.contract_address.parse() {
+            Ok(H160(addr)) => addr,
             Err(err) => ic_cdk::trap(&format!(
                 "failed to parse contract address {}: {err}",
                 t.contract_address,
@@ -378,9 +378,14 @@ fn add_user_token(token: Token) {
         }
     }
 
+    // Check that the contract address parses.
+    let _ = eth_address(&token);
+
     if let Some(symbol) = token.symbol.as_ref() {
         if symbol.len() > MAX_SYMBOL_LENGTH {
-            ic_cdk::trap("Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes");
+            ic_cdk::trap(&format!(
+                "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
+            ));
         }
     }
     let stored_principal = StoredPrincipal(ic_cdk::caller());
