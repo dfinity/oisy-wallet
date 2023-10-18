@@ -1,4 +1,4 @@
-use crate::read_state;
+use crate::read_config;
 use candid::Principal;
 use ic_cdk::caller;
 
@@ -11,7 +11,7 @@ pub fn caller_is_not_anonymous() -> Result<(), String> {
 }
 
 pub fn caller_is_allowed() -> Result<(), String> {
-    if read_state(|s| s.allowed_callers.contains(&caller())) {
+    if read_config(|s| s.allowed_callers.contains(&caller())) {
         Ok(())
     } else {
         Err("Caller is not allowed.".to_string())
