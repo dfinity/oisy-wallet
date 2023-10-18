@@ -115,10 +115,7 @@ pub struct Token {
 struct StoredPrincipal(Principal);
 
 impl Storable for StoredPrincipal {
-    const BOUND: Bound = Bound::Bounded {
-        max_size: 29,
-        is_fixed_size: false,
-    };
+    const BOUND: Bound = Blob::<29>::BOUND;
 
     fn to_bytes(&self) -> Cow<'_, [u8]> {
         Cow::Owned(
