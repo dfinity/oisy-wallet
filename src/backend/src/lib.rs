@@ -111,6 +111,12 @@ pub struct Token {
     pub decimals: Option<u8>,
 }
 
+#[derive(CandidType, Deserialize)]
+pub struct TokenId {
+    pub contract_address: String,
+    pub chain_id: ChainId,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 struct StoredPrincipal(Principal);
 
@@ -221,6 +227,15 @@ async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
     .await
     .expect("failed to get public key");
     key.public_key
+}
+
+fn parse_eth_address(address: &str) -> [u8; 20] {
+    match address.parse() {
+        Ok(H160(addr)) => addr,
+        Err(err) => ic_cdk::trap(&format!(
+            "failed to parse contract address {address}: {err}",
+        )),
+    }
 }
 
 /// Returns the Ethereum address of the caller.
@@ -368,18 +383,7 @@ async fn sign_prehash(prehash: String) -> String {
 /// Adds a new token to the user.
 #[update(guard = "caller_is_not_anonymous")]
 fn add_user_token(token: Token) {
-    fn eth_address(t: &Token) -> [u8; 20] {
-        match t.contract_address.parse() {
-            Ok(H160(addr)) => addr,
-            Err(err) => ic_cdk::trap(&format!(
-                "failed to parse contract address {}: {err}",
-                t.contract_address,
-            )),
-        }
-    }
-
-    // Check that the contract address parses.
-    let _ = eth_address(&token);
+    let addr = parse_eth_address(&token.contract_address);
 
     if let Some(symbol) = token.symbol.as_ref() {
         if symbol.len() > MAX_SYMBOL_LENGTH {
@@ -391,10 +395,9 @@ fn add_user_token(token: Token) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
         let Candid(mut tokens) = s.user_token.get(&stored_principal).unwrap_or_default();
-        match tokens
-            .iter()
-            .position(|t| t.chain_id == token.chain_id && eth_address(t) == eth_address(&token))
-        {
+        match tokens.iter().position(|t| {
+            t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
+        }) {
             Some(p) => {
                 tokens[p] = token;
             }
@@ -408,6 +411,23 @@ fn add_user_token(token: Token) {
             }
         }
         s.user_token.insert(stored_principal, Candid(tokens))
+    });
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+fn remove_user_token(token_id: TokenId) {
+    let addr = parse_eth_address(&token_id.contract_address);
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    mutate_state(|s| match s.user_token.get(&stored_principal) {
+        None => (),
+        Some(Candid(mut tokens)) => {
+            if let Some(p) = tokens.iter().position(|t| {
+                t.chain_id == token_id.chain_id && parse_eth_address(&t.contract_address) == addr
+            }) {
+                tokens.swap_remove(p);
+                s.user_token.insert(stored_principal, Candid(tokens));
+            }
+        }
     });
 }
 

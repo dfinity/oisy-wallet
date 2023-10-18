@@ -45,6 +45,10 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
+	const TokenId = IDL.Record({
+		chain_id: IDL.Nat64,
+		contract_address: IDL.Text
+	});
 	const SignRequest = IDL.Record({
 		to: IDL.Text,
 		gas: IDL.Nat,
@@ -61,8 +65,9 @@ export const idlFactory = ({ IDL }) => {
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
-		list_user_tokens: IDL.Func([], [IDL.Vec(Token)], []),
+		list_user_tokens: IDL.Func([], [IDL.Vec(Token)], ['query']),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
+		remove_user_token: IDL.Func([TokenId], [], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
 	});

@@ -52,6 +52,10 @@ export interface Token {
 	contract_address: string;
 	symbol: [] | [string];
 }
+export interface TokenId {
+	chain_id: bigint;
+	contract_address: string;
+}
 export interface _SERVICE {
 	add_user_token: ActorMethod<[Token], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
@@ -60,6 +64,7 @@ export interface _SERVICE {
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_user_tokens: ActorMethod<[], Array<Token>>;
 	personal_sign: ActorMethod<[string], string>;
+	remove_user_token: ActorMethod<[TokenId], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }

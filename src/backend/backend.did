@@ -49,6 +49,7 @@ type Token = record {
   contract_address : text;
   symbol : opt text;
 };
+type TokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_token : (Token) -> ();
   caller_eth_address : () -> (text);
@@ -57,6 +58,7 @@ service : (Arg) -> {
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_user_tokens : () -> (vec Token) query;
   personal_sign : (text) -> (text);
+  remove_user_token : (TokenId) -> ();
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
 }
