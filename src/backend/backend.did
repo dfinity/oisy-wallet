@@ -55,7 +55,7 @@ service : (Arg) -> {
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
   http_request : (HttpRequest) -> (HttpResponse) query;
-  list_user_tokens : () -> (vec Token);
+  list_user_tokens : () -> (vec Token) query;
   personal_sign : (text) -> (text);
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);

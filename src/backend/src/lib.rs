@@ -409,7 +409,7 @@ fn add_user_token(token: Token) {
     });
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[query(guard = "caller_is_not_anonymous")]
 fn list_user_tokens() -> Vec<Token> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
