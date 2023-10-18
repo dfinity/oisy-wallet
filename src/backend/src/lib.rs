@@ -184,7 +184,7 @@ fn post_upgrade(_: Option<Arg>) {
             .config
             .get()
             .as_ref()
-            .expect("config is not initialized: reinstall the canister from scratch");
+            .expect("config is not initialized: reinstall the canister instead of upgrading");
     })
 }
 
