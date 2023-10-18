@@ -43,11 +43,19 @@ type SignRequest = record {
   chain_id : nat;
   nonce : nat;
 };
+type Token = record {
+  decimals : opt nat8;
+  chain_id : nat64;
+  contract_address : text;
+  symbol : opt text;
+};
 service : (Arg) -> {
+  add_user_token : (Token) -> ();
   caller_eth_address : () -> (text);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
   http_request : (HttpRequest) -> (HttpResponse) query;
+  list_user_tokens : () -> (vec Token);
   personal_sign : (text) -> (text);
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);

@@ -46,11 +46,19 @@ export interface SignRequest {
 	chain_id: bigint;
 	nonce: bigint;
 }
+export interface Token {
+	decimals: [] | [number];
+	chain_id: bigint;
+	contract_address: string;
+	symbol: [] | [string];
+}
 export interface _SERVICE {
+	add_user_token: ActorMethod<[Token], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
+	list_user_tokens: ActorMethod<[], Array<Token>>;
 	personal_sign: ActorMethod<[string], string>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;

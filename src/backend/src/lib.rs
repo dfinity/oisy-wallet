@@ -1,5 +1,6 @@
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use candid::{CandidType, Deserialize, Nat, Principal};
+use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, U256, U64};
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
@@ -8,10 +9,16 @@ use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
-use ic_cdk_macros::{export_candid, init, post_upgrade, pre_upgrade, query, update};
+use ic_cdk_macros::{export_candid, init, query, update};
+use ic_stable_structures::{
+    memory_manager::{MemoryId, MemoryManager, VirtualMemory},
+    storable::{Blob, Bound, Storable},
+    DefaultMemoryImpl, StableBTreeMap, StableCell,
+};
 use k256::PublicKey;
 use metrics::get_metrics;
 use serde_bytes::ByteBuf;
+use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
 
@@ -20,16 +27,119 @@ pub mod http;
 mod metrics;
 mod std_canister_status;
 
+type VMem = VirtualMemory<DefaultMemoryImpl>;
+type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
+type ChainId = u64;
+type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<Token>>, VMem>;
+
+const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
+const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
+
+const MAX_SYMBOL_LENGTH: usize = 20;
+const MAX_TOKEN_LIST_LENGTH: usize = 100;
+
 thread_local! {
-    static STATE: RefCell<Option<State>> = RefCell::default();
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
+        MemoryManager::init(DefaultMemoryImpl::default())
+    );
+
+    static STATE: RefCell<State> = RefCell::new(
+        MEMORY_MANAGER.with(|mm| State {
+            config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
+            user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
+        })
+    );
 }
 
 pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
-    STATE.with(|cell| f(cell.borrow().as_ref().expect("state not initialized")))
+    STATE.with(|cell| f(&*cell.borrow()))
+}
+
+pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
+    STATE.with(|cell| f(&mut *cell.borrow_mut()))
+}
+
+pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
+    read_state(|state| {
+        f(state
+            .config
+            .get()
+            .as_ref()
+            .expect("config is not initialized"))
+    })
+}
+
+#[derive(Default)]
+struct Candid<T>(T)
+where
+    T: CandidType + for<'de> Deserialize<'de>;
+
+impl<T> Storable for Candid<T>
+where
+    T: CandidType + for<'de> Deserialize<'de>,
+{
+    const BOUND: Bound = Bound::Unbounded;
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        Cow::Owned(candid::encode_one(&self.0).expect("encoding should always succeed"))
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        Self(candid::decode_one(bytes.as_ref()).expect("decoding should succeed"))
+    }
+}
+
+impl<T> Deref for Candid<T>
+where
+    T: CandidType + for<'de> Deserialize<'de>,
+{
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        &self.0
+    }
+}
+
+pub struct State {
+    config: ConfigCell,
+    user_token: UserTokenMap,
 }
 
 #[derive(CandidType, Deserialize)]
-pub struct State {
+pub struct Token {
+    pub contract_address: String,
+    pub chain_id: ChainId,
+    pub symbol: Option<String>,
+    pub decimals: Option<u8>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+struct StoredPrincipal(Principal);
+
+impl Storable for StoredPrincipal {
+    const BOUND: Bound = Bound::Bounded {
+        max_size: 29,
+        is_fixed_size: false,
+    };
+
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
+        Cow::Owned(
+            Blob::<29>::try_from(self.0.as_slice())
+                .expect("principal length should not exceed 29 bytes")
+                .to_bytes()
+                .into_owned(),
+        )
+    }
+
+    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
+        Self(Principal::from_slice(
+            Blob::<29>::from_bytes(bytes).as_slice(),
+        ))
+    }
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct Config {
     pub ecdsa_key_name: String,
     // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
     pub allowed_callers: Vec<Principal>,
@@ -53,27 +163,17 @@ fn init(arg: Arg) {
         Arg::Init(InitArg {
             ecdsa_key_name,
             allowed_callers,
-        }) => STATE.with(|cell| {
-            *cell.borrow_mut() = Some(State {
-                ecdsa_key_name,
-                allowed_callers,
-            })
+        }) => mutate_state(|state| {
+            state
+                .config
+                .set(Some(Candid(Config {
+                    ecdsa_key_name,
+                    allowed_callers,
+                })))
+                .expect("setting config should succeed");
         }),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
-}
-
-#[pre_upgrade]
-fn pre_upgrade() {
-    read_state(|s| ic_cdk::storage::stable_save((s,))).expect("failed to encode the state");
-}
-
-#[post_upgrade]
-fn post_upgrade() {
-    STATE.with(|cell| {
-        let (s,) = ic_cdk::storage::stable_restore().expect("failed to decode state");
-        *cell.borrow_mut() = s;
-    });
 }
 
 /// Processes external HTTP requests.
@@ -114,7 +214,7 @@ fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
 
 /// Computes the public key of the specified principal.
 async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
-    let name = read_state(|s| s.ecdsa_key_name.clone());
+    let name = read_config(|s| s.ecdsa_key_name.clone());
     let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
         canister_id: None,
         derivation_path: principal_to_derivation_path(principal),
@@ -175,7 +275,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
             derivation_path: principal_to_derivation_path(caller),
             key_id: EcdsaKeyId {
                 curve: EcdsaCurve::Secp256k1,
-                name: read_state(|s| s.ecdsa_key_name.clone()),
+                name: read_config(|s| s.ecdsa_key_name.clone()),
             },
         })
     );
@@ -268,6 +368,53 @@ async fn sign_prehash(prehash: String) -> String {
     let v = y_parity(&hash_bytes, &signature, &pubkey);
     signature.push(v as u8);
     format!("0x{}", hex::encode(&signature))
+}
+
+/// Adds a new token to the user.
+#[update(guard = "caller_is_not_anonymous")]
+fn add_user_token(token: Token) {
+    fn eth_address(t: &Token) -> [u8; 20] {
+        match ethers_core::utils::parse_checksummed(&t.contract_address, None) {
+            Ok(addr) => addr.0,
+            Err(err) => ic_cdk::trap(&format!(
+                "failed to parse contract address {}: {err}",
+                t.contract_address,
+            )),
+        }
+    }
+
+    if let Some(symbol) = token.symbol.as_ref() {
+        if symbol.len() > MAX_SYMBOL_LENGTH {
+            ic_cdk::trap("Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes");
+        }
+    }
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    mutate_state(|s| {
+        let Candid(mut tokens) = s.user_token.get(&stored_principal).unwrap_or_default();
+        match tokens
+            .iter()
+            .position(|t| t.chain_id == token.chain_id && eth_address(t) == eth_address(&token))
+        {
+            Some(p) => {
+                tokens[p] = token;
+            }
+            None => {
+                if tokens.len() == MAX_TOKEN_LIST_LENGTH {
+                    ic_cdk::trap(&format!(
+                        "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
+                    ));
+                }
+                tokens.push(token);
+            }
+        }
+        s.user_token.insert(stored_principal, Candid(tokens))
+    });
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+fn list_user_tokens() -> Vec<Token> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
 /// API method to get cycle balance and burn rate.

@@ -7,10 +7,9 @@ function generate_did() {
   cargo build --manifest-path="$canister_root/Cargo.toml" \
       --target wasm32-unknown-unknown \
       --release --package "$canister" \
-      --features "ic-cdk/wasi"
 
-  # Installation https://docs.wasmtime.dev/cli-install.html
-  wasmtime "target/wasm32-unknown-unknown/release/$canister.wasm" > "$canister_root/$canister.did"
+  # cargo install candid-extractor
+  candid-extractor "target/wasm32-unknown-unknown/release/$canister.wasm" > "$canister_root/$canister.did"
 }
 
 CANISTERS=backend,airdrop
