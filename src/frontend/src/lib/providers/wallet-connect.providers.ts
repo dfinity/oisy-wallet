@@ -6,7 +6,7 @@ import {
 	SESSION_REQUEST_SEND_TRANSACTION,
 	WALLET_CONNECT_METADATA
 } from '$lib/constants/wallet-connect.constants';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';
@@ -21,8 +21,19 @@ export const initWalletConnect = async ({
 	address
 }: {
 	uri: string;
-	address: ECDSA_PUBLIC_KEY;
+	address: ETH_ADDRESS;
 }): Promise<WalletConnectListener> => {
+	const clearLocalStorage = () => {
+		const keys = Object.keys(localStorage).filter((key) => key.startsWith('wc@'));
+		keys.forEach((key) => localStorage.removeItem(key));
+	};
+
+	// During testing, we frequently encountered session approval failures with Uniswap due to the following reason:
+	// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c....
+	// The issue appears to be linked to incorrect cached information used by the WalletConnect library.
+	// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Wec3Wallet object.
+	clearLocalStorage();
+
 	const web3wallet = await Web3Wallet.init({
 		core: new Core({
 			projectId: PROJECT_ID

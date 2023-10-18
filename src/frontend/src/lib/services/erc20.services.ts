@@ -1,3 +1,4 @@
+import oneInch from '$lib/assets/1inch.svg';
 import dai from '$lib/assets/dai.svg';
 import icp from '$lib/assets/icp.svg';
 import uniswap from '$lib/assets/uniswap.svg';
@@ -18,6 +19,10 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return usdt;
 		case 'dai':
 			return dai;
+		case '1inch':
+			return oneInch;
+		// ICP in production. ckICP was used on staging because the definitive name and symbol had not been decided.
+		case 'icp':
 		case 'ckicp':
 			return icp;
 		default:

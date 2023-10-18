@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Transaction } from '$lib/types/transaction';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { Utils } from 'alchemy-sdk';
 	import { isTransactionPending } from '$lib/utils/transactions.utils';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import type { SvelteComponent } from 'svelte';
@@ -9,9 +8,10 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Card from '$lib/components/ui/Card.svelte';
-	import { formatToDate } from '$lib/utils/format.utils';
+	import { formatToDate, formatTokenShort } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { token } from '$lib/derived/token.derived';
 
 	export let transaction: Transaction;
 
@@ -44,7 +44,12 @@
 
 		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-15' : ''} />
 
-		<svelte:fragment slot="amount">{Utils.formatEther(amount.toString())}</svelte:fragment>
+		<svelte:fragment slot="amount">
+			{formatTokenShort({
+				value: amount,
+				unitName: $token.decimals
+			})}</svelte:fragment
+		>
 		<svelte:fragment slot="description">
 			{#if nonNullish(transactionDate)}
 				{formatToDate(transactionDate)}

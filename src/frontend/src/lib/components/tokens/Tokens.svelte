@@ -25,11 +25,11 @@
 	{@const url = transactionsUrl(token)}
 
 	<Listener {token}>
-		<a class="no-underline" href={url} title={`Open token ${token.name} transactions`}>
+		<a class="no-underline" href={url} aria-label={`Open the list of ${token.symbol} transactions`}>
 			<Card>
 				{token.name}
 
-				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" />
+				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" color="white" />
 
 				<output class="break-words" slot="amount">
 					{formatTokenShort({

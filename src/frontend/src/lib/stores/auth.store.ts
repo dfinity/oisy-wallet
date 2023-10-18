@@ -4,15 +4,15 @@ import {
 	AUTH_POPUP_WIDTH,
 	localIdentityCanisterId
 } from '$lib/constants/app.constants';
+import type { OptionIdentity } from '$lib/types/identity';
 import { createAuthClient } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
-import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
-	identity: Identity | undefined | null;
+	identity: OptionIdentity;
 }
 
 let authClient: AuthClient | undefined | null;
@@ -50,7 +50,7 @@ const initAuthStore = (): AuthStore => {
 				authClient = authClient ?? (await createAuthClient());
 
 				const identityProvider = nonNullish(localIdentityCanisterId)
-					? `http://${localIdentityCanisterId}.localhost:4943`
+					? `http://localhost:4943?canisterId=${localIdentityCanisterId}`
 					: `https://identity.${domain ?? 'ic0.app'}`;
 
 				await authClient?.login({

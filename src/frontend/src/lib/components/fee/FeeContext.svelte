@@ -5,19 +5,22 @@
 	import { getFeeData } from '$lib/providers/infura.providers';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
-	import { getFeeData as getErc20FeeData } from '$lib/providers/infura-erc20.providers';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { addressStore } from '$lib/stores/address.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
+	import type { TargetNetwork } from '$lib/enums/network';
+	import { getErc20FeeData } from '$lib/services/fee.services';
 
 	export let observe: boolean;
 	export let destination = '';
 	export let amount: string | number | undefined = undefined;
+	export let network: TargetNetwork | undefined = undefined;
 
 	const { store }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -26,6 +29,8 @@
 	 */
 
 	let listener: WebSocketListener | undefined = undefined;
+
+	const errorMsgs: symbol[] = [];
 
 	const updateFeeData = async () => {
 		try {
@@ -41,15 +46,21 @@
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
 					contract: $token as Erc20Token,
-					address: destination !== '' ? destination : $addressStore!,
-					amount: parseToken({ value: `${amount ?? '1'}` })
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					address: mapAddressStartsWith0x(destination !== '' ? destination : $addressStore!),
+					amount: parseToken({ value: `${amount ?? '1'}` }),
+					network
 				})
 			});
 		} catch (err: unknown) {
-			toastsError({
-				msg: { text: `Cannot fetch gas fee.` },
-				err
-			});
+			toastsHide(errorMsgs);
+
+			errorMsgs.push(
+				toastsError({
+					msg: { text: `Cannot fetch gas fee.` },
+					err
+				})
+			);
 		}
 	};
 

@@ -2,15 +2,21 @@ import type { SignRequest } from '$declarations/backend/backend.did';
 import { signTransaction } from '$lib/api/backend.api';
 import { ETH_BASE_FEE, ETH_CHAIN_ID } from '$lib/constants/eth.constants';
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { TargetNetwork } from '$lib/enums/network';
 import { SendStep } from '$lib/enums/steps';
+import { populateBurnTransaction } from '$lib/providers/infura-erc20-icp.providers';
 import { populateTransaction } from '$lib/providers/infura-erc20.providers';
 import { getTransactionCount, sendTransaction } from '$lib/providers/infura.providers';
 import { processTransactionSent } from '$lib/services/transaction.services';
+import { authStore } from '$lib/stores/auth.store';
 import type { Erc20Token } from '$lib/types/erc20';
+import type { Erc20PopulateTransaction } from '$lib/types/erc20-providers';
 import type { Token } from '$lib/types/token';
 import type { TransactionFeeData } from '$lib/types/transaction';
+import { isErc20Icp } from '$lib/utils/token.utils';
 import { isNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+import { get } from 'svelte/store';
 
 export interface TransferParams {
 	from: string;
@@ -25,6 +31,7 @@ export interface SendParams {
 	progress: (step: SendStep) => void;
 	lastProgressStep?: SendStep;
 	token: Token;
+	network?: TargetNetwork | undefined;
 }
 
 const ethPrepareTransaction = async ({
@@ -35,7 +42,7 @@ const ethPrepareTransaction = async ({
 	nonce,
 	gas,
 	data
-}: TransferParams & { nonce: number } & { gas: bigint | undefined }): Promise<SignRequest> => ({
+}: TransferParams & { nonce: number; gas: bigint | undefined }): Promise<SignRequest> => ({
 	to,
 	value: amount.toBigInt(),
 	chain_id: ETH_CHAIN_ID,
@@ -53,11 +60,15 @@ const erc20PrepareTransaction = async ({
 	maxFeePerGas: max_fee_per_gas,
 	nonce,
 	token,
-	gas
-}: TransferParams & { nonce: number; token: Token; gas: bigint }): Promise<SignRequest> => {
-	const { data } = await populateTransaction({
+	gas,
+	populate
+}: TransferParams & { nonce: number; gas: bigint; populate: Erc20PopulateTransaction } & Pick<
+		SendParams,
+		'token'
+	>): Promise<SignRequest> => {
+	const { data } = await populate({
 		contract: token as Erc20Token,
-		address: to,
+		to,
 		amount
 	});
 
@@ -87,6 +98,7 @@ export const send = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	gas,
+	network,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
@@ -114,12 +126,17 @@ export const send = async ({
 				nonce,
 				gas: gas.toBigInt(),
 				maxFeePerGas: maxFeePerGas.toBigInt(),
-				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
+				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+				populate:
+					isErc20Icp(token) && network === TargetNetwork.ICP
+						? populateBurnTransaction
+						: populateTransaction
 		  }));
 
 	progress(SendStep.SIGN);
 
-	const rawTransaction = await signTransaction(transaction);
+	const { identity } = get(authStore);
+	const rawTransaction = await signTransaction({ identity, transaction });
 
 	progress(SendStep.SEND);
 

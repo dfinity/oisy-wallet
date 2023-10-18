@@ -5,20 +5,19 @@
 	let visible = true;
 
 	const banner = STAGING;
+	const NETWORK = import.meta.env.VITE_INFURA_NETWORK;
 
 	const close = () => (visible = false);
 </script>
 
 {#if banner && visible}
 	<div>
-		<h3>For <strong>TEST</strong> purpose only.</h3>
+		<h3 class="clamp-2">For testing purposes on <strong>{NETWORK.toUpperCase()}</strong> only.</h3>
 		<button on:click={close} aria-label="Close"><IconClose /></button>
 	</div>
 {/if}
 
 <style lang="scss">
-	@use '../../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/text';
-
 	div {
 		position: fixed;
 		top: 0;
@@ -35,20 +34,18 @@
 
 		background: var(--negative-emphasis);
 
-		padding: var(--padding-4x) var(--padding-3x);
-		margin: var(--padding-2x) 0;
+		padding: var(--padding-2x) var(--padding-3x);
+		margin: var(--padding-3x) 0;
 
 		border-radius: var(--border-radius-lg);
 
 		width: calc(100% - var(--padding-4x));
-		max-width: calc(768px + var(--padding-8x) + var(--padding-2x));
+		max-width: 768px;
 
 		box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.1215686275);
 	}
 
 	h3 {
-		@include text.clamp(2);
-
 		margin: 0;
 
 		grid-column-start: 2;

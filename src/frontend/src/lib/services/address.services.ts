@@ -1,10 +1,14 @@
 import { getEthAddress } from '$lib/api/backend.api';
 import { addressStore } from '$lib/stores/address.store';
+import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { get } from 'svelte/store';
 
 export const loadAddress = async (): Promise<{ success: boolean }> => {
 	try {
-		const address = await getEthAddress();
+		const { identity } = get(authStore);
+
+		const address = await getEthAddress(identity);
 		addressStore.set(address);
 	} catch (err: unknown) {
 		addressStore.reset();

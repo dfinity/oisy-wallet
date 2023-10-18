@@ -1,10 +1,26 @@
 <script lang="ts">
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
+	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 </script>
 
-<p
-	class="flex gap-1 items-center justify-center text-center px-3 sm:px-8 py-1 font-bold text-xxs sm:text-base"
-	style="color: var(--alpha-color, var(--color-misty-rose))"
+<a
+	href={OISY_REPO_URL}
+	rel="external noopener noreferrer"
+	target="_blank"
+	class="no-underline inline-block text-center px-3 py-1 font-bold text-xs md:text-base"
 >
-	<IconWarning /> This is alpha version. Use at your own risk!
-</p>
+	<IconWarning inline />
+	<span class="pl-1">Learn more about this alpha version. Use with caution.</span>
+</a>
+
+<style lang="scss">
+	a {
+		color: var(--alpha-color, var(--color-misty-rose));
+		max-width: 300px;
+		margin: 0 auto;
+
+		@include media.min-width(medium) {
+			max-width: 100%;
+		}
+	}
+</style>

@@ -2,8 +2,6 @@
 
 This document list a couple of useful information for development and deployment purpose.
 
-## Development
-
 ## Deployment
 
 Following terminal commands are useful to deploy `frontend` and `backend`.

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconCheckCircle } from '@dfinity/gix-components';
+	import {IconCheckCircle, IconInfo} from '@dfinity/gix-components';
 	import type { StaticStep } from '$lib/types/steps';
 	import { nonNullish } from '@dfinity/utils';
 
@@ -11,6 +11,8 @@
 	<div class={`step ${state} ${last ? 'last' : ''}`}>
 		{#if state === 'completed'}
 			<IconCheckCircle />
+		{:else if state === 'skipped'}
+			<IconInfo size="27px" />
 		{:else}
 			<span class="checkmark round">{i + 1}</span>
 		{/if}
@@ -26,8 +28,6 @@
 {/each}
 
 <style lang="scss">
-	@use '../../../../../../node_modules/@dfinity/gix-components/dist/styles/mixins/fonts';
-
 	.step {
 		display: grid;
 		grid-template-columns: max-content auto;
@@ -83,7 +83,8 @@
 		display: inline-flex;
 		gap: var(--padding-0_5x);
 
-		@include fonts.small;
+		font-size: var(--font-size-small);
+		line-height: var(--line-height-small);
 
 		color: var(--positive-emphasis);
 		background: rgba(var(--positive-emphasis-rgb), 0.3);
@@ -108,7 +109,8 @@
 	}
 
 	.checkmark {
-		@include fonts.small;
+		font-size: var(--font-size-small);
+		line-height: var(--line-height-small);
 
 		color: var(--progress-color);
 		--checkmark-color: var(--progress-color);

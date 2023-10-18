@@ -3,6 +3,7 @@ import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { SendStep, SignStep } from '$lib/enums/steps';
 import { send as executeSend, type SendParams } from '$lib/services/send.services';
 import type { AddressData } from '$lib/stores/address.store';
+import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import type { FeeStoreData } from '$lib/stores/fee.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -15,6 +16,7 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+import { get } from 'svelte/store';
 
 export type WalletConnectCallBackParams = {
 	request: Web3WalletTypes.SessionRequest;
@@ -186,15 +188,17 @@ export const signMessage = ({
 				progress(SignStep.SIGN);
 
 				const sign = (params: string[]): Promise<string> => {
+					const { identity } = get(authStore);
+
 					try {
 						const hash = getSignParamsMessageTypedDataV4Hash(params);
-						return signPrehash(hash);
+						return signPrehash({ hash, identity });
 					} catch (err: unknown) {
 						// If the above failed, it's because JSON.parse throw an exception.
 						// We are assuming that it did so because it tried to parse a string that does not represent an object.
 						// Therefore, we continue with a message as hex string.
 						const message = getSignParamsMessageHex(params);
-						return signMessageApi(message);
+						return signMessageApi({ message, identity });
 					}
 				};
 

@@ -18,6 +18,7 @@
 	import { loadEthData } from '$lib/services/loader.services';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
+	import {loading} from "$lib/stores/loader.store";
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
@@ -43,7 +44,6 @@
 		} as ProgressStep
 	];
 
-	let inProgress = true;
 	$: (() => {
 		if (progressStep !== LoaderStep.DONE) {
 			return;
@@ -54,7 +54,7 @@
 		}
 
 		// A small delay for display animation purpose.
-		setTimeout(() => (inProgress = false), 1000);
+		setTimeout(() => (loading.set(false)), 1000);
 	})();
 
 	const { oisy_introduction }: Storage = browser
@@ -89,11 +89,11 @@
 
 	const confirmIntroduction = () => {
 		localStorage.setItem('oisy_introduction', 'done');
-		inProgress = false;
+		loading.set(false);
 	};
 </script>
 
-{#if inProgress}
+{#if $loading}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<Modal>
 			<div

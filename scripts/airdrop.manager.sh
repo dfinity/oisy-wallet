@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 USERS=(
+    "4psgo-ivgoy-uagvy-jvdaa-zah65-qi3la-xhpfp-5zyap-rxg7s-bzt4w-kae"
     "uekbi-m7qsr-3zuav-taupw-e53m2-lpxws-qjhld-dorr5-asqve-zuuzd-rqe"
     "wxqbs-yoaxo-zw4of-lvh62-uyn6s-k6a4l-shx5f-vwxss-p7m6h-4gapv-bqe"
     "53sme-q5aha-avmvx-kh36v-fnh4o-2ej5m-dznms-uuhup-cqrqc-obtri-dqe"
@@ -22,8 +23,38 @@ USERS=(
     "3y5uj-oyiwp-f5vbw-cxna2-jscer-bcreg-w3q4v-l467g-fs7lc-sou5y-tqe"
     "z7lvn-zff37-ngtmx-6ivd2-dkwgm-7jvzc-5f4au-q6zzv-chfar-xthok-3ae"
     "myzmi-vv6he-vkpx7-kqccd-fu5np-k7d6o-g5gji-ryq3v-r6ogh-ymlby-tqe"
+    "6njbb-dcozo-h42ey-omju4-zjpzz-utlqa-pop5b-6boty-cfejh-dbaai-3qe"
+    "moadj-5cc4w-zmzpn-pzcbv-h2miy-zimrb-uydgo-spdgq-3oceb-2tllm-rae"
+    "6w6xi-olnij-4cavj-q5di3-k4u45-ph4ix-lak3t-mco2m-6y2w7-ugb2n-uqe"
+    "r2p3m-ky6ga-o2vxt-cdopl-spoof-nurjr-xf5yj-3t5cp-ogpap-ca3ur-gae"
+    "6ojwf-vtptf-nfq3o-keopb-z5kow-sn74y-wdlgl-ulr7s-vnpgs-m2sls-pqe"
+    "5rw7j-sdrkn-tnihn-3sbec-ry3rg-ctupb-idlle-wvmix-lilyd-cw34i-qqe"
+    "ywsjp-vv2sv-x2c56-aiz3h-n32yq-4xieg-kcrsc-fkvnk-tfnyd-uisfy-hae"
+    "mxc4i-5e5bk-ixse6-2ps76-guy27-3t5tn-oa66r-tyval-pgw5m-krgn2-3ae"
+    "p2qa7-2gf5p-ytm2e-y6kzz-wjrt5-kdqim-jmmsb-6oh53-juvjm-3qc36-wqe"
+    "qx7h4-rswaz-hr5h5-ghuwq-ymili-nfzat-5kdpq-h5xsf-m7j7i-eap2a-mqe"
+    "c44p3-dg4uz-wrmox-w23mt-ivrqj-szelc-ow2oj-tycht-jnblo-alqhf-aae"
+    "gunpy-gpv7l-7bvnj-djpvd-6dc37-tb4cr-qod3w-cuinm-ng77a-dgrqj-2qe"
+    "qu5ro-tt322-qgnun-go2hb-pfamm-65bh2-qq73q-c7xpm-gh7ki-2ztrz-cae"
+    "ahpyl-ltr37-ygwmv-yjot6-v4snp-obcnt-aiicn-d7rxe-7277l-3ar6j-7ae"
+    "qxcoc-35k6m-5xinx-thcxc-chwf6-5lpoh-ub2uf-7z54n-ag3yz-hpttv-gae"
 )
 
+case $ENV in
+  "staging")
+    WALLET="cvthj-wyaaa-aaaad-aaaaq-cai"
+    ;;
+  "ic")
+    WALLET="yit3i-lyaaa-aaaan-qeavq-cai"
+    ;;
+  *)
+    ;;
+esac
+
 for USER in "${USERS[@]}"; do
-    dfx canister call airdrop add_manager '(principal"'$USER'")'
+    if [ -n "${ENV+1}" ]; then
+        dfx canister call airdrop add_manager '(principal"'$USER'")' --network "$ENV" --wallet "$WALLET"
+    else
+        dfx canister call airdrop add_manager '(principal"'$USER'")'
+    fi
 done

@@ -1,8 +1,15 @@
 {
-	"name": "@dfinity/ic-eth-wallet",
+	"name": "@dfinity/oisy-wallet",
 	"version": "0.0.1",
 	"private": true,
 	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dfinity/oisy-wallet.git"
+	},
+	"bugs": {
+		"url": "https://github.com/dfinity/oisy-wallet"
+	},
 	"scripts": {
 		"build:compress": "./scripts/build.compress.sh",
 		"build:csp": "node scripts/build.csp.mjs",
@@ -25,8 +32,9 @@
 		"@dfinity/auth-client": "^0.19.2",
 		"@dfinity/candid": "^0.19.2",
 		"@dfinity/gix-components": "^2.6.0",
+		"@dfinity/nns": "^0.16.7",
 		"@dfinity/principal": "^0.19.2",
-		"@dfinity/utils": "^0.0.20",
+		"@dfinity/utils": "^0.0.22",
 		"@metamask/detect-provider": "^2.0.0",
 		"@walletconnect/web3wallet": "^1.9.1",
 		"alchemy-sdk": "^2.10.1",

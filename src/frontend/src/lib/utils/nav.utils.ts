@@ -4,12 +4,15 @@ import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import type { LoadEvent, Page } from '@sveltejs/kit';
 
-export const transactionsUrl = (token: Token): string => tokenUrl({ path: 'transactions/', token });
+export const transactionsUrl = (token: Token): string =>
+	tokenUrl({ path: '/transactions/', token });
 
 export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
 	id === '/(app)/transactions';
 
 export const isRouteSettings = ({ route: { id } }: Page): boolean => id === '/(app)/settings';
+
+export const isRouteTokens = ({ route: { id } }: Page): boolean => id === '/(app)';
 
 export const isSubRoute = (page: Page): boolean =>
 	isRouteTransactions(page) || isRouteSettings(page);
@@ -19,7 +22,7 @@ const tokenUrl = ({
 	path
 }: {
 	token: Token;
-	path: 'transactions/' | '/';
+	path: '/transactions/' | '/';
 }): string =>
 	`${path}?token=${encodeURIComponent(
 		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
@@ -37,13 +40,16 @@ export const back = async (pop: boolean) => {
 export type RouteParams = {
 	token: string | null | undefined;
 	airdropCode: string | null | undefined;
+	// WalletConnect URI parameter
+	uri: string | null | undefined;
 };
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	if (!browser) {
 		return {
 			token: undefined,
-			airdropCode: undefined
+			airdropCode: undefined,
+			uri: undefined
 		};
 	}
 
@@ -63,8 +69,11 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 		);
 	};
 
+	const uri = searchParams?.get('uri');
+
 	return {
 		token: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
-		airdropCode: searchParams?.get('code')
+		airdropCode: searchParams?.get('code'),
+		uri: nonNullish(uri) ? decodeURIComponent(uri) : null
 	};
 };

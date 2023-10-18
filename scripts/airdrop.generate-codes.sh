@@ -60,7 +60,7 @@ case $ENV in
 esac
 
 if [ -n "${ENV+1}" ]; then
-  dfx canister call airdrop add_codes '(vec '"$FORMATTED_CODES"')' --network "$ENV" --wallet $WALLET
+  dfx canister call airdrop add_codes '(vec '"$FORMATTED_CODES"')' --network "$ENV" --wallet "$WALLET"
 else
   dfx canister call airdrop add_codes '(vec '"$FORMATTED_CODES"')'
 fi
