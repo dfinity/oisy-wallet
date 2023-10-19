@@ -8,7 +8,7 @@ use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
-use ic_cdk_macros::{export_candid, init, query, update};
+use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
     storable::{Blob, Bound, Storable},
@@ -175,6 +175,17 @@ fn init(arg: Arg) {
         }),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+}
+
+#[post_upgrade]
+fn post_upgrade(_: Option<Arg>) {
+    read_state(|s| {
+        let _ = s
+            .config
+            .get()
+            .as_ref()
+            .expect("config is not initialized: reinstall the canister instead of upgrading");
+    })
 }
 
 /// Processes external HTTP requests.
