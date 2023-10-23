@@ -35,7 +35,5 @@ export const loadFiatBalance = async (): Promise<{ success: boolean }> => {
 			err
 		});
 	}
-
-	console.log('>>>', get(fiatStore));
 	return { success: true };
 };
