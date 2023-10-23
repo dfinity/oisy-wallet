@@ -1,10 +1,10 @@
 import { COINGECKO_ETHEREUM_NETWORK_ID } from '$lib/constants/coingecko.constants';
 import { DEFAULT_CURRENCY } from '$lib/constants/tokens.constants';
-import type { TokenId } from '$lib/types/token';
 import { erc20Tokens } from '$lib/derived/erc20.derived';
+import type { TokenId } from '$lib/types/token';
+import { get } from 'svelte/store';
 import type { TokenPriceCurrencyResponse, TokenPriceResponse } from './coingecko';
 import { CoinGeckoClient } from './coingecko';
-import { get } from 'svelte/store';
 
 const provider = new CoinGeckoClient({ autoRetry: true });
 
@@ -40,11 +40,10 @@ export const Erc20PriceByContract = async (
 	});
 
 	// transform from {<coin:str>: {<currency:str>: <value:number>},...} => {<coin:Symbol>: <value:number>}
-	const xx = Object.keys(r)
+	return Object.keys(r)
 		.map((k) => ({ [contract2Symbol[k.toLowerCase()]]: r[k][currency] }))
 		.reduce(
 			(obj, item) => ({ ...obj, ...item }),
 			tokenList.reduce((acc, val) => ({ ...acc, [val]: undefined }), {})
 		);
-	return xx;
 };
