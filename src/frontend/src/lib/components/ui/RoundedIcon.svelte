@@ -2,7 +2,7 @@
 	import type { ComponentType } from 'svelte';
 
 	export let icon: ComponentType;
-	export let iconSize = '3rem';
+	export let iconSize = '2.9rem';
 	export let backgroundStyleClass = 'bg-dark-blue opacity-15';
 	export let iconStyleClass = '';
 </script>

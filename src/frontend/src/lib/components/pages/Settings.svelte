@@ -10,7 +10,7 @@
 	import { AIRDROP, AIRDROP_COMPLETED } from '$lib/constants/airdrop.constants';
 	import AdminGuard from '$lib/components/admin/AdminGuard.svelte';
 	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
-	import AddToken from "$lib/components/tokens/AddToken.svelte";
+	import AddToken from '$lib/components/tokens/AddToken.svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -55,7 +55,7 @@
 
 <TokensMetadata />
 
-<div class="mt-3 px-2">
+<div class="mt-3 px-2" style="border-left: 1px solid transparent">
 	<AddToken iconSize="small" />
 </div>
 
