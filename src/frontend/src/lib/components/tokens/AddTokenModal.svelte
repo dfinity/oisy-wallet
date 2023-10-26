@@ -72,7 +72,7 @@
 			saveProgressStep = AddTokenStep.SAVE;
 
 			await addUserToken({
-				identity,
+				identity: $authStore.identity,
 				token: {
 					chain_id: ETH_CHAIN_ID,
 					contract_address: contractAddress,
