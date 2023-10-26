@@ -5,6 +5,8 @@
 	import { AddTokenStep } from '$lib/enums/steps';
 	import AddTokenForm from '$lib/components/tokens/AddTokenForm.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import SendReview from "$lib/components/send/SendReview.svelte";
+	import AddTokenReview from "$lib/components/tokens/AddTokenReview.svelte";
 
 	const steps: WizardSteps = [
 		{
@@ -33,12 +35,18 @@
 	};
 
 	let contractAddress = '';
+
+	const save = () => {
+
+	}
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	{#if currentStep?.name === 'Review'}{:else if currentStep?.name === 'Saving'}{:else}
+	{#if currentStep?.name === 'Review'}
+		<AddTokenReview on:icBack={modal.back} on:icSave={save} {contractAddress} />
+	{:else if currentStep?.name === 'Saving'}{:else}
 		<AddTokenForm on:icNext={modal.next} on:icClose={close} bind:contractAddress />
 	{/if}
 </WizardModal>

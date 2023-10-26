@@ -18,7 +18,7 @@
 		inputType="text"
 		required
 		bind:value={contractAddress}
-		placeholder="Enter a contract address"
+		placeholder="Enter an ERC20 contract address"
 	/>
 
 	<div class="flex justify-end gap-1">
