@@ -12,7 +12,7 @@ export const isIcpAccountIdentifier = async (address: string | undefined): Promi
 	}
 
 	try {
-		const { checkAccountId } = await import('@dfinity/nns');
+		const { checkAccountId } = await import('@dfinity/ledger-icp');
 		checkAccountId(address);
 		return true;
 	} catch (_: unknown) {
