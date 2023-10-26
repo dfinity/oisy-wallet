@@ -11,10 +11,12 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { ADD_TOKEN_STEPS, SEND_STEPS } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import {isNullish} from "@dfinity/utils";
-	import {authStore} from "$lib/stores/auth.store";
-	import {addUserToken} from "$lib/api/backend.api";
-	import {ETH_CHAIN_ID} from "$lib/constants/eth.constants";
+	import { isNullish } from '@dfinity/utils';
+	import { authStore } from '$lib/stores/auth.store';
+	import { addUserToken } from '$lib/api/backend.api';
+	import { ETH_CHAIN_ID } from '$lib/constants/eth.constants';
+	import { erc20TokensStore } from '$lib/stores/erc20.store';
+	import { Erc20Metadata } from '$lib/types/erc20';
 
 	const steps: WizardSteps = [
 		{
@@ -43,11 +45,19 @@
 	};
 
 	let contractAddress = '';
+	let metadata: Erc20Metadata | undefined;
 
-	const save = () => {
+	const save = async () => {
 		if (isNullishOrEmpty(contractAddress)) {
 			toastsError({
 				msg: { text: `Contract address is invalid.` }
+			});
+			return;
+		}
+
+		if (isNullish(metadata)) {
+			toastsError({
+				msg: { text: `No metadata were fetched for the contract address.` }
 			});
 			return;
 		}
@@ -62,6 +72,8 @@
 		modal.next();
 
 		try {
+			saveProgressStep = AddTokenStep.SAVE;
+
 			await addUserToken({
 				identity,
 				token: {
@@ -71,6 +83,15 @@
 					decimals: []
 				}
 			});
+
+			saveProgressStep = AddTokenStep.UPDATE_UI;
+
+			erc20TokensStore.add({
+				address: contractAddress,
+				...metadata
+			});
+
+			saveProgressStep = AddTokenStep.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
@@ -88,7 +109,7 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<AddTokenReview on:icBack={modal.back} on:icSave={save} {contractAddress} />
+		<AddTokenReview on:icBack={modal.back} on:icSave={save} {contractAddress} bind:metadata />
 	{:else if currentStep?.name === 'Saving'}
 		<InProgressWizard progressStep={saveProgressStep} steps={ADD_TOKEN_STEPS} />
 	{:else}

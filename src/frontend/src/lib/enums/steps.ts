@@ -30,5 +30,6 @@ export enum LoaderStep {
 export enum AddTokenStep {
 	INITIALIZATION = 'initialization',
 	SAVE = 'save',
+	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }

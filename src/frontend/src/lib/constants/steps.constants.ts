@@ -1,6 +1,5 @@
-import {AddTokenStep, SendStep} from '$lib/enums/steps';
+import { AddTokenStep, SendStep } from '$lib/enums/steps';
 import type { ProgressStep } from '@dfinity/gix-components';
-import AddToken from "$lib/components/tokens/AddToken.svelte";
 
 export const SEND_STEPS: [ProgressStep, ...ProgressStep[]] = [
 	{
@@ -56,6 +55,11 @@ export const ADD_TOKEN_STEPS: [ProgressStep, ...ProgressStep[]] = [
 	{
 		step: AddTokenStep.SAVE,
 		text: 'Saving...',
+		state: 'next'
+	} as ProgressStep,
+	{
+		step: AddTokenStep.UPDATE_UI,
+		text: 'Updating the UI...',
 		state: 'next'
 	} as ProgressStep
 ];
