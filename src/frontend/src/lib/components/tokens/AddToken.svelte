@@ -5,13 +5,15 @@
 	import IconPlus from '$lib/components/icons/IconPlus.svelte';
 	import { modalAddToken } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$lib/components/tokens/AddTokenModal.svelte';
+
+	export let iconSize: 'big' | 'small' = 'big';
 </script>
 
 <button on:click={() => modalStore.openAddToken()} class="contents">
 	<Card>
 		<span class="text-grey">Add new token</span>
 
-		<RoundedIcon slot="icon" icon={IconPlus} backgroundStyleClass="bg-dust" />
+		<RoundedIcon slot="icon" icon={IconPlus} backgroundStyleClass="bg-dust" iconSize={iconSize === 'small' ? '32px' : '2.9rem'} />
 	</Card>
 </button>
 
