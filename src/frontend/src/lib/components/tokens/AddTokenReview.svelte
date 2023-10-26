@@ -6,7 +6,6 @@
 	import type { Erc20Metadata } from '$lib/types/erc20';
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import {IconWarning} from "@dfinity/gix-components";
 	import Warning from "$lib/components/ui/Warning.svelte";
 
 	export let contractAddress = '';
