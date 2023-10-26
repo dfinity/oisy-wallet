@@ -2,7 +2,6 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import AirdropInvites from '$lib/components/airdrop/AirdropInvites.svelte';
 	import type { Info } from '$declarations/airdrop/airdrop.did';
-	import { AirdropStep } from '$lib/enums/airdrop';
 	import type { StaticStep } from '$lib/types/steps';
 	import { fromNullable } from '@dfinity/utils';
 	import {
@@ -10,6 +9,7 @@
 		hasAirdropInvites,
 		isAirdropTransferred
 	} from '$lib/utils/airdrop.utils';
+    import {AirdropStep} from "$lib/enums/steps";
 
 	export let airdrop: Info;
 
