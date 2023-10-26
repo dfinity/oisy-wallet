@@ -52,3 +52,8 @@ export const addUserToken = async ({
 	const { add_user_token } = await getBackendActor(identity);
 	return add_user_token(token);
 };
+
+export const listUserTokens = async ({ identity }: { identity: Identity }): Promise<Token[]> => {
+	const { list_user_tokens } = await getBackendActor(identity);
+	return list_user_tokens();
+};
