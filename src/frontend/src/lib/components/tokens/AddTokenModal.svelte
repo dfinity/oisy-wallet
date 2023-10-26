@@ -11,6 +11,10 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { ADD_TOKEN_STEPS, SEND_STEPS } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import {isNullish} from "@dfinity/utils";
+	import {authStore} from "$lib/stores/auth.store";
+	import {addUserToken} from "$lib/api/backend.api";
+	import {ETH_CHAIN_ID} from "$lib/constants/eth.constants";
 
 	const steps: WizardSteps = [
 		{
@@ -48,9 +52,25 @@
 			return;
 		}
 
+		if (isNullish($authStore.identity)) {
+			toastsError({
+				msg: { text: `You are not authenticated.` }
+			});
+			return;
+		}
+
 		modal.next();
 
 		try {
+			await addUserToken({
+				identity,
+				token: {
+					chain_id: ETH_CHAIN_ID,
+					contract_address: contractAddress,
+					symbol: [],
+					decimals: []
+				}
+			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
