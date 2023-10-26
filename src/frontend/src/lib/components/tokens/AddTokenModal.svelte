@@ -14,6 +14,7 @@
 	import { ETH_CHAIN_ID } from '$lib/constants/eth.constants';
 	import { erc20TokensStore } from '$lib/stores/erc20.store';
 	import type { Erc20Metadata } from '$lib/types/erc20';
+	import { mapErc20Token } from '$lib/utils/erc20.utils';
 
 	const steps: WizardSteps = [
 		{
@@ -83,10 +84,7 @@
 
 			saveProgressStep = AddTokenStep.UPDATE_UI;
 
-			erc20TokensStore.add({
-				address: contractAddress,
-				...metadata
-			});
+			erc20TokensStore.add(mapErc20Token({ address: contractAddress, ...metadata }));
 
 			saveProgressStep = AddTokenStep.DONE;
 
