@@ -1,17 +1,65 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { metadata } from '$lib/providers/infura-erc20.providers';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { Erc20Metadata } from '$lib/types/erc20';
+	import { isNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
 
-    export let contractAddress = '';
+	export let contractAddress = '';
+
+	let invalidERC20Address = true;
+	let meta: Erc20Metadata | undefined;
+
+	onMount(async () => {
+		try {
+			meta = await metadata({ address: contractAddress });
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: 'Error while loading the ERC20 contract metadata.' },
+				err
+			});
+
+			dispatch('icBack');
+		}
+	});
 
 	let invalid = true;
-	$: invalid = isNullishOrEmpty(contractAddress);
+	$: invalid = isNullishOrEmpty(contractAddress) || invalidERC20Address;
 
 	const dispatch = createEventDispatcher();
 </script>
 
 <label for="contractAddress" class="font-bold px-1.25">Contract address:</label>
 <div id="contractAddress" class="font-normal mb-2 px-1.25 break-words">{contractAddress}</div>
+
+<label for="contractName" class="font-bold px-1.25">Name:</label>
+<div id="contractName" class="font-normal mb-2 px-1.25 break-words">
+	{#if isNullish(meta)}
+		&#8203;
+	{:else}
+		<span in:fade>{meta.name}</span>
+	{/if}
+</div>
+
+<label for="contractSymbol" class="font-bold px-1.25">Symbol:</label>
+<div id="contractSymbol" class="font-normal mb-2 px-1.25 break-words">
+	{#if isNullish(meta)}
+		&#8203;
+	{:else}
+		<span in:fade>{meta.symbol}</span>
+	{/if}
+</div>
+
+<label for="contractDecimals" class="font-bold px-1.25">Decimals:</label>
+<div id="contractDecimals" class="font-normal mb-2 px-1.25 break-words">
+	{#if isNullish(meta)}
+		&#8203;
+	{:else}
+		<span in:fade>{meta.decimals}</span>
+	{/if}
+</div>
 
 <p class="mt-1 mb-4 px-1.25">⚠️ Before manually adding a token, make sure you trust it.</p>
 
