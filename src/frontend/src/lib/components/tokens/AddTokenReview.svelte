@@ -7,11 +7,25 @@
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import Warning from '$lib/components/ui/Warning.svelte';
+	import { erc20TokensStore } from '$lib/stores/erc20.store';
 
 	export let contractAddress = '';
 	export let metadata: Erc20Metadata | undefined;
 
 	onMount(async () => {
+		if (
+			$erc20TokensStore?.find(
+				({ address }) => address.toLowerCase() === contractAddress.toLowerCase()
+			)
+		) {
+			toastsError({
+				msg: { text: 'Token is already available.' }
+			});
+
+			dispatch('icBack');
+			return;
+		}
+
 		try {
 			metadata = await metadataApi({ address: contractAddress });
 		} catch (err: unknown) {
