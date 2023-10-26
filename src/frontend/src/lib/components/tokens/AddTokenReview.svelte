@@ -6,11 +6,10 @@
 	import type { Erc20Metadata } from '$lib/types/erc20';
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import Warning from "$lib/components/ui/Warning.svelte";
+	import Warning from '$lib/components/ui/Warning.svelte';
 
 	export let contractAddress = '';
 
-	let invalidERC20Address = true;
 	let meta: Erc20Metadata | undefined;
 
 	onMount(async () => {
@@ -27,7 +26,7 @@
 	});
 
 	let invalid = true;
-	$: invalid = isNullishOrEmpty(contractAddress) || invalidERC20Address;
+	$: invalid = isNullishOrEmpty(contractAddress) || isNullish(meta);
 
 	const dispatch = createEventDispatcher();
 </script>
