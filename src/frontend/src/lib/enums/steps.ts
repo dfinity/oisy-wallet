@@ -26,3 +26,9 @@ export enum LoaderStep {
 	ETH_DATA = 'eth_data',
 	DONE = 'done'
 }
+
+export enum AddTokenStep {
+	INITIALIZATION = 'initialization',
+	SAVE = 'save',
+	DONE = 'done'
+}

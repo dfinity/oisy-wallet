@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { AddTokenStep } from '$lib/enums/token';
+
+    import {AddTokenStep} from "$lib/enums/steps";
 
 	const steps: WizardSteps = [
 		{
