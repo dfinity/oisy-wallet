@@ -3,7 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { isTransactionPending } from '$lib/utils/transactions.utils';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import type { SvelteComponent } from 'svelte';
+	import type { ComponentType } from 'svelte';
 	import { addressStore } from '$lib/stores/address.store';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
@@ -25,7 +25,7 @@
 	let type: 'send' | 'receive';
 	$: type = from?.toLowerCase() === $addressStore?.toLowerCase() ? 'send' : 'receive';
 
-	let icon: typeof SvelteComponent;
+	let icon: ComponentType;
 	$: icon = type === 'send' ? IconSend : IconReceive;
 
 	let amount: BigNumber;
