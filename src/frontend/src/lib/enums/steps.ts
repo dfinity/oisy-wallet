@@ -12,3 +12,17 @@ export enum SignStep {
 	APPROVE = 'approve',
 	DONE = 'done'
 }
+
+export enum AirdropStep {
+	INITIALIZATION = 'initialization',
+	AIRDROP = 'airdrop',
+	INVITE_FRIENDS = 'invite_friends',
+	DONE = 'done'
+}
+
+export enum LoaderStep {
+	INITIALIZATION = 'initialization',
+	ETH_ADDRESS = 'eth_address',
+	ETH_DATA = 'eth_data',
+	DONE = 'done'
+}

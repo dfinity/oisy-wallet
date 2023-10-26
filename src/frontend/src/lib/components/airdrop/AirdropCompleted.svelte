@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Info } from '$declarations/airdrop/airdrop.did';
-	import { AirdropStep } from '$lib/enums/airdrop';
 	import type { StaticStep } from '$lib/types/steps';
 	import { countAirdropInvitesRedeemed } from '$lib/utils/airdrop.utils';
 	import StaticSteps from "$lib/components/ui/StaticSteps.svelte";
+    import {AirdropStep} from "$lib/enums/steps";
 
 	export let airdrop: Info;
 
