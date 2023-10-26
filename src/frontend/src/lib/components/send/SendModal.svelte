@@ -5,7 +5,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
-	import { invalidAmount, invalidDestination, mapAddressStartsWith0x } from '$lib/utils/send.utils';
+	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -21,6 +21,7 @@
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import type { TargetNetwork } from '$lib/enums/network';
+	import {invalidAmount, isNullishOrEmpty} from "$lib/utils/input.utils";
 
 	/**
 	 * Fee context store
@@ -47,7 +48,7 @@
 	let sendProgressStep: string = SendStep.INITIALIZATION;
 
 	const send = async () => {
-		if (invalidDestination(destination)) {
+		if (isNullishOrEmpty(destination)) {
 			toastsError({
 				msg: { text: `Destination address is invalid.` }
 			});
