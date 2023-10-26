@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import SendSource from '$lib/components/send/SendSource.svelte';
-	import { invalidDestination, invalidAmount } from '$lib/utils/send.utils';
 	import { createEventDispatcher } from 'svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import SendNetworkICP from "$lib/components/send/SendNetworkICP.svelte";
 	import SendDestination from "$lib/components/send/SendDestination.svelte";
 	import type {TargetNetwork} from "$lib/enums/network";
+	import {invalidAmount, isNullishOrEmpty} from "$lib/utils/input.utils";
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let network: TargetNetwork | undefined = undefined;
 
 	let invalid = true;
-	$: invalid = invalidDestination(destination) || invalidAmount(amount);
+	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount);
 
 	const dispatch = createEventDispatcher();
 </script>
