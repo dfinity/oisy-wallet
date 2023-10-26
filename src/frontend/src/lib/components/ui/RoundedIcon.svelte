@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { SvelteComponent } from 'svelte';
+	import type { ComponentType } from 'svelte';
 
-	export let icon: typeof SvelteComponent;
+	export let icon: ComponentType;
 	export let backgroundStyleClass = 'bg-dark-blue opacity-15';
 	export let iconStyleClass = '';
 </script>

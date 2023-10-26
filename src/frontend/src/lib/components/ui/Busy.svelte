@@ -29,6 +29,8 @@
 		on:keydown={keyboardClose}
 		class:close={$busy.close}
 		class="busy"
+		role="button"
+		tabindex="-1"
 	>
 		<div class="content">
 			{#if $busy.spinner}

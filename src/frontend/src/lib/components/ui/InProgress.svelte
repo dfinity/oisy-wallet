@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ProgressSteps, type ProgressStep } from '@dfinity/gix-components';
-	import type { SvelteComponent } from 'svelte';
+	import type { ComponentType } from 'svelte';
 	import StaticSteps from '$lib/components/ui/StaticSteps.svelte';
 	import type { StaticStep } from '$lib/types/steps';
 
@@ -8,7 +8,7 @@
 	export let steps: [ProgressStep | StaticStep, ...(ProgressStep | StaticStep)[]];
 	export let type: 'progress' | 'static' = 'progress';
 
-	let cmp: typeof SvelteComponent;
+	let cmp: ComponentType;
 	$: cmp = type === 'static' ? StaticSteps : ProgressSteps;
 
 	let dynamicSteps: [ProgressStep | StaticStep, ...(ProgressStep | StaticStep)[]] = [...steps];
