@@ -6,6 +6,8 @@
 	import type { Erc20Metadata } from '$lib/types/erc20';
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import {IconWarning} from "@dfinity/gix-components";
+	import Warning from "$lib/components/ui/Warning.svelte";
 
 	export let contractAddress = '';
 
@@ -61,7 +63,9 @@
 	{/if}
 </div>
 
-<p class="mt-1 mb-4 px-1.25">⚠️ Before manually adding a token, make sure you trust it.</p>
+<Warning>
+	<p>Before manually adding a token, make sure you trust it.</p>
+</Warning>
 
 <div class="flex justify-end gap-1">
 	<button class="secondary" on:click={() => dispatch('icBack')}>Back</button>

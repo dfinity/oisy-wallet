@@ -7,6 +7,8 @@
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import SendReview from "$lib/components/send/SendReview.svelte";
 	import AddTokenReview from "$lib/components/tokens/AddTokenReview.svelte";
+	import {isNullishOrEmpty} from "$lib/utils/input.utils";
+	import {toastsError} from "$lib/stores/toasts.store";
 
 	const steps: WizardSteps = [
 		{
@@ -37,7 +39,14 @@
 	let contractAddress = '';
 
 	const save = () => {
+		if (isNullishOrEmpty(contractAddress)) {
+			toastsError({
+				msg: { text: `Contract address is invalid.` }
+			});
+			return;
+		}
 
+		modal.next();
 	}
 </script>
 
