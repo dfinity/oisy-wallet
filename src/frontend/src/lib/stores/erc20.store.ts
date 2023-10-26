@@ -16,7 +16,13 @@ const initEcr20TokensStore = (): Ecr20TokensStore => {
 
 	return {
 		set: (tokens: Ecr20TokensData) => set(tokens),
-		add: (token: Erc20Token) => update((state) => [...(state ?? []), token]),
+		add: (token: Erc20Token) =>
+			update((state) => [
+				...(state ?? []).filter(
+					({ address }) => address.toLowerCase() !== token.address.toLowerCase()
+				),
+				token
+			]),
 		reset: () => set(INITIAL),
 		subscribe
 	};
