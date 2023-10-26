@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { ProgressStep } from '@dfinity/gix-components';
-	import { LoaderStep } from '$lib/enums/loader';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
 	import { loadAddress } from '$lib/services/address.services';
@@ -19,6 +18,7 @@
 	import { tokenId } from '$lib/derived/token.derived';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import {loading} from "$lib/stores/loader.store";
+    import {LoaderStep} from "$lib/enums/steps";
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
