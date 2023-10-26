@@ -4,8 +4,8 @@ import type { OptionIdentity } from '$lib/types/identity';
 import { getBackendActor } from '$lib/utils/actor.utils';
 
 export const getEthAddress = async (identity: OptionIdentity): Promise<ECDSA_PUBLIC_KEY> => {
-	const actor = await getBackendActor(identity);
-	return actor.caller_eth_address();
+	const { caller_eth_address } = await getBackendActor(identity);
+	return caller_eth_address();
 };
 
 export const signTransaction = async ({
@@ -15,8 +15,8 @@ export const signTransaction = async ({
 	transaction: SignRequest;
 	identity: OptionIdentity;
 }): Promise<string> => {
-	const actor = await getBackendActor(identity);
-	return actor.sign_transaction(transaction);
+	const { sign_transaction } = await getBackendActor(identity);
+	return sign_transaction(transaction);
 };
 
 export const signMessage = async ({
@@ -26,8 +26,8 @@ export const signMessage = async ({
 	message: string;
 	identity: OptionIdentity;
 }): Promise<string> => {
-	const actor = await getBackendActor(identity);
-	return actor.personal_sign(message);
+	const { personal_sign } = await getBackendActor(identity);
+	return personal_sign(message);
 };
 
 export const signPrehash = async ({
@@ -37,6 +37,6 @@ export const signPrehash = async ({
 	hash: string;
 	identity: OptionIdentity;
 }): Promise<string> => {
-	const actor = await getBackendActor(identity);
-	return actor.sign_prehash(hash);
+	const { sign_prehash } = await getBackendActor(identity);
+	return sign_prehash(hash);
 };
