@@ -6,7 +6,7 @@
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
-	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { addressStore } from '$lib/stores/address.store';
@@ -160,7 +160,7 @@
 		{#if currentStep?.name === 'Review'}
 			<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {network} />
 		{:else if currentStep?.name === 'Sending'}
-			<SendProgress progressStep={sendProgressStep} steps={SEND_STEPS} />
+			<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
 		{:else}
 			<SendForm
 				on:icNext={modal.next}
