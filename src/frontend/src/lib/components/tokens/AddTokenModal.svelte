@@ -5,10 +5,12 @@
 	import { AddTokenStep } from '$lib/enums/steps';
 	import AddTokenForm from '$lib/components/tokens/AddTokenForm.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
-	import SendReview from "$lib/components/send/SendReview.svelte";
-	import AddTokenReview from "$lib/components/tokens/AddTokenReview.svelte";
-	import {isNullishOrEmpty} from "$lib/utils/input.utils";
-	import {toastsError} from "$lib/stores/toasts.store";
+	import SendReview from '$lib/components/send/SendReview.svelte';
+	import AddTokenReview from '$lib/components/tokens/AddTokenReview.svelte';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import { ADD_TOKEN_STEPS, SEND_STEPS } from '$lib/constants/steps.constants';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 
 	const steps: WizardSteps = [
 		{
@@ -25,7 +27,7 @@
 		}
 	];
 
-	let sendProgressStep: string = AddTokenStep.INITIALIZATION;
+	let saveProgressStep: string = AddTokenStep.INITIALIZATION;
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -33,7 +35,7 @@
 	const close = () => {
 		modalStore.close();
 
-		sendProgressStep = AddTokenStep.INITIALIZATION;
+		saveProgressStep = AddTokenStep.INITIALIZATION;
 	};
 
 	let contractAddress = '';
@@ -47,7 +49,19 @@
 		}
 
 		modal.next();
-	}
+
+		try {
+
+			setTimeout(() => close(), 750);
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: `Something went wrong while saving the token.` },
+				err
+			});
+
+			modal.back();
+		}
+	};
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
@@ -55,7 +69,9 @@
 
 	{#if currentStep?.name === 'Review'}
 		<AddTokenReview on:icBack={modal.back} on:icSave={save} {contractAddress} />
-	{:else if currentStep?.name === 'Saving'}{:else}
+	{:else if currentStep?.name === 'Saving'}
+		<InProgressWizard progressStep={saveProgressStep} steps={ADD_TOKEN_STEPS} />
+	{:else}
 		<AddTokenForm on:icNext={modal.next} on:icClose={close} bind:contractAddress />
 	{/if}
 </WizardModal>
