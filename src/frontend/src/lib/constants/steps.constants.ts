@@ -1,4 +1,4 @@
-import { SendStep } from '$lib/enums/steps';
+import { AddTokenStep, SendStep } from '$lib/enums/steps';
 import type { ProgressStep } from '@dfinity/gix-components';
 
 export const SEND_STEPS: [ProgressStep, ...ProgressStep[]] = [
@@ -42,6 +42,24 @@ export const WALLET_CONNECT_SIGN_STEPS: [ProgressStep, ...ProgressStep[]] = [
 	{
 		step: SendStep.SEND,
 		text: 'Approving...',
+		state: 'next'
+	} as ProgressStep
+];
+
+export const ADD_TOKEN_STEPS: [ProgressStep, ...ProgressStep[]] = [
+	{
+		step: AddTokenStep.INITIALIZATION,
+		text: 'Initializing...',
+		state: 'in_progress'
+	} as ProgressStep,
+	{
+		step: AddTokenStep.SAVE,
+		text: 'Saving...',
+		state: 'next'
+	} as ProgressStep,
+	{
+		step: AddTokenStep.UPDATE_UI,
+		text: 'Updating the UI...',
 		state: 'next'
 	} as ProgressStep
 ];

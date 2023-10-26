@@ -8,15 +8,12 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { erc20Tokens } from '$lib/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
-	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import IconPlus from '$lib/components/icons/IconPlus.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
+	import AddToken from "$lib/components/tokens/AddToken.svelte";
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
-
-	const icon = IconPlus;
 </script>
 
 <h2 class="text-base mb-3 pb-0.5" class:mt-6={AIRDROP} class:mt-8={!AIRDROP}>Tokens</h2>
@@ -43,8 +40,4 @@
 	</Listener>
 {/each}
 
-<Card>
-	<span class="text-grey">Add new token (Coming soon)</span>
-
-	<RoundedIcon slot="icon" {icon} backgroundStyleClass="bg-dust" />
-</Card>
+<AddToken />
