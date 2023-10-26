@@ -1,22 +1,19 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
-
 	import { AddTokenStep } from '$lib/enums/steps';
 	import AddTokenForm from '$lib/components/tokens/AddTokenForm.svelte';
-	import SendForm from '$lib/components/send/SendForm.svelte';
-	import SendReview from '$lib/components/send/SendReview.svelte';
 	import AddTokenReview from '$lib/components/tokens/AddTokenReview.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { ADD_TOKEN_STEPS, SEND_STEPS } from '$lib/constants/steps.constants';
+	import { ADD_TOKEN_STEPS } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { isNullish } from '@dfinity/utils';
 	import { authStore } from '$lib/stores/auth.store';
 	import { addUserToken } from '$lib/api/backend.api';
 	import { ETH_CHAIN_ID } from '$lib/constants/eth.constants';
 	import { erc20TokensStore } from '$lib/stores/erc20.store';
-	import { Erc20Metadata } from '$lib/types/erc20';
+	import type { Erc20Metadata } from '$lib/types/erc20';
 
 	const steps: WizardSteps = [
 		{
