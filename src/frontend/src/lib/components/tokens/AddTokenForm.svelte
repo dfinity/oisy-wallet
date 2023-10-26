@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import { invalidDestination } from '$lib/utils/send.utils';
 	import { createEventDispatcher } from 'svelte';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let contractAddress = '';
 
 	let invalid = true;
-	$: invalid = invalidDestination(contractAddress);
+	$: invalid = isNullishOrEmpty(contractAddress);
 
 	const dispatch = createEventDispatcher();
 </script>
