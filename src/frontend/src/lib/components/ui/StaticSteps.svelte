@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {IconCheckCircle, IconInfo} from '@dfinity/gix-components';
+	import { IconCheckCircle, IconInfo } from '@dfinity/gix-components';
 	import type { StaticStep } from '$lib/types/steps';
 	import { nonNullish } from '@dfinity/utils';
 

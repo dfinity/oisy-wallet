@@ -21,7 +21,7 @@
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import type { TargetNetwork } from '$lib/enums/network';
-	import {invalidAmount, isNullishOrEmpty} from "$lib/utils/input.utils";
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	/**
 	 * Fee context store

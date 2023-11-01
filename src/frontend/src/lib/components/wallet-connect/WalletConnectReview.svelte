@@ -28,7 +28,7 @@
 
 	onMount(() => (timer = setTimeout(() => (displayCancel = true), 2000)));
 
-    onDestroy(() => {
+	onDestroy(() => {
 		if (isNullish(timer)) {
 			return;
 		}

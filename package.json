@@ -21,8 +21,8 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest",
-		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write .",
+		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
+		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}'",
 		"prebuild": "npm run generate",
 		"generate": "scripts/did.sh && dfx generate && node scripts/update.types.mjs && npm run format",
 		"deploy": "scripts/deploy.sh"

@@ -10,12 +10,7 @@
 	$: disabled = $addressNotLoaded || $isBusy;
 </script>
 
-<button
-	class="flex-1 hero"
-	on:click={modalStore.openSend}
-	{disabled}
-	class:opacity-50={disabled}
->
+<button class="flex-1 hero" on:click={modalStore.openSend} {disabled} class:opacity-50={disabled}>
 	<IconSend size="28" />
 	<span>Send</span></button
 >

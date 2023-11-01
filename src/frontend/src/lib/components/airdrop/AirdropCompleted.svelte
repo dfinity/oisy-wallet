@@ -2,8 +2,8 @@
 	import type { Info } from '$declarations/airdrop/airdrop.did';
 	import type { StaticStep } from '$lib/types/steps';
 	import { countAirdropInvitesRedeemed } from '$lib/utils/airdrop.utils';
-	import StaticSteps from "$lib/components/ui/StaticSteps.svelte";
-    import {AirdropStep} from "$lib/enums/steps";
+	import StaticSteps from '$lib/components/ui/StaticSteps.svelte';
+	import { AirdropStep } from '$lib/enums/steps';
 
 	export let airdrop: Info;
 

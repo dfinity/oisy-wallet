@@ -5,7 +5,7 @@
 	import type { Info } from '$declarations/airdrop/airdrop.did';
 	import { AIRDROP_COMPLETED } from '$lib/constants/airdrop.constants';
 	import AirdropOngoing from '$lib/components/airdrop/AirdropOngoing.svelte';
-	import AirdropOver from "$lib/components/airdrop/AirdropCompleted.svelte";
+	import AirdropOver from '$lib/components/airdrop/AirdropCompleted.svelte';
 
 	export let airdrop: Info;
 </script>

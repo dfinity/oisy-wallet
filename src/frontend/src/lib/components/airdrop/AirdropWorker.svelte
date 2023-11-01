@@ -5,8 +5,8 @@
 	import { isAirdropOver } from '$lib/utils/airdrop.utils';
 	import type { PostMessage, PostMessageDataResponseAirdropCode } from '$lib/types/post-message';
 	import { airdropStore } from '$lib/stores/airdrop.store';
-    import {toastsShow} from "$lib/stores/toasts.store";
-    import {AIRDROP_COMPLETED} from "$lib/constants/airdrop.constants";
+	import { toastsShow } from '$lib/stores/toasts.store';
+	import { AIRDROP_COMPLETED } from '$lib/constants/airdrop.constants';
 
 	export let worker: Worker | undefined = undefined;
 
@@ -24,16 +24,16 @@
 
 			airdropStore.set(Ok);
 
-            if (Ok.tokens_transferred && !transferred) {
-                // A local state use to display once and only once a toast to inform that the airdrop has been received if the state is fetched with the cronjob.
-                transferred = true;
+			if (Ok.tokens_transferred && !transferred) {
+				// A local state use to display once and only once a toast to inform that the airdrop has been received if the state is fetched with the cronjob.
+				transferred = true;
 
-                toastsShow({
-                    text: 'Your received your Airdrop 🥳.',
-                    level: 'success',
-                    duration: 3500
-                });
-            }
+				toastsShow({
+					text: 'Your received your Airdrop 🥳.',
+					level: 'success',
+					duration: 3500
+				});
+			}
 
 			if (!isAirdropOver(Ok)) {
 				// We continue to poll until code is redeemed and all children are also redeemed.
@@ -56,16 +56,16 @@
 
 	const stopTimer = () => worker?.postMessage({ msg: 'stopCodeTimer' });
 
-    let transferred = $airdropStore?.tokens_transferred === true;
+	let transferred = $airdropStore?.tokens_transferred === true;
 
 	onMount(async () => {
 		if (!$airdropAvailable) {
 			return;
 		}
 
-        if (AIRDROP_COMPLETED) {
-            return;
-        }
+		if (AIRDROP_COMPLETED) {
+			return;
+		}
 
 		if (isNullish($airdropStore)) {
 			return;

@@ -8,6 +8,9 @@
 </script>
 
 <div class="relative">
-	<div class={`rounded-50 ${backgroundStyleClass}`} style={`width: ${iconSize}; aspect-ratio: 1/1`} />
+	<div
+		class={`rounded-50 ${backgroundStyleClass}`}
+		style={`width: ${iconSize}; aspect-ratio: 1/1`}
+	/>
 	<svelte:component this={icon} styleClass={`inset-center ${iconStyleClass}`} />
 </div>

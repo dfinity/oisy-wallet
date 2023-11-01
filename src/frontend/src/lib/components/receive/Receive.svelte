@@ -14,7 +14,12 @@
 	onMount(initMetamaskSupport);
 </script>
 
-<button class="flex-1 hero" {disabled} class:opacity-50={disabled} on:click={modalStore.openReceive}>
+<button
+	class="flex-1 hero"
+	{disabled}
+	class:opacity-50={disabled}
+	on:click={modalStore.openReceive}
+>
 	<IconReceive size="28" />
 	<span>Receive</span></button
 >

@@ -46,7 +46,7 @@
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
 					contract: $token as Erc20Token,
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					address: mapAddressStartsWith0x(destination !== '' ? destination : $addressStore!),
 					amount: parseToken({ value: `${amount ?? '1'}` }),
 					network

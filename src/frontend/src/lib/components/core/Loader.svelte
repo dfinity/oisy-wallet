@@ -17,8 +17,8 @@
 	import { loadEthData } from '$lib/services/loader.services';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
-	import {loading} from "$lib/stores/loader.store";
-    import {LoaderStep} from "$lib/enums/steps";
+	import { loading } from '$lib/stores/loader.store';
+	import { LoaderStep } from '$lib/enums/steps';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
@@ -54,7 +54,7 @@
 		}
 
 		// A small delay for display animation purpose.
-		setTimeout(() => (loading.set(false)), 1000);
+		setTimeout(() => loading.set(false), 1000);
 	})();
 
 	const { oisy_introduction }: Storage = browser

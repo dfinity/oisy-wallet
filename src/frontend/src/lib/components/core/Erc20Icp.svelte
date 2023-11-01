@@ -14,16 +14,16 @@
 </a>
 
 <style lang="scss">
-  a {
-    color: var(--alpha-color, var(--color-misty-rose));
-    margin: 0 auto;
+	a {
+		color: var(--alpha-color, var(--color-misty-rose));
+		margin: 0 auto;
 
-    :global(svg) {
-      vertical-align: bottom;
+		:global(svg) {
+			vertical-align: bottom;
 
-      @include media.min-width(medium) {
-        vertical-align: sub;
-      }
-    }
-  }
+			@include media.min-width(medium) {
+				vertical-align: sub;
+			}
+		}
+	}
 </style>
