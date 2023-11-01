@@ -5,7 +5,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
-	import {formatToDate, formatTokenDetailed } from '$lib/utils/format.utils';
+	import { formatToDate, formatTokenDetailed } from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import TransactionStatus from '$lib/components/transactions/TransactionStatus.svelte';
 	import { token } from '$lib/derived/token.derived';

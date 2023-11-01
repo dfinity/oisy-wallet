@@ -10,7 +10,7 @@
 	import Listener from '$lib/components/core/Listener.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
-	import AddToken from "$lib/components/tokens/AddToken.svelte";
+	import AddToken from '$lib/components/tokens/AddToken.svelte';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];

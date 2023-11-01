@@ -17,7 +17,9 @@
 	class:bg-off-white={color === 'off-white'}
 	class:bg-white={color === 'white'}
 	class:opacity-15={!loaded}
-	style={`border: 1px solid var(--color-${color === "off-white" ? "off-white" : "dust"}); width: calc(${size} + 2px); height: calc(${size} + 2px); transition: opacity 0.15s ease-in;`}
+	style={`border: 1px solid var(--color-${
+		color === 'off-white' ? 'off-white' : 'dust'
+	}); width: calc(${size} + 2px); height: calc(${size} + 2px); transition: opacity 0.15s ease-in;`}
 >
 	{#if nonNullish(src)}
 		<Img {src} {alt} width={size} height={size} on:load={() => (loaded = true)} />

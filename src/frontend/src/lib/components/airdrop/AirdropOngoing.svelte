@@ -9,7 +9,7 @@
 		hasAirdropInvites,
 		isAirdropTransferred
 	} from '$lib/utils/airdrop.utils';
-    import {AirdropStep} from "$lib/enums/steps";
+	import { AirdropStep } from '$lib/enums/steps';
 
 	export let airdrop: Info;
 

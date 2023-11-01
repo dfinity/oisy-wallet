@@ -4,10 +4,10 @@
 	import { createEventDispatcher } from 'svelte';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { token } from '$lib/derived/token.derived';
-	import SendNetworkICP from "$lib/components/send/SendNetworkICP.svelte";
-	import SendDestination from "$lib/components/send/SendDestination.svelte";
-	import type {TargetNetwork} from "$lib/enums/network";
-	import {invalidAmount, isNullishOrEmpty} from "$lib/utils/input.utils";
+	import SendNetworkICP from '$lib/components/send/SendNetworkICP.svelte';
+	import SendDestination from '$lib/components/send/SendDestination.svelte';
+	import type { TargetNetwork } from '$lib/enums/network';
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
