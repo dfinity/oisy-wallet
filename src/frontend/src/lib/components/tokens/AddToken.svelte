@@ -11,12 +11,13 @@
 
 <button on:click={() => modalStore.openAddToken()} class="contents">
 	<Card>
-		<span class="text-grey">Add new token</span>
+		<span>Add new token</span>
 
 		<RoundedIcon
 			slot="icon"
 			icon={IconPlus}
-			backgroundStyleClass="bg-dust"
+			backgroundStyleClass="bg-white"
+			additionalStyleClass="border: 1px solid var(--color-dust);"
 			iconSize={iconSize === 'small' ? '32px' : '2.9rem'}
 		/>
 	</Card>
