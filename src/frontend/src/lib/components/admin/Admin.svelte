@@ -10,8 +10,8 @@
 	import { generateAirdropCode } from '$lib/api/airdrop.api';
 	import type { CodeInfo } from '$declarations/airdrop/airdrop.did';
 	import { airdropCodeUrl } from '$lib/utils/airdrop.utils';
-	import {get} from "svelte/store";
-	import {authStore} from "$lib/stores/auth.store";
+	import { get } from 'svelte/store';
+	import { authStore } from '$lib/stores/auth.store';
 
 	let codeInfo: CodeInfo | undefined;
 	let busy = false;
@@ -28,7 +28,7 @@
 		codeInfo = undefined;
 
 		try {
-			const {identity} = get(authStore);
+			const { identity } = get(authStore);
 
 			const result = await generateAirdropCode(identity);
 

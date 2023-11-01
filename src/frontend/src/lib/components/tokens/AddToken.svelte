@@ -13,7 +13,12 @@
 	<Card>
 		<span class="text-grey">Add new token</span>
 
-		<RoundedIcon slot="icon" icon={IconPlus} backgroundStyleClass="bg-dust" iconSize={iconSize === 'small' ? '32px' : '2.9rem'} />
+		<RoundedIcon
+			slot="icon"
+			icon={IconPlus}
+			backgroundStyleClass="bg-dust"
+			iconSize={iconSize === 'small' ? '32px' : '2.9rem'}
+		/>
 	</Card>
 </button>
 

@@ -3,7 +3,6 @@
 <div class="z-0 bg-misty-rose opacity-5 bottom-left rounded-50" />
 
 <style lang="scss">
-
 	div {
 		position: fixed;
 
