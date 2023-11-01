@@ -14,14 +14,14 @@
 >
 	<path
 		d="M6.99976 13.0005L6.99976 0.999999"
-		stroke="#937993"
+		stroke="#3B00B9"
 		stroke-width="2"
 		stroke-linecap="round"
 		stroke-linejoin="round"
 	/>
 	<path
 		d="M13 7.00024H0.999511"
-		stroke="#937993"
+		stroke="#3B00B9"
 		stroke-width="2"
 		stroke-linecap="round"
 		stroke-linejoin="round"

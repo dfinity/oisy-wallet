@@ -5,12 +5,13 @@
 	export let iconSize = '2.9rem';
 	export let backgroundStyleClass = 'bg-dark-blue opacity-15';
 	export let iconStyleClass = '';
+	export let additionalStyleClass = '';
 </script>
 
 <div class="relative">
 	<div
 		class={`rounded-50 ${backgroundStyleClass}`}
-		style={`width: ${iconSize}; aspect-ratio: 1/1`}
+		style={`width: ${iconSize}; aspect-ratio: 1/1; ${additionalStyleClass}`}
 	/>
 	<svelte:component this={icon} styleClass={`inset-center ${iconStyleClass}`} />
 </div>
