@@ -75,7 +75,16 @@
 </div>
 
 <Warning>
-	<p>Before manually adding a token, make sure you trust it.</p>
+	<p>
+		Make sure that you trust the token that you are adding. If the token you are adding is
+		controlled by a malicious party, they could try and scam you e.g. by making you believe you
+		received a significant amount of tokens in order to trick you into sending them tokens in return
+		or perform other undesired actions. Learn more about scams and security risks e.g. <a
+			rel="noreferrer noopener"
+			target="_blank"
+			href="https://support.metamask.io/hc/en-us/articles/4403988839451">here</a
+		>.
+	</p>
 </Warning>
 
 <div class="flex justify-end gap-1">
@@ -89,3 +98,10 @@
 		Save
 	</button>
 </div>
+
+<style lang="scss">
+	a:active,
+	a:hover {
+		color: var(--color-off-white);
+	}
+</style>
