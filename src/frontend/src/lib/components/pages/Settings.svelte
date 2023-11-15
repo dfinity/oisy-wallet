@@ -4,7 +4,7 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { secondsToDuration } from '$lib/utils/date.utils';
+	import { secondsToDuration } from '@dfinity/utils';
 	import Admin from '$lib/components/admin/Admin.svelte';
 	import type { Principal } from '@dfinity/principal';
 	import { AIRDROP, AIRDROP_COMPLETED } from '$lib/constants/airdrop.constants';
@@ -42,7 +42,7 @@
 			{#if nonNullish(remainingTimeMilliseconds)}
 				{remainingTimeMilliseconds <= 0
 					? '0'
-					: secondsToDuration(BigInt(remainingTimeMilliseconds) / 1000n)}
+					: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
 			{/if}
 		</output>
 
