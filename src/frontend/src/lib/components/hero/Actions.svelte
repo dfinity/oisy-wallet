@@ -5,7 +5,7 @@
 	export let send = false;
 </script>
 
-<div role="toolbar" class="flex gap-4 text-deep-violet font-bold py-8">
+<div role="toolbar" class="flex gap-4 text-deep-violet font-bold py-6">
 	<Receive />
 
 	{#if send}
