@@ -9,10 +9,10 @@
 </script>
 
 <label for="source" class="font-bold px-4.5">Source:</label>
-<div id="source" class="font-normal mb-4 px-4.5 break-words">{$addressStore ?? ''}</div>
+<div id="source" class="font-normal mb-4 px-4.5 break-all">{$addressStore ?? ''}</div>
 
 <label for="balance" class="font-bold px-4.5">Balance:</label>
-<div id="balance" class="font-normal px-4.5 mb-4 break-words">
+<div id="balance" class="font-normal px-4.5 mb-4 break-all">
 	{formatTokenDetailed({
 		value: $balance ?? BigNumber.from(0n),
 		unitName: token.decimals

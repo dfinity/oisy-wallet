@@ -31,7 +31,7 @@
 	<div>
 		{#if nonNullish(hash)}
 			<label for="hash" class="font-bold px-4.5">Transaction Hash:</label>
-			<p id="hash" class="font-normal mb-4 px-4.5 break-words">
+			<p id="hash" class="font-normal mb-4 px-4.5 break-all">
 				<output>{hash}</output>
 				<Copy value={hash} text="Transaction hash copied to clipboard." inline />
 			</p>
@@ -39,7 +39,7 @@
 
 		{#if nonNullish(blockNumber)}
 			<label for="block-number" class="font-bold px-4.5">Block:</label>
-			<p id="block-number" class="font-normal mb-4 px-4.5 break-words">
+			<p id="block-number" class="font-normal mb-4 px-4.5 break-all">
 				<output>{blockNumber}</output>
 			</p>
 
@@ -48,32 +48,32 @@
 
 		{#if nonNullish(timestamp)}
 			<label for="timestamp" class="font-bold px-4.5">Timestamp:</label>
-			<p id="timestamp" class="font-normal mb-4 px-4.5 break-words">
+			<p id="timestamp" class="font-normal mb-4 px-4.5 break-all">
 				<output>{formatToDate(timestamp)}</output>
 			</p>
 		{/if}
 
 		<label for="type" class="font-bold px-4.5">Type:</label>
-		<p id="type" class="font-normal mb-4 px-4.5 break-words">
+		<p id="type" class="font-normal mb-4 px-4.5 break-all">
 			{`${type === 'send' ? 'Send' : 'Receive'}`}
 		</p>
 
 		<label for="from" class="font-bold px-4.5">From:</label>
-		<p id="from" class="font-normal mb-4 px-4.5 break-words">
+		<p id="from" class="font-normal mb-4 px-4.5 break-all">
 			<output>{from}</output>
 			<Copy value={from} text="From address copied to clipboard." inline />
 		</p>
 
 		{#if nonNullish(to)}
 			<label for="to" class="font-bold px-4.5">Interacted With (To):</label>
-			<p id="to" class="font-normal mb-4 px-4.5 break-words">
+			<p id="to" class="font-normal mb-4 px-4.5 break-all">
 				<output>{to}</output>
 				<Copy value={to} text="To address copied to clipboard." inline />
 			</p>
 		{/if}
 
 		<label for="amount" class="font-bold px-4.5">Value:</label>
-		<p id="amount" class="font-normal mb-4 px-4.5 break-words">
+		<p id="amount" class="font-normal mb-4 px-4.5 break-all">
 			<output>
 				{formatTokenDetailed({
 					value,

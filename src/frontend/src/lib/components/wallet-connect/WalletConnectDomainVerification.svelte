@@ -25,7 +25,7 @@
 			Unknown ❓
 		{/if}</label
 	>
-	<div id="verification" class="font-normal mb-4 break-words">
+	<div id="verification" class="font-normal mb-4 break-all">
 		{#if validation === 'VALID'}
 			The validation of the proposer's domain passed.
 		{:else if validation === 'INVALID'}

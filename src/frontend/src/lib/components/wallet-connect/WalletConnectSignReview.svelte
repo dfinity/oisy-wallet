@@ -35,7 +35,7 @@
 	</div>
 {:else}
 	<p class="mb-4 font-normal">
-		<output class="break-words">{getSignParamsMessageUtf8(request.params.request.params)}</output>
+		<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
 	</p>
 {/if}
 

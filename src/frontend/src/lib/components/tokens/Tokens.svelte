@@ -28,7 +28,7 @@
 
 				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" color="white" />
 
-				<output class="break-words" slot="amount">
+				<output class="break-all" slot="amount">
 					{formatTokenShort({
 						value: $balancesStore?.[token.id] ?? BigNumber.from(0n),
 						unitName: token.decimals

@@ -22,8 +22,7 @@
 <KeyValuePairInfo>
 	<svelte:fragment slot="key"><span class="font-bold">Your Principal:</span></svelte:fragment>
 	<svelte:fragment slot="value"
-		><output class="break-words">{shortenWithMiddleEllipsis(principal?.toText() ?? '')}</output
-		><Copy
+		><output class="break-all">{shortenWithMiddleEllipsis(principal?.toText() ?? '')}</output><Copy
 			value={principal?.toText() ?? ''}
 			text="Principal copied to clipboard."
 		/></svelte:fragment

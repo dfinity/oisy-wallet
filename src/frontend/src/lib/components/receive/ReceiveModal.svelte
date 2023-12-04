@@ -13,7 +13,7 @@
 
 	<p class="font-bold text-center">Address:</p>
 	<p class="mb-4 font-normal text-center">
-		<output class="break-words">{$addressStore ?? ''}</output><Copy
+		<output class="break-all">{$addressStore ?? ''}</output><Copy
 			inline
 			value={$addressStore ?? ''}
 			text="Address copied to clipboard."

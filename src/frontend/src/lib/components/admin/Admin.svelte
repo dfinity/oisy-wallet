@@ -122,7 +122,7 @@
 
 		<label for="code" class="font-bold">Code:</label>
 		<p id="code" class="flex gap-1 items-center mb-4">
-			<output class="font-normal break-words">{code}</output><Copy
+			<output class="font-normal break-all">{code}</output><Copy
 				value={code}
 				text="Code copied to clipboard."
 			/>
@@ -140,12 +140,12 @@
 
 		<label for="generated" class="font-bold">Number of generated codes:</label>
 		<p id="generated" class="flex gap-1 items-center mb-4">
-			<output class="font-normal break-words">{generated}</output>
+			<output class="font-normal break-all">{generated}</output>
 		</p>
 
 		<label for="redeemed" class="font-bold">Number of redeemed codes:</label>
 		<p id="redeemed" class="flex gap-1 items-center">
-			<output class="font-normal break-words">{redeemed}</output>
+			<output class="font-normal break-all">{redeemed}</output>
 		</p>
 	</div>
 {:else if busy}
