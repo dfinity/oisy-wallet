@@ -1,21 +1,21 @@
 :root {
 	// Figma color names
-	--color-off-white: #fcfaf6;
-	--color-white: #ffffff;
-	--color-grey: #c0bbc4;
-	--color-dust: #dbd9d6;
-	--color-light-blue: #ede7fb;
-	--color-blue: #3b00b9;
-	--color-dark: #0e002d;
-	--color-dark-blue: #321469;
-	--color-misty-rose: #937993;
+	--color-off-white: theme(colors.off-white);
+	--color-white: theme(colors.white);
+	--color-grey: theme(colors.grey);
+	--color-dust: theme(colors.dust);
+	--color-light-blue: theme(colors.light-blue);
+	--color-blue: theme(colors.blue);
+	--color-dark: theme(colors.dark);
+	--color-dark-blue: theme(colors.dark-blue);
+	--color-misty-rose: theme(colors.misty-rose);
 
 	// https://www.color-name.com
-	--color-goldenrod: #dfa81b;
-	--color-cyclamen: #ea6c99;
-	--color-medium-purple: #8969d5;
-	--color-platinum: #e4e4e4;
-	--color-mountain-meadow: #30af91;
+	--color-goldenrod: theme(colors.goldenrod);
+	--color-cyclamen: theme(colors.cyclamen);
+	--color-medium-purple: theme(colors.medium-purple);
+	--color-platinum: theme(colors.platinum);
+	--color-mountain-meadow: theme(colors.mountain-meadow);
 
 	// Brand
 	--color-wallet-connect: #3b99fc;
