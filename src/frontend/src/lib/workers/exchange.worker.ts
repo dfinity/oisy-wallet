@@ -52,12 +52,12 @@ const syncExchange = async () => {
 	syncInProgress = true;
 
 	try {
-		const currentPrice = await exchangeRateETHToUsd();
+		const currentPrices = await exchangeRateETHToUsd();
 
 		postMessage({
 			msg: 'syncExchange',
 			data: {
-				currentPrice
+				currentPrices
 			}
 		});
 	} catch (err: unknown) {

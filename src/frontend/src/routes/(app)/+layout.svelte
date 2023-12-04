@@ -19,6 +19,7 @@
 </script>
 
 <Hero
+	usdTotal={route === 'tokens'}
 	summary={route === 'transactions'}
 	send={route === 'transactions'}
 	actions={route !== 'settings'}
