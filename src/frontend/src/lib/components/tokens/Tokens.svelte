@@ -52,7 +52,7 @@
 {#if $erc20TokensNotInitialized}
 	{#each ERC20_CONTRACTS_ADDRESSES as _}
 		<Card>
-			<span class="inline-block w-full max-w-[70%]"><SkeletonText /></span>
+			<span class="inline-block max-w-full w-[120px] sm:w-[200px]"><SkeletonText /></span>
 
 			<span class="inline-block w-full max-w-[100px]" slot="amount"><SkeletonText /></span>
 
