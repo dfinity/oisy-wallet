@@ -1,3 +1,4 @@
+import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { PostMessage, PostMessageDataResponseExchange } from '$lib/types/post-message';
 
@@ -17,7 +18,10 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 
 		switch (msg) {
 			case 'syncExchange':
-				exchangeStore.set(value?.currentPrice);
+				exchangeStore.set({
+					tokenId: ETHEREUM_TOKEN_ID,
+					currentPrice: value?.currentPrices.ethereum
+				});
 				return;
 		}
 	};

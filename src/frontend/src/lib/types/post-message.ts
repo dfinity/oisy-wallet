@@ -1,5 +1,5 @@
 import type { Result_3 } from '$declarations/airdrop/airdrop.did';
-import type { CoingeckoSimplePrice } from '$lib/types/coingecko';
+import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
@@ -27,7 +27,7 @@ export interface PostMessageDataResponseAirdropCode extends PostMessageDataRespo
 }
 
 export interface PostMessageDataResponseExchange extends PostMessageDataResponse {
-	currentPrice: CoingeckoSimplePrice;
+	currentPrices: CoingeckoSimplePriceResponse;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {
