@@ -9,7 +9,7 @@
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
 </script>
 
-<div class="my-2">
+<div class="mt-4 mb-2">
 	<KeyValuePairInfo>
 		<svelte:fragment slot="key"><span class="font-bold">Tokens:</span></svelte:fragment>
 
@@ -39,7 +39,7 @@
 		<div class="py-4">
 			<p><strong>{token.name}</strong> <small>({token.symbol})</small></p>
 
-			<span class="break-words py-4">
+			<span class="break-all py-4">
 				<small>Decimals: {token.decimals}</small>
 			</span>
 		</div>
