@@ -24,6 +24,7 @@
 
 	<ReceiveMetamask />
 
-	<button class="primary full center text-center mt-12 mb-6" on:click={modalStore.close}>Done</button
+	<button class="primary full center text-center mt-12 mb-6" on:click={modalStore.close}
+		>Done</button
 	>
 </Modal>
