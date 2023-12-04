@@ -58,7 +58,7 @@
 />
 
 <div class="flex justify-end gap-1 mt-4">
-	<button class="primary" disabled={invalid} class:opacity-15={invalid} on:click={connect}>
+	<button class="primary" disabled={invalid} class:opacity-10={invalid} on:click={connect}>
 		Connect
 	</button>
 </div>

@@ -92,7 +92,7 @@
 	<button
 		class="primary"
 		disabled={invalid}
-		class:opacity-15={invalid}
+		class:opacity-10={invalid}
 		on:click={() => dispatch('icSave')}
 	>
 		Save
