@@ -6,11 +6,15 @@
 	import type { Token } from '$lib/types/token';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { erc20Tokens } from '$lib/derived/erc20.derived';
+	import { erc20Tokens, erc20TokensNotInitialized } from '$lib/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
+	import { ERC20_CONTRACTS_ADDRESSES } from '$lib/constants/erc20.constants';
+	import { fade } from 'svelte/transition';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
@@ -18,11 +22,16 @@
 
 <h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Tokens</h2>
 
-{#each tokens as token}
+{#each tokens as token (token.id)}
 	{@const url = transactionsUrl(token)}
 
 	<Listener {token}>
-		<a class="no-underline" href={url} aria-label={`Open the list of ${token.symbol} transactions`}>
+		<a
+			class="no-underline"
+			href={url}
+			aria-label={`Open the list of ${token.symbol} transactions`}
+			in:fade
+		>
 			<Card>
 				{token.name}
 
@@ -39,5 +48,17 @@
 		</a>
 	</Listener>
 {/each}
+
+{#if $erc20TokensNotInitialized}
+	{#each ERC20_CONTRACTS_ADDRESSES as _}
+		<Card>
+			<span class="inline-block w-full max-w-[70%]"><SkeletonText /></span>
+
+			<span class="inline-block w-full max-w-[100px]" slot="amount"><SkeletonText /></span>
+
+			<SkeletonLogo slot="icon" />
+		</Card>
+	{/each}
+{/if}
 
 <AddToken />

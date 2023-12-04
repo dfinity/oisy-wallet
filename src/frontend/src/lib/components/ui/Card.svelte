@@ -12,7 +12,7 @@
 
 	<div class="flex-1 flex flex-col justify-center">
 		<div class="flex font-bold gap-1" class:items-center={!description}>
-			<span class="clamp-4" style="max-width: 60%"><slot /></span>
+			<span class="clamp-4 w-full" style="max-width: 60%"><slot /></span>
 			<span class="flex-1 text-right"><slot name="amount" /></span>
 		</div>
 		<p class="text-grey text-left" class:text-goldenrod={pending}>
