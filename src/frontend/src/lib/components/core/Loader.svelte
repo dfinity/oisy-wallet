@@ -83,7 +83,7 @@
 
 		// Once the address initialized, we load the data without displaying a progress step.
 		// Instead, we use effect, placeholders and skeleton until those data are loaded.
-		setTimeout(async () => await loadData(), 3000)
+		await loadData();
 	});
 
 	const confirmIntroduction = () => {
