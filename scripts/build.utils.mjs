@@ -23,5 +23,5 @@ export const ENV =
 	process.env.ENV === 'ic'
 		? 'production'
 		: process.env.ENV === 'staging'
-		? 'staging'
-		: 'development';
+		  ? 'staging'
+		  : 'development';

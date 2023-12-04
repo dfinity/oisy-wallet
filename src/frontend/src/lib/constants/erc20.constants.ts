@@ -56,8 +56,8 @@ const NETWORK = import.meta.env.VITE_ETHERSCAN_NETWORK;
 export const ERC20_CONTRACTS_ADDRESSES: Erc20ContractAddress[] = PROD
 	? ERC20_CONTRACTS_ADDRESSES_PRODUCTION
 	: NETWORK === 'goerli'
-	? ERC20_CONTRACTS_ADDRESSES_GOERLI
-	: ERC20_CONTRACTS_ADDRESSES_SEPOLIA;
+	  ? ERC20_CONTRACTS_ADDRESSES_GOERLI
+	  : ERC20_CONTRACTS_ADDRESSES_SEPOLIA;
 
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
 export const ERC20_ABI = [
