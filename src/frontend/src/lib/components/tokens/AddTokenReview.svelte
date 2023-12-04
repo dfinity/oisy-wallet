@@ -45,10 +45,10 @@
 </script>
 
 <label for="contractAddress" class="font-bold px-4.5">Contract address:</label>
-<div id="contractAddress" class="font-normal mb-4 px-4.5 break-words">{contractAddress}</div>
+<div id="contractAddress" class="font-normal mb-4 px-4.5 break-all">{contractAddress}</div>
 
 <label for="contractName" class="font-bold px-4.5">Name:</label>
-<div id="contractName" class="font-normal mb-4 px-4.5 break-words">
+<div id="contractName" class="font-normal mb-4 px-4.5 break-all">
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
@@ -57,7 +57,7 @@
 </div>
 
 <label for="contractSymbol" class="font-bold px-4.5">Symbol:</label>
-<div id="contractSymbol" class="font-normal mb-4 px-4.5 break-words">
+<div id="contractSymbol" class="font-normal mb-4 px-4.5 break-all">
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
@@ -66,7 +66,7 @@
 </div>
 
 <label for="contractDecimals" class="font-bold px-4.5">Decimals:</label>
-<div id="contractDecimals" class="font-normal mb-4 px-4.5 break-words">
+<div id="contractDecimals" class="font-normal mb-4 px-4.5 break-all">
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}

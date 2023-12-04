@@ -70,7 +70,7 @@
 
 <label for="to" class="font-bold px-4.5">Status:</label>
 
-<p id="to" class="font-normal mb-4 px-4.5 break-words" style="text-transform: capitalize;">
+<p id="to" class="font-normal mb-4 px-4.5 break-all" style="text-transform: capitalize;">
 	{#if nonNullish(status)}
 		<span in:fade>{status}</span>
 	{:else}

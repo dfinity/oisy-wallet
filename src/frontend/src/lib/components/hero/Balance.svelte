@@ -8,7 +8,7 @@
 
 <span class="text-off-white">
 	<output
-		class={`break-words ${($balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'}`}
+		class={`break-all ${($balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'}`}
 		style="font-size: calc(2 * var(--font-size-h1)); line-height: 0.95;"
 	>
 		{nonNullish($balance) && !$balanceZero
