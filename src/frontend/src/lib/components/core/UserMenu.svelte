@@ -34,7 +34,7 @@
 			aria-label="Open the Internet Computer portal"
 		>
 			<div
-				class="flex items-center justify-center rounded-50"
+				class="flex items-center justify-center rounded-full"
 				style="border: 1px solid var(--color-grey); zoom: 0.6;"
 			>
 				<IconIcLogo />

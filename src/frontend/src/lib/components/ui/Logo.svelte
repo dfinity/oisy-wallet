@@ -12,11 +12,11 @@
 </script>
 
 <div
-	class="flex items-center justify-center rounded-50"
+	class="flex items-center justify-center rounded-full"
 	class:bg-dust={color === 'dust'}
 	class:bg-off-white={color === 'off-white'}
 	class:bg-white={color === 'white'}
-	class:opacity-15={!loaded}
+	class:opacity-10={!loaded}
 	style={`border: 1px solid var(--color-${
 		color === 'off-white' ? 'off-white' : 'dust'
 	}); width: calc(${size} + 2px); height: calc(${size} + 2px); transition: opacity 0.15s ease-in;`}

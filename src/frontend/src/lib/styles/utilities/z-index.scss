@@ -1,6 +1,0 @@
-@use '../mixins/utilities';
-
-$property: z-index;
-
-@include utilities.generate(z-0, $property, 0);
-@include utilities.generate(z-1, $property, var(--z-index));

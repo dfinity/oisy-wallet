@@ -55,16 +55,16 @@
 			{#each value.chains ?? [] as chainId}
 				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
 
-				<p class="font-bold mt-3">
+				<p class="font-bold mt-6">
 					Review {chainName} ({key}) required permissions:
 				</p>
 
-				<article class="bg-dust rounded-sm p-2 mt-1">
+				<article class="bg-dust rounded-sm p-4 mt-4">
 					<p class="font-bold">Methods:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
 
-					<p class="font-bold mt-1">Events:</p>
+					<p class="font-bold mt-4">Events:</p>
 
 					<p>{allEvents.length ? allEvents.join(', ') : '-'}</p>
 				</article>
@@ -81,7 +81,7 @@
 		<p>Connecting...</p>
 
 		{#if displayCancel}
-			<div class="flex justify-end gap-1 mt-4" in:fade>
+			<div class="flex justify-end gap-1 mt-8" in:fade>
 				<button class="secondary" on:click={() => dispatch('icCancel')} disabled={$isBusy}
 					>Cancel</button
 				>

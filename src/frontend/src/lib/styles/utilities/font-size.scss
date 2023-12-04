@@ -1,8 +1,0 @@
-@use '../mixins/utilities';
-
-$property: font-size;
-
-@include utilities.generate(text-xxs, $property, var(--font-size-ultra-small));
-@include utilities.generate(text-xs, $property, var(--font-size-very-small));
-@include utilities.generate(text-sm, $property, var(--font-size-small));
-@include utilities.generate(text-base, $property, 1rem);

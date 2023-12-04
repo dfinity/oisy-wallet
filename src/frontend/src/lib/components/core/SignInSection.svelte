@@ -8,12 +8,12 @@
 <section class="flex flex-col justify-center items-center sm:pt-0 sm:pb-8 relative z-1">
 	<OisyWalletLogo size="66" />
 
-	<h1 class="text-center py-4 xs:px-3 sm:px-4 mb-0.25" style="max-width: 600px">
+	<h1 class="text-center py-8 xs:px-6 sm:px-8 mb-0.5" style="max-width: 600px">
 		A browser-based Ethereum wallet secured by the Internet Computer and supporting
 		networked-custody
 	</h1>
 
-	<p class="text-center pb-4 xs:px-3 sm:px-4 mb-0.25" style="max-width: 600px">
+	<p class="text-center pb-8 xs:px-6 sm:px-8 mb-0.5" style="max-width: 600px">
 		{OISY_NAME} provides a seamless on-chain experience to manage your Ethereum assets. Using native
 		web technologies and advanced cryptography, {OISY_NAME} eliminates the need for browser extensions
 		or mobile apps.

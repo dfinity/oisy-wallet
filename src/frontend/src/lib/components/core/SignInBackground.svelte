@@ -1,6 +1,6 @@
-<div class="z-0 bg-misty-rose opacity-5 top-right rounded-50" />
+<div class="z-0 bg-misty-rose opacity-5 top-right rounded-full" />
 
-<div class="z-0 bg-misty-rose opacity-5 bottom-left rounded-50" />
+<div class="z-0 bg-misty-rose opacity-5 bottom-left rounded-full" />
 
 <style lang="scss">
 	div {

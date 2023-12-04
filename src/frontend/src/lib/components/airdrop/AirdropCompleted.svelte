@@ -49,6 +49,6 @@
 
 <div class="my-2"><StaticSteps {steps} /></div>
 
-<p class="mt-4 mb-2">
+<p class="mt-8 mb-4">
 	<small>The airdrop is completed. All rewards have been distributed.</small>
 </p>

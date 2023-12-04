@@ -28,17 +28,17 @@
 		: undefined;
 </script>
 
-<h2 class="text-base mb-3 pb-0.5" class:mt-6={AIRDROP} class:mt-8={!AIRDROP}>Transactions</h2>
+<h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Transactions</h2>
 
 {#if loading}
-	<p class="mt-1 text-dark opacity-50">Transactions will appear here. Loading...</p>
+	<p class="mt-4 text-dark opacity-50">Transactions will appear here. Loading...</p>
 {:else}
 	{#each $sortedTransactions as transaction, index (`${transaction.hash}-${index}`)}
 		<Transaction {transaction} />
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<p class="mt-1 text-dark opacity-50">You have no transactions.</p>
+		<p class="mt-4 text-dark opacity-50">You have no transactions.</p>
 	{/if}
 {/if}
 

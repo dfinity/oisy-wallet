@@ -109,7 +109,7 @@
 			{#if confirm}
 				<button
 					on:click={confirmIntroduction}
-					class="primary full center mt-3"
+					class="primary full center mt-6"
 					disabled={disabledConfirm}
 					class:opacity-0={disabledConfirm}>Let's go!</button
 				>

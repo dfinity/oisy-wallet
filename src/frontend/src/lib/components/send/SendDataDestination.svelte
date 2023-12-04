@@ -28,12 +28,12 @@
 	})();
 </script>
 
-<label for="destination" class="font-bold px-1.25">Destination:</label>
-<div id="destination" class="font-normal mb-2 px-1.25 break-words">{destination}</div>
+<label for="destination" class="font-bold px-4.5">Destination:</label>
+<div id="destination" class="font-normal mb-4 px-4.5 break-words">{destination}</div>
 
 {#if nonNullish(network)}
-	<label for="network" class="font-bold px-1.25">Network:</label>
-	<div id="network" class="font-normal mb-2 px-1.25 break-words">
+	<label for="network" class="font-bold px-4.5">Network:</label>
+	<div id="network" class="font-normal mb-4 px-4.5 break-words">
 		{#if network === TargetNetwork.ICP}
 			Convert to native ICP
 		{:else}
@@ -42,8 +42,8 @@
 	</div>
 {/if}
 
-<label for="amount" class="font-bold px-1.25">Amount:</label>
-<div id="amount" class="font-normal px-1.25 mb-2 break-words">
+<label for="amount" class="font-bold px-4.5">Amount:</label>
+<div id="amount" class="font-normal px-4.5 mb-4 break-words">
 	{amountDisplay}
 	{$tokenSymbol}
 </div>

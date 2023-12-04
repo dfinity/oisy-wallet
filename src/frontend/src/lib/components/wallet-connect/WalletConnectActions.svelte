@@ -7,7 +7,7 @@
 	export let approve = true;
 </script>
 
-<div class="flex justify-end gap-1 mt-4">
+<div class="flex justify-end gap-1 mt-8">
 	<button class="secondary" on:click={() => dispatch('icReject')} disabled={$isBusy}>Reject</button>
 
 	{#if approve}

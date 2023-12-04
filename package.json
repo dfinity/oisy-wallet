@@ -39,8 +39,7 @@
 		"@walletconnect/web3wallet": "^1.9.5",
 		"alchemy-sdk": "^3.1.0",
 		"buffer": "^6.0.3",
-		"ethers": "^5.7.0",
-		"the-new-css-reset": "^1.11.2"
+		"ethers": "^5.7.0"
 	},
 	"devDependencies": {
 		"@esbuild-plugins/node-modules-polyfill": "^0.2.2",
@@ -54,12 +53,14 @@
 		"eslint": "^8.55.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.35.1",
+		"postcss": "^8.4.32",
 		"prettier": "^3.1.0",
 		"prettier-plugin-organize-imports": "^3.2.4",
 		"prettier-plugin-svelte": "^3.1.2",
 		"sass": "^1.69.5",
 		"svelte": "^4.2.8",
 		"svelte-check": "^3.6.2",
+		"tailwindcss": "^3.3.5",
 		"tslib": "^2.6.2",
 		"typescript": "^5.2.2",
 		"vite": "^4.5.0",

@@ -24,17 +24,17 @@
 </script>
 
 <p class="font-bold">Method</p>
-<p class="mb-2 font-normal">
+<p class="mb-4 font-normal">
 	{request.params.request.method}
 </p>
 
 <p class="font-bold">Message</p>
 {#if nonNullish(json)}
-	<div class="bg-dust rounded-sm p-2 mt-1">
+	<div class="bg-dust rounded-sm p-4 mt-4">
 		<Json {json} _collapsed={true} />
 	</div>
 {:else}
-	<p class="mb-2 font-normal">
+	<p class="mb-4 font-normal">
 		<output class="break-words">{getSignParamsMessageUtf8(request.params.request.params)}</output>
 	</p>
 {/if}

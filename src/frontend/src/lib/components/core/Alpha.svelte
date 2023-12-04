@@ -7,7 +7,7 @@
 	href={OISY_ALPHA_WARNING_URL}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="no-underline inline-block text-center px-3 py-1 font-bold text-xs md:text-base"
+	class="no-underline inline-flex items-center gap-2 text-center px-6 py-2 font-bold text-xs md:text-base"
 >
 	<IconWarning inline />
 	<span class="pl-1">Learn more about this alpha version. Use with caution.</span>

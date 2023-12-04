@@ -11,18 +11,18 @@
 </script>
 
 <header
-	class="flex justify-between md:px-2 relative z-1 pointer-events-none"
+	class="flex justify-between md:px-4 relative z-1 pointer-events-none"
 	style="min-height: 76px"
 >
 	{#if back}
 		<Back />
 	{:else}
-		<div class="flex p-2 items-center text-off-white">
+		<div class="flex p-4 items-center text-off-white">
 			<OisyWalletLogo />
 		</div>
 	{/if}
 
-	<div class="flex m-2 gap-2 pointer-events-all" style="margin-left: auto">
+	<div class="flex m-4 gap-4 pointer-events-auto" style="margin-left: auto">
 		<WalletConnect />
 		<UserMenu />
 	</div>

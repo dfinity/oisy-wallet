@@ -1,8 +1,0 @@
-@use '../mixins/utilities';
-
-$property: justify-self;
-
-@include utilities.generate(justify-self-start, $property, start);
-@include utilities.generate(justify-self-end, $property, end);
-@include utilities.generate(justify-self-center, $property, center);
-@include utilities.generate(justify-self-stretch, $property, stretch);

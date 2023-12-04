@@ -42,7 +42,7 @@
 	<Card {pending}>
 		{`${type === 'send' ? 'Send' : 'Receive'}`}
 
-		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-15' : ''} />
+		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-10' : ''} />
 
 		<svelte:fragment slot="amount">
 			{formatTokenShort({

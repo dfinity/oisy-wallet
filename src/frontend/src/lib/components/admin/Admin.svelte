@@ -95,9 +95,9 @@
 	const shareAvailable = canShare();
 </script>
 
-<h2 class="text-base mt-8 mb-2 pb-0.5">Admin</h2>
+<h2 class="text-base mt-16 mb-4 pb-1">Admin</h2>
 
-<div class="flex gap-2 mb-3" style="flex-wrap: wrap;">
+<div class="flex gap-4 mb-6" style="flex-wrap: wrap;">
 	<button class="primary" on:click={generate} disabled={busy} class:opacity-50={busy}
 		>Generate a new AirDrop code</button
 	>
@@ -114,14 +114,14 @@
 
 	<div in:fade>
 		<div
-			class="p-2 rounded-sm bg-off-white mb-3 airdrop-qrcode"
+			class="p-4 rounded-sm bg-off-white mb-6 airdrop-qrcode"
 			style={`border: 1px dashed var(--color-dark); max-width: var(--qrcode-max-width, 360px); height: var(--qrcode-height);`}
 		>
 			<QRCode value={codeUrl} />
 		</div>
 
 		<label for="code" class="font-bold">Code:</label>
-		<p id="code" class="flex gap-1 items-center mb-2">
+		<p id="code" class="flex gap-1 items-center mb-4">
 			<output class="font-normal break-words">{code}</output><Copy
 				value={code}
 				text="Code copied to clipboard."
@@ -131,7 +131,7 @@
 		<label for="codeUrl" class="font-bold">URL to use code:</label>
 		<a
 			id="codeUrl"
-			class="flex gap-1 items-center mb-2"
+			class="flex gap-1 items-center mb-4"
 			href={codeUrl}
 			aria-label="URL to use the airdrop code"
 		>
@@ -139,7 +139,7 @@
 		</a>
 
 		<label for="generated" class="font-bold">Number of generated codes:</label>
-		<p id="generated" class="flex gap-1 items-center mb-2">
+		<p id="generated" class="flex gap-1 items-center mb-4">
 			<output class="font-normal break-words">{generated}</output>
 		</p>
 

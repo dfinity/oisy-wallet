@@ -44,11 +44,11 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<label for="contractAddress" class="font-bold px-1.25">Contract address:</label>
-<div id="contractAddress" class="font-normal mb-2 px-1.25 break-words">{contractAddress}</div>
+<label for="contractAddress" class="font-bold px-4.5">Contract address:</label>
+<div id="contractAddress" class="font-normal mb-4 px-4.5 break-words">{contractAddress}</div>
 
-<label for="contractName" class="font-bold px-1.25">Name:</label>
-<div id="contractName" class="font-normal mb-2 px-1.25 break-words">
+<label for="contractName" class="font-bold px-4.5">Name:</label>
+<div id="contractName" class="font-normal mb-4 px-4.5 break-words">
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
@@ -56,8 +56,8 @@
 	{/if}
 </div>
 
-<label for="contractSymbol" class="font-bold px-1.25">Symbol:</label>
-<div id="contractSymbol" class="font-normal mb-2 px-1.25 break-words">
+<label for="contractSymbol" class="font-bold px-4.5">Symbol:</label>
+<div id="contractSymbol" class="font-normal mb-4 px-4.5 break-words">
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
@@ -65,8 +65,8 @@
 	{/if}
 </div>
 
-<label for="contractDecimals" class="font-bold px-1.25">Decimals:</label>
-<div id="contractDecimals" class="font-normal mb-2 px-1.25 break-words">
+<label for="contractDecimals" class="font-bold px-4.5">Decimals:</label>
+<div id="contractDecimals" class="font-normal mb-4 px-4.5 break-words">
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
@@ -92,7 +92,7 @@
 	<button
 		class="primary"
 		disabled={invalid}
-		class:opacity-15={invalid}
+		class:opacity-10={invalid}
 		on:click={() => dispatch('icSave')}
 	>
 		Save

@@ -12,7 +12,7 @@
 	$: validation = context?.verified.validation;
 </script>
 
-<div class="mt-3">
+<div class="mt-6">
 	<label for="verification" class="font-bold"
 		>Domain Verification:
 		{#if validation === 'VALID'}
@@ -25,7 +25,7 @@
 			Unknown ❓
 		{/if}</label
 	>
-	<div id="verification" class="font-normal mb-2 break-words">
+	<div id="verification" class="font-normal mb-4 break-words">
 		{#if validation === 'VALID'}
 			The validation of the proposer's domain passed.
 		{:else if validation === 'INVALID'}

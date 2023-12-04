@@ -1,6 +1,0 @@
-@use '../mixins/utilities';
-
-$property: pointer-events;
-
-@include utilities.generate(pointer-events-none, $property, none);
-@include utilities.generate(pointer-events-all, $property, all);

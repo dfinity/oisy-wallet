@@ -1,4 +1,0 @@
-@use '../mixins/utilities';
-
-@include utilities.generate(relative, position, relative);
-@include utilities.generate(absolute, position, absolute);

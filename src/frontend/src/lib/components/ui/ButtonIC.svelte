@@ -4,7 +4,7 @@
 
 <button on:click class="ic">
 	<IconIcLogo />
-	<span>
+	<span class="text-left">
 		<span><slot name="action" /></span>
 		<span><slot /></span>
 	</span>

@@ -3,7 +3,7 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 </script>
 
-<footer class="flex flex-col justify-center items-center pt-8 mt-3 pb-4 px-2 gap-3 z-1">
+<footer class="flex flex-col justify-center items-center pt-8 mt-6 pb-4 px-4 gap-3 z-1">
 	<a
 		href={OISY_REPO_URL}
 		rel="external noopener noreferrer"

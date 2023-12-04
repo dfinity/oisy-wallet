@@ -6,7 +6,7 @@
 	export let network: TargetNetwork | undefined = undefined;
 </script>
 
-<label for="destination" class="font-bold px-1.25">Destination:</label>
+<label for="destination" class="font-bold px-4.5">Destination:</label>
 <Input
 	name="destination"
 	inputType="text"

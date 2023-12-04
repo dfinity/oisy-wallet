@@ -2,7 +2,7 @@
 	import { IconWarning } from '@dfinity/gix-components';
 </script>
 
-<div class="bg-blue text-off-white rounded-lg p-4 mb-4 flex gap-2">
+<div class="bg-blue text-off-white rounded-lg p-4 mb-4 flex gap-4">
 	<div style="min-width: 44px">
 		<IconWarning size="44px" />
 	</div>
