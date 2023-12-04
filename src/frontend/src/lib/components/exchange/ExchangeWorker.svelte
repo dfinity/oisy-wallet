@@ -12,8 +12,6 @@
 	});
 
 	onDestroy(() => worker?.stopExchangeTimer());
-
-	$: console.log($exchangeStore);
 </script>
 
 <slot />
