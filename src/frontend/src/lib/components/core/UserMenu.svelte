@@ -25,7 +25,7 @@
 </button>
 
 <Popover bind:visible anchor={button} direction="rtl">
-	<div class="flex flex-col gap-1">
+	<div class="flex flex-col gap-2">
 		<a
 			href="https://internetcomputer.org"
 			rel="external noopener noreferrer"
