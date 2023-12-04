@@ -8,6 +8,7 @@
 	import AirdropWorker from '$lib/components/airdrop/AirdropWorker.svelte';
 	import { isErc20Icp } from '$lib/utils/token.utils';
 	import { token } from '$lib/derived/token.derived';
+	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -27,11 +28,13 @@
 <main>
 	<Loader>
 		<AirdropWorker>
-			{#if $airdropAvailable}
-				<AirdropButton />
-			{/if}
+			<ExchangeWorker>
+				{#if $airdropAvailable}
+					<AirdropButton />
+				{/if}
 
-			<slot />
+				<slot />
+			</ExchangeWorker>
 		</AirdropWorker>
 	</Loader>
 </main>
