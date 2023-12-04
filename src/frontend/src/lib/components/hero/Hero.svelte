@@ -22,12 +22,12 @@
 <div class="hero">
 	<HeaderHero />
 
-	<article class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-4 relative main">
+	<article class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main">
 		<Alpha />
 
 		{#if summary}
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-				<div class="icon flex flex-col items-start mt-3 md:mt-6 mb-0.5 pt-2">
+				<div class="icon flex flex-col items-start mt-6 md:mt-12 mb-0.5 pt-2">
 					{#if displayTokenSymbol}
 						<div in:fade>
 							<Logo src={$token.icon} size="64px" alt={`${$token.name} logo`} color="off-white" />

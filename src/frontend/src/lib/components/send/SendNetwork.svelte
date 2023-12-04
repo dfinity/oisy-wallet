@@ -31,9 +31,9 @@
 	$: destination, onDestinationAddressInput();
 </script>
 
-<label for="network" class="font-bold px-1.25">Network:</label>
+<label for="network" class="font-bold px-4.5">Network:</label>
 
-<div id="network" class="mb-2 mt-0.5 pt-0.25">
+<div id="network" class="mb-4 mt-1 pt-0.5">
 	<Dropdown name="network" bind:selectedValue={network}>
 		<option disabled selected value={undefined} class="hidden"
 			><span class="description">Select network</span></option

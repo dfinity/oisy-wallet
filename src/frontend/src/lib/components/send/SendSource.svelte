@@ -8,11 +8,11 @@
 	export let token: Token;
 </script>
 
-<label for="source" class="font-bold px-1.25">Source:</label>
-<div id="source" class="font-normal mb-2 px-1.25 break-words">{$addressStore ?? ''}</div>
+<label for="source" class="font-bold px-4.5">Source:</label>
+<div id="source" class="font-normal mb-4 px-4.5 break-words">{$addressStore ?? ''}</div>
 
-<label for="balance" class="font-bold px-1.25">Balance:</label>
-<div id="balance" class="font-normal px-1.25 mb-2 break-words">
+<label for="balance" class="font-bold px-4.5">Balance:</label>
+<div id="balance" class="font-normal px-4.5 mb-4 break-words">
 	{formatTokenDetailed({
 		value: $balance ?? BigNumber.from(0n),
 		unitName: token.decimals

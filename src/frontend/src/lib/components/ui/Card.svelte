@@ -7,12 +7,12 @@
 	$: description = nonNullish($$slots.description);
 </script>
 
-<div class="flex gap-2 mb-3">
+<div class="flex gap-4 mb-6">
 	<slot name="icon" />
 
 	<div class="flex-1 flex flex-col justify-center">
 		<div class="flex font-bold gap-1" class:items-center={!description}>
-			<span class="clamp-2" style="max-width: 60%"><slot /></span>
+			<span class="clamp-4" style="max-width: 60%"><slot /></span>
 			<span class="flex-1 text-right"><slot name="amount" /></span>
 		</div>
 		<p class="text-grey" class:text-goldenrod={pending}>

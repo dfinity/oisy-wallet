@@ -24,7 +24,7 @@
 
 	<SendNetworkICP token={$token} bind:destination bind:network />
 
-	<label for="amount" class="font-bold px-1.25">Amount:</label>
+	<label for="amount" class="font-bold px-4.5">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
 	<SendSource token={$token} />

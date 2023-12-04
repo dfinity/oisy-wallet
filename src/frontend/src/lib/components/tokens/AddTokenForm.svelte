@@ -12,7 +12,7 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<label for="destination" class="font-bold px-1.25">Contract address:</label>
+	<label for="destination" class="font-bold px-4.5">Contract address:</label>
 	<Input
 		name="contractAddress"
 		inputType="text"

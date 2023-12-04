@@ -12,7 +12,7 @@
 
 {#if banner && visible}
 	<div>
-		<h3 class="clamp-2">For testing purposes on <strong>{NETWORK.toUpperCase()}</strong> only.</h3>
+		<h3 class="clamp-4">For testing purposes on <strong>{NETWORK.toUpperCase()}</strong> only.</h3>
 		<button on:click={close} aria-label="Close"><IconClose /></button>
 	</div>
 {/if}
