@@ -1,21 +1,21 @@
-import type { BinanceAvgPrice } from '$lib/types/binance';
+import type { CoingeckoSimplePrice } from '$lib/types/coingecko';
 import { writable, type Readable } from 'svelte/store';
 
 export interface ExchangeData {
-	avgPrice: BinanceAvgPrice | undefined | null;
+	currentPrice: CoingeckoSimplePrice | undefined | null;
 }
 
 export interface ExchangeStore extends Readable<ExchangeData> {
-	set: (avgPrice: BinanceAvgPrice | undefined) => void;
+	set: (currentPrice: CoingeckoSimplePrice | undefined) => void;
 	reset: () => void;
 }
 
 const initExchangeStore = (): ExchangeStore => {
-	const { subscribe, set } = writable<ExchangeData>({ avgPrice: undefined });
+	const { subscribe, set } = writable<ExchangeData>({ currentPrice: undefined });
 
 	return {
-		set: (avgPrice: BinanceAvgPrice | undefined) => set({ avgPrice }),
-		reset: () => set({ avgPrice: null }),
+		set: (currentPrice: CoingeckoSimplePrice | undefined) => set({ currentPrice }),
+		reset: () => set({ currentPrice: null }),
 		subscribe
 	};
 };

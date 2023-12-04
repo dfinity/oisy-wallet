@@ -17,7 +17,7 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 
 		switch (msg) {
 			case 'syncExchange':
-				exchangeStore.set(value?.avgPrice);
+				exchangeStore.set(value?.currentPrice);
 				return;
 		}
 	};

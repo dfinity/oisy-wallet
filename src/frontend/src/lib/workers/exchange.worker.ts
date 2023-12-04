@@ -1,5 +1,5 @@
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
-import { exchangeRateETHToUsd } from '$lib/providers/binance.providers';
+import { exchangeRateETHToUsd } from '$lib/services/exchange.services';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -52,12 +52,12 @@ const syncExchange = async () => {
 	syncInProgress = true;
 
 	try {
-		const avgPrice = await exchangeRateETHToUsd();
+		const currentPrice = await exchangeRateETHToUsd();
 
 		postMessage({
 			msg: 'syncExchange',
 			data: {
-				avgPrice
+				currentPrice
 			}
 		});
 	} catch (err: unknown) {
