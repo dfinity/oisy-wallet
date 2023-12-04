@@ -1,4 +1,6 @@
-@import '../../../../../node_modules/the-new-css-reset/css/reset.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @import './global/font-faces';
 @import './global/fonts';
@@ -12,27 +14,3 @@
 @import './global/gix';
 @import './global/position';
 @import './global/links';
-
-@import './utilities/display';
-@import './utilities/text';
-@import './utilities/text-decoration';
-@import './utilities/flex';
-@import './utilities/justify-content';
-@import './utilities/justify-self';
-@import './utilities/align-items';
-@import './utilities/flex-direction';
-@import './utilities/padding';
-@import './utilities/margin';
-@import './utilities/text';
-@import './utilities/color';
-@import './utilities/background';
-@import './utilities/border-radius';
-@import './utilities/position';
-@import './utilities/gap';
-@import './utilities/opacity';
-@import './utilities/font-weight';
-@import './utilities/font-size';
-@import './utilities/word-break';
-@import './utilities/line-height';
-@import './utilities/z-index';
-@import './utilities/pointer-events';

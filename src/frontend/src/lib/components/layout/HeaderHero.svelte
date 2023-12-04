@@ -22,7 +22,7 @@
 		</div>
 	{/if}
 
-	<div class="flex m-2 gap-2 pointer-events-all" style="margin-left: auto">
+	<div class="flex m-2 gap-2 pointer-events-auto" style="margin-left: auto">
 		<WalletConnect />
 		<UserMenu />
 	</div>

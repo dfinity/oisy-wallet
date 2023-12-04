@@ -12,7 +12,7 @@
 </script>
 
 <div
-	class="flex items-center justify-center rounded-50"
+	class="flex items-center justify-center rounded-full"
 	class:bg-dust={color === 'dust'}
 	class:bg-off-white={color === 'off-white'}
 	class:bg-white={color === 'white'}

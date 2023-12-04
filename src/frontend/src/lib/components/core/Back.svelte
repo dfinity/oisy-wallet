@@ -13,6 +13,6 @@
 </script>
 
 <button
-	class="flex gap-0.5 text-white font-bold pointer-events-all"
+	class="flex gap-0.5 text-white font-bold pointer-events-auto"
 	on:click={async () => back(nonNullish(fromRoute))}><IconBack /> Back to Wallet</button
 >

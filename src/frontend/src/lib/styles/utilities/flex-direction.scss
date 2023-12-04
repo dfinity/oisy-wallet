@@ -1,8 +1,0 @@
-@use '../mixins/utilities';
-
-$property: flex-direction;
-
-@include utilities.generate(flex-row, $property, row);
-@include utilities.generate(flex-row-reverse, $property, row-reverse);
-@include utilities.generate(flex-col, $property, column);
-@include utilities.generate(flex-col-reverse, $property, column-reverse);

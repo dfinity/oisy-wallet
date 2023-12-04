@@ -10,7 +10,7 @@
 
 <div class="relative">
 	<div
-		class={`rounded-50 ${backgroundStyleClass}`}
+		class={`rounded-full ${backgroundStyleClass}`}
 		style={`width: ${iconSize}; aspect-ratio: 1/1; ${additionalStyleClass}`}
 	/>
 	<svelte:component this={icon} styleClass={`inset-center ${iconStyleClass}`} />
