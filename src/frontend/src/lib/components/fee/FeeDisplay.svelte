@@ -42,10 +42,10 @@
 	});
 </script>
 
-<label for="balance" class="font-bold px-1.25"
+<label for="balance" class="font-bold px-4.5"
 	>Max fee <small>(likely in &lt; 30 seconds)</small>:</label
 >
-<div id="balance" class="font-normal px-1.25 mb-2 break-words" style="min-height: 24px">
+<div id="balance" class="font-normal px-4.5 mb-4 break-words" style="min-height: 24px">
 	{#if nonNullish(fee)}
 		<div in:fade>
 			{formatTokenShort({

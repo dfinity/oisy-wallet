@@ -36,10 +36,10 @@
 			<Logo src={token.icon} alt={`${token.name} logo`} size="32" color="white" />
 		</div>
 
-		<div class="py-2">
+		<div class="py-4">
 			<p><strong>{token.name}</strong> <small>({token.symbol})</small></p>
 
-			<span class="break-words py-2">
+			<span class="break-words py-4">
 				<small>Decimals: {token.decimals}</small>
 			</span>
 		</div>

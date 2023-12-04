@@ -43,18 +43,18 @@
 		class:rounded-br-sm={last}
 	>
 		<div
-			class="font-bold p-2"
+			class="font-bold p-4"
 			style="border-right: 1px solid var(--color-platinum); width: var(--padding-6x)"
 		>
-			<span class:opacity-15={state}>{i + 1}</span>
+			<span class:opacity-10={state}>{i + 1}</span>
 		</div>
 		<div
 			class:state
-			class="flex justify-between items-center px-2 gap-4"
+			class="flex justify-between items-center px-4 gap-4"
 			style="width: calc(100% - var(--padding-6x))"
 		>
 			<div class="flex gap-1 truncate">
-				<span class="font-bold truncate" class:opacity-15={state}>{code}</span>
+				<span class="font-bold truncate" class:opacity-10={state}>{code}</span>
 
 				{#if state}
 					<span class="font-bold text-mountain-meadow">+2 ICP</span>
@@ -62,7 +62,7 @@
 			</div>
 
 			<button
-				class:opacity-15={state}
+				class:opacity-10={state}
 				disabled={state}
 				on:click={async () => await share(codeUrl)}
 				class="flex gap-0.5 font-bold text-blue text-sm"><IconShare /> Share</button
@@ -72,7 +72,7 @@
 {/each}
 
 {#if children.length > 0}
-	<p class="mt-4 mb-2">
+	<p class="mt-8 mb-4">
 		<small>Tokens are claimable as long as the airdrop is not exhausted!</small>
 	</p>
 {/if}

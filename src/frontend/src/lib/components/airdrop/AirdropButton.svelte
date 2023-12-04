@@ -7,7 +7,7 @@
 	import { airdropStore } from '$lib/stores/airdrop.store';
 </script>
 
-<button class="airdrop full center mt-3" in:fade on:click={modalStore.openAirdrop}
+<button class="airdrop full center mt-6" in:fade on:click={modalStore.openAirdrop}
 	><IconCelebrate /> AirDrop status <span class="text-blue">Check</span></button
 >
 

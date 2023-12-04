@@ -33,7 +33,7 @@
 	</svelte:fragment>
 </KeyValuePairInfo>
 
-<div class="mt-2">
+<div class="mt-4">
 	<KeyValuePairInfo>
 		<svelte:fragment slot="key"
 			><span class="font-bold">Your session expires in:</span></svelte:fragment
@@ -55,7 +55,7 @@
 
 <TokensMetadata />
 
-<div class="mt-3 px-2" style="border-left: 1px solid transparent">
+<div class="mt-6 px-4" style="border-left: 1px solid transparent">
 	<AddToken iconSize="small" />
 </div>
 

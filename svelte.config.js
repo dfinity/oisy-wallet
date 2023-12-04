@@ -1,6 +1,5 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/kit/vite';
-import autoprefixer from 'autoprefixer';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -12,11 +11,7 @@ const filesPath = (path) => `src/frontend/${path}`;
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
-	preprocess: vitePreprocess({
-		postcss: {
-			plugins: [autoprefixer]
-		}
-	}),
+	preprocess: vitePreprocess(),
 
 	kit: {
 		adapter: adapter({

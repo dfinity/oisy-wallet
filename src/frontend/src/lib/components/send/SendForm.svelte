@@ -24,7 +24,7 @@
 
 	<SendNetworkICP token={$token} bind:destination bind:network />
 
-	<label for="amount" class="font-bold px-1.25">Amount:</label>
+	<label for="amount" class="font-bold px-4.5">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
 	<SendSource token={$token} />
@@ -33,7 +33,7 @@
 
 	<div class="flex justify-end gap-1">
 		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>
-		<button class="primary" type="submit" disabled={invalid} class:opacity-15={invalid}>
+		<button class="primary" type="submit" disabled={invalid} class:opacity-10={invalid}>
 			Next
 		</button>
 	</div>
