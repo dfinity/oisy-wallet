@@ -1,9 +1,6 @@
 <script lang="ts">
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
-	import {
-		sortedTransactions,
-		transactionsNotInitialized
-	} from '$lib/derived/transactions.derived';
+	import { sortedTransactions } from '$lib/derived/transactions.derived';
 	import { loadTransactions } from '$lib/services/transactions.services';
 	import type { TokenId } from '$lib/types/token';
 	import { onMount } from 'svelte';
@@ -14,6 +11,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
+	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 
 	const load = async (tokenId: TokenId) => await loadTransactions(tokenId);
 
@@ -27,9 +25,7 @@
 
 <h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Transactions</h2>
 
-{#if $transactionsNotInitialized}
-	<p class="mt-4 text-dark opacity-50">Transactions will appear here. Loading...</p>
-{:else}
+<TransactionsSkeletons>
 	{#each $sortedTransactions as transaction, index (`${transaction.hash}-${index}`)}
 		<Transaction {transaction} />
 	{/each}
@@ -37,7 +33,7 @@
 	{#if $sortedTransactions.length === 0}
 		<p class="mt-4 text-dark opacity-50">You have no transactions.</p>
 	{/if}
-{/if}
+</TransactionsSkeletons>
 
 {#if $modalTransaction && nonNullish(selectedTransaction)}
 	<TransactionModal transaction={selectedTransaction} />

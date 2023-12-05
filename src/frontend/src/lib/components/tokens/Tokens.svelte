@@ -11,7 +11,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
-	import TokensLoader from '$lib/components/tokens/TokensLoader.svelte';
+	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
@@ -19,7 +19,7 @@
 
 <h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Tokens</h2>
 
-<TokensLoader>
+<TokensSkeletons>
 	{#each tokens as token (token.id)}
 		{@const url = transactionsUrl(token)}
 
@@ -47,4 +47,4 @@
 	{/each}
 
 	<AddToken />
-</TokensLoader>
+</TokensSkeletons>
