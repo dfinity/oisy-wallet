@@ -72,10 +72,10 @@ export const formatToDate = (seconds: number): string => {
 export const formatUSD = (
 	value: number,
 	options?: {
-		minFraction: number;
-		maxFraction: number;
+		minFraction?: number;
+		maxFraction?: number;
 		maximumSignificantDigits?: number;
-		symbol: boolean;
+		symbol?: boolean;
 	}
 ): string => {
 	const {

@@ -11,6 +11,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
+	import ExchangeTokenValue from "$lib/components/exchange/ExchangeTokenValue.svelte";
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
@@ -28,13 +29,15 @@
 
 				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" color="white" />
 
-				<output class="break-all" slot="amount">
+				<output class="break-all" slot="description">
 					{formatTokenShort({
 						value: $balancesStore?.[token.id] ?? BigNumber.from(0n),
 						unitName: token.decimals
 					})}
 					{token.symbol}
 				</output>
+
+				<ExchangeTokenValue tokenId={token.id} slot="amount" />
 			</Card>
 		</a>
 	</Listener>

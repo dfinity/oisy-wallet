@@ -9,7 +9,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import Balance from '$lib/components/hero/Balance.svelte';
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
-	import UsdBalance from '$lib/components/hero/UsdBalance.svelte';
+	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -43,7 +43,7 @@
 
 		{#if usdTotal}
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-				<UsdBalance />
+				<ExchangeBalance />
 			</div>
 		{/if}
 
