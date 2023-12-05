@@ -1,6 +1,9 @@
 <script lang="ts">
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
-	import { sortedTransactions } from '$lib/derived/transactions.derived';
+	import {
+		sortedTransactions,
+		transactionsNotInitialized
+	} from '$lib/derived/transactions.derived';
 	import { loadTransactions } from '$lib/services/transactions.services';
 	import type { TokenId } from '$lib/types/token';
 	import { onMount } from 'svelte';
@@ -12,15 +15,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 
-	let loading = true;
-
 	const load = async (tokenId: TokenId) => await loadTransactions(tokenId);
 
-	onMount(async () => {
-		await load($tokenId);
-
-		loading = false;
-	});
+	onMount(async () => await load($tokenId));
 
 	let selectedTransaction: TransactionType | undefined;
 	$: selectedTransaction = $modalTransaction
@@ -30,7 +27,7 @@
 
 <h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Transactions</h2>
 
-{#if loading}
+{#if $transactionsNotInitialized}
 	<p class="mt-4 text-dark opacity-50">Transactions will appear here. Loading...</p>
 {:else}
 	{#each $sortedTransactions as transaction, index (`${transaction.hash}-${index}`)}
