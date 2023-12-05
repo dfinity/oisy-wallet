@@ -2,13 +2,13 @@
 	import type { WebSocketListener } from '$lib/types/listener';
 	import { token } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-	import { getFeeData } from '$lib/providers/infura.providers';
+	import { estimateGas, getFeeData } from '$lib/providers/infura.providers';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { addressStore } from '$lib/stores/address.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
@@ -21,6 +21,7 @@
 	export let destination = '';
 	export let amount: string | number | undefined = undefined;
 	export let network: TargetNetwork | undefined = undefined;
+	export let data: string | undefined = undefined;
 
 	const { store }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -37,7 +38,10 @@
 			if ($token.id === ETHEREUM_TOKEN_ID) {
 				store.setFee({
 					...(await getFeeData()),
-					gas: BigNumber.from(ETH_BASE_FEE)
+					gas:
+						nonNullish(data) && destination !== ''
+							? await estimateGas({ address: destination, data })
+							: BigNumber.from(ETH_BASE_FEE)
 				});
 				return;
 			}
