@@ -28,7 +28,7 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 				exchangeStore.set([
 					{
 						tokenId: ETHEREUM_TOKEN_ID,
-						currentPrice: value?.currentEthPrice.ethereum
+						currentPrice: value?.currentEthPrice?.ethereum
 					},
 					...Object.entries(value?.currentErc20Prices ?? {})
 						.map(([key, currentPrice]) => {
