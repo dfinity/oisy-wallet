@@ -5,9 +5,6 @@ import type {
 	CoingeckoSimpleTokenPriceParams
 } from '$lib/types/coingecko';
 
-/**
- * Coingecko public API provides cached values updated every 60 seconds (every 30 seconds for Pro API).
- */
 const API_URL = import.meta.env.VITE_COINGECKO_API_URL;
 
 /**
