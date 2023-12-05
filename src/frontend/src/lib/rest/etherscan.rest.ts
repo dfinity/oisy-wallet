@@ -83,5 +83,6 @@ export const contractAbi = async (contractAddress: ETH_ADDRESS): Promise<string>
 		throw new Error(`Fetching contract ABI with Etherscan API failed.`);
 	}
 
-	return response.text();
+	const {result} = await response.json();
+	return result;
 };
