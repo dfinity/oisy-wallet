@@ -8,14 +8,15 @@
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { addressStore } from '$lib/stores/address.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
 	import type { TargetNetwork } from '$lib/enums/network';
-	import { getErc20FeeData } from '$lib/services/fee.services';
+	import { getErc20Gas, getEthereumGas } from '$lib/services/fee.services';
+	import { isContractAddress } from '$lib/services/address.services';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -37,14 +38,14 @@
 			if ($token.id === ETHEREUM_TOKEN_ID) {
 				store.setFee({
 					...(await getFeeData()),
-					gas: BigNumber.from(ETH_BASE_FEE)
+					gas: await getEthereumGas(destination)
 				});
 				return;
 			}
 
 			store.setFee({
 				...(await getFeeData()),
-				gas: await getErc20FeeData({
+				gas: await getErc20Gas({
 					contract: $token as Erc20Token,
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					address: mapAddressStartsWith0x(destination !== '' ? destination : $addressStore!),

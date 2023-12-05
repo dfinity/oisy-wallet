@@ -68,3 +68,20 @@ export const transactions = async ({
 		})
 	);
 };
+
+// Documentation: https://docs.etherscan.io/api-endpoints/contracts#get-contract-abi-for-verified-contract-source-codes
+export const contractAbi = async (contractAddress: ETH_ADDRESS): Promise<string> => {
+	const url = new URL(API_URL);
+	url.searchParams.set('module', 'contract');
+	url.searchParams.set('action', 'getabi');
+	url.searchParams.set('address', contractAddress);
+	url.searchParams.set('apikey', API_KEY);
+
+	const response = await fetch(url);
+
+	if (!response.ok) {
+		throw new Error(`Fetching contract ABI with Etherscan API failed.`);
+	}
+
+	return response.text();
+};
