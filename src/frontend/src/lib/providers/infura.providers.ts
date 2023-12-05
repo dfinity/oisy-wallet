@@ -21,16 +21,13 @@ export const getBlockNumber = (): Promise<number> => provider.getBlockNumber();
 
 export const estimateGas = async ({
 	address,
-	data,
-	amount
+	data
 }: {
 	address: ETH_ADDRESS;
 	data: string;
-	amount: BigNumber;
 }): Promise<BigNumber> => {
 	return provider.estimateGas({
 		to: address,
-		data,
-		value: amount
+		data
 	});
 };

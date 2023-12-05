@@ -35,8 +35,6 @@
 
 	const updateFeeData = async () => {
 		try {
-			const amountToken = parseToken({ value: `${amount ?? '1'}` });
-
 			if ($token.id === ETHEREUM_TOKEN_ID) {
 				store.setFee({
 					...(await getFeeData()),
@@ -44,8 +42,7 @@
 						nonNullish(data) && destination !== ''
 							? await estimateGas({
 									address: destination,
-									data,
-									amount: amountToken
+									data
 							  })
 							: BigNumber.from(ETH_BASE_FEE)
 				});
@@ -58,7 +55,7 @@
 					contract: $token as Erc20Token,
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					address: mapAddressStartsWith0x(destination !== '' ? destination : $addressStore!),
-					amount: amountToken,
+					amount: parseToken({ value: `${amount ?? '1'}` }),
 					network
 				})
 			});
