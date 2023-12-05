@@ -11,7 +11,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
-	import ExchangeTokenValue from "$lib/components/exchange/ExchangeTokenValue.svelte";
+	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
