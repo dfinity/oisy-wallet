@@ -2,7 +2,7 @@
 	import { formatTokenDetailed, formatUSD } from '$lib/utils/format.utils';
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { exchangeStore } from '$lib/stores/exchange.store';
 	import type { Token } from '$lib/types/token';

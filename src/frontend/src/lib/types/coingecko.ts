@@ -52,7 +52,4 @@ export interface CoingeckoSimplePrice {
 	last_updated_at?: number;
 }
 
-export type CoingeckoSimplePriceResponse = Record<
-	CoingeckoCoinsId | string,
-	CoingeckoSimplePrice
->;
+export type CoingeckoSimplePriceResponse = Record<CoingeckoCoinsId | string, CoingeckoSimplePrice>;

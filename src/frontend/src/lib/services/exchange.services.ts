@@ -1,6 +1,6 @@
 import { simplePrice, simpleTokenPrice } from '$lib/providers/goincecko.provider';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
-import type {Erc20ContractAddress} from "$lib/types/erc20";
+import type { Erc20ContractAddress } from '$lib/types/erc20';
 
 export const exchangeRateETHToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({

@@ -1,6 +1,6 @@
 import type { Result_3 } from '$declarations/airdrop/airdrop.did';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
-import type {Erc20ContractAddress, Erc20Token} from '$lib/types/erc20';
+import type { Erc20ContractAddress } from '$lib/types/erc20';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
