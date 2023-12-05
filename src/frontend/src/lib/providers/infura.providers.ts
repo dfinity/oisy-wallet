@@ -26,13 +26,20 @@ export const getContractFeeData = async ({
 	contractAddress,
 	address,
 	amount,
-	abi
+	abi,
+	data
 }: {
 	contractAddress: ETH_ADDRESS;
 	address: ETH_ADDRESS;
 	amount: BigNumber;
 	abi: string;
+	data: string;
 }): Promise<BigNumber> => {
-	const erc20Contract = new ethers.Contract(contractAddress, abi, provider);
-	return erc20Contract.estimateGas.approve(address, amount);
+	const contract = new ethers.Contract(contractAddress, abi, provider);
+	// TODO: using the function we resolved ????
+	// return erc20Contract.estimateGas.approve(address, amount);
+	return provider.estimateGas({
+		to: contractAddress,
+		data
+	});
 };

@@ -3,12 +3,10 @@
 	import { token } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { getFeeData } from '$lib/providers/infura.providers';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { addressStore } from '$lib/stores/address.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$lib/services/listener.services';
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
@@ -16,7 +14,6 @@
 	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
 	import type { TargetNetwork } from '$lib/enums/network';
 	import { getErc20Gas, getEthereumGas } from '$lib/services/fee.services';
-	import { isContractAddress } from '$lib/services/address.services';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -38,7 +35,10 @@
 			if ($token.id === ETHEREUM_TOKEN_ID) {
 				store.setFee({
 					...(await getFeeData()),
-					gas: await getEthereumGas(destination)
+					gas: await getEthereumGas({
+                        destination,
+                        amount: parseToken({ value: `${amount ?? '1'}` }),
+                    })
 				});
 				return;
 			}
