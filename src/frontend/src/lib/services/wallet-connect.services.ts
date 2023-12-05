@@ -12,8 +12,8 @@ import {
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash
 } from '$lib/utils/wallet-connect.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
+import { isNullish } from '@dfinity/utils';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import { get } from 'svelte/store';
@@ -131,7 +131,10 @@ export const send = ({
 				return { success: false };
 			}
 
-			const { to, gas: gasWC, data } = firstParam;
+			// Gas fee provided by WalletConnect happens to be too low according user feedback.
+			// Example: Unexpected error while processing the request with WalletConnect. / processing response error (body="{\"jsonrpc\":\"2.0\",\"id\":60,\"error\":{\"code\":-32000,\"message\":\"intrinsic gas too low: needed 21552, allowed 21000\"}}"
+			// That is why we are using the fee we are calculating and not those provided by wallet connect in the request params.
+			const { to, data } = firstParam;
 
 			modalNext();
 
@@ -145,7 +148,7 @@ export const send = ({
 					amount,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
-					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
+					gas,
 					data
 				});
 
