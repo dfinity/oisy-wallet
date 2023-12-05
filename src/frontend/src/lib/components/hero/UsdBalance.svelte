@@ -23,7 +23,7 @@
 
 <span class="text-off-white">
 	<output
-		class={`break-all ${ethTotalUsd === 0 ? 'opacity-50' : 'opacity-100'} inline-block mt-8`}
+		class={`break-all font-bold ${ethTotalUsd === 0 ? 'opacity-50' : 'opacity-100'} inline-block mt-8`}
 		style="font-size: calc(2 * var(--font-size-h1)); line-height: 0.95;"
 	>
 		{#if $exchangeInitialized}
