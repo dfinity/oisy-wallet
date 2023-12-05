@@ -47,7 +47,10 @@ export const getEthereumGas = async ({
 	if (destination !== '' && (await isContractAddress(destination))) {
 		const abi = await getAbi(destination);
 
+		// TODO: this should be a parameter
 		const data = '0xb214faa51dfeb26f62a9b69cf6c4d7e35df85d33c08ff494378bc61ab5c65ec855020000';
+
+		// TODO: refactor me
 		const fourBytes = data.slice(0, 10);
 
 		const jsonAbi = JSON.parse(abi) as JsonFragment[];
@@ -61,8 +64,6 @@ export const getEthereumGas = async ({
 				const hash = keccak256(toUtf8Bytes(signature));
 				const selector = hash.slice(0, 10);
 
-				console.log(name, inputs, selector);
-
 				return fourBytes === selector;
 			});
 
@@ -71,10 +72,8 @@ export const getEthereumGas = async ({
 
 			const test = await getContractFeeData({
 				contractAddress: destination,
-				address: destination,
 				abi,
-				amount,
-				data
+				fn: "deposit"
 			});
 
 			console.log(abi, test.toNumber());

@@ -24,22 +24,14 @@ export const getCode = (address: ETH_ADDRESS): Promise<string> => provider.getCo
 
 export const getContractFeeData = async ({
 	contractAddress,
-	address,
-	amount,
 	abi,
-	data
+	fn
 }: {
 	contractAddress: ETH_ADDRESS;
-	address: ETH_ADDRESS;
-	amount: BigNumber;
 	abi: string;
-	data: string;
+	fn: string;
 }): Promise<BigNumber> => {
 	const contract = new ethers.Contract(contractAddress, abi, provider);
-	// TODO: using the function we resolved ????
-	// return erc20Contract.estimateGas.approve(address, amount);
-	return provider.estimateGas({
-		to: contractAddress,
-		data
-	});
+	// TODO: how do we pass the parameters?!!?!?!?
+	return contract.estimateGas[fn]();
 };
