@@ -3,8 +3,6 @@
 	import { token } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { getFeeData } from '$lib/providers/infura.providers';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { addressStore } from '$lib/stores/address.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
@@ -15,7 +13,7 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
 	import type { TargetNetwork } from '$lib/enums/network';
-	import { getErc20FeeData } from '$lib/services/fee.services';
+	import { getErc20Gas, getEthereumGas } from '$lib/services/fee.services';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -37,14 +35,17 @@
 			if ($token.id === ETHEREUM_TOKEN_ID) {
 				store.setFee({
 					...(await getFeeData()),
-					gas: BigNumber.from(ETH_BASE_FEE)
+					gas: await getEthereumGas({
+                        destination,
+                        amount: parseToken({ value: `${amount ?? '1'}` }),
+                    })
 				});
 				return;
 			}
 
 			store.setFee({
 				...(await getFeeData()),
-				gas: await getErc20FeeData({
+				gas: await getErc20Gas({
 					contract: $token as Erc20Token,
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					address: mapAddressStartsWith0x(destination !== '' ? destination : $addressStore!),
