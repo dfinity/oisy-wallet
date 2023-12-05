@@ -1,5 +1,6 @@
 import type { Result_3 } from '$declarations/airdrop/airdrop.did';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
+import type {Erc20ContractAddress, Erc20Token} from '$lib/types/erc20';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
@@ -11,6 +12,10 @@ export type PostMessageRequest =
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;
+
+export interface PostMessageDataRequestExchangeTimer {
+	erc20Addresses: Erc20ContractAddress[];
+}
 
 export type PostMessageResponse =
 	| 'signOutIdleTimer'
@@ -27,7 +32,8 @@ export interface PostMessageDataResponseAirdropCode extends PostMessageDataRespo
 }
 
 export interface PostMessageDataResponseExchange extends PostMessageDataResponse {
-	currentPrices: CoingeckoSimplePriceResponse;
+	currentEthPrice: CoingeckoSimplePriceResponse;
+	currentErc20Prices: CoingeckoSimplePriceResponse;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {

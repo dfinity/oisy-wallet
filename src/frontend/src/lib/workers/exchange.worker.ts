@@ -1,30 +1,31 @@
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
-import { exchangeRateETHToUsd } from '$lib/services/exchange.services';
-import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
+import { exchangeRateERC20ToUsd, exchangeRateETHToUsd } from '$lib/services/exchange.services';
+import type { Erc20ContractAddress } from '$lib/types/erc20';
+import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-onmessage = async ({ data }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
-	const { msg } = data;
+onmessage = async ({ data }: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>>) => {
+	const { msg, data: payload } = data;
 
 	switch (msg) {
 		case 'stopExchangeTimer':
 			stopTimer();
 			return;
 		case 'startExchangeTimer':
-			await startMetricsTimer();
+			await startMetricsTimer(payload);
 			return;
 	}
 };
 
 let timer: NodeJS.Timeout | undefined = undefined;
 
-const startMetricsTimer = async () => {
+const startMetricsTimer = async (data: PostMessageDataRequestExchangeTimer | undefined) => {
 	// This worker has already been started
 	if (nonNullish(timer)) {
 		return;
 	}
 
-	const sync = async () => await syncExchange();
+	const sync = async () => await syncExchange(data?.erc20Addresses ?? []);
 
 	// We sync now but also schedule the update afterwards
 	await sync();
@@ -43,7 +44,7 @@ const stopTimer = () => {
 
 let syncInProgress = false;
 
-const syncExchange = async () => {
+const syncExchange = async (contractAddresses: Erc20ContractAddress[]) => {
 	// Avoid to duplicate the sync if already in progress and not yet finished
 	if (syncInProgress) {
 		return;
@@ -52,12 +53,16 @@ const syncExchange = async () => {
 	syncInProgress = true;
 
 	try {
-		const currentPrices = await exchangeRateETHToUsd();
+		const [currentEthPrice, currentErc20Prices] = await Promise.all([
+			exchangeRateETHToUsd(),
+			exchangeRateERC20ToUsd(contractAddresses)
+		]);
 
 		postMessage({
 			msg: 'syncExchange',
 			data: {
-				currentPrices
+				currentEthPrice,
+				currentErc20Prices
 			}
 		});
 	} catch (err: unknown) {

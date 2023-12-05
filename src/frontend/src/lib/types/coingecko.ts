@@ -1,17 +1,18 @@
 // https://www.coingecko.com/api/documentation
 
-// We only support ETH <> USD for now, therefore not an exhaustive list.
+// For ethereum (non ERC20), we are only interested in ETH <> USD for now, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/coins/list
 export type CoingeckoCoinsId = 'ethereum';
 
-// We only support ETH <> USD for now, therefore not an exhaustive list.
+// We are interested in the ERC20 <> USD on Ethereum only, therefore not an exhaustive list.
+// *refers to curl -l https://api.coingecko.com/api/v3/asset_platforms
+export type CoingeckoPlatformId = 'ethereum';
+
+// We only support conversion in USD for now, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/simple/supported_vs_currencies
 export type CoingeckoCurrency = 'usd';
 
-export interface CoingeckoSimplePriceParams {
-	// id of coins, comma-separated if querying more than 1 coin (therefore an array join(","))
-	ids: CoingeckoCoinsId | CoingeckoCoinsId[];
-
+export interface CoingeckoSimpleParams {
 	// vs_currency of coins, comma-separated if querying more than 1 vs_currency
 	vs_currencies: CoingeckoCurrency;
 
@@ -31,6 +32,18 @@ export interface CoingeckoSimplePriceParams {
 	precision?: number;
 }
 
+export interface CoingeckoSimplePriceParams extends CoingeckoSimpleParams {
+	// id of coins, comma-separated if querying more than 1 coin (therefore an array join(","))
+	ids: CoingeckoCoinsId | CoingeckoCoinsId[];
+}
+
+export interface CoingeckoSimpleTokenPriceParams extends CoingeckoSimpleParams {
+	// The id of the platform issuing tokens (See asset_platforms endpoint for list of options)
+	id: CoingeckoPlatformId;
+	// The contract address of tokens, comma separated
+	contract_addresses: string | string[];
+}
+
 export interface CoingeckoSimplePrice {
 	usd: number;
 	usd_market_cap?: number;
@@ -39,4 +52,7 @@ export interface CoingeckoSimplePrice {
 	last_updated_at?: number;
 }
 
-export type CoingeckoSimplePriceResponse = Record<CoingeckoCoinsId, CoingeckoSimplePrice>;
+export type CoingeckoSimplePriceResponse = Record<
+	CoingeckoCoinsId | CoingeckoPlatformId,
+	CoingeckoSimplePrice
+>;

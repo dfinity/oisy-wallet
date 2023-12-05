@@ -1,9 +1,13 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { exchangeStore } from '$lib/stores/exchange.store';
-import type { PostMessage, PostMessageDataResponseExchange } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataRequestExchangeTimer,
+	PostMessageDataResponseExchange
+} from '$lib/types/post-message';
 
 export interface ExchangeWorker {
-	startExchangeTimer: () => void;
+	startExchangeTimer: (params: PostMessageDataRequestExchangeTimer) => void;
 	stopExchangeTimer: () => void;
 }
 
@@ -20,16 +24,18 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 			case 'syncExchange':
 				exchangeStore.set({
 					tokenId: ETHEREUM_TOKEN_ID,
-					currentPrice: value?.currentPrices.ethereum
+					// TODO
+					currentPrice: undefined //value?.currentPrices.ethereum
 				});
 				return;
 		}
 	};
 
 	return {
-		startExchangeTimer: () => {
+		startExchangeTimer: (data: PostMessageDataRequestExchangeTimer) => {
 			exchangeWorker.postMessage({
-				msg: 'startExchangeTimer'
+				msg: 'startExchangeTimer',
+				data
 			});
 		},
 		stopExchangeTimer: () => {
