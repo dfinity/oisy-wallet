@@ -1,10 +1,13 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
 	PostMessage,
 	PostMessageDataRequestExchangeTimer,
 	PostMessageDataResponseExchange
 } from '$lib/types/post-message';
+import { nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export interface ExchangeWorker {
 	startExchangeTimer: (params: PostMessageDataRequestExchangeTimer) => void;
@@ -22,11 +25,19 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 
 		switch (msg) {
 			case 'syncExchange':
-				exchangeStore.set({
-					tokenId: ETHEREUM_TOKEN_ID,
-					// TODO
-					currentPrice: undefined //value?.currentPrices.ethereum
-				});
+				exchangeStore.set([
+					{
+						tokenId: ETHEREUM_TOKEN_ID,
+						currentPrice: value?.currentEthPrice.ethereum
+					},
+					...Object.entries(value?.currentErc20Prices ?? {})
+						.map(([key, currentPrice]) => {
+							const tokens = get(erc20Tokens);
+							const token = tokens.find(({ address }) => address === key);
+							return nonNullish(token) ? { tokenId: token.id, currentPrice } : undefined;
+						})
+						.filter(nonNullish)
+				]);
 				return;
 		}
 	};

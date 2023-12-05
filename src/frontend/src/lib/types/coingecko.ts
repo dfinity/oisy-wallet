@@ -53,6 +53,6 @@ export interface CoingeckoSimplePrice {
 }
 
 export type CoingeckoSimplePriceResponse = Record<
-	CoingeckoCoinsId | CoingeckoPlatformId,
+	CoingeckoCoinsId | string,
 	CoingeckoSimplePrice
 >;
