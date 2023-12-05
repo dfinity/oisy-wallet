@@ -15,7 +15,7 @@
 			<span class="clamp-4" style="max-width: 60%"><slot /></span>
 			<span class="flex-1 text-right"><slot name="amount" /></span>
 		</div>
-		<p class="text-grey text-left" class:text-goldenrod={pending}>
+		<p class="text-misty-rose text-left" class:text-goldenrod={pending}>
 			<slot name="description" />
 
 			{#if pending}
