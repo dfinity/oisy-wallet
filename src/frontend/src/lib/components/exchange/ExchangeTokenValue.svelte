@@ -18,7 +18,7 @@
 
 <output class="break-all">
 	{#if $exchangeInitialized}
-		{formatUSD(usd, { symbol: true })}
+		{formatUSD(usd)}
 	{:else}
 		&ZeroWidthSpace;
 	{/if}

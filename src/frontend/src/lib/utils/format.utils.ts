@@ -82,7 +82,7 @@ export const formatUSD = (
 		minFraction = 2,
 		maxFraction = 2,
 		maximumSignificantDigits,
-		symbol = false
+		symbol = true
 	} = options || {};
 
 	return new Intl.NumberFormat('en-US', {
