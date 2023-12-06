@@ -8,13 +8,16 @@ import type {
 	PostMessageDataResponseExchange,
 	PostMessageDataResponseExchangeError
 } from '$lib/types/post-message';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export interface ExchangeWorker {
 	startExchangeTimer: (params: PostMessageDataRequestExchangeTimer) => void;
 	stopExchangeTimer: () => void;
+	destroy: () => void;
 }
+
+let errorMessages: { msg: string; timestamp: number }[] = [];
 
 export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 	const ExchangeWorker = await import('$lib/workers/exchange.worker?worker');
@@ -26,6 +29,51 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 		PostMessage<PostMessageDataResponseExchange | PostMessageDataResponseExchangeError>
 	>) => {
 		const { msg, data: value } = data;
+
+		// If Coingecko throws an error, for instance, if too many requests are queried within the same minute, it is possible that the window may receive the same error twice because we start and stop the worker based on certain store changes.
+		// To prevent the same issue from being displayed multiple times, which would not be user-friendly, the following function keeps track of errors and only displays those that have occurred with a time span of one minute or more.
+		const toastError = (value: PostMessageDataResponseExchangeError | undefined) => {
+			const text =
+				'An error occurred while attempting to retrieve the USD exchange rates.' as const;
+
+			const msg = (value as PostMessageDataResponseExchangeError | undefined)?.err;
+
+			if (isNullish(msg)) {
+				toastsError({
+					msg: { text }
+				});
+				return;
+			}
+
+			const now = Date.now();
+
+			const errorIndex = errorMessages.findIndex(
+				({ msg: message, timestamp }) =>
+					msg === message && timestamp > new Date(now - 1000 * 60).getTime()
+			);
+
+			if (errorIndex > -1) {
+				errorMessages.splice(errorIndex, 1);
+				errorMessages.push({
+					msg,
+					timestamp: now
+				});
+				return;
+			}
+
+			errorMessages = [
+				...errorMessages,
+				{
+					msg,
+					timestamp: now
+				}
+			];
+
+			toastsError({
+				msg: { text },
+				err: (value as PostMessageDataResponseExchangeError | undefined)?.err
+			});
+		};
 
 		switch (msg) {
 			case 'syncExchange':
@@ -50,13 +98,15 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 				]);
 				return;
 			case 'syncExchangeError':
-				toastsError({
-					msg: { text: 'An error occurred while attempting to retrieve the USD exchange rates.' },
-					err: (value as PostMessageDataResponseExchangeError | undefined)?.err
-				});
+				toastError(value as PostMessageDataResponseExchangeError | undefined);
 				return;
 		}
 	};
+
+	const stopTimer = () =>
+		exchangeWorker.postMessage({
+			msg: 'stopExchangeTimer'
+		});
 
 	return {
 		startExchangeTimer: (data: PostMessageDataRequestExchangeTimer) => {
@@ -65,10 +115,10 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 				data
 			});
 		},
-		stopExchangeTimer: () => {
-			exchangeWorker.postMessage({
-				msg: 'stopExchangeTimer'
-			});
+		stopExchangeTimer: stopTimer,
+		destroy: () => {
+			stopTimer();
+			errorMessages = [];
 		}
 	};
 };
