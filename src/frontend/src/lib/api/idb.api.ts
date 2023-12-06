@@ -1,6 +1,6 @@
 import type { IdbEthAddress } from '$lib/types/idb';
 import type { Principal } from '@dfinity/principal';
-import { createStore, get, set } from 'idb-keyval';
+import { createStore, del, get, set } from 'idb-keyval';
 
 const oisyEthAddressesStore = createStore('oisy-eth-addresses', 'eth-addresses');
 
@@ -14,3 +14,6 @@ export const setIdbEthAddress = ({
 
 export const getIdbEthAddress = (principal: Principal): Promise<IdbEthAddress | undefined> =>
 	get(principal.toText(), oisyEthAddressesStore);
+
+export const deleteIdbEthAddress = (principal: Principal): Promise<void> =>
+	del(principal.toText(), oisyEthAddressesStore);
