@@ -19,7 +19,7 @@ const initBalancesStore = (): BalancesStore => {
 				...(nonNullish(state) && state),
 				[tokenId]: balance
 			})),
-		reset: () => set(undefined),
+		reset: () => set(null),
 		subscribe
 	};
 };

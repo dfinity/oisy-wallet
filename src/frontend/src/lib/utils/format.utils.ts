@@ -1,3 +1,4 @@
+import { nonNullish } from '@dfinity/utils';
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
@@ -66,4 +67,30 @@ export const formatToDate = (seconds: number): string => {
 
 	const date = new Date(seconds * 1000);
 	return date.toLocaleDateString('en', options);
+};
+
+export const formatUSD = (
+	value: number,
+	options?: {
+		minFraction?: number;
+		maxFraction?: number;
+		maximumSignificantDigits?: number;
+		symbol?: boolean;
+	}
+): string => {
+	const {
+		minFraction = 2,
+		maxFraction = 2,
+		maximumSignificantDigits,
+		symbol = true
+	} = options || {};
+
+	return new Intl.NumberFormat('en-US', {
+		...(symbol && { style: 'currency', currency: 'USD' }),
+		minimumFractionDigits: minFraction,
+		maximumFractionDigits: maxFraction,
+		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })
+	})
+		.format(value)
+		.replace(/,/g, '’');
 };
