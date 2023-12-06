@@ -13,6 +13,11 @@ export const erc20TokensInitialized: Readable<boolean> = derived(
 	([$erc20TokensStore]) => nonNullish($erc20TokensStore)
 );
 
+export const erc20TokensNotInitialized: Readable<boolean> = derived(
+	[erc20TokensInitialized],
+	([$erc20TokensInitialized]) => !$erc20TokensInitialized
+);
+
 export const erc20TokensAddresses: Readable<Erc20ContractAddress[]> = derived(
 	[erc20Tokens],
 	([$erc20Tokens]) => $erc20Tokens.map(({ address }: Erc20Token) => ({ address }))
