@@ -11,6 +11,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
+	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
 	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
@@ -18,26 +19,32 @@
 
 <h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Tokens</h2>
 
-{#each tokens as token}
-	{@const url = transactionsUrl(token)}
+<TokensSkeletons>
+	{#each tokens as token (token.id)}
+		{@const url = transactionsUrl(token)}
 
-	<Listener {token}>
-		<a class="no-underline" href={url} aria-label={`Open the list of ${token.symbol} transactions`}>
-			<Card>
-				{token.name}
+		<Listener {token}>
+			<a
+				class="no-underline"
+				href={url}
+				aria-label={`Open the list of ${token.symbol} transactions`}
+			>
+				<Card>
+					{token.name}
 
-				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" color="white" />
+					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" color="white" />
 
-				<output class="break-all" slot="amount">
-					{formatTokenShort({
-						value: $balancesStore?.[token.id] ?? BigNumber.from(0n),
-						unitName: token.decimals
-					})}
-					{token.symbol}
-				</output>
-			</Card>
-		</a>
-	</Listener>
-{/each}
+					<output class="break-all" slot="amount">
+						{formatTokenShort({
+							value: $balancesStore?.[token.id] ?? BigNumber.from(0n),
+							unitName: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				</Card>
+			</a>
+		</Listener>
+	{/each}
 
-<AddToken />
+	<AddToken />
+</TokensSkeletons>
