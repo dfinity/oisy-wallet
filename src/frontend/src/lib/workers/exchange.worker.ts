@@ -13,14 +13,14 @@ onmessage = async ({ data }: MessageEvent<PostMessage<PostMessageDataRequestExch
 			stopTimer();
 			return;
 		case 'startExchangeTimer':
-			await startMetricsTimer(payload);
+			await startExchangeTimer(payload);
 			return;
 	}
 };
 
 let timer: NodeJS.Timeout | undefined = undefined;
 
-const startMetricsTimer = async (data: PostMessageDataRequestExchangeTimer | undefined) => {
+const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | undefined) => {
 	// This worker has already been started
 	if (nonNullish(timer)) {
 		return;
