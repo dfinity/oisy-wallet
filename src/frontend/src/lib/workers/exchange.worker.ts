@@ -2,6 +2,7 @@ import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants'
 import { exchangeRateERC20ToUsd, exchangeRateETHToUsd } from '$lib/services/exchange.services';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
+import { errorDetailToString } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 onmessage = async ({ data }: MessageEvent<PostMessage<PostMessageDataRequestExchangeTimer>>) => {
@@ -68,6 +69,13 @@ const syncExchange = async (contractAddresses: Erc20ContractAddress[]) => {
 	} catch (err: unknown) {
 		console.error('Unexpected error while fetching symbol average price:', err);
 		stopTimer();
+
+		postMessage({
+			msg: 'syncExchangeError',
+			data: {
+				err: errorDetailToString(err)
+			}
+		});
 	}
 
 	syncInProgress = false;
