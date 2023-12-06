@@ -5,6 +5,7 @@
 	import { exchangeStore } from '$lib/stores/exchange.store';
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { formatUSD } from '$lib/utils/format.utils';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let tokenId: TokenId;
 
@@ -14,11 +15,18 @@
 		balances: $balancesStore,
 		exchanges: $exchangeStore
 	});
+
+	let hasExchangeValue: boolean;
+	$: hasExchangeValue = nonNullish($exchangeStore?.[tokenId]);
 </script>
 
 <output class="break-all">
 	{#if $exchangeInitialized}
-		{formatUSD(usd)}
+		{#if hasExchangeValue}
+			{formatUSD(usd)}
+		{:else}
+			—
+		{/if}
 	{:else}
 		&ZeroWidthSpace;
 	{/if}
