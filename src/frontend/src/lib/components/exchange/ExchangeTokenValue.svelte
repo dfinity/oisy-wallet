@@ -25,7 +25,7 @@
 		{#if hasExchangeValue}
 			{formatUSD(usd)}
 		{:else}
-			—
+			{formatUSD(0, { minFraction: 0, maxFraction: 0 }).replace('0', '-')}
 		{/if}
 	{:else}
 		&ZeroWidthSpace;
