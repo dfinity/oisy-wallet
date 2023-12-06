@@ -3,50 +3,19 @@ import { getIdbEthAddress, setIdbEthAddress } from '$lib/api/idb.api';
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import type { ETH_ADDRESS } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadAddress = async (): Promise<{ success: boolean }> => {
-	const { identity } = get(authStore);
-
-	// Should not happen given the current layout and guards
-	if (isNullish(identity)) {
-		toastsError({
-			msg: { text: 'Cannot continue without an identity.' }
-		});
-
-		return { success: false };
-	}
-
 	try {
-		// TODO: just for test, if we've got IDB data then the popup should not even be displayed
-		if (!identity.getPrincipal().isAnonymous()) {
-			const idbEthAddress = await getIdbEthAddress(identity.getPrincipal());
+		const { identity } = get(authStore);
 
-			if (nonNullish(idbEthAddress)) {
-				const { address } = idbEthAddress;
-				addressStore.set(address);
-
-				// TODO: perform a non blocker async security check that the address still match await getEthAddress(identity)
-
-				return { success: true };
-			}
-		}
-
-		// Note that the backend throws an error if the caller is an anonymous
 		const address = await getEthAddress(identity);
 		addressStore.set(address);
 
-		const now = Date.now();
-
-		await setIdbEthAddress({
-			address: {
-				address,
-				createdAtTimestamp: now,
-				lastUsedTimestamp: now
-			},
-			principal: identity.getPrincipal()
-		});
+		await saveEthAddressForFutureSignIn({ address, identity });
 	} catch (err: unknown) {
 		addressStore.reset();
 
@@ -54,6 +23,61 @@ export const loadAddress = async (): Promise<{ success: boolean }> => {
 			msg: { text: 'Error while loading the ETH address.' },
 			err
 		});
+
+		return { success: false };
+	}
+
+	return { success: true };
+};
+
+const saveEthAddressForFutureSignIn = async ({
+	identity,
+	address
+}: {
+	identity: OptionIdentity;
+	address: ETH_ADDRESS;
+}) => {
+	// Should not happen given the current layout and guards. Moreover, the backend throws an error if the caller is anonymous.
+	assertNonNullish(identity, 'Cannot continue without an identity.');
+
+	const now = Date.now();
+
+	await setIdbEthAddress({
+		address: {
+			address,
+			createdAtTimestamp: now,
+			lastUsedTimestamp: now
+		},
+		principal: identity.getPrincipal()
+	});
+};
+
+export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
+	try {
+		const { identity } = get(authStore);
+
+		// Should not happen given the current layout and guards.
+		assertNonNullish(identity, 'Cannot continue without an identity.');
+
+		if (identity.getPrincipal().isAnonymous()) {
+			return { success: false };
+		}
+
+		const idbEthAddress = await getIdbEthAddress(identity.getPrincipal());
+
+		if (isNullish(idbEthAddress)) {
+			return { success: false };
+		}
+
+		const { address } = idbEthAddress;
+		addressStore.set(address);
+
+		// TODO: perform a non blocker async security check that the address still match await getEthAddress(identity)
+	} catch (err: unknown) {
+		// We silent the error as the dapp will proceed with a standard lookup of the address.
+		console.error(
+			'Error encountered while searching for a locally stored public address in the browser.'
+		);
 
 		return { success: false };
 	}
