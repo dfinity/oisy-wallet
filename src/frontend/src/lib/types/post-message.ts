@@ -21,7 +21,8 @@ export type PostMessageResponse =
 	| 'signOutIdleTimer'
 	| 'delegationRemainingTime'
 	| 'syncAirdropCode'
-	| 'syncExchange';
+	| 'syncExchange'
+	| 'syncExchangeError';
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 	authRemainingTime: number;
@@ -34,6 +35,10 @@ export interface PostMessageDataResponseAirdropCode extends PostMessageDataRespo
 export interface PostMessageDataResponseExchange extends PostMessageDataResponse {
 	currentEthPrice: CoingeckoSimplePriceResponse;
 	currentErc20Prices: CoingeckoSimplePriceResponse;
+}
+
+export interface PostMessageDataResponseExchangeError extends PostMessageDataResponse {
+	err: string | undefined;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {

@@ -1,10 +1,12 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type {
 	PostMessage,
 	PostMessageDataRequestExchangeTimer,
-	PostMessageDataResponseExchange
+	PostMessageDataResponseExchange,
+	PostMessageDataResponseExchangeError
 } from '$lib/types/post-message';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -20,17 +22,23 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 
 	exchangeWorker.onmessage = async ({
 		data
-	}: MessageEvent<PostMessage<PostMessageDataResponseExchange>>) => {
+	}: MessageEvent<
+		PostMessage<PostMessageDataResponseExchange | PostMessageDataResponseExchangeError>
+	>) => {
 		const { msg, data: value } = data;
 
 		switch (msg) {
 			case 'syncExchange':
+				// Avoid the duplication of the cast. Just handy to do so here to improve readability.
+				// eslint-disable-next-line no-case-declarations
+				const optionValue = value as PostMessageDataResponseExchange | undefined;
+
 				exchangeStore.set([
 					{
 						tokenId: ETHEREUM_TOKEN_ID,
-						currentPrice: value?.currentEthPrice?.ethereum
+						currentPrice: optionValue?.currentEthPrice?.ethereum
 					},
-					...Object.entries(value?.currentErc20Prices ?? {})
+					...Object.entries(optionValue?.currentErc20Prices ?? {})
 						.map(([key, currentPrice]) => {
 							const tokens = get(erc20Tokens);
 							const token = tokens.find(
@@ -40,6 +48,12 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 						})
 						.filter(nonNullish)
 				]);
+				return;
+			case 'syncExchangeError':
+				toastsError({
+					msg: { text: 'An error occurred while attempting to retrieve the USD exchange rates.' },
+					err: (value as PostMessageDataResponseExchangeError | undefined)?.err
+				});
 				return;
 		}
 	};
