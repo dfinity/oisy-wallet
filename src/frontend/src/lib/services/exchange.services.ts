@@ -1,4 +1,4 @@
-import { simplePrice, simpleTokenPrice } from '$lib/providers/goincecko.provider';
+import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 
