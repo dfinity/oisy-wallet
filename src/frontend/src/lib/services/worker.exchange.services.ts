@@ -33,7 +33,9 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 					...Object.entries(value?.currentErc20Prices ?? {})
 						.map(([key, currentPrice]) => {
 							const tokens = get(erc20Tokens);
-							const token = tokens.find(({ address }) => address === key);
+							const token = tokens.find(
+								({ address }) => address.toLowerCase() === key.toLowerCase()
+							);
 							return nonNullish(token) ? { tokenId: token.id, currentPrice } : undefined;
 						})
 						.filter(nonNullish)
