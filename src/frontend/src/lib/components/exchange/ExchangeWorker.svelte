@@ -8,7 +8,7 @@
 
 	onMount(async () => (worker = await initExchangeWorker()));
 
-	onDestroy(() => worker?.stopExchangeTimer());
+	onDestroy(() => worker?.destroy());
 
 	const syncTimer = () => {
 		worker?.stopExchangeTimer();
