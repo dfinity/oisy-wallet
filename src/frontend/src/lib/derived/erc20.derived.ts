@@ -12,3 +12,8 @@ export const erc20TokensInitialized: Readable<boolean> = derived(
 	[erc20TokensStore],
 	([$erc20TokensStore]) => nonNullish($erc20TokensStore)
 );
+
+export const erc20TokensNotInitialized: Readable<boolean> = derived(
+	[erc20TokensInitialized],
+	([$erc20TokensInitialized]) => !$erc20TokensInitialized
+);

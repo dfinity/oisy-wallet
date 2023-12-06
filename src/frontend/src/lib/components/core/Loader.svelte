@@ -36,11 +36,6 @@
 			step: LoaderStep.ETH_ADDRESS,
 			text: 'Retrieving your Ethereum public key',
 			state: 'in_progress'
-		} as ProgressStep,
-		{
-			step: LoaderStep.ETH_DATA,
-			text: `Fetching token balances${loadTransactions ? ' and transactions' : ''}`,
-			state: 'next'
 		} as ProgressStep
 	];
 
@@ -65,16 +60,7 @@
 	let disabledConfirm = true;
 	$: disabledConfirm = progressStep !== LoaderStep.DONE;
 
-	onMount(async () => {
-		const { success: addressSuccess } = await loadAddress();
-
-		if (!addressSuccess) {
-			await signOut();
-			return;
-		}
-
-		progressStep = LoaderStep.ETH_DATA;
-
+	const loadData = async () => {
 		// Load Erc20 contracts before loading balances and transactions
 		await loadErc20Contracts();
 
@@ -83,8 +69,21 @@
 			loadEthData({ loadTransactions, tokenId: $tokenId }),
 			...(AIRDROP ? [initAirdrop()] : [])
 		]);
+	};
+
+	onMount(async () => {
+		const { success: addressSuccess } = await loadAddress();
+
+		if (!addressSuccess) {
+			await signOut();
+			return;
+		}
 
 		progressStep = LoaderStep.DONE;
+
+		// Once the address initialized, we load the data without displaying a progress step.
+		// Instead, we use effect, placeholders and skeleton until those data are loaded.
+		await loadData();
 	});
 
 	const confirmIntroduction = () => {

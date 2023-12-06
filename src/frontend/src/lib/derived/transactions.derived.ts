@@ -33,3 +33,13 @@ export const sortedTransactions: Readable<Transaction[]> = derived(
 			}
 		)
 );
+
+export const transactionsInitialized: Readable<boolean> = derived(
+	[transactionsStore, tokenId],
+	([$transactionsStore, $tokenId]) => nonNullish($transactionsStore?.[$tokenId])
+);
+
+export const transactionsNotInitialized: Readable<boolean> = derived(
+	[transactionsInitialized],
+	([$transactionsInitialized]) => !$transactionsInitialized
+);
