@@ -1,9 +1,8 @@
-import { localIdentityCanisterId } from '$lib/constants/app.constants';
+import { LOCAL } from '$lib/constants/app.constants';
 import { HttpAgent, type Identity } from '@dfinity/agent';
-import { nonNullish } from '@dfinity/utils';
 
 export const getAgent = (params: { identity: Identity }): Promise<HttpAgent> => {
-	if (nonNullish(localIdentityCanisterId)) {
+	if (LOCAL) {
 		return getLocalAgent(params);
 	}
 
