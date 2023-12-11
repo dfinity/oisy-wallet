@@ -12,13 +12,17 @@ export const getAgent = (params: { identity: Identity }): Promise<HttpAgent> => 
 
 const getMainnetAgent = async ({ identity }: { identity: Identity }): Promise<HttpAgent> => {
 	const host = 'https://icp-api.io';
-	return new HttpAgent({ identity, ...(host && { host }) });
+	return new HttpAgent({ identity, ...(host && { host }), verifyQuerySignatures: true });
 };
 
 const getLocalAgent = async ({ identity }: { identity: Identity }): Promise<HttpAgent> => {
 	const host = 'http://localhost:4943/';
 
-	const agent: HttpAgent = new HttpAgent({ identity, ...(host && { host }) });
+	const agent: HttpAgent = new HttpAgent({
+		identity,
+		...(host && { host }),
+		verifyQuerySignatures: false
+	});
 
 	// Fetch root key for certificate validation during development
 	await agent.fetchRootKey();
