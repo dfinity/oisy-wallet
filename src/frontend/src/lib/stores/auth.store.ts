@@ -2,7 +2,7 @@ import {
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
 	AUTH_POPUP_WIDTH,
-	localIdentityCanisterId
+	LOCAL_INTERNET_IDENTITY_CANISTER_ID
 } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { createAuthClient } from '$lib/utils/auth.utils';
@@ -49,8 +49,8 @@ const initAuthStore = (): AuthStore => {
 			new Promise<void>(async (resolve, reject) => {
 				authClient = authClient ?? (await createAuthClient());
 
-				const identityProvider = nonNullish(localIdentityCanisterId)
-					? `http://localhost:4943?canisterId=${localIdentityCanisterId}`
+				const identityProvider = nonNullish(LOCAL_INTERNET_IDENTITY_CANISTER_ID)
+					? `http://localhost:4943?canisterId=${LOCAL_INTERNET_IDENTITY_CANISTER_ID}`
 					: `https://identity.${domain ?? 'ic0.app'}`;
 
 				await authClient?.login({
