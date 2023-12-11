@@ -1,3 +1,4 @@
+import { ICP_INDEX_CANISTER_ID } from '$lib/constants/app.constants';
 import { ICP_WALLET_PAGINATION } from '$lib/constants/icp.constants';
 import { getAgent } from '$lib/ic/agent.ic';
 import type { Identity } from '@dfinity/agent';
@@ -6,7 +7,7 @@ import {
 	IndexCanister,
 	type GetAccountIdentifierTransactionsResponse
 } from '@dfinity/ledger-icp';
-import type { Principal } from '@dfinity/principal';
+import { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 
 export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
@@ -31,7 +32,7 @@ export const getTransactions = async ({
 
 	const { getTransactions } = IndexCanister.create({
 		agent,
-		canisterId: MY_LEDGER_CANISTER_ID
+		canisterId: Principal.fromText(ICP_INDEX_CANISTER_ID)
 	});
 
 	return getTransactions({
