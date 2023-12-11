@@ -1,10 +1,11 @@
 export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
+export const LOCAL = MODE === 'local';
 export const STAGING = MODE === 'staging';
 export const PROD = MODE === 'ic';
 
-export const localIdentityCanisterId: string | null | undefined = import.meta.env
+export const LOCAL_INTERNET_IDENTITY_CANISTER_ID: string | null | undefined = import.meta.env
 	.VITE_INTERNET_IDENTITY_CANISTER_ID as string | null | undefined;
 
 // How long the delegation identity should remain valid?
