@@ -36,6 +36,7 @@ export const getTransactions = async ({
 	});
 
 	return getTransactions({
+		certified: false,
 		start,
 		maxResults,
 		accountIdentifier: getAccountIdentifier(owner).toHex()
