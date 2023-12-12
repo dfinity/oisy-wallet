@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TokenId } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { exchangeStore } from '$lib/stores/exchange.store';
@@ -7,17 +7,17 @@
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { nonNullish } from '@dfinity/utils';
 
-	export let tokenId: TokenId;
+	export let token: Token;
 
 	let usd: number;
 	$: usd = usdValue({
-		tokenId,
+		token,
 		balances: $balancesStore,
 		exchanges: $exchangeStore
 	});
 
 	let hasExchangeValue: boolean;
-	$: hasExchangeValue = nonNullish($exchangeStore?.[tokenId]);
+	$: hasExchangeValue = nonNullish($exchangeStore?.[token.id]);
 </script>
 
 <output class="break-all">
