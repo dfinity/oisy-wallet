@@ -1,17 +1,11 @@
 import { ICP_INDEX_CANISTER_ID } from '$lib/constants/app.constants';
 import { ICP_WALLET_PAGINATION } from '$lib/constants/icp.constants';
 import { getAgent } from '$lib/ic/agent.ic';
+import { getAccountIdentifier } from '$lib/utils/icp-account.utils';
 import type { Identity } from '@dfinity/agent';
-import {
-	AccountIdentifier,
-	IndexCanister,
-	type GetAccountIdentifierTransactionsResponse
-} from '@dfinity/ledger-icp';
+import { IndexCanister, type GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
-
-export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
-	AccountIdentifier.fromPrincipal({ principal, subAccount: undefined });
 
 export const getTransactions = async ({
 	owner,

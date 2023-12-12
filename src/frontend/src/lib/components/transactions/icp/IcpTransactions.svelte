@@ -3,6 +3,7 @@
 	import type { TransactionWithId } from '@dfinity/ledger-icp';
 	import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import IcpTransactionsSkeletons from '$lib/components/transactions/icp/IcpTransactionsSkeletons.svelte';
+	import IcpTransaction from '$lib/components/transactions/icp/IcpTransaction.svelte';
 
 	let transactions: TransactionWithId[];
 	$: transactions = $icpTransactionsStore[ICP_TOKEN_ID] ?? [];
@@ -10,7 +11,7 @@
 
 <IcpTransactionsSkeletons>
 	{#each transactions as transaction, index (`${transaction.id}-${index}`)}
-		{transaction.id}
+		<IcpTransaction {transaction} />
 	{/each}
 
 	{#if transactions.length === 0}
