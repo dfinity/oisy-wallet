@@ -5,7 +5,6 @@
 	import type { TokenId } from '$lib/types/token';
 	import { onMount } from 'svelte';
 	import { tokenId } from '$lib/derived/token.derived';
-	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import { modalTransaction } from '$lib/derived/modal.derived';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -22,8 +21,6 @@
 		? ($modalStore?.data as TransactionType | undefined)
 		: undefined;
 </script>
-
-<h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Transactions</h2>
 
 <TransactionsSkeletons>
 	{#each $sortedTransactions as transaction, index (`${transaction.hash}-${index}`)}
