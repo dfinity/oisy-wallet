@@ -2,7 +2,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import { formatTokenShort } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+	import {ETHEREUM_TOKEN, ICP_TOKEN} from '$lib/constants/tokens.constants';
 	import type { Token } from '$lib/types/token';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
@@ -15,7 +15,7 @@
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 
 	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
-	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
+	$: tokens = [ICP_TOKEN, ETHEREUM_TOKEN, ...$erc20Tokens];
 </script>
 
 <h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Tokens</h2>

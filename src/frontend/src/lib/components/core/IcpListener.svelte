@@ -4,6 +4,10 @@
 		type IcpWalletWorker,
 		initIcpWalletWorker
 	} from '$lib/services/worker.icp-wallet.services';
+    import type {Token} from "$lib/types/token";
+
+    // eslint-disable-next-line svelte/valid-compile
+    export let token: Token;
 
 	let worker: IcpWalletWorker | undefined;
 
