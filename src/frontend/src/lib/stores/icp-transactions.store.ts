@@ -6,7 +6,8 @@ import { writable, type Readable } from 'svelte/store';
 export type IcpTransactionsData = Record<TokenId, IcpTransaction[]>;
 
 export interface IcpTransactionsStore extends Readable<IcpTransactionsData> {
-	add: (params: { tokenId: TokenId; transactions: IcpTransaction[] }) => void;
+	prepend: (params: { tokenId: TokenId; transactions: IcpTransaction[] }) => void;
+	append: (params: { tokenId: TokenId; transactions: IcpTransaction[] }) => void;
 	reset: () => void;
 }
 
@@ -16,7 +17,7 @@ const initIcpTransactionsStore = (): IcpTransactionsStore => {
 	const { subscribe, update, set } = writable<IcpTransactionsData>(INITIAL);
 
 	return {
-		add: ({ tokenId, transactions }: { tokenId: TokenId; transactions: IcpTransaction[] }) =>
+		prepend: ({ tokenId, transactions }: { tokenId: TokenId; transactions: IcpTransaction[] }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: [
@@ -25,6 +26,11 @@ const initIcpTransactionsStore = (): IcpTransactionsStore => {
 						({ id }) => !transactions.some(({ id: txId }) => txId === id)
 					)
 				]
+			})),
+		append: ({ tokenId, transactions }: { tokenId: TokenId; transactions: IcpTransaction[] }) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: [...(state[tokenId] ?? []), ...transactions]
 			})),
 		reset: () => set(INITIAL),
 		subscribe

@@ -15,7 +15,7 @@ export const syncIcpWallet = (data: PostMessageDataResponseIcpWallet) => {
 		balance: BigNumber.from(balance)
 	});
 
-	icpTransactionsStore.add({
+	icpTransactionsStore.prepend({
 		tokenId: ICP_TOKEN_ID,
 		transactions: JSON.parse(newTransactions, jsonReviver)
 	});
