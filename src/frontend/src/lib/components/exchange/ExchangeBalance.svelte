@@ -13,10 +13,10 @@
 
 	let totalUsd: number;
 	$: totalUsd = tokens.reduce(
-		(acc, { id: tokenId }) =>
+		(acc, token) =>
 			acc +
 			usdValue({
-				tokenId,
+				token,
 				balances: $balancesStore,
 				exchanges: $exchangeStore
 			}),
