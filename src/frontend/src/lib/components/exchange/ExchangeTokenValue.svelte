@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type {Token, TokenId} from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { exchangeStore } from '$lib/stores/exchange.store';

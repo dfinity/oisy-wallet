@@ -1,12 +1,7 @@
 <script lang="ts">
-	import type { Token } from '$lib/types/token';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-	import { erc20Tokens } from '$lib/derived/erc20.derived';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { KeyValuePairInfo } from '@dfinity/gix-components';
-
-	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
-	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
+	import { tokens } from '$lib/derived/tokens.derived';
 </script>
 
 <div class="mt-4 mb-2">
@@ -19,8 +14,8 @@
 	</KeyValuePairInfo>
 </div>
 
-{#each tokens as token, i}
-	{@const last = i === tokens.length - 1}
+{#each $tokens as token, i}
+	{@const last = i === $tokens.length - 1}
 
 	<div
 		class="flex gap-1"
