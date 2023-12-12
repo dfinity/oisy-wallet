@@ -1,4 +1,4 @@
-import {ETHEREUM_TOKEN_ID, ICP_TOKEN_ID} from '$lib/constants/tokens.constants';
+import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -29,7 +29,7 @@ export const exchangeRateERC20ToUsd = async (
 		contract_addresses: contractAddresses.map(({ address }) => address)
 	});
 
-export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
+export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
 	exchangeStore.set([
 		{
 			tokenId: ETHEREUM_TOKEN_ID,
@@ -47,4 +47,3 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 			})
 			.filter(nonNullish)
 	]);
-};
