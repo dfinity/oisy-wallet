@@ -21,8 +21,6 @@ const worker = new TimerWorkerUtils();
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg, data } = dataMsg;
 
-	console.log('AAAA')
-
 	switch (msg) {
 		case 'stopICPWalletTimer':
 			worker.stop();
@@ -41,9 +39,6 @@ let transactions: Record<string, Transaction> = {};
 let initialized = false;
 
 const syncWallet = async ({ identity }: TimerWorkerUtilsJobData<PostMessageDataRequest>) => {
-
-	console.log('BBBB')
-
 	const { transactions: fetchedTransactions, ...rest } = await getTransactions({
 		identity,
 		owner: identity.getPrincipal(),
