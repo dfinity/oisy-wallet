@@ -8,6 +8,12 @@ export const exchangeRateETHToUsd = async (): Promise<CoingeckoSimplePriceRespon
 		vs_currencies: 'usd'
 	});
 
+export const exchangeRateICPToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'internet-computer',
+		vs_currencies: 'usd'
+	});
+
 export const exchangeRateERC20ToUsd = async (
 	contractAddresses: Erc20ContractAddress[]
 ): Promise<CoingeckoSimplePriceResponse | null> =>

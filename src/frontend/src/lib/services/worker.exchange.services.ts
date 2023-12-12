@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -85,6 +85,10 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 					{
 						tokenId: ETHEREUM_TOKEN_ID,
 						currentPrice: optionValue?.currentEthPrice?.ethereum
+					},
+					{
+						tokenId: ICP_TOKEN_ID,
+						currentPrice: optionValue?.currentIcpPrice?.['internet-computer']
 					},
 					...Object.entries(optionValue?.currentErc20Prices ?? {})
 						.map(([key, currentPrice]) => {
