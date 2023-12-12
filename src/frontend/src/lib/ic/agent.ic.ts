@@ -25,8 +25,7 @@ const createAgent = ({ identity }: { identity: Identity }): Promise<HttpAgent> =
 	createAgentUtils({
 		identity,
 		fetchRootKey: LOCAL,
-		host: LOCAL ? 'http://localhost:4943/' : 'https://icp-api.io',
-		verifyQuerySignatures: true
+		host: LOCAL ? 'http://localhost:4943/' : 'https://icp-api.io'
 	});
 
 export const clearAgents = () => (agents = null);
