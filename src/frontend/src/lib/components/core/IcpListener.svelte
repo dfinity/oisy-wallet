@@ -4,10 +4,10 @@
 		type IcpWalletWorker,
 		initIcpWalletWorker
 	} from '$lib/services/worker.icp-wallet.services';
-    import type {Token} from "$lib/types/token";
+	import type { Token } from '$lib/types/token';
 
-    // eslint-disable-next-line svelte/valid-compile
-    export let token: Token;
+	// eslint-disable-next-line svelte/valid-compile
+	export let token: Token;
 
 	let worker: IcpWalletWorker | undefined;
 
@@ -17,7 +17,7 @@
 
 	const syncTimer = () => {
 		worker?.stop();
-		worker?.start({ callback: () => console.log('TODO') });
+		worker?.start();
 	};
 
 	$: worker, syncTimer();

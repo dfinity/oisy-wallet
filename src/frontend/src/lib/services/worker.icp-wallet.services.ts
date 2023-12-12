@@ -1,17 +1,14 @@
+import { syncIcpWallet } from '$lib/services/icp-listener.services';
 import type { PostMessage, PostMessageDataResponseIcpWallet } from '$lib/types/post-message';
 
-export type IcpWalletCallback = (data: PostMessageDataResponseIcpWallet | undefined) => void;
-
 export interface IcpWalletWorker {
-	start: (params: { callback: IcpWalletCallback }) => void;
+	start: () => void;
 	stop: () => void;
 }
 
 export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
 	const WalletWorker = await import('$lib/workers/icp-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
-
-	let walletCallback: IcpWalletCallback | undefined;
 
 	worker.onmessage = async ({
 		data
@@ -20,15 +17,13 @@ export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
 
 		switch (msg) {
 			case 'syncIcpWallet':
-				walletCallback?.(data.data);
+				syncIcpWallet(data.data as PostMessageDataResponseIcpWallet);
 				return;
 		}
 	};
 
 	return {
-		start: ({ callback }: { callback: IcpWalletCallback }) => {
-			walletCallback = callback;
-
+		start: () => {
 			worker.postMessage({
 				msg: 'startIcpWalletTimer'
 			});
