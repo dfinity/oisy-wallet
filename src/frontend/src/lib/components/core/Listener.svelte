@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type ComponentType } from 'svelte';
 	import type { Token, TokenStandard } from '$lib/types/token';
-	import EthereumListener from '$lib/components/core/EthereumListener.svelte';
+	import EthereumListener from '$lib/components/core/EthListener.svelte';
 	import IcpListener from '$lib/components/core/IcpListener.svelte';
 
 	export let token: Token;

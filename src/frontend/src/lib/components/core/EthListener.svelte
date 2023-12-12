@@ -2,7 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { type AddressData, addressStore } from '$lib/stores/address.store';
 	import { onDestroy } from 'svelte';
-	import { initTransactionsListener } from '$lib/services/listener.services';
+	import { initTransactionsListener } from '$lib/services/eth-listener.services';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
 
