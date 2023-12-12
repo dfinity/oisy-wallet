@@ -1,6 +1,4 @@
-import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { erc20Tokens } from '$lib/derived/erc20.derived';
-import { exchangeStore } from '$lib/stores/exchange.store';
+import { syncExchange } from '$lib/services/exchange.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type {
 	PostMessage,
@@ -8,8 +6,7 @@ import type {
 	PostMessageDataResponseExchange,
 	PostMessageDataResponseExchangeError
 } from '$lib/types/post-message';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
+import { isNullish } from '@dfinity/utils';
 
 export interface ExchangeWorker {
 	startExchangeTimer: (params: PostMessageDataRequestExchangeTimer) => void;
@@ -77,29 +74,7 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 
 		switch (msg) {
 			case 'syncExchange':
-				// Avoid the duplication of the cast. Just handy to do so here to improve readability.
-				// eslint-disable-next-line no-case-declarations
-				const optionValue = value as PostMessageDataResponseExchange | undefined;
-
-				exchangeStore.set([
-					{
-						tokenId: ETHEREUM_TOKEN_ID,
-						currentPrice: optionValue?.currentEthPrice?.ethereum
-					},
-					{
-						tokenId: ICP_TOKEN_ID,
-						currentPrice: optionValue?.currentIcpPrice?.['internet-computer']
-					},
-					...Object.entries(optionValue?.currentErc20Prices ?? {})
-						.map(([key, currentPrice]) => {
-							const tokens = get(erc20Tokens);
-							const token = tokens.find(
-								({ address }) => address.toLowerCase() === key.toLowerCase()
-							);
-							return nonNullish(token) ? { tokenId: token.id, currentPrice } : undefined;
-						})
-						.filter(nonNullish)
-				]);
+				syncExchange(value as PostMessageDataResponseExchange | undefined);
 				return;
 			case 'syncExchangeError':
 				toastError(value as PostMessageDataResponseExchangeError | undefined);
