@@ -9,11 +9,11 @@ export const LOCAL_INTERNET_IDENTITY_CANISTER_ID: string | null | undefined = im
 	.VITE_INTERNET_IDENTITY_CANISTER_ID as string | null | undefined;
 
 export const ICP_LEDGER_CANISTER_ID =
-	(import.meta.env.VITE_INTERNET_IDENTITY_CANISTER_ID as string | null | undefined) ??
+	(import.meta.env.VITE_ICP_LEDGER_CANISTER_ID as string | null | undefined) ??
 	'yjl3-tyaaa-aaaaa-aaaba-cai';
 
 export const ICP_INDEX_CANISTER_ID =
-	(import.meta.env.VITE_INTERNET_IDENTITY_CANISTER_ID as string | null | undefined) ??
+	(import.meta.env.VITE_ICP_INDEX_CANISTER_ID as string | null | undefined) ??
 	'qhbym-qaaaa-aaaaa-aaafq-cai';
 
 // How long the delegation identity should remain valid?
