@@ -3,7 +3,7 @@ import { SYNC_ICP_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/icp.consta
 import type {
 	PostMessage,
 	PostMessageDataRequest,
-	PostMessageDataResponseICPWallet
+	PostMessageDataResponseIcpWallet
 } from '$lib/types/post-message';
 import {
 	TimerWorkerUtils,
@@ -22,10 +22,10 @@ onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRe
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
-		case 'stopICPWalletTimer':
+		case 'stopIcpWalletTimer':
 			worker.stop();
 			return;
-		case 'startICPWalletTimer':
+		case 'startIcpWalletTimer':
 			await worker.start<PostMessageDataRequest>({
 				interval: SYNC_ICP_WALLET_TIMER_INTERVAL_MILLIS,
 				job: syncWallet,
@@ -79,8 +79,8 @@ const postMessageWallet = ({
 	transactions: newTransactions,
 	...rest
 }: GetAccountIdentifierTransactionsResponse) =>
-	worker.postMsg<PostMessageDataResponseICPWallet>({
-		msg: 'syncICPWallet',
+	worker.postMsg<PostMessageDataResponseIcpWallet>({
+		msg: 'syncIcpWallet',
 		data: {
 			wallet: {
 				...rest,

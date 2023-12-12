@@ -2,6 +2,6 @@ import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-i
 
 export type JsonTransactionsText = string;
 
-export type ICPWallet = Omit<GetAccountIdentifierTransactionsResponse, 'transactions'> & {
+export type IcpWallet = Omit<GetAccountIdentifierTransactionsResponse, 'transactions'> & {
 	newTransactions: JsonTransactionsText;
 };
