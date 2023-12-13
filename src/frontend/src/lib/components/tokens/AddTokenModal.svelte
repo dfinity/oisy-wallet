@@ -84,7 +84,9 @@
 
 			saveProgressStep = AddTokenStep.UPDATE_UI;
 
-			erc20TokensStore.add(mapErc20Token({ address: contractAddress, ...metadata }));
+			erc20TokensStore.add(
+				mapErc20Token({ address: contractAddress, exchange: 'ethereum', ...metadata })
+			);
 
 			saveProgressStep = AddTokenStep.DONE;
 

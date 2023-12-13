@@ -14,6 +14,12 @@ export const exchangeRateETHToUsd = async (): Promise<CoingeckoSimplePriceRespon
 		vs_currencies: 'usd'
 	});
 
+export const exchangeRateICPToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'internet-computer',
+		vs_currencies: 'usd'
+	});
+
 export const exchangeRateERC20ToUsd = async (
 	contractAddresses: Erc20ContractAddress[]
 ): Promise<CoingeckoSimplePriceResponse | null> =>
@@ -24,6 +30,8 @@ export const exchangeRateERC20ToUsd = async (
 	});
 
 export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
+	const tokens = get(erc20Tokens);
+
 	exchangeStore.set([
 		{
 			tokenId: ETHEREUM_TOKEN_ID,
@@ -31,10 +39,15 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 		},
 		...Object.entries(data?.currentErc20Prices ?? {})
 			.map(([key, currentPrice]) => {
-				const tokens = get(erc20Tokens);
 				const token = tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase());
 				return nonNullish(token) ? { tokenId: token.id, currentPrice } : undefined;
 			})
-			.filter(nonNullish)
+			.filter(nonNullish),
+		...tokens
+			.filter(({ exchange }) => exchange === 'icp')
+			.map(({ id }) => ({
+				tokenId: id,
+				currentPrice: data?.currentIcpPrice['internet-computer']
+			}))
 	]);
 };

@@ -1,5 +1,9 @@
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
-import { exchangeRateERC20ToUsd, exchangeRateETHToUsd } from '$lib/services/exchange.services';
+import {
+	exchangeRateERC20ToUsd,
+	exchangeRateETHToUsd,
+	exchangeRateICPToUsd
+} from '$lib/services/exchange.services';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
@@ -54,16 +58,18 @@ const syncExchange = async (contractAddresses: Erc20ContractAddress[]) => {
 	syncInProgress = true;
 
 	try {
-		const [currentEthPrice, currentErc20Prices] = await Promise.all([
+		const [currentEthPrice, currentErc20Prices, currentIcpPrice] = await Promise.all([
 			exchangeRateETHToUsd(),
-			exchangeRateERC20ToUsd(contractAddresses)
+			exchangeRateERC20ToUsd(contractAddresses),
+			exchangeRateICPToUsd()
 		]);
 
 		postMessage({
 			msg: 'syncExchange',
 			data: {
 				currentEthPrice,
-				currentErc20Prices
+				currentErc20Prices,
+				currentIcpPrice
 			}
 		});
 	} catch (err: unknown) {
