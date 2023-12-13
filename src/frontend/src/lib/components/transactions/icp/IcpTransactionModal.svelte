@@ -8,8 +8,7 @@
 	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatToDate } from '$lib/utils/format.utils';
-	import { formatNanosecondsToDate } from '$lib/utils/date.utils';
+    import {formatNanosecondsToDate, formatToDate} from '$lib/utils/format.utils';
 
 	export let transaction: IcpTransaction;
 

@@ -5,14 +5,13 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Card from '$lib/components/ui/Card.svelte';
-	import { formatTokenShort } from '$lib/utils/format.utils';
+    import {formatNanosecondsToDate, formatTokenShort} from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/derived/token.derived';
 	import type { IcpTransaction } from '$lib/types/icp-wallet';
 	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
 	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
-	import { formatNanosecondsToDate } from '$lib/utils/date.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 
 	export let transaction: IcpTransaction;
