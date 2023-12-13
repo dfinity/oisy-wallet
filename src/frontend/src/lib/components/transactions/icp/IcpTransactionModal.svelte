@@ -8,7 +8,9 @@
 	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
+	import { formatNanosecondsToDate, formatTokenDetailed } from '$lib/utils/format.utils';
+	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+	import { token } from '$lib/derived/token.derived';
 
 	export let transaction: IcpTransaction;
 
@@ -20,6 +22,10 @@
 	let to: string | undefined;
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
+
+	let type: 'send' | 'receive';
+	$: type =
+		from?.toLowerCase() === $icpAccountIdentifiedStore?.toHex().toLowerCase() ? 'send' : 'receive';
 
 	onMount(() => {
 		try {
@@ -49,5 +55,40 @@
 				<output>{formatNanosecondsToDate(timestamp)}</output>
 			</p>
 		{/if}
+
+		<label for="type" class="font-bold px-4.5">Type:</label>
+		<p id="type" class="font-normal mb-4 px-4.5 break-all">
+			{`${type === 'send' ? 'Send' : 'Receive'}`}
+		</p>
+
+		{#if nonNullish(from)}
+			<label for="from" class="font-bold px-4.5">From:</label>
+			<p id="from" class="font-normal mb-4 px-4.5 break-all">
+				<output>{from}</output>
+				<Copy value={from} text="From address copied to clipboard." inline />
+			</p>
+		{/if}
+
+		{#if nonNullish(to)}
+			<label for="to" class="font-bold px-4.5">To:</label>
+			<p id="to" class="font-normal mb-4 px-4.5 break-all">
+				<output>{to}</output>
+				<Copy value={to} text="To address copied to clipboard." inline />
+			</p>
+		{/if}
+
+		{#if nonNullish(value)}
+			<label for="amount" class="font-bold px-4.5">Value:</label>
+			<p id="amount" class="font-normal mb-4 px-4.5 break-all">
+				<output>
+					{formatTokenDetailed({
+						value,
+						unitName: $token.decimals
+					})}
+				</output> ICP
+			</p>
+		{/if}
+
+		<button class="primary full center text-center my-3" on:click={modalStore.close}>Close</button>
 	</div>
 </Modal>
