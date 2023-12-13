@@ -55,7 +55,7 @@ export const shortenWithMiddleEllipsis = (text: string, splitLength = 7): string
 		: text;
 };
 
-export const formatToDate = (seconds: number): string => {
+export const formatSecondsToDate = (seconds: number): string => {
 	const options: Intl.DateTimeFormatOptions = {
 		month: 'short',
 		day: 'numeric',
