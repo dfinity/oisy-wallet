@@ -11,6 +11,7 @@
 	import { formatNanosecondsToDate, formatTokenDetailed } from '$lib/utils/format.utils';
 	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
 	import { token } from '$lib/derived/token.derived';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	export let transaction: IcpTransaction;
 
@@ -43,50 +44,50 @@
 	<svelte:fragment slot="title">Transaction details</svelte:fragment>
 
 	<div>
-		<label for="id" class="font-bold px-4.5">Transaction ID:</label>
-		<p id="id" class="font-normal mb-4 px-4.5 break-all">
+		<Value ref="id">
+			<svelte:fragment slot="label">Transaction ID</svelte:fragment>
 			<output>{id}</output>
 			<Copy value={`${id}`} text="Transaction ID copied to clipboard." inline />
-		</p>
+		</Value>
 
 		{#if nonNullish(timestamp)}
-			<label for="timestamp" class="font-bold px-4.5">Timestamp:</label>
-			<p id="timestamp" class="font-normal mb-4 px-4.5 break-all">
+			<Value ref="timestamp">
+				<svelte:fragment slot="label">Timestamp</svelte:fragment>
 				<output>{formatNanosecondsToDate(timestamp)}</output>
-			</p>
+			</Value>
 		{/if}
 
-		<label for="type" class="font-bold px-4.5">Type:</label>
-		<p id="type" class="font-normal mb-4 px-4.5 break-all">
+		<Value ref="type">
+			<svelte:fragment slot="label">Type</svelte:fragment>
 			{`${type === 'send' ? 'Send' : 'Receive'}`}
-		</p>
+		</Value>
 
 		{#if nonNullish(from)}
-			<label for="from" class="font-bold px-4.5">From:</label>
-			<p id="from" class="font-normal mb-4 px-4.5 break-all">
+			<Value ref="from">
+				<svelte:fragment slot="label">From</svelte:fragment>
 				<output>{from}</output>
 				<Copy value={from} text="From address copied to clipboard." inline />
-			</p>
+			</Value>
 		{/if}
 
 		{#if nonNullish(to)}
-			<label for="to" class="font-bold px-4.5">To:</label>
-			<p id="to" class="font-normal mb-4 px-4.5 break-all">
+			<Value ref="to">
+				<svelte:fragment slot="label">To</svelte:fragment>
 				<output>{to}</output>
 				<Copy value={to} text="To address copied to clipboard." inline />
-			</p>
+			</Value>
 		{/if}
 
 		{#if nonNullish(value)}
-			<label for="amount" class="font-bold px-4.5">Value:</label>
-			<p id="amount" class="font-normal mb-4 px-4.5 break-all">
+			<Value ref="amount">
+				<svelte:fragment slot="label">Value</svelte:fragment>
 				<output>
 					{formatTokenDetailed({
 						value,
 						unitName: $token.decimals
 					})}
-				</output> ICP
-			</p>
+				</output>
+			</Value>
 		{/if}
 
 		<button class="primary full center text-center my-3" on:click={modalStore.close}>Close</button>
