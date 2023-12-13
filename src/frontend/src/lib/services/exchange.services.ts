@@ -1,6 +1,7 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
+import { erc20TokensStore } from '$lib/stores/erc20.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
@@ -11,6 +12,12 @@ import { get } from 'svelte/store';
 export const exchangeRateETHToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'ethereum',
+		vs_currencies: 'usd'
+	});
+
+export const exchangeRateICPToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'internet-computer',
 		vs_currencies: 'usd'
 	});
 
@@ -35,6 +42,12 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 				const token = tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase());
 				return nonNullish(token) ? { tokenId: token.id, currentPrice } : undefined;
 			})
-			.filter(nonNullish)
+			.filter(nonNullish),
+		...(get(erc20TokensStore) ?? [])
+			.filter(({ exchange }) => exchange === 'icp')
+			.map(({ id }) => ({
+				tokenId: id,
+				currentPrice: data?.currentIcpPrice['internet-computer']
+			}))
 	]);
 };
