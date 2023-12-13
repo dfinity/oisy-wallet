@@ -90,7 +90,7 @@
 	</p>
 </Warning>
 
-<div class="flex justify-end gap-1">
+<div class="flex justify-end gap-1 mb-2">
 	<button class="secondary" on:click={() => dispatch('icBack')}>Back</button>
 	<button
 		class="primary"
