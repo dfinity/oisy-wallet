@@ -4,13 +4,13 @@ import icp from '$lib/assets/icp.svg';
 import uniswap from '$lib/assets/uniswap.svg';
 import usdc from '$lib/assets/usdc.svg';
 import usdt from '$lib/assets/usdt.svg';
-import type { Erc20ContractAddress, Erc20Metadata, Erc20Token } from '$lib/types/erc20';
+import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$lib/types/erc20';
 
 export const mapErc20Token = ({
 	symbol,
 	name,
 	...rest
-}: Erc20ContractAddress & Erc20Metadata): Erc20Token => ({
+}: Erc20Contract & Erc20Metadata): Erc20Token => ({
 	id: Symbol(symbol),
 	standard: 'erc20',
 	name,

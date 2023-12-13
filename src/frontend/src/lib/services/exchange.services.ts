@@ -29,7 +29,9 @@ export const exchangeRateERC20ToUsd = async (
 		contract_addresses: contractAddresses.map(({ address }) => address)
 	});
 
-export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
+export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
+	const tokens = get(erc20Tokens);
+
 	exchangeStore.set([
 		{
 			tokenId: ETHEREUM_TOKEN_ID,
@@ -41,9 +43,15 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 		},
 		...Object.entries(data?.currentErc20Prices ?? {})
 			.map(([key, currentPrice]) => {
-				const tokens = get(erc20Tokens);
 				const token = tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase());
 				return nonNullish(token) ? { tokenId: token.id, currentPrice } : undefined;
 			})
-			.filter(nonNullish)
+			.filter(nonNullish),
+		...tokens
+			.filter(({ exchange }) => exchange === 'icp')
+			.map(({ id }) => ({
+				tokenId: id,
+				currentPrice: data?.currentIcpPrice['internet-computer']
+			}))
 	]);
+};
