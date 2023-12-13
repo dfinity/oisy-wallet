@@ -5,7 +5,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatToDate, formatTokenDetailed } from '$lib/utils/format.utils';
+	import { formatSecondsToDate, formatTokenDetailed } from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import TransactionStatus from '$lib/components/transactions/TransactionStatus.svelte';
 	import { token } from '$lib/derived/token.derived';
@@ -49,7 +49,7 @@
 		{#if nonNullish(timestamp)}
 			<label for="timestamp" class="font-bold px-4.5">Timestamp:</label>
 			<p id="timestamp" class="font-normal mb-4 px-4.5 break-all">
-				<output>{formatToDate(timestamp)}</output>
+				<output>{formatSecondsToDate(timestamp)}</output>
 			</p>
 		{/if}
 
