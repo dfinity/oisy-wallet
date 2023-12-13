@@ -1,0 +1,66 @@
+<script lang="ts">
+	import { BigNumber } from '@ethersproject/bignumber';
+	import IconReceive from '$lib/components/icons/IconReceive.svelte';
+	import { type ComponentType, onMount } from 'svelte';
+	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import Card from '$lib/components/ui/Card.svelte';
+	import { formatTokenShort } from '$lib/utils/format.utils';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { token } from '$lib/derived/token.derived';
+	import type { IcpTransaction } from '$lib/types/icp-wallet';
+	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
+	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+	import { formatNanosecondsToDate } from '$lib/utils/date.utils';
+	import { toastsError } from '$lib/stores/toasts.store';
+
+	export let transaction: IcpTransaction;
+
+	let from: string | undefined;
+	let value: BigNumber | undefined;
+	let timestamp: bigint | undefined;
+
+	onMount(() => {
+		try {
+			({ from, value, timestamp } = mapIcpTransaction({ transaction }));
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: 'Cannot map the transaction to display its information.' },
+				err
+			});
+		}
+	});
+
+	let type: 'send' | 'receive';
+	$: type =
+		from?.toLowerCase() === $icpAccountIdentifiedStore?.toHex().toLowerCase() ? 'send' : 'receive';
+
+	let icon: ComponentType;
+	$: icon = type === 'send' ? IconSend : IconReceive;
+
+	let amount: BigNumber | undefined;
+	$: amount = type == 'send' && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
+</script>
+
+<button on:click={() => modalStore.openTransaction(transaction)} class="block w-full">
+	<Card>
+		{`${type === 'send' ? 'Send' : 'Receive'}`}
+
+		<RoundedIcon slot="icon" {icon} />
+
+		<svelte:fragment slot="amount">
+			{nonNullish(amount)
+				? formatTokenShort({
+						value: amount,
+						unitName: $token.decimals
+				  })
+				: ''}</svelte:fragment
+		>
+		<svelte:fragment slot="description">
+			{#if nonNullish(timestamp)}
+				{formatNanosecondsToDate(timestamp)}
+			{/if}
+		</svelte:fragment>
+	</Card>
+</button>
