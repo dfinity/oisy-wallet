@@ -7,7 +7,7 @@
 	import { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
-	import IcpFeeDisplay from "$lib/components/send/icp/IcpFeeDisplay.svelte";
+	import IcpFeeDisplay from '$lib/components/send/icp/IcpFeeDisplay.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;

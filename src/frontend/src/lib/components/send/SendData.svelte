@@ -8,7 +8,7 @@
 	export let amount: string | number | undefined = undefined;
 	export let token: Token;
 	export let network: TargetNetwork | undefined = undefined;
-    export let source: string;
+	export let source: string;
 </script>
 
 <SendDataDestination {destination} {amount} {token} {network} />
