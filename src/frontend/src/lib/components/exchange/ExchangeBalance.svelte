@@ -2,21 +2,16 @@
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { exchangeStore } from '$lib/stores/exchange.store';
-	import type { Token } from '$lib/types/token';
-	import { erc20Tokens } from '$lib/derived/erc20.derived';
 	import { usdValue } from '$lib/utils/exchange.utils';
-
-	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
-	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
+	import { tokens } from '$lib/derived/tokens.derived';
 
 	let totalUsd: number;
-	$: totalUsd = tokens.reduce(
-		(acc, { id: tokenId }) =>
+	$: totalUsd = $tokens.reduce(
+		(acc, token) =>
 			acc +
 			usdValue({
-				tokenId,
+				token,
 				balances: $balancesStore,
 				exchanges: $exchangeStore
 			}),
