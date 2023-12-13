@@ -8,6 +8,7 @@
 	import { fade } from 'svelte/transition';
 	import Warning from '$lib/components/ui/Warning.svelte';
 	import { erc20TokensStore } from '$lib/stores/erc20.store';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	export let contractAddress = '';
 	export let metadata: Erc20Metadata | undefined;
@@ -44,35 +45,37 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<label for="contractAddress" class="font-bold px-4.5">Contract address:</label>
-<div id="contractAddress" class="font-normal mb-4 px-4.5 break-all">{contractAddress}</div>
+<Value ref="contractAddress" element="div">
+	<svelte:fragment slot="label">Contract address</svelte:fragment>
+	{contractAddress}
+</Value>
 
-<label for="contractName" class="font-bold px-4.5">Name:</label>
-<div id="contractName" class="font-normal mb-4 px-4.5 break-all">
+<Value ref="contractName" element="div">
+	<svelte:fragment slot="label">Name</svelte:fragment>
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
 		<span in:fade>{metadata.name}</span>
 	{/if}
-</div>
+</Value>
 
-<label for="contractSymbol" class="font-bold px-4.5">Symbol:</label>
-<div id="contractSymbol" class="font-normal mb-4 px-4.5 break-all">
+<Value ref="contractSymbol" element="div">
+	<svelte:fragment slot="label">Symbol</svelte:fragment>
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
 		<span in:fade>{metadata.symbol}</span>
 	{/if}
-</div>
+</Value>
 
-<label for="contractDecimals" class="font-bold px-4.5">Decimals:</label>
-<div id="contractDecimals" class="font-normal mb-4 px-4.5 break-all">
+<Value ref="contractDecimals" element="div">
+	<svelte:fragment slot="label">Decimals</svelte:fragment>
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
 		<span in:fade>{metadata.decimals}</span>
 	{/if}
-</div>
+</Value>
 
 <Warning>
 	<p>
