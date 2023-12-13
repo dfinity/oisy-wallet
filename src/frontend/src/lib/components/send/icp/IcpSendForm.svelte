@@ -7,6 +7,7 @@
 	import { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+	import IcpFeeDisplay from "$lib/components/send/icp/IcpFeeDisplay.svelte";
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -24,6 +25,8 @@
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
 	<SendSource token={$token} source={$icpAccountIdentifiedStore?.toHex() ?? ''} />
+
+	<IcpFeeDisplay />
 
 	<div class="flex justify-end gap-1">
 		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>

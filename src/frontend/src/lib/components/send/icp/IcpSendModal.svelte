@@ -6,6 +6,7 @@
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import IcpSendForm from '$lib/components/send/icp/IcpSendForm.svelte';
+	import IcpSendReview from '$lib/components/send/icp/IcpSendReview.svelte';
 
 	/**
 	 * Props
@@ -53,7 +54,9 @@
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	{#if currentStep?.name === 'Review'}{:else if currentStep?.name === 'Sending'}
+	{#if currentStep?.name === 'Review'}
+		<IcpSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} />
+	{:else if currentStep?.name === 'Sending'}
 		<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
 	{:else}
 		<IcpSendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
