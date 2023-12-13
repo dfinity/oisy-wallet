@@ -4,6 +4,7 @@
 	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import type { Token } from '$lib/types/token';
 	import type { TargetNetwork } from '$lib/enums/network';
+	import { addressStore } from '$lib/stores/address.store';
 
 	export let destination = '';
 	export let amount: string | number | undefined = undefined;
@@ -15,6 +16,6 @@
 
 <slot />
 
-<SendSource {token} />
+<SendSource {token} source={$addressStore ?? ''} />
 
 <FeeDisplay />

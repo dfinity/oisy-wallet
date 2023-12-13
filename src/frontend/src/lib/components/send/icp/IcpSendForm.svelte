@@ -2,17 +2,14 @@
 	import { Input } from '@dfinity/gix-components';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 	import { token } from '$lib/derived/token.derived';
-	import SendNetworkICP from '$lib/components/send/SendNetworkICP.svelte';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
-	import type { TargetNetwork } from '$lib/enums/network';
+	import { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { addressStore } from '$lib/stores/address.store';
+	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
-	export let network: TargetNetwork | undefined = undefined;
 
 	let invalid = true;
 	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount);
@@ -21,16 +18,12 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<SendDestination bind:destination {network} />
-
-	<SendNetworkICP token={$token} bind:destination bind:network />
+	<SendDestination bind:destination network={TargetNetwork.ICP} />
 
 	<label for="amount" class="font-bold px-4.5">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
-	<SendSource token={$token} source={$addressStore ?? ''} />
-
-	<FeeDisplay />
+	<SendSource token={$token} source={$icpAccountIdentifiedStore?.toHex() ?? ''} />
 
 	<div class="flex justify-end gap-1">
 		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>
