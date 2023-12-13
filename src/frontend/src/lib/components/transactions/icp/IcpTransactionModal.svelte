@@ -3,12 +3,12 @@
 	import { Modal } from '@dfinity/gix-components';
 	import type { IcpTransaction } from '$lib/types/icp-wallet';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { BigNumber } from '@ethersproject/bignumber';
+	import type { BigNumber } from '@ethersproject/bignumber';
 	import { onMount } from 'svelte';
 	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { nonNullish } from '@dfinity/utils';
-    import {formatNanosecondsToDate, formatToDate} from '$lib/utils/format.utils';
+	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
 
 	export let transaction: IcpTransaction;
 
