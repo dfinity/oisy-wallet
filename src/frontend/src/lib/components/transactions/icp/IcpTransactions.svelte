@@ -1,18 +1,21 @@
 <script lang="ts">
 	import { icpTransactionsStore } from '$lib/stores/icp-transactions.store';
-	import type { TransactionWithId } from '@dfinity/ledger-icp';
 	import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import IcpTransactionsSkeletons from '$lib/components/transactions/icp/IcpTransactionsSkeletons.svelte';
 	import IcpTransaction from '$lib/components/transactions/icp/IcpTransaction.svelte';
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { last } from '$lib/utils/array.utils';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getTransactions } from '$lib/api/icp-index.api';
 	import { authStore } from '$lib/stores/auth.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { ICP_WALLET_PAGINATION } from '$lib/constants/icp.constants';
+	import { modalIcpTransaction } from '$lib/derived/modal.derived';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { IcpTransaction as IcpTransactionType } from '$lib/types/icp-wallet';
+	import IcpTransactionModal from '$lib/components/transactions/icp/IcpTransactionModal.svelte';
 
-	let transactions: TransactionWithId[];
+	let transactions: IcpTransactionType[];
 	$: transactions = $icpTransactionsStore[ICP_TOKEN_ID] ?? [];
 
 	let disableInfiniteScroll = false;
@@ -55,6 +58,11 @@
 			disableInfiniteScroll = true;
 		}
 	};
+
+	let selectedTransaction: IcpTransactionType | undefined;
+	$: selectedTransaction = $modalIcpTransaction
+		? ($modalStore?.data as IcpTransactionType | undefined)
+		: undefined;
 </script>
 
 <IcpTransactionsSkeletons>
@@ -70,3 +78,7 @@
 		<p class="mt-4 text-dark opacity-50">You have no transactions.</p>
 	{/if}
 </IcpTransactionsSkeletons>
+
+{#if $modalIcpTransaction && nonNullish(selectedTransaction)}
+	<IcpTransactionModal transaction={selectedTransaction} />
+{/if}

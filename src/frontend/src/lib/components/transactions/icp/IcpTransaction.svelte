@@ -43,7 +43,7 @@
 	$: amount = type == 'send' && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
 </script>
 
-<button on:click={() => modalStore.openTransaction(transaction)} class="block w-full">
+<button on:click={() => modalStore.openIcpTransaction(transaction)} class="block w-full">
 	<Card>
 		{`${type === 'send' ? 'Send' : 'Receive'}`}
 
