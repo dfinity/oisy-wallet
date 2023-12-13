@@ -2,26 +2,21 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import { formatTokenShort } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-	import type { Token } from '$lib/types/token';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { erc20Tokens } from '$lib/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-
-	let tokens: [Token, ...Token[]] = [ETHEREUM_TOKEN];
-	$: tokens = [ETHEREUM_TOKEN, ...$erc20Tokens];
+	import { tokens } from '$lib/derived/tokens.derived';
 </script>
 
 <h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Tokens</h2>
 
 <TokensSkeletons>
-	{#each tokens as token (token.id)}
+	{#each $tokens as token (token.id)}
 		{@const url = transactionsUrl(token)}
 
 		<Listener {token}>
@@ -43,7 +38,7 @@
 						{token.symbol}
 					</output>
 
-					<ExchangeTokenValue tokenId={token.id} slot="amount" />
+					<ExchangeTokenValue {token} slot="amount" />
 				</Card>
 			</a>
 		</Listener>
