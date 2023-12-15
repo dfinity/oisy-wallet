@@ -18,3 +18,16 @@ export const getTransactionCount = (address: ETH_ADDRESS): Promise<number> =>
 	provider.getTransactionCount(address, 'pending');
 
 export const getBlockNumber = (): Promise<number> => provider.getBlockNumber();
+
+export const estimateGas = async ({
+	address,
+	data
+}: {
+	address: ETH_ADDRESS;
+	data: string;
+}): Promise<BigNumber> => {
+	return provider.estimateGas({
+		to: address,
+		data
+	});
+};
