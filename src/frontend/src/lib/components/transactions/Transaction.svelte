@@ -4,7 +4,7 @@
 	import { isTransactionPending } from '$lib/utils/transactions.utils';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import type { ComponentType } from 'svelte';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -23,7 +23,7 @@
 	$: ({ from, value, timestamp, displayTimestamp } = transaction);
 
 	let type: 'send' | 'receive';
-	$: type = from?.toLowerCase() === $addressStore?.toLowerCase() ? 'send' : 'receive';
+	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
 
 	let icon: ComponentType;
 	$: icon = type === 'send' ? IconSend : IconReceive;
