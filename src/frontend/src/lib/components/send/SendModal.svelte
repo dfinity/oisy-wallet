@@ -9,7 +9,7 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import {
 		FEE_CONTEXT_KEY,
@@ -82,7 +82,7 @@
 		}
 
 		// Unexpected errors
-		if (isNullish($addressStore)) {
+		if (isNullish($address)) {
 			toastsError({
 				msg: { text: 'Address is unknown.' }
 			});
@@ -93,7 +93,7 @@
 
 		try {
 			await executeSend({
-				from: $addressStore,
+				from: $address,
 				to: mapAddressStartsWith0x(destination),
 				progress: (step: SendStep) => (sendProgressStep = step),
 				token: $token,

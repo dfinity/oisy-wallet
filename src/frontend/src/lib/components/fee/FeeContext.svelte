@@ -6,7 +6,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
 	import type { Erc20Token } from '$lib/types/erc20';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$lib/services/eth-listener.services';
@@ -47,7 +47,7 @@
 				gas: await getErc20FeeData({
 					contract: $token as Erc20Token,
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					address: mapAddressStartsWith0x(destination !== '' ? destination : $addressStore!),
+					address: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
 					amount: parseToken({ value: `${amount ?? '1'}` }),
 					network
 				})

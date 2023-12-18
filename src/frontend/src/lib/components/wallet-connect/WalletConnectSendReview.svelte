@@ -7,7 +7,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import WalletConnectSendData from '$lib/components/wallet-connect/WalletConnectSendData.svelte';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 
 	export let amount: BigNumber;
@@ -23,7 +23,7 @@
 	amount={formatTokenShort({ value: amountDisplay })}
 	{destination}
 	token={ETHEREUM_TOKEN}
-	source={$addressStore ?? ''}
+	source={$address ?? ''}
 >
 	<WalletConnectSendData {data} />
 

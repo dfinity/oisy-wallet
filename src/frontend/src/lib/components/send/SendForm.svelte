@@ -8,7 +8,7 @@
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import type { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -28,7 +28,7 @@
 	<label for="amount" class="font-bold px-4.5">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
-	<SendSource token={$token} source={$addressStore ?? ''} />
+	<SendSource token={$token} source={$address ?? ''} />
 
 	<FeeDisplay />
 

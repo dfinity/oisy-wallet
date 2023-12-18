@@ -13,7 +13,7 @@
 		type FeeContext as FeeContextType,
 		initFeeStore
 	} from '$lib/stores/fee.store';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectSendReview from '$lib/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { SendStep } from '$lib/enums/steps';
@@ -92,7 +92,7 @@
 		const { success } = await sendServices({
 			request,
 			listener,
-			address: $addressStore,
+			address: $address,
 			amount,
 			fee: $storeFeeData,
 			modalNext: modal.next,

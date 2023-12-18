@@ -6,7 +6,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import type { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 
 	export let destination = '';
@@ -21,7 +21,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<SendData {amount} {destination} token={$token} source={$addressStore ?? ''} {network}>
+<SendData {amount} {destination} token={$token} source={$address ?? ''} {network}>
 	<FeeDisplay slot="fee" />
 </SendData>
 
