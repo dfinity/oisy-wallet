@@ -50,7 +50,9 @@ const initAuthStore = (): AuthStore => {
 				authClient = authClient ?? (await createAuthClient());
 
 				const identityProvider = nonNullish(LOCAL_INTERNET_IDENTITY_CANISTER_ID)
-					? `http://localhost:4943?canisterId=${LOCAL_INTERNET_IDENTITY_CANISTER_ID}`
+					? /apple/i.test(navigator?.vendor)
+						? `http://localhost:4943?canisterId=${LOCAL_INTERNET_IDENTITY_CANISTER_ID}`
+						: `http://${LOCAL_INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
 					: `https://identity.${domain ?? 'ic0.app'}`;
 
 				await authClient?.login({
