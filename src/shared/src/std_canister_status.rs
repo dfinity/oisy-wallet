@@ -37,6 +37,7 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
             memory_size,
             cycles,
             idle_cycles_burned_per_day,
+            ..
         } = value;
 
         let controller = *settings
