@@ -1,5 +1,5 @@
 import { getEthAddress } from '$lib/api/backend.api';
-import { getIdbEthAddress, setIdbEthAddress } from '$lib/api/idb.api';
+import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from '$lib/api/idb.api';
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -71,6 +71,8 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 
 		const { address } = idbEthAddress;
 		addressStore.set({ address, certified: false });
+
+		await updateIdbEthAddressLastUsage(identity.getPrincipal());
 	} catch (err: unknown) {
 		// We silence the error as the dapp will proceed with a standard lookup of the address.
 		console.error(
@@ -89,6 +91,12 @@ export const certifyAddress = async (
 	try {
 		const { identity } = get(authStore);
 
+		assertNonNullish(identity, 'Cannot continue without an identity.');
+
+		if (identity.getPrincipal().isAnonymous()) {
+			return { success: false, err: 'Using the dapp with an anonymous user if not supported.' };
+		}
+
 		const certifiedAddress = await getEthAddress(identity);
 
 		if (address.toLowerCase() !== certifiedAddress.toLowerCase()) {
@@ -100,7 +108,7 @@ export const certifyAddress = async (
 
 		addressStore.set({ address, certified: true });
 
-		await saveEthAddressForFutureSignIn({ address, identity });
+		await updateIdbEthAddressLastUsage(identity.getPrincipal());
 	} catch (err: unknown) {
 		addressStore.reset();
 
