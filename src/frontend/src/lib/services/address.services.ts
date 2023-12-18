@@ -13,7 +13,7 @@ export const loadAddress = async (): Promise<{ success: boolean }> => {
 		const { identity } = get(authStore);
 
 		const address = await getEthAddress(identity);
-		addressStore.set(address);
+		addressStore.set({ address, certified: true });
 
 		await saveEthAddressForFutureSignIn({ address, identity });
 	} catch (err: unknown) {
@@ -70,16 +70,41 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 		}
 
 		const { address } = idbEthAddress;
-		addressStore.set(address);
-
-		// TODO: perform a non blocker async security check that the address still match await getEthAddress(identity)
+		addressStore.set({ address, certified: false });
 	} catch (err: unknown) {
-		// We silent the error as the dapp will proceed with a standard lookup of the address.
+		// We silence the error as the dapp will proceed with a standard lookup of the address.
 		console.error(
 			'Error encountered while searching for a locally stored public address in the browser.'
 		);
 
 		return { success: false };
+	}
+
+	return { success: true };
+};
+
+export const certifyAddress = async (
+	address: string
+): Promise<{ success: boolean; err?: string }> => {
+	try {
+		const { identity } = get(authStore);
+
+		const certifiedAddress = await getEthAddress(identity);
+
+		if (address.toLowerCase() !== certifiedAddress.toLowerCase()) {
+			return {
+				success: false,
+				err: 'The address used to load the data did not match your actual wallet address, which is why your session was ended. Please sign in again to reload your own data.'
+			};
+		}
+
+		addressStore.set({ address, certified: true });
+
+		await saveEthAddressForFutureSignIn({ address, identity });
+	} catch (err: unknown) {
+		addressStore.reset();
+
+		return { success: false, err: 'Error while loading the ETH address.' };
 	}
 
 	return { success: true };
