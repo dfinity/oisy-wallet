@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -13,9 +13,9 @@
 
 	<p class="font-bold text-center">Address:</p>
 	<p class="mb-4 font-normal text-center">
-		<output class="break-all">{$addressStore ?? ''}</output><Copy
+		<output class="break-all">{$address ?? ''}</output><Copy
 			inline
-			value={$addressStore ?? ''}
+			value={$address ?? ''}
 			text="Address copied to clipboard."
 		/>
 	</p>

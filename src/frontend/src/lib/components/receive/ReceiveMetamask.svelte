@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { openMetamaskTransaction } from '$lib/services/metamask.services';
 	import { metamaskAvailable } from '$lib/derived/metamask.derived';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
 	import { toastsError } from '$lib/stores/toasts.store';
 
@@ -13,7 +13,7 @@
 			return;
 		}
 
-		await openMetamaskTransaction($addressStore);
+		await openMetamaskTransaction($address);
 	};
 </script>
 
