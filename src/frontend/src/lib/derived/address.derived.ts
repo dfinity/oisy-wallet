@@ -1,4 +1,5 @@
-import { addressStore, type AddressData } from '$lib/stores/address.store';
+import { addressStore } from '$lib/stores/address.store';
+import type { OptionAddress } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -6,7 +7,6 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 	isNullish($addressStore)
 );
 
-export const address: Readable<AddressData> = derived(
-	[addressStore],
-	([$addressStore]) => $addressStore
+export const address: Readable<OptionAddress> = derived([addressStore], ([$addressStore]) =>
+	$addressStore === null ? null : $addressStore?.address
 );

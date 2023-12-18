@@ -39,7 +39,15 @@ export const signIn = async (
 
 export const signOut = (): Promise<void> => logout({});
 
-export const idleSignOut = async () =>
+export const warnSignOut = (text: string): Promise<void> =>
+	logout({
+		msg: {
+			text,
+			level: 'warn'
+		}
+	});
+
+export const idleSignOut = (): Promise<void> =>
 	logout({
 		msg: {
 			text: 'You have been logged out because your session has expired.',
