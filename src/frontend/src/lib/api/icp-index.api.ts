@@ -1,11 +1,11 @@
 import { ICP_INDEX_CANISTER_ID } from '$lib/constants/app.constants';
 import { ICP_WALLET_PAGINATION } from '$lib/constants/icp.constants';
 import { getAgent } from '$lib/ic/agent.ic';
+import type { OptionIdentity } from '$lib/types/identity';
 import { getAccountIdentifier } from '$lib/utils/icp-account.utils';
-import type { Identity } from '@dfinity/agent';
 import { IndexCanister, type GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
-import { isNullish } from '@dfinity/utils';
+import { assertNonNullish } from '@dfinity/utils';
 
 export const getTransactions = async ({
 	owner,
@@ -14,13 +14,11 @@ export const getTransactions = async ({
 	maxResults = ICP_WALLET_PAGINATION
 }: {
 	owner: Principal;
-	identity: Identity | undefined | null;
+	identity: OptionIdentity;
 	start?: bigint;
 	maxResults?: bigint;
 }): Promise<GetAccountIdentifierTransactionsResponse> => {
-	if (isNullish(identity)) {
-		throw new Error('No internet identity.');
-	}
+	assertNonNullish(identity, 'No internet identity.');
 
 	const agent = await getAgent({ identity });
 
