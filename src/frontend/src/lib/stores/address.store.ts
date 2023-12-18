@@ -13,7 +13,7 @@ const initAddressStore = (): AddressStore => {
 
 	return {
 		set: (address: ECDSA_PUBLIC_KEY) => set(address),
-		reset: () => set(undefined),
+		reset: () => set(null),
 		subscribe
 	};
 };

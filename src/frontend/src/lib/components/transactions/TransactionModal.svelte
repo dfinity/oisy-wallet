@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Transaction } from '$lib/types/transaction';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
@@ -23,7 +23,7 @@
 	$: ({ from, value, timestamp, hash, blockNumber, to } = transaction);
 
 	let type: 'send' | 'receive';
-	$: type = from?.toLowerCase() === $addressStore?.toLowerCase() ? 'send' : 'receive';
+	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>

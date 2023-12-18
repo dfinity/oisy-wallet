@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { type AddressData, addressStore } from '$lib/stores/address.store';
+	import { type AddressData } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import { onDestroy } from 'svelte';
 	import { initTransactionsListener } from '$lib/services/listener.services';
 	import type { WebSocketListener } from '$lib/types/listener';
@@ -20,7 +21,7 @@
 		listener = initTransactionsListener({ address, token });
 	};
 
-	$: (async () => initListener({ address: $addressStore }))();
+	$: (async () => initListener({ address: $address }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>
