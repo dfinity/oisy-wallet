@@ -21,7 +21,7 @@
 						text: 'Airdropped 2 ICP for you',
 						state: 'completed'
 					} as StaticStep
-			  ]
+				]
 			: []),
 		...(!airdrop.tokens_transferred && countInvitesRedeemed === 0
 			? [
@@ -30,7 +30,7 @@
 						text: 'Airdrop is unfortunately completed',
 						state: 'skipped'
 					} as StaticStep
-			  ]
+				]
 			: []),
 		...(countInvitesRedeemed > 0
 			? [
@@ -39,7 +39,7 @@
 						text: `You earned ${countInvitesRedeemed * 2} ICP by inviting friends!`,
 						state: 'completed'
 					} as StaticStep
-			  ]
+				]
 			: [])
 	];
 
