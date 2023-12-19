@@ -11,7 +11,7 @@
 	};
 </script>
 
-<button data-tid="logout" on:click={logout} class="text">
+<button on:click={logout} class="text gap-2">
 	<IconLogout />
 	Logout
 </button>
