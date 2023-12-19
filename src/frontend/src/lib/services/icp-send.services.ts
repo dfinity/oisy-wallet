@@ -26,10 +26,10 @@ export const sendIcp = async ({
 				identity,
 				to: decodeIcrcAccount(to),
 				amount: amount.toBigInt()
-		  })
+			})
 		: sendIcpApi({
 				identity,
 				to,
 				amount: amount.toBigInt()
-		  });
+			});
 };

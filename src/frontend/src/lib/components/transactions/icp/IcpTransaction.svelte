@@ -53,7 +53,7 @@
 				? formatTokenShort({
 						value: amount,
 						unitName: $token.decimals
-				  })
+					})
 				: ''}</svelte:fragment
 		>
 		<svelte:fragment slot="description">
