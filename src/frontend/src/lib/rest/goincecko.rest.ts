@@ -19,7 +19,7 @@ export const simplePrice = async ({
 	...rest
 }: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse | null> =>
 	fetchCoingecko({
-		endpointPath: '/simple/price',
+		endpointPath: 'simple/price',
 		queryParams: joinParams([
 			`ids=${Array.isArray(ids) ? ids.join(',') : ids}`,
 			joinSimpleParams(rest)
@@ -39,7 +39,7 @@ export const simpleTokenPrice = async ({
 	...rest
 }: CoingeckoSimpleTokenPriceParams): Promise<CoingeckoSimplePriceResponse | null> =>
 	fetchCoingecko({
-		endpointPath: `/simple/token_price/${id}`,
+		endpointPath: `simple/token_price/${id}`,
 		queryParams: joinParams([
 			`contract_addresses=${
 				Array.isArray(contract_addresses) ? contract_addresses.join(',') : contract_addresses
