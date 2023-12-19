@@ -5,6 +5,8 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { goto } from '$app/navigation';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -16,12 +18,12 @@
 </script>
 
 <button
-	class="user icon"
+	class="user icon desktop-wide"
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label="Settings, sign-out and external links"
 >
-	<IconIcLogo />
+	<IconWallet /><span><IconChevronDown /></span>
 </button>
 
 <Popover bind:visible anchor={button} direction="rtl">

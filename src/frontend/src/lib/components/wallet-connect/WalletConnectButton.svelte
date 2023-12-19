@@ -10,5 +10,5 @@
 	class:opacity-0={$addressNotLoaded}
 >
 	<IconWalletConnectWhite />
-	<span class="text-white font-bold text-xs"><slot /></span>
+	<span class="text-white font-bold"><slot /></span>
 </button>
