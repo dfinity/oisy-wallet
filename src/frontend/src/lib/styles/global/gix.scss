@@ -76,6 +76,8 @@
 		--dialog-max-height: var(--alert-max-height);
 		--dialog-border-radius: var(--alert-border-radius);
 		--dialog-padding-x: var(--padding-3x);
+
+		--section-max-width: 576px;
 	}
 
 	@media (min-width: 768px) and (min-height: 560px) {
@@ -124,7 +126,7 @@ div.popover {
 	--background-contrast: var(--overlay-background-contrast);
 
 	.wrapper {
-		padding: var(--padding-1_5x);
+		padding: var(--padding-2x);
 		--padding: var(--padding-1_5x);
 	}
 }

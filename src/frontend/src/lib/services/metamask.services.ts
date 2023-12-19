@@ -1,8 +1,8 @@
 import { METAMASK_DEFAULT_TRANSFER_AMOUNT } from '$lib/constants/metamask.constants';
 import { metamaskAccounts, sendMetamaskTransaction } from '$lib/providers/metamask.providers';
-import type { AddressData } from '$lib/stores/address.store';
 import { metamaskStore } from '$lib/stores/metamask.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { OptionAddress } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
 import detectEthereumProvider from '@metamask/detect-provider';
 
@@ -15,7 +15,7 @@ export const initMetamaskSupport = async () => {
 };
 
 export const openMetamaskTransaction = async (
-	address: AddressData
+	address: OptionAddress
 ): Promise<{ success: 'ok' | 'error'; err?: unknown }> => {
 	if (isNullish(address)) {
 		toastsError({

@@ -4,11 +4,11 @@
 	import { isTransactionPending } from '$lib/utils/transactions.utils';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import type { ComponentType } from 'svelte';
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Card from '$lib/components/ui/Card.svelte';
-	import { formatToDate, formatTokenShort } from '$lib/utils/format.utils';
+	import { formatSecondsToDate, formatTokenShort } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/derived/token.derived';
@@ -23,7 +23,7 @@
 	$: ({ from, value, timestamp, displayTimestamp } = transaction);
 
 	let type: 'send' | 'receive';
-	$: type = from?.toLowerCase() === $addressStore?.toLowerCase() ? 'send' : 'receive';
+	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
 
 	let icon: ComponentType;
 	$: icon = type === 'send' ? IconSend : IconReceive;
@@ -52,7 +52,7 @@
 		>
 		<svelte:fragment slot="description">
 			{#if nonNullish(transactionDate)}
-				{formatToDate(transactionDate)}
+				{formatSecondsToDate(transactionDate)}
 			{/if}
 		</svelte:fragment>
 	</Card>

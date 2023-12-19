@@ -1,21 +1,24 @@
 <script lang="ts">
-	import { addressStore } from '$lib/stores/address.store';
+	import { address } from '$lib/derived/address.derived';
 	import { formatTokenDetailed } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { Token } from '$lib/types/token';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	export let token: Token;
 </script>
 
-<label for="source" class="font-bold px-4.5">Source:</label>
-<div id="source" class="font-normal mb-4 px-4.5 break-all">{$addressStore ?? ''}</div>
+<Value ref="source" element="div">
+	<svelte:fragment slot="label">Source</svelte:fragment>
+	{$address ?? ''}
+</Value>
 
-<label for="balance" class="font-bold px-4.5">Balance:</label>
-<div id="balance" class="font-normal px-4.5 mb-4 break-all">
+<Value ref="balance" element="div">
+	<svelte:fragment slot="label">Balance</svelte:fragment>
 	{formatTokenDetailed({
 		value: $balance ?? BigNumber.from(0n),
 		unitName: token.decimals
 	})}
 	{token.symbol}
-</div>
+</Value>

@@ -5,6 +5,7 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import { TargetNetwork } from '$lib/enums/network';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	export let destination: string;
 	export let amount: string | number | undefined = undefined;
@@ -28,22 +29,24 @@
 	})();
 </script>
 
-<label for="destination" class="font-bold px-4.5">Destination:</label>
-<div id="destination" class="font-normal mb-4 px-4.5 break-all">{destination}</div>
+<Value ref="destination" element="div">
+	<svelte:fragment slot="label">Destination</svelte:fragment>
+	{destination}
+</Value>
 
 {#if nonNullish(network)}
-	<label for="network" class="font-bold px-4.5">Network:</label>
-	<div id="network" class="font-normal mb-4 px-4.5 break-all">
+	<Value ref="network" element="div">
+		<svelte:fragment slot="label">Network</svelte:fragment>
 		{#if network === TargetNetwork.ICP}
 			Convert to native ICP
 		{:else}
 			Ethereum
 		{/if}
-	</div>
+	</Value>
 {/if}
 
-<label for="amount" class="font-bold px-4.5">Amount:</label>
-<div id="amount" class="font-normal px-4.5 mb-4 break-all">
+<Value ref="amount" element="div">
+	<svelte:fragment slot="label">Amount</svelte:fragment>
 	{amountDisplay}
 	{$tokenSymbol}
-</div>
+</Value>
