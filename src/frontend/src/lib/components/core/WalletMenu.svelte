@@ -1,6 +1,5 @@
 <script lang="ts">
-	import IconIcLogo from '$lib/components/icons/IconIcLogo.svelte';
-	import { IconGitHub, IconNorthEast, IconSettings, Popover } from '@dfinity/gix-components';
+	import { IconGitHub, IconSettings, Popover } from '@dfinity/gix-components';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { goto } from '$app/navigation';
@@ -10,6 +9,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -18,6 +18,11 @@
 		visible = false;
 		await goto('/settings');
 	};
+
+	const ETHERSCAN_URL = import.meta.env.VITE_ETHERSCAN_EXPLORER_URL;
+
+	let explorerUrl: string;
+	$: explorerUrl = `${ETHERSCAN_URL}/address/${$address ?? ''}`;
 </script>
 
 <button
@@ -39,6 +44,17 @@
 			/>
 		</div>
 
+		<a
+			href={explorerUrl}
+			rel="external noopener noreferrer"
+			target="_blank"
+			class="flex gap-2 items-center no-underline"
+			aria-label="Open your address on Etherscan"
+		>
+			<IconExternalLink />
+			View on explorer
+		</a>
+
 		<Hr />
 
 		<a
@@ -48,7 +64,7 @@
 			class="flex gap-2 items-center no-underline"
 			aria-label="Source code on GitHub"
 		>
-			<IconGitHub /> Source code <IconNorthEast size="12" />
+			<IconGitHub /> Source code
 		</a>
 
 		<Hr />
