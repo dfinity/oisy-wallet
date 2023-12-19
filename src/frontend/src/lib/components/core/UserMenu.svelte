@@ -7,6 +7,9 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
+	import { address } from '$lib/derived/address.derived';
+	import Copy from '$lib/components/ui/Copy.svelte';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -28,27 +31,21 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div class="flex flex-col gap-4">
-		<a
-			href="https://internetcomputer.org"
-			rel="external noopener noreferrer"
-			target="_blank"
-			class="flex gap-1 items-center no-underline"
-			aria-label="Open the Internet Computer portal"
-		>
-			<div
-				class="flex items-center justify-center rounded-full"
-				style="border: 1px solid var(--color-grey); zoom: 0.6;"
-			>
-				<IconIcLogo />
-			</div>
-			Internet Computer <IconNorthEast size="12" />
-		</a>
+		<div>
+			<output class="break-all">{shortenWithMiddleEllipsis($address ?? '')}</output><Copy
+				inline
+				value={$address ?? ''}
+				text="Address copied to clipboard."
+			/>
+		</div>
+
+		<Hr />
 
 		<a
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			class="flex gap-1 items-center no-underline"
+			class="flex gap-2 items-center no-underline"
 			aria-label="Source code on GitHub"
 		>
 			<IconGitHub /> Source code <IconNorthEast size="12" />
@@ -57,7 +54,7 @@
 		<Hr />
 
 		<button
-			class="flex gap-1 items-center no-underline"
+			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
 			aria-label="More settings"
 			on:click={gotoSettings}
 		>
