@@ -1,30 +1,13 @@
 <script lang="ts">
-	import IconIcLogo from '$lib/components/icons/IconIcLogo.svelte';
-	import {
-		IconCheck,
-		IconGitHub,
-		IconNorthEast,
-		IconSettings,
-		Popover
-	} from '@dfinity/gix-components';
-	import SignOut from '$lib/components/core/SignOut.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
-	import { goto } from '$app/navigation';
-	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import { IconCheck, Popover } from '@dfinity/gix-components';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { token } from '$lib/derived/token.derived';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
-
-	const gotoSettings = async () => {
-		visible = false;
-		await goto('/settings');
-	};
 </script>
 
 <button
