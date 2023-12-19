@@ -25,6 +25,7 @@ button {
 	&.primary,
 	&.secondary,
 	&.user,
+	&.token,
 	&.ic {
 		justify-content: flex-start;
 
@@ -117,6 +118,7 @@ button {
 	}
 
 	&.user,
+	&.token,
 	&.wallet-connect {
 		&.icon {
 			padding: 0;
@@ -153,6 +155,25 @@ button {
 		&.icon {
 			gap: var(--padding-0_5x);
 			--button-padding: var(--padding);
+		}
+	}
+
+	&.token {
+		border-width: 0;
+		background: transparent;
+
+		&.icon {
+			@include media.min-width(medium) {
+				background: var(--color-white);
+				border-width: 1px;
+
+				&.desktop-wide {
+					span {
+						display: flex;
+						gap: var(--padding);
+					}
+				}
+			}
 		}
 	}
 }
