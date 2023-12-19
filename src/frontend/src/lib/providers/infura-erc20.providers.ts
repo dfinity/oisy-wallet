@@ -12,7 +12,9 @@ const NETWORK = import.meta.env.VITE_INFURA_NETWORK;
 
 const provider = new InfuraProvider(NETWORK, API_KEY);
 
-export const metadata = async ({ address }: Erc20ContractAddress): Promise<Erc20Metadata> => {
+export const metadata = async ({
+	address
+}: Pick<Erc20ContractAddress, 'address'>): Promise<Erc20Metadata> => {
 	const erc20Contract = new ethers.Contract(address, ERC20_ABI, provider);
 
 	const [name, symbol, decimals] = await Promise.all([

@@ -24,7 +24,9 @@
 <div class="hero">
 	<HeaderHero />
 
-	<article class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main">
+	<article
+		class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main 2xl:mt-[-70px]"
+	>
 		<Alpha />
 
 		{#if summary}
@@ -64,12 +66,6 @@
 		background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
 
 		--alpha-color: var(--color-grey);
-
-		@include media.min-width(xlarge) {
-			article {
-				margin-top: -70px;
-			}
-		}
 	}
 
 	.icon {
