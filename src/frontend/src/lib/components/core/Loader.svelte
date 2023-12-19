@@ -2,7 +2,7 @@
 	import type { ProgressStep } from '@dfinity/gix-components';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
-	import { loadAddress } from '$lib/services/address.services';
+	import { loadAddress, loadIdbAddress } from '$lib/services/address.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Contracts } from '$lib/services/erc20.services';
@@ -71,7 +71,30 @@
 		]);
 	};
 
+	const progressAndLoad = async () => {
+		progressStep = LoaderStep.DONE;
+
+		// Once the address initialized, we load the data without displaying a progress step.
+		// Instead, we use effect, placeholders and skeleton until those data are loaded.
+		await loadData();
+	};
+
+	let progressModal = false;
+
 	onMount(async () => {
+		const { success: addressIdbSuccess } = await loadIdbAddress();
+
+		if (addressIdbSuccess) {
+			loading.set(false);
+
+			await progressAndLoad();
+
+			return;
+		}
+
+		// We are loading the ETH address from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
+		progressModal = true;
+
 		const { success: addressSuccess } = await loadAddress();
 
 		if (!addressSuccess) {
@@ -79,11 +102,7 @@
 			return;
 		}
 
-		progressStep = LoaderStep.DONE;
-
-		// Once the address initialized, we load the data without displaying a progress step.
-		// Instead, we use effect, placeholders and skeleton until those data are loaded.
-		await loadData();
+		await progressAndLoad();
 	});
 
 	const confirmIntroduction = () => {
@@ -93,28 +112,30 @@
 </script>
 
 {#if $loading}
-	<div in:fade={{ delay: 0, duration: 250 }}>
-		<Modal>
-			<div
-				style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
-			>
-				<Img width="100%" src={banner} />
-			</div>
-
-			<h3 class="my-3">Initializing your wallet</h3>
-
-			<InProgress {progressStep} {steps} />
-
-			{#if confirm}
-				<button
-					on:click={confirmIntroduction}
-					class="primary full center mt-6"
-					disabled={disabledConfirm}
-					class:opacity-0={disabledConfirm}>Let's go!</button
+	{#if progressModal}
+		<div in:fade={{ delay: 0, duration: 250 }}>
+			<Modal>
+				<div
+					style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
 				>
-			{/if}
-		</Modal>
-	</div>
+					<Img width="100%" src={banner} />
+				</div>
+
+				<h3 class="my-3">Initializing your wallet</h3>
+
+				<InProgress {progressStep} {steps} />
+
+				{#if confirm}
+					<button
+						on:click={confirmIntroduction}
+						class="primary full center mt-6"
+						disabled={disabledConfirm}
+						class:opacity-0={disabledConfirm}>Let's go!</button
+					>
+				{/if}
+			</Modal>
+		</div>
+	{/if}
 {:else}
 	<div in:fade>
 		<slot />

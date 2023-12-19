@@ -9,7 +9,7 @@ const ETHEREUM_SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
 
 export const ETHEREUM_TOKEN_ID = Symbol(ETHEREUM_SYMBOL);
 
-export const ETHEREUM_TOKEN: Token = {
+export const ETHEREUM_TOKEN: Required<Token> = {
 	id: ETHEREUM_TOKEN_ID,
 	standard: 'ethereum',
 	name: 'Ethereum',
