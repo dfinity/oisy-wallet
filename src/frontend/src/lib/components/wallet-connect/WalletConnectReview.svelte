@@ -10,6 +10,7 @@
 	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
+	import { addressNotCertified } from '$lib/derived/address.derived';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -82,8 +83,10 @@
 
 		{#if displayCancel}
 			<div class="flex justify-end gap-1 mt-8" in:fade>
-				<button class="secondary" on:click={() => dispatch('icCancel')} disabled={$isBusy}
-					>Cancel</button
+				<button
+					class="secondary"
+					on:click={() => dispatch('icCancel')}
+					disabled={$isBusy || $addressNotCertified}>Cancel</button
 				>
 			</div>
 		{/if}

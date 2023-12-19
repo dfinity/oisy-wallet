@@ -6,6 +6,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import type { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { addressNotCertified } from '$lib/derived/address.derived';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -25,7 +26,7 @@
 	<button class="secondary" on:click={() => dispatch('icBack')}>Back</button>
 	<button
 		class="primary"
-		disabled={invalid}
+		disabled={invalid || $addressNotCertified}
 		class:opacity-10={invalid}
 		on:click={() => dispatch('icSend')}
 	>

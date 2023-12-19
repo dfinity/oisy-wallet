@@ -1,3 +1,4 @@
+import { deleteIdbEthAddress } from '$lib/api/idb.api';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -5,6 +6,7 @@ import type { ToastMsg } from '$lib/types/toast';
 import { replaceHistory } from '$lib/utils/route.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
 import { isNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const signIn = async (
 	params: AuthSignInParams
@@ -37,17 +39,52 @@ export const signIn = async (
 
 export const signOut = (): Promise<void> => logout({});
 
-export const idleSignOut = async () =>
+export const warnSignOut = (text: string): Promise<void> =>
 	logout({
 		msg: {
-			text: 'You have been logged out because your session has expired.',
+			text,
 			level: 'warn'
 		}
 	});
 
-const logout = async ({ msg = undefined }: { msg?: ToastMsg }) => {
+export const idleSignOut = (): Promise<void> =>
+	logout({
+		msg: {
+			text: 'You have been logged out because your session has expired.',
+			level: 'warn'
+		},
+		clearIdbAddress: false
+	});
+
+const emptyIdbEthAddress = async () => {
+	const { identity } = get(authStore);
+
+	if (isNullish(identity)) {
+		return;
+	}
+
+	try {
+		await deleteIdbEthAddress(identity.getPrincipal());
+	} catch (err: unknown) {
+		// We silence the error.
+		// Effective logout is more important here.
+		console.error(err);
+	}
+};
+
+const logout = async ({
+	msg = undefined,
+	clearIdbAddress = true
+}: {
+	msg?: ToastMsg;
+	clearIdbAddress?: boolean;
+}) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
+
+	if (clearIdbAddress) {
+		await emptyIdbEthAddress();
+	}
 
 	await authStore.signOut();
 

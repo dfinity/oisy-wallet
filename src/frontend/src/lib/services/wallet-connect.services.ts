@@ -2,11 +2,11 @@ import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { SendStep, SignStep } from '$lib/enums/steps';
 import { send as executeSend, type SendParams } from '$lib/services/send.services';
-import type { AddressData } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import type { FeeStoreData } from '$lib/stores/fee.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+import type { OptionAddress } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import {
 	getSignParamsMessageHex,
@@ -29,7 +29,7 @@ export type WalletConnectExecuteParams = Pick<WalletConnectCallBackParams, 'requ
 
 export type WalletConnectSendParams = WalletConnectExecuteParams & {
 	listener: WalletConnectListener | null | undefined;
-	address: AddressData;
+	address: OptionAddress;
 	fee: FeeStoreData;
 	modalNext: () => void;
 	amount: BigNumber;

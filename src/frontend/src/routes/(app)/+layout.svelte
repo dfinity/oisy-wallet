@@ -8,6 +8,7 @@
 	import { isErc20Icp } from '$lib/utils/token.utils';
 	import { token } from '$lib/derived/token.derived';
 	import Workers from '$lib/components/core/Workers.svelte';
+	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -26,13 +27,15 @@
 />
 
 <main>
-	<Loader>
-		<Workers>
-			{#if $airdropAvailable}
-				<AirdropButton />
-			{/if}
+	<AddressGuard>
+		<Loader>
+			<Workers>
+				{#if $airdropAvailable}
+					<AirdropButton />
+				{/if}
 
-			<slot />
-		</Workers>
-	</Loader>
+				<slot />
+			</Workers>
+		</Loader>
+	</AddressGuard>
 </main>
