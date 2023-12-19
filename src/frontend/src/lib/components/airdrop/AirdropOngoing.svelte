@@ -32,7 +32,7 @@
 						text: `Earn up to 6 ICP by inviting friends!`,
 						state: 'next'
 					} as StaticStep
-			  ]
+				]
 			: [])
 	];
 

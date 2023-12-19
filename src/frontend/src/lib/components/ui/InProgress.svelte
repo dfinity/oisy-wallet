@@ -21,11 +21,11 @@
 				? {
 						...step,
 						state: 'in_progress'
-				  }
+					}
 				: {
 						...step,
 						state: index < progressIndex || progressStep === 'done' ? 'completed' : 'next'
-				  }
+					}
 		) as [ProgressStep, ...ProgressStep[]];
 	};
 

@@ -17,7 +17,7 @@
 			? formatTokenShort({
 					value: $balance,
 					unitName: $tokenDecimals
-			  })
+				})
 			: '0'}
 	</output>
 	{#if $erc20TokensInitialized}

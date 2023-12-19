@@ -118,7 +118,7 @@ export const send = async ({
 				gas: gas?.toBigInt(),
 				maxFeePerGas: maxFeePerGas.toBigInt(),
 				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
-		  })
+			})
 		: erc20PrepareTransaction({
 				...rest,
 				from,
@@ -131,7 +131,7 @@ export const send = async ({
 					isErc20Icp(token) && network === TargetNetwork.ICP
 						? populateBurnTransaction
 						: populateTransaction
-		  }));
+			}));
 
 	progress(SendStep.SIGN);
 

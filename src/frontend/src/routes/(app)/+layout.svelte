@@ -14,8 +14,8 @@
 	$: route = isRouteSettings($page)
 		? 'settings'
 		: isRouteTransactions($page)
-		  ? 'transactions'
-		  : 'tokens';
+			? 'transactions'
+			: 'tokens';
 </script>
 
 <Hero
