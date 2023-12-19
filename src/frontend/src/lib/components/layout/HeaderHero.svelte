@@ -5,6 +5,7 @@
 	import { page } from '$app/stores';
 	import Back from '$lib/components/core/Back.svelte';
 	import { isSubRoute } from '$lib/utils/nav.utils';
+	import TokenStandard from '$lib/components/core/TokenStandard.svelte';
 
 	let back = false;
 	$: back = isSubRoute($page);
@@ -24,6 +25,7 @@
 
 	<div class="flex m-4 gap-4 pointer-events-auto" style="margin-left: auto">
 		<WalletConnect />
+		<TokenStandard />
 		<UserMenu />
 	</div>
 </header>
