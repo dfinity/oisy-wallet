@@ -12,6 +12,7 @@ export const mapErc20Token = ({
 	...rest
 }: Erc20Contract & Erc20Metadata): Erc20Token => ({
 	id: Symbol(symbol),
+	network: 'ethereum',
 	standard: 'erc20',
 	name,
 	symbol,

@@ -1,13 +1,15 @@
 <script lang="ts">
-	import { IconCheck, Popover } from '@dfinity/gix-components';
+	import { Popover } from '@dfinity/gix-components';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$lib/constants/tokens.constants';
 	import Img from '$lib/components/ui/Img.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import IconMore from '$lib/components/icons/IconMore.svelte';
+	import TokenNetwork from '$lib/components/tokens/TokenNetwork.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
+
+	const close = () => (visible = false);
 </script>
 
 <button
@@ -24,18 +26,12 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<ul class="flex flex-col gap-4 list-none">
-		<li class="flex justify-between items-center">
-			<div class="flex gap-2 items-center">
-				<Logo
-					src={ETHEREUM_TOKEN.icon}
-					size="20px"
-					alt={`${ETHEREUM_TOKEN.name} logo`}
-					color="off-white"
-				/>
-				<span>{ETHEREUM_TOKEN.name}</span>
-			</div>
+		<li>
+			<TokenNetwork token={ETHEREUM_TOKEN} on:icSelected={close} />
+		</li>
 
-			<IconCheck size="20px" />
+		<li>
+			<TokenNetwork token={ICP_TOKEN} on:icSelected={close} />
 		</li>
 
 		<li class="flex justify-between items-center">
