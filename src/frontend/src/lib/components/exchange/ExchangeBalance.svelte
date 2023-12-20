@@ -4,10 +4,10 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { exchangeStore } from '$lib/stores/exchange.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
-	import { tokens } from '$lib/derived/tokens.derived';
+	import { networkTokens } from '$lib/derived/network.derived';
 
 	let totalUsd: number;
-	$: totalUsd = $tokens.reduce(
+	$: totalUsd = $networkTokens.reduce(
 		(acc, token) =>
 			acc +
 			usdValue({
