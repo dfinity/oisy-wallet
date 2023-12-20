@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { onDestroy } from 'svelte';
-	import { initWalletConnectListener } from '$lib/services/listener.services';
+	import { initWalletConnectListener } from '$lib/services/eth-listener.services';
 	import { address } from '$lib/derived/address.derived';
 	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';

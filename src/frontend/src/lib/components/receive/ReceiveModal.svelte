@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { address } from '$lib/derived/address.derived';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ReceiveMetamask from '$lib/components/receive/ReceiveMetamask.svelte';
+	import { networkAddress } from '$lib/derived/network.derived';
 </script>
 
 <Modal visible={$modalReceive} on:nnsClose={modalStore.close}>
@@ -13,9 +13,9 @@
 
 	<p class="font-bold text-center">Address:</p>
 	<p class="mb-4 font-normal text-center">
-		<output class="break-all">{$address ?? ''}</output><Copy
+		<output class="break-all">{$networkAddress ?? ''}</output><Copy
 			inline
-			value={$address ?? ''}
+			value={$networkAddress ?? ''}
 			text="Address copied to clipboard."
 		/>
 	</p>

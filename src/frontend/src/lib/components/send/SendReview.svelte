@@ -6,7 +6,8 @@
 	import { token } from '$lib/derived/token.derived';
 	import type { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { addressNotCertified } from '$lib/derived/address.derived';
+	import { address } from '$lib/derived/address.derived';
+	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -20,13 +21,15 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<SendData {amount} {destination} token={$token} {network} />
+<SendData {amount} {destination} token={$token} source={$address ?? ''} {network}>
+	<FeeDisplay slot="fee" />
+</SendData>
 
 <div class="flex justify-end gap-1">
 	<button class="secondary" on:click={() => dispatch('icBack')}>Back</button>
 	<button
 		class="primary"
-		disabled={invalid || $addressNotCertified}
+		disabled={invalid}
 		class:opacity-10={invalid}
 		on:click={() => dispatch('icSend')}
 	>

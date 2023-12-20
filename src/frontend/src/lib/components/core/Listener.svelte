@@ -1,29 +1,18 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
-	import { address } from '$lib/derived/address.derived';
-	import { onDestroy } from 'svelte';
-	import { initTransactionsListener } from '$lib/services/listener.services';
-	import type { WebSocketListener } from '$lib/types/listener';
-	import type { Token } from '$lib/types/token';
-	import type { OptionAddress } from '$lib/types/address';
+	import type { ComponentType } from 'svelte';
+	import type { Token, TokenStandard } from '$lib/types/token';
+	import EthereumListener from '$lib/components/core/EthListener.svelte';
+	import IcpListener from '$lib/components/core/IcpListener.svelte';
 
 	export let token: Token;
 
-	let listener: WebSocketListener | undefined = undefined;
+	let standard: TokenStandard;
+	$: ({ standard } = token);
 
-	const initListener = async ({ address }: { address: OptionAddress }) => {
-		await listener?.disconnect();
-
-		if (isNullish(address)) {
-			return;
-		}
-
-		listener = initTransactionsListener({ address, token });
-	};
-
-	$: (async () => initListener({ address: $address }))();
-
-	onDestroy(async () => await listener?.disconnect());
+	let cmp: ComponentType;
+	$: cmp = standard === 'icp' ? IcpListener : EthereumListener;
 </script>
 
-<slot />
+<svelte:component this={cmp} {token}>
+	<slot />
+</svelte:component>

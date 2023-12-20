@@ -9,7 +9,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
-	import { initMinedTransactionsListener } from '$lib/services/listener.services';
+	import { initMinedTransactionsListener } from '$lib/services/eth-listener.services';
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';

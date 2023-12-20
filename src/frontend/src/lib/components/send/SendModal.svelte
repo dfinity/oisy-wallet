@@ -89,13 +89,6 @@
 			return;
 		}
 
-		if (isNullish(destination)) {
-			toastsError({
-				msg: { text: 'Destination address is unknown.' }
-			});
-			return;
-		}
-
 		modal.next();
 
 		try {

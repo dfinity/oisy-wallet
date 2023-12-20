@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -36,6 +36,10 @@ export const syncExchange = (data: PostMessageDataResponseExchange | undefined) 
 		{
 			tokenId: ETHEREUM_TOKEN_ID,
 			currentPrice: data?.currentEthPrice?.ethereum
+		},
+		{
+			tokenId: ICP_TOKEN_ID,
+			currentPrice: data?.currentIcpPrice?.['internet-computer']
 		},
 		...Object.entries(data?.currentErc20Prices ?? {})
 			.map(([key, currentPrice]) => {
