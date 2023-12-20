@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { address } from '$lib/derived/address.derived';
 	import { QRCode } from '@dfinity/gix-components';
 	import { debounce } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { networkAddress } from '$lib/derived/network.derived';
 
 	let render = true;
 
@@ -21,6 +21,6 @@
 	style={`border: 1px dashed var(--color-dark); max-width: var(--qrcode-max-width, 360px); margin: 0 auto; height: var(--qrcode-height);`}
 >
 	{#if render}
-		<QRCode value={$address ?? ''} />
+		<QRCode value={$networkAddress ?? ''} />
 	{/if}
 </div>
