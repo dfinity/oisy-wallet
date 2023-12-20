@@ -93,7 +93,7 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	};
 };
 
-export const replaceNetworkParamUrl = (networkId: NetworkId | undefined | null) => {
+export const switchNetwork = async (networkId: NetworkId | undefined | null) => {
 	const url = new URL(window.location.href);
 
 	if (isNullish(networkId) || isNullish(networkId.description)) {
@@ -102,5 +102,5 @@ export const replaceNetworkParamUrl = (networkId: NetworkId | undefined | null) 
 		url.searchParams.set('network', networkId.description);
 	}
 
-	window.history.replaceState({}, '', url);
+	await goto(url, { replaceState: true, noScroll: true });
 };
