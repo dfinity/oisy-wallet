@@ -11,14 +11,14 @@
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 
-	import { networkTokens } from '$lib/derived/network.derived';
+	import { networkId, networkTokens } from '$lib/derived/network.derived';
 </script>
 
 <h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Tokens</h2>
 
 <TokensSkeletons>
 	{#each $networkTokens as token (token.id)}
-		{@const url = transactionsUrl(token)}
+		{@const url = transactionsUrl({ token, networkId: $networkId })}
 
 		<Listener {token}>
 			<a
