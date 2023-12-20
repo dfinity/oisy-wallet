@@ -5,7 +5,8 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
-	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
+	import { NETWORKS } from '$lib/constants/networks.constants';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -20,20 +21,23 @@
 	aria-label="Settings, sign-out and external links"
 >
 	<div class="w-full h-full md:w-[28px] md:h-[28px]">
-		<Img src={ETHEREUM_TOKEN.icon} alt={`${ETHEREUM_TOKEN.name} logo`} width="100%" height="100%" />
+		<Img
+			src={$selectedNetwork.icon}
+			alt={`${$selectedNetwork.name} logo`}
+			width="100%"
+			height="100%"
+		/>
 	</div>
-	<span class="text-black font-bold">{ETHEREUM_TOKEN.name} <IconChevronDown /></span>
+	<span class="text-black font-bold">{$selectedNetwork.name} <IconChevronDown /></span>
 </button>
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<ul class="flex flex-col gap-4 list-none">
-		<li>
-			<Network network={ETHEREUM_NETWORK} on:icSelected={close} />
-		</li>
-
-		<li>
-			<Network network={ICP_NETWORK} on:icSelected={close} />
-		</li>
+		{#each NETWORKS as network}
+			<li>
+				<Network {network} on:icSelected={close} />
+			</li>
+		{/each}
 
 		<li class="flex justify-between items-center">
 			<div class="flex gap-2 items-center">

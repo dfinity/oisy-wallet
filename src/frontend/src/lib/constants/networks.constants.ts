@@ -27,3 +27,5 @@ export const ICP_NETWORK: Network = {
 	name: 'Internet Computer',
 	icon: icp
 };
+
+export const NETWORKS: Network[] = [ETHEREUM_NETWORK, ICP_NETWORK];
