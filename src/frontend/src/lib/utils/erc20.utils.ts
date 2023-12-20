@@ -4,6 +4,7 @@ import icp from '$lib/assets/icp.svg';
 import uniswap from '$lib/assets/uniswap.svg';
 import usdc from '$lib/assets/usdc.svg';
 import usdt from '$lib/assets/usdt.svg';
+import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$lib/types/erc20';
 
 export const mapErc20Token = ({
@@ -12,6 +13,8 @@ export const mapErc20Token = ({
 	...rest
 }: Erc20Contract & Erc20Metadata): Erc20Token => ({
 	id: Symbol(symbol),
+	network: ETHEREUM_NETWORK,
+	standard: 'erc20',
 	name,
 	symbol,
 	icon: mapErc20Icon(symbol),

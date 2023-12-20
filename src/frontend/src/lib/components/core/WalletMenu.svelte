@@ -6,10 +6,10 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
-	import { address } from '$lib/derived/address.derived';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
+	import { networkAddress, networkICP } from '$lib/derived/network.derived';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -19,10 +19,13 @@
 		await goto('/settings');
 	};
 
+	const DASHBOARD_URL = import.meta.env.VITE_ICP_DASHBOARD_EXPLORER_URL;
 	const ETHERSCAN_URL = import.meta.env.VITE_ETHERSCAN_EXPLORER_URL;
 
 	let explorerUrl: string;
-	$: explorerUrl = `${ETHERSCAN_URL}/address/${$address ?? ''}`;
+	$: explorerUrl = $networkICP
+		? `${DASHBOARD_URL}/account/${$networkAddress ?? ''}`
+		: `${ETHERSCAN_URL}/address/${$networkAddress ?? ''}`;
 </script>
 
 <button
@@ -37,9 +40,9 @@
 <Popover bind:visible anchor={button} direction="rtl">
 	<div class="flex flex-col gap-4">
 		<div>
-			<output class="break-all">{shortenWithMiddleEllipsis($address ?? '')}</output><Copy
+			<output class="break-all">{shortenWithMiddleEllipsis($networkAddress ?? '')}</output><Copy
 				inline
-				value={$address ?? ''}
+				value={$networkAddress ?? ''}
 				text="Address copied to clipboard."
 			/>
 		</div>

@@ -55,18 +55,23 @@ export const shortenWithMiddleEllipsis = (text: string, splitLength = 7): string
 		: text;
 };
 
-export const formatSecondsToDate = (seconds: number): string => {
-	const options: Intl.DateTimeFormatOptions = {
-		month: 'short',
-		day: 'numeric',
-		year: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-		hour12: false
-	};
+const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+	month: 'short',
+	day: 'numeric',
+	year: 'numeric',
+	hour: '2-digit',
+	minute: '2-digit',
+	hour12: false
+};
 
+export const formatSecondsToDate = (seconds: number): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString('en', options);
+	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+};
+
+export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
+	const date = new Date(Number(nanoseconds / 1_000_000n));
+	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatUSD = (

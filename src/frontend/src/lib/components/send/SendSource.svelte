@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { address } from '$lib/derived/address.derived';
 	import { formatTokenDetailed } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { balance } from '$lib/derived/balances.derived';
@@ -7,11 +6,12 @@
 	import Value from '$lib/components/ui/Value.svelte';
 
 	export let token: Token;
+	export let source: string;
 </script>
 
 <Value ref="source" element="div">
 	<svelte:fragment slot="label">Source</svelte:fragment>
-	{$address ?? ''}
+	{source}
 </Value>
 
 <Value ref="balance" element="div">

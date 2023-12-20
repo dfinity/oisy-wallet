@@ -7,6 +7,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import WalletConnectSendData from '$lib/components/wallet-connect/WalletConnectSendData.svelte';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+	import { address } from '$lib/derived/address.derived';
+	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 
 	export let amount: BigNumber;
 	export let destination: string;
@@ -17,8 +19,15 @@
 	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
 </script>
 
-<SendData amount={formatTokenShort({ value: amountDisplay })} {destination} token={ETHEREUM_TOKEN}>
+<SendData
+	amount={formatTokenShort({ value: amountDisplay })}
+	{destination}
+	token={ETHEREUM_TOKEN}
+	source={$address ?? ''}
+>
 	<WalletConnectSendData {data} />
+
+	<FeeDisplay slot="fee" />
 </SendData>
 
 <WalletConnectActions on:icApprove on:icReject />

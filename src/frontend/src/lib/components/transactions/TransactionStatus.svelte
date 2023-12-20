@@ -5,7 +5,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { fade } from 'svelte/transition';
 	import type { WebSocketListener } from '$lib/types/listener';
-	import { initMinedTransactionsListener } from '$lib/services/listener.services';
+	import { initMinedTransactionsListener } from '$lib/services/eth-listener.services';
 
 	export let blockNumber: number;
 

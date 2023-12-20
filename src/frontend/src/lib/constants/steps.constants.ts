@@ -63,3 +63,16 @@ export const ADD_TOKEN_STEPS: [ProgressStep, ...ProgressStep[]] = [
 		state: 'next'
 	} as ProgressStep
 ];
+
+export const SEND_ICP_STEPS: [ProgressStep, ...ProgressStep[]] = [
+	{
+		step: SendStep.INITIALIZATION,
+		text: 'Initializing transaction...',
+		state: 'in_progress'
+	} as ProgressStep,
+	{
+		step: SendStep.SEND,
+		text: 'Sending...',
+		state: 'next'
+	} as ProgressStep
+];

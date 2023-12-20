@@ -32,3 +32,9 @@ export enum AddTokenStep {
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }
+
+export enum SendIcpStep {
+	INITIALIZATION = 'initialization',
+	SEND = 'send',
+	DONE = 'done'
+}
