@@ -1,5 +1,5 @@
 import eth from '$lib/assets/eth.svg';
-import icp from '$lib/assets/icp.svg';
+import icpLight from '$lib/assets/icp_light.svg';
 import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
 import type { Token } from '$lib/types/token';
 
@@ -34,5 +34,5 @@ export const ICP_TOKEN: Required<Token> = {
 	name: 'ICP',
 	symbol: ICP_SYMBOL,
 	decimals: 8,
-	icon: icp
+	icon: icpLight
 };
