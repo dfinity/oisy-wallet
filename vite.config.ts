@@ -1,4 +1,3 @@
-import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { readFileSync } from 'fs';
@@ -112,7 +111,6 @@ const config: UserConfig = {
 				global: 'globalThis'
 			},
 			plugins: [
-				NodeModulesPolyfillPlugin(),
 				{
 					name: 'fix-node-globals-polyfill',
 					setup(build) {
