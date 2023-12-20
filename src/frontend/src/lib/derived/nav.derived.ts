@@ -9,3 +9,12 @@ export const routeToken: Readable<string | undefined | null> = derived(
 		}
 	]) => token
 );
+
+export const routeNetwork: Readable<string | undefined | null> = derived(
+	[page],
+	([
+		{
+			data: { network }
+		}
+	]) => network
+);
