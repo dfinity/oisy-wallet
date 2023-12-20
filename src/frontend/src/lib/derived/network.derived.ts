@@ -7,34 +7,34 @@ import {
 import { address } from '$lib/derived/address.derived';
 import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
 import { tokens } from '$lib/derived/tokens.derived';
-import { networkId } from '$lib/stores/token.store';
+import { networkIdStore } from '$lib/stores/network.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
 export const networkTokens: Readable<Token[]> = derived(
-	[tokens, networkId],
-	([$tokens, $networkId]) => $tokens.filter(({ network: { id } }) => id === $networkId)
+	[tokens, networkIdStore],
+	([$tokens, $networkIdStore]) => $tokens.filter(({ network: { id } }) => id === $networkIdStore)
 );
 
 export const networkICP: Readable<boolean> = derived(
-	[networkId],
-	([$networkId]) => ICP_NETWORK_ID === $networkId
+	[networkIdStore],
+	([$networkIdStore]) => ICP_NETWORK_ID === $networkIdStore
 );
 
 export const networkEthereum: Readable<boolean> = derived(
-	[networkId],
-	([$networkId]) => ETHEREUM_NETWORK_ID === $networkId
+	[networkIdStore],
+	([$networkIdStore]) => ETHEREUM_NETWORK_ID === $networkIdStore
 );
 
 export const networkAddress: Readable<OptionAddress | string> = derived(
 	[address, icpAccountIdentifiedStore, networkICP],
-	([$address, $icpAccountIdentifiedStore, $networkICP]) =>
-		$networkICP ? $icpAccountIdentifiedStore?.toHex() : $address
+	([$address, $icpAccountIdentifiedStore, $networkIdStore]) =>
+		$networkIdStore ? $icpAccountIdentifiedStore?.toHex() : $address
 );
 
 export const selectedNetwork: Readable<Network> = derived(
-	[networkId],
-	([$networkId]) => NETWORKS.find(({ id }) => id === $networkId) ?? ETHEREUM_NETWORK
+	[networkIdStore],
+	([$networkIdStore]) => NETWORKS.find(({ id }) => id === $networkIdStore) ?? ETHEREUM_NETWORK
 );

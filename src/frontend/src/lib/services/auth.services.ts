@@ -1,4 +1,5 @@
 import { deleteIdbEthAddress } from '$lib/api/idb.api';
+import { clearLocalStorage } from '$lib/api/local-storage.api';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -53,7 +54,7 @@ export const idleSignOut = (): Promise<void> =>
 			text: 'You have been logged out because your session has expired.',
 			level: 'warn'
 		},
-		clearIdbAddress: false
+		clearLocalData: false
 	});
 
 const emptyIdbEthAddress = async () => {
@@ -72,18 +73,28 @@ const emptyIdbEthAddress = async () => {
 	}
 };
 
+const emptyLocalStorage = async () => {
+	try {
+		clearLocalStorage();
+	} catch (err: unknown) {
+		// We silence the error.
+		// Effective logout is more important here.
+		console.error(err);
+	}
+};
+
 const logout = async ({
 	msg = undefined,
-	clearIdbAddress = true
+	clearLocalData = true
 }: {
 	msg?: ToastMsg;
-	clearIdbAddress?: boolean;
+	clearLocalData?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
 
-	if (clearIdbAddress) {
-		await emptyIdbEthAddress();
+	if (clearLocalData) {
+		await Promise.all([emptyIdbEthAddress(), emptyLocalStorage()]);
 	}
 
 	await authStore.signOut();

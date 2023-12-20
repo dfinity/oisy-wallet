@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { IconCheck } from '@dfinity/gix-components';
-	import { networkId } from '$lib/stores/token.store';
+	import { networkIdStore } from '$lib/stores/network.store';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import type { Network, NetworkId } from '$lib/types/network';
@@ -11,7 +11,7 @@
 	const dispatch = createEventDispatcher();
 
 	const onClick = () => {
-		networkId.set(id);
+		networkIdStore.set(id);
 
 		// A small delay to give the user a visual feedback that the network is checked
 		setTimeout(() => dispatch('icSelected'), 500);
@@ -29,7 +29,7 @@
 		<span>{name}</span>
 	</div>
 
-	{#if id === $networkId}
+	{#if id === $networkIdStore}
 		<span in:fade><IconCheck size="20px" /></span>
 	{/if}
 </button>
