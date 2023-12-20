@@ -5,17 +5,20 @@
 	import { fade } from 'svelte/transition';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { networkId } from '$lib/derived/network.derived';
-	import { invalidateAll } from '$app/navigation';
-	import { replaceNetworkParamUrl } from '$lib/utils/nav.utils';
+	import { switchNetwork } from '$lib/utils/network.utils';
+	import { back, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { page } from '$app/stores';
 
 	export let network: Network;
 
 	const dispatch = createEventDispatcher();
 
 	const onClick = async () => {
-		replaceNetworkParamUrl(network.id);
+		await switchNetwork(network.id);
 
-		await invalidateAll();
+		if (isRouteTransactions($page)) {
+			await back(true);
+		}
 
 		// A small delay to give the user a visual feedback that the network is checked
 		setTimeout(() => dispatch('icSelected'), 500);
