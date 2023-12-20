@@ -7,7 +7,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { ICP_NETWORK_ID } from '$lib/constants/networks.constants';
-	import { switchNetwork } from '$lib/utils/network.utils';
+	import { switchNetwork } from '$lib/utils/nav.utils';
 
 	onMount(async () => {
 		// A user is accessing the ICP transactions page without providing the network information

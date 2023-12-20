@@ -5,8 +5,7 @@
 	import { fade } from 'svelte/transition';
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { networkId } from '$lib/derived/network.derived';
-	import { switchNetwork } from '$lib/utils/network.utils';
-	import { back, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { back, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 
 	export let network: Network;
