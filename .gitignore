@@ -32,9 +32,9 @@ internet_identity.did
 
 codes.txt
 
-icp_ledger.did
+/icp_ledger.did
 icp_ledger.wasm
 icp_ledger.wasm.gz
-icp_index.did
+/icp_index.did
 icp_index.wasm
 icp_index.wasm.gz
