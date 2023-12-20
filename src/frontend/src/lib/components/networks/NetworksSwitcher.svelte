@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import Img from '$lib/components/ui/Img.svelte';
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import Network from '$lib/components/networks/Network.svelte';

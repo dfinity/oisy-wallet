@@ -6,7 +6,7 @@
 	} from '$lib/services/worker.icp-wallet.services';
 	import { ICP_TOKEN } from '$lib/constants/tokens.constants';
 
-	// eslint-disable-next-line svelte/valid-compile
+	// svelte-ignore unused-export-let
 	export let token = ICP_TOKEN;
 
 	let worker: IcpWalletWorker | undefined;
