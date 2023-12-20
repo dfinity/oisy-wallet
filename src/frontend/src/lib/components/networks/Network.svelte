@@ -1,17 +1,21 @@
 <script lang="ts">
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { IconCheck } from '@dfinity/gix-components';
-	import { networkId } from '$lib/stores/token.store';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import type { Network, NetworkId } from '$lib/types/network';
+	import { networkId } from '$lib/derived/network.derived';
+	import { invalidateAll } from '$app/navigation';
+	import { replaceNetworkParamUrl } from '$lib/utils/nav.utils';
 
 	export let network: Network;
 
 	const dispatch = createEventDispatcher();
 
-	const onClick = () => {
-		networkId.set(id);
+	const onClick = async () => {
+		replaceNetworkParamUrl(network.id);
+
+		await invalidateAll();
 
 		// A small delay to give the user a visual feedback that the network is checked
 		setTimeout(() => dispatch('icSelected'), 500);

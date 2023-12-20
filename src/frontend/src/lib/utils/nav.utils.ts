@@ -1,7 +1,8 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
+import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { LoadEvent, Page } from '@sveltejs/kit';
 
 export const transactionsUrl = (token: Token): string =>
@@ -39,6 +40,7 @@ export const back = async (pop: boolean) => {
 
 export type RouteParams = {
 	token: string | null | undefined;
+	network: string | null | undefined;
 	airdropCode: string | null | undefined;
 	// WalletConnect URI parameter
 	uri: string | null | undefined;
@@ -48,6 +50,7 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	if (!browser) {
 		return {
 			token: undefined,
+			network: undefined,
 			airdropCode: undefined,
 			uri: undefined
 		};
@@ -73,7 +76,20 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 
 	return {
 		token: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
+		network: searchParams?.get('network'),
 		airdropCode: searchParams?.get('code'),
 		uri: nonNullish(uri) ? decodeURIComponent(uri) : null
 	};
+};
+
+export const replaceNetworkParamUrl = (networkId: NetworkId | undefined | null) => {
+	const url = new URL(window.location.href);
+
+	if (isNullish(networkId) || isNullish(networkId.description)) {
+		url.searchParams.delete('network');
+	} else {
+		url.searchParams.set('network', networkId.description);
+	}
+
+	window.history.replaceState({}, '', url);
 };
