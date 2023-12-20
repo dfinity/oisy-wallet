@@ -10,7 +10,7 @@ export const LOCAL_INTERNET_IDENTITY_CANISTER_ID: string | null | undefined = im
 
 export const ICP_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_ICP_LEDGER_CANISTER_ID as string | null | undefined) ??
-	'yjl3-tyaaa-aaaaa-aaaba-cai';
+	'ryjl3-tyaaa-aaaaa-aaaba-cai';
 
 export const ICP_INDEX_CANISTER_ID =
 	(import.meta.env.VITE_ICP_INDEX_CANISTER_ID as string | null | undefined) ??
