@@ -23,7 +23,6 @@
 		"test": "vitest",
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
 		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}'",
-		"prebuild": "npm run generate",
 		"generate": "scripts/did.sh && dfx generate && node scripts/update.types.mjs && npm run format",
 		"deploy": "scripts/deploy.sh"
 	},
