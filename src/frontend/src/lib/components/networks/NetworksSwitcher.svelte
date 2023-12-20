@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
-	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import Img from '$lib/components/ui/Img.svelte';
 	import IconMore from '$lib/components/icons/IconMore.svelte';
-	import TokenNetwork from '$lib/components/tokens/TokenNetwork.svelte';
+	import Network from '$lib/components/networks/Network.svelte';
+	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -27,11 +28,11 @@
 <Popover bind:visible anchor={button} direction="rtl">
 	<ul class="flex flex-col gap-4 list-none">
 		<li>
-			<TokenNetwork token={ETHEREUM_TOKEN} on:icSelected={close} />
+			<Network network={ETHEREUM_NETWORK} on:icSelected={close} />
 		</li>
 
 		<li>
-			<TokenNetwork token={ICP_TOKEN} on:icSelected={close} />
+			<Network network={ICP_NETWORK} on:icSelected={close} />
 		</li>
 
 		<li class="flex justify-between items-center">

@@ -1,4 +1,5 @@
-import type { TokenNetwork } from '$lib/types/token';
+import { ETHEREUM_NETWORK_ID } from '$lib/constants/networks.constants';
+import type { NetworkId } from '$lib/types/network';
 import { writable } from 'svelte/store';
 
-export const selectedTokenNetwork = writable<TokenNetwork>('ethereum');
+export const networkId = writable<NetworkId>(ETHEREUM_NETWORK_ID);

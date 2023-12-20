@@ -1,12 +1,12 @@
-export type TokenId = symbol;
+import type { Network } from '$lib/types/network';
 
-export type TokenNetwork = 'ethereum' | 'icp';
+export type TokenId = symbol;
 
 export type TokenStandard = 'ethereum' | 'erc20' | 'icp';
 
 export type Token = {
 	id: TokenId;
-	network: TokenNetwork;
+	network: Network;
 	standard: TokenStandard;
 } & TokenMetadata;
 
