@@ -10,13 +10,13 @@
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import { tokens } from '$lib/derived/tokens.derived';
+	import { selectedTokens } from '$lib/derived/tokens.derived';
 </script>
 
 <h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Tokens</h2>
 
 <TokensSkeletons>
-	{#each $tokens as token (token.id)}
+	{#each $selectedTokens as token (token.id)}
 		{@const url = transactionsUrl(token)}
 
 		<Listener {token}>
