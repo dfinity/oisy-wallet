@@ -17,7 +17,7 @@
 		await switchNetwork(network.id);
 
 		if (isRouteTransactions($page)) {
-			await back(true);
+			await back({ pop: true, networkId: $networkId });
 		}
 
 		// A small delay to give the user a visual feedback that the network is checked

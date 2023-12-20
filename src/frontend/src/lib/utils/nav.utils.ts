@@ -34,15 +34,19 @@ const tokenUrl = ({
 }): string =>
 	`${path}?token=${encodeURIComponent(
 		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
-	)}${nonNullish(networkId.description) ? `&network=${networkId.description}` : ''}`;
+	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
-export const back = async (pop: boolean) => {
+const networkParam = (networkId: NetworkId): string => `network=${networkId.description ?? ''}`;
+
+export const back = async ({ pop, networkId }: { pop: boolean; networkId: NetworkId }) => {
+	const rootUrl = `/?${networkParam(networkId)}`;
+
 	if (!pop) {
-		await goto('/');
+		await goto(rootUrl);
 		return;
 	}
 
-	await goto('/', { replaceState: true });
+	await goto(rootUrl, { replaceState: true });
 };
 
 export type RouteParams = {
