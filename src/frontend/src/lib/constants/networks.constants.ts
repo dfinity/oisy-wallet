@@ -1,5 +1,5 @@
 import eth from '$lib/assets/eth.svg';
-import icp from '$lib/assets/icp.svg';
+import icpLight from '$lib/assets/icp_light.svg';
 import type { Network } from '$lib/types/network';
 
 /**
@@ -25,7 +25,7 @@ export const ICP_NETWORK_ID = Symbol(ICP_NETWORK_SYMBOL);
 export const ICP_NETWORK: Network = {
 	id: ICP_NETWORK_ID,
 	name: 'Internet Computer',
-	icon: icp
+	icon: icpLight
 };
 
 export const NETWORKS: Network[] = [ETHEREUM_NETWORK, ICP_NETWORK];
