@@ -6,12 +6,19 @@ import {
 } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
 import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+import { routeNetwork } from '$lib/derived/nav.derived';
 import { tokens } from '$lib/derived/tokens.derived';
-import { networkId } from '$lib/stores/token.store';
 import type { OptionAddress } from '$lib/types/address';
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
+
+export const networkId: Readable<NetworkId> = derived([routeNetwork], ([$routeNetwork]) =>
+	nonNullish($routeNetwork)
+		? NETWORKS.find(({ id }) => id.description === $routeNetwork)?.id ?? ETHEREUM_NETWORK_ID
+		: ETHEREUM_NETWORK_ID
+);
 
 export const networkTokens: Readable<Token[]> = derived(
 	[tokens, networkId],
