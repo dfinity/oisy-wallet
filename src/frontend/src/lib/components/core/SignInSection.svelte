@@ -5,7 +5,7 @@
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 </script>
 
-<section class="flex flex-col justify-center items-center sm:pt-0 sm:pb-8 relative z-1">
+<section class="flex flex-col justify-center items-center sm:pt-0 sm:pb-8 relative z-10">
 	<OisyWalletLogo size="66" />
 
 	<h1 class="text-center py-8 xs:px-6 sm:px-8 mb-0.5" style="max-width: 600px">

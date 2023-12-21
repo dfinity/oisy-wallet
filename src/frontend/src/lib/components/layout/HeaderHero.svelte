@@ -12,7 +12,7 @@
 </script>
 
 <header
-	class="flex justify-between md:px-4 relative z-1 pointer-events-none"
+	class="flex justify-between md:px-4 relative z-10 pointer-events-none"
 	style="min-height: 78px"
 >
 	{#if back}

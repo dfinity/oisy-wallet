@@ -2,6 +2,6 @@
 	import Alpha from '$lib/components/core/Alpha.svelte';
 </script>
 
-<header class="flex justify-center md:px-4 py-4 relative z-1">
+<header class="flex justify-center md:px-4 py-4 relative z-10">
 	<Alpha />
 </header>
