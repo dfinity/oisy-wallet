@@ -10,12 +10,12 @@
 	"prefer_related_applications": false,
 	"icons": [
 		{
-			"src": "https://cha4i-riaaa-aaaan-qeccq-cai.raw.icp0.io/favicons/icon-192x192.png",
+			"src": "{{VITE_OISY_URL}}/favicons/icon-192x192.png",
 			"sizes": "192x192",
 			"type": "image/png"
 		},
 		{
-			"src": "https://cha4i-riaaa-aaaan-qeccq-cai.raw.icp0.io/favicons/icon-512x512.png",
+			"src": "{{VITE_OISY_URL}}/favicons/icon-512x512.png",
 			"sizes": "512x512",
 			"type": "image/png"
 		}
