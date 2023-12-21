@@ -39,7 +39,7 @@
 		"@sveltejs/adapter-static": "^3.0.1",
 		"@sveltejs/kit": "^2.0.4",
 		"@sveltejs/vite-plugin-svelte": "^3.0.1",
-		"@walletconnect/web3wallet": "^1.9.1",
+		"@walletconnect/web3wallet": "^1.9.5",
 		"alchemy-sdk": "^3.1.0",
 		"buffer": "^6.0.3",
 		"ethers": "^5.7.0",
