@@ -1,9 +1,8 @@
 import type { Result_3 } from '$declarations/airdrop/airdrop.did';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
-import type { IcpWallet } from '$lib/types/icp-wallet';
 import type { IcrcCanisters } from '$lib/types/icrc';
-import type { IcrcWallet } from '$lib/types/icrc-wallet';
+import type { Wallet } from '$lib/types/wallet';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
@@ -53,12 +52,8 @@ export interface PostMessageDataResponseExchangeError extends PostMessageDataRes
 	err: string | undefined;
 }
 
-export interface PostMessageDataResponseIcpWallet extends PostMessageDataResponse {
-	wallet: IcpWallet;
-}
-
-export interface PostMessageDataResponseIcrcWallet extends PostMessageDataResponse {
-	wallet: IcrcWallet;
+export interface PostMessageDataResponseWallet<T> extends PostMessageDataResponse {
+	wallet: Wallet<T>;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {

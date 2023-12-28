@@ -3,7 +3,7 @@ import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type {
 	PostMessage,
 	PostMessageDataRequest,
-	PostMessageDataResponseIcpWallet
+	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
 import {
 	TimerWorkerUtils,
@@ -79,7 +79,7 @@ const postMessageWallet = ({
 	transactions: newTransactions,
 	...rest
 }: GetAccountIdentifierTransactionsResponse) =>
-	worker.postMsg<PostMessageDataResponseIcpWallet>({
+	worker.postMsg<PostMessageDataResponseWallet<GetAccountIdentifierTransactionsResponse>>({
 		msg: 'syncIcpWallet',
 		data: {
 			wallet: {

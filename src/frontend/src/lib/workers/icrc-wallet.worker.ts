@@ -3,14 +3,17 @@ import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type {
 	PostMessage,
 	PostMessageDataRequestIcrc,
-	PostMessageDataResponseIcrcWallet
+	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
 import {
 	TimerWorkerUtils,
 	type TimerWorkerUtilsJobData
 } from '$lib/worker-utils/timer.worker-utils';
-import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
-import type { GetTransactions } from '@dfinity/ledger-icrc/dist/candid/icrc_index';
+import type {
+	IcrcGetTransactions,
+	IcrcTransaction,
+	IcrcTransactionWithId
+} from '@dfinity/ledger-icrc';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
 const worker = new TimerWorkerUtils();
@@ -78,8 +81,8 @@ const syncWallet = async ({
 	postMessageWallet({ transactions: newTransactions, ...rest });
 };
 
-const postMessageWallet = ({ transactions: newTransactions, ...rest }: GetTransactions) =>
-	worker.postMsg<PostMessageDataResponseIcrcWallet>({
+const postMessageWallet = ({ transactions: newTransactions, ...rest }: IcrcGetTransactions) =>
+	worker.postMsg<PostMessageDataResponseWallet<IcrcGetTransactions>>({
 		msg: 'syncIcrcWallet',
 		data: {
 			wallet: {

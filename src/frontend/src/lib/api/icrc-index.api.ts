@@ -4,8 +4,7 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import { getIcrcAccount } from '$lib/utils/icrc-account.utils';
 import { type Identity } from '@dfinity/agent';
-import { IcrcIndexCanister } from '@dfinity/ledger-icrc';
-import type { GetTransactions } from '@dfinity/ledger-icrc/dist/candid/icrc_index';
+import { IcrcIndexCanister, type IcrcGetTransactions } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
 
@@ -21,7 +20,7 @@ export const getTransactions = async ({
 	start?: bigint;
 	maxResults?: bigint;
 	indexCanisterId: CanisterIdText;
-}): Promise<GetTransactions> => {
+}): Promise<IcrcGetTransactions> => {
 	assertNonNullish(identity, 'No internet identity.');
 
 	const { getTransactions } = await indexCanister({ identity, indexCanisterId });
