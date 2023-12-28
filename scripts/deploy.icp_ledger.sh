@@ -3,11 +3,6 @@
 # Install ICP ledger locally as documented in:
 # https://internetcomputer.org/docs/current/developer-docs/integrations/ledger/ledger-local-setup
 
-IC_VERSION=d87954601e4b22972899e9957e800406a0a6b929
-curl -o icp_ledger.wasm.gz "https://download.dfinity.systems/ic/$IC_VERSION/canisters/ledger-canister.wasm.gz"
-gunzip icp_ledger.wasm.gz
-curl -o icp_ledger.did "https://raw.githubusercontent.com/dfinity/ic/$IC_VERSION/rs/rosetta-api/icp_ledger/ledger.did"
-
 dfx identity new minter
 dfx identity use minter
 MINTER_ACCOUNT_ID=$(dfx ledger account-id)

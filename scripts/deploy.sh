@@ -56,6 +56,7 @@ fi
     --numbers-of-children="$NUMBERS_OF_CHILDREN" --number-of-codes-to-generate="$NUMBER_OF_CODES_TO_GENERATE"  \
     --number-of-characters-per-code="$NUMBER_OF_CHARACTERS_PER_CODE"
 
+./scripts/download.icp.sh
 ./scripts/deploy.icp_ledger.sh
 ./scripts/deploy.icp_index.sh
 
