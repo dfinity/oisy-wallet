@@ -23,6 +23,9 @@ const config = {
 			lib: filesPath('src/lib'),
 			routes: filesPath('src/routes'),
 			appTemplate: filesPath('src/app.html')
+		},
+		alias: {
+			$declarations: './src/declarations'
 		}
 	},
 
