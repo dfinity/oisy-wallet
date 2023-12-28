@@ -75,7 +75,8 @@
 			"wasm": "target/ic/ckbtc_minter.wasm",
 			"remote": {
 				"id": {
-					"ic": "mqygn-kiaaa-aaaar-qaadq-cai"
+					"ic": "mqygn-kiaaa-aaaar-qaadq-cai",
+					"staging": "ml52i-qqaaa-aaaar-qaaba-cai"
 				}
 			},
 			"declarations": {
@@ -88,7 +89,8 @@
 			"wasm": "target/ic/ckbtc_ledger.wasm",
 			"remote": {
 				"id": {
-					"ic": "mxzaz-hqaaa-aaaar-qaada-cai"
+					"ic": "mxzaz-hqaaa-aaaar-qaada-cai",
+					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai"
 				}
 			},
 			"declarations": {
@@ -101,7 +103,8 @@
 			"wasm": "target/ic/ckbtc_index.wasm",
 			"remote": {
 				"id": {
-					"ic": "n5wcd-faaaa-aaaar-qaaea-cai"
+					"ic": "n5wcd-faaaa-aaaar-qaaea-cai",
+					"staging": "mm444-5iaaa-aaaar-qaabq-cai"
 				}
 			},
 			"declarations": {
