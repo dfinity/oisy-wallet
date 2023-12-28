@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Download
+# Download ckBTC
 
 DIR=target/ic
 
