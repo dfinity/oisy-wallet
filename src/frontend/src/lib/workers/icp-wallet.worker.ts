@@ -1,5 +1,5 @@
 import { getTransactions } from '$lib/api/icp-index.api';
-import { SYNC_ICP_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/icp.constants';
+import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type {
 	PostMessage,
 	PostMessageDataRequest,
@@ -27,7 +27,7 @@ onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRe
 			return;
 		case 'startIcpWalletTimer':
 			await worker.start<PostMessageDataRequest>({
-				interval: SYNC_ICP_WALLET_TIMER_INTERVAL_MILLIS,
+				interval: WALLET_TIMER_INTERVAL_MILLIS,
 				job: syncWallet,
 				data
 			});

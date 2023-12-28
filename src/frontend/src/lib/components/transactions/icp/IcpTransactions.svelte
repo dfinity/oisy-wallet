@@ -9,11 +9,11 @@
 	import { getTransactions } from '$lib/api/icp-index.api';
 	import { authStore } from '$lib/stores/auth.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { ICP_WALLET_PAGINATION } from '$lib/constants/icp.constants';
 	import { modalIcpTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { IcpTransaction as IcpTransactionType } from '$lib/types/icp-wallet';
 	import IcpTransactionModal from '$lib/components/transactions/icp/IcpTransactionModal.svelte';
+	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 
 	let transactions: IcpTransactionType[];
 	$: transactions = $icpTransactionsStore[ICP_TOKEN_ID] ?? [];
@@ -39,7 +39,7 @@
 			const { transactions: nextTransactions } = await getTransactions({
 				owner: $authStore.identity.getPrincipal(),
 				identity: $authStore.identity,
-				maxResults: ICP_WALLET_PAGINATION,
+				maxResults: WALLET_PAGINATION,
 				start: lastId
 			});
 
