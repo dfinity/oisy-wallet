@@ -19,6 +19,7 @@
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import { loading } from '$lib/stores/loader.store';
 	import { LoaderStep } from '$lib/enums/steps';
+	import { loadIcrcTokens } from '$lib/services/icrc.services';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
@@ -61,8 +62,8 @@
 	$: disabledConfirm = progressStep !== LoaderStep.DONE;
 
 	const loadData = async () => {
-		// Load Erc20 contracts before loading balances and transactions
-		await loadErc20Contracts();
+		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
+		await Promise.all([loadErc20Contracts(), loadIcrcTokens()]);
 
 		// In case of error we want to display the dapp anyway and not get stuck on the loader
 		await Promise.allSettled([

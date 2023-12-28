@@ -6,7 +6,7 @@ import type { Token } from '$lib/types/token';
 /**
  * Ethereum
  */
-const ETHEREUM_SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
+export const ETHEREUM_SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
 
 export const ETHEREUM_TOKEN_ID = Symbol(ETHEREUM_SYMBOL);
 
@@ -23,7 +23,7 @@ export const ETHEREUM_TOKEN: Required<Token> = {
 /**
  * ICP
  */
-const ICP_SYMBOL = 'ICP';
+export const ICP_SYMBOL = 'ICP';
 
 export const ICP_TOKEN_ID = Symbol(ICP_SYMBOL);
 

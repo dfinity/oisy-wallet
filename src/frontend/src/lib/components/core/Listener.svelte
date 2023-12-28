@@ -9,6 +9,8 @@
 	let standard: TokenStandard;
 	$: ({ standard } = token);
 
+	// TODO: icrc listener
+
 	let cmp: ComponentType;
 	$: cmp = standard === 'icp' ? IcpListener : EthereumListener;
 </script>
