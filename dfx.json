@@ -68,6 +68,58 @@
 			"declarations": {
 				"node_compatibility": true
 			}
+		},
+		"ckbtc_minter": {
+			"type": "custom",
+			"candid": "target/ic/ckbtc_minter.did",
+			"wasm": "target/ic/ckbtc_minter.wasm",
+			"remote": {
+				"id": {
+					"ic": "mqygn-kiaaa-aaaar-qaadq-cai"
+				}
+			},
+			"declarations": {
+				"node_compatibility": true
+			}
+		},
+		"ckbtc_ledger": {
+			"type": "custom",
+			"candid": "target/ic/ckbtc_ledger.did",
+			"wasm": "target/ic/ckbtc_ledger.wasm",
+			"remote": {
+				"id": {
+					"ic": "mxzaz-hqaaa-aaaar-qaada-cai"
+				}
+			},
+			"declarations": {
+				"node_compatibility": true
+			}
+		},
+		"ckbtc_index": {
+			"type": "custom",
+			"candid": "target/ic/ckbtc_index.did",
+			"wasm": "target/ic/ckbtc_index.wasm",
+			"remote": {
+				"id": {
+					"ic": "n5wcd-faaaa-aaaar-qaaea-cai"
+				}
+			},
+			"declarations": {
+				"node_compatibility": true
+			}
+		},
+		"ckbtc_kyt": {
+			"type": "custom",
+			"candid": "target/ic/ckbtc_kyt.did",
+			"wasm": "target/ic/ckbtc_kyt.wasm",
+			"remote": {
+				"id": {
+					"ic": "pjihx-aaaaa-aaaar-qaaka-cai"
+				}
+			},
+			"declarations": {
+				"node_compatibility": true
+			}
 		}
 	},
 	"defaults": {
