@@ -117,7 +117,8 @@
 			"wasm": "target/ic/ckbtc_kyt.wasm",
 			"remote": {
 				"id": {
-					"ic": "pjihx-aaaaa-aaaar-qaaka-cai"
+					"ic": "pjihx-aaaaa-aaaar-qaaka-cai",
+					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai"
 				}
 			},
 			"declarations": {
