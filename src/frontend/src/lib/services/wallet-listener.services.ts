@@ -1,5 +1,5 @@
 import { balancesStore } from '$lib/stores/balances.store';
-import { walletTransactionsStore } from '$lib/stores/wallet-transactions.store';
+import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
@@ -25,7 +25,7 @@ export const syncWallet = <
 		balance: BigNumber.from(balance)
 	});
 
-	walletTransactionsStore.prepend({
+	icTransactionsStore.prepend({
 		tokenId,
 		transactions: JSON.parse(newTransactions, jsonReviver)
 	});

@@ -1,20 +1,20 @@
+import type { IcTransaction } from '$lib/types/ic';
 import type { TokenId } from '$lib/types/token';
-import type { WalletTransaction } from '$lib/types/wallet';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type WalletData<T> = Record<TokenId, T[]>;
+export type IcTransactionsData<T> = Record<TokenId, T[]>;
 
-export interface WalletStore<T> extends Readable<WalletData<T>> {
+export interface IcTransactionsStore<T> extends Readable<IcTransactionsData<T>> {
 	prepend: (params: { tokenId: TokenId; transactions: T[] }) => void;
 	append: (params: { tokenId: TokenId; transactions: T[] }) => void;
 	reset: () => void;
 }
 
-const initWalletStore = <T extends WalletTransaction>(): WalletStore<T> => {
-	const INITIAL: WalletData<T> = {} as Record<TokenId, T[]>;
+const initIcTransactionsStore = <T extends IcTransaction>(): IcTransactionsStore<T> => {
+	const INITIAL: IcTransactionsData<T> = {} as Record<TokenId, T[]>;
 
-	const { subscribe, update, set } = writable<WalletData<T>>(INITIAL);
+	const { subscribe, update, set } = writable<IcTransactionsData<T>>(INITIAL);
 
 	return {
 		prepend: ({ tokenId, transactions }: { tokenId: TokenId; transactions: T[] }) =>
@@ -37,4 +37,4 @@ const initWalletStore = <T extends WalletTransaction>(): WalletStore<T> => {
 	};
 };
 
-export const walletTransactionsStore = initWalletStore();
+export const icTransactionsStore = initIcTransactionsStore();

@@ -7,4 +7,4 @@ export type Wallet<T> = Omit<T, 'transactions'> & {
 	newTransactions: JsonTransactionsText;
 };
 
-export type WalletTransaction = IcpTransaction | IcrcTransactionWithId;
+export type IcTransaction = IcpTransaction | IcrcTransactionWithId;

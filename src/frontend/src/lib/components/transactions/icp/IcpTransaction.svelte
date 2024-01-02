@@ -12,15 +12,15 @@
 	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
 	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { WalletTransaction } from '$lib/types/wallet';
+	import type { IcTransaction } from '$lib/types/ic';
 
-	export let transaction: WalletTransaction;
+	export let transaction: IcTransaction;
 
 	let from: string | undefined;
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
 
-    // TODO: icrc transaction
+	// TODO: icrc transaction
 
 	onMount(() => {
 		try {

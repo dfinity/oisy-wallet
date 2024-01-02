@@ -13,11 +13,11 @@
 	import type { IcpTransaction as IcpTransactionType } from '$lib/types/icp';
 	import IcpTransactionModal from '$lib/components/transactions/icp/IcpTransactionModal.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-	import { walletTransactionsStore } from '$lib/stores/wallet-transactions.store';
-	import type { WalletTransaction } from '$lib/types/wallet';
+	import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
+	import type { IcTransaction } from '$lib/types/ic';
 
-	let transactions: WalletTransaction[];
-	$: transactions = $walletTransactionsStore[ICP_TOKEN_ID] ?? [];
+	let transactions: IcTransaction[];
+	$: transactions = $icTransactionsStore[ICP_TOKEN_ID] ?? [];
 
 	let disableInfiniteScroll = false;
 
@@ -49,7 +49,7 @@
 				return;
 			}
 
-			walletTransactionsStore.append({ tokenId: ICP_TOKEN_ID, transactions: nextTransactions });
+			icTransactionsStore.append({ tokenId: ICP_TOKEN_ID, transactions: nextTransactions });
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: 'Something went wrong while fetching the transactions.' },
