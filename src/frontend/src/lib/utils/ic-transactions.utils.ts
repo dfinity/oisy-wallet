@@ -4,6 +4,7 @@ import type { IcpTransaction } from '$lib/types/icp';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { getAccountIdentifier } from '$lib/utils/icp-account.utils';
+import { getIcrcAccount } from '$lib/utils/icrc-account.utils';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -122,7 +123,7 @@ const mapIcrcTransaction = ({
 			: undefined;
 
 	const accountIdentifier = nonNullish(identity)
-		? encodeIcrcAccount({ owner: identity.getPrincipal() })
+		? encodeIcrcAccount(getIcrcAccount(identity.getPrincipal()))
 		: undefined;
 
 	const mapFrom = (from: string): Pick<IcTransactionUi, 'from' | 'incoming'> => ({

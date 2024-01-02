@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
-	import { token } from '$lib/derived/token.derived';
+	import { token, tokenStandard } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { invalidIcpAddress } from '$lib/utils/icp-account.utils';
 	import { icAccountIdentifierStore } from '$lib/derived/ic.derived';
@@ -15,7 +15,9 @@
 	$: invalid =
 		isNullishOrEmpty(destination) ||
 		invalidAmount(amount) ||
-		(invalidIcpAddress(destination) && invalidIcrcAddress(destination));
+		($tokenStandard === 'icrc'
+			? invalidIcrcAddress(destination)
+			: invalidIcpAddress(destination) && invalidIcrcAddress(destination));
 
 	const dispatch = createEventDispatcher();
 

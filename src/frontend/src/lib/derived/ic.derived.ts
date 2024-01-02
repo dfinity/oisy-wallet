@@ -1,6 +1,7 @@
 import { tokenStandard } from '$lib/derived/token.derived';
 import { authStore } from '$lib/stores/auth.store';
 import { getAccountIdentifier } from '$lib/utils/icp-account.utils';
+import { getIcrcAccount } from '$lib/utils/icrc-account.utils';
 import type { AccountIdentifier } from '@dfinity/ledger-icp';
 import { encodeIcrcAccount, type IcrcAccount } from '@dfinity/ledger-icrc';
 import { nonNullish } from '@dfinity/utils';
@@ -14,7 +15,7 @@ export const icpAccountIdentifierStore: Readable<AccountIdentifier | undefined> 
 
 export const icrcAccountStore: Readable<IcrcAccount | undefined> = derived(
 	authStore,
-	({ identity }) => (nonNullish(identity) ? { owner: identity.getPrincipal() } : undefined)
+	({ identity }) => (nonNullish(identity) ? getIcrcAccount(identity.getPrincipal()) : undefined)
 );
 
 export const icAccountIdentifierStore: Readable<string | undefined> = derived(
