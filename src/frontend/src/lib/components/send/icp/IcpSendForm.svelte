@@ -6,7 +6,7 @@
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
-	import IcpFeeDisplay from '$lib/components/send/icp/IcpFeeDisplay.svelte';
+	import IcFeeDisplay from '$lib/components/send/icp/IcFeeDisplay.svelte';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 
 	export let destination = '';
@@ -26,7 +26,7 @@
 
 	<SendSource token={$token} source={$icpAccountIdentifierStore?.toHex() ?? ''} />
 
-	<IcpFeeDisplay />
+	<IcFeeDisplay />
 
 	<div class="flex justify-end gap-1">
 		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>

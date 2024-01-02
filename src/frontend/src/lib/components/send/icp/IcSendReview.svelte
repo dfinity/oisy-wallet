@@ -4,8 +4,8 @@
 	import { token } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { invalidIcpAddress } from '$lib/utils/icp-account.utils';
-	import { icAccountIdentifierStore, icpAccountIdentifierStore } from '$lib/derived/icp.derived';
-	import IcpFeeDisplay from '$lib/components/send/icp/IcpFeeDisplay.svelte';
+	import { icAccountIdentifierStore } from '$lib/derived/icp.derived';
+	import IcFeeDisplay from '$lib/components/send/icp/IcFeeDisplay.svelte';
 	import { invalidIcrcAddress } from '$lib/utils/icrc-account.utils';
 
 	export let destination = '';
@@ -24,7 +24,7 @@
 </script>
 
 <SendData {amount} {destination} token={$token} {source}>
-	<IcpFeeDisplay slot="fee" />
+	<IcFeeDisplay slot="fee" />
 </SendData>
 
 <div class="flex justify-end gap-1">
