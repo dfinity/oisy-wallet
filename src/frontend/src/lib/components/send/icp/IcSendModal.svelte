@@ -6,7 +6,7 @@
 	import { SEND_ICP_STEPS } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import IcpSendForm from '$lib/components/send/icp/IcpSendForm.svelte';
-	import IcpSendReview from '$lib/components/send/icp/IcpSendReview.svelte';
+	import IcSendReview from '$lib/components/send/icp/IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { isNullish } from '@dfinity/utils';
@@ -100,7 +100,7 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<IcpSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} />
+		<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} />
 	{:else if currentStep?.name === 'Sending'}
 		<InProgressWizard progressStep={sendProgressStep} steps={SEND_ICP_STEPS} />
 	{:else}

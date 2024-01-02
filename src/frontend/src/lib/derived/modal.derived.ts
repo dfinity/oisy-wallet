@@ -9,9 +9,9 @@ export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
 );
-export const modalIcpSend: Readable<boolean> = derived(
+export const modalIcSend: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'icp-send'
+	($modalStore) => $modalStore?.type === 'ic-send'
 );
 export const modalWalletConnectAuth: Readable<boolean> = derived(
 	modalStore,

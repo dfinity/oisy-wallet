@@ -5,7 +5,7 @@ export interface Modal<T> {
 	type:
 		| 'receive'
 		| 'send'
-		| 'icp-send'
+		| 'ic-send'
 		| 'wallet-connect-auth'
 		| 'wallet-connect-sign'
 		| 'wallet-connect-send'
@@ -21,7 +21,7 @@ export type ModalData<T> = Modal<T> | undefined | null;
 export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReceive: () => void;
 	openSend: () => void;
-	openIcpSend: () => void;
+	openIcSend: () => void;
 	openWalletConnectAuth: () => void;
 	openWalletConnectSign: <D extends T>(data: D) => void;
 	openWalletConnectSend: <D extends T>(data: D) => void;
@@ -38,7 +38,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 	return {
 		openReceive: () => set({ type: 'receive' }),
 		openSend: () => set({ type: 'send' }),
-		openIcpSend: () => set({ type: 'icp-send' }),
+		openIcSend: () => set({ type: 'ic-send' }),
 		openWalletConnectAuth: () => set({ type: 'wallet-connect-auth' }),
 		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),
 		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),
