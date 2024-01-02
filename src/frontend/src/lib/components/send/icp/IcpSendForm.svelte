@@ -4,10 +4,10 @@
 	import { createEventDispatcher } from 'svelte';
 	import { token } from '$lib/derived/token.derived';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
-	import { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import IcpFeeDisplay from '$lib/components/send/icp/IcpFeeDisplay.svelte';
+	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -19,7 +19,7 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<SendDestination bind:destination network={TargetNetwork.ICP} />
+	<SendDestination bind:destination network={ICP_NETWORK} />
 
 	<label for="amount" class="font-bold px-4.5">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
