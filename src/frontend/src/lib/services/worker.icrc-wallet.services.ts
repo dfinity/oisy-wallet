@@ -1,5 +1,5 @@
 import { syncWallet } from '$lib/services/ic-listener.services';
-import type { IcrcToken } from '$lib/types/icrc';
+import type { IcToken } from '$lib/types/ic';
 import type { PostMessage, PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { IcrcGetTransactions } from '@dfinity/ledger-icrc';
 
@@ -11,7 +11,7 @@ export interface WalletWorker {
 export const initIcrcWalletWorker = async ({
 	indexCanisterId,
 	id: tokenId
-}: IcrcToken): Promise<WalletWorker> => {
+}: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$lib/workers/icrc-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 

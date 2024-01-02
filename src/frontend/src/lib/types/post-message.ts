@@ -2,7 +2,8 @@ import type { Result_3 } from '$declarations/airdrop/airdrop.did';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 import type { PostMessageWalletData } from '$lib/types/ic.post-message';
-import type { IcrcCanisters } from '$lib/types/icrc';
+
+import type { IcCanisters } from '$lib/types/ic';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
@@ -23,7 +24,7 @@ export interface PostMessageDataRequestExchangeTimer {
 	erc20Addresses: Erc20ContractAddress[];
 }
 
-export type PostMessageDataRequestIcrc = Pick<IcrcCanisters, 'indexCanisterId'>;
+export type PostMessageDataRequestIcrc = Pick<IcCanisters, 'indexCanisterId'>;
 
 export type PostMessageResponse =
 	| 'signOutIdleTimer'

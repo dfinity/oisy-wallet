@@ -5,8 +5,8 @@
 		initIcrcWalletWorker,
 		type WalletWorker
 	} from '$lib/services/worker.icrc-wallet.services';
-	import type { IcrcToken } from '$lib/types/icrc';
 	import { initIcpWalletWorker } from '$lib/services/worker.icp-wallet.services';
+	import type { IcToken } from '$lib/types/ic';
 
 	export let token: Token;
 
@@ -15,7 +15,7 @@
 	onMount(
 		async () =>
 			(worker = await (token.standard === 'icrc'
-				? initIcrcWalletWorker(token as IcrcToken)
+				? initIcrcWalletWorker(token as IcToken)
 				: initIcpWalletWorker()))
 	);
 

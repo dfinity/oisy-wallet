@@ -1,12 +1,12 @@
 import { ICP_NETWORK } from '$lib/constants/networks.constants';
-import type { IcrcCanisters, IcrcFee, IcrcToken } from '$lib/types/icrc';
+import type { IcCanisters, IcFee, IcToken } from '$lib/types/ic';
 import type { TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
 import { isNullish } from '@dfinity/utils';
 
-export type IcrcLoadData = IcrcCanisters & { metadata: IcrcTokenMetadataResponse };
+export type IcrcLoadData = IcCanisters & { metadata: IcrcTokenMetadataResponse };
 
-export const mapIcrcToken = ({ metadata, ...rest }: IcrcLoadData): IcrcToken | undefined => {
+export const mapIcrcToken = ({ metadata, ...rest }: IcrcLoadData): IcToken | undefined => {
 	const token = mapOptionalToken(metadata);
 
 	if (isNullish(token)) {
@@ -25,7 +25,7 @@ export const mapIcrcToken = ({ metadata, ...rest }: IcrcLoadData): IcrcToken | u
 	};
 };
 
-type IcrcTokenMetadata = TokenMetadata & IcrcFee;
+type IcrcTokenMetadata = TokenMetadata & IcFee;
 
 const mapOptionalToken = (response: IcrcTokenMetadataResponse): IcrcTokenMetadata | undefined => {
 	const nullishToken: Partial<IcrcTokenMetadata> = response.reduce((acc, [key, value]) => {

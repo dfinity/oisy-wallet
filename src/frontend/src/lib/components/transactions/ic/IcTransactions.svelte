@@ -11,11 +11,9 @@
 	import IcpTransactionModal from '$lib/components/transactions/ic/IcTransactionModal.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
-	import type { IcTransaction as IcTransactionType, IcTransactionUi } from '$lib/types/ic';
-	import { token, tokenId, tokenStandard } from '$lib/derived/token.derived';
+	import type { IcToken, IcTransaction as IcTransactionType, IcTransactionUi } from '$lib/types/ic';
+	import { token, tokenId } from '$lib/derived/token.derived';
 	import { getTransactions } from '$lib/services/ic-transactions.services';
-	import type { IcrcToken } from '$lib/types/icrc';
-	import { ICP_INDEX_CANISTER_ID } from '$lib/constants/icp.constants';
 
 	let transactions: IcTransactionType[];
 	$: transactions = $icTransactionsStore[$tokenId] ?? [];
@@ -43,8 +41,7 @@
 				identity: $authStore.identity,
 				maxResults: WALLET_PAGINATION,
 				start: lastId,
-				standard: $tokenStandard,
-				indexCanisterId: ($token as IcrcToken).indexCanisterId ?? ICP_INDEX_CANISTER_ID
+				token: $token as IcToken
 			});
 
 			if (nextTransactions.length === 0) {
