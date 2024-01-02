@@ -10,9 +10,9 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { mapIcTransaction } from '$lib/utils/ic-transactions.utils';
-	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { IcTransaction, IcTransactionUi } from '$lib/types/ic';
+	import { authStore } from '$lib/stores/auth.store';
 
 	export let transaction: IcTransaction;
 
@@ -22,7 +22,8 @@
 		try {
 			uiTransaction = mapIcTransaction({
 				transaction,
-				tokenId: $tokenId
+				tokenId: $tokenId,
+				identity: $authStore.identity
 			});
 		} catch (err: unknown) {
 			toastsError({
@@ -32,28 +33,24 @@
 		}
 	});
 
-	let from: string | undefined;
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
+	let incoming: boolean | undefined;
 
-	$: from = uiTransaction?.from;
 	$: value = uiTransaction?.value;
 	$: timestamp = uiTransaction?.timestamp;
-
-	let type: 'send' | 'receive';
-	$: type =
-		from?.toLowerCase() === $icpAccountIdentifierStore?.toHex().toLowerCase() ? 'send' : 'receive';
+	$: incoming = uiTransaction?.incoming;
 
 	let icon: ComponentType;
-	$: icon = type === 'send' ? IconSend : IconReceive;
+	$: icon = incoming === false ? IconSend : IconReceive;
 
 	let amount: BigNumber | undefined;
-	$: amount = type == 'send' && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
+	$: amount = !incoming && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
 </script>
 
 <button on:click={() => modalStore.openIcTransaction(uiTransaction)} class="block w-full">
 	<Card>
-		{`${type === 'send' ? 'Send' : 'Receive'}`}
+		{`${incoming === false ? 'Send' : 'Receive'}`}
 
 		<RoundedIcon slot="icon" {icon} />
 

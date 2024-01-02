@@ -5,10 +5,9 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatNanosecondsToDate, formatTokenDetailed } from '$lib/utils/format.utils';
-	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
-	import type { IcTransactionUi } from '$lib/types/ic';
+	import type { IcTransactionType, IcTransactionUi } from '$lib/types/ic';
 
 	export let transaction: IcTransactionUi;
 
@@ -17,12 +16,9 @@
 	let to: string | undefined;
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
+	let type: IcTransactionType;
 
-	$: ({ id, from, to, value, timestamp } = transaction);
-
-	let type: 'send' | 'receive';
-	$: type =
-		from?.toLowerCase() === $icpAccountIdentifierStore?.toHex().toLowerCase() ? 'send' : 'receive';
+	$: ({ id, from, to, value, timestamp, type } = transaction);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -44,7 +40,7 @@
 
 		<Value ref="type">
 			<svelte:fragment slot="label">Type</svelte:fragment>
-			{`${type === 'send' ? 'Send' : 'Receive'}`}
+			<span class="capitalize">{type}</span>
 		</Value>
 
 		{#if nonNullish(from)}

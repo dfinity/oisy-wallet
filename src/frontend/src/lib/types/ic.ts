@@ -10,10 +10,14 @@ export type Wallet<T> = Omit<T, 'transactions'> & {
 
 export type IcTransaction = IcpTransaction | IcrcTransactionWithId;
 
+export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'transfer' | 'transfer-from';
+
 export interface IcTransactionUi {
 	id: bigint;
+	type: IcTransactionType;
 	from?: string;
 	to?: string;
+	incoming?: boolean;
 	value?: BigNumber;
 	timestamp?: bigint;
 }

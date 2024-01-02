@@ -1,29 +1,35 @@
 import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
-import type { IcTransaction, IcTransactionUi } from '$lib/types/ic';
+import type { IcTransaction, IcTransactionType, IcTransactionUi } from '$lib/types/ic';
 import type { IcpTransaction } from '$lib/types/icp';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
+import { getAccountIdentifier } from '$lib/utils/icp-account.utils';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export const mapIcTransaction = ({
 	transaction,
-	tokenId
+	tokenId,
+	...rest
 }: {
 	transaction: IcTransaction;
 	tokenId: TokenId;
+	identity: OptionIdentity;
 }): IcTransactionUi => {
 	if (tokenId === ICP_TOKEN_ID) {
-		return mapIcpTransaction({ transaction: transaction as IcpTransaction });
+		return mapIcpTransaction({ transaction: transaction as IcpTransaction, ...rest });
 	}
 
-	return mapIcrcTransaction({ transaction: transaction as IcrcTransactionWithId });
+	return mapIcrcTransaction({ transaction: transaction as IcrcTransactionWithId, ...rest });
 };
 
 export const mapIcpTransaction = ({
-	transaction: { transaction, id }
+	transaction: { transaction, id },
+	identity
 }: {
 	transaction: IcpTransaction;
+	identity: OptionIdentity;
 }): IcTransactionUi => {
 	const { operation, created_at_time } = transaction;
 
@@ -32,17 +38,28 @@ export const mapIcpTransaction = ({
 		timestamp: fromNullable(created_at_time)?.timestamp_nanos
 	};
 
+	const accountIdentifier = nonNullish(identity)
+		? getAccountIdentifier(identity.getPrincipal())
+		: undefined;
+
+	const mapFrom = (from: string): Pick<IcTransactionUi, 'from' | 'incoming'> => ({
+		from,
+		incoming: from?.toLowerCase() !== accountIdentifier?.toHex().toLowerCase()
+	});
+
 	if ('Approve' in operation) {
 		return {
 			...tx,
-			from: operation.Approve.from
+			type: 'approve',
+			...mapFrom(operation.Approve.from)
 		};
 	}
 
 	if ('Burn' in operation) {
 		return {
 			...tx,
-			from: operation.Burn.from,
+			type: 'burn',
+			...mapFrom(operation.Burn.from),
 			value: BigNumber.from(operation.Burn.amount.e8s)
 		};
 	}
@@ -50,7 +67,9 @@ export const mapIcpTransaction = ({
 	if ('Mint' in operation) {
 		return {
 			...tx,
+			type: 'mint',
 			to: operation.Mint.to,
+			incoming: false,
 			value: BigNumber.from(operation.Mint.amount.e8s)
 		};
 	}
@@ -58,7 +77,8 @@ export const mapIcpTransaction = ({
 	if ('Transfer' in operation) {
 		return {
 			...tx,
-			from: operation.Transfer.from,
+			type: 'transfer',
+			...mapFrom(operation.Transfer.from),
 			to: operation.Transfer.to,
 			value: BigNumber.from(operation.Transfer.amount.e8s)
 		};
@@ -67,7 +87,8 @@ export const mapIcpTransaction = ({
 	if ('TransferFrom' in operation) {
 		return {
 			...tx,
-			from: operation.TransferFrom.from,
+			type: 'transfer-from',
+			...mapFrom(operation.TransferFrom.from),
 			to: operation.TransferFrom.to,
 			value: BigNumber.from(operation.TransferFrom.amount.e8s)
 		};
@@ -77,9 +98,11 @@ export const mapIcpTransaction = ({
 };
 
 const mapIcrcTransaction = ({
-	transaction: { transaction, id }
+	transaction: { transaction, id },
+	identity
 }: {
 	transaction: IcrcTransactionWithId;
+	identity: OptionIdentity;
 }): IcTransactionUi => {
 	const { timestamp, approve, burn, mint, transfer } = transaction;
 
@@ -98,15 +121,33 @@ const mapIcrcTransaction = ({
 			? BigNumber.from(data.amount)
 			: undefined;
 
+	const accountIdentifier = nonNullish(identity)
+		? encodeIcrcAccount({ owner: identity.getPrincipal() })
+		: undefined;
+
+	const mapFrom = (from: string): Pick<IcTransactionUi, 'from' | 'incoming'> => ({
+		from,
+		incoming: from?.toLowerCase() !== accountIdentifier?.toLowerCase()
+	});
+
+	const type: IcTransactionType = nonNullish(fromNullable(approve))
+		? 'approve'
+		: nonNullish(fromNullable(burn))
+			? 'burn'
+			: nonNullish(fromNullable(mint))
+				? 'mint'
+				: 'transfer';
+
 	return {
 		id,
-		from:
-			'from' in data
-				? encodeIcrcAccount({
-						owner: data.from.owner,
-						subaccount: fromNullable(data.from.subaccount)
-					})
-				: undefined,
+		type,
+		...('from' in data &&
+			mapFrom(
+				encodeIcrcAccount({
+					owner: data.from.owner,
+					subaccount: fromNullable(data.from.subaccount)
+				})
+			)),
 		to:
 			'to' in data
 				? encodeIcrcAccount({
