@@ -1,7 +1,9 @@
 import type { Result_3 } from '$declarations/airdrop/airdrop.did';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
-import type { IcpWallet } from '$lib/types/icp-wallet';
+import type { PostMessageWalletData } from '$lib/types/ic.post-message';
+
+import type { IcCanisters } from '$lib/types/ic';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
@@ -11,7 +13,9 @@ export type PostMessageRequest =
 	| 'startExchangeTimer'
 	| 'stopExchangeTimer'
 	| 'stopIcpWalletTimer'
-	| 'startIcpWalletTimer';
+	| 'startIcpWalletTimer'
+	| 'stopIcrcWalletTimer'
+	| 'startIcrcWalletTimer';
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;
@@ -20,13 +24,16 @@ export interface PostMessageDataRequestExchangeTimer {
 	erc20Addresses: Erc20ContractAddress[];
 }
 
+export type PostMessageDataRequestIcrc = Pick<IcCanisters, 'indexCanisterId'>;
+
 export type PostMessageResponse =
 	| 'signOutIdleTimer'
 	| 'delegationRemainingTime'
 	| 'syncAirdropCode'
 	| 'syncExchange'
 	| 'syncExchangeError'
-	| 'syncIcpWallet';
+	| 'syncIcpWallet'
+	| 'syncIcrcWallet';
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 	authRemainingTime: number;
@@ -46,8 +53,8 @@ export interface PostMessageDataResponseExchangeError extends PostMessageDataRes
 	err: string | undefined;
 }
 
-export interface PostMessageDataResponseIcpWallet extends PostMessageDataResponse {
-	wallet: IcpWallet;
+export interface PostMessageDataResponseWallet<T> extends PostMessageDataResponse {
+	wallet: PostMessageWalletData<T>;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {

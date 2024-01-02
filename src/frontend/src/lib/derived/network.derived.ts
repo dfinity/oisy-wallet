@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID, NETWORKS } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
-import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
+import { icpAccountIdentifierStore } from '$lib/derived/ic.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { OptionAddress } from '$lib/types/address';

@@ -3,17 +3,17 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
-	import { modalIcpSend, modalSend } from '$lib/derived/modal.derived';
+	import { modalIcSend, modalSend } from '$lib/derived/modal.derived';
 	import SendModal from '$lib/components/send/SendModal.svelte';
-	import IcpSendModal from '$lib/components/send/icp/IcpSendModal.svelte';
-	import { tokenStandard } from '$lib/derived/token.derived';
+	import IcSendModal from '$lib/components/send/ic/IcSendModal.svelte';
+	import { tokenStandardIc } from '$lib/derived/token.derived';
 
 	let disabled: boolean;
 	$: disabled = $addressNotLoaded || $isBusy;
 
 	const onClick = () => {
-		if ($tokenStandard === 'icp') {
-			modalStore.openIcpSend();
+		if ($tokenStandardIc) {
+			modalStore.openIcSend();
 			return;
 		}
 
@@ -28,6 +28,6 @@
 
 {#if $modalSend}
 	<SendModal />
-{:else if $modalIcpSend}
-	<IcpSendModal />
+{:else if $modalIcSend}
+	<IcSendModal />
 {/if}

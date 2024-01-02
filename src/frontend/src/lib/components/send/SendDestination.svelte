@@ -15,6 +15,6 @@
 	required
 	bind:value={destination}
 	placeholder={isNetworkICP(network ?? ETHEREUM_NETWORK)
-		? 'Enter ICP account identifier'
+		? 'Enter account identifier'
 		: 'Enter public address (0x)'}
 />

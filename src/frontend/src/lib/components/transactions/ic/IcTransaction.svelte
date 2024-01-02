@@ -8,43 +8,49 @@
 	import { formatNanosecondsToDate, formatTokenShort } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/derived/token.derived';
-	import type { IcpTransaction } from '$lib/types/icp-wallet';
-	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
-	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
+	import { token, tokenId } from '$lib/derived/token.derived';
+	import { mapIcTransaction } from '$lib/utils/ic-transactions.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { IcTransaction, IcTransactionUi } from '$lib/types/ic';
+	import { authStore } from '$lib/stores/auth.store';
 
-	export let transaction: IcpTransaction;
+	export let transaction: IcTransaction;
 
-	let from: string | undefined;
-	let value: BigNumber | undefined;
-	let timestamp: bigint | undefined;
+	let uiTransaction: IcTransactionUi | undefined;
 
 	onMount(() => {
 		try {
-			({ from, value, timestamp } = mapIcpTransaction({ transaction }));
+			uiTransaction = mapIcTransaction({
+				transaction,
+				tokenId: $tokenId,
+				identity: $authStore.identity
+			});
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: 'Cannot map the transaction to display its information.' },
+				msg: { text: 'Cannot map the transaction for display purpose.' },
 				err
 			});
 		}
 	});
 
-	let type: 'send' | 'receive';
-	$: type =
-		from?.toLowerCase() === $icpAccountIdentifierStore?.toHex().toLowerCase() ? 'send' : 'receive';
+	let value: BigNumber | undefined;
+	let timestamp: bigint | undefined;
+	let incoming: boolean | undefined;
+
+	$: value = uiTransaction?.value;
+	$: timestamp = uiTransaction?.timestamp;
+	$: incoming = uiTransaction?.incoming;
 
 	let icon: ComponentType;
-	$: icon = type === 'send' ? IconSend : IconReceive;
+	$: icon = incoming === false ? IconSend : IconReceive;
 
 	let amount: BigNumber | undefined;
-	$: amount = type == 'send' && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
+	$: amount = !incoming && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
 </script>
 
-<button on:click={() => modalStore.openIcpTransaction(transaction)} class="block w-full">
+<button on:click={() => modalStore.openIcTransaction(uiTransaction)} class="block w-full">
 	<Card>
-		{`${type === 'send' ? 'Send' : 'Receive'}`}
+		{`${incoming === false ? 'Send' : 'Receive'}`}
 
 		<RoundedIcon slot="icon" {icon} />
 

@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { icpTransactionsStore } from '$lib/stores/icp-transactions.store';
-	import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
-	import IcpTransactionsSkeletons from '$lib/components/transactions/icp/IcpTransactionsSkeletons.svelte';
-	import IcpTransaction from '$lib/components/transactions/icp/IcpTransaction.svelte';
+	import IcTransactionsSkeletons from '$lib/components/transactions/ic/IcTransactionsSkeletons.svelte';
+	import IcTransaction from '$lib/components/transactions/ic/IcTransaction.svelte';
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { last } from '$lib/utils/array.utils';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getTransactions } from '$lib/api/icp-index.api';
 	import { authStore } from '$lib/stores/auth.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { ICP_WALLET_PAGINATION } from '$lib/constants/icp.constants';
-	import { modalIcpTransaction } from '$lib/derived/modal.derived';
+	import { modalIcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { IcpTransaction as IcpTransactionType } from '$lib/types/icp-wallet';
-	import IcpTransactionModal from '$lib/components/transactions/icp/IcpTransactionModal.svelte';
+	import IcpTransactionModal from '$lib/components/transactions/ic/IcTransactionModal.svelte';
+	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+	import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
+	import type { IcToken, IcTransaction as IcTransactionType, IcTransactionUi } from '$lib/types/ic';
+	import { token, tokenId } from '$lib/derived/token.derived';
+	import { getTransactions } from '$lib/services/ic-transactions.services';
 
-	let transactions: IcpTransactionType[];
-	$: transactions = $icpTransactionsStore[ICP_TOKEN_ID] ?? [];
+	let transactions: IcTransactionType[];
+	$: transactions = $icTransactionsStore[$tokenId] ?? [];
 
 	let disableInfiniteScroll = false;
 
@@ -39,8 +39,9 @@
 			const { transactions: nextTransactions } = await getTransactions({
 				owner: $authStore.identity.getPrincipal(),
 				identity: $authStore.identity,
-				maxResults: ICP_WALLET_PAGINATION,
-				start: lastId
+				maxResults: WALLET_PAGINATION,
+				start: lastId,
+				token: $token as IcToken
 			});
 
 			if (nextTransactions.length === 0) {
@@ -48,7 +49,7 @@
 				return;
 			}
 
-			icpTransactionsStore.append({ tokenId: ICP_TOKEN_ID, transactions: nextTransactions });
+			icTransactionsStore.append({ tokenId: $tokenId, transactions: nextTransactions });
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: 'Something went wrong while fetching the transactions.' },
@@ -59,17 +60,17 @@
 		}
 	};
 
-	let selectedTransaction: IcpTransactionType | undefined;
-	$: selectedTransaction = $modalIcpTransaction
-		? ($modalStore?.data as IcpTransactionType | undefined)
+	let selectedTransaction: IcTransactionUi | undefined;
+	$: selectedTransaction = $modalIcTransaction
+		? ($modalStore?.data as IcTransactionUi | undefined)
 		: undefined;
 </script>
 
-<IcpTransactionsSkeletons>
+<IcTransactionsSkeletons>
 	{#if transactions.length > 0}
 		<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
 			{#each transactions as transaction, index (`${transaction.id}-${index}`)}
-				<IcpTransaction {transaction} />
+				<IcTransaction {transaction} />
 			{/each}
 		</InfiniteScroll>
 	{/if}
@@ -77,8 +78,8 @@
 	{#if transactions.length === 0}
 		<p class="mt-4 text-dark opacity-50">You have no transactions.</p>
 	{/if}
-</IcpTransactionsSkeletons>
+</IcTransactionsSkeletons>
 
-{#if $modalIcpTransaction && nonNullish(selectedTransaction)}
+{#if $modalIcTransaction && nonNullish(selectedTransaction)}
 	<IcpTransactionModal transaction={selectedTransaction} />
 {/if}

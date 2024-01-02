@@ -2,7 +2,7 @@ import type { Network } from '$lib/types/network';
 
 export type TokenId = symbol;
 
-export type TokenStandard = 'ethereum' | 'erc20' | 'icp';
+export type TokenStandard = 'ethereum' | 'erc20' | 'icp' | 'icrc';
 
 export type Token = {
 	id: TokenId;
