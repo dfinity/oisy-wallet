@@ -20,8 +20,8 @@
 	import FeeContext from '$lib/components/fee/FeeContext.svelte';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type { Network } from '$lib/types/network';
 
 	/**
 	 * Fee context store
@@ -39,7 +39,7 @@
 
 	let destination = '';
 	let amount: number | undefined = undefined;
-	let network: TargetNetwork | undefined = undefined;
+	let network: Network | undefined = undefined;
 
 	/**
 	 * Send

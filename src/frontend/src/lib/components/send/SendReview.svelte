@@ -4,14 +4,14 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import { token } from '$lib/derived/token.derived';
-	import type { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
+	import type { Network } from '$lib/types/network';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
-	export let network: TargetNetwork | undefined = undefined;
+	export let network: Network | undefined = undefined;
 
 	const { store: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
