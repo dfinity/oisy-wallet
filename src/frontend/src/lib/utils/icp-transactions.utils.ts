@@ -1,4 +1,4 @@
-import type { IcpTransaction } from '$lib/types/icp-wallet';
+import type { IcpTransaction } from '$lib/types/icp';
 import { fromNullable } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 

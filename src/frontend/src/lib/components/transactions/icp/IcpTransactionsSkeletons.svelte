@@ -3,10 +3,10 @@
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { nonNullish } from '@dfinity/utils';
-	import { icpTransactionsStore } from '$lib/stores/icp-transactions.store';
+	import { walletTransactionsStore } from '$lib/stores/wallet-transactions.store';
 
 	let transactionsInitialized: boolean;
-	$: transactionsInitialized = nonNullish($icpTransactionsStore[ICP_TOKEN_ID]);
+	$: transactionsInitialized = nonNullish($walletTransactionsStore[ICP_TOKEN_ID]);
 </script>
 
 {#if !transactionsInitialized}

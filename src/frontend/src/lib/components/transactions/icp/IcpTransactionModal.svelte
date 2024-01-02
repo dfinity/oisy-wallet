@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import { Modal } from '@dfinity/gix-components';
-	import type { IcpTransaction } from '$lib/types/icp-wallet';
+	import type { IcpTransaction } from '$lib/types/icp';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { onMount } from 'svelte';

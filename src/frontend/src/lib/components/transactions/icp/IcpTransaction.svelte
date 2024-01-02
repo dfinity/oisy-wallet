@@ -9,16 +9,18 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/derived/token.derived';
-	import type { IcpTransaction } from '$lib/types/icp-wallet';
 	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
 	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { WalletTransaction } from '$lib/types/wallet';
 
-	export let transaction: IcpTransaction;
+	export let transaction: WalletTransaction;
 
 	let from: string | undefined;
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
+
+    // TODO: icrc transaction
 
 	onMount(() => {
 		try {

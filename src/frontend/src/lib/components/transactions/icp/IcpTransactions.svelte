@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { icpTransactionsStore } from '$lib/stores/icp-transactions.store';
 	import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import IcpTransactionsSkeletons from '$lib/components/transactions/icp/IcpTransactionsSkeletons.svelte';
 	import IcpTransaction from '$lib/components/transactions/icp/IcpTransaction.svelte';
@@ -11,12 +10,14 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { modalIcpTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { IcpTransaction as IcpTransactionType } from '$lib/types/icp-wallet';
+	import type { IcpTransaction as IcpTransactionType } from '$lib/types/icp';
 	import IcpTransactionModal from '$lib/components/transactions/icp/IcpTransactionModal.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+	import { walletTransactionsStore } from '$lib/stores/wallet-transactions.store';
+	import type { WalletTransaction } from '$lib/types/wallet';
 
-	let transactions: IcpTransactionType[];
-	$: transactions = $icpTransactionsStore[ICP_TOKEN_ID] ?? [];
+	let transactions: WalletTransaction[];
+	$: transactions = $walletTransactionsStore[ICP_TOKEN_ID] ?? [];
 
 	let disableInfiniteScroll = false;
 
@@ -48,7 +49,7 @@
 				return;
 			}
 
-			icpTransactionsStore.append({ tokenId: ICP_TOKEN_ID, transactions: nextTransactions });
+			walletTransactionsStore.append({ tokenId: ICP_TOKEN_ID, transactions: nextTransactions });
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: 'Something went wrong while fetching the transactions.' },

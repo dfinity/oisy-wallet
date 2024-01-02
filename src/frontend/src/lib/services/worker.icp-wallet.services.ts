@@ -1,4 +1,5 @@
-import { syncIcpWallet } from '$lib/services/icp-listener.services';
+import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { syncWallet } from '$lib/services/wallet-listener.services';
 import type { PostMessage, PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
 
@@ -20,9 +21,10 @@ export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
 
 		switch (msg) {
 			case 'syncIcpWallet':
-				syncIcpWallet(
-					data.data as PostMessageDataResponseWallet<GetAccountIdentifierTransactionsResponse>
-				);
+				syncWallet({
+					tokenId: ICP_TOKEN_ID,
+					data: data.data as PostMessageDataResponseWallet<GetAccountIdentifierTransactionsResponse>
+				});
 				return;
 		}
 	};
