@@ -7,13 +7,12 @@
 	import { getTransactions } from '$lib/api/icp-index.api';
 	import { authStore } from '$lib/stores/auth.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { modalIcpTransaction } from '$lib/derived/modal.derived';
+	import { modalIcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { IcpTransaction as IcpTransactionType } from '$lib/types/icp';
-	import IcpTransactionModal from '$lib/components/transactions/icp/IcpTransactionModal.svelte';
+	import IcpTransactionModal from '$lib/components/transactions/icp/IcTransactionModal.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
-	import type { IcTransaction as IcTransactionType } from '$lib/types/ic';
+	import type { IcTransaction as IcTransactionType, IcTransactionUi } from '$lib/types/ic';
 	import { tokenId } from '$lib/derived/token.derived';
 
 	let transactions: IcTransactionType[];
@@ -60,9 +59,9 @@
 		}
 	};
 
-	let selectedTransaction: IcpTransactionType | undefined;
-	$: selectedTransaction = $modalIcpTransaction
-		? ($modalStore?.data as IcpTransactionType | undefined)
+	let selectedTransaction: IcTransactionUi | undefined;
+	$: selectedTransaction = $modalIcTransaction
+		? ($modalStore?.data as IcTransactionUi | undefined)
 		: undefined;
 </script>
 
@@ -80,6 +79,6 @@
 	{/if}
 </IcTransactionsSkeletons>
 
-{#if $modalIcpTransaction && nonNullish(selectedTransaction)}
+{#if $modalIcTransaction && nonNullish(selectedTransaction)}
 	<IcpTransactionModal transaction={selectedTransaction} />
 {/if}

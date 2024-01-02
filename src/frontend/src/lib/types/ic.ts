@@ -11,6 +11,7 @@ export type Wallet<T> = Omit<T, 'transactions'> & {
 export type IcTransaction = IcpTransaction | IcrcTransactionWithId;
 
 export interface IcTransactionUi {
+	id: bigint;
 	from?: string;
 	to?: string;
 	value?: BigNumber;

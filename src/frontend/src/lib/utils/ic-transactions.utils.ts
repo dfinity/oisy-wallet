@@ -21,13 +21,14 @@ export const mapIcTransaction = ({
 };
 
 export const mapIcpTransaction = ({
-	transaction: { transaction }
+	transaction: { transaction, id }
 }: {
 	transaction: IcpTransaction;
 }): IcTransactionUi => {
 	const { operation, created_at_time } = transaction;
 
-	const tx: Pick<IcTransactionUi, 'timestamp'> = {
+	const tx: Pick<IcTransactionUi, 'timestamp' | 'id'> = {
+		id,
 		timestamp: fromNullable(created_at_time)?.timestamp_nanos
 	};
 
@@ -76,7 +77,7 @@ export const mapIcpTransaction = ({
 };
 
 const mapIcrcTransaction = ({
-	transaction: { transaction }
+	transaction: { transaction, id }
 }: {
 	transaction: IcrcTransactionWithId;
 }): IcTransactionUi => {
@@ -98,6 +99,7 @@ const mapIcrcTransaction = ({
 			: undefined;
 
 	return {
+		id,
 		from:
 			'from' in data
 				? encodeIcrcAccount({

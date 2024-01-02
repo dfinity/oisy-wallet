@@ -9,23 +9,21 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
-	import { mapIcTransaction } from '$lib/utils/icp-transactions.utils';
+	import { mapIcTransaction } from '$lib/utils/ic-transactions.utils';
 	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { IcTransaction } from '$lib/types/ic';
+	import type { IcTransaction, IcTransactionUi } from '$lib/types/ic';
 
 	export let transaction: IcTransaction;
 
-	let from: string | undefined;
-	let value: BigNumber | undefined;
-	let timestamp: bigint | undefined;
+	let uiTransaction: IcTransactionUi | undefined;
 
 	onMount(() => {
 		try {
-			({ from, value, timestamp } = mapIcTransaction({
+			uiTransaction = mapIcTransaction({
 				transaction,
 				tokenId: $tokenId
-			}));
+			});
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: 'Cannot map the transaction for display purpose.' },
@@ -33,6 +31,14 @@
 			});
 		}
 	});
+
+	let from: string | undefined;
+	let value: BigNumber | undefined;
+	let timestamp: bigint | undefined;
+
+	$: from = uiTransaction?.from;
+	$: value = uiTransaction?.value;
+	$: timestamp = uiTransaction?.timestamp;
 
 	let type: 'send' | 'receive';
 	$: type =
@@ -45,7 +51,7 @@
 	$: amount = type == 'send' && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
 </script>
 
-<button on:click={() => modalStore.openIcpTransaction(transaction)} class="block w-full">
+<button on:click={() => modalStore.openIcTransaction(uiTransaction)} class="block w-full">
 	<Card>
 		{`${type === 'send' ? 'Send' : 'Receive'}`}
 

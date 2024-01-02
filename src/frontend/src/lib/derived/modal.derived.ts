@@ -33,9 +33,9 @@ export const modalTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'transaction'
 );
-export const modalIcpTransaction: Readable<boolean> = derived(
+export const modalIcTransaction: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'icp-transaction'
+	($modalStore) => $modalStore?.type === 'ic-transaction'
 );
 export const modalAddToken: Readable<boolean> = derived(
 	modalStore,

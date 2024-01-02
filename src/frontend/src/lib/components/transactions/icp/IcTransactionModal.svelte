@@ -1,43 +1,28 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import { Modal } from '@dfinity/gix-components';
-	import type { IcpTransaction } from '$lib/types/icp';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { onMount } from 'svelte';
-	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatNanosecondsToDate, formatTokenDetailed } from '$lib/utils/format.utils';
 	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
+	import type { IcTransactionUi } from '$lib/types/ic';
 
-	export let transaction: IcpTransaction;
+	export let transaction: IcTransactionUi;
 
 	let id: bigint;
-
-	$: ({ id } = transaction);
-
 	let from: string | undefined;
 	let to: string | undefined;
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
 
+	$: ({ id, from, to, value, timestamp } = transaction);
+
 	let type: 'send' | 'receive';
 	$: type =
 		from?.toLowerCase() === $icpAccountIdentifierStore?.toHex().toLowerCase() ? 'send' : 'receive';
-
-	onMount(() => {
-		try {
-			({ from, to, value, timestamp } = mapIcpTransaction({ transaction }));
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: 'Cannot map the transaction to display its information.' },
-				err
-			});
-		}
-	});
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
