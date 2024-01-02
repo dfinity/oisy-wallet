@@ -1,6 +1,6 @@
 <script lang="ts">
-	import IcTransactionsSkeletons from '$lib/components/transactions/icp/IcTransactionsSkeletons.svelte';
-	import IcTransaction from '$lib/components/transactions/icp/IcTransaction.svelte';
+	import IcTransactionsSkeletons from '$lib/components/transactions/ic/IcTransactionsSkeletons.svelte';
+	import IcTransaction from '$lib/components/transactions/ic/IcTransaction.svelte';
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { last } from '$lib/utils/array.utils';
 	import { isNullish, nonNullish } from '@dfinity/utils';
@@ -9,7 +9,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { modalIcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import IcpTransactionModal from '$lib/components/transactions/icp/IcTransactionModal.svelte';
+	import IcpTransactionModal from '$lib/components/transactions/ic/IcTransactionModal.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
 	import type { IcTransaction as IcTransactionType, IcTransactionUi } from '$lib/types/ic';
