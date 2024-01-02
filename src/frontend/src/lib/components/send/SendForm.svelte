@@ -6,13 +6,13 @@
 	import { token } from '$lib/derived/token.derived';
 	import SendNetworkICP from '$lib/components/send/SendNetworkICP.svelte';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
-	import type { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { address } from '$lib/derived/address.derived';
+	import type { Network } from '$lib/types/network';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
-	export let network: TargetNetwork | undefined = undefined;
+	export let network: Network | undefined = undefined;
 
 	let invalid = true;
 	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount);

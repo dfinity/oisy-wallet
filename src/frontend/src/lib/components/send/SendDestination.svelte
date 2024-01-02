@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import { TargetNetwork } from '$lib/enums/network';
+	import type { Network } from '$lib/types/network';
+	import { isNetworkICP } from '$lib/utils/network.utils';
+	import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 
 	export let destination = '';
-	export let network: TargetNetwork | undefined = undefined;
+	export let network: Network | undefined = undefined;
 </script>
 
 <label for="destination" class="font-bold px-4.5">Destination:</label>
@@ -12,7 +14,7 @@
 	inputType="text"
 	required
 	bind:value={destination}
-	placeholder={network === TargetNetwork.ICP
+	placeholder={isNetworkICP(network ?? ETHEREUM_NETWORK)
 		? 'Enter ICP account identifier'
 		: 'Enter public address (0x)'}
 />
