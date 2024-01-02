@@ -5,8 +5,8 @@
 	import { SendIcpStep } from '$lib/enums/steps';
 	import { SEND_ICP_STEPS } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import IcSendForm from '$lib/components/send/icp/IcSendForm.svelte';
-	import IcSendReview from '$lib/components/send/icp/IcSendReview.svelte';
+	import IcSendForm from '$lib/components/send/ic/IcSendForm.svelte';
+	import IcSendReview from '$lib/components/send/ic/IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { isNullish } from '@dfinity/utils';

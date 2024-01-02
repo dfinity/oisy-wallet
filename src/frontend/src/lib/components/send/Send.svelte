@@ -5,7 +5,7 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalIcSend, modalSend } from '$lib/derived/modal.derived';
 	import SendModal from '$lib/components/send/SendModal.svelte';
-	import IcSendModal from '$lib/components/send/icp/IcSendModal.svelte';
+	import IcSendModal from '$lib/components/send/ic/IcSendModal.svelte';
 	import { tokenStandardIc } from '$lib/derived/token.derived';
 
 	let disabled: boolean;

@@ -6,7 +6,7 @@
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { icAccountIdentifierStore } from '$lib/derived/ic.derived';
-	import IcFeeDisplay from '$lib/components/send/icp/IcFeeDisplay.svelte';
+	import IcFeeDisplay from '$lib/components/send/ic/IcFeeDisplay.svelte';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 
 	export let destination = '';

@@ -5,7 +5,7 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { invalidIcpAddress } from '$lib/utils/icp-account.utils';
 	import { icAccountIdentifierStore } from '$lib/derived/ic.derived';
-	import IcFeeDisplay from '$lib/components/send/icp/IcFeeDisplay.svelte';
+	import IcFeeDisplay from '$lib/components/send/ic/IcFeeDisplay.svelte';
 	import { invalidIcrcAddress } from '$lib/utils/icrc-account.utils';
 
 	export let destination = '';

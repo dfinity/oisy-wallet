@@ -20,7 +20,6 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { LoaderStep } from '$lib/enums/steps';
 	import { loadIcrcTokens } from '$lib/services/icrc.services';
-	import { isTokenStandardIc } from '$lib/utils/token.utils';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
