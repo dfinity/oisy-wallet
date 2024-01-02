@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
-	import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { nonNullish } from '@dfinity/utils';
 	import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
+	import { tokenId } from '$lib/derived/token.derived';
 
 	let transactionsInitialized: boolean;
-	$: transactionsInitialized = nonNullish($icTransactionsStore[ICP_TOKEN_ID]);
+	$: transactionsInitialized = nonNullish($icTransactionsStore[$tokenId]);
 </script>
 
 {#if !transactionsInitialized}

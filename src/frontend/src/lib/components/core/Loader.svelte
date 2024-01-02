@@ -20,6 +20,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { LoaderStep } from '$lib/enums/steps';
 	import { loadIcrcTokens } from '$lib/services/icrc.services';
+	import { isTokenStandardIc } from '$lib/utils/token.utils';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
@@ -67,7 +68,9 @@
 
 		// In case of error we want to display the dapp anyway and not get stuck on the loader
 		await Promise.allSettled([
-			...($tokenStandard === 'icp' ? [] : [loadEthData({ loadTransactions, tokenId: $tokenId })]),
+			...(isTokenStandardIc($tokenStandard)
+				? []
+				: [loadEthData({ loadTransactions, tokenId: $tokenId })]),
 			...(AIRDROP ? [initAirdrop()] : [])
 		]);
 	};
