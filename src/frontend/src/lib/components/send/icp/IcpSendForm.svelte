@@ -6,7 +6,7 @@
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { TargetNetwork } from '$lib/enums/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import IcpFeeDisplay from '$lib/components/send/icp/IcpFeeDisplay.svelte';
 
 	export let destination = '';
@@ -24,7 +24,7 @@
 	<label for="amount" class="font-bold px-4.5">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
-	<SendSource token={$token} source={$icpAccountIdentifiedStore?.toHex() ?? ''} />
+	<SendSource token={$token} source={$icpAccountIdentifierStore?.toHex() ?? ''} />
 
 	<IcpFeeDisplay />
 
