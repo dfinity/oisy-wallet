@@ -10,7 +10,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { mapIcTransaction } from '$lib/utils/icp-transactions.utils';
-	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { IcTransaction } from '$lib/types/ic';
 
@@ -36,7 +36,7 @@
 
 	let type: 'send' | 'receive';
 	$: type =
-		from?.toLowerCase() === $icpAccountIdentifiedStore?.toHex().toLowerCase() ? 'send' : 'receive';
+		from?.toLowerCase() === $icpAccountIdentifierStore?.toHex().toLowerCase() ? 'send' : 'receive';
 
 	let icon: ComponentType;
 	$: icon = type === 'send' ? IconSend : IconReceive;

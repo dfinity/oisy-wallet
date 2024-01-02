@@ -4,7 +4,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { invalidIcpAddress } from '$lib/utils/icp-account.utils';
-	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import IcpFeeDisplay from '$lib/components/send/icp/IcpFeeDisplay.svelte';
 	import { invalidIcrcAddress } from '$lib/utils/icrc-account.utils';
 
@@ -20,7 +20,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<SendData {amount} {destination} token={$token} source={$icpAccountIdentifiedStore?.toHex() ?? ''}>
+<SendData {amount} {destination} token={$token} source={$icpAccountIdentifierStore?.toHex() ?? ''}>
 	<IcpFeeDisplay slot="fee" />
 </SendData>
 
