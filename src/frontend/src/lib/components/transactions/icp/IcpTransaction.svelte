@@ -11,7 +11,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import type { IcpTransaction } from '$lib/types/icp-wallet';
 	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
-	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import { toastsError } from '$lib/stores/toasts.store';
 
 	export let transaction: IcpTransaction;
@@ -33,7 +33,7 @@
 
 	let type: 'send' | 'receive';
 	$: type =
-		from?.toLowerCase() === $icpAccountIdentifiedStore?.toHex().toLowerCase() ? 'send' : 'receive';
+		from?.toLowerCase() === $icpAccountIdentifierStore?.toHex().toLowerCase() ? 'send' : 'receive';
 
 	let icon: ComponentType;
 	$: icon = type === 'send' ? IconSend : IconReceive;

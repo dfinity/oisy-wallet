@@ -9,7 +9,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatNanosecondsToDate, formatTokenDetailed } from '$lib/utils/format.utils';
-	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 
@@ -26,7 +26,7 @@
 
 	let type: 'send' | 'receive';
 	$: type =
-		from?.toLowerCase() === $icpAccountIdentifiedStore?.toHex().toLowerCase() ? 'send' : 'receive';
+		from?.toLowerCase() === $icpAccountIdentifierStore?.toHex().toLowerCase() ? 'send' : 'receive';
 
 	onMount(() => {
 		try {
