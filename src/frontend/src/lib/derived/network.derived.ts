@@ -5,7 +5,7 @@ import {
 	NETWORKS
 } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
-import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
+import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { OptionAddress } from '$lib/types/address';
@@ -36,7 +36,7 @@ export const networkEthereum: Readable<boolean> = derived(
 );
 
 export const networkAddress: Readable<OptionAddress | string> = derived(
-	[address, icpAccountIdentifiedStore, networkICP],
+	[address, icpAccountIdentifierStore, networkICP],
 	([$address, $icpAccountIdentifiedStore, $networkICP]) =>
 		$networkICP ? $icpAccountIdentifiedStore?.toHex() : $address
 );
