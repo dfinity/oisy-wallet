@@ -7,7 +7,7 @@ import type { IcrcAccount } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 
-export const sendIcp = async ({
+export const transfer = async ({
 	identity,
 	to,
 	amount
@@ -26,7 +26,7 @@ export const sendIcp = async ({
 	});
 };
 
-export const sendIcpIcrc1 = async ({
+export const icrc1Transfer = async ({
 	identity,
 	to,
 	amount

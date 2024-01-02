@@ -10,9 +10,11 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { isNullish } from '@dfinity/utils';
-	import { sendIcp } from '$lib/services/icp-send.services';
+	import { sendIc } from '$lib/services/icp-send.services';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { tokenDecimals } from '$lib/derived/token.derived';
+	import { token, tokenDecimals } from '$lib/derived/token.derived';
+	import { authStore } from '$lib/stores/auth.store';
+	import type { IcToken } from '$lib/types/ic';
 
 	/**
 	 * Props
@@ -47,12 +49,14 @@
 		try {
 			sendProgressStep = SendIcpStep.SEND;
 
-			await sendIcp({
+			await sendIc({
 				to: destination,
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $tokenDecimals
-				})
+				}),
+				identity: $authStore.identity,
+				token: $token as IcToken
 			});
 
 			sendProgressStep = SendIcpStep.DONE;
