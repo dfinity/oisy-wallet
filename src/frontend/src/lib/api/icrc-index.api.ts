@@ -26,6 +26,7 @@ export const getTransactions = async ({
 	const { getTransactions } = await indexCanister({ identity, indexCanisterId });
 
 	return getTransactions({
+		certified: false,
 		start,
 		max_results: maxResults,
 		account: getIcrcAccount(owner)
