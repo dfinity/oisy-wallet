@@ -15,7 +15,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { initAirdrop } from '$lib/services/airdrop.services';
 	import { loadEthData } from '$lib/services/loader.services';
-	import {tokenId, tokenStandardIc} from '$lib/derived/token.derived';
+	import { tokenId, tokenStandardIc } from '$lib/derived/token.derived';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import { loading } from '$lib/stores/loader.store';
 	import { LoaderStep } from '$lib/enums/steps';
@@ -68,9 +68,7 @@
 
 		// In case of error we want to display the dapp anyway and not get stuck on the loader
 		await Promise.allSettled([
-			...($tokenStandardIc
-				? []
-				: [loadEthData({ loadTransactions, tokenId: $tokenId })]),
+			...($tokenStandardIc ? [] : [loadEthData({ loadTransactions, tokenId: $tokenId })]),
 			...(AIRDROP ? [initAirdrop()] : [])
 		]);
 	};

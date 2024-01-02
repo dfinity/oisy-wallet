@@ -3,12 +3,6 @@ import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-i
 import type { IcrcGetTransactions, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { BigNumber } from '@ethersproject/bignumber';
 
-export type JsonTransactionsText = string;
-
-export type Wallet<T> = Omit<T, 'transactions'> & {
-	newTransactions: JsonTransactionsText;
-};
-
 export type IcTransaction = IcpTransaction | IcrcTransactionWithId;
 export type IcGetTransactions = GetAccountIdentifierTransactionsResponse | IcrcGetTransactions;
 

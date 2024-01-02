@@ -1,7 +1,7 @@
 import type { Result_3 } from '$declarations/airdrop/airdrop.did';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
-import type { Wallet } from '$lib/types/ic';
+import type { PostMessageWalletData } from '$lib/types/ic.post-message';
 import type { IcrcCanisters } from '$lib/types/icrc';
 
 export type PostMessageRequest =
@@ -53,7 +53,7 @@ export interface PostMessageDataResponseExchangeError extends PostMessageDataRes
 }
 
 export interface PostMessageDataResponseWallet<T> extends PostMessageDataResponse {
-	wallet: Wallet<T>;
+	wallet: PostMessageWalletData<T>;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {

@@ -3,9 +3,9 @@ import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { icrcTokens } from '$lib/derived/icrc.derived';
 import { routeToken } from '$lib/derived/nav.derived';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import { isTokenStandardIc } from '$lib/utils/token.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-import {isTokenStandardIc} from "$lib/utils/token.utils";
 
 export const token: Readable<Token> = derived(
 	[routeToken, erc20Tokens, icrcTokens],
@@ -31,9 +31,8 @@ export const tokenStandard: Readable<TokenStandard> = derived(
 	([{ standard }]) => standard
 );
 
-export const tokenStandardIc: Readable<boolean> = derived(
-	[token],
-	([{ standard }]) => isTokenStandardIc(standard)
+export const tokenStandardIc: Readable<boolean> = derived([token], ([{ standard }]) =>
+	isTokenStandardIc(standard)
 );
 
 export const tokenSymbol: Readable<string> = derived([token], ([$token]) => $token.symbol);
