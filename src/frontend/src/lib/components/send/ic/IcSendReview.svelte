@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
-	import { token } from '$lib/derived/token.derived';
+	import { token, tokenStandard } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { invalidIcpAddress } from '$lib/utils/icp-account.utils';
-	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
-	import IcpFeeDisplay from '$lib/components/send/icp/IcpFeeDisplay.svelte';
+	import { icAccountIdentifierStore } from '$lib/derived/ic.derived';
+	import IcFeeDisplay from '$lib/components/send/ic/IcFeeDisplay.svelte';
 	import { invalidIcrcAddress } from '$lib/utils/icrc-account.utils';
 
 	export let destination = '';
@@ -15,13 +15,18 @@
 	$: invalid =
 		isNullishOrEmpty(destination) ||
 		invalidAmount(amount) ||
-		(invalidIcpAddress(destination) && invalidIcrcAddress(destination));
+		($tokenStandard === 'icrc'
+			? invalidIcrcAddress(destination)
+			: invalidIcpAddress(destination) && invalidIcrcAddress(destination));
 
 	const dispatch = createEventDispatcher();
+
+	let source: string;
+	$: source = $icAccountIdentifierStore ?? '';
 </script>
 
-<SendData {amount} {destination} token={$token} source={$icpAccountIdentifierStore?.toHex() ?? ''}>
-	<IcpFeeDisplay slot="fee" />
+<SendData {amount} {destination} token={$token} {source}>
+	<IcFeeDisplay slot="fee" />
 </SendData>
 
 <div class="flex justify-end gap-1">

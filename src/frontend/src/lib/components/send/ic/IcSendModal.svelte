@@ -5,14 +5,16 @@
 	import { SendIcpStep } from '$lib/enums/steps';
 	import { SEND_ICP_STEPS } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import IcpSendForm from '$lib/components/send/icp/IcpSendForm.svelte';
-	import IcpSendReview from '$lib/components/send/icp/IcpSendReview.svelte';
+	import IcSendForm from '$lib/components/send/ic/IcSendForm.svelte';
+	import IcSendReview from '$lib/components/send/ic/IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { isNullish } from '@dfinity/utils';
-	import { sendIcp } from '$lib/services/icp-send.services';
+	import { sendIc } from '$lib/services/icp-send.services';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { tokenDecimals } from '$lib/derived/token.derived';
+	import { token, tokenDecimals } from '$lib/derived/token.derived';
+	import { authStore } from '$lib/stores/auth.store';
+	import type { IcToken } from '$lib/types/ic';
 
 	/**
 	 * Props
@@ -47,12 +49,14 @@
 		try {
 			sendProgressStep = SendIcpStep.SEND;
 
-			await sendIcp({
+			await sendIc({
 				to: destination,
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $tokenDecimals
-				})
+				}),
+				identity: $authStore.identity,
+				token: $token as IcToken
 			});
 
 			sendProgressStep = SendIcpStep.DONE;
@@ -100,10 +104,10 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<IcpSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} />
+		<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} />
 	{:else if currentStep?.name === 'Sending'}
 		<InProgressWizard progressStep={sendProgressStep} steps={SEND_ICP_STEPS} />
 	{:else}
-		<IcpSendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
+		<IcSendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
 	{/if}
 </WizardModal>

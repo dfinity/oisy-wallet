@@ -5,8 +5,8 @@
 	import { token } from '$lib/derived/token.derived';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
-	import IcpFeeDisplay from '$lib/components/send/icp/IcpFeeDisplay.svelte';
+	import { icAccountIdentifierStore } from '$lib/derived/ic.derived';
+	import IcFeeDisplay from '$lib/components/send/ic/IcFeeDisplay.svelte';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 
 	export let destination = '';
@@ -24,9 +24,9 @@
 	<label for="amount" class="font-bold px-4.5">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
-	<SendSource token={$token} source={$icpAccountIdentifierStore?.toHex() ?? ''} />
+	<SendSource token={$token} source={$icAccountIdentifierStore ?? ''} />
 
-	<IcpFeeDisplay />
+	<IcFeeDisplay />
 
 	<div class="flex justify-end gap-1">
 		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>

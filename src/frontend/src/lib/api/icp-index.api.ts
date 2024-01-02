@@ -1,5 +1,5 @@
-import { ICP_INDEX_CANISTER_ID } from '$lib/constants/app.constants';
-import { ICP_WALLET_PAGINATION } from '$lib/constants/icp.constants';
+import { WALLET_PAGINATION } from '$lib/constants/app.constants';
+import { ICP_INDEX_CANISTER_ID } from '$lib/constants/icp.constants';
 import { getAgent } from '$lib/ic/agent.ic';
 import type { OptionIdentity } from '$lib/types/identity';
 import { getAccountIdentifier } from '$lib/utils/icp-account.utils';
@@ -11,7 +11,7 @@ export const getTransactions = async ({
 	owner,
 	identity,
 	start,
-	maxResults = ICP_WALLET_PAGINATION
+	maxResults = WALLET_PAGINATION
 }: {
 	owner: Principal;
 	identity: OptionIdentity;

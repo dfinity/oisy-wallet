@@ -1,5 +1,8 @@
-import { decodeIcrcAccount } from '@dfinity/ledger-icrc';
+import { decodeIcrcAccount, type IcrcAccount } from '@dfinity/ledger-icrc';
+import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
+
+export const getIcrcAccount = (principal: Principal): IcrcAccount => ({ owner: principal });
 
 export const invalidIcrcAddress = (address: string | undefined): boolean => {
 	if (isNullish(address)) {
