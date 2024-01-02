@@ -5,7 +5,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { icpAccountIdentifierStore } from '$lib/derived/icp.derived';
+	import { icAccountIdentifierStore } from '$lib/derived/ic.derived';
 	import IcFeeDisplay from '$lib/components/send/icp/IcFeeDisplay.svelte';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 
@@ -24,7 +24,7 @@
 	<label for="amount" class="font-bold px-4.5">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
 
-	<SendSource token={$token} source={$icpAccountIdentifierStore?.toHex() ?? ''} />
+	<SendSource token={$token} source={$icAccountIdentifierStore ?? ''} />
 
 	<IcFeeDisplay />
 

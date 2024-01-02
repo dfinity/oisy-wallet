@@ -5,7 +5,7 @@
 	import { SendIcpStep } from '$lib/enums/steps';
 	import { SEND_ICP_STEPS } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import IcpSendForm from '$lib/components/send/icp/IcpSendForm.svelte';
+	import IcSendForm from '$lib/components/send/icp/IcSendForm.svelte';
 	import IcSendReview from '$lib/components/send/icp/IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -104,6 +104,6 @@
 	{:else if currentStep?.name === 'Sending'}
 		<InProgressWizard progressStep={sendProgressStep} steps={SEND_ICP_STEPS} />
 	{:else}
-		<IcpSendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
+		<IcSendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount />
 	{/if}
 </WizardModal>
