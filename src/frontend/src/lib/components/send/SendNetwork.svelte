@@ -22,12 +22,12 @@
 		}
 
 		if (isAddress(destination)) {
-			network = ETHEREUM_NETWORK;
+			networkName = ETHEREUM_NETWORK.name;
 			return;
 		}
 
 		if (await isIcpAccountIdentifier(destination)) {
-			network = ICP_NETWORK;
+			networkName = ICP_NETWORK.name;
 		}
 	});
 
