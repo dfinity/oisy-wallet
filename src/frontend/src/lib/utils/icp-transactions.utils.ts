@@ -1,22 +1,33 @@
+import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
+import type { IcTransaction, IcTransactionUi } from '$lib/types/ic';
 import type { IcpTransaction } from '$lib/types/icp';
-import { fromNullable } from '@dfinity/utils';
+import type { TokenId } from '$lib/types/token';
+import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
-export type IcpTransactionUi = {
-	from?: string;
-	to?: string;
-	value?: BigNumber;
-	timestamp?: bigint;
+export const mapIcTransaction = ({
+	transaction,
+	tokenId
+}: {
+	transaction: IcTransaction;
+	tokenId: TokenId;
+}): IcTransactionUi => {
+	if (tokenId === ICP_TOKEN_ID) {
+		return mapIcpTransaction({ transaction: transaction as IcpTransaction });
+	}
+
+	return mapIcrcTransaction({ transaction: transaction as IcrcTransactionWithId });
 };
 
 export const mapIcpTransaction = ({
 	transaction: { transaction }
 }: {
 	transaction: IcpTransaction;
-}): IcpTransactionUi => {
+}): IcTransactionUi => {
 	const { operation, created_at_time } = transaction;
 
-	const tx: Pick<IcpTransactionUi, 'timestamp'> = {
+	const tx: Pick<IcTransactionUi, 'timestamp'> = {
 		timestamp: fromNullable(created_at_time)?.timestamp_nanos
 	};
 
@@ -61,5 +72,47 @@ export const mapIcpTransaction = ({
 		};
 	}
 
-	throw new Error('Unsupported type of transaction');
+	throw new Error(`Unknown transaction type ${JSON.stringify(transaction)}`);
+};
+
+const mapIcrcTransaction = ({
+	transaction: { transaction }
+}: {
+	transaction: IcrcTransactionWithId;
+}): IcTransactionUi => {
+	const { timestamp, approve, burn, mint, transfer } = transaction;
+
+	const data =
+		fromNullable(approve) ?? fromNullable(burn) ?? fromNullable(mint) ?? fromNullable(transfer);
+
+	if (isNullish(data)) {
+		throw new Error(`Unknown transaction type ${JSON.stringify(transaction)}`);
+	}
+
+	const isApprove = nonNullish(fromNullable(approve));
+
+	const value = isApprove
+		? BigNumber.from(0n)
+		: nonNullish(data?.amount)
+			? BigNumber.from(data.amount)
+			: undefined;
+
+	return {
+		from:
+			'from' in data
+				? encodeIcrcAccount({
+						owner: data.from.owner,
+						subaccount: fromNullable(data.from.subaccount)
+					})
+				: undefined,
+		to:
+			'to' in data
+				? encodeIcrcAccount({
+						owner: data.to.owner,
+						subaccount: fromNullable(data.to.subaccount)
+					})
+				: undefined,
+		...(nonNullish(value) && { value }),
+		timestamp
+	};
 };

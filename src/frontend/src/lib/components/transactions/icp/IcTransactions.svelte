@@ -1,6 +1,6 @@
 <script lang="ts">
 	import IcTransactionsSkeletons from '$lib/components/transactions/icp/IcTransactionsSkeletons.svelte';
-	import IcpTransaction from '$lib/components/transactions/icp/IcpTransaction.svelte';
+	import IcTransaction from '$lib/components/transactions/icp/IcTransaction.svelte';
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { last } from '$lib/utils/array.utils';
 	import { isNullish, nonNullish } from '@dfinity/utils';
@@ -13,10 +13,10 @@
 	import IcpTransactionModal from '$lib/components/transactions/icp/IcpTransactionModal.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
-	import type { IcTransaction } from '$lib/types/ic';
+	import type { IcTransaction as IcTransactionType } from '$lib/types/ic';
 	import { tokenId } from '$lib/derived/token.derived';
 
-	let transactions: IcTransaction[];
+	let transactions: IcTransactionType[];
 	$: transactions = $icTransactionsStore[$tokenId] ?? [];
 
 	let disableInfiniteScroll = false;
@@ -70,7 +70,7 @@
 	{#if transactions.length > 0}
 		<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
 			{#each transactions as transaction, index (`${transaction.id}-${index}`)}
-				<IcpTransaction {transaction} />
+				<IcTransaction {transaction} />
 			{/each}
 		</InfiniteScroll>
 	{/if}

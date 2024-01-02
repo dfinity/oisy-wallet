@@ -8,8 +8,8 @@
 	import { formatNanosecondsToDate, formatTokenShort } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/derived/token.derived';
-	import { mapIcpTransaction } from '$lib/utils/icp-transactions.utils';
+	import { token, tokenId } from '$lib/derived/token.derived';
+	import { mapIcTransaction } from '$lib/utils/icp-transactions.utils';
 	import { icpAccountIdentifiedStore } from '$lib/derived/icp.derived';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { IcTransaction } from '$lib/types/ic';
@@ -20,14 +20,15 @@
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
 
-	// TODO: icrc transaction
-
 	onMount(() => {
 		try {
-			({ from, value, timestamp } = mapIcpTransaction({ transaction }));
+			({ from, value, timestamp } = mapIcTransaction({
+				transaction,
+				tokenId: $tokenId
+			}));
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: 'Cannot map the transaction to display its information.' },
+				msg: { text: 'Cannot map the transaction for display purpose.' },
 				err
 			});
 		}
