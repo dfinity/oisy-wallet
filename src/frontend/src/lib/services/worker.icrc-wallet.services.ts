@@ -1,4 +1,4 @@
-import { syncWallet } from '$lib/services/wallet-listener.services';
+import { syncWallet } from '$lib/services/ic-listener.services';
 import type { IcrcToken } from '$lib/types/icrc';
 import type { PostMessage, PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { IcrcGetTransactions } from '@dfinity/ledger-icrc';

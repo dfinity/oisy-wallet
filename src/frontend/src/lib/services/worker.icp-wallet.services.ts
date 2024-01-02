@@ -1,5 +1,5 @@
 import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { syncWallet } from '$lib/services/wallet-listener.services';
+import { syncWallet } from '$lib/services/ic-listener.services';
 import type { PostMessage, PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
 

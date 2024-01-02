@@ -1,15 +1,12 @@
 import { balancesStore } from '$lib/stores/balances.store';
 import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
+import type { IcGetTransactions } from '$lib/types/ic';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
-import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
-import type { IcrcGetTransactions } from '@dfinity/ledger-icrc';
 import { jsonReviver } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
-export const syncWallet = <
-	T extends GetAccountIdentifierTransactionsResponse | IcrcGetTransactions
->({
+export const syncWallet = <T extends IcGetTransactions>({
 	data,
 	tokenId
 }: {

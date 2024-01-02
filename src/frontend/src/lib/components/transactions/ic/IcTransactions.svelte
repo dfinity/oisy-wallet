@@ -4,7 +4,6 @@
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { last } from '$lib/utils/array.utils';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getTransactions } from '$lib/api/icp-index.api';
 	import { authStore } from '$lib/stores/auth.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { modalIcTransaction } from '$lib/derived/modal.derived';
@@ -13,7 +12,10 @@
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { icTransactionsStore } from '$lib/stores/ic-transactions.store';
 	import type { IcTransaction as IcTransactionType, IcTransactionUi } from '$lib/types/ic';
-	import { tokenId } from '$lib/derived/token.derived';
+	import { token, tokenId, tokenStandard } from '$lib/derived/token.derived';
+	import { getTransactions } from '$lib/services/ic-transactions.services';
+	import type { IcrcToken } from '$lib/types/icrc';
+	import { ICP_INDEX_CANISTER_ID } from '$lib/constants/icp.constants';
 
 	let transactions: IcTransactionType[];
 	$: transactions = $icTransactionsStore[$tokenId] ?? [];
@@ -40,7 +42,9 @@
 				owner: $authStore.identity.getPrincipal(),
 				identity: $authStore.identity,
 				maxResults: WALLET_PAGINATION,
-				start: lastId
+				start: lastId,
+				standard: $tokenStandard,
+				indexCanisterId: ($token as IcrcToken).indexCanisterId ?? ICP_INDEX_CANISTER_ID
 			});
 
 			if (nextTransactions.length === 0) {
