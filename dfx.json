@@ -124,6 +124,48 @@
 			"declarations": {
 				"node_compatibility": true
 			}
+		},
+		"cketh_minter": {
+			"type": "custom",
+			"candid": "target/ic/cketh_minter.did",
+			"wasm": "target/ic/cketh_minter.wasm",
+			"remote": {
+				"id": {
+					"ic": "sv3dd-oaaaa-aaaar-qacoa-cai",
+					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai"
+				}
+			},
+			"declarations": {
+				"node_compatibility": true
+			}
+		},
+		"cketh_ledger": {
+			"type": "custom",
+			"candid": "target/ic/cketh_ledger.did",
+			"wasm": "target/ic/cketh_ledger.wasm",
+			"remote": {
+				"id": {
+					"ic": "ss2fx-dyaaa-aaaar-qacoq-cai",
+					"staging": "apia6-jaaaa-aaaar-qabma-cai"
+				}
+			},
+			"declarations": {
+				"node_compatibility": true
+			}
+		},
+		"cketh_index": {
+			"type": "custom",
+			"candid": "target/ic/cketh_index.did",
+			"wasm": "target/ic/cketh_index.wasm",
+			"remote": {
+				"id": {
+					"ic": "s3zol-vqaaa-aaaar-qacpa-cai",
+					"staging": "sh5u2-cqaaa-aaaar-qacna-cai"
+				}
+			},
+			"declarations": {
+				"node_compatibility": true
+			}
 		}
 	},
 	"defaults": {
