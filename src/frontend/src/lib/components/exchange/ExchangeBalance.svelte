@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { formatUSD } from '$lib/utils/format.utils';
-	import { exchangeInitialized } from '$lib/derived/exchange.derived';
+	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { exchangeStore } from '$lib/stores/exchange.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { networkTokens } from '$lib/derived/network.derived';
 
@@ -13,7 +12,7 @@
 			usdValue({
 				token,
 				balances: $balancesStore,
-				exchanges: $exchangeStore
+				exchanges: $exchanges
 			}),
 		0
 	);

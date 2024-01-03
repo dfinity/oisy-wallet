@@ -1,8 +1,8 @@
 // https://www.coingecko.com/api/documentation
 
-// For ethereum (non ERC20), we are only interested in ETH <> USD for now, therefore not an exhaustive list.
+// We are only interested in specific coin <> USD for now, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/coins/list
-export type CoingeckoCoinsId = 'ethereum' | 'internet-computer';
+export type CoingeckoCoinsId = 'ethereum' | 'bitcoin' | 'internet-computer';
 
 // We are interested in the ERC20 <> USD on Ethereum only, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/asset_platforms

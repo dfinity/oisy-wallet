@@ -1,16 +1,19 @@
-import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import { nonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
 export const exchangeRateETHToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
 		ids: 'ethereum',
+		vs_currencies: 'usd'
+	});
+
+export const exchangeRateBTCToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'bitcoin',
 		vs_currencies: 'usd'
 	});
 
@@ -29,29 +32,10 @@ export const exchangeRateERC20ToUsd = async (
 		contract_addresses: contractAddresses.map(({ address }) => address)
 	});
 
-export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
-	const tokens = get(erc20Tokens);
-
+export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
 	exchangeStore.set([
-		{
-			tokenId: ETHEREUM_TOKEN_ID,
-			currentPrice: data?.currentEthPrice?.ethereum
-		},
-		{
-			tokenId: ICP_TOKEN_ID,
-			currentPrice: data?.currentIcpPrice?.['internet-computer']
-		},
-		...Object.entries(data?.currentErc20Prices ?? {})
-			.map(([key, currentPrice]) => {
-				const token = tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase());
-				return nonNullish(token) ? { tokenId: token.id, currentPrice } : undefined;
-			})
-			.filter(nonNullish),
-		...tokens
-			.filter(({ exchange }) => exchange === 'icp')
-			.map(({ id }) => ({
-				tokenId: id,
-				currentPrice: data?.currentIcpPrice['internet-computer']
-			}))
+		...(nonNullish(data) ? [data.currentEthPrice] : []),
+		...(nonNullish(data) ? [data.currentBtcPrice] : []),
+		...(nonNullish(data) ? [data.currentIcpPrice] : []),
+		...(nonNullish(data) ? [data.currentErc20Prices] : [])
 	]);
-};

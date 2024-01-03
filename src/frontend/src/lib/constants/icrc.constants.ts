@@ -1,4 +1,4 @@
-import type { IcCanisters } from '$lib/types/ic';
+import type { IcInterface } from '$lib/types/ic';
 
 export const CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_CKBTC_LEDGER_CANISTER_ID as string | null | undefined) ??
@@ -8,9 +8,10 @@ export const CKBTC_INDEX_CANISTER_ID =
 	(import.meta.env.VITE_CKBTC_INDEX_CANISTER_ID as string | null | undefined) ??
 	'n5wcd-faaaa-aaaar-qaaea-cai';
 
-export const ICRC_CANISTERS: IcCanisters[] = [
+export const ICRC_CANISTERS: IcInterface[] = [
 	{
 		ledgerCanisterId: CKBTC_LEDGER_CANISTER_ID,
-		indexCanisterId: CKBTC_INDEX_CANISTER_ID
+		indexCanisterId: CKBTC_INDEX_CANISTER_ID,
+		exchangeCoinId: 'bitcoin'
 	}
 ];

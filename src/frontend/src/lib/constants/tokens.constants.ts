@@ -37,6 +37,7 @@ export const ICP_TOKEN: Required<IcToken> = {
 	id: ICP_TOKEN_ID,
 	network: ICP_NETWORK,
 	standard: 'icp',
+	exchangeCoinId: 'internet-computer',
 	name: 'ICP',
 	symbol: ICP_SYMBOL,
 	decimals: 8,
