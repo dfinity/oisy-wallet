@@ -4,6 +4,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { token } from '$lib/derived/token.derived';
 	import type { IcToken } from '$lib/types/ic';
+	import { ICP_FEE_DECIMALS } from '$lib/constants/icp.constants';
 
 	// We know here the token is of standard IC
 	let fee: bigint;
@@ -18,7 +19,8 @@
 
 	{formatTokenShort({
 		value: BigNumber.from(fee),
-		unitName: decimals
+		unitName: decimals,
+		displayDecimals: ICP_FEE_DECIMALS
 	})}
 	{symbol}
 </Value>
