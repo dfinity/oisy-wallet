@@ -1,3 +1,4 @@
+import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { icrcTokens } from '$lib/derived/icrc.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
@@ -17,8 +18,8 @@ export const exchanges: Readable<ExchangesData> = derived(
 		const icpPrice = $exchangeStore?.['internet-computer'];
 
 		return {
-			ETHEREUM_TOKEN_ID: ethPrice,
-			ICP_TOKEN_ID: icpPrice,
+			[ETHEREUM_TOKEN_ID]: ethPrice,
+			[ICP_TOKEN_ID]: icpPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const token = $erc20Tokens.find(
 					({ address }) => address.toLowerCase() === key.toLowerCase()
@@ -26,7 +27,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 
 				return {
 					...acc,
-					...(nonNullish(token) && { tokenId: token.id, currentPrice })
+					...(nonNullish(token) && { [token.id]: currentPrice })
 				};
 			}, {}),
 			...$erc20Tokens
