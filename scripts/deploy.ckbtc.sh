@@ -37,7 +37,7 @@ PRINCIPAL="$(dfx identity get-principal)"
 dfx deploy ckbtc_ledger --network "$DFX_NETWORK" --argument "(variant {
   Init = record {
      token_symbol = \"ckBTC\";
-     token_name = \"Token ckBTC\";
+     token_name = \"Chain key local Bitcoin\";
      minting_account = record { owner = principal \"$MINTERID\" };
      transfer_fee = 11_500;
      metadata = vec {};
@@ -46,8 +46,11 @@ dfx deploy ckbtc_ledger --network "$DFX_NETWORK" --argument "(variant {
          num_blocks_to_archive = 10_000;
          trigger_threshold = 20_000;
          controller_id = principal \"$PRINCIPAL\";
-         cycles_for_archive_creation = opt 4_000_000_000_000;
+         cycles_for_archive_creation = opt 1_000_000_000_000;
+         max_message_size_bytes = null;
+         node_max_memory_size_bytes = opt 3_221_225_472;
      };
+     feature_flags  = opt record { icrc2 = true };
  }
 })"
 
@@ -83,5 +86,4 @@ dfx deploy ckbtc_index --network "$DFX_NETWORK" --argument "(opt variant {
 # dfx canister call ckbtc_minter retrieve_btc '(record {fee = null; address="bcrt1qu9za0uzzd3kjjecgv7waqq0ynn8dl8l538q0xl"; amount=10000})'
 
 echo "Step 6: transfer ckBTC to principal..."
-# record { owner= principal “”;}
 dfx canister call ckbtc_ledger --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"73avq-yvrvj-kuzxq-kttlj-nkaz4-tecy6-biuud-3ymeg-guvci-naire-uqe\";}; amount=100000000; fee=null; memo=null; created_at_time=null;})"
