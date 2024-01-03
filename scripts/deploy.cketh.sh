@@ -12,6 +12,9 @@ LEDGERID="$(dfx canister id cketh_ledger --network "$DFX_NETWORK")"
 echo "$LEDGERID"
 
 echo "Step 2: deploy minter canister..."
+
+# TODO: those parameters - the contract address - is not yet correct. It's unclear where the ckETH Minter should point when deployed locally.
+
 dfx deploy cketh_minter --network "$DFX_NETWORK" --argument "(variant {
   InitArg = record {
        ethereum_network = variant {Sepolia};
