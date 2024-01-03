@@ -1,13 +1,9 @@
-import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { erc20Tokens } from '$lib/derived/erc20.derived';
-import { icrcTokens } from '$lib/derived/icrc.derived';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import { nonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
 export const exchangeRateETHToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
 	simplePrice({
@@ -36,47 +32,10 @@ export const exchangeRateERC20ToUsd = async (
 		contract_addresses: contractAddresses.map(({ address }) => address)
 	});
 
-export const syncExchange = (data: PostMessageDataResponseExchange | undefined) => {
-	const tokensErc20 = get(erc20Tokens);
-	const tokensIcrc = get(icrcTokens);
-
-	const ethPrice = data?.currentEthPrice?.ethereum;
-	const btcPrice = data?.currentBtcPrice?.bitcoin;
-	const icpPrice = data?.currentIcpPrice?.['internet-computer'];
-
+export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
 	exchangeStore.set([
-		{
-			tokenId: ETHEREUM_TOKEN_ID,
-			currentPrice: ethPrice
-		},
-		{
-			tokenId: ICP_TOKEN_ID,
-			currentPrice: icpPrice
-		},
-		...Object.entries(data?.currentErc20Prices ?? {})
-			.map(([key, currentPrice]) => {
-				const token = tokensErc20.find(
-					({ address }) => address.toLowerCase() === key.toLowerCase()
-				);
-				return nonNullish(token) ? { tokenId: token.id, currentPrice } : undefined;
-			})
-			.filter(nonNullish),
-		...tokensErc20
-			.filter(({ exchange }) => exchange === 'icp')
-			.map(({ id }) => ({
-				tokenId: id,
-				currentPrice: icpPrice
-			})),
-		...tokensIcrc.map(({ id: tokenId, exchangeCoinId }) => ({
-			tokenId,
-			currentPrice:
-				exchangeCoinId === 'ethereum'
-					? ethPrice
-					: exchangeCoinId === 'bitcoin'
-						? btcPrice
-						: exchangeCoinId === 'internet-computer'
-							? icpPrice
-							: undefined
-		}))
+		...(nonNullish(data) ? [data.currentEthPrice] : []),
+		...(nonNullish(data) ? [data.currentBtcPrice] : []),
+		...(nonNullish(data) ? [data.currentIcpPrice] : []),
+		...(nonNullish(data) ? [data.currentErc20Prices] : [])
 	]);
-};
