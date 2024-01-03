@@ -2,8 +2,7 @@
 	import type { Token } from '$lib/types/token';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { exchangeStore } from '$lib/stores/exchange.store';
-	import { exchangeInitialized } from '$lib/derived/exchange.derived';
+	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { nonNullish } from '@dfinity/utils';
 
@@ -13,11 +12,11 @@
 	$: usd = usdValue({
 		token,
 		balances: $balancesStore,
-		exchanges: $exchangeStore
+		exchanges: $exchanges
 	});
 
 	let hasExchangeValue: boolean;
-	$: hasExchangeValue = nonNullish($exchangeStore?.[token.id]);
+	$: hasExchangeValue = nonNullish($exchanges?.[token.id]);
 </script>
 
 <output class="break-all">

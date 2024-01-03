@@ -45,6 +45,7 @@ export interface PostMessageDataResponseAirdropCode extends PostMessageDataRespo
 
 export interface PostMessageDataResponseExchange extends PostMessageDataResponse {
 	currentEthPrice: CoingeckoSimplePriceResponse;
+	currentBtcPrice: CoingeckoSimplePriceResponse;
 	currentErc20Prices: CoingeckoSimplePriceResponse;
 	currentIcpPrice: CoingeckoSimplePriceResponse;
 }

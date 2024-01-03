@@ -1,5 +1,6 @@
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import {
+	exchangeRateBTCToUsd,
 	exchangeRateERC20ToUsd,
 	exchangeRateETHToUsd,
 	exchangeRateICPToUsd
@@ -58,16 +59,19 @@ const syncExchange = async (contractAddresses: Erc20ContractAddress[]) => {
 	syncInProgress = true;
 
 	try {
-		const [currentEthPrice, currentErc20Prices, currentIcpPrice] = await Promise.all([
-			exchangeRateETHToUsd(),
-			exchangeRateERC20ToUsd(contractAddresses),
-			exchangeRateICPToUsd()
-		]);
+		const [currentEthPrice, currentBtcPrice, currentErc20Prices, currentIcpPrice] =
+			await Promise.all([
+				exchangeRateETHToUsd(),
+				exchangeRateBTCToUsd(),
+				exchangeRateERC20ToUsd(contractAddresses),
+				exchangeRateICPToUsd()
+			]);
 
 		postMessage({
 			msg: 'syncExchange',
 			data: {
 				currentEthPrice,
+				currentBtcPrice,
 				currentErc20Prices,
 				currentIcpPrice
 			}

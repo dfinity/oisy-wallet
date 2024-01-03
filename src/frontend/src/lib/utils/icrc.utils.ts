@@ -1,10 +1,10 @@
 import { ICP_NETWORK } from '$lib/constants/networks.constants';
-import type { IcCanisters, IcFee, IcToken } from '$lib/types/ic';
+import type { IcFee, IcInterface, IcToken } from '$lib/types/ic';
 import type { TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
 import { isNullish } from '@dfinity/utils';
 
-export type IcrcLoadData = IcCanisters & { metadata: IcrcTokenMetadataResponse };
+export type IcrcLoadData = IcInterface & { metadata: IcrcTokenMetadataResponse };
 
 export const mapIcrcToken = ({ metadata, ...rest }: IcrcLoadData): IcToken | undefined => {
 	const token = mapOptionalToken(metadata);

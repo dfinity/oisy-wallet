@@ -1,12 +1,11 @@
-import type { CoingeckoSimplePrice } from '$lib/types/coingecko';
-import type { TokenId } from '$lib/types/token';
+import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type ExchangeData = Record<TokenId, CoingeckoSimplePrice | undefined> | undefined | null;
+export type ExchangeData = CoingeckoSimplePriceResponse | undefined | null;
 
 export interface ExchangeStore extends Readable<ExchangeData> {
-	set: (params: { tokenId: TokenId; currentPrice: CoingeckoSimplePrice | undefined }[]) => void;
+	set: (params: CoingeckoSimplePriceResponse[]) => void;
 	reset: () => void;
 }
 
@@ -14,18 +13,13 @@ const initExchangeStore = (): ExchangeStore => {
 	const { subscribe, set, update } = writable<ExchangeData>(undefined);
 
 	return {
-		set: (
-			tokensPrice: {
-				tokenId: TokenId;
-				currentPrice: CoingeckoSimplePrice | undefined;
-			}[]
-		) =>
+		set: (tokensPrice: CoingeckoSimplePriceResponse[]) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				...tokensPrice.reduce(
-					(acc, { tokenId, currentPrice }) => ({
+					(acc, price) => ({
 						...acc,
-						[tokenId]: currentPrice
+						...price
 					}),
 					{}
 				)
