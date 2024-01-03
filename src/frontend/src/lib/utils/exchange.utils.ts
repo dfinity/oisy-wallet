@@ -1,5 +1,5 @@
 import type { BalancesData } from '$lib/stores/balances.store';
-import type { ExchangeData } from '$lib/stores/exchange.store';
+import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
 import { formatTokenDetailed } from '$lib/utils/format.utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -11,7 +11,7 @@ export const usdValue = ({
 }: {
 	token: Token;
 	balances: BalancesData;
-	exchanges: ExchangeData;
+	exchanges: ExchangesData;
 }): number =>
 	Number(formatTokenDetailed({ value: balances?.[id] ?? BigNumber.from(0), unitName: decimals })) *
 	(exchanges?.[id]?.usd ?? 0);

@@ -1,8 +1,7 @@
 import { erc20Tokens } from '$lib/derived/erc20.derived';
 import { icrcTokens } from '$lib/derived/icrc.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
-import type { CoingeckoSimplePrice } from '$lib/types/coingecko';
-import type { TokenId } from '$lib/types/token';
+import type { ExchangesData } from '$lib/types/exchange';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -10,7 +9,7 @@ export const exchangeInitialized: Readable<boolean> = derived([exchangeStore], (
 	nonNullish($exchangeStore)
 );
 
-export const exchanges: Readable<Record<TokenId, CoingeckoSimplePrice | undefined>> = derived(
+export const exchanges: Readable<ExchangesData> = derived(
 	[exchangeStore, erc20Tokens, icrcTokens],
 	([$exchangeStore, $erc20Tokens, $icrcTokens]) => {
 		const ethPrice = $exchangeStore?.ethereum;
