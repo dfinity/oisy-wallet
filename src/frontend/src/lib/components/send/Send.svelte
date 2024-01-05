@@ -6,13 +6,13 @@
 	import { modalIcSend, modalSend } from '$lib/derived/modal.derived';
 	import SendModal from '$lib/components/send/SendModal.svelte';
 	import IcSendModal from '$lib/components/send/ic/IcSendModal.svelte';
-	import { tokenStandardIc } from '$lib/derived/token.derived';
+	import { networkICP } from '$lib/derived/network.derived';
 
 	let disabled: boolean;
 	$: disabled = $addressNotLoaded || $isBusy;
 
 	const onClick = () => {
-		if ($tokenStandardIc) {
+		if ($networkICP) {
 			modalStore.openIcSend();
 			return;
 		}
