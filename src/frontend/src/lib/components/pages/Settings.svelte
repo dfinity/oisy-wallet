@@ -11,6 +11,7 @@
 	import AdminGuard from '$lib/components/admin/AdminGuard.svelte';
 	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
+	import { networkEthereum } from '$lib/derived/network.derived';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -54,9 +55,11 @@
 
 <TokensMetadata />
 
-<div class="mt-6 px-4" style="border-left: 1px solid transparent">
-	<AddToken iconSize="small" />
-</div>
+{#if $networkEthereum}
+	<div class="mt-6 px-4" style="border-left: 1px solid transparent">
+		<AddToken iconSize="small" />
+	</div>
+{/if}
 
 {#if AIRDROP && !AIRDROP_COMPLETED}
 	<AdminGuard>
