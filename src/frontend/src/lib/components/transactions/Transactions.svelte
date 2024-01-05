@@ -2,19 +2,28 @@
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { sortedTransactions } from '$lib/derived/transactions.derived';
 	import { loadTransactions } from '$lib/services/transactions.services';
-	import type { TokenId } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import { onMount } from 'svelte';
-	import { tokenId } from '$lib/derived/token.derived';
+	import { token } from '$lib/derived/token.derived';
 	import { modalTransaction } from '$lib/derived/modal.derived';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 
-	const load = async (tokenId: TokenId) => await loadTransactions(tokenId);
+	const load = async ({ network: { id: networkId }, id: tokenId }: Token) => {
+		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
+		// This prevents the glitch load of ETH transaction with a token ID for ICP.
+		if (!isNetworkIdEthereum(networkId)) {
+			return;
+		}
 
-	onMount(async () => await load($tokenId));
+		await loadTransactions(tokenId);
+	};
+
+	onMount(async () => await load($token));
 
 	let selectedTransaction: TransactionType | undefined;
 	$: selectedTransaction = $modalTransaction
