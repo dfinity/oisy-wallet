@@ -4,7 +4,7 @@ import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
-import { SendStep } from '$lib/enums/steps';
+import { SendIcStep } from '$lib/enums/steps';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
 
@@ -19,7 +19,7 @@ export const convertCkBTCToBtc = async ({
 }): Promise<void> => {
 	assertNonNullish(minterCanisterId, 'A configured minter is required to convert ckBTC to BTC.');
 
-	progress(SendStep.APPROVE);
+	progress(SendIcStep.APPROVE);
 
 	const amount = amountBigNumber.toBigInt();
 
@@ -33,7 +33,7 @@ export const convertCkBTCToBtc = async ({
 		}
 	});
 
-	progress(SendStep.SEND);
+	progress(SendIcStep.SEND);
 
 	await retrieveBtc({
 		identity,
