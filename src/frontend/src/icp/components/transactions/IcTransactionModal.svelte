@@ -7,7 +7,7 @@
 	import { formatNanosecondsToDate, formatTokenDetailed } from '$lib/utils/format.utils';
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
-	import type { IcTransactionType, IcTransactionUi } from '../../types/ic';
+	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 
 	export let transaction: IcTransactionUi;
 

@@ -1,3 +1,6 @@
+import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index.api';
+import { type TimerWorkerUtilsJobData } from '$icp/worker-utils/timer.worker-utils';
+import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
 import type { PostMessage, PostMessageDataRequestIcrc } from '$lib/types/post-message';
 import type {
 	IcrcGetTransactions,
@@ -5,9 +8,6 @@ import type {
 	IcrcTransactionWithId
 } from '@dfinity/ledger-icrc';
 import { assertNonNullish } from '@dfinity/utils';
-import { getTransactions as getTransactionsApi } from '../api/icrc-index.api';
-import { type TimerWorkerUtilsJobData } from '../worker-utils/timer.worker-utils';
-import { WalletWorkerUtils } from '../worker-utils/wallet.worker-utils';
 
 const getTransactions = ({
 	identity,

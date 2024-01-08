@@ -5,7 +5,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { icAccountIdentifierStore } from '../../derived/ic.derived';
+	import { icAccountIdentifierStore } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 

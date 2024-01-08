@@ -1,4 +1,4 @@
-import type { IcInterface } from '../types/ic';
+import type { IcInterface } from '$icp/types/ic';
 
 export const CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_CKBTC_LEDGER_CANISTER_ID as string | null | undefined) ??

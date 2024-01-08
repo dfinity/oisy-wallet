@@ -1,7 +1,7 @@
+import type { IcTransaction } from '$icp/types/ic';
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
-import type { IcTransaction } from '../types/ic';
 
 export type IcTransactionsData<T> = Record<TokenId, T[]>;
 
