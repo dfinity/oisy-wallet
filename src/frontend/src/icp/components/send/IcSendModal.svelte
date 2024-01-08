@@ -61,7 +61,8 @@
 
 			await sendIc({
 				...params,
-				token: $token as IcToken
+				token: $token as IcToken,
+				targetNetworkId: networkId
 			});
 
 			sendProgressStep = SendIcStep.DONE;
