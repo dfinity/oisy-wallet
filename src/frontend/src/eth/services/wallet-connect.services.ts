@@ -1,5 +1,6 @@
 import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
 import type { FeeStoreData } from '$eth/stores/fee.store';
+import type { SendParams } from '$eth/types/send';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import {
 	getSignParamsMessageHex,
@@ -11,7 +12,6 @@ import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
-import type { SendParams } from '$lib/types/send';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
