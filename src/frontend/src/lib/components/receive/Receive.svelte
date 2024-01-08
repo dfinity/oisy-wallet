@@ -4,7 +4,7 @@
 	import { addressNotCertified } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
-	import { metamaskNotInitialized } from '$lib/derived/metamask.derived';
+	import { metamaskNotInitialized } from '../../../eth/derived/metamask.derived';
 	import { onMount } from 'svelte';
 	import { initMetamaskSupport } from '$lib/services/metamask.services';
 

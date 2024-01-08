@@ -2,7 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { transactionsNotInitialized } from '$lib/derived/transactions.derived';
-	import { erc20Tokens, erc20TokensNotInitialized } from '$lib/derived/erc20.derived';
+	import { erc20Tokens, erc20TokensNotInitialized } from '../../derived/erc20.derived';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { nonNullish } from '@dfinity/utils';
 	import { routeToken } from '$lib/derived/nav.derived';

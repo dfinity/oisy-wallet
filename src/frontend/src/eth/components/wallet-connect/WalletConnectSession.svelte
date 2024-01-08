@@ -21,7 +21,7 @@
 	import WalletConnectButton from './WalletConnectButton.svelte';
 	import { getSdkError } from '@walletconnect/utils';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
-	import { walletConnectUri } from '$lib/derived/wallet-connect.derived';
+	import { walletConnectUri } from '../../derived/wallet-connect.derived';
 	import { loading } from '$lib/stores/loader.store';
 
 	export let listener: WalletConnectListener | undefined | null;

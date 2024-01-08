@@ -1,6 +1,6 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { address as addressStore } from '$lib/derived/address.derived';
-import { erc20Tokens } from '$lib/derived/erc20.derived';
+import { erc20Tokens } from '../../eth/derived/erc20.derived';
 import { balance as balanceErc20Service } from '$lib/providers/infura-erc20.providers';
 import { balance as balanceService } from '$lib/providers/infura.providers';
 import { balancesStore } from '$lib/stores/balances.store';
