@@ -13,6 +13,8 @@
 	<slot name="network" />
 </SendDataDestination>
 
+<slot />
+
 <SendSource {token} {source} />
 
 <slot name="fee" />

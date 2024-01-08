@@ -3,10 +3,7 @@
 	import { tokenSymbol } from '$lib/derived/token.derived';
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
-	import type { Network } from '$lib/types/network';
-	import { isNetworkICP } from '$lib/utils/network.utils';
 
 	export let destination: string;
 	export let amount: string | number | undefined = undefined;
