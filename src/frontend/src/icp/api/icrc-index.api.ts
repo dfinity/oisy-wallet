@@ -1,8 +1,8 @@
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import { getIcrcAccount } from '$lib/utils/icrc-account.utils';
 import { type Identity } from '@dfinity/agent';
 import { IcrcIndexCanister, type IcrcGetTransactions } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';

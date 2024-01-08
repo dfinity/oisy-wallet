@@ -1,10 +1,10 @@
 import type { IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 import type { IcpTransaction } from '$icp/types/icp';
+import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
-import { getAccountIdentifier } from '$lib/utils/icp-account.utils';
-import { getIcrcAccount } from '$lib/utils/icrc-account.utils';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
