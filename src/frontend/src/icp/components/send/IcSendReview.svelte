@@ -3,10 +3,10 @@
 	import SendData from '$lib/components/send/SendData.svelte';
 	import { token, tokenStandard } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { invalidIcpAddress } from '$lib/utils/icp-account.utils';
+	import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 	import { icAccountIdentifierStore } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
-	import { invalidIcrcAddress } from '$lib/utils/icrc-account.utils';
+	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
