@@ -1,4 +1,3 @@
-import type { TransferParams } from '$eth/services/send.services';
 import {
 	icrc1Transfer as icrc1TransferIcp,
 	transfer as transferIcp
@@ -8,6 +7,7 @@ import type { IcToken } from '$icp/types/ic';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { TransferParams } from '$lib/types/send';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
 

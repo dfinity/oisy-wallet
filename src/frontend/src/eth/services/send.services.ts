@@ -6,8 +6,7 @@ import { SendStep } from '$lib/enums/steps';
 import { authStore } from '$lib/stores/auth.store';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Erc20PopulateTransaction } from '$lib/types/erc20-providers';
-import type { Network } from '$lib/types/network';
-import type { Token } from '$lib/types/token';
+import type { SendParams, TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { isErc20Icp } from '$lib/utils/token.utils';
@@ -19,22 +18,6 @@ import { populateBurnTransaction } from '../providers/infura-erc20-icp.providers
 import { populateTransaction } from '../providers/infura-erc20.providers';
 import { getTransactionCount, sendTransaction } from '../providers/infura.providers';
 import { processTransactionSent } from './transaction.services';
-
-export interface TransferParams {
-	from: string;
-	to: string;
-	amount: BigNumber;
-	maxPriorityFeePerGas: bigint;
-	maxFeePerGas: bigint;
-	data?: string;
-}
-
-export interface SendParams {
-	progress: (step: SendStep) => void;
-	lastProgressStep?: SendStep;
-	token: Token;
-	network?: Network | undefined;
-}
 
 const ethPrepareTransaction = async ({
 	to,
