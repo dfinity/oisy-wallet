@@ -1,4 +1,5 @@
 import { ETHEREUM_DEFAULT_DECIMALS } from '$eth/constants/eth.constants';
+import { NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
@@ -69,7 +70,7 @@ export const formatSecondsToDate = (seconds: number): string => {
 };
 
 export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
-	const date = new Date(Number(nanoseconds / 1_000_000n));
+	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
 

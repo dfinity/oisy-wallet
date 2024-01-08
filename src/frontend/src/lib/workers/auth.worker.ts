@@ -1,4 +1,4 @@
-import { AUTH_TIMER_INTERVAL } from '$lib/constants/app.constants';
+import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import { createAuthClient } from '$lib/utils/auth.utils';
 import { IdbStorage, KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
@@ -94,7 +94,7 @@ const emitExpirationTime = (delegation: DelegationChain) => {
 
 	// 1_000_000 as NANO_SECONDS_IN_MILLISECOND. Constant not imported to not break prod build.
 	const authRemainingTime =
-		new Date(Number(expirationTime / BigInt(1_000_000))).getTime() - Date.now();
+		new Date(Number(expirationTime / NANO_SECONDS_IN_MILLISECOND)).getTime() - Date.now();
 
 	postMessage({
 		msg: 'delegationRemainingTime',

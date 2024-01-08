@@ -19,14 +19,14 @@ export const AUTH_POPUP_HEIGHT = 625;
 export const AUTH_TIMER_INTERVAL = 1000;
 export const CODE_TIMER_INTERVAL = 10000;
 
-// Time and dates
+// Date and time
 export const SECONDS_IN_MINUTE = 60;
 export const MINUTES_IN_HOUR = 60;
 export const HOURS_IN_DAY = 24;
 export const DAYS_IN_NON_LEAP_YEAR = 365;
 
-export const NANO_SECONDS_IN_MILLISECOND = 1_000_000;
-export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_MILLISECOND * 1_000 * 60;
+export const NANO_SECONDS_IN_MILLISECOND = 1_000_000n;
+export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_MILLISECOND * 1_000n * 60n;
 
 // Wallet
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
