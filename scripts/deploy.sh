@@ -63,6 +63,9 @@ fi
 ./scripts/download.ckbtc.sh
 ./scripts/deploy.ckbtc.sh
 
+./scripts/download.cketh.sh
+./scripts/deploy.cketh.sh
+
 dfx deploy internet_identity --specified-id rdmx6-jaaaa-aaaaa-aaadq-cai
 
 dfx deploy frontend
