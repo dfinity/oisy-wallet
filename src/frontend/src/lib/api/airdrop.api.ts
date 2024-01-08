@@ -1,5 +1,5 @@
 import type { Result_1, Result_3 } from '$declarations/airdrop/airdrop.did';
-import { getAirdropActor } from '$lib/ic/actor.ic';
+import { getAirdropActor } from '$lib/actors/actors.ic';
 import type { OptionIdentity } from '$lib/types/identity';
 
 export const getAirdropCode = async (identity: OptionIdentity): Promise<Result_3> => {

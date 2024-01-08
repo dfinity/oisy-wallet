@@ -1,5 +1,5 @@
+import type { IcFee, IcInterface, IcToken } from '$icp/types/ic';
 import { ICP_NETWORK } from '$lib/constants/networks.constants';
-import type { IcFee, IcInterface, IcToken } from '$lib/types/ic';
 import type { TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
 import { isNullish } from '@dfinity/utils';

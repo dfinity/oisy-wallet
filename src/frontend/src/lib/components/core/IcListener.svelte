@@ -4,9 +4,9 @@
 	import {
 		initIcrcWalletWorker,
 		type WalletWorker
-	} from '$lib/services/worker.icrc-wallet.services';
-	import { initIcpWalletWorker } from '$lib/services/worker.icp-wallet.services';
-	import type { IcToken } from '$lib/types/ic';
+	} from '$icp/services/worker.icrc-wallet.services';
+	import { initIcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
+	import type { IcToken } from '$icp/types/ic';
 
 	export let token: Token;
 

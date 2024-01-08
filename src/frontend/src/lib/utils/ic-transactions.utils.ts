@@ -1,6 +1,6 @@
+import type { IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+import type { IcpTransaction } from '$icp/types/icp';
 import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
-import type { IcTransaction, IcTransactionType, IcTransactionUi } from '$lib/types/ic';
-import type { IcpTransaction } from '$lib/types/icp';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { getAccountIdentifier } from '$lib/utils/icp-account.utils';

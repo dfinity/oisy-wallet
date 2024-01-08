@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Transactions from '$lib/components/transactions/Transactions.svelte';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-	import IcTransactions from '$lib/components/transactions/ic/IcTransactions.svelte';
+	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
