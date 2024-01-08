@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Token } from '$lib/types/token';
-	import { isErc20Icp } from '$lib/utils/token.utils';
+	import { isErc20Icp } from '$eth/utils/token.utils';
 	import SendNetwork from './SendNetwork.svelte';
 	import type { Network } from '$lib/types/network';
 

@@ -5,7 +5,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import SendForm from './SendForm.svelte';
 	import SendReview from './SendReview.svelte';
-	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
+	import { mapAddressStartsWith0x } from '$eth/utils/send.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';

@@ -2,7 +2,7 @@ import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { ethers } from 'ethers';
-import { ERC20_APPROVE_HASH } from '../../eth/constants/erc20.constants';
+import { ERC20_APPROVE_HASH } from '../constants/erc20.constants';
 
 export const isTransactionPending = ({ blockNumber }: Transaction): boolean =>
 	isNullish(blockNumber);

@@ -7,7 +7,7 @@
 	import { EIP155_CHAINS } from '../../constants/eip155-chains.constants';
 	import WalletConnectActions from './WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from './WalletConnectDomainVerification.svelte';
-	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
+	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { addressNotCertified } from '$lib/derived/address.derived';

@@ -1,7 +1,7 @@
+import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
-import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import { nonNullish } from '@dfinity/utils';
 

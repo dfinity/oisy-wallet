@@ -1,5 +1,5 @@
-import type { ETH_ADDRESS } from '$lib/types/address';
 import type { WebSocketListener } from '$eth/types/listener';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
 import { Alchemy, AlchemySubscription, type Network } from 'alchemy-sdk';
 

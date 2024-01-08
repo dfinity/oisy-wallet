@@ -1,3 +1,4 @@
+import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import oneInch from '$lib/assets/1inch.svg';
 import dai from '$lib/assets/dai.svg';
 import icpDark from '$lib/assets/icp_dark.svg';
@@ -5,7 +6,6 @@ import uniswap from '$lib/assets/uniswap.svg';
 import usdc from '$lib/assets/usdc.svg';
 import usdt from '$lib/assets/usdt.svg';
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
-import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 
 export const mapErc20Token = ({
 	symbol,

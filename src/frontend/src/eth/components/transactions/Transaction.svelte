@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Transaction } from '$lib/types/transaction';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { isTransactionPending } from '$lib/utils/transactions.utils';
+	import { isTransactionPending } from '$eth/utils/transactions.utils';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import type { ComponentType } from 'svelte';
 	import { address } from '$lib/derived/address.derived';

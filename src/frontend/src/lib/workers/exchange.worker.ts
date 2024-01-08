@@ -1,3 +1,4 @@
+import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import {
 	exchangeRateBTCToUsd,
@@ -5,7 +6,6 @@ import {
 	exchangeRateETHToUsd,
 	exchangeRateICPToUsd
 } from '$lib/services/exchange.services';
-import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';

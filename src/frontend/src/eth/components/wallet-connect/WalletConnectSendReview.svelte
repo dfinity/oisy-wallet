@@ -3,7 +3,7 @@
 	import SendData from '$lib/components/send/SendData.svelte';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectActions from './WalletConnectActions.svelte';
-	import { decodeErc20AbiDataValue } from '$lib/utils/transactions.utils';
+	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import WalletConnectSendData from './WalletConnectSendData.svelte';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';

@@ -13,7 +13,7 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '../../stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
+	import { mapAddressStartsWith0x } from '$eth/utils/send.utils';
 	import { getErc20FeeData } from '../../services/fee.services';
 	import type { Network } from '$lib/types/network';
 

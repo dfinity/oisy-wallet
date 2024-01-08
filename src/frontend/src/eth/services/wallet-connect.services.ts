@@ -1,3 +1,8 @@
+import type { WalletConnectListener } from '$eth/types/wallet-connect';
+import {
+	getSignParamsMessageHex,
+	getSignParamsMessageTypedDataV4Hash
+} from '$eth/utils/wallet-connect.utils';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
 import { SendStep, SignStep } from '$lib/enums/steps';
 import { authStore } from '$lib/stores/auth.store';
@@ -5,11 +10,6 @@ import { busy } from '$lib/stores/busy.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { SendParams } from '$lib/types/send';
-import type { WalletConnectListener } from '$eth/types/wallet-connect';
-import {
-	getSignParamsMessageHex,
-	getSignParamsMessageTypedDataV4Hash
-} from '$lib/utils/wallet-connect.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';

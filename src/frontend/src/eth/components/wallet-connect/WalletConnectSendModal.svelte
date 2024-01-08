@@ -25,7 +25,7 @@
 		reject as rejectServices
 	} from '../../services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
-	import { isErc20TransactionApprove } from '$lib/utils/transactions.utils';
+	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;

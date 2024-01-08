@@ -1,15 +1,15 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
+import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc20PopulateTransaction } from '$eth/types/erc20-providers';
+import { isErc20Icp } from '$eth/utils/token.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { SendStep } from '$lib/enums/steps';
 import { authStore } from '$lib/stores/auth.store';
-import type { Erc20Token } from '$eth/types/erc20';
-import type { Erc20PopulateTransaction } from '$eth/types/erc20-providers';
 import type { SendParams, TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNetworkICP } from '$lib/utils/network.utils';
-import { isErc20Icp } from '$lib/utils/token.utils';
 import { isNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';

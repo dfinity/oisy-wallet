@@ -1,5 +1,5 @@
-import { PROD } from '$lib/constants/app.constants';
 import type { Erc20Contract } from '$eth/types/erc20';
+import { PROD } from '$lib/constants/app.constants';
 
 // TODO: extract environment file(s)?
 const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {

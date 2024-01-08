@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { isIcpAccountIdentifier } from '$lib/utils/send.utils';
+	import { isIcpAccountIdentifier } from '$eth/utils/send.utils';
 	import { isAddress } from '@ethersproject/address';
 	import type { Network } from '$lib/types/network';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';

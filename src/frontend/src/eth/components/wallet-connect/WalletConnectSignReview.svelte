@@ -2,7 +2,7 @@
 	import {
 		getSignParamsMessageUtf8,
 		getSignParamsMessageHex
-	} from '$lib/utils/wallet-connect.utils';
+	} from '$eth/utils/wallet-connect.utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectActions from './WalletConnectActions.svelte';
 	import { nonNullish } from '@dfinity/utils';
