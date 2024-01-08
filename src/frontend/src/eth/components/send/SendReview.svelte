@@ -8,6 +8,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
+	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -21,7 +22,8 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<SendData {amount} {destination} token={$token} source={$address ?? ''} {network}>
+<SendData {amount} {destination} token={$token} source={$address ?? ''}>
+	<SendReviewNetwork {network} slot="network" />
 	<FeeDisplay slot="fee" />
 </SendData>
 

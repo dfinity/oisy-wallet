@@ -19,7 +19,7 @@ export const ETHEREUM_NETWORK: Network = {
 /**
  * ICP
  */
-const ICP_NETWORK_SYMBOL = 'ICP';
+export const ICP_NETWORK_SYMBOL = 'ICP';
 
 export const ICP_NETWORK_ID = Symbol(ICP_NETWORK_SYMBOL);
 
