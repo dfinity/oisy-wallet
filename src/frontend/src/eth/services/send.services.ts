@@ -1,4 +1,8 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
+import { ETH_BASE_FEE, ETH_CHAIN_ID } from '$eth/constants/eth.constants';
+import { populateBurnTransaction } from '$eth/providers/infura-erc20-icp.providers';
+import { populateTransaction } from '$eth/providers/infura-erc20.providers';
+import { getTransactionCount, sendTransaction } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20PopulateTransaction } from '$eth/types/erc20-providers';
 import { isErc20Icp } from '$eth/utils/token.utils';
@@ -13,10 +17,6 @@ import { isNetworkICP } from '$lib/utils/network.utils';
 import { isNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
-import { ETH_BASE_FEE, ETH_CHAIN_ID } from '../constants/eth.constants';
-import { populateBurnTransaction } from '../providers/infura-erc20-icp.providers';
-import { populateTransaction } from '../providers/infura-erc20.providers';
-import { getTransactionCount, sendTransaction } from '../providers/infura.providers';
 import { processTransactionSent } from './transaction.services';
 
 const ethPrepareTransaction = async ({

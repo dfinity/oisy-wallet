@@ -7,7 +7,7 @@
 	import WalletConnectSignReview from './WalletConnectSignReview.svelte';
 	import { WALLET_CONNECT_SIGN_STEPS } from '$lib/constants/steps.constants';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
-	import { signMessage, reject as rejectServices } from '../../services/wallet-connect.services';
+	import { signMessage, reject as rejectServices } from '$eth/services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 
 	export let listener: WalletConnectListener | undefined | null;

@@ -1,12 +1,12 @@
+import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
+import { getFeeData as getBurnFeeData } from '$eth/providers/infura-erc20-icp.providers';
+import { getFeeData } from '$eth/providers/infura-erc20.providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { ERC20_FALLBACK_FEE } from '../constants/erc20.constants';
-import { getFeeData as getBurnFeeData } from '../providers/infura-erc20-icp.providers';
-import { getFeeData } from '../providers/infura-erc20.providers';
 
 export const getErc20FeeData = async ({
 	network,

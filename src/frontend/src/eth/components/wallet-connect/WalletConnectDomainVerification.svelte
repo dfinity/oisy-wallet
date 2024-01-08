@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Verify } from '@walletconnect/types';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import { CONTEXT_VALIDATION_ISSCAM } from '../../constants/wallet-connect.constants';
+	import { CONTEXT_VALIDATION_ISSCAM } from '$eth/constants/wallet-connect.constants';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 

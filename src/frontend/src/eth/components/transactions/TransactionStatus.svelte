@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getBlockNumber } from '../../providers/infura.providers';
+	import { getBlockNumber } from '$eth/providers/infura.providers';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { fade } from 'svelte/transition';
 	import type { WebSocketListener } from '$eth/types/listener';
-	import { initMinedTransactionsListener } from '../../services/eth-listener.services';
+	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 
 	export let blockNumber: number;
 

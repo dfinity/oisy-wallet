@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { openMetamaskTransaction } from '../../../eth/services/metamask.services';
-	import { metamaskAvailable } from '../../../eth/derived/metamask.derived';
+	import { openMetamaskTransaction } from '$eth/services/metamask.services';
+	import { metamaskAvailable } from '$eth/derived/metamask.derived';
 	import { address } from '$lib/derived/address.derived';
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
 	import { toastsError } from '$lib/stores/toasts.store';

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { send as executeSend } from '../../services/send.services';
+	import { send as executeSend } from '$eth/services/send.services';
 	import { isNullish } from '@dfinity/utils';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import SendForm from './SendForm.svelte';
@@ -15,9 +15,9 @@
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
 		initFeeStore
-	} from '../../stores/fee.store';
+	} from '$eth/stores/fee.store';
 	import { setContext } from 'svelte';
-	import FeeContext from '../fee/FeeContext.svelte';
+	import FeeContext from '$eth/fee/FeeContext.svelte';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';

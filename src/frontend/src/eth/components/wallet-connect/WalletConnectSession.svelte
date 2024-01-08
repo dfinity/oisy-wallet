@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { onDestroy } from 'svelte';
-	import { initWalletConnectListener } from '../../services/eth-listener.services';
+	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
 	import { address } from '$lib/derived/address.derived';
 	import WalletConnectForm from './WalletConnectForm.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
@@ -16,12 +16,12 @@
 		SESSION_REQUEST_PERSONAL_SIGN,
 		SESSION_REQUEST_ETH_SIGN,
 		SESSION_REQUEST_ETH_SIGN_V4
-	} from '../../constants/wallet-connect.constants';
+	} from '$eth/constants/wallet-connect.constants';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import WalletConnectButton from './WalletConnectButton.svelte';
 	import { getSdkError } from '@walletconnect/utils';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
-	import { walletConnectUri } from '../../derived/wallet-connect.derived';
+	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { loading } from '$lib/stores/loader.store';
 
 	export let listener: WalletConnectListener | undefined | null;

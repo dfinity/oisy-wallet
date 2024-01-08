@@ -2,7 +2,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { initExchangeWorker } from '$lib/services/worker.exchange.services';
-	import { erc20TokensAddresses } from '../../../eth/derived/erc20.derived';
+	import { erc20TokensAddresses } from '$eth/derived/erc20.derived';
 	import { LOCAL } from '$lib/constants/app.constants';
 
 	let worker: ExchangeWorker | undefined;

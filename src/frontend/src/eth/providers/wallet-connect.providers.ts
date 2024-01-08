@@ -1,3 +1,11 @@
+import { ETH_CHAIN_ID } from '$eth/constants/eth.constants';
+import {
+	SESSION_REQUEST_ETH_SIGN,
+	SESSION_REQUEST_ETH_SIGN_V4,
+	SESSION_REQUEST_PERSONAL_SIGN,
+	SESSION_REQUEST_SEND_TRANSACTION,
+	WALLET_CONNECT_METADATA
+} from '$eth/constants/wallet-connect.constants';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import { Core } from '@walletconnect/core';
@@ -5,14 +13,6 @@ import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';
 import { formatJsonRpcResult, type ErrorResponse } from '@walletconnect/jsonrpc-utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { Web3Wallet, type Web3WalletTypes } from '@walletconnect/web3wallet';
-import { ETH_CHAIN_ID } from '../constants/eth.constants';
-import {
-	SESSION_REQUEST_ETH_SIGN,
-	SESSION_REQUEST_ETH_SIGN_V4,
-	SESSION_REQUEST_PERSONAL_SIGN,
-	SESSION_REQUEST_SEND_TRANSACTION,
-	WALLET_CONNECT_METADATA
-} from '../constants/wallet-connect.constants';
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 

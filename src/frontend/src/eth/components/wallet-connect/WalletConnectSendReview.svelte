@@ -8,7 +8,7 @@
 	import WalletConnectSendData from './WalletConnectSendData.svelte';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { address } from '$lib/derived/address.derived';
-	import FeeDisplay from '../fee/FeeDisplay.svelte';
+	import FeeDisplay from '$eth/fee/FeeDisplay.svelte';
 
 	export let amount: BigNumber;
 	export let destination: string;

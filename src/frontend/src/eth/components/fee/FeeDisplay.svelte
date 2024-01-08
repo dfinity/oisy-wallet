@@ -4,8 +4,8 @@
 	import { fade } from 'svelte/transition';
 	import { getContext, onDestroy } from 'svelte';
 	import { formatTokenShort } from '$lib/utils/format.utils';
-	import type { FeeContext } from '../../stores/fee.store';
-	import { FEE_CONTEXT_KEY } from '../../stores/fee.store';
+	import type { FeeContext } from '$eth/stores/fee.store';
+	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 
 	const { store: feeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);

@@ -1,3 +1,6 @@
+import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { balance as balanceErc20Service } from '$eth/providers/infura-erc20.providers';
+import { balance as balanceService } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { address as addressStore } from '$lib/derived/address.derived';
@@ -6,9 +9,6 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { erc20Tokens } from '../derived/erc20.derived';
-import { balance as balanceErc20Service } from '../providers/infura-erc20.providers';
-import { balance as balanceService } from '../providers/infura.providers';
 
 export const reloadBalance = async (token: Token): Promise<{ success: boolean }> => {
 	if (token.id === ETHEREUM_TOKEN_ID) {

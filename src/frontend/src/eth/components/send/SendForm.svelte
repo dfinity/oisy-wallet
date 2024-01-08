@@ -2,7 +2,7 @@
 	import { Input } from '@dfinity/gix-components';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import FeeDisplay from '../fee/FeeDisplay.svelte';
+	import FeeDisplay from '$eth/fee/FeeDisplay.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import SendNetworkICP from './SendNetworkICP.svelte';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';

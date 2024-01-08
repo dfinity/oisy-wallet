@@ -6,13 +6,13 @@
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
 	} from '$eth/types/wallet-connect';
-	import FeeContext from '../fee/FeeContext.svelte';
+	import FeeContext from '$eth/fee/FeeContext.svelte';
 	import { setContext } from 'svelte';
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
 		initFeeStore
-	} from '../../stores/fee.store';
+	} from '$eth/stores/fee.store';
 	import { address } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
@@ -23,7 +23,7 @@
 	import {
 		send as sendServices,
 		reject as rejectServices
-	} from '../../services/wallet-connect.services';
+	} from '$eth/services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 

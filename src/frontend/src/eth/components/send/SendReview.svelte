@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { isNullish } from '@dfinity/utils';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '../../stores/fee.store';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { address } from '$lib/derived/address.derived';
-	import FeeDisplay from '../fee/FeeDisplay.svelte';
+	import FeeDisplay from '$eth/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 
 	export let destination = '';

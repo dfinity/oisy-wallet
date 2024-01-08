@@ -1,4 +1,7 @@
 import type { Token } from '$declarations/backend/backend.did';
+import { ERC20_CONTRACTS } from '$eth/constants/erc20.constants';
+import { metadata } from '$eth/providers/infura-erc20.providers';
+import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20Contract, Erc20Metadata } from '$eth/types/erc20';
 import { mapErc20Token } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
@@ -6,9 +9,6 @@ import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { ERC20_CONTRACTS } from '../constants/erc20.constants';
-import { metadata } from '../providers/infura-erc20.providers';
-import { erc20TokensStore } from '../stores/erc20.store';
 
 export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 	try {

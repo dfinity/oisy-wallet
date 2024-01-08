@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
-	import { initTransactionsListener } from '../../services/eth-listener.services';
+	import { initTransactionsListener } from '$eth/services/eth-listener.services';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { Token } from '$lib/types/token';
 	import { address } from '$lib/derived/address.derived';

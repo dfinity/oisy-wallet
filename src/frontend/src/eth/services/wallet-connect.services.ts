@@ -1,3 +1,5 @@
+import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
+import type { FeeStoreData } from '$eth/stores/fee.store';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import {
 	getSignParamsMessageHex,
@@ -15,8 +17,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import { get } from 'svelte/store';
-import { UNEXPECTED_ERROR } from '../constants/wallet-connect.constants';
-import type { FeeStoreData } from '../stores/fee.store';
 import { send as executeSend } from './send.services';
 
 export type WalletConnectCallBackParams = {

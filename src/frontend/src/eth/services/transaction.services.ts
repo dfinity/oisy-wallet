@@ -1,3 +1,4 @@
+import { getTransaction } from '$eth/providers/alchemy.providers';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -6,7 +7,6 @@ import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
-import { getTransaction } from '../providers/alchemy.providers';
 import { reloadBalance } from './balance.services';
 
 export const processTransactionSent = async ({
