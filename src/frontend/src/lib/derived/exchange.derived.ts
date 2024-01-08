@@ -1,6 +1,6 @@
+import { icrcTokens } from '$icp/derived/icrc.derived';
 import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { erc20Tokens } from '$lib/derived/erc20.derived';
-import { icrcTokens } from '$lib/derived/icrc.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import { nonNullish } from '@dfinity/utils';
