@@ -1,2 +1,1 @@
-export const nowInBigIntNanoSeconds = (): bigint =>
-    BigInt(Date.now()) * BigInt(1e6);
+export const nowInBigIntNanoSeconds = (): bigint => BigInt(Date.now()) * BigInt(1e6);
