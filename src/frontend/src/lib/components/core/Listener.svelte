@@ -2,7 +2,7 @@
 	import type { ComponentType } from 'svelte';
 	import type { Token } from '$lib/types/token';
 	import EthereumListener from '$lib/components/core/EthListener.svelte';
-	import IcListener from '$lib/components/core/IcListener.svelte';
+	import IcListener from '$icp/components/core/IcListener.svelte';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 
 	export let token: Token;
