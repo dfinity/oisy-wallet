@@ -1,7 +1,7 @@
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
-import { UNEXPECTED_ERROR } from '../../eth/constants/wallet-connect.constants';
+import { UNEXPECTED_ERROR } from '../constants/wallet-connect.constants';
 import { SendStep, SignStep } from '$lib/enums/steps';
-import { send as executeSend, type SendParams } from '$lib/services/send.services';
+import { send as executeSend, type SendParams } from './send.services';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import type { FeeStoreData } from '$lib/stores/fee.store';

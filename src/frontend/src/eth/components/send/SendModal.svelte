@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { send as executeSend } from '$lib/services/send.services';
+	import { send as executeSend } from '../../services/send.services';
 	import { isNullish } from '@dfinity/utils';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import SendForm from './SendForm.svelte';

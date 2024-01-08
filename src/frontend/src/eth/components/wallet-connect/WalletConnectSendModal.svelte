@@ -23,7 +23,7 @@
 	import {
 		send as sendServices,
 		reject as rejectServices
-	} from '$lib/services/wallet-connect.services';
+	} from '../../services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import { isErc20TransactionApprove } from '$lib/utils/transactions.utils';
 

@@ -2,19 +2,19 @@
 	import type { WebSocketListener } from '$lib/types/listener';
 	import { token } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-	import { getFeeData } from '$lib/providers/infura.providers';
+	import { getFeeData } from '../../providers/infura.providers';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETH_BASE_FEE } from '../../constants/eth.constants';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { address } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
-	import { initMinedTransactionsListener } from '$lib/services/eth-listener.services';
+	import { initMinedTransactionsListener } from '../../services/eth-listener.services';
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
-	import { getErc20FeeData } from '$lib/services/fee.services';
+	import { getErc20FeeData } from '../../services/fee.services';
 	import type { Network } from '$lib/types/network';
 
 	export let observe: boolean;

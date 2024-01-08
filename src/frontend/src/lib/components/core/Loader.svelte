@@ -5,7 +5,7 @@
 	import { loadAddress, loadIdbAddress } from '$lib/services/address.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
-	import { loadErc20Contracts } from '$lib/services/erc20.services';
+	import { loadErc20Contracts } from '../../../eth/services/erc20.services';
 	import banner from '$lib/assets/banner.svg';
 	import { Modal } from '@dfinity/gix-components';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -14,14 +14,14 @@
 	import { browser } from '$app/environment';
 	import { isNullish } from '@dfinity/utils';
 	import { initAirdrop } from '$lib/services/airdrop.services';
-	import { loadTransactions as loadEthTransactions } from '$lib/services/transactions.services';
+	import { loadTransactions as loadEthTransactions } from '../../../eth/services/transactions.services';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import { loading } from '$lib/stores/loader.store';
 	import { LoaderStep } from '$lib/enums/steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import { networkEthereum } from '$lib/derived/network.derived';
-	import { loadBalances } from '$lib/services/balance.services';
+	import { loadBalances } from '../../../eth/services/balance.services';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 

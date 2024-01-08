@@ -1,8 +1,8 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { address as addressStore } from '$lib/derived/address.derived';
-import { erc20Tokens } from '../../eth/derived/erc20.derived';
-import { transactions as transactionsProviders } from '$lib/providers/etherscan.providers';
-import { transactions as transactionsRest } from '$lib/rest/etherscan.rest';
+import { erc20Tokens } from '../derived/erc20.derived';
+import { transactions as transactionsProviders } from '../providers/etherscan.providers';
+import { transactions as transactionsRest } from '../rest/etherscan.rest';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { TokenId } from '$lib/types/token';

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Transaction from './Transaction.svelte';
 	import { sortedTransactions } from '$lib/derived/transactions.derived';
-	import { loadTransactions } from '$lib/services/transactions.services';
+	import { loadTransactions } from '../../services/transactions.services';
 	import type { Token } from '$lib/types/token';
 	import { onMount } from 'svelte';
 	import { token } from '$lib/derived/token.derived';

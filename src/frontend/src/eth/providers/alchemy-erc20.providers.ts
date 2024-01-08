@@ -1,4 +1,4 @@
-import { ERC20_ABI } from '../../eth/constants/erc20.constants';
+import { ERC20_ABI } from '../constants/erc20.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Erc20Transaction } from '$lib/types/erc20-transaction';

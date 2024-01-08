@@ -1,11 +1,11 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { initMinedTransactionsListener as initErc20PendingTransactionsListenerProvider } from '$lib/providers/alchemy-erc20.providers';
+import { initMinedTransactionsListener as initErc20PendingTransactionsListenerProvider } from '../providers/alchemy-erc20.providers';
 import {
 	initPendingTransactionsListener as initEthPendingTransactionsListenerProvider,
 	initMinedTransactionsListener as initMinedTransactionsListenerProvider
-} from '$lib/providers/alchemy.providers';
-import { initWalletConnect } from '$lib/providers/wallet-connect.providers';
-import { processErc20Transaction, processEthTransaction } from '$lib/services/transaction.services';
+} from '../providers/alchemy.providers';
+import { initWalletConnect } from '../providers/wallet-connect.providers';
+import { processErc20Transaction, processEthTransaction } from './transaction.services';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { WebSocketListener } from '$lib/types/listener';

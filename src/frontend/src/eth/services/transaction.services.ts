@@ -1,6 +1,6 @@
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { getTransaction } from '$lib/providers/alchemy.providers';
-import { reloadBalance } from '$lib/services/balance.services';
+import { getTransaction } from '../providers/alchemy.providers';
+import { reloadBalance } from './balance.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { Token } from '$lib/types/token';

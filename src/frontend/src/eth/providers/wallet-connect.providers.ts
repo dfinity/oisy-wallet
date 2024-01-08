@@ -1,11 +1,11 @@
-import { ETH_CHAIN_ID } from '../../eth/constants/eth.constants';
+import { ETH_CHAIN_ID } from '../constants/eth.constants';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN,
 	SESSION_REQUEST_SEND_TRANSACTION,
 	WALLET_CONNECT_METADATA
-} from '../../eth/constants/wallet-connect.constants';
+} from '../constants/wallet-connect.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
 import { Core } from '@walletconnect/core';

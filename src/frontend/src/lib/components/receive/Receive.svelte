@@ -6,7 +6,7 @@
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { metamaskNotInitialized } from '../../../eth/derived/metamask.derived';
 	import { onMount } from 'svelte';
-	import { initMetamaskSupport } from '$lib/services/metamask.services';
+	import { initMetamaskSupport } from '../../../eth/services/metamask.services';
 
 	let disabled: boolean;
 	$: disabled = $addressNotCertified || $isBusy || $metamaskNotInitialized;
