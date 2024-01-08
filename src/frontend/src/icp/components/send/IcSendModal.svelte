@@ -2,9 +2,7 @@
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import type { WizardSteps } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { SendIcpStep } from '$lib/enums/steps';
-	import { SEND_ICP_STEPS } from '$lib/constants/steps.constants';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import { SendIcStep } from '$lib/enums/steps';
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -16,6 +14,7 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import type { IcToken } from '$icp/types/ic';
 	import type { NetworkId } from '$lib/types/network';
+	import IcSendProgress from "$icp/components/send/IcSendProgress.svelte";
 
 	/**
 	 * Props
@@ -29,7 +28,7 @@
 	 * Send
 	 */
 
-	let sendProgressStep: string = SendIcpStep.INITIALIZATION;
+	let sendProgressStep: string = SendIcStep.INITIALIZATION;
 
 	const send = async () => {
 		if (isNullishOrEmpty(destination)) {
@@ -49,7 +48,7 @@
 		modal.next();
 
 		try {
-			sendProgressStep = SendIcpStep.SEND;
+			sendProgressStep = SendIcStep.SEND;
 
 			await sendIc({
 				to: destination,
@@ -61,7 +60,7 @@
 				token: $token as IcToken
 			});
 
-			sendProgressStep = SendIcpStep.DONE;
+			sendProgressStep = SendIcStep.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
@@ -98,7 +97,7 @@
 		destination = '';
 		amount = undefined;
 
-		sendProgressStep = SendIcpStep.INITIALIZATION;
+		sendProgressStep = SendIcStep.INITIALIZATION;
 	};
 </script>
 
@@ -108,7 +107,7 @@
 	{#if currentStep?.name === 'Review'}
 		<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
 	{:else if currentStep?.name === 'Sending'}
-		<InProgressWizard progressStep={sendProgressStep} steps={SEND_ICP_STEPS} />
+		<IcSendProgress bind:sendProgressStep {networkId} />
 	{:else}
 		<IcSendForm
 			on:icNext={modal.next}

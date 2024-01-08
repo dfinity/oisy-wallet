@@ -4,19 +4,18 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { ICP_NETWORK_ID, ICP_NETWORK_SYMBOL } from '$lib/constants/networks.constants';
 	import { BTC_NETWORK, BTC_NETWORK_ID, BTC_NETWORK_SYMBOL } from '$icp/constants/ckbtc.constants';
-	import { isBtcAddress } from '$icp/utils/send.utils';
+	import { isBtcAddress, isNetworkIdBtc } from '$icp/utils/send.utils';
 	import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let destination: string | undefined = undefined;
 
-	let networkSymbol: string | undefined =
-		networkId === BTC_NETWORK_ID
-			? BTC_NETWORK_SYMBOL
-			: networkId === ICP_NETWORK_ID
-				? ICP_NETWORK_SYMBOL
-				: undefined;
+	let networkSymbol: string | undefined = isNetworkIdBtc(networkId)
+		? BTC_NETWORK_SYMBOL
+		: networkId === ICP_NETWORK_ID
+			? ICP_NETWORK_SYMBOL
+			: undefined;
 
 	const onDestinationAddressInput = debounce(async () => {
 		if (nonNullish(networkId)) {
