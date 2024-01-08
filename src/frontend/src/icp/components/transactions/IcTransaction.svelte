@@ -11,7 +11,7 @@
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { mapIcTransaction } from '$lib/utils/ic-transactions.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { IcTransaction, IcTransactionUi } from '../../types/ic';
+	import type { IcTransaction, IcTransactionUi } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 
 	export let transaction: IcTransaction;

@@ -1,12 +1,15 @@
+import {
+	icrc1Transfer as icrc1TransferIcp,
+	transfer as transferIcp
+} from '$icp/api/icp-ledger.api';
+import { transfer as transferIcrc } from '$icp/api/icrc-ledger.api';
+import type { IcToken } from '$icp/types/ic';
 import type { TransferParams } from '$lib/services/send.services';
 import type { OptionIdentity } from '$lib/types/identity';
 import { invalidIcpAddress } from '$lib/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$lib/utils/icrc-account.utils';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
-import { icrc1Transfer as icrc1TransferIcp, transfer as transferIcp } from '../api/icp-ledger.api';
-import { transfer as transferIcrc } from '../api/icrc-ledger.api';
-import type { IcToken } from '../types/ic';
 
 export const sendIc = async ({
 	token: { standard, ledgerCanisterId },

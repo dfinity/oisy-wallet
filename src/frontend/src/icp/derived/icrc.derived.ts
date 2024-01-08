@@ -1,6 +1,6 @@
+import { icrcTokensStore } from '$icp/stores/icrc.store';
+import type { IcToken } from '$icp/types/ic';
 import { derived, type Readable } from 'svelte/store';
-import { icrcTokensStore } from '../stores/icrc.store';
-import type { IcToken } from '../types/ic';
 
 export const icrcTokens: Readable<IcToken[]> = derived(
 	[icrcTokensStore],
