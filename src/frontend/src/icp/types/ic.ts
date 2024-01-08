@@ -23,6 +23,16 @@ export interface IcTransactionUi {
 
 export type IcToken = Token & IcFee & IcInterface;
 export type IcFee = { fee: bigint };
+
 export type IcInterface = IcCanisters & IcExchangeCoin;
-export type IcCanisters = { ledgerCanisterId: CanisterIdText; indexCanisterId: CanisterIdText };
+export type IcCanisters = {
+	ledgerCanisterId: CanisterIdText;
+	indexCanisterId: CanisterIdText;
+};
+
+export type IcCkInterface = IcInterface & IcCkCanisters;
+export type IcCkCanisters = {
+	minterCanisterId: CanisterIdText;
+};
+
 export type IcExchangeCoin = { exchangeCoinId: CoingeckoCoinsId };
