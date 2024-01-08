@@ -13,13 +13,14 @@ echo "$LEDGERID"
 
 echo "Step 2: deploy minter canister..."
 
-# TODO: those parameters - the contract address - is not yet correct. It's unclear where the ckETH Minter should point when deployed locally.
+# ckETH minter deployed on using the smart contract address on Sepolia used by testnet.
+# We can alternatively also deploy our own contract.
 
 dfx deploy cketh_minter --network "$DFX_NETWORK" --argument "(variant {
   InitArg = record {
        ethereum_network = variant {Sepolia};
        ecdsa_key_name = \"key_1\";
-       ethereum_contract_address = opt \"0x111B5e756A894775FC32EDdf3314Bb1B1944dC34\";
+       ethereum_contract_address = opt \"0xb44B5e756A894775FC32EDdf3314Bb1B1944dC34\";
        ledger_id = principal \"$LEDGERID\";
        ethereum_block_height = variant {Finalized};
        minimum_withdrawal_amount = 10_000_000_000_000_000;
