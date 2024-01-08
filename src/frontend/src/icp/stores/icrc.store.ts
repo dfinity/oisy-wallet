@@ -1,5 +1,5 @@
+import type { IcToken } from '$icp/types/ic';
 import { writable, type Readable } from 'svelte/store';
-import type { IcToken } from '../types/ic';
 
 export type IcrcTokensData = IcToken[] | undefined;
 

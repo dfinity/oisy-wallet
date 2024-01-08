@@ -9,7 +9,7 @@ export interface IcpWalletWorker {
 }
 
 export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
-	const WalletWorker = await import('../workers/icp-wallet.worker?worker');
+	const WalletWorker = await import('$icp/workers/icp-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 
 	worker.onmessage = async ({

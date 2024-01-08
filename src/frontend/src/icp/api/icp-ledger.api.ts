@@ -1,3 +1,4 @@
+import { ICP_LEDGER_CANISTER_ID } from '$icp/constants/icp.constants';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
@@ -5,7 +6,6 @@ import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@dfinity/le
 import type { IcrcAccount } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
-import { ICP_LEDGER_CANISTER_ID } from '../constants/icp.constants';
 
 export const transfer = async ({
 	identity,

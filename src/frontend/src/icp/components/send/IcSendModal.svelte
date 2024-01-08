@@ -10,11 +10,11 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { isNullish } from '@dfinity/utils';
-	import { sendIc } from '../../services/icp-send.services';
+	import { sendIc } from '$icp/services/icp-send.services';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import { authStore } from '$lib/stores/auth.store';
-	import type { IcToken } from '../../types/ic';
+	import type { IcToken } from '$icp/types/ic';
 
 	/**
 	 * Props

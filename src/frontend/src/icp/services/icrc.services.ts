@@ -1,9 +1,9 @@
+import { metadata } from '$icp/api/icrc-ledger.api';
+import { ICRC_CANISTERS } from '$icp/constants/icrc.constants';
+import { icrcTokensStore } from '$icp/stores/icrc.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { mapIcrcToken, type IcrcLoadData } from '$lib/utils/icrc.utils';
 import { nonNullish } from '@dfinity/utils';
-import { metadata } from '../api/icrc-ledger.api';
-import { ICRC_CANISTERS } from '../constants/icrc.constants';
-import { icrcTokensStore } from '../stores/icrc.store';
 
 export const loadIcrcTokens = async (): Promise<{ success: boolean }> => {
 	try {

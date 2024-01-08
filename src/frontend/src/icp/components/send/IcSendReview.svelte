@@ -4,7 +4,7 @@
 	import { token, tokenStandard } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { invalidIcpAddress } from '$lib/utils/icp-account.utils';
-	import { icAccountIdentifierStore } from '../../derived/ic.derived';
+	import { icAccountIdentifierStore } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import { invalidIcrcAddress } from '$lib/utils/icrc-account.utils';
 

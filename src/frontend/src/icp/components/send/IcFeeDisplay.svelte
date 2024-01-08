@@ -3,8 +3,8 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { token } from '$lib/derived/token.derived';
-	import type { IcToken } from '../../types/ic';
-	import { ICP_FEE_DECIMALS } from '../../constants/icp.constants';
+	import type { IcToken } from '$icp/types/ic';
+	import { ICP_FEE_DECIMALS } from '$icp/constants/icp.constants';
 
 	// We know here the token is of standard IC
 	let fee: bigint;

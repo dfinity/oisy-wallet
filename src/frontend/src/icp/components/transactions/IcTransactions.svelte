@@ -10,14 +10,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcpTransactionModal from './IcTransactionModal.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-	import { icTransactionsStore } from '../../stores/ic-transactions.store';
-	import type {
-		IcToken,
-		IcTransaction as IcTransactionType,
-		IcTransactionUi
-	} from '../../types/ic';
+	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import type { IcToken, IcTransaction as IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import { token, tokenId } from '$lib/derived/token.derived';
-	import { getTransactions } from '../../services/ic-transactions.services';
+	import { getTransactions } from '$icp/services/ic-transactions.services';
 
 	let transactions: IcTransactionType[];
 	$: transactions = $icTransactionsStore[$tokenId] ?? [];
