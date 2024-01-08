@@ -3,15 +3,11 @@
 	import { tokenSymbol } from '$lib/derived/token.derived';
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
-	import type { Network } from '$lib/types/network';
-	import { isNetworkICP } from '$lib/utils/network.utils';
 
 	export let destination: string;
 	export let amount: string | number | undefined = undefined;
 	export let token: Token;
-	export let network: Network | undefined;
 
 	let amountDisplay: string;
 	$: (() => {
@@ -35,16 +31,7 @@
 	{destination}
 </Value>
 
-{#if nonNullish(network)}
-	<Value ref="network" element="div">
-		<svelte:fragment slot="label">Network</svelte:fragment>
-		{#if isNetworkICP(network)}
-			Convert to native ICP
-		{:else}
-			Ethereum
-		{/if}
-	</Value>
-{/if}
+<slot />
 
 <Value ref="amount" element="div">
 	<svelte:fragment slot="label">Amount</svelte:fragment>
