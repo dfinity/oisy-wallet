@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { erc20TokensNotInitialized } from '$lib/derived/erc20.derived';
+	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { fade } from 'svelte/transition';
-	import { ERC20_CONTRACTS } from '$lib/constants/erc20.constants';
+	import { ERC20_CONTRACTS } from '$eth/constants/erc20.constants';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 </script>
 

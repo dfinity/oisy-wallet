@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { balance, balanceZero } from '$lib/derived/balances.derived';
 	import { tokenDecimals, tokenSymbol } from '$lib/derived/token.derived';
-	import { erc20TokensInitialized } from '$lib/derived/erc20.derived';
+	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
 </script>
 
 <span class="text-off-white">

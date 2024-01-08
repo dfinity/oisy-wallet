@@ -5,7 +5,7 @@
 	import { page } from '$app/stores';
 	import AirdropButton from '$lib/components/airdrop/AirdropButton.svelte';
 	import { airdropAvailable } from '$lib/derived/airdrop.derived';
-	import { isErc20Icp } from '$lib/utils/token.utils';
+	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { token } from '$lib/derived/token.derived';
 	import Workers from '$lib/components/core/Workers.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
