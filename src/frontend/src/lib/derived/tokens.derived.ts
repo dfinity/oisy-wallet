@@ -1,6 +1,6 @@
+import { icrcTokens } from '$icp/derived/icrc.derived';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$lib/constants/tokens.constants';
 import { erc20Tokens } from '$lib/derived/erc20.derived';
-import { icrcTokens } from '$lib/derived/icrc.derived';
 import type { Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 

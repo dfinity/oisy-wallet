@@ -1,12 +1,12 @@
-import eth from '$lib/assets/eth.svg';
-import icpLight from '$lib/assets/icp_light.svg';
 import {
 	ICP_INDEX_CANISTER_ID,
 	ICP_LEDGER_CANISTER_ID,
 	ICP_TRANSACTION_FEE_E8S
-} from '$lib/constants/icp.constants';
+} from '$icp/constants/icp.constants';
+import type { IcToken } from '$icp/types/ic';
+import eth from '$lib/assets/eth.svg';
+import icpLight from '$lib/assets/icp_light.svg';
 import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
-import type { IcToken } from '$lib/types/ic';
 import type { Token } from '$lib/types/token';
 
 /**

@@ -25,7 +25,8 @@ const config = {
 			appTemplate: filesPath('src/app.html')
 		},
 		alias: {
-			$declarations: './src/declarations'
+			$declarations: './src/declarations',
+			$icp: './src/frontend/src/icp'
 		}
 	},
 

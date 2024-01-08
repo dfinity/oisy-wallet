@@ -1,5 +1,5 @@
 import type { SignRequest, Token } from '$declarations/backend/backend.did';
-import { getBackendActor } from '$lib/ic/actor.ic';
+import { getBackendActor } from '$lib/actors/actors.ic';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';

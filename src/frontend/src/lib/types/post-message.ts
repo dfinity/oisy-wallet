@@ -1,9 +1,9 @@
 import type { Result_3 } from '$declarations/airdrop/airdrop.did';
+import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
-import type { PostMessageWalletData } from '$lib/types/ic.post-message';
 
-import type { IcCanisters } from '$lib/types/ic';
+import type { IcCanisters } from '$icp/types/ic';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
