@@ -2,7 +2,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import type { WalletConnectListener } from '$lib/types/wallet-connect';
+	import type { WalletConnectListener } from '$eth/types/wallet-connect';
 	import { SignStep } from '$lib/enums/steps';
 	import WalletConnectSignReview from './WalletConnectSignReview.svelte';
 	import { WALLET_CONNECT_SIGN_STEPS } from '$lib/constants/steps.constants';

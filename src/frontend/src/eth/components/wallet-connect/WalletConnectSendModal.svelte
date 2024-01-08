@@ -5,7 +5,7 @@
 	import type {
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
-	} from '$lib/types/wallet-connect';
+	} from '$eth/types/wallet-connect';
 	import FeeContext from '../fee/FeeContext.svelte';
 	import { setContext } from 'svelte';
 	import {

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { WebSocketListener } from '$lib/types/listener';
+	import type { WebSocketListener } from '$eth/types/listener';
 	import { token } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { getFeeData } from '../../providers/infura.providers';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { ETH_BASE_FEE } from '../../constants/eth.constants';
-	import type { Erc20Token } from '$lib/types/erc20';
+	import type { Erc20Token } from '$eth/types/erc20';
 	import { address } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';

@@ -1,6 +1,6 @@
 import type { ETH_ADDRESS } from '$lib/types/address';
-import type { Erc20Token } from '$lib/types/erc20';
-import type { EtherscanRestTransaction } from '$lib/types/etherscan-transaction';
+import type { Erc20Token } from '$eth/types/erc20';
+import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
 import type { Transaction } from '$lib/types/transaction';
 import { BigNumber } from '@ethersproject/bignumber';
 

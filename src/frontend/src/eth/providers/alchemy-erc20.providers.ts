@@ -1,7 +1,7 @@
 import type { ETH_ADDRESS } from '$lib/types/address';
-import type { Erc20Token } from '$lib/types/erc20';
-import type { Erc20Transaction } from '$lib/types/erc20-transaction';
-import type { WebSocketListener } from '$lib/types/listener';
+import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc20Transaction } from '$eth/types/erc20-transaction';
+import type { WebSocketListener } from '$eth/types/listener';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';

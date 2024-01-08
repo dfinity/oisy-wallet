@@ -1,4 +1,4 @@
-import type { WalletConnectEthSignTypedDataV4 } from '$lib/types/wallet-connect';
+import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
 import { isNullish } from '@dfinity/utils';
 import { isAddress } from '@ethersproject/address';
 import type { Verify } from '@walletconnect/types';

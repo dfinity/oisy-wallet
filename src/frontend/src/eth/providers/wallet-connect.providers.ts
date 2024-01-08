@@ -1,5 +1,5 @@
 import type { ETH_ADDRESS } from '$lib/types/address';
-import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import { Core } from '@walletconnect/core';
 import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';
 import { formatJsonRpcResult, type ErrorResponse } from '@walletconnect/jsonrpc-utils';

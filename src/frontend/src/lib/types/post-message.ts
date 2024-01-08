@@ -1,7 +1,7 @@
 import type { Result_3 } from '$declarations/airdrop/airdrop.did';
 import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
-import type { Erc20ContractAddress } from '$lib/types/erc20';
+import type { Erc20ContractAddress } from '$eth/types/erc20';
 
 import type { IcCanisters } from '$icp/types/ic';
 

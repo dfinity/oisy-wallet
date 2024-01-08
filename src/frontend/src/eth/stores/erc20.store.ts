@@ -1,4 +1,4 @@
-import type { Erc20Token } from '$lib/types/erc20';
+import type { Erc20Token } from '$eth/types/erc20';
 import { writable, type Readable } from 'svelte/store';
 
 export type Ecr20TokensData = Erc20Token[] | undefined;

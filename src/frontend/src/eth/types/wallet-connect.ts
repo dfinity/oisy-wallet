@@ -1,4 +1,4 @@
-import type { WebSocketListener } from '$lib/types/listener';
+import type { WebSocketListener } from '$eth/types/listener';
 import type { ErrorResponse } from '@walletconnect/jsonrpc-utils';
 import type { PairingTypes } from '@walletconnect/types';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';

@@ -2,7 +2,7 @@ import type {
 	MetamaskAccounts,
 	MetamaskSendTransactionRequestParams,
 	MetamaskTransactionHash
-} from '$lib/types/metamask';
+} from '$eth/types/metamask';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 

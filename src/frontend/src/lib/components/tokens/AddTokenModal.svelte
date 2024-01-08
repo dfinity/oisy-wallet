@@ -13,7 +13,7 @@
 	import { addUserToken } from '$lib/api/backend.api';
 	import { ETH_CHAIN_ID } from '../../../eth/constants/eth.constants';
 	import { erc20TokensStore } from '../../../eth/stores/erc20.store';
-	import type { Erc20Metadata } from '$lib/types/erc20';
+	import type { Erc20Metadata } from '$eth/types/erc20';
 	import { mapErc20Token } from '$lib/utils/erc20.utils';
 
 	const steps: WizardSteps = [

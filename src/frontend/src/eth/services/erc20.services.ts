@@ -2,7 +2,7 @@ import type { Token } from '$declarations/backend/backend.did';
 import { listUserTokens } from '$lib/api/backend.api';
 import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { Erc20Contract, Erc20Metadata } from '$lib/types/erc20';
+import type { Erc20Contract, Erc20Metadata } from '$eth/types/erc20';
 import { mapErc20Token } from '$lib/utils/erc20.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';

@@ -5,7 +5,7 @@ import {
 	exchangeRateETHToUsd,
 	exchangeRateICPToUsd
 } from '$lib/services/exchange.services';
-import type { Erc20ContractAddress } from '$lib/types/erc20';
+import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';

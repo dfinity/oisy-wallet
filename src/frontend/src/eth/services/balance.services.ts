@@ -2,7 +2,7 @@ import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { Erc20Token } from '$lib/types/erc20';
+import type { Erc20Token } from '$eth/types/erc20';
 import type { Token } from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';

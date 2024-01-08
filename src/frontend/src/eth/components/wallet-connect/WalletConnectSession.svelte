@@ -9,7 +9,7 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import WalletConnectReview from './WalletConnectReview.svelte';
 	import { busy } from '$lib/stores/busy.store';
-	import type { WalletConnectListener } from '$lib/types/wallet-connect';
+	import type { WalletConnectListener } from '$eth/types/wallet-connect';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		SESSION_REQUEST_SEND_TRANSACTION,

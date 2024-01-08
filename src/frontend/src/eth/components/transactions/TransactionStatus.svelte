@@ -4,7 +4,7 @@
 	import { getBlockNumber } from '../../providers/infura.providers';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { fade } from 'svelte/transition';
-	import type { WebSocketListener } from '$lib/types/listener';
+	import type { WebSocketListener } from '$eth/types/listener';
 	import { initMinedTransactionsListener } from '../../services/eth-listener.services';
 
 	export let blockNumber: number;

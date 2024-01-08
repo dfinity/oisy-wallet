@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
-import type { Erc20ContractAddress } from '$lib/types/erc20';
+import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { Network } from '$lib/types/network';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { BigNumber } from '@ethersproject/bignumber';

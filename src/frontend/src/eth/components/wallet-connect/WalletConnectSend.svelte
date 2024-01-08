@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
-	import type { WalletConnectEthSendTransactionParams } from '$lib/types/wallet-connect';
+	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
 	import WalletConnectSendModal from './WalletConnectSendModal.svelte';
-	import type { WalletConnectListener } from '$lib/types/wallet-connect';
+	import type { WalletConnectListener } from '$eth/types/wallet-connect';
 
 	export let listener: WalletConnectListener | undefined | null;
 

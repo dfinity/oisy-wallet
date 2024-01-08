@@ -3,7 +3,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { metadata as metadataApi } from '../../../eth/providers/infura-erc20.providers';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Erc20Metadata } from '$lib/types/erc20';
+	import type { Erc20Metadata } from '$eth/types/erc20';
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import Warning from '$lib/components/ui/Warning.svelte';

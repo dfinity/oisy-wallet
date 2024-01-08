@@ -5,7 +5,7 @@ import { busy } from '$lib/stores/busy.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { SendParams } from '$lib/types/send';
-import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import {
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash
