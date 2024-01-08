@@ -7,17 +7,27 @@
 	import { icAccountIdentifierStore } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
+	import type { NetworkId } from '$lib/types/network';
+	import IcSendReviewNetwork from '$icp/components/send/IcSendReviewNetwork.svelte';
+	import { invalidBtcAddress, isNetworkIdBTC } from '$icp/utils/send.utils';
+	import { BTC_NETWORK } from '$icp/constants/ckbtc.constants';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
+	export let networkId: NetworkId | undefined = undefined;
 
 	let invalid = true;
 	$: invalid =
 		isNullishOrEmpty(destination) ||
 		invalidAmount(amount) ||
-		($tokenStandard === 'icrc'
-			? invalidIcrcAddress(destination)
-			: invalidIcpAddress(destination) && invalidIcrcAddress(destination));
+		(isNetworkIdBTC(networkId)
+			? invalidBtcAddress({
+					address: destination,
+					network: BTC_NETWORK
+				})
+			: $tokenStandard === 'icrc'
+				? invalidIcrcAddress(destination)
+				: invalidIcpAddress(destination) && invalidIcrcAddress(destination));
 
 	const dispatch = createEventDispatcher();
 
@@ -27,6 +37,7 @@
 
 <SendData {amount} {destination} token={$token} {source}>
 	<IcFeeDisplay slot="fee" />
+	<IcSendReviewNetwork {networkId} slot="network" />
 </SendData>
 
 <div class="flex justify-end gap-1">

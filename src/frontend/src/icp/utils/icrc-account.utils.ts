@@ -4,17 +4,19 @@ import { isNullish } from '@dfinity/utils';
 
 export const getIcrcAccount = (principal: Principal): IcrcAccount => ({ owner: principal });
 
-export const invalidIcrcAddress = (address: string | undefined): boolean => {
+export const isIcrcAddress = (address: string | undefined): boolean => {
 	if (isNullish(address)) {
-		return true;
+		return false;
 	}
 
 	try {
 		decodeIcrcAccount(address);
-		return false;
+		return true;
 	} catch (_: unknown) {
 		// We do not parse the error
 	}
 
-	return true;
+	return false;
 };
+
+export const invalidIcrcAddress = (address: string | undefined): boolean => !isIcrcAddress(address);

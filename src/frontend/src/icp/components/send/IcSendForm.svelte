@@ -8,9 +8,12 @@
 	import { icAccountIdentifierStore } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
+	import IcSendNetworkCkBTC from '$icp/components/send/IcSendNetworkCkBTC.svelte';
+	import type { NetworkId } from '$lib/types/network';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
+	export let networkId: NetworkId | undefined = undefined;
 
 	let invalid = true;
 	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount);
@@ -20,6 +23,8 @@
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<SendDestination bind:destination network={ICP_NETWORK} />
+
+	<IcSendNetworkCkBTC token={$token} bind:destination bind:networkId />
 
 	<label for="amount" class="font-bold px-4.5">Amount:</label>
 	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
