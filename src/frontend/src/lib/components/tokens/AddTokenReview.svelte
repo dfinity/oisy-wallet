@@ -7,7 +7,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import Warning from '$lib/components/ui/Warning.svelte';
-	import { erc20TokensStore } from '$lib/stores/erc20.store';
+	import { erc20TokensStore } from '../../../eth/stores/erc20.store';
 	import Value from '$lib/components/ui/Value.svelte';
 
 	export let contractAddress = '';

@@ -3,7 +3,7 @@ import { listUserTokens } from '$lib/api/backend.api';
 import { ERC20_CONTRACTS } from '../constants/erc20.constants';
 import { metadata } from '../providers/infura-erc20.providers';
 import { authStore } from '$lib/stores/auth.store';
-import { erc20TokensStore } from '$lib/stores/erc20.store';
+import { erc20TokensStore } from '../stores/erc20.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Erc20Contract, Erc20Metadata } from '$lib/types/erc20';
 import { mapErc20Token } from '$lib/utils/erc20.utils';

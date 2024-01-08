@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { isNullish } from '@dfinity/utils';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '../../stores/fee.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';

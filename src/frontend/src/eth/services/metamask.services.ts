@@ -1,6 +1,6 @@
 import { METAMASK_DEFAULT_TRANSFER_AMOUNT } from '../constants/metamask.constants';
 import { metamaskAccounts, sendMetamaskTransaction } from '../providers/metamask.providers';
-import { metamaskStore } from '$lib/stores/metamask.store';
+import { metamaskStore } from '../stores/metamask.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';

@@ -11,7 +11,7 @@
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '../../services/eth-listener.services';
 	import { getContext, onDestroy } from 'svelte';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$lib/stores/fee.store';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '../../stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
 	import { getErc20FeeData } from '../../services/fee.services';

@@ -12,7 +12,7 @@
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
 		initFeeStore
-	} from '$lib/stores/fee.store';
+	} from '../../stores/fee.store';
 	import { address } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';

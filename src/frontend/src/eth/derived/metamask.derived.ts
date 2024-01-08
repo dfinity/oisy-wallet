@@ -1,4 +1,4 @@
-import { metamaskStore } from '$lib/stores/metamask.store';
+import { metamaskStore } from '../stores/metamask.store';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 

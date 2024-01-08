@@ -4,7 +4,7 @@ import { SendStep, SignStep } from '$lib/enums/steps';
 import { send as executeSend, type SendParams } from './send.services';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
-import type { FeeStoreData } from '$lib/stores/fee.store';
+import type { FeeStoreData } from '../stores/fee.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';

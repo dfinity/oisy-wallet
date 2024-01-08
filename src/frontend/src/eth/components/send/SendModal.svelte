@@ -15,7 +15,7 @@
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
 		initFeeStore
-	} from '$lib/stores/fee.store';
+	} from '../../stores/fee.store';
 	import { setContext } from 'svelte';
 	import FeeContext from '../fee/FeeContext.svelte';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
