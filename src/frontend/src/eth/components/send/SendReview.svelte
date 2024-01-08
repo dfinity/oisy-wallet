@@ -8,7 +8,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
-	import SendReviewNetwork from "$eth/components/send/SendReviewNetwork.svelte";
+	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
