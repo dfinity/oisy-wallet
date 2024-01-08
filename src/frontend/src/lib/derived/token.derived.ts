@@ -1,10 +1,10 @@
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$lib/constants/tokens.constants';
-import { erc20Tokens } from '../../eth/derived/erc20.derived';
 import { routeToken } from '$lib/derived/nav.derived';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
+import { erc20Tokens } from '../../eth/derived/erc20.derived';
 
 export const token: Readable<Token> = derived(
 	[routeToken, erc20Tokens, icrcTokens],

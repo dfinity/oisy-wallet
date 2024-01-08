@@ -1,4 +1,3 @@
-import { ERC20_ABI } from '../constants/erc20.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20Token } from '$lib/types/erc20';
 import type { Erc20Transaction } from '$lib/types/erc20-transaction';
@@ -6,6 +5,7 @@ import type { WebSocketListener } from '$lib/types/listener';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
+import { ERC20_ABI } from '../constants/erc20.constants';
 
 const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
 const PROVIDER_URL = import.meta.env.VITE_ALCHEMY_JSON_RPC_URL;

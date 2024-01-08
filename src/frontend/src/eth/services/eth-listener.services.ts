@@ -1,4 +1,10 @@
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import type { ETH_ADDRESS } from '$lib/types/address';
+import type { Erc20Token } from '$lib/types/erc20';
+import type { WebSocketListener } from '$lib/types/listener';
+import type { Token } from '$lib/types/token';
+import type { WalletConnectListener } from '$lib/types/wallet-connect';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { initMinedTransactionsListener as initErc20PendingTransactionsListenerProvider } from '../providers/alchemy-erc20.providers';
 import {
 	initPendingTransactionsListener as initEthPendingTransactionsListenerProvider,
@@ -6,12 +12,6 @@ import {
 } from '../providers/alchemy.providers';
 import { initWalletConnect } from '../providers/wallet-connect.providers';
 import { processErc20Transaction, processEthTransaction } from './transaction.services';
-import type { ETH_ADDRESS } from '$lib/types/address';
-import type { Erc20Token } from '$lib/types/erc20';
-import type { WebSocketListener } from '$lib/types/listener';
-import type { Token } from '$lib/types/token';
-import type { WalletConnectListener } from '$lib/types/wallet-connect';
-import type { BigNumber } from '@ethersproject/bignumber';
 
 export const initTransactionsListener = ({
 	token,

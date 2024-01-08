@@ -1,10 +1,7 @@
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
-import { UNEXPECTED_ERROR } from '../constants/wallet-connect.constants';
 import { SendStep, SignStep } from '$lib/enums/steps';
-import { send as executeSend, type SendParams } from './send.services';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
-import type { FeeStoreData } from '../stores/fee.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { WalletConnectListener } from '$lib/types/wallet-connect';
@@ -17,6 +14,9 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import { get } from 'svelte/store';
+import { UNEXPECTED_ERROR } from '../constants/wallet-connect.constants';
+import type { FeeStoreData } from '../stores/fee.store';
+import { send as executeSend, type SendParams } from './send.services';
 
 export type WalletConnectCallBackParams = {
 	request: Web3WalletTypes.SessionRequest;

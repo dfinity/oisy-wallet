@@ -1,6 +1,4 @@
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-import { getTransaction } from '../providers/alchemy.providers';
-import { reloadBalance } from './balance.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import { transactionsStore } from '$lib/stores/transactions.store';
 import type { Token } from '$lib/types/token';
@@ -8,6 +6,8 @@ import { decodeErc20AbiDataValue } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
+import { getTransaction } from '../providers/alchemy.providers';
+import { reloadBalance } from './balance.services';
 
 export const processTransactionSent = async ({
 	token,

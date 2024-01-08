@@ -1,4 +1,3 @@
-import { ERC20_ABI } from '../constants/erc20.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20ContractAddress, Erc20Metadata } from '$lib/types/erc20';
 import type { Erc20PopulateTransaction } from '$lib/types/erc20-providers';
@@ -6,6 +5,7 @@ import type { BigNumber } from '@ethersproject/bignumber';
 import type { PopulatedTransaction } from '@ethersproject/contracts';
 import { InfuraProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
+import { ERC20_ABI } from '../constants/erc20.constants';
 
 const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
 const NETWORK = import.meta.env.VITE_INFURA_NETWORK;
