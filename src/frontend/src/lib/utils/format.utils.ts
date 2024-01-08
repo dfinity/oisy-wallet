@@ -1,8 +1,7 @@
+import { ETHEREUM_DEFAULT_DECIMALS } from '$lib/constants/eth.constants';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
-
-const ETHEREUM_DEFAULT_DECIMALS = 18;
 
 export const formatTokenShort = ({
 	value,
