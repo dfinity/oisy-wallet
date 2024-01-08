@@ -6,7 +6,7 @@
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
 	} from '$eth/types/wallet-connect';
-	import FeeContext from '$eth/fee/FeeContext.svelte';
+	import FeeContext from '$eth/components/fee/FeeContext.svelte';
 	import { setContext } from 'svelte';
 	import {
 		FEE_CONTEXT_KEY,
