@@ -10,7 +10,7 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { isNullish } from '@dfinity/utils';
-	import { sendIc } from '$icp/services/icp-send.services';
+	import { sendIc } from '$icp/services/ic-send.services';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import { authStore } from '$lib/stores/auth.store';
