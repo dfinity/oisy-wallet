@@ -4,20 +4,24 @@ import {
 } from '$icp/api/icp-ledger.api';
 import { transfer as transferIcrc } from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic';
+import type { IcTransferParams } from '$icp/types/ic-send';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TransferParams } from '$lib/types/send';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
+import {SendIcStep} from "$lib/enums/steps";
 
 export const sendIc = async ({
 	token: { standard, ledgerCanisterId },
+	progress,
 	...rest
-}: Pick<TransferParams, 'amount' | 'to'> & {
-	identity: OptionIdentity;
+}: IcTransferParams & {
 	token: IcToken;
 }): Promise<bigint> => {
+	progress(SendIcStep.SEND);
+
 	if (standard === 'icrc') {
 		return sendIcrc({
 			...rest,

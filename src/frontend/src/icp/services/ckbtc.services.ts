@@ -1,11 +1,10 @@
 import { retrieveBtc } from '$icp/api/ckbtc-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
+import type { IcTransferParams } from '$icp/types/ic-send';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { SendStep } from '$lib/enums/steps';
-import type { OptionIdentity } from '$lib/types/identity';
-import type { SendParams, TransferParams } from '$lib/types/send';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
 
@@ -15,12 +14,9 @@ export const convertCkBTCToBtc = async ({
 	amount: amountBigNumber,
 	identity,
 	to
-}: Pick<TransferParams, 'amount' | 'to'> & {
-	identity: OptionIdentity;
+}: IcTransferParams & {
 	token: IcToken & Partial<IcCkCanisters>;
-} & Pick<SendParams, 'progress'>): Promise<void> => {
-	progress(SendStep.INITIALIZATION);
-
+}): Promise<void> => {
 	assertNonNullish(minterCanisterId, 'A configured minter is required to convert ckBTC to BTC.');
 
 	progress(SendStep.APPROVE);

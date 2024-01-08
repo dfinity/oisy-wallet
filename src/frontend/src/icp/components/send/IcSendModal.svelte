@@ -14,7 +14,8 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import type { IcToken } from '$icp/types/ic';
 	import type { NetworkId } from '$lib/types/network';
-	import IcSendProgress from "$icp/components/send/IcSendProgress.svelte";
+	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
+	import type { IcTransferParams } from '$icp/types/ic-send';
 
 	/**
 	 * Props
@@ -48,15 +49,18 @@
 		modal.next();
 
 		try {
-			sendProgressStep = SendIcStep.SEND;
-
-			await sendIc({
+			let params: IcTransferParams = {
 				to: destination,
 				amount: parseToken({
 					value: `${amount}`,
 					unitName: $tokenDecimals
 				}),
 				identity: $authStore.identity,
+				progress: (step: SendIcStep) => (sendProgressStep = step)
+			};
+
+			await sendIc({
+				...params,
 				token: $token as IcToken
 			});
 
