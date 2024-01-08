@@ -18,6 +18,9 @@ export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
 	}
 };
 
+export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
+	!isBtcAddress(address);
+
 export const isNetworkUsingCkBtcLedger = ({ ledgerCanisterId }: IcToken): boolean =>
 	ledgerCanisterId === CKBTC_LEDGER_CANISTER_ID;
 

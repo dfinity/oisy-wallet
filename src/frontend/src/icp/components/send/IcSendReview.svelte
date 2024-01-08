@@ -9,6 +9,8 @@
 	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendReviewNetwork from '$icp/components/send/IcSendReviewNetwork.svelte';
+	import { invalidBtcAddress, isNetworkIdBTC } from '$icp/utils/send.utils';
+	import { BTC_NETWORK } from '$icp/constants/ckbtc.constants';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -18,9 +20,14 @@
 	$: invalid =
 		isNullishOrEmpty(destination) ||
 		invalidAmount(amount) ||
-		($tokenStandard === 'icrc'
-			? invalidIcrcAddress(destination)
-			: invalidIcpAddress(destination) && invalidIcrcAddress(destination));
+		(isNetworkIdBTC(networkId)
+			? invalidBtcAddress({
+					address: destination,
+					network: BTC_NETWORK
+				})
+			: $tokenStandard === 'icrc'
+				? invalidIcrcAddress(destination)
+				: invalidIcpAddress(destination) && invalidIcrcAddress(destination));
 
 	const dispatch = createEventDispatcher();
 
