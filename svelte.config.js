@@ -26,6 +26,7 @@ const config = {
 		},
 		alias: {
 			$declarations: './src/declarations',
+			$eth: './src/frontend/src/eth',
 			$icp: './src/frontend/src/icp'
 		}
 	},

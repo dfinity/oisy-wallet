@@ -1,4 +1,4 @@
-import { ETHEREUM_DEFAULT_DECIMALS } from '$lib/constants/eth.constants';
+import { ETHEREUM_DEFAULT_DECIMALS } from '$eth/constants/eth.constants';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
