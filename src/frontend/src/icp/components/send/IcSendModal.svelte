@@ -15,7 +15,7 @@
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import { authStore } from '$lib/stores/auth.store';
 	import type { IcToken } from '$icp/types/ic';
-	import type {NetworkId} from "$lib/types/network";
+	import type { NetworkId } from '$lib/types/network';
 
 	/**
 	 * Props
@@ -106,10 +106,16 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} />
+		<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
 	{:else if currentStep?.name === 'Sending'}
 		<InProgressWizard progressStep={sendProgressStep} steps={SEND_ICP_STEPS} />
 	{:else}
-		<IcSendForm on:icNext={modal.next} on:icClose={close} bind:destination bind:amount bind:networkId />
+		<IcSendForm
+			on:icNext={modal.next}
+			on:icClose={close}
+			bind:destination
+			bind:amount
+			bind:networkId
+		/>
 	{/if}
 </WizardModal>

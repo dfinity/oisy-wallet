@@ -4,14 +4,19 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { ICP_NETWORK_ID, ICP_NETWORK_SYMBOL } from '$lib/constants/networks.constants';
 	import { BTC_NETWORK, BTC_NETWORK_ID, BTC_NETWORK_SYMBOL } from '$icp/constants/ckbtc.constants';
-	import { BtcNetwork } from '@dfinity/ckbtc';
 	import { isBtcAddress } from '$icp/utils/send.utils';
-	import {isIcrcAddress} from "$icp/utils/icrc-account.utils";
+	import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
+	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let destination: string | undefined = undefined;
 
-	let networkSymbol: string | undefined = undefined;
+	let networkSymbol: string | undefined =
+		networkId === BTC_NETWORK_ID
+			? BTC_NETWORK_SYMBOL
+			: networkId === ICP_NETWORK_ID
+				? ICP_NETWORK_SYMBOL
+				: undefined;
 
 	const onDestinationAddressInput = debounce(async () => {
 		if (nonNullish(networkId)) {
@@ -63,13 +68,7 @@
 		<DropdownItem value={ICP_NETWORK_SYMBOL}>Internet Computer</DropdownItem>
 
 		<DropdownItem value={BTC_NETWORK_SYMBOL}>
-			{#if BTC_NETWORK === BtcNetwork.Mainnet}
-				Bitcoin
-			{:else if BTC_NETWORK === BtcNetwork.Testnet}
-				Bitcoin (Testnet)
-			{:else if BTC_NETWORK === BtcNetwork.Regtest}
-				Bitcoin (Regtest)
-			{/if}
+			<IcSendBtcNetwork />
 		</DropdownItem>
 	</Dropdown>
 </div>

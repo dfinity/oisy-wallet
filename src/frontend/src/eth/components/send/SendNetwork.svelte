@@ -4,12 +4,12 @@
 	import { isAddress } from '@ethersproject/address';
 	import type { Network } from '$lib/types/network';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
-	import {isIcpAccountIdentifier} from "$lib/utils/account.utils";
+	import { isIcpAccountIdentifier } from '$lib/utils/account.utils';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
 
-	let networkName: string | undefined = undefined;
+	let networkName: string | undefined = network?.name;
 
 	const onDestinationAddressInput = debounce(async () => {
 		if (nonNullish(network)) {
