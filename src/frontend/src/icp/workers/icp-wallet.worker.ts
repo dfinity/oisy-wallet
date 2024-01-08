@@ -1,12 +1,12 @@
+import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
+import { type TimerWorkerUtilsJobData } from '$icp/worker-utils/timer.worker-utils';
+import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import type {
 	GetAccountIdentifierTransactionsResponse,
 	Transaction,
 	TransactionWithId
 } from '@dfinity/ledger-icp';
-import { getTransactions as getTransactionsApi } from '../api/icp-index.api';
-import { type TimerWorkerUtilsJobData } from '../worker-utils/timer.worker-utils';
-import { WalletWorkerUtils } from '../worker-utils/wallet.worker-utils';
 
 const getTransactions = ({
 	identity
