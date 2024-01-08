@@ -3,29 +3,44 @@ import {
 	transfer as transferIcp
 } from '$icp/api/icp-ledger.api';
 import { transfer as transferIcrc } from '$icp/api/icrc-ledger.api';
+import { convertCkBTCToBtc } from '$icp/services/ckbtc.services';
 import type { IcToken } from '$icp/types/ic';
+import type { IcTransferParams } from '$icp/types/ic-send';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
-import type { OptionIdentity } from '$lib/types/identity';
-import type { TransferParams } from '$lib/types/send';
+import { isNetworkIdBTC } from '$icp/utils/send.utils';
+import { SendIcStep } from '$lib/enums/steps';
+import type { NetworkId } from '$lib/types/network';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
 
 export const sendIc = async ({
-	token: { standard, ledgerCanisterId },
+	token,
+	targetNetworkId,
 	...rest
-}: Pick<TransferParams, 'amount' | 'to'> & {
-	identity: OptionIdentity;
+}: IcTransferParams & {
 	token: IcToken;
-}): Promise<bigint> => {
+	targetNetworkId: NetworkId | undefined;
+}): Promise<void> => {
+	if (isNetworkIdBTC(targetNetworkId)) {
+		await convertCkBTCToBtc({
+			...rest,
+			token
+		});
+		return;
+	}
+
+	const { standard, ledgerCanisterId } = token;
+
 	if (standard === 'icrc') {
-		return sendIcrc({
+		await sendIcrc({
 			...rest,
 			ledgerCanisterId
 		});
+		return;
 	}
 
-	return sendIcp({
+	await sendIcp({
 		...rest
 	});
 };
@@ -34,16 +49,17 @@ const sendIcrc = async ({
 	to,
 	amount,
 	identity,
-	ledgerCanisterId
-}: Pick<TransferParams, 'amount' | 'to'> & {
-	identity: OptionIdentity;
-} & Pick<IcToken, 'ledgerCanisterId'>): Promise<IcrcBlockIndex> => {
+	ledgerCanisterId,
+	progress
+}: IcTransferParams & Pick<IcToken, 'ledgerCanisterId'>): Promise<IcrcBlockIndex> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
 	if (!validIcrcAddress) {
 		throw new Error('The address is invalid. Please try again with a valid address identifier.');
 	}
+
+	progress(SendIcStep.SEND);
 
 	return transferIcrc({
 		identity,
@@ -56,8 +72,9 @@ const sendIcrc = async ({
 const sendIcp = async ({
 	to,
 	amount,
-	identity
-}: Pick<TransferParams, 'amount' | 'to'> & { identity: OptionIdentity }): Promise<BlockHeight> => {
+	identity,
+	progress
+}: IcTransferParams): Promise<BlockHeight> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 	const validIcpAddress = !invalidIcpAddress(to);
 
@@ -65,6 +82,8 @@ const sendIcp = async ({
 	if (!validIcrcAddress && !validIcpAddress) {
 		throw new Error('The address is invalid. Please try again with a valid address identifier.');
 	}
+
+	progress(SendIcStep.SEND);
 
 	return validIcrcAddress
 		? icrc1TransferIcp({

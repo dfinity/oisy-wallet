@@ -33,8 +33,9 @@ export enum AddTokenStep {
 	DONE = 'done'
 }
 
-export enum SendIcpStep {
+export enum SendIcStep {
 	INITIALIZATION = 'initialization',
+	APPROVE = 'approve',
 	SEND = 'send',
 	DONE = 'done'
 }
