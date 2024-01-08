@@ -12,15 +12,21 @@ import type { TransferParams } from '$lib/types/send';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
 import {SendIcStep} from "$lib/enums/steps";
+import type {NetworkId} from "$lib/types/network";
+import {isNetworkIdBTC} from "$icp/utils/send.utils";
+import {networkId} from "$lib/derived/network.derived";
 
 export const sendIc = async ({
 	token: { standard, ledgerCanisterId },
-	progress,
+	targetNetworkId,
 	...rest
 }: IcTransferParams & {
 	token: IcToken;
+	targetNetworkId: NetworkId;
 }): Promise<bigint> => {
-	progress(SendIcStep.SEND);
+	if (isNetworkIdBTC(targetNetworkId)) {
+		// TODO
+	}
 
 	if (standard === 'icrc') {
 		return sendIcrc({
@@ -38,16 +44,17 @@ const sendIcrc = async ({
 	to,
 	amount,
 	identity,
-	ledgerCanisterId
-}: Pick<TransferParams, 'amount' | 'to'> & {
-	identity: OptionIdentity;
-} & Pick<IcToken, 'ledgerCanisterId'>): Promise<IcrcBlockIndex> => {
+	ledgerCanisterId,
+	progress
+}: IcTransferParams & Pick<IcToken, 'ledgerCanisterId'>): Promise<IcrcBlockIndex> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
 	if (!validIcrcAddress) {
 		throw new Error('The address is invalid. Please try again with a valid address identifier.');
 	}
+
+	progress(SendIcStep.SEND);
 
 	return transferIcrc({
 		identity,
@@ -60,8 +67,9 @@ const sendIcrc = async ({
 const sendIcp = async ({
 	to,
 	amount,
-	identity
-}: Pick<TransferParams, 'amount' | 'to'> & { identity: OptionIdentity }): Promise<BlockHeight> => {
+	identity,
+	progress
+}: IcTransferParams): Promise<BlockHeight> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 	const validIcpAddress = !invalidIcpAddress(to);
 
@@ -69,6 +77,8 @@ const sendIcp = async ({
 	if (!validIcrcAddress && !validIcpAddress) {
 		throw new Error('The address is invalid. Please try again with a valid address identifier.');
 	}
+
+	progress(SendIcStep.SEND);
 
 	return validIcrcAddress
 		? icrc1TransferIcp({

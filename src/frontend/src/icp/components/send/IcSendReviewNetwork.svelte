@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
-	import {isNetworkIdBtc} from "$icp/utils/send.utils";
+	import {isNetworkIdBTC} from "$icp/utils/send.utils";
 
 	export let networkId: NetworkId | undefined = undefined;
 </script>
@@ -11,7 +11,7 @@
 {#if nonNullish(networkId)}
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">Network</svelte:fragment>
-		{#if isNetworkIdBtc(networkId)}
+		{#if isNetworkIdBTC(networkId)}
 			<IcSendBtcNetwork />
 		{:else}
 			Internet Computer

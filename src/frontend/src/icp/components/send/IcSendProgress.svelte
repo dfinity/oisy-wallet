@@ -3,7 +3,7 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import type { ProgressStep } from '@dfinity/gix-components';
 	import type { NetworkId } from '$lib/types/network';
-	import { isNetworkIdBtc } from '$icp/utils/send.utils';
+	import { isNetworkIdBTC } from '$icp/utils/send.utils';
 
 	export let sendProgressStep: string = SendIcStep.INITIALIZATION;
 	export let networkId: NetworkId | undefined = undefined;
@@ -15,7 +15,7 @@
 			text: 'Initializing transaction...',
 			state: 'in_progress'
 		} as ProgressStep,
-		...(isNetworkIdBtc(networkId)
+		...(isNetworkIdBTC(networkId)
 			? [
 					{
 						step: SendStep.APPROVE,
