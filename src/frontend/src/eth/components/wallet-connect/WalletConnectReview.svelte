@@ -5,8 +5,8 @@
 	import { fade } from 'svelte/transition';
 	import type { ProposalTypes } from '@walletconnect/types';
 	import { EIP155_CHAINS } from '$lib/constants/eip155-chains.constants';
-	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
-	import WalletConnectDomainVerification from '$lib/components/wallet-connect/WalletConnectDomainVerification.svelte';
+	import WalletConnectActions from './WalletConnectActions.svelte';
+	import WalletConnectDomainVerification from './WalletConnectDomainVerification.svelte';
 	import { acceptedContext } from '$lib/utils/wallet-connect.utils';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';

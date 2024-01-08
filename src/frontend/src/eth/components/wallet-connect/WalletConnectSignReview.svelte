@@ -4,7 +4,7 @@
 		getSignParamsMessageHex
 	} from '$lib/utils/wallet-connect.utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
+	import WalletConnectActions from './WalletConnectActions.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Json from '$lib/components/ui/Json.svelte';
 

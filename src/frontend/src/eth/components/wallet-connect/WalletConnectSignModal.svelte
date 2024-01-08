@@ -4,11 +4,11 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 	import { SignStep } from '$lib/enums/steps';
-	import WalletConnectSignReview from '$lib/components/wallet-connect/WalletConnectSignReview.svelte';
+	import WalletConnectSignReview from './WalletConnectSignReview.svelte';
 	import { WALLET_CONNECT_SIGN_STEPS } from '$lib/constants/steps.constants';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { signMessage, reject as rejectServices } from '$lib/services/wallet-connect.services';
-	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 
 	export let listener: WalletConnectListener | undefined | null;
 	export let request: Web3WalletTypes.SessionRequest;

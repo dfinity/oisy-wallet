@@ -3,8 +3,8 @@
 	import { send as executeSend } from '$lib/services/send.services';
 	import { isNullish } from '@dfinity/utils';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import SendForm from '$lib/components/send/SendForm.svelte';
-	import SendReview from '$lib/components/send/SendReview.svelte';
+	import SendForm from './SendForm.svelte';
+	import SendReview from './SendReview.svelte';
 	import { mapAddressStartsWith0x } from '$lib/utils/send.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
@@ -17,7 +17,7 @@
 		initFeeStore
 	} from '$lib/stores/fee.store';
 	import { setContext } from 'svelte';
-	import FeeContext from '$lib/components/fee/FeeContext.svelte';
+	import FeeContext from '../fee/FeeContext.svelte';
 	import { SEND_STEPS } from '$lib/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';

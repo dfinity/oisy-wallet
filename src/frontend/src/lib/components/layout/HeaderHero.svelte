@@ -1,6 +1,6 @@
 <script lang="ts">
 	import WalletMenu from '$lib/components/core/WalletMenu.svelte';
-	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
+	import WalletConnect from '../../../eth/components/wallet-connect/WalletConnect.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { page } from '$app/stores';
 	import Back from '$lib/components/core/Back.svelte';

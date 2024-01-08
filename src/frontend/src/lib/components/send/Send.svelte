@@ -4,7 +4,7 @@
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalIcSend, modalSend } from '$lib/derived/modal.derived';
-	import SendModal from '$lib/components/send/SendModal.svelte';
+	import SendModal from '../../../eth/components/send/SendModal.svelte';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 

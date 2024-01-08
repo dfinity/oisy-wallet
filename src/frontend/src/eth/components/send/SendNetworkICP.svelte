@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Token } from '$lib/types/token';
 	import { isErc20Icp } from '$lib/utils/token.utils';
-	import SendNetwork from '$lib/components/send/SendNetwork.svelte';
+	import SendNetwork from './SendNetwork.svelte';
 	import type { Network } from '$lib/types/network';
 
 	export let token: Token;

@@ -6,7 +6,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { address } from '$lib/derived/address.derived';
-	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
+	import FeeDisplay from '../fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 
 	export let destination = '';

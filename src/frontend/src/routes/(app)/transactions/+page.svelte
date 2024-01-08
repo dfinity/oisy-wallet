@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Transactions from '$lib/components/transactions/Transactions.svelte';
+	import Transactions from '../../../eth/components/transactions/Transactions.svelte';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 	import { AIRDROP } from '$lib/constants/airdrop.constants';

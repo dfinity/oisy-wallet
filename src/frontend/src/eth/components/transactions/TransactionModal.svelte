@@ -7,7 +7,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { formatSecondsToDate, formatTokenDetailed } from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import TransactionStatus from '$lib/components/transactions/TransactionStatus.svelte';
+	import TransactionStatus from './TransactionStatus.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 

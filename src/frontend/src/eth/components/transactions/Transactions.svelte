@@ -1,16 +1,16 @@
 <script lang="ts">
-	import Transaction from '$lib/components/transactions/Transaction.svelte';
+	import Transaction from './Transaction.svelte';
 	import { sortedTransactions } from '$lib/derived/transactions.derived';
 	import { loadTransactions } from '$lib/services/transactions.services';
 	import type { Token } from '$lib/types/token';
 	import { onMount } from 'svelte';
 	import { token } from '$lib/derived/token.derived';
 	import { modalTransaction } from '$lib/derived/modal.derived';
-	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
+	import TransactionModal from './TransactionModal.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
-	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
+	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	const load = async ({ network: { id: networkId }, id: tokenId }: Token) => {

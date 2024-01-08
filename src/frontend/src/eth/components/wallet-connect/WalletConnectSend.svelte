@@ -4,7 +4,7 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
-	import WalletConnectSendModal from '$lib/components/wallet-connect/WalletConnectSendModal.svelte';
+	import WalletConnectSendModal from './WalletConnectSendModal.svelte';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 
 	export let listener: WalletConnectListener | undefined | null;

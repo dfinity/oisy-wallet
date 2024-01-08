@@ -2,9 +2,9 @@
 	import { Input } from '@dfinity/gix-components';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
+	import FeeDisplay from '../fee/FeeDisplay.svelte';
 	import { token } from '$lib/derived/token.derived';
-	import SendNetworkICP from '$lib/components/send/SendNetworkICP.svelte';
+	import SendNetworkICP from './SendNetworkICP.svelte';
 	import SendDestination from '$lib/components/send/SendDestination.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { address } from '$lib/derived/address.derived';

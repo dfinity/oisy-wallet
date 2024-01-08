@@ -4,7 +4,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { nonNullish } from '@dfinity/utils';
-	import WalletConnectSignModal from '$lib/components/wallet-connect/WalletConnectSignModal.svelte';
+	import WalletConnectSignModal from './WalletConnectSignModal.svelte';
 
 	export let listener: WalletConnectListener | undefined | null;
 

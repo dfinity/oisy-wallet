@@ -4,10 +4,10 @@
 	import { onDestroy } from 'svelte';
 	import { initWalletConnectListener } from '$lib/services/eth-listener.services';
 	import { address } from '$lib/derived/address.derived';
-	import WalletConnectForm from '$lib/components/wallet-connect/WalletConnectForm.svelte';
+	import WalletConnectForm from './WalletConnectForm.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
+	import WalletConnectReview from './WalletConnectReview.svelte';
 	import { busy } from '$lib/stores/busy.store';
 	import type { WalletConnectListener } from '$lib/types/wallet-connect';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -18,9 +18,9 @@
 		SESSION_REQUEST_ETH_SIGN_V4
 	} from '$lib/constants/wallet-connect.constants';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
-	import WalletConnectButton from '$lib/components/wallet-connect/WalletConnectButton.svelte';
+	import WalletConnectButton from './WalletConnectButton.svelte';
 	import { getSdkError } from '@walletconnect/utils';
-	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import { walletConnectUri } from '$lib/derived/wallet-connect.derived';
 	import { loading } from '$lib/stores/loader.store';
 

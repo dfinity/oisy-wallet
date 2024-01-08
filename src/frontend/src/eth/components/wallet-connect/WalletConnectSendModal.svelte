@@ -6,7 +6,7 @@
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
 	} from '$lib/types/wallet-connect';
-	import FeeContext from '$lib/components/fee/FeeContext.svelte';
+	import FeeContext from '../fee/FeeContext.svelte';
 	import { setContext } from 'svelte';
 	import {
 		FEE_CONTEXT_KEY,
@@ -15,7 +15,7 @@
 	} from '$lib/stores/fee.store';
 	import { address } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import WalletConnectSendReview from '$lib/components/wallet-connect/WalletConnectSendReview.svelte';
+	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { token } from '$lib/derived/token.derived';
@@ -24,7 +24,7 @@
 		send as sendServices,
 		reject as rejectServices
 	} from '$lib/services/wallet-connect.services';
-	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import { isErc20TransactionApprove } from '$lib/utils/transactions.utils';
 
 	export let request: Web3WalletTypes.SessionRequest;
