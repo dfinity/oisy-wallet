@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ERC20_ICP_REPO_URL } from '$lib/constants/erc20-icp.constants';
+	import { ERC20_ICP_REPO_URL } from '../../../eth/constants/erc20-icp.constants';
 	import { IconInfo } from '@dfinity/gix-components';
 </script>
 

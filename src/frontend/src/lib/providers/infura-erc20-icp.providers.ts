@@ -1,4 +1,4 @@
-import { ERC20_ICP_ABI } from '$lib/constants/erc20-icp.constants';
+import { ERC20_ICP_ABI } from '../../eth/constants/erc20-icp.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Erc20ContractAddress } from '$lib/types/erc20';
 import type { Erc20PopulateTransaction } from '$lib/types/erc20-providers';

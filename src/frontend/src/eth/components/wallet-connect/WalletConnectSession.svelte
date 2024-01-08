@@ -16,7 +16,7 @@
 		SESSION_REQUEST_PERSONAL_SIGN,
 		SESSION_REQUEST_ETH_SIGN,
 		SESSION_REQUEST_ETH_SIGN_V4
-	} from '$lib/constants/wallet-connect.constants';
+	} from '../../constants/wallet-connect.constants';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import WalletConnectButton from './WalletConnectButton.svelte';
 	import { getSdkError } from '@walletconnect/utils';

@@ -1,4 +1,4 @@
-import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
+import { CONTEXT_VALIDATION_ISSCAM } from '../../eth/constants/wallet-connect.constants';
 import type { WalletConnectEthSignTypedDataV4 } from '$lib/types/wallet-connect';
 import { isNullish } from '@dfinity/utils';
 import { isAddress } from '@ethersproject/address';

@@ -1,4 +1,4 @@
-import { ERC20_FALLBACK_FEE } from '$lib/constants/erc20.constants';
+import { ERC20_FALLBACK_FEE } from '../../eth/constants/erc20.constants';
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { getFeeData as getBurnFeeData } from '$lib/providers/infura-erc20-icp.providers';
 import { getFeeData } from '$lib/providers/infura-erc20.providers';

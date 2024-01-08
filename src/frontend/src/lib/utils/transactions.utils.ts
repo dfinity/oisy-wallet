@@ -1,4 +1,4 @@
-import { ERC20_APPROVE_HASH } from '$lib/constants/erc20.constants';
+import { ERC20_APPROVE_HASH } from '../../eth/constants/erc20.constants';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';

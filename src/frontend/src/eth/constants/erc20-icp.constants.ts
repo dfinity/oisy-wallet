@@ -1,4 +1,4 @@
-import { ERC20_ABI } from '$lib/constants/erc20.constants';
+import { ERC20_ABI } from './erc20.constants';
 
 // Burn ETH ICP ERC20 to ICP
 // - the amount of wrapped ICP to unwrap, e.g. 100_000_000_000_000_000 corresponds to exactly 0.1 ICP

@@ -4,7 +4,7 @@
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { getFeeData } from '$lib/providers/infura.providers';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { ETH_BASE_FEE } from '$lib/constants/eth.constants';
+	import { ETH_BASE_FEE } from '../../constants/eth.constants';
 	import type { Erc20Token } from '$lib/types/erc20';
 	import { address } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
