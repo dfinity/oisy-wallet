@@ -7,6 +7,7 @@
 	import type { FeeContext } from '$eth/stores/fee.store';
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+	import { maxGasFee } from '$eth/utils/fee.utils';
 
 	const { store: feeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -27,7 +28,7 @@
 					return;
 				}
 
-				fee = $feeData.maxFeePerGas.mul($feeData.gas);
+				fee = maxGasFee($feeData);
 			};
 
 			timer = setTimeout(calculateFee, 500);
