@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
@@ -9,13 +8,16 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { address } from '$lib/derived/address.derived';
 	import type { Network } from '$lib/types/network';
+	import SendAmount from '$eth/components/send/SendAmount.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let network: Network | undefined = undefined;
 
+	let insufficientFunds: boolean;
+
 	let invalid = true;
-	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount);
+	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount) || insufficientFunds;
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -25,8 +27,7 @@
 
 	<SendNetworkICP token={$token} bind:destination bind:network />
 
-	<label for="amount" class="font-bold px-4.5">Amount:</label>
-	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
+	<SendAmount bind:amount bind:insufficientFunds />
 
 	<SendSource token={$token} source={$address ?? ''} />
 
