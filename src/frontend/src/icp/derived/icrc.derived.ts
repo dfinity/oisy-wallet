@@ -4,5 +4,5 @@ import { derived, type Readable } from 'svelte/store';
 
 export const icrcTokens: Readable<IcToken[]> = derived(
 	[icrcTokensStore],
-	([$icrcTokensStore]) => $icrcTokensStore ?? []
+	([$icrcTokensStore]) => $icrcTokensStore?.map(({ data: token }) => token) ?? []
 );
