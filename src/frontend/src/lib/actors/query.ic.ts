@@ -42,7 +42,7 @@ export const queryAndUpdate = async <R, E = unknown>({
 					return;
 				}
 
-				onLoad({ certified, response });
+				!certifiedDone && onLoad({ certified, response });
 			})
 			.catch((error: E) => {
 				if (certifiedDone) {
@@ -53,8 +53,15 @@ export const queryAndUpdate = async <R, E = unknown>({
 			})
 			.finally(() => (certifiedDone = certifiedDone || certified));
 
-	await Promise.race([
-		...[strategy === 'update' ? [] : [queryOrUpdate(false)]],
-		...[strategy === 'query' ? [] : [queryOrUpdate(true)]]
-	]);
+	let requests: Array<Promise<void>>;
+
+	if (strategy === 'query') {
+		requests = [queryOrUpdate(false)];
+	} else if (strategy === 'update') {
+		requests = [queryOrUpdate(true)];
+	} else {
+		requests = [queryOrUpdate(false), queryOrUpdate(true)];
+	}
+
+	await Promise.race(requests);
 };
