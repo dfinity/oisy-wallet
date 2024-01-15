@@ -1,5 +1,7 @@
+import { queryAndUpdate } from '$lib/actors/query.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
+import type { CertifiedData } from '$lib/types/store';
 import type {
 	GetAccountIdentifierTransactionsResponse,
 	Transaction,
@@ -10,8 +12,12 @@ import type {
 	IcrcTransaction,
 	IcrcTransactionWithId
 } from '@dfinity/ledger-icrc';
-import { jsonReplacer } from '@dfinity/utils';
-import { TimerWorkerUtils, type TimerWorkerUtilsJobData } from './timer.worker-utils';
+import { isNullish, jsonReplacer } from '@dfinity/utils';
+import {
+	TimerWorkerUtils,
+	type TimerWorkerUtilsJobData,
+	type TimerWorkerUtilsJobParams
+} from './timer.worker-utils';
 
 export type GetTransactions =
 	| Omit<IcrcGetTransactions, 'transactions'>
@@ -24,12 +30,12 @@ export class WalletWorkerUtils<
 > {
 	private worker = new TimerWorkerUtils();
 
-	private transactions: Record<string, T> = {};
+	private transactions: Record<string, CertifiedData<T>> = {};
 	private initialized = false;
 
 	constructor(
 		private getTransactions: (
-			data: TimerWorkerUtilsJobData<PostMessageDataRequest>
+			data: TimerWorkerUtilsJobParams<PostMessageDataRequest>
 		) => Promise<GetTransactions & { transactions: TWithId[] }>,
 		private msg: 'syncIcpWallet' | 'syncIcrcWallet'
 	) {}
@@ -46,11 +52,27 @@ export class WalletWorkerUtils<
 		});
 	}
 
-	private syncWallet = async (data: TimerWorkerUtilsJobData<PostMessageDataRequest>) => {
-		const { transactions: fetchedTransactions, ...rest } = await this.getTransactions(data);
+	private syncWallet = async ({
+		identity,
+		...data
+	}: TimerWorkerUtilsJobData<PostMessageDataRequest>) => {
+		await queryAndUpdate<GetTransactions & { transactions: TWithId[] }>({
+			request: ({ identity: _, certified }) =>
+				this.getTransactions({ ...data, identity, certified }),
+			onLoad: (results) => this.syncTransactions(results),
+			identity
+		});
+	};
 
+	private syncTransactions = ({
+		response: { transactions: fetchedTransactions, ...rest },
+		certified
+	}: {
+		response: GetTransactions & { transactions: TWithId[] };
+		certified: boolean;
+	}) => {
 		const newTransactions = fetchedTransactions.filter(
-			({ id }) => !Object.keys(this.transactions).includes(`${id}`)
+			({ id }) => isNullish(this.transactions[`${id}`]) || !this.transactions[`${id}`].certified
 		);
 
 		if (newTransactions.length === 0) {
@@ -67,9 +89,12 @@ export class WalletWorkerUtils<
 		this.transactions = {
 			...this.transactions,
 			...newTransactions.reduce(
-				(acc: Record<string, T>, { id, transaction }) => ({
+				(acc: Record<string, CertifiedData<T>>, { id, transaction }) => ({
 					...acc,
-					[`${id}`]: transaction as T
+					[`${id}`]: {
+						data: transaction as T,
+						certified
+					}
 				}),
 				{}
 			)

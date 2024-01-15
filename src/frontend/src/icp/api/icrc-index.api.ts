@@ -6,27 +6,28 @@ import type { OptionIdentity } from '$lib/types/identity';
 import { type Identity } from '@dfinity/agent';
 import { IcrcIndexCanister, type IcrcGetTransactions } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
 export const getTransactions = async ({
 	owner,
 	identity,
 	start,
 	maxResults = WALLET_PAGINATION,
-	indexCanisterId
+	indexCanisterId,
+	certified = true
 }: {
 	owner: Principal;
 	identity: OptionIdentity;
 	start?: bigint;
 	maxResults?: bigint;
 	indexCanisterId: CanisterIdText;
-}): Promise<IcrcGetTransactions> => {
+} & QueryParams): Promise<IcrcGetTransactions> => {
 	assertNonNullish(identity, 'No internet identity.');
 
 	const { getTransactions } = await indexCanister({ identity, indexCanisterId });
 
 	return getTransactions({
-		certified: false,
+		certified,
 		start,
 		max_results: maxResults,
 		account: getIcrcAccount(owner)
