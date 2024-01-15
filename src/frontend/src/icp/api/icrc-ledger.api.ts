@@ -2,7 +2,7 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import { AnonymousIdentity, type Identity } from '@dfinity/agent';
+import { type Identity } from '@dfinity/agent';
 import {
 	IcrcLedgerCanister,
 	type IcrcAccount,
@@ -12,14 +12,21 @@ import {
 } from '@dfinity/ledger-icrc';
 import type { BlockIndex } from '@dfinity/ledger-icrc/dist/candid/icrc_ledger';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, toNullable } from '@dfinity/utils';
+import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
 
-export const metadata = async (params: {
+export const metadata = async ({
+	certified = true,
+	identity,
+	...rest
+}: {
+	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-}): Promise<IcrcTokenMetadataResponse> => {
-	const { metadata } = await ledgerCanister({ identity: new AnonymousIdentity(), ...params });
+} & QueryParams): Promise<IcrcTokenMetadataResponse> => {
+	assertNonNullish(identity, 'No internet identity.');
 
-	return metadata({ certified: false });
+	const { metadata } = await ledgerCanister({ identity, ...rest });
+
+	return metadata({ certified });
 };
 
 export const transfer = async ({
