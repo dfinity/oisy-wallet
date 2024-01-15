@@ -1,34 +1,51 @@
 import { metadata } from '$icp/api/icrc-ledger.api';
 import { ICRC_CANISTERS } from '$icp/constants/icrc.constants';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
+import type { IcCkInterface } from '$icp/types/ic';
 import { mapIcrcToken, type IcrcLoadData } from '$icp/utils/icrc.utils';
+import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { toastsError } from '$lib/stores/toasts.store';
+import { AnonymousIdentity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
 
-export const loadIcrcTokens = async (): Promise<{ success: boolean }> => {
-	try {
-		const loadKnownIcrc = (): Promise<IcrcLoadData>[] =>
-			ICRC_CANISTERS.map(
-				async ({ ledgerCanisterId, ...rest }): Promise<IcrcLoadData> => ({
-					...rest,
-					ledgerCanisterId,
-					metadata: await metadata({ ledgerCanisterId })
-				})
-			);
+export const loadIcrcTokens = async (): Promise<void> => {
+	const loadKnownIcrcData = async ({
+		ledgerCanisterId,
+		identity,
+		certified,
+		...rest
+	}: IcCkInterface & QueryAndUpdateRequestParams): Promise<IcrcLoadData> => ({
+		...rest,
+		ledgerCanisterId,
+		metadata: await metadata({ ledgerCanisterId, identity, certified })
+	});
 
-		// TODO: extend with user defined ICRC tokens
-		const tokens = await Promise.all([...loadKnownIcrc()]);
-		icrcTokensStore.set(tokens.map(mapIcrcToken).filter(nonNullish));
-	} catch (err: unknown) {
-		icrcTokensStore.reset();
+	const loadKnownIcrc = (data: IcCkInterface): Promise<void> =>
+		queryAndUpdate<IcrcLoadData>({
+			request: (params) => loadKnownIcrcData({ ...params, ...data }),
+			onLoad: ({ response: token, certified }) => {
+				const data = mapIcrcToken(token);
+				// In the unlikely event of a token not being mapped, we choose to skip it instead of throwing an error. This prevents the token from being displayed and, consequently, from being noticed as missing by the user.
+				nonNullish(data) && icrcTokensStore.set({ data, certified });
+			},
+			onError: ({ error: err, certified }) => {
+				console.error(err);
 
-		toastsError({
-			msg: { text: 'Error while loading the ICRC canisters.' },
-			err
+				if (!certified) {
+					return;
+				}
+
+				icrcTokensStore.reset();
+
+				toastsError({
+					msg: { text: 'Error while loading the ICRC canisters.' },
+					err
+				});
+			},
+			identity: new AnonymousIdentity()
 		});
 
-		return { success: false };
-	}
+	await Promise.all(ICRC_CANISTERS.map(loadKnownIcrc));
 
-	return { success: true };
+	// TODO: extend with user defined ICRC tokens
 };
