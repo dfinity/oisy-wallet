@@ -7,17 +7,17 @@ export interface CertifiedStore<T> extends Readable<CertifiedStoreData<T>> {
 	reset: (tokenId: TokenId) => void;
 }
 
-export const initCertifiedStore = <T>(): Omit<CertifiedStore<T>, 'set'> &
+export const initCertifiedStore = <T>(): CertifiedStore<T> &
 	Pick<Writable<CertifiedStoreData<T>>, 'update'> => {
-	const { subscribe, update } = writable<CertifiedStoreData<T>>(undefined);
+	const { update, subscribe } = writable<CertifiedStoreData<T>>(undefined);
 
 	return {
 		update,
+		subscribe,
 		reset: (tokenId: TokenId) =>
 			update((state) => {
 				const { [tokenId]: _, ...rest } = state ?? {};
 				return rest;
-			}),
-		subscribe
+			})
 	};
 };
