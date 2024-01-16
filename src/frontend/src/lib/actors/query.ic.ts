@@ -2,14 +2,15 @@ import type { OptionIdentity } from '$lib/types/identity';
 
 export type QueryAndUpdateOnResponse<R> = (options: { certified: boolean; response: R }) => void;
 
-export type QueryAndUpdateOnError<E = unknown> = (options: {
-	certified: boolean;
+export type QueryAndUpdateOnCertifiedError<E = unknown> = (options: {
 	error: E;
 	// The identity used for the request
 	identity: OptionIdentity;
 }) => void;
 
 export type QueryAndUpdateStrategy = 'query_and_update' | 'query' | 'update';
+
+export type QueryAndUpdatePromiseResolution = 'all_settled' | 'race';
 
 export interface QueryAndUpdateRequestParams {
 	certified: boolean;
@@ -23,15 +24,17 @@ export interface QueryAndUpdateRequestParams {
 export const queryAndUpdate = async <R, E = unknown>({
 	request,
 	onLoad,
-	onError,
+	onCertifiedError,
 	strategy = 'query_and_update',
-	identity
+	identity,
+	resolution = 'race'
 }: {
 	request: (options: QueryAndUpdateRequestParams) => Promise<R>;
 	onLoad: QueryAndUpdateOnResponse<R>;
-	onError?: QueryAndUpdateOnError<E>;
+	onCertifiedError?: QueryAndUpdateOnCertifiedError<E>;
 	strategy?: QueryAndUpdateStrategy;
 	identity: OptionIdentity;
+	resolution?: QueryAndUpdatePromiseResolution;
 }): Promise<void> => {
 	let certifiedDone = false;
 
@@ -42,14 +45,20 @@ export const queryAndUpdate = async <R, E = unknown>({
 					return;
 				}
 
-				!certifiedDone && onLoad({ certified, response });
+				onLoad({ certified, response });
 			})
 			.catch((error: E) => {
 				if (certifiedDone) {
 					return;
 				}
 
-				onError?.({ certified, error, identity });
+				console.error(error);
+
+				if (!certified) {
+					return;
+				}
+
+				onCertifiedError?.({ error, identity });
 			})
 			.finally(() => (certifiedDone = certifiedDone || certified));
 
@@ -63,5 +72,5 @@ export const queryAndUpdate = async <R, E = unknown>({
 		requests = [queryOrUpdate(false), queryOrUpdate(true)];
 	}
 
-	await Promise.race(requests);
+	await (resolution === 'all_settled' ? Promise.allSettled(requests) : Promise.race(requests));
 };
