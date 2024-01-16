@@ -2,32 +2,25 @@
 	import { createEventDispatcher } from 'svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import { token, tokenStandard } from '$lib/derived/token.derived';
-	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
+	import { invalidAmount } from '$lib/utils/input.utils';
 	import { icAccountIdentifierStore } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
-	import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendReviewNetwork from '$icp/components/send/IcSendReviewNetwork.svelte';
-	import { invalidBtcAddress, isNetworkIdBTC } from '$icp/utils/send.utils';
-	import { BTC_NETWORK } from '$icp/constants/ckbtc.constants';
+	import { isInvalidDestinationIc } from '$icp/utils/send.utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
+	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
 	$: invalid =
-		isNullishOrEmpty(destination) ||
-		invalidAmount(amount) ||
-		(isNetworkIdBTC(networkId)
-			? invalidBtcAddress({
-					address: destination,
-					network: BTC_NETWORK
-				})
-			: $tokenStandard === 'icrc'
-				? invalidIcrcAddress(destination)
-				: invalidIcpAddress(destination) && invalidIcrcAddress(destination));
+		isInvalidDestinationIc({
+			destination,
+			tokenStandard: $tokenStandard,
+			networkId
+		}) || invalidAmount(amount);
 
 	const dispatch = createEventDispatcher();
 
