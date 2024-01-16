@@ -2,8 +2,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 
 export type QueryAndUpdateOnResponse<R> = (options: { certified: boolean; response: R }) => void;
 
-export type QueryAndUpdateOnError<E = unknown> = (options: {
-	certified: boolean;
+export type QueryAndUpdateOnCertifiedError<E = unknown> = (options: {
 	error: E;
 	// The identity used for the request
 	identity: OptionIdentity;
@@ -25,14 +24,14 @@ export interface QueryAndUpdateRequestParams {
 export const queryAndUpdate = async <R, E = unknown>({
 	request,
 	onLoad,
-	onError,
+	onCertifiedError,
 	strategy = 'query_and_update',
 	identity,
 	resolution = 'race'
 }: {
 	request: (options: QueryAndUpdateRequestParams) => Promise<R>;
 	onLoad: QueryAndUpdateOnResponse<R>;
-	onError?: QueryAndUpdateOnError<E>;
+	onCertifiedError?: QueryAndUpdateOnCertifiedError<E>;
 	strategy?: QueryAndUpdateStrategy;
 	identity: OptionIdentity;
 	resolution?: QueryAndUpdatePromiseResolution;
@@ -53,7 +52,13 @@ export const queryAndUpdate = async <R, E = unknown>({
 					return;
 				}
 
-				onError?.({ certified, error, identity });
+				console.error(error);
+
+				if (!certified) {
+					return;
+				}
+
+				onCertifiedError?.({ error, identity });
 			})
 			.finally(() => (certifiedDone = certifiedDone || certified));
 

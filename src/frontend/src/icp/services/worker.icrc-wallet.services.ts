@@ -1,5 +1,10 @@
+import { onLoadTransactionsError } from '$icp/services/ic-transactions.services';
 import type { IcToken } from '$icp/types/ic';
-import type { PostMessage, PostMessageDataResponseWallet } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataResponseWallet,
+	PostMessageDataResponseWalletError
+} from '$lib/types/post-message';
 import type { IcrcGetTransactions } from '@dfinity/ledger-icrc';
 import { syncWallet } from './ic-listener.services';
 
@@ -17,7 +22,11 @@ export const initIcrcWalletWorker = async ({
 
 	worker.onmessage = async ({
 		data
-	}: MessageEvent<PostMessage<PostMessageDataResponseWallet<IcrcGetTransactions>>>) => {
+	}: MessageEvent<
+		PostMessage<
+			PostMessageDataResponseWallet<IcrcGetTransactions> | PostMessageDataResponseWalletError
+		>
+	>) => {
 		const { msg } = data;
 
 		switch (msg) {
@@ -25,6 +34,12 @@ export const initIcrcWalletWorker = async ({
 				syncWallet({
 					tokenId,
 					data: data.data as PostMessageDataResponseWallet<IcrcGetTransactions>
+				});
+				return;
+			case 'syncIcpWalletError':
+				onLoadTransactionsError({
+					tokenId,
+					error: (data.data as PostMessageDataResponseWalletError).error
 				});
 				return;
 		}

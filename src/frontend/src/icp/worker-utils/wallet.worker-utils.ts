@@ -1,6 +1,9 @@
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
+import type {
+	PostMessageDataResponseWallet,
+	PostMessageDataResponseWalletError
+} from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type {
 	GetAccountIdentifierTransactionsResponse,
@@ -60,6 +63,7 @@ export class WalletWorkerUtils<
 			request: ({ identity: _, certified }) =>
 				this.getTransactions({ ...data, identity, certified }),
 			onLoad: (results) => this.syncTransactions(results),
+			onCertifiedError: ({ error }) => this.postMessageWalletError(error),
 			identity,
 			resolution: 'all_settled'
 		});
@@ -125,6 +129,15 @@ export class WalletWorkerUtils<
 						jsonReplacer
 					)
 				}
+			}
+		});
+	}
+
+	private postMessageWalletError(error: unknown) {
+		this.worker.postMsg<PostMessageDataResponseWalletError>({
+			msg: `${this.msg}Error`,
+			data: {
+				error
 			}
 		});
 	}
