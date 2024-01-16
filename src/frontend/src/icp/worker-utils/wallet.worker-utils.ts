@@ -114,6 +114,7 @@ export class WalletWorkerUtils<
 
 	private postMessageWallet({
 		transactions: newTransactions,
+		balance: data,
 		certified,
 		...rest
 	}: GetTransactions & { transactions: TWithId[] } & { certified: boolean }) {
@@ -123,6 +124,10 @@ export class WalletWorkerUtils<
 			msg: this.msg,
 			data: {
 				wallet: {
+					balance: {
+						data,
+						certified
+					},
 					...rest,
 					newTransactions: JSON.stringify(
 						Object.entries(certifiedTransactions).map(([_id, transaction]) => transaction),
