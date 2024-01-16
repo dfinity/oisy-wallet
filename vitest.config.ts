@@ -26,7 +26,7 @@ export default defineConfig(
 				},
 				{
 					find: '$tests',
-					replacement: resolve(__dirname, 'src/frontend/tests')
+					replacement: resolve(__dirname, 'src/frontend/src/tests')
 				}
 			]
 		},
