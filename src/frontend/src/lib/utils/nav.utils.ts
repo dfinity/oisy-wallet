@@ -36,7 +36,8 @@ const tokenUrl = ({
 		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
 	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
-const networkParam = (networkId: NetworkId): string => `network=${networkId.description ?? ''}`;
+export const networkParam = (networkId: NetworkId): string =>
+	`network=${networkId.description ?? ''}`;
 
 export const back = async ({ pop, networkId }: { pop: boolean; networkId: NetworkId }) => {
 	const rootUrl = `/?${networkParam(networkId)}`;
