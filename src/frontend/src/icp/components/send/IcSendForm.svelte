@@ -4,7 +4,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import { icAccountIdentifierStore } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
-	import IcSendNetworkCkBTC from '$icp/components/send/IcSendNetworkCkBTC.svelte';
+	import IcSendNetworkCkBTC from '$icp/components/send/IcSendNetworkCk.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';

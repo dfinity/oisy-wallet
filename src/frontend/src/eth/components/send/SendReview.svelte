@@ -9,7 +9,7 @@
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
-	import { isAddress } from '@ethersproject/address';
+	import { isEthAddress } from '$lib/utils/account.utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -20,7 +20,7 @@
 	let invalid = true;
 	$: invalid =
 		isNullishOrEmpty(destination) ||
-		!isAddress(destination) ||
+		!isEthAddress(destination) ||
 		invalidAmount(amount) ||
 		isNullish($storeFeeData);
 

@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { isAddress } from '@ethersproject/address';
 	import type { Network } from '$lib/types/network';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
-	import { isIcpAccountIdentifier } from '$lib/utils/account.utils';
+	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
@@ -21,7 +20,7 @@
 			return;
 		}
 
-		if (isAddress(destination)) {
+		if (isEthAddress(destination)) {
 			networkName = ETHEREUM_NETWORK.name;
 			return;
 		}
