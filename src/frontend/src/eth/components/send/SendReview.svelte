@@ -9,6 +9,7 @@
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
+	import { isAddress } from '@ethersproject/address';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -17,7 +18,11 @@
 	const { store: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let invalid = true;
-	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount) || isNullish($storeFeeData);
+	$: invalid =
+		isNullishOrEmpty(destination) ||
+		!isAddress(destination) ||
+		invalidAmount(amount) ||
+		isNullish($storeFeeData);
 
 	const dispatch = createEventDispatcher();
 </script>
