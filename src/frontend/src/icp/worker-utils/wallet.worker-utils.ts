@@ -60,7 +60,8 @@ export class WalletWorkerUtils<
 			request: ({ identity: _, certified }) =>
 				this.getTransactions({ ...data, identity, certified }),
 			onLoad: (results) => this.syncTransactions(results),
-			identity
+			identity,
+			resolution: 'all_settled'
 		});
 	};
 
@@ -78,7 +79,7 @@ export class WalletWorkerUtils<
 		if (newTransactions.length === 0) {
 			// We execute postMessage at least once because developer may have no transaction at all so, we want to display the balance zero
 			if (!this.initialized) {
-				this.postMessageWallet({ transactions: newTransactions, ...rest });
+				this.postMessageWallet({ transactions: newTransactions, certified, ...rest });
 
 				this.initialized = true;
 			}
@@ -100,20 +101,27 @@ export class WalletWorkerUtils<
 			)
 		};
 
-		this.postMessageWallet({ transactions: newTransactions, ...rest });
+		this.postMessageWallet({
+			transactions: newTransactions,
+			certified,
+			...rest
+		});
 	};
 
 	private postMessageWallet({
 		transactions: newTransactions,
+		certified,
 		...rest
-	}: GetTransactions & { transactions: TWithId[] }) {
+	}: GetTransactions & { transactions: TWithId[] } & { certified: boolean }) {
+		const certifiedTransactions = newTransactions.map((data) => ({ data, certified }));
+
 		this.worker.postMsg<PostMessageDataResponseWallet<GetTransactions>>({
 			msg: this.msg,
 			data: {
 				wallet: {
 					...rest,
 					newTransactions: JSON.stringify(
-						Object.entries(newTransactions).map(([_id, transaction]) => transaction),
+						Object.entries(certifiedTransactions).map(([_id, transaction]) => transaction),
 						jsonReplacer
 					)
 				}

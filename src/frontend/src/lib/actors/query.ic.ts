@@ -11,6 +11,8 @@ export type QueryAndUpdateOnError<E = unknown> = (options: {
 
 export type QueryAndUpdateStrategy = 'query_and_update' | 'query' | 'update';
 
+export type QueryAndUpdatePromiseResolution = 'all_settled' | 'race';
+
 export interface QueryAndUpdateRequestParams {
 	certified: boolean;
 	identity: OptionIdentity;
@@ -25,13 +27,15 @@ export const queryAndUpdate = async <R, E = unknown>({
 	onLoad,
 	onError,
 	strategy = 'query_and_update',
-	identity
+	identity,
+	resolution = 'race'
 }: {
 	request: (options: QueryAndUpdateRequestParams) => Promise<R>;
 	onLoad: QueryAndUpdateOnResponse<R>;
 	onError?: QueryAndUpdateOnError<E>;
 	strategy?: QueryAndUpdateStrategy;
 	identity: OptionIdentity;
+	resolution?: QueryAndUpdatePromiseResolution;
 }): Promise<void> => {
 	let certifiedDone = false;
 
@@ -42,7 +46,7 @@ export const queryAndUpdate = async <R, E = unknown>({
 					return;
 				}
 
-				!certifiedDone && onLoad({ certified, response });
+				onLoad({ certified, response });
 			})
 			.catch((error: E) => {
 				if (certifiedDone) {
@@ -63,5 +67,5 @@ export const queryAndUpdate = async <R, E = unknown>({
 		requests = [queryOrUpdate(false), queryOrUpdate(true)];
 	}
 
-	await Promise.race(requests);
+	await (resolution === 'all_settled' ? Promise.allSettled(requests) : Promise.race(requests));
 };

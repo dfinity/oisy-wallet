@@ -178,4 +178,36 @@ describe('query.ic', () => {
 		expect(updateDone).toBeTruthy();
 		expect(queryDone).toBe(false);
 	});
+
+	it('should not resolve promise when the first response is done', async () => {
+		let updateDone = false;
+		let queryDone = false;
+		const request = vi.fn().mockImplementation(({ certified }: { certified: boolean }) =>
+			certified
+				? new Promise((resolve) => {
+						setTimeout(() => {
+							updateDone = true;
+							resolve({});
+						}, 1);
+					})
+				: new Promise((resolve) => {
+						setTimeout(() => {
+							queryDone = true;
+							resolve({});
+						}, 100);
+					})
+		);
+		const onLoad = vi.fn();
+
+		expect(updateDone).toBe(false);
+		expect(queryDone).toBe(false);
+		await queryAndUpdate<number, unknown>({
+			request,
+			onLoad,
+			identity,
+			resolution: 'all_settled'
+		});
+		expect(updateDone).toBeTruthy();
+		expect(queryDone).toBeTruthy();
+	});
 });
