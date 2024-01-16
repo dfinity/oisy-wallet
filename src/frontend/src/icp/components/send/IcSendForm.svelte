@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { token } from '$lib/derived/token.derived';
@@ -10,13 +9,16 @@
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import IcSendNetworkCkBTC from '$icp/components/send/IcSendNetworkCkBTC.svelte';
 	import type { NetworkId } from '$lib/types/network';
+	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
+	let insufficientFunds: boolean;
+
 	let invalid = true;
-	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount);
+	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount) || insufficientFunds;
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -26,8 +28,7 @@
 
 	<IcSendNetworkCkBTC token={$token} bind:destination bind:networkId />
 
-	<label for="amount" class="font-bold px-4.5">Amount:</label>
-	<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
+	<IcSendAmount bind:amount bind:insufficientFunds />
 
 	<SendSource token={$token} source={$icAccountIdentifierStore ?? ''} />
 
