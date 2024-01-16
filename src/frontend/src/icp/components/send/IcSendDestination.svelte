@@ -38,7 +38,7 @@
 
 	const debounceValidate = debounce(validate);
 
-	$: destination, debounceValidate();
+	$: destination, networkId, debounceValidate();
 </script>
 
 <SendDestination bind:destination {invalidDestination} network={ICP_NETWORK} />
