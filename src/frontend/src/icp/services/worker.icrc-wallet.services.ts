@@ -36,7 +36,7 @@ export const initIcrcWalletWorker = async ({
 					data: data.data as PostMessageDataResponseWallet<IcrcGetTransactions>
 				});
 				return;
-			case 'syncIcpWalletError':
+			case 'syncIcrcWalletError':
 				onLoadTransactionsError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseWalletError).error
