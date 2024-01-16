@@ -17,7 +17,7 @@
 	import type { CertifiedData } from '$lib/types/store';
 
 	let transactions: CertifiedData<IcTransactionType>[];
-	$: transactions = $icTransactionsStore[$tokenId] ?? [];
+	$: transactions = $icTransactionsStore?.[$tokenId] ?? [];
 
 	let disableInfiniteScroll = false;
 

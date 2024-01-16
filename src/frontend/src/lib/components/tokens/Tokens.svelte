@@ -33,7 +33,7 @@
 
 					<output class="break-all" slot="description">
 						{formatTokenShort({
-							value: $balancesStore?.[token.id].data ?? BigNumber.from(0n),
+							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
 							unitName: token.decimals
 						})}
 						{token.symbol}

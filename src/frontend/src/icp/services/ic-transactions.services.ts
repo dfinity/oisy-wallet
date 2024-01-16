@@ -80,7 +80,7 @@ export const onLoadTransactionsError = ({
 	icTransactionsStore.reset(tokenId);
 
 	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
-	balancesStore.reset();
+	balancesStore.reset(tokenId);
 
 	toastsError({
 		msg: { text: 'Something went wrong while fetching the transactions.' },
