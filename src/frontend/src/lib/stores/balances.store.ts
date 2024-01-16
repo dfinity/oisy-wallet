@@ -1,26 +1,25 @@
+import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
-import { writable, type Readable } from 'svelte/store';
 
-export type BalancesData = Record<TokenId, CertifiedData<BigNumber>> | undefined | null;
+export type BalancesData = CertifiedData<BigNumber>;
 
-export interface BalancesStore extends Readable<BalancesData> {
-	set: (params: { tokenId: TokenId; balance: CertifiedData<BigNumber> }) => void;
-	reset: () => void;
+export interface BalancesStore extends CertifiedStore<BalancesData> {
+	set: (params: { tokenId: TokenId; balance: BalancesData }) => void;
 }
 
 const initBalancesStore = (): BalancesStore => {
-	const { subscribe, set, update } = writable<BalancesData>(undefined);
+	const { subscribe, update, reset } = initCertifiedStore<BalancesData>();
 
 	return {
-		set: ({ tokenId, balance }: { tokenId: TokenId; balance: CertifiedData<BigNumber> }) =>
+		set: ({ tokenId, balance }: { tokenId: TokenId; balance: BalancesData }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: balance
 			})),
-		reset: () => set(null),
+		reset,
 		subscribe
 	};
 };

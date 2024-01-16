@@ -33,7 +33,7 @@ export const loadBalance = async (): Promise<{ success: boolean }> => {
 		const data = await balanceService(address);
 		balancesStore.set({ tokenId: ETHEREUM_TOKEN_ID, balance: { data, certified: false } });
 	} catch (err: unknown) {
-		balancesStore.reset();
+		balancesStore.reset(ETHEREUM_TOKEN_ID);
 
 		toastsError({
 			msg: { text: 'Error while loading the ETH balance.' },
@@ -61,7 +61,7 @@ export const loadErc20Balance = async (contract: Erc20Token): Promise<{ success:
 		const data = await balanceErc20Service({ address, contract });
 		balancesStore.set({ tokenId: contract.id, balance: { data, certified: false } });
 	} catch (err: unknown) {
-		balancesStore.reset();
+		balancesStore.reset(contract.id);
 
 		toastsError({
 			msg: { text: `Error while loading ${contract.symbol} balance.` },

@@ -1,16 +1,17 @@
 import type { IcToken, IcTokenWithoutId } from '$icp/types/ic';
+import type { CanisterIdText } from '$lib/types/canister';
 import type { CertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 
-export type IcrcTokensData = CertifiedData<IcToken>[] | undefined | null;
+export type IcrcTokensData = CertifiedData<IcToken>[] | undefined;
 
 export interface IcrcTokensStore extends Readable<IcrcTokensData> {
 	set: (token: CertifiedData<IcTokenWithoutId>) => void;
-	reset: () => void;
+	reset: (ledgerCanisterId: CanisterIdText) => void;
 }
 
 const initIcrcTokensStore = (): IcrcTokensStore => {
-	const { subscribe, set, update } = writable<IcrcTokensData>(undefined);
+	const { subscribe, update } = writable<IcrcTokensData>(undefined);
 
 	return {
 		set: ({ data, certified }: CertifiedData<IcTokenWithoutId>) =>
@@ -31,7 +32,10 @@ const initIcrcTokensStore = (): IcrcTokensStore => {
 					}
 				}
 			]),
-		reset: () => set(null),
+		reset: (ledgerCanisterId: CanisterIdText) =>
+			update((state) => [
+				...(state ?? []).filter(({ data: { ledgerCanisterId: id } }) => id !== ledgerCanisterId)
+			]),
 		subscribe
 	};
 };

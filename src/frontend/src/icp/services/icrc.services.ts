@@ -14,7 +14,7 @@ export const loadIcrcTokens = async (): Promise<void> => {
 			request: (params) => requestKnownIcrcData({ ...params, ...data }),
 			onLoad: loadKnownIcrcData,
 			onCertifiedError: ({ error: err }) => {
-				icrcTokensStore.reset();
+				icrcTokensStore.reset(data.ledgerCanisterId);
 
 				toastsError({
 					msg: { text: 'Error while loading the ICRC canisters.' },

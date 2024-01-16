@@ -6,7 +6,7 @@
 	import { tokenId } from '$lib/derived/token.derived';
 
 	let transactionsInitialized: boolean;
-	$: transactionsInitialized = nonNullish($icTransactionsStore[$tokenId]);
+	$: transactionsInitialized = nonNullish($icTransactionsStore?.[$tokenId]);
 </script>
 
 {#if !transactionsInitialized}
