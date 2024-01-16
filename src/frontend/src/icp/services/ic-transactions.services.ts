@@ -3,11 +3,11 @@ import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index.api'
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcGetTransactions, IcToken } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { balancesStore } from '$lib/stores/balances.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { Principal } from '@dfinity/principal';
-import {balancesStore} from "$lib/stores/balances.store";
 
 const getTransactions = async ({
 	token: { standard, indexCanisterId },
