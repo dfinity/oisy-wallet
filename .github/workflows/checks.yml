@@ -4,6 +4,17 @@ on:
   pull_request:
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+
   lint:
     runs-on: ubuntu-latest
 
@@ -26,8 +37,19 @@ jobs:
       - name: Lint
         run: npm run check
 
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm run test
+
   may-merge:
-    needs: ['check', 'lint']
+    needs: ['build', 'check', 'lint', 'test']
     runs-on: ubuntu-latest
     steps:
       - name: Cleared for merging
