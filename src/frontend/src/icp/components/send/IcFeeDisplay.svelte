@@ -5,22 +5,26 @@
 	import { token } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { ICP_FEE_DECIMALS } from '$icp/constants/icp.constants';
+	import { nonNullish } from '@dfinity/utils';
 
-	// We know here the token is of standard IC
-	let fee: bigint;
 	let decimals: number;
 	let symbol: string;
 
-	$: ({ decimals, symbol, fee } = $token as IcToken);
+	$: ({ decimals, symbol } = $token);
+
+	let fee: bigint | undefined;
+	$: fee = ($token as IcToken).fee;
 </script>
 
 <Value ref="fee">
 	<svelte:fragment slot="label">Fee</svelte:fragment>
 
-	{formatTokenShort({
-		value: BigNumber.from(fee),
-		unitName: decimals,
-		displayDecimals: ICP_FEE_DECIMALS
-	})}
-	{symbol}
+	{#if nonNullish(fee)}
+		{formatTokenShort({
+			value: BigNumber.from(fee),
+			unitName: decimals,
+			displayDecimals: ICP_FEE_DECIMALS
+		})}
+		{symbol}
+	{/if}
 </Value>

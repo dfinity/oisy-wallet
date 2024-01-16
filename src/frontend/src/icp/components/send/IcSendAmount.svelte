@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { slide } from 'svelte/transition';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
@@ -12,13 +12,16 @@
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
 
-	// We know here the token is of standard IC
-	let fee: bigint;
-
-	$: ({ fee } = $token as IcToken);
+	let fee: bigint | undefined;
+	$: fee = ($token as IcToken).fee;
 
 	const validate = () => {
 		if (invalidAmount(amount)) {
+			insufficientFunds = false;
+			return;
+		}
+
+		if (isNullish(fee)) {
 			insufficientFunds = false;
 			return;
 		}
