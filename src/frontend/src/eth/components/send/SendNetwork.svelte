@@ -26,7 +26,7 @@
 			return;
 		}
 
-		if (await isIcpAccountIdentifier(destination)) {
+		if (isIcpAccountIdentifier(destination)) {
 			networkName = ICP_NETWORK.name;
 		}
 	});
