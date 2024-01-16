@@ -8,6 +8,8 @@
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isNullish } from '@dfinity/utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -17,7 +19,8 @@
 	let invalidDestination: boolean;
 
 	let invalid = true;
-	$: invalid = invalidDestination || insufficientFunds;
+	$: invalid =
+		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
 
 	const dispatch = createEventDispatcher();
 </script>
