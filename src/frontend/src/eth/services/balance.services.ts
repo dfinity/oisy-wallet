@@ -30,8 +30,8 @@ export const loadBalance = async (): Promise<{ success: boolean }> => {
 	}
 
 	try {
-		const balance = await balanceService(address);
-		balancesStore.set({ tokenId: ETHEREUM_TOKEN_ID, balance });
+		const data = await balanceService(address);
+		balancesStore.set({ tokenId: ETHEREUM_TOKEN_ID, balance: { data, certified: false } });
 	} catch (err: unknown) {
 		balancesStore.reset();
 
@@ -58,8 +58,8 @@ export const loadErc20Balance = async (contract: Erc20Token): Promise<{ success:
 	}
 
 	try {
-		const balance = await balanceErc20Service({ address, contract });
-		balancesStore.set({ tokenId: contract.id, balance });
+		const data = await balanceErc20Service({ address, contract });
+		balancesStore.set({ tokenId: contract.id, balance: { data, certified: false } });
 	} catch (err: unknown) {
 		balancesStore.reset();
 

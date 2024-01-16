@@ -3,6 +3,7 @@ import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index.api'
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcGetTransactions, IcToken } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { balancesStore } from '$lib/stores/balances.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
@@ -77,6 +78,9 @@ export const onLoadTransactionsError = ({
 	error: unknown;
 }) => {
 	icTransactionsStore.reset(tokenId);
+
+	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
+	balancesStore.reset();
 
 	toastsError({
 		msg: { text: 'Something went wrong while fetching the transactions.' },
