@@ -32,7 +32,8 @@ export default defineConfig(
 		},
 		test: {
 			globals: true,
-			watch: false
+			watch: false,
+			silent: true
 		}
 	})
 );
