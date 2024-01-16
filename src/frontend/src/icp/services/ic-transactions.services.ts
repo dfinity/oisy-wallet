@@ -7,6 +7,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { Principal } from '@dfinity/principal';
+import {balancesStore} from "$lib/stores/balances.store";
 
 const getTransactions = async ({
 	token: { standard, indexCanisterId },
@@ -77,6 +78,9 @@ export const onLoadTransactionsError = ({
 	error: unknown;
 }) => {
 	icTransactionsStore.reset(tokenId);
+
+	// We get transactions and balance for the same end point therefore if getting certified transactions fails, it also means the balance is incorrect.
+	balancesStore.reset();
 
 	toastsError({
 		msg: { text: 'Something went wrong while fetching the transactions.' },
