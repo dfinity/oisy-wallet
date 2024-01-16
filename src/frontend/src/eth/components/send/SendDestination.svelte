@@ -1,7 +1,7 @@
 <script lang="ts">
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
-	import { isAddress } from '@ethersproject/address';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isEthAddress } from '$lib/utils/account.utils';
 
 	export let destination = '';
 	export let invalidDestination = false;
@@ -12,7 +12,7 @@
 			return false;
 		}
 
-		return !isAddress(destination);
+		return !isEthAddress(destination);
 	};
 </script>
 

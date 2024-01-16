@@ -6,7 +6,7 @@ import type { Network } from '$lib/types/network';
 /**
  * Ethereum
  */
-const ETHEREUM_NETWORK_SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
+export const ETHEREUM_NETWORK_SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
 
 export const ETHEREUM_NETWORK_ID = Symbol(ETHEREUM_NETWORK_SYMBOL);
 

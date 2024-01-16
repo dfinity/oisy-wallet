@@ -1,13 +1,13 @@
 import { CONTEXT_VALIDATION_ISSCAM } from '$eth/constants/wallet-connect.constants';
 import type { WalletConnectEthSignTypedDataV4 } from '$eth/types/wallet-connect';
+import { isEthAddress } from '$lib/utils/account.utils';
 import { isNullish } from '@dfinity/utils';
-import { isAddress } from '@ethersproject/address';
 import type { Verify } from '@walletconnect/types';
 import { Utils } from 'alchemy-sdk';
 import { utils } from 'ethers';
 
 export const getSignParamsMessageHex = (params: string[]): string =>
-	params.filter((p) => !isAddress(p))[0];
+	params.filter((p) => !isEthAddress(p))[0];
 
 export const getSignParamsMessageUtf8 = (params: string[]): string => {
 	const message = getSignParamsMessageHex(params);

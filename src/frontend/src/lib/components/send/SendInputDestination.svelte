@@ -14,7 +14,7 @@
 
 	const debounceValidate = debounce(validate);
 
-	$: destination, networkId, debounceValidate();
+	$: destination, networkId, isInvalidDestination, debounceValidate();
 </script>
 
 <label for="destination" class="font-bold px-4.5">Destination:</label>
