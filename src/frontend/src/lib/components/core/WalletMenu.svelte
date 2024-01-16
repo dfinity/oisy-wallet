@@ -9,14 +9,15 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
-	import { networkAddress, networkICP } from '$lib/derived/network.derived';
+	import { networkAddress, networkICP, networkId } from '$lib/derived/network.derived';
+	import { networkParam } from '$lib/utils/nav.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
 	const gotoSettings = async () => {
 		visible = false;
-		await goto('/settings');
+		await goto(`/settings?${networkParam($networkId)}`);
 	};
 
 	const DASHBOARD_URL = import.meta.env.VITE_ICP_DASHBOARD_EXPLORER_URL;
