@@ -1,7 +1,7 @@
 import { checkAccountId } from '@dfinity/ledger-icp';
 import { isNullish } from '@dfinity/utils';
 
-export const isIcpAccountIdentifier = async (address: string | undefined): Promise<boolean> => {
+export const isIcpAccountIdentifier = (address: string | undefined): boolean => {
 	if (isNullish(address)) {
 		return false;
 	}
