@@ -1,13 +1,20 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import type { Network } from '$lib/types/network';
-	import { isNetworkICP } from '$lib/utils/network.utils';
-	import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
+	import type { NetworkId } from '$lib/types/network';
 	import { slide } from 'svelte/transition';
+	import { debounce } from '@dfinity/utils';
 
 	export let destination = '';
-	export let network: Network | undefined = undefined;
+	export let networkId: NetworkId | undefined = undefined;
 	export let invalidDestination = false;
+	export let inputPlaceholder: string;
+	export let isInvalidDestination: () => boolean;
+
+	const validate = () => (invalidDestination = isInvalidDestination());
+
+	const debounceValidate = debounce(validate);
+
+	$: destination, networkId, debounceValidate();
 </script>
 
 <label for="destination" class="font-bold px-4.5">Destination:</label>
@@ -16,9 +23,7 @@
 	inputType="text"
 	required
 	bind:value={destination}
-	placeholder={isNetworkICP(network ?? ETHEREUM_NETWORK)
-		? 'Enter account identifier'
-		: 'Enter public address (0x)'}
+	placeholder={inputPlaceholder}
 />
 
 {#if invalidDestination}

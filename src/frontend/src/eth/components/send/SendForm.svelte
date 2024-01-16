@@ -4,26 +4,29 @@
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import SendNetworkICP from './SendNetworkICP.svelte';
-	import SendDestination from '$lib/components/send/SendDestination.svelte';
-	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { address } from '$lib/derived/address.derived';
 	import type { Network } from '$lib/types/network';
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
+	import { isNullish } from '@dfinity/utils';
+	import SendDestination from '$eth/components/send/SendDestination.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let network: Network | undefined = undefined;
 
 	let insufficientFunds: boolean;
+	let invalidDestination: boolean;
 
 	let invalid = true;
-	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount) || insufficientFunds;
+	$: invalid =
+		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
 
 	const dispatch = createEventDispatcher();
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<SendDestination bind:destination {network} />
+	<SendDestination bind:destination bind:invalidDestination />
 
 	<SendNetworkICP token={$token} bind:destination bind:network />
 
