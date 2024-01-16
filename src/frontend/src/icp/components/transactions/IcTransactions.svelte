@@ -13,9 +13,10 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken, IcTransaction as IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import { token, tokenId } from '$lib/derived/token.derived';
-	import { getTransactions } from '$icp/services/ic-transactions.services';
+	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
+	import type { CertifiedData } from '$lib/types/store';
 
-	let transactions: IcTransactionType[];
+	let transactions: CertifiedData<IcTransactionType>[];
 	$: transactions = $icTransactionsStore[$tokenId] ?? [];
 
 	let disableInfiniteScroll = false;
@@ -28,36 +29,21 @@
 			return;
 		}
 
-		const lastId = last(transactions)?.id;
+		const lastId = last(transactions)?.data.id;
 
 		if (isNullish(lastId)) {
 			// No transactions, we do nothing here and wait for the worker to post the first transactions
 			return;
 		}
 
-		try {
-			const { transactions: nextTransactions } = await getTransactions({
-				owner: $authStore.identity.getPrincipal(),
-				identity: $authStore.identity,
-				maxResults: WALLET_PAGINATION,
-				start: lastId,
-				token: $token as IcToken
-			});
-
-			if (nextTransactions.length === 0) {
-				disableInfiniteScroll = true;
-				return;
-			}
-
-			icTransactionsStore.append({ tokenId: $tokenId, transactions: nextTransactions });
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: 'Something went wrong while fetching the transactions.' },
-				err
-			});
-
-			disableInfiniteScroll = true;
-		}
+		await loadNextTransactions({
+			owner: $authStore.identity.getPrincipal(),
+			identity: $authStore.identity,
+			maxResults: WALLET_PAGINATION,
+			start: lastId,
+			token: $token as IcToken,
+			signalEnd: () => (disableInfiniteScroll = true)
+		});
 	};
 
 	let selectedTransaction: IcTransactionUi | undefined;
@@ -69,8 +55,8 @@
 <IcTransactionsSkeletons>
 	{#if transactions.length > 0}
 		<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
-			{#each transactions as transaction, index (`${transaction.id}-${index}`)}
-				<IcTransaction {transaction} />
+			{#each transactions as transaction, index (`${transaction.data.id}-${index}`)}
+				<IcTransaction transaction={transaction.data} />
 			{/each}
 		</InfiniteScroll>
 	{/if}

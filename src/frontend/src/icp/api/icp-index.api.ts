@@ -5,19 +5,20 @@ import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { IndexCanister, type GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
 export const getTransactions = async ({
 	owner,
 	identity,
 	start,
-	maxResults = WALLET_PAGINATION
+	maxResults = WALLET_PAGINATION,
+	certified = true
 }: {
 	owner: Principal;
 	identity: OptionIdentity;
 	start?: bigint;
 	maxResults?: bigint;
-}): Promise<GetAccountIdentifierTransactionsResponse> => {
+} & QueryParams): Promise<GetAccountIdentifierTransactionsResponse> => {
 	assertNonNullish(identity, 'No internet identity.');
 
 	const agent = await getAgent({ identity });
@@ -28,7 +29,7 @@ export const getTransactions = async ({
 	});
 
 	return getTransactions({
-		certified: false,
+		certified,
 		start,
 		maxResults,
 		accountIdentifier: getAccountIdentifier(owner).toHex()

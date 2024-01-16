@@ -1,5 +1,5 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index.api';
-import { type TimerWorkerUtilsJobData } from '$icp/worker-utils/timer.worker-utils';
+import { type TimerWorkerUtilsJobParams } from '$icp/worker-utils/timer.worker-utils';
 import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
 import type { PostMessage, PostMessageDataRequestIcrc } from '$lib/types/post-message';
 import type {
@@ -11,12 +11,14 @@ import { assertNonNullish } from '@dfinity/utils';
 
 const getTransactions = ({
 	identity,
+	certified,
 	data
-}: TimerWorkerUtilsJobData<PostMessageDataRequestIcrc>): Promise<IcrcGetTransactions> => {
+}: TimerWorkerUtilsJobParams<PostMessageDataRequestIcrc>): Promise<IcrcGetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
 	return getTransactionsApi({
 		identity,
+		certified,
 		owner: identity.getPrincipal(),
 		// We query tip to discover the new transactions
 		start: undefined,

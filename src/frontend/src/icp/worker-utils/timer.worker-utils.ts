@@ -2,15 +2,18 @@ import type { PostMessageResponse } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
 import { loadIdentity } from '$lib/utils/auth.utils';
 import type { Identity } from '@dfinity/agent';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
 
 export interface TimerWorkerUtilsParams<T> {
 	job: (params: TimerWorkerUtilsJobData<T>) => Promise<void>;
 	data?: T;
 }
+
 export type TimerWorkerUtilsJobData<T> = {
 	data?: T;
 } & TimerWorkerUtilsSyncParams;
+
+export type TimerWorkerUtilsJobParams<T> = TimerWorkerUtilsJobData<T> & Required<QueryParams>;
 
 export interface TimerWorkerUtilsSyncParams {
 	identity: Identity;

@@ -1,5 +1,5 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
-import { type TimerWorkerUtilsJobData } from '$icp/worker-utils/timer.worker-utils';
+import { type TimerWorkerUtilsJobParams } from '$icp/worker-utils/timer.worker-utils';
 import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import type {
@@ -9,10 +9,12 @@ import type {
 } from '@dfinity/ledger-icp';
 
 const getTransactions = ({
-	identity
-}: TimerWorkerUtilsJobData<PostMessageDataRequest>): Promise<GetAccountIdentifierTransactionsResponse> => {
+	identity,
+	certified
+}: TimerWorkerUtilsJobParams<PostMessageDataRequest>): Promise<GetAccountIdentifierTransactionsResponse> => {
 	return getTransactionsApi({
 		identity,
+		certified,
 		owner: identity.getPrincipal(),
 		// We query tip to discover the new transactions
 		start: undefined

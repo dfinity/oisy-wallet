@@ -13,13 +13,7 @@ export const loadIcrcTokens = async (): Promise<void> => {
 		queryAndUpdate<IcrcLoadData>({
 			request: (params) => requestKnownIcrcData({ ...params, ...data }),
 			onLoad: loadKnownIcrcData,
-			onError: ({ error: err, certified }) => {
-				console.error(err);
-
-				if (!certified) {
-					return;
-				}
-
+			onCertifiedError: ({ error: err }) => {
 				icrcTokensStore.reset();
 
 				toastsError({
