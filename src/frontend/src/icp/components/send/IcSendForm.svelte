@@ -2,29 +2,31 @@
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { token } from '$lib/derived/token.derived';
-	import SendDestination from '$lib/components/send/SendDestination.svelte';
-	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { icAccountIdentifierStore } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
-	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import IcSendNetworkCkBTC from '$icp/components/send/IcSendNetworkCkBTC.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
+	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isNullish } from '@dfinity/utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
 	let insufficientFunds: boolean;
+	let invalidDestination: boolean;
 
 	let invalid = true;
-	$: invalid = isNullishOrEmpty(destination) || invalidAmount(amount) || insufficientFunds;
+	$: invalid =
+		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
 
 	const dispatch = createEventDispatcher();
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<SendDestination bind:destination network={ICP_NETWORK} />
+	<IcSendDestination bind:destination bind:invalidDestination {networkId} />
 
 	<IcSendNetworkCkBTC token={$token} bind:destination bind:networkId />
 
