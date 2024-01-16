@@ -7,7 +7,7 @@
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendReviewNetwork from '$icp/components/send/IcSendReviewNetwork.svelte';
-	import { isInvalidDestinationIc } from '$icp/utils/send.utils';
+	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;

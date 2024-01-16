@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
-	import { isNetworkIdBTC } from '$icp/utils/send.utils';
+	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
 </script>

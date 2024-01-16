@@ -4,7 +4,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { ICP_NETWORK_ID, ICP_NETWORK_SYMBOL } from '$lib/constants/networks.constants';
 	import { BTC_NETWORK, BTC_NETWORK_ID, BTC_NETWORK_SYMBOL } from '$icp/constants/ckbtc.constants';
-	import { isBtcAddress, isNetworkIdBTC } from '$icp/utils/send.utils';
+	import { isBtcAddress, isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 
