@@ -26,6 +26,8 @@
 			return;
 		}
 
+		console.log(amount, fee);
+
 		const total = parseToken({
 			value: `${amount}`,
 			unitName: $tokenDecimals
@@ -40,7 +42,14 @@
 </script>
 
 <label for="amount" class="font-bold px-4.5">Amount:</label>
-<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
+<Input
+	name="amount"
+	inputType="icp"
+	required
+	bind:value={amount}
+	icpDecimals={$tokenDecimals}
+	placeholder="Amount"
+/>
 
 {#if insufficientFunds}
 	<p transition:slide class="text-cyclamen pb-3">Insufficient funds</p>

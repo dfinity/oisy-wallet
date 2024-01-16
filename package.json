@@ -31,7 +31,7 @@
 		"@dfinity/auth-client": "^0.20.2",
 		"@dfinity/candid": "^0.20.2",
 		"@dfinity/ckbtc": "^2.1.0",
-		"@dfinity/gix-components": "^3.1.0",
+		"@dfinity/gix-components": "file:../gix-components",
 		"@dfinity/ledger-icp": "^2.1.1",
 		"@dfinity/ledger-icrc": "^2.1.0-next-2024-01-10.1",
 		"@dfinity/principal": "^0.20.2",
