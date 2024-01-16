@@ -3,7 +3,7 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import type { ProgressStep } from '@dfinity/gix-components';
 	import type { NetworkId } from '$lib/types/network';
-	import { isNetworkIdBTC } from '$icp/utils/send.utils';
+	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 
 	export let sendProgressStep: string = SendIcStep.INITIALIZATION;
 	export let networkId: NetworkId | undefined = undefined;

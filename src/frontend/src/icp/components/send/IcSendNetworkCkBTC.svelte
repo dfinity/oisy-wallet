@@ -2,7 +2,7 @@
 	import IcSendNetwork from './IcSendNetwork.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import type { IcToken } from '$icp/types/ic';
-	import { isNetworkUsingCkBtcLedger } from '$icp/utils/send.utils';
+	import { isNetworkUsingCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
