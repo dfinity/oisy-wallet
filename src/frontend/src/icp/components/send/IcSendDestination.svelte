@@ -4,7 +4,7 @@
 	import { debounce } from '@dfinity/utils';
 	import type { NetworkId } from '$lib/types/network';
 	import { tokenStandard } from '$lib/derived/token.derived';
-	import { isInvalidDestinationIc } from '$icp/utils/send.utils';
+	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
