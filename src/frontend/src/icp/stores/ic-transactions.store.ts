@@ -1,21 +1,18 @@
 import type { IcTransaction } from '$icp/types/ic';
+import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
-import { writable, type Readable } from 'svelte/store';
 
-export type IcTransactionsData<T> = Record<TokenId, CertifiedData<T>[]>;
+export type IcTransactionsData<T> = CertifiedData<T>[];
 
-export interface IcTransactionsStore<T> extends Readable<IcTransactionsData<T>> {
+export interface IcTransactionsStore<T> extends CertifiedStore<IcTransactionsData<T>> {
 	prepend: (params: { tokenId: TokenId; transactions: CertifiedData<T>[] }) => void;
 	append: (params: { tokenId: TokenId; transactions: CertifiedData<T>[] }) => void;
-	reset: (tokenId: TokenId) => void;
 }
 
 const initIcTransactionsStore = <T extends IcTransaction>(): IcTransactionsStore<T> => {
-	const INITIAL: IcTransactionsData<T> = {} as Record<TokenId, CertifiedData<T>[]>;
-
-	const { subscribe, update } = writable<IcTransactionsData<T>>(INITIAL);
+	const { subscribe, update, reset } = initCertifiedStore<IcTransactionsData<T>>();
 
 	return {
 		prepend: ({ tokenId, transactions }: { tokenId: TokenId; transactions: CertifiedData<T>[] }) =>
@@ -23,7 +20,7 @@ const initIcTransactionsStore = <T extends IcTransaction>(): IcTransactionsStore
 				...(nonNullish(state) && state),
 				[tokenId]: [
 					...transactions,
-					...(state[tokenId] ?? []).filter(
+					...((state ?? {})[tokenId] ?? []).filter(
 						({ data: { id } }) => !transactions.some(({ data: { id: txId } }) => txId === id)
 					)
 				]
@@ -31,13 +28,9 @@ const initIcTransactionsStore = <T extends IcTransaction>(): IcTransactionsStore
 		append: ({ tokenId, transactions }: { tokenId: TokenId; transactions: CertifiedData<T>[] }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
-				[tokenId]: [...(state[tokenId] ?? []), ...transactions]
+				[tokenId]: [...((state ?? {})[tokenId] ?? []), ...transactions]
 			})),
-		reset: (tokenId: TokenId) =>
-			update((state) => {
-				const { [tokenId]: _, ...rest } = state;
-				return rest;
-			}),
+		reset,
 		subscribe
 	};
 };
