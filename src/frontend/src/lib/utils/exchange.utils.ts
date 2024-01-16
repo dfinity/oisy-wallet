@@ -13,5 +13,6 @@ export const usdValue = ({
 	balances: BalancesData;
 	exchanges: ExchangesData;
 }): number =>
-	Number(formatTokenDetailed({ value: balances?.[id] ?? BigNumber.from(0), unitName: decimals })) *
-	(exchanges?.[id]?.usd ?? 0);
+	Number(
+		formatTokenDetailed({ value: balances?.[id].data ?? BigNumber.from(0), unitName: decimals })
+	) * (exchanges?.[id]?.usd ?? 0);

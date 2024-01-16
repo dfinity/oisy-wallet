@@ -14,12 +14,18 @@ export const syncWallet = <T extends IcGetTransactions>({
 	tokenId: TokenId;
 }) => {
 	const {
-		wallet: { balance, newTransactions }
+		wallet: {
+			balance: { certified, data: balance },
+			newTransactions
+		}
 	} = data;
 
 	balancesStore.set({
 		tokenId,
-		balance: BigNumber.from(balance)
+		balance: {
+			data: BigNumber.from(balance),
+			certified
+		}
 	});
 
 	icTransactionsStore.prepend({
