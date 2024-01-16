@@ -9,6 +9,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import Workers from '$lib/components/core/Workers.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
+	import { networkICP } from '$lib/derived/network.derived';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -24,6 +25,7 @@
 	send={route === 'transactions'}
 	actions={route !== 'settings'}
 	erc20IcpLink={isErc20Icp($token)}
+	background={$networkICP ? 'icp' : 'eth'}
 />
 
 <main>

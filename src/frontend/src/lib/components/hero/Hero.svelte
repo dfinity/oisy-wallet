@@ -16,12 +16,13 @@
 	export let actions = true;
 	export let send = false;
 	export let erc20IcpLink = false;
+	export let background: 'eth' | 'icp';
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20TokensInitialized;
 </script>
 
-<div class="hero">
+<div class={`hero ${background}`}>
 	<HeaderHero />
 
 	<article
@@ -66,6 +67,10 @@
 		background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
 
 		--alpha-color: var(--color-grey);
+
+		&.icp {
+			background: radial-gradient(66.11% 97.11% at 50% 115.28%, #300097 0%, #1f005e 100%);
+		}
 	}
 
 	.icon {
