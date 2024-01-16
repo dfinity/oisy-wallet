@@ -11,5 +11,5 @@
 		"strict": true,
 		"types": ["node"]
 	},
-	"exclude": ["src/frontend/tests/**/*"]
+	"exclude": ["src/frontend/src/tests/**/*"]
 }
