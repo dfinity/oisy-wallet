@@ -12,29 +12,29 @@ describe('query.ic', () => {
 	it('should request twice', async () => {
 		const request = vi.fn().mockImplementation(() => Promise.resolve({ certified: true }));
 		const onLoad = vi.fn();
-		const onError = vi.fn();
+		const onCertifiedError = vi.fn();
 
 		await queryAndUpdate<number, unknown>({
 			request,
 			onLoad,
-			onError,
+			onCertifiedError,
 			identity
 		});
 
 		expect(request).toHaveBeenCalledTimes(2);
 		expect(onLoad).toHaveBeenCalledTimes(2);
-		expect(onError).not.toBeCalled();
+		expect(onCertifiedError).not.toBeCalled();
 	});
 
 	it('should work w/o await call', async () => {
 		const request = vi.fn().mockImplementation(() => Promise.resolve({ certified: true }));
 		const onLoad = vi.fn();
-		const onError = vi.fn();
+		const onCertifiedError = vi.fn();
 
 		await queryAndUpdate<number, unknown>({
 			request,
 			onLoad,
-			onError,
+			onCertifiedError,
 			identity
 		});
 
@@ -42,7 +42,7 @@ describe('query.ic', () => {
 
 		expect(request).toHaveBeenCalledTimes(2);
 		expect(onLoad).toHaveBeenCalledTimes(2);
-		expect(onError).not.toBeCalled();
+		expect(onCertifiedError).not.toBeCalled();
 	});
 
 	it('should support "query_and_update" strategy', async () => {
@@ -101,19 +101,18 @@ describe('query.ic', () => {
 	it('should catch errors', async () => {
 		const request = vi.fn().mockImplementation(() => Promise.reject('test'));
 		const onLoad = vi.fn();
-		const onError = vi.fn();
+		const onCertifiedError = vi.fn();
 
 		await queryAndUpdate<number, unknown>({
 			request,
 			onLoad,
-			onError,
+			onCertifiedError,
 			identity
 		});
 
 		expect(onLoad).not.toBeCalled();
-		expect(onError).toBeCalledTimes(2);
-		expect(onError).toBeCalledWith({
-			certified: false,
+		expect(onCertifiedError).toBeCalledTimes(1);
+		expect(onCertifiedError).toBeCalledWith({
 			error: 'test',
 			identity
 		});
@@ -132,12 +131,12 @@ describe('query.ic', () => {
 					)
 		);
 		const onLoad = vi.fn();
-		const onError = vi.fn();
+		const onCertifiedError = vi.fn();
 
 		await queryAndUpdate<number, unknown>({
 			request,
 			onLoad,
-			onError,
+			onCertifiedError,
 			identity
 		});
 		await new Promise((resolve) => setTimeout(resolve, 10));
@@ -145,7 +144,7 @@ describe('query.ic', () => {
 		expect(queryDone).toBe(true);
 		expect(request).toBeCalledTimes(2);
 		expect(onLoad).toBeCalledTimes(1);
-		expect(onError).not.toBeCalled();
+		expect(onCertifiedError).not.toBeCalled();
 	});
 
 	it('should resolve promise when the first response is done', async () => {
