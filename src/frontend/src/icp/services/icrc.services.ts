@@ -9,25 +9,10 @@ import { AnonymousIdentity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
 
 export const loadIcrcTokens = async (): Promise<void> => {
-	const loadKnownIcrcData = async ({
-		ledgerCanisterId,
-		identity,
-		certified,
-		...rest
-	}: IcCkInterface & QueryAndUpdateRequestParams): Promise<IcrcLoadData> => ({
-		...rest,
-		ledgerCanisterId,
-		metadata: await metadata({ ledgerCanisterId, identity, certified })
-	});
-
 	const loadKnownIcrc = (data: IcCkInterface): Promise<void> =>
 		queryAndUpdate<IcrcLoadData>({
-			request: (params) => loadKnownIcrcData({ ...params, ...data }),
-			onLoad: ({ response: token, certified }) => {
-				const data = mapIcrcToken(token);
-				// In the unlikely event of a token not being mapped, we choose to skip it instead of throwing an error. This prevents the token from being displayed and, consequently, from being noticed as missing by the user.
-				nonNullish(data) && icrcTokensStore.set({ data, certified });
-			},
+			request: (params) => requestKnownIcrcData({ ...params, ...data }),
+			onLoad: loadKnownIcrcData,
 			onError: ({ error: err, certified }) => {
 				console.error(err);
 
@@ -48,4 +33,27 @@ export const loadIcrcTokens = async (): Promise<void> => {
 	await Promise.all(ICRC_CANISTERS.map(loadKnownIcrc));
 
 	// TODO: extend with user defined ICRC tokens
+};
+
+const requestKnownIcrcData = async ({
+	ledgerCanisterId,
+	identity,
+	certified,
+	...rest
+}: IcCkInterface & QueryAndUpdateRequestParams): Promise<IcrcLoadData> => ({
+	...rest,
+	ledgerCanisterId,
+	metadata: await metadata({ ledgerCanisterId, identity, certified })
+});
+
+const loadKnownIcrcData = ({
+	response: token,
+	certified
+}: {
+	certified: boolean;
+	response: IcrcLoadData;
+}) => {
+	const data = mapIcrcToken(token);
+	// In the unlikely event of a token not being mapped, we choose to skip it instead of throwing an error. This prevents the token from being displayed and, consequently, from being noticed as missing by the user.
+	nonNullish(data) && icrcTokensStore.set({ data, certified });
 };
