@@ -22,6 +22,8 @@ export interface IcTransactionUi {
 }
 
 export type IcToken = Token & IcFee & IcInterface;
+export type IcTokenWithoutId = Omit<IcToken, 'id'>;
+
 export type IcFee = { fee: bigint };
 
 export type IcInterface = IcCanisters & IcExchangeCoin;
