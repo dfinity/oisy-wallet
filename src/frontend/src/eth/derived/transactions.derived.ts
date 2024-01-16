@@ -1,5 +1,5 @@
+import { transactionsStore } from '$eth/stores/transactions.store';
 import { tokenId } from '$lib/derived/token.derived';
-import { transactionsStore } from '$lib/stores/transactions.store';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Readable } from 'svelte/store';
