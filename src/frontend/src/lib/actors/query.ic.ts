@@ -1,12 +1,23 @@
 import type { OptionIdentity } from '$lib/types/identity';
+import { isNullish } from '@dfinity/utils';
 
 export type QueryAndUpdateOnResponse<R> = (options: { certified: boolean; response: R }) => void;
 
-export type QueryAndUpdateOnCertifiedError<E = unknown> = (options: {
+export type QueryAndUpdateOnErrorOptions<E = unknown> = {
 	error: E;
 	// The identity used for the request
 	identity: OptionIdentity;
-}) => void;
+};
+
+export type QueryAndUpdateOnError<E = unknown> = (
+	options: {
+		certified: boolean;
+	} & QueryAndUpdateOnErrorOptions<E>
+) => void;
+
+export type QueryAndUpdateOnCertifiedError<E = unknown> = (
+	options: QueryAndUpdateOnErrorOptions<E>
+) => void;
 
 export type QueryAndUpdateStrategy = 'query_and_update' | 'query' | 'update';
 
@@ -24,6 +35,7 @@ export interface QueryAndUpdateRequestParams {
 export const queryAndUpdate = async <R, E = unknown>({
 	request,
 	onLoad,
+	onError,
 	onCertifiedError,
 	strategy = 'query_and_update',
 	identity,
@@ -31,6 +43,7 @@ export const queryAndUpdate = async <R, E = unknown>({
 }: {
 	request: (options: QueryAndUpdateRequestParams) => Promise<R>;
 	onLoad: QueryAndUpdateOnResponse<R>;
+	onError?: QueryAndUpdateOnError<E>;
 	onCertifiedError?: QueryAndUpdateOnCertifiedError<E>;
 	strategy?: QueryAndUpdateStrategy;
 	identity: OptionIdentity;
@@ -49,6 +62,13 @@ export const queryAndUpdate = async <R, E = unknown>({
 			})
 			.catch((error: E) => {
 				if (certifiedDone) {
+					return;
+				}
+
+				onError?.({ certified, error, identity });
+
+				// Handling certified is always handled the same way in Oisy - i.e. just console error query error and do something with the update error
+				if (isNullish(onCertifiedError)) {
 					return;
 				}
 
