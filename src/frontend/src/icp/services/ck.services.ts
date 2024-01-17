@@ -8,6 +8,7 @@ import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { SendIcStep } from '$lib/enums/steps';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
+import {withdrawEth} from "$icp/api/cketh-minter.api";
 
 export const convertCkBTCToBtc = async ({
 	token: { ledgerCanisterId, minterCanisterId },
@@ -63,7 +64,12 @@ export const convertCkETHToEth = async ({
 
 	progress(SendIcStep.SEND);
 
-	// TODO: finalize
+	await withdrawEth({
+		identity,
+		minterCanisterId,
+		address: to,
+		amount
+	});
 };
 
 const approveTransfer = async ({
