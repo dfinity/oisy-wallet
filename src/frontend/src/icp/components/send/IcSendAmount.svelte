@@ -26,8 +26,6 @@
 			return;
 		}
 
-		console.log(amount, fee);
-
 		const total = parseToken({
 			value: `${amount}`,
 			unitName: $tokenDecimals
