@@ -1,6 +1,6 @@
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
+import type { Erc20PopulateTransaction } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Metadata } from '$eth/types/erc20';
-import type { Erc20PopulateTransaction } from '$eth/types/erc20-providers';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { PopulatedTransaction } from '@ethersproject/contracts';
