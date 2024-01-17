@@ -30,3 +30,6 @@ export const CKETH_ABI = [
 		type: 'function'
 	}
 ];
+
+// As discussed with cross-chain team, we decided to hardcode gas estimation for ETH to ckETH for now.
+export const CKETH_FEE = 50_000n;

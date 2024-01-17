@@ -15,7 +15,6 @@
 	import { getErc20FeeData, getEthFeeData, type GetFeeData } from '$eth/services/fee.services';
 	import type { Network } from '$lib/types/network';
 	import { CKETH_HELPER_CONTRACT } from '$eth/types/cketh';
-	import { authStore } from '$lib/stores/auth.store';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -42,11 +41,7 @@
 			if ($token.id === ETHEREUM_TOKEN_ID) {
 				store.setFee({
 					...(await getFeeData()),
-					gas: await getEthFeeData({
-						...params,
-						ckEthContract: { address: CKETH_HELPER_CONTRACT },
-						identity: $authStore.identity
-					})
+					gas: await getEthFeeData(params)
 				});
 				return;
 			}
