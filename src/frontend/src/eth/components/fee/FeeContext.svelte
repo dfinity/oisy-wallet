@@ -3,8 +3,6 @@
 	import { token } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { getFeeData } from '$eth/providers/infura.providers';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { address } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
@@ -14,8 +12,10 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { mapAddressStartsWith0x } from '$eth/utils/send.utils';
-	import { getErc20FeeData } from '$eth/services/fee.services';
+	import { getErc20FeeData, getEthFeeData, type GetFeeData } from '$eth/services/fee.services';
 	import type { Network } from '$lib/types/network';
+	import { CKETH_HELPER_CONTRACT } from '$eth/types/cketh';
+	import { authStore } from '$lib/stores/auth.store';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -34,10 +34,19 @@
 
 	const updateFeeData = async () => {
 		try {
+			const params: GetFeeData = {
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				address: mapAddressStartsWith0x(destination !== '' ? destination : $address!)
+			};
+
 			if ($token.id === ETHEREUM_TOKEN_ID) {
 				store.setFee({
 					...(await getFeeData()),
-					gas: BigNumber.from(ETH_BASE_FEE)
+					gas: await getEthFeeData({
+						...params,
+						ckEthContract: { address: CKETH_HELPER_CONTRACT },
+						identity: $authStore.identity
+					})
 				});
 				return;
 			}
@@ -88,7 +97,10 @@
 	$: amount,
 		destination,
 		(() => {
-			if ($token.id === ETHEREUM_TOKEN_ID) {
+			if (
+				$token.id === ETHEREUM_TOKEN_ID &&
+				destination?.toLowerCase() !== CKETH_HELPER_CONTRACT.toLowerCase()
+			) {
 				return;
 			}
 
