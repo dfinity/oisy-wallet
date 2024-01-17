@@ -6,7 +6,7 @@ import { derived, type Readable } from 'svelte/store';
 
 export const balance: Readable<BigNumber | undefined | null> = derived(
 	[balancesStore, tokenId],
-	([$balanceStore, $tokenId]) => $balanceStore?.[$tokenId].data
+	([$balanceStore, $tokenId]) => $balanceStore?.[$tokenId]?.data
 );
 
 export const balanceEmpty: Readable<boolean> = derived(
