@@ -3,7 +3,7 @@ import {
 	transfer as transferIcp
 } from '$icp/api/icp-ledger.api';
 import { transfer as transferIcrc } from '$icp/api/icrc-ledger.api';
-import { convertCkBTCToBtc } from '$icp/services/ckbtc.services';
+import { convertCkBTCToBtc, convertCkETHToEth } from '$icp/services/ck.services';
 import type { IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
@@ -11,8 +11,10 @@ import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { SendIcStep } from '$lib/enums/steps';
 import type { NetworkId } from '$lib/types/network';
+import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
+import { nonNullish } from '@dfinity/utils';
 
 export const sendIc = async ({
 	token,
@@ -24,6 +26,14 @@ export const sendIc = async ({
 }): Promise<void> => {
 	if (isNetworkIdBTC(targetNetworkId)) {
 		await convertCkBTCToBtc({
+			...rest,
+			token
+		});
+		return;
+	}
+
+	if (nonNullish(targetNetworkId) && isNetworkIdEthereum(targetNetworkId)) {
+		await convertCkETHToEth({
 			...rest,
 			token
 		});
