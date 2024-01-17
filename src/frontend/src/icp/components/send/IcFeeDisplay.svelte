@@ -2,9 +2,8 @@
 	import { formatTokenShort } from '$lib/utils/format.utils.js';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { token } from '$lib/derived/token.derived';
+	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
-	import { ICP_FEE_DECIMALS } from '$icp/constants/icp.constants';
 	import { nonNullish } from '@dfinity/utils';
 
 	let decimals: number;
@@ -23,7 +22,7 @@
 		{formatTokenShort({
 			value: BigNumber.from(fee),
 			unitName: decimals,
-			displayDecimals: ICP_FEE_DECIMALS
+			displayDecimals: $tokenDecimals
 		})}
 		{symbol}
 	{/if}
