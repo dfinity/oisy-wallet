@@ -22,6 +22,7 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import type { Network } from '$lib/types/network';
+	import { authStore } from '$lib/stores/auth.store';
 
 	/**
 	 * Fee context store
@@ -104,7 +105,8 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
-				network
+				network,
+				identity: $authStore.identity
 			});
 
 			setTimeout(() => close(), 750);
