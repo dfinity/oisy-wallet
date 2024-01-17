@@ -36,6 +36,9 @@ export const isNetworkUsingCkEthLedger = ({ ledgerCanisterId }: IcToken): boolea
 export const isNetworkIdBTC = (networkId: NetworkId | undefined): boolean =>
 	networkId === BTC_NETWORK_ID;
 
+export const isNetworkIdETH = (networkId: NetworkId | undefined): boolean =>
+	nonNullish(networkId) && isNetworkIdEthereum(networkId);
+
 export const isInvalidDestinationIc = ({
 	destination,
 	networkId,
