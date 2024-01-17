@@ -8,9 +8,9 @@
 	export let networkId: NetworkId | undefined = undefined;
 	export let invalidDestination = false;
 	export let inputPlaceholder: string;
-	export let isInvalidDestination: () => boolean;
+	export let isInvalidDestination: (() => boolean) | undefined;
 
-	const validate = () => (invalidDestination = isInvalidDestination());
+	const validate = () => (invalidDestination = isInvalidDestination?.() ?? false);
 
 	const debounceValidate = debounce(validate);
 
