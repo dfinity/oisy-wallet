@@ -3,10 +3,10 @@ import {
 	transfer as transferIcp
 } from '$icp/api/icp-ledger.api';
 import { transfer as transferIcrc } from '$icp/api/icrc-ledger.api';
-import { convertCkBTCToBtc } from '$icp/services/ckbtc.services';
+import { convertCkBTCToBtc, convertCkETHToEth } from '$icp/services/ck.services';
 import type { IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
-import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
+import { isNetworkIdBTC, isNetworkIdETH } from '$icp/utils/ic-send.utils';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { SendIcStep } from '$lib/enums/steps';
@@ -24,6 +24,14 @@ export const sendIc = async ({
 }): Promise<void> => {
 	if (isNetworkIdBTC(targetNetworkId)) {
 		await convertCkBTCToBtc({
+			...rest,
+			token
+		});
+		return;
+	}
+
+	if (isNetworkIdETH(targetNetworkId)) {
+		await convertCkETHToEth({
 			...rest,
 			token
 		});
