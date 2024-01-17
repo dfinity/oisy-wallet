@@ -94,15 +94,7 @@
 
 	$: obverseFeeData(observe);
 
-	$: amount,
-		destination,
-		(() => {
-			if ($token.id === ETHEREUM_TOKEN_ID) {
-				return;
-			}
-
-			debounceUpdateFeeData();
-		})();
+	$: amount, destination, debounceUpdateFeeData();
 </script>
 
 <slot />

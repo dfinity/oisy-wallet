@@ -10,7 +10,8 @@ import type { ETH_ADDRESS } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import { isNetworkICP } from '$lib/utils/network.utils';
-import { assertNonNullish, decodeBase32, encodeBase32 } from '@dfinity/utils';
+import { encodePrincipalToEthAddress } from '@dfinity/cketh';
+import { assertNonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export interface GetFeeData {
@@ -25,25 +26,13 @@ export const getEthFeeData = async ({
 	identity: OptionIdentity;
 	ckEthContract: Erc20ContractAddress;
 }): Promise<BigNumber> => {
-	console.log(address, address === CKETH_HELPER_CONTRACT);
-
-	if (address === CKETH_HELPER_CONTRACT) {
+	if (address.toLowerCase() === CKETH_HELPER_CONTRACT.toLowerCase()) {
 		assertNonNullish(identity, 'No identity provided to calculate the fee for its principal.');
 
-		const rawBytes = decodeBase32(identity.getPrincipal().toText().toLowerCase().replace(/-/g, ''));
-		const encoded = encodeBase32(rawBytes);
-
-		console.log(
-			identity.getPrincipal().toText(),
-			decodeBase32(identity.getPrincipal().toText().toLowerCase().replace(/-/g, ''))
-		);
-
-		const tmp = await getCkEthFeeData({
-			address: decodeBase32(identity.getPrincipal().toText().toLowerCase().replace(/-/g, '')),
+		return getCkEthFeeData({
+			address: encodePrincipalToEthAddress(identity.getPrincipal()),
 			contract: ckEthContract
 		});
-
-		return tmp;
 	}
 
 	return BigNumber.from(ETH_BASE_FEE);
