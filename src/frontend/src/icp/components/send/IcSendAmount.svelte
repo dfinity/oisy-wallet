@@ -44,10 +44,10 @@
 <label for="amount" class="font-bold px-4.5">Amount:</label>
 <Input
 	name="amount"
-	inputType="icp"
+	inputType="currency"
 	required
 	bind:value={amount}
-	icpDecimals={$tokenDecimals}
+	decimals={$tokenDecimals}
 	placeholder="Amount"
 />
 
