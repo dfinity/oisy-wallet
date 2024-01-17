@@ -94,7 +94,18 @@
 
 	$: obverseFeeData(observe);
 
-	$: amount, destination, debounceUpdateFeeData();
+	$: amount,
+		destination,
+		(() => {
+			if (
+				$token.id === ETHEREUM_TOKEN_ID &&
+				destination?.toLowerCase() !== CKETH_HELPER_CONTRACT.toLowerCase()
+			) {
+				return;
+			}
+
+			debounceUpdateFeeData();
+		})();
 </script>
 
 <slot />
