@@ -29,10 +29,12 @@ export const getEthFeeData = async ({
 	if (address.toLowerCase() === CKETH_HELPER_CONTRACT.toLowerCase()) {
 		assertNonNullish(identity, 'No identity provided to calculate the fee for its principal.');
 
-		return getCkEthFeeData({
+		const depositEstimateGas = await getCkEthFeeData({
 			address: encodePrincipalToEthAddress(identity.getPrincipal()),
 			contract: ckEthContract
 		});
+
+		return depositEstimateGas.add(ETH_BASE_FEE);
 	}
 
 	return BigNumber.from(ETH_BASE_FEE);
