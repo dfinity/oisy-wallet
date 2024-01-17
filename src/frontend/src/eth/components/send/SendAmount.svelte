@@ -41,7 +41,14 @@
 </script>
 
 <label for="amount" class="font-bold px-4.5">Amount:</label>
-<Input name="amount" inputType="icp" required bind:value={amount} placeholder="Amount" />
+<Input
+	name="amount"
+	inputType="currency"
+	required
+	bind:value={amount}
+	decimals={$tokenDecimals}
+	placeholder="Amount"
+/>
 
 {#if insufficientFunds}
 	<p transition:slide class="text-cyclamen pb-3">Insufficient funds for gas</p>
