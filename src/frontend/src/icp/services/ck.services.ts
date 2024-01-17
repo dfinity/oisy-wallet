@@ -1,5 +1,6 @@
 import type { BlockIndex } from '$declarations/icp_ledger/icp_ledger.did';
 import { retrieveBtc } from '$icp/api/ckbtc-minter.api';
+import { withdrawEth } from '$icp/api/cketh-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcCkCanisters, IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
@@ -8,7 +9,6 @@ import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { SendIcStep } from '$lib/enums/steps';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
-import {withdrawEth} from "$icp/api/cketh-minter.api";
 
 export const convertCkBTCToBtc = async ({
 	token: { ledgerCanisterId, minterCanisterId },
