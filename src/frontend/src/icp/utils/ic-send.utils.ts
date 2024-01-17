@@ -56,8 +56,6 @@ export const isInvalidDestinationIc = ({
 		});
 	}
 
-	console.log('HERE', networkId);
-
 	if (nonNullish(networkId) && isNetworkIdEthereum(networkId)) {
 		return !isEthAddress(destination);
 	}
