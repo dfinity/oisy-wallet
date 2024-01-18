@@ -33,6 +33,7 @@ export class WalletWorkerUtils<
 > {
 	private worker = new TimerWorkerUtils();
 
+	private balance: CertifiedData<bigint> | undefined;
 	private transactions: Record<string, CertifiedData<T>> = {};
 	private initialized = false;
 
@@ -70,26 +71,35 @@ export class WalletWorkerUtils<
 	};
 
 	private syncTransactions = ({
-		response: { transactions: fetchedTransactions, ...rest },
+		response: { transactions: fetchedTransactions, balance, ...rest },
 		certified
 	}: {
 		response: GetTransactions & { transactions: TWithId[] };
 		certified: boolean;
 	}) => {
+		// Is there any new transactions unknown so far or which has become certified
 		const newTransactions = fetchedTransactions.filter(
 			({ id }) => isNullish(this.transactions[`${id}`]) || !this.transactions[`${id}`].certified
 		);
 
-		if (newTransactions.length === 0) {
+		// Is the balance different from last value or has it become certified
+		const newBalance =
+			isNullish(this.balance) ||
+			this.balance.data !== balance ||
+			(!this.balance.certified && certified);
+
+		if (newTransactions.length === 0 && !newBalance) {
 			// We execute postMessage at least once because developer may have no transaction at all so, we want to display the balance zero
 			if (!this.initialized) {
-				this.postMessageWallet({ transactions: newTransactions, certified, ...rest });
+				this.postMessageWallet({ transactions: newTransactions, balance, certified, ...rest });
 
 				this.initialized = true;
 			}
 
 			return;
 		}
+
+		this.balance = { data: balance, certified };
 
 		this.transactions = {
 			...this.transactions,
@@ -107,6 +117,7 @@ export class WalletWorkerUtils<
 
 		this.postMessageWallet({
 			transactions: newTransactions,
+			balance,
 			certified,
 			...rest
 		});
