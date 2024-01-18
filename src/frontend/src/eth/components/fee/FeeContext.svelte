@@ -14,7 +14,7 @@
 	import { mapAddressStartsWith0x } from '$eth/utils/send.utils';
 	import { getErc20FeeData, getEthFeeData, type GetFeeData } from '$eth/services/fee.services';
 	import type { Network } from '$lib/types/network';
-	import { CKETH_HELPER_CONTRACT } from '$eth/types/cketh';
+	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -89,18 +89,7 @@
 
 	$: obverseFeeData(observe);
 
-	$: amount,
-		destination,
-		(() => {
-			if (
-				$token.id === ETHEREUM_TOKEN_ID &&
-				destination?.toLowerCase() !== CKETH_HELPER_CONTRACT.toLowerCase()
-			) {
-				return;
-			}
-
-			debounceUpdateFeeData();
-		})();
+	$: amount, destination, $ckEthHelperContractAddressStore, debounceUpdateFeeData();
 </script>
 
 <slot />

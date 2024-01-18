@@ -10,7 +10,7 @@
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { address } from '$lib/derived/address.derived';
-	import { token, tokenDecimals } from '$lib/derived/token.derived';
+	import { token, tokenDecimals, tokenStandard } from '$lib/derived/token.derived';
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
@@ -24,6 +24,7 @@
 	import type { Network } from '$lib/types/network';
 	import { authStore } from '$lib/stores/auth.store';
 	import CkEthContext from '$eth/components/cketh/CkEthContext.svelte';
+	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
 
 	/**
 	 * Fee context store
@@ -71,6 +72,24 @@
 			return;
 		}
 
+		if ($tokenStandard === 'ethereum' && isNullish($ckEthHelperContractAddressStore)) {
+			toastsError({
+				msg: {
+					text: `Try again in few seconds, a ckETH configuration parameter is not yet loaded.`
+				}
+			});
+			return;
+		}
+
+		if ($tokenStandard === 'ethereum' && $ckEthHelperContractAddressStore?.certified !== true) {
+			toastsError({
+				msg: {
+					text: `Try again in few seconds, a ckETH configuration parameter has not yet certified.`
+				}
+			});
+			return;
+		}
+
 		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
 		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $storeFeeData;
 
@@ -107,7 +126,8 @@
 				maxPriorityFeePerGas,
 				gas,
 				network,
-				identity: $authStore.identity
+				identity: $authStore.identity,
+				ckEthHelperContractAddress: $ckEthHelperContractAddressStore
 			});
 
 			setTimeout(() => close(), 750);

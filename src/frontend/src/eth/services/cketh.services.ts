@@ -9,7 +9,7 @@ import { get } from 'svelte/store';
 export const loadCkEthHelperContractAddress = async () => {
 	const addressInStore = get(ckEthHelperContractAddressStore);
 
-	// We load only once per session the help contract address
+	// We try to load only once per session the help contract address
 	if (addressInStore === undefined) {
 		return;
 	}
@@ -29,7 +29,6 @@ export const loadCkEthHelperContractAddress = async () => {
 
 			ckEthHelperContractAddressStore.reset();
 		},
-		identity: new AnonymousIdentity(),
-		strategy: 'update'
+		identity: new AnonymousIdentity()
 	});
 };

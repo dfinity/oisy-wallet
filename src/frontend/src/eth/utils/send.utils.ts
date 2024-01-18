@@ -1,3 +1,6 @@
+import type { CkEthHelperContractAddressData } from '$eth/stores/cketh.store';
+import { nonNullish } from '@dfinity/utils';
+
 export const mapAddressStartsWith0x = (address: string) => {
 	const PREFIX = '0x' as const;
 
@@ -7,3 +10,11 @@ export const mapAddressStartsWith0x = (address: string) => {
 
 	return `${PREFIX}${address}`;
 };
+
+export const isDestinationCkEthHelperContract = ({
+	helperContractAddress,
+	destination
+}: {
+	helperContractAddress: CkEthHelperContractAddressData;
+	destination: string | undefined;
+}): boolean => nonNullish(helperContractAddress) && destination === helperContractAddress.data;
