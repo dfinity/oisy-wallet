@@ -4,13 +4,13 @@ import { populateDepositTransaction } from '$eth/providers/infura-cketh.provider
 import { populateBurnTransaction } from '$eth/providers/infura-erc20-icp.providers';
 import { populateTransaction } from '$eth/providers/infura-erc20.providers';
 import { getTransactionCount, sendTransaction } from '$eth/providers/infura.providers';
-import { CKETH_HELPER_CONTRACT } from '$eth/types/cketh';
 import type {
 	CkEthPopulateTransaction,
 	Erc20PopulateTransaction
 } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { SendParams } from '$eth/types/send';
+import { isDestinationCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
@@ -129,6 +129,7 @@ export const send = async ({
 	gas,
 	network,
 	identity,
+	ckEthHelperContractAddress,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
@@ -146,7 +147,11 @@ export const send = async ({
 	};
 
 	const transaction = await (token.id === ETHEREUM_TOKEN_ID
-		? to.toLowerCase() !== CKETH_HELPER_CONTRACT.toLowerCase()
+		? isNullish(ckEthHelperContractAddress) ||
+			!isDestinationCkEthHelperContract({
+				destination: to,
+				helperContractAddress: ckEthHelperContractAddress
+			})
 			? ethPrepareTransaction({
 					...rest,
 					from,
@@ -158,7 +163,7 @@ export const send = async ({
 				})
 			: ethContractPrepareTransaction({
 					...rest,
-					contract: { address: CKETH_HELPER_CONTRACT },
+					contract: { address: ckEthHelperContractAddress.data },
 					from,
 					to: principalEthAddress(),
 					nonce,

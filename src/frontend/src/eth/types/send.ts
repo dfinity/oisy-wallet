@@ -1,3 +1,4 @@
+import type { CkEthHelperContractAddressData } from '$eth/stores/cketh.store';
 import { SendStep } from '$lib/enums/steps';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
@@ -9,4 +10,5 @@ export interface SendParams {
 	token: Token;
 	network?: Network | undefined;
 	identity?: OptionIdentity;
+	ckEthHelperContractAddress?: CkEthHelperContractAddressData;
 }

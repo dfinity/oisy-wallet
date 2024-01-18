@@ -10,7 +10,7 @@
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { address } from '$lib/derived/address.derived';
-	import { token, tokenDecimals } from '$lib/derived/token.derived';
+	import { token, tokenDecimals, tokenStandard } from '$lib/derived/token.derived';
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
@@ -23,6 +23,8 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import type { Network } from '$lib/types/network';
 	import { authStore } from '$lib/stores/auth.store';
+	import CkEthContext from '$eth/components/cketh/CkEthContext.svelte';
+	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
 
 	/**
 	 * Fee context store
@@ -70,6 +72,24 @@
 			return;
 		}
 
+		if ($tokenStandard === 'ethereum' && isNullish($ckEthHelperContractAddressStore)) {
+			toastsError({
+				msg: {
+					text: `Try again in few seconds, a ckETH configuration parameter is not yet loaded.`
+				}
+			});
+			return;
+		}
+
+		if ($tokenStandard === 'ethereum' && $ckEthHelperContractAddressStore?.certified !== true) {
+			toastsError({
+				msg: {
+					text: `Try again in few seconds, a ckETH configuration parameter has not yet certified.`
+				}
+			});
+			return;
+		}
+
 		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
 		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $storeFeeData;
 
@@ -106,7 +126,8 @@
 				maxPriorityFeePerGas,
 				gas,
 				network,
-				identity: $authStore.identity
+				identity: $authStore.identity,
+				ckEthHelperContractAddress: $ckEthHelperContractAddressStore
 			});
 
 			setTimeout(() => close(), 750);
@@ -151,19 +172,21 @@
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
-		{#if currentStep?.name === 'Review'}
-			<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {network} />
-		{:else if currentStep?.name === 'Sending'}
-			<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
-		{:else}
-			<SendForm
-				on:icNext={modal.next}
-				on:icClose={close}
-				bind:destination
-				bind:amount
-				bind:network
-			/>
-		{/if}
-	</FeeContext>
+	<CkEthContext>
+		<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
+			{#if currentStep?.name === 'Review'}
+				<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {network} />
+			{:else if currentStep?.name === 'Sending'}
+				<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
+			{:else}
+				<SendForm
+					on:icNext={modal.next}
+					on:icClose={close}
+					bind:destination
+					bind:amount
+					bind:network
+				/>
+			{/if}
+		</FeeContext>
+	</CkEthContext>
 </WizardModal>
