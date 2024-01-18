@@ -41,7 +41,10 @@
 			if ($token.id === ETHEREUM_TOKEN_ID) {
 				store.setFee({
 					...(await getFeeData()),
-					gas: await getEthFeeData(params)
+					gas: await getEthFeeData({
+						...params,
+						helperContractAddress: $ckEthHelperContractAddressStore
+					})
 				});
 				return;
 			}

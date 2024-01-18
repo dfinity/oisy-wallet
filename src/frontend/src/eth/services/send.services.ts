@@ -4,7 +4,6 @@ import { populateDepositTransaction } from '$eth/providers/infura-cketh.provider
 import { populateBurnTransaction } from '$eth/providers/infura-erc20-icp.providers';
 import { populateTransaction } from '$eth/providers/infura-erc20.providers';
 import { getTransactionCount, sendTransaction } from '$eth/providers/infura.providers';
-import { CKETH_HELPER_CONTRACT } from '$eth/types/cketh';
 import type {
 	CkEthPopulateTransaction,
 	Erc20PopulateTransaction
@@ -148,7 +147,8 @@ export const send = async ({
 	};
 
 	const transaction = await (token.id === ETHEREUM_TOKEN_ID
-		? !isDestinationCkEthHelperContract({
+		? isNullish(ckEthHelperContractAddress) ||
+			!isDestinationCkEthHelperContract({
 				destination: to,
 				helperContractAddress: ckEthHelperContractAddress
 			})
@@ -163,7 +163,7 @@ export const send = async ({
 				})
 			: ethContractPrepareTransaction({
 					...rest,
-					contract: { address: CKETH_HELPER_CONTRACT },
+					contract: { address: ckEthHelperContractAddress.data },
 					from,
 					to: principalEthAddress(),
 					nonce,
