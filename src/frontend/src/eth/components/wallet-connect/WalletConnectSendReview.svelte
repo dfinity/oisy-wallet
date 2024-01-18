@@ -9,11 +9,14 @@
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import type { Network } from '$lib/types/network';
+	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 
 	export let amount: BigNumber;
 	export let destination: string;
 	export let data: string | undefined;
 	export let erc20Approve: boolean;
+	export let network: Network | undefined = undefined;
 
 	let amountDisplay: BigNumber;
 	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
@@ -28,6 +31,8 @@
 	<WalletConnectSendData {data} />
 
 	<FeeDisplay slot="fee" />
+
+	<SendReviewNetwork {network} token={ETHEREUM_TOKEN} slot="network" />
 </SendData>
 
 <WalletConnectActions on:icApprove on:icReject />

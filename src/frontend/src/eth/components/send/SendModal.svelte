@@ -75,7 +75,8 @@
 
 		const { valid } = assertCkEthHelperContractAddressLoaded({
 			tokenStandard: $tokenStandard,
-			helperContractAddress: $ckEthHelperContractAddressStore
+			helperContractAddress: $ckEthHelperContractAddressStore,
+			network
 		});
 
 		if (!valid) {
