@@ -101,6 +101,7 @@
 
 		destination = '';
 		amount = undefined;
+		networkId = undefined;
 
 		sendProgressStep = SendIcStep.INITIALIZATION;
 	};

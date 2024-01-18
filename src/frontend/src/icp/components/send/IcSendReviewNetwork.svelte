@@ -4,6 +4,8 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 
 	export let networkId: NetworkId | undefined = undefined;
 </script>
@@ -13,6 +15,8 @@
 		<svelte:fragment slot="label">Network</svelte:fragment>
 		{#if isNetworkIdBTC(networkId)}
 			<IcSendBtcNetwork />
+		{:else if isNetworkIdEthereum(networkId)}
+			{ETHEREUM_NETWORK.name}
 		{:else}
 			Internet Computer
 		{/if}
