@@ -29,7 +29,7 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 
 		// If Coingecko throws an error, for instance, if too many requests are queried within the same minute, it is possible that the window may receive the same error twice because we start and stop the worker based on certain store changes.
 		// To prevent the same issue from being displayed multiple times, which would not be user-friendly, the following function keeps track of errors and only displays those that have occurred with a time span of one minute or more.
-		const toastError = (value: PostMessageDataResponseExchangeError | undefined) => {
+		const _toastError = (value: PostMessageDataResponseExchangeError | undefined) => {
 			const text =
 				'An error occurred while attempting to retrieve the USD exchange rates.' as const;
 
