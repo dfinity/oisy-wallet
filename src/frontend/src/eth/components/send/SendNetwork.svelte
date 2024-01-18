@@ -20,7 +20,7 @@
 		}
 
 		if (isNullish(destination) || destination === '') {
-			network = undefined;
+			networkName = undefined;
 			return;
 		}
 
@@ -49,6 +49,9 @@
 	$: networkName,
 		(() => {
 			switch (networkName) {
+				case undefined:
+					network = undefined;
+					break;
 				case ETHEREUM_NETWORK.name:
 					network = ETHEREUM_NETWORK;
 					break;

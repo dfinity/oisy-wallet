@@ -157,6 +157,7 @@
 
 		destination = '';
 		amount = undefined;
+		network = undefined;
 
 		sendProgressStep = SendStep.INITIALIZATION;
 	};
