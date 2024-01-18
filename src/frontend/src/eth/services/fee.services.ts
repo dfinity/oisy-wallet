@@ -3,8 +3,9 @@ import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { getFeeData as getBurnFeeData } from '$eth/providers/infura-erc20-icp.providers';
 import { getFeeData as getErc20FeeDataProvider } from '$eth/providers/infura-erc20.providers';
-import { CKETH_HELPER_CONTRACT } from '$eth/types/cketh';
+import type { CkEthHelperContractAddressData } from '$eth/stores/cketh.store';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
+import { isDestinationCkEthHelperContract } from '$eth/utils/send.utils';
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
@@ -15,8 +16,11 @@ export interface GetFeeData {
 	address: ETH_ADDRESS;
 }
 
-export const getEthFeeData = async ({ address }: GetFeeData): Promise<BigNumber> => {
-	if (address.toLowerCase() === CKETH_HELPER_CONTRACT.toLowerCase()) {
+export const getEthFeeData = async ({
+	address,
+	helperContractAddress
+}: GetFeeData & { helperContractAddress: CkEthHelperContractAddressData }): Promise<BigNumber> => {
+	if (isDestinationCkEthHelperContract({ destination: address, helperContractAddress })) {
 		return BigNumber.from(CKETH_FEE);
 	}
 
