@@ -9,6 +9,7 @@ export type IcTransactionsData<T> = CertifiedData<T>[];
 export interface IcTransactionsStore<T> extends CertifiedStore<IcTransactionsData<T>> {
 	prepend: (params: { tokenId: TokenId; transactions: CertifiedData<T>[] }) => void;
 	append: (params: { tokenId: TokenId; transactions: CertifiedData<T>[] }) => void;
+	cleanUp: (params: { tokenId: TokenId; transactionIds: string[] }) => void;
 }
 
 const initIcTransactionsStore = <T extends IcTransaction>(): IcTransactionsStore<T> => {
@@ -29,6 +30,13 @@ const initIcTransactionsStore = <T extends IcTransaction>(): IcTransactionsStore
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: [...((state ?? {})[tokenId] ?? []), ...transactions]
+			})),
+		cleanUp: ({ tokenId, transactionIds }: { tokenId: TokenId; transactionIds: string[] }) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: ((state ?? {})[tokenId] ?? []).filter(
+					({ data: { id } }) => !transactionIds.includes(`${id}`)
+				)
 			})),
 		reset,
 		subscribe

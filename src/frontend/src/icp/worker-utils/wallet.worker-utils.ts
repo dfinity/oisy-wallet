@@ -2,6 +2,7 @@ import { queryAndUpdate } from '$lib/actors/query.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type {
 	PostMessageDataResponseWallet,
+	PostMessageDataResponseWalletCleanUp,
 	PostMessageDataResponseWalletError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
@@ -26,10 +27,12 @@ export type GetTransactions =
 	| Omit<IcrcGetTransactions, 'transactions'>
 	| Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>;
 
+type IndexedTransactions<T> = Record<string, CertifiedData<T>>;
+
 // Not reactive, only used to hold values imperatively.
 interface WalletWorkerStore<T> {
 	balance: CertifiedData<bigint> | undefined;
-	transactions: Record<string, CertifiedData<T>>;
+	transactions: IndexedTransactions<T>;
 }
 
 export class WalletWorkerUtils<
@@ -72,7 +75,10 @@ export class WalletWorkerUtils<
 		await queryAndUpdate<GetTransactions & { transactions: TWithId[] }>({
 			request: ({ identity: _, certified }) =>
 				this.getTransactions({ ...data, identity, certified }),
-			onLoad: (results) => this.syncTransactions(results),
+			onLoad: ({ certified, ...rest }) => {
+				this.syncTransactions({ certified, ...rest });
+				this.cleanTransactions({ certified });
+			},
 			onCertifiedError: ({ error }) => this.postMessageWalletError(error),
 			identity,
 			resolution: 'all_settled'
@@ -134,6 +140,49 @@ export class WalletWorkerUtils<
 		});
 	};
 
+	/**
+	 * For security reason, everytime we get an update results we check if there are remaining transactions not certified in memory.
+	 * If we find some, we prune those. Given that we are fetching transactions every X seconds, there should not be any query in memory when update calls have been resolved.
+	 */
+	private cleanTransactions({ certified }: { certified: boolean }) {
+		if (!certified) {
+			return;
+		}
+
+		const [certifiedTransactions, notCertifiedTransactions] = Object.entries(
+			this.store.transactions
+		).reduce(
+			(
+				[certified, notCertified]: [IndexedTransactions<T>, IndexedTransactions<T>],
+				[key, data]
+			) => [
+				{
+					...certified,
+					...(data.certified && { [key]: data })
+				},
+				{
+					...notCertified,
+					...(!data.certified && { [key]: data })
+				}
+			],
+			[{}, {}]
+		);
+
+		if (Object.keys(notCertifiedTransactions).length === 0) {
+			// No not certified found.
+			return;
+		}
+
+		this.postMessageWalletCleanUp(notCertifiedTransactions);
+
+		this.store = {
+			...this.store,
+			transactions: {
+				...certifiedTransactions
+			}
+		};
+	}
+
 	private postMessageWallet({
 		transactions: newTransactions,
 		balance: data,
@@ -165,6 +214,15 @@ export class WalletWorkerUtils<
 			msg: `${this.msg}Error`,
 			data: {
 				error
+			}
+		});
+	}
+
+	private postMessageWalletCleanUp(transactions: IndexedTransactions<T>) {
+		this.worker.postMsg<PostMessageDataResponseWalletCleanUp>({
+			msg: `${this.msg}CleanUp`,
+			data: {
+				transactionIds: Object.keys(transactions)
 			}
 		});
 	}
