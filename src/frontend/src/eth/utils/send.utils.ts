@@ -11,7 +11,7 @@ export const mapAddressStartsWith0x = (address: string) => {
 	return `${PREFIX}${address}`;
 };
 
-export const isDestinationCkEthHelperContract = ({
+export const isCkEthHelperContract = ({
 	helperContractAddress,
 	destination
 }: {
