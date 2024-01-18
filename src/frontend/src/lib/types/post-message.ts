@@ -35,7 +35,9 @@ export type PostMessageResponse =
 	| 'syncIcpWallet'
 	| 'syncIcrcWallet'
 	| 'syncIcpWalletError'
-	| 'syncIcrcWalletError';
+	| 'syncIcrcWalletError'
+	| 'syncIcpWalletCleanUp'
+	| 'syncIcrcWalletCleanUp';
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 	authRemainingTime: number;
@@ -62,6 +64,10 @@ export interface PostMessageDataResponseWallet<T> extends PostMessageDataRespons
 
 export interface PostMessageDataResponseWalletError extends PostMessageDataResponse {
 	error: unknown;
+}
+
+export interface PostMessageDataResponseWalletCleanUp extends PostMessageDataResponse {
+	transactionIds: string[];
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {

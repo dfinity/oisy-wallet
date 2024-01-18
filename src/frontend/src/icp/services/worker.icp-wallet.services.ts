@@ -1,8 +1,12 @@
-import { onLoadTransactionsError } from '$icp/services/ic-transactions.services';
+import {
+	onLoadTransactionsError,
+	onTransactionsCleanUp
+} from '$icp/services/ic-transactions.services';
 import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import type {
 	PostMessage,
 	PostMessageDataResponseWallet,
+	PostMessageDataResponseWalletCleanUp,
 	PostMessageDataResponseWalletError
 } from '$lib/types/post-message';
 import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
@@ -23,6 +27,7 @@ export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
 		PostMessage<
 			| PostMessageDataResponseWallet<GetAccountIdentifierTransactionsResponse>
 			| PostMessageDataResponseWalletError
+			| PostMessageDataResponseWalletCleanUp
 		>
 	>) => {
 		const { msg } = data;
@@ -38,6 +43,12 @@ export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
 				onLoadTransactionsError({
 					tokenId: ICP_TOKEN_ID,
 					error: (data.data as PostMessageDataResponseWalletError).error
+				});
+				return;
+			case 'syncIcpWalletCleanUp':
+				onTransactionsCleanUp({
+					tokenId: ICP_TOKEN_ID,
+					transactionIds: (data.data as PostMessageDataResponseWalletCleanUp).transactionIds
 				});
 				return;
 		}
