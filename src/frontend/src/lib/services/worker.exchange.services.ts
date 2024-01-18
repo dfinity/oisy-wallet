@@ -77,7 +77,12 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 				syncExchange(value as PostMessageDataResponseExchange | undefined);
 				return;
 			case 'syncExchangeError':
-				toastError(value as PostMessageDataResponseExchangeError | undefined);
+				// TODO: error appears to often currently and is super annoying. So until we figure out a way to solve this, hide the error to the console.
+				console.error(
+					'An error occurred while attempting to retrieve the USD exchange rates.',
+					(value as PostMessageDataResponseExchangeError | undefined)?.err
+				);
+				// toastError(value as PostMessageDataResponseExchangeError | undefined);
 				return;
 		}
 	};
