@@ -10,7 +10,7 @@ import type {
 } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { SendParams } from '$eth/types/send';
-import { isDestinationCkEthHelperContract } from '$eth/utils/send.utils';
+import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
@@ -148,7 +148,7 @@ export const send = async ({
 
 	const transaction = await (token.id === ETHEREUM_TOKEN_ID
 		? isNullish(ckEthHelperContractAddress) ||
-			!isDestinationCkEthHelperContract({
+			!isCkEthHelperContract({
 				destination: to,
 				helperContractAddress: ckEthHelperContractAddress
 			})
