@@ -26,6 +26,12 @@ export type GetTransactions =
 	| Omit<IcrcGetTransactions, 'transactions'>
 	| Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>;
 
+// Not reactive, only used to hold values imperatively.
+interface WalletWorkerStore<T> {
+	balance: CertifiedData<bigint> | undefined;
+	transactions: Record<string, CertifiedData<T>>;
+}
+
 export class WalletWorkerUtils<
 	T extends IcrcTransaction | Transaction,
 	TWithId extends IcrcTransactionWithId | TransactionWithId,
@@ -33,8 +39,11 @@ export class WalletWorkerUtils<
 > {
 	private worker = new TimerWorkerUtils();
 
-	private balance: CertifiedData<bigint> | undefined;
-	private transactions: Record<string, CertifiedData<T>> = {};
+	private store: WalletWorkerStore<T> = {
+		balance: undefined,
+		transactions: {}
+	};
+
 	private initialized = false;
 
 	constructor(
@@ -79,14 +88,15 @@ export class WalletWorkerUtils<
 	}) => {
 		// Is there any new transactions unknown so far or which has become certified
 		const newTransactions = fetchedTransactions.filter(
-			({ id }) => isNullish(this.transactions[`${id}`]) || !this.transactions[`${id}`].certified
+			({ id }) =>
+				isNullish(this.store.transactions[`${id}`]) || !this.store.transactions[`${id}`].certified
 		);
 
 		// Is the balance different from last value or has it become certified
 		const newBalance =
-			isNullish(this.balance) ||
-			this.balance.data !== balance ||
-			(!this.balance.certified && certified);
+			isNullish(this.store.balance) ||
+			this.store.balance.data !== balance ||
+			(!this.store.balance.certified && certified);
 
 		if (newTransactions.length === 0 && !newBalance) {
 			// We execute postMessage at least once because developer may have no transaction at all so, we want to display the balance zero
@@ -99,20 +109,21 @@ export class WalletWorkerUtils<
 			return;
 		}
 
-		this.balance = { data: balance, certified };
-
-		this.transactions = {
-			...this.transactions,
-			...newTransactions.reduce(
-				(acc: Record<string, CertifiedData<T>>, { id, transaction }) => ({
-					...acc,
-					[`${id}`]: {
-						data: transaction as T,
-						certified
-					}
-				}),
-				{}
-			)
+		this.store = {
+			balance: { data: balance, certified },
+			transactions: {
+				...this.store.transactions,
+				...newTransactions.reduce(
+					(acc: Record<string, CertifiedData<T>>, { id, transaction }) => ({
+						...acc,
+						[`${id}`]: {
+							data: transaction as T,
+							certified
+						}
+					}),
+					{}
+				)
+			}
 		};
 
 		this.postMessageWallet({
