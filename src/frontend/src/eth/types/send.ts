@@ -9,6 +9,6 @@ export interface SendParams {
 	lastProgressStep?: SendStep;
 	token: Token;
 	network?: Network | undefined;
-	identity?: OptionIdentity;
-	ckEthHelperContractAddress?: CkEthHelperContractAddressData;
+	identity: OptionIdentity;
+	ckEthHelperContractAddress: CkEthHelperContractAddressData;
 }
