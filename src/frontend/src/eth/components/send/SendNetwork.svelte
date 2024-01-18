@@ -4,19 +4,33 @@
 	import type { Network } from '$lib/types/network';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
+	import { isCkEthHelperContract } from '$eth/utils/send.utils';
+	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
+	export let disabled = false;
 
 	let networkName: string | undefined = network?.name;
 
 	const onDestinationAddressInput = debounce(async () => {
-		if (nonNullish(network)) {
-			// A network was already manually selected
+		if (nonNullish(network) && !disabled) {
+			// A network was already manually selected except if disabled, in that case we always recalculate the network based on the provided destination
 			return;
 		}
 
 		if (isNullish(destination) || destination === '') {
+			network = undefined;
+			return;
+		}
+
+		if (
+			isCkEthHelperContract({
+				destination,
+				helperContractAddress: $ckEthHelperContractAddressStore
+			})
+		) {
+			networkName = ICP_NETWORK.name;
 			return;
 		}
 
@@ -47,14 +61,16 @@
 
 <label for="network" class="font-bold px-4.5">Network:</label>
 
-<div id="network" class="mb-4 mt-1 pt-0.5">
-	<Dropdown name="network" bind:selectedValue={networkName}>
+<div id="network" class="mb-4 mt-1 pt-0.5" class:opacity-50={disabled}>
+	<Dropdown name="network" bind:selectedValue={networkName} {disabled}>
 		<option disabled selected value={undefined} class="hidden"
 			><span class="description">Select network</span></option
 		>
 		<DropdownItem value={ETHEREUM_NETWORK.name}>Ethereum</DropdownItem>
 
-		<DropdownItem value={ICP_NETWORK.name}>Convert to native ICP</DropdownItem>
+		<DropdownItem value={ICP_NETWORK.name}>
+			<slot name="icp-network" />
+		</DropdownItem>
 	</Dropdown>
 </div>
 

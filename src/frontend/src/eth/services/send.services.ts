@@ -20,7 +20,7 @@ import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
-import { assertNonNullish, isNullish, toNullable } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { processTransactionSent } from './transaction.services';
 
@@ -147,21 +147,13 @@ export const send = async ({
 	};
 
 	const transaction = await (token.id === ETHEREUM_TOKEN_ID
-		? isNullish(ckEthHelperContractAddress) ||
-			!isCkEthHelperContract({
+		? nonNullish(ckEthHelperContractAddress) &&
+			isCkEthHelperContract({
 				destination: to,
 				helperContractAddress: ckEthHelperContractAddress
-			})
-			? ethPrepareTransaction({
-					...rest,
-					from,
-					to,
-					nonce,
-					gas: gas?.toBigInt(),
-					maxFeePerGas: maxFeePerGas.toBigInt(),
-					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
-				})
-			: ethContractPrepareTransaction({
+			}) &&
+			isNetworkICP(network ?? ETHEREUM_NETWORK)
+			? ethContractPrepareTransaction({
 					...rest,
 					contract: { address: ckEthHelperContractAddress.data },
 					from,
@@ -171,6 +163,15 @@ export const send = async ({
 					maxFeePerGas: maxFeePerGas.toBigInt(),
 					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 					populate: populateDepositTransaction
+				})
+			: ethPrepareTransaction({
+					...rest,
+					from,
+					to,
+					nonce,
+					gas: gas?.toBigInt(),
+					maxFeePerGas: maxFeePerGas.toBigInt(),
+					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
 				})
 		: erc20PrepareTransaction({
 				...rest,
