@@ -28,7 +28,7 @@
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<SendDestination bind:destination bind:invalidDestination />
 
-	<SendNetworkICP token={$token} bind:destination bind:network />
+	<SendNetworkICP token={$token} {destination} bind:network />
 
 	<SendAmount bind:amount bind:insufficientFunds />
 

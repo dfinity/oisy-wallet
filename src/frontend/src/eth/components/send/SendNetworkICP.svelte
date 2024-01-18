@@ -17,7 +17,7 @@
 </script>
 
 {#if icp || eth}
-	<SendNetwork bind:network bind:destination disabled={eth}>
+	<SendNetwork bind:network {destination} disabled={eth}>
 		<SendNetworkICPText erc20Icp={icp} slot="icp-network" />
 	</SendNetwork>
 {/if}
