@@ -18,7 +18,7 @@
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
-	import { token } from '$lib/derived/token.derived';
+	import { token, tokenStandard } from '$lib/derived/token.derived';
 	import { WALLET_CONNECT_SEND_STEPS } from '$lib/constants/steps.constants';
 	import {
 		send as sendServices,
@@ -26,6 +26,9 @@
 	} from '$eth/services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
+	import CkEthContext from '$eth/components/cketh/CkEthContext.svelte';
+	import { authStore } from '$lib/stores/auth.store';
+	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -97,7 +100,10 @@
 			fee: $storeFeeData,
 			modalNext: modal.next,
 			token: $token,
-			progress: (step: SendStep) => (sendProgressStep = step)
+			progress: (step: SendStep) => (sendProgressStep = step),
+			identity: $authStore.identity,
+			ckEthHelperContractAddress: $ckEthHelperContractAddressStore,
+			tokenStandard: $tokenStandard
 		});
 
 		setTimeout(() => close(), success ? 750 : 0);
@@ -112,17 +118,19 @@
 	>
 
 	<FeeContext amount={amount.toString()} {destination} observe={currentStep?.name !== 'Sending'}>
-		{#if currentStep?.name === 'Sending'}
-			<SendProgress progressStep={sendProgressStep} steps={WALLET_CONNECT_SEND_STEPS} />
-		{:else}
-			<WalletConnectSendReview
-				{amount}
-				{destination}
-				{data}
-				{erc20Approve}
-				on:icApprove={send}
-				on:icReject={reject}
-			/>
-		{/if}
+		<CkEthContext>
+			{#if currentStep?.name === 'Sending'}
+				<SendProgress progressStep={sendProgressStep} steps={WALLET_CONNECT_SEND_STEPS} />
+			{:else}
+				<WalletConnectSendReview
+					{amount}
+					{destination}
+					{data}
+					{erc20Approve}
+					on:icApprove={send}
+					on:icReject={reject}
+				/>
+			{/if}
+		</CkEthContext>
 	</FeeContext>
 </WizardModal>
