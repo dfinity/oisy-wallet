@@ -87,3 +87,13 @@ export const onLoadTransactionsError = ({
 		err
 	});
 };
+
+export const onTransactionsCleanUp = (data: { tokenId: TokenId; transactionIds: string[] }) => {
+	icTransactionsStore.cleanUp(data);
+
+	toastsError({
+		msg: {
+			text: 'Several uncertified transactions were identified and subsequently removed from the displayed lists.'
+		}
+	});
+};
