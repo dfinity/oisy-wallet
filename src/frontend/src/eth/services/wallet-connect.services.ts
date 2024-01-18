@@ -1,4 +1,5 @@
 import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
+import { assertCkEthHelperContractAddressLoaded } from '$eth/services/cketh.services';
 import type { FeeStoreData } from '$eth/stores/fee.store';
 import type { SendParams } from '$eth/types/send';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
@@ -12,6 +13,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
+import type { TokenStandard } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
@@ -74,8 +76,14 @@ export const send = ({
 	progress,
 	amount,
 	lastProgressStep = SendStep.DONE,
+	identity,
+	ckEthHelperContractAddress,
+	tokenStandard,
 	...params
-}: WalletConnectSendParams): Promise<{ success: boolean; err?: unknown }> =>
+}: WalletConnectSendParams &
+	Pick<SendParams, 'identity' | 'ckEthHelperContractAddress'> & {
+		tokenStandard: TokenStandard;
+	}): Promise<{ success: boolean; err?: unknown }> =>
 	execute({
 		params,
 		callback: async ({
@@ -116,6 +124,15 @@ export const send = ({
 				return { success: false };
 			}
 
+			const { valid } = assertCkEthHelperContractAddressLoaded({
+				tokenStandard,
+				helperContractAddress: ckEthHelperContractAddress
+			});
+
+			if (!valid) {
+				return { success: false };
+			}
+
 			if (isNullish(fee)) {
 				toastsError({
 					msg: { text: `Gas fees are not defined.` }
@@ -147,7 +164,9 @@ export const send = ({
 					maxFeePerGas,
 					maxPriorityFeePerGas,
 					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
-					data
+					data,
+					identity,
+					ckEthHelperContractAddress
 				});
 
 				await listener.approveRequest({ id, topic, message: hash });

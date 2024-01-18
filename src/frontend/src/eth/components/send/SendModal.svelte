@@ -25,6 +25,7 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import CkEthContext from '$eth/components/cketh/CkEthContext.svelte';
 	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
+	import { assertCkEthHelperContractAddressLoaded } from '$eth/services/cketh.services';
 
 	/**
 	 * Fee context store
@@ -72,21 +73,12 @@
 			return;
 		}
 
-		if ($tokenStandard === 'ethereum' && isNullish($ckEthHelperContractAddressStore)) {
-			toastsError({
-				msg: {
-					text: `Try again in few seconds, a ckETH configuration parameter is not yet loaded.`
-				}
-			});
-			return;
-		}
+		const { valid } = assertCkEthHelperContractAddressLoaded({
+			tokenStandard: $tokenStandard,
+			helperContractAddress: $ckEthHelperContractAddressStore
+		});
 
-		if ($tokenStandard === 'ethereum' && $ckEthHelperContractAddressStore?.certified !== true) {
-			toastsError({
-				msg: {
-					text: `Try again in few seconds, a ckETH configuration parameter has not yet certified.`
-				}
-			});
+		if (!valid) {
 			return;
 		}
 
