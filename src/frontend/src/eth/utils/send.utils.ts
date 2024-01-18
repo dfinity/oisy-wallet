@@ -17,4 +17,6 @@ export const isDestinationCkEthHelperContract = ({
 }: {
 	helperContractAddress: CkEthHelperContractAddressData;
 	destination: string | undefined;
-}): boolean => nonNullish(helperContractAddress) && destination === helperContractAddress.data;
+}): boolean =>
+	nonNullish(helperContractAddress) &&
+	destination?.toLowerCase() === helperContractAddress.data.toLowerCase();
