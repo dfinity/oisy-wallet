@@ -10,7 +10,7 @@ export const loadCkEthHelperContractAddress = async () => {
 	const addressInStore = get(ckEthHelperContractAddressStore);
 
 	// We try to load only once per session the help contract address
-	if (addressInStore === undefined) {
+	if (addressInStore !== undefined) {
 		return;
 	}
 
