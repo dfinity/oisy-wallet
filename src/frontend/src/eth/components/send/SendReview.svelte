@@ -29,7 +29,7 @@
 
 <SendData {amount} {destination} token={$token} source={$address ?? ''}>
 	<FeeDisplay slot="fee" />
-	<SendReviewNetwork {network} slot="network" />
+	<SendReviewNetwork {network} token={$token} slot="network" />
 </SendData>
 
 <div class="flex justify-end gap-1">

@@ -79,11 +79,11 @@ export const send = ({
 	identity,
 	ckEthHelperContractAddress,
 	tokenStandard,
+	network,
 	...params
-}: WalletConnectSendParams &
-	Pick<SendParams, 'identity' | 'ckEthHelperContractAddress'> & {
-		tokenStandard: TokenStandard;
-	}): Promise<{ success: boolean; err?: unknown }> =>
+}: WalletConnectSendParams & {
+	tokenStandard: TokenStandard;
+}): Promise<{ success: boolean; err?: unknown }> =>
 	execute({
 		params,
 		callback: async ({
@@ -126,7 +126,8 @@ export const send = ({
 
 			const { valid } = assertCkEthHelperContractAddressLoaded({
 				tokenStandard,
-				helperContractAddress: ckEthHelperContractAddress
+				helperContractAddress: ckEthHelperContractAddress,
+				network
 			});
 
 			if (!valid) {

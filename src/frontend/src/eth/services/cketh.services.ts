@@ -5,9 +5,12 @@ import {
 } from '$eth/stores/cketh.store';
 import { CKETH_MINTER_CANISTER_ID } from '$icp/constants/icrc.constants';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
+import type { Network } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
+import { isNetworkICP } from '$lib/utils/network.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -41,12 +44,18 @@ export const loadCkEthHelperContractAddress = async () => {
 
 export const assertCkEthHelperContractAddressLoaded = ({
 	helperContractAddress,
-	tokenStandard
+	tokenStandard,
+	network
 }: {
 	helperContractAddress: CkEthHelperContractAddressData;
 	tokenStandard: TokenStandard;
+	network: Network | undefined;
 }): { valid: boolean } => {
-	if (tokenStandard === 'ethereum' && isNullish(helperContractAddress)) {
+	if (tokenStandard !== 'ethereum' || !isNetworkICP(network ?? ETHEREUM_NETWORK)) {
+		return { valid: true };
+	}
+
+	if (isNullish(helperContractAddress)) {
 		toastsError({
 			msg: {
 				text: `Try again in few seconds, a ckETH configuration parameter is not yet loaded.`
@@ -55,7 +64,7 @@ export const assertCkEthHelperContractAddressLoaded = ({
 		return { valid: false };
 	}
 
-	if (tokenStandard === 'ethereum' && helperContractAddress?.certified !== true) {
+	if (helperContractAddress?.certified !== true) {
 		toastsError({
 			msg: {
 				text: `Try again in few seconds, a ckETH configuration parameter has not yet certified.`

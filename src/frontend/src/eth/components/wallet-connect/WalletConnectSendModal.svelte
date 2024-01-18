@@ -29,6 +29,8 @@
 	import CkEthContext from '$eth/components/cketh/CkEthContext.svelte';
 	import { authStore } from '$lib/stores/auth.store';
 	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
+	import type { Network } from '$lib/types/network';
+	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -45,6 +47,17 @@
 	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
 		store: storeFeeData
 	});
+
+	/**
+	 * Network
+	 */
+
+	let destination = '';
+	$: destination = firstTransaction.to ?? '';
+
+	let network: Network | undefined = undefined;
+	$: network =
+		destination === $ckEthHelperContractAddressStore?.data ? ICP_NETWORK : ETHEREUM_NETWORK;
 
 	/**
 	 * Modal
@@ -103,7 +116,8 @@
 			progress: (step: SendStep) => (sendProgressStep = step),
 			identity: $authStore.identity,
 			ckEthHelperContractAddress: $ckEthHelperContractAddressStore,
-			tokenStandard: $tokenStandard
+			tokenStandard: $tokenStandard,
+			network
 		});
 
 		setTimeout(() => close(), success ? 750 : 0);
@@ -111,7 +125,6 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	{@const destination = firstTransaction.to ?? ''}
 	{@const data = firstTransaction.data}
 
 	<WalletConnectModalTitle slot="title">{erc20Approve ? 'Approve' : 'Send'}</WalletConnectModalTitle
@@ -127,6 +140,7 @@
 					{destination}
 					{data}
 					{erc20Approve}
+					{network}
 					on:icApprove={send}
 					on:icReject={reject}
 				/>
