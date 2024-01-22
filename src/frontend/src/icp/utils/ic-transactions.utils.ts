@@ -76,10 +76,12 @@ export const mapIcpTransaction = ({
 	}
 
 	if ('Transfer' in operation) {
+		const source = mapFrom(operation.Transfer.from);
+
 		return {
 			...tx,
-			type: 'transfer',
-			...mapFrom(operation.Transfer.from),
+			type: source.incoming === false ? 'send' : 'receive',
+			...source,
 			to: operation.Transfer.to,
 			value: BigNumber.from(operation.Transfer.amount.e8s)
 		};
@@ -131,24 +133,30 @@ const mapIcrcTransaction = ({
 		incoming: from?.toLowerCase() !== accountIdentifier?.toLowerCase()
 	});
 
-	const type: IcTransactionType = nonNullish(fromNullable(approve))
-		? 'approve'
-		: nonNullish(fromNullable(burn))
-			? 'burn'
-			: nonNullish(fromNullable(mint))
-				? 'mint'
-				: 'transfer';
-
-	return {
-		id,
-		type,
+	const source: Pick<IcTransactionUi, 'from' | 'incoming'> = {
 		...('from' in data &&
 			mapFrom(
 				encodeIcrcAccount({
 					owner: data.from.owner,
 					subaccount: fromNullable(data.from.subaccount)
 				})
-			)),
+			))
+	};
+
+	const type: IcTransactionType = nonNullish(fromNullable(approve))
+		? 'approve'
+		: nonNullish(fromNullable(burn))
+			? 'burn'
+			: nonNullish(fromNullable(mint))
+				? 'mint'
+				: source.incoming === false
+					? 'send'
+					: 'receive';
+
+	return {
+		id,
+		type,
+		...source,
 		to:
 			'to' in data
 				? encodeIcrcAccount({
