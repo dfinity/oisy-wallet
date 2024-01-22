@@ -8,18 +8,17 @@ import type {
 } from '@dfinity/ledger-icrc';
 import type { BigNumber } from '@ethersproject/bignumber';
 
-export interface IcTransactionToSelf {
-	toSelf: boolean;
+export interface IcTransactionAddOnsInfo {
+	transferToSelf?: 'send' | 'receive';
 }
 
-export type IcpTransaction = { transaction: Transaction & IcTransactionToSelf } & Pick<
+export type IcpTransaction = { transaction: Transaction & IcTransactionAddOnsInfo } & Pick<
 	TransactionWithId,
 	'id'
 >;
-export type IcrcTransaction = { transaction: IcrcTransactionCandid & IcTransactionToSelf } & Pick<
-	IcrcTransactionWithId,
-	'id'
->;
+export type IcrcTransaction = {
+	transaction: IcrcTransactionCandid & IcTransactionAddOnsInfo;
+} & Pick<IcrcTransactionWithId, 'id'>;
 
 export type IcTransaction = IcpTransaction | IcrcTransaction;
 

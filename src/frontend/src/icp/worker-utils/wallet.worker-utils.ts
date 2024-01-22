@@ -1,4 +1,4 @@
-import type { IcTransactionToSelf } from '$icp/types/ic';
+import type { IcTransactionAddOnsInfo } from '$icp/types/ic';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -17,7 +17,7 @@ import {
 	type TimerWorkerUtilsJobParams
 } from './timer.worker-utils';
 
-type IndexedTransaction<T> = T & IcTransactionToSelf;
+type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
 type IndexedTransactions<T> = Record<string, CertifiedData<IndexedTransaction<T>>>;
 
