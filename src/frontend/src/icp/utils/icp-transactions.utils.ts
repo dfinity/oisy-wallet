@@ -102,7 +102,7 @@ export const mapIcpTransaction = ({
 			...tx,
 			type: 'mint',
 			to: operation.Mint.to,
-			incoming: false,
+			incoming: true,
 			value: BigNumber.from(operation.Mint.amount.e8s)
 		};
 	}

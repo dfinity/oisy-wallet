@@ -79,28 +79,32 @@ export const mapIcrcTransaction = ({
 			from?.toLowerCase() !== accountIdentifier?.toLowerCase() || transferToSelf === 'receive'
 	});
 
+	const isApprove = nonNullish(fromNullable(approve));
+	const isTransfer = nonNullish(fromNullable(transfer));
+	const isMint = nonNullish(fromNullable(mint));
+
 	const source: Pick<IcTransactionUi, 'from' | 'incoming'> = {
-		...('from' in data &&
-			mapFrom(
-				encodeIcrcAccount({
-					owner: data.from.owner,
-					subaccount: fromNullable(data.from.subaccount)
-				})
-			))
+		...('from' in data
+			? mapFrom(
+					encodeIcrcAccount({
+						owner: data.from.owner,
+						subaccount: fromNullable(data.from.subaccount)
+					})
+				)
+			: isMint
+				? { incoming: true }
+				: {})
 	};
 
 	const type: IcTransactionType = nonNullish(fromNullable(approve))
 		? 'approve'
 		: nonNullish(fromNullable(burn))
 			? 'burn'
-			: nonNullish(fromNullable(mint))
+			: isMint
 				? 'mint'
 				: source.incoming === false
 					? 'send'
 					: 'receive';
-
-	const isApprove = nonNullish(fromNullable(approve));
-	const isTransfer = nonNullish(fromNullable(transfer));
 
 	const value = isApprove
 		? BigNumber.from(0n)
