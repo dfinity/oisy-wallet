@@ -11,7 +11,7 @@
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { IcTransaction, IcTransactionUi } from '$icp/types/ic';
+	import type { IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 
 	export let transaction: IcTransaction;
@@ -33,10 +33,12 @@
 		}
 	});
 
+	let transactionType: IcTransactionType | undefined;
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
 	let incoming: boolean | undefined;
 
+	$: transactionType = uiTransaction?.type;
 	$: value = uiTransaction?.value;
 	$: timestamp = uiTransaction?.timestamp;
 	$: incoming = uiTransaction?.incoming;
@@ -50,7 +52,7 @@
 
 <button on:click={() => modalStore.openIcTransaction(uiTransaction)} class="block w-full">
 	<Card>
-		{`${incoming === false ? 'Send' : 'Receive'}`}
+		<span class="capitalize">{transactionType}</span>
 
 		<RoundedIcon slot="icon" {icon} />
 
