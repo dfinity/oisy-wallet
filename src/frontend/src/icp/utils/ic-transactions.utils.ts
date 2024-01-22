@@ -1,11 +1,16 @@
-import type { IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
-import type { IcpTransaction } from '$icp/types/icp';
+import type {
+	IcpTransaction,
+	IcrcTransaction,
+	IcTransaction,
+	IcTransactionType,
+	IcTransactionUi
+} from '$icp/types/ic';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
-import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
+import { encodeIcrcAccount } from '@dfinity/ledger-icrc';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -22,7 +27,7 @@ export const mapIcTransaction = ({
 		return mapIcpTransaction({ transaction: transaction as IcpTransaction, ...rest });
 	}
 
-	return mapIcrcTransaction({ transaction: transaction as IcrcTransactionWithId, ...rest });
+	return mapIcrcTransaction({ transaction: transaction as IcrcTransaction, ...rest });
 };
 
 export const mapIcpTransaction = ({
@@ -104,7 +109,7 @@ const mapIcrcTransaction = ({
 	transaction: { transaction, id },
 	identity
 }: {
-	transaction: IcrcTransactionWithId;
+	transaction: IcrcTransaction;
 	identity: OptionIdentity;
 }): IcTransactionUi => {
 	const { timestamp, approve, burn, mint, transfer } = transaction;

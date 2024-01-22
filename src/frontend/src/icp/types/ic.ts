@@ -1,17 +1,27 @@
 import type { CanisterIdText } from '$lib/types/canister';
 import type { CoingeckoCoinsId } from '$lib/types/coingecko';
 import type { Token } from '$lib/types/token';
-import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
-import type { IcrcGetTransactions, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
-import { BigNumber } from '@ethersproject/bignumber';
-import type { IcpTransaction } from './icp';
-
-export type IcTransaction = IcpTransaction | IcrcTransactionWithId;
-export type IcGetTransactions = GetAccountIdentifierTransactionsResponse | IcrcGetTransactions;
+import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
+import type {
+	IcrcTransaction as IcrcTransactionCandid,
+	IcrcTransactionWithId
+} from '@dfinity/ledger-icrc';
+import type { BigNumber } from '@ethersproject/bignumber';
 
 export interface IcTransactionToSelf {
 	toSelf: boolean;
 }
+
+export type IcpTransaction = { transaction: Transaction & IcTransactionToSelf } & Pick<
+	TransactionWithId,
+	'id'
+>;
+export type IcrcTransaction = { transaction: IcrcTransactionCandid & IcTransactionToSelf } & Pick<
+	IcrcTransactionWithId,
+	'id'
+>;
+
+export type IcTransaction = IcpTransaction | IcrcTransaction;
 
 export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'send' | 'receive' | 'transfer-from';
 

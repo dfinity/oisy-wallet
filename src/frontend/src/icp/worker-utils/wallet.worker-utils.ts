@@ -1,4 +1,5 @@
 import type { IcTransactionToSelf } from '$icp/types/ic';
+import type { GetTransactions } from '$icp/types/ic.post-message';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type {
@@ -7,26 +8,14 @@ import type {
 	PostMessageDataResponseWalletError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type {
-	GetAccountIdentifierTransactionsResponse,
-	Transaction,
-	TransactionWithId
-} from '@dfinity/ledger-icp';
-import type {
-	IcrcGetTransactions,
-	IcrcTransaction,
-	IcrcTransactionWithId
-} from '@dfinity/ledger-icrc';
+import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
+import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { isNullish, jsonReplacer } from '@dfinity/utils';
 import {
 	TimerWorkerUtils,
 	type TimerWorkerUtilsJobData,
 	type TimerWorkerUtilsJobParams
 } from './timer.worker-utils';
-
-export type GetTransactions =
-	| Omit<IcrcGetTransactions, 'transactions'>
-	| Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>;
 
 type IndexedTransaction<T> = T & IcTransactionToSelf;
 
@@ -151,8 +140,6 @@ export class WalletWorkerUtils<
 			certified,
 			...rest
 		});
-
-		console.log(newExtendedTransactions);
 	};
 
 	/**
