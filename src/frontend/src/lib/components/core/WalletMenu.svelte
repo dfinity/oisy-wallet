@@ -11,6 +11,7 @@
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import { networkAddress, networkICP, networkId } from '$lib/derived/network.derived';
 	import { networkParam } from '$lib/utils/nav.utils';
+	import { nonNullish } from '@dfinity/utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -20,13 +21,10 @@
 		await goto(`/settings?${networkParam($networkId)}`);
 	};
 
-	const DASHBOARD_URL = import.meta.env.VITE_ICP_DASHBOARD_EXPLORER_URL;
 	const ETHERSCAN_URL = import.meta.env.VITE_ETHERSCAN_EXPLORER_URL;
 
-	let explorerUrl: string;
-	$: explorerUrl = $networkICP
-		? `${DASHBOARD_URL}/account/${$networkAddress ?? ''}`
-		: `${ETHERSCAN_URL}/address/${$networkAddress ?? ''}`;
+	let explorerUrl: string | undefined;
+	$: explorerUrl = $networkICP ? undefined : `${ETHERSCAN_URL}/address/${$networkAddress ?? ''}`;
 </script>
 
 <button
@@ -48,16 +46,18 @@
 			/>
 		</div>
 
-		<a
-			href={explorerUrl}
-			rel="external noopener noreferrer"
-			target="_blank"
-			class="flex gap-2 items-center no-underline"
-			aria-label="Open your address on Etherscan"
-		>
-			<IconExternalLink />
-			View on explorer
-		</a>
+		{#if nonNullish(explorerUrl)}
+			<a
+				href={explorerUrl}
+				rel="external noopener noreferrer"
+				target="_blank"
+				class="flex gap-2 items-center no-underline"
+				aria-label="Open your address on Etherscan"
+			>
+				<IconExternalLink />
+				View on explorer
+			</a>
+		{/if}
 
 		<Hr />
 
