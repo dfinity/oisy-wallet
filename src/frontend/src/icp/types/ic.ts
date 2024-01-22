@@ -9,6 +9,10 @@ import type { IcpTransaction } from './icp';
 export type IcTransaction = IcpTransaction | IcrcTransactionWithId;
 export type IcGetTransactions = GetAccountIdentifierTransactionsResponse | IcrcGetTransactions;
 
+export interface IcTransactionToSelf {
+	toSelf: boolean;
+}
+
 export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'send' | 'receive' | 'transfer-from';
 
 export interface IcTransactionUi {
