@@ -1,7 +1,9 @@
 import { getTransactions as getTransactionsIcp } from '$icp/api/icp-index.api';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index.api';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-import type { IcGetTransactions, IcToken } from '$icp/types/ic';
+import type { IcToken, IcTransaction } from '$icp/types/ic';
+import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
+import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { balancesStore } from '$lib/stores/balances.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -18,17 +20,19 @@ const getTransactions = async ({
 	start?: bigint;
 	maxResults?: bigint;
 	token: IcToken;
-}): Promise<IcGetTransactions> => {
+}): Promise<IcTransaction[]> => {
 	if (standard === 'icrc') {
-		return getTransactionsIcrc({
+		const { transactions } = await getTransactionsIcrc({
 			indexCanisterId,
 			...rest
 		});
+		return transactions.flatMap(mapTransactionIcrcToSelf);
 	}
 
-	return getTransactionsIcp({
+	const { transactions } = await getTransactionsIcp({
 		...rest
 	});
+	return transactions.flatMap(mapTransactionIcpToSelf);
 };
 
 export const loadNextTransactions = async ({
@@ -44,14 +48,14 @@ export const loadNextTransactions = async ({
 	token: IcToken;
 	signalEnd: () => void;
 }): Promise<void> =>
-	queryAndUpdate<IcGetTransactions>({
+	queryAndUpdate<IcTransaction[]>({
 		request: (params) =>
 			getTransactions({
 				token: { id: tokenId, ...token },
 				...rest,
 				...params
 			}),
-		onLoad: ({ response: { transactions }, certified }) => {
+		onLoad: ({ response: transactions, certified }) => {
 			if (transactions.length === 0) {
 				signalEnd();
 				return;

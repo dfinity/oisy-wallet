@@ -25,7 +25,9 @@ export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
 		data
 	}: MessageEvent<
 		PostMessage<
-			| PostMessageDataResponseWallet<GetAccountIdentifierTransactionsResponse>
+			| PostMessageDataResponseWallet<
+					Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>
+			  >
 			| PostMessageDataResponseWalletError
 			| PostMessageDataResponseWalletCleanUp
 		>
@@ -36,7 +38,9 @@ export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
 			case 'syncIcpWallet':
 				syncWallet({
 					tokenId: ICP_TOKEN_ID,
-					data: data.data as PostMessageDataResponseWallet<GetAccountIdentifierTransactionsResponse>
+					data: data.data as PostMessageDataResponseWallet<
+						Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>
+					>
 				});
 				return;
 			case 'syncIcpWalletError':

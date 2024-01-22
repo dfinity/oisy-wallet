@@ -1,3 +1,5 @@
+import type { IcTransactionAddOnsInfo } from '$icp/types/ic';
+import type { GetTransactions } from '$icp/types/ic.post-message';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type {
@@ -6,16 +8,8 @@ import type {
 	PostMessageDataResponseWalletError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type {
-	GetAccountIdentifierTransactionsResponse,
-	Transaction,
-	TransactionWithId
-} from '@dfinity/ledger-icp';
-import type {
-	IcrcGetTransactions,
-	IcrcTransaction,
-	IcrcTransactionWithId
-} from '@dfinity/ledger-icrc';
+import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
+import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { isNullish, jsonReplacer } from '@dfinity/utils';
 import {
 	TimerWorkerUtils,
@@ -23,11 +17,9 @@ import {
 	type TimerWorkerUtilsJobParams
 } from './timer.worker-utils';
 
-export type GetTransactions =
-	| Omit<IcrcGetTransactions, 'transactions'>
-	| Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>;
+type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
-type IndexedTransactions<T> = Record<string, CertifiedData<T>>;
+type IndexedTransactions<T> = Record<string, CertifiedData<IndexedTransaction<T>>>;
 
 // Not reactive, only used to hold values imperatively.
 interface WalletWorkerStore<T> {
@@ -53,6 +45,9 @@ export class WalletWorkerUtils<
 		private getTransactions: (
 			data: TimerWorkerUtilsJobParams<PostMessageDataRequest>
 		) => Promise<GetTransactions & { transactions: TWithId[] }>,
+		private mapToSelfTransaction: (
+			transaction: TWithId
+		) => (Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> })[],
 		private msg: 'syncIcpWallet' | 'syncIcrcWallet'
 	) {}
 
@@ -98,16 +93,23 @@ export class WalletWorkerUtils<
 				isNullish(this.store.transactions[`${id}`]) || !this.store.transactions[`${id}`].certified
 		);
 
+		const newExtendedTransactions = newTransactions.flatMap(this.mapToSelfTransaction);
+
 		// Is the balance different from last value or has it become certified
 		const newBalance =
 			isNullish(this.store.balance) ||
 			this.store.balance.data !== balance ||
 			(!this.store.balance.certified && certified);
 
-		if (newTransactions.length === 0 && !newBalance) {
+		if (newExtendedTransactions.length === 0 && !newBalance) {
 			// We execute postMessage at least once because developer may have no transaction at all so, we want to display the balance zero
 			if (!this.initialized) {
-				this.postMessageWallet({ transactions: newTransactions, balance, certified, ...rest });
+				this.postMessageWallet({
+					transactions: newExtendedTransactions,
+					balance,
+					certified,
+					...rest
+				});
 
 				this.initialized = true;
 			}
@@ -119,11 +121,11 @@ export class WalletWorkerUtils<
 			balance: { data: balance, certified },
 			transactions: {
 				...this.store.transactions,
-				...newTransactions.reduce(
-					(acc: Record<string, CertifiedData<T>>, { id, transaction }) => ({
+				...newExtendedTransactions.reduce(
+					(acc: Record<string, CertifiedData<IndexedTransaction<T>>>, { id, transaction }) => ({
 						...acc,
 						[`${id}`]: {
-							data: transaction as T,
+							data: transaction as IndexedTransaction<T>,
 							certified
 						}
 					}),
@@ -133,7 +135,7 @@ export class WalletWorkerUtils<
 		};
 
 		this.postMessageWallet({
-			transactions: newTransactions,
+			transactions: newExtendedTransactions,
 			balance,
 			certified,
 			...rest
@@ -188,7 +190,11 @@ export class WalletWorkerUtils<
 		balance: data,
 		certified,
 		...rest
-	}: GetTransactions & { transactions: TWithId[] } & { certified: boolean }) {
+	}: GetTransactions & {
+		transactions: (Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> })[];
+	} & {
+		certified: boolean;
+	}) {
 		const certifiedTransactions = newTransactions.map((data) => ({ data, certified }));
 
 		this.worker.postMsg<PostMessageDataResponseWallet<GetTransactions>>({

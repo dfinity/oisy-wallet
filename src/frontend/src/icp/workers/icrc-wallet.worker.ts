@@ -1,11 +1,12 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index.api';
+import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { type TimerWorkerUtilsJobParams } from '$icp/worker-utils/timer.worker-utils';
 import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
 import type { PostMessage, PostMessageDataRequestIcrc } from '$lib/types/post-message';
-import type {
-	IcrcGetTransactions,
-	IcrcTransaction,
-	IcrcTransactionWithId
+import {
+	type IcrcGetTransactions,
+	type IcrcTransaction,
+	type IcrcTransactionWithId
 } from '@dfinity/ledger-icrc';
 import { assertNonNullish } from '@dfinity/utils';
 
@@ -30,7 +31,7 @@ const worker: WalletWorkerUtils<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrc
-> = new WalletWorkerUtils(getTransactions, 'syncIcrcWallet');
+> = new WalletWorkerUtils(getTransactions, mapTransactionIcrcToSelf, 'syncIcrcWallet');
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
