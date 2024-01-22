@@ -9,7 +9,7 @@ import type { IcpTransaction } from './icp';
 export type IcTransaction = IcpTransaction | IcrcTransactionWithId;
 export type IcGetTransactions = GetAccountIdentifierTransactionsResponse | IcrcGetTransactions;
 
-export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'transfer' | 'transfer-from';
+export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'send' | 'receive' | 'transfer-from';
 
 export interface IcTransactionUi {
 	id: bigint;
