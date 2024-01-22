@@ -1,12 +1,12 @@
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-import type { IcGetTransactions } from '$icp/types/ic';
+import type { GetTransactions } from '$icp/types/ic.post-message';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import { jsonReviver } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
-export const syncWallet = <T extends IcGetTransactions>({
+export const syncWallet = <T extends GetTransactions>({
 	data,
 	tokenId
 }: {

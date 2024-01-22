@@ -1,4 +1,5 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
+import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { type TimerWorkerUtilsJobParams } from '$icp/worker-utils/timer.worker-utils';
 import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
@@ -22,7 +23,7 @@ const getTransactions = ({
 };
 
 const worker: WalletWorkerUtils<Transaction, TransactionWithId, PostMessageDataRequest> =
-	new WalletWorkerUtils(getTransactions, 'syncIcpWallet');
+	new WalletWorkerUtils(getTransactions, mapTransactionIcpToSelf, 'syncIcpWallet');
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg, data } = dataMsg;

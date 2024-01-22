@@ -28,7 +28,7 @@ export const initIcrcWalletWorker = async ({
 		data
 	}: MessageEvent<
 		PostMessage<
-			| PostMessageDataResponseWallet<IcrcGetTransactions>
+			| PostMessageDataResponseWallet<Omit<IcrcGetTransactions, 'transactions'>>
 			| PostMessageDataResponseWalletError
 			| PostMessageDataResponseWalletCleanUp
 		>
@@ -39,7 +39,9 @@ export const initIcrcWalletWorker = async ({
 			case 'syncIcrcWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as PostMessageDataResponseWallet<IcrcGetTransactions>
+					data: data.data as PostMessageDataResponseWallet<
+						Omit<IcrcGetTransactions, 'transactions'>
+					>
 				});
 				return;
 			case 'syncIcrcWalletError':
