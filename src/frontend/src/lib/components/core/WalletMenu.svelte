@@ -54,7 +54,7 @@
 				class="flex gap-2 items-center no-underline"
 				aria-label="Open your address on Etherscan"
 			>
-				<IconExternalLink />
+				<span class="ml-1"><IconExternalLink /></span>
 				View on explorer
 			</a>
 		{/if}
@@ -72,6 +72,17 @@
 		</a>
 
 		<Hr />
+
+		<a
+			href="https://identity.ic0.app"
+			rel="external noopener noreferrer"
+			target="_blank"
+			class="flex gap-2 items-center no-underline"
+			aria-label="Administrate your Internet Identity"
+		>
+			<span class="ml-1"><IconExternalLink /></span>
+			Manage Internet Identity
+		</a>
 
 		<button
 			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
