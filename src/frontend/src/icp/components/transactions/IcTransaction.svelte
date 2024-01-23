@@ -5,7 +5,7 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Card from '$lib/components/ui/Card.svelte';
-	import { formatNanosecondsToDate, formatTokenShort } from '$lib/utils/format.utils';
+	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
@@ -58,7 +58,7 @@
 
 		<svelte:fragment slot="amount">
 			{nonNullish(amount)
-				? formatTokenShort({
+				? formatToken({
 						value: amount,
 						unitName: $token.decimals
 					})

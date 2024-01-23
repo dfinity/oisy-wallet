@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatTokenDetailed } from '$lib/utils/format.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { Token } from '$lib/types/token';
@@ -16,9 +16,10 @@
 
 <Value ref="balance" element="div">
 	<svelte:fragment slot="label">Balance</svelte:fragment>
-	{formatTokenDetailed({
+	{formatToken({
 		value: $balance ?? BigNumber.from(0n),
-		unitName: token.decimals
+		unitName: token.decimals,
+		displayDecimals: token.decimals
 	})}
 	{token.symbol}
 </Value>

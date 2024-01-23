@@ -4,7 +4,7 @@ import { nonNullish } from '@dfinity/utils';
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
-export const formatTokenShort = ({
+export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
 	displayDecimals = 4
@@ -14,31 +14,10 @@ export const formatTokenShort = ({
 	displayDecimals?: number;
 }): string => {
 	const res = Utils.formatUnits(value, unitName);
-	return (+res).toFixed(displayDecimals).replace(/(\.0+|0+)$/, '');
-};
-
-export const formatTokenDetailed = ({
-	value,
-	unitName = ETHEREUM_DEFAULT_DECIMALS,
-	displayDecimals
-}: {
-	value: BigNumber;
-	unitName?: string | BigNumberish;
-	displayDecimals?: number;
-}): string => {
-	const res = Utils.formatUnits(value, unitName);
-
-	const minimumFractionDigits = displayDecimals ?? 4;
-	const maximumFractionDigits =
-		displayDecimals ??
-		(typeof unitName === 'number' ? (unitName as number) : ETHEREUM_DEFAULT_DECIMALS);
-
-	return new Intl.NumberFormat('en-US', {
-		minimumFractionDigits,
-		...(maximumFractionDigits > minimumFractionDigits && { maximumFractionDigits })
-	})
-		.format(+res)
-		.replace(/(\.0+|0+)$/, '');
+	return (+res).toLocaleString('en-US', {
+		useGrouping: false,
+		maximumFractionDigits: displayDecimals
+	});
 };
 
 /**
