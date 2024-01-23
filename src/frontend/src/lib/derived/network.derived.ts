@@ -1,4 +1,4 @@
-import { icpAccountIdentifierStore } from '$icp/derived/ic.derived';
+import { icrcAccountIdentifierStore } from '$icp/derived/ic.derived';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID, NETWORKS } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
@@ -31,9 +31,9 @@ export const networkEthereum: Readable<boolean> = derived(
 );
 
 export const networkAddress: Readable<OptionAddress | string> = derived(
-	[address, icpAccountIdentifierStore, networkICP],
-	([$address, $icpAccountIdentifiedStore, $networkICP]) =>
-		$networkICP ? $icpAccountIdentifiedStore?.toHex() : $address
+	[address, icrcAccountIdentifierStore, networkICP],
+	([$address, $icrcAccountIdentifierStore, $networkICP]) =>
+		$networkICP ? $icrcAccountIdentifierStore : $address
 );
 
 export const selectedNetwork: Readable<Network> = derived(
