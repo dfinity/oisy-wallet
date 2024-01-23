@@ -6,47 +6,18 @@
 	import { metamaskNotInitialized } from '$eth/derived/metamask.derived';
 	import { onMount } from 'svelte';
 	import { initMetamaskSupport } from '$eth/services/metamask.services';
-	import { busy } from '$lib/stores/busy.store';
-	import { toastsShow } from '$lib/stores/toasts.store';
 	import { isBusy } from '$lib/derived/busy.derived';
+	import { waitWalletReady } from '$lib/services/actions.services';
 
 	onMount(initMetamaskSupport);
 
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
-	const waitReady = async (count: number): Promise<'ready' | 'timeout'> => {
-		const disabled = isDisabled();
-
-		if (!disabled) {
-			return 'ready';
-		}
-
-		let nextCount = count - 1;
-
-		if (nextCount === 0) {
-			return 'timeout';
-		}
-
-		await new Promise((resolve) => setTimeout(resolve, 500));
-
-		return waitReady(nextCount);
-	};
-
 	const openReceive = async () => {
 		if (isDisabled()) {
-			busy.start({ msg: 'Loading initial data...' });
+			const status = await waitWalletReady(isDisabled);
 
-			// 20 tries with a delay of 500ms each = max 10 seconds
-			const result = await waitReady(20);
-
-			busy.stop();
-
-			if (result === 'timeout') {
-				toastsShow({
-					text: 'Your wallet requires some initial data which has not been loaded yet. Please try again.',
-					level: 'info',
-					duration: 3000
-				});
+			if (status === 'timeout') {
 				return;
 			}
 		}
