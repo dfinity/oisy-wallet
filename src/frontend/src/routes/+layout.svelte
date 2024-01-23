@@ -8,7 +8,7 @@
 	import Busy from '$lib/components/ui/Busy.svelte';
 
 	import '$lib/styles/global.scss';
-	import { authSignedInStore } from '$lib/derived/auth.derived';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 	import SignIn from '$lib/components/pages/SignIn.svelte';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
@@ -75,7 +75,7 @@
 		<Spinner />
 	</div>
 {:then _}
-	{#if $authSignedInStore}
+	{#if $authSignedIn}
 		<slot />
 	{:else}
 		<SignIn />

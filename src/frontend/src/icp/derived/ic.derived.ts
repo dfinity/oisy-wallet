@@ -7,30 +7,29 @@ import { encodeIcrcAccount, type IcrcAccount } from '@dfinity/ledger-icrc';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const icpAccountIdentifierStore: Readable<AccountIdentifier | undefined> = derived(
+export const icpAccountIdentifier: Readable<AccountIdentifier | undefined> = derived(
 	authStore,
 	({ identity }) =>
 		nonNullish(identity) ? getAccountIdentifier(identity.getPrincipal()) : undefined
 );
 
-export const icpAccountIdentifierTextStore: Readable<string | undefined> = derived(
-	icpAccountIdentifierStore,
+export const icpAccountIdentifierText: Readable<string | undefined> = derived(
+	icpAccountIdentifier,
 	($icpAccountIdentifierStore) => $icpAccountIdentifierStore?.toHex()
 );
 
-export const icrcAccountStore: Readable<IcrcAccount | undefined> = derived(
-	authStore,
-	({ identity }) => (nonNullish(identity) ? getIcrcAccount(identity.getPrincipal()) : undefined)
+export const icrcAccount: Readable<IcrcAccount | undefined> = derived(authStore, ({ identity }) =>
+	nonNullish(identity) ? getIcrcAccount(identity.getPrincipal()) : undefined
 );
 
-export const icrcAccountIdentifierStore: Readable<string | undefined> = derived(
-	icrcAccountStore,
+export const icrcAccountIdentifierText: Readable<string | undefined> = derived(
+	icrcAccount,
 	($icrcAccountStore) =>
 		nonNullish($icrcAccountStore) ? encodeIcrcAccount($icrcAccountStore) : undefined
 );
 
-export const icAccountIdentifierStore: Readable<string | undefined> = derived(
-	[tokenStandard, icpAccountIdentifierStore, icrcAccountIdentifierStore],
+export const icAccountIdentifierText: Readable<string | undefined> = derived(
+	[tokenStandard, icpAccountIdentifier, icrcAccountIdentifierText],
 	([$tokenStandard, $icpAccountIdentifierStore, $icrcAccountIdentifierStore]) =>
 		$tokenStandard === 'icrc' ? $icrcAccountIdentifierStore : $icpAccountIdentifierStore?.toHex()
 );

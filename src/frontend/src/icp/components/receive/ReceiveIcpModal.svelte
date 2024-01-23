@@ -4,10 +4,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import {
-		icpAccountIdentifierTextStore,
-		icrcAccountIdentifierStore
-	} from '$icp/derived/ic.derived';
+	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -23,10 +20,10 @@
 
 			<div class="flex justify-between gap-4 items-center pb-2">
 				<output id="ic-wallet-address" class="break-normal"
-					>{$icrcAccountIdentifierStore ?? ''}</output
+					>{$icrcAccountIdentifierText ?? ''}</output
 				><Copy
 					inline
-					value={$icrcAccountIdentifierStore ?? ''}
+					value={$icrcAccountIdentifierText ?? ''}
 					text="Wallet address copied to clipboard."
 				/>
 			</div>
@@ -43,11 +40,10 @@
 			</p>
 
 			<div class="flex justify-between gap-4 items-center">
-				<output id="ic-wallet-address" class="break-all"
-					>{$icpAccountIdentifierTextStore ?? ''}</output
+				<output id="ic-wallet-address" class="break-all">{$icpAccountIdentifierText ?? ''}</output
 				><Copy
 					inline
-					value={$icpAccountIdentifierTextStore ?? ''}
+					value={$icpAccountIdentifierText ?? ''}
 					text="ICP Account ID copied to clipboard."
 				/>
 			</div>
