@@ -18,12 +18,14 @@ export const icrcAccountStore: Readable<IcrcAccount | undefined> = derived(
 	({ identity }) => (nonNullish(identity) ? getIcrcAccount(identity.getPrincipal()) : undefined)
 );
 
+export const icrcAccountIdentifierStore: Readable<string | undefined> = derived(
+	icrcAccountStore,
+	($icrcAccountStore) =>
+		nonNullish($icrcAccountStore) ? encodeIcrcAccount($icrcAccountStore) : undefined
+);
+
 export const icAccountIdentifierStore: Readable<string | undefined> = derived(
-	[tokenStandard, icpAccountIdentifierStore, icrcAccountStore],
-	([$tokenStandard, $icpAccountIdentifierStore, $icrcAccountStore]) =>
-		$tokenStandard === 'icrc'
-			? nonNullish($icrcAccountStore)
-				? encodeIcrcAccount($icrcAccountStore)
-				: undefined
-			: $icpAccountIdentifierStore?.toHex()
+	[tokenStandard, icpAccountIdentifierStore, icrcAccountIdentifierStore],
+	([$tokenStandard, $icpAccountIdentifierStore, $icrcAccountIdentifierStore]) =>
+		$tokenStandard === 'icrc' ? $icrcAccountIdentifierStore : $icpAccountIdentifierStore?.toHex()
 );
