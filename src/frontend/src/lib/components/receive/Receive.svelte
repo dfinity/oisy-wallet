@@ -8,6 +8,7 @@
 	import { initMetamaskSupport } from '$eth/services/metamask.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
+	import { isBusy } from '$lib/derived/busy.derived';
 
 	onMount(initMetamaskSupport);
 
@@ -54,7 +55,12 @@
 	};
 </script>
 
-<button class="flex-1 hero" on:click={async () => await openReceive()}>
+<button
+	class="flex-1 hero"
+	disabled={$isBusy}
+	class:opacity-50={$isBusy}
+	on:click={async () => await openReceive()}
+>
 	<IconReceive size="28" />
 	<span>Receive</span></button
 >
