@@ -4,7 +4,7 @@ import { nonNullish } from '@dfinity/utils';
 import type { BigNumber, BigNumberish } from '@ethersproject/bignumber';
 import { Utils } from 'alchemy-sdk';
 
-export const formatTokenShort = ({
+export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
 	displayDecimals = 4
