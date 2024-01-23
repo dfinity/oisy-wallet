@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
+	import ReceiveQRCode from '$eth/receive/ReceiveQRCode.svelte';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import ReceiveMetamask from '$lib/components/receive/ReceiveMetamask.svelte';
+	import ReceiveMetamask from '$eth/receive/ReceiveMetamask.svelte';
 	import { networkAddress } from '$lib/derived/network.derived';
 </script>
 
