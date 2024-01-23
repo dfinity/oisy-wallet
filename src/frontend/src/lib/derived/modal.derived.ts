@@ -49,6 +49,10 @@ export const modalAddToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'add-token'
 );
+export const modalReceiveBitcoin: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'receive-bitcoin'
+);
 
 export const modalWalletConnect: Readable<boolean> = derived(
 	[modalWalletConnectAuth, modalWalletConnectSign, modalWalletConnectSend],
