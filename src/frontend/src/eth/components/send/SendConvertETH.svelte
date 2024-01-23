@@ -2,7 +2,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
-	import { modalIcSend, modalSend } from '$lib/derived/modal.derived';
+	import { modalConvertETHToCkETH, modalIcSend, modalSend } from '$lib/derived/modal.derived';
 	import SendModal from '$eth/components/send/SendModal.svelte';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import IconImportExport from '$lib/components/icons/IconImportExport.svelte';
@@ -10,6 +10,7 @@
 	import CkEthLoader from '$eth/components/cketh/CkEthLoader.svelte';
 	import { isNullish } from '@dfinity/utils';
 	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
+	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 
 	const isDisabled = (): boolean =>
 		$addressNotLoaded || isNullish($ckEthHelperContractAddressStore);
@@ -23,7 +24,7 @@
 			}
 		}
 
-		modalStore.openSend();
+		modalStore.openConvertETHToCkETH();
 	};
 </script>
 
@@ -39,8 +40,12 @@
 	>
 </CkEthLoader>
 
-{#if $modalSend}
-	<SendModal />
+{#if $modalConvertETHToCkETH}
+	<SendModal
+		destination={$ckEthHelperContractAddressStore?.data ?? ''}
+		network={ICP_NETWORK}
+		destinationReadonly
+	/>
 {:else if $modalIcSend}
 	<IcSendModal />
 {/if}

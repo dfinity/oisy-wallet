@@ -40,9 +40,11 @@
 	 * Props
 	 */
 
-	let destination = '';
+	export let destination = '';
+	export let network: Network | undefined = undefined;
+	export let destinationReadonly = false;
+
 	let amount: number | undefined = undefined;
-	let network: Network | undefined = undefined;
 
 	/**
 	 * Send
@@ -177,6 +179,7 @@
 				bind:destination
 				bind:amount
 				bind:network
+				{destinationReadonly}
 			/>
 		{/if}
 	</FeeContext>
