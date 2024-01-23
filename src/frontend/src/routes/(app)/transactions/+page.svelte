@@ -2,7 +2,6 @@
 	import Transactions from '$eth/components/transactions/Transactions.svelte';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
-	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { networkICP } from '$lib/derived/network.derived';
@@ -18,8 +17,6 @@
 		}
 	});
 </script>
-
-<h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Transactions</h2>
 
 {#if nonNullish($routeNetwork)}
 	{#if $networkICP}
