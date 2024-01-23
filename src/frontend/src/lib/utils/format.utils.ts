@@ -20,30 +20,6 @@ export const formatTokenShort = ({
 	});
 };
 
-export const formatTokenDetailed = ({
-	value,
-	unitName = ETHEREUM_DEFAULT_DECIMALS,
-	displayDecimals
-}: {
-	value: BigNumber;
-	unitName?: string | BigNumberish;
-	displayDecimals?: number;
-}): string => {
-	const res = Utils.formatUnits(value, unitName);
-
-	const minimumFractionDigits = displayDecimals ?? 4;
-	const maximumFractionDigits =
-		displayDecimals ??
-		(typeof unitName === 'number' ? (unitName as number) : ETHEREUM_DEFAULT_DECIMALS);
-
-	return new Intl.NumberFormat('en-US', {
-		minimumFractionDigits,
-		...(maximumFractionDigits > minimumFractionDigits && { maximumFractionDigits })
-	})
-		.format(+res)
-		.replace(/(\.0+|0+)$/, '');
-};
-
 /**
  * Shortens the text from the middle. Ex: "12345678901234567890" -> "1234567...5678901"
  * @param text
