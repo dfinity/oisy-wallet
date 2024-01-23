@@ -32,7 +32,7 @@
 	<FeeDisplay slot="fee" />
 
 	{#if !destinationReadonly}
-		<SendReviewNetwork {network} token={$token} slot="network" />
+		<SendReviewNetwork {network} slot="network" />
 	{/if}
 </SendData>
 

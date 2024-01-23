@@ -32,7 +32,7 @@
 
 	<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork {network} token={ETHEREUM_TOKEN} slot="network" />
+	<SendReviewNetwork {network} slot="network" />
 </SendData>
 
 <WalletConnectActions on:icApprove on:icReject />
