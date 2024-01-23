@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Send from '$lib/components/send/Send.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
-	import ConvertETHToCkETH from '$eth/components/convert/ConvertETHToCkETH.svelte';
+	import ConvertETHToCkETH from '$eth/components/send/SendConvertETH.svelte';
 
 	export let send = false;
 	export let convertEth = false;
