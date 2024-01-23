@@ -3,7 +3,7 @@
 	import type { IcToken } from '$icp/types/ic';
 	import { token } from '$lib/derived/token.derived';
 	import IconSync from '$lib/components/icons/IconSync.svelte';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { updateBalance } from '$icp/services/ckbtc.services';
 	import { authStore } from '$lib/stores/auth.store';
 	import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
@@ -11,6 +11,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
 	import ReceiveBitcoinProgress from '$icp/components/receive/ReceiveBitcoinProgress.svelte';
+	import { MinterNoNewUtxosError } from '@dfinity/ckbtc';
 
 	let ckBTC = false;
 	$: ckBTC = isNetworkUsingCkBtcLedger($token as IcToken);
@@ -37,6 +38,17 @@
 
 			setTimeout(() => modalStore.close(), 750);
 		} catch (err: unknown) {
+			if (err instanceof MinterNoNewUtxosError) {
+				toastsShow({
+					text: 'No new confirmed BTC.',
+					level: 'info',
+					duration: 2000
+				});
+
+				modalStore.close();
+				return;
+			}
+
 			toastsError({
 				msg: { text: `Something went wrong while checking for incoming BTC.` },
 				err
