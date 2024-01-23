@@ -39,3 +39,10 @@ export enum SendIcStep {
 	SEND = 'send',
 	DONE = 'done'
 }
+
+export enum UpdateBalanceCkBtcStep {
+	INITIALIZATION = 'initialization',
+	RETRIEVE = 'retrieve',
+	RELOAD = 'reload',
+	DONE = 'done'
+}

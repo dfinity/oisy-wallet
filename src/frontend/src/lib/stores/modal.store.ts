@@ -14,7 +14,8 @@ export interface Modal<T> {
 		| 'airdrop'
 		| 'transaction'
 		| 'ic-transaction'
-		| 'add-token';
+		| 'add-token'
+		| 'receive-bitcoin';
 	data?: T;
 }
 
@@ -33,6 +34,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openTransaction: <D extends T>(data: D) => void;
 	openIcTransaction: <D extends T>(data: D) => void;
 	openAddToken: () => void;
+	openReceiveBitcoin: () => void;
 	close: () => void;
 }
 
@@ -52,6 +54,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openTransaction: <D extends T>(data: D) => set({ type: 'transaction', data }),
 		openIcTransaction: <D extends T>(data: D) => set({ type: 'ic-transaction', data }),
 		openAddToken: () => set({ type: 'add-token' }),
+		openReceiveBitcoin: () => set({ type: 'receive-bitcoin' }),
 		close: () => set(null),
 		subscribe
 	};
