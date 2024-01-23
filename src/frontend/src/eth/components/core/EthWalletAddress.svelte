@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { networkAddress } from '$lib/derived/network.derived';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
+	import { address } from '$lib/derived/address.derived';
 
 	const ETHERSCAN_URL = import.meta.env.VITE_ETHERSCAN_EXPLORER_URL;
 
-	let explorerUrl = `${ETHERSCAN_URL}/address/${$networkAddress ?? ''}`;
+	let explorerUrl = `${ETHERSCAN_URL}/address/${$address ?? ''}`;
 </script>
 
 <div>
 	<label class="block text-sm font-semibold" for="eth-wallet-address">Wallet address:</label>
 
 	<output class="break-all" id="eth-wallet-address"
-		>{shortenWithMiddleEllipsis($networkAddress ?? '')}</output
-	><Copy inline value={$networkAddress ?? ''} text="Address copied to clipboard." />
+		>{shortenWithMiddleEllipsis($address ?? '')}</output
+	><Copy inline value={$address ?? ''} text="Address copied to clipboard." />
 </div>
 
 <a
