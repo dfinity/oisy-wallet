@@ -44,7 +44,7 @@
 	<SendModal
 		destination={$ckEthHelperContractAddressStore?.data ?? ''}
 		network={ICP_NETWORK}
-		destinationReadonly
+		purpose="convert-eth-to-cketh"
 	/>
 {:else if $modalIcSend}
 	<IcSendModal />
