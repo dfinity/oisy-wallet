@@ -10,10 +10,12 @@
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import { isNullish } from '@dfinity/utils';
 	import SendDestination from '$eth/components/send/SendDestination.svelte';
+	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
 	export let network: Network | undefined = undefined;
+	export let destinationReadonly = false;
+	export let amount: number | undefined = undefined;
 
 	let insufficientFunds: boolean;
 	let invalidDestination: boolean;
@@ -26,9 +28,13 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<SendDestination bind:destination bind:invalidDestination />
+	{#if destinationReadonly}
+		<SendDataDestination {destination} />
+	{:else}
+		<SendDestination bind:destination bind:invalidDestination />
 
-	<SendNetworkICP token={$token} {destination} bind:network />
+		<SendNetworkICP token={$token} {destination} bind:network />
+	{/if}
 
 	<SendAmount bind:amount bind:insufficientFunds />
 

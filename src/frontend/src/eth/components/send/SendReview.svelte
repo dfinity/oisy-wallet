@@ -12,8 +12,9 @@
 	import { isEthAddress } from '$lib/utils/account.utils';
 
 	export let destination = '';
-	export let amount: number | undefined = undefined;
 	export let network: Network | undefined = undefined;
+	export let destinationReadonly = false;
+	export let amount: number | undefined = undefined;
 
 	const { store: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -29,7 +30,10 @@
 
 <SendData {amount} {destination} token={$token} source={$address ?? ''}>
 	<FeeDisplay slot="fee" />
-	<SendReviewNetwork {network} token={$token} slot="network" />
+
+	{#if !destinationReadonly}
+		<SendReviewNetwork {network} token={$token} slot="network" />
+	{/if}
 </SendData>
 
 <div class="flex justify-end gap-1">

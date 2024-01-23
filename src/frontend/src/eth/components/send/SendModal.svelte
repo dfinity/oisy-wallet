@@ -40,9 +40,14 @@
 	 * Props
 	 */
 
-	let destination = '';
+	export let destination = '';
+	export let network: Network | undefined = undefined;
+	export let purpose: 'send' | 'convert-eth-to-cketh' = 'send';
+
+	let destinationReadonly = false;
+	$: destinationReadonly = purpose === 'convert-eth-to-cketh';
+
 	let amount: number | undefined = undefined;
-	let network: Network | undefined = undefined;
 
 	/**
 	 * Send
@@ -133,10 +138,11 @@
 		}
 	};
 
-	const steps: WizardSteps = [
+	let steps: WizardSteps;
+	$: steps = [
 		{
 			name: 'Send',
-			title: 'Send'
+			title: purpose === 'convert-eth-to-cketh' ? 'Convert ETH to ckETH' : 'Send'
 		},
 		{
 			name: 'Review',
@@ -167,7 +173,14 @@
 
 	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
 		{#if currentStep?.name === 'Review'}
-			<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {network} />
+			<SendReview
+				on:icBack={modal.back}
+				on:icSend={send}
+				{destination}
+				{amount}
+				{network}
+				{destinationReadonly}
+			/>
 		{:else if currentStep?.name === 'Sending'}
 			<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
 		{:else}
@@ -177,6 +190,7 @@
 				bind:destination
 				bind:amount
 				bind:network
+				{destinationReadonly}
 			/>
 		{/if}
 	</FeeContext>
