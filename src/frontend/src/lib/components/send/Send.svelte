@@ -7,21 +7,34 @@
 	import SendModal from '$eth/components/send/SendModal.svelte';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
+	import { waitWalletReady } from '$lib/services/actions.services';
 
-	let disabled: boolean;
-	$: disabled = $addressNotLoaded || $isBusy;
+	const isDisabled = (): boolean => $addressNotLoaded;
 
-	const onClick = () => {
+	const openSend = async () => {
 		if ($networkICP) {
 			modalStore.openIcSend();
 			return;
+		}
+
+		if (isDisabled()) {
+			const status = await waitWalletReady(isDisabled);
+
+			if (status === 'timeout') {
+				return;
+			}
 		}
 
 		modalStore.openSend();
 	};
 </script>
 
-<button class="hero" on:click={onClick} {disabled} class:opacity-50={disabled}>
+<button
+	class="hero"
+	on:click={async () => await openSend()}
+	disabled={$isBusy}
+	class:opacity-50={$isBusy}
+>
 	<IconSend size="28" />
 	<span>Send</span></button
 >
