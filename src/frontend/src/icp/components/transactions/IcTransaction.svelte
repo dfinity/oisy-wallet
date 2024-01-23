@@ -50,7 +50,7 @@
 	$: amount = !incoming && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
 </script>
 
-<button on:click={() => modalStore.openIcTransaction(uiTransaction)} class="block w-full">
+<button on:click={() => modalStore.openIcTransaction(uiTransaction)} class="block w-full border-0">
 	<Card>
 		<span class="capitalize">{transactionType}</span>
 
