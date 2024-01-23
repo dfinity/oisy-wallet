@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatTokenShort } from '$lib/utils/format.utils.js';
+	import { formatToken } from '$lib/utils/format.utils.js';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
@@ -19,7 +19,7 @@
 	<svelte:fragment slot="label">Fee</svelte:fragment>
 
 	{#if nonNullish(fee)}
-		{formatTokenShort({
+		{formatToken({
 			value: BigNumber.from(fee),
 			unitName: decimals,
 			displayDecimals: $tokenDecimals
