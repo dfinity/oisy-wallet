@@ -56,7 +56,9 @@
 	{#if transactions.length > 0}
 		<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
 			{#each transactions as transaction, index (`${transaction.data.id}-${index}`)}
-				<IcTransaction transaction={transaction.data} />
+				<li>
+					<IcTransaction transaction={transaction.data} />
+				</li>
 			{/each}
 		</InfiniteScroll>
 	{/if}
