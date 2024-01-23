@@ -169,7 +169,7 @@
 
 	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
 		{#if currentStep?.name === 'Review'}
-			<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {network} />
+			<SendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {network} {destinationReadonly} />
 		{:else if currentStep?.name === 'Sending'}
 			<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
 		{:else}
