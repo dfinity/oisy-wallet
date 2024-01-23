@@ -3,10 +3,11 @@ import { writable, type Readable } from 'svelte/store';
 export interface Busy {
 	spinner: boolean;
 	close: boolean;
+	msg?: string;
 }
 
 export interface BusyStore extends Readable<Busy | undefined> {
-	start: () => void;
+	start: (params?: Pick<Busy, 'msg'>) => void;
 	show: () => void;
 	stop: () => void;
 }
@@ -17,8 +18,8 @@ const initBusyStore = (): BusyStore => {
 	return {
 		subscribe,
 
-		start() {
-			set({ spinner: true, close: false });
+		start({ msg } = {}) {
+			set({ spinner: true, close: false, msg });
 		},
 
 		show() {

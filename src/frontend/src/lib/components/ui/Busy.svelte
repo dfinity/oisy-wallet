@@ -39,6 +39,10 @@
 				</div>
 			{/if}
 
+			{#if nonNullish($busy.msg)}
+				<p class="text-off-white text-sm">{$busy.msg}</p>
+			{/if}
+
 			{#if $busy.close}
 				<button on:click|stopPropagation={close} aria-label="Close" class="text-off-white"
 					>Cancel</button
@@ -60,6 +64,7 @@
 		left: 0;
 
 		background: var(--backdrop);
+		backdrop-filter: var(--backdrop-filter);
 	}
 
 	.content {
