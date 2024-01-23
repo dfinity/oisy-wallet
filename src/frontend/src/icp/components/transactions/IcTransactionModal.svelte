@@ -4,7 +4,7 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatNanosecondsToDate, formatTokenShort } from '$lib/utils/format.utils';
+	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
@@ -63,7 +63,7 @@
 			<Value ref="amount">
 				<svelte:fragment slot="label">Value</svelte:fragment>
 				<output>
-					{formatTokenShort({
+					{formatToken({
 						value,
 						unitName: $token.decimals,
 						displayDecimals: $token.decimals

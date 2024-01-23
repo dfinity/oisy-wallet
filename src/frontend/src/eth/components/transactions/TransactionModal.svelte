@@ -5,7 +5,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatSecondsToDate, formatTokenShort } from '$lib/utils/format.utils';
+	import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import TransactionStatus from './TransactionStatus.svelte';
 	import { token } from '$lib/derived/token.derived';
@@ -76,7 +76,7 @@
 		<Value ref="amount">
 			<svelte:fragment slot="label">Value</svelte:fragment>
 			<output>
-				{formatTokenShort({
+				{formatToken({
 					value,
 					unitName: $token.decimals,
 					displayDecimals: $token.decimals

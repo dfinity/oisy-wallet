@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatTokenShort } from '$lib/utils/format.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { tokenSymbol } from '$lib/derived/token.derived';
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -12,7 +12,7 @@
 	let amountDisplay: string;
 	$: (() => {
 		try {
-			amountDisplay = formatTokenShort({
+			amountDisplay = formatToken({
 				value: parseToken({
 					value: `${amount ?? 0}`,
 					unitName: token.decimals

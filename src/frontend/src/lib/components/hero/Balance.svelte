@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatTokenShort } from '$lib/utils/format.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import { balance, balanceZero } from '$lib/derived/balances.derived';
 	import { tokenDecimals, tokenSymbol } from '$lib/derived/token.derived';
@@ -14,7 +14,7 @@
 		style="font-size: calc(2 * var(--font-size-h1)); line-height: 0.95;"
 	>
 		{nonNullish($balance) && !$balanceZero
-			? formatTokenShort({
+			? formatToken({
 					value: $balance,
 					unitName: $tokenDecimals
 				})

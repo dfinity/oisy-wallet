@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatTokenShort } from '$lib/utils/format.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectActions from './WalletConnectActions.svelte';
@@ -23,7 +23,7 @@
 </script>
 
 <SendData
-	amount={formatTokenShort({ value: amountDisplay })}
+	amount={formatToken({ value: amountDisplay })}
 	{destination}
 	token={ETHEREUM_TOKEN}
 	source={$address ?? ''}

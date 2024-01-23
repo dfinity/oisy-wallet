@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Card from '$lib/components/ui/Card.svelte';
-	import { formatTokenShort } from '$lib/utils/format.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
@@ -32,7 +32,7 @@
 					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" color="white" />
 
 					<output class="break-all" slot="description">
-						{formatTokenShort({
+						{formatToken({
 							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
 							unitName: token.decimals
 						})}
