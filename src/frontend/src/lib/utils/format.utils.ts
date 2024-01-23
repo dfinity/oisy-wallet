@@ -14,7 +14,10 @@ export const formatTokenShort = ({
 	displayDecimals?: number;
 }): string => {
 	const res = Utils.formatUnits(value, unitName);
-	return (+res).toFixed(displayDecimals).replace(/(\.0+|0+)$/, '');
+	return (+res).toLocaleString('en-US', {
+		useGrouping: false,
+		maximumFractionDigits: displayDecimals
+	});
 };
 
 export const formatTokenDetailed = ({
