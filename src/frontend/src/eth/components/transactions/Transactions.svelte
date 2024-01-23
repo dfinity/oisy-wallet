@@ -12,6 +12,7 @@
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { AIRDROP } from '$lib/constants/airdrop.constants';
 
 	const load = async ({ network: { id: networkId }, id: tokenId }: Token) => {
 		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
@@ -30,6 +31,8 @@
 		? ($modalStore?.data as TransactionType | undefined)
 		: undefined;
 </script>
+
+<h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Transactions</h2>
 
 <TransactionsSkeletons>
 	{#each $sortedTransactions as transaction, index (`${transaction.hash}-${index}`)}
