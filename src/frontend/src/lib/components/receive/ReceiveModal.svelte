@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import ReceiveQRCode from '$eth/receive/ReceiveQRCode.svelte';
+	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import ReceiveMetamask from '$eth/receive/ReceiveMetamask.svelte';
-	import { networkAddress } from '$lib/derived/network.derived';
+	import { networkAddress, networkEthereum } from '$lib/derived/network.derived';
+	import ReceiveMetamask from '$eth/components/receive/ReceiveMetamask.svelte';
 </script>
 
 <Modal visible={$modalReceive} on:nnsClose={modalStore.close}>
@@ -22,7 +22,9 @@
 
 	<ReceiveQRCode />
 
-	<ReceiveMetamask />
+	{#if $networkEthereum}
+		<ReceiveMetamask />
+	{/if}
 
 	<button class="primary full center text-center mt-12 mb-6" on:click={modalStore.close}
 		>Done</button
