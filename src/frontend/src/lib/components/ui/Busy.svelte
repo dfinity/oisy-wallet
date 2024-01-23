@@ -65,6 +65,10 @@
 
 		background: var(--backdrop);
 		backdrop-filter: var(--backdrop-filter);
+
+		&:not(.close) {
+			cursor: inherit;
+		}
 	}
 
 	.content {
