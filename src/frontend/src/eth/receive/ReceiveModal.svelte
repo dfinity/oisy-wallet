@@ -5,7 +5,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ReceiveMetamask from '$eth/receive/ReceiveMetamask.svelte';
-	import { networkAddress } from '$lib/derived/network.derived';
+	import { address } from '$lib/derived/address.derived';
 </script>
 
 <Modal visible={$modalReceive} on:nnsClose={modalStore.close}>
@@ -13,9 +13,9 @@
 
 	<p class="font-bold text-center">Address:</p>
 	<p class="mb-4 font-normal text-center">
-		<output class="break-all">{$networkAddress ?? ''}</output><Copy
+		<output class="break-all">{$address ?? ''}</output><Copy
 			inline
-			value={$networkAddress ?? ''}
+			value={$address ?? ''}
 			text="Address copied to clipboard."
 		/>
 	</p>
