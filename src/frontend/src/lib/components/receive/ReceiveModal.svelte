@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { modalReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import { Modal } from '@dfinity/gix-components';
@@ -8,7 +7,7 @@
 	import ReceiveMetamask from '$eth/components/receive/ReceiveMetamask.svelte';
 </script>
 
-<Modal visible={$modalReceive} on:nnsClose={modalStore.close}>
+<Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">Receive</svelte:fragment>
 
 	<p class="font-bold text-center">Address:</p>

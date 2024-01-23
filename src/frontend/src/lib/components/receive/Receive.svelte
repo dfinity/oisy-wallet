@@ -8,12 +8,26 @@
 	import { initMetamaskSupport } from '$eth/services/metamask.services';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
+	import { networkICP } from '$lib/derived/network.derived';
+	import { tokenStandard } from '$lib/derived/token.derived';
+	import { modalIcpReceive, modalReceive } from '$lib/derived/modal.derived';
+	import ReceiveIcpModal from '$icp/components/receive/ReceiveIcpModal.svelte';
 
 	onMount(initMetamaskSupport);
 
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
 	const openReceive = async () => {
+		if ($tokenStandard === 'icp') {
+			modalStore.openIcpReceive();
+			return;
+		}
+
+		if ($networkICP) {
+			modalStore.openReceive();
+			return;
+		}
+
 		if (isDisabled()) {
 			const status = await waitWalletReady(isDisabled);
 
@@ -36,4 +50,8 @@
 	<span>Receive</span></button
 >
 
-<ReceiveModal />
+{#if $modalIcpReceive}
+	<ReceiveIcpModal />
+{:else if $modalReceive}
+	<ReceiveModal />
+{/if}

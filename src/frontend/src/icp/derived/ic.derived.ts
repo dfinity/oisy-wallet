@@ -13,6 +13,11 @@ export const icpAccountIdentifierStore: Readable<AccountIdentifier | undefined> 
 		nonNullish(identity) ? getAccountIdentifier(identity.getPrincipal()) : undefined
 );
 
+export const icpAccountIdentifierTextStore: Readable<string | undefined> = derived(
+	icpAccountIdentifierStore,
+	($icpAccountIdentifierStore) => $icpAccountIdentifierStore?.toHex()
+);
+
 export const icrcAccountStore: Readable<IcrcAccount | undefined> = derived(
 	authStore,
 	({ identity }) => (nonNullish(identity) ? getIcrcAccount(identity.getPrincipal()) : undefined)

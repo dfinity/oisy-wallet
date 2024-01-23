@@ -4,6 +4,7 @@ import { writable } from 'svelte/store';
 export interface Modal<T> {
 	type:
 		| 'receive'
+		| 'icp-receive'
 		| 'send'
 		| 'convert-eth-cketh'
 		| 'ic-send'
@@ -21,6 +22,7 @@ export type ModalData<T> = Modal<T> | undefined | null;
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReceive: () => void;
+	openIcpReceive: () => void;
 	openSend: () => void;
 	openConvertETHToCkETH: () => void;
 	openIcSend: () => void;
@@ -39,6 +41,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 
 	return {
 		openReceive: () => set({ type: 'receive' }),
+		openIcpReceive: () => set({ type: 'icp-receive' }),
 		openSend: () => set({ type: 'send' }),
 		openConvertETHToCkETH: () => set({ type: 'convert-eth-cketh' }),
 		openIcSend: () => set({ type: 'ic-send' }),
