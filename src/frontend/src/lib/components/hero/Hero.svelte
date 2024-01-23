@@ -16,6 +16,7 @@
 	export let actions = true;
 	export let send = false;
 	export let erc20IcpLink = false;
+	export let convertEth = false;
 	export let background: 'eth' | 'icp';
 
 	let displayTokenSymbol = false;
@@ -52,7 +53,7 @@
 
 		{#if actions}
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-				<Actions {send} />
+				<Actions {send} {convertEth} />
 			</div>
 		{/if}
 
