@@ -9,6 +9,10 @@ export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
 );
+export const modalConvertETHToCkETH: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'convert-eth-cketh'
+);
 export const modalIcSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-send'
