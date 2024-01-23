@@ -3,7 +3,7 @@
 	import SendData from '$lib/components/send/SendData.svelte';
 	import { token, tokenStandard } from '$lib/derived/token.derived';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { icAccountIdentifierStore } from '$icp/derived/ic.derived';
+	import { icAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendReviewNetwork from '$icp/components/send/IcSendReviewNetwork.svelte';
@@ -25,7 +25,7 @@
 	const dispatch = createEventDispatcher();
 
 	let source: string;
-	$: source = $icAccountIdentifierStore ?? '';
+	$: source = $icAccountIdentifierText ?? '';
 </script>
 
 <SendData {amount} {destination} token={$token} {source}>
