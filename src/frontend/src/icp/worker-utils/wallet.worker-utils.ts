@@ -63,6 +63,13 @@ export class WalletWorkerUtils<
 		});
 	}
 
+	async trigger(data: PostMessageDataRequest | undefined) {
+		await this.worker.trigger<PostMessageDataRequest>({
+			job: this.syncWallet,
+			data
+		});
+	}
+
 	private syncWallet = async ({
 		identity,
 		...data

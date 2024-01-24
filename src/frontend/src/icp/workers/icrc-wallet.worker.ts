@@ -43,5 +43,8 @@ onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRe
 		case 'startIcrcWalletTimer':
 			await worker.start(data);
 			return;
+		case 'triggerIcrcWalletTimer':
+			await worker.trigger(data);
+			return;
 	}
 };
