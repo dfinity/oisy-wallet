@@ -15,7 +15,7 @@ export const isCkEthHelperContract = ({
 	helperContractAddress,
 	destination
 }: {
-	helperContractAddress: CkEthHelperContractAddressData;
+	helperContractAddress: CkEthHelperContractAddressData | null | undefined;
 	destination: string | undefined;
 }): boolean =>
 	nonNullish(helperContractAddress) &&

@@ -10,7 +10,7 @@
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { address } from '$lib/derived/address.derived';
-	import { token, tokenDecimals, tokenStandard } from '$lib/derived/token.derived';
+	import { token, tokenDecimals, tokenId, tokenStandard } from '$lib/derived/token.derived';
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
@@ -79,7 +79,7 @@
 
 		const { valid } = assertCkEthHelperContractAddressLoaded({
 			tokenStandard: $tokenStandard,
-			helperContractAddress: $ckEthHelperContractAddressStore,
+			helperContractAddress: $ckEthHelperContractAddressStore?.[$tokenId],
 			network
 		});
 
@@ -124,7 +124,7 @@
 				gas,
 				network,
 				identity: $authStore.identity,
-				ckEthHelperContractAddress: $ckEthHelperContractAddressStore
+				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$tokenId]
 			});
 
 			setTimeout(() => close(), 750);

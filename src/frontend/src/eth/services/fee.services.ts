@@ -19,7 +19,9 @@ export interface GetFeeData {
 export const getEthFeeData = async ({
 	address,
 	helperContractAddress
-}: GetFeeData & { helperContractAddress: CkEthHelperContractAddressData }): Promise<BigNumber> => {
+}: GetFeeData & {
+	helperContractAddress: CkEthHelperContractAddressData | null | undefined;
+}): Promise<BigNumber> => {
 	if (isCkEthHelperContract({ destination: address, helperContractAddress })) {
 		return BigNumber.from(CKETH_FEE);
 	}

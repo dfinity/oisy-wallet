@@ -1,21 +1,28 @@
+import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
-import { writable, type Readable } from 'svelte/store';
+import type { TokenId } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 
-export type CkEthHelperContractAddressData = CertifiedData<ETH_ADDRESS> | undefined | null;
+export type CkEthHelperContractAddressData = CertifiedData<ETH_ADDRESS>;
 
-export interface CkEthHelperContractAddressStore extends Readable<CkEthHelperContractAddressData> {
-	set: (data: CkEthHelperContractAddressData) => void;
-	reset: () => void;
+export interface CkEthHelperContractAddressStore
+	extends CertifiedStore<CkEthHelperContractAddressData> {
+	set: (params: { tokenId: TokenId; address: CkEthHelperContractAddressData }) => void;
 }
 
 const initCkEthHelperContractAddressStore = (): CkEthHelperContractAddressStore => {
-	const { subscribe, set } = writable<CkEthHelperContractAddressData>(undefined);
+	const { subscribe, update, reset } = initCertifiedStore<CkEthHelperContractAddressData>();
 
 	return {
-		set: (data: CkEthHelperContractAddressData) => set(data),
-		reset: () => set(null),
+		set: ({ tokenId, address }: { tokenId: TokenId; address: CkEthHelperContractAddressData }) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: address
+			})),
+		reset,
 		subscribe
 	};
 };
+
 export const ckEthHelperContractAddressStore = initCkEthHelperContractAddressStore();

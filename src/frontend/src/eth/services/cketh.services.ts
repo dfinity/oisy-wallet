@@ -9,17 +9,17 @@ import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
-import type { TokenStandard } from '$lib/types/token';
+import type { Token, TokenStandard } from '$lib/types/token';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadCkEthHelperContractAddress = async () => {
+export const loadCkEthHelperContractAddress = async ({ id: tokenId }: Token) => {
 	const addressInStore = get(ckEthHelperContractAddressStore);
 
 	// We try to load only once per session the help contract address
-	if (addressInStore !== undefined) {
+	if (addressInStore?.[tokenId] !== undefined) {
 		return;
 	}
 
@@ -31,12 +31,12 @@ export const loadCkEthHelperContractAddress = async () => {
 				certified
 			}),
 		onLoad: ({ response: data, certified }) =>
-			ckEthHelperContractAddressStore.set({ data, certified }),
+			ckEthHelperContractAddressStore.set({ tokenId, address: { data, certified } }),
 		onCertifiedError: ({ error }) => {
 			// We silence the error here because we display a visual error when we try to effectively use the information
 			console.error(error);
 
-			ckEthHelperContractAddressStore.reset();
+			ckEthHelperContractAddressStore.reset(tokenId);
 		},
 		identity: new AnonymousIdentity()
 	});
@@ -47,7 +47,7 @@ export const assertCkEthHelperContractAddressLoaded = ({
 	tokenStandard,
 	network
 }: {
-	helperContractAddress: CkEthHelperContractAddressData;
+	helperContractAddress: CkEthHelperContractAddressData | null | undefined;
 	tokenStandard: TokenStandard;
 	network: Network | undefined;
 }): { valid: boolean } => {

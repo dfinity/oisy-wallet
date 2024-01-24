@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { loadCkEthHelperContractAddress } from '$eth/services/cketh.services';
-	import { tokenStandard } from '$lib/derived/token.derived';
+	import { token, tokenStandard } from '$lib/derived/token.derived';
 
 	const load = async () => {
 		if ($tokenStandard !== 'ethereum') {
 			return;
 		}
 
-		await loadCkEthHelperContractAddress();
+		await loadCkEthHelperContractAddress($token);
 	};
 
 	$: $tokenStandard, (async () => load())();
