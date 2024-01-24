@@ -3,17 +3,16 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { IcToken } from '$icp/types/ic';
 	import { isTokenCkBtcLedger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
-	import type { Token } from '$lib/types/token';
+	import { token } from '$lib/derived/token.derived';
 
-	export let token: Token;
 	export let networkId: NetworkId | undefined = undefined;
 	export let destination: string | undefined = undefined;
 
 	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger(token as IcToken);
+	$: ckBTC = isTokenCkBtcLedger($token as IcToken);
 
 	let ckETH = false;
-	$: ckETH = isTokenCkEthLedger(token as IcToken);
+	$: ckETH = isTokenCkEthLedger($token as IcToken);
 </script>
 
 {#if ckBTC || ckETH}
