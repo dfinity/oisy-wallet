@@ -64,7 +64,7 @@ export const loadCkBtcMinterInfo = async ({
 				certified
 			}),
 		onLoad: ({ response: data, certified }) =>
-			ckBtcMinterInfoStore.set({ tokenId, minterInfo: { data, certified } }),
+			ckBtcMinterInfoStore.set({ tokenId, data: { data, certified } }),
 		onCertifiedError: ({ error: err }) => {
 			ckBtcMinterInfoStore.reset(tokenId);
 

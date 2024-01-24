@@ -22,7 +22,7 @@ export const syncWallet = <T extends GetTransactions>({
 
 	balancesStore.set({
 		tokenId,
-		balance: {
+		data: {
 			data: BigNumber.from(balance),
 			certified
 		}
