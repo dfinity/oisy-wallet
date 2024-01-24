@@ -2,7 +2,7 @@
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { token } from '$lib/derived/token.derived';
-	import { icAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import IcSendNetworkCkBTC from '$icp/components/send/IcSendNetworkCk.svelte';
 	import type { NetworkId } from '$lib/types/network';
@@ -32,7 +32,7 @@
 
 	<IcSendAmount bind:amount bind:insufficientFunds />
 
-	<SendSource token={$token} source={$icAccountIdentifierText ?? ''} />
+	<SendSource token={$token} source={$icrcAccountIdentifierText ?? ''} />
 
 	<IcFeeDisplay {networkId} />
 
