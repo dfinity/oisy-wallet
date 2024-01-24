@@ -5,10 +5,7 @@
 	import { modalIcSend } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 
-	const openSend = async () => {
-		// TODO: load ckBTC and ckETH minter min withdrawal and fee
-		modalStore.openIcSend();
-	};
+	const openSend = async () => modalStore.openIcSend();
 </script>
 
 <button
