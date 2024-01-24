@@ -4,9 +4,16 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalIcSend } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
+	import { isNetworkUsingCkBtcLedger } from '$icp/utils/ic-send.utils';
+	import { token } from '$lib/derived/token.derived';
+	import type { IcToken } from '$icp/types/ic';
+	import { loadCkBtcMinterInfo } from '$icp/services/ckbtc.services';
 
 	const openSend = async () => {
-		// TODO: load ckBTC and ckETH minter min withdrawal and fee
+		if (isNetworkUsingCkBtcLedger($token as IcToken)) {
+			await loadCkBtcMinterInfo();
+		}
+
 		modalStore.openIcSend();
 	};
 </script>
