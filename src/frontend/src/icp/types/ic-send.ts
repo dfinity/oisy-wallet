@@ -6,3 +6,5 @@ export type IcTransferParams = Pick<TransferParams, 'amount' | 'to'> & {
 	identity: OptionIdentity;
 	progress: (step: SendIcStep) => void;
 };
+
+export class IcAmountAssertionError extends Error {}

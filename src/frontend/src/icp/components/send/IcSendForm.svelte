@@ -9,18 +9,22 @@
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
-	let insufficientFunds: boolean;
+	let amountError: IcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
 
 	let invalid = true;
 	$: invalid =
-		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
+		invalidDestination ||
+		nonNullish(amountError) ||
+		isNullishOrEmpty(destination) ||
+		isNullish(amount);
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -30,7 +34,7 @@
 
 	<IcSendNetworkCkBTC bind:destination bind:networkId />
 
-	<IcSendAmount bind:amount bind:insufficientFunds />
+	<IcSendAmount bind:amount bind:amountError {networkId} />
 
 	<SendSource token={$token} source={$icrcAccountIdentifierText ?? ''} />
 
