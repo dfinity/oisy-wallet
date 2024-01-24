@@ -1,15 +1,20 @@
-import { minterInfo, updateBalance as updateBalanceApi } from '$icp/api/ckbtc-minter.api';
+import {
+	getBtcAddress,
+	minterInfo,
+	updateBalance as updateBalanceApi
+} from '$icp/api/ckbtc-minter.api';
 import { CKBTC_TRANSACTIONS_RELOAD_DELAY } from '$icp/constants/ckbtc.constants';
-import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc-info.store';
+import { btcAddressStore, ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
-import { queryAndUpdate } from '$lib/actors/query.ic';
+import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
 import { busy } from '$lib/stores/busy.store';
+import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { CertifiedData } from '$lib/types/store';
 import { emit } from '$lib/utils/events.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
-import type { MinterInfo } from '@dfinity/ckbtc';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -41,32 +46,53 @@ export const updateBalance = async ({
 	emit({ message: 'oisyTriggerWallet' });
 };
 
-export const loadCkBtcMinterInfo = async ({
+export const loadCkBtcMinterInfo = async (params: IcToken & Partial<IcCkCanisters>) =>
+	loadCkBtcData({
+		...params,
+		store: ckBtcMinterInfoStore,
+		request: (params) => minterInfo(params)
+	});
+
+export const loadBtcAddress = async (params: IcToken & Partial<IcCkCanisters>) =>
+	loadCkBtcData({
+		...params,
+		store: btcAddressStore,
+		request: (params) => getBtcAddress(params)
+	});
+
+const loadCkBtcData = async <T>({
 	id: tokenId,
-	minterCanisterId
-}: IcToken & Partial<IcCkCanisters>) => {
+	minterCanisterId,
+	store,
+	request
+}: IcToken &
+	Partial<IcCkCanisters> & {
+		store: CertifiedSetterStoreStore<CertifiedData<T>>;
+		request: (
+			options: QueryAndUpdateRequestParams & Pick<IcCkCanisters, 'minterCanisterId'>
+		) => Promise<T>;
+	}) => {
 	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
 
-	const minterInfoStore = get(ckBtcMinterInfoStore);
+	const minterStore = get(store);
 
 	// We try to load only once per session the information for performance reason
-	if (minterInfoStore?.[tokenId] !== undefined) {
+	if (minterStore?.[tokenId] !== undefined) {
 		return;
 	}
 
 	busy.start({ msg: 'Loading minter data...' });
 
-	await queryAndUpdate<MinterInfo>({
+	await queryAndUpdate<T>({
 		request: ({ identity: _, certified }) =>
-			minterInfo({
+			request({
 				minterCanisterId,
 				identity: new AnonymousIdentity(),
 				certified
 			}),
-		onLoad: ({ response: data, certified }) =>
-			ckBtcMinterInfoStore.set({ tokenId, data: { data, certified } }),
+		onLoad: ({ response: data, certified }) => store.set({ tokenId, data: { data, certified } }),
 		onCertifiedError: ({ error: err }) => {
-			ckBtcMinterInfoStore.reset(tokenId);
+			store.reset(tokenId);
 
 			toastsError({
 				msg: { text: 'Error while loading the ckBtc minter information.' },
