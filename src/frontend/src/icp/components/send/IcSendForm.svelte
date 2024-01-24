@@ -28,7 +28,7 @@
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<IcSendDestination bind:destination bind:invalidDestination {networkId} />
 
-	<IcSendNetworkCkBTC token={$token} bind:destination bind:networkId />
+	<IcSendNetworkCkBTC bind:destination bind:networkId />
 
 	<IcSendAmount bind:amount bind:insufficientFunds />
 
