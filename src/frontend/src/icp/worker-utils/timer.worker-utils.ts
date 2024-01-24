@@ -48,6 +48,18 @@ export class TimerWorkerUtils {
 		this.timer = setInterval(execute, interval);
 	}
 
+	async trigger<T>(params: TimerWorkerUtilsParams<T>) {
+		const identity: Identity | undefined = await loadIdentity();
+
+		if (isNullish(identity)) {
+			// We cannot execute without an identity
+			console.error('Attempted to execute a worker without an authenticated identity.');
+			return;
+		}
+
+		await this.executeJob<T>({ identity, ...params });
+	}
+
 	private async executeJob<T>({
 		job,
 		...rest
