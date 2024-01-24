@@ -7,14 +7,15 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { getContext } from 'svelte';
-	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
+	import { IC_FEE_CONTEXT_KEY, type IcFeeContext } from '$icp/stores/ic-fee.store';
 
-	const { store: storeFeeData } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
+	const { store: storeFeeData } = getContext<IcFeeContext>(IC_FEE_CONTEXT_KEY);
 
 	let bitcoinEstimatedFee: bigint | undefined;
-	$: bitcoinEstimatedFee = nonNullish($storeFeeData)
-		? $storeFeeData.bitcoin_fee + $storeFeeData.minter_fee
-		: undefined;
+	$: bitcoinEstimatedFee =
+		nonNullish($storeFeeData) && nonNullish($storeFeeData.bitcoinFee)
+			? $storeFeeData.bitcoinFee.bitcoin_fee + $storeFeeData.bitcoinFee.minter_fee
+			: undefined;
 </script>
 
 {#if nonNullish(bitcoinEstimatedFee)}

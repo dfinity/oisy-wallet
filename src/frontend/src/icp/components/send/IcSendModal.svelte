@@ -17,12 +17,12 @@
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import {
-		BITCOIN_FEE_CONTEXT_KEY,
-		type BitcoinFeeContext as BtcFeeContextType,
+		IC_FEE_CONTEXT_KEY,
+		type IcFeeContext as IcFeeContextType,
 		initBitcoinFeeStore
-	} from '$icp/stores/bitcoin-fee.store';
+	} from '$icp/stores/ic-fee.store';
 	import { setContext } from 'svelte';
-	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
+	import BitcoinFeeContext from '$icp/components/fee/IcFeeContext.svelte';
 
 	/**
 	 * Props
@@ -119,7 +119,7 @@
 
 	let storeFeeData = initBitcoinFeeStore();
 
-	setContext<BtcFeeContextType>(BITCOIN_FEE_CONTEXT_KEY, {
+	setContext<IcFeeContextType>(IC_FEE_CONTEXT_KEY, {
 		store: storeFeeData
 	});
 </script>
