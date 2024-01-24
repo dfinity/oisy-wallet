@@ -1,7 +1,8 @@
 import type { TokenId } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable, type Writable } from 'svelte/store';
 
-export type CertifiedStoreData<T> = Record<TokenId, T> | undefined;
+export type CertifiedStoreData<T> = Record<TokenId, T | null> | undefined;
 
 export interface CertifiedStore<T> extends Readable<CertifiedStoreData<T>> {
 	reset: (tokenId: TokenId) => void;
@@ -15,9 +16,9 @@ export const initCertifiedStore = <T>(): CertifiedStore<T> &
 		update,
 		subscribe,
 		reset: (tokenId: TokenId) =>
-			update((state) => {
-				const { [tokenId]: _, ...rest } = state ?? {};
-				return rest;
-			})
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: null
+			}))
 	};
 };
