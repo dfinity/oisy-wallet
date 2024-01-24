@@ -1,10 +1,15 @@
 <script lang="ts">
-	import Send from '$lib/components/send/Send.svelte';
+	import Send from '$eth/components/send/Send.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import SendConvertETH from '$eth/components/send/SendConvertETH.svelte';
+	import { tokenStandard } from '$lib/derived/token.derived';
+	import { networkICP } from '$lib/derived/network.derived';
+	import IcSend from '$icp/components/send/IcSend.svelte';
 
 	export let send = false;
-	export let convertEth = false;
+
+	let convertEth = false;
+	$: convertEth = send && $tokenStandard === 'ethereum';
 
 	let singleAction = true;
 	$: singleAction = !send && !convertEth;
@@ -19,7 +24,11 @@
 	<Receive />
 
 	{#if send}
-		<Send />
+		{#if $networkICP}
+			<IcSend />
+		{:else}
+			<Send />
+		{/if}
 	{/if}
 
 	{#if convertEth}

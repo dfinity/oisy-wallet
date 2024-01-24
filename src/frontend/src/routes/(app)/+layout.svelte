@@ -5,11 +5,8 @@
 	import { page } from '$app/stores';
 	import AirdropButton from '$lib/components/airdrop/AirdropButton.svelte';
 	import { airdropAvailable } from '$lib/derived/airdrop.derived';
-	import { isErc20Icp } from '$eth/utils/token.utils';
-	import { token, tokenStandard } from '$lib/derived/token.derived';
 	import Workers from '$lib/components/core/Workers.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
-	import { networkICP } from '$lib/derived/network.derived';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -24,9 +21,6 @@
 	summary={route === 'transactions'}
 	send={route === 'transactions'}
 	actions={route !== 'settings'}
-	erc20IcpLink={isErc20Icp($token)}
-	convertEth={route === 'transactions' && $tokenStandard === 'ethereum'}
-	background={$networkICP ? 'icp' : 'eth'}
 />
 
 <main>
