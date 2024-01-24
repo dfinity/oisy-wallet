@@ -2,10 +2,10 @@ import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
-import type { RetrieveBtcOk, UpdateBalanceOk } from '@dfinity/ckbtc';
+import type { MinterInfo, RetrieveBtcOk, UpdateBalanceOk } from '@dfinity/ckbtc';
 import { CkBTCMinterCanister } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
 export const retrieveBtc = async ({
 	identity,
@@ -40,6 +40,21 @@ export const updateBalance = async ({
 	return updateBalance({
 		owner: identity.getPrincipal()
 	});
+};
+
+export const minterInfo = async ({
+	identity,
+	minterCanisterId,
+	...rest
+}: {
+	identity: OptionIdentity;
+	minterCanisterId: CanisterIdText;
+} & QueryParams): Promise<MinterInfo> => {
+	assertNonNullish(identity, 'No internet identity.');
+
+	const { getMinterInfo } = await minterCanister({ identity, minterCanisterId });
+
+	return getMinterInfo(rest);
 };
 
 const minterCanister = async ({
