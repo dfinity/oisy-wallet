@@ -7,7 +7,7 @@
 </script>
 
 {#if ckBTC}
-	<div class="border-2 border-dust bg-white rounded-lg my-10 py-4 px-6">
+	<div class="border-2 border-dust bg-white rounded-lg mb-12 py-4 px-6">
 		<InfoBitcoin />
 	</div>
 {/if}

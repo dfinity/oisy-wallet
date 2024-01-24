@@ -95,7 +95,7 @@
 	const shareAvailable = canShare();
 </script>
 
-<h2 class="text-base mt-16 mb-4 pb-1">Admin</h2>
+<h2 class="text-base mb-4 pb-1">Admin</h2>
 
 <div class="flex gap-4 mb-6" style="flex-wrap: wrap;">
 	<button class="primary" on:click={generate} disabled={busy} class:opacity-50={busy}

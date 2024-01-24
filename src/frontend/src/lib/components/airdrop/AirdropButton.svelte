@@ -9,7 +9,7 @@
 </script>
 
 <button
-	class="airdrop full center mt-6"
+	class="airdrop full center mb-12"
 	in:slide={{ delay: 0, duration: 500, easing: quintOut, axis: 'y' }}
 	on:click={modalStore.openAirdrop}
 	><IconCelebrate /> AirDrop status <span class="text-blue">Check</span></button
