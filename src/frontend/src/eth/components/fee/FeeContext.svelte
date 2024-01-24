@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WebSocketListener } from '$eth/types/listener';
-	import { token } from '$lib/derived/token.derived';
+	import { token, tokenId } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { getFeeData } from '$eth/providers/infura.providers';
 	import type { Erc20Token } from '$eth/types/erc20';
@@ -43,7 +43,7 @@
 					...(await getFeeData()),
 					gas: await getEthFeeData({
 						...params,
-						helperContractAddress: $ckEthHelperContractAddressStore
+						helperContractAddress: $ckEthHelperContractAddressStore?.[$tokenId]
 					})
 				});
 				return;

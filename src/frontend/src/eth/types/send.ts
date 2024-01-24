@@ -10,5 +10,5 @@ export interface SendParams {
 	token: Token;
 	network?: Network | undefined;
 	identity: OptionIdentity;
-	ckEthHelperContractAddress: CkEthHelperContractAddressData;
+	ckEthHelperContractAddress: CkEthHelperContractAddressData | null | undefined;
 }

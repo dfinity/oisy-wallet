@@ -18,7 +18,7 @@
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
-	import { token, tokenStandard } from '$lib/derived/token.derived';
+	import { token, tokenId, tokenStandard } from '$lib/derived/token.derived';
 	import { WALLET_CONNECT_SEND_STEPS } from '$lib/constants/steps.constants';
 	import {
 		send as sendServices,
@@ -57,7 +57,9 @@
 
 	let network: Network | undefined = undefined;
 	$: network =
-		destination === $ckEthHelperContractAddressStore?.data ? ICP_NETWORK : ETHEREUM_NETWORK;
+		destination === $ckEthHelperContractAddressStore?.[$tokenId]?.data
+			? ICP_NETWORK
+			: ETHEREUM_NETWORK;
 
 	/**
 	 * Modal
@@ -115,7 +117,7 @@
 			token: $token,
 			progress: (step: SendStep) => (sendProgressStep = step),
 			identity: $authStore.identity,
-			ckEthHelperContractAddress: $ckEthHelperContractAddressStore,
+			ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$tokenId],
 			tokenStandard: $tokenStandard,
 			network
 		});
