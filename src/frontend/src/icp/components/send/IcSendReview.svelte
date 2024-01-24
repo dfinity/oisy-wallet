@@ -29,7 +29,7 @@
 </script>
 
 <SendData {amount} {destination} token={$token} {source}>
-	<IcFeeDisplay slot="fee" />
+	<IcFeeDisplay slot="fee" {networkId} />
 	<IcSendReviewNetwork {networkId} slot="network" />
 </SendData>
 

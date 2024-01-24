@@ -34,7 +34,7 @@
 
 	<SendSource token={$token} source={$icAccountIdentifierText ?? ''} />
 
-	<IcFeeDisplay />
+	<IcFeeDisplay {networkId} />
 
 	<div class="flex justify-end gap-1">
 		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>
