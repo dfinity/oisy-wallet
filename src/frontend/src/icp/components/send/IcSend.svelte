@@ -6,10 +6,12 @@
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { loadCkBtcMinterInfo } from '$icp/services/ckbtc.services';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
+	import { token } from '$lib/derived/token.derived';
+	import type { IcToken } from '$icp/types/ic';
 
 	const openSend = async () => {
 		if ($tokenCkBtcLedger) {
-			await loadCkBtcMinterInfo();
+			await loadCkBtcMinterInfo($token as IcToken);
 		}
 
 		modalStore.openIcSend();

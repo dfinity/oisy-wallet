@@ -1,11 +1,11 @@
 import { minterInfo, updateBalance as updateBalanceApi } from '$icp/api/ckbtc-minter.api';
 import { CKBTC_TRANSACTIONS_RELOAD_DELAY } from '$icp/constants/ckbtc.constants';
-import { CKBTC_MINTER_CANISTER_ID } from '$icp/constants/icrc.constants';
-import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc-info.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
+import { busy } from '$lib/stores/busy.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { emit } from '$lib/utils/events.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
@@ -41,24 +41,32 @@ export const updateBalance = async ({
 	emit({ message: 'oisyTriggerWallet' });
 };
 
-export const loadCkBtcMinterInfo = async () => {
+export const loadCkBtcMinterInfo = async ({
+	id: tokenId,
+	minterCanisterId
+}: IcToken & Partial<IcCkCanisters>) => {
+	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
+
 	const minterInfoStore = get(ckBtcMinterInfoStore);
 
 	// We try to load only once per session the information for performance reason
-	if (minterInfoStore !== undefined) {
+	if (minterInfoStore?.[tokenId] !== undefined) {
 		return;
 	}
+
+	busy.start({ msg: 'Loading minter data...' });
 
 	await queryAndUpdate<MinterInfo>({
 		request: ({ identity: _, certified }) =>
 			minterInfo({
-				minterCanisterId: CKBTC_MINTER_CANISTER_ID,
+				minterCanisterId,
 				identity: new AnonymousIdentity(),
 				certified
 			}),
-		onLoad: ({ response: data, certified }) => ckBtcMinterInfoStore.set({ data, certified }),
+		onLoad: ({ response: data, certified }) =>
+			ckBtcMinterInfoStore.set({ tokenId, minterInfo: { data, certified } }),
 		onCertifiedError: ({ error: err }) => {
-			ckBtcMinterInfoStore.reset();
+			ckBtcMinterInfoStore.reset(tokenId);
 
 			toastsError({
 				msg: { text: 'Error while loading the ckBtc minter information.' },
@@ -67,4 +75,6 @@ export const loadCkBtcMinterInfo = async () => {
 		},
 		identity: new AnonymousIdentity()
 	});
+
+	busy.stop();
 };
