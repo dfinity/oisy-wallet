@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { NetworkId } from '$lib/types/network';
 	import { getContext } from 'svelte';
-	import { BTC_FEE_CONTEXT_KEY, type BtcFeeContext } from '$icp/stores/btc-fee.store';
+	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
@@ -17,7 +17,7 @@
 	let ckBTC = false;
 	$: ckBTC = isTokenCkBtcLedger($token as IcToken);
 
-	const { store } = getContext<BtcFeeContext>(BTC_FEE_CONTEXT_KEY);
+	const { store } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 
 	const loadEstimatedFee = async () => {
 		if (!ckBTC) {
