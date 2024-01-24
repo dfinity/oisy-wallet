@@ -13,7 +13,7 @@
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
-	export let destinationReadonly = false;
+	export let destinationEditable = true;
 	export let amount: number | undefined = undefined;
 
 	const { store: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
@@ -28,10 +28,15 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<SendData {amount} {destination} token={$token} source={$address ?? ''}>
+<SendData
+	{amount}
+	destination={destinationEditable ? destination : null}
+	token={$token}
+	source={$address ?? ''}
+>
 	<FeeDisplay slot="fee" />
 
-	{#if !destinationReadonly}
+	{#if destinationEditable}
 		<SendReviewNetwork {network} slot="network" />
 	{/if}
 </SendData>
