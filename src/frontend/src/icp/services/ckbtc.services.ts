@@ -1,4 +1,5 @@
 import {
+	estimateFee,
 	getBtcAddress,
 	minterInfo,
 	updateBalance as updateBalanceApi
@@ -12,9 +13,11 @@ import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
 import { busy } from '$lib/stores/busy.store';
 import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
 import { emit } from '$lib/utils/events.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
+import type { EstimateWithdrawalFee } from '@dfinity/ckbtc';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -103,4 +106,36 @@ const loadCkBtcData = async <T>({
 	});
 
 	busy.stop();
+};
+
+export const queryEstimateFee = async ({
+	identity,
+	minterCanisterId,
+	amount
+}: Partial<IcCkCanisters> & {
+	identity: OptionIdentity;
+	amount: bigint;
+}): Promise<{
+	result: 'success' | 'error';
+	fee?: EstimateWithdrawalFee;
+}> => {
+	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
+
+	try {
+		const fee = await estimateFee({
+			identity,
+			amount,
+			minterCanisterId,
+			certified: false
+		});
+
+		return { result: 'success', fee };
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: 'Error while querying the estimation of the Btc fees.' },
+			err
+		});
+
+		return { result: 'error' };
+	}
 };
