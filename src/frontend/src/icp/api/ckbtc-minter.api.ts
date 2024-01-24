@@ -35,11 +35,7 @@ export const updateBalance = async ({
 
 	const { updateBalance } = await minterCanister({ identity, minterCanisterId });
 
-	// We use the identity to follow NNS-dapp's scheme but, if it would not be provided, it would be the same result.
-	// If "owner" is not provided, the minter canister uses the "caller" as a fallback.
-	return updateBalance({
-		owner: identity.getPrincipal()
-	});
+	return updateBalance(minterAccountParams({ identity }));
 };
 
 export const minterInfo = async ({
@@ -57,6 +53,20 @@ export const minterInfo = async ({
 	return getMinterInfo(rest);
 };
 
+export const getBtcAddress = async ({
+	identity,
+	minterCanisterId
+}: {
+	identity: OptionIdentity;
+	minterCanisterId: CanisterIdText;
+}): Promise<string> => {
+	assertNonNullish(identity, 'No internet identity.');
+
+	const { getBtcAddress } = await minterCanister({ identity, minterCanisterId });
+
+	return getBtcAddress(minterAccountParams({ identity }));
+};
+
 const minterCanister = async ({
 	identity,
 	minterCanisterId
@@ -70,4 +80,12 @@ const minterCanister = async ({
 		agent,
 		canisterId: Principal.fromText(minterCanisterId)
 	});
+};
+
+const minterAccountParams = ({ identity }: { identity: Identity }): { owner: Principal } => {
+	// We use the identity to follow NNS-dapp's scheme but, if it would not be provided, it would be the same result.
+	// If "owner" is not provided, the minter canister uses the "caller" as a fallback.
+	return {
+		owner: identity.getPrincipal()
+	};
 };
