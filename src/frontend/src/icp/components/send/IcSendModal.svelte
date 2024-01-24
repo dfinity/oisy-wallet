@@ -16,6 +16,13 @@
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import type { IcTransferParams } from '$icp/types/ic-send';
+	import {
+		BTC_FEE_CONTEXT_KEY,
+		type BtcFeeContext as BtcFeeContextType,
+		initBtcFeeStore
+	} from '$icp/stores/btc-fee.store';
+	import { setContext } from 'svelte';
+	import BtcFeeContext from '$icp/components/fee/BtcFeeContext.svelte';
 
 	/**
 	 * Props
@@ -105,22 +112,34 @@
 
 		sendProgressStep = SendIcStep.INITIALIZATION;
 	};
+
+	/**
+	 * Btc Fee context store
+	 */
+
+	let storeFeeData = initBtcFeeStore();
+
+	setContext<BtcFeeContextType>(BTC_FEE_CONTEXT_KEY, {
+		store: storeFeeData
+	});
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	{#if currentStep?.name === 'Review'}
-		<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
-	{:else if currentStep?.name === 'Sending'}
-		<IcSendProgress bind:sendProgressStep {networkId} />
-	{:else}
-		<IcSendForm
-			on:icNext={modal.next}
-			on:icClose={close}
-			bind:destination
-			bind:amount
-			bind:networkId
-		/>
-	{/if}
+	<BtcFeeContext {amount} {networkId}>
+		{#if currentStep?.name === 'Review'}
+			<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
+		{:else if currentStep?.name === 'Sending'}
+			<IcSendProgress bind:sendProgressStep {networkId} />
+		{:else}
+			<IcSendForm
+				on:icNext={modal.next}
+				on:icClose={close}
+				bind:destination
+				bind:amount
+				bind:networkId
+			/>
+		{/if}
+	</BtcFeeContext>
 </WizardModal>

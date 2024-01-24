@@ -2,7 +2,13 @@ import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
-import type { MinterInfo, RetrieveBtcOk, UpdateBalanceOk } from '@dfinity/ckbtc';
+import type {
+	EstimateWithdrawalFee,
+	EstimateWithdrawalFeeParams,
+	MinterInfo,
+	RetrieveBtcOk,
+	UpdateBalanceOk
+} from '@dfinity/ckbtc';
 import { CkBTCMinterCanister } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
@@ -65,6 +71,21 @@ export const getBtcAddress = async ({
 	const { getBtcAddress } = await minterCanister({ identity, minterCanisterId });
 
 	return getBtcAddress(minterAccountParams({ identity }));
+};
+
+export const estimateFee = async ({
+	identity,
+	minterCanisterId,
+	...params
+}: {
+	identity: OptionIdentity;
+	minterCanisterId: CanisterIdText;
+} & EstimateWithdrawalFeeParams): Promise<EstimateWithdrawalFee> => {
+	assertNonNullish(identity, 'No internet identity.');
+
+	const { estimateWithdrawalFee } = await minterCanister({ identity, minterCanisterId });
+
+	return estimateWithdrawalFee(params);
 };
 
 const minterCanister = async ({
