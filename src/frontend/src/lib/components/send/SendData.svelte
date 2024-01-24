@@ -3,16 +3,19 @@
 	import SendDataDestination from './SendDataDestination.svelte';
 	import type { Token } from '$lib/types/token';
 	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
+	import { nonNullish } from '@dfinity/utils';
 
-	export let destination = '';
+	export let destination: string | null;
 	export let amount: string | number | undefined = undefined;
 	export let token: Token;
 	export let source: string;
 </script>
 
-<SendDataDestination {destination}>
-	<slot name="network" />
-</SendDataDestination>
+{#if nonNullish(destination)}
+	<SendDataDestination {destination} />
+{/if}
+
+<slot name="network" />
 
 <SendDataAmount {amount} {token} />
 
