@@ -10,14 +10,16 @@
 	import Balance from '$lib/components/hero/Balance.svelte';
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
+	import { isErc20Icp } from '$eth/utils/token.utils';
+	import { networkICP } from '$lib/derived/network.derived';
 
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
 	export let send = false;
-	export let erc20IcpLink = false;
-	export let convertEth = false;
-	export let background: 'eth' | 'icp';
+
+	let background: 'eth' | 'icp';
+	$: background = $networkICP ? 'icp' : 'eth';
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20TokensInitialized;
@@ -53,11 +55,11 @@
 
 		{#if actions}
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-				<Actions {send} {convertEth} />
+				<Actions {send} />
 			</div>
 		{/if}
 
-		{#if erc20IcpLink}
+		{#if isErc20Icp($token)}
 			<Erc20Icp />
 		{/if}
 	</article>
