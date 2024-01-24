@@ -4,12 +4,12 @@ import { writable, type Readable } from 'svelte/store';
 
 export type CkEthHelperContractAddressData = CertifiedData<ETH_ADDRESS> | undefined | null;
 
-export interface AddressStore extends Readable<CkEthHelperContractAddressData> {
+export interface CkEthHelperContractAddressStore extends Readable<CkEthHelperContractAddressData> {
 	set: (data: CkEthHelperContractAddressData) => void;
 	reset: () => void;
 }
 
-const initCkEthHelperContractAddressStore = (): AddressStore => {
+const initCkEthHelperContractAddressStore = (): CkEthHelperContractAddressStore => {
 	const { subscribe, set } = writable<CkEthHelperContractAddressData>(undefined);
 
 	return {
