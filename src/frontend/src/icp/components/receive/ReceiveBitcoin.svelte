@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { isNetworkUsingCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import type { IcToken } from '$icp/types/ic';
 	import { token } from '$lib/derived/token.derived';
 	import IconSync from '$lib/components/icons/IconSync.svelte';
@@ -12,9 +11,10 @@
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
 	import ReceiveBitcoinProgress from '$icp/components/receive/ReceiveBitcoinProgress.svelte';
 	import { MinterNoNewUtxosError } from '@dfinity/ckbtc';
+	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 
 	let ckBTC = false;
-	$: ckBTC = isNetworkUsingCkBtcLedger($token as IcToken);
+	$: ckBTC = $tokenCkBtcLedger;
 
 	/**
 	 * Update balance / receive Bitcoin
