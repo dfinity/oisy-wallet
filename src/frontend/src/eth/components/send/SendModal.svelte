@@ -44,8 +44,8 @@
 	export let network: Network | undefined = undefined;
 	export let purpose: 'send' | 'convert-eth-to-cketh' = 'send';
 
-	let destinationReadonly = false;
-	$: destinationReadonly = purpose === 'convert-eth-to-cketh';
+	let destinationEditable = true;
+	$: destinationEditable = purpose !== 'convert-eth-to-cketh';
 
 	let amount: number | undefined = undefined;
 
@@ -179,7 +179,7 @@
 				{destination}
 				{amount}
 				{network}
-				{destinationReadonly}
+				{destinationEditable}
 			/>
 		{:else if currentStep?.name === 'Sending'}
 			<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
@@ -190,7 +190,7 @@
 				bind:destination
 				bind:amount
 				bind:network
-				{destinationReadonly}
+				{destinationEditable}
 			/>
 		{/if}
 	</FeeContext>

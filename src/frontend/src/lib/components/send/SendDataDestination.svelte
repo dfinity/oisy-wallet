@@ -8,5 +8,3 @@
 	<svelte:fragment slot="label">Destination</svelte:fragment>
 	{destination}
 </Value>
-
-<slot />
