@@ -11,9 +11,10 @@
 	import { isNullish } from '@dfinity/utils';
 	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
+	import { tokenId } from '$lib/derived/token.derived';
 
 	const isDisabled = (): boolean =>
-		$addressNotLoaded || isNullish($ckEthHelperContractAddressStore);
+		$addressNotLoaded || isNullish($ckEthHelperContractAddressStore?.[$tokenId]);
 
 	const openSend = async () => {
 		if (isDisabled()) {
@@ -42,7 +43,7 @@
 
 {#if $modalConvertETHToCkETH}
 	<SendModal
-		destination={$ckEthHelperContractAddressStore?.data ?? ''}
+		destination={$ckEthHelperContractAddressStore?.[$tokenId]?.data ?? ''}
 		network={ICP_NETWORK}
 		purpose="convert-eth-to-cketh"
 	/>

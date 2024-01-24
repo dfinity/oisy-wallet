@@ -6,6 +6,7 @@
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
 	import { isCkEthHelperContract } from '$eth/utils/send.utils';
 	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
+	import { tokenId } from '$lib/derived/token.derived';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
@@ -26,7 +27,7 @@
 		if (
 			isCkEthHelperContract({
 				destination,
-				helperContractAddress: $ckEthHelperContractAddressStore
+				helperContractAddress: $ckEthHelperContractAddressStore?.[$tokenId]
 			})
 		) {
 			networkName = ICP_NETWORK.name;
