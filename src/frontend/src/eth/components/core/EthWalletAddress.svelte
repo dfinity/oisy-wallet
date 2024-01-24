@@ -10,7 +10,7 @@
 </script>
 
 <div>
-	<label class="block text-sm font-semibold" for="eth-wallet-address">Wallet address:</label>
+	<label class="block text-sm font-bold" for="eth-wallet-address">Wallet address:</label>
 
 	<output class="break-all" id="eth-wallet-address"
 		>{shortenWithMiddleEllipsis($address ?? '')}</output

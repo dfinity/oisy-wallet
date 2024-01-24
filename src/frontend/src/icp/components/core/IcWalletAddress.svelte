@@ -5,7 +5,7 @@
 </script>
 
 <div>
-	<label class="block text-sm font-semibold" for="ic-wallet-address">Wallet address:</label>
+	<label class="block text-sm font-bold" for="ic-wallet-address">Wallet address:</label>
 
 	<output id="ic-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
