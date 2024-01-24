@@ -23,7 +23,7 @@
 	actions={route !== 'settings'}
 />
 
-<main>
+<main class="pt-12">
 	<AddressGuard>
 		<Loader>
 			<Workers>

@@ -6,7 +6,6 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { AIRDROP } from '$lib/constants/airdrop.constants';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
@@ -14,7 +13,7 @@
 	import { networkEthereum, networkId, networkTokens } from '$lib/derived/network.derived';
 </script>
 
-<h2 class="text-base mb-6 pb-1" class:mt-12={AIRDROP} class:mt-16={!AIRDROP}>Tokens</h2>
+<h2 class="text-base mb-6 pb-1">Tokens</h2>
 
 <TokensSkeletons>
 	{#each $networkTokens as token (token.id)}
