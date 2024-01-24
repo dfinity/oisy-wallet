@@ -1,29 +1,10 @@
 <script lang="ts">
-	import { formatToken } from '$lib/utils/format.utils.js';
-	import Value from '$lib/components/ui/Value.svelte';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import { token, tokenDecimals } from '$lib/derived/token.derived';
-	import type { IcToken } from '$icp/types/ic';
-	import { nonNullish } from '@dfinity/utils';
+	import IcTokenFee from '$icp/components/send/fees/IcTokenFee.svelte';
+	import BitcoinKYTFee from '$icp/components/send/fees/BitcoinKYTFee.svelte';
+	import type { NetworkId } from '$lib/types/network';
 
-	let decimals: number;
-	let symbol: string;
-
-	$: ({ decimals, symbol } = $token);
-
-	let fee: bigint | undefined;
-	$: fee = ($token as IcToken).fee;
+	export let networkId: NetworkId | undefined = undefined;
 </script>
 
-<Value ref="fee">
-	<svelte:fragment slot="label">Fee</svelte:fragment>
-
-	{#if nonNullish(fee)}
-		{formatToken({
-			value: BigNumber.from(fee),
-			unitName: decimals,
-			displayDecimals: $tokenDecimals
-		})}
-		{symbol}
-	{/if}
-</Value>
+<IcTokenFee />
+<BitcoinKYTFee {networkId} />
