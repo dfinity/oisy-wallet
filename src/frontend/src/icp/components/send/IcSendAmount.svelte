@@ -44,9 +44,9 @@
 				tokenDecimals: $tokenDecimals
 			});
 
-            if (nonNullish(amountError)) {
-                return;
-            }
+			if (nonNullish(amountError)) {
+				return;
+			}
 		}
 
 		const total = value.add(fee);
