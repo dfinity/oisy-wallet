@@ -1,37 +1,59 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { slide } from 'svelte/transition';
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { token, tokenDecimals } from '$lib/derived/token.derived';
+	import { token, tokenDecimals, tokenId } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
+	import type { NetworkId } from '$lib/types/network';
+	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
+	import { IcAmountAssertionError } from '$icp/types/ic-send';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 
 	export let amount: number | undefined = undefined;
-	export let insufficientFunds: boolean;
+	export let amountError: IcAmountAssertionError | undefined;
+	export let networkId: NetworkId | undefined = undefined;
 
 	let fee: bigint | undefined;
 	$: fee = ($token as IcToken).fee;
 
 	const validate = () => {
 		if (invalidAmount(amount)) {
-			insufficientFunds = false;
+			amountError = undefined;
 			return;
 		}
 
 		if (isNullish(fee)) {
-			insufficientFunds = false;
+			amountError = undefined;
 			return;
 		}
 
-		const total = parseToken({
+		const value = parseToken({
 			value: `${amount}`,
 			unitName: $tokenDecimals
-		}).add(fee);
+		});
 
-		insufficientFunds = total.gt($balance ?? BigNumber.from(0n));
+		if (networkId === BTC_NETWORK_ID) {
+			amountError = assertCkBTCUserInputAmount({
+				amount: value,
+				minterInfo: $ckBtcMinterInfoStore?.[$tokenId],
+				tokenDecimals: $tokenDecimals
+			});
+
+            if (nonNullish(amountError)) {
+                return;
+            }
+		}
+
+		const total = value.add(fee);
+
+		if (total.gt($balance ?? BigNumber.from(0n))) {
+			amountError = new IcAmountAssertionError('Insufficient funds.');
+		}
 	};
 
 	const debounceValidate = debounce(validate);
@@ -49,6 +71,6 @@
 	placeholder="Amount"
 />
 
-{#if insufficientFunds}
-	<p transition:slide class="text-cyclamen pb-3">Insufficient funds</p>
+{#if nonNullish(amountError)}
+	<p transition:slide class="text-cyclamen pb-3">{amountError.message}</p>
 {/if}
