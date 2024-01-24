@@ -16,6 +16,7 @@
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import type { CertifiedData } from '$lib/types/store';
 	import ReceiveBitcoin from '$icp/components/receive/ReceiveBitcoin.svelte';
+	import Info from '$icp/components/info/Info.svelte';
 
 	let transactions: CertifiedData<IcTransactionType>[];
 	$: transactions = $icTransactionsStore?.[$tokenId] ?? [];
@@ -53,7 +54,9 @@
 		: undefined;
 </script>
 
-<div class="flex justify-between mb-6 pb-1 mt-16 items-center">
+<Info />
+
+<div class="flex justify-between mb-6 pb-1 items-center">
 	<h2 class="text-base">Transactions</h2>
 
 	<ReceiveBitcoin />
