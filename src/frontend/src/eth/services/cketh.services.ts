@@ -31,7 +31,7 @@ export const loadCkEthHelperContractAddress = async ({ id: tokenId }: Token) => 
 				certified
 			}),
 		onLoad: ({ response: data, certified }) =>
-			ckEthHelperContractAddressStore.set({ tokenId, address: { data, certified } }),
+			ckEthHelperContractAddressStore.set({ tokenId, data: { data, certified } }),
 		onCertifiedError: ({ error }) => {
 			// We silence the error here because we display a visual error when we try to effectively use the information
 			console.error(error);
