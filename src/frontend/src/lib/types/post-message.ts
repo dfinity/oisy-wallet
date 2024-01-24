@@ -14,8 +14,10 @@ export type PostMessageRequest =
 	| 'stopExchangeTimer'
 	| 'stopIcpWalletTimer'
 	| 'startIcpWalletTimer'
+	| 'triggerIcpWalletTimer'
 	| 'stopIcrcWalletTimer'
-	| 'startIcrcWalletTimer';
+	| 'startIcrcWalletTimer'
+	| 'triggerIcrcWalletTimer';
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;

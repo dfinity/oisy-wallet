@@ -2,6 +2,7 @@ import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
+import type { WalletWorker } from '$icp/types/ic-listener';
 import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import type {
 	PostMessage,
@@ -12,12 +13,7 @@ import type {
 import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
 import { syncWallet } from './ic-listener.services';
 
-export interface IcpWalletWorker {
-	start: () => void;
-	stop: () => void;
-}
-
-export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
+export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 	const WalletWorker = await import('$icp/workers/icp-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 
@@ -67,6 +63,11 @@ export const initIcpWalletWorker = async (): Promise<IcpWalletWorker> => {
 		stop: () => {
 			worker.postMessage({
 				msg: 'stopIcpWalletTimer'
+			});
+		},
+		trigger: () => {
+			worker.postMessage({
+				msg: 'triggerIcpWalletTimer'
 			});
 		}
 	};

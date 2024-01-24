@@ -3,6 +3,7 @@ import { CKBTC_TRANSACTIONS_RELOAD_DELAY } from '$icp/constants/ckbtc.constants'
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
+import { emit } from '$lib/utils/events.utils';
 import { assertNonNullish } from '@dfinity/utils';
 
 export const updateBalance = async ({
@@ -30,5 +31,5 @@ export const updateBalance = async ({
 
 	await waitForMilliseconds(CKBTC_TRANSACTIONS_RELOAD_DELAY);
 
-	// TODO: postMessage
+	emit({ message: 'oisyTriggerWallet' });
 };
