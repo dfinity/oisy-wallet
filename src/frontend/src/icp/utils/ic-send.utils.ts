@@ -27,10 +27,10 @@ export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
 export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
 	!isBtcAddress(address);
 
-export const isTokenCkBtcLedger = ({ ledgerCanisterId }: IcToken): boolean =>
+export const isTokenCkBtcLedger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
 	ledgerCanisterId === CKBTC_LEDGER_CANISTER_ID;
 
-export const isTokenCkEthLedger = ({ ledgerCanisterId }: IcToken): boolean =>
+export const isTokenCkEthLedger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
 	ledgerCanisterId === CKETH_LEDGER_CANISTER_ID;
 
 export const isNetworkIdBTC = (networkId: NetworkId | undefined): boolean =>

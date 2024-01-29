@@ -3,19 +3,25 @@ import {
 	ckEthHelperContractAddressStore,
 	type CkEthHelperContractAddressData
 } from '$icp-eth/stores/cketh.store';
-import { CKETH_MINTER_CANISTER_ID } from '$icp/constants/icrc.constants';
+import type { IcCkCanisters } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
-import type { Token, TokenStandard } from '$lib/types/token';
+import type { TokenId, TokenStandard } from '$lib/types/token';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadCkEthHelperContractAddress = async ({ id: tokenId }: Token) => {
+export const loadCkEthHelperContractAddress = async ({
+	tokenId,
+	canisters: { minterCanisterId }
+}: {
+	tokenId: TokenId;
+	canisters: IcCkCanisters;
+}) => {
 	const addressInStore = get(ckEthHelperContractAddressStore);
 
 	// We try to load only once per session the help contract address
@@ -26,7 +32,7 @@ export const loadCkEthHelperContractAddress = async ({ id: tokenId }: Token) => 
 	await queryAndUpdate<ETH_ADDRESS>({
 		request: ({ identity: _, certified }) =>
 			ckEthHelperContractAddress({
-				minterCanisterId: CKETH_MINTER_CANISTER_ID,
+				minterCanisterId,
 				identity: new AnonymousIdentity(),
 				certified
 			}),

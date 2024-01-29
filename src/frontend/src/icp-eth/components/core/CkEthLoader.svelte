@@ -1,16 +1,24 @@
 <script lang="ts">
 	import { loadCkEthHelperContractAddress } from '$icp-eth/services/cketh.services';
-	import { token, tokenStandard } from '$lib/derived/token.derived';
+	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
+	import { icrcTokensStore } from '$icp/stores/icrc.store';
+	import { CKETH_MINTER_CANISTER_ID } from '$icp/constants/icrc.constants';
+	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 
 	const load = async () => {
-		if ($tokenStandard !== 'ethereum') {
+		if (!$ethToCkETHEnabled) {
 			return;
 		}
 
-		await loadCkEthHelperContractAddress($token);
+		await loadCkEthHelperContractAddress({
+			tokenId: ETHEREUM_TOKEN_ID,
+			canisters: {
+				minterCanisterId: CKETH_MINTER_CANISTER_ID
+			}
+		});
 	};
 
-	$: $tokenStandard, (async () => load())();
+	$: $ethToCkETHEnabled, $icrcTokensStore, (async () => await load())();
 </script>
 
 <slot />
