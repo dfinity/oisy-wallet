@@ -12,7 +12,7 @@
 	import { tokenId } from '$lib/derived/token.derived';
 	import { setContext } from 'svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
-	import SendEthModal from '$eth/components/send/SendEthModal.svelte';
+	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
 
 	const isDisabled = (): boolean =>
 		$addressNotLoaded || isNullish($ckEthHelperContractAddressStore?.[$tokenId]);
@@ -50,7 +50,7 @@
 </CkEthLoader>
 
 {#if $modalConvertETHToCkETH}
-	<SendEthModal
+	<SendTokenModal
 		destination={$ckEthHelperContractAddressStore?.[$tokenId]?.data ?? ''}
 		network={ICP_NETWORK}
 	/>
