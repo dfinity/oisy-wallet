@@ -40,6 +40,8 @@
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
+<svelte:window on:oisyOpenConvertEthToCkEth={openSend} />
+
 <CkEthLoader>
 	<button
 		class="hero col-span-2"
