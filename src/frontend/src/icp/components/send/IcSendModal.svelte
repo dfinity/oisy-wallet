@@ -124,7 +124,13 @@
 	});
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
+<WizardModal
+	{steps}
+	bind:currentStep
+	bind:this={modal}
+	on:nnsClose={close}
+	disablePointerEvents={currentStep?.name === 'Sending'}
+>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	<BitcoinFeeContext {amount} {networkId}>
