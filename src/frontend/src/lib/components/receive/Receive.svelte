@@ -12,6 +12,8 @@
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { modalIcpReceive, modalReceive } from '$lib/derived/modal.derived';
 	import ReceiveIcpModal from '$icp/components/receive/ReceiveIcpModal.svelte';
+	import { page } from '$app/stores';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
 
 	onMount(initMetamaskSupport);
 
@@ -19,7 +21,7 @@
 
 	const openReceive = async () => {
 		// $token is never undefined and per default "ethereum"
-		let tokensPage = $tokenStandard === 'ethereum';
+		let tokensPage = isRouteTokens($page) && $networkICP;
 
 		if ($tokenStandard === 'icp' || tokensPage) {
 			modalStore.openIcpReceive();
