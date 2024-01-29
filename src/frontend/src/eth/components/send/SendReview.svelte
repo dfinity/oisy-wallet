@@ -3,13 +3,13 @@
 	import { isNullish } from '@dfinity/utils';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import SendData from '$lib/components/send/SendData.svelte';
-	import { token } from '$lib/derived/token.derived';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { isEthAddress } from '$lib/utils/account.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -26,12 +26,14 @@
 		isNullish($storeFeeData);
 
 	const dispatch = createEventDispatcher();
+
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <SendData
 	{amount}
 	destination={destinationEditable ? destination : null}
-	token={$token}
+	token={$sendToken}
 	source={$address ?? ''}
 >
 	<FeeDisplay slot="fee" />

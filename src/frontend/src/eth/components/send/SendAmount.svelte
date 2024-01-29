@@ -6,15 +6,15 @@
 	import { minGasFee } from '$eth/utils/fee.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { tokenDecimals } from '$lib/derived/token.derived';
-	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { slide } from 'svelte/transition';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
 
-	const { store: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { store: storeFeeData } = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { sendTokenDecimals, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const validate = () => {
 		if (invalidAmount(amount)) {
@@ -29,10 +29,10 @@
 
 		const total = parseToken({
 			value: `${amount}`,
-			unitName: $tokenDecimals
+			unitName: $sendTokenDecimals
 		}).add(minGasFee($storeFeeData));
 
-		insufficientFunds = total.gt($balance ?? BigNumber.from(0n));
+		insufficientFunds = total.gt($sendBalance ?? BigNumber.from(0n));
 	};
 
 	const debounceValidate = debounce(validate);
@@ -46,7 +46,7 @@
 	inputType="currency"
 	required
 	bind:value={amount}
-	decimals={$tokenDecimals}
+	decimals={$sendTokenDecimals}
 	placeholder="Amount"
 />
 
