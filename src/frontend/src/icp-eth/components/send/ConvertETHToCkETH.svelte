@@ -13,6 +13,7 @@
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
 	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import { tokenStandard } from '$lib/derived/token.derived';
 
 	// Convert ETH to ckETH can be executed on Ethereum and ckETH pages, therefore we use Ethereum for both statically.
 	const convertTokenId = ETHEREUM_TOKEN_ID;
@@ -50,7 +51,13 @@
 		class:opacity-50={$isBusy}
 	>
 		<IconImportExport size="28" />
-		<span>Convert ETH to ckETH</span></button
+		<span>
+			{#if $tokenStandard === 'ethereum'}
+				Convert ETH to ckETH
+			{:else}
+				Receive from ETH network
+			{/if}
+		</span></button
 	>
 </CkEthLoader>
 
