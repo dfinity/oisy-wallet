@@ -5,7 +5,11 @@ import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcCkCanisters, IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
+import {
+	queryAndUpdate,
+	type QueryAndUpdateRequestParams,
+	type QueryAndUpdateStrategy
+} from '$lib/actors/query.ic';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { SendIcStep } from '$lib/enums/steps';
 import { busy } from '$lib/stores/busy.store';
@@ -104,13 +108,15 @@ export const loadCkData = async <T>({
 	id: tokenId,
 	minterCanisterId,
 	store,
-	request
+	request,
+	strategy
 }: IcToken &
 	Partial<IcCkCanisters> & {
 		store: CertifiedSetterStoreStore<CertifiedData<T>>;
 		request: (
 			options: QueryAndUpdateRequestParams & Pick<IcCkCanisters, 'minterCanisterId'>
 		) => Promise<T>;
+		strategy?: QueryAndUpdateStrategy;
 	}) => {
 	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
 
@@ -139,7 +145,8 @@ export const loadCkData = async <T>({
 				err
 			});
 		},
-		identity: new AnonymousIdentity()
+		identity: new AnonymousIdentity(),
+		strategy
 	});
 
 	busy.stop();
