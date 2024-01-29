@@ -2,7 +2,7 @@
 	import { slide, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { token, tokenId } from '$lib/derived/token.derived';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import type { IcToken } from '$icp/types/ic';
 	import type { NetworkId } from '$lib/types/network';
