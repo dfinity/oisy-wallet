@@ -9,13 +9,16 @@
 	import { isNullish } from '@dfinity/utils';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
-	import { tokenId } from '$lib/derived/token.derived';
 	import { setContext } from 'svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
 	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
+	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+
+	// Convert ETH to ckETH can be executed on Ethereum and ckETH pages, therefore we use Ethereum for both statically.
+	const convertTokenId = ETHEREUM_TOKEN_ID;
 
 	const isDisabled = (): boolean =>
-		$addressNotLoaded || isNullish($ckEthHelperContractAddressStore?.[$tokenId]);
+		$addressNotLoaded || isNullish($ckEthHelperContractAddressStore?.[convertTokenId]);
 
 	const openSend = async () => {
 		if (isDisabled()) {
@@ -51,7 +54,7 @@
 
 {#if $modalConvertETHToCkETH}
 	<SendTokenModal
-		destination={$ckEthHelperContractAddressStore?.[$tokenId]?.data ?? ''}
+		destination={$ckEthHelperContractAddressStore?.[convertTokenId]?.data ?? ''}
 		network={ICP_NETWORK}
 	/>
 {/if}

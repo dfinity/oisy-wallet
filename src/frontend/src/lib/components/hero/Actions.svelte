@@ -2,14 +2,14 @@
 	import Send from '$eth/components/send/Send.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import ConvertETHToCkETH from '$icp-eth/components/send/ConvertETHToCkETH.svelte';
-	import { tokenStandard } from '$lib/derived/token.derived';
 	import { networkICP } from '$lib/derived/network.derived';
 	import IcSend from '$icp/components/send/IcSend.svelte';
+	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 
 	export let send = false;
 
 	let convertEth = false;
-	$: convertEth = send && $tokenStandard === 'ethereum';
+	$: convertEth = send && $ethToCkETHEnabled;
 
 	let singleAction = true;
 	$: singleAction = !send && !convertEth;
