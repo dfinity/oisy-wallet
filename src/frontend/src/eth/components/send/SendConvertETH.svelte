@@ -2,9 +2,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
-	import { modalConvertETHToCkETH, modalIcSend } from '$lib/derived/modal.derived';
+	import { modalConvertETHToCkETH } from '$lib/derived/modal.derived';
 	import SendModal from '$eth/components/send/SendModal.svelte';
-	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import IconImportExport from '$lib/components/icons/IconImportExport.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import CkEthLoader from '$eth/components/cketh/CkEthLoader.svelte';
@@ -47,6 +46,4 @@
 		network={ICP_NETWORK}
 		purpose="convert-eth-to-cketh"
 	/>
-{:else if $modalIcSend}
-	<IcSendModal />
 {/if}
