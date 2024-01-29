@@ -14,7 +14,7 @@
 	import { mapAddressStartsWith0x } from '$eth/utils/send.utils';
 	import { getErc20FeeData, getEthFeeData, type GetFeeData } from '$eth/services/fee.services';
 	import type { Network } from '$lib/types/network';
-	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
+	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 
 	export let observe: boolean;
 	export let destination = '';

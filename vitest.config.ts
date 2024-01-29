@@ -25,6 +25,10 @@ export default defineConfig(
 					replacement: resolve(__dirname, 'src/frontend/src/icp')
 				},
 				{
+					find: '$icp-eth',
+					replacement: resolve(__dirname, 'src/frontend/src/icp')
+				},
+				{
 					find: '$tests',
 					replacement: resolve(__dirname, 'src/frontend/src/tests')
 				}
