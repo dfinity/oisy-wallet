@@ -1,7 +1,7 @@
+import { WALLET_TIMER_INTERVAL_MILLIS } from '$icp/constants/ic.constants';
 import type { IcTransactionAddOnsInfo } from '$icp/types/ic';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import { queryAndUpdate } from '$lib/actors/query.ic';
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type {
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp,

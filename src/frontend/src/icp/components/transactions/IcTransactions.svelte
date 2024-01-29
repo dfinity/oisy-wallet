@@ -9,7 +9,6 @@
 	import { modalIcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcpTransactionModal from './IcTransactionModal.svelte';
-	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken, IcTransaction as IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import { token, tokenId } from '$lib/derived/token.derived';
@@ -17,6 +16,7 @@
 	import type { CertifiedData } from '$lib/types/store';
 	import ReceiveBitcoin from '$icp/components/receive/ReceiveBitcoin.svelte';
 	import Info from '$icp/components/info/Info.svelte';
+	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 
 	let transactions: CertifiedData<IcTransactionType>[];
 	$: transactions = $icTransactionsStore?.[$tokenId] ?? [];
