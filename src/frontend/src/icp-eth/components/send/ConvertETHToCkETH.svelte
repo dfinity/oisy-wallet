@@ -11,6 +11,8 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import { tokenId } from '$lib/derived/token.derived';
+	import { setContext } from 'svelte';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
 
 	const isDisabled = (): boolean =>
 		$addressNotLoaded || isNullish($ckEthHelperContractAddressStore?.[$tokenId]);
@@ -26,6 +28,13 @@
 
 		modalStore.openConvertETHToCkETH();
 	};
+
+	/**
+	 * Send modal context store
+	 */
+
+	const context = initSendContext();
+	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
 <CkEthLoader>
