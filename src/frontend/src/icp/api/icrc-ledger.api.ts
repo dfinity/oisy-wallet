@@ -33,11 +33,13 @@ export const transfer = async ({
 	identity,
 	to,
 	amount,
+	createdAt,
 	ledgerCanisterId
 }: {
 	identity: OptionIdentity;
 	to: IcrcAccount;
 	amount: bigint;
+	createdAt?: bigint;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<IcrcBlockIndex> => {
 	assertNonNullish(identity, 'No internet identity.');
@@ -46,7 +48,8 @@ export const transfer = async ({
 
 	return transfer({
 		to: toAccount(to),
-		amount
+		amount,
+		created_at_time: createdAt ?? nowInBigIntNanoSeconds()
 	});
 };
 
