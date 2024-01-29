@@ -40,7 +40,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken, sendTokenStandard } =
+	const { sendTokenDecimals, sendTokenId, sendToken, sendTokenStandard, sendPurpose } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
@@ -49,10 +49,9 @@
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
-	export let purpose: 'send' | 'convert-eth-to-cketh' = 'send';
 
 	let destinationEditable = true;
-	$: destinationEditable = purpose !== 'convert-eth-to-cketh';
+	$: destinationEditable = sendPurpose !== 'convert-eth-to-cketh';
 
 	let amount: number | undefined = undefined;
 
@@ -149,7 +148,7 @@
 	$: steps = [
 		{
 			name: 'Send',
-			title: purpose === 'convert-eth-to-cketh' ? 'Convert ETH to ckETH' : 'Send'
+			title: sendPurpose === 'convert-eth-to-cketh' ? 'Convert ETH to ckETH' : 'Send'
 		},
 		{
 			name: 'Review',
