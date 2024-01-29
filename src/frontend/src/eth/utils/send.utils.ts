@@ -1,4 +1,4 @@
-import type { CkEthHelperContractAddressData } from '$eth/stores/cketh.store';
+import type { CkEthHelperContractAddressData } from '$icp-eth/stores/cketh.store';
 import { nonNullish } from '@dfinity/utils';
 
 export const mapAddressStartsWith0x = (address: string) => {

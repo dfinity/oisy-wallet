@@ -23,8 +23,8 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import type { Network } from '$lib/types/network';
 	import { authStore } from '$lib/stores/auth.store';
-	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
-	import { assertCkEthHelperContractAddressLoaded } from '$eth/services/cketh.services';
+	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
 
 	/**
 	 * Fee context store

@@ -1,4 +1,4 @@
-import { ckEthMinterCanister } from '$lib/api/cketh-minter.api';
+import { ckEthMinterCanister } from '$icp-eth/api/cketh-minter.api';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { RetrieveEthRequest } from '@dfinity/cketh/dist/candid/minter';

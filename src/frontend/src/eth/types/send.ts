@@ -1,4 +1,4 @@
-import type { CkEthHelperContractAddressData } from '$eth/stores/cketh.store';
+import type { CkEthHelperContractAddressData } from '$icp-eth/stores/cketh.store';
 import { SendStep } from '$lib/enums/steps';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';

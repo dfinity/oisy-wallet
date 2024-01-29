@@ -1,5 +1,4 @@
 import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
-import { assertCkEthHelperContractAddressLoaded } from '$eth/services/cketh.services';
 import type { FeeStoreData } from '$eth/stores/fee.store';
 import type { SendParams } from '$eth/types/send';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
@@ -7,6 +6,7 @@ import {
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash
 } from '$eth/utils/wallet-connect.utils';
+import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
 import { SendStep, SignStep } from '$lib/enums/steps';
 import { authStore } from '$lib/stores/auth.store';

@@ -1,8 +1,8 @@
-import { ckEthHelperContractAddress } from '$eth/api/cketh-minter.api';
+import { ckEthHelperContractAddress } from '$icp-eth/api/cketh-minter.api';
 import {
 	ckEthHelperContractAddressStore,
 	type CkEthHelperContractAddressData
-} from '$eth/stores/cketh.store';
+} from '$icp-eth/stores/cketh.store';
 import { CKETH_MINTER_CANISTER_ID } from '$icp/constants/icrc.constants';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';

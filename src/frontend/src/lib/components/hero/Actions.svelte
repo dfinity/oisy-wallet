@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Send from '$eth/components/send/Send.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
-	import SendConvertETH from '$eth/components/send/SendConvertETH.svelte';
+	import ConvertETHToCkETH from '$icp-eth/components/send/ConvertETHToCkETH.svelte';
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { networkICP } from '$lib/derived/network.derived';
 	import IcSend from '$icp/components/send/IcSend.svelte';
@@ -32,6 +32,6 @@
 	{/if}
 
 	{#if convertEth}
-		<SendConvertETH />
+		<ConvertETHToCkETH />
 	{/if}
 </div>
