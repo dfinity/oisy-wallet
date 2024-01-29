@@ -1,29 +1,6 @@
 import { busy } from '$lib/stores/busy.store';
 import { toastsShow } from '$lib/stores/toasts.store';
-
-const waitReady = async ({
-	count,
-	isDisabled
-}: {
-	count: number;
-	isDisabled: () => boolean;
-}): Promise<'ready' | 'timeout'> => {
-	const disabled = isDisabled();
-
-	if (!disabled) {
-		return 'ready';
-	}
-
-	const nextCount = count - 1;
-
-	if (nextCount === 0) {
-		return 'timeout';
-	}
-
-	await new Promise((resolve) => setTimeout(resolve, 500));
-
-	return waitReady({ count: nextCount, isDisabled });
-};
+import { waitReady } from '$lib/utils/timeout.utils';
 
 export const waitWalletReady = async (isDisabled: () => boolean): Promise<'ready' | 'timeout'> => {
 	busy.start({ msg: 'Loading initial data...' });
