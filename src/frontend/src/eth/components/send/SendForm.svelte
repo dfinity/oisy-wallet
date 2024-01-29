@@ -1,8 +1,7 @@
 <script lang="ts">
 	import SendSource from '$lib/components/send/SendSource.svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
-	import { token } from '$lib/derived/token.derived';
 	import SendNetworkICP from './SendNetworkICP.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { address } from '$lib/derived/address.derived';
@@ -10,6 +9,7 @@
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import { isNullish } from '@dfinity/utils';
 	import SendDestination from '$eth/components/send/SendDestination.svelte';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -24,18 +24,20 @@
 		invalidDestination || insufficientFunds || isNullishOrEmpty(destination) || isNullish(amount);
 
 	const dispatch = createEventDispatcher();
+
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	{#if destinationEditable}
 		<SendDestination bind:destination bind:invalidDestination />
 
-		<SendNetworkICP token={$token} {destination} bind:network />
+		<SendNetworkICP {destination} bind:network />
 	{/if}
 
 	<SendAmount bind:amount bind:insufficientFunds />
 
-	<SendSource token={$token} source={$address ?? ''} />
+	<SendSource token={$sendToken} source={$address ?? ''} />
 
 	<FeeDisplay />
 

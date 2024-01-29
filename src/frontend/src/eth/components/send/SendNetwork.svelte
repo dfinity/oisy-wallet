@@ -6,10 +6,13 @@
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
 	import { isCkEthHelperContract } from '$eth/utils/send.utils';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
-	import { tokenId } from '$lib/derived/token.derived';
+	import { getContext } from 'svelte';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
+
+	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let networkName: string | undefined = network?.name;
 
@@ -27,7 +30,7 @@
 		if (
 			isCkEthHelperContract({
 				destination,
-				helperContractAddress: $ckEthHelperContractAddressStore?.[$tokenId]
+				helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
 			})
 		) {
 			networkName = ICP_NETWORK.name;
