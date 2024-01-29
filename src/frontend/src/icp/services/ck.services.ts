@@ -5,10 +5,17 @@ import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcCkCanisters, IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
+import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { SendIcStep } from '$lib/enums/steps';
+import { busy } from '$lib/stores/busy.store';
+import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
+import { toastsError } from '$lib/stores/toasts.store';
+import type { CertifiedData } from '$lib/types/store';
+import { AnonymousIdentity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const convertCkBTCToBtc = async ({
 	token: { ledgerCanisterId, minterCanisterId },
@@ -91,4 +98,49 @@ const approveTransfer = async ({
 			owner: Principal.from(minterCanisterId)
 		}
 	});
+};
+
+export const loadCkData = async <T>({
+	id: tokenId,
+	minterCanisterId,
+	store,
+	request
+}: IcToken &
+	Partial<IcCkCanisters> & {
+		store: CertifiedSetterStoreStore<CertifiedData<T>>;
+		request: (
+			options: QueryAndUpdateRequestParams & Pick<IcCkCanisters, 'minterCanisterId'>
+		) => Promise<T>;
+	}) => {
+	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
+
+	const minterStore = get(store);
+
+	// We try to load only once per session the information for performance reason
+	if (minterStore?.[tokenId] !== undefined) {
+		return;
+	}
+
+	busy.start({ msg: 'Loading minter data...' });
+
+	await queryAndUpdate<T>({
+		request: ({ identity: _, certified }) =>
+			request({
+				minterCanisterId,
+				identity: new AnonymousIdentity(),
+				certified
+			}),
+		onLoad: ({ response: data, certified }) => store.set({ tokenId, data: { data, certified } }),
+		onCertifiedError: ({ error: err }) => {
+			store.reset(tokenId);
+
+			toastsError({
+				msg: { text: 'Error while loading the ckBtc minter information.' },
+				err
+			});
+		},
+		identity: new AnonymousIdentity()
+	});
+
+	busy.stop();
 };
