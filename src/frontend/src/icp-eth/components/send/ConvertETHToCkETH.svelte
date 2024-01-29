@@ -3,7 +3,6 @@
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertETHToCkETH } from '$lib/derived/modal.derived';
-	import SendModal from '$eth/components/send/SendModal.svelte';
 	import IconImportExport from '$lib/components/icons/IconImportExport.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
@@ -13,6 +12,7 @@
 	import { tokenId } from '$lib/derived/token.derived';
 	import { setContext } from 'svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import SendEthModal from '$eth/components/send/SendEthModal.svelte';
 
 	const isDisabled = (): boolean =>
 		$addressNotLoaded || isNullish($ckEthHelperContractAddressStore?.[$tokenId]);
@@ -33,7 +33,7 @@
 	 * Send modal context store
 	 */
 
-	const context = initSendContext();
+	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh' });
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
@@ -50,9 +50,8 @@
 </CkEthLoader>
 
 {#if $modalConvertETHToCkETH}
-	<SendModal
+	<SendEthModal
 		destination={$ckEthHelperContractAddressStore?.[$tokenId]?.data ?? ''}
 		network={ICP_NETWORK}
-		purpose="convert-eth-to-cketh"
 	/>
 {/if}

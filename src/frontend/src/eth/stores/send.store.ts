@@ -22,7 +22,7 @@ const initSendStore = (): SendStore => {
 	};
 };
 
-export const initSendContext = (): SendContext => {
+export const initSendContext = (staticContext: Pick<SendContext, 'sendPurpose'>): SendContext => {
 	const sendToken = initSendStore();
 
 	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
@@ -39,9 +39,12 @@ export const initSendContext = (): SendContext => {
 		sendTokenDecimals,
 		sendTokenId,
 		sendTokenStandard,
-		sendBalance
+		sendBalance,
+		...staticContext
 	};
 };
+
+export type SendContextPurpose = 'send' | 'convert-eth-to-cketh';
 
 export interface SendContext {
 	sendToken: SendStore;
@@ -49,6 +52,7 @@ export interface SendContext {
 	sendTokenId: Readable<TokenId>;
 	sendTokenStandard: Readable<TokenStandard>;
 	sendBalance: Readable<BigNumber | undefined | null>;
+	sendPurpose: SendContextPurpose;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');
