@@ -1,30 +1,40 @@
 <script lang="ts">
-	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
+	import { tokenCkBtcLedger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import InfoBitcoin from '$icp/components/info/InfoBitcoin.svelte';
-	import { IconClose } from '@dfinity/gix-components';
-	import { saveHideBitcoinInfo, shouldHideBitcoinInfo } from '$icp/utils/ck.utils';
-	import { slide } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
+	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$icp/utils/ck.utils';
+	import InfoBox from '$icp/components/info/InfoBox.svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import InfoEthereum from '$icp/components/info/InfoEthereum.svelte';
 
 	let ckBTC = false;
 	$: ckBTC = $tokenCkBtcLedger;
 
-	let hideInfo = shouldHideBitcoinInfo();
+	let ckETH = false;
+	$: ckETH = $tokenCkEthLedger;
+
+	let key: HideInfoKey | undefined = undefined;
+	$: key = ckBTC ? 'oisy_ic_hide_bitcoin_info' : ckETH ? 'oisy_ic_hide_ethereum_info' : undefined;
+
+	let hideInfo = true;
+	$: hideInfo = nonNullish(key) ? shouldHideInfo(key) : true;
 
 	const close = () => {
 		hideInfo = true;
 
-		saveHideBitcoinInfo();
+		if (isNullish(key)) {
+			return;
+		}
+
+		saveHideInfo(key);
 	};
 </script>
 
-{#if ckBTC && !hideInfo}
-	<div
-		class="border-2 border-dust bg-white rounded-lg mb-12 py-4 px-6 relative"
-		transition:slide={{ easing: quintOut, axis: 'y' }}
-	>
-		<button class="text absolute top-2 right-2" on:click={close}><IconClose size="24px" /></button>
-
-		<InfoBitcoin />
-	</div>
+{#if ckBTC || ckETH}
+	<InfoBox {hideInfo} on:click={close}>
+		{#if ckBTC}
+			<InfoBitcoin />
+		{:else}
+			<InfoEthereum />
+		{/if}
+	</InfoBox>
 {/if}
