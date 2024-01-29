@@ -66,7 +66,7 @@
 {/if}
 
 {#if $modalReceiveBitcoin}
-	<Modal on:nnsClose={modalStore.close}>
+	<Modal on:nnsClose={modalStore.close} disablePointerEvents={true}>
 		<svelte:fragment slot="title">Check for incoming BTC</svelte:fragment>
 
 		<div>
