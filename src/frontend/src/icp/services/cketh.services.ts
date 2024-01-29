@@ -7,5 +7,6 @@ export const loadEip1559TransactionPrice = async (params: IcToken & Partial<IcCk
 	loadCkData({
 		...params,
 		store: eip1559TransactionPriceStore,
-		request: (params) => eip1559TransactionPrice(params)
+		request: (params) => eip1559TransactionPrice(params),
+		strategy: 'update'
 	});
