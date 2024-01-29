@@ -37,6 +37,7 @@ export enum SendIcStep {
 	INITIALIZATION = 'initialization',
 	APPROVE = 'approve',
 	SEND = 'send',
+	RELOAD = 'reload',
 	DONE = 'done'
 }
 

@@ -16,6 +16,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
 import { emit } from '$lib/utils/events.utils';
+import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
 import type { EstimateWithdrawalFee } from '@dfinity/ckbtc';
 import { assertNonNullish } from '@dfinity/utils';
@@ -38,11 +39,6 @@ export const updateBalance = async ({
 	});
 
 	progress(UpdateBalanceCkBtcStep.RELOAD);
-
-	const waitForMilliseconds = (milliseconds: number): Promise<void> =>
-		new Promise((resolve) => {
-			setTimeout(resolve, milliseconds);
-		});
 
 	await waitForMilliseconds(CKBTC_TRANSACTIONS_RELOAD_DELAY);
 
