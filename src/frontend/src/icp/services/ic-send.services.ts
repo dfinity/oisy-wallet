@@ -7,6 +7,7 @@ import { convertCkBTCToBtc, convertCkETHToEth } from '$icp/services/ck.services'
 import type { IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { isNetworkIdBTC, isNetworkIdETH } from '$icp/utils/ic-send.utils';
+import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { SendIcStep } from '$lib/enums/steps';
@@ -15,6 +16,23 @@ import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
 
 export const sendIc = async ({
+	progress,
+	...rest
+}: IcTransferParams & {
+	token: IcToken;
+	targetNetworkId: NetworkId | undefined;
+}): Promise<void> => {
+	await send({
+		progress,
+		...rest
+	});
+
+	progress(SendIcStep.RELOAD);
+
+	await waitAndTriggerWallet();
+};
+
+const send = async ({
 	token,
 	targetNetworkId,
 	...rest

@@ -4,10 +4,10 @@ import {
 	minterInfo,
 	updateBalance as updateBalanceApi
 } from '$icp/api/ckbtc-minter.api';
-import { CKBTC_TRANSACTIONS_RELOAD_DELAY } from '$icp/constants/ckbtc.constants';
 import { btcAddressStore, ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
+import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
 import { busy } from '$lib/stores/busy.store';
@@ -15,7 +15,6 @@ import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.sto
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
-import { emit } from '$lib/utils/events.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
 import type { EstimateWithdrawalFee } from '@dfinity/ckbtc';
 import { assertNonNullish } from '@dfinity/utils';
@@ -39,14 +38,7 @@ export const updateBalance = async ({
 
 	progress(UpdateBalanceCkBtcStep.RELOAD);
 
-	const waitForMilliseconds = (milliseconds: number): Promise<void> =>
-		new Promise((resolve) => {
-			setTimeout(resolve, milliseconds);
-		});
-
-	await waitForMilliseconds(CKBTC_TRANSACTIONS_RELOAD_DELAY);
-
-	emit({ message: 'oisyTriggerWallet' });
+	await waitAndTriggerWallet();
 };
 
 export const loadCkBtcMinterInfo = async (params: IcToken & Partial<IcCkCanisters>) =>

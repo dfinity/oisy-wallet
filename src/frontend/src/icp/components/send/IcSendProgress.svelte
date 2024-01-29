@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SendIcStep, SendStep } from '$lib/enums/steps';
+	import { SendIcStep } from '$lib/enums/steps';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import type { ProgressStep } from '@dfinity/gix-components';
 	import type { NetworkId } from '$lib/types/network';
@@ -11,22 +11,27 @@
 	let steps: [ProgressStep, ...ProgressStep[]];
 	$: steps = [
 		{
-			step: SendStep.INITIALIZATION,
+			step: SendIcStep.INITIALIZATION,
 			text: 'Initializing transaction...',
 			state: 'in_progress'
 		} as ProgressStep,
 		...(isNetworkIdBTC(networkId) || isNetworkIdETH(networkId)
 			? [
 					{
-						step: SendStep.APPROVE,
+						step: SendIcStep.APPROVE,
 						text: 'Approving...',
 						state: 'next'
 					} as ProgressStep
 				]
 			: []),
 		{
-			step: SendStep.SEND,
+			step: SendIcStep.SEND,
 			text: 'Sending...',
+			state: 'next'
+		} as ProgressStep,
+		{
+			step: SendIcStep.RELOAD,
+			text: 'Refreshing UI...',
 			state: 'next'
 		} as ProgressStep
 	];
