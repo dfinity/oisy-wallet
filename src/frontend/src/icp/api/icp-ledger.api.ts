@@ -1,4 +1,5 @@
 import { ICP_LEDGER_CANISTER_ID } from '$icp/constants/icp.constants';
+import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
@@ -29,11 +30,13 @@ export const transfer = async ({
 export const icrc1Transfer = async ({
 	identity,
 	to,
-	amount
+	amount,
+	createdAt
 }: {
 	identity: OptionIdentity;
 	to: IcrcAccount;
 	amount: bigint;
+	createdAt?: bigint;
 }): Promise<BlockHeight> => {
 	assertNonNullish(identity, 'No internet identity.');
 
@@ -44,7 +47,8 @@ export const icrc1Transfer = async ({
 			owner: to.owner,
 			subaccount: toNullable(to.subaccount)
 		},
-		amount
+		amount,
+		createdAt: createdAt ?? nowInBigIntNanoSeconds()
 	});
 };
 
