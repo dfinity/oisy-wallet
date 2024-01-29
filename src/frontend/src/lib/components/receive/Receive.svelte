@@ -18,7 +18,10 @@
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
 	const openReceive = async () => {
-		if ($tokenStandard === 'icp') {
+		// $token is never undefined and per default "ethereum"
+		let tokensPage = $tokenStandard === 'ethereum';
+
+		if ($tokenStandard === 'icp' || tokensPage) {
 			modalStore.openIcpReceive();
 			return;
 		}
