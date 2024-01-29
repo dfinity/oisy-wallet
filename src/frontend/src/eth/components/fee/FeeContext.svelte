@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { WebSocketListener } from '$eth/types/listener';
-	import { token, tokenId } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { getFeeData } from '$eth/providers/infura.providers';
 	import type { Erc20Token } from '$eth/types/erc20';
@@ -15,6 +14,7 @@
 	import { getErc20FeeData, getEthFeeData, type GetFeeData } from '$eth/services/fee.services';
 	import type { Network } from '$lib/types/network';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -22,6 +22,8 @@
 	export let network: Network | undefined = undefined;
 
 	const { store }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+
+	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee
@@ -38,12 +40,12 @@
 				address: mapAddressStartsWith0x(destination !== '' ? destination : $address!)
 			};
 
-			if ($token.id === ETHEREUM_TOKEN_ID) {
+			if ($sendTokenId === ETHEREUM_TOKEN_ID) {
 				store.setFee({
 					...(await getFeeData()),
 					gas: await getEthFeeData({
 						...params,
-						helperContractAddress: $ckEthHelperContractAddressStore?.[$tokenId]
+						helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
 					})
 				});
 				return;
@@ -52,7 +54,7 @@
 			store.setFee({
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
-					contract: $token as Erc20Token,
+					contract: $sendToken as Erc20Token,
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					address: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
 					amount: parseToken({ value: `${amount ?? '1'}` }),
