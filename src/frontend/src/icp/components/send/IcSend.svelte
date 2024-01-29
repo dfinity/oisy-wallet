@@ -5,7 +5,7 @@
 	import { modalIcSend } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { loadCkBtcMinterInfo } from '$icp/services/ckbtc.services';
-	import { tokenCkBtcLedger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
+	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { token } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 
