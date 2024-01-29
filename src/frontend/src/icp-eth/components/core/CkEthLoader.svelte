@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { loadCkEthHelperContractAddress } from '$eth/services/cketh.services';
+	import { loadCkEthHelperContractAddress } from '$icp-eth/services/cketh.services';
 	import { token, tokenStandard } from '$lib/derived/token.derived';
 
 	const load = async () => {

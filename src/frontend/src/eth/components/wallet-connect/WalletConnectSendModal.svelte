@@ -26,9 +26,9 @@
 	} from '$eth/services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
-	import CkEthLoader from '$eth/components/cketh/CkEthLoader.svelte';
+	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { authStore } from '$lib/stores/auth.store';
-	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
+	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
 

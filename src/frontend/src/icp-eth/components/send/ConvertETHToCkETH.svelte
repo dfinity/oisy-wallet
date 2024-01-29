@@ -6,9 +6,9 @@
 	import SendModal from '$eth/components/send/SendModal.svelte';
 	import IconImportExport from '$lib/components/icons/IconImportExport.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import CkEthLoader from '$eth/components/cketh/CkEthLoader.svelte';
+	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { isNullish } from '@dfinity/utils';
-	import { ckEthHelperContractAddressStore } from '$eth/stores/cketh.store';
+	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import { tokenId } from '$lib/derived/token.derived';
 
