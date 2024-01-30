@@ -11,8 +11,8 @@ import { SendIcStep } from '$lib/enums/steps';
 import { busy } from '$lib/stores/busy.store';
 import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
-import { AnonymousIdentity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -104,13 +104,15 @@ export const loadCkData = async <T>({
 	id: tokenId,
 	minterCanisterId,
 	store,
-	request
+	request,
+	identity
 }: IcToken &
 	Partial<IcCkCanisters> & {
 		store: CertifiedSetterStoreStore<CertifiedData<T>>;
 		request: (
 			options: QueryAndUpdateRequestParams & Pick<IcCkCanisters, 'minterCanisterId'>
 		) => Promise<T>;
+		identity: OptionIdentity;
 	}) => {
 	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
 
@@ -121,13 +123,13 @@ export const loadCkData = async <T>({
 		return;
 	}
 
-	busy.start({ msg: 'Loading minter data...' });
+	busy.start({ msg: 'Hold tight, we are loading some information...' });
 
 	await queryAndUpdate<T>({
-		request: ({ identity: _, certified }) =>
+		request: ({ identity, certified }) =>
 			request({
 				minterCanisterId,
-				identity: new AnonymousIdentity(),
+				identity,
 				certified
 			}),
 		onLoad: ({ response: data, certified }) => store.set({ tokenId, data: { data, certified } }),
@@ -139,7 +141,7 @@ export const loadCkData = async <T>({
 				err
 			});
 		},
-		identity: new AnonymousIdentity()
+		identity
 	});
 
 	busy.stop();

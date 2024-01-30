@@ -12,6 +12,7 @@ import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import { AnonymousIdentity } from '@dfinity/agent';
 import type { EstimateWithdrawalFee } from '@dfinity/ckbtc';
 import { assertNonNullish } from '@dfinity/utils';
 
@@ -40,10 +41,13 @@ export const loadCkBtcMinterInfo = async (params: IcToken & Partial<IcCkCanister
 	loadCkData({
 		...params,
 		store: ckBtcMinterInfoStore,
-		request: (params) => minterInfo(params)
+		request: (params) => minterInfo(params),
+		identity: new AnonymousIdentity()
 	});
 
-export const loadBtcAddress = async (params: IcToken & Partial<IcCkCanisters>) =>
+export const loadBtcAddress = async (
+	params: IcToken & Partial<IcCkCanisters> & { identity: OptionIdentity }
+) =>
 	loadCkData({
 		...params,
 		store: btcAddressStore,
