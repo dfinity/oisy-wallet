@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import ReceiveIcInfo from '$icp/components/receive/ReceiveIcInfo.svelte';
-	import ReceiveIcQRCode from '$icp/components/receive/ReceiveIcQRCode.svelte';
+	import IcReceiveInfo from '$icp/components/receive/IcReceiveInfo.svelte';
+	import IcReceiveQRCode from '$icp/components/receive/IcReceiveQRCode.svelte';
 
 	const steps: WizardSteps = [
 		{
@@ -35,8 +35,8 @@
 	<svelte:fragment slot="title">Receive</svelte:fragment>
 
 	{#if currentStep?.name === steps[1].name}
-		<ReceiveIcQRCode on:icBack={displayAddresses} {qrCodeAddressType} />
+		<IcReceiveQRCode on:icBack={displayAddresses} {qrCodeAddressType} />
 	{:else}
-		<ReceiveIcInfo on:icQRCode={displayQRCode} />
+		<IcReceiveInfo on:icQRCode={displayQRCode} />
 	{/if}
 </WizardModal>
