@@ -11,6 +11,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { fade } from 'svelte/transition';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -32,34 +33,21 @@
 >
 	<svelte:fragment slot="title">Wallet address</svelte:fragment>
 	<svelte:fragment slot="text"
-		>Use this address to transfer ckBTC to and from your wallet.
+		>Use this address to transfer ckETH to and from your wallet.
 	</svelte:fragment>
 </IcReceiveInfoBlock>
 
-{#if nonNullish(btcAddress)}
-	<div class="mb-6">
-		<Hr />
-	</div>
+<div class="mb-6">
+	<Hr />
+</div>
 
-	<IcReceiveInfoBlock
-		labelRef="bitcoin-address"
-		address={btcAddress}
-		qrCodeAriaLabel="Display Bitcoin Address as a QR code"
-		copyAriaLabel="Bitcoin Address copied to clipboard."
-		on:click={() => displayQRCode(btcAddress ?? '')}
-	>
-		<svelte:fragment slot="title">Bitcoin Address</svelte:fragment>
-		<svelte:fragment slot="text"
-			>Transfer Bitcoin on the BTC network to this address to receive ckBTC. {#if nonNullish(kytFee)}<span
-					in:fade
-					>Please note that an estimated inter-network fee of {formatToken({
-						value: BigNumber.from(kytFee),
-						unitName: BTC_DECIMALS,
-						displayDecimals: BTC_DECIMALS
-					})} BTC will be applied.</span
-				>{/if}
-		</svelte:fragment>
-	</IcReceiveInfoBlock>
-{/if}
+<Value ref="ethereum-helper-contract" element="div">
+	<svelte:fragment slot="label">Receive from Ethereum Network</svelte:fragment>
+
+	<p class="text-misty-rose break-normal py-2">
+		Converting ETH into ckETH requires a call to a smart contract on Ethereum and passing your IC
+		principal as argument, in the form of a bytes32 array.
+	</p>
+</Value>
 
 <button class="primary full center text-center mt-8 mb-6" on:click={modalStore.close}>Done</button>
