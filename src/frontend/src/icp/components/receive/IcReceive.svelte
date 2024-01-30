@@ -3,7 +3,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { token, tokenStandard } from '$lib/derived/token.derived';
-	import { modalIcpReceive, modalReceive } from '$lib/derived/modal.derived';
+	import { modalCkBTCReceive, modalIcpReceive, modalReceive } from '$lib/derived/modal.derived';
 	import IcReceiveModal from '$icp/components/receive/IcReceiveModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
@@ -12,6 +12,8 @@
 	import { loadBtcAddress } from '$icp/services/ckbtc.services';
 	import type { IcToken } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
+	import IcReceiveInfo from '$icp/components/receive/IcReceiveInfo.svelte';
+	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
 
 	const openReceive = async () => {
 		if ($tokenStandard === 'icp' || isRouteTokens($page)) {
@@ -24,6 +26,9 @@
 				...($token as IcToken),
 				identity: $authStore.identity
 			});
+
+			modalStore.openCkBTCReceive();
+			return;
 		}
 
 		modalStore.openReceive();
@@ -41,7 +46,9 @@
 >
 
 {#if $modalIcpReceive}
-	<IcReceiveModal />
+	<IcReceiveModal infoCmp={IcReceiveInfo} />
+{:else if $modalCkBTCReceive}
+	<IcReceiveModal infoCmp={IcReceiveInfoCkBTC} />
 {:else if $modalReceive}
 	<ReceiveModal />
 {/if}

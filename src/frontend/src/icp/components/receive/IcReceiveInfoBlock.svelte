@@ -16,7 +16,7 @@
 			<slot name="text" />
 		</p>
 
-		<div class="flex justify-between gap-4 items-center">
+		<div class="flex justify-between gap-16 items-center">
 			<output id="ic-wallet-address" class="break-all">{address}</output>
 
 			<div class="flex gap-2">

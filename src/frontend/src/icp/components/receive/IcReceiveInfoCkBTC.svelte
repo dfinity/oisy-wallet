@@ -1,0 +1,51 @@
+<script lang="ts">
+	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { modalStore } from '$lib/stores/modal.store';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import { createEventDispatcher } from 'svelte';
+	import IcReceiveInfoBlock from '$icp/components/receive/IcReceiveInfoBlock.svelte';
+	import { btcAddressStore } from '$icp/stores/ckbtc.store';
+	import { tokenId } from '$lib/derived/token.derived';
+	import { nonNullish } from '@dfinity/utils';
+
+	const dispatch = createEventDispatcher();
+
+	const displayQRCode = (addressType: 'icrc' | 'icp') => dispatch('icQRCode', addressType);
+
+	let btcAddress: string | undefined = undefined;
+	$: btcAddress = $btcAddressStore?.[$tokenId]?.data;
+</script>
+
+<IcReceiveInfoBlock
+	labelRef="wallet-address"
+	address={$icrcAccountIdentifierText ?? ''}
+	qrCodeAriaLabel="Display wallet address as a QR code"
+	copyAriaLabel="Wallet address copied to clipboard."
+	on:click={() => displayQRCode('icrc')}
+>
+	<svelte:fragment slot="title">Wallet address</svelte:fragment>
+	<svelte:fragment slot="text"
+		>Use this address to transfer ckBTC from and to your wallet.
+	</svelte:fragment>
+</IcReceiveInfoBlock>
+
+{#if nonNullish(btcAddress)}
+	<div class="mb-6">
+		<Hr />
+	</div>
+
+	<IcReceiveInfoBlock
+		labelRef="bitcoin-address"
+		address={btcAddress}
+		qrCodeAriaLabel="Display Bitcoin Address as a QR code"
+		copyAriaLabel="Bitcoin Address copied to clipboard."
+		on:click={() => displayQRCode('icp')}
+	>
+		<svelte:fragment slot="title">Bitcoin Address</svelte:fragment>
+		<svelte:fragment slot="text"
+			>Transfer Bitcoin on the BTC network to this address to receive ckBTC.</svelte:fragment
+		>
+	</IcReceiveInfoBlock>
+{/if}
+
+<button class="primary full center text-center mt-8 mb-6" on:click={modalStore.close}>Done</button>
