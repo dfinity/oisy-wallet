@@ -17,7 +17,6 @@ declare const VITE_DFX_NETWORK: string;
 declare namespace svelteHTML {
 	interface HTMLAttributes<T> {
 		'on:oisyTriggerWallet'?: (event: CustomEvent<any>) => void;
-		'on:oisyOpenConvertEthToCkEth'?: (event: CustomEvent<any>) => void;
 	}
 }
 

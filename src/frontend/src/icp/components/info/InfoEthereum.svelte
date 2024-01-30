@@ -2,9 +2,9 @@
 	import eth from '$lib/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
-	import { emit } from '$lib/utils/events.utils';
+	import { modalStore } from '$lib/stores/modal.store';
 
-	const openReceive = () => emit({ message: 'oisyOpenConvertEthToCkEth' });
+	const openReceive = () => modalStore.openCkETHReceive();
 </script>
 
 <div class="pr-2">
