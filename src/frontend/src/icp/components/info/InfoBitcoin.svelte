@@ -4,7 +4,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { isBusy } from '$lib/derived/busy.derived';
 
-	const openReceive = () => modalStore.openReceive();
+	const openReceive = () => modalStore.openCkBTCReceive();
 </script>
 
 <div class="pr-2">
