@@ -7,7 +7,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (addressType: 'icrc' | 'icp') => dispatch('icQRCode', addressType);
+	const displayQRCode = (addressType: string) => dispatch('icQRCode', addressType);
 </script>
 
 <IcReceiveInfoBlock
@@ -15,7 +15,7 @@
 	address={$icrcAccountIdentifierText ?? ''}
 	qrCodeAriaLabel="Display wallet address as a QR code"
 	copyAriaLabel="Wallet address copied to clipboard."
-	on:click={() => displayQRCode('icrc')}
+	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
 	<svelte:fragment slot="title">Wallet address</svelte:fragment>
 	<svelte:fragment slot="text"
@@ -33,7 +33,7 @@
 	address={$icpAccountIdentifierText ?? ''}
 	qrCodeAriaLabel="Display ICP Account ID as a QR code"
 	copyAriaLabel="ICP Account ID copied to clipboard."
-	on:click={() => displayQRCode('icp')}
+	on:click={() => displayQRCode($icpAccountIdentifierText ?? '')}
 >
 	<svelte:fragment slot="title">ICP Account ID</svelte:fragment>
 	<svelte:fragment slot="text"

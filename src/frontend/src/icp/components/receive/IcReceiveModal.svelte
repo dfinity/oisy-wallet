@@ -20,16 +20,16 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	let qrCodeAddressType: undefined | 'icrc' | 'icp';
+	let qrCodeAddress: undefined | string;
 
-	const displayQRCode = ({ detail: step }: CustomEvent<'icrc' | 'icp'>) => {
-		qrCodeAddressType = step;
+	const displayQRCode = ({ detail: address }: CustomEvent<string>) => {
+		qrCodeAddress = address;
 		modal.next();
 	};
 
 	const displayAddresses = () => {
 		modal.back();
-		qrCodeAddressType = undefined;
+		qrCodeAddress = undefined;
 	};
 </script>
 
@@ -37,7 +37,7 @@
 	<svelte:fragment slot="title">Receive</svelte:fragment>
 
 	{#if currentStep?.name === steps[1].name}
-		<IcReceiveQRCode on:icBack={displayAddresses} {qrCodeAddressType} />
+		<IcReceiveQRCode on:icBack={displayAddresses} address={qrCodeAddress} />
 	{:else}
 		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />
 	{/if}

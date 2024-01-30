@@ -14,7 +14,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (addressType: 'icrc' | 'icp') => dispatch('icQRCode', addressType);
+	const displayQRCode = (addressType: string) => dispatch('icQRCode', addressType);
 
 	let btcAddress: string | undefined = undefined;
 	$: btcAddress = $btcAddressStore?.[$tokenId]?.data;
@@ -28,11 +28,11 @@
 	address={$icrcAccountIdentifierText ?? ''}
 	qrCodeAriaLabel="Display wallet address as a QR code"
 	copyAriaLabel="Wallet address copied to clipboard."
-	on:click={() => displayQRCode('icrc')}
+	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
 	<svelte:fragment slot="title">Wallet address</svelte:fragment>
 	<svelte:fragment slot="text"
-		>Use this address to transfer ckBTC from and to your wallet.
+		>Use this address to transfer ckBTC to and from your wallet.
 	</svelte:fragment>
 </IcReceiveInfoBlock>
 
@@ -46,11 +46,11 @@
 		address={btcAddress}
 		qrCodeAriaLabel="Display Bitcoin Address as a QR code"
 		copyAriaLabel="Bitcoin Address copied to clipboard."
-		on:click={() => displayQRCode('icp')}
+		on:click={() => displayQRCode(btcAddress ?? '')}
 	>
 		<svelte:fragment slot="title">Bitcoin Address</svelte:fragment>
 		<svelte:fragment slot="text"
-			>Transfer Bitcoin on the BTC network to this address to receive ckBTC. {#if nonNullish(kytFee)}<span
+			>"Transfer Bitcoin on the BTC network to this address to receive ckBTC. {#if nonNullish(kytFee)}<span
 					in:fade
 					>Please note that an estimated inter-network fee of {formatToken({
 						value: BigNumber.from(kytFee),
