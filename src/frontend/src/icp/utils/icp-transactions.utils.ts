@@ -123,21 +123,5 @@ export const mapIcpTransaction = ({
 		};
 	}
 
-	if ('TransferFrom' in operation) {
-		const source = mapFrom(operation.TransferFrom.from);
-
-		return {
-			...tx,
-			type: 'transfer-from',
-			...source,
-			to: operation.TransferFrom.to,
-			value: mapAmount({
-				amount: operation.TransferFrom.amount,
-				fee: operation.TransferFrom.fee,
-				incoming: source.incoming
-			})
-		};
-	}
-
 	throw new Error(`Unknown transaction type ${JSON.stringify(transaction)}`);
 };
