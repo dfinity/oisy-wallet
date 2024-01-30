@@ -4,24 +4,11 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import IcReceiveInfoBlock from '$icp/components/receive/IcReceiveInfoBlock.svelte';
-	import { btcAddressStore, ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { tokenId } from '$lib/derived/token.derived';
-	import { nonNullish } from '@dfinity/utils';
-	import { BTC_DECIMALS } from '$icp/constants/ckbtc.constants';
-	import { formatToken } from '$lib/utils/format.utils';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import { fade } from 'svelte/transition';
 	import Value from '$lib/components/ui/Value.svelte';
 
 	const dispatch = createEventDispatcher();
 
 	const displayQRCode = (addressType: string) => dispatch('icQRCode', addressType);
-
-	let btcAddress: string | undefined = undefined;
-	$: btcAddress = $btcAddressStore?.[$tokenId]?.data;
-
-	let kytFee: bigint | undefined = undefined;
-	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
 </script>
 
 <IcReceiveInfoBlock
