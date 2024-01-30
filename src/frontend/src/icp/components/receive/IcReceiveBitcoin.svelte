@@ -9,7 +9,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
-	import ReceiveBitcoinProgress from '$icp/components/receive/ReceiveBitcoinProgress.svelte';
+	import IcReceiveBitcoinProgress from '$icp/components/receive/IcReceiveBitcoinProgress.svelte';
 	import { MinterNoNewUtxosError } from '@dfinity/ckbtc';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 
@@ -70,7 +70,7 @@
 		<svelte:fragment slot="title">Check for incoming BTC</svelte:fragment>
 
 		<div>
-			<ReceiveBitcoinProgress bind:receiveProgressStep />
+			<IcReceiveBitcoinProgress bind:receiveProgressStep />
 		</div>
 	</Modal>
 {/if}
