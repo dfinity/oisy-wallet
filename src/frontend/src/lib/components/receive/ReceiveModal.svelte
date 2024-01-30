@@ -19,7 +19,7 @@
 		/>
 	</p>
 
-	<ReceiveQRCode />
+	<ReceiveQRCode address={$networkAddress ?? ''} />
 
 	{#if $networkEthereum}
 		<ReceiveMetamask />

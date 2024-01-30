@@ -11,7 +11,7 @@
 	import { networkICP } from '$lib/derived/network.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { modalIcpReceive, modalReceive } from '$lib/derived/modal.derived';
-	import ReceiveIcpModal from '$icp/components/receive/ReceiveIcpModal.svelte';
+	import ReceiveIcModal from '$icp/components/receive/ReceiveIcModal.svelte';
 	import { page } from '$app/stores';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 
@@ -56,7 +56,7 @@
 >
 
 {#if $modalIcpReceive}
-	<ReceiveIcpModal />
+	<ReceiveIcModal />
 {:else if $modalReceive}
 	<ReceiveModal />
 {/if}
