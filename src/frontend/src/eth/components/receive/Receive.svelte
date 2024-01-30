@@ -8,31 +8,13 @@
 	import { initMetamaskSupport } from '$eth/services/metamask.services';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import { networkICP } from '$lib/derived/network.derived';
-	import { tokenStandard } from '$lib/derived/token.derived';
-	import { modalIcpReceive, modalReceive } from '$lib/derived/modal.derived';
-	import IcReceiveIcModal from '$icp/components/receive/IcReceiveIcModal.svelte';
-	import { page } from '$app/stores';
-	import { isRouteTokens } from '$lib/utils/nav.utils';
+	import { modalReceive } from '$lib/derived/modal.derived';
 
 	onMount(initMetamaskSupport);
 
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
 	const openReceive = async () => {
-		// $token is never undefined and per default "ethereum"
-		let tokensPage = isRouteTokens($page) && $networkICP;
-
-		if ($tokenStandard === 'icp' || tokensPage) {
-			modalStore.openIcpReceive();
-			return;
-		}
-
-		if ($networkICP) {
-			modalStore.openReceive();
-			return;
-		}
-
 		if (isDisabled()) {
 			const status = await waitWalletReady(isDisabled);
 
@@ -55,8 +37,6 @@
 	<span>Receive</span></button
 >
 
-{#if $modalIcpReceive}
-	<IcReceiveIcModal />
-{:else if $modalReceive}
+{#if $modalReceive}
 	<ReceiveModal />
 {/if}
