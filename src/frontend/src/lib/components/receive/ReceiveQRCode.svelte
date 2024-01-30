@@ -15,13 +15,19 @@
 
 <svelte:window on:resize={rerender} />
 
-<div
-	in:fade
-	class="p-4 rounded-sm bg-off-white"
-	class:opacity-0={!render}
-	style={`border: 1px dashed var(--color-dark); max-width: var(--qrcode-max-width, 360px); margin: 0 auto; height: var(--qrcode-height);`}
->
+<div in:fade class="p-4 rounded-sm bg-off-white" class:opacity-0={!render}>
 	{#if render}
 		<QRCode value={address} />
 	{/if}
 </div>
+
+<style lang="scss">
+	div {
+		border: 2px solid var(--color-dark);
+		max-width: var(--qrcode-max-width, 300px);
+		margin: 0 auto;
+		height: var(--qrcode-height);
+		border-radius: 10px;
+		background: white;
+	}
+</style>
