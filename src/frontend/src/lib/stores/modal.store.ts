@@ -6,6 +6,7 @@ export interface Modal<T> {
 		| 'receive'
 		| 'icp-receive'
 		| 'ckbtc-receive'
+		| 'cketh-receive'
 		| 'send'
 		| 'convert-eth-cketh'
 		| 'ic-send'
@@ -26,6 +27,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReceive: () => void;
 	openIcpReceive: () => void;
 	openCkBTCReceive: () => void;
+	openCkETHReceive: () => void;
 	openSend: () => void;
 	openConvertETHToCkETH: () => void;
 	openIcSend: () => void;
@@ -47,6 +49,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openReceive: () => set({ type: 'receive' }),
 		openIcpReceive: () => set({ type: 'icp-receive' }),
 		openCkBTCReceive: () => set({ type: 'ckbtc-receive' }),
+		openCkETHReceive: () => set({ type: 'cketh-receive' }),
 		openSend: () => set({ type: 'send' }),
 		openConvertETHToCkETH: () => set({ type: 'convert-eth-cketh' }),
 		openIcSend: () => set({ type: 'ic-send' }),
