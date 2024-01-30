@@ -1,10 +1,11 @@
 <script lang="ts">
 	import Send from '$eth/components/send/Send.svelte';
-	import Receive from '$lib/components/receive/Receive.svelte';
+	import Receive from '$eth/components/receive/Receive.svelte';
 	import ConvertETHToCkETH from '$icp-eth/components/send/ConvertETHToCkETH.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 	import IcSend from '$icp/components/send/IcSend.svelte';
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
+	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 
 	export let send = false;
 
@@ -21,7 +22,11 @@
 	class:flex={singleAction}
 	class:grid={!singleAction}
 >
-	<Receive />
+	{#if $networkICP}
+		<IcReceive />
+	{:else}
+		<Receive />
+	{/if}
 
 	{#if send}
 		{#if $networkICP}
