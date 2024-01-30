@@ -14,7 +14,7 @@
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import type { CertifiedData } from '$lib/types/store';
-	import ReceiveBitcoin from '$icp/components/receive/ReceiveBitcoin.svelte';
+	import IcReceiveBitcoin from '$icp/components/receive/IcReceiveBitcoin.svelte';
 	import Info from '$icp/components/info/Info.svelte';
 	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 
@@ -59,7 +59,7 @@
 <div class="flex justify-between mb-6 pb-1 items-center">
 	<h2 class="text-base">Transactions</h2>
 
-	<ReceiveBitcoin />
+	<IcReceiveBitcoin />
 </div>
 
 <IcTransactionsSkeletons>
