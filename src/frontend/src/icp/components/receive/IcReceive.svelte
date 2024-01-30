@@ -9,7 +9,7 @@
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
-	import { loadBtcAddress, loadCkBtcMinterInfo } from '$icp/services/ckbtc.services';
+	import { loadBtcAddress } from '$icp/services/ckbtc.services';
 	import type { IcToken } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 
