@@ -3,7 +3,7 @@ import { toastsShow } from '$lib/stores/toasts.store';
 import { waitReady } from '$lib/utils/timeout.utils';
 
 export const waitWalletReady = async (isDisabled: () => boolean): Promise<'ready' | 'timeout'> => {
-	busy.start({ msg: 'Loading initial data...' });
+	busy.start({ msg: 'Hold tight, we are loading some initial data for your wallet...' });
 
 	// 20 tries with a delay of 500ms each = max 10 seconds
 	const result = await waitReady({ count: 20, isDisabled });
