@@ -4,7 +4,7 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { token, tokenStandard } from '$lib/derived/token.derived';
 	import { modalIcpReceive, modalReceive } from '$lib/derived/modal.derived';
-	import IcReceiveIcModal from '$icp/components/receive/IcReceiveIcModal.svelte';
+	import IcReceiveModal from '$icp/components/receive/IcReceiveModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
@@ -41,7 +41,7 @@
 >
 
 {#if $modalIcpReceive}
-	<IcReceiveIcModal />
+	<IcReceiveModal />
 {:else if $modalReceive}
 	<ReceiveModal />
 {/if}
