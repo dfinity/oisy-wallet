@@ -14,7 +14,7 @@
 
 <div class="mb-6 container">
 	<p class="font-bold text-center">Address:</p>
-	<p class="mb-4 font-normal text-center">
+	<p class="mb-4 font-normal text-center px-8">
 		<output class="break-all">{address}</output><Copy
 			inline
 			value={address ?? ''}
@@ -22,7 +22,7 @@
 		/>
 	</p>
 
-	<ReceiveQRCode --qrcode-max-width="300px" address={address ?? ''} />
+	<ReceiveQRCode address={address ?? ''} />
 
 	<button class="secondary full center text-center mt-8" on:click={() => dispatch('icBack')}
 		>Back</button
