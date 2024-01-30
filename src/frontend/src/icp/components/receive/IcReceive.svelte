@@ -9,7 +9,7 @@
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
-	import { loadBtcAddress } from '$icp/services/ckbtc.services';
+	import { loadBtcAddress, loadCkBtcMinterInfo } from '$icp/services/ckbtc.services';
 	import type { IcToken } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 	import IcReceiveInfo from '$icp/components/receive/IcReceiveInfo.svelte';
@@ -22,10 +22,13 @@
 		}
 
 		if ($tokenCkBtcLedger) {
-			await loadBtcAddress({
-				...($token as IcToken),
-				identity: $authStore.identity
-			});
+			await Promise.all([
+				loadBtcAddress({
+					...($token as IcToken),
+					identity: $authStore.identity
+				}),
+				loadCkBtcMinterInfo($token as IcToken)
+			]);
 
 			modalStore.openCkBTCReceive();
 			return;

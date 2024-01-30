@@ -29,5 +29,7 @@
 				<Copy inline value={address} text={copyAriaLabel} />
 			</div>
 		</div>
+
+		<slot />
 	</Value>
 </div>

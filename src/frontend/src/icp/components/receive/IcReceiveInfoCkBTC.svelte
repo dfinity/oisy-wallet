@@ -1,12 +1,16 @@
 <script lang="ts">
-	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import IcReceiveInfoBlock from '$icp/components/receive/IcReceiveInfoBlock.svelte';
-	import { btcAddressStore } from '$icp/stores/ckbtc.store';
+	import { btcAddressStore, ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { nonNullish } from '@dfinity/utils';
+	import { BTC_DECIMALS } from '$icp/constants/ckbtc.constants';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import { fade } from 'svelte/transition';
 
 	const dispatch = createEventDispatcher();
 
@@ -14,6 +18,9 @@
 
 	let btcAddress: string | undefined = undefined;
 	$: btcAddress = $btcAddressStore?.[$tokenId]?.data;
+
+	let kytFee: bigint | undefined = undefined;
+	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
 </script>
 
 <IcReceiveInfoBlock
@@ -43,8 +50,15 @@
 	>
 		<svelte:fragment slot="title">Bitcoin Address</svelte:fragment>
 		<svelte:fragment slot="text"
-			>Transfer Bitcoin on the BTC network to this address to receive ckBTC.</svelte:fragment
-		>
+			>Transfer Bitcoin on the BTC network to this address to receive ckBTC. {#if nonNullish(kytFee)}<span
+					in:fade
+					>Please note that an estimated inter-network fee of {formatToken({
+						value: BigNumber.from(kytFee),
+						unitName: BTC_DECIMALS,
+						displayDecimals: BTC_DECIMALS
+					})} BTC will be applied.</span
+				>{/if}
+		</svelte:fragment>
 	</IcReceiveInfoBlock>
 {/if}
 
