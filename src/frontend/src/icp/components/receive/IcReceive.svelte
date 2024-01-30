@@ -18,7 +18,7 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import IcReceiveInfo from '$icp/components/receive/IcReceiveInfo.svelte';
 	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
-	import IcReceiveInfoCkETH from "$icp/components/receive/IcReceiveInfoCkETH.svelte";
+	import IcReceiveInfoCkETH from '$icp/components/receive/IcReceiveInfoCkETH.svelte';
 
 	const openReceive = async () => {
 		if ($tokenStandard === 'icp' || isRouteTokens($page)) {
