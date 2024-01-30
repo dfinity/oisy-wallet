@@ -11,7 +11,7 @@
 
 	const openSend = async () => {
 		if ($tokenCkBtcLedger) {
-			await loadCkBtcMinterInfo($token as IcToken);
+			await loadCkBtcMinterInfo({ params: $token as IcToken });
 		}
 
 		modalStore.openIcSend();
