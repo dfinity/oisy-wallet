@@ -23,7 +23,7 @@
 	aria-label={`Copy: ${value}`}
 	class:py-2={!inline}
 	class:inline-block={inline}
-	class="hover:text-blue active:text-blue"
+	class="text-blue hover:text-dark-blue active:text-dark-blue"
 	style={`height: var(--padding-4x); width: var(--padding-4x); min-width: var(--padding-4x); ${
 		inline ? 'vertical-align: sub;' : ''
 	}`}

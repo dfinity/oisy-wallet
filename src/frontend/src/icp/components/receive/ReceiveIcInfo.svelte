@@ -27,6 +27,7 @@
 			<div class="flex gap-2">
 				<button
 					aria-label="Display wallet address as a QR code"
+					class="text-blue hover:text-dark-blue active:text-dark-blue"
 					on:click={() => displayQRCode('icrc')}><IconQRCodeScanner /></button
 				>
 				<Copy
@@ -54,6 +55,7 @@
 			<div class="flex gap-2">
 				<button
 					aria-label="Display ICP Account ID as a QR code"
+					class="text-blue hover:text-dark-blue active:text-dark-blue"
 					on:click={() => displayQRCode('icp')}><IconQRCodeScanner /></button
 				>
 

@@ -79,7 +79,7 @@
 	button {
 		&:hover,
 		&:active {
-			color: var(--color-dark);
+			color: var(--color-dark-blue);
 		}
 	}
 </style>
