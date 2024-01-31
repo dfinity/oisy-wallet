@@ -1,12 +1,11 @@
+import { onLoadStatusesError, syncStatuses } from '$icp/services/btc-listener.services';
 import type { BtcStatusesWorker } from '$icp/types/btc-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type {
 	PostMessage,
-	PostMessageDataResponseWallet,
-	PostMessageDataResponseWalletCleanUp,
-	PostMessageDataResponseWalletError
+	PostMessageDataResponseBtcStatuses,
+	PostMessageDataResponseError
 } from '$lib/types/post-message';
-import type { IcrcGetTransactions } from '@dfinity/ledger-icrc';
 
 export const initBtcStatusesWorker = async ({
 	minterCanisterId,
@@ -18,20 +17,22 @@ export const initBtcStatusesWorker = async ({
 	worker.onmessage = async ({
 		data
 	}: MessageEvent<
-		PostMessage<
-			| PostMessageDataResponseWallet<Omit<IcrcGetTransactions, 'transactions'>>
-			| PostMessageDataResponseWalletError
-			| PostMessageDataResponseWalletCleanUp
-		>
+		PostMessage<PostMessageDataResponseBtcStatuses | PostMessageDataResponseError>
 	>) => {
 		const { msg } = data;
 
 		switch (msg) {
 			case 'syncBtcStatuses':
-				// TODO
+				syncStatuses({
+					tokenId,
+					data: data.data as PostMessageDataResponseBtcStatuses
+				});
 				return;
 			case 'syncBtcStatusesError':
-				// TODO
+				onLoadStatusesError({
+					tokenId,
+					error: (data.data as PostMessageDataResponseError).error
+				});
 				return;
 		}
 	};

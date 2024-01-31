@@ -3,9 +3,9 @@ import type { IcTransactionAddOnsInfo } from '$icp/types/ic';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
+	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
-	PostMessageDataResponseWalletCleanUp,
-	PostMessageDataResponseWalletError
+	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
@@ -223,7 +223,7 @@ export class WalletWorkerUtils<
 	}
 
 	private postMessageWalletError(error: unknown) {
-		this.worker.postMsg<PostMessageDataResponseWalletError>({
+		this.worker.postMsg<PostMessageDataResponseError>({
 			msg: `${this.msg}Error`,
 			data: {
 				error
