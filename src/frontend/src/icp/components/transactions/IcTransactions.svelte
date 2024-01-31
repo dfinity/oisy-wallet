@@ -17,9 +17,16 @@
 	import IcReceiveBitcoin from '$icp/components/receive/IcReceiveBitcoin.svelte';
 	import Info from '$icp/components/info/Info.svelte';
 	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
+	import type { ComponentType } from 'svelte';
+	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
+	import IcTransactionsBtcListener from '$icp/components/transactions/IcTransactionsBtcListener.svelte';
+	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 
 	let transactions: CertifiedData<IcTransactionType>[];
 	$: transactions = $icTransactionsStore?.[$tokenId] ?? [];
+
+	let additionalListener: ComponentType;
+	$: additionalListener = $tokenCkBtcLedger ? IcTransactionsBtcListener : IcTransactionsNoListener;
 
 	let disableInfiniteScroll = false;
 
@@ -63,19 +70,21 @@
 </div>
 
 <IcTransactionsSkeletons>
-	{#if transactions.length > 0}
-		<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
-			{#each transactions as transaction, index (`${transaction.data.id}-${index}`)}
-				<li>
-					<IcTransaction transaction={transaction.data} />
-				</li>
-			{/each}
-		</InfiniteScroll>
-	{/if}
+	<svelte:component this={additionalListener}>
+		{#if transactions.length > 0}
+			<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
+				{#each transactions as transaction, index (`${transaction.data.id}-${index}`)}
+					<li>
+						<IcTransaction transaction={transaction.data} />
+					</li>
+				{/each}
+			</InfiniteScroll>
+		{/if}
 
-	{#if transactions.length === 0}
-		<p class="mt-4 text-dark opacity-50">You have no transactions.</p>
-	{/if}
+		{#if transactions.length === 0}
+			<p class="mt-4 text-dark opacity-50">You have no transactions.</p>
+		{/if}
+	</svelte:component>
 </IcTransactionsSkeletons>
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}

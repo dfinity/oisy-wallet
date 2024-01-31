@@ -9,13 +9,13 @@ onmessage = async ({
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
-		case 'stopIcpWalletTimer':
+		case 'stopBtcStatusesTimer':
 			worker.stop();
 			return;
-		case 'startIcpWalletTimer':
+		case 'startBtcStatusesTimer':
 			await worker.start(data);
 			return;
-		case 'triggerIcpWalletTimer':
+		case 'triggerBtcStatusesTimer':
 			await worker.trigger(data);
 			return;
 	}

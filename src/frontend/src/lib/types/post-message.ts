@@ -18,7 +18,10 @@ export type PostMessageRequest =
 	| 'triggerIcpWalletTimer'
 	| 'stopIcrcWalletTimer'
 	| 'startIcrcWalletTimer'
-	| 'triggerIcrcWalletTimer';
+	| 'triggerIcrcWalletTimer'
+	| 'stopBtcStatusesTimer'
+	| 'startBtcStatusesTimer'
+	| 'triggerBtcStatusesTimer';
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;
@@ -29,7 +32,7 @@ export interface PostMessageDataRequestExchangeTimer {
 
 export type PostMessageDataRequestIcrc = Pick<IcCanisters, 'indexCanisterId'>;
 
-export type PostMessageDataRequestBtcStatuses = IcCkCanisters;
+export type PostMessageDataRequestBtcStatuses = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 
 export type PostMessageResponse =
 	| 'signOutIdleTimer'

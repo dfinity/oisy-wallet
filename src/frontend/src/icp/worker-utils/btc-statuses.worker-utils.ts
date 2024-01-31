@@ -41,13 +41,16 @@ export class BtcStatusesWorkerUtils {
 		identity,
 		data
 	}: TimerWorkerUtilsJobData<PostMessageDataRequestBtcStatuses>) => {
+		const minterCanisterId = data?.minterCanisterId;
+
 		assertNonNullish(
-			data,
+			minterCanisterId,
 			'No data - minterCanisterId - provided to fetch the BTC withdrawal statuses.'
 		);
 
 		await queryAndUpdate<RetrieveBtcStatusV2WithId[]>({
-			request: ({ identity: _, certified }) => withdrawalStatuses({ ...data, identity, certified }),
+			request: ({ identity: _, certified }) =>
+				withdrawalStatuses({ minterCanisterId, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncStatusesResults({ certified, ...rest }),
 			onCertifiedError: ({ error }) => this.postMessageWalletError(error),
 			identity,
