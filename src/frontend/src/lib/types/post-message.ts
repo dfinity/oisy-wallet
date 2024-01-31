@@ -3,7 +3,8 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 
-import type { IcCanisters } from '$icp/types/ic';
+import type { JsonStatusesText } from '$icp/types/btc.post-message';
+import type { IcCanisters, IcCkCanisters } from '$icp/types/ic';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
@@ -28,6 +29,8 @@ export interface PostMessageDataRequestExchangeTimer {
 
 export type PostMessageDataRequestIcrc = Pick<IcCanisters, 'indexCanisterId'>;
 
+export type PostMessageDataRequestBtcStatuses = IcCkCanisters;
+
 export type PostMessageResponse =
 	| 'signOutIdleTimer'
 	| 'delegationRemainingTime'
@@ -39,7 +42,9 @@ export type PostMessageResponse =
 	| 'syncIcpWalletError'
 	| 'syncIcrcWalletError'
 	| 'syncIcpWalletCleanUp'
-	| 'syncIcrcWalletCleanUp';
+	| 'syncIcrcWalletCleanUp'
+	| 'syncBtcStatuses'
+	| 'syncBtcStatusesError';
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 	authRemainingTime: number;
@@ -70,6 +75,10 @@ export interface PostMessageDataResponseWalletError extends PostMessageDataRespo
 
 export interface PostMessageDataResponseWalletCleanUp extends PostMessageDataResponse {
 	transactionIds: string[];
+}
+
+export interface PostMessageDataResponseBtcStatuses extends PostMessageDataResponse {
+	statuses: JsonStatusesText;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {
