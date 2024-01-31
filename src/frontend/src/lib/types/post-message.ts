@@ -72,7 +72,7 @@ export interface PostMessageDataResponseWallet<T> extends PostMessageDataRespons
 	wallet: PostMessageWalletData<T>;
 }
 
-export interface PostMessageDataResponseWalletError extends PostMessageDataResponse {
+export interface PostMessageDataResponseError extends PostMessageDataResponse {
 	error: unknown;
 }
 
