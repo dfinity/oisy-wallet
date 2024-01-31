@@ -7,6 +7,7 @@ import type {
 	EstimateWithdrawalFeeParams,
 	MinterInfo,
 	RetrieveBtcOk,
+	RetrieveBtcStatusV2WithId,
 	UpdateBalanceOk
 } from '@dfinity/ckbtc';
 import { CkBTCMinterCanister } from '@dfinity/ckbtc';
@@ -86,6 +87,21 @@ export const estimateFee = async ({
 	const { estimateWithdrawalFee } = await minterCanister({ identity, minterCanisterId });
 
 	return estimateWithdrawalFee(params);
+};
+
+export const withdrawalStatuses = async ({
+	identity,
+	minterCanisterId,
+	...params
+}: {
+	identity: OptionIdentity;
+	minterCanisterId: CanisterIdText;
+} & Required<QueryParams>): Promise<RetrieveBtcStatusV2WithId[]> => {
+	assertNonNullish(identity, 'No internet identity.');
+
+	const { retrieveBtcStatusV2ByAccount } = await minterCanister({ identity, minterCanisterId });
+
+	return retrieveBtcStatusV2ByAccount(params);
 };
 
 const minterCanister = async ({
