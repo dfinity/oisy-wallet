@@ -1,6 +1,6 @@
 import { withdrawalStatuses } from '$icp/api/ckbtc-minter.api';
 import { BTC_STATUSES_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
-import type { BtcWithdrawalStatuses } from '$icp/types/ckbtc';
+import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import {
 	TimerWorkerUtils,
 	type TimerWorkerUtilsJobData
@@ -9,7 +9,7 @@ import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
 	PostMessageDataRequestBtcStatuses,
 	PostMessageDataResponseBtcStatuses,
-	PostMessageDataResponseWalletError
+	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
@@ -87,7 +87,7 @@ export class BtcStatusesWorkerUtils {
 	};
 
 	private postMessageWalletError(error: unknown) {
-		this.worker.postMsg<PostMessageDataResponseWalletError>({
+		this.worker.postMsg<PostMessageDataResponseError>({
 			msg: 'syncBtcStatusesError',
 			data: {
 				error
