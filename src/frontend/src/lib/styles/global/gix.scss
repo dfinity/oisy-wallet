@@ -128,5 +128,11 @@ div.popover {
 	.wrapper {
 		padding: var(--padding-2x);
 		--padding: var(--padding-2x);
+
+		max-width: calc(100vw - (2 * var(--padding)));
+
+		@include media.min-width(xsmall) {
+			max-width: 300px;
+		}
 	}
 }
