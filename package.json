@@ -39,7 +39,7 @@
 		"@dfinity/utils": "^2.1.0",
 		"@metamask/detect-provider": "^2.0.0",
 		"@walletconnect/web3wallet": "^1.10.0",
-		"alchemy-sdk": "^3.1.1",
+		"alchemy-sdk": "^3.1.2",
 		"buffer": "^6.0.3",
 		"ethers": "^5.7.0",
 		"idb-keyval": "^6.2.1"
@@ -47,13 +47,13 @@
 	"devDependencies": {
 		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.1",
-		"@sveltejs/kit": "^2.4.3",
-		"@sveltejs/vite-plugin-svelte": "^3.0.1",
-		"@types/node": "^20.11.6",
-		"@typescript-eslint/eslint-plugin": "^6.19.1",
-		"@typescript-eslint/parser": "^6.19.1",
+		"@sveltejs/kit": "^2.5.0",
+		"@sveltejs/vite-plugin-svelte": "^3.0.2",
+		"@types/node": "^20.11.13",
+		"@typescript-eslint/eslint-plugin": "^6.20.0",
+		"@typescript-eslint/parser": "^6.20.0",
 		"autoprefixer": "^10.4.17",
-		"dotenv": "^16.4.0",
+		"dotenv": "^16.4.1",
 		"eslint": "^8.56.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.35.1",
@@ -68,7 +68,7 @@
 		"tslib": "^2.6.2",
 		"typescript": "^5.2.2",
 		"vite": "^5.0.12",
-		"vitest": "^1.2.1"
+		"vitest": "^1.2.2"
 	},
 	"type": "module"
 }
