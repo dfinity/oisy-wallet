@@ -13,10 +13,10 @@ onmessage = async ({
 			worker.stop();
 			return;
 		case 'startIcpWalletTimer':
-			await worker.start();
+			await worker.start(data);
 			return;
 		case 'triggerIcpWalletTimer':
-			await worker.trigger();
+			await worker.trigger(data);
 			return;
 	}
 };
