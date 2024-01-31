@@ -24,6 +24,8 @@ export type IcTransaction = IcpTransaction | IcrcTransaction;
 
 export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'send' | 'receive';
 
+export type IcTransactionIdText = string;
+
 export interface IcTransactionUi {
 	id: bigint;
 	type: IcTransactionType;

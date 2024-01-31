@@ -3,7 +3,8 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 
-import type { IcCanisters } from '$icp/types/ic';
+import type { JsonStatusesText } from '$icp/types/btc.post-message';
+import type { IcCanisters, IcCkCanisters } from '$icp/types/ic';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
@@ -17,7 +18,10 @@ export type PostMessageRequest =
 	| 'triggerIcpWalletTimer'
 	| 'stopIcrcWalletTimer'
 	| 'startIcrcWalletTimer'
-	| 'triggerIcrcWalletTimer';
+	| 'triggerIcrcWalletTimer'
+	| 'stopBtcStatusesTimer'
+	| 'startBtcStatusesTimer'
+	| 'triggerBtcStatusesTimer';
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;
@@ -27,6 +31,8 @@ export interface PostMessageDataRequestExchangeTimer {
 }
 
 export type PostMessageDataRequestIcrc = Pick<IcCanisters, 'indexCanisterId'>;
+
+export type PostMessageDataRequestBtcStatuses = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 
 export type PostMessageResponse =
 	| 'signOutIdleTimer'
@@ -39,7 +45,9 @@ export type PostMessageResponse =
 	| 'syncIcpWalletError'
 	| 'syncIcrcWalletError'
 	| 'syncIcpWalletCleanUp'
-	| 'syncIcrcWalletCleanUp';
+	| 'syncIcrcWalletCleanUp'
+	| 'syncBtcStatuses'
+	| 'syncBtcStatusesError';
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 	authRemainingTime: number;
@@ -64,12 +72,16 @@ export interface PostMessageDataResponseWallet<T> extends PostMessageDataRespons
 	wallet: PostMessageWalletData<T>;
 }
 
-export interface PostMessageDataResponseWalletError extends PostMessageDataResponse {
+export interface PostMessageDataResponseError extends PostMessageDataResponse {
 	error: unknown;
 }
 
 export interface PostMessageDataResponseWalletCleanUp extends PostMessageDataResponse {
 	transactionIds: string[];
+}
+
+export interface PostMessageDataResponseBtcStatuses extends PostMessageDataResponse {
+	statuses: JsonStatusesText;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {
