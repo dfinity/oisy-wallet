@@ -53,6 +53,7 @@ export const mapTransactionIcrcToSelf = (tx: IcrcTransactionWithId): IcrcTransac
 			: [])
 	];
 };
+
 export const mapIcrcTransaction = ({
 	transaction: { transaction, id },
 	identity

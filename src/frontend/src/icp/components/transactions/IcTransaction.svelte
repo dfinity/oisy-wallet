@@ -11,7 +11,7 @@
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+	import type { IcToken, IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 
 	export let transaction: IcTransaction;
@@ -22,7 +22,7 @@
 		try {
 			uiTransaction = mapIcTransaction({
 				transaction,
-				tokenId: $tokenId,
+				token: $token as IcToken,
 				identity: $authStore.identity
 			});
 		} catch (err: unknown) {

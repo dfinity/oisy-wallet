@@ -27,8 +27,12 @@ export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'send' | 'receive'
 export interface IcTransactionUi {
 	id: bigint;
 	type: IcTransactionType;
+	// e.g. BTC Received
+	description?: string;
 	from?: string;
 	to?: string;
+	// e.g. To: BTC Network
+	toLabel?: string;
 	incoming?: boolean;
 	value?: BigNumber;
 	timestamp?: bigint;
