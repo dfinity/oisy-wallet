@@ -8,9 +8,9 @@
 	import HowToConvertETHInfo from '$icp-eth/components/send/HowToConvertETHInfo.svelte';
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import { address } from '$lib/derived/address.derived';
-	import {ICP_NETWORK} from "$lib/constants/networks.constants";
-	import {ckEthHelperContractAddressStore} from "$icp-eth/stores/cketh.store";
-	import {ETHEREUM_TOKEN_ID} from "$lib/constants/tokens.constants";
+	import { ICP_NETWORK } from '$lib/constants/networks.constants';
+	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 
 	/**
 	 * Props
@@ -72,6 +72,8 @@
 		on:icBack={modal.back}
 		on:icNext={modal.next}
 		on:icClose={close}
+		formCancelAction="back"
+		on:icSendBack={() => modal.set(0)}
 	>
 		{#if currentStep?.name === steps[1].name}
 			<ReceiveAddressQRCode address={$address ?? ''} on:icBack={modal.back} />

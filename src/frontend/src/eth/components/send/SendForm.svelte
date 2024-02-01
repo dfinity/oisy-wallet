@@ -42,7 +42,7 @@
 	<FeeDisplay />
 
 	<div class="flex justify-end gap-1">
-		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>
+		<slot name="cancel" />
 		<button class="primary" type="submit" disabled={invalid} class:opacity-10={invalid}>
 			Next
 		</button>

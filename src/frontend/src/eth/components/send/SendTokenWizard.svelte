@@ -26,6 +26,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
 
 	export let currentStep: WizardStep | undefined;
+	export let formCancelAction: 'back' | 'close' = 'close';
 
 	/**
 	 * Fee context store
@@ -146,6 +147,7 @@
 	};
 
 	const close = () => dispatch('icClose');
+	const back = () => dispatch('icSendBack');
 </script>
 
 <FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
@@ -161,7 +163,15 @@
 			bind:amount
 			bind:network
 			{destinationEditable}
-		/>
+		>
+			<svelte:fragment slot="cancel">
+				{#if formCancelAction === 'back'}
+					<button type="button" class="secondary" on:click={back}>Back</button>
+				{:else}
+					<button type="button" class="secondary" on:click={close}>Cancel</button>
+				{/if}
+			</svelte:fragment>
+		</SendForm>
 	{:else}
 		<slot />
 	{/if}
