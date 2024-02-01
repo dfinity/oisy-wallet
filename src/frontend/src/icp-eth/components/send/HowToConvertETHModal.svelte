@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import type { Network } from '$lib/types/network';
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
@@ -11,6 +10,7 @@
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import type { Network } from '$lib/types/network';
 
 	/**
 	 * Props
@@ -18,7 +18,7 @@
 
 	let destination = '';
 	$: destination = $ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data ?? '';
-	let network = ICP_NETWORK;
+	let network: Network | undefined = ICP_NETWORK;
 
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = SendStep.INITIALIZATION;
