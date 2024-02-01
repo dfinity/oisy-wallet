@@ -3,7 +3,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import IcReceiveInfoBlock from '$icp/components/receive/IcReceiveInfoBlock.svelte';
+	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 
 	const dispatch = createEventDispatcher();
@@ -11,7 +11,7 @@
 	const displayQRCode = (addressType: string) => dispatch('icQRCode', addressType);
 </script>
 
-<IcReceiveInfoBlock
+<ReceiveAddress
 	labelRef="wallet-address"
 	address={$icrcAccountIdentifierText ?? ''}
 	qrCodeAriaLabel="Display wallet address as a QR code"
@@ -22,7 +22,7 @@
 	<svelte:fragment slot="text"
 		>Use this address to transfer ckETH to and from your wallet.
 	</svelte:fragment>
-</IcReceiveInfoBlock>
+</ReceiveAddress>
 
 <div class="mb-6">
 	<Hr />

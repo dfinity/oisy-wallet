@@ -3,7 +3,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import IcReceiveInfoBlock from '$icp/components/receive/IcReceiveInfoBlock.svelte';
+	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { nonNullish } from '@dfinity/utils';
@@ -24,7 +24,7 @@
 	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
 </script>
 
-<IcReceiveInfoBlock
+<ReceiveAddress
 	labelRef="wallet-address"
 	address={$icrcAccountIdentifierText ?? ''}
 	qrCodeAriaLabel="Display wallet address as a QR code"
@@ -35,14 +35,14 @@
 	<svelte:fragment slot="text"
 		>Use this address to transfer ckBTC to and from your wallet.
 	</svelte:fragment>
-</IcReceiveInfoBlock>
+</ReceiveAddress>
 
 {#if nonNullish(btcAddress)}
 	<div class="mb-6">
 		<Hr />
 	</div>
 
-	<IcReceiveInfoBlock
+	<ReceiveAddress
 		labelRef="bitcoin-address"
 		address={btcAddress}
 		qrCodeAriaLabel="Display Bitcoin Address as a QR code"
@@ -60,7 +60,7 @@
 					})} BTC will be applied.</span
 				>{/if}
 		</svelte:fragment>
-	</IcReceiveInfoBlock>
+	</ReceiveAddress>
 {/if}
 
 <button class="primary full center text-center mt-8 mb-6" on:click={modalStore.close}>Done</button>
