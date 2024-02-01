@@ -8,13 +8,17 @@
 	import HowToConvertETHInfo from '$icp-eth/components/send/HowToConvertETHInfo.svelte';
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import { address } from '$lib/derived/address.derived';
+	import {ICP_NETWORK} from "$lib/constants/networks.constants";
+	import {ckEthHelperContractAddressStore} from "$icp-eth/stores/cketh.store";
+	import {ETHEREUM_TOKEN_ID} from "$lib/constants/tokens.constants";
 
 	/**
 	 * Props
 	 */
 
 	let destination = '';
-	let network: Network | undefined = undefined;
+	$: destination = $ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data ?? '';
+	let network = ICP_NETWORK;
 
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = SendStep.INITIALIZATION;
@@ -31,7 +35,7 @@
 		},
 		{
 			name: 'QR code',
-			title: 'QR code'
+			title: 'Receive address'
 		},
 		...SEND_WIZARD_STEPS
 	];
@@ -72,7 +76,7 @@
 		{#if currentStep?.name === steps[1].name}
 			<ReceiveAddressQRCode address={$address ?? ''} on:icBack={modal.back} />
 		{:else if currentStep?.name === steps[0].name}
-			<HowToConvertETHInfo on:icQRCode={modal.next} />
+			<HowToConvertETHInfo on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
 		{/if}
 	</SendTokenWizard>
 </WizardModal>
