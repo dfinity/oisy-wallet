@@ -4,6 +4,8 @@
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
+	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
+	import HowToConvertETHInfo from '$icp-eth/components/send/HowToConvertETHInfo.svelte';
 
 	/**
 	 * Props
@@ -20,7 +22,13 @@
 	 */
 
 	let steps: WizardSteps;
-	$: steps = SEND_WIZARD_STEPS;
+	$: steps = [
+		{
+			name: 'Info',
+			title: 'How to convert ETH to ckETH'
+		},
+		...SEND_WIZARD_STEPS
+	];
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -44,4 +52,17 @@
 	disablePointerEvents={currentStep?.name === 'Sending'}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+
+	<SendTokenWizard
+		{currentStep}
+		bind:destination
+		bind:network
+		bind:amount
+		bind:sendProgressStep
+		on:icBack={modal.back}
+		on:icNext={modal.next}
+		on:icClose={close}
+	>
+		<HowToConvertETHInfo />
+	</SendTokenWizard>
 </WizardModal>

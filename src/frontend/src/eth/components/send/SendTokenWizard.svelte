@@ -153,7 +153,7 @@
 		<SendReview on:icBack on:icSend={send} {destination} {amount} {network} {destinationEditable} />
 	{:else if currentStep?.name === 'Sending'}
 		<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
-	{:else}
+	{:else if currentStep?.name === 'Send'}
 		<SendForm
 			on:icNext
 			on:icClose={close}
@@ -162,5 +162,7 @@
 			bind:network
 			{destinationEditable}
 		/>
+	{:else}
+		<slot />
 	{/if}
 </FeeContext>
