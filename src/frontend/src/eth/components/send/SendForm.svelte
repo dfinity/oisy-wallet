@@ -25,7 +25,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
@@ -37,7 +37,7 @@
 
 	<SendAmount bind:amount bind:insufficientFunds />
 
-	<SendSource token={$sendToken} source={$address ?? ''} />
+	<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
 
 	<FeeDisplay />
 

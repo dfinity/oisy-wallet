@@ -11,6 +11,7 @@
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
+	import { balance } from '$lib/derived/balances.derived';
 
 	export let amount: BigNumber;
 	export let destination: string;
@@ -26,6 +27,7 @@
 	amount={formatToken({ value: amountDisplay })}
 	{destination}
 	token={ETHEREUM_TOKEN}
+	balance={$balance}
 	source={$address ?? ''}
 >
 	<WalletConnectSendData {data} />

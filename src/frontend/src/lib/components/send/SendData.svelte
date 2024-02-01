@@ -4,10 +4,12 @@
 	import type { Token } from '$lib/types/token';
 	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
 
 	export let destination: string | null;
 	export let amount: string | number | undefined = undefined;
 	export let token: Token;
+	export let balance: BigNumber | undefined | null;
 	export let source: string;
 </script>
 
@@ -21,6 +23,6 @@
 
 <slot />
 
-<SendSource {token} {source} />
+<SendSource {token} {balance} {source} />
 
 <slot name="fee" />
