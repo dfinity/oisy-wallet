@@ -9,6 +9,9 @@
 	import type { Network } from '$lib/types/network';
 	import HowToConvertETHWizard from '$icp-eth/components/send/HowToConvertETHWizard.svelte';
 	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
+	import IcReceiveInfoCkETH from '$icp/components/receive/IcReceiveInfoCkETH.svelte';
+	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 
 	/**
 	 * Props
@@ -26,7 +29,17 @@
 	 */
 
 	let steps: WizardSteps;
-	$: steps = HOW_TO_CONVERT_WIZARD_STEPS;
+	$: steps = [
+		{
+			name: 'Receive',
+			title: 'Receive'
+		},
+		{
+			name: 'QR Code',
+			title: 'Receive address'
+		},
+		...HOW_TO_CONVERT_WIZARD_STEPS
+	];
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -55,13 +68,24 @@
 		on:icBack={modal.back}
 		on:icNext={modal.next}
 		on:icClose={close}
-		on:icSendBack={() => modal.set(0)}
+		on:icSendBack={() => modal.set(2)}
 		bind:destination
 		bind:network
 		bind:amount
 		bind:sendProgressStep
 		{currentStep}
 	>
-		<HowToConvertETHInfo on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
+		{#if currentStep?.name === HOW_TO_CONVERT_WIZARD_STEPS[0].name}
+			<HowToConvertETHInfo
+				cancelAction="back"
+				on:icBack={() => modal.set(0)}
+				on:icQRCode={modal.next}
+				on:icConvert={() => modal.set(4)}
+			/>
+		{:else if currentStep?.name === steps[1].name}
+			<ReceiveAddressQRCode on:icBack={modal.back} address={$icrcAccountIdentifierText ?? ''} />
+		{:else}
+			<IcReceiveInfoCkETH on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
+		{/if}
 	</HowToConvertETHWizard>
 </WizardModal>

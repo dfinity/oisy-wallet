@@ -33,8 +33,12 @@
 
 	<p class="text-misty-rose break-normal py-2">
 		Converting ETH into ckETH requires a call to a smart contract on Ethereum and passing your IC
-		principal as argument, in the form of a bytes32 array.
+		principal as argument, in the form of a bytes32 array – Oisy allows to do it within the wallet.
 	</p>
 </Value>
 
-<button class="primary full center text-center mt-8 mb-6" on:click={modalStore.close}>Done</button>
+<button class="secondary full center mt-6 mb-8" on:click={() => dispatch('icConvert')}>
+	<span class="text-dark-slate-blue font-bold">Learn how to convert ETH to ckETH</span>
+</button>
+
+<button class="primary full center text-center mb-6" on:click={modalStore.close}>Done</button>

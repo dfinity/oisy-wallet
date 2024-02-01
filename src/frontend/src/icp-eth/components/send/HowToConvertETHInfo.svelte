@@ -4,6 +4,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { createEventDispatcher } from 'svelte';
 
+	export let cancelAction: 'back' | 'close' = 'close';
+
 	const dispatch = createEventDispatcher();
 </script>
 
@@ -43,4 +45,10 @@
 	<span class="text-dark-slate-blue font-bold">Convert ETH to ckETH</span>
 </button>
 
-<button class="primary full center text-center mb-6" on:click={modalStore.close}>Done</button>
+{#if cancelAction === 'back'}
+	<button class="primary full center text-center mt-8" on:click={() => dispatch('icBack')}
+		>Back</button
+	>
+{:else}
+	<button class="primary full center text-center mb-6" on:click={modalStore.close}>Done</button>
+{/if}
