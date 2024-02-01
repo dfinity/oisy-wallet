@@ -8,7 +8,7 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { slide } from 'svelte/transition';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;

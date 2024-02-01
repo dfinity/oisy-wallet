@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { modalCkETHReceive } from '$lib/derived/modal.derived';
 	import { setContext } from 'svelte';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcReceiveCkETHModal from '$icp/components/receive/IcReceiveCkETHModal.svelte';
 	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';

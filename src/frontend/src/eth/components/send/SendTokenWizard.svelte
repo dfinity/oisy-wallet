@@ -23,7 +23,7 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';

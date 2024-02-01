@@ -6,7 +6,7 @@
 	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import ConvertETHToCkETH from '$icp-eth/components/send/ConvertETHToCkETH.svelte';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 
 	/**
