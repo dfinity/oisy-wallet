@@ -11,6 +11,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
+	import { balance } from '$lib/derived/balances.derived';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -36,7 +37,7 @@
 
 	<IcSendAmount bind:amount bind:amountError {networkId} />
 
-	<SendSource token={$token} source={$icrcAccountIdentifierText ?? ''} />
+	<SendSource token={$token} balance={$balance} source={$icrcAccountIdentifierText ?? ''} />
 
 	<IcFeeDisplay {networkId} />
 
