@@ -3,6 +3,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { OISY_NAME } from '$lib/constants/oisy.constants';
 
 	const openReceive = () => modalStore.openHowToConvertETHToCkETH();
 </script>
@@ -14,7 +15,7 @@
 	</h4>
 
 	<p class="text-misty-rose mt-3">
-		With a few steps, transfer and convert your Ethereum (ETH) to ckETH directly within the Oisy
+		With a few steps, transfer and convert your Ethereum (ETH) to ckETH directly within the {OISY_NAME}
 		Wallet.
 	</p>
 

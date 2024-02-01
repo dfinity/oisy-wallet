@@ -12,6 +12,7 @@
 	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
 	import { networkEthereum } from '$lib/derived/network.derived';
+	import { OISY_NAME } from '$lib/constants/oisy.constants';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -29,7 +30,7 @@
 		/></svelte:fragment
 	>
 	<svelte:fragment slot="info">
-		Your ID for the Oisy Wallet. Created by your Internet Identity.
+		Your ID for the {OISY_NAME} Wallet. Created by your Internet Identity.
 	</svelte:fragment>
 </KeyValuePairInfo>
 
