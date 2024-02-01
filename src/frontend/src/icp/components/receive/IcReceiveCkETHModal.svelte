@@ -76,7 +76,12 @@
 		{currentStep}
 	>
 		{#if currentStep?.name === HOW_TO_CONVERT_WIZARD_STEPS[0].name}
-			<HowToConvertETHInfo on:icQRCode={modal.next} on:icConvert={() => modal.set(4)} />
+			<HowToConvertETHInfo
+				cancelAction="back"
+				on:icBack={() => modal.set(0)}
+				on:icQRCode={modal.next}
+				on:icConvert={() => modal.set(4)}
+			/>
 		{:else if currentStep?.name === steps[1].name}
 			<ReceiveAddressQRCode on:icBack={modal.back} address={$icrcAccountIdentifierText ?? ''} />
 		{:else}
