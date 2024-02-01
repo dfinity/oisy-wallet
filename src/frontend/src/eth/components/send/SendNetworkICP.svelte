@@ -3,7 +3,7 @@
 	import SendNetwork from './SendNetwork.svelte';
 	import type { Network } from '$lib/types/network';
 	import { getContext } from 'svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;

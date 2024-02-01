@@ -3,7 +3,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { getContext } from 'svelte';
 	import type { Network } from '$lib/types/network';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';

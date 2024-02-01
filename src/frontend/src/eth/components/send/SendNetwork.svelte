@@ -7,7 +7,7 @@
 	import { isCkEthHelperContract } from '$eth/utils/send.utils';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { getContext } from 'svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
