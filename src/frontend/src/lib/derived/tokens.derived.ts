@@ -5,7 +5,7 @@ import type { Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
 export const sortedIcrcTokens: Readable<Token[]> = derived([icrcTokens], ([$icrcTokens]) =>
-	$icrcTokens.sort()
+	$icrcTokens.sort(({ name: nameA }, { name: nameB }) => nameA.localeCompare(nameB))
 );
 
 export const tokens: Readable<Token[]> = derived(
