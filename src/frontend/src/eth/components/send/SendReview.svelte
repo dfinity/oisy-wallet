@@ -27,13 +27,14 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <SendData
 	{amount}
 	destination={destinationEditable ? destination : null}
 	token={$sendToken}
+	balance={$sendBalance}
 	source={$address ?? ''}
 >
 	<FeeDisplay slot="fee" />
