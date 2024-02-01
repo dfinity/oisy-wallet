@@ -9,6 +9,7 @@ export interface Modal<T> {
 		| 'cketh-receive'
 		| 'send'
 		| 'convert-eth-cketh'
+		| 'how-to-convert-eth-cketh'
 		| 'ic-send'
 		| 'wallet-connect-auth'
 		| 'wallet-connect-sign'
@@ -30,6 +31,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openCkETHReceive: () => void;
 	openSend: () => void;
 	openConvertETHToCkETH: () => void;
+	openHowToConvertETHToCkETH: () => void;
 	openIcSend: () => void;
 	openWalletConnectAuth: () => void;
 	openWalletConnectSign: <D extends T>(data: D) => void;
@@ -52,6 +54,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openCkETHReceive: () => set({ type: 'cketh-receive' }),
 		openSend: () => set({ type: 'send' }),
 		openConvertETHToCkETH: () => set({ type: 'convert-eth-cketh' }),
+		openHowToConvertETHToCkETH: () => set({ type: 'how-to-convert-eth-cketh' }),
 		openIcSend: () => set({ type: 'ic-send' }),
 		openWalletConnectAuth: () => set({ type: 'wallet-connect-auth' }),
 		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),
