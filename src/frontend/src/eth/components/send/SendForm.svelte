@@ -9,7 +9,7 @@
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import { isNullish } from '@dfinity/utils';
 	import SendDestination from '$eth/components/send/SendDestination.svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -25,7 +25,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
@@ -37,12 +37,12 @@
 
 	<SendAmount bind:amount bind:insufficientFunds />
 
-	<SendSource token={$sendToken} source={$address ?? ''} />
+	<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
 
 	<FeeDisplay />
 
 	<div class="flex justify-end gap-1">
-		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>
+		<slot name="cancel" />
 		<button class="primary" type="submit" disabled={invalid} class:opacity-10={invalid}>
 			Next
 		</button>

@@ -30,7 +30,7 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;

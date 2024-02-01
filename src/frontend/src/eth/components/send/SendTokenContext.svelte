@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 	import { token } from '$lib/derived/token.derived';
 

@@ -8,6 +8,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendReviewNetwork from '$icp/components/send/IcSendReviewNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import { balance } from '$lib/derived/balances.derived';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -28,7 +29,7 @@
 	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
-<SendData {amount} {destination} token={$token} {source}>
+<SendData {amount} {destination} token={$token} balance={$balance} {source}>
 	<IcFeeDisplay slot="fee" {networkId} />
 	<IcSendReviewNetwork {networkId} slot="network" />
 </SendData>

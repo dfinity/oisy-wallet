@@ -1,47 +1,12 @@
 <script lang="ts">
-	import { toastsError } from '$lib/stores/toasts.store';
-	import { send as executeSend } from '$eth/services/send.services';
-	import { isNullish } from '@dfinity/utils';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import SendForm from './SendForm.svelte';
-	import SendReview from './SendReview.svelte';
-	import { mapAddressStartsWith0x } from '$eth/utils/send.utils';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { address } from '$lib/derived/address.derived';
-	import {
-		FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeStore
-	} from '$eth/stores/fee.store';
-	import { getContext, setContext } from 'svelte';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import { SEND_STEPS } from '$lib/constants/steps.constants';
-	import { parseToken } from '$lib/utils/parse.utils';
-	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { getContext } from 'svelte';
 	import type { Network } from '$lib/types/network';
-	import { authStore } from '$lib/stores/auth.store';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
-	import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
-
-	/**
-	 * Fee context store
-	 */
-
-	let storeFeeData = initFeeStore();
-
-	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
-		store: storeFeeData
-	});
-
-	/**
-	 * Send context store
-	 */
-
-	const { sendTokenDecimals, sendTokenId, sendToken, sendTokenStandard, sendPurpose } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
+	import { SendStep } from '$lib/enums/steps';
+	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
 
 	/**
 	 * Props
@@ -50,114 +15,28 @@
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 
-	let destinationEditable = true;
-	$: destinationEditable = sendPurpose !== 'convert-eth-to-cketh';
-
 	let amount: number | undefined = undefined;
-
-	/**
-	 * Send
-	 */
-
 	let sendProgressStep: string = SendStep.INITIALIZATION;
 
-	const send = async () => {
-		if (isNullishOrEmpty(destination)) {
-			toastsError({
-				msg: { text: `Destination address is invalid.` }
-			});
-			return;
-		}
+	/**
+	 * Send context store
+	 */
 
-		if (invalidAmount(amount) || isNullish(amount)) {
-			toastsError({
-				msg: { text: `Amount is invalid.` }
-			});
-			return;
-		}
+	const { sendPurpose } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-		if (isNullish($storeFeeData)) {
-			toastsError({
-				msg: { text: `Gas fees are not defined.` }
-			});
-			return;
-		}
+	/**
+	 * Wizard modal
+	 */
 
-		const { valid } = assertCkEthHelperContractAddressLoaded({
-			tokenStandard: $sendTokenStandard,
-			helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
-			network
-		});
-
-		if (!valid) {
-			return;
-		}
-
-		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $storeFeeData;
-
-		// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
-		// exceeds block gas limit
-		if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
-			toastsError({
-				msg: { text: `Max fee per gas or max priority fee per gas is undefined.` }
-			});
-			return;
-		}
-
-		// Unexpected errors
-		if (isNullish($address)) {
-			toastsError({
-				msg: { text: 'Address is unknown.' }
-			});
-			return;
-		}
-
-		modal.next();
-
-		try {
-			await executeSend({
-				from: $address,
-				to: mapAddressStartsWith0x(destination),
-				progress: (step: SendStep) => (sendProgressStep = step),
-				token: $sendToken,
-				amount: parseToken({
-					value: `${amount}`,
-					unitName: $sendTokenDecimals
-				}),
-				maxFeePerGas,
-				maxPriorityFeePerGas,
-				gas,
-				network,
-				identity: $authStore.identity,
-				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
-			});
-
-			setTimeout(() => close(), 750);
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: `Something went wrong while sending the transaction.` },
-				err
-			});
-
-			modal.back();
-		}
-	};
+	const [firstStep, ...otherSteps] = SEND_WIZARD_STEPS;
 
 	let steps: WizardSteps;
 	$: steps = [
 		{
-			name: 'Send',
+			...firstStep,
 			title: sendPurpose === 'convert-eth-to-cketh' ? 'Convert ETH to ckETH' : 'Send'
 		},
-		{
-			name: 'Review',
-			title: 'Review'
-		},
-		{
-			name: 'Sending',
-			title: 'Sending...'
-		}
+		...otherSteps
 	];
 
 	let currentStep: WizardStep | undefined;
@@ -183,27 +62,14 @@
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
-		{#if currentStep?.name === 'Review'}
-			<SendReview
-				on:icBack={modal.back}
-				on:icSend={send}
-				{destination}
-				{amount}
-				{network}
-				{destinationEditable}
-			/>
-		{:else if currentStep?.name === 'Sending'}
-			<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
-		{:else}
-			<SendForm
-				on:icNext={modal.next}
-				on:icClose={close}
-				bind:destination
-				bind:amount
-				bind:network
-				{destinationEditable}
-			/>
-		{/if}
-	</FeeContext>
+	<SendTokenWizard
+		{currentStep}
+		bind:destination
+		bind:network
+		bind:amount
+		bind:sendProgressStep
+		on:icBack={modal.back}
+		on:icNext={modal.next}
+		on:icClose={close}
+	/>
 </WizardModal>

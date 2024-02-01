@@ -9,7 +9,7 @@
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { isEthAddress } from '$lib/utils/account.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -27,13 +27,14 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <SendData
 	{amount}
 	destination={destinationEditable ? destination : null}
 	token={$sendToken}
+	balance={$sendBalance}
 	source={$address ?? ''}
 >
 	<FeeDisplay slot="fee" />

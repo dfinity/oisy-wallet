@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import IcReceiveQRCode from '$icp/components/receive/IcReceiveQRCode.svelte';
+	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import type { ComponentType } from 'svelte';
 
 	export let infoCmp: ComponentType;
@@ -13,7 +13,7 @@
 		},
 		{
 			name: 'QR code',
-			title: 'QR code'
+			title: 'Receive address'
 		}
 	];
 
@@ -37,7 +37,7 @@
 	<svelte:fragment slot="title">Receive</svelte:fragment>
 
 	{#if currentStep?.name === steps[1].name}
-		<IcReceiveQRCode on:icBack={displayAddresses} address={qrCodeAddress} />
+		<ReceiveAddressQRCode on:icBack={displayAddresses} address={qrCodeAddress} />
 	{:else}
 		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />
 	{/if}
