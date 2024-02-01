@@ -2,12 +2,12 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { SendStep } from '$lib/enums/steps';
 	import { modalStore } from '$lib/stores/modal.store';
-	import HowToConvertETHInfo from '$icp-eth/components/send/HowToConvertETHInfo.svelte';
+	import HowToConvertETHInfo from '$icp/components/convert/HowToConvertETHInfo.svelte';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import type { Network } from '$lib/types/network';
-	import HowToConvertETHWizard from '$icp-eth/components/send/HowToConvertETHWizard.svelte';
+	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
 
 	/**
@@ -51,7 +51,7 @@
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<HowToConvertETHWizard
+	<ConvertETHToCkETHWizard
 		on:icBack={modal.back}
 		on:icNext={modal.next}
 		on:icClose={close}
@@ -63,5 +63,5 @@
 		{currentStep}
 	>
 		<HowToConvertETHInfo on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
-	</HowToConvertETHWizard>
+	</ConvertETHToCkETHWizard>
 </WizardModal>

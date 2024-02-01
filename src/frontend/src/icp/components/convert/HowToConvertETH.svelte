@@ -4,7 +4,7 @@
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { IconInfo } from '@dfinity/gix-components';
 	import ConvertETHToCkETH from '$icp-eth/components/send/ConvertETHToCkETH.svelte';
-	import HowToConvertETHModal from '$icp-eth/components/send/HowToConvertETHModal.svelte';
+	import HowToConvertETHModal from '$icp/components/convert/HowToConvertETHModal.svelte';
 
 	/**
 	 * Send modal context store

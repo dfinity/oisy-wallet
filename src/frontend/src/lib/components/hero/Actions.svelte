@@ -6,7 +6,7 @@
 	import IcSend from '$icp/components/send/IcSend.svelte';
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
-	import HowToConvertETH from '$icp-eth/components/send/HowToConvertETH.svelte';
+	import HowToConvertETH from '$icp/components/convert/HowToConvertETH.svelte';
 
 	export let send = false;
 
