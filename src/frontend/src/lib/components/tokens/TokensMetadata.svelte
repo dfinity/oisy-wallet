@@ -2,6 +2,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { KeyValuePairInfo } from '@dfinity/gix-components';
 	import { tokens } from '$lib/derived/tokens.derived';
+	import { OISY_NAME } from '$lib/constants/oisy.constants';
 </script>
 
 <div class="mt-4 mb-2">
@@ -9,7 +10,7 @@
 		<svelte:fragment slot="key"><span class="font-bold">Tokens:</span></svelte:fragment>
 
 		<svelte:fragment slot="info">
-			The list of tokens currently supported by Oisy Wallet.
+			The list of tokens currently supported by {OISY_NAME} Wallet.
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>

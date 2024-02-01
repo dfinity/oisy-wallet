@@ -3,6 +3,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { createEventDispatcher } from 'svelte';
+	import { OISY_NAME } from '$lib/constants/oisy.constants';
 
 	export let cancelAction: 'back' | 'close' = 'close';
 
@@ -10,7 +11,7 @@
 </script>
 
 <div>
-	<p>Here is how to can convert ETH to ckETH on OISY:</p>
+	<p>Here is how to can convert ETH to ckETH on {OISY_NAME}:</p>
 </div>
 
 <div class="grid grid-cols-[1fr_auto] gap-x-4 mt-4">
@@ -30,7 +31,7 @@
 		copyAriaLabel="Wallet address copied to clipboard."
 		on:click={() => dispatch('icQRCode')}
 	>
-		<svelte:fragment slot="title">Send ETH to you OISY wallet address</svelte:fragment>
+		<svelte:fragment slot="title">Send ETH to you {OISY_NAME} wallet address</svelte:fragment>
 	</ReceiveAddress>
 
 	<span

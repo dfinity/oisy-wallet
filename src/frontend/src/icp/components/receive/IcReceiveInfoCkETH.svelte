@@ -5,6 +5,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { OISY_NAME } from '$lib/constants/oisy.constants';
 
 	const dispatch = createEventDispatcher();
 
@@ -33,7 +34,8 @@
 
 	<p class="text-misty-rose break-normal py-2">
 		Converting ETH into ckETH requires a call to a smart contract on Ethereum and passing your IC
-		principal as argument, in the form of a bytes32 array – Oisy allows to do it within the wallet.
+		principal as argument – {OISY_NAME} simplifies this procedure by enabling you to perform the conversion
+		directly within the wallet.
 	</p>
 </Value>
 
