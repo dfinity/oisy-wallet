@@ -32,7 +32,7 @@
 	$: steps = [
 		{
 			name: 'Receive',
-			title: 'Receive ETH'
+			title: 'Receive'
 		},
 		{
 			name: 'QR Code',

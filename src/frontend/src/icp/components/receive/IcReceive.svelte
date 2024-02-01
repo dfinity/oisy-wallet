@@ -1,11 +1,14 @@
 <script lang="ts">
-	import { tokenCkEthLedger } from '$icp/derived/ic-token.derived';
+	import { tokenCkBtcLedger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import IcReceiveCkETH from '$icp/components/receive/IcReceiveCkETH.svelte';
-	import IcReceiveAction from '$icp/components/receive/IcReceiveAction.svelte';
+	import IcReceiveIcp from '$icp/components/receive/IcReceiveICP.svelte';
+	import IcReceiveCkBTC from '$icp/components/receive/IcReceiveCkBTC.svelte';
 </script>
 
 {#if $tokenCkEthLedger}
 	<IcReceiveCkETH />
+{:else if $tokenCkBtcLedger}
+	<IcReceiveCkBTC />
 {:else}
-	<IcReceiveAction />
+	<IcReceiveIcp />
 {/if}
