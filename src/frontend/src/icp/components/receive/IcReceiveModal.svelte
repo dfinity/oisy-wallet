@@ -13,7 +13,7 @@
 		},
 		{
 			name: 'QR code',
-			title: 'QR code'
+			title: 'Receive address'
 		}
 	];
 
