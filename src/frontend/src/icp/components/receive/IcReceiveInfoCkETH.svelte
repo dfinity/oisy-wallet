@@ -37,4 +37,8 @@
 	</p>
 </Value>
 
-<button class="primary full center text-center mt-8 mb-6" on:click={modalStore.close}>Done</button>
+<button class="secondary full center mt-6 mb-8" on:click={() => dispatch('icConvert')}>
+	<span class="text-dark-slate-blue font-bold">Learn how to convert ETH to ckETH</span>
+</button>
+
+<button class="primary full center text-center mb-6" on:click={modalStore.close}>Done</button>
