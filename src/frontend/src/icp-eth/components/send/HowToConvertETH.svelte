@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { modalHowToConvertETHToCkETH } from '$lib/derived/modal.derived';
 	import { setContext } from 'svelte';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$eth/stores/send.store';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { IconInfo } from '@dfinity/gix-components';
 	import ConvertETHToCkETH from '$icp-eth/components/send/ConvertETHToCkETH.svelte';
 	import HowToConvertETHModal from '$icp-eth/components/send/HowToConvertETHModal.svelte';
