@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
-	import { addressStore } from '$lib/stores/address.store';
 	import { address } from '$lib/derived/address.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <div>
@@ -26,7 +26,7 @@
 		address={$address ?? ''}
 		qrCodeAriaLabel="Display wallet address as a QR code"
 		copyAriaLabel="Wallet address copied to clipboard."
-		on:click
+		on:click={() => dispatch('icQRCode')}
 	>
 		<svelte:fragment slot="title">Send ETH to you OISY wallet address</svelte:fragment>
 	</ReceiveAddress>
@@ -39,7 +39,7 @@
 	<p class="font-bold">Convert ETH to ckETH</p>
 </div>
 
-<button class="secondary full center mt-6 mb-8" on:click>
+<button class="secondary full center mt-6 mb-8" on:click={() => dispatch('icConvert')}>
 	<span class="text-dark-slate-blue font-bold">Convert ETH to ckETH</span>
 </button>
 

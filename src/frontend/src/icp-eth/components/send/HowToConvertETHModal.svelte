@@ -6,6 +6,8 @@
 	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
 	import HowToConvertETHInfo from '$icp-eth/components/send/HowToConvertETHInfo.svelte';
+	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
+	import { address } from '$lib/derived/address.derived';
 
 	/**
 	 * Props
@@ -26,6 +28,10 @@
 		{
 			name: 'Info',
 			title: 'How to convert ETH to ckETH'
+		},
+		{
+			name: 'QR code',
+			title: 'QR code'
 		},
 		...SEND_WIZARD_STEPS
 	];
@@ -63,6 +69,10 @@
 		on:icNext={modal.next}
 		on:icClose={close}
 	>
-		<HowToConvertETHInfo />
+		{#if currentStep?.name === steps[1].name}
+			<ReceiveAddressQRCode address={$address ?? ''} on:icBack={modal.back} />
+		{:else if currentStep?.name === steps[0].name}
+			<HowToConvertETHInfo on:icQRCode={modal.next} />
+		{/if}
 	</SendTokenWizard>
 </WizardModal>
