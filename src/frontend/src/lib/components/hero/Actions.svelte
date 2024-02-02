@@ -6,8 +6,8 @@
 	import IcSend from '$icp/components/send/IcSend.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import HowToConvertETH from '$icp/components/convert/HowToConvertETH.svelte';
-	import {ethToCkETHEnabled} from "$icp-eth/derived/cketh.derived";
-	import {PROD} from "$lib/constants/app.constants";
+	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
+	import { PROD } from '$lib/constants/app.constants';
 
 	export let send = false;
 
