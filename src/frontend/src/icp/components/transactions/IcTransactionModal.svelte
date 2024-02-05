@@ -47,7 +47,7 @@
 				<p class="capitalize mb-0.5">{typeLabel}</p>
 			{/if}
 
-			<p class="capitalize" class:text-xs={nonNullish(typeLabel)}>{type}</p>
+			<p class="capitalize">{type}</p>
 		</Value>
 
 		{#if nonNullish(from)}
@@ -67,7 +67,7 @@
 				{/if}
 
 				{#if nonNullish(to)}
-					<p class="capitalize" class:text-xs={nonNullish(typeLabel)}>
+					<p class="capitalize">
 						<output>{to}</output><Copy value={to} text="To address copied to clipboard." inline />
 					</p>
 				{/if}
