@@ -43,10 +43,6 @@
 		<Value ref="type" element="div">
 			<svelte:fragment slot="label">Type</svelte:fragment>
 
-			{#if nonNullish(typeLabel)}
-				<p class="capitalize mb-0.5">{typeLabel}</p>
-			{/if}
-
 			<p class="capitalize">{type}</p>
 		</Value>
 
