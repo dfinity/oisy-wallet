@@ -31,7 +31,7 @@
 		copyAriaLabel="Wallet address copied to clipboard."
 		on:click={() => dispatch('icQRCode')}
 	>
-		<svelte:fragment slot="title">Send ETH to you {OISY_NAME} wallet address</svelte:fragment>
+		<svelte:fragment slot="title">Send ETH to your {OISY_NAME} address</svelte:fragment>
 	</ReceiveAddress>
 
 	<span
