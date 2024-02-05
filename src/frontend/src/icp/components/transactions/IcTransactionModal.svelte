@@ -21,8 +21,6 @@
 	let toLabel: string | undefined;
 
 	$: ({ id, from, to, value, timestamp, type, typeLabel, toLabel } = transaction);
-
-	$: console.log(transaction);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -42,11 +40,14 @@
 			</Value>
 		{/if}
 
-		<Value ref="type">
+		<Value ref="type" element="div">
 			<svelte:fragment slot="label">Type</svelte:fragment>
-			<span class="capitalize"
-				>{type}{#if nonNullish(typeLabel)}&nbsp;- {typeLabel}{/if}</span
-			>
+
+			{#if nonNullish(typeLabel)}
+				<p class="capitalize mb-0.5">{typeLabel}</p>
+			{/if}
+
+			<p class="capitalize" class:text-xs={nonNullish(typeLabel)}>{type}</p>
 		</Value>
 
 		{#if nonNullish(from)}
@@ -57,11 +58,19 @@
 			</Value>
 		{/if}
 
-		{#if nonNullish(to)}
-			<Value ref="to">
+		{#if nonNullish(to) || nonNullish(toLabel)}
+			<Value ref="to" element="div">
 				<svelte:fragment slot="label">To</svelte:fragment>
-				<output>{to}</output>{#if nonNullish(toLabel)}&nbsp;- {toLabel}{/if}
-				<Copy value={to} text="To address copied to clipboard." inline />
+
+				{#if nonNullish(typeLabel)}
+					<p class="capitalize mb-0.5">{typeLabel}</p>
+				{/if}
+
+				{#if nonNullish(to)}
+					<p class="capitalize" class:text-xs={nonNullish(typeLabel)}>
+						<output>{to}</output><Copy value={to} text="To address copied to clipboard." inline />
+					</p>
+				{/if}
 			</Value>
 		{/if}
 
