@@ -10,7 +10,7 @@
 		<svelte:fragment slot="key"><span class="font-bold">Tokens:</span></svelte:fragment>
 
 		<svelte:fragment slot="info">
-			The list of tokens currently supported by {OISY_NAME} Wallet.
+			The list of tokens currently supported by your {OISY_NAME}.
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
