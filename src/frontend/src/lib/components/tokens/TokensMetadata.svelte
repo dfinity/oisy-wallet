@@ -11,6 +11,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { ETH_CHAIN_ID } from '$eth/constants/eth.constants';
 	import { busy } from '$lib/stores/busy.store';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	let userTokens: Token[] = [];
 
@@ -103,12 +104,20 @@
 	</div>
 {/each}
 
-<ul class="my-4 mx-4">
-	{#each userTokens as userToken, i (`${userToken.contract_address}-${i}}`)}
-		<li class="text-sm flex">
-			<button aria-label="delete-user-token" on:click={async () => await deleteUserToken(userToken)}
-				><IconClose />{userToken.contract_address}</button
-			>
-		</li>
-	{/each}
-</ul>
+<div class="my-8">
+	<Value>
+		<svelte:fragment slot="label">User tokens</svelte:fragment>
+
+		<ul class="my-2">
+			{#each userTokens as userToken, i (`${userToken.contract_address}-${i}}`)}
+				<li class="text-sm flex">
+					<button
+						aria-label="delete-user-token"
+						on:click={async () => await deleteUserToken(userToken)}
+						><IconClose />{userToken.contract_address}</button
+					>
+				</li>
+			{/each}
+		</ul>
+	</Value>
+</div>
