@@ -8,10 +8,10 @@
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token, tokenId } from '$lib/derived/token.derived';
+	import { token } from '$lib/derived/token.derived';
 	import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+	import type { IcToken, IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 
 	export let transaction: IcTransaction;
@@ -22,7 +22,7 @@
 		try {
 			uiTransaction = mapIcTransaction({
 				transaction,
-				tokenId: $tokenId,
+				token: $token as IcToken,
 				identity: $authStore.identity
 			});
 		} catch (err: unknown) {
@@ -34,14 +34,19 @@
 	});
 
 	let transactionType: IcTransactionType | undefined;
+	let transactionTypeLabel: string | undefined;
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
 	let incoming: boolean | undefined;
 
 	$: transactionType = uiTransaction?.type;
+	$: transactionTypeLabel = uiTransaction?.typeLabel;
 	$: value = uiTransaction?.value;
 	$: timestamp = uiTransaction?.timestamp;
 	$: incoming = uiTransaction?.incoming;
+
+	let pending = false;
+	$: pending = uiTransaction?.status === 'pending';
 
 	let icon: ComponentType;
 	$: icon = incoming === false ? IconSend : IconReceive;
@@ -51,8 +56,8 @@
 </script>
 
 <button on:click={() => modalStore.openIcTransaction(uiTransaction)} class="block w-full border-0">
-	<Card>
-		<span class="capitalize">{transactionType}</span>
+	<Card {pending}>
+		<span class="capitalize">{transactionTypeLabel ?? transactionType}</span>
 
 		<RoundedIcon slot="icon" {icon} />
 
