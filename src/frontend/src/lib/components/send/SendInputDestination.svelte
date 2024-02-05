@@ -24,6 +24,7 @@
 	required
 	bind:value={destination}
 	placeholder={inputPlaceholder}
+	spellcheck={false}
 />
 
 {#if invalidDestination}

@@ -69,6 +69,7 @@
 	bind:value={amount}
 	decimals={$tokenDecimals}
 	placeholder="Amount"
+	spellcheck={false}
 />
 
 {#if nonNullish(amountError)}
