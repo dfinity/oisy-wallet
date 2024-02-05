@@ -4,14 +4,15 @@
 	import ConvertETHToCkETH from '$eth/components/send/ConvertETHToCkETH.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 	import IcSend from '$icp/components/send/IcSend.svelte';
-	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import HowToConvertETH from '$icp/components/convert/HowToConvertETH.svelte';
+	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
+	import { PROD } from '$lib/constants/app.constants';
 
 	export let send = false;
 
 	let convertEth = false;
-	$: convertEth = send && $ethToCkETHEnabled;
+	$: convertEth = send && $ethToCkETHEnabled && !PROD;
 
 	let singleAction = true;
 	$: singleAction = !send && !convertEth;
