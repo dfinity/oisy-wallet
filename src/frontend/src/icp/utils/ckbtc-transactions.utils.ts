@@ -3,7 +3,7 @@ import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import { Cbor } from '@dfinity/agent';
 import type { RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
-import { fromNullable, nonNullish } from '@dfinity/utils';
+import { arrayOfNumberToUint8Array, fromNullable, nonNullish } from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -24,34 +24,77 @@ export const mapCkBTCTransaction = ({
 	const isBurn = nonNullish(fromNullable(burn));
 
 	if (isMint) {
-		const memo = fromNullable(mint)?.memo[0];
+		const memo = fromNullable(fromNullable(mint)!.memo);
 
-		const toLabel = 'BTC Network';
-
-		if (nonNullish(memo) && isCkbtcReimbursementMintMemo(memo)) {
-			const description = 'Reimbursement';
-		} else {
-			const description = 'BTC Received';
-		}
+		return {
+			...tx,
+			toLabel: 'BTC Network',
+			description:
+				nonNullish(memo) && isCkbtcReimbursementMintMemo(memo) ? 'Reimbursement' : 'BTC Received'
+		};
 	}
 
 	if (isBurn) {
-		const description = 'BTC Sent';
+		const memo = fromNullable(fromNullable(burn)!.memo) ?? [];
+
+		const burnMemo = burnMemoLabel(memo);
+
+		return {
+			...tx,
+			description: burnDescription(retrieveBtcStatus),
+			toLabel: burnMemo ?? 'BTC Network'
+		};
 	}
 
 	return tx;
 };
 
+const burnDescription = (retrieveBtcStatus: RetrieveBtcStatusV2 | undefined): string => {
+	if (nonNullish(retrieveBtcStatus)) {
+		if ('Reimbursed' in retrieveBtcStatus || 'AmountTooLow' in retrieveBtcStatus) {
+			return 'Sending BTC failed';
+			// status failed?
+		} else if (
+			'Pending' in retrieveBtcStatus ||
+			'Signing' in retrieveBtcStatus ||
+			'Sending' in retrieveBtcStatus ||
+			'Submitted' in retrieveBtcStatus ||
+			'WillReimburse' in retrieveBtcStatus
+		) {
+			return 'Sending BTC';
+			// status pending?
+		} else if (!('Confirmed' in retrieveBtcStatus)) {
+			console.error('Unknown retrieveBtcStatusV2:', retrieveBtcStatus);
+			// Leave the transaction as "Sent".
+		}
+	}
+
+	return 'BTC Sent';
+};
+
 const isCkbtcReimbursementMintMemo = (memo: Uint8Array | number[]) => {
 	try {
-		return decodeMintMemo(memo)[0] === MINT_MEMO_TYPE_KYT_FAIL;
+		const [mintType, _] = decodeMintMemo(memo);
+		return mintType === MINT_MEMO_TYPE_KYT_FAIL;
 	} catch (err) {
 		console.error('Failed to decode ckBTC mint memo', memo, err);
 		return false;
 	}
 };
 
-// TODO: replace with ic-js
+export const burnMemoLabel = (memo: Uint8Array | number[]): string | undefined => {
+	try {
+		const [_, [label]] = decodeBurnMemo(
+			memo instanceof Uint8Array ? memo : arrayOfNumberToUint8Array(memo)
+		);
+		return label;
+	} catch (err: unknown) {
+		console.error('Failed to decode ckBTC burn memo', memo, err);
+		return undefined;
+	}
+};
+
+// TODO: replace with ic-js PR https://github.com/dfinity/ic-js/pull/535
 
 // The minter converted a single UTXO to ckBTC.
 export const MINT_MEMO_TYPE_UTXO_TO_CKBTC = 0;
@@ -81,3 +124,10 @@ export const decodeMintMemo = (memo: Uint8Array | number[]): MintMemo => {
 
 	return Cbor.decode(new Uint8Array(memo)) as MintMemo;
 };
+
+// TODO: to be implemented in ic-js
+
+// The memo will decode to: [0, [ withdrawalAddress, kytFee, status]]
+type CkbtcBurnMemo = [0, [string, number, number | null | undefined]];
+
+const decodeBurnMemo = (memo: Uint8Array): CkbtcBurnMemo => Cbor.decode(memo) as CkbtcBurnMemo;
