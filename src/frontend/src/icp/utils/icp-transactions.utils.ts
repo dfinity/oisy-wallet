@@ -54,10 +54,10 @@ export const mapIcpTransaction = ({
 }): IcTransactionUi => {
 	const { operation, created_at_time, transferToSelf } = transaction;
 
-	const tx: Pick<IcTransactionUi, 'timestamp' | 'id' | "status"> = {
+	const tx: Pick<IcTransactionUi, 'timestamp' | 'id' | 'status'> = {
 		id,
 		timestamp: fromNullable(created_at_time)?.timestamp_nanos,
-		status: "executed"
+		status: 'executed'
 	};
 
 	const accountIdentifier = nonNullish(identity)

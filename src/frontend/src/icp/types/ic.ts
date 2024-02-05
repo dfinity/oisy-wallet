@@ -26,7 +26,7 @@ export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'send' | 'receive'
 
 export type IcTransactionIdText = string;
 
-export type IcTransactionStatus = "executed" | "pending" | "reimbursed" | "failed";
+export type IcTransactionStatus = 'executed' | 'pending' | 'reimbursed' | 'failed';
 
 export interface IcTransactionUi {
 	id: bigint;

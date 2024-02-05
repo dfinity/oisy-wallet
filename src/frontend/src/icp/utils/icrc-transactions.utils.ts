@@ -130,6 +130,6 @@ export const mapIcrcTransaction = ({
 				: undefined,
 		...(nonNullish(value) && { value }),
 		timestamp,
-		status: "executed"
+		status: 'executed'
 	};
 };
