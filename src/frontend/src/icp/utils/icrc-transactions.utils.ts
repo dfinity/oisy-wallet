@@ -129,6 +129,7 @@ export const mapIcrcTransaction = ({
 					})
 				: undefined,
 		...(nonNullish(value) && { value }),
-		timestamp
+		timestamp,
+		status: "executed"
 	};
 };

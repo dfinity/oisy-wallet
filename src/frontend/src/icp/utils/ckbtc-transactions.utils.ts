@@ -26,11 +26,13 @@ export const mapCkBTCTransaction = ({
 	if (isMint) {
 		const memo = fromNullable(fromNullable(mint)!.memo);
 
+		const isReimbursement = nonNullish(memo) && isCkbtcReimbursementMintMemo(memo);
+
 		return {
 			...tx,
 			toLabel: 'BTC Network',
-			typeLabel:
-				nonNullish(memo) && isCkbtcReimbursementMintMemo(memo) ? 'Reimbursement' : 'BTC Received'
+			typeLabel: isReimbursement ? 'Reimbursement' : 'BTC Received',
+			status: isReimbursement ? 'reimbursed' : 'executed'
 		};
 	}
 
@@ -41,7 +43,7 @@ export const mapCkBTCTransaction = ({
 
 		return {
 			...tx,
-			typeLabel: burnDescription(retrieveBtcStatus),
+			...burnStatus(retrieveBtcStatus),
 			toLabel: burnMemo ?? 'BTC Network'
 		};
 	}
@@ -49,11 +51,15 @@ export const mapCkBTCTransaction = ({
 	return tx;
 };
 
-const burnDescription = (retrieveBtcStatus: RetrieveBtcStatusV2 | undefined): string => {
+const burnStatus = (
+	retrieveBtcStatus: RetrieveBtcStatusV2 | undefined
+): Required<Pick<IcTransactionUi, 'typeLabel'>> & Pick<IcTransactionUi, 'status'> => {
 	if (nonNullish(retrieveBtcStatus)) {
 		if ('Reimbursed' in retrieveBtcStatus || 'AmountTooLow' in retrieveBtcStatus) {
-			return 'Sending BTC failed';
-			// status failed?
+			return {
+				typeLabel: 'Sending BTC failed',
+				status: 'failed'
+			};
 		} else if (
 			'Pending' in retrieveBtcStatus ||
 			'Signing' in retrieveBtcStatus ||
@@ -61,15 +67,19 @@ const burnDescription = (retrieveBtcStatus: RetrieveBtcStatusV2 | undefined): st
 			'Submitted' in retrieveBtcStatus ||
 			'WillReimburse' in retrieveBtcStatus
 		) {
-			return 'Sending BTC';
-			// status pending?
+			return {
+				typeLabel: 'Sending BTC',
+				status: 'pending'
+			};
 		} else if (!('Confirmed' in retrieveBtcStatus)) {
 			console.error('Unknown retrieveBtcStatusV2:', retrieveBtcStatus);
-			// Leave the transaction as "Sent".
 		}
 	}
 
-	return 'BTC Sent';
+	return {
+		typeLabel: 'BTC Sent',
+		status: 'executed'
+	};
 };
 
 const isCkbtcReimbursementMintMemo = (memo: Uint8Array | number[]) => {
