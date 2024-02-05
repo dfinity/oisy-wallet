@@ -5,10 +5,12 @@
 	import HeaderSignIn from '$lib/components/layout/HeaderSignIn.svelte';
 </script>
 
-<HeaderSignIn />
+<main>
+	<HeaderSignIn />
 
-<SignInSection />
+	<SignInSection />
 
-<SignInBackground />
+	<SignInBackground />
 
-<Footer />
+	<Footer />
+</main>
