@@ -1,4 +1,4 @@
-import type { SignRequest, Token } from '$declarations/backend/backend.did';
+import type { SignRequest, Token, TokenId } from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -56,4 +56,15 @@ export const addUserToken = async ({
 export const listUserTokens = async ({ identity }: { identity: Identity }): Promise<Token[]> => {
 	const { list_user_tokens } = await getBackendActor({ identity });
 	return list_user_tokens();
+};
+
+export const removeUserToken = async ({
+	tokenId,
+	identity
+}: {
+	tokenId: TokenId;
+	identity: Identity;
+}): Promise<void> => {
+	const { remove_user_token } = await getBackendActor({ identity });
+	return remove_user_token(tokenId);
 };

@@ -1,8 +1,69 @@
 <script lang="ts">
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { KeyValuePairInfo } from '@dfinity/gix-components';
+	import { IconClose, KeyValuePairInfo } from '@dfinity/gix-components';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
+	import { listUserTokens, removeUserToken } from '$lib/api/backend.api';
+	import type { Token } from '$declarations/backend/backend.did';
+	import { authStore } from '$lib/stores/auth.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { OptionIdentity } from '$lib/types/identity';
+	import { isNullish } from '@dfinity/utils';
+	import { ETH_CHAIN_ID } from '$eth/constants/eth.constants';
+	import { busy } from '$lib/stores/busy.store';
+
+	let userTokens: Token[] = [];
+
+	const loadUserTokens = async (identity: OptionIdentity) => {
+		if (isNullish(identity)) {
+			userTokens = [];
+			return;
+		}
+
+		try {
+			userTokens = await listUserTokens({ identity });
+		} catch (err: unknown) {
+			userTokens = [];
+
+			toastsError({
+				msg: { text: 'Unexpected error while loading your custom tokens.' },
+				err
+			});
+		}
+	};
+
+	$: $authStore, (async () => await loadUserTokens($authStore.identity))();
+
+	const deleteUserToken = async ({ contract_address }: Token) => {
+		if (isNullish($authStore.identity)) {
+			toastsError({
+				msg: { text: 'You are not logged in.' }
+			});
+			return;
+		}
+
+		busy.start();
+
+		try {
+			await removeUserToken({
+				identity: $authStore.identity,
+				tokenId: {
+					chain_id: ETH_CHAIN_ID,
+					contract_address
+				}
+			});
+
+			// This PR is just a workaround for staging anyway.
+			window.location.reload();
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: 'Unexpected error while deleting your custom token.' },
+				err
+			});
+		}
+
+		busy.stop();
+	};
 </script>
 
 <div class="mt-4 mb-2">
@@ -41,3 +102,13 @@
 		</div>
 	</div>
 {/each}
+
+<ul class="my-4 mx-4">
+	{#each userTokens as userToken, i (`${userToken.contract_address}-${i}}`)}
+		<li class="text-sm flex">
+			<button aria-label="delete-user-token" on:click={async () => await deleteUserToken(userToken)}
+				><IconClose />{userToken.contract_address}</button
+			>
+		</li>
+	{/each}
+</ul>
