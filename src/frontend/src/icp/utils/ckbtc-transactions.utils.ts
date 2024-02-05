@@ -29,7 +29,7 @@ export const mapCkBTCTransaction = ({
 		return {
 			...tx,
 			toLabel: 'BTC Network',
-			description:
+			typeLabel:
 				nonNullish(memo) && isCkbtcReimbursementMintMemo(memo) ? 'Reimbursement' : 'BTC Received'
 		};
 	}
@@ -41,7 +41,7 @@ export const mapCkBTCTransaction = ({
 
 		return {
 			...tx,
-			description: burnDescription(retrieveBtcStatus),
+			typeLabel: burnDescription(retrieveBtcStatus),
 			toLabel: burnMemo ?? 'BTC Network'
 		};
 	}

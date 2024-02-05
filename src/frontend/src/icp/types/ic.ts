@@ -30,7 +30,7 @@ export interface IcTransactionUi {
 	id: bigint;
 	type: IcTransactionType;
 	// e.g. BTC Received
-	description?: string;
+	typeLabel?: string;
 	from?: string;
 	to?: string;
 	// e.g. To: BTC Network
