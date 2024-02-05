@@ -19,6 +19,7 @@
 		required
 		bind:value={contractAddress}
 		placeholder="Enter an ERC20 contract address"
+		spellcheck={false}
 	/>
 
 	<div class="flex justify-end gap-1">
