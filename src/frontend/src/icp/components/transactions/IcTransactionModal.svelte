@@ -62,8 +62,8 @@
 			<Value ref="to" element="div">
 				<svelte:fragment slot="label">To</svelte:fragment>
 
-				{#if nonNullish(typeLabel)}
-					<p class="capitalize mb-0.5">{typeLabel}</p>
+				{#if nonNullish(toLabel)}
+					<p class="capitalize mb-0.5">{toLabel}</p>
 				{/if}
 
 				{#if nonNullish(to)}
