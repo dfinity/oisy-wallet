@@ -2,6 +2,7 @@
 <script lang="ts">
 	export let styleClass: string | undefined = undefined;
 	export let size = '24';
+	export let direction: 'out' | 'in' = 'out';
 </script>
 
 <svg
@@ -11,6 +12,7 @@
 	fill="none"
 	xmlns="http://www.w3.org/2000/svg"
 	class={styleClass}
+	class:rotate-180={direction === 'in'}
 >
 	<path
 		d="M17 17V7M17 7H7M17 7L7 17"
