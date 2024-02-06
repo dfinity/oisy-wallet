@@ -14,6 +14,8 @@
 	import type { IcToken, IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import IconMint from '$lib/components/icons/IconMint.svelte';
+	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 
 	export let transaction: IcTransaction;
 
@@ -51,11 +53,15 @@
 
 	let icon: ComponentType;
 	$: icon =
-		nonNullish(transactionType) && ['approve', 'burn', 'mint'].includes(transactionType)
-			? IconConvert
-			: incoming === false
-				? IconSend
-				: IconReceive;
+		transactionType === 'burn'
+			? IconBurn
+			: transactionType === 'mint'
+				? IconMint
+				: transactionType === 'approve'
+					? IconConvert
+					: incoming === false
+						? IconSend
+						: IconReceive;
 
 	let amount: BigNumber | undefined;
 	$: amount = !incoming && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
