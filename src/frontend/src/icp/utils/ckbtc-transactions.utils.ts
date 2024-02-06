@@ -1,8 +1,11 @@
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
-import { decodeMintMemo, MINT_MEMO_TYPE_KYT_FAIL } from '$icp/utils/ckbtc-minter.utils';
+import {
+	decodeBurnMemo,
+	decodeMintMemo,
+	MINT_MEMO_TYPE_KYT_FAIL
+} from '$icp/utils/ckbtc-minter.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
-import { Cbor } from '@dfinity/agent';
 import type { RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import { arrayOfNumberToUint8Array, fromNullable, nonNullish } from '@dfinity/utils';
 
@@ -93,7 +96,7 @@ const isCkbtcReimbursementMintMemo = (memo: Uint8Array | number[]) => {
 	}
 };
 
-export const burnMemoLabel = (memo: Uint8Array | number[]): string | undefined => {
+export const burnMemoLabel = (memo: Uint8Array | number[]): string | undefined | null => {
 	try {
 		const [_, [label]] = decodeBurnMemo(
 			memo instanceof Uint8Array ? memo : arrayOfNumberToUint8Array(memo)
@@ -104,10 +107,3 @@ export const burnMemoLabel = (memo: Uint8Array | number[]): string | undefined =
 		return undefined;
 	}
 };
-
-// TODO: to be implemented in ic-js
-
-// The memo will decode to: [0, [ withdrawalAddress, kytFee, status]]
-type CkbtcBurnMemo = [0, [string, number, number | null | undefined]];
-
-const decodeBurnMemo = (memo: Uint8Array): CkbtcBurnMemo => Cbor.decode(memo) as CkbtcBurnMemo;
