@@ -28,9 +28,10 @@
 	 * Props
 	 */
 
+	export let networkId: NetworkId | undefined = undefined;
+
 	let destination = '';
 	let amount: number | undefined = undefined;
-	let networkId: NetworkId | undefined = undefined;
 
 	/**
 	 * Send

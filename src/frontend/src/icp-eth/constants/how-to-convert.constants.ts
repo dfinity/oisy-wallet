@@ -14,7 +14,7 @@ export const HOW_TO_CONVERT_WIZARD_STEPS: WizardSteps = [
 	},
 	{
 		...send,
-		title: 'Convert ETH to ckETH'
+		title: 'Convert to ckETH'
 	},
 	...rest
 ];

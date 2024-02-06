@@ -5,7 +5,7 @@
 	import { networkICP } from '$lib/derived/network.derived';
 	import IcSend from '$icp/components/send/IcSend.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
-	import HowToConvertETH from '$icp/components/convert/HowToConvertETH.svelte';
+	import ConvertCkETHToETH from '$icp/components/convert/ConvertCkETHToETH.svelte';
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { PROD } from '$lib/constants/app.constants';
 
@@ -40,7 +40,7 @@
 
 	{#if convertEth}
 		{#if $networkICP}
-			<HowToConvertETH />
+			<ConvertCkETHToETH />
 		{:else}
 			<ConvertETHToCkETH />
 		{/if}

@@ -25,7 +25,7 @@
 		}
 
 		if ($networkICP) {
-			modalStore.openHowToConvertETHToCkETH();
+			modalStore.openConvertCkETHToETH();
 			return;
 		}
 
