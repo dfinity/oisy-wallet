@@ -19,7 +19,7 @@
 
 <ConvertETHToCkETH>
 	<IconImportExport size="28" />
-	<span> Convert ETH to ckETH </span>
+	<span> Convert to ckETH </span>
 </ConvertETHToCkETH>
 
 {#if $modalConvertETHToCkETH}

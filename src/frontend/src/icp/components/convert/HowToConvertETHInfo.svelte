@@ -39,11 +39,11 @@
 		>2</span
 	>
 
-	<p class="font-bold">Convert ETH to ckETH</p>
+	<p class="font-bold">Convert to ckETH</p>
 </div>
 
 <button class="secondary full center mt-6 mb-8" on:click={() => dispatch('icConvert')}>
-	<span class="text-dark-slate-blue font-bold">Convert ETH to ckETH</span>
+	<span class="text-dark-slate-blue font-bold">Convert to ckETH</span>
 </button>
 
 {#if cancelAction === 'back'}

@@ -34,7 +34,7 @@
 	$: steps = [
 		{
 			...firstStep,
-			title: sendPurpose === 'convert-eth-to-cketh' ? 'Convert ETH to ckETH' : 'Send'
+			title: sendPurpose === 'convert-eth-to-cketh' ? 'Convert to ckETH' : 'Send'
 		},
 		...otherSteps
 	];
