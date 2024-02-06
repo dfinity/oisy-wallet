@@ -13,17 +13,7 @@
 	class={styleClass}
 >
 	<path
-		d="M17.5 9.65692L11.8431 4.00007M11.8431 4.00007L6.18628 9.65692M11.8431 4.00007V15.3138"
-		stroke="currentColor"
-		stroke-width="2"
-		stroke-linecap="round"
-		stroke-linejoin="round"
-	/>
-	<line
-		x1="5.5"
-		y1="19"
-		x2="18.5"
-		y2="19"
+		d="M17 17V7M17 7H7M17 7L7 17"
 		stroke="currentColor"
 		stroke-width="2"
 		stroke-linecap="round"
