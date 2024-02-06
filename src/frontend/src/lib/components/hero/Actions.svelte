@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Send from '$eth/components/send/Send.svelte';
 	import Receive from '$eth/components/receive/Receive.svelte';
-	import ConvertETHToCkETH from '$eth/components/send/ConvertETHToCkETH.svelte';
+	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 	import IcSend from '$icp/components/send/IcSend.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
-	import ConvertCkETHToETH from '$icp/components/convert/ConvertCkETHToETH.svelte';
+	import ConvertToETH from '$icp/components/convert/ConvertToETH.svelte';
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { PROD } from '$lib/constants/app.constants';
 
@@ -40,9 +40,9 @@
 
 	{#if convertEth}
 		{#if $networkICP}
-			<ConvertCkETHToETH />
+			<ConvertToETH />
 		{:else}
-			<ConvertETHToCkETH />
+			<ConvertToCkETH />
 		{/if}
 	{/if}
 </div>
