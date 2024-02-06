@@ -13,6 +13,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { IcToken, IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 
 	export let transaction: IcTransaction;
 
@@ -49,7 +50,12 @@
 	$: pending = uiTransaction?.status === 'pending';
 
 	let icon: ComponentType;
-	$: icon = incoming === false ? IconSend : IconReceive;
+	$: icon =
+		nonNullish(transactionType) && ['approve', 'burn', 'mint'].includes(transactionType)
+			? IconConvert
+			: incoming === false
+				? IconSend
+				: IconReceive;
 
 	let amount: BigNumber | undefined;
 	$: amount = !incoming && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
