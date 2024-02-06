@@ -4,7 +4,6 @@
 	import { token } from '$lib/derived/token.derived';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
-	import IcSendNetworkCkBTC from '$icp/components/send/IcSendNetworkCk.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
@@ -32,8 +31,6 @@
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<IcSendDestination bind:destination bind:invalidDestination {networkId} />
-
-	<IcSendNetworkCkBTC bind:destination bind:networkId />
 
 	<IcSendAmount bind:amount bind:amountError {networkId} />
 

@@ -6,7 +6,7 @@
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import type { NetworkId } from '$lib/types/network';
-	import IcSendReviewNetwork from '$icp/components/send/IcSendReviewNetwork.svelte';
+	import IcSendReviewNetwork from '$icp/components/send/IcNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import { balance } from '$lib/derived/balances.derived';
 
