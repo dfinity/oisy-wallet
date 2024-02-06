@@ -8,7 +8,7 @@
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { token } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
-	import {ICP_NETWORK_ID} from "$lib/constants/networks.constants";
+	import { ICP_NETWORK_ID } from '$lib/constants/networks.constants';
 
 	const openSend = async () => {
 		if ($tokenCkBtcLedger) {

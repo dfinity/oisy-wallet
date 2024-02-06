@@ -1,11 +1,9 @@
 <script lang="ts">
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import { address } from '$lib/derived/address.derived';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { createEventDispatcher } from 'svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
-
-	export let cancelAction: 'back' | 'close' = 'close';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -39,17 +37,17 @@
 		>2</span
 	>
 
-	<p class="font-bold">Convert to ckETH</p>
+	<div>
+		<Value element="div">
+			<svelte:fragment slot="label">Convert ETH to ckETH</svelte:fragment>
+
+			<button class="secondary full center mt-3 mb-8" on:click={() => dispatch('icConvert')}>
+				<span class="text-dark-slate-blue font-bold">Convert to ckETH</span>
+			</button>
+		</Value>
+	</div>
 </div>
 
-<button class="secondary full center mt-6 mb-8" on:click={() => dispatch('icConvert')}>
-	<span class="text-dark-slate-blue font-bold">Convert to ckETH</span>
-</button>
-
-{#if cancelAction === 'back'}
-	<button class="primary full center text-center mt-8" on:click={() => dispatch('icBack')}
-		>Back</button
-	>
-{:else}
-	<button class="primary full center text-center mb-6" on:click={modalStore.close}>Done</button>
-{/if}
+<button class="primary full center text-center mt-8" on:click={() => dispatch('icBack')}
+	>Back</button
+>
