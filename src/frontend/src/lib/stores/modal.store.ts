@@ -8,6 +8,7 @@ export interface Modal<T> {
 		| 'ckbtc-receive'
 		| 'cketh-receive'
 		| 'send'
+		| 'convert-ckbtc-btc'
 		| 'convert-eth-cketh'
 		| 'convert-cketh-eth'
 		| 'how-to-convert-eth-cketh'
@@ -31,6 +32,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openCkBTCReceive: () => void;
 	openCkETHReceive: () => void;
 	openSend: () => void;
+	openConvertCkBTCToBTC: () => void;
 	openConvertETHToCkETH: () => void;
 	openConvertCkETHToETH: () => void;
 	openHowToConvertETHToCkETH: () => void;
@@ -55,6 +57,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openCkBTCReceive: () => set({ type: 'ckbtc-receive' }),
 		openCkETHReceive: () => set({ type: 'cketh-receive' }),
 		openSend: () => set({ type: 'send' }),
+		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
 		openConvertETHToCkETH: () => set({ type: 'convert-eth-cketh' }),
 		openConvertCkETHToETH: () => set({ type: 'convert-cketh-eth' }),
 		openHowToConvertETHToCkETH: () => set({ type: 'how-to-convert-eth-cketh' }),

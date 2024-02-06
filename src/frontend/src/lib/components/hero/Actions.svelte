@@ -8,11 +8,18 @@
 	import ConvertToETH from '$icp/components/convert/ConvertToETH.svelte';
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { PROD } from '$lib/constants/app.constants';
+	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
+	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
+	import { routeToken } from '$lib/derived/nav.derived';
+	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 
 	export let send = false;
 
 	let convertEth = false;
-	$: convertEth = send && $ethToCkETHEnabled && !PROD;
+	$: convertEth = send && $ethToCkETHEnabled && $routeToken === ETHEREUM_TOKEN.name && !PROD;
+
+	let convertBtc = false;
+	$: convertBtc = send && $tokenCkBtcLedger && !PROD;
 
 	let singleAction = true;
 	$: singleAction = !send && !convertEth;
@@ -44,5 +51,9 @@
 		{:else}
 			<ConvertToCkETH />
 		{/if}
+	{/if}
+
+	{#if convertBtc}
+		<ConvertToBTC />
 	{/if}
 </div>
