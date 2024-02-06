@@ -1,13 +1,16 @@
 <script lang="ts">
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import { address } from '$lib/derived/address.derived';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
-
-	export let cancelAction: 'back' | 'close' = 'close';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	const dispatch = createEventDispatcher();
+
+	const { sendBalance, sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <div>
@@ -17,11 +20,11 @@
 <div class="grid grid-cols-[1fr_auto] gap-x-4 mt-4">
 	<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
 		<span
-			class="inline-flex items-center justify-center p-3 w-4 h-4 text-misty-rose border-2 rounded-full"
+			class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
 			>1</span
 		>
 
-		<div class="border h-full w-0.5 border-misty-rose"></div>
+		<div class="h-full w-[1.5px] bg-misty-rose"></div>
 	</div>
 
 	<ReceiveAddress
@@ -34,22 +37,46 @@
 		<svelte:fragment slot="title">Send ETH to your {OISY_NAME} address</svelte:fragment>
 	</ReceiveAddress>
 
+	<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
+		<span
+			class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+			>2</span
+		>
+
+		<div class="h-full w-[1.5px] bg-misty-rose"></div>
+	</div>
+
+	<div>
+		<Value element="div">
+			<svelte:fragment slot="label">Wait for ETH to arrive. Current balance</svelte:fragment>
+
+			<p class="mb-6">
+				{formatToken({
+					value: $sendBalance ?? BigNumber.from(0n),
+					unitName: $sendTokenDecimals,
+					displayDecimals: $sendTokenDecimals
+				})}
+				{$sendToken.symbol}
+			</p>
+		</Value>
+	</div>
+
 	<span
-		class="inline-flex items-center justify-center p-3 w-4 h-4 text-misty-rose border-2 rounded-full"
-		>2</span
+		class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+		>3</span
 	>
 
-	<p class="font-bold">Convert ETH to ckETH</p>
+	<div>
+		<Value element="div">
+			<svelte:fragment slot="label">Convert ETH to ckETH</svelte:fragment>
+
+			<button class="secondary full center mt-3 mb-4" on:click={() => dispatch('icConvert')}>
+				<span class="text-dark-slate-blue font-bold">Set amount for conversion</span>
+			</button>
+		</Value>
+	</div>
 </div>
 
-<button class="secondary full center mt-6 mb-8" on:click={() => dispatch('icConvert')}>
-	<span class="text-dark-slate-blue font-bold">Convert ETH to ckETH</span>
-</button>
-
-{#if cancelAction === 'back'}
-	<button class="primary full center text-center mt-8" on:click={() => dispatch('icBack')}
-		>Back</button
-	>
-{:else}
-	<button class="primary full center text-center mb-6" on:click={modalStore.close}>Done</button>
-{/if}
+<button class="primary full center text-center mt-8 mb-6" on:click={() => dispatch('icBack')}
+	>Back</button
+>

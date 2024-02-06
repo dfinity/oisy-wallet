@@ -77,7 +77,6 @@
 	>
 		{#if currentStep?.name === HOW_TO_CONVERT_WIZARD_STEPS[0].name}
 			<HowToConvertETHInfo
-				cancelAction="back"
 				on:icBack={() => modal.set(0)}
 				on:icQRCode={modal.next}
 				on:icConvert={() => modal.set(4)}

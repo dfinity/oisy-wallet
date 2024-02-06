@@ -25,6 +25,10 @@ export const modalConvertETHToCkETH: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-eth-cketh'
 );
+export const modalConvertCkETHToETH: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'convert-cketh-eth'
+);
 export const modalHowToConvertETHToCkETH: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'how-to-convert-eth-cketh'
