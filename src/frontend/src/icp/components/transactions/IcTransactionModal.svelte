@@ -17,10 +17,9 @@
 	let value: BigNumber | undefined;
 	let timestamp: bigint | undefined;
 	let type: IcTransactionType;
-	let typeLabel: string | undefined;
 	let toLabel: string | undefined;
 
-	$: ({ id, from, to, value, timestamp, type, typeLabel, toLabel } = transaction);
+	$: ({ id, from, to, value, timestamp, type, toLabel } = transaction);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
