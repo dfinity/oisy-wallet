@@ -71,7 +71,7 @@
 			<svelte:fragment slot="label">Convert ETH to ckETH</svelte:fragment>
 
 			<button class="secondary full center mt-3 mb-4" on:click={() => dispatch('icConvert')}>
-				<span class="text-dark-slate-blue font-bold">Convert to ckETH</span>
+				<span class="text-dark-slate-blue font-bold">Set amount for conversion</span>
 			</button>
 		</Value>
 	</div>
