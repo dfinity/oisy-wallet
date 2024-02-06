@@ -1,10 +1,10 @@
 <script lang="ts">
 	import bitcoin from '$lib/assets/bitcoin.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { isBusy } from '$lib/derived/busy.derived';
+	import { emit } from '$lib/utils/events.utils';
 
-	const openReceive = () => modalStore.openCkBTCReceive();
+	const openReceive = () => emit({ message: 'oisyReceiveCkBTC' });
 </script>
 
 <div class="pr-2">

@@ -20,6 +20,8 @@
 	};
 </script>
 
+<svelte:window on:oisyReceiveCkBTC={openReceive} />
+
 <IcReceiveButton on:click={async () => await openReceive()} />
 
 {#if $modalCkBTCReceive}
