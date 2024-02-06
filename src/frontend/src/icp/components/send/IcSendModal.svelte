@@ -23,6 +23,8 @@
 	} from '$icp/stores/ic-fee.store';
 	import { setContext } from 'svelte';
 	import BitcoinFeeContext from '$icp/components/fee/IcFeeContext.svelte';
+	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
+	import { ETHEREUM_NETWORK_ID } from '$lib/constants/networks.constants';
 
 	/**
 	 * Props
@@ -86,10 +88,16 @@
 		}
 	};
 
-	const steps: WizardSteps = [
+	let steps: WizardSteps;
+	$: steps = [
 		{
 			name: 'Send',
-			title: 'Send'
+			title:
+				networkId === BTC_NETWORK_ID
+					? 'Convert to BTC'
+					: networkId === ETHEREUM_NETWORK_ID
+						? 'Convert to ETH'
+						: 'Send'
 		},
 		{
 			name: 'Review',
