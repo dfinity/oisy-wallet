@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { slide, fade } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { nonNullish } from '@dfinity/utils';
 	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
@@ -50,7 +49,7 @@
 </script>
 
 {#if ckETH && ethNetwork}
-	<div transition:slide={{ easing: quintOut, axis: 'y' }}>
+	<div transition:slide={{ duration: 250 }}>
 		<Value ref="kyt-fee">
 			<svelte:fragment slot="label">Estimated Ethereum Fee (Updated ≈30 Seconds)</svelte:fragment>
 

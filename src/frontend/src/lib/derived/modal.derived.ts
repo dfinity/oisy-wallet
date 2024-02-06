@@ -21,9 +21,17 @@ export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
 );
+export const modalConvertCkBTCToBTC: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'convert-ckbtc-btc'
+);
 export const modalConvertETHToCkETH: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-eth-cketh'
+);
+export const modalConvertCkETHToETH: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'convert-cketh-eth'
 );
 export const modalHowToConvertETHToCkETH: Readable<boolean> = derived(
 	modalStore,

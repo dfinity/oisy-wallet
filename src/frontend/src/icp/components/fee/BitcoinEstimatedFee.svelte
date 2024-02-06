@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
 	import { nonNullish } from '@dfinity/utils';
 	import { BTC_DECIMALS } from '$icp/constants/ckbtc.constants';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -19,7 +18,7 @@
 </script>
 
 {#if nonNullish(bitcoinEstimatedFee)}
-	<div transition:slide={{ easing: quintOut, axis: 'y' }}>
+	<div transition:slide={{ duration: 250 }}>
 		<Value ref="kyt-fee">
 			<svelte:fragment slot="label">Estimated BTC Network Fee</svelte:fragment>
 
