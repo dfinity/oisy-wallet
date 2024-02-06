@@ -51,5 +51,5 @@
 />
 
 {#if insufficientFunds}
-	<p transition:slide class="text-cyclamen pb-3">Insufficient funds for gas</p>
+	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">Insufficient funds for gas</p>
 {/if}

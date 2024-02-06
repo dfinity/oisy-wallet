@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { nonNullish } from '@dfinity/utils';
@@ -25,7 +24,7 @@
 </script>
 
 {#if ckBTC && btcNetwork && nonNullish(kytFee)}
-	<div transition:slide={{ easing: quintOut, axis: 'y' }}>
+	<div transition:slide={{ duration: 250 }}>
 		<Value ref="kyt-fee">
 			<svelte:fragment slot="label">Estimated Inter-network Fee</svelte:fragment>
 

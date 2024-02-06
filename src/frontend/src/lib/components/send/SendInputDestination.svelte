@@ -28,5 +28,5 @@
 />
 
 {#if invalidDestination}
-	<p transition:slide class="text-cyclamen pb-3">Invalid destination address</p>
+	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">Invalid destination address</p>
 {/if}
