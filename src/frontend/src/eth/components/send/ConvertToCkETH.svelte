@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { modalConvertETHToCkETH } from '$lib/derived/modal.derived';
-	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
@@ -18,7 +18,7 @@
 </script>
 
 <ConvertETH>
-	<IconConvert size="28" />
+	<IconBurn size="28" />
 	<span> Convert to ckETH </span>
 </ConvertETH>
 
