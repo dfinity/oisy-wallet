@@ -34,6 +34,8 @@ export interface IcTransactionUi {
 	// e.g. BTC Received
 	typeLabel?: string;
 	from?: string;
+	// e.g. From: BTC Network
+	fromLabel?: string;
 	to?: string;
 	// e.g. To: BTC Network
 	toLabel?: string;
