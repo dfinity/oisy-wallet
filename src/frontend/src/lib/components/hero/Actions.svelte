@@ -10,13 +10,11 @@
 	import { PROD } from '$lib/constants/app.constants';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
-	import { routeToken } from '$lib/derived/nav.derived';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 
 	export let send = false;
 
 	let convertEth = false;
-	$: convertEth = send && $ethToCkETHEnabled && $routeToken === ETHEREUM_TOKEN.name && !PROD;
+	$: convertEth = send && $ethToCkETHEnabled && !PROD;
 
 	let convertBtc = false;
 	$: convertBtc = send && $tokenCkBtcLedger && !PROD;
