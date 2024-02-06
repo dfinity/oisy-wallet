@@ -5,7 +5,7 @@
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-	import ConvertETHToCkETH from '$icp-eth/components/send/ConvertETHToCkETH.svelte';
+	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 
@@ -17,10 +17,10 @@
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
-<ConvertETHToCkETH>
+<ConvertETH>
 	<IconImportExport size="28" />
 	<span> Convert to ckETH </span>
-</ConvertETHToCkETH>
+</ConvertETH>
 
 {#if $modalConvertETHToCkETH}
 	<SendTokenModal

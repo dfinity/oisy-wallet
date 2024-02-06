@@ -4,8 +4,19 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
+	import { modalHowToConvertETHToCkETH } from '$lib/derived/modal.derived';
+	import HowToConvertETHModal from '$icp/components/convert/HowToConvertETHModal.svelte';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { setContext } from 'svelte';
 
 	const openReceive = () => modalStore.openHowToConvertETHToCkETH();
+
+	/**
+	 * Send modal context store
+	 */
+
+	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh' });
+	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
 <div class="pr-2">
@@ -22,3 +33,7 @@
 		How to convert ETH to ckETH</button
 	>
 </div>
+
+{#if $modalHowToConvertETHToCkETH}
+	<HowToConvertETHModal />
+{/if}
