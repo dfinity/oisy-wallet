@@ -34,7 +34,7 @@ export const mapCkBTCTransaction = ({
 
 		return {
 			...tx,
-			toLabel: 'BTC Network',
+			fromLabel: 'BTC Network',
 			typeLabel: isReimbursement ? 'Reimbursement' : 'BTC Received',
 			status: isReimbursement ? 'reimbursed' : 'executed'
 		};
