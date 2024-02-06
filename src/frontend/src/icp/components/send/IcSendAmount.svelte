@@ -73,5 +73,5 @@
 />
 
 {#if nonNullish(amountError)}
-	<p transition:slide class="text-cyclamen pb-3">{amountError.message}</p>
+	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">{amountError.message}</p>
 {/if}
