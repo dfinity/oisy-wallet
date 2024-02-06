@@ -49,7 +49,7 @@
 			await removeUserToken({
 				identity: $authStore.identity,
 				tokenId: {
-					chain_id: ETH_CHAIN_ID,
+					chain_id: 5n, // Goerli
 					contract_address
 				}
 			});
