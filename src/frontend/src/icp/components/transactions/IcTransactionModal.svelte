@@ -18,8 +18,9 @@
 	let timestamp: bigint | undefined;
 	let type: IcTransactionType;
 	let toLabel: string | undefined;
+	let fromLabel: string | undefined;
 
-	$: ({ id, from, to, value, timestamp, type, toLabel } = transaction);
+	$: ({ id, from, to, value, timestamp, type, toLabel, fromLabel } = transaction);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -45,11 +46,23 @@
 			<p class="capitalize">{type}</p>
 		</Value>
 
-		{#if nonNullish(from)}
-			<Value ref="from">
+		{#if nonNullish(from) || nonNullish(fromLabel)}
+			<Value ref="from" element="div">
 				<svelte:fragment slot="label">From</svelte:fragment>
-				<output>{from}</output>
-				<Copy value={from} text="From address copied to clipboard." inline />
+
+				{#if nonNullish(fromLabel)}
+					<p class="capitalize mb-0.5">{fromLabel}</p>
+				{/if}
+
+				{#if nonNullish(from)}
+					<p class="capitalize">
+						<output>{from}</output><Copy
+							value={from}
+							text="From address copied to clipboard."
+							inline
+						/>
+					</p>
+				{/if}
 			</Value>
 		{/if}
 
