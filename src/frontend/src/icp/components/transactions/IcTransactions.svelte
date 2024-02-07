@@ -10,7 +10,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcpTransactionModal from './IcTransactionModal.svelte';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import type { IcToken, IcTransaction as IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+	import type { IcToken, IcTransactionUi } from '$icp/types/ic';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import type { CertifiedData } from '$lib/types/store';
@@ -22,7 +22,7 @@
 	import IcTransactionsBtcListener from '$icp/components/transactions/IcTransactionsBtcListener.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 
-	let transactions: CertifiedData<IcTransactionType>[];
+	let transactions: CertifiedData<IcTransactionUi>[];
 	$: transactions = $icTransactionsStore?.[$tokenId] ?? [];
 
 	let additionalListener: ComponentType;

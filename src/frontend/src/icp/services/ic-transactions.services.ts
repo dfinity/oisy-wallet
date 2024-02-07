@@ -2,6 +2,7 @@ import { getTransactions as getTransactionsIcp } from '$icp/api/icp-index.api';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index.api';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken, IcTransaction } from '$icp/types/ic';
+import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
 import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
@@ -36,7 +37,7 @@ const getTransactions = async ({
 };
 
 export const loadNextTransactions = async ({
-	token: { id: tokenId, ...token },
+	token,
 	identity,
 	signalEnd,
 	...rest
@@ -51,7 +52,7 @@ export const loadNextTransactions = async ({
 	queryAndUpdate<IcTransaction[]>({
 		request: (params) =>
 			getTransactions({
-				token: { id: tokenId, ...token },
+				token,
 				...rest,
 				...params
 			}),
@@ -62,12 +63,19 @@ export const loadNextTransactions = async ({
 			}
 
 			icTransactionsStore.append({
-				tokenId,
-				transactions: transactions.map((data) => ({ data, certified }))
+				tokenId: token.id,
+				transactions: transactions.map((transaction) => ({
+					data: mapIcTransaction({
+						transaction,
+						token,
+						identity
+					}),
+					certified
+				}))
 			});
 		},
 		onCertifiedError: ({ error }) => {
-			onLoadTransactionsError({ tokenId, error });
+			onLoadTransactionsError({ tokenId: token.id, error });
 
 			signalEnd();
 		},

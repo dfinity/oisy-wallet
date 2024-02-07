@@ -6,7 +6,6 @@ import type {
 	IcrcTransaction as IcrcTransactionCandid,
 	IcrcTransactionWithId
 } from '@dfinity/ledger-icrc';
-import type { BigNumber } from '@ethersproject/bignumber';
 
 export interface IcTransactionAddOnsInfo {
 	transferToSelf?: 'send' | 'receive';
@@ -40,7 +39,7 @@ export interface IcTransactionUi {
 	// e.g. To: BTC Network
 	toLabel?: string;
 	incoming?: boolean;
-	value?: BigNumber;
+	value?: bigint;
 	timestamp?: bigint;
 	status: IcTransactionStatus;
 }

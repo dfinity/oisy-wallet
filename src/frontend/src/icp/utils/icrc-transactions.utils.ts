@@ -3,7 +3,6 @@ import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const mapTransactionIcrcToSelf = (tx: IcrcTransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;
@@ -108,13 +107,12 @@ export const mapIcrcTransaction = ({
 					: 'receive';
 
 	const value = isApprove
-		? BigNumber.from(0n)
+		? 0n
 		: nonNullish(data?.amount)
-			? BigNumber.from(data.amount).add(
-					isTransfer && source.incoming === false
-						? fromNullable(fromNullable(transfer)?.fee ?? []) ?? 0n
-						: 0n
-				)
+			? data.amount +
+				(isTransfer && source.incoming === false
+					? fromNullable(fromNullable(transfer)?.fee ?? []) ?? 0n
+					: 0n)
 			: undefined;
 
 	return {
