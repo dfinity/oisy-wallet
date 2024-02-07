@@ -11,7 +11,12 @@ import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { isNullish, jsonReplacer } from '@dfinity/utils';
-import { Scheduler, type SchedulerJobData, type SchedulerJobParams } from './scheduler';
+import {
+	SchedulerTimer,
+	type Scheduler,
+	type SchedulerJobData,
+	type SchedulerJobParams
+} from './scheduler';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
@@ -27,8 +32,9 @@ export class WalletScheduler<
 	T extends IcrcTransaction | Transaction,
 	TWithId extends IcrcTransactionWithId | TransactionWithId,
 	PostMessageDataRequest
-> {
-	private scheduler = new Scheduler();
+> implements Scheduler<PostMessageDataRequest>
+{
+	private timer = new SchedulerTimer();
 
 	private store: WalletStore<T> = {
 		balance: undefined,
@@ -52,11 +58,11 @@ export class WalletScheduler<
 	) {}
 
 	stop() {
-		this.scheduler.stop();
+		this.timer.stop();
 	}
 
 	async start(data: PostMessageDataRequest | undefined) {
-		await this.scheduler.start<PostMessageDataRequest>({
+		await this.timer.start<PostMessageDataRequest>({
 			interval: WALLET_TIMER_INTERVAL_MILLIS,
 			job: this.syncWallet,
 			data
@@ -64,7 +70,7 @@ export class WalletScheduler<
 	}
 
 	async trigger(data: PostMessageDataRequest | undefined) {
-		await this.scheduler.trigger<PostMessageDataRequest>({
+		await this.timer.trigger<PostMessageDataRequest>({
 			job: this.syncWallet,
 			data
 		});
@@ -207,7 +213,7 @@ export class WalletScheduler<
 	}) {
 		const certifiedTransactions = newTransactions.map((data) => ({ data, certified }));
 
-		this.scheduler.postMsg<PostMessageDataResponseWallet<GetTransactions>>({
+		this.timer.postMsg<PostMessageDataResponseWallet<GetTransactions>>({
 			msg: this.msg,
 			data: {
 				wallet: {
@@ -226,7 +232,7 @@ export class WalletScheduler<
 	}
 
 	private postMessageWalletError(error: unknown) {
-		this.scheduler.postMsg<PostMessageDataResponseError>({
+		this.timer.postMsg<PostMessageDataResponseError>({
 			msg: `${this.msg}Error`,
 			data: {
 				error
@@ -235,7 +241,7 @@ export class WalletScheduler<
 	}
 
 	private postMessageWalletCleanUp(transactions: IndexedTransactions<T>) {
-		this.scheduler.postMsg<PostMessageDataResponseWalletCleanUp>({
+		this.timer.postMsg<PostMessageDataResponseWalletCleanUp>({
 			msg: `${this.msg}CleanUp`,
 			data: {
 				transactionIds: Object.keys(transactions)
