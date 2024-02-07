@@ -9,7 +9,7 @@ import type { CertifiedData } from '$lib/types/store';
 import { MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
-export class CkbtcUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestCkBTCWallet> {
+export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestCkBTCWallet> {
 	private timer = new SchedulerTimer();
 
 	stop() {
