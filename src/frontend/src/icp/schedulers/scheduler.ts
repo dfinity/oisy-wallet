@@ -4,30 +4,27 @@ import { loadIdentity } from '$lib/utils/auth.utils';
 import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
 
-export interface TimerWorkerUtilsParams<T> {
-	job: (params: TimerWorkerUtilsJobData<T>) => Promise<void>;
+export interface SchedulerParams<T> {
+	job: (params: SchedulerJobData<T>) => Promise<void>;
 	data?: T;
 }
 
-export type TimerWorkerUtilsJobData<T> = {
+export type SchedulerJobData<T> = {
 	data?: T;
-} & TimerWorkerUtilsSyncParams;
+} & SchedulerSyncParams;
 
-export type TimerWorkerUtilsJobParams<T> = TimerWorkerUtilsJobData<T> & Required<QueryParams>;
+export type SchedulerJobParams<T> = SchedulerJobData<T> & Required<QueryParams>;
 
-export interface TimerWorkerUtilsSyncParams {
+export interface SchedulerSyncParams {
 	identity: Identity;
 }
 
-export class TimerWorkerUtils {
+export class Scheduler {
 	private timer: NodeJS.Timeout | undefined = undefined;
 	private timerStatus: SyncState = 'idle';
 
-	async start<T>({
-		interval,
-		...rest
-	}: TimerWorkerUtilsParams<T> & { interval: number }): Promise<void> {
-		// This worker has already been started
+	async start<T>({ interval, ...rest }: SchedulerParams<T> & { interval: number }): Promise<void> {
+		// This worker scheduler has already been started
 		if (nonNullish(this.timer)) {
 			return;
 		}
@@ -48,7 +45,7 @@ export class TimerWorkerUtils {
 		this.timer = setInterval(execute, interval);
 	}
 
-	async trigger<T>(params: TimerWorkerUtilsParams<T>) {
+	async trigger<T>(params: SchedulerParams<T>) {
 		const identity: Identity | undefined = await loadIdentity();
 
 		if (isNullish(identity)) {
@@ -63,7 +60,7 @@ export class TimerWorkerUtils {
 	private async executeJob<T>({
 		job,
 		...rest
-	}: TimerWorkerUtilsParams<T> & TimerWorkerUtilsSyncParams): Promise<void> {
+	}: SchedulerParams<T> & SchedulerSyncParams): Promise<void> {
 		// Avoid to sync if already in progress - do not duplicate calls - or if there was a previous error
 		if (this.timerStatus !== 'idle') {
 			return;
@@ -93,7 +90,7 @@ export class TimerWorkerUtils {
 
 	postMsg<T>(data: { msg: PostMessageResponse; data: T }) {
 		if (this.isIdle()) {
-			// The worker was stopped between the start of the execution and the actual completion of the job it runs.
+			// The worker scheduler was stopped between the start of the execution and the actual completion of the job it runs.
 			return;
 		}
 

@@ -11,30 +11,26 @@ import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { isNullish, jsonReplacer } from '@dfinity/utils';
-import {
-	TimerWorkerUtils,
-	type TimerWorkerUtilsJobData,
-	type TimerWorkerUtilsJobParams
-} from './timer.worker-utils';
+import { Scheduler, type SchedulerJobData, type SchedulerJobParams } from './scheduler';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
 type IndexedTransactions<T> = Record<string, CertifiedData<IndexedTransaction<T>>>;
 
 // Not reactive, only used to hold values imperatively.
-interface WalletWorkerStore<T> {
+interface WalletStore<T> {
 	balance: CertifiedData<bigint> | undefined;
 	transactions: IndexedTransactions<T>;
 }
 
-export class WalletWorkerUtils<
+export class WalletScheduler<
 	T extends IcrcTransaction | Transaction,
 	TWithId extends IcrcTransactionWithId | TransactionWithId,
 	PostMessageDataRequest
 > {
-	private worker = new TimerWorkerUtils();
+	private scheduler = new Scheduler();
 
-	private store: WalletWorkerStore<T> = {
+	private store: WalletStore<T> = {
 		balance: undefined,
 		transactions: {}
 	};
@@ -43,24 +39,24 @@ export class WalletWorkerUtils<
 
 	constructor(
 		private getTransactions: (
-			data: TimerWorkerUtilsJobParams<PostMessageDataRequest>
+			data: SchedulerJobParams<PostMessageDataRequest>
 		) => Promise<GetTransactions & { transactions: TWithId[] }>,
 		private mapToSelfTransaction: (
 			transaction: TWithId
 		) => (Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> })[],
 		private mapTransaction: (params: {
 			transaction: Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> };
-			jobData: TimerWorkerUtilsJobData<PostMessageDataRequest>;
+			jobData: SchedulerJobData<PostMessageDataRequest>;
 		}) => IcTransactionUi,
 		private msg: 'syncIcpWallet' | 'syncIcrcWallet'
 	) {}
 
 	stop() {
-		this.worker.stop();
+		this.scheduler.stop();
 	}
 
 	async start(data: PostMessageDataRequest | undefined) {
-		await this.worker.start<PostMessageDataRequest>({
+		await this.scheduler.start<PostMessageDataRequest>({
 			interval: WALLET_TIMER_INTERVAL_MILLIS,
 			job: this.syncWallet,
 			data
@@ -68,16 +64,13 @@ export class WalletWorkerUtils<
 	}
 
 	async trigger(data: PostMessageDataRequest | undefined) {
-		await this.worker.trigger<PostMessageDataRequest>({
+		await this.scheduler.trigger<PostMessageDataRequest>({
 			job: this.syncWallet,
 			data
 		});
 	}
 
-	private syncWallet = async ({
-		identity,
-		...data
-	}: TimerWorkerUtilsJobData<PostMessageDataRequest>) => {
+	private syncWallet = async ({ identity, ...data }: SchedulerJobData<PostMessageDataRequest>) => {
 		await queryAndUpdate<GetTransactions & { transactions: TWithId[] }>({
 			request: ({ identity: _, certified }) =>
 				this.getTransactions({ ...data, identity, certified }),
@@ -98,7 +91,7 @@ export class WalletWorkerUtils<
 	}: {
 		response: GetTransactions & { transactions: TWithId[] };
 		certified: boolean;
-		jobData: TimerWorkerUtilsJobData<PostMessageDataRequest>;
+		jobData: SchedulerJobData<PostMessageDataRequest>;
 	}) => {
 		// Is there any new transactions unknown so far or which has become certified
 		const newTransactions = fetchedTransactions.filter(
@@ -214,7 +207,7 @@ export class WalletWorkerUtils<
 	}) {
 		const certifiedTransactions = newTransactions.map((data) => ({ data, certified }));
 
-		this.worker.postMsg<PostMessageDataResponseWallet<GetTransactions>>({
+		this.scheduler.postMsg<PostMessageDataResponseWallet<GetTransactions>>({
 			msg: this.msg,
 			data: {
 				wallet: {
@@ -233,7 +226,7 @@ export class WalletWorkerUtils<
 	}
 
 	private postMessageWalletError(error: unknown) {
-		this.worker.postMsg<PostMessageDataResponseError>({
+		this.scheduler.postMsg<PostMessageDataResponseError>({
 			msg: `${this.msg}Error`,
 			data: {
 				error
@@ -242,7 +235,7 @@ export class WalletWorkerUtils<
 	}
 
 	private postMessageWalletCleanUp(transactions: IndexedTransactions<T>) {
-		this.worker.postMsg<PostMessageDataResponseWalletCleanUp>({
+		this.scheduler.postMsg<PostMessageDataResponseWalletCleanUp>({
 			msg: `${this.msg}CleanUp`,
 			data: {
 				transactionIds: Object.keys(transactions)
