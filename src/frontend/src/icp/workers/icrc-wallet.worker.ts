@@ -1,13 +1,10 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index.api';
+import type { SchedulerJobData, SchedulerJobParams } from '$icp/schedulers/scheduler';
+import { WalletScheduler } from '$icp/schedulers/wallet.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
 import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 import { mapIcrcTransaction, mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
-import {
-	type TimerWorkerUtilsJobData,
-	type TimerWorkerUtilsJobParams
-} from '$icp/worker-utils/timer.worker-utils';
-import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
 import type { PostMessage, PostMessageDataRequestIcrc } from '$lib/types/post-message';
 import {
 	type IcrcGetTransactions,
@@ -20,7 +17,7 @@ const getTransactions = ({
 	identity,
 	certified,
 	data
-}: TimerWorkerUtilsJobParams<PostMessageDataRequestIcrc>): Promise<IcrcGetTransactions> => {
+}: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<IcrcGetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
 	return getTransactionsApi({
@@ -38,7 +35,7 @@ const mapTransaction = ({
 	jobData: { identity, data }
 }: {
 	transaction: Pick<IcrcTransactionWithId, 'id'> & { transaction: IcrcTransaction };
-	jobData: TimerWorkerUtilsJobData<PostMessageDataRequestIcrc>;
+	jobData: SchedulerJobData<PostMessageDataRequestIcrc>;
 }): IcTransactionUi => {
 	if (nonNullish(data) && isTokenCkBtcLedger({ ledgerCanisterId: data.ledgerCanisterId })) {
 		return mapCkBTCTransaction({ transaction, identity });
@@ -47,11 +44,11 @@ const mapTransaction = ({
 	return mapIcrcTransaction({ transaction, identity });
 };
 
-const worker: WalletWorkerUtils<
+const scheduler: WalletScheduler<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrc
-> = new WalletWorkerUtils(
+> = new WalletScheduler(
 	getTransactions,
 	mapTransactionIcrcToSelf,
 	mapTransaction,
@@ -63,13 +60,13 @@ onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRe
 
 	switch (msg) {
 		case 'stopIcrcWalletTimer':
-			worker.stop();
+			scheduler.stop();
 			return;
 		case 'startIcrcWalletTimer':
-			await worker.start(data);
+			await scheduler.start(data);
 			return;
 		case 'triggerIcrcWalletTimer':
-			await worker.trigger(data);
+			await scheduler.trigger(data);
 			return;
 	}
 };

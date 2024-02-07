@@ -1,10 +1,7 @@
 import { withdrawalStatuses } from '$icp/api/ckbtc-minter.api';
 import { BTC_STATUSES_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
+import { Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
-import {
-	TimerWorkerUtils,
-	type TimerWorkerUtilsJobData
-} from '$icp/worker-utils/timer.worker-utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
 	PostMessageDataRequestCkBTCWallet,
@@ -15,15 +12,15 @@ import type { CertifiedData } from '$lib/types/store';
 import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
-export class BtcStatusesWorkerUtils {
-	private worker = new TimerWorkerUtils();
+export class BtcStatusesScheduler {
+	private scheduler = new Scheduler();
 
 	stop() {
-		this.worker.stop();
+		this.scheduler.stop();
 	}
 
 	async start(data: PostMessageDataRequestCkBTCWallet | undefined) {
-		await this.worker.start<PostMessageDataRequestCkBTCWallet>({
+		await this.scheduler.start<PostMessageDataRequestCkBTCWallet>({
 			interval: BTC_STATUSES_TIMER_INTERVAL_MILLIS,
 			job: this.syncStatuses,
 			data
@@ -31,7 +28,7 @@ export class BtcStatusesWorkerUtils {
 	}
 
 	async trigger(data: PostMessageDataRequestCkBTCWallet | undefined) {
-		await this.worker.trigger<PostMessageDataRequestCkBTCWallet>({
+		await this.scheduler.trigger<PostMessageDataRequestCkBTCWallet>({
 			job: this.syncStatuses,
 			data
 		});
@@ -40,7 +37,7 @@ export class BtcStatusesWorkerUtils {
 	private syncStatuses = async ({
 		identity,
 		data
-	}: TimerWorkerUtilsJobData<PostMessageDataRequestCkBTCWallet>) => {
+	}: SchedulerJobData<PostMessageDataRequestCkBTCWallet>) => {
 		const minterCanisterId = data?.minterCanisterId;
 
 		assertNonNullish(
@@ -78,7 +75,7 @@ export class BtcStatusesWorkerUtils {
 			data: statuses
 		};
 
-		this.worker.postMsg<PostMessageDataResponseCkBTCWallet>({
+		this.scheduler.postMsg<PostMessageDataResponseCkBTCWallet>({
 			msg: 'syncBtcStatuses',
 			data: {
 				statuses: JSON.stringify(data, jsonReplacer)
@@ -87,7 +84,7 @@ export class BtcStatusesWorkerUtils {
 	};
 
 	private postMessageWalletError(error: unknown) {
-		this.worker.postMsg<PostMessageDataResponseError>({
+		this.scheduler.postMsg<PostMessageDataResponseError>({
 			msg: 'syncBtcStatusesError',
 			data: {
 				error

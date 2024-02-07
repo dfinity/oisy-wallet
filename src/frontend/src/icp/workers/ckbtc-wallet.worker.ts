@@ -1,7 +1,7 @@
-import { BtcStatusesWorkerUtils } from '$icp/worker-utils/btc-statuses.worker-utils';
+import { BtcStatusesScheduler } from '$icp/schedulers/btc-statuses.scheduler';
 import type { PostMessage, PostMessageDataRequestCkBTCWallet } from '$lib/types/post-message';
 
-const worker = new BtcStatusesWorkerUtils();
+const scheduler = new BtcStatusesScheduler();
 
 onmessage = async ({
 	data: dataMsg
@@ -10,13 +10,13 @@ onmessage = async ({
 
 	switch (msg) {
 		case 'stopCkBTCWalletTimer':
-			worker.stop();
+			scheduler.stop();
 			return;
 		case 'startCkBTCWalletTimer':
-			await worker.start(data);
+			await scheduler.start(data);
 			return;
 		case 'triggerCkBTCWalletTimer':
-			await worker.trigger(data);
+			await scheduler.trigger(data);
 			return;
 	}
 };
