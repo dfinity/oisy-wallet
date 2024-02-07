@@ -19,7 +19,13 @@ export interface SchedulerSyncParams {
 	identity: Identity;
 }
 
-export class Scheduler {
+export interface Scheduler<T> {
+	stop: () => void;
+	start: (data: T | undefined) => Promise<void>;
+	trigger: (data: T | undefined) => Promise<void>;
+}
+
+export class SchedulerTimer {
 	private timer: NodeJS.Timeout | undefined = undefined;
 	private timerStatus: SyncState = 'idle';
 

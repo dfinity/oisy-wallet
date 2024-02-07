@@ -1,6 +1,6 @@
 import { withdrawalStatuses } from '$icp/api/ckbtc-minter.api';
 import { BTC_STATUSES_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
-import { Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
+import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
@@ -12,15 +12,15 @@ import type { CertifiedData } from '$lib/types/store';
 import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
-export class BtcStatusesScheduler {
-	private scheduler = new Scheduler();
+export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestCkBTCWallet> {
+	private timer = new SchedulerTimer();
 
 	stop() {
-		this.scheduler.stop();
+		this.timer.stop();
 	}
 
 	async start(data: PostMessageDataRequestCkBTCWallet | undefined) {
-		await this.scheduler.start<PostMessageDataRequestCkBTCWallet>({
+		await this.timer.start<PostMessageDataRequestCkBTCWallet>({
 			interval: BTC_STATUSES_TIMER_INTERVAL_MILLIS,
 			job: this.syncStatuses,
 			data
@@ -28,7 +28,7 @@ export class BtcStatusesScheduler {
 	}
 
 	async trigger(data: PostMessageDataRequestCkBTCWallet | undefined) {
-		await this.scheduler.trigger<PostMessageDataRequestCkBTCWallet>({
+		await this.timer.trigger<PostMessageDataRequestCkBTCWallet>({
 			job: this.syncStatuses,
 			data
 		});
@@ -75,7 +75,7 @@ export class BtcStatusesScheduler {
 			data: statuses
 		};
 
-		this.scheduler.postMsg<PostMessageDataResponseCkBTCWallet>({
+		this.timer.postMsg<PostMessageDataResponseCkBTCWallet>({
 			msg: 'syncBtcStatuses',
 			data: {
 				statuses: JSON.stringify(data, jsonReplacer)
@@ -84,7 +84,7 @@ export class BtcStatusesScheduler {
 	};
 
 	private postMessageWalletError(error: unknown) {
-		this.scheduler.postMsg<PostMessageDataResponseError>({
+		this.timer.postMsg<PostMessageDataResponseError>({
 			msg: 'syncBtcStatusesError',
 			data: {
 				error
