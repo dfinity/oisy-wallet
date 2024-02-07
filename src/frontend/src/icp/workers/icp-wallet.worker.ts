@@ -6,11 +6,7 @@ import {
 	type TimerWorkerUtilsJobParams
 } from '$icp/worker-utils/timer.worker-utils';
 import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
-import type {
-	PostMessage,
-	PostMessageDataRequest,
-	PostMessageDataRequestIcrc
-} from '$lib/types/post-message';
+import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import type {
 	GetAccountIdentifierTransactionsResponse,
 	Transaction,
@@ -30,13 +26,15 @@ const getTransactions = ({
 	});
 };
 
-const mapTransaction = (
-	params: {
-		transaction: Pick<TransactionWithId, 'id'> & {
-			transaction: Transaction & IcTransactionAddOnsInfo;
-		};
-	} & Pick<TimerWorkerUtilsJobData<PostMessageDataRequestIcrc>, 'identity'>
-): IcTransactionUi => mapIcpTransaction(params);
+const mapTransaction = ({
+	transaction,
+	jobData: { identity }
+}: {
+	transaction: Pick<TransactionWithId, 'id'> & {
+		transaction: Transaction & IcTransactionAddOnsInfo;
+	};
+	jobData: TimerWorkerUtilsJobData<PostMessageDataRequest>;
+}): IcTransactionUi => mapIcpTransaction({ transaction, identity });
 
 const worker: WalletWorkerUtils<Transaction, TransactionWithId, PostMessageDataRequest> =
 	new WalletWorkerUtils(getTransactions, mapTransactionIcpToSelf, mapTransaction, 'syncIcpWallet');

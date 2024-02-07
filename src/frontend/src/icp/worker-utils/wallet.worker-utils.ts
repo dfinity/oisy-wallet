@@ -48,11 +48,10 @@ export class WalletWorkerUtils<
 		private mapToSelfTransaction: (
 			transaction: TWithId
 		) => (Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> })[],
-		private mapTransaction: (
-			params: {
-				transaction: Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> };
-			} & Pick<TimerWorkerUtilsJobData<PostMessageDataRequest>, 'identity'>
-		) => IcTransactionUi,
+		private mapTransaction: (params: {
+			transaction: Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> };
+			jobData: TimerWorkerUtilsJobData<PostMessageDataRequest>;
+		}) => IcTransactionUi,
 		private msg: 'syncIcpWallet' | 'syncIcrcWallet'
 	) {}
 
@@ -83,7 +82,7 @@ export class WalletWorkerUtils<
 			request: ({ identity: _, certified }) =>
 				this.getTransactions({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => {
-				this.syncTransactions({ identity, certified, ...rest });
+				this.syncTransactions({ jobData: { identity, ...data }, certified, ...rest });
 				this.cleanTransactions({ certified });
 			},
 			onCertifiedError: ({ error }) => this.postMessageWalletError(error),
@@ -95,11 +94,12 @@ export class WalletWorkerUtils<
 	private syncTransactions = ({
 		response: { transactions: fetchedTransactions, balance, ...rest },
 		certified,
-		identity
+		jobData
 	}: {
 		response: GetTransactions & { transactions: TWithId[] };
 		certified: boolean;
-	} & Pick<TimerWorkerUtilsJobData<PostMessageDataRequest>, 'identity'>) => {
+		jobData: TimerWorkerUtilsJobData<PostMessageDataRequest>;
+	}) => {
 		// Is there any new transactions unknown so far or which has become certified
 		const newTransactions = fetchedTransactions.filter(
 			({ id }) =>
@@ -148,7 +148,7 @@ export class WalletWorkerUtils<
 		};
 
 		const newUiTransactions = newExtendedTransactions.map((transaction) =>
-			this.mapTransaction({ transaction, identity })
+			this.mapTransaction({ transaction, jobData })
 		);
 
 		this.postMessageWallet({

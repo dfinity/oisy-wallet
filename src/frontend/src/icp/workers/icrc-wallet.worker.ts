@@ -1,5 +1,7 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index.api';
 import type { IcTransactionUi } from '$icp/types/ic';
+import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
+import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 import { mapIcrcTransaction, mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import {
 	type TimerWorkerUtilsJobData,
@@ -12,7 +14,7 @@ import {
 	type IcrcTransaction,
 	type IcrcTransactionWithId
 } from '@dfinity/ledger-icrc';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 
 const getTransactions = ({
 	identity,
@@ -31,14 +33,18 @@ const getTransactions = ({
 	});
 };
 
-const mapTransaction = (
-	params: {
-		transaction: Pick<IcrcTransactionWithId, 'id'> & { transaction: IcrcTransaction };
-	} & Pick<TimerWorkerUtilsJobData<PostMessageDataRequestIcrc>, 'identity'>
-): IcTransactionUi => {
-	// TODO ckBTC
+const mapTransaction = ({
+	transaction,
+	jobData: { identity, data }
+}: {
+	transaction: Pick<IcrcTransactionWithId, 'id'> & { transaction: IcrcTransaction };
+	jobData: TimerWorkerUtilsJobData<PostMessageDataRequestIcrc>;
+}): IcTransactionUi => {
+	if (nonNullish(data) && isTokenCkBtcLedger({ ledgerCanisterId: data.ledgerCanisterId })) {
+		return mapCkBTCTransaction({ transaction, identity });
+	}
 
-	return mapIcrcTransaction(params);
+	return mapIcrcTransaction({ transaction, identity });
 };
 
 const worker: WalletWorkerUtils<
