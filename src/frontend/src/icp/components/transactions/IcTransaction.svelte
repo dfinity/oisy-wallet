@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { BigNumber } from '@ethersproject/bignumber';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import { type ComponentType, onMount } from 'svelte';
+	import { type ComponentType } from 'svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -9,62 +9,43 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/derived/token.derived';
-	import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import type { IcToken, IcTransaction, IcTransactionType, IcTransactionUi } from '$icp/types/ic';
-	import { authStore } from '$lib/stores/auth.store';
+	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import IconMint from '$lib/components/icons/IconMint.svelte';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 
-	export let transaction: IcTransaction;
+	export let transaction: IcTransactionUi;
 
-	let uiTransaction: IcTransactionUi | undefined;
-
-	onMount(() => {
-		try {
-			uiTransaction = mapIcTransaction({
-				transaction,
-				token: $token as IcToken,
-				identity: $authStore.identity
-			});
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: 'Cannot map the transaction for display purpose.' },
-				err
-			});
-		}
-	});
-
-	let transactionType: IcTransactionType | undefined;
+	let transactionType: IcTransactionType;
 	let transactionTypeLabel: string | undefined;
-	let value: BigNumber | undefined;
+	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let incoming: boolean | undefined;
 
-	$: transactionType = uiTransaction?.type;
-	$: transactionTypeLabel = uiTransaction?.typeLabel;
-	$: value = uiTransaction?.value;
-	$: timestamp = uiTransaction?.timestamp;
-	$: incoming = uiTransaction?.incoming;
+	$: ({
+		type: transactionType,
+		typeLabel: transactionTypeLabel,
+		value,
+		timestamp,
+		incoming
+	} = transaction);
 
 	let pending = false;
-	$: pending = uiTransaction?.status === 'pending';
+	$: pending = transaction?.status === 'pending';
 
 	let icon: ComponentType;
-	$: icon =
-		nonNullish(transactionType) && ['burn', 'approve'].includes(transactionType)
-			? IconBurn
-			: transactionType === 'mint'
-				? IconMint
-				: incoming === false
-					? IconSend
-					: IconReceive;
+	$: icon = ['burn', 'approve'].includes(transactionType)
+		? IconBurn
+		: transactionType === 'mint'
+			? IconMint
+			: incoming === false
+				? IconSend
+				: IconReceive;
 
-	let amount: BigNumber | undefined;
-	$: amount = !incoming && nonNullish(value) ? value.mul(BigNumber.from(-1)) : value;
+	let amount: bigint | undefined;
+	$: amount = !incoming && nonNullish(value) ? value * -1n : value;
 </script>
 
-<button on:click={() => modalStore.openIcTransaction(uiTransaction)} class="block w-full border-0">
+<button on:click={() => modalStore.openIcTransaction(transaction)} class="block w-full border-0">
 	<Card {pending}>
 		<span class="capitalize">{transactionTypeLabel ?? transactionType}</span>
 
@@ -73,7 +54,7 @@
 		<svelte:fragment slot="amount">
 			{nonNullish(amount)
 				? formatToken({
-						value: amount,
+						value: BigNumber.from(amount),
 						unitName: $token.decimals
 					})
 				: ''}</svelte:fragment

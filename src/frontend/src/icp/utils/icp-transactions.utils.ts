@@ -3,7 +3,6 @@ import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import { fromNullable, nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const mapTransactionIcpToSelf = (
 	tx: TransactionWithId
@@ -79,7 +78,7 @@ export const mapIcpTransaction = ({
 		incoming: boolean | undefined;
 		fee: Tokens;
 		amount: Tokens;
-	}): BigNumber => BigNumber.from(amount.e8s).add(incoming === false ? fee.e8s : 0n);
+	}): bigint => amount.e8s + (incoming === false ? fee.e8s : 0n);
 
 	if ('Approve' in operation) {
 		return {
@@ -94,7 +93,7 @@ export const mapIcpTransaction = ({
 			...tx,
 			type: 'burn',
 			...mapFrom(operation.Burn.from),
-			value: BigNumber.from(operation.Burn.amount.e8s)
+			value: operation.Burn.amount.e8s
 		};
 	}
 
@@ -104,7 +103,7 @@ export const mapIcpTransaction = ({
 			type: 'mint',
 			to: operation.Mint.to,
 			incoming: true,
-			value: BigNumber.from(operation.Mint.amount.e8s)
+			value: operation.Mint.amount.e8s
 		};
 	}
 

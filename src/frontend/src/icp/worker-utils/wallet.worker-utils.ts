@@ -1,5 +1,5 @@
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$icp/constants/ic.constants';
-import type { IcTransactionAddOnsInfo } from '$icp/types/ic';
+import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
@@ -48,6 +48,10 @@ export class WalletWorkerUtils<
 		private mapToSelfTransaction: (
 			transaction: TWithId
 		) => (Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> })[],
+		private mapTransaction: (params: {
+			transaction: Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> };
+			jobData: TimerWorkerUtilsJobData<PostMessageDataRequest>;
+		}) => IcTransactionUi,
 		private msg: 'syncIcpWallet' | 'syncIcrcWallet'
 	) {}
 
@@ -78,7 +82,7 @@ export class WalletWorkerUtils<
 			request: ({ identity: _, certified }) =>
 				this.getTransactions({ ...data, identity, certified }),
 			onLoad: ({ certified, ...rest }) => {
-				this.syncTransactions({ certified, ...rest });
+				this.syncTransactions({ jobData: { identity, ...data }, certified, ...rest });
 				this.cleanTransactions({ certified });
 			},
 			onCertifiedError: ({ error }) => this.postMessageWalletError(error),
@@ -89,10 +93,12 @@ export class WalletWorkerUtils<
 
 	private syncTransactions = ({
 		response: { transactions: fetchedTransactions, balance, ...rest },
-		certified
+		certified,
+		jobData
 	}: {
 		response: GetTransactions & { transactions: TWithId[] };
 		certified: boolean;
+		jobData: TimerWorkerUtilsJobData<PostMessageDataRequest>;
 	}) => {
 		// Is there any new transactions unknown so far or which has become certified
 		const newTransactions = fetchedTransactions.filter(
@@ -112,7 +118,7 @@ export class WalletWorkerUtils<
 			// We execute postMessage at least once because developer may have no transaction at all so, we want to display the balance zero
 			if (!this.initialized) {
 				this.postMessageWallet({
-					transactions: newExtendedTransactions,
+					transactions: [],
 					balance,
 					certified,
 					...rest
@@ -141,8 +147,12 @@ export class WalletWorkerUtils<
 			}
 		};
 
+		const newUiTransactions = newExtendedTransactions.map((transaction) =>
+			this.mapTransaction({ transaction, jobData })
+		);
+
 		this.postMessageWallet({
-			transactions: newExtendedTransactions,
+			transactions: newUiTransactions,
 			balance,
 			certified,
 			...rest
@@ -198,7 +208,7 @@ export class WalletWorkerUtils<
 		certified,
 		...rest
 	}: GetTransactions & {
-		transactions: (Pick<TWithId, 'id'> & { transaction: IndexedTransaction<T> })[];
+		transactions: IcTransactionUi[];
 	} & {
 		certified: boolean;
 	}) {

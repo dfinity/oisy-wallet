@@ -15,6 +15,7 @@ import { syncWallet } from './ic-listener.services';
 
 export const initIcrcWalletWorker = async ({
 	indexCanisterId,
+	ledgerCanisterId,
 	id: tokenId
 }: IcToken): Promise<WalletWorker> => {
 	const WalletWorker = await import('$icp/workers/icrc-wallet.worker?worker');
@@ -60,7 +61,8 @@ export const initIcrcWalletWorker = async ({
 			worker.postMessage({
 				msg: 'startIcrcWalletTimer',
 				data: {
-					indexCanisterId
+					indexCanisterId,
+					ledgerCanisterId
 				}
 			});
 		},
@@ -73,7 +75,8 @@ export const initIcrcWalletWorker = async ({
 			worker.postMessage({
 				msg: 'triggerIcrcWalletTimer',
 				data: {
-					indexCanisterId
+					indexCanisterId,
+					ledgerCanisterId
 				}
 			});
 		}

@@ -30,7 +30,7 @@ export interface PostMessageDataRequestExchangeTimer {
 	erc20Addresses: Erc20ContractAddress[];
 }
 
-export type PostMessageDataRequestIcrc = Pick<IcCanisters, 'indexCanisterId'>;
+export type PostMessageDataRequestIcrc = IcCanisters;
 
 export type PostMessageDataRequestBtcStatuses = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 

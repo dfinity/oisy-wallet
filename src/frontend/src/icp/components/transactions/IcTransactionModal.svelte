@@ -2,7 +2,7 @@
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import type { BigNumber } from '@ethersproject/bignumber';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 	import { token } from '$lib/derived/token.derived';
@@ -14,7 +14,7 @@
 	let id: bigint;
 	let from: string | undefined;
 	let to: string | undefined;
-	let value: BigNumber | undefined;
+	let value: bigint | undefined;
 	let timestamp: bigint | undefined;
 	let type: IcTransactionType;
 	let toLabel: string | undefined;
@@ -87,7 +87,7 @@
 				<svelte:fragment slot="label">Value</svelte:fragment>
 				<output>
 					{formatToken({
-						value,
+						value: BigNumber.from(value),
 						unitName: $token.decimals,
 						displayDecimals: $token.decimals
 					})}
