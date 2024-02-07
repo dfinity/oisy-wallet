@@ -1,11 +1,8 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
+import type { SchedulerJobData, SchedulerJobParams } from '$icp/schedulers/scheduler';
+import { WalletScheduler } from '$icp/schedulers/wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
-import {
-	type TimerWorkerUtilsJobData,
-	type TimerWorkerUtilsJobParams
-} from '$icp/worker-utils/timer.worker-utils';
-import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import type {
 	GetAccountIdentifierTransactionsResponse,
@@ -16,7 +13,7 @@ import type {
 const getTransactions = ({
 	identity,
 	certified
-}: TimerWorkerUtilsJobParams<PostMessageDataRequest>): Promise<GetAccountIdentifierTransactionsResponse> => {
+}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetAccountIdentifierTransactionsResponse> => {
 	return getTransactionsApi({
 		identity,
 		certified,
@@ -33,24 +30,24 @@ const mapTransaction = ({
 	transaction: Pick<TransactionWithId, 'id'> & {
 		transaction: Transaction & IcTransactionAddOnsInfo;
 	};
-	jobData: TimerWorkerUtilsJobData<PostMessageDataRequest>;
+	jobData: SchedulerJobData<PostMessageDataRequest>;
 }): IcTransactionUi => mapIcpTransaction({ transaction, identity });
 
-const worker: WalletWorkerUtils<Transaction, TransactionWithId, PostMessageDataRequest> =
-	new WalletWorkerUtils(getTransactions, mapTransactionIcpToSelf, mapTransaction, 'syncIcpWallet');
+const scheduler: WalletScheduler<Transaction, TransactionWithId, PostMessageDataRequest> =
+	new WalletScheduler(getTransactions, mapTransactionIcpToSelf, mapTransaction, 'syncIcpWallet');
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
 		case 'stopIcpWalletTimer':
-			worker.stop();
+			scheduler.stop();
 			return;
 		case 'startIcpWalletTimer':
-			await worker.start(data);
+			await scheduler.start(data);
 			return;
 		case 'triggerIcpWalletTimer':
-			await worker.trigger(data);
+			await scheduler.trigger(data);
 			return;
 	}
 };
