@@ -43,6 +43,9 @@ export class CkbtcUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		);
 
 		try {
+			// TODO: debug - to be removed
+			console.log('Start updateBalance');
+
 			await updateBalance({
 				identity,
 				minterCanisterId
@@ -55,10 +58,10 @@ export class CkbtcUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 				msg: 'syncCkBtcUpdateOk'
 			});
 		} catch (err: unknown) {
-			// TODO: debug - to be removed
-			console.log('UPDATE BALANCE', err);
-
 			if (err instanceof MinterNoNewUtxosError) {
+				// TODO: debug - to be removed
+				console.log('Pending Utxos', err);
+
 				this.postUtxos(err);
 				return;
 			}
