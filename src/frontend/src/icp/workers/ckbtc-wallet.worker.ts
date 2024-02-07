@@ -1,7 +1,12 @@
 import { BtcStatusesScheduler } from '$icp/schedulers/btc-statuses.scheduler';
+import { CkbtcUpdateBalanceScheduler } from '$icp/schedulers/ckbtc-update-balance.scheduler';
+import type { Scheduler } from '$icp/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequestCkBTCWallet } from '$lib/types/post-message';
 
-const scheduler = new BtcStatusesScheduler();
+const schedulers: Scheduler<PostMessageDataRequestCkBTCWallet>[] = [
+	new BtcStatusesScheduler(),
+	new CkbtcUpdateBalanceScheduler()
+];
 
 onmessage = async ({
 	data: dataMsg
@@ -10,13 +15,13 @@ onmessage = async ({
 
 	switch (msg) {
 		case 'stopCkBTCWalletTimer':
-			scheduler.stop();
+			schedulers.forEach((scheduler) => scheduler.stop());
 			return;
 		case 'startCkBTCWalletTimer':
-			await scheduler.start(data);
+			await Promise.allSettled(schedulers.map((scheduler) => scheduler.start(data)));
 			return;
 		case 'triggerCkBTCWalletTimer':
-			await scheduler.trigger(data);
+			await Promise.allSettled(schedulers.map((scheduler) => scheduler.trigger(data)));
 			return;
 	}
 };

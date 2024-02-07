@@ -1,16 +1,20 @@
 import { btcStatusesStore } from '$icp/stores/btc.store';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { PostMessageDataResponseCkBTCWallet } from '$lib/types/post-message';
+import type {
+	PostMessageDataResponseBtcPendingUtxos,
+	PostMessageDataResponseBtcStatuses
+} from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
+import type { PendingUtxo } from '@dfinity/ckbtc';
 import { jsonReviver } from '@dfinity/utils';
 
-export const syncStatuses = ({
+export const syncBtcStatuses = ({
 	data: postMsgData,
 	tokenId
 }: {
-	data: PostMessageDataResponseCkBTCWallet;
+	data: PostMessageDataResponseBtcStatuses;
 	tokenId: TokenId;
 }) => {
 	const { statuses } = postMsgData;
@@ -23,7 +27,22 @@ export const syncStatuses = ({
 	});
 };
 
-export const onLoadStatusesError = ({
+export const syncBtcPendingUtxos = ({
+	data: postMsgData,
+	tokenId
+}: {
+	data: PostMessageDataResponseBtcPendingUtxos;
+	tokenId: TokenId;
+}) => {
+	const { pendingUtxos } = postMsgData;
+
+	const data: CertifiedData<PendingUtxo> = JSON.parse(pendingUtxos, jsonReviver);
+
+	// TODO: data
+	console.log(data, tokenId);
+};
+
+export const onLoadBtcStatusesError = ({
 	tokenId,
 	error: err
 }: {

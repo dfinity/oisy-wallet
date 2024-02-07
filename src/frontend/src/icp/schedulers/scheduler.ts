@@ -94,7 +94,7 @@ export class SchedulerTimer {
 		this.setStatus('idle');
 	}
 
-	postMsg<T>(data: { msg: PostMessageResponse; data: T }) {
+	postMsg<T>(data: { msg: PostMessageResponse; data?: T }) {
 		if (this.isIdle()) {
 			// The worker scheduler was stopped between the start of the execution and the actual completion of the job it runs.
 			return;
