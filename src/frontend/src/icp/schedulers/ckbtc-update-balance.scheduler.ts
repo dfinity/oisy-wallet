@@ -48,6 +48,9 @@ export class CkbtcUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 				minterCanisterId
 			});
 
+			// TODO: debug - to be removed
+			console.log('UPDATE BALANCE OK');
+
 			this.timer.postMsg<never>({
 				msg: 'syncCkBtcUpdateOk'
 			});
