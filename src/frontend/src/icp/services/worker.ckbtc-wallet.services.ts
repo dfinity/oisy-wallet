@@ -1,10 +1,11 @@
 import {
-	onLoadStatusesError,
-	syncPendingUtxos,
-	syncStatuses
+	onLoadBtcStatusesError,
+	syncBtcPendingUtxos,
+	syncBtcStatuses
 } from '$icp/services/ckbtc-listener.services';
 import type { CkBTCWalletWorker } from '$icp/types/ckbtc-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
+import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import type {
 	PostMessage,
 	PostMessageDataResponseBtcPendingUtxos,
@@ -32,19 +33,22 @@ export const initCkBTCWalletWorker = async ({
 
 		switch (msg) {
 			case 'syncBtcStatuses':
-				syncStatuses({
+				syncBtcStatuses({
 					tokenId,
 					data: data.data as PostMessageDataResponseBtcStatuses
 				});
 				return;
 			case 'syncBtcPendingUtxos':
-				syncPendingUtxos({
+				syncBtcPendingUtxos({
 					tokenId,
 					data: data.data as PostMessageDataResponseBtcPendingUtxos
 				});
 				return;
+			case 'syncCkBtcUpdateOk':
+				await waitAndTriggerWallet();
+				return;
 			case 'syncBtcStatusesError':
-				onLoadStatusesError({
+				onLoadBtcStatusesError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error
 				});

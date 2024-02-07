@@ -10,7 +10,7 @@ import type { TokenId } from '$lib/types/token';
 import type { PendingUtxo } from '@dfinity/ckbtc';
 import { jsonReviver } from '@dfinity/utils';
 
-export const syncStatuses = ({
+export const syncBtcStatuses = ({
 	data: postMsgData,
 	tokenId
 }: {
@@ -27,7 +27,7 @@ export const syncStatuses = ({
 	});
 };
 
-export const syncPendingUtxos = ({
+export const syncBtcPendingUtxos = ({
 	data: postMsgData,
 	tokenId
 }: {
@@ -42,7 +42,7 @@ export const syncPendingUtxos = ({
 	console.log(data, tokenId);
 };
 
-export const onLoadStatusesError = ({
+export const onLoadBtcStatusesError = ({
 	tokenId,
 	error: err
 }: {

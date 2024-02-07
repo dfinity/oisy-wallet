@@ -42,14 +42,19 @@ export class CkbtcUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			'No data - minterCanisterId - provided to fetch the BTC withdrawal statuses.'
 		);
 
-		console.log('UPDATE BALANCE');
-
 		try {
 			await updateBalance({
 				identity,
 				minterCanisterId
 			});
+
+			this.timer.postMsg<never>({
+				msg: 'syncCkBtcUpdateOk'
+			});
 		} catch (err: unknown) {
+			// TODO: debug - to be removed
+			console.log('UPDATE BALANCE', err);
+
 			if (err instanceof MinterNoNewUtxosError) {
 				this.postUtxos(err);
 				return;

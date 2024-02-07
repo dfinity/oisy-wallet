@@ -47,8 +47,9 @@ export type PostMessageResponse =
 	| 'syncIcpWalletCleanUp'
 	| 'syncIcrcWalletCleanUp'
 	| 'syncBtcStatuses'
+	| 'syncBtcStatusesError'
 	| 'syncBtcPendingUtxos'
-	| 'syncBtcStatusesError';
+	| 'syncCkBtcUpdateOk';
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 	authRemainingTime: number;
