@@ -55,7 +55,10 @@ export const mapCkBTCTransaction = ({
 };
 
 export const extendCkBTCTransaction = ({
-	transaction: { data: tx, certified },
+	transaction: {
+		data: { type: txType, id, ...rest },
+		certified
+	},
 	btcStatuses
 }: {
 	transaction: IcCertifiedTransaction;
@@ -65,8 +68,10 @@ export const extendCkBTCTransaction = ({
 
 	return {
 		data: {
-			...burnStatus(statuses?.[`${tx.id}`]),
-			...tx
+			id,
+			type: txType,
+			...rest,
+			...(txType === 'burn' && burnStatus(statuses?.[`${id}`]))
 		},
 		certified
 	};
