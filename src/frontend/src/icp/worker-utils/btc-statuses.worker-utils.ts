@@ -7,8 +7,8 @@ import {
 } from '$icp/worker-utils/timer.worker-utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
-	PostMessageDataRequestBtcStatuses,
-	PostMessageDataResponseBtcStatuses,
+	PostMessageDataRequestCkBTCWallet,
+	PostMessageDataResponseCkBTCWallet,
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
@@ -22,16 +22,16 @@ export class BtcStatusesWorkerUtils {
 		this.worker.stop();
 	}
 
-	async start(data: PostMessageDataRequestBtcStatuses | undefined) {
-		await this.worker.start<PostMessageDataRequestBtcStatuses>({
+	async start(data: PostMessageDataRequestCkBTCWallet | undefined) {
+		await this.worker.start<PostMessageDataRequestCkBTCWallet>({
 			interval: BTC_STATUSES_TIMER_INTERVAL_MILLIS,
 			job: this.syncStatuses,
 			data
 		});
 	}
 
-	async trigger(data: PostMessageDataRequestBtcStatuses | undefined) {
-		await this.worker.trigger<PostMessageDataRequestBtcStatuses>({
+	async trigger(data: PostMessageDataRequestCkBTCWallet | undefined) {
+		await this.worker.trigger<PostMessageDataRequestCkBTCWallet>({
 			job: this.syncStatuses,
 			data
 		});
@@ -40,7 +40,7 @@ export class BtcStatusesWorkerUtils {
 	private syncStatuses = async ({
 		identity,
 		data
-	}: TimerWorkerUtilsJobData<PostMessageDataRequestBtcStatuses>) => {
+	}: TimerWorkerUtilsJobData<PostMessageDataRequestCkBTCWallet>) => {
 		const minterCanisterId = data?.minterCanisterId;
 
 		assertNonNullish(
@@ -78,7 +78,7 @@ export class BtcStatusesWorkerUtils {
 			data: statuses
 		};
 
-		this.worker.postMsg<PostMessageDataResponseBtcStatuses>({
+		this.worker.postMsg<PostMessageDataResponseCkBTCWallet>({
 			msg: 'syncBtcStatuses',
 			data: {
 				statuses: JSON.stringify(data, jsonReplacer)

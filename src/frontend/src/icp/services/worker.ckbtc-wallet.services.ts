@@ -1,23 +1,23 @@
-import { onLoadStatusesError, syncStatuses } from '$icp/services/btc-listener.services';
-import type { BtcStatusesWorker } from '$icp/types/btc-listener';
+import { onLoadStatusesError, syncStatuses } from '$icp/services/ckbtc-listener.services';
+import type { CkBTCWalletWorker } from '$icp/types/ckbtc-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type {
 	PostMessage,
-	PostMessageDataResponseBtcStatuses,
+	PostMessageDataResponseCkBTCWallet,
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 
-export const initBtcStatusesWorker = async ({
+export const initCkBTCWalletWorker = async ({
 	minterCanisterId,
 	id: tokenId
-}: IcToken & Partial<IcCkCanisters>): Promise<BtcStatusesWorker> => {
-	const BtcStatusesWorker = await import('$icp/workers/btc-statuses.worker?worker');
-	const worker: Worker = new BtcStatusesWorker.default();
+}: IcToken & Partial<IcCkCanisters>): Promise<CkBTCWalletWorker> => {
+	const CkBTCWalletWorker = await import('$icp/workers/ckbtc-wallet.worker?worker');
+	const worker: Worker = new CkBTCWalletWorker.default();
 
 	worker.onmessage = async ({
 		data
 	}: MessageEvent<
-		PostMessage<PostMessageDataResponseBtcStatuses | PostMessageDataResponseError>
+		PostMessage<PostMessageDataResponseCkBTCWallet | PostMessageDataResponseError>
 	>) => {
 		const { msg } = data;
 
@@ -25,7 +25,7 @@ export const initBtcStatusesWorker = async ({
 			case 'syncBtcStatuses':
 				syncStatuses({
 					tokenId,
-					data: data.data as PostMessageDataResponseBtcStatuses
+					data: data.data as PostMessageDataResponseCkBTCWallet
 				});
 				return;
 			case 'syncBtcStatusesError':
@@ -40,7 +40,7 @@ export const initBtcStatusesWorker = async ({
 	return {
 		start: () => {
 			worker.postMessage({
-				msg: 'startBtcStatusesTimer',
+				msg: 'startCkBTCWalletTimer',
 				data: {
 					minterCanisterId
 				}
@@ -48,12 +48,12 @@ export const initBtcStatusesWorker = async ({
 		},
 		stop: () => {
 			worker.postMessage({
-				msg: 'stopBtcStatusesTimer'
+				msg: 'stopCkBTCWalletTimer'
 			});
 		},
 		trigger: () => {
 			worker.postMessage({
-				msg: 'triggerBtcStatusesTimer',
+				msg: 'triggerCkBTCWalletTimer',
 				data: {
 					minterCanisterId
 				}
