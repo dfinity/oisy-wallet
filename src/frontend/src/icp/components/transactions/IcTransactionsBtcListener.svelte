@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import type { IcToken } from '$icp/types/ic';
-	import type { BtcStatusesWorker } from '$icp/types/btc-listener';
-	import { initBtcStatusesWorker } from '$icp/services/worker.btc-statuses.services';
+	import type { CkBTCWalletWorker } from '$icp/types/ckbtc-listener';
+	import { initCkBTCWalletWorker } from '$icp/services/worker.ckbtc-wallet.services';
 	import { token } from '$lib/derived/token.derived';
 
-	let worker: BtcStatusesWorker | undefined;
+	let worker: CkBTCWalletWorker | undefined;
 
-	onMount(async () => (worker = await initBtcStatusesWorker($token as IcToken)));
+	onMount(async () => (worker = await initCkBTCWalletWorker($token as IcToken)));
 
 	onDestroy(() => worker?.stop());
 
