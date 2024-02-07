@@ -1,7 +1,7 @@
 import { btcStatusesStore } from '$icp/stores/btc.store';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { PostMessageDataResponseBtcStatuses } from '$lib/types/post-message';
+import type { PostMessageDataResponseCkBTCWallet } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { jsonReviver } from '@dfinity/utils';
@@ -10,7 +10,7 @@ export const syncStatuses = ({
 	data: postMsgData,
 	tokenId
 }: {
-	data: PostMessageDataResponseBtcStatuses;
+	data: PostMessageDataResponseCkBTCWallet;
 	tokenId: TokenId;
 }) => {
 	const { statuses } = postMsgData;

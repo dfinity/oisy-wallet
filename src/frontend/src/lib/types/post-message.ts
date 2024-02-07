@@ -19,9 +19,9 @@ export type PostMessageRequest =
 	| 'stopIcrcWalletTimer'
 	| 'startIcrcWalletTimer'
 	| 'triggerIcrcWalletTimer'
-	| 'stopBtcStatusesTimer'
-	| 'startBtcStatusesTimer'
-	| 'triggerBtcStatusesTimer';
+	| 'stopCkBTCWalletTimer'
+	| 'startCkBTCWalletTimer'
+	| 'triggerCkBTCWalletTimer';
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;
@@ -32,7 +32,7 @@ export interface PostMessageDataRequestExchangeTimer {
 
 export type PostMessageDataRequestIcrc = IcCanisters;
 
-export type PostMessageDataRequestBtcStatuses = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
+export type PostMessageDataRequestCkBTCWallet = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 
 export type PostMessageResponse =
 	| 'signOutIdleTimer'
@@ -80,7 +80,7 @@ export interface PostMessageDataResponseWalletCleanUp extends PostMessageDataRes
 	transactionIds: string[];
 }
 
-export interface PostMessageDataResponseBtcStatuses extends PostMessageDataResponse {
+export interface PostMessageDataResponseCkBTCWallet extends PostMessageDataResponse {
 	statuses: JsonStatusesText;
 }
 
