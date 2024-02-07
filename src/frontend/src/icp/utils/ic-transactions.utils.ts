@@ -1,3 +1,5 @@
+import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type {
 	IcpTransaction,
 	IcrcTransaction,
@@ -5,12 +7,13 @@ import type {
 	IcTransaction,
 	IcTransactionUi
 } from '$icp/types/ic';
-import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
+import { extendCkBTCTransaction, mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
 import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { Token } from '$lib/types/token';
 
 export const mapIcTransaction = ({
 	transaction,
@@ -32,4 +35,23 @@ export const mapIcTransaction = ({
 	}
 
 	return mapIcrcTransaction({ transaction: transaction as IcrcTransaction, ...rest });
+};
+
+export const extendIcTransaction = ({
+	transaction,
+	btcStatuses,
+	token
+}: {
+	transaction: IcCertifiedTransaction;
+	btcStatuses: BtcStatusesData | undefined;
+	token: Token;
+}): IcCertifiedTransaction => {
+	if (isTokenCkBtcLedger(token)) {
+		return extendCkBTCTransaction({
+			transaction,
+			btcStatuses
+		});
+	}
+
+	return transaction;
 };
