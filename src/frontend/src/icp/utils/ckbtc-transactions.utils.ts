@@ -1,3 +1,5 @@
+import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
 import {
 	decodeBurnMemo,
@@ -11,12 +13,10 @@ import { arrayOfNumberToUint8Array, fromNullable, nonNullish } from '@dfinity/ut
 
 export const mapCkBTCTransaction = ({
 	transaction,
-	identity,
-	retrieveBtcStatus
+	identity
 }: {
 	transaction: IcrcTransaction;
 	identity: OptionIdentity;
-	retrieveBtcStatus?: RetrieveBtcStatusV2;
 }): IcTransactionUi => {
 	const tx = mapIcrcTransaction({ transaction, identity });
 
@@ -47,12 +47,34 @@ export const mapCkBTCTransaction = ({
 
 		return {
 			...tx,
-			...burnStatus(retrieveBtcStatus),
 			toLabel: burnMemo ?? 'BTC Network'
 		};
 	}
 
 	return tx;
+};
+
+export const extendCkBTCTransaction = ({
+	transaction: {
+		data: { type: txType, id, ...rest },
+		certified
+	},
+	btcStatuses
+}: {
+	transaction: IcCertifiedTransaction;
+	btcStatuses: BtcStatusesData | undefined;
+}): IcCertifiedTransaction => {
+	const { data: statuses } = btcStatuses ?? { data: undefined };
+
+	return {
+		data: {
+			id,
+			type: txType,
+			...rest,
+			...(txType === 'burn' && burnStatus(statuses?.[`${id}`]))
+		},
+		certified
+	};
 };
 
 const burnStatus = (
