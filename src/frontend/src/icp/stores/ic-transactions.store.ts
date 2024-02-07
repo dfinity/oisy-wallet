@@ -1,22 +1,30 @@
-import type { IcTransaction } from '$icp/types/ic';
+import type { IcTransactionUi } from '$icp/types/ic';
 import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
-export type IcTransactionsData<T> = CertifiedData<T>[];
+export type IcCertifiedTransaction = CertifiedData<IcTransactionUi>;
 
-export interface IcTransactionsStore<T> extends CertifiedStore<IcTransactionsData<T>> {
-	prepend: (params: { tokenId: TokenId; transactions: CertifiedData<T>[] }) => void;
-	append: (params: { tokenId: TokenId; transactions: CertifiedData<T>[] }) => void;
+export type IcTransactionsData = IcCertifiedTransaction[];
+
+export interface IcTransactionsStore extends CertifiedStore<IcTransactionsData> {
+	prepend: (params: { tokenId: TokenId; transactions: IcCertifiedTransaction[] }) => void;
+	append: (params: { tokenId: TokenId; transactions: IcCertifiedTransaction[] }) => void;
 	cleanUp: (params: { tokenId: TokenId; transactionIds: string[] }) => void;
 }
 
-const initIcTransactionsStore = <T extends IcTransaction>(): IcTransactionsStore<T> => {
-	const { subscribe, update, reset } = initCertifiedStore<IcTransactionsData<T>>();
+const initIcTransactionsStore = (): IcTransactionsStore => {
+	const { subscribe, update, reset } = initCertifiedStore<IcTransactionsData>();
 
 	return {
-		prepend: ({ tokenId, transactions }: { tokenId: TokenId; transactions: CertifiedData<T>[] }) =>
+		prepend: ({
+			tokenId,
+			transactions
+		}: {
+			tokenId: TokenId;
+			transactions: IcCertifiedTransaction[];
+		}) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: [
@@ -26,7 +34,13 @@ const initIcTransactionsStore = <T extends IcTransaction>(): IcTransactionsStore
 					)
 				]
 			})),
-		append: ({ tokenId, transactions }: { tokenId: TokenId; transactions: CertifiedData<T>[] }) =>
+		append: ({
+			tokenId,
+			transactions
+		}: {
+			tokenId: TokenId;
+			transactions: IcCertifiedTransaction[];
+		}) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: [...((state ?? {})[tokenId] ?? []), ...transactions]

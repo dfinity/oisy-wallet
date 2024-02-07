@@ -1,6 +1,10 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index.api';
-import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
-import { type TimerWorkerUtilsJobParams } from '$icp/worker-utils/timer.worker-utils';
+import type { IcTransactionUi } from '$icp/types/ic';
+import { mapIcrcTransaction, mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
+import {
+	type TimerWorkerUtilsJobData,
+	type TimerWorkerUtilsJobParams
+} from '$icp/worker-utils/timer.worker-utils';
 import { WalletWorkerUtils } from '$icp/worker-utils/wallet.worker-utils';
 import type { PostMessage, PostMessageDataRequestIcrc } from '$lib/types/post-message';
 import {
@@ -27,11 +31,26 @@ const getTransactions = ({
 	});
 };
 
+const mapTransaction = (
+	params: {
+		transaction: Pick<IcrcTransactionWithId, 'id'> & { transaction: IcrcTransaction };
+	} & Pick<TimerWorkerUtilsJobData<PostMessageDataRequestIcrc>, 'identity'>
+): IcTransactionUi => {
+	// TODO ckBTC
+
+	return mapIcrcTransaction(params);
+};
+
 const worker: WalletWorkerUtils<
 	IcrcTransaction,
 	IcrcTransactionWithId,
 	PostMessageDataRequestIcrc
-> = new WalletWorkerUtils(getTransactions, mapTransactionIcrcToSelf, 'syncIcrcWallet');
+> = new WalletWorkerUtils(
+	getTransactions,
+	mapTransactionIcrcToSelf,
+	mapTransaction,
+	'syncIcrcWallet'
+);
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcrc>>) => {
 	const { msg, data } = dataMsg;
