@@ -19,7 +19,7 @@
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
-	import { icTransactions } from '$icp/derived/ic-transactions.store';
+	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger ? IcTransactionsBtcListeners : IcTransactionsNoListener;
