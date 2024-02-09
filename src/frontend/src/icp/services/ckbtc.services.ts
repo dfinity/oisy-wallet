@@ -4,7 +4,7 @@ import {
 	updateBalance as updateBalanceApi
 } from '$icp/api/ckbtc-minter.api';
 import { btcAddressStore } from '$icp/stores/btc.store';
-import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+import { ckBtcMinterInfoStore, ckBtcPendingUtxosStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
@@ -16,12 +16,17 @@ import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.sto
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
-import type { EstimateWithdrawalFee } from '@dfinity/ckbtc';
+import type { TokenId } from '$lib/types/token';
+import {
+	MinterNoNewUtxosError,
+	type EstimateWithdrawalFee,
+	type PendingUtxo
+} from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const updateBalance = async ({
-	token: { minterCanisterId },
+	token: { minterCanisterId, id: tokenId },
 	progress,
 	identity
 }: CkBtcUpdateBalanceParams & {
@@ -31,14 +36,42 @@ export const updateBalance = async ({
 
 	progress(UpdateBalanceCkBtcStep.RETRIEVE);
 
-	await updateBalanceApi({
-		identity,
-		minterCanisterId
-	});
+	try {
+		await updateBalanceApi({
+			identity,
+			minterCanisterId
+		});
+	} catch (err: unknown) {
+		if (!(err instanceof MinterNoNewUtxosError)) {
+			throw err;
+		}
+
+		populatePendingUtxos({ tokenId, err });
+	}
 
 	progress(UpdateBalanceCkBtcStep.RELOAD);
 
 	await waitAndTriggerWallet();
+};
+
+const populatePendingUtxos = ({
+	err,
+	tokenId
+}: {
+	err: MinterNoNewUtxosError;
+	tokenId: TokenId;
+}) => {
+	const { pendingUtxos } = err;
+
+	const data: CertifiedData<PendingUtxo[]> = {
+		certified: true,
+		data: pendingUtxos
+	};
+
+	ckBtcPendingUtxosStore.set({
+		tokenId,
+		data
+	});
 };
 
 export const loadAllCkBtcInfo = async ({
