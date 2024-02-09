@@ -13,7 +13,7 @@ import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
 import { waitWalletReady } from '$lib/services/actions.services';
 import { busy } from '$lib/stores/busy.store';
 import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
@@ -37,16 +37,29 @@ export const updateBalance = async ({
 	progress(UpdateBalanceCkBtcStep.RETRIEVE);
 
 	try {
-		await updateBalanceApi({
+		const ok = await updateBalanceApi({
 			identity,
 			minterCanisterId
 		});
+
+		populatePendingUtxos({ tokenId, pendingUtxos: [] });
+
+		if (ok.length === 0) {
+			toastsShow({
+				text: 'No new confirmed BTC.',
+				level: 'info',
+				duration: 3000
+			});
+			return;
+		}
 	} catch (err: unknown) {
 		if (!(err instanceof MinterNoNewUtxosError)) {
 			throw err;
 		}
 
-		populatePendingUtxos({ tokenId, err });
+		const { pendingUtxos } = err;
+
+		populatePendingUtxos({ tokenId, pendingUtxos });
 	}
 
 	progress(UpdateBalanceCkBtcStep.RELOAD);
@@ -55,14 +68,12 @@ export const updateBalance = async ({
 };
 
 const populatePendingUtxos = ({
-	err,
+	pendingUtxos,
 	tokenId
 }: {
-	err: MinterNoNewUtxosError;
+	pendingUtxos: PendingUtxo[];
 	tokenId: TokenId;
 }) => {
-	const { pendingUtxos } = err;
-
 	const data: CertifiedData<PendingUtxo[]> = {
 		certified: true,
 		data: pendingUtxos
