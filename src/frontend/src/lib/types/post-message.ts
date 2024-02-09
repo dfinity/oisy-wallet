@@ -3,7 +3,7 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 
-import type { JsonPendingUtxos, JsonStatusesText } from '$icp/types/btc.post-message';
+import type { JsonPendingUtxos, JsonStatusesText, JsonText } from '$icp/types/btc.post-message';
 import type { IcCanisters, IcCkCanisters } from '$icp/types/ic';
 
 export type PostMessageRequest =
@@ -21,7 +21,10 @@ export type PostMessageRequest =
 	| 'triggerIcrcWalletTimer'
 	| 'stopCkBTCWalletTimer'
 	| 'startCkBTCWalletTimer'
-	| 'triggerCkBTCWalletTimer';
+	| 'triggerCkBTCWalletTimer'
+	| 'stopCkBTCMinterInfoTimer'
+	| 'startCkBTCMinterInfoTimer'
+	| 'triggerCkBTCMinterInfoTimer';
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;
@@ -32,6 +35,7 @@ export interface PostMessageDataRequestExchangeTimer {
 
 export type PostMessageDataRequestIcrc = IcCanisters;
 
+// TODO: rename
 export type PostMessageDataRequestCkBTCWallet = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 
 export type PostMessageResponse =
@@ -48,6 +52,8 @@ export type PostMessageResponse =
 	| 'syncIcrcWalletCleanUp'
 	| 'syncBtcStatuses'
 	| 'syncBtcStatusesError'
+	| 'syncCktcMinterInfo'
+	| 'syncCktcMinterInfoError'
 	| 'syncBtcPendingUtxos'
 	| 'syncCkBtcUpdateOk';
 
@@ -82,12 +88,18 @@ export interface PostMessageDataResponseWalletCleanUp extends PostMessageDataRes
 	transactionIds: string[];
 }
 
+// TODO: use PostMessageJsonDataResponseCkBTC
 export interface PostMessageDataResponseBtcStatuses extends PostMessageDataResponse {
 	statuses: JsonStatusesText;
 }
 
+// TODO: use PostMessageJsonDataResponseCkBTC
 export interface PostMessageDataResponseBtcPendingUtxos extends PostMessageDataResponse {
 	pendingUtxos: JsonPendingUtxos;
+}
+
+export interface PostMessageJsonDataResponseCkBTC extends PostMessageDataResponse {
+	json: JsonText;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {

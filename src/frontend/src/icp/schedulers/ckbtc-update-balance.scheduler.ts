@@ -39,7 +39,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 
 		assertNonNullish(
 			minterCanisterId,
-			'No data - minterCanisterId - provided to fetch the BTC withdrawal statuses.'
+			'No data - minterCanisterId - provided to update the BTC balance.'
 		);
 
 		try {
