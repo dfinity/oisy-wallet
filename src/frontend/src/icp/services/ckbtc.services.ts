@@ -1,7 +1,6 @@
 import {
 	estimateFee,
 	getBtcAddress,
-	minterInfo,
 	updateBalance as updateBalanceApi
 } from '$icp/api/ckbtc-minter.api';
 import { btcAddressStore } from '$icp/stores/btc.store';
@@ -17,7 +16,6 @@ import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.sto
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
-import { AnonymousIdentity } from '@dfinity/agent';
 import type { EstimateWithdrawalFee } from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -90,20 +88,6 @@ export const loadAllCkBtcInfo = async ({
 	busy.stop();
 };
 
-export const loadCkBtcMinterInfo = async ({
-	params,
-	fn = loadDataOnce
-}: {
-	fn?: LoadData;
-	params: IcToken & Partial<IcCkCanisters>;
-}) =>
-	fn({
-		...params,
-		store: ckBtcMinterInfoStore,
-		request: (params) => minterInfo(params),
-		identity: new AnonymousIdentity()
-	});
-
 const loadBtcAddress = async (
 	params: IcToken & Partial<IcCkCanisters> & { identity: OptionIdentity }
 ) =>
@@ -123,33 +107,6 @@ type LoadDataParams<T> = IcToken &
 		) => Promise<T>;
 		identity: OptionIdentity;
 	};
-
-const loadDataOnce: LoadData = async <T>({
-	id: tokenId,
-	minterCanisterId,
-	store,
-	...rest
-}: LoadDataParams<T>) => {
-	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
-
-	const minterStore = get(store);
-
-	// We try to load only once per session the information for performance reason
-	if (nonNullish(minterStore?.[tokenId])) {
-		return;
-	}
-
-	busy.start({ msg: 'Hold tight, we are loading some information...' });
-
-	await loadData<T>({
-		id: tokenId,
-		minterCanisterId,
-		store,
-		...rest
-	});
-
-	busy.stop();
-};
 
 const loadData: LoadData = async <T>({
 	id: tokenId,
