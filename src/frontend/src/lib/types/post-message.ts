@@ -21,7 +21,10 @@ export type PostMessageRequest =
 	| 'triggerIcrcWalletTimer'
 	| 'stopCkBTCWalletTimer'
 	| 'startCkBTCWalletTimer'
-	| 'triggerCkBTCWalletTimer';
+	| 'triggerCkBTCWalletTimer'
+	| 'stopCkBTCMinterInfoTimer'
+	| 'startCkBTCMinterInfoTimer'
+	| 'triggerCkBTCMinterInfoTimer';
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;
@@ -32,6 +35,7 @@ export interface PostMessageDataRequestExchangeTimer {
 
 export type PostMessageDataRequestIcrc = IcCanisters;
 
+// TODO: rename
 export type PostMessageDataRequestCkBTCWallet = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 
 export type PostMessageResponse =
@@ -84,10 +88,12 @@ export interface PostMessageDataResponseWalletCleanUp extends PostMessageDataRes
 	transactionIds: string[];
 }
 
+// TODO: use PostMessageJsonDataResponseCkBTC
 export interface PostMessageDataResponseBtcStatuses extends PostMessageDataResponse {
 	statuses: JsonStatusesText;
 }
 
+// TODO: use PostMessageJsonDataResponseCkBTC
 export interface PostMessageDataResponseBtcPendingUtxos extends PostMessageDataResponse {
 	pendingUtxos: JsonPendingUtxos;
 }

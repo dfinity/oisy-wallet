@@ -1,25 +1,22 @@
 import {
 	onLoadBtcStatusesError,
-	onLoadCkBtcMinterInfoError,
 	syncBtcPendingUtxos,
-	syncBtcStatuses,
-	syncCkBtcMinterInfo
+	syncBtcStatuses
 } from '$icp/services/ckbtc-listener.services';
-import type { CkBTCWalletWorker } from '$icp/types/ckbtc-listener';
+import type { CkBTCWorker, CkBTCWorkerInitResult } from '$icp/types/ckbtc-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import type {
 	PostMessage,
 	PostMessageDataResponseBtcPendingUtxos,
 	PostMessageDataResponseBtcStatuses,
-	PostMessageDataResponseError,
-	PostMessageJsonDataResponseCkBTC
+	PostMessageDataResponseError
 } from '$lib/types/post-message';
 
-export const initCkBTCWalletWorker = async ({
+export const initCkBTCWalletWorker: CkBTCWorker = async ({
 	minterCanisterId,
 	id: tokenId
-}: IcToken & Partial<IcCkCanisters>): Promise<CkBTCWalletWorker> => {
+}: IcToken & Partial<IcCkCanisters>): Promise<CkBTCWorkerInitResult> => {
 	const CkBTCWalletWorker = await import('$icp/workers/ckbtc-wallet.worker?worker');
 	const worker: Worker = new CkBTCWalletWorker.default();
 
@@ -28,7 +25,6 @@ export const initCkBTCWalletWorker = async ({
 	}: MessageEvent<
 		PostMessage<
 			| PostMessageDataResponseBtcStatuses
-			| PostMessageJsonDataResponseCkBTC
 			| PostMessageDataResponseBtcPendingUtxos
 			| PostMessageDataResponseError
 		>
@@ -51,20 +47,8 @@ export const initCkBTCWalletWorker = async ({
 			case 'syncCkBtcUpdateOk':
 				await waitAndTriggerWallet();
 				return;
-			case 'syncCktcMinterInfo':
-				syncCkBtcMinterInfo({
-					tokenId,
-					data: data.data as PostMessageJsonDataResponseCkBTC
-				});
-				return;
 			case 'syncBtcStatusesError':
 				onLoadBtcStatusesError({
-					tokenId,
-					error: (data.data as PostMessageDataResponseError).error
-				});
-				return;
-			case 'syncCktcMinterInfoError':
-				onLoadCkBtcMinterInfoError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error
 				});

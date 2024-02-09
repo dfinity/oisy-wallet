@@ -55,8 +55,6 @@ export const syncCkBtcMinterInfo = ({
 
 	const data: CertifiedData<MinterInfo> = JSON.parse(json, jsonReviver);
 
-	console.log('HEREHEREHRE', data);
-
 	ckBtcMinterInfoStore.set({
 		tokenId,
 		data
