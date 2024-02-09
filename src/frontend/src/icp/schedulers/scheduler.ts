@@ -29,7 +29,10 @@ export class SchedulerTimer {
 	private timer: NodeJS.Timeout | undefined = undefined;
 	private timerStatus: SyncState = 'idle';
 
-	async start<T>({ interval, ...rest }: SchedulerParams<T> & { interval: number }): Promise<void> {
+	async start<T>({
+		interval,
+		...rest
+	}: SchedulerParams<T> & { interval: number | 'disabled' }): Promise<void> {
 		// This worker scheduler has already been started
 		if (nonNullish(this.timer)) {
 			return;
@@ -47,6 +50,11 @@ export class SchedulerTimer {
 
 		// We sync the cycles now but also schedule the update after wards
 		await execute();
+
+		// Support for features that implement the exact same pattern of a repetitive task but, are currently not scheduled for being refreshed automatically.
+		if (interval === 'disabled') {
+			return;
+		}
 
 		this.timer = setInterval(execute, interval);
 	}

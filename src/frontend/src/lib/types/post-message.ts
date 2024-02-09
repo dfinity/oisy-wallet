@@ -3,7 +3,7 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 
-import type { JsonPendingUtxos, JsonStatusesText } from '$icp/types/btc.post-message';
+import type { JsonPendingUtxos, JsonStatusesText, JsonText } from '$icp/types/btc.post-message';
 import type { IcCanisters, IcCkCanisters } from '$icp/types/ic';
 
 export type PostMessageRequest =
@@ -48,6 +48,8 @@ export type PostMessageResponse =
 	| 'syncIcrcWalletCleanUp'
 	| 'syncBtcStatuses'
 	| 'syncBtcStatusesError'
+	| 'syncCktcMinterInfo'
+	| 'syncCktcMinterInfoError'
 	| 'syncBtcPendingUtxos'
 	| 'syncCkBtcUpdateOk';
 
@@ -88,6 +90,10 @@ export interface PostMessageDataResponseBtcStatuses extends PostMessageDataRespo
 
 export interface PostMessageDataResponseBtcPendingUtxos extends PostMessageDataResponse {
 	pendingUtxos: JsonPendingUtxos;
+}
+
+export interface PostMessageJsonDataResponseCkBTC extends PostMessageDataResponse {
+	json: JsonText;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {
