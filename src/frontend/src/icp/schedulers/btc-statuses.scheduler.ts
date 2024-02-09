@@ -4,7 +4,7 @@ import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/sche
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
-	PostMessageDataRequestCkBTCWallet,
+	PostMessageDataRequestCkBTC,
 	PostMessageDataResponseBtcStatuses,
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
@@ -12,23 +12,23 @@ import type { CertifiedData } from '$lib/types/store';
 import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
-export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestCkBTCWallet> {
+export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestCkBTC> {
 	private timer = new SchedulerTimer();
 
 	stop() {
 		this.timer.stop();
 	}
 
-	async start(data: PostMessageDataRequestCkBTCWallet | undefined) {
-		await this.timer.start<PostMessageDataRequestCkBTCWallet>({
+	async start(data: PostMessageDataRequestCkBTC | undefined) {
+		await this.timer.start<PostMessageDataRequestCkBTC>({
 			interval: BTC_STATUSES_TIMER_INTERVAL_MILLIS,
 			job: this.syncStatuses,
 			data
 		});
 	}
 
-	async trigger(data: PostMessageDataRequestCkBTCWallet | undefined) {
-		await this.timer.trigger<PostMessageDataRequestCkBTCWallet>({
+	async trigger(data: PostMessageDataRequestCkBTC | undefined) {
+		await this.timer.trigger<PostMessageDataRequestCkBTC>({
 			job: this.syncStatuses,
 			data
 		});
@@ -37,7 +37,7 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestCkB
 	private syncStatuses = async ({
 		identity,
 		data
-	}: SchedulerJobData<PostMessageDataRequestCkBTCWallet>) => {
+	}: SchedulerJobData<PostMessageDataRequestCkBTC>) => {
 		const minterCanisterId = data?.minterCanisterId;
 
 		assertNonNullish(
