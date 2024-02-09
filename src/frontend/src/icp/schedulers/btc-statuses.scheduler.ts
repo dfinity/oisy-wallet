@@ -5,8 +5,8 @@ import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
 	PostMessageDataRequestCkBTC,
-	PostMessageDataResponseBtcStatuses,
-	PostMessageDataResponseError
+	PostMessageDataResponseError,
+	PostMessageJsonDataResponseCkBTC
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
@@ -75,10 +75,10 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestCkB
 			data: statuses
 		};
 
-		this.timer.postMsg<PostMessageDataResponseBtcStatuses>({
+		this.timer.postMsg<PostMessageJsonDataResponseCkBTC>({
 			msg: 'syncBtcStatuses',
 			data: {
-				statuses: JSON.stringify(data, jsonReplacer)
+				json: JSON.stringify(data, jsonReplacer)
 			}
 		});
 	};

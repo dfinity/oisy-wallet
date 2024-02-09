@@ -3,7 +3,7 @@ import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type {
 	PostMessageDataRequestCkBTC,
-	PostMessageDataResponseBtcPendingUtxos
+	PostMessageJsonDataResponseCkBTC
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
@@ -70,10 +70,10 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			data: pendingUtxos
 		};
 
-		this.timer.postMsg<PostMessageDataResponseBtcPendingUtxos>({
+		this.timer.postMsg<PostMessageJsonDataResponseCkBTC>({
 			msg: 'syncBtcPendingUtxos',
 			data: {
-				pendingUtxos: JSON.stringify(data, jsonReplacer)
+				json: JSON.stringify(data, jsonReplacer)
 			}
 		});
 	}
