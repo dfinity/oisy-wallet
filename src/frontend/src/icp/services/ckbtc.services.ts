@@ -11,6 +11,7 @@ import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
+import { waitWalletReady } from '$lib/services/actions.services';
 import { busy } from '$lib/stores/busy.store';
 import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -18,7 +19,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
 import { AnonymousIdentity } from '@dfinity/agent';
 import type { EstimateWithdrawalFee } from '@dfinity/ckbtc';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const updateBalance = async ({
@@ -68,14 +69,22 @@ export const loadAllCkBtcInfo = async ({
 		...rest
 	};
 
+	// ckBTC minter info are loaded when accessing the ckBTC transactions page with a worker
+	const waitCkBtcMinterInfoLoaded = (): Promise<void> => {
+		return new Promise<void>((resolve, reject) => {
+			const isDisabled = (): boolean => {
+				const $ckBtcMinterInfoStore = get(ckBtcMinterInfoStore);
+				console.log($ckBtcMinterInfoStore);
+				return isNullish($ckBtcMinterInfoStore?.[tokenId]);
+			};
+
+			waitWalletReady(isDisabled).then((status) => (status === 'timeout' ? reject() : resolve()));
+		});
+	};
+
 	await Promise.all([
 		addressLoaded ? Promise.resolve() : loadBtcAddress(params),
-		infoLoaded
-			? Promise.resolve()
-			: loadCkBtcMinterInfo({
-					params,
-					fn: loadData
-				})
+		infoLoaded ? Promise.resolve() : waitCkBtcMinterInfoLoaded()
 	]);
 
 	busy.stop();

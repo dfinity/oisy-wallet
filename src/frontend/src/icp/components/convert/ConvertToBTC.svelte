@@ -7,15 +7,15 @@
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import { ckBtcMinterInfoNotLoaded } from '$icp/derived/ckbtc.derived';
+	import { isNullish } from '@dfinity/utils';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { tokenId } from '$lib/derived/token.derived';
 
-	const isDisabled = (): boolean => $ckBtcMinterInfoNotLoaded;
+	const isDisabled = (): boolean => isNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
 	const openSend = async () => {
 		if ($tokenCkBtcLedger) {
 			const status = await waitWalletReady(isDisabled);
-
-			console.log(status);
 
 			if (status === 'timeout') {
 				return;
