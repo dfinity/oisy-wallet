@@ -17,12 +17,12 @@
 	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 	import type { ComponentType } from 'svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
-	import IcTransactionsBtcListener from '$icp/components/transactions/IcTransactionsBtcListener.svelte';
+	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.store';
 
 	let additionalListener: ComponentType;
-	$: additionalListener = $tokenCkBtcLedger ? IcTransactionsBtcListener : IcTransactionsNoListener;
+	$: additionalListener = $tokenCkBtcLedger ? IcTransactionsBtcListeners : IcTransactionsNoListener;
 
 	let disableInfiniteScroll = false;
 
