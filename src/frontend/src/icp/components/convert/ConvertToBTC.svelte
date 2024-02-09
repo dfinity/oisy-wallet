@@ -6,13 +6,20 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
-	import { loadCkBtcMinterInfo } from '$icp/services/ckbtc.services';
-	import { token } from '$lib/derived/token.derived';
-	import type { IcToken } from '$icp/types/ic';
+	import { waitWalletReady } from '$lib/services/actions.services';
+	import { ckBtcMinterInfoNotLoaded } from '$icp/derived/ckbtc.derived';
+
+	const isDisabled = (): boolean => $ckBtcMinterInfoNotLoaded;
 
 	const openSend = async () => {
 		if ($tokenCkBtcLedger) {
-			await loadCkBtcMinterInfo({ params: $token as IcToken });
+			const status = await waitWalletReady(isDisabled);
+
+			console.log(status);
+
+			if (status === 'timeout') {
+				return;
+			}
 		}
 
 		modalStore.openConvertCkBTCToBTC();
