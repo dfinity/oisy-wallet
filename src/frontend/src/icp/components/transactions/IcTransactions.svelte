@@ -20,6 +20,7 @@
 	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
+	import { slide } from 'svelte/transition';
 
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger ? IcTransactionsBtcListeners : IcTransactionsNoListener;
@@ -76,7 +77,7 @@
 		{#if $icTransactions.length > 0}
 			<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
-					<li>
+					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
 						<IcTransaction transaction={transaction.data} />
 					</li>
 				{/each}
