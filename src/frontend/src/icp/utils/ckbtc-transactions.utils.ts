@@ -8,8 +8,13 @@ import {
 } from '$icp/utils/ckbtc-minter.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
-import { arrayOfNumberToUint8Array, fromNullable, nonNullish } from '@dfinity/utils';
+import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
+import {
+	arrayOfNumberToUint8Array,
+	fromNullable,
+	nonNullish,
+	uint8ArrayToHexString
+} from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -53,6 +58,22 @@ export const mapCkBTCTransaction = ({
 
 	return tx;
 };
+
+export const mapCkBTCPendingUtxo = ({
+	utxo,
+	kytFee
+}: {
+	utxo: PendingUtxo;
+	kytFee: bigint;
+}): IcTransactionUi => ({
+	id: `${uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid))}-${utxo.outpoint.vout}`,
+	incoming: true,
+	type: 'receive',
+	status: 'pending',
+	fromLabel: 'BTC Network',
+	typeLabel: 'Receiving BTC',
+	value: utxo.value - kytFee
+});
 
 export const extendCkBTCTransaction = ({
 	transaction: {

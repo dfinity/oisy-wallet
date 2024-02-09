@@ -11,7 +11,7 @@
 
 	export let transaction: IcTransactionUi;
 
-	let id: bigint;
+	let id: bigint | string;
 	let from: string | undefined;
 	let to: string | undefined;
 	let value: bigint | undefined;

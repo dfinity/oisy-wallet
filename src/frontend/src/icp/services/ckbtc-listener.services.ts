@@ -1,5 +1,5 @@
 import { btcStatusesStore } from '$icp/stores/btc.store';
-import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+import { ckBtcMinterInfoStore, ckBtcPendingUtxosStore } from '$icp/stores/ckbtc.store';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { toastsError } from '$lib/stores/toasts.store';
 import type {
@@ -38,10 +38,12 @@ export const syncBtcPendingUtxos = ({
 }) => {
 	const { pendingUtxos } = postMsgData;
 
-	const data: CertifiedData<PendingUtxo> = JSON.parse(pendingUtxos, jsonReviver);
+	const data: CertifiedData<PendingUtxo[]> = JSON.parse(pendingUtxos, jsonReviver);
 
-	// TODO: data
-	console.log(data, tokenId);
+	ckBtcPendingUtxosStore.set({
+		tokenId,
+		data
+	});
 };
 
 export const syncCkBtcMinterInfo = ({

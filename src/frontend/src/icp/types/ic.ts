@@ -28,7 +28,7 @@ export type IcTransactionIdText = string;
 export type IcTransactionStatus = 'executed' | 'pending' | 'reimbursed' | 'failed';
 
 export interface IcTransactionUi {
-	id: bigint;
+	id: bigint | string;
 	type: IcTransactionType;
 	// e.g. BTC Received
 	typeLabel?: string;
