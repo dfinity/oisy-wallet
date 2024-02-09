@@ -2,30 +2,30 @@ import { updateBalance } from '$icp/api/ckbtc-minter.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type {
-	PostMessageDataRequestCkBTCWallet,
+	PostMessageDataRequestCkBTC,
 	PostMessageDataResponseBtcPendingUtxos
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
-export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestCkBTCWallet> {
+export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestCkBTC> {
 	private timer = new SchedulerTimer();
 
 	stop() {
 		this.timer.stop();
 	}
 
-	async start(data: PostMessageDataRequestCkBTCWallet | undefined) {
-		await this.timer.start<PostMessageDataRequestCkBTCWallet>({
+	async start(data: PostMessageDataRequestCkBTC | undefined) {
+		await this.timer.start<PostMessageDataRequestCkBTC>({
 			interval: CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS,
 			job: this.updateBalance,
 			data
 		});
 	}
 
-	async trigger(data: PostMessageDataRequestCkBTCWallet | undefined) {
-		await this.timer.trigger<PostMessageDataRequestCkBTCWallet>({
+	async trigger(data: PostMessageDataRequestCkBTC | undefined) {
+		await this.timer.trigger<PostMessageDataRequestCkBTC>({
 			job: this.updateBalance,
 			data
 		});
@@ -34,7 +34,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 	private updateBalance = async ({
 		identity,
 		data
-	}: SchedulerJobData<PostMessageDataRequestCkBTCWallet>) => {
+	}: SchedulerJobData<PostMessageDataRequestCkBTC>) => {
 		const minterCanisterId = data?.minterCanisterId;
 
 		assertNonNullish(

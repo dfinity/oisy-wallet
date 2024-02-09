@@ -35,8 +35,7 @@ export interface PostMessageDataRequestExchangeTimer {
 
 export type PostMessageDataRequestIcrc = IcCanisters;
 
-// TODO: rename
-export type PostMessageDataRequestCkBTCWallet = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
+export type PostMessageDataRequestCkBTC = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 
 export type PostMessageResponse =
 	| 'signOutIdleTimer'
