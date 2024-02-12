@@ -12,5 +12,5 @@ export const BTC_DECIMALS = 8;
 
 // Worker refresh rate
 export const BTC_STATUSES_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1000; // 1 minute in milliseconds
-export const CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1000; // 1 minute in milliseconds
+export const CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5000; // 5 minutes in milliseconds
 export const CKBTC_MINTER_INFO_TIMER = 'disabled';
