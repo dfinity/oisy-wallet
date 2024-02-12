@@ -10,7 +10,7 @@ import { MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestCkBTC> {
-	private timer = new SchedulerTimer();
+	private timer = new SchedulerTimer('syncCkBtcUpdateBalanceStatus');
 
 	stop() {
 		this.timer.stop();

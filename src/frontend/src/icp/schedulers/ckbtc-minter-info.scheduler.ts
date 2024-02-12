@@ -12,7 +12,7 @@ import type { MinterInfo } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
 export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataRequestCkBTC> {
-	private timer = new SchedulerTimer();
+	private timer = new SchedulerTimer('syncCktcMinterInfoStatus');
 
 	stop() {
 		this.timer.stop();

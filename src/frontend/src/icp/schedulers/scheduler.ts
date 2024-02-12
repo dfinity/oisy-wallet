@@ -1,4 +1,4 @@
-import type { PostMessageResponse } from '$lib/types/post-message';
+import type { PostMessageResponse, PostMessageResponseStatus } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
 import { loadIdentity } from '$lib/utils/auth.utils';
 import type { Identity } from '@dfinity/agent';
@@ -28,6 +28,8 @@ export interface Scheduler<T> {
 export class SchedulerTimer {
 	private timer: NodeJS.Timeout | undefined = undefined;
 	private timerStatus: SyncState = 'idle';
+
+	constructor(private statusMsg: PostMessageResponseStatus) {}
 
 	async start<T>({
 		interval,
@@ -128,7 +130,7 @@ export class SchedulerTimer {
 		this.timerStatus = state;
 
 		postMessage({
-			msg: 'oisySyncStatus',
+			msg: this.statusMsg,
 			data: {
 				state
 			}
