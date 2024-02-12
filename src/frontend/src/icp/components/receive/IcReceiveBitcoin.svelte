@@ -10,7 +10,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
 	import IcReceiveBitcoinProgress from '$icp/components/receive/IcReceiveBitcoinProgress.svelte';
-	import { MinterNoNewUtxosError } from '@dfinity/ckbtc';
+	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 
 	let ckBTC = false;
@@ -41,6 +41,17 @@
 			if (err instanceof MinterNoNewUtxosError) {
 				toastsShow({
 					text: 'No new confirmed BTC.',
+					level: 'info',
+					duration: 2000
+				});
+
+				modalStore.close();
+				return;
+			}
+
+			if (err instanceof MinterAlreadyProcessingError) {
+				toastsShow({
+					text: 'Checking for incoming BTC already in progress.',
 					level: 'info',
 					duration: 2000
 				});
