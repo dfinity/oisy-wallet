@@ -16,14 +16,19 @@
 	import Info from '$icp/components/info/Info.svelte';
 	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 	import type { ComponentType } from 'svelte';
-	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
+	import { tokenCkBtcLedger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { slide } from 'svelte/transition';
+	import ConvertCkETHTransactionsListener from '$icp-eth/components/core/ConvertCkETHTransactionsListener.svelte';
 
 	let additionalListener: ComponentType;
-	$: additionalListener = $tokenCkBtcLedger ? IcTransactionsBtcListeners : IcTransactionsNoListener;
+	$: additionalListener = $tokenCkBtcLedger
+		? IcTransactionsBtcListeners
+		: $tokenCkEthLedger
+			? ConvertCkETHTransactionsListener
+			: IcTransactionsNoListener;
 
 	let disableInfiniteScroll = false;
 
