@@ -2,7 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$eth/types/listener';
-	import type { ETH_ADDRESS, OptionAddress } from '$lib/types/address';
+	import type { OptionAddress } from '$lib/types/address';
 	import {
 		getTransaction,
 		initPendingTransactionsListener as initEthPendingTransactionsListenerProvider
