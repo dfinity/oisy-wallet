@@ -7,6 +7,9 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { modalStore } from '$lib/stores/modal.store';
+
+	export let formCancelAction: 'back' | 'close' = 'back';
 
 	const dispatch = createEventDispatcher();
 
@@ -77,6 +80,16 @@
 	</div>
 </div>
 
-<button class="primary full center text-center mt-8 mb-6" on:click={() => dispatch('icBack')}
-	>Back</button
->
+<div class="mt-8 mb-6">
+	{#if formCancelAction === 'back'}
+		<button
+			type="button"
+			class="primary full center text-center"
+			on:click={() => dispatch('icBack')}>Back</button
+		>
+	{:else}
+		<button type="button" class="primary full center text-center" on:click={modalStore.close}
+			>Done</button
+		>
+	{/if}
+</div>
