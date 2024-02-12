@@ -7,17 +7,25 @@ import { Utils } from 'alchemy-sdk';
 export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
-	displayDecimals = 4
+	displayDecimals = 4,
+	trailingZeros = true
 }: {
 	value: BigNumber;
 	unitName?: string | BigNumberish;
 	displayDecimals?: number;
+	trailingZeros?: boolean;
 }): string => {
 	const res = Utils.formatUnits(value, unitName);
-	return (+res).toLocaleString('en-US', {
+	const formatted = (+res).toLocaleString('en-US', {
 		useGrouping: false,
 		maximumFractionDigits: displayDecimals
 	});
+
+	if (trailingZeros) {
+		return formatted;
+	}
+
+	return formatted.replace(/\.0+$/, '');
 };
 
 /**

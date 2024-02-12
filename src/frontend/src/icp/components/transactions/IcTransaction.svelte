@@ -12,6 +12,7 @@
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import IconMint from '$lib/components/icons/IconMint.svelte';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
+	import { HEIGHT_DECIMALS } from '$lib/constants/app.constants';
 
 	export let transaction: IcTransactionUi;
 
@@ -55,7 +56,9 @@
 			{nonNullish(amount)
 				? formatToken({
 						value: BigNumber.from(amount),
-						unitName: $token.decimals
+						unitName: $token.decimals,
+						displayDecimals: HEIGHT_DECIMALS,
+						trailingZeros: false
 					})
 				: ''}</svelte:fragment
 		>

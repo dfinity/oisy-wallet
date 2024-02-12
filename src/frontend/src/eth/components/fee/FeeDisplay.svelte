@@ -8,6 +8,7 @@
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { maxGasFee } from '$eth/utils/fee.utils';
+	import { HEIGHT_DECIMALS } from '$lib/constants/app.constants';
 
 	const { store: feeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -51,7 +52,7 @@
 		<div in:fade>
 			{formatToken({
 				value: fee,
-				displayDecimals: 8
+				displayDecimals: HEIGHT_DECIMALS
 			})}
 			{ETHEREUM_TOKEN.symbol}
 		</div>

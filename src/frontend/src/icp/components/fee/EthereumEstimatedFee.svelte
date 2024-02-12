@@ -13,6 +13,7 @@
 	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { onDestroy } from 'svelte';
+	import { HEIGHT_DECIMALS } from '$lib/constants/app.constants';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -59,7 +60,7 @@
 					<span in:fade>
 						{formatToken({
 							value: BigNumber.from(maxTransactionFee),
-							displayDecimals: 8
+							displayDecimals: HEIGHT_DECIMALS
 						})}
 						{ETHEREUM_TOKEN.symbol}
 					</span>
