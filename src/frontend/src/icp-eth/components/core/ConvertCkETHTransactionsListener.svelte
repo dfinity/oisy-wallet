@@ -17,10 +17,16 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { address } from '$lib/derived/address.derived';
 	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
+	import { balance } from '$lib/derived/balances.derived';
 
 	let listener: WebSocketListener | undefined = undefined;
 
-	const loadPendingTransactions = async ({ toAddress }: { toAddress: ETH_ADDRESS }) => {
+	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
+		if (isNullish(toAddress)) {
+			convertEthToCkEthPendingStore.reset($tokenId);
+			return;
+		}
+
 		const currentBlockNumber = await getBlockNumber();
 		const transactions = await transactionsProviders(toAddress);
 
@@ -87,7 +93,8 @@
 
 	$: (async () => init({ toAddress: ckEthHelperContractAddress }))();
 
-	// TODO: reload when ICRC worker transactions kicks
+	// When the balance updates - i.e. when new transactions are detected - it might be that the pending ETH -> ckETH transactions have been minted.
+	$: $balance, (async () => loadPendingTransactions({ toAddress: ckEthHelperContractAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>
