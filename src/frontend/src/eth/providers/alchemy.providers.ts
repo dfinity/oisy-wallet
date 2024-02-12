@@ -1,5 +1,6 @@
 import type { WebSocketListener } from '$eth/types/listener';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { ETH_ADDRESS, OptionAddress } from '$lib/types/address';
+import { nonNullish } from '@dfinity/utils';
 import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
 import { Alchemy, AlchemySubscription, type Network } from 'alchemy-sdk';
 
@@ -35,10 +36,12 @@ export const initMinedTransactionsListener = ({
 };
 
 export const initPendingTransactionsListener = ({
-	address,
+	toAddress,
+	fromAddress,
 	listener
 }: {
-	address: ETH_ADDRESS;
+	toAddress: ETH_ADDRESS;
+	fromAddress?: OptionAddress;
 	listener: Listener;
 }): WebSocketListener => {
 	let provider: Alchemy | null = new Alchemy(config);
@@ -46,7 +49,8 @@ export const initPendingTransactionsListener = ({
 	provider.ws.on(
 		{
 			method: AlchemySubscription.PENDING_TRANSACTIONS,
-			toAddress: address,
+			toAddress: toAddress,
+			...(nonNullish(fromAddress) && { fromAddress }),
 			hashesOnly: true
 		},
 		listener
