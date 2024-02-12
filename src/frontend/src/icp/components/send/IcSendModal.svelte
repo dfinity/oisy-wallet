@@ -31,8 +31,7 @@
 	 */
 
 	export let networkId: NetworkId | undefined = undefined;
-
-	let destination = '';
+	export let destination = '';
 	let amount: number | undefined = undefined;
 
 	/**
