@@ -12,11 +12,11 @@
 	import { getBlockNumber } from '$eth/providers/infura.providers';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh.store';
 	import { mapCkETHPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { address } from '$lib/derived/address.derived';
+    import {convertEthToCkEthPendingStore} from "$icp/stores/cketh-transactions.store";
 
 	let listener: WebSocketListener | undefined = undefined;
 
