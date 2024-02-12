@@ -18,6 +18,7 @@ declare namespace svelteHTML {
 	interface HTMLAttributes<T> {
 		'on:oisyTriggerWallet'?: (event: CustomEvent<any>) => void;
 		'on:oisyReceiveCkBTC'?: (event: CustomEvent<any>) => void;
+		'on:oisyCkBtcUpdateBalance'?: (event: CustomEvent<any>) => void;
 	}
 }
 

@@ -100,7 +100,6 @@ export interface PostMessageJsonDataResponseCkBTC extends PostMessageDataRespons
 }
 
 export interface PostMessageSyncState extends PostMessageDataResponse {
-	sync: PostMessageResponseStatus;
 	state: SyncState;
 }
 
