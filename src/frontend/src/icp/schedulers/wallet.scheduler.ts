@@ -34,7 +34,7 @@ export class WalletScheduler<
 	PostMessageDataRequest
 > implements Scheduler<PostMessageDataRequest>
 {
-	private timer = new SchedulerTimer();
+	private timer = new SchedulerTimer('syncWalletStatus');
 
 	private store: WalletStore<T> = {
 		balance: undefined,

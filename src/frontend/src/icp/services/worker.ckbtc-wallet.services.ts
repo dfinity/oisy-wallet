@@ -39,6 +39,9 @@ export const initCkBTCWalletWorker: CkBTCWorker = async ({
 					data: data.data as PostMessageJsonDataResponseCkBTC
 				});
 				return;
+			case 'syncCkBtcUpdateBalanceStatus':
+				console.log(data);
+				return;
 			case 'syncCkBtcUpdateOk':
 				await waitAndTriggerWallet();
 				return;

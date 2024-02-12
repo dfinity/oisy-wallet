@@ -5,6 +5,7 @@ import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 
 import type { JsonText } from '$icp/types/btc.post-message';
 import type { IcCanisters, IcCkCanisters } from '$icp/types/ic';
+import type { SyncState } from '$lib/types/sync';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
@@ -37,6 +38,12 @@ export type PostMessageDataRequestIcrc = IcCanisters;
 
 export type PostMessageDataRequestCkBTC = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 
+export type PostMessageResponseStatus =
+	| 'syncWalletStatus'
+	| 'syncBtcStatusesStatus'
+	| 'syncCktcMinterInfoStatus'
+	| 'syncCkBtcUpdateBalanceStatus';
+
 export type PostMessageResponse =
 	| 'signOutIdleTimer'
 	| 'delegationRemainingTime'
@@ -54,7 +61,8 @@ export type PostMessageResponse =
 	| 'syncCktcMinterInfo'
 	| 'syncCktcMinterInfoError'
 	| 'syncBtcPendingUtxos'
-	| 'syncCkBtcUpdateOk';
+	| 'syncCkBtcUpdateOk'
+	| PostMessageResponseStatus;
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 	authRemainingTime: number;
@@ -89,6 +97,11 @@ export interface PostMessageDataResponseWalletCleanUp extends PostMessageDataRes
 
 export interface PostMessageJsonDataResponseCkBTC extends PostMessageDataResponse {
 	json: JsonText;
+}
+
+export interface PostMessageSyncState extends PostMessageDataResponse {
+	sync: PostMessageResponseStatus;
+	state: SyncState;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {
