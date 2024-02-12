@@ -62,6 +62,10 @@
 		bind:sendProgressStep
 		{currentStep}
 	>
-		<HowToConvertETHInfo on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
+		<HowToConvertETHInfo
+			on:icQRCode={modal.next}
+			on:icConvert={() => modal.set(2)}
+			formCancelAction="close"
+		/>
 	</ConvertETHToCkETHWizard>
 </WizardModal>
