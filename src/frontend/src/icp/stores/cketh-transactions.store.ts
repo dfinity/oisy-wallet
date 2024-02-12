@@ -1,7 +1,52 @@
 import type { IcTransactionUi } from '$icp/types/ic';
-import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
+import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
+import type { TokenId } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 
-export type ConvertEthToCkEthPendingData = CertifiedData<IcTransactionUi[]>;
-export const convertEthToCkEthPendingStore =
-	initCertifiedSetterStore<ConvertEthToCkEthPendingData>();
+export type ConvertEthToCkEthPendingTransaction = CertifiedData<IcTransactionUi>;
+
+export type ConvertEthToCkEthPendingTransactionsData = ConvertEthToCkEthPendingTransaction[];
+
+export interface ConvertEthToCkEthPendingStore
+	extends CertifiedStore<ConvertEthToCkEthPendingTransactionsData> {
+	prepend: (params: { tokenId: TokenId; transaction: CertifiedData<IcTransactionUi> }) => void;
+	set: (params: { tokenId: TokenId; data: ConvertEthToCkEthPendingTransactionsData }) => void;
+}
+
+const initConvertEthToCkEthPendingStore = (): ConvertEthToCkEthPendingStore => {
+	const { subscribe, update, reset } =
+		initCertifiedStore<ConvertEthToCkEthPendingTransactionsData>();
+
+	return {
+		prepend: ({
+			tokenId,
+			transaction
+		}: {
+			tokenId: TokenId;
+			transaction: CertifiedData<IcTransactionUi>;
+		}) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: [
+					transaction,
+					...((state ?? {})[tokenId] ?? []).filter(({ data: { id } }) => transaction.data.id !== id)
+				]
+			})),
+		set: ({
+			tokenId,
+			data
+		}: {
+			tokenId: TokenId;
+			data: ConvertEthToCkEthPendingTransactionsData;
+		}) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: data
+			})),
+		reset,
+		subscribe
+	};
+};
+
+export const convertEthToCkEthPendingStore = initConvertEthToCkEthPendingStore();

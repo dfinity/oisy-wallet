@@ -1,19 +1,18 @@
-import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import {
+	convertEthToCkEthPendingStore,
+	type ConvertEthToCkEthPendingTransactionsData
+} from '$icp/stores/cketh-transactions.store';
 import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { token } from '$lib/derived/token.derived';
 import { derived, type Readable } from 'svelte/store';
-import {convertEthToCkEthPendingStore} from "$icp/stores/cketh-transactions.store";
 
-export const ckEthPendingTransactions: Readable<IcTransactionsData> = derived(
+export const ckEthPendingTransactions: Readable<ConvertEthToCkEthPendingTransactionsData> = derived(
 	[token, convertEthToCkEthPendingStore],
 	([$token, $convertEthToCkEthPendingStore]) => {
 		if (!isTokenCkEthLedger($token)) {
 			return [];
 		}
 
-		return ($convertEthToCkEthPendingStore?.[$token.id]?.data ?? []).map((transaction) => ({
-			data: transaction,
-			certified: false
-		}));
+		return $convertEthToCkEthPendingStore?.[$token.id] ?? [];
 	}
 );

@@ -16,7 +16,7 @@
 	import { tokenId } from '$lib/derived/token.derived';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { address } from '$lib/derived/address.derived';
-    import {convertEthToCkEthPendingStore} from "$icp/stores/cketh-transactions.store";
+	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -40,12 +40,10 @@
 
 		convertEthToCkEthPendingStore.set({
 			tokenId: $tokenId,
-			data: {
-				data: pendingEthToCkEthTransactions.map((transaction) =>
-					mapCkETHPendingTransaction({ transaction })
-				),
+			data: pendingEthToCkEthTransactions.map((transaction) => ({
+				data: mapCkETHPendingTransaction({ transaction }),
 				certified: false
-			}
+			}))
 		});
 	};
 
@@ -73,8 +71,13 @@
 					return;
 				}
 
-				// TODO: add to ic-transaction store?
-				console.log('PENDING', transaction);
+				convertEthToCkEthPendingStore.prepend({
+					tokenId: $tokenId,
+					transaction: {
+						data: mapCkETHPendingTransaction({ transaction }),
+						certified: false
+					}
+				});
 			}
 		});
 	};
