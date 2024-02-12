@@ -1,4 +1,5 @@
 import { ckBtcPendingUtxoTransactions } from '$icp/derived/ckbtc-transactions.derived';
+import { ckEthPendingTransactions } from '$icp/derived/cketh-transactions.derived';
 import { btcStatusesStore } from '$icp/stores/btc.store';
 import { icTransactionsStore, type IcTransactionsData } from '$icp/stores/ic-transactions.store';
 import { extendIcTransaction } from '$icp/utils/ic-transactions.utils';
@@ -18,9 +19,10 @@ const icExtendedTransactions: Readable<IcTransactionsData> = derived(
 );
 
 export const icTransactions: Readable<IcTransactionsData> = derived(
-	[ckBtcPendingUtxoTransactions, icExtendedTransactions],
-	([$ckBtcPendingUtxoTransactions, $icExtendedTransactions]) => [
+	[ckBtcPendingUtxoTransactions, ckEthPendingTransactions, icExtendedTransactions],
+	([$ckBtcPendingUtxoTransactions, $ckEthPendingTransactions, $icExtendedTransactions]) => [
 		...$ckBtcPendingUtxoTransactions,
+		...$ckEthPendingTransactions,
 		...$icExtendedTransactions
 	]
 );

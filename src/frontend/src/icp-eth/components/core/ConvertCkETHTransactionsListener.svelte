@@ -3,13 +3,18 @@
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { ETH_ADDRESS, OptionAddress } from '$lib/types/address';
-	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
+	import {
+		getTransaction,
+		initPendingTransactionsListener as initEthPendingTransactionsListenerProvider
+	} from '$eth/providers/alchemy.providers';
 	import { transactions as transactionsProviders } from '$eth/providers/etherscan.providers';
 	import { isTransactionPending } from '$eth/utils/transactions.utils';
 	import { getBlockNumber } from '$eth/providers/infura.providers';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-	import { processEthTransaction } from '$eth/services/transaction.services';
+	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh.store';
+	import { mapCkETHPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
+	import { tokenId } from '$lib/derived/token.derived';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -26,8 +31,26 @@
 			return diff < 64;
 		});
 
+		convertEthToCkEthPendingStore.set({
+			tokenId: $tokenId,
+			data: {
+				data: pendingEthToCkEthTransactions.map((transaction) =>
+					mapCkETHPendingTransaction({ transaction })
+				),
+				certified: false
+			}
+		});
+
 		// TODO: add to ic-transaction store?
-		console.log('Pending transactions', pendingEthToCkEthTransactions);
+		console.log('Pending transactions', {
+			tokenId: $tokenId,
+			data: {
+				data: pendingEthToCkEthTransactions.map((transaction) =>
+					mapCkETHPendingTransaction({ transaction })
+				),
+				certified: false
+			}
+		});
 	};
 
 	const init = async ({ address }: { address: OptionAddress }) => {
@@ -42,7 +65,7 @@
 		listener = initEthPendingTransactionsListenerProvider({
 			address,
 			listener: async (hash: string) => {
-				const transaction = await processEthTransaction({ hash });
+				const transaction = await getTransaction(hash);
 
 				// TODO: add to ic-transaction store?
 				console.log('PENDING', transaction);
