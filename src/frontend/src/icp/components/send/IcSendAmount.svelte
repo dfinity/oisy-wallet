@@ -3,7 +3,7 @@
 	import { slide } from 'svelte/transition';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import { token, tokenDecimals, tokenId } from '$lib/derived/token.derived';
+	import { token, tokenDecimals, tokenId, tokenSymbol } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { balance } from '$lib/derived/balances.derived';
@@ -13,6 +13,9 @@
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import { CKETH_MIN_WITHDRAWAL_AMOUNT } from '$icp/constants/cketh.constants';
+	import { ETHEREUM_NETWORK_ID } from '$lib/constants/networks.constants';
+	import { assertCkETHUserInputAmount } from '$icp/utils/cketh.utils';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -42,6 +45,18 @@
 				amount: value,
 				minterInfo: $ckBtcMinterInfoStore?.[$tokenId],
 				tokenDecimals: $tokenDecimals
+			});
+
+			if (nonNullish(amountError)) {
+				return;
+			}
+		}
+
+		if (networkId === ETHEREUM_NETWORK_ID) {
+			amountError = assertCkETHUserInputAmount({
+				amount: value,
+				tokenDecimals: $tokenDecimals,
+				tokenSymbol: $tokenSymbol
 			});
 
 			if (nonNullish(amountError)) {
