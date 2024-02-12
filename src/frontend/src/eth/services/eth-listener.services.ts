@@ -22,7 +22,7 @@ export const initTransactionsListener = ({
 }): WebSocketListener => {
 	if (token.id === ETHEREUM_TOKEN_ID) {
 		return initEthPendingTransactionsListenerProvider({
-			address,
+			toAddress: address,
 			listener: async (hash: string) => await processEthTransaction({ hash })
 		});
 	}
