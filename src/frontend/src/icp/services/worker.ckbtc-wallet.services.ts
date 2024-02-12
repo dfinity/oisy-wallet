@@ -9,8 +9,10 @@ import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,
-	PostMessageJsonDataResponseCkBTC
+	PostMessageJsonDataResponseCkBTC,
+	PostMessageSyncState
 } from '$lib/types/post-message';
+import { emit } from '$lib/utils/events.utils';
 
 export const initCkBTCWalletWorker: CkBTCWorker = async ({
 	minterCanisterId,
@@ -22,7 +24,9 @@ export const initCkBTCWalletWorker: CkBTCWorker = async ({
 	worker.onmessage = async ({
 		data
 	}: MessageEvent<
-		PostMessage<PostMessageJsonDataResponseCkBTC | PostMessageDataResponseError>
+		PostMessage<
+			PostMessageJsonDataResponseCkBTC | PostMessageSyncState | PostMessageDataResponseError
+		>
 	>) => {
 		const { msg } = data;
 
@@ -40,7 +44,10 @@ export const initCkBTCWalletWorker: CkBTCWorker = async ({
 				});
 				return;
 			case 'syncCkBtcUpdateBalanceStatus':
-				console.log(data);
+				emit({
+					message: 'oisyCkBtcUpdateBalance',
+					detail: (data.data as PostMessageSyncState).state
+				});
 				return;
 			case 'syncCkBtcUpdateOk':
 				await waitAndTriggerWallet();
