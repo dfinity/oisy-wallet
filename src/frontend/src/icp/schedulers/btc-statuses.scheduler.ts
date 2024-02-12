@@ -13,7 +13,7 @@ import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestCkBTC> {
-	private timer = new SchedulerTimer();
+	private timer = new SchedulerTimer('syncBtcStatusesStatus');
 
 	stop() {
 		this.timer.stop();
