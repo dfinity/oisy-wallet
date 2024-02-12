@@ -12,6 +12,7 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/derived/token.derived';
+	import { HEIGHT_DECIMALS } from '$lib/constants/app.constants';
 
 	export let transaction: Transaction;
 
@@ -47,7 +48,9 @@
 		<svelte:fragment slot="amount">
 			{formatToken({
 				value: amount,
-				unitName: $token.decimals
+				unitName: $token.decimals,
+				displayDecimals: HEIGHT_DECIMALS,
+				trailingZeros: false
 			})}</svelte:fragment
 		>
 		<svelte:fragment slot="description">
