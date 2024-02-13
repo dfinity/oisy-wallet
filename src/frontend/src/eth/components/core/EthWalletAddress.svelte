@@ -13,7 +13,7 @@
 
 	<output class="break-all" id="eth-wallet-address"
 		>{shortenWithMiddleEllipsis($address ?? '')}</output
-	><Copy inline value={$address ?? ''} text="Address copied to clipboard." />
+	><Copy inline color="inherit" value={$address ?? ''} text="Address copied to clipboard." />
 </div>
 
 <ExternalLink href={explorerUrl} ariaLabel="Open your address on Etherscan">

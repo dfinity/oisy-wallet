@@ -5,7 +5,11 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import {
+		formatSecondsToDate,
+		formatToken,
+		shortenWithMiddleEllipsis
+	} from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import TransactionStatus from './TransactionStatus.svelte';
 	import { token } from '$lib/derived/token.derived';
@@ -36,18 +40,17 @@
 
 	<div>
 		{#if nonNullish(hash)}
-			<div class="flex justify-end mb-4 text-sm">
-				<ExternalLink
-					iconSize="16"
-					href={explorerUrl}
-					ariaLabel="Open this transaction on a block explorer">View on block explorer</ExternalLink
-				>
-			</div>
-
 			<Value ref="hash">
 				<svelte:fragment slot="label">Transaction Hash</svelte:fragment>
-				<output>{hash}</output>
-				<Copy value={hash} text="Transaction hash copied to clipboard." inline />
+				<output>{shortenWithMiddleEllipsis(hash)}</output>
+				<Copy value={hash} text={`Transaction hash ${hash} copied to clipboard.`} inline />
+				<ExternalLink
+					iconSize="18"
+					href={explorerUrl}
+					ariaLabel="Open this transaction on a block explorer"
+					inline
+					color="blue"
+				/>
 			</Value>
 		{/if}
 

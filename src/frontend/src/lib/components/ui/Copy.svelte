@@ -6,6 +6,7 @@
 	export let value: string;
 	export let text: string;
 	export let inline = false;
+	export let color: 'blue' | 'inherit' = 'blue';
 
 	const copyToClipboard = async () => {
 		await copyText(value);
@@ -21,12 +22,15 @@
 <button
 	on:click|preventDefault|stopPropagation={copyToClipboard}
 	aria-label={`Copy: ${value}`}
+	class="pl-0.5"
 	class:py-2={!inline}
 	class:inline-block={inline}
-	class="text-blue hover:text-dark-blue active:text-dark-blue"
-	style={`height: var(--padding-4x); width: var(--padding-4x); min-width: var(--padding-4x); ${
-		inline ? 'vertical-align: sub;' : ''
-	}`}
+	class:text-blue={color === 'blue'}
+	class:hover:text-dark-blue={color === 'blue'}
+	class:active:text-dark-blue={color === 'blue'}
+	class:hover:text-blue={color === 'inherit'}
+	class:active:text-blue={color === 'inherit'}
+	style={`${inline ? 'vertical-align: sub;' : ''}`}
 >
 	<IconCopy />
 </button>
