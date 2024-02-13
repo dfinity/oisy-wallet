@@ -18,6 +18,10 @@
 	};
 
 	$: worker, syncTimer();
+
+	const triggerTimer = () => worker?.trigger();
 </script>
+
+<svelte:window on:oisyTriggerWallet={triggerTimer} />
 
 <slot />
