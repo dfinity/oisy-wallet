@@ -65,7 +65,7 @@ export const mapCkBTCPendingUtxo = ({
 	utxo: PendingUtxo;
 	kytFee: bigint;
 }): IcTransactionUi => {
-	const id = uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid));
+	const id = uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid).reverse());
 
 	return {
 		id: `${id}-${utxo.outpoint.vout}`,
