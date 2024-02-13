@@ -3,6 +3,7 @@
 
 	export let href: string;
 	export let ariaLabel: string;
+	export let iconSize = '20';
 </script>
 
 <a
@@ -12,6 +13,6 @@
 	class="flex gap-2 items-center no-underline"
 	aria-label={ariaLabel}
 >
-	<IconExternalLink />
+	<IconExternalLink size={iconSize} />
 	<slot />
 </a>
