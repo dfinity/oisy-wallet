@@ -13,7 +13,6 @@
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { CKETH_MIN_WITHDRAWAL_AMOUNT } from '$icp/constants/cketh.constants';
 	import { ETHEREUM_NETWORK_ID } from '$lib/constants/networks.constants';
 	import { assertCkETHUserInputAmount } from '$icp/utils/cketh.utils';
 
