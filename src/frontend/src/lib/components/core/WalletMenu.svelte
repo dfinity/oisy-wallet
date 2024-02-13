@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconGitHub, IconSettings, Popover } from '@dfinity/gix-components';
+	import { Popover } from '@dfinity/gix-components';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { goto } from '$app/navigation';
@@ -11,6 +11,8 @@
 	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
 	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import IconSettings from '$lib/components/icons/IconSettings.svelte';
+	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
