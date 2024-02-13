@@ -55,16 +55,6 @@ export const mapCkETHTransaction = ({
 	return tx;
 };
 
-const isMemoReimbursement = (memo: Uint8Array | number[]) => {
-	try {
-		const [mintType, _] = decodeMintMemo(memo);
-		return mintType === MINT_MEMO_REIMBURSE;
-	} catch (err: unknown) {
-		console.error('Failed to decode ckETH mint memo', memo, err);
-		return false;
-	}
-};
-
 export const mintMemoInfo = (
 	memo: Uint8Array | number[]
 ): { fromAddress: string | undefined; reimbursement: boolean } | undefined => {
