@@ -3,9 +3,9 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { address } from '$lib/derived/address.derived';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { ETHERSCAN_EXPLORER_URL } from '$lib/constants/explorers.constants';
+	import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
 
-	let explorerUrl = `${ETHERSCAN_EXPLORER_URL}/address/${$address ?? ''}`;
+	let explorerUrl = `${ETHEREUM_EXPLORER_URL}/address/${$address ?? ''}`;
 </script>
 
 <div>

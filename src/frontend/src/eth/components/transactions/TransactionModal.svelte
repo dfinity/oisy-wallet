@@ -15,7 +15,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { ETHERSCAN_EXPLORER_URL } from '$lib/constants/explorers.constants';
+	import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
 
 	export let transaction: Transaction;
 
@@ -32,7 +32,7 @@
 	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
 
 	let explorerUrl: string;
-	$: explorerUrl = `${ETHERSCAN_EXPLORER_URL}/tx/${hash ?? ''}`;
+	$: explorerUrl = `${ETHEREUM_EXPLORER_URL}/tx/${hash ?? ''}`;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
