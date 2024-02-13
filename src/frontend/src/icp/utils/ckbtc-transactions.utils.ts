@@ -65,13 +65,14 @@ export const mapCkBTCPendingUtxo = ({
 	utxo: PendingUtxo;
 	kytFee: bigint;
 }): IcTransactionUi => {
-	const id = uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid))
-		.split('')
-		.reverse()
-		.join('');
+	// Bitcoin txid to text representation requires inverting the array.
+	const idArr = Uint8Array.from(utxo.outpoint.txid);
+	idArr.reverse();
+
+	const id = uint8ArrayToHexString(idArr);
 
 	// eslint-disable-next-line no-console
-	console.log(uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid)), id);
+	console.log(uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid)), idArr, id);
 
 	return {
 		id: `${id}-${utxo.outpoint.vout}`,
