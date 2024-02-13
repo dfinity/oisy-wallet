@@ -10,11 +10,11 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { mapAddressStartsWith0x } from '$eth/utils/send.utils';
 	import { getErc20FeeData, getEthFeeData, type GetFeeData } from '$eth/services/fee.services';
 	import type { Network } from '$lib/types/network';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 
 	export let observe: boolean;
 	export let destination = '';
