@@ -1,20 +1,11 @@
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
-import {
-	decodeBurnMemo,
-	decodeMintMemo,
-	MINT_MEMO_TYPE_KYT_FAIL
-} from '$icp/utils/ckbtc-minter.utils';
+import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_KYT_FAIL } from '$icp/utils/ckbtc-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
-import {
-	arrayOfNumberToUint8Array,
-	fromNullable,
-	nonNullish,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { fromNullable, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -27,15 +18,15 @@ export const mapCkBTCTransaction = ({
 
 	const { transaction: rawTransaction } = transaction;
 
-	const { mint, burn } = rawTransaction;
+	const { mint: rawMint, burn: rawBurn } = rawTransaction;
 
-	const isMint = nonNullish(fromNullable(mint));
-	const isBurn = nonNullish(fromNullable(burn));
+	const mint = fromNullable(rawMint);
+	const burn = fromNullable(rawBurn);
 
-	if (isMint) {
-		const memo = fromNullable(fromNullable(mint)!.memo);
+	if (nonNullish(mint)) {
+		const memo = fromNullable(mint.memo);
 
-		const isReimbursement = nonNullish(memo) && isCkbtcReimbursementMintMemo(memo);
+		const isReimbursement = nonNullish(memo) && isMemoReimbursement(memo);
 
 		return {
 			...tx,
@@ -45,8 +36,8 @@ export const mapCkBTCTransaction = ({
 		};
 	}
 
-	if (isBurn) {
-		const memo = fromNullable(fromNullable(burn)!.memo) ?? [];
+	if (nonNullish(burn)) {
+		const memo = fromNullable(burn.memo) ?? [];
 
 		const burnMemo = burnMemoLabel(memo);
 
@@ -129,11 +120,11 @@ const burnStatus = (
 	};
 };
 
-const isCkbtcReimbursementMintMemo = (memo: Uint8Array | number[]) => {
+const isMemoReimbursement = (memo: Uint8Array | number[]) => {
 	try {
 		const [mintType, _] = decodeMintMemo(memo);
-		return mintType === MINT_MEMO_TYPE_KYT_FAIL;
-	} catch (err) {
+		return mintType === MINT_MEMO_KYT_FAIL;
+	} catch (err: unknown) {
 		console.error('Failed to decode ckBTC mint memo', memo, err);
 		return false;
 	}
@@ -141,9 +132,7 @@ const isCkbtcReimbursementMintMemo = (memo: Uint8Array | number[]) => {
 
 export const burnMemoLabel = (memo: Uint8Array | number[]): string | undefined | null => {
 	try {
-		const [_, [label]] = decodeBurnMemo(
-			memo instanceof Uint8Array ? memo : arrayOfNumberToUint8Array(memo)
-		);
+		const [_, [label]] = decodeBurnMemo(memo);
 		return label;
 	} catch (err: unknown) {
 		console.error('Failed to decode ckBTC burn memo', memo, err);

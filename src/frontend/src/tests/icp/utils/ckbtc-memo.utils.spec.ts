@@ -1,8 +1,8 @@
-import { decodeBurnMemo, decodeMintMemo, LegacyMintMemoError } from '$icp/utils/ckbtc-minter.utils';
+import { decodeBurnMemo, decodeMintMemo, LegacyMintMemoError } from '$icp/utils/ckbtc-memo.utils';
 import { Cbor } from '@dfinity/agent';
 import { hexStringToUint8Array } from '@dfinity/utils';
 
-describe('ckbtc-minter.utils', () => {
+describe('ckbtc-memo.utils', () => {
 	describe('decode mint memo', () => {
 		it('should decode memo as a kyt fail', () => {
 			const kytFee = 1331;
@@ -19,7 +19,7 @@ describe('ckbtc-minter.utils', () => {
 			expect(decodeMintMemo(memo)).toEqual(decodedMemo);
 		});
 
-		it('should decode memo as a single UTXO to ckBTC', () => {
+		it('should decode memo as a converted single UTXO to ckBTC', () => {
 			const btcWithdrawalAddress = hexStringToUint8Array('1ASLxsAMbbt4gcrNc6v6qDBW4JkeWAtTeh');
 			const kytFee = 1333;
 			const decodedMemo = [0, [btcWithdrawalAddress, kytFee, undefined]];
