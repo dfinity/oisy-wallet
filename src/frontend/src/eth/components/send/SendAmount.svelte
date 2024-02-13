@@ -2,37 +2,70 @@
 	import { Input } from '@dfinity/gix-components';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { getContext } from 'svelte';
-	import { debounce, isNullish } from '@dfinity/utils';
-	import { minGasFee } from '$eth/utils/fee.utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { maxGasFee, minGasFee } from '$eth/utils/fee.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { slide } from 'svelte/transition';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
 
+	let insufficientFundsError: string | undefined;
+
+	$: insufficientFunds = nonNullish(insufficientFundsError);
+
 	const { store: storeFeeData } = getContext<FeeContext>(FEE_CONTEXT_KEY);
-	const { sendTokenDecimals, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenDecimals, sendBalance, sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const validate = () => {
 		if (invalidAmount(amount)) {
-			insufficientFunds = false;
+			insufficientFundsError = undefined;
 			return;
 		}
 
 		if (isNullish($storeFeeData)) {
-			insufficientFunds = false;
+			insufficientFundsError = undefined;
 			return;
 		}
 
-		const total = parseToken({
+		const userAmount = parseToken({
 			value: `${amount}`,
 			unitName: $sendTokenDecimals
-		}).add(minGasFee($storeFeeData));
+		});
 
-		insufficientFunds = total.gt($sendBalance ?? BigNumber.from(0n));
+		// If ETH, the balance should cover the user entered amount plus the min gas fee
+		if ($sendTokenId === ETHEREUM_TOKEN_ID) {
+			const total = userAmount.add(minGasFee($storeFeeData));
+
+			if (total.gt($sendBalance ?? BigNumber.from(0n))) {
+				insufficientFundsError = 'Insufficient funds for gas';
+				return;
+			}
+
+			insufficientFundsError = undefined;
+			return;
+		}
+
+		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the user
+		if (userAmount.gt($sendBalance ?? BigNumber.from(0n))) {
+			insufficientFundsError = 'Insufficient funds for amount';
+			return;
+		}
+
+		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
+		const maxFee = maxGasFee($storeFeeData);
+		const ethBalance = $balancesStore?.[ETHEREUM_TOKEN_ID]?.data ?? BigNumber.from(0n);
+		if (nonNullish(maxFee) && ethBalance.lt(maxFee)) {
+			insufficientFundsError = 'Insufficient Ethereum funds to cover the fees';
+			return;
+		}
+
+		insufficientFundsError = undefined;
 	};
 
 	const debounceValidate = debounce(validate);
@@ -51,5 +84,5 @@
 />
 
 {#if insufficientFunds}
-	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">Insufficient funds for gas</p>
+	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">{insufficientFundsError}</p>
 {/if}
