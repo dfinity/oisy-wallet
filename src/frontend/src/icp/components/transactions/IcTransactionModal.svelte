@@ -8,6 +8,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 
 	export let transaction: IcTransactionUi;
 
@@ -19,8 +20,9 @@
 	let type: IcTransactionType;
 	let toLabel: string | undefined;
 	let fromLabel: string | undefined;
+	let explorerUrl: string | undefined;
 
-	$: ({ id, from, to, value, timestamp, type, toLabel, fromLabel } = transaction);
+	$: ({ id, from, to, value, timestamp, type, toLabel, fromLabel, explorerUrl } = transaction);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -31,6 +33,15 @@
 			<svelte:fragment slot="label">Transaction ID</svelte:fragment>
 			<output>{id}</output>
 			<Copy value={`${id}`} text="Transaction ID copied to clipboard." inline />
+			{#if nonNullish(explorerUrl)}
+				<ExternalLink
+					iconSize="18"
+					href={explorerUrl}
+					ariaLabel="Open this transaction on a block explorer"
+					inline
+					color="blue"
+				/>
+			{/if}
 		</Value>
 
 		{#if nonNullish(timestamp)}

@@ -2,6 +2,7 @@ import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
 import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_REIMBURSE } from '$icp/utils/cketh-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import { CKETH_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { fromNullable, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 
@@ -12,7 +13,13 @@ export const mapCkETHTransaction = ({
 	transaction: IcrcTransaction;
 	identity: OptionIdentity;
 }): IcTransactionUi => {
-	const tx = mapIcrcTransaction({ transaction, identity });
+	const { id, ...txRest } = mapIcrcTransaction({ transaction, identity });
+
+	const tx = {
+		id,
+		explorerUrl: `${CKETH_EXPLORER_URL}/${id}`,
+		...txRest
+	};
 
 	const { transaction: rawTransaction } = transaction;
 

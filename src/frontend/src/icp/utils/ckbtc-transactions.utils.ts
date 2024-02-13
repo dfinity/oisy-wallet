@@ -3,6 +3,7 @@ import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
 import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_KYT_FAIL } from '$icp/utils/ckbtc-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
+import { CKBTC_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import { fromNullable, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
@@ -14,7 +15,13 @@ export const mapCkBTCTransaction = ({
 	transaction: IcrcTransaction;
 	identity: OptionIdentity;
 }): IcTransactionUi => {
-	const tx = mapIcrcTransaction({ transaction, identity });
+	const { id, ...txRest } = mapIcrcTransaction({ transaction, identity });
+
+	const tx = {
+		id,
+		explorerUrl: `${CKBTC_EXPLORER_URL}/${id}`,
+		...txRest
+	};
 
 	const { transaction: rawTransaction } = transaction;
 
