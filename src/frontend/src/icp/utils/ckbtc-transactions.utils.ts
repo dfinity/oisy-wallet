@@ -3,7 +3,7 @@ import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
 import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_KYT_FAIL } from '$icp/utils/ckbtc-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
-import { CKBTC_EXPLORER_URL } from '$lib/constants/explorers.constants';
+import { BITCOIN_EXPLORER_URL, CKBTC_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import { fromNullable, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
@@ -64,15 +64,20 @@ export const mapCkBTCPendingUtxo = ({
 }: {
 	utxo: PendingUtxo;
 	kytFee: bigint;
-}): IcTransactionUi => ({
-	id: `${uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid))}-${utxo.outpoint.vout}`,
-	incoming: true,
-	type: 'receive',
-	status: 'pending',
-	fromLabel: 'BTC Network',
-	typeLabel: 'Receiving BTC',
-	value: utxo.value - kytFee
-});
+}): IcTransactionUi => {
+	const id = uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid));
+
+	return {
+		id: `${id}-${utxo.outpoint.vout}`,
+		incoming: true,
+		type: 'receive',
+		status: 'pending',
+		fromLabel: 'BTC Network',
+		typeLabel: 'Receiving BTC',
+		value: utxo.value - kytFee,
+		explorerUrl: `${BITCOIN_EXPLORER_URL}/block/${id}`
+	};
+};
 
 export const extendCkBTCTransaction = ({
 	transaction: {
