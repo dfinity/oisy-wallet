@@ -55,7 +55,7 @@ export const mapCkETHTransaction = ({
 	return tx;
 };
 
-let isMemoReimbursement = (memo: Uint8Array | number[]) => {
+const isMemoReimbursement = (memo: Uint8Array | number[]) => {
 	try {
 		const [mintType, _] = decodeMintMemo(memo);
 		return mintType === MINT_MEMO_REIMBURSE;
