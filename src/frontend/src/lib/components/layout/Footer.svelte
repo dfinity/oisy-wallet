@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { IconGitHub } from '@dfinity/gix-components';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 </script>
 
 <footer class="flex flex-col justify-center items-center pt-8 mt-6 pb-4 px-4 gap-3 z-10">
