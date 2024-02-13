@@ -68,13 +68,6 @@ export const mapCkBTCPendingUtxo = ({
 	// Bitcoin txid to text representation requires inverting the array.
 	const id = uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid).toReversed());
 
-	// eslint-disable-next-line no-console
-	console.log(
-		uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid)),
-		uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid).toReversed()),
-		id
-	);
-
 	return {
 		id: `${id}-${utxo.outpoint.vout}`,
 		incoming: true,
@@ -83,7 +76,7 @@ export const mapCkBTCPendingUtxo = ({
 		fromLabel: 'BTC Network',
 		typeLabel: 'Receiving BTC',
 		value: utxo.value - kytFee,
-		explorerUrl: `${BITCOIN_EXPLORER_URL}/block/${id}`
+		explorerUrl: `${BITCOIN_EXPLORER_URL}/tx/${id}`
 	};
 };
 
