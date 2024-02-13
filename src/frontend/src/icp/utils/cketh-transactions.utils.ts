@@ -1,10 +1,9 @@
-import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
 import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_REIMBURSE } from '$icp/utils/cketh-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { CKETH_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
-import { fromNullable, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 
 export const mapCkETHTransaction = ({
 	transaction,
@@ -33,13 +32,13 @@ export const mapCkETHTransaction = ({
 
 		const memoInfo = nonNullish(memo) ? mintMemoInfo(memo) : undefined;
 
+		console.log(tx);
+
 		return {
 			...tx,
 			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
-			fromLabel:
-				memoInfo?.fromAddress !== undefined
-					? mapAddressStartsWith0x(memoInfo.fromAddress)
-					: 'ETH Network',
+			...(nonNullish(memoInfo?.fromAddress) && { from: memoInfo?.fromAddress }),
+			...(isNullish(memoInfo?.fromAddress) && { fromLabel: 'ETH Network' }),
 			status: memoInfo?.reimbursement === true ? 'reimbursed' : 'executed'
 		};
 	}
@@ -52,10 +51,8 @@ export const mapCkETHTransaction = ({
 		return {
 			...tx,
 			typeLabel: 'ETH Sent',
-			toLabel:
-				burnMemo?.toAddress !== undefined
-					? mapAddressStartsWith0x(burnMemo.toAddress)
-					: 'ETH Network'
+			...(nonNullish(burnMemo?.toAddress) && { to: burnMemo?.toAddress }),
+			...(isNullish(burnMemo?.toAddress) && { toLabel: 'ETH Network' })
 		};
 	}
 
