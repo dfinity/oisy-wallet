@@ -10,6 +10,8 @@
 	import TransactionStatus from './TransactionStatus.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { ETHERSCAN_URL } from '$icp-eth/constants/eth.constants';
 
 	export let transaction: Transaction;
 
@@ -24,6 +26,9 @@
 
 	let type: 'send' | 'receive';
 	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
+
+	let explorerUrl: string;
+	$: explorerUrl = `${ETHERSCAN_URL}/tx/${hash ?? ''}`;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -31,6 +36,14 @@
 
 	<div>
 		{#if nonNullish(hash)}
+			<div class="flex justify-end mb-4 text-sm">
+				<ExternalLink
+					iconSize="16"
+					href={explorerUrl}
+					ariaLabel="Open this transaction on a block explorer">View on block explorer</ExternalLink
+				>
+			</div>
+
 			<Value ref="hash">
 				<svelte:fragment slot="label">Transaction Hash</svelte:fragment>
 				<output>{hash}</output>
