@@ -1,3 +1,4 @@
+import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
 import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_REIMBURSE } from '$icp/utils/cketh-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
@@ -28,7 +29,10 @@ export const mapCkETHTransaction = ({
 		return {
 			...tx,
 			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
-			fromLabel: memoInfo?.label ?? 'ETH Network',
+			fromLabel:
+				memoInfo?.fromAddress !== undefined
+					? mapAddressStartsWith0x(memoInfo.fromAddress)
+					: 'ETH Network',
 			status: memoInfo?.reimbursement === true ? 'reimbursed' : 'executed'
 		};
 	}
@@ -36,12 +40,15 @@ export const mapCkETHTransaction = ({
 	if (nonNullish(burn)) {
 		const memo = fromNullable(burn.memo) ?? [];
 
-		const burnMemo = burnMemoLabel(memo);
+		const burnMemo = burnMemoInfo(memo);
 
 		return {
 			...tx,
 			typeLabel: 'ETH Sent',
-			toLabel: burnMemo ?? 'ETH Network'
+			toLabel:
+				burnMemo?.toAddress !== undefined
+					? mapAddressStartsWith0x(burnMemo.toAddress)
+					: 'ETH Network'
 		};
 	}
 
@@ -60,11 +67,12 @@ const isMemoReimbursement = (memo: Uint8Array | number[]) => {
 
 export const mintMemoInfo = (
 	memo: Uint8Array | number[]
-): { label: string | null | undefined; reimbursement: boolean } | undefined => {
+): { fromAddress: string | undefined; reimbursement: boolean } | undefined => {
 	try {
-		const [mintType, [label]] = decodeMintMemo(memo);
+		const [mintType, [fromAddress]] = decodeMintMemo(memo);
 		return {
-			label: label instanceof Uint8Array ? uint8ArrayToHexString(label) : undefined,
+			fromAddress:
+				fromAddress instanceof Uint8Array ? uint8ArrayToHexString(fromAddress) : undefined,
 			reimbursement: mintType === MINT_MEMO_REIMBURSE
 		};
 	} catch (err: unknown) {
@@ -73,10 +81,10 @@ export const mintMemoInfo = (
 	}
 };
 
-export const burnMemoLabel = (memo: Uint8Array | number[]): string | undefined | null => {
+export const burnMemoInfo = (memo: Uint8Array | number[]): { toAddress: string } | undefined => {
 	try {
-		const [_, [label]] = decodeBurnMemo(memo);
-		return uint8ArrayToHexString(label);
+		const [_, [toAddress]] = decodeBurnMemo(memo);
+		return { toAddress: uint8ArrayToHexString(toAddress) };
 	} catch (err: unknown) {
 		console.error('Failed to decode ckETH burn memo', memo, err);
 		return undefined;
