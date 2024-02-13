@@ -6,11 +6,11 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
-	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
 	import { networkICP, networkId } from '$lib/derived/network.derived';
 	import { networkParam } from '$lib/utils/nav.utils';
 	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
 	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -52,16 +52,9 @@
 
 		<Hr />
 
-		<a
-			href="https://identity.ic0.app"
-			rel="external noopener noreferrer"
-			target="_blank"
-			class="flex gap-2 items-center no-underline"
-			aria-label="Administrate your Internet Identity"
-		>
-			<span class="ml-1"><IconExternalLink /></span>
+		<ExternalLink href="https://identity.ic0.app" ariaLabel="Administrate your Internet Identity">
 			Manage Internet Identity
-		</a>
+		</ExternalLink>
 
 		<button
 			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
