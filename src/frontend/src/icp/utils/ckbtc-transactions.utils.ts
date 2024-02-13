@@ -39,11 +39,11 @@ export const mapCkBTCTransaction = ({
 	if (nonNullish(burn)) {
 		const memo = fromNullable(burn.memo) ?? [];
 
-		const burnMemo = burnMemoLabel(memo);
+		const toAddress = burnMemoAddress(memo);
 
 		return {
 			...tx,
-			toLabel: burnMemo ?? 'BTC Network'
+			toLabel: toAddress ?? 'BTC Network'
 		};
 	}
 
@@ -130,10 +130,10 @@ const isMemoReimbursement = (memo: Uint8Array | number[]) => {
 	}
 };
 
-export const burnMemoLabel = (memo: Uint8Array | number[]): string | undefined | null => {
+export const burnMemoAddress = (memo: Uint8Array | number[]): string | undefined | null => {
 	try {
-		const [_, [label]] = decodeBurnMemo(memo);
-		return label;
+		const [_, [toAddress]] = decodeBurnMemo(memo);
+		return toAddress;
 	} catch (err: unknown) {
 		console.error('Failed to decode ckBTC burn memo', memo, err);
 		return undefined;
