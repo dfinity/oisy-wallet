@@ -9,7 +9,12 @@
 
 	<output id="ic-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
-	><Copy inline value={$icrcAccountIdentifierText ?? ''} text="Address copied to clipboard." />
+	><Copy
+		color="inherit"
+		inline
+		value={$icrcAccountIdentifierText ?? ''}
+		text="Address copied to clipboard."
+	/>
 
 	<p class="pt-2 text-misty-rose break-normal">
 		Note: For ICP deposits, use the 'Receive' button in your ICP account to get the right address.
