@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { OptionAddress } from '$lib/types/address';
@@ -18,14 +18,25 @@
 	import { address } from '$lib/derived/address.derived';
 	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
 	import { balance } from '$lib/derived/balances.derived';
+	import type { BigNumber } from '@ethersproject/bignumber';
 
 	let listener: WebSocketListener | undefined = undefined;
+
+	let loadBalance: BigNumber | undefined | null = undefined;
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
 		if (isNullish(toAddress)) {
 			convertEthToCkEthPendingStore.reset($tokenId);
 			return;
 		}
+
+		// We keep track of what balance was used to fetch the pending transactions to avoid triggering unecessary reload.
+		// In addition, a transaction might be emitted by the socket (Alchemy) as pending but, might require a few extra time to be delivered as pending by the API (Ehterscan) which can lead to a "race condition" where a pending transaction is displayed and then hidden few seconds later.
+		if (nonNullish(loadBalance) && nonNullish($balance) && loadBalance.eq($balance)) {
+			return;
+		}
+
+		loadBalance = $balance;
 
 		const currentBlockNumber = await getBlockNumber();
 		const transactions = await transactionsProviders(toAddress);
