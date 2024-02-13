@@ -1,29 +1,32 @@
 import { Cbor } from '@dfinity/agent';
+import { arrayOfNumberToUint8Array } from '@dfinity/utils';
 import { z } from 'zod';
+
+/// Mint
 
 export class LegacyMintMemoError extends Error {}
 
 // The minter converted a single UTXO to ckBTC.
-export const MINT_MEMO_TYPE_UTXO_TO_CKBTC = 0;
+export const MINT_MEMO_CONVERT = 0;
 // The minter minted accumulated KYT fees to the KYT provider.
-export const MINT_MEMO_TYPE_ACCUMULATED_KYT_FEES = 1;
+export const MINT_MEMO_KYT = 1;
 // The minter failed to check retrieve btc destination address or the destination address is tainted.
-export const MINT_MEMO_TYPE_KYT_FAIL = 2;
+export const MINT_MEMO_KYT_FAIL = 2;
 
-const MintMemoUtxoToCkBTC = z.tuple([
-	z.literal(MINT_MEMO_TYPE_UTXO_TO_CKBTC),
+const MintMemoConvert = z.tuple([
+	z.literal(MINT_MEMO_CONVERT),
 	z.tuple([z.instanceof(Uint8Array).nullish(), z.number().nullish(), z.number().nullish()])
 ]);
 
-const MintMemoAccumulatedKytFees = z.tuple([z.literal(MINT_MEMO_TYPE_ACCUMULATED_KYT_FEES)]);
+const MintMemoKyt = z.tuple([z.literal(MINT_MEMO_KYT)]);
 
-const MintMemoTypeKytFail = z.tuple([
-	z.literal(MINT_MEMO_TYPE_KYT_FAIL),
+const MintMemoKytFail = z.tuple([
+	z.literal(MINT_MEMO_KYT_FAIL),
 	z.tuple([z.number().nullish(), z.number().nullish(), z.number().nullish()])
 ]);
 
 // Source: https://github.com/dfinity/ic/blob/c22a5aebd4f26ae2e4016de55e3f7aa00d086479/rs/bitcoin/ckbtc/minter/src/memo.rs#L25
-const MintMemoSchema = MintMemoUtxoToCkBTC.or(MintMemoAccumulatedKytFees.or(MintMemoTypeKytFail));
+const MintMemoSchema = MintMemoConvert.or(MintMemoKyt.or(MintMemoKytFail));
 
 export type MintMemo = z.infer<typeof MintMemoSchema>;
 
@@ -44,8 +47,10 @@ export const decodeMintMemo = (memo: Uint8Array | number[]): MintMemo => {
 	return MintMemoSchema.parse(Cbor.decode(new Uint8Array(memo)));
 };
 
+/// Burn
+
 // The minter processed a retrieve_btc request.
-export const BURN_MEMO_TYPE_RETRIEVE_BTC = 0;
+export const BURN_MEMO_CONVERT = 0;
 
 enum BurnMemoStatus {
 	Accepted,
@@ -53,13 +58,13 @@ enum BurnMemoStatus {
 	CallFailed
 }
 
-const BurnMemoRetrieveBTC = z.tuple([
-	z.literal(BURN_MEMO_TYPE_RETRIEVE_BTC),
+const BurnMemoConvert = z.tuple([
+	z.literal(BURN_MEMO_CONVERT),
 	z.tuple([z.string().nullish(), z.number().nullish(), z.nativeEnum(BurnMemoStatus).nullish()])
 ]);
 
 // Source: https://github.com/dfinity/ic/blob/c22a5aebd4f26ae2e4016de55e3f7aa00d086479/rs/bitcoin/ckbtc/minter/src/memo.rs#L25
-const BurnMemoSchema = BurnMemoRetrieveBTC;
+const BurnMemoSchema = BurnMemoConvert;
 
 export type BurnMemo = z.infer<typeof BurnMemoSchema>;
 
@@ -69,5 +74,7 @@ export type BurnMemo = z.infer<typeof BurnMemoSchema>;
  * @param memo a Cbor encoded memo.
  * @returns {BurnMemo} the decoded memo object.
  */
-export const decodeBurnMemo = (memo: Uint8Array): BurnMemo =>
-	BurnMemoSchema.parse(Cbor.decode(memo));
+export const decodeBurnMemo = (memo: Uint8Array | number[]): BurnMemo =>
+	BurnMemoSchema.parse(
+		Cbor.decode(memo instanceof Uint8Array ? memo : arrayOfNumberToUint8Array(memo))
+	);
