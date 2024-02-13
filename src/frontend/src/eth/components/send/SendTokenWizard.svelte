@@ -5,7 +5,6 @@
 	import { type WizardStep } from '@dfinity/gix-components';
 	import SendForm from './SendForm.svelte';
 	import SendReview from './SendReview.svelte';
-	import { mapAddressStartsWith0x } from '$eth/utils/send.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { address } from '$lib/derived/address.derived';
@@ -24,6 +23,7 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
