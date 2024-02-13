@@ -23,13 +23,13 @@ export const mapCkETHTransaction = ({
 	if (nonNullish(mint)) {
 		const memo = fromNullable(mint.memo);
 
-		const isReimbursement = nonNullish(memo) && isMemoReimbursement(memo);
+		const memoInfo = nonNullish(memo) ? mintMemoInfo(memo) : undefined;
 
 		return {
 			...tx,
-			fromLabel: 'ETH Network',
-			typeLabel: isReimbursement ? 'Reimbursement' : 'ETH Received',
-			status: isReimbursement ? 'reimbursed' : 'executed'
+			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
+			fromLabel: memoInfo?.label ?? 'ETH Network',
+			status: memoInfo?.reimbursement === true ? 'reimbursed' : 'executed'
 		};
 	}
 
@@ -40,7 +40,7 @@ export const mapCkETHTransaction = ({
 
 		return {
 			...tx,
-			typeLabel: "ETH Sent",
+			typeLabel: 'ETH Sent',
 			toLabel: burnMemo ?? 'ETH Network'
 		};
 	}
@@ -55,6 +55,21 @@ const isMemoReimbursement = (memo: Uint8Array | number[]) => {
 	} catch (err: unknown) {
 		console.error('Failed to decode ckETH mint memo', memo, err);
 		return false;
+	}
+};
+
+export const mintMemoInfo = (
+	memo: Uint8Array | number[]
+): { label: string | null | undefined; reimbursement: boolean } | undefined => {
+	try {
+		const [mintType, [label]] = decodeMintMemo(memo);
+		return {
+			label: label instanceof Uint8Array ? uint8ArrayToHexString(label) : undefined,
+			reimbursement: mintType === MINT_MEMO_REIMBURSE
+		};
+	} catch (err: unknown) {
+		console.error('Failed to decode ckETH mint memo', memo, err);
+		return undefined;
 	}
 };
 
