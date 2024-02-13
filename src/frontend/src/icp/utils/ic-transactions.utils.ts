@@ -8,7 +8,8 @@ import type {
 	IcTransactionUi
 } from '$icp/types/ic';
 import { extendCkBTCTransaction, mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
-import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
+import { mapCkETHTransaction } from '$icp/utils/cketh-transactions.utils';
+import { isTokenCkBtcLedger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
@@ -32,6 +33,10 @@ export const mapIcTransaction = ({
 
 	if (isTokenCkBtcLedger(token)) {
 		return mapCkBTCTransaction({ transaction: transaction as IcrcTransaction, ...rest });
+	}
+
+	if (isTokenCkEthLedger(token)) {
+		return mapCkETHTransaction({ transaction: transaction as IcrcTransaction, ...rest });
 	}
 
 	return mapIcrcTransaction({ transaction: transaction as IcrcTransaction, ...rest });
