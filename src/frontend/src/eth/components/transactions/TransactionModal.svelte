@@ -15,7 +15,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { ETHERSCAN_URL } from '$icp-eth/constants/eth.constants';
+	import { ETHERSCAN_EXPLORER_URL } from '$lib/constants/explorers.constants';
 
 	export let transaction: Transaction;
 
@@ -32,7 +32,7 @@
 	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
 
 	let explorerUrl: string;
-	$: explorerUrl = `${ETHERSCAN_URL}/tx/${hash ?? ''}`;
+	$: explorerUrl = `${ETHERSCAN_EXPLORER_URL}/tx/${hash ?? ''}`;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
