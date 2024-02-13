@@ -6,7 +6,7 @@ import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { CKBTC_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
-import { fromNullable, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -50,7 +50,8 @@ export const mapCkBTCTransaction = ({
 
 		return {
 			...tx,
-			toLabel: toAddress ?? 'BTC Network'
+			...(nonNullish(toAddress) && { to: toAddress }),
+			...(isNullish(toAddress) && { toLabel: 'BTC Network' })
 		};
 	}
 
