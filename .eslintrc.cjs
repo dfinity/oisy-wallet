@@ -37,7 +37,7 @@ module.exports = {
 				caughtErrorsIgnorePattern: '^_'
 			}
 		],
-		'no-console': ['error', { allow: ['error'] }]
+		'no-console': ['error', { allow: ['error', 'warn'] }]
 	},
 	globals: {
 		NodeJS: true
