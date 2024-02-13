@@ -116,7 +116,6 @@ export const loadAllCkBtcInfo = async ({
 		return new Promise<void>((resolve, reject) => {
 			const isDisabled = (): boolean => {
 				const $ckBtcMinterInfoStore = get(ckBtcMinterInfoStore);
-				console.log($ckBtcMinterInfoStore);
 				return isNullish($ckBtcMinterInfoStore?.[tokenId]);
 			};
 
