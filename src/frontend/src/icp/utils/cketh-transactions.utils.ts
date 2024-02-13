@@ -32,8 +32,6 @@ export const mapCkETHTransaction = ({
 
 		const memoInfo = nonNullish(memo) ? mintMemoInfo(memo) : undefined;
 
-		console.log(tx);
-
 		return {
 			...tx,
 			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
