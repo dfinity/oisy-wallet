@@ -19,7 +19,7 @@ export const mapCkBTCTransaction = ({
 
 	const tx = {
 		id,
-		explorerUrl: `${CKBTC_EXPLORER_URL}/${id}`,
+		explorerUrl: `${CKBTC_EXPLORER_URL}/transaction/${id}`,
 		...txRest
 	};
 

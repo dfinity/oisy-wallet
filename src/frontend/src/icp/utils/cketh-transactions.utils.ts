@@ -16,7 +16,7 @@ export const mapCkETHTransaction = ({
 
 	const tx = {
 		id,
-		explorerUrl: `${CKETH_EXPLORER_URL}/${id}`,
+		explorerUrl: `${CKETH_EXPLORER_URL}/transaction/${id}`,
 		...txRest
 	};
 
