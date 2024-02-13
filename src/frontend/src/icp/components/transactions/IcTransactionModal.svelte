@@ -95,13 +95,14 @@
 
 		{#if nonNullish(value)}
 			<Value ref="amount">
-				<svelte:fragment slot="label">Value</svelte:fragment>
+				<svelte:fragment slot="label">Amount</svelte:fragment>
 				<output>
 					{formatToken({
 						value: BigNumber.from(value),
 						unitName: $token.decimals,
 						displayDecimals: $token.decimals
 					})}
+					{$token.symbol}
 				</output>
 			</Value>
 		{/if}
