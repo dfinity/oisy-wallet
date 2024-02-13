@@ -40,6 +40,7 @@ export const mapCkETHTransaction = ({
 
 		return {
 			...tx,
+			typeLabel: "ETH Sent",
 			toLabel: burnMemo ?? 'ETH Network'
 		};
 	}
