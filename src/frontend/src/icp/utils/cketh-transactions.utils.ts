@@ -20,8 +20,6 @@ export const mapCkETHTransaction = ({
 	const mint = fromNullable(rawMint);
 	const burn = fromNullable(rawBurn);
 
-	console.log(tx);
-
 	if (nonNullish(mint)) {
 		const memo = fromNullable(mint.memo);
 

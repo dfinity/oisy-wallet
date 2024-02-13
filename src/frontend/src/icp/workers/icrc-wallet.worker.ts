@@ -3,7 +3,7 @@ import type { SchedulerJobData, SchedulerJobParams } from '$icp/schedulers/sched
 import { WalletScheduler } from '$icp/schedulers/wallet.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
-import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
+import {isTokenCkBtcLedger, isTokenCkEthLedger} from '$icp/utils/ic-send.utils';
 import { mapIcrcTransaction, mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import type { PostMessage, PostMessageDataRequestIcrc } from '$lib/types/post-message';
 import {
@@ -12,6 +12,7 @@ import {
 	type IcrcTransactionWithId
 } from '@dfinity/ledger-icrc';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import {mapCkETHTransaction} from "$icp/utils/cketh-transactions.utils";
 
 const getTransactions = ({
 	identity,
@@ -39,6 +40,10 @@ const mapTransaction = ({
 }): IcTransactionUi => {
 	if (nonNullish(data) && isTokenCkBtcLedger({ ledgerCanisterId: data.ledgerCanisterId })) {
 		return mapCkBTCTransaction({ transaction, identity });
+	}
+
+	if (nonNullish(data) && isTokenCkEthLedger({ ledgerCanisterId: data.ledgerCanisterId })) {
+		return mapCkETHTransaction({ transaction, identity });
 	}
 
 	return mapIcrcTransaction({ transaction, identity });
