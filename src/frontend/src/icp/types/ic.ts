@@ -35,9 +35,11 @@ export interface IcTransactionUi {
 	from?: string;
 	// e.g. From: BTC Network
 	fromLabel?: string;
+	fromExplorerUrl?: string;
 	to?: string;
 	// e.g. To: BTC Network
 	toLabel?: string;
+	toExplorerUrl?: string;
 	incoming?: boolean;
 	value?: bigint;
 	timestamp?: bigint;
