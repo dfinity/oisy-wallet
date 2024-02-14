@@ -20,7 +20,7 @@
 	let type: IcTransactionType;
 	let toLabel: string | undefined;
 	let fromLabel: string | undefined;
-	let explorerUrl: string | undefined;
+	let txExplorerUrl: string | undefined;
 	let fromExplorerUrl: string | undefined;
 	let toExplorerUrl: string | undefined;
 
@@ -33,7 +33,7 @@
 		type,
 		toLabel,
 		fromLabel,
-		explorerUrl,
+		txExplorerUrl,
 		fromExplorerUrl,
 		toExplorerUrl
 	} = transaction);
@@ -49,10 +49,10 @@
 				value={`${id}`}
 				text="Transaction ID copied to clipboard."
 				inline
-			/>{#if nonNullish(explorerUrl)}
+			/>{#if nonNullish(txExplorerUrl)}
 				<ExternalLink
 					iconSize="18"
-					href={explorerUrl}
+					href={txExplorerUrl}
 					ariaLabel="Open this transaction on a block explorer"
 					inline
 					color="blue"

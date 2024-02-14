@@ -83,7 +83,7 @@ export const mapCkBTCPendingUtxo = ({
 		fromLabel: 'BTC Network',
 		typeLabel: 'Receiving BTC',
 		value: utxo.value - kytFee,
-		explorerUrl: `${BITCOIN_EXPLORER_URL}/tx/${id}`
+		txExplorerUrl: `${BITCOIN_EXPLORER_URL}/tx/${id}`
 	};
 };
 
