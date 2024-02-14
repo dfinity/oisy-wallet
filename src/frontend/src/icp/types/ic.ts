@@ -44,7 +44,7 @@ export interface IcTransactionUi {
 	value?: bigint;
 	timestamp?: bigint;
 	status: IcTransactionStatus;
-	explorerUrl?: string;
+	txExplorerUrl?: string;
 }
 
 export type IcToken = Token & IcFee & IcInterface;
