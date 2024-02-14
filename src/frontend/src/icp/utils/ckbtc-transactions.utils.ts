@@ -56,7 +56,7 @@ export const mapCkBTCTransaction = ({
 			...tx,
 			...(nonNullish(toAddress) && {
 				to: toAddress,
-				toExplorerUrl: `${BITCOIN_EXPLORER_URL}/address/${to}`
+				toExplorerUrl: `${BITCOIN_EXPLORER_URL}/address/${toAddress}`
 			}),
 			...(isNullish(toAddress) && { toLabel: 'BTC Network' })
 		};
