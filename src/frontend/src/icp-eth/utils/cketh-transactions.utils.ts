@@ -15,5 +15,5 @@ export const mapCkETHPendingTransaction = ({
 	to,
 	typeLabel: 'Converting ETH to ckETH',
 	value: value.toBigInt(),
-	explorerUrl: `${ETHEREUM_EXPLORER_URL}/tx/${hash}`
+	txExplorerUrl: `${ETHEREUM_EXPLORER_URL}/tx/${hash}`
 });
