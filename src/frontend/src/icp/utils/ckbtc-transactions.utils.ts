@@ -15,11 +15,15 @@ export const mapCkBTCTransaction = ({
 	transaction: IcrcTransaction;
 	identity: OptionIdentity;
 }): IcTransactionUi => {
-	const { id, ...txRest } = mapIcrcTransaction({ transaction, identity });
+	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
 	const tx = {
 		id,
 		explorerUrl: `${CKBTC_EXPLORER_URL}/transaction/${id}`,
+		from,
+		...(nonNullish(from) && { fromExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${from}` }),
+		to,
+		...(nonNullish(to) && { toExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${to}` }),
 		...txRest
 	};
 
@@ -50,7 +54,10 @@ export const mapCkBTCTransaction = ({
 
 		return {
 			...tx,
-			...(nonNullish(toAddress) && { to: toAddress }),
+			...(nonNullish(toAddress) && {
+				to: toAddress,
+				toExplorerUrl: `${BITCOIN_EXPLORER_URL}/address/${to}`
+			}),
 			...(isNullish(toAddress) && { toLabel: 'BTC Network' })
 		};
 	}

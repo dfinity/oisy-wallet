@@ -21,19 +21,35 @@
 	let toLabel: string | undefined;
 	let fromLabel: string | undefined;
 	let explorerUrl: string | undefined;
+	let fromExplorerUrl: string | undefined;
+	let toExplorerUrl: string | undefined;
 
-	$: ({ id, from, to, value, timestamp, type, toLabel, fromLabel, explorerUrl } = transaction);
+	$: ({
+		id,
+		from,
+		to,
+		value,
+		timestamp,
+		type,
+		toLabel,
+		fromLabel,
+		explorerUrl,
+		fromExplorerUrl,
+		toExplorerUrl
+	} = transaction);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">Transaction details</svelte:fragment>
 
 	<div>
-		<Value ref="id">
+		<Value ref="id" element="div">
 			<svelte:fragment slot="label">Transaction ID</svelte:fragment>
-			<output>{id}</output>
-			<Copy value={`${id}`} text="Transaction ID copied to clipboard." inline />
-			{#if nonNullish(explorerUrl)}
+			<output>{id}</output><Copy
+				value={`${id}`}
+				text="Transaction ID copied to clipboard."
+				inline
+			/>{#if nonNullish(explorerUrl)}
 				<ExternalLink
 					iconSize="18"
 					href={explorerUrl}
@@ -71,7 +87,15 @@
 							value={from}
 							text="From address copied to clipboard."
 							inline
-						/>
+						/>{#if nonNullish(fromExplorerUrl)}
+							<ExternalLink
+								iconSize="18"
+								href={fromExplorerUrl}
+								ariaLabel="Open the 'From' address on a block explorer"
+								inline
+								color="blue"
+							/>
+						{/if}
 					</p>
 				{/if}
 			</Value>
@@ -87,7 +111,19 @@
 
 				{#if nonNullish(to)}
 					<p class="capitalize">
-						<output>{to}</output><Copy value={to} text="To address copied to clipboard." inline />
+						<output>{to}</output><Copy
+							value={to}
+							text="To address copied to clipboard."
+							inline
+						/>{#if nonNullish(toExplorerUrl)}
+							<ExternalLink
+								iconSize="18"
+								href={toExplorerUrl}
+								ariaLabel="Open the 'To' address on a block explorer"
+								inline
+								color="blue"
+							/>
+						{/if}
 					</p>
 				{/if}
 			</Value>

@@ -1,7 +1,8 @@
+import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
 import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_REIMBURSE } from '$icp/utils/cketh-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
-import { CKETH_EXPLORER_URL } from '$lib/constants/explorers.constants';
+import { CKETH_EXPLORER_URL, ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { fromNullable, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
 
@@ -12,11 +13,15 @@ export const mapCkETHTransaction = ({
 	transaction: IcrcTransaction;
 	identity: OptionIdentity;
 }): IcTransactionUi => {
-	const { id, ...txRest } = mapIcrcTransaction({ transaction, identity });
+	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
 	const tx = {
 		id,
 		explorerUrl: `${CKETH_EXPLORER_URL}/transaction/${id}`,
+		from,
+		...(nonNullish(from) && { fromExplorerUrl: `${CKETH_EXPLORER_URL}/account/${from}` }),
+		to,
+		...(nonNullish(to) && { toExplorerUrl: `${CKETH_EXPLORER_URL}/account/${to}` }),
 		...txRest
 	};
 
@@ -32,10 +37,18 @@ export const mapCkETHTransaction = ({
 
 		const memoInfo = nonNullish(memo) ? mintMemoInfo(memo) : undefined;
 
+		const from =
+			memoInfo?.fromAddress !== undefined
+				? mapAddressStartsWith0x(memoInfo.fromAddress)
+				: undefined;
+
 		return {
 			...tx,
 			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
-			...(nonNullish(memoInfo?.fromAddress) && { from: memoInfo?.fromAddress }),
+			...(nonNullish(from) && {
+				from,
+				fromExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${from}`
+			}),
 			...(isNullish(memoInfo?.fromAddress) && { fromLabel: 'ETH Network' }),
 			status: memoInfo?.reimbursement === true ? 'reimbursed' : 'executed'
 		};
@@ -46,10 +59,13 @@ export const mapCkETHTransaction = ({
 
 		const burnMemo = burnMemoInfo(memo);
 
+		const to =
+			burnMemo?.toAddress !== undefined ? mapAddressStartsWith0x(burnMemo.toAddress) : undefined;
+
 		return {
 			...tx,
 			typeLabel: 'ETH Sent',
-			...(nonNullish(burnMemo?.toAddress) && { to: burnMemo?.toAddress }),
+			...(nonNullish(to) && { to, toExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${to}` }),
 			...(isNullish(burnMemo?.toAddress) && { toLabel: 'ETH Network' })
 		};
 	}

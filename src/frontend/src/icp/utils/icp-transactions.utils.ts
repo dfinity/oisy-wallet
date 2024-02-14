@@ -1,5 +1,6 @@
 import type { IcpTransaction, IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
+import { ICP_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import { fromNullable, nonNullish } from '@dfinity/utils';
@@ -63,11 +64,19 @@ export const mapIcpTransaction = ({
 		? getAccountIdentifier(identity.getPrincipal())
 		: undefined;
 
-	const mapFrom = (from: string): Pick<IcTransactionUi, 'from' | 'incoming'> => ({
+	const mapFrom = (
+		from: string
+	): Pick<IcTransactionUi, 'from' | 'fromExplorerUrl' | 'incoming'> => ({
 		from,
+		fromExplorerUrl: `${ICP_EXPLORER_URL}/account/${from}`,
 		incoming:
 			from?.toLowerCase() !== accountIdentifier?.toHex().toLowerCase() ||
 			transferToSelf === 'receive'
+	});
+
+	const mapTo = (to: string): Pick<IcTransactionUi, 'to' | 'toExplorerUrl'> => ({
+		to,
+		toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}`
 	});
 
 	const mapAmount = ({
@@ -101,7 +110,7 @@ export const mapIcpTransaction = ({
 		return {
 			...tx,
 			type: 'mint',
-			to: operation.Mint.to,
+			...mapTo(operation.Mint.to),
 			incoming: true,
 			value: operation.Mint.amount.e8s
 		};
@@ -114,7 +123,7 @@ export const mapIcpTransaction = ({
 			...tx,
 			type: source.incoming === false ? 'send' : 'receive',
 			...source,
-			to: operation.Transfer.to,
+			...mapTo(operation.Transfer.to),
 			value: mapAmount({
 				amount: operation.Transfer.amount,
 				fee: operation.Transfer.fee,
