@@ -33,6 +33,12 @@
 
 	let explorerUrl: string;
 	$: explorerUrl = `${ETHEREUM_EXPLORER_URL}/tx/${hash ?? ''}`;
+
+	let fromExplorerUrl: string;
+	$: fromExplorerUrl = `${ETHEREUM_EXPLORER_URL}/address/${from}`;
+
+	let toExplorerUrl: string | undefined;
+	$: toExplorerUrl = nonNullish(to) ? `${ETHEREUM_EXPLORER_URL}/address/${to}` : undefined;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -79,13 +85,33 @@
 
 		<Value ref="from">
 			<svelte:fragment slot="label">From</svelte:fragment>
-			<output>{from}</output><Copy value={from} text="From address copied to clipboard." inline />
+			<output>{from}</output><Copy
+				value={from}
+				text="From address copied to clipboard."
+				inline
+			/><ExternalLink
+				iconSize="18"
+				href={fromExplorerUrl}
+				ariaLabel="Open 'From' address on a block explorer"
+				inline
+				color="blue"
+			/>
 		</Value>
 
 		{#if nonNullish(to)}
 			<Value ref="to">
 				<svelte:fragment slot="label">Interacted With (To)</svelte:fragment>
-				<output>{to}</output><Copy value={to} text="To address copied to clipboard." inline />
+				<output>{to}</output><Copy
+					value={to}
+					text="To address copied to clipboard."
+					inline
+				/>{#if nonNullish(toExplorerUrl)}<ExternalLink
+						iconSize="18"
+						href={toExplorerUrl}
+						ariaLabel="Open 'To' address on a block explorer"
+						inline
+						color="blue"
+					/>{/if}
 			</Value>
 		{/if}
 
