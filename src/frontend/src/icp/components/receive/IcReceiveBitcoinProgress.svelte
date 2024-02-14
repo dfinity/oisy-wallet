@@ -19,7 +19,7 @@
 		} as ProgressStep,
 		{
 			step: UpdateBalanceCkBtcStep.RELOAD,
-			text: 'Refreshing UI...',
+			text: 'Refreshing wallet...',
 			state: 'next'
 		} as ProgressStep
 	];
