@@ -73,7 +73,7 @@ export const mapCkETHTransaction = ({
 	return tx;
 };
 
-export const mintMemoInfo = (
+const mintMemoInfo = (
 	memo: Uint8Array | number[]
 ): { fromAddress: string | undefined; reimbursement: boolean } | undefined => {
 	try {
@@ -89,7 +89,7 @@ export const mintMemoInfo = (
 	}
 };
 
-export const burnMemoInfo = (memo: Uint8Array | number[]): { toAddress: string } | undefined => {
+const burnMemoInfo = (memo: Uint8Array | number[]): { toAddress: string } | undefined => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
 		return { toAddress: uint8ArrayToHexString(toAddress) };
