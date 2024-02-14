@@ -1,3 +1,4 @@
+import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
 import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_REIMBURSE } from '$icp/utils/cketh-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
@@ -35,7 +36,9 @@ export const mapCkETHTransaction = ({
 		return {
 			...tx,
 			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
-			...(nonNullish(memoInfo?.fromAddress) && { from: memoInfo?.fromAddress }),
+			...(memoInfo?.fromAddress !== undefined && {
+				from: mapAddressStartsWith0x(memoInfo.fromAddress)
+			}),
 			...(isNullish(memoInfo?.fromAddress) && { fromLabel: 'ETH Network' }),
 			status: memoInfo?.reimbursement === true ? 'reimbursed' : 'executed'
 		};
@@ -49,7 +52,7 @@ export const mapCkETHTransaction = ({
 		return {
 			...tx,
 			typeLabel: 'ETH Sent',
-			...(nonNullish(burnMemo?.toAddress) && { to: burnMemo?.toAddress }),
+			...(burnMemo?.toAddress !== undefined && { to: mapAddressStartsWith0x(burnMemo.toAddress) }),
 			...(isNullish(burnMemo?.toAddress) && { toLabel: 'ETH Network' })
 		};
 	}
