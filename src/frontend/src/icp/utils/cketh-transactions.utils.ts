@@ -15,9 +15,9 @@ export const mapCkETHTransaction = ({
 }): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
-	const tx = {
+	const tx: IcTransactionUi = {
 		id,
-		explorerUrl: `${CKETH_EXPLORER_URL}/transaction/${id}`,
+		txExplorerUrl: `${CKETH_EXPLORER_URL}/transaction/${id}`,
 		from,
 		...(nonNullish(from) && { fromExplorerUrl: `${CKETH_EXPLORER_URL}/account/${from}` }),
 		to,
