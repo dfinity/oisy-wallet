@@ -17,9 +17,9 @@ export const mapCkBTCTransaction = ({
 }): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
-	const tx = {
+	const tx: IcTransactionUi = {
 		id,
-		explorerUrl: `${CKBTC_EXPLORER_URL}/transaction/${id}`,
+		txExplorerUrl: `${CKBTC_EXPLORER_URL}/transaction/${id}`,
 		from,
 		...(nonNullish(from) && { fromExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${from}` }),
 		to,
