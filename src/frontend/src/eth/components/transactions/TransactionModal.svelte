@@ -42,9 +42,11 @@
 		{#if nonNullish(hash)}
 			<Value ref="hash">
 				<svelte:fragment slot="label">Transaction Hash</svelte:fragment>
-				<output>{shortenWithMiddleEllipsis(hash)}</output>
-				<Copy value={hash} text={`Transaction hash ${hash} copied to clipboard.`} inline />
-				<ExternalLink
+				<output>{shortenWithMiddleEllipsis(hash)}</output><Copy
+					value={hash}
+					text={`Transaction hash ${hash} copied to clipboard.`}
+					inline
+				/><ExternalLink
 					iconSize="18"
 					href={explorerUrl}
 					ariaLabel="Open this transaction on a block explorer"
@@ -77,15 +79,13 @@
 
 		<Value ref="from">
 			<svelte:fragment slot="label">From</svelte:fragment>
-			<output>{from}</output>
-			<Copy value={from} text="From address copied to clipboard." inline />
+			<output>{from}</output><Copy value={from} text="From address copied to clipboard." inline />
 		</Value>
 
 		{#if nonNullish(to)}
 			<Value ref="to">
 				<svelte:fragment slot="label">Interacted With (To)</svelte:fragment>
-				<output>{to}</output>
-				<Copy value={to} text="To address copied to clipboard." inline />
+				<output>{to}</output><Copy value={to} text="To address copied to clipboard." inline />
 			</Value>
 		{/if}
 
