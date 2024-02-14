@@ -85,7 +85,7 @@
 	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div
 			class="text-misty-rose flex gap-2.5 animate-pulse"
 		>
-			<span in:blur>Checking for incoming BTC...</span>
+			<span in:blur>Checking BTC status...</span>
 		</div>{:else}
 		<button in:blur class="text text-blue border-0" on:click={async () => await receive()}
 			><IconSync /> Check for incoming BTC</button
@@ -95,7 +95,7 @@
 
 {#if $modalReceiveBitcoin}
 	<Modal on:nnsClose={modalStore.close} disablePointerEvents={true}>
-		<svelte:fragment slot="title">Check for incoming BTC</svelte:fragment>
+		<svelte:fragment slot="title">Check BTC status</svelte:fragment>
 
 		<div>
 			<IcReceiveBitcoinProgress bind:receiveProgressStep />
