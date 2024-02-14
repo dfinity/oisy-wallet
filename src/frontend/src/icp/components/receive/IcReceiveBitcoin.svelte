@@ -88,14 +88,14 @@
 			<span in:blur>Checking BTC status...</span>
 		</div>{:else}
 		<button in:blur class="text text-blue border-0" on:click={async () => await receive()}
-			><IconSync /> Check for incoming BTC</button
+			><IconSync /> Refresh</button
 		>
 	{/if}
 {/if}
 
 {#if $modalReceiveBitcoin}
 	<Modal on:nnsClose={modalStore.close} disablePointerEvents={true}>
-		<svelte:fragment slot="title">Check BTC status</svelte:fragment>
+		<svelte:fragment slot="title">Refresh BTC status</svelte:fragment>
 
 		<div>
 			<IcReceiveBitcoinProgress bind:receiveProgressStep />
