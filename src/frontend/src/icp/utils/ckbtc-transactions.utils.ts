@@ -144,7 +144,7 @@ const isMemoReimbursement = (memo: Uint8Array | number[]) => {
 	}
 };
 
-export const burnMemoAddress = (memo: Uint8Array | number[]): string | undefined | null => {
+const burnMemoAddress = (memo: Uint8Array | number[]): string | undefined | null => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
 		return toAddress;
