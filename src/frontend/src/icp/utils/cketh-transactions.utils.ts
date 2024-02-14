@@ -19,9 +19,9 @@ export const mapCkETHTransaction = ({
 		id,
 		explorerUrl: `${CKETH_EXPLORER_URL}/transaction/${id}`,
 		from,
-		...(nonNullish(from) && { fromExplorerUrl: `${CKETH_EXPLORER_URL}/account/${from}` }),
+		...(nonNullish(from) && { fromExplorerUrl: `${CKETH_EXPLORER_URL}/address/${from}` }),
 		to,
-		...(nonNullish(to) && { toExplorerUrl: `${CKETH_EXPLORER_URL}/account/${to}` }),
+		...(nonNullish(to) && { toExplorerUrl: `${CKETH_EXPLORER_URL}/address/${to}` }),
 		...txRest
 	};
 
