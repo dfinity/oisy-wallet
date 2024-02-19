@@ -1,6 +1,6 @@
-import { getAirdropCode, redeemAirdropCode } from '$lib/api/airdrop.api';
-import { airdropCode } from '$lib/derived/airdrop.derived';
-import { airdropStore } from '$lib/stores/airdrop.store';
+import { getAirdropCode, redeemAirdropCode } from '$airdrop/api/airdrop.api';
+import { airdropCode } from '$airdrop/derived/airdrop.derived';
+import { airdropStore } from '$airdrop/stores/airdrop.store';
 import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { nonNullish } from '@dfinity/utils';

@@ -28,7 +28,8 @@ const config = {
 			$declarations: './src/declarations',
 			$eth: './src/frontend/src/eth',
 			$icp: './src/frontend/src/icp',
-			'$icp-eth': './src/frontend/src/icp-eth'
+			'$icp-eth': './src/frontend/src/icp-eth',
+			$airdrop: './src/frontend/src/airdrop'
 		}
 	},
 
