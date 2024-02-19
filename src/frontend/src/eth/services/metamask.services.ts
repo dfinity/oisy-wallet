@@ -44,6 +44,16 @@ export const openMetamaskTransaction = async (
 		return { success: 'error', err };
 	}
 
+	const [from] = accounts ?? [];
+
+	if (isNullish(from)) {
+		toastsError({
+			msg: { text: 'No Metamask accounts found.' }
+		});
+
+		return { success: 'error' };
+	}
+
 	try {
 		await switchMetamaskChain(ethers.utils.hexlify(ETH_CHAIN_ID).toString() as MetamaskChainId);
 	} catch (err: unknown) {
@@ -54,16 +64,6 @@ export const openMetamaskTransaction = async (
 		});
 
 		return { success: 'error', err };
-	}
-
-	const [from] = accounts ?? [];
-
-	if (isNullish(from)) {
-		toastsError({
-			msg: { text: 'No Metamask accounts found.' }
-		});
-
-		return { success: 'error' };
 	}
 
 	try {
