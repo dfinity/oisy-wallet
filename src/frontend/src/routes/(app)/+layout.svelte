@@ -3,8 +3,8 @@
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
-	import AirdropButton from '$lib/components/airdrop/AirdropButton.svelte';
-	import { airdropAvailable } from '$lib/derived/airdrop.derived';
+	import AirdropButton from '$airdrop/components/airdrop/AirdropButton.svelte';
+	import { airdropAvailable } from '$airdrop/derived/airdrop.derived';
 	import Workers from '$lib/components/core/Workers.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 

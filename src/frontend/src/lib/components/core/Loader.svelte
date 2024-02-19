@@ -13,10 +13,10 @@
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import { isNullish } from '@dfinity/utils';
-	import { initAirdrop } from '$lib/services/airdrop.services';
+	import { initAirdrop } from '$airdrop/services/airdrop.services';
 	import { loadTransactions as loadEthTransactions } from '$eth/services/transactions.services';
 	import { tokenId } from '$lib/derived/token.derived';
-	import { AIRDROP } from '$lib/constants/airdrop.constants';
+	import { AIRDROP } from '$airdrop/constants/airdrop.constants';
 	import { loading } from '$lib/stores/loader.store';
 	import { LoaderStep } from '$lib/enums/steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';

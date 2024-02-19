@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import { airdropAvailable } from '$lib/derived/airdrop.derived';
+	import { airdropAvailable } from '$airdrop/derived/airdrop.derived';
 	import { isNullish } from '@dfinity/utils';
-	import { isAirdropOver } from '$lib/utils/airdrop.utils';
+	import { isAirdropOver } from '$airdrop/utils/airdrop.utils';
 	import type { PostMessage, PostMessageDataResponseAirdropCode } from '$lib/types/post-message';
-	import { airdropStore } from '$lib/stores/airdrop.store';
+	import { airdropStore } from '$airdrop/stores/airdrop.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
-	import { AIRDROP_COMPLETED } from '$lib/constants/airdrop.constants';
+	import { AIRDROP_COMPLETED } from '$airdrop/constants/airdrop.constants';
 
 	export let worker: Worker | undefined = undefined;
 
@@ -46,7 +46,7 @@
 	};
 
 	const startTimer = async () => {
-		const CodeWorker = await import('$lib/workers/code.worker?worker');
+		const CodeWorker = await import('$airdrop/workers/code.worker?worker');
 		worker = new CodeWorker.default();
 
 		worker.onmessage = onWorkerMessage;

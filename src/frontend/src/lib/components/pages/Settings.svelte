@@ -5,14 +5,12 @@
 	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '@dfinity/utils';
-	import Admin from '$lib/components/admin/Admin.svelte';
 	import type { Principal } from '@dfinity/principal';
-	import { AIRDROP, AIRDROP_COMPLETED } from '$lib/constants/airdrop.constants';
-	import AdminGuard from '$lib/components/admin/AdminGuard.svelte';
 	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
 	import AddToken from '$lib/components/tokens/AddToken.svelte';
 	import { networkEthereum } from '$lib/derived/network.derived';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
+	import AdminAirdrop from '$airdrop/components/admin/AdminAirdrop.svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -62,8 +60,4 @@
 	</div>
 {/if}
 
-{#if AIRDROP && !AIRDROP_COMPLETED}
-	<AdminGuard>
-		<Admin />
-	</AdminGuard>
-{/if}
+<AdminAirdrop />

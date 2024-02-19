@@ -17,7 +17,6 @@ export const AUTH_POPUP_HEIGHT = 625;
 
 // Workers
 export const AUTH_TIMER_INTERVAL = 1000;
-export const CODE_TIMER_INTERVAL = 10000;
 
 // Date and time
 export const SECONDS_IN_MINUTE = 60;

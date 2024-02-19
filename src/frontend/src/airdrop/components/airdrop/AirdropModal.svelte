@@ -3,9 +3,9 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
 	import type { Info } from '$declarations/airdrop/airdrop.did';
-	import { AIRDROP_COMPLETED } from '$lib/constants/airdrop.constants';
-	import AirdropOngoing from '$lib/components/airdrop/AirdropOngoing.svelte';
-	import AirdropOver from '$lib/components/airdrop/AirdropCompleted.svelte';
+	import { AIRDROP_COMPLETED } from '$airdrop/constants/airdrop.constants';
+	import AirdropOngoing from '$airdrop/components/airdrop/AirdropOngoing.svelte';
+	import AirdropOver from '$airdrop/components/airdrop/AirdropCompleted.svelte';
 
 	export let airdrop: Info;
 </script>

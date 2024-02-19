@@ -1,6 +1,6 @@
 <script lang="ts">
 	import InProgress from '$lib/components/ui/InProgress.svelte';
-	import AirdropInvites from '$lib/components/airdrop/AirdropInvites.svelte';
+	import AirdropInvites from '$airdrop/components/airdrop/AirdropInvites.svelte';
 	import type { Info } from '$declarations/airdrop/airdrop.did';
 	import type { StaticStep } from '$lib/types/steps';
 	import { fromNullable } from '@dfinity/utils';
@@ -8,7 +8,7 @@
 		allAirdropInvitesRedeemed,
 		hasAirdropInvites,
 		isAirdropTransferred
-	} from '$lib/utils/airdrop.utils';
+	} from '$airdrop/utils/airdrop.utils';
 	import { AirdropStep } from '$lib/enums/steps';
 
 	export let airdrop: Info;
