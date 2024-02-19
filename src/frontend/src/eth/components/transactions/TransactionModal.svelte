@@ -16,7 +16,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
-	import { notEmptyString } from '@dfinity/utils/dist/types/utils/nullish.utils';
+	import { notEmptyString } from '@dfinity/utils';
 
 	export let transaction: Transaction;
 

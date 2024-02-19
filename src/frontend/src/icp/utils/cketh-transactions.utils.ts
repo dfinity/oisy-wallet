@@ -4,8 +4,13 @@ import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_REIMBURSE } from '$icp/utils/
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { CKETH_EXPLORER_URL, ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
-import { fromNullable, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
-import { notEmptyString } from '@dfinity/utils/dist/types/utils/nullish.utils';
+import {
+	fromNullable,
+	isNullish,
+	nonNullish,
+	notEmptyString,
+	uint8ArrayToHexString
+} from '@dfinity/utils';
 
 export const mapCkETHTransaction = ({
 	transaction,

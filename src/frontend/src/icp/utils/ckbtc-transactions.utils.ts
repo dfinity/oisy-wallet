@@ -6,8 +6,13 @@ import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { BITCOIN_EXPLORER_URL, CKBTC_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
-import { fromNullable, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
-import { notEmptyString } from '@dfinity/utils/dist/types/utils/nullish.utils';
+import {
+	fromNullable,
+	isNullish,
+	nonNullish,
+	notEmptyString,
+	uint8ArrayToHexString
+} from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,

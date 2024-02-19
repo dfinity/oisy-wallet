@@ -5,7 +5,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
 	import { nonNullish } from '@dfinity/utils';
-	import { notEmptyString } from '@dfinity/utils/dist/types/utils/nullish.utils';
+	import { notEmptyString } from '@dfinity/utils';
 
 	let explorerUrl: string | undefined =
 		notEmptyString(ETHEREUM_EXPLORER_URL) && notEmptyString($address)
