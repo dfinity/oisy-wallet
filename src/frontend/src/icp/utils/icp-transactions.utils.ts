@@ -58,7 +58,7 @@ export const mapIcpTransaction = ({
 		id,
 		timestamp: fromNullable(created_at_time)?.timestamp_nanos,
 		status: 'executed',
-		txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${id}`
+		...(nonNullish(ICP_EXPLORER_URL) && { txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${id}` })
 	};
 
 	const accountIdentifier = nonNullish(identity)
@@ -69,7 +69,7 @@ export const mapIcpTransaction = ({
 		from: string
 	): Pick<IcTransactionUi, 'from' | 'fromExplorerUrl' | 'incoming'> => ({
 		from,
-		fromExplorerUrl: `${ICP_EXPLORER_URL}/account/${from}`,
+		...(nonNullish(ICP_EXPLORER_URL) && { fromExplorerUrl: `${ICP_EXPLORER_URL}/account/${from}` }),
 		incoming:
 			from?.toLowerCase() !== accountIdentifier?.toHex().toLowerCase() ||
 			transferToSelf === 'receive'
@@ -77,7 +77,7 @@ export const mapIcpTransaction = ({
 
 	const mapTo = (to: string): Pick<IcTransactionUi, 'to' | 'toExplorerUrl'> => ({
 		to,
-		toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}`
+		...(nonNullish(ICP_EXPLORER_URL) && { toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}` })
 	});
 
 	const mapAmount = ({
