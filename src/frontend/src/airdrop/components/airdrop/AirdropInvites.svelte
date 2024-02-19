@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { Info } from '$declarations/airdrop/airdrop.did';
-	import type { CodeText } from '$lib/types/airdrop';
+	import type { CodeText } from '$airdrop/types/airdrop';
 	import { fromNullable } from '@dfinity/utils';
-	import IconShare from '$lib/components/icons/IconShare.svelte';
+	import IconShare from '$airdrop/components/icons/IconShare.svelte';
 	import { canShare, copyText, shareText } from '$lib/utils/share.utils';
 	import { toastsShow } from '$lib/stores/toasts.store';
-	import { airdropCodeUrl } from '$lib/utils/airdrop.utils';
+	import { airdropCodeUrl } from '$airdrop/utils/airdrop.utils';
 
 	export let airdrop: Info;
 

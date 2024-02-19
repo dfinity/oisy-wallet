@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { isAirdropManager } from '$lib/api/airdrop.api';
+	import { isAirdropManager } from '$airdrop/api/airdrop.api';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { authStore } from '$lib/stores/auth.store';
 

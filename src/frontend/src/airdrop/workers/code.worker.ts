@@ -1,5 +1,5 @@
-import { getAirdropCode } from '$lib/api/airdrop.api';
-import { CODE_TIMER_INTERVAL } from '$lib/constants/app.constants';
+import { getAirdropCode } from '$airdrop/api/airdrop.api';
+import { CODE_TIMER_INTERVAL } from '$airdrop/constants/airdrop.constants';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import type { Identity } from '@dfinity/agent';
 import { AuthClient } from '@dfinity/auth-client';

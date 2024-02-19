@@ -2,14 +2,14 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { QRCode, Spinner } from '@dfinity/gix-components';
-	import { canvasToBlob } from '$lib/utils/canvas.utils';
+	import { canvasToBlob } from '$airdrop/utils/canvas.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { canShare, shareFile } from '$lib/utils/share.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import IconShare from '$lib/components/icons/IconShare.svelte';
-	import { generateAirdropCode } from '$lib/api/airdrop.api';
+	import IconShare from '$airdrop/components/icons/IconShare.svelte';
+	import { generateAirdropCode } from '$airdrop/api/airdrop.api';
 	import type { CodeInfo } from '$declarations/airdrop/airdrop.did';
-	import { airdropCodeUrl } from '$lib/utils/airdrop.utils';
+	import { airdropCodeUrl } from '$airdrop/utils/airdrop.utils';
 	import { get } from 'svelte/store';
 	import { authStore } from '$lib/stores/auth.store';
 

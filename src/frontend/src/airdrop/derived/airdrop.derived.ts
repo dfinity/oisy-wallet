@@ -1,7 +1,7 @@
+import { AIRDROP } from '$airdrop/constants/airdrop.constants';
+import { airdropStore } from '$airdrop/stores/airdrop.store';
+import type { CodeText } from '$airdrop/types/airdrop';
 import { page } from '$app/stores';
-import { AIRDROP } from '$lib/constants/airdrop.constants';
-import { airdropStore } from '$lib/stores/airdrop.store';
-import type { CodeText } from '$lib/types/airdrop';
 import { isRouteTokens } from '$lib/utils/nav.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';

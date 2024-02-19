@@ -31,6 +31,10 @@ export default defineConfig(
 				{
 					find: '$tests',
 					replacement: resolve(__dirname, 'src/frontend/src/tests')
+				},
+				{
+					find: '$airdrop',
+					replacement: resolve(__dirname, 'src/frontend/src/airdrop')
 				}
 			]
 		},
