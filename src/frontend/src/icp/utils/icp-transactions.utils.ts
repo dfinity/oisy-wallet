@@ -3,8 +3,7 @@ import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { ICP_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
-import { fromNullable, nonNullish } from '@dfinity/utils';
-import { notEmptyString } from '@dfinity/utils/dist/types/utils/nullish.utils';
+import { fromNullable, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const mapTransactionIcpToSelf = (
 	tx: TransactionWithId
