@@ -19,11 +19,13 @@ export const mapCkBTCTransaction = ({
 
 	const tx: IcTransactionUi = {
 		id,
-		txExplorerUrl: `${CKBTC_EXPLORER_URL}/transaction/${id}`,
 		from,
-		...(nonNullish(from) && { fromExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${from}` }),
 		to,
-		...(nonNullish(to) && { toExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${to}` }),
+		...(nonNullish(CKBTC_EXPLORER_URL) && {
+			txExplorerUrl: `${CKBTC_EXPLORER_URL}/transaction/${id}`,
+			...(nonNullish(from) && { fromExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${from}` }),
+			...(nonNullish(to) && { toExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${to}` })
+		}),
 		...txRest
 	};
 
@@ -56,7 +58,9 @@ export const mapCkBTCTransaction = ({
 			...tx,
 			...(nonNullish(toAddress) && {
 				to: toAddress,
-				toExplorerUrl: `${BITCOIN_EXPLORER_URL}/address/${toAddress}`
+				...(nonNullish(BITCOIN_EXPLORER_URL) && {
+					toExplorerUrl: `${BITCOIN_EXPLORER_URL}/address/${toAddress}`
+				})
 			}),
 			...(isNullish(toAddress) && { toLabel: 'BTC Network' })
 		};
@@ -83,7 +87,7 @@ export const mapCkBTCPendingUtxo = ({
 		fromLabel: 'BTC Network',
 		typeLabel: 'Receiving BTC',
 		value: utxo.value - kytFee,
-		txExplorerUrl: `${BITCOIN_EXPLORER_URL}/tx/${id}`
+		...(nonNullish(BITCOIN_EXPLORER_URL) && { txExplorerUrl: `${BITCOIN_EXPLORER_URL}/tx/${id}` })
 	};
 };
 
