@@ -1,5 +1,6 @@
 import type { IcTransactionUi } from '$icp/types/ic';
 import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
+import { nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 
 export const mapCkETHPendingTransaction = ({
@@ -12,10 +13,12 @@ export const mapCkETHPendingTransaction = ({
 	type: 'burn',
 	status: 'pending',
 	from,
-	fromExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${from}`,
 	to,
-	toExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${to}`,
 	typeLabel: 'Converting ETH to ckETH',
 	value: value.toBigInt(),
-	txExplorerUrl: `${ETHEREUM_EXPLORER_URL}/tx/${hash}`
+	...(nonNullish(ETHEREUM_EXPLORER_URL) && {
+		fromExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${from}`,
+		toExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${to}`,
+		txExplorerUrl: `${ETHEREUM_EXPLORER_URL}/tx/${hash}`
+	})
 });
