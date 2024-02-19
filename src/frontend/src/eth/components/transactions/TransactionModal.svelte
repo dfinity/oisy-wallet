@@ -16,6 +16,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
+	import { notEmptyString } from '@dfinity/utils/dist/types/utils/nullish.utils';
 
 	export let transaction: Transaction;
 
@@ -32,18 +33,19 @@
 	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
 
 	let explorerUrl: string | undefined;
-	$: explorerUrl = nonNullish(ETHEREUM_EXPLORER_URL)
-		? `${ETHEREUM_EXPLORER_URL}/tx/${hash ?? ''}`
-		: undefined;
+	$: explorerUrl =
+		notEmptyString(ETHEREUM_EXPLORER_URL) && notEmptyString(hash)
+			? `${ETHEREUM_EXPLORER_URL}/tx/${hash}`
+			: undefined;
 
 	let fromExplorerUrl: string | undefined;
-	$: fromExplorerUrl = nonNullish(ETHEREUM_EXPLORER_URL)
+	$: fromExplorerUrl = notEmptyString(ETHEREUM_EXPLORER_URL)
 		? `${ETHEREUM_EXPLORER_URL}/address/${from}`
 		: undefined;
 
 	let toExplorerUrl: string | undefined;
 	$: toExplorerUrl =
-		nonNullish(to) && nonNullish(ETHEREUM_EXPLORER_URL)
+		notEmptyString(to) && notEmptyString(ETHEREUM_EXPLORER_URL)
 			? `${ETHEREUM_EXPLORER_URL}/address/${to}`
 			: undefined;
 </script>
