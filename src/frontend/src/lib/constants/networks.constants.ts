@@ -1,6 +1,5 @@
 import eth from '$lib/assets/eth.svg';
 import icpLight from '$lib/assets/icp_light.svg';
-import { PROD } from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 
 /**
@@ -29,4 +28,4 @@ export const ICP_NETWORK: Network = {
 	icon: icpLight
 };
 
-export const NETWORKS: Network[] = [ETHEREUM_NETWORK, ...(PROD ? [] : [ICP_NETWORK])];
+export const NETWORKS: Network[] = [ETHEREUM_NETWORK, ICP_NETWORK];
