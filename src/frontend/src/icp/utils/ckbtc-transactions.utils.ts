@@ -7,6 +7,7 @@ import { BITCOIN_EXPLORER_URL, CKBTC_EXPLORER_URL } from '$lib/constants/explore
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import { fromNullable, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { notEmptyString } from '@dfinity/utils/dist/types/utils/nullish.utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -21,10 +22,10 @@ export const mapCkBTCTransaction = ({
 		id,
 		from,
 		to,
-		...(nonNullish(CKBTC_EXPLORER_URL) && {
+		...(notEmptyString(CKBTC_EXPLORER_URL) && {
 			txExplorerUrl: `${CKBTC_EXPLORER_URL}/transaction/${id}`,
-			...(nonNullish(from) && { fromExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${from}` }),
-			...(nonNullish(to) && { toExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${to}` })
+			...(notEmptyString(from) && { fromExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${from}` }),
+			...(notEmptyString(to) && { toExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${to}` })
 		}),
 		...txRest
 	};
@@ -58,7 +59,7 @@ export const mapCkBTCTransaction = ({
 			...tx,
 			...(nonNullish(toAddress) && {
 				to: toAddress,
-				...(nonNullish(BITCOIN_EXPLORER_URL) && {
+				...(notEmptyString(BITCOIN_EXPLORER_URL) && {
 					toExplorerUrl: `${BITCOIN_EXPLORER_URL}/address/${toAddress}`
 				})
 			}),
@@ -87,7 +88,9 @@ export const mapCkBTCPendingUtxo = ({
 		fromLabel: 'BTC Network',
 		typeLabel: 'Receiving BTC',
 		value: utxo.value - kytFee,
-		...(nonNullish(BITCOIN_EXPLORER_URL) && { txExplorerUrl: `${BITCOIN_EXPLORER_URL}/tx/${id}` })
+		...(notEmptyString(BITCOIN_EXPLORER_URL) && {
+			txExplorerUrl: `${BITCOIN_EXPLORER_URL}/tx/${id}`
+		})
 	};
 };
 

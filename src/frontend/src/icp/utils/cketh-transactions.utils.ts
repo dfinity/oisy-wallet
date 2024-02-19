@@ -5,6 +5,7 @@ import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { CKETH_EXPLORER_URL, ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { fromNullable, isNullish, nonNullish, uint8ArrayToHexString } from '@dfinity/utils';
+import { notEmptyString } from '@dfinity/utils/dist/types/utils/nullish.utils';
 
 export const mapCkETHTransaction = ({
 	transaction,
@@ -19,10 +20,10 @@ export const mapCkETHTransaction = ({
 		id,
 		from,
 		to,
-		...(nonNullish(CKETH_EXPLORER_URL) && {
+		...(notEmptyString(CKETH_EXPLORER_URL) && {
 			txExplorerUrl: `${CKETH_EXPLORER_URL}/transaction/${id}`,
-			...(nonNullish(from) && { fromExplorerUrl: `${CKETH_EXPLORER_URL}/account/${from}` }),
-			...(nonNullish(to) && { toExplorerUrl: `${CKETH_EXPLORER_URL}/account/${to}` })
+			...(notEmptyString(from) && { fromExplorerUrl: `${CKETH_EXPLORER_URL}/account/${from}` }),
+			...(notEmptyString(to) && { toExplorerUrl: `${CKETH_EXPLORER_URL}/account/${to}` })
 		}),
 		...txRest
 	};
@@ -49,7 +50,7 @@ export const mapCkETHTransaction = ({
 			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
 			...(nonNullish(from) && {
 				from,
-				...(nonNullish(ETHEREUM_EXPLORER_URL) && {
+				...(notEmptyString(ETHEREUM_EXPLORER_URL) && {
 					fromExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${from}`
 				})
 			}),
@@ -69,7 +70,11 @@ export const mapCkETHTransaction = ({
 		return {
 			...tx,
 			typeLabel: 'ETH Sent',
-			...(nonNullish(to) && { to, toExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${to}` }),
+			...(notEmptyString(to) &&
+				notEmptyString(ETHEREUM_EXPLORER_URL) && {
+					to,
+					toExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${to}`
+				}),
 			...(isNullish(burnMemo?.toAddress) && { toLabel: 'ETH Network' })
 		};
 	}
