@@ -4,8 +4,12 @@
 	import { address } from '$lib/derived/address.derived';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
+	import { nonNullish } from '@dfinity/utils';
 
-	let explorerUrl = `${ETHEREUM_EXPLORER_URL}/address/${$address ?? ''}`;
+	let explorerUrl: string | undefined =
+		nonNullish(ETHEREUM_EXPLORER_URL) && nonNullish($address)
+			? `${ETHEREUM_EXPLORER_URL}/address/${$address}`
+			: undefined;
 </script>
 
 <div>
@@ -16,6 +20,8 @@
 	><Copy inline color="inherit" value={$address ?? ''} text="Address copied to clipboard." />
 </div>
 
-<ExternalLink href={explorerUrl} ariaLabel="Open your address on Etherscan">
-	View on explorer
-</ExternalLink>
+{#if nonNullish(explorerUrl)}
+	<ExternalLink href={explorerUrl} ariaLabel="Open your address on Etherscan">
+		View on explorer
+	</ExternalLink>
+{/if}
