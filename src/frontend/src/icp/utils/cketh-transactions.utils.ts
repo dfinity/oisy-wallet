@@ -17,11 +17,13 @@ export const mapCkETHTransaction = ({
 
 	const tx: IcTransactionUi = {
 		id,
-		txExplorerUrl: `${CKETH_EXPLORER_URL}/transaction/${id}`,
 		from,
-		...(nonNullish(from) && { fromExplorerUrl: `${CKETH_EXPLORER_URL}/account/${from}` }),
 		to,
-		...(nonNullish(to) && { toExplorerUrl: `${CKETH_EXPLORER_URL}/account/${to}` }),
+		...(nonNullish(CKETH_EXPLORER_URL) && {
+			txExplorerUrl: `${CKETH_EXPLORER_URL}/transaction/${id}`,
+			...(nonNullish(from) && { fromExplorerUrl: `${CKETH_EXPLORER_URL}/account/${from}` }),
+			...(nonNullish(to) && { toExplorerUrl: `${CKETH_EXPLORER_URL}/account/${to}` })
+		}),
 		...txRest
 	};
 
