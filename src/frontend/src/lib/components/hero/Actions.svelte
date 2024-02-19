@@ -7,17 +7,16 @@
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import ConvertToETH from '$icp/components/convert/ConvertToETH.svelte';
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
-	import { PROD } from '$lib/constants/app.constants';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
 
 	export let send = false;
 
 	let convertEth = false;
-	$: convertEth = send && $ethToCkETHEnabled && !PROD;
+	$: convertEth = send && $ethToCkETHEnabled;
 
 	let convertBtc = false;
-	$: convertBtc = send && $tokenCkBtcLedger && !PROD;
+	$: convertBtc = send && $tokenCkBtcLedger;
 
 	let singleAction = true;
 	$: singleAction = !send && !convertEth;
