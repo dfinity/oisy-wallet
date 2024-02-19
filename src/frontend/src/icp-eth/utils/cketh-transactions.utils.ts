@@ -1,6 +1,6 @@
 import type { IcTransactionUi } from '$icp/types/ic';
 import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
-import { notEmptyString } from '@dfinity/utils/dist/types/utils/nullish.utils';
+import { notEmptyString } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 
 export const mapCkETHPendingTransaction = ({
