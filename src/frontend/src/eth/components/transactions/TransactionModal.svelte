@@ -31,14 +31,21 @@
 	let type: 'send' | 'receive';
 	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
 
-	let explorerUrl: string;
-	$: explorerUrl = `${ETHEREUM_EXPLORER_URL}/tx/${hash ?? ''}`;
+	let explorerUrl: string | undefined;
+	$: explorerUrl = nonNullish(ETHEREUM_EXPLORER_URL)
+		? `${ETHEREUM_EXPLORER_URL}/tx/${hash ?? ''}`
+		: undefined;
 
-	let fromExplorerUrl: string;
-	$: fromExplorerUrl = `${ETHEREUM_EXPLORER_URL}/address/${from}`;
+	let fromExplorerUrl: string | undefined;
+	$: fromExplorerUrl = nonNullish(ETHEREUM_EXPLORER_URL)
+		? `${ETHEREUM_EXPLORER_URL}/address/${from}`
+		: undefined;
 
 	let toExplorerUrl: string | undefined;
-	$: toExplorerUrl = nonNullish(to) ? `${ETHEREUM_EXPLORER_URL}/address/${to}` : undefined;
+	$: toExplorerUrl =
+		nonNullish(to) && nonNullish(ETHEREUM_EXPLORER_URL)
+			? `${ETHEREUM_EXPLORER_URL}/address/${to}`
+			: undefined;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -52,13 +59,13 @@
 					value={hash}
 					text={`Transaction hash ${hash} copied to clipboard.`}
 					inline
-				/><ExternalLink
-					iconSize="18"
-					href={explorerUrl}
-					ariaLabel="Open this transaction on a block explorer"
-					inline
-					color="blue"
-				/>
+				/>{#if nonNullish(explorerUrl)}<ExternalLink
+						iconSize="18"
+						href={explorerUrl}
+						ariaLabel="Open this transaction on a block explorer"
+						inline
+						color="blue"
+					/>{/if}
 			</Value>
 		{/if}
 
@@ -89,13 +96,13 @@
 				value={from}
 				text="From address copied to clipboard."
 				inline
-			/><ExternalLink
-				iconSize="18"
-				href={fromExplorerUrl}
-				ariaLabel="Open 'From' address on a block explorer"
-				inline
-				color="blue"
-			/>
+			/>{#if nonNullish(fromExplorerUrl)}<ExternalLink
+					iconSize="18"
+					href={fromExplorerUrl}
+					ariaLabel="Open 'From' address on a block explorer"
+					inline
+					color="blue"
+				/>{/if}
 		</Value>
 
 		{#if nonNullish(to)}

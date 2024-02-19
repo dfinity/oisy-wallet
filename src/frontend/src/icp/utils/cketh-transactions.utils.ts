@@ -49,7 +49,9 @@ export const mapCkETHTransaction = ({
 			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
 			...(nonNullish(from) && {
 				from,
-				fromExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${from}`
+				...(nonNullish(ETHEREUM_EXPLORER_URL) && {
+					fromExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${from}`
+				})
 			}),
 			...(isNullish(memoInfo?.fromAddress) && { fromLabel: 'ETH Network' }),
 			status: memoInfo?.reimbursement === true ? 'reimbursed' : 'executed'
