@@ -1,5 +1,6 @@
 import type {
 	MetamaskAccounts,
+	MetamaskChainId,
 	MetamaskSendTransactionRequestParams,
 	MetamaskTransactionHash
 } from '$eth/types/metamask';
@@ -10,6 +11,9 @@ import { Utils } from 'alchemy-sdk';
 
 export const metamaskAccounts = (): Promise<MetamaskAccounts> =>
 	window.ethereum.request({ method: 'eth_requestAccounts' });
+
+export const switchMetamaskChain = (chainId: MetamaskChainId): Promise<null> =>
+	window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId }] });
 
 export const sendMetamaskTransaction = ({
 	value,
