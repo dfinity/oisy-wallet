@@ -1,13 +1,15 @@
 import { updateBalance } from '$icp/api/ckbtc-minter.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
+import type { UtxoTxidText } from '$icp/types/ckbtc';
 import type {
 	PostMessageDataRequestCkBTC,
 	PostMessageJsonDataResponseCkBTC
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
-import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
+import type { UtxoStatus } from '@dfinity/ckbtc/dist/candid/minter';
+import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestCkBTC> {
 	private timer = new SchedulerTimer('syncCkBtcUpdateBalanceStatus');
@@ -43,14 +45,12 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		);
 
 		try {
-			await updateBalance({
+			const utxosStatuses = await updateBalance({
 				identity,
 				minterCanisterId
 			});
 
-			this.timer.postMsg<never>({
-				msg: 'syncCkBtcUpdateOk'
-			});
+			this.postUpdateOk(utxosStatuses);
 		} catch (err: unknown) {
 			if (err instanceof MinterNoNewUtxosError) {
 				this.postUtxos(err);
@@ -61,6 +61,36 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			console.error(err);
 		}
 	};
+
+	private postUpdateOk(utxosStatuses: UtxoStatus[]) {
+		const data: CertifiedData<UtxoTxidText[]> = {
+			certified: true,
+			data: utxosStatuses
+				.map((utxosStatus) => {
+					if ('ValueTooSmall' in utxosStatus) {
+						return utxosStatus.ValueTooSmall;
+					}
+
+					if ('Tainted' in utxosStatus) {
+						return utxosStatus.Tainted;
+					}
+
+					if ('Minted' in utxosStatus) {
+						return utxosStatus.Minted.utxo;
+					}
+
+					return utxosStatus.Checked;
+				})
+				.map(({ outpoint: { txid } }) => uint8ArrayToHexString(txid))
+		};
+
+		this.timer.postMsg<PostMessageJsonDataResponseCkBTC>({
+			msg: 'syncCkBtcUpdateOk',
+			data: {
+				json: JSON.stringify(data, jsonReplacer)
+			}
+		});
+	}
 
 	private postUtxos(err: MinterNoNewUtxosError) {
 		const { pendingUtxos } = err;
