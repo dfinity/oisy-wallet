@@ -5,3 +5,5 @@ export interface CkBtcUpdateBalanceParams {
 	identity: OptionIdentity;
 	progress: (step: UpdateBalanceCkBtcStep) => void;
 }
+
+export type UtxoTxidText = string;
