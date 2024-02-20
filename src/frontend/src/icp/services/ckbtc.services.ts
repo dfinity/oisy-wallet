@@ -4,7 +4,8 @@ import {
 	updateBalance as updateBalanceApi
 } from '$icp/api/ckbtc-minter.api';
 import { btcAddressStore } from '$icp/stores/btc.store';
-import { ckBtcMinterInfoStore, ckBtcPendingUtxosStore } from '$icp/stores/ckbtc.store';
+import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';

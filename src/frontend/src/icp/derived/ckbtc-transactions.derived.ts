@@ -1,4 +1,5 @@
-import { ckBtcMinterInfoStore, ckBtcPendingUtxosStore } from '$icp/stores/ckbtc.store';
+import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
 import { mapCkBTCPendingUtxo } from '$icp/utils/ckbtc-transactions.utils';
 import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';

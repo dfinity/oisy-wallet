@@ -1,6 +1,9 @@
 import { btcStatusesStore } from '$icp/stores/btc.store';
-import { ckBtcMinterInfoStore, ckBtcPendingUtxosStore } from '$icp/stores/ckbtc.store';
+import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
+import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
+import type { UtxoTxidText } from '$icp/types/ckbtc';
+import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { PostMessageJsonDataResponseCkBTC } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
@@ -22,6 +25,27 @@ export const syncBtcStatuses = ({
 	btcStatusesStore.set({
 		tokenId,
 		data
+	});
+};
+
+export const syncCkBtcUpdateOk = async ({
+	data: postMsgData,
+	tokenId
+}: {
+	data: PostMessageJsonDataResponseCkBTC;
+	tokenId: TokenId;
+}) => {
+	// First update the new IC transactions
+	await waitAndTriggerWallet();
+
+	// Then remove the pending transactions
+	const { json } = postMsgData;
+
+	const utxosIds: CertifiedData<UtxoTxidText[]> = JSON.parse(json, jsonReviver);
+
+	ckBtcPendingUtxosStore.filter({
+		tokenId,
+		utxosIds
 	});
 };
 
