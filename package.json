@@ -28,7 +28,7 @@
 	},
 	"dependencies": {
 		"@dfinity/agent": "^0.20.2",
-		"@dfinity/auth-client": "^0.20.2",
+		"@dfinity/auth-client": "^1.0.1",
 		"@dfinity/candid": "^0.20.2",
 		"@dfinity/ckbtc": "^2.2.0",
 		"@dfinity/cketh": "^1.0.1",
