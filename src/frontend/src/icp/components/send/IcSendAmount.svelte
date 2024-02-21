@@ -67,7 +67,10 @@
 
 		if (total.gt($balance ?? BigNumber.from(0n))) {
 			amountError = new IcAmountAssertionError('Insufficient funds.');
+			return;
 		}
+
+		amountError = undefined;
 	};
 
 	const debounceValidate = debounce(validate);
