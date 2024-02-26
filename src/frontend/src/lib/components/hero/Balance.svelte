@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { formatToken } from '$lib/utils/format.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import { balance, balanceZero } from '$lib/derived/balances.derived';
-	import { tokenDecimals, tokenSymbol } from '$lib/derived/token.derived';
+	import { tokenSymbol } from '$lib/derived/token.derived';
 	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
+	import Amount from '$lib/components/ui/Amount.svelte';
 </script>
 
 <span class="text-off-white">
@@ -13,12 +13,11 @@
 		}`}
 		style="font-size: calc(2 * var(--font-size-h1)); line-height: 0.95;"
 	>
-		{nonNullish($balance) && !$balanceZero
-			? formatToken({
-					value: $balance,
-					unitName: $tokenDecimals
-				})
-			: '0'}
+		{#if nonNullish($balance) && !$balanceZero}
+			<Amount amount={$balance} />
+		{:else}
+			0
+		{/if}
 	</output>
 	{#if $erc20TokensInitialized}
 		<span class="opacity-100">{$tokenSymbol}</span>
