@@ -92,8 +92,4 @@
 		height: 30px;
 		margin: 1.45rem;
 	}
-
-	.close {
-		align-self: flex-end;
-	}
 </style>
