@@ -2,7 +2,7 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { token } from '$lib/derived/token.derived';
-	import { HEIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 
 	export let amount: BigNumber;
 
@@ -17,7 +17,7 @@
 	$: displayValue = formatToken({
 		value: amount,
 		unitName: $token.decimals,
-		displayDecimals: HEIGHT_DECIMALS,
+		displayDecimals: EIGHT_DECIMALS,
 		trailingZeros: false
 	});
 </script>
