@@ -29,4 +29,4 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_MILLISECOND * 1_000n * 60n
 
 // For some use case we want to display some amount to a maximal number of decimals which is not related to the number of decimals of the selected token.
 // Just a value that looks good visually.
-export const HEIGHT_DECIMALS = 8;
+export const EIGHT_DECIMALS = 8;
