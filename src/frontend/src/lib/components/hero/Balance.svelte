@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { balance, balanceZero } from '$lib/derived/balances.derived';
 	import { tokenSymbol } from '$lib/derived/token.derived';
 	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
@@ -14,7 +14,7 @@
 				<span class="opacity-100">{$tokenSymbol}</span>
 			{/if}
 		{:else}
-			<span class="amount font-bold animate-pulse">0.00</span>
+			<span class="amount font-bold" class:animate-pulse={isNullish($balance)}>0.00</span>
 		{/if}
 	</output>
 </span>
