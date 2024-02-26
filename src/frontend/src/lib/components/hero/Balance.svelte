@@ -7,19 +7,21 @@
 </script>
 
 <span class="text-off-white">
-	<output
-		class={`break-all font-bold ${
-			($balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'
-		}`}
-		style="font-size: calc(2 * var(--font-size-h1)); line-height: 0.95;"
-	>
+	<output class={`break-all ${($balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'}`}>
 		{#if nonNullish($balance) && !$balanceZero}
-			<Amount amount={$balance} />
+			<span class="amount font-bold"><Amount amount={$balance} /></span>
+			{#if $erc20TokensInitialized}
+				<span class="opacity-100">{$tokenSymbol}</span>
+			{/if}
 		{:else}
-			0
+			<span class="amount font-bold animate-pulse">0.00</span>
 		{/if}
 	</output>
-	{#if $erc20TokensInitialized}
-		<span class="opacity-100">{$tokenSymbol}</span>
-	{/if}
 </span>
+
+<style lang="scss">
+	.amount {
+		font-size: calc(2 * var(--font-size-h1));
+		line-height: 0.95;
+	}
+</style>
