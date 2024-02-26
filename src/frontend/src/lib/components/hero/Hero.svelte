@@ -12,6 +12,7 @@
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { networkICP } from '$lib/derived/network.derived';
+	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -40,6 +41,8 @@
 						<div in:fade>
 							<Logo src={$token.icon} size="64px" alt={`${$token.name} logo`} color="off-white" />
 						</div>
+					{:else}
+						<SkeletonLogo size="big" />
 					{/if}
 				</div>
 
