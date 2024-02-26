@@ -14,7 +14,7 @@
 				<span class="opacity-100">{$tokenSymbol}</span>
 			{/if}
 		{:else}
-			<span class="amount">&ZeroWidthSpace;</span>
+			<span class="amount font-bold animate-pulse">0.00</span>
 		{/if}
 	</output>
 </span>
