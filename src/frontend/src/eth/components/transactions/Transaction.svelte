@@ -8,11 +8,10 @@
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Card from '$lib/components/ui/Card.svelte';
-	import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/derived/token.derived';
-	import { HEIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import Amount from '$lib/components/ui/Amount.svelte';
 
 	export let transaction: Transaction;
 
@@ -45,14 +44,8 @@
 
 		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-10' : ''} />
 
-		<svelte:fragment slot="amount">
-			{formatToken({
-				value: amount,
-				unitName: $token.decimals,
-				displayDecimals: HEIGHT_DECIMALS,
-				trailingZeros: false
-			})}</svelte:fragment
-		>
+		<Amount {amount} slot="amount" />
+
 		<svelte:fragment slot="description">
 			{#if nonNullish(transactionDate)}
 				{formatSecondsToDate(transactionDate)}
