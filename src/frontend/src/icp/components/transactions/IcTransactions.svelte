@@ -21,13 +21,13 @@
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { slide } from 'svelte/transition';
-	import ConvertCkETHTransactionsListener from '$icp-eth/components/core/ConvertCkETHTransactionsListener.svelte';
+	import IcTransactionsCkETHListeners from '$icp/components/transactions/IcTransactionsCkETHListeners.svelte';
 
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger
 		? IcTransactionsBtcListeners
 		: $tokenCkEthLedger
-			? ConvertCkETHTransactionsListener
+			? IcTransactionsCkETHListeners
 			: IcTransactionsNoListener;
 
 	let disableInfiniteScroll = false;
