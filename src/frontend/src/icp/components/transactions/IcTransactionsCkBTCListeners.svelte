@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tokenId } from '$lib/derived/token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import IcTransactionsCkBTCListener from '$icp/components/transactions/IcTransactionsCkBTCListener.svelte';
+	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { initCkBTCWalletWorker } from '$icp/services/worker.ckbtc-wallet.services';
 	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
 
@@ -9,10 +9,10 @@
 	$: minterInfoLoaded = $ckBtcMinterInfoStore?.[$tokenId]?.certified === true;
 </script>
 
-<IcTransactionsCkBTCListener initFn={initCkBTCWalletWorker} />
+<IcCkListener initFn={initCkBTCWalletWorker} />
 
 {#if !minterInfoLoaded}
-	<IcTransactionsCkBTCListener initFn={initCkBTCMinterInfoWorker} />
+	<IcCkListener initFn={initCkBTCMinterInfoWorker} />
 {/if}
 
 <slot />
