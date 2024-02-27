@@ -4,7 +4,7 @@ import {
 	syncBtcStatuses,
 	syncCkBTCUpdateOk
 } from '$icp/services/ckbtc-listener.services';
-import type { CkBTCWorker, CkBTCWorkerInitResult } from '$icp/types/ckbtc-listener';
+import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type {
 	PostMessage,
@@ -14,10 +14,10 @@ import type {
 } from '$lib/types/post-message';
 import { emit } from '$lib/utils/events.utils';
 
-export const initCkBTCWalletWorker: CkBTCWorker = async ({
+export const initCkBTCWalletWorker: IcCkWorker = async ({
 	minterCanisterId,
 	id: tokenId
-}: IcToken & Partial<IcCkCanisters>): Promise<CkBTCWorkerInitResult> => {
+}: IcToken & Partial<IcCkCanisters>): Promise<IcCkWorkerInitResult> => {
 	const CkBTCWalletWorker = await import('$icp/workers/ckbtc-wallet.worker?worker');
 	const worker: Worker = new CkBTCWalletWorker.default();
 
