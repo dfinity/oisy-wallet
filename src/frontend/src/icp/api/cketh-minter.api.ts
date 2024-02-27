@@ -37,16 +37,7 @@ export const eip1559TransactionPrice = async ({
 
 	const { eip1559TransactionPrice } = await ckEthMinterCanister({ identity, minterCanisterId });
 
-	// TODO: does not work locally
-	// return eip1559TransactionPrice(rest);
-
-	return {
-		max_priority_fee_per_gas: 1_500_000_000n,
-		max_fee_per_gas: 11_332_030_494n,
-		max_transaction_fee: 237_972_640_374_000n,
-		timestamp: [1_708_535_922_705_724_331n],
-		gas_limit: 21_000n
-	};
+	return eip1559TransactionPrice(rest);
 };
 
 export const minterInfo = async ({
