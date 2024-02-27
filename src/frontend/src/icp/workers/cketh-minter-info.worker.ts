@@ -7,13 +7,13 @@ onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRe
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
-		case 'stopCkETHWalletTimer':
+		case 'stopCkETHMinterInfoTimer':
 			scheduler.stop();
 			return;
-		case 'startCkETHWalletTimer':
+		case 'startCkETHMinterInfoTimer':
 			await scheduler.start(data);
 			return;
-		case 'triggerCkETHWalletTimer':
+		case 'triggerCkETHMinterInfoTimer':
 			await scheduler.trigger(data);
 			return;
 	}
