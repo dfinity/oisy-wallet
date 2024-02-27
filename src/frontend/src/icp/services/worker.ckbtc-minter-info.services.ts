@@ -41,7 +41,7 @@ export const initCkBTCMinterInfoWorker: IcCkWorker = async ({
 	return {
 		start: () => {
 			worker.postMessage({
-				msg: 'startCkBTCMinterInfoTimer',
+				msg: 'startCkMinterInfoTimer',
 				data: {
 					minterCanisterId
 				}
@@ -49,12 +49,12 @@ export const initCkBTCMinterInfoWorker: IcCkWorker = async ({
 		},
 		stop: () => {
 			worker.postMessage({
-				msg: 'stopCkBTCMinterInfoTimer'
+				msg: 'stopCkMinterInfoTimer'
 			});
 		},
 		trigger: () => {
 			worker.postMessage({
-				msg: 'triggerCkBTCMinterInfoTimer',
+				msg: 'triggerCkMinterInfoTimer',
 				data: {
 					minterCanisterId
 				}
