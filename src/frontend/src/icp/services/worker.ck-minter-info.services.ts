@@ -10,13 +10,23 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 
-export const initCkBTCMinterInfoWorker: IcCkWorker = async ({
-	minterCanisterId,
-	id: tokenId
-}: IcToken & Partial<IcCkCanisters>): Promise<IcCkWorkerInitResult> => {
+export const initCkBTCMinterInfoWorker: IcCkWorker = async (
+	params
+): Promise<IcCkWorkerInitResult> => {
 	const CkBTCMinterInfoWorker = await import('$icp/workers/ckbtc-minter-info.worker?worker');
 	const worker: Worker = new CkBTCMinterInfoWorker.default();
 
+	return await initCkMinterInfoWorker({
+		worker,
+		...params
+	});
+};
+
+const initCkMinterInfoWorker = async ({
+	minterCanisterId,
+	id: tokenId,
+	worker
+}: IcToken & Partial<IcCkCanisters> & { worker: Worker }): Promise<IcCkWorkerInitResult> => {
 	worker.onmessage = async ({
 		data
 	}: MessageEvent<PostMessage<PostMessageJsonDataResponse | PostMessageDataResponseError>>) => {
