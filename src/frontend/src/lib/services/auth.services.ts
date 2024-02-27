@@ -47,6 +47,9 @@ export const warnSignOut = (text: string): Promise<void> =>
 		}
 	});
 
+export const nullishSignOut = (): Promise<void> =>
+	warnSignOut('You are not signed in. Please sign in to continue.');
+
 export const idleSignOut = (): Promise<void> =>
 	logout({
 		msg: {

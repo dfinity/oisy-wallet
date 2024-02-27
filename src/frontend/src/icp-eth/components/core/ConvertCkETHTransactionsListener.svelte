@@ -21,7 +21,7 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 	import { populateDepositTransaction } from '$eth/providers/infura-cketh.providers';
-	import { warnSignOut } from '$lib/services/auth.services';
+	import { nullishSignOut } from '$lib/services/auth.services';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -31,7 +31,7 @@
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
 		if (isNullish($authStore.identity)) {
-			await warnSignOut('You are not signed in. Please sign in to continue.');
+			await nullishSignOut();
 			return;
 		}
 
