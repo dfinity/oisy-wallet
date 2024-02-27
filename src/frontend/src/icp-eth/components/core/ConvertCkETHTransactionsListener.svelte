@@ -18,12 +18,23 @@
 	import { balance } from '$lib/derived/balances.derived';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
+	import { authStore } from '$lib/stores/auth.store';
+	import { encodePrincipalToEthAddress } from '@dfinity/cketh';
+	import { populateDepositTransaction } from '$eth/providers/infura-cketh.providers';
+	import { warnSignOut } from '$lib/services/auth.services';
 
 	let listener: WebSocketListener | undefined = undefined;
 
 	let loadBalance: BigNumber | undefined | null = undefined;
 
+	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
+
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
+		if (isNullish($authStore.identity)) {
+			await warnSignOut('You are not signed in. Please sign in to continue.');
+			return;
+		}
+
 		if (isNullish(toAddress)) {
 			convertEthToCkEthPendingStore.reset($tokenId);
 			return;
@@ -51,16 +62,16 @@
 			startBlock: `${lastObservedBlockNumber}`
 		});
 
-		const pendingEthToCkEthTransactions = transactions.filter((tx) => {
-			// TODO: we need to decode the data and check if the target principal is this principal
-
-			// Pending transactions for this Oisy Wallet address - i.e. if from address is different, it is not a pending address?
-			if (isNullish($address) || tx.from.toLowerCase() !== $address.toLowerCase()) {
-				return false;
-			}
-
-			return true;
+		// We compute the data of a transfer of ETH to the ckETH helper contract with the principal of the user.
+		// That way, we can use the data to compare the pending transaction of the contract to filter those that targets this user.
+		const { data } = await populateDepositTransaction({
+			contract: { address: toAddress },
+			to: encodePrincipalToEthAddress($authStore.identity.getPrincipal())
 		});
+
+		const pendingEthToCkEthTransactions = transactions.filter(
+			({ data: txData }) => txData === data
+		);
 
 		convertEthToCkEthPendingStore.set({
 			tokenId: $tokenId,
@@ -94,8 +105,6 @@
 					});
 					return;
 				}
-
-				// TODO: filter destination helper
 
 				convertEthToCkEthPendingStore.prepend({
 					tokenId: $tokenId,
