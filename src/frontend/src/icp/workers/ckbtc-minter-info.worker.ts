@@ -9,13 +9,13 @@ onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRe
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
-		case 'stopCkBTCMinterInfoTimer':
+		case 'stopCkMinterInfoTimer':
 			scheduler.stop();
 			return;
-		case 'startCkBTCMinterInfoTimer':
+		case 'startCkMinterInfoTimer':
 			await scheduler.start(data);
 			return;
-		case 'triggerCkBTCMinterInfoTimer':
+		case 'triggerCkMinterInfoTimer':
 			await scheduler.trigger(data);
 			return;
 	}

@@ -2,7 +2,7 @@ import {
 	onLoadCkBtcMinterInfoError,
 	syncCkMinterInfo
 } from '$icp/services/ckbtc-listener.services';
-import type { CkBTCWorker, CkBTCWorkerInitResult } from '$icp/types/ckbtc-listener';
+import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type {
 	PostMessage,
@@ -10,10 +10,10 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 
-export const initCkBTCMinterInfoWorker: CkBTCWorker = async ({
+export const initCkBTCMinterInfoWorker: IcCkWorker = async ({
 	minterCanisterId,
 	id: tokenId
-}: IcToken & Partial<IcCkCanisters>): Promise<CkBTCWorkerInitResult> => {
+}: IcToken & Partial<IcCkCanisters>): Promise<IcCkWorkerInitResult> => {
 	const CkBTCMinterInfoWorker = await import('$icp/workers/ckbtc-minter-info.worker?worker');
 	const worker: Worker = new CkBTCMinterInfoWorker.default();
 
@@ -41,7 +41,7 @@ export const initCkBTCMinterInfoWorker: CkBTCWorker = async ({
 	return {
 		start: () => {
 			worker.postMessage({
-				msg: 'startCkBTCMinterInfoTimer',
+				msg: 'startCkMinterInfoTimer',
 				data: {
 					minterCanisterId
 				}
@@ -49,12 +49,12 @@ export const initCkBTCMinterInfoWorker: CkBTCWorker = async ({
 		},
 		stop: () => {
 			worker.postMessage({
-				msg: 'stopCkBTCMinterInfoTimer'
+				msg: 'stopCkMinterInfoTimer'
 			});
 		},
 		trigger: () => {
 			worker.postMessage({
-				msg: 'triggerCkBTCMinterInfoTimer',
+				msg: 'triggerCkMinterInfoTimer',
 				data: {
 					minterCanisterId
 				}

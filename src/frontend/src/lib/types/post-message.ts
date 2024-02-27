@@ -23,12 +23,9 @@ export type PostMessageRequest =
 	| 'stopCkBTCWalletTimer'
 	| 'startCkBTCWalletTimer'
 	| 'triggerCkBTCWalletTimer'
-	| 'stopCkBTCMinterInfoTimer'
-	| 'startCkBTCMinterInfoTimer'
-	| 'triggerCkBTCMinterInfoTimer'
-	| 'stopCkETHMinterInfoTimer'
-	| 'startCkETHMinterInfoTimer'
-	| 'triggerCkETHMinterInfoTimer';
+	| 'stopCkMinterInfoTimer'
+	| 'startCkMinterInfoTimer'
+	| 'triggerCkMinterInfoTimer';
 
 export type PostMessageDataRequest = never;
 export type PostMessageDataResponse = object;
