@@ -29,7 +29,7 @@ const loadEthTransactions = async (): Promise<{ success: boolean }> => {
 	}
 
 	try {
-		const transactions = await transactionsProviders(address);
+		const transactions = await transactionsProviders({ address });
 		transactionsStore.set({ tokenId: ETHEREUM_TOKEN_ID, transactions });
 	} catch (err: unknown) {
 		transactionsStore.reset();

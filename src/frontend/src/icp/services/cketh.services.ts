@@ -1,4 +1,4 @@
-import { eip1559TransactionPrice, minterInfo } from '$icp/api/cketh-minter.api';
+import { eip1559TransactionPrice } from '$icp/api/cketh-minter.api';
 import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';

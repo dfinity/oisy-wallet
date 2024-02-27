@@ -39,7 +39,7 @@
 		loadBalance = $balance;
 
 		const currentBlockNumber = await getBlockNumber();
-		const transactions = await transactionsProviders(toAddress);
+		const transactions = await transactionsProviders({ address: toAddress });
 
 		const pendingEthToCkEthTransactions = transactions.filter((tx) => {
 			// Pending transactions for this Oisy Wallet address - i.e. if from address is different, it is not a pending address?
