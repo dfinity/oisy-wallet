@@ -9,7 +9,7 @@ import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,
-	PostMessageJsonDataResponseCkBTC,
+	PostMessageJsonDataResponse,
 	PostMessageSyncState
 } from '$lib/types/post-message';
 import { emit } from '$lib/utils/events.utils';
@@ -24,9 +24,7 @@ export const initCkBTCWalletWorker: CkBTCWorker = async ({
 	worker.onmessage = async ({
 		data
 	}: MessageEvent<
-		PostMessage<
-			PostMessageJsonDataResponseCkBTC | PostMessageSyncState | PostMessageDataResponseError
-		>
+		PostMessage<PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseError>
 	>) => {
 		const { msg } = data;
 
@@ -34,13 +32,13 @@ export const initCkBTCWalletWorker: CkBTCWorker = async ({
 			case 'syncBtcStatuses':
 				syncBtcStatuses({
 					tokenId,
-					data: data.data as PostMessageJsonDataResponseCkBTC
+					data: data.data as PostMessageJsonDataResponse
 				});
 				return;
 			case 'syncBtcPendingUtxos':
 				syncBtcPendingUtxos({
 					tokenId,
-					data: data.data as PostMessageJsonDataResponseCkBTC
+					data: data.data as PostMessageJsonDataResponse
 				});
 				return;
 			case 'syncCkBtcUpdateBalanceStatus':
@@ -52,7 +50,7 @@ export const initCkBTCWalletWorker: CkBTCWorker = async ({
 			case 'syncCkBtcUpdateOk':
 				await syncCkBtcUpdateOk({
 					tokenId,
-					data: data.data as PostMessageJsonDataResponseCkBTC
+					data: data.data as PostMessageJsonDataResponse
 				});
 				return;
 			case 'syncBtcStatusesError':

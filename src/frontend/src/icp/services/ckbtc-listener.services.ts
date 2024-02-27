@@ -5,7 +5,7 @@ import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { PostMessageJsonDataResponseCkBTC } from '$lib/types/post-message';
+import type { PostMessageJsonDataResponse } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import type { MinterInfo, PendingUtxo } from '@dfinity/ckbtc';
@@ -15,7 +15,7 @@ export const syncBtcStatuses = ({
 	data: postMsgData,
 	tokenId
 }: {
-	data: PostMessageJsonDataResponseCkBTC;
+	data: PostMessageJsonDataResponse;
 	tokenId: TokenId;
 }) => {
 	const { json } = postMsgData;
@@ -32,7 +32,7 @@ export const syncCkBtcUpdateOk = async ({
 	data: postMsgData,
 	tokenId
 }: {
-	data: PostMessageJsonDataResponseCkBTC;
+	data: PostMessageJsonDataResponse;
 	tokenId: TokenId;
 }) => {
 	// First update the new IC transactions
@@ -53,7 +53,7 @@ export const syncBtcPendingUtxos = ({
 	data: postMsgData,
 	tokenId
 }: {
-	data: PostMessageJsonDataResponseCkBTC;
+	data: PostMessageJsonDataResponse;
 	tokenId: TokenId;
 }) => {
 	const { json } = postMsgData;
@@ -70,7 +70,7 @@ export const syncCkBtcMinterInfo = ({
 	data: postMsgData,
 	tokenId
 }: {
-	data: PostMessageJsonDataResponseCkBTC;
+	data: PostMessageJsonDataResponse;
 	tokenId: TokenId;
 }) => {
 	const { json } = postMsgData;

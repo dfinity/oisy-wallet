@@ -3,31 +3,31 @@ import { CKBTC_MINTER_INFO_TIMER } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
-	PostMessageDataRequestCkBTC,
+	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
-	PostMessageJsonDataResponseCkBTC
+	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { MinterInfo } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
-export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataRequestCkBTC> {
+export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataRequestIcCk> {
 	private timer = new SchedulerTimer('syncCktcMinterInfoStatus');
 
 	stop() {
 		this.timer.stop();
 	}
 
-	async start(data: PostMessageDataRequestCkBTC | undefined) {
-		await this.timer.start<PostMessageDataRequestCkBTC>({
+	async start(data: PostMessageDataRequestIcCk | undefined) {
+		await this.timer.start<PostMessageDataRequestIcCk>({
 			interval: CKBTC_MINTER_INFO_TIMER,
 			job: this.syncStatuses,
 			data
 		});
 	}
 
-	async trigger(data: PostMessageDataRequestCkBTC | undefined) {
-		await this.timer.trigger<PostMessageDataRequestCkBTC>({
+	async trigger(data: PostMessageDataRequestIcCk | undefined) {
+		await this.timer.trigger<PostMessageDataRequestIcCk>({
 			job: this.syncStatuses,
 			data
 		});
@@ -36,7 +36,7 @@ export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataReques
 	private syncStatuses = async ({
 		identity,
 		data
-	}: SchedulerJobData<PostMessageDataRequestCkBTC>) => {
+	}: SchedulerJobData<PostMessageDataRequestIcCk>) => {
 		const minterCanisterId = data?.minterCanisterId;
 
 		assertNonNullish(
@@ -66,7 +66,7 @@ export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataReques
 			data: response
 		};
 
-		this.timer.postMsg<PostMessageJsonDataResponseCkBTC>({
+		this.timer.postMsg<PostMessageJsonDataResponse>({
 			msg: 'syncCktcMinterInfo',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)
