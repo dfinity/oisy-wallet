@@ -19,13 +19,13 @@ echo "Step 2: deploy minter canister..."
 dfx deploy cketh_minter --network "$DFX_NETWORK" --argument "(variant {
   InitArg = record {
        ethereum_network = variant {Sepolia};
-       ecdsa_key_name = \"key_1\";
+       ecdsa_key_name = \"dfx_test_key\";
        ethereum_contract_address = opt \"0xb44B5e756A894775FC32EDdf3314Bb1B1944dC34\";
        ledger_id = principal \"$LEDGERID\";
        ethereum_block_height = variant {Finalized};
        minimum_withdrawal_amount = 10_000_000_000_000_000;
        next_transaction_nonce = 209;
-       last_scraped_block_number = 1;
+       last_scraped_block_number = 5371702;
    }
 })"
 
@@ -40,7 +40,7 @@ dfx deploy cketh_ledger --network "$DFX_NETWORK" --argument "(variant {
      minting_account = record { owner = principal \"$MINTERID\" };
      transfer_fee = 9_500;
      metadata = vec {};
-     initial_balances = vec { record { record { owner = principal \"$PRINCIPAL\"; }; 100_000_000_000; }; };
+     initial_balances = vec { record { record { owner = principal \"$PRINCIPAL\"; }; 100_000_000_000_000_000_000; }; };
      archive_options = record {
          num_blocks_to_archive = 10_000;
          trigger_threshold = 20_000;
@@ -61,4 +61,4 @@ dfx deploy cketh_index --network "$DFX_NETWORK" --argument "(opt variant {
 })"
 
 echo "Step 5: transfer ckETH to principal..."
-dfx canister call cketh_ledger --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"73avq-yvrvj-kuzxq-kttlj-nkaz4-tecy6-biuud-3ymeg-guvci-naire-uqe\";}; amount=100000000; fee=null; memo=null; created_at_time=null;})"
+dfx canister call cketh_ledger --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"x4w27-so7wg-cudsa-yy7fh-wcpy5-njul4-q54tv-euzzi-tdnzz-ill46-zqe\";}; amount=500_000_000_000_000_000; fee=null; memo=null; created_at_time=null;})"
