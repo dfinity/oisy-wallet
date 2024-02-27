@@ -22,6 +22,18 @@ export const initCkBTCMinterInfoWorker: IcCkWorker = async (
 	});
 };
 
+export const initCkETHMinterInfoWorker: IcCkWorker = async (
+	params
+): Promise<IcCkWorkerInitResult> => {
+	const CkETHMinterInfoWorker = await import('$icp/workers/cketh-minter-info.worker?worker');
+	const worker: Worker = new CkETHMinterInfoWorker.default();
+
+	return await initCkMinterInfoWorker({
+		worker,
+		...params
+	});
+};
+
 const initCkMinterInfoWorker = async ({
 	minterCanisterId,
 	id: tokenId,
