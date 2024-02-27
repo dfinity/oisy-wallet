@@ -28,7 +28,7 @@ export const syncBtcStatuses = ({
 	});
 };
 
-export const syncCkBtcUpdateOk = async ({
+export const syncCkBTCUpdateOk = async ({
 	data: postMsgData,
 	tokenId
 }: {
@@ -66,7 +66,7 @@ export const syncBtcPendingUtxos = ({
 	});
 };
 
-export const syncCkBtcMinterInfo = ({
+export const syncCkBTCMinterInfo = ({
 	data: postMsgData,
 	tokenId
 }: {

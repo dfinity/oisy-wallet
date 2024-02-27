@@ -12,7 +12,7 @@ import type { MinterInfo } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
 export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataRequestIcCk> {
-	private timer = new SchedulerTimer('syncCkBtcMinterInfoStatus');
+	private timer = new SchedulerTimer('syncCkBTCMinterInfoStatus');
 
 	stop() {
 		this.timer.stop();
@@ -67,7 +67,7 @@ export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataReques
 		};
 
 		this.timer.postMsg<PostMessageJsonDataResponse>({
-			msg: 'syncCkBtcMinterInfo',
+			msg: 'syncCkBTCMinterInfo',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)
 			}
@@ -76,7 +76,7 @@ export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataReques
 
 	private postMessageWalletError(error: unknown) {
 		this.timer.postMsg<PostMessageDataResponseError>({
-			msg: 'syncCkBtcMinterInfoError',
+			msg: 'syncCkBTCMinterInfoError',
 			data: {
 				error
 			}

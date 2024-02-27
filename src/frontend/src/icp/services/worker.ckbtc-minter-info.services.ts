@@ -1,6 +1,6 @@
 import {
 	onLoadCkBtcMinterInfoError,
-	syncCkBtcMinterInfo
+	syncCkBTCMinterInfo
 } from '$icp/services/ckbtc-listener.services';
 import type { CkBTCWorker, CkBTCWorkerInitResult } from '$icp/types/ckbtc-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
@@ -23,13 +23,13 @@ export const initCkBTCMinterInfoWorker: CkBTCWorker = async ({
 		const { msg } = data;
 
 		switch (msg) {
-			case 'syncCkBtcMinterInfo':
-				syncCkBtcMinterInfo({
+			case 'syncCkBTCMinterInfo':
+				syncCkBTCMinterInfo({
 					tokenId,
 					data: data.data as PostMessageJsonDataResponse
 				});
 				return;
-			case 'syncCkBtcMinterInfoError':
+			case 'syncCkBTCMinterInfoError':
 				onLoadCkBtcMinterInfoError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error
