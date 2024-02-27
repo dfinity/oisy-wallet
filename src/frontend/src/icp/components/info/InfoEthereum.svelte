@@ -22,7 +22,7 @@
 <div class="pr-2">
 	<h4 class="flex gap-2 items-center font-medium">
 		<Logo src={eth} size="20px" alt={`Ethereum logo`} />
-		<span>Receive ETH from Ethereum Network and convert to ckETH</span>
+		<span class="w-[70%]">Receive ETH from Ethereum Network and convert to ckETH</span>
 	</h4>
 
 	<p class="text-misty-rose mt-3">
