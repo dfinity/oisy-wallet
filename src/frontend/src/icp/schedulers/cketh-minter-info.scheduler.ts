@@ -12,7 +12,7 @@ import type { MinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
 export class CkETHMinterInfoScheduler implements Scheduler<PostMessageDataRequestIcCk> {
-	private timer = new SchedulerTimer('syncCktcMinterInfoStatus');
+	private timer = new SchedulerTimer('syncCkETHMinterInfoStatus');
 
 	stop() {
 		this.timer.stop();
@@ -64,7 +64,7 @@ export class CkETHMinterInfoScheduler implements Scheduler<PostMessageDataReques
 		};
 
 		this.timer.postMsg<PostMessageJsonDataResponse>({
-			msg: 'syncCkEthMinterInfo',
+			msg: 'syncCkETHMinterInfo',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)
 			}
@@ -73,7 +73,7 @@ export class CkETHMinterInfoScheduler implements Scheduler<PostMessageDataReques
 
 	private postMessageWalletError(error: unknown) {
 		this.timer.postMsg<PostMessageDataResponseError>({
-			msg: 'syncCkEthMinterInfoError',
+			msg: 'syncCkETHMinterInfoError',
 			data: {
 				error
 			}

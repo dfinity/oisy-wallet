@@ -45,6 +45,7 @@ export type PostMessageResponseStatus =
 	| 'syncWalletStatus'
 	| 'syncBtcStatusesStatus'
 	| 'syncCkBTCMinterInfoStatus'
+	| 'syncCkETHMinterInfoStatus'
 	| 'syncCkBTCUpdateBalanceStatus';
 
 export type PostMessageResponse =
@@ -63,8 +64,8 @@ export type PostMessageResponse =
 	| 'syncBtcStatusesError'
 	| 'syncCkBTCMinterInfo'
 	| 'syncCkBTCMinterInfoError'
-    | 'syncCkEthMinterInfo'
-    | 'syncCkEthMinterInfoError'
+    | 'syncCkETHMinterInfo'
+    | 'syncCkETHMinterInfoError'
 	| 'syncBtcPendingUtxos'
 	| 'syncCkBTCUpdateOk'
 	| PostMessageResponseStatus;
