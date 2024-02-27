@@ -1,6 +1,5 @@
-import { minterInfo } from '$icp/api/ckbtc-minter.api';
-import { CKBTC_MINTER_INFO_TIMER } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
+import type { MinterInfoParams } from '$icp/types/ck';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
 	PostMessageDataRequestIcCk,
@@ -11,8 +10,15 @@ import type { CertifiedData } from '$lib/types/store';
 import type { MinterInfo } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
-export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataRequestIcCk> {
-	private timer = new SchedulerTimer('syncCkBTCMinterInfoStatus');
+export class CkMinterInfoScheduler<T extends MinterInfo>
+	implements Scheduler<PostMessageDataRequestIcCk>
+{
+	private timer = new SchedulerTimer('syncCkMinterInfoStatus');
+
+	constructor(
+		private interval: number | 'disabled',
+		private minterInfo: (params: MinterInfoParams) => Promise<T>
+	) {}
 
 	stop() {
 		this.timer.stop();
@@ -20,7 +26,7 @@ export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataReques
 
 	async start(data: PostMessageDataRequestIcCk | undefined) {
 		await this.timer.start<PostMessageDataRequestIcCk>({
-			interval: CKBTC_MINTER_INFO_TIMER,
+			interval: this.interval,
 			job: this.syncStatuses,
 			data
 		});
@@ -44,9 +50,9 @@ export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataReques
 			'No data - minterCanisterId - provided to fetch the minter information.'
 		);
 
-		await queryAndUpdate<MinterInfo>({
+		await queryAndUpdate<T>({
 			request: ({ identity: _, certified }) =>
-				minterInfo({ minterCanisterId, identity, certified }),
+				this.minterInfo({ minterCanisterId, identity, certified }),
 			onLoad: ({ certified, ...rest }) => this.syncMinterInfo({ certified, ...rest }),
 			onCertifiedError: ({ error }) => this.postMessageWalletError(error),
 			identity,
@@ -54,20 +60,14 @@ export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataReques
 		});
 	};
 
-	private syncMinterInfo = ({
-		response,
-		certified
-	}: {
-		response: MinterInfo;
-		certified: boolean;
-	}) => {
-		const data: CertifiedData<MinterInfo> = {
+	private syncMinterInfo = ({ response, certified }: { response: T; certified: boolean }) => {
+		const data: CertifiedData<T> = {
 			certified,
 			data: response
 		};
 
 		this.timer.postMsg<PostMessageJsonDataResponse>({
-			msg: 'syncCkBTCMinterInfo',
+			msg: 'syncCkMinterInfo',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)
 			}
@@ -76,7 +76,7 @@ export class CkBTCMinterInfoScheduler implements Scheduler<PostMessageDataReques
 
 	private postMessageWalletError(error: unknown) {
 		this.timer.postMsg<PostMessageDataResponseError>({
-			msg: 'syncCkBTCMinterInfoError',
+			msg: 'syncCkMinterInfoError',
 			data: {
 				error
 			}

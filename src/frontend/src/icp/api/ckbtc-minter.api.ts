@@ -1,3 +1,4 @@
+import type { MinterInfoParams } from '$icp/types/ck';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -49,10 +50,7 @@ export const minterInfo = async ({
 	identity,
 	minterCanisterId,
 	...rest
-}: {
-	identity: OptionIdentity;
-	minterCanisterId: CanisterIdText;
-} & QueryParams): Promise<MinterInfo> => {
+}: MinterInfoParams): Promise<MinterInfo> => {
 	assertNonNullish(identity, 'No internet identity.');
 
 	const { getMinterInfo } = await minterCanister({ identity, minterCanisterId });
