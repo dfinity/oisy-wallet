@@ -41,7 +41,7 @@ export type PostMessageDataRequestIcCk = Partial<Pick<IcCkCanisters, 'minterCani
 export type PostMessageResponseStatus =
 	| 'syncWalletStatus'
 	| 'syncBtcStatusesStatus'
-	| 'syncCkBTCMinterInfoStatus'
+	| 'syncCkMinterInfoStatus'
 	| 'syncCkBTCUpdateBalanceStatus';
 
 export type PostMessageResponse =
@@ -58,8 +58,8 @@ export type PostMessageResponse =
 	| 'syncIcrcWalletCleanUp'
 	| 'syncBtcStatuses'
 	| 'syncBtcStatusesError'
-	| 'syncCkBTCMinterInfo'
-	| 'syncCkBTCMinterInfoError'
+	| 'syncCkMinterInfo'
+	| 'syncCkMinterInfoError'
 	| 'syncBtcPendingUtxos'
 	| 'syncCkBTCUpdateOk'
 	| PostMessageResponseStatus;
