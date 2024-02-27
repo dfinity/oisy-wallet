@@ -12,7 +12,7 @@ import type { UtxoStatus } from '@dfinity/ckbtc/dist/candid/minter';
 import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestIcCk> {
-	private timer = new SchedulerTimer('syncCkBtcUpdateBalanceStatus');
+	private timer = new SchedulerTimer('syncCkBTCUpdateBalanceStatus');
 
 	stop() {
 		this.timer.stop();
@@ -85,7 +85,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		};
 
 		this.timer.postMsg<PostMessageJsonDataResponse>({
-			msg: 'syncCkBtcUpdateOk',
+			msg: 'syncCkBTCUpdateOk',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)
 			}
