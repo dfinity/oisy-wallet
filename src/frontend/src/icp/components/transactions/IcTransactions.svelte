@@ -5,7 +5,6 @@
 	import { last } from '$lib/utils/array.utils';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { authStore } from '$lib/stores/auth.store';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import { modalIcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcpTransactionModal from './IcTransactionModal.svelte';
@@ -22,6 +21,7 @@
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { slide } from 'svelte/transition';
 	import ConvertCkETHTransactionsListener from '$icp-eth/components/core/ConvertCkETHTransactionsListener.svelte';
+	import { nullishSignOut } from '$lib/services/auth.services';
 
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger
@@ -34,9 +34,7 @@
 
 	const onIntersect = async () => {
 		if (isNullish($authStore.identity)) {
-			toastsError({
-				msg: { text: 'You are not signed-in.' }
-			});
+			await nullishSignOut();
 			return;
 		}
 
