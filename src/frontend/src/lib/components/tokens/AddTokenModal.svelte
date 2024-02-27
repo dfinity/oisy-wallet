@@ -15,6 +15,7 @@
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import { mapErc20Token } from '$eth/utils/erc20.utils';
+	import { nullishSignOut } from '$lib/services/auth.services';
 
 	const steps: WizardSteps = [
 		{
@@ -61,9 +62,7 @@
 		}
 
 		if (isNullish($authStore.identity)) {
-			toastsError({
-				msg: { text: `You are not authenticated.` }
-			});
+			await nullishSignOut();
 			return;
 		}
 
