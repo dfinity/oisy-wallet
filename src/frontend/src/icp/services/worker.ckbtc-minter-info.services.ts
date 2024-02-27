@@ -23,13 +23,13 @@ export const initCkBTCMinterInfoWorker: CkBTCWorker = async ({
 		const { msg } = data;
 
 		switch (msg) {
-			case 'syncCktcMinterInfo':
+			case 'syncCkBtcMinterInfo':
 				syncCkBtcMinterInfo({
 					tokenId,
 					data: data.data as PostMessageJsonDataResponse
 				});
 				return;
-			case 'syncCktcMinterInfoError':
+			case 'syncCkBtcMinterInfoError':
 				onLoadCkBtcMinterInfoError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error
