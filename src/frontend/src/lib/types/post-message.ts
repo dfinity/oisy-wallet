@@ -41,8 +41,8 @@ export type PostMessageDataRequestIcCk = Partial<Pick<IcCkCanisters, 'minterCani
 export type PostMessageResponseStatus =
 	| 'syncWalletStatus'
 	| 'syncBtcStatusesStatus'
-	| 'syncCkBtcMinterInfoStatus'
-	| 'syncCkBtcUpdateBalanceStatus';
+	| 'syncCkBTCMinterInfoStatus'
+	| 'syncCkBTCUpdateBalanceStatus';
 
 export type PostMessageResponse =
 	| 'signOutIdleTimer'
@@ -58,10 +58,10 @@ export type PostMessageResponse =
 	| 'syncIcrcWalletCleanUp'
 	| 'syncBtcStatuses'
 	| 'syncBtcStatusesError'
-	| 'syncCkBtcMinterInfo'
-	| 'syncCkBtcMinterInfoError'
+	| 'syncCkBTCMinterInfo'
+	| 'syncCkBTCMinterInfoError'
 	| 'syncBtcPendingUtxos'
-	| 'syncCkBtcUpdateOk'
+	| 'syncCkBTCUpdateOk'
 	| PostMessageResponseStatus;
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
