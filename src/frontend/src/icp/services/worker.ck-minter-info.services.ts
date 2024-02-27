@@ -1,7 +1,6 @@
-import {
-	onLoadCkBtcMinterInfoError,
-	syncCkMinterInfo
-} from '$icp/services/ckbtc-listener.services';
+import { syncCkBtcMinterError, syncCkBtcMinterInfo } from '$icp/services/ckbtc-listener.services';
+import { syncCkEthMinterError, syncCkEthMinterInfo } from '$icp/services/cketh-listener.services';
+import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type {
@@ -18,6 +17,8 @@ export const initCkBTCMinterInfoWorker: IcCkWorker = async (
 
 	return await initCkMinterInfoWorker({
 		worker,
+		onSyncSuccess: syncCkBtcMinterInfo,
+		onSyncError: syncCkBtcMinterError,
 		...params
 	});
 };
@@ -30,6 +31,8 @@ export const initCkETHMinterInfoWorker: IcCkWorker = async (
 
 	return await initCkMinterInfoWorker({
 		worker,
+		onSyncSuccess: syncCkEthMinterInfo,
+		onSyncError: syncCkEthMinterError,
 		...params
 	});
 };
@@ -37,8 +40,15 @@ export const initCkETHMinterInfoWorker: IcCkWorker = async (
 const initCkMinterInfoWorker = async ({
 	minterCanisterId,
 	id: tokenId,
-	worker
-}: IcToken & Partial<IcCkCanisters> & { worker: Worker }): Promise<IcCkWorkerInitResult> => {
+	worker,
+	onSyncSuccess,
+	onSyncError
+}: IcToken &
+	Partial<IcCkCanisters> & {
+		worker: Worker;
+		onSyncSuccess: (params: SyncCkMinterInfoSuccess) => void;
+		onSyncError: (params: SyncCkMinterInfoError) => void;
+	}): Promise<IcCkWorkerInitResult> => {
 	worker.onmessage = async ({
 		data
 	}: MessageEvent<PostMessage<PostMessageJsonDataResponse | PostMessageDataResponseError>>) => {
@@ -46,13 +56,13 @@ const initCkMinterInfoWorker = async ({
 
 		switch (msg) {
 			case 'syncCkMinterInfo':
-				syncCkMinterInfo({
+				onSyncSuccess({
 					tokenId,
 					data: data.data as PostMessageJsonDataResponse
 				});
 				return;
 			case 'syncCkMinterInfoError':
-				onLoadCkBtcMinterInfoError({
+				onSyncError({
 					tokenId,
 					error: (data.data as PostMessageDataResponseError).error
 				});

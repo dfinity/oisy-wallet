@@ -2,6 +2,7 @@ import { btcStatusesStore } from '$icp/stores/btc.store';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
+import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -66,13 +67,7 @@ export const syncBtcPendingUtxos = ({
 	});
 };
 
-export const syncCkMinterInfo = ({
-	data: postMsgData,
-	tokenId
-}: {
-	data: PostMessageJsonDataResponse;
-	tokenId: TokenId;
-}) => {
+export const syncCkBtcMinterInfo = ({ data: postMsgData, tokenId }: SyncCkMinterInfoSuccess) => {
 	const { json } = postMsgData;
 
 	const data: CertifiedData<MinterInfo> = JSON.parse(json, jsonReviver);
@@ -98,13 +93,7 @@ export const onLoadBtcStatusesError = ({
 	});
 };
 
-export const onLoadCkBtcMinterInfoError = ({
-	tokenId,
-	error: err
-}: {
-	tokenId: TokenId;
-	error: unknown;
-}) => {
+export const syncCkBtcMinterError = ({ tokenId, error: err }: SyncCkMinterInfoError) => {
 	ckBtcMinterInfoStore.reset(tokenId);
 
 	toastsError({
