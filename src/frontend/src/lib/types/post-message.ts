@@ -36,7 +36,7 @@ export interface PostMessageDataRequestExchangeTimer {
 
 export type PostMessageDataRequestIcrc = IcCanisters;
 
-export type PostMessageDataRequestCkBTC = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
+export type PostMessageDataRequestIcCk = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 
 export type PostMessageResponseStatus =
 	| 'syncWalletStatus'
@@ -95,7 +95,7 @@ export interface PostMessageDataResponseWalletCleanUp extends PostMessageDataRes
 	transactionIds: string[];
 }
 
-export interface PostMessageJsonDataResponseCkBTC extends PostMessageDataResponse {
+export interface PostMessageJsonDataResponse extends PostMessageDataResponse {
 	json: JsonText;
 }
 
