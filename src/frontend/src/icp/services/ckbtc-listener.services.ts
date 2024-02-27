@@ -66,7 +66,7 @@ export const syncBtcPendingUtxos = ({
 	});
 };
 
-export const syncCkBTCMinterInfo = ({
+export const syncCkMinterInfo = ({
 	data: postMsgData,
 	tokenId
 }: {
