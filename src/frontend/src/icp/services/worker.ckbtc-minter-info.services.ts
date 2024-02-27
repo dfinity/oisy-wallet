@@ -7,7 +7,7 @@ import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,
-	PostMessageJsonDataResponseCkBTC
+	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 
 export const initCkBTCMinterInfoWorker: CkBTCWorker = async ({
@@ -19,16 +19,14 @@ export const initCkBTCMinterInfoWorker: CkBTCWorker = async ({
 
 	worker.onmessage = async ({
 		data
-	}: MessageEvent<
-		PostMessage<PostMessageJsonDataResponseCkBTC | PostMessageDataResponseError>
-	>) => {
+	}: MessageEvent<PostMessage<PostMessageJsonDataResponse | PostMessageDataResponseError>>) => {
 		const { msg } = data;
 
 		switch (msg) {
 			case 'syncCktcMinterInfo':
 				syncCkBtcMinterInfo({
 					tokenId,
-					data: data.data as PostMessageJsonDataResponseCkBTC
+					data: data.data as PostMessageJsonDataResponse
 				});
 				return;
 			case 'syncCktcMinterInfoError':

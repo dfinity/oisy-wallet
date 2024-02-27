@@ -4,31 +4,31 @@ import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/sche
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import type {
-	PostMessageDataRequestCkBTC,
+	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
-	PostMessageJsonDataResponseCkBTC
+	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
-export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestCkBTC> {
+export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcCk> {
 	private timer = new SchedulerTimer('syncBtcStatusesStatus');
 
 	stop() {
 		this.timer.stop();
 	}
 
-	async start(data: PostMessageDataRequestCkBTC | undefined) {
-		await this.timer.start<PostMessageDataRequestCkBTC>({
+	async start(data: PostMessageDataRequestIcCk | undefined) {
+		await this.timer.start<PostMessageDataRequestIcCk>({
 			interval: BTC_STATUSES_TIMER_INTERVAL_MILLIS,
 			job: this.syncStatuses,
 			data
 		});
 	}
 
-	async trigger(data: PostMessageDataRequestCkBTC | undefined) {
-		await this.timer.trigger<PostMessageDataRequestCkBTC>({
+	async trigger(data: PostMessageDataRequestIcCk | undefined) {
+		await this.timer.trigger<PostMessageDataRequestIcCk>({
 			job: this.syncStatuses,
 			data
 		});
@@ -37,7 +37,7 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestCkB
 	private syncStatuses = async ({
 		identity,
 		data
-	}: SchedulerJobData<PostMessageDataRequestCkBTC>) => {
+	}: SchedulerJobData<PostMessageDataRequestIcCk>) => {
 		const minterCanisterId = data?.minterCanisterId;
 
 		assertNonNullish(
@@ -75,7 +75,7 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestCkB
 			data: statuses
 		};
 
-		this.timer.postMsg<PostMessageJsonDataResponseCkBTC>({
+		this.timer.postMsg<PostMessageJsonDataResponse>({
 			msg: 'syncBtcStatuses',
 			data: {
 				json: JSON.stringify(data, jsonReplacer)
