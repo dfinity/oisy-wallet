@@ -50,6 +50,13 @@ export const loadPendingCkEthTransactions = async ({
 			({ data: txData }) => txData === data
 		);
 
+		// There are no pending ETH -> ckETH transactions, therefore we reset the store.
+		// This can be useful if there was a previous pending transactions displayed and the transaction has now been processed.
+		if (pendingEthToCkEthTransactions.length === 0) {
+			convertEthToCkEthPendingStore.reset(tokenId);
+			return;
+		}
+
 		convertEthToCkEthPendingStore.set({
 			tokenId,
 			data: pendingEthToCkEthTransactions.map((transaction) => ({
