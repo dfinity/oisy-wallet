@@ -9,8 +9,10 @@ const provider = new EtherscanProvider(NETWORK, API_KEY);
 
 export const transactions = ({
 	address,
-	startBlock
+	startBlock,
+	endBlock
 }: {
 	address: ETH_ADDRESS;
 	startBlock?: BlockTag;
-}): Promise<TransactionResponse[]> => provider.getHistory(address, startBlock);
+	endBlock?: BlockTag;
+}): Promise<TransactionResponse[]> => provider.getHistory(address, startBlock, endBlock);
