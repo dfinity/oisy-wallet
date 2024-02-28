@@ -3,25 +3,20 @@
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { OptionAddress } from '$lib/types/address';
-	import {
-		getTransaction,
-		initPendingTransactionsListener as initEthPendingTransactionsListenerProvider
-	} from '$eth/providers/alchemy.providers';
-	import { transactions as transactionsProviders } from '$eth/providers/etherscan.providers';
+	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-	import { mapCkETHPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
 	import { tokenId } from '$lib/derived/token.derived';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import { address } from '$lib/derived/address.derived';
 	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import { authStore } from '$lib/stores/auth.store';
-	import { encodePrincipalToEthAddress } from '@dfinity/cketh';
-	import { populateDepositTransaction } from '$eth/providers/infura-cketh.providers';
-	import { nullishSignOut } from '$lib/services/auth.services';
+	import {
+		loadPendingCkEthTransaction,
+		loadPendingCkEthTransactions
+	} from '$icp-eth/services/eth.services';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -30,11 +25,6 @@
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
-		if (isNullish($authStore.identity)) {
-			await nullishSignOut();
-			return;
-		}
-
 		if (isNullish(toAddress)) {
 			convertEthToCkEthPendingStore.reset($tokenId);
 			return;
@@ -57,28 +47,11 @@
 
 		loadBalance = $balance;
 
-		const transactions = await transactionsProviders({
-			address: toAddress,
-			startBlock: `${lastObservedBlockNumber}`
-		});
-
-		// We compute the data of a transfer of ETH to the ckETH helper contract with the principal of the user.
-		// That way, we can use the data to compare the pending transaction of the contract to filter those that targets this user.
-		const { data } = await populateDepositTransaction({
-			contract: { address: toAddress },
-			to: encodePrincipalToEthAddress($authStore.identity.getPrincipal())
-		});
-
-		const pendingEthToCkEthTransactions = transactions.filter(
-			({ data: txData }) => txData === data
-		);
-
-		convertEthToCkEthPendingStore.set({
+		await loadPendingCkEthTransactions({
 			tokenId: $tokenId,
-			data: pendingEthToCkEthTransactions.map((transaction) => ({
-				data: mapCkETHPendingTransaction({ transaction }),
-				certified: false
-			}))
+			lastObservedBlockNumber,
+			identity: $authStore.identity,
+			toAddress
 		});
 	};
 
@@ -89,31 +62,11 @@
 			return;
 		}
 
-		await loadPendingTransactions({ toAddress });
-
 		listener = initEthPendingTransactionsListenerProvider({
 			toAddress,
 			fromAddress: $address,
-			listener: async (hash: string) => {
-				const transaction = await getTransaction(hash);
-
-				if (isNullish(transaction)) {
-					toastsError({
-						msg: {
-							text: `Failed to get the transaction from the provided (hash: ${hash}). Please reload the wallet dapp.`
-						}
-					});
-					return;
-				}
-
-				convertEthToCkEthPendingStore.prepend({
-					tokenId: $tokenId,
-					transaction: {
-						data: mapCkETHPendingTransaction({ transaction }),
-						certified: false
-					}
-				});
-			}
+			listener: async (hash: string) =>
+				await loadPendingCkEthTransaction({ hash, tokenId: $tokenId })
 		});
 	};
 
@@ -127,6 +80,7 @@
 	// - When the scheduled minter info are updated given that we use the information it provides to query the Ethereum network from above a particular block index.
 	$: $balance,
 		$ckEthMinterInfoStore,
+		ckEthHelperContractAddress,
 		(async () => await loadPendingTransactions({ toAddress: ckEthHelperContractAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
