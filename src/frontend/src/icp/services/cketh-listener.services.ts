@@ -2,6 +2,8 @@ import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { CertifiedData } from '$lib/types/store';
+import type { SyncState } from '$lib/types/sync';
+import { emit } from '$lib/utils/events.utils';
 import type { MinterInfo } from '@dfinity/cketh';
 import { jsonReviver } from '@dfinity/utils';
 
@@ -24,3 +26,9 @@ export const syncCkEthMinterError = ({ tokenId, error: err }: SyncCkMinterInfoEr
 		err
 	});
 };
+
+export const syncCkEthMinterStatus = (state: SyncState) =>
+	emit({
+		message: 'oisyCkEthMinterInfoStatus',
+		detail: state
+	});

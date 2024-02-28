@@ -8,7 +8,9 @@ import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { PostMessageJsonDataResponse } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
+import type { SyncState } from '$lib/types/sync';
 import type { TokenId } from '$lib/types/token';
+import { emit } from '$lib/utils/events.utils';
 import type { MinterInfo, PendingUtxo } from '@dfinity/ckbtc';
 import { jsonReviver } from '@dfinity/utils';
 
@@ -101,3 +103,9 @@ export const syncCkBtcMinterError = ({ tokenId, error: err }: SyncCkMinterInfoEr
 		err
 	});
 };
+
+export const syncCkBtcMinterStatus = (state: SyncState) =>
+	emit({
+		message: 'oisyCkBtcMinterInfoStatus',
+		detail: state
+	});
