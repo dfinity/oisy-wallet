@@ -7,7 +7,9 @@
 </script>
 
 <span class="text-off-white">
-	<output class={`break-all ${($balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'}`}>
+	<output
+		class={`break-all ${($balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'} flex flex-col sm:block`}
+	>
 		{#if nonNullish($balance) && !$balanceZero}
 			<span class="amount font-bold"><Amount amount={$balance} /></span>
 			{#if $erc20TokensInitialized}
