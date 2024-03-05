@@ -34,7 +34,7 @@
 			$ckEthMinterInfoStore?.[$tokenId]?.data.last_observed_block_number ?? []
 		);
 
-		// The ckETH minter info have not yet been fetched. We require those to query all transactions above a block index. Those can be considered as pending given that they have not yet been seen by the minter.
+		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
 		if (isNullish(lastObservedBlockNumber)) {
 			return;
 		}
@@ -76,8 +76,8 @@
 	$: (async () => init({ toAddress: ckEthHelperContractAddress }))();
 
 	// Update pending transactions:
-	// - When the balance updates - i.e. when new transactions are detected - it might be that the pending ETH -> ckETH transactions have been minted.
-	// - When the scheduled minter info are updated given that we use the information it provides to query the Ethereum network from above a particular block index.
+	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
+	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
 	$: $balance,
 		$ckEthMinterInfoStore,
 		ckEthHelperContractAddress,

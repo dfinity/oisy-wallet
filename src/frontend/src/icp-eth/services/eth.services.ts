@@ -39,8 +39,8 @@ export const loadPendingCkEthTransactions = async ({
 			startBlock: `${lastObservedBlockNumber}`
 		});
 
-		// We compute the data of a transfer of ETH to the ckETH helper contract with the principal of the user.
-		// That way, we can use the data to compare the pending transaction of the contract to filter those that targets this user.
+		// We compute the data for a transfer of ETH to the ckETH helper contract using the user's principal.
+		// This allows us to use the data to compare with the contract's pending transactions and filter those targeting this user.
 		const { data } = await populateDepositTransaction({
 			contract: { address: toAddress },
 			to: encodePrincipalToEthAddress(identity.getPrincipal())
