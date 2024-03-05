@@ -8,7 +8,7 @@ import { isTokenCkBtcLedger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils
 import { mapIcrcTransaction, mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import type { PostMessage, PostMessageDataRequestIcrc } from '$lib/types/post-message';
 import {
-	type IcrcGetTransactions,
+	type IcrcIndexNgGetTransactions,
 	type IcrcTransaction,
 	type IcrcTransactionWithId
 } from '@dfinity/ledger-icrc';
@@ -18,7 +18,7 @@ const getTransactions = ({
 	identity,
 	certified,
 	data
-}: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<IcrcGetTransactions> => {
+}: SchedulerJobParams<PostMessageDataRequestIcrc>): Promise<IcrcIndexNgGetTransactions> => {
 	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
 
 	return getTransactionsApi({
