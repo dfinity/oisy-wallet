@@ -1,6 +1,9 @@
 import { getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { getBitcoinUtxosQuery } from '$icp/api/ic-management.api';
-import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
+import {
+	BTC_NETWORK,
+	CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS
+} from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
 import type {
@@ -8,7 +11,7 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
+import { BtcNetwork, MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
 import type { UtxoStatus } from '@dfinity/ckbtc/dist/candid/minter';
 import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
@@ -22,7 +25,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 	async start(data: PostMessageDataRequestIcCk | undefined) {
 		await this.timer.start<PostMessageDataRequestIcCk>({
 			interval: CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS,
-			job: this.updateBalance,
+			job: this.executeJob,
 			data
 		});
 	}
@@ -42,15 +45,26 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			'No data - minterCanisterId - provided to update the BTC balance.'
 		);
 
-		// TODO
+		// TODO: fetch address
 
-		await Promise.all([getBitcoinUtxosQuery(), getKnownUtxos()]);
+		await Promise.all([
+			getBitcoinUtxosQuery({
+				identity,
+				address: '',
+				network: BTC_NETWORK === BtcNetwork.Testnet ? 'testnet' : 'mainnet'
+			}),
+			getKnownUtxos({
+				identity,
+				certified: false,
+				minterCanisterId
+			})
+		]);
 	};
 
 	private updateBalance = async ({
 		identity,
-		data
-	}: SchedulerJobData<PostMessageDataRequestIcCk>) => {
+		data: { minterCanisterId }
+	}: Required<SchedulerJobData<Required<PostMessageDataRequestIcCk>>>) => {
 		try {
 			const utxosStatuses = await updateBalance({
 				identity,
