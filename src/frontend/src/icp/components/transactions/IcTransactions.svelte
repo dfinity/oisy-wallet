@@ -20,14 +20,15 @@
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { slide } from 'svelte/transition';
-	import ConvertCkETHTransactionsListener from '$icp-eth/components/core/ConvertCkETHTransactionsListener.svelte';
+	import IcTransactionsCkETHListeners from '$icp/components/transactions/IcTransactionsCkETHListeners.svelte';
 	import { nullishSignOut } from '$lib/services/auth.services';
+	import IcReceiveEthereum from '$icp/components/receive/IcReceiveEthereum.svelte';
 
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger
 		? IcTransactionsBtcListeners
 		: $tokenCkEthLedger
-			? ConvertCkETHTransactionsListener
+			? IcTransactionsCkETHListeners
 			: IcTransactionsNoListener;
 
 	let disableInfiniteScroll = false;
@@ -72,7 +73,11 @@
 <div class="flex justify-between mb-6 pb-1 items-center">
 	<h2 class="text-base">Transactions</h2>
 
-	<IcReceiveBitcoin />
+	{#if $tokenCkBtcLedger}
+		<IcReceiveBitcoin />
+	{:else if $tokenCkEthLedger}
+		<IcReceiveEthereum />
+	{/if}
 </div>
 
 <IcTransactionsSkeletons>
