@@ -1,4 +1,4 @@
-import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index.api';
+import { getTransactions as getTransactionsApi } from '$icp/api/icrc-index-ng.api';
 import type { SchedulerJobData, SchedulerJobParams } from '$icp/schedulers/scheduler';
 import { WalletScheduler } from '$icp/schedulers/wallet.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic';
