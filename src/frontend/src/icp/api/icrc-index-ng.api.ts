@@ -4,7 +4,7 @@ import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import { type Identity } from '@dfinity/agent';
-import { IcrcIndexCanister, type IcrcGetTransactions } from '@dfinity/ledger-icrc';
+import { IcrcIndexNgCanister, type IcrcIndexNgGetTransactions } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
@@ -21,10 +21,10 @@ export const getTransactions = async ({
 	start?: bigint;
 	maxResults?: bigint;
 	indexCanisterId: CanisterIdText;
-} & QueryParams): Promise<IcrcGetTransactions> => {
+} & QueryParams): Promise<IcrcIndexNgGetTransactions> => {
 	assertNonNullish(identity, 'No internet identity.');
 
-	const { getTransactions } = await indexCanister({ identity, indexCanisterId });
+	const { getTransactions } = await indexNgCanister({ identity, indexCanisterId });
 
 	return getTransactions({
 		certified,
@@ -34,16 +34,16 @@ export const getTransactions = async ({
 	});
 };
 
-const indexCanister = async ({
+const indexNgCanister = async ({
 	identity,
 	indexCanisterId
 }: {
 	identity: Identity;
 	indexCanisterId: CanisterIdText;
-}): Promise<IcrcIndexCanister> => {
+}): Promise<IcrcIndexNgCanister> => {
 	const agent = await getAgent({ identity });
 
-	return IcrcIndexCanister.create({
+	return IcrcIndexNgCanister.create({
 		agent,
 		canisterId: Principal.fromText(indexCanisterId)
 	});

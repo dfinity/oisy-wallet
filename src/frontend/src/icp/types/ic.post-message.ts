@@ -1,6 +1,6 @@
 import type { CertifiedData } from '$lib/types/store';
 import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
-import type { IcrcGetTransactions } from '@dfinity/ledger-icrc';
+import type { IcrcIndexNgGetTransactions } from '@dfinity/ledger-icrc';
 
 // Transactions & {certified: boolean}
 export type JsonTransactionsText = string;
@@ -11,5 +11,5 @@ export type PostMessageWalletData<T> = Omit<T, 'transactions' | 'balance'> & {
 };
 
 export type GetTransactions =
-	| Omit<IcrcGetTransactions, 'transactions'>
+	| Omit<IcrcIndexNgGetTransactions, 'transactions'>
 	| Omit<GetAccountIdentifierTransactionsResponse, 'transactions'>;

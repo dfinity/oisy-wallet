@@ -1,5 +1,5 @@
 import { getTransactions as getTransactionsIcp } from '$icp/api/icp-index.api';
-import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index.api';
+import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken, IcTransaction } from '$icp/types/ic';
 import { mapIcTransaction } from '$icp/utils/ic-transactions.utils';
