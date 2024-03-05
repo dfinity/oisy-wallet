@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { getContext } from 'svelte';
 	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
+	import { closeModal } from '$lib/utils/modal.utils';
 
 	/**
 	 * Props
@@ -42,15 +42,16 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const close = () => {
-		modalStore.close();
+	const close = () =>
+		closeModal(() => {
+			destination = '';
+			amount = undefined;
+			network = undefined;
 
-		destination = '';
-		amount = undefined;
-		network = undefined;
+			sendProgressStep = SendStep.INITIALIZATION;
 
-		sendProgressStep = SendStep.INITIALIZATION;
-	};
+			currentStep = undefined;
+		});
 </script>
 
 <WizardModal
