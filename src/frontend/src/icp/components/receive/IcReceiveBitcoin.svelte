@@ -11,17 +11,9 @@
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
 	import IcReceiveBitcoinProgress from '$icp/components/receive/IcReceiveBitcoinProgress.svelte';
 	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
-	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import type { SyncState } from '$lib/types/sync';
 	import { blur } from 'svelte/transition';
 	import { debounce, nonNullish } from '@dfinity/utils';
-
-	let ckBTC = false;
-	$: ckBTC = $tokenCkBtcLedger;
-
-	/**
-	 * Update balance / receive Bitcoin
-	 */
 
 	let receiveProgressStep: string | undefined = undefined;
 
@@ -81,14 +73,14 @@
 
 <svelte:window on:oisyCkBtcUpdateBalance={onSyncState} />
 
-{#if ckBTC && nonNullish(ckBtcUpdateBalanceSyncState)}
-	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div
-			class="text-misty-rose flex gap-2.5 animate-pulse"
-		>
+{#if nonNullish(ckBtcUpdateBalanceSyncState)}
+	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="text-misty-rose animate-pulse">
 			<span in:blur>Checking BTC status...</span>
 		</div>{:else}
-		<button in:blur class="text text-blue border-0" on:click={async () => await receive()}
-			><IconSync /> Refresh</button
+		<button
+			in:blur
+			class="text text-blue border-0 flex gap-2"
+			on:click={async () => await receive()}><IconSync /> Refresh</button
 		>
 	{/if}
 {/if}
