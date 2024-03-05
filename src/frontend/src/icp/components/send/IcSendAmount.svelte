@@ -15,7 +15,7 @@
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { ETHEREUM_NETWORK_ID } from '$lib/constants/networks.constants';
 	import { assertCkETHUserInputAmount } from '$icp/utils/cketh.utils';
-	import {ckEthMinterInfoStore} from "$icp/stores/cketh.store";
+	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -57,7 +57,7 @@
 				amount: value,
 				tokenDecimals: $tokenDecimals,
 				tokenSymbol: $tokenSymbol,
-				minterInfo: $ckEthMinterInfoStore?.[$tokenId],
+				minterInfo: $ckEthMinterInfoStore?.[$tokenId]
 			});
 
 			if (nonNullish(amountError)) {
