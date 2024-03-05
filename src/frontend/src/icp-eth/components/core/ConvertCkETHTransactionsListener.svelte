@@ -1,28 +1,28 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { OptionAddress } from '$lib/types/address';
-	import {
-		getTransaction,
-		initPendingTransactionsListener as initEthPendingTransactionsListenerProvider
-	} from '$eth/providers/alchemy.providers';
-	import { transactions as transactionsProviders } from '$eth/providers/etherscan.providers';
-	import { isTransactionPending } from '$eth/utils/transactions.utils';
-	import { getBlockNumber } from '$eth/providers/infura.providers';
+	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
-	import { mapCkETHPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
 	import { tokenId } from '$lib/derived/token.derived';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import { address } from '$lib/derived/address.derived';
 	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { BigNumber } from '@ethersproject/bignumber';
+	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
+	import { authStore } from '$lib/stores/auth.store';
+	import {
+		loadPendingCkEthTransaction,
+		loadPendingCkEthTransactions
+	} from '$icp-eth/services/eth.services';
 
 	let listener: WebSocketListener | undefined = undefined;
 
 	let loadBalance: BigNumber | undefined | null = undefined;
+
+	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
 		if (isNullish(toAddress)) {
@@ -30,7 +30,16 @@
 			return;
 		}
 
-		// We keep track of what balance was used to fetch the pending transactions to avoid triggering unecessary reload.
+		const lastObservedBlockNumber = fromNullable(
+			$ckEthMinterInfoStore?.[$tokenId]?.data.last_observed_block_number ?? []
+		);
+
+		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
+		if (isNullish(lastObservedBlockNumber)) {
+			return;
+		}
+
+		// We keep track of what balance was used to fetch the pending transactions to avoid triggering unnecessary reload.
 		// In addition, a transaction might be emitted by the socket (Alchemy) as pending but, might require a few extra time to be delivered as pending by the API (Ehterscan) which can lead to a "race condition" where a pending transaction is displayed and then hidden few seconds later.
 		if (nonNullish(loadBalance) && nonNullish($balance) && loadBalance.eq($balance)) {
 			return;
@@ -38,29 +47,11 @@
 
 		loadBalance = $balance;
 
-		const currentBlockNumber = await getBlockNumber();
-		const transactions = await transactionsProviders({ address: toAddress });
-
-		const pendingEthToCkEthTransactions = transactions.filter((tx) => {
-			// Pending transactions for this Oisy Wallet address - i.e. if from address is different, it is not a pending address?
-			if (isNullish($address) || tx.from.toLowerCase() !== $address.toLowerCase()) {
-				return false;
-			}
-
-			if (isTransactionPending(tx)) {
-				return true;
-			}
-
-			const diff = currentBlockNumber - (tx.blockNumber ?? 0);
-			return diff < 64;
-		});
-
-		convertEthToCkEthPendingStore.set({
+		await loadPendingCkEthTransactions({
 			tokenId: $tokenId,
-			data: pendingEthToCkEthTransactions.map((transaction) => ({
-				data: mapCkETHPendingTransaction({ transaction }),
-				certified: false
-			}))
+			lastObservedBlockNumber,
+			identity: $authStore.identity,
+			toAddress
 		});
 	};
 
@@ -71,31 +62,11 @@
 			return;
 		}
 
-		await loadPendingTransactions({ toAddress });
-
 		listener = initEthPendingTransactionsListenerProvider({
 			toAddress,
 			fromAddress: $address,
-			listener: async (hash: string) => {
-				const transaction = await getTransaction(hash);
-
-				if (isNullish(transaction)) {
-					toastsError({
-						msg: {
-							text: `Failed to get the transaction from the provided (hash: ${hash}). Please reload the wallet dapp.`
-						}
-					});
-					return;
-				}
-
-				convertEthToCkEthPendingStore.prepend({
-					tokenId: $tokenId,
-					transaction: {
-						data: mapCkETHPendingTransaction({ transaction }),
-						certified: false
-					}
-				});
-			}
+			listener: async (hash: string) =>
+				await loadPendingCkEthTransaction({ hash, tokenId: $tokenId })
 		});
 	};
 
@@ -104,8 +75,13 @@
 
 	$: (async () => init({ toAddress: ckEthHelperContractAddress }))();
 
-	// When the balance updates - i.e. when new transactions are detected - it might be that the pending ETH -> ckETH transactions have been minted.
-	$: $balance, (async () => loadPendingTransactions({ toAddress: ckEthHelperContractAddress }))();
+	// Update pending transactions:
+	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
+	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
+	$: $balance,
+		$ckEthMinterInfoStore,
+		ckEthHelperContractAddress,
+		(async () => await loadPendingTransactions({ toAddress: ckEthHelperContractAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>
