@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import type { WizardSteps } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { SendIcStep } from '$lib/enums/steps';
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
@@ -25,6 +24,7 @@
 	import BitcoinFeeContext from '$icp/components/fee/IcFeeContext.svelte';
 	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
 	import { ETHEREUM_NETWORK_ID } from '$lib/constants/networks.constants';
+	import { closeModal } from '$lib/utils/modal.utils';
 
 	/**
 	 * Props
@@ -111,15 +111,16 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const close = () => {
-		modalStore.close();
+	const close = () =>
+		closeModal(() => {
+			destination = '';
+			amount = undefined;
+			networkId = undefined;
 
-		destination = '';
-		amount = undefined;
-		networkId = undefined;
+			sendProgressStep = SendIcStep.INITIALIZATION;
 
-		sendProgressStep = SendIcStep.INITIALIZATION;
-	};
+			currentStep = undefined;
+		});
 
 	/**
 	 * Btc Fee context store

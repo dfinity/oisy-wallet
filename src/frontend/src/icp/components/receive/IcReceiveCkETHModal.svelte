@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { SendStep } from '$lib/enums/steps';
-	import { modalStore } from '$lib/stores/modal.store';
 	import HowToConvertETHInfo from '$icp/components/convert/HowToConvertETHInfo.svelte';
 	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
@@ -12,6 +11,7 @@
 	import IcReceiveInfoCkETH from '$icp/components/receive/IcReceiveInfoCkETH.svelte';
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { closeModal } from '$lib/utils/modal.utils';
 
 	/**
 	 * Props
@@ -44,15 +44,16 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const close = () => {
-		modalStore.close();
+	const close = () =>
+		closeModal(() => {
+			destination = '';
+			amount = undefined;
+			network = undefined;
 
-		destination = '';
-		amount = undefined;
-		network = undefined;
+			sendProgressStep = SendStep.INITIALIZATION;
 
-		sendProgressStep = SendStep.INITIALIZATION;
-	};
+			currentStep = undefined;
+		});
 </script>
 
 <WizardModal
