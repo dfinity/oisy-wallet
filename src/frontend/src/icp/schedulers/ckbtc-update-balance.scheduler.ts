@@ -1,4 +1,5 @@
-import { updateBalance } from '$icp/api/ckbtc-minter.api';
+import { getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
+import { getBitcoinUtxosQuery } from '$icp/api/ic-management.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
@@ -28,15 +29,12 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 
 	async trigger(data: PostMessageDataRequestIcCk | undefined) {
 		await this.timer.trigger<PostMessageDataRequestIcCk>({
-			job: this.updateBalance,
+			job: this.executeJob,
 			data
 		});
 	}
 
-	private updateBalance = async ({
-		identity,
-		data
-	}: SchedulerJobData<PostMessageDataRequestIcCk>) => {
+	private executeJob = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestIcCk>) => {
 		const minterCanisterId = data?.minterCanisterId;
 
 		assertNonNullish(
@@ -44,6 +42,15 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			'No data - minterCanisterId - provided to update the BTC balance.'
 		);
 
+		// TODO
+
+		await Promise.all([getBitcoinUtxosQuery(), getKnownUtxos()]);
+	};
+
+	private updateBalance = async ({
+		identity,
+		data
+	}: SchedulerJobData<PostMessageDataRequestIcCk>) => {
 		try {
 			const utxosStatuses = await updateBalance({
 				identity,

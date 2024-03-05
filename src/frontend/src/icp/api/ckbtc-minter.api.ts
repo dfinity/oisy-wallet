@@ -12,6 +12,7 @@ import type {
 	UpdateBalanceOk
 } from '@dfinity/ckbtc';
 import { CkBTCMinterCanister } from '@dfinity/ckbtc';
+import type { Utxo } from '@dfinity/ckbtc/dist/candid/minter';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
@@ -100,6 +101,24 @@ export const withdrawalStatuses = async ({
 	const { retrieveBtcStatusV2ByAccount } = await minterCanister({ identity, minterCanisterId });
 
 	return retrieveBtcStatusV2ByAccount(params);
+};
+
+export const getKnownUtxos = async ({
+	identity,
+	minterCanisterId,
+	...params
+}: {
+	identity: OptionIdentity;
+	minterCanisterId: CanisterIdText;
+} & Required<QueryParams>): Promise<Utxo[]> => {
+	assertNonNullish(identity, 'No internet identity.');
+
+	const { getKnownUtxos } = await minterCanister({ identity, minterCanisterId });
+
+	return getKnownUtxos({
+		...minterAccountParams({ identity }),
+		...params
+	});
 };
 
 const minterCanister = async ({
