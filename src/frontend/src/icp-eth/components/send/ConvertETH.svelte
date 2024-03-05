@@ -8,12 +8,16 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import { networkICP } from '$lib/derived/network.derived';
+	import { tokenId } from '$lib/derived/token.derived';
+	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 
 	// Convert ETH to ckETH can be executed on Ethereum and ckETH pages, therefore we use Ethereum for both statically.
 	const convertTokenId = ETHEREUM_TOKEN_ID;
 
 	const isDisabled = (): boolean =>
-		$addressNotLoaded || isNullish($ckEthHelperContractAddressStore?.[convertTokenId]);
+		$addressNotLoaded ||
+		isNullish($ckEthHelperContractAddressStore?.[convertTokenId]) ||
+		($networkICP && isNullish($ckEthMinterInfoStore?.[$tokenId]));
 
 	const openSend = async () => {
 		if (isDisabled()) {

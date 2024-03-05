@@ -15,6 +15,7 @@
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { ETHEREUM_NETWORK_ID } from '$lib/constants/networks.constants';
 	import { assertCkETHUserInputAmount } from '$icp/utils/cketh.utils';
+	import {ckEthMinterInfoStore} from "$icp/stores/cketh.store";
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -55,7 +56,8 @@
 			amountError = assertCkETHUserInputAmount({
 				amount: value,
 				tokenDecimals: $tokenDecimals,
-				tokenSymbol: $tokenSymbol
+				tokenSymbol: $tokenSymbol,
+				minterInfo: $ckEthMinterInfoStore?.[$tokenId],
 			});
 
 			if (nonNullish(amountError)) {
@@ -75,7 +77,7 @@
 
 	const debounceValidate = debounce(validate);
 
-	$: amount, fee, debounceValidate();
+	$: amount, fee, $ckBtcMinterInfoStore, $ckEthMinterInfoStore, debounceValidate();
 </script>
 
 <label for="amount" class="font-bold px-4.5">Amount:</label>
