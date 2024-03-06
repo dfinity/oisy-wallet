@@ -2,7 +2,7 @@ import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { balance as balanceErc20Service } from '$eth/providers/infura-erc20.providers';
 import { balance as balanceService } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
-import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { toastsError } from '$lib/stores/toasts.store';

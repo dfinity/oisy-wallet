@@ -1,3 +1,4 @@
+import { ICP_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type {
@@ -12,7 +13,6 @@ import { mapCkETHTransaction } from '$icp/utils/cketh-transactions.utils';
 import { isTokenCkBtcLedger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
-import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 

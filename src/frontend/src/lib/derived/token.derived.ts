@@ -1,6 +1,6 @@
 import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { ETHEREUM_TOKEN, ICP_TOKEN } from '$icp-eth/constants/tokens.constants';
 import { icrcTokens } from '$icp/derived/icrc.derived';
-import { ETHEREUM_TOKEN, ICP_TOKEN } from '$lib/constants/tokens.constants';
 import { routeToken } from '$lib/derived/nav.derived';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';

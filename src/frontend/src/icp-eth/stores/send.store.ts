@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import type { BigNumber } from '@ethersproject/bignumber';
