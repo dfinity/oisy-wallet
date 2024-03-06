@@ -16,6 +16,7 @@
 	import { mapErc20Token } from '$eth/utils/erc20.utils';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { ADD_TOKEN_STEPS } from '$lib/constants/steps.constants';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	const steps: WizardSteps = [
 		{
@@ -84,7 +85,12 @@
 			saveProgressStep = AddTokenStep.UPDATE_UI;
 
 			erc20TokensStore.add(
-				mapErc20Token({ address: contractAddress, exchange: 'ethereum', ...metadata })
+				mapErc20Token({
+					address: contractAddress,
+					exchange: 'ethereum',
+					network: $selectedNetwork,
+					...metadata
+				})
 			);
 
 			saveProgressStep = AddTokenStep.DONE;

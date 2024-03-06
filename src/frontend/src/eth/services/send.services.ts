@@ -15,6 +15,7 @@ import { isErc20Icp } from '$eth/utils/token.utils';
 import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
 import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import { signTransaction } from '$lib/api/backend.api';
+import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
 import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
@@ -152,7 +153,7 @@ export const send = async ({
 				destination: to,
 				helperContractAddress: ckEthHelperContractAddress
 			}) &&
-			isNetworkICP(network ?? ETHEREUM_NETWORK)
+			isNetworkICP(network ?? DEFAULT_NETWORK)
 			? ethContractPrepareTransaction({
 					...rest,
 					contract: { address: ckEthHelperContractAddress.data },

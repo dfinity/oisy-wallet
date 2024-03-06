@@ -5,8 +5,8 @@ import { getFeeData as getBurnFeeData } from '$eth/providers/infura-erc20-icp.pr
 import { getFeeData as getErc20FeeDataProvider } from '$eth/providers/infura-erc20.providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
-import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
 import type { CkEthHelperContractAddressData } from '$icp-eth/stores/cketh.store';
+import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import { isNetworkICP } from '$lib/utils/network.utils';
@@ -38,7 +38,7 @@ export const getErc20FeeData = async ({
 	network: Network | undefined;
 }): Promise<BigNumber> => {
 	try {
-		const fn = isNetworkICP(network ?? ETHEREUM_NETWORK) ? getBurnFeeData : getErc20FeeDataProvider;
+		const fn = isNetworkICP(network ?? DEFAULT_NETWORK) ? getBurnFeeData : getErc20FeeDataProvider;
 		return await fn(rest);
 	} catch (err: unknown) {
 		// We silence the error on purpose.

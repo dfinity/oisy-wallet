@@ -30,7 +30,8 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+	import {selectedNetwork} from "$lib/derived/network.derived";
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -65,7 +66,7 @@
 	$: network =
 		destination === $ckEthHelperContractAddressStore?.[$sendTokenId]?.data
 			? ICP_NETWORK
-			: ETHEREUM_NETWORK;
+			: $selectedNetwork;
 
 	/**
 	 * Modal
