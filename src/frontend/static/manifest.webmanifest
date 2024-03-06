@@ -22,13 +22,15 @@
 		}
 	],
 	"shortcuts": [
-      {
-        "name": "Ethereum",
-        "url": "/"
-      },
-      {
-        "name": "Internet Computer",
-        "url": "/?network=ICP"
-      }
-    ]
+		{
+			"name": "Ethereum",
+			"url": "/",
+			"icons": [{ "src": "/icons/eth.png", "type": "image/png", "sizes": "192x192" }]
+		},
+		{
+			"name": "Internet Computer",
+			"url": "/?network=ICP",
+			"icons": [{ "src": "/icons/icp.png", "type": "image/png", "sizes": "192x192" }]
+		}
+	]
 }
