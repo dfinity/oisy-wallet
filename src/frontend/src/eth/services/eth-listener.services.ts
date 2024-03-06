@@ -7,7 +7,7 @@ import { initWalletConnect } from '$eth/providers/wallet-connect.providers';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { WebSocketListener } from '$eth/types/listener';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
-import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { BigNumber } from '@ethersproject/bignumber';

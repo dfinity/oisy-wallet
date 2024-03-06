@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WebSocketListener } from '$eth/types/listener';
-	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 	import { getFeeData } from '$eth/providers/infura.providers';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { address } from '$lib/derived/address.derived';

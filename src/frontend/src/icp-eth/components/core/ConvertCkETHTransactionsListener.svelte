@@ -5,7 +5,7 @@
 	import type { OptionAddress } from '$lib/types/address';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
-	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { address } from '$lib/derived/address.derived';
 	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';

@@ -7,7 +7,7 @@ import {
 } from '$eth/providers/metamask.providers';
 import { metamaskStore } from '$eth/stores/metamask.store';
 import type { MetamaskChainId } from '$eth/types/metamask';
-import { ETHEREUM_SYMBOL } from '$lib/constants/tokens.constants';
+import { ETHEREUM_SYMBOL } from '$icp-eth/constants/tokens.constants';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';

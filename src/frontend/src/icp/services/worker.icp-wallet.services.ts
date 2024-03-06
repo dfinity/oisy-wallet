@@ -1,9 +1,9 @@
+import { ICP_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import type { WalletWorker } from '$icp/types/ic-listener';
-import { ICP_TOKEN_ID } from '$lib/constants/tokens.constants';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,

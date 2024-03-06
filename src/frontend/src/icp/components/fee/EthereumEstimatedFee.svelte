@@ -9,7 +9,7 @@
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { onDestroy } from 'svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';

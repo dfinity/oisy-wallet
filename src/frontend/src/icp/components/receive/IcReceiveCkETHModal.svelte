@@ -3,7 +3,7 @@
 	import { SendStep } from '$lib/enums/steps';
 	import HowToConvertETHInfo from '$icp/components/convert/HowToConvertETHInfo.svelte';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
-	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';

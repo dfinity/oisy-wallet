@@ -3,7 +3,7 @@
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
-	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';

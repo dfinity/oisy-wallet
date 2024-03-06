@@ -6,7 +6,7 @@
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { isNullish } from '@dfinity/utils';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
-	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 	import { networkICP } from '$lib/derived/network.derived';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
