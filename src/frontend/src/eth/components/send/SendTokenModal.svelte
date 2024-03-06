@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
-	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import type { Network } from '$lib/types/network';
+	import { selectedChainId } from '$eth/derived/network.derived';
 
 	/**
 	 * Props
@@ -65,6 +66,7 @@
 
 	<SendTokenWizard
 		{currentStep}
+		chainId={$selectedChainId}
 		bind:destination
 		bind:network
 		bind:amount

@@ -80,6 +80,7 @@ export const send = ({
 	ckEthHelperContractAddress,
 	tokenStandard,
 	network,
+	chainId,
 	...params
 }: WalletConnectSendParams & {
 	tokenStandard: TokenStandard;
@@ -167,7 +168,8 @@ export const send = ({
 					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
 					data,
 					identity,
-					ckEthHelperContractAddress
+					ckEthHelperContractAddress,
+					chainId
 				});
 
 				await listener.approveRequest({ id, topic, message: hash });

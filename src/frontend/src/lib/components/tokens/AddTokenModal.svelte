@@ -10,13 +10,12 @@
 	import { isNullish } from '@dfinity/utils';
 	import { authStore } from '$lib/stores/auth.store';
 	import { addUserToken } from '$lib/api/backend.api';
-	import { ETH_CHAIN_ID } from '$eth/constants/eth.constants';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import { mapErc20Token } from '$eth/utils/erc20.utils';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { ADD_TOKEN_STEPS } from '$lib/constants/steps.constants';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
 
 	const steps: WizardSteps = [
 		{
@@ -75,7 +74,7 @@
 			await addUserToken({
 				identity: $authStore.identity,
 				token: {
-					chain_id: ETH_CHAIN_ID,
+					chain_id: $selectedChainId,
 					contract_address: contractAddress,
 					symbol: [],
 					decimals: []
@@ -88,7 +87,7 @@
 				mapErc20Token({
 					address: contractAddress,
 					exchange: 'ethereum',
-					network: $selectedNetwork,
+					network: $selectedEthereumNetwork,
 					...metadata
 				})
 			);

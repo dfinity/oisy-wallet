@@ -31,7 +31,8 @@
 	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
-	import {selectedNetwork} from "$lib/derived/network.derived";
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { selectedChainId } from '$eth/derived/network.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -126,7 +127,8 @@
 			identity: $authStore.identity,
 			ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
 			tokenStandard: $sendTokenStandard,
-			network
+			network,
+			chainId: $selectedChainId
 		});
 
 		setTimeout(() => close(), success ? 750 : 0);

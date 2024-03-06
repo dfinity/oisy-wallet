@@ -18,12 +18,13 @@
 	import { SEND_STEPS } from '$eth/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import type { Network } from '$lib/types/network';
 	import { authStore } from '$lib/stores/auth.store';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
+	import type { Network } from '$lib/types/network';
+	import type { EthereumChainId } from '$eth/types/network';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -53,6 +54,7 @@
 	export let network: Network | undefined = undefined;
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
+	export let chainId: EthereumChainId;
 
 	let destinationEditable = true;
 	$: destinationEditable = sendPurpose !== 'convert-eth-to-cketh';
@@ -132,7 +134,8 @@
 				gas,
 				network,
 				identity: $authStore.identity,
-				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
+				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
+				chainId
 			});
 
 			setTimeout(() => close(), 750);

@@ -1,5 +1,5 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
-import { ETH_BASE_FEE, ETH_CHAIN_ID } from '$eth/constants/eth.constants';
+import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { populateDepositTransaction } from '$eth/providers/infura-cketh.providers';
 import { populateBurnTransaction } from '$eth/providers/infura-erc20-icp.providers';
 import { populateTransaction } from '$eth/providers/infura-erc20.providers';
@@ -9,6 +9,7 @@ import type {
 	Erc20PopulateTransaction
 } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
+import type { NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
@@ -32,11 +33,13 @@ const ethPrepareTransaction = async ({
 	maxFeePerGas: max_fee_per_gas,
 	nonce,
 	gas,
-	data
-}: TransferParams & { nonce: number; gas: bigint | undefined }): Promise<SignRequest> => ({
+	data,
+	chainId: chain_id
+}: TransferParams &
+	NetworkChainId & { nonce: number; gas: bigint | undefined }): Promise<SignRequest> => ({
 	to,
 	value: amount.toBigInt(),
-	chain_id: ETH_CHAIN_ID,
+	chain_id,
 	nonce: BigInt(nonce),
 	gas: gas ?? ETH_BASE_FEE,
 	max_fee_per_gas,
@@ -52,11 +55,14 @@ const erc20PrepareTransaction = async ({
 	nonce,
 	token,
 	gas,
-	populate
-}: TransferParams & { nonce: number; gas: bigint; populate: Erc20PopulateTransaction } & Pick<
-		SendParams,
-		'token'
-	>): Promise<SignRequest> => {
+	populate,
+	chainId: chain_id
+}: TransferParams &
+	NetworkChainId & {
+		nonce: number;
+		gas: bigint;
+		populate: Erc20PopulateTransaction;
+	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
 	const { data } = await populate({
 		contract: token as Erc20Token,
 		to,
@@ -71,7 +77,7 @@ const erc20PrepareTransaction = async ({
 
 	return {
 		to: contractAddress,
-		chain_id: ETH_CHAIN_ID,
+		chain_id,
 		nonce: BigInt(nonce),
 		gas,
 		max_fee_per_gas,
@@ -89,13 +95,15 @@ const ethContractPrepareTransaction = async ({
 	maxFeePerGas: max_fee_per_gas,
 	nonce,
 	gas,
-	populate
-}: TransferParams & {
-	nonce: number;
-	gas: bigint;
-	populate: CkEthPopulateTransaction;
-	contract: Erc20ContractAddress;
-}): Promise<SignRequest> => {
+	populate,
+	chainId: chain_id
+}: TransferParams &
+	NetworkChainId & {
+		nonce: number;
+		gas: bigint;
+		populate: CkEthPopulateTransaction;
+		contract: Erc20ContractAddress;
+	}): Promise<SignRequest> => {
 	const { data } = await populate({
 		contract,
 		to
@@ -109,7 +117,7 @@ const ethContractPrepareTransaction = async ({
 
 	return {
 		to: contractAddress,
-		chain_id: ETH_CHAIN_ID,
+		chain_id,
 		nonce: BigInt(nonce),
 		gas,
 		max_fee_per_gas,

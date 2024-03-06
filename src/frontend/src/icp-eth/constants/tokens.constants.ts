@@ -17,11 +17,11 @@ export const ETHEREUM_SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
 export const ETHEREUM_TOKEN_ID = Symbol(ETHEREUM_SYMBOL);
 
 export const ETHEREUM_TOKEN: Required<Token> = {
-	id: ETHEREUM_TOKEN_ID,
+	id: Symbol('ETH'),
 	network: ETHEREUM_NETWORK,
 	standard: 'ethereum',
 	name: 'Ethereum',
-	symbol: ETHEREUM_SYMBOL,
+	symbol: 'ETH',
 	decimals: 18,
 	icon: eth
 };
