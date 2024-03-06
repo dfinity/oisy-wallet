@@ -1,6 +1,5 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
 import { ETH_BASE_FEE, ETH_CHAIN_ID } from '$eth/constants/eth.constants';
-import { ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
 import { populateDepositTransaction } from '$eth/providers/infura-cketh.providers';
 import { populateBurnTransaction } from '$eth/providers/infura-erc20-icp.providers';
 import { populateTransaction } from '$eth/providers/infura-erc20.providers';
@@ -13,6 +12,7 @@ import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { SendParams } from '$eth/types/send';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
+import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
 import { signTransaction } from '$lib/api/backend.api';
 import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 import { SendStep } from '$lib/enums/steps';

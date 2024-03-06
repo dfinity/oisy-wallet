@@ -1,5 +1,4 @@
-import { ETHEREUM_NETWORK_ID } from '$eth/constants/networks.constants';
-import { ICP_NETWORK_ID } from '$icp/constants/networks.constants';
+import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$icp-eth/constants/networks.constants';
 import type { Network, NetworkId } from '$lib/types/network';
 
 export const isNetworkICP = ({ id }: Network): boolean => isNetworkIdICP(id);

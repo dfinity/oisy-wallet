@@ -13,7 +13,8 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { onDestroy } from 'svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-	import { ETHEREUM_NETWORK_ID } from '$eth/constants/networks.constants';
+
+	import { ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
 
 	export let networkId: NetworkId | undefined = undefined;
 
