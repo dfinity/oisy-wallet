@@ -1,10 +1,10 @@
+import oneInch from '$eth/assets/1inch.svg';
+import dai from '$eth/assets/dai.svg';
+import icpDark from '$eth/assets/icp_dark.svg';
+import uniswap from '$eth/assets/uniswap.svg';
+import usdc from '$eth/assets/usdc.svg';
+import usdt from '$eth/assets/usdt.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
-import oneInch from '$lib/assets/1inch.svg';
-import dai from '$lib/assets/dai.svg';
-import icpDark from '$lib/assets/icp_dark.svg';
-import uniswap from '$lib/assets/uniswap.svg';
-import usdc from '$lib/assets/usdc.svg';
-import usdt from '$lib/assets/usdt.svg';
 
 import { ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
 

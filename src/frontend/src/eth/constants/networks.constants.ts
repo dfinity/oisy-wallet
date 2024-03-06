@@ -1,4 +1,4 @@
-import eth from '$lib/assets/eth.svg';
+import eth from '$icp-eth/assets/eth.svg';
 import type { Network } from '$lib/types/network';
 
 export const ETHEREUM_NETWORK_SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
