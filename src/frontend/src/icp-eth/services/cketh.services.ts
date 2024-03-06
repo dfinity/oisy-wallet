@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
 import { ckEthHelperContractAddress } from '$icp-eth/api/cketh-minter.api';
 import {
 	ckEthHelperContractAddressStore,
@@ -5,7 +6,6 @@ import {
 } from '$icp-eth/stores/cketh.store';
 import type { IcCkCanisters } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
-import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Network } from '$lib/types/network';

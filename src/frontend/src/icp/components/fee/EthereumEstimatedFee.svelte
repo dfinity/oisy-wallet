@@ -6,7 +6,6 @@
 	import type { IcToken } from '$icp/types/ic';
 	import type { NetworkId } from '$lib/types/network';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { ETHEREUM_NETWORK_ID } from '$lib/constants/networks.constants';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -14,6 +13,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { onDestroy } from 'svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { ETHEREUM_NETWORK_ID } from '$eth/constants/networks.constants';
 
 	export let networkId: NetworkId | undefined = undefined;
 

@@ -2,12 +2,13 @@
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Network } from '$lib/types/network';
-	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$lib/constants/networks.constants';
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
 	import { isCkEthHelperContract } from '$eth/utils/send.utils';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { ICP_NETWORK } from '$icp/constants/networks.constants';
+	import { ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;

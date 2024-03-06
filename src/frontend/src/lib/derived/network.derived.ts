@@ -1,5 +1,6 @@
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$eth/constants/networks.constants';
 import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID, NETWORKS } from '$lib/constants/networks.constants';
+import { NETWORKS } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { tokens } from '$lib/derived/tokens.derived';
