@@ -3,8 +3,8 @@
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { modalConvertCkETHToETH } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
-	import { ETHEREUM_NETWORK_ID } from '$lib/constants/networks.constants';
 	import { address } from '$lib/derived/address.derived';
+	import { ETHEREUM_NETWORK_ID } from '$eth/constants/networks.constants';
 </script>
 
 <ConvertETH>

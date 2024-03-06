@@ -2,7 +2,6 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { SendStep } from '$lib/enums/steps';
 	import HowToConvertETHInfo from '$icp/components/convert/HowToConvertETHInfo.svelte';
-	import { ICP_NETWORK } from '$lib/constants/networks.constants';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { ETHEREUM_TOKEN_ID } from '$lib/constants/tokens.constants';
 	import type { Network } from '$lib/types/network';
@@ -12,6 +11,7 @@
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { ICP_NETWORK } from '$icp/constants/networks.constants';
 
 	/**
 	 * Props
