@@ -1,4 +1,4 @@
-import icpLight from '$lib/assets/icp_light.svg';
+import icpLight from '$icp/assets/icp_light.svg';
 import type { Network } from '$lib/types/network';
 
 export const ICP_NETWORK_SYMBOL = 'ICP';

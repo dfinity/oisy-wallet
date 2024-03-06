@@ -1,4 +1,6 @@
 import { ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
+import eth from '$icp-eth/assets/eth.svg';
+import icpLight from '$icp/assets/icp_light.svg';
 import {
 	ICP_INDEX_CANISTER_ID,
 	ICP_LEDGER_CANISTER_ID,
@@ -6,8 +8,6 @@ import {
 } from '$icp/constants/icp.constants';
 import { ICP_NETWORK } from '$icp/constants/networks.constants';
 import type { IcToken } from '$icp/types/ic';
-import eth from '$lib/assets/eth.svg';
-import icpLight from '$lib/assets/icp_light.svg';
 import type { Token } from '$lib/types/token';
 
 /**

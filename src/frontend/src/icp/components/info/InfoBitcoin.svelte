@@ -1,5 +1,5 @@
 <script lang="ts">
-	import bitcoin from '$lib/assets/bitcoin.svg';
+	import bitcoin from '$icp/assets/bitcoin.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { emit } from '$lib/utils/events.utils';
