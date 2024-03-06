@@ -1,5 +1,5 @@
 <script lang="ts">
-	import eth from '$lib/assets/eth.svg';
+	import eth from '$icp-eth/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalStore } from '$lib/stores/modal.store';
