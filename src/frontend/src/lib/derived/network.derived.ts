@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$eth/constants/networks.constants';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
 import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 import { NETWORKS } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';

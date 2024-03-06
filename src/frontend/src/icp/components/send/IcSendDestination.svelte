@@ -5,7 +5,8 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import { debounce } from '@dfinity/utils';
 	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
-	import { ETHEREUM_NETWORK_ID } from '$eth/constants/networks.constants';
+
+	import { ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;

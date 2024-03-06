@@ -4,7 +4,8 @@
 	import { modalConvertCkETHToETH } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { address } from '$lib/derived/address.derived';
-	import { ETHEREUM_NETWORK_ID } from '$eth/constants/networks.constants';
+
+	import { ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
 </script>
 
 <ConvertETH>

@@ -1,5 +1,5 @@
-import { ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
 import { ckEthHelperContractAddress } from '$icp-eth/api/cketh-minter.api';
+import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
 import {
 	ckEthHelperContractAddressStore,
 	type CkEthHelperContractAddressData

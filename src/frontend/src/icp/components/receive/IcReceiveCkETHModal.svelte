@@ -11,7 +11,7 @@
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { ICP_NETWORK } from '$icp/constants/networks.constants';
+	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
 
 	/**
 	 * Props
