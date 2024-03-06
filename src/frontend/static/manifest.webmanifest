@@ -20,5 +20,15 @@
 			"sizes": "512x512",
 			"type": "image/png"
 		}
-	]
+	],
+	"shortcuts": [
+      {
+        "name": "Ethereum",
+        "url": "/"
+      },
+      {
+        "name": "Internet Computer",
+        "url": "/?network=ICP"
+      }
+    ]
 }
