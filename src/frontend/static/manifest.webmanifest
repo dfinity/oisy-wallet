@@ -8,6 +8,7 @@
 	"description": "{{VITE_OISY_ONELINER}}",
 	"orientation": "portrait-primary",
 	"prefer_related_applications": false,
+	"categories": ["finance"],
 	"icons": [
 		{
 			"src": "{{VITE_OISY_URL}}/favicons/icon-192x192.png",
