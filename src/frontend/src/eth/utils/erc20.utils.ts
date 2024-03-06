@@ -5,7 +5,8 @@ import icpDark from '$lib/assets/icp_dark.svg';
 import uniswap from '$lib/assets/uniswap.svg';
 import usdc from '$lib/assets/usdc.svg';
 import usdt from '$lib/assets/usdt.svg';
-import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
+
+import { ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
 
 export const mapErc20Token = ({
 	symbol,

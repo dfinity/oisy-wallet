@@ -5,7 +5,8 @@
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
+
+	import { ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
 
 	export let networkId: NetworkId | undefined = undefined;
 </script>
