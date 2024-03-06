@@ -24,8 +24,7 @@
 	import BitcoinFeeContext from '$icp/components/fee/IcFeeContext.svelte';
 	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
 	import { closeModal } from '$lib/utils/modal.utils';
-
-	import { ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	/**
 	 * Props
@@ -95,7 +94,7 @@
 			title:
 				networkId === BTC_NETWORK_ID
 					? 'Convert to BTC'
-					: networkId === ETHEREUM_NETWORK_ID
+					: isNetworkIdEthereum(networkId)
 						? 'Convert to ETH'
 						: 'Send'
 		},

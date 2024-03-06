@@ -4,8 +4,9 @@
 	import { modalConvertCkETHToETH } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { address } from '$lib/derived/address.derived';
-
 	import { ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
+
+	// TODO: if ckETH => SEPOLIA_NETWORK else ETHEREUM_NETWORK
 </script>
 
 <ConvertETH>

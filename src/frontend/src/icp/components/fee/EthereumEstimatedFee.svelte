@@ -13,8 +13,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { onDestroy } from 'svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-
-	import { ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -22,7 +21,7 @@
 	$: ckETH = isTokenCkEthLedger($token as IcToken);
 
 	let ethNetwork = false;
-	$: ethNetwork = networkId === ETHEREUM_NETWORK_ID;
+	$: ethNetwork = isNetworkIdEthereum(networkId);
 
 	let maxTransactionFee: bigint | undefined = undefined;
 	$: maxTransactionFee = $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee;

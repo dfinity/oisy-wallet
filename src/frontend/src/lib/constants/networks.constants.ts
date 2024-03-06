@@ -1,4 +1,7 @@
-import { ETHEREUM_NETWORK, ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+import { ETHEREUM_NETWORKS, ICP_NETWORK } from '$icp-eth/constants/networks.constants';
 import type { Network } from '$lib/types/network';
 
-export const NETWORKS: Network[] = [ETHEREUM_NETWORK, ICP_NETWORK];
+export const [DEFAULT_NETWORK, _rest] = ETHEREUM_NETWORKS;
+export const { id: DEFAULT_NETWORK_ID } = DEFAULT_NETWORK;
+
+export const NETWORKS: Network[] = [...ETHEREUM_NETWORKS, ICP_NETWORK];

@@ -5,10 +5,11 @@
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-
 	import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
 
 	export let networkId: NetworkId | undefined = undefined;
+
+	// TODO: ETHEREUM_NETWORK.name sepolia or ethereum
 </script>
 
 {#if nonNullish(networkId)}
