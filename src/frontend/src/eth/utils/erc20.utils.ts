@@ -6,7 +6,7 @@ import usdc from '$eth/assets/usdc.svg';
 import usdt from '$eth/assets/usdt.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 
-import { ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
+import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
 
 export const mapErc20Token = ({
 	symbol,
