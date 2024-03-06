@@ -18,7 +18,7 @@
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
-	import { WALLET_CONNECT_SEND_STEPS } from '$lib/constants/steps.constants';
+	import { WALLET_CONNECT_SEND_STEPS } from '$eth/constants/steps.constants';
 	import {
 		send as sendServices,
 		reject as rejectServices

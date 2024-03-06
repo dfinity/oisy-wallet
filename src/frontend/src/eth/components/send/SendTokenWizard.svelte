@@ -15,7 +15,7 @@
 	} from '$eth/stores/fee.store';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import { SEND_STEPS } from '$lib/constants/steps.constants';
+	import { SEND_STEPS } from '$eth/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import type { Network } from '$lib/types/network';
