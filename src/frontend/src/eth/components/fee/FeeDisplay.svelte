@@ -6,7 +6,7 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import type { FeeContext } from '$eth/stores/fee.store';
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { maxGasFee } from '$eth/utils/fee.utils';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 

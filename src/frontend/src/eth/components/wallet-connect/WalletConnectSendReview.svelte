@@ -6,7 +6,7 @@
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import WalletConnectSendData from './WalletConnectSendData.svelte';
-	import { ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
