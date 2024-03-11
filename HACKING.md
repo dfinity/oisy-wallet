@@ -1,6 +1,6 @@
 # Hacking
 
-This document list a couple of useful information for development and deployment purpose.
+This document lists a couple of useful information for development and deployment purpose.
 
 ## Deployment
 

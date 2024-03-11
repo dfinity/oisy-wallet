@@ -22,7 +22,7 @@ We invite you to take Oisy for a test drive at [oisy.com](https://oisy.com), exp
 
 ## Features
 
-The Oisy Wallet provides a convenient user experience known from custodial wallets but without their strong trust assumptions. In contrast to the latter, Oisy provides trust assumptions comparable to self-custody solutions. Different to self-custody wallets though, Oisy requires no browser extensions or additional mobile app, a standard off-the-shelf web browser is sufficient. In conclusion, Oisy provides an attractive user experience, i.e., a low entry barrier, yet requires no strong trust assumptions.
+The Oisy Wallet provides a convenient user experience known from custodial wallets but without their strong trust assumptions. In contrast to the latter, Oisy provides trust assumptions comparable to self-custody solutions. Different from self-custody wallets though, Oisy requires no browser extensions or additional mobile app, a standard off-the-shelf web browser is sufficient. In conclusion, Oisy provides an attractive user experience, i.e., a low entry barrier, yet requires no strong trust assumptions.
 
 <div align="center" style="display:flex;flex-direction:column;">
   <img src="./oisy-comparison.svg" alt="Oisy feature comparison" style="max-width:500px"/>
@@ -32,7 +32,7 @@ Building on ICP, Oisy achieves a very unique set of features:
 
 - **Browser-based:** no matter your browser and operating system preferences, Oisy allows you to receive, hold, and send native ETH and ERC-20 tokens on Ethereum. Currently, the list of ERC-20 tokens is hardcoded but it can easily be extended.
 
-- **Cross-device:** due the use of Internet Identity, Oisy can easily be used across all devices you have linked to your Internet Identity.
+- **Cross-device:** due to the use of Internet Identity, Oisy can easily be used across all devices you have linked to your Internet Identity.
 
 - **Networked-custody:** the key controlling your multichain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using [threshold ECDSA](https://internetcomputer.org/docs/current/developer-docs/integrations/t-ecdsa/).
 
@@ -50,19 +50,19 @@ What are the unique ICP technical building blocks enabling the creation of Oisy?
 
 - **Internet Identity (II):** based on ICP's threshold BLS signature schemes and WebAuthn, Internet Identity (II) is an authentication and key management system with strong privacy and security guarantees. Using [WebAuthn](https://www.w3.org/TR/webauthn-3), users can conveniently create secure sessions with their fingerprint or other biometric identifiers. Read more about [Internet Identity technology](https://internetcomputer.org/internet-identity) or [start integrating II](https://internetcomputer.org/docs/current/developer-docs/integrations/internet-identity/integrate-identity) into your canister smart contract.
 
-- **Web applications served from chain:** ICP is not only designed to run _backends_, such as ledgers, on chain, its low storage cost and low latency allows it to serve _frontends_, such as HTML files and images, from chain, too. Read more about [smart contracts serving web applications](https://internetcomputer.org/how-it-works/smart-contracts-serve-the-web/) or directly start [building your first decentralized web frontend](https://internetcomputer.org/docs/current/developer-docs/frontend/).
+- **Web applications served from chain:** ICP is not only designed to run _backends_, such as ledgers, on chain, its low storage cost and low latency allow it to serve _frontends_, such as HTML files and images, from chain, too. Read more about [smart contracts serving web applications](https://internetcomputer.org/how-it-works/smart-contracts-serve-the-web/) or directly start [building your first decentralized web frontend](https://internetcomputer.org/docs/current/developer-docs/frontend/).
 
 - (Upcoming) **HTTP outcalls:** for now, Oisy calls centralized Ethereum endpoints, such as Infura or Alchemy, from the frontend. In the future, Oisy might be improved to use [HTTP outcalls](https://internetcomputer.org/https-outcalls) to call these endpoints in a decentralized fashion. Check out the [HTTP outcalls sample code](https://internetcomputer.org/docs/current/developer-docs/integrations/https-outcalls/https-outcalls-how-to-use) to explore how to use Web 2.0 services on ICP.
 
 ## Related projects
 
-While Oisy is intended as showcase of what the ICP technology is capably of, a number of products already build on it and demonstrate the multichain and decentralized custody capabilities of ICP. Examples include the [Me wallet](https://astrox.me/) by [AstroX](https://astrox.network), the [NFID wallet](https://nfid.one/), and [Helix Markets](https://helixmarkets.io) which is a next-gen DEX.
+While Oisy is intended as showcase of what the ICP technology is capable of, a number of products already build on it and demonstrate the multichain and decentralized custody capabilities of ICP. Examples include the [Me wallet](https://astrox.me/) by [AstroX](https://astrox.network), the [NFID wallet](https://nfid.one/), and [Helix Markets](https://helixmarkets.io) which is a next-gen DEX.
 
 ## Status
 
 This project is **not ready for production use** and for now meant to serve as technology demonstrator. We are happy to answer questions if they are raised as issues in this github repo.
 
-## Build an run yourself
+## Build and run yourself
 
 ### Prerequisites
 
