@@ -1,7 +1,8 @@
 import type { Erc20Contract } from '$eth/types/erc20';
-import { PROD } from '$lib/constants/app.constants';
+import type { EthereumNetwork } from '$eth/types/network';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$icp-eth/constants/networks.constants';
+import { LOCAL } from '$lib/constants/app.constants';
 
-// TODO: extract environment file(s)?
 const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
 	// Uniswap
 	address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
@@ -17,7 +18,7 @@ const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	ERC20_CONTRACT_ADDRESS_UNISWAP
 ];
 
-const ERC20_CONTRACTS_GOERLI: Erc20Contract[] = [
+const _ERC20_CONTRACTS_GOERLI: Erc20Contract[] = [
 	{
 		// ICP
 		address: '0x8c283B98Edeb405816FD1D321005dF4d3AA956ba',
@@ -60,13 +61,12 @@ const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ADDRESS_UNISWAP
 ];
 
-const NETWORK = import.meta.env.VITE_ETHERSCAN_NETWORK;
-
-export const ERC20_CONTRACTS: Erc20Contract[] = PROD
-	? ERC20_CONTRACTS_PRODUCTION
-	: NETWORK === 'goerli'
-		? ERC20_CONTRACTS_GOERLI
-		: ERC20_CONTRACTS_SEPOLIA;
+export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = {
+	...(LOCAL
+		? []
+		: ERC20_CONTRACTS_PRODUCTION.map((contract) => ({ ...contract, network: ETHEREUM_NETWORK }))),
+	...ERC20_CONTRACTS_SEPOLIA.map((contract) => ({ ...contract, network: SEPOLIA_NETWORK }))
+};
 
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
 export const ERC20_ABI = [

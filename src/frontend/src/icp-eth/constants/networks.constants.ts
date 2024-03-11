@@ -1,4 +1,4 @@
-import type { EthereumNetwork } from '$eth/types/network';
+import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import { LOCAL } from '$lib/constants/app.constants';
@@ -14,7 +14,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	icon: eth
 };
 
-export const { id: ETHEREUM_NETWORK_ID } = ETHEREUM_NETWORK;
+export const { id: ETHEREUM_NETWORK_ID, chainId: ETHEREUM_NETWORK_CHAIN_ID } = ETHEREUM_NETWORK;
 
 export const SEPOLIA_NETWORK: EthereumNetwork = {
 	id: Symbol('SepoliaETH'),
@@ -23,7 +23,7 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	icon: eth
 };
 
-export const { id: SEPOLIA_NETWORK_ID } = SEPOLIA_NETWORK;
+export const { id: SEPOLIA_NETWORK_ID, chainId: SEPOLIA_NETWORK_CHAIN_ID } = SEPOLIA_NETWORK;
 
 export const ETHEREUM_NETWORKS: [...EthereumNetwork[], EthereumNetwork] = [
 	...(LOCAL ? [] : [ETHEREUM_NETWORK]),
@@ -31,6 +31,10 @@ export const ETHEREUM_NETWORKS: [...EthereumNetwork[], EthereumNetwork] = [
 ];
 
 export const ETHEREUM_NETWORKS_IDS: symbol[] = ETHEREUM_NETWORKS.map(({ id }) => id);
+
+export const ETHEREUM_NETWORKS_CHAIN_IDS: EthereumChainId[] = ETHEREUM_NETWORKS.map(
+	({ chainId }) => chainId
+);
 
 /**
  * ICP

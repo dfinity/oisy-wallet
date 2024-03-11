@@ -3,7 +3,12 @@ import { ERC20_CONTRACTS } from '$eth/constants/erc20.constants';
 import { metadata } from '$eth/providers/infura-erc20.providers';
 import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20Contract, Erc20Metadata } from '$eth/types/erc20';
+import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token } from '$eth/utils/erc20.utils';
+import {
+	ETHEREUM_NETWORKS,
+	ETHEREUM_NETWORKS_CHAIN_IDS
+} from '$icp-eth/constants/networks.constants';
 import { listUserTokens } from '$lib/api/backend.api';
 import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -12,7 +17,7 @@ import { get } from 'svelte/store';
 
 export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 	try {
-		type ContractData = Erc20Contract & Erc20Metadata;
+		type ContractData = Erc20Contract & Erc20Metadata & { network: EthereumNetwork };
 
 		const loadKnownContracts = (): Promise<ContractData>[] =>
 			ERC20_CONTRACTS.map(
@@ -31,12 +36,20 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 
 			const contracts = await listUserTokens({ identity });
 
-			return contracts.map(
-				async ({ contract_address: address }: Token): Promise<ContractData> => ({
-					...{ address, exchange: 'erc20' as const },
-					...(await metadata({ address }))
-				})
-			);
+			return contracts
+				.filter(({ chain_id }) => ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
+				.map(
+					async ({ contract_address: address, chain_id }: Token): Promise<ContractData> => ({
+						...{
+							address,
+							exchange: 'erc20' as const,
+							network: ETHEREUM_NETWORKS.find(
+								({ chainId }) => chainId === chain_id
+							) as EthereumNetwork
+						},
+						...(await metadata({ address }))
+					})
+				);
 		};
 
 		const userContracts = await loadUserContracts();
