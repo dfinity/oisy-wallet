@@ -24,7 +24,7 @@ export class AlchemyErc20Provider {
 		this.provider = new JsonRpcProvider(`${this.providerUrl}/${API_KEY}`);
 	}
 
-	initMinedTransactionsListener({
+	initMinedTransactionsListener = ({
 		contract,
 		address,
 		listener
@@ -32,7 +32,7 @@ export class AlchemyErc20Provider {
 		contract: Erc20Token;
 		address: ETH_ADDRESS;
 		listener: (params: { hash: string; value: BigNumber }) => Promise<void>;
-	}): WebSocketListener {
+	}): WebSocketListener => {
 		const erc20Contract = new ethers.Contract(contract.address, ERC20_ABI, this.provider);
 
 		const filterListener = async (
@@ -54,7 +54,7 @@ export class AlchemyErc20Provider {
 				erc20Contract.off(filterToAddress, filterListener);
 			}
 		};
-	}
+	};
 }
 
 const providers: Record<NetworkId, AlchemyErc20Provider> = {

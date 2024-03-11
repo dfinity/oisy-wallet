@@ -99,9 +99,9 @@ export class AlchemyProvider {
 		});
 	}
 
-	getTransaction(hash: string): Promise<TransactionResponse | null> {
+	getTransaction = (hash: string): Promise<TransactionResponse | null> => {
 		return this.provider.core.getTransaction(hash);
-	}
+	};
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = {

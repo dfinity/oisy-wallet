@@ -22,15 +22,15 @@ export class EtherscanProvider {
 		this.provider = new EtherscanProviderLib(this.network, API_KEY);
 	}
 
-	transactions({
+	transactions = ({
 		address,
 		startBlock
 	}: {
 		address: ETH_ADDRESS;
 		startBlock?: BlockTag;
-	}): Promise<TransactionResponse[]> {
+	}): Promise<TransactionResponse[]> => {
 		return this.provider.getHistory(address, startBlock);
-	}
+	};
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = {

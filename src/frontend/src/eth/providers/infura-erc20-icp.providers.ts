@@ -24,7 +24,7 @@ export class InfuraErc20IcpProvider implements Erc20Provider {
 		this.provider = new InfuraProvider(this.network, API_KEY);
 	}
 
-	getFeeData({
+	getFeeData = ({
 		contract: { address: contractAddress },
 		address,
 		amount
@@ -32,22 +32,22 @@ export class InfuraErc20IcpProvider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		address: ETH_ADDRESS;
 		amount: BigNumber;
-	}): Promise<BigNumber> {
+	}): Promise<BigNumber> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, this.provider);
 		return erc20Contract.estimateGas.burnToAccountId(amount, address);
-	}
+	};
 
 	/**
 	 * @override
 	 */
-	populateTransaction({
+	populateTransaction = ({
 		contract: { address: contractAddress },
 		to,
 		amount
-	}: PopulateTransactionParams & { amount: BigNumber }): Promise<PopulatedTransaction> {
+	}: PopulateTransactionParams & { amount: BigNumber }): Promise<PopulatedTransaction> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, this.provider);
 		return erc20Contract.populateTransaction.burnToAccountId(amount, to);
-	}
+	};
 }
 
 const providers: Record<NetworkId, InfuraErc20IcpProvider> = {

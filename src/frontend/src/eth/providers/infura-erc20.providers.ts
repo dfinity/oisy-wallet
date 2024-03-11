@@ -24,7 +24,7 @@ export class InfuraErc20Provider implements Erc20Provider {
 		this.provider = new InfuraProvider(this.network, API_KEY);
 	}
 
-	async metadata({ address }: Pick<Erc20ContractAddress, 'address'>): Promise<Erc20Metadata> {
+	metadata = async ({ address }: Pick<Erc20ContractAddress, 'address'>): Promise<Erc20Metadata> => {
 		const erc20Contract = new ethers.Contract(address, ERC20_ABI, this.provider);
 
 		const [name, symbol, decimals] = await Promise.all([
@@ -38,21 +38,21 @@ export class InfuraErc20Provider implements Erc20Provider {
 			symbol,
 			decimals
 		};
-	}
+	};
 
-	async balance({
+	balance = ({
 		contract: { address: contractAddress },
 		address
 	}: {
 		contract: Erc20ContractAddress;
 		address: ETH_ADDRESS;
-	}): Promise<BigNumber> {
+	}): Promise<BigNumber> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
 
 		return erc20Contract.balanceOf(address);
-	}
+	};
 
-	async getFeeData({
+	getFeeData = ({
 		contract: { address: contractAddress },
 		address,
 		amount
@@ -60,14 +60,14 @@ export class InfuraErc20Provider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		address: ETH_ADDRESS;
 		amount: BigNumber;
-	}): Promise<BigNumber> {
+	}): Promise<BigNumber> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.estimateGas.approve(address, amount);
-	}
+	};
 
 	// Transaction send: https://ethereum.stackexchange.com/a/131944
 
-	async populateTransaction({
+	populateTransaction = ({
 		contract: { address: contractAddress },
 		to,
 		amount
@@ -75,10 +75,10 @@ export class InfuraErc20Provider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		to: ETH_ADDRESS;
 		amount: BigNumber;
-	}): Promise<PopulatedTransaction> {
+	}): Promise<PopulatedTransaction> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.populateTransaction.transfer(to, amount);
-	}
+	};
 }
 
 const providers: Record<NetworkId, InfuraErc20Provider> = {

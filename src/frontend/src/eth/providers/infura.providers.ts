@@ -23,9 +23,9 @@ export class InfuraProvider {
 		this.provider = new InfuraProviderLib(this.network, API_KEY);
 	}
 
-	balance(address: ETH_ADDRESS): Promise<BigNumber> {
+	balance = (address: ETH_ADDRESS): Promise<BigNumber> => {
 		return this.provider.getBalance(address);
-	}
+	};
 
 	getFeeData(): Promise<FeeData> {
 		return this.provider.getFeeData();
