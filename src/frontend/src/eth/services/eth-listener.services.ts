@@ -1,4 +1,4 @@
-import { initMinedTransactionsListener as initErc20PendingTransactionsListenerProvider } from '$eth/providers/alchemy-erc20.providers';
+import { alchemyErc20Providers } from '$eth/providers/alchemy-erc20.providers';
 import {
 	initPendingTransactionsListener as initEthPendingTransactionsListenerProvider,
 	initMinedTransactionsListener as initMinedTransactionsListenerProvider
@@ -26,6 +26,9 @@ export const initTransactionsListener = ({
 			listener: async (hash: string) => await processEthTransaction({ hash })
 		});
 	}
+
+	const { initMinedTransactionsListener: initErc20PendingTransactionsListenerProvider } =
+		alchemyErc20Providers(token.network.id);
 
 	return initErc20PendingTransactionsListenerProvider({
 		address,

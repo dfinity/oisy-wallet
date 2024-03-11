@@ -1,7 +1,14 @@
 import type { Networkish } from '@ethersproject/networks';
+import { Network } from 'alchemy-sdk';
 
-export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';
 export const INFURA_NETWORK_HOMESTEAD: Networkish = 'homestead';
+export const INFURA_NETWORK_SEPOLIA: Networkish = 'sepolia';
 
-export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'sepolia';
 export const ETHERSCAN_NETWORK_HOMESTEAD: Networkish = 'homestead';
+export const ETHERSCAN_NETWORK_SEPOLIA: Networkish = 'sepolia';
+
+export const ALCHEMY_JSON_RPC_URL_MAINNET = 'https://eth-mainnet.g.alchemy.com/v2';
+export const ALCHEMY_JSON_RPC_URL_SEPOLIA = 'https://eth-sepolia.g.alchemy.com/v2';
+
+export const ALCHEMY_NETWORK_MAINNET: Network = Network.ETH_MAINNET;
+export const ALCHEMY_NETWORK_SEPOLIA: Network = Network.ETH_SEPOLIA;
