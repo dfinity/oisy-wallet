@@ -12,12 +12,12 @@ import type { Token } from '$lib/types/token';
 /**
  * Ethereum
  */
-export const ETHEREUM_SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
+export const ETHEREUM_SYMBOL = 'ETH';
 
-export const ETHEREUM_TOKEN_ID = Symbol(ETHEREUM_SYMBOL);
+export const ETHEREUM_TOKEN_ID: unique symbol = Symbol(ETHEREUM_SYMBOL);
 
 export const ETHEREUM_TOKEN: Required<Token> = {
-	id: Symbol('ETH'),
+	id: ETHEREUM_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: 'ethereum',
 	name: 'Ethereum',
