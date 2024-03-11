@@ -15,6 +15,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { infuraProviders } from '$eth/providers/infura.providers';
+	import { networkId } from '$lib/derived/network.derived';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -85,7 +86,10 @@
 		}
 
 		await updateFeeData();
-		listener = initMinedTransactionsListener(async () => debounceUpdateFeeData());
+		listener = initMinedTransactionsListener({
+			callback: async () => debounceUpdateFeeData(),
+			networkId: $networkId
+		});
 	};
 
 	onDestroy(() => listener?.disconnect());

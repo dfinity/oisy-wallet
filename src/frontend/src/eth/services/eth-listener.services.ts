@@ -9,6 +9,7 @@ import type { WebSocketListener } from '$eth/types/listener';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
+import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { processErc20Transaction, processEthTransaction } from './transaction.services';
@@ -23,7 +24,8 @@ export const initTransactionsListener = ({
 	if (token.id === ETHEREUM_TOKEN_ID) {
 		return initEthPendingTransactionsListenerProvider({
 			toAddress: address,
-			listener: async (hash: string) => await processEthTransaction({ hash })
+			listener: async (hash: string) => await processEthTransaction({ hash }),
+			networkId: token.network.id
 		});
 	}
 
@@ -38,11 +40,16 @@ export const initTransactionsListener = ({
 	});
 };
 
-export const initMinedTransactionsListener = (
-	callback: (tx: { removed: boolean; transaction: { has: string } }) => Promise<void>
-): WebSocketListener =>
+export const initMinedTransactionsListener = ({
+	callback,
+	networkId
+}: {
+	callback: (tx: { removed: boolean; transaction: { has: string } }) => Promise<void>;
+	networkId: NetworkId;
+}): WebSocketListener =>
 	initMinedTransactionsListenerProvider({
-		listener: callback
+		listener: callback,
+		networkId
 	});
 
 export const initWalletConnectListener = async (params: {

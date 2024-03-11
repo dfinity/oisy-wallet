@@ -39,7 +39,10 @@
 	onMount(async () => {
 		await loadCurrentBlockNumber();
 
-		listener = initMinedTransactionsListener(async () => debounceLoadCurrentBlockNumber());
+		listener = initMinedTransactionsListener({
+			callback: async () => debounceLoadCurrentBlockNumber(),
+			networkId: $networkId
+		});
 	});
 
 	onDestroy(disconnect);

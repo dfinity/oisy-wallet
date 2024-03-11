@@ -1,4 +1,4 @@
-import { getTransaction } from '$eth/providers/alchemy.providers';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { mapCkETHPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
@@ -8,7 +8,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import type { TokenId } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish } from '@dfinity/utils';
@@ -84,12 +84,13 @@ export const loadPendingCkEthTransactions = async ({
 
 export const loadPendingCkEthTransaction = async ({
 	hash,
-	tokenId
+	token
 }: {
 	hash: string;
-	tokenId: TokenId;
+	token: Token;
 }) => {
 	try {
+		const { getTransaction } = alchemyProviders(token.network.id);
 		const transaction = await getTransaction(hash);
 
 		if (isNullish(transaction)) {
@@ -102,7 +103,7 @@ export const loadPendingCkEthTransaction = async ({
 		}
 
 		convertEthToCkEthPendingStore.prepend({
-			tokenId,
+			tokenId: token.id,
 			transaction: {
 				data: mapCkETHPendingTransaction({ transaction }),
 				certified: false

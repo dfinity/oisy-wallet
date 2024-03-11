@@ -1,4 +1,4 @@
-import { getTransaction } from '$eth/providers/alchemy.providers';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { transactionsStore } from '$eth/stores/transactions.store';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
@@ -56,6 +56,7 @@ const processPendingTransaction = async ({
 	token?: Token;
 	value?: BigNumber;
 }) => {
+	const { getTransaction } = alchemyProviders(token.network.id);
 	const transaction = await getTransaction(hash);
 
 	if (isNullish(transaction)) {
@@ -94,6 +95,7 @@ const processMinedTransaction = async ({
 	token: Token;
 	value?: BigNumber;
 }) => {
+	const { getTransaction } = alchemyProviders(token.network.id);
 	const minedTransaction = await getTransaction(hash);
 
 	if (isNullish(minedTransaction)) {
