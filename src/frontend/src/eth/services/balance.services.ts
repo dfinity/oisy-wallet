@@ -13,13 +13,17 @@ import { get } from 'svelte/store';
 
 export const reloadBalance = async (token: Token): Promise<{ success: boolean }> => {
 	if (token.id === ETHEREUM_TOKEN_ID) {
-		return loadBalance(token.network.id);
+		return loadBalance({ networkId: token.network.id });
 	}
 
 	return loadErc20Balance(token as Erc20Token);
 };
 
-export const loadBalance = async (networkId: NetworkId): Promise<{ success: boolean }> => {
+export const loadBalance = async ({
+	networkId
+}: {
+	networkId: NetworkId;
+}): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
@@ -78,7 +82,11 @@ export const loadErc20Balance = async (contract: Erc20Token): Promise<{ success:
 	return { success: true };
 };
 
-export const loadBalances = async (networkId: NetworkId): Promise<{ success: boolean }> => {
+export const loadBalances = async ({
+	networkId
+}: {
+	networkId: NetworkId;
+}): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
@@ -92,7 +100,7 @@ export const loadBalances = async (networkId: NetworkId): Promise<{ success: boo
 	const contracts = get(erc20Tokens);
 
 	const results = await Promise.all([
-		loadBalance(networkId),
+		loadBalance({ networkId }),
 		...contracts.map((contract) => loadErc20Balance(contract))
 	]);
 

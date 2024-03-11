@@ -69,8 +69,10 @@
 
 		// In case of error we want to display the dapp anyway and not get stuck on the loader
 		await Promise.allSettled([
-			loadBalances($networkId),
-			...(loadTransactions && $networkEthereum ? [loadEthTransactions($tokenId)] : []),
+			loadBalances({ networkId: $networkId }),
+			...(loadTransactions && $networkEthereum
+				? [loadEthTransactions({ networkId: $networkId, tokenId: $tokenId })]
+				: []),
 			...(AIRDROP ? [initAirdrop()] : [])
 		]);
 	};

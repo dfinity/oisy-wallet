@@ -1,5 +1,5 @@
 import { getTransaction } from '$eth/providers/alchemy.providers';
-import { transactions as transactionsProviders } from '$eth/providers/etherscan.providers';
+import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { mapCkETHPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
 import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
@@ -37,6 +37,7 @@ export const loadPendingCkEthTransactions = async ({
 	});
 
 	try {
+		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({
 			address: toAddress,
 			startBlock: `${lastObservedBlockNumber}`
