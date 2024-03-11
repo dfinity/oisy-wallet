@@ -136,7 +136,7 @@ const updateCSP = (indexHtml) => {
 	}
 
 	const ethMainnetConnectSrc = 'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com https://mainnet.infura.io';
-	const ethSepoliaConnectSrc = 'https://api-sepolia.etherscan.io https://sepolia.infura.io wss://sepolia.g.alchemy.com https://sepolia.g.alchemy.com';
+	const ethSepoliaConnectSrc = 'https://api-sepolia.etherscan.io https://sepolia.infura.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
 
 	const walletConnectSrc = 'wss://relay.walletconnect.com https://verify.walletconnect.com';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
