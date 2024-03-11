@@ -27,19 +27,19 @@ export class InfuraProvider {
 		return this.provider.getBalance(address);
 	};
 
-	getFeeData(): Promise<FeeData> {
+	getFeeData = (): Promise<FeeData> => {
 		return this.provider.getFeeData();
 	}
 
-	sendTransaction(signedTransaction: string): Promise<TransactionResponse> {
+	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> => {
 		return this.provider.sendTransaction(signedTransaction);
 	}
 
-	getTransactionCount(address: ETH_ADDRESS): Promise<number> {
+	getTransactionCount = (address: ETH_ADDRESS): Promise<number> => {
 		return this.provider.getTransactionCount(address, 'pending');
 	}
 
-	getBlockNumber(): Promise<number> {
+	getBlockNumber = (): Promise<number> => {
 		return this.provider.getBlockNumber();
 	}
 }
