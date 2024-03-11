@@ -61,12 +61,12 @@ const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ADDRESS_UNISWAP
 ];
 
-export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = {
+export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = [
 	...(LOCAL
 		? []
 		: ERC20_CONTRACTS_PRODUCTION.map((contract) => ({ ...contract, network: ETHEREUM_NETWORK }))),
 	...ERC20_CONTRACTS_SEPOLIA.map((contract) => ({ ...contract, network: SEPOLIA_NETWORK }))
-};
+];
 
 // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
 export const ERC20_ABI = [
