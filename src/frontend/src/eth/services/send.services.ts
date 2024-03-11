@@ -1,9 +1,9 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
-import { populateDepositTransaction } from '$eth/providers/infura-cketh.providers';
-import { populateBurnTransaction } from '$eth/providers/infura-erc20-icp.providers';
-import { populateTransaction } from '$eth/providers/infura-erc20.providers';
-import { getTransactionCount, sendTransaction } from '$eth/providers/infura.providers';
+import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
+import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
+import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import type {
 	CkEthPopulateTransaction,
 	Erc20PopulateTransaction
@@ -137,6 +137,7 @@ export const send = async ({
 	maxPriorityFeePerGas,
 	gas,
 	network,
+	targetNetwork,
 	identity,
 	ckEthHelperContractAddress,
 	...rest
@@ -147,6 +148,8 @@ export const send = async ({
 		maxPriorityFeePerGas: BigNumber;
 	}): Promise<{ hash: string }> => {
 	progress(SendStep.INITIALIZATION);
+
+	const { sendTransaction, getTransactionCount } = infuraProviders(network.id);
 
 	const nonce = await getTransactionCount(from);
 
@@ -161,7 +164,7 @@ export const send = async ({
 				destination: to,
 				helperContractAddress: ckEthHelperContractAddress
 			}) &&
-			isNetworkICP(network ?? DEFAULT_NETWORK)
+			isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
 			? ethContractPrepareTransaction({
 					...rest,
 					contract: { address: ckEthHelperContractAddress.data },
@@ -171,7 +174,7 @@ export const send = async ({
 					gas: gas.toBigInt(),
 					maxFeePerGas: maxFeePerGas.toBigInt(),
 					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-					populate: populateDepositTransaction
+					populate: infuraCkETHProviders(network.id).populateTransaction
 				})
 			: ethPrepareTransaction({
 					...rest,
@@ -192,9 +195,9 @@ export const send = async ({
 				maxFeePerGas: maxFeePerGas.toBigInt(),
 				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 				populate:
-					isErc20Icp(token) && isNetworkICP(network ?? ETHEREUM_NETWORK)
-						? populateBurnTransaction
-						: populateTransaction
+					isErc20Icp(token) && isNetworkICP(targetNetwork ?? ETHEREUM_NETWORK)
+						? infuraErc20IcpProviders(network.id).populateTransaction
+						: infuraErc20Providers(network.id).populateTransaction
 			}));
 
 	progress(SendStep.SIGN);

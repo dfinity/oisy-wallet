@@ -1,6 +1,6 @@
 import type { Token } from '$declarations/backend/backend.did';
 import { ERC20_CONTRACTS } from '$eth/constants/erc20.constants';
-import { metadata } from '$eth/providers/infura-erc20.providers';
+import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20Contract, Erc20Metadata } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -21,9 +21,10 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 
 		const loadKnownContracts = (): Promise<ContractData>[] =>
 			ERC20_CONTRACTS.map(
-				async (contract): Promise<ContractData> => ({
+				async ({ network, ...contract }): Promise<ContractData> => ({
 					...contract,
-					...(await metadata(contract))
+					network,
+					...(await infuraErc20Providers(network.id).metadata(contract))
 				})
 			);
 
@@ -38,18 +39,20 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 
 			return contracts
 				.filter(({ chain_id }) => ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
-				.map(
-					async ({ contract_address: address, chain_id }: Token): Promise<ContractData> => ({
+				.map(async ({ contract_address: address, chain_id }: Token): Promise<ContractData> => {
+					const network = ETHEREUM_NETWORKS.find(
+						({ chainId }) => chainId === chain_id
+					) as EthereumNetwork;
+
+					return {
 						...{
 							address,
 							exchange: 'erc20' as const,
-							network: ETHEREUM_NETWORKS.find(
-								({ chainId }) => chainId === chain_id
-							) as EthereumNetwork
+							network
 						},
-						...(await metadata({ address }))
-					})
-				);
+						...(await infuraErc20Providers(network.id).metadata({ address }))
+					};
+				});
 		};
 
 		const userContracts = await loadUserContracts();

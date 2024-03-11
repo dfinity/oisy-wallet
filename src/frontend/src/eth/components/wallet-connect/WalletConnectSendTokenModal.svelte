@@ -127,7 +127,8 @@
 			identity: $authStore.identity,
 			ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
 			tokenStandard: $sendTokenStandard,
-			network,
+			network: $selectedNetwork,
+			targetNetwork: network,
 			chainId: $selectedChainId
 		});
 

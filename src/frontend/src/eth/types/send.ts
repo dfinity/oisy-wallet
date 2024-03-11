@@ -9,7 +9,8 @@ export type SendParams = {
 	progress: (step: SendStep) => void;
 	lastProgressStep?: SendStep;
 	token: Token;
-	network?: Network | undefined;
+	network: Network;
+	targetNetwork?: Network | undefined;
 	identity: OptionIdentity;
 	ckEthHelperContractAddress: CkEthHelperContractAddressData | null | undefined;
 } & NetworkChainId;

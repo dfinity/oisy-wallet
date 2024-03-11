@@ -25,6 +25,7 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import type { Network } from '$lib/types/network';
 	import type { EthereumChainId } from '$eth/types/network';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -132,7 +133,8 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
-				network,
+				network: $selectedNetwork,
+				targetNetwork: network,
 				identity: $authStore.identity,
 				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
 				chainId

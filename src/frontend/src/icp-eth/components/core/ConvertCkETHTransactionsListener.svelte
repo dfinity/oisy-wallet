@@ -17,6 +17,7 @@
 		loadPendingCkEthTransaction,
 		loadPendingCkEthTransactions
 	} from '$icp-eth/services/eth.services';
+	import { networkId } from '$lib/derived/network.derived';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -51,7 +52,8 @@
 			tokenId: $tokenId,
 			lastObservedBlockNumber,
 			identity: $authStore.identity,
-			toAddress
+			toAddress,
+			networkId: $networkId
 		});
 	};
 
