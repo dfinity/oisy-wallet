@@ -1,6 +1,6 @@
 import {
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA
+	ETHERSCAN_NETWORK_HOMESTEAD,
+	ETHERSCAN_NETWORK_SEPOLIA
 } from '$eth/constants/networks.constants';
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$icp-eth/constants/networks.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
@@ -34,8 +34,8 @@ export class EtherscanProvider {
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = {
-	[ETHEREUM_NETWORK_ID]: new EtherscanProvider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new EtherscanProvider(INFURA_NETWORK_SEPOLIA)
+	[ETHEREUM_NETWORK_ID]: new EtherscanProvider(ETHERSCAN_NETWORK_HOMESTEAD),
+	[SEPOLIA_NETWORK_ID]: new EtherscanProvider(ETHERSCAN_NETWORK_SEPOLIA)
 };
 
 export const etherscanProviders = (networkId: NetworkId): EtherscanProvider => {
