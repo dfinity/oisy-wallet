@@ -19,7 +19,8 @@
 
 	let destination = '';
 	$: destination = $ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data ?? '';
-	let network: Network | undefined = ICP_NETWORK;
+
+	let targetNetwork: Network | undefined = ICP_NETWORK;
 
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = SendStep.INITIALIZATION;
@@ -48,7 +49,7 @@
 		closeModal(() => {
 			destination = '';
 			amount = undefined;
-			network = undefined;
+			targetNetwork = undefined;
 
 			sendProgressStep = SendStep.INITIALIZATION;
 
@@ -71,7 +72,7 @@
 		on:icClose={close}
 		on:icSendBack={() => modal.set(2)}
 		bind:destination
-		bind:network
+		bind:targetNetwork
 		bind:amount
 		bind:sendProgressStep
 		{currentStep}

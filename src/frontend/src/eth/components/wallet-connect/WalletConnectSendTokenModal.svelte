@@ -32,7 +32,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { selectedChainId } from '$eth/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -63,8 +63,8 @@
 	let destination = '';
 	$: destination = firstTransaction.to ?? '';
 
-	let network: Network | undefined = undefined;
-	$: network =
+	let targetNetwork: Network | undefined = undefined;
+	$: targetNetwork =
 		destination === $ckEthHelperContractAddressStore?.[$sendTokenId]?.data
 			? ICP_NETWORK
 			: $selectedNetwork;
@@ -127,9 +127,8 @@
 			identity: $authStore.identity,
 			ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
 			tokenStandard: $sendTokenStandard,
-			network: $selectedNetwork,
-			targetNetwork: network,
-			chainId: $selectedChainId
+			sourceNetwork: $selectedEthereumNetwork,
+			targetNetwork
 		});
 
 		setTimeout(() => close(), success ? 750 : 0);
@@ -152,7 +151,7 @@
 					{destination}
 					{data}
 					{erc20Approve}
-					{network}
+					{targetNetwork}
 					on:icApprove={send}
 					on:icReject={reject}
 				/>

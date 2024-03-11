@@ -17,7 +17,7 @@
 	export let destination: string;
 	export let data: string | undefined;
 	export let erc20Approve: boolean;
-	export let network: Network | undefined = undefined;
+	export let targetNetwork: Network | undefined = undefined;
 
 	let amountDisplay: BigNumber;
 	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
@@ -34,7 +34,7 @@
 
 	<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork {network} slot="network" />
+	<SendReviewNetwork {targetNetwork} slot="network" />
 </SendData>
 
 <WalletConnectActions on:icApprove on:icReject />

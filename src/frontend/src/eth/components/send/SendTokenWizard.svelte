@@ -24,8 +24,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import type { Network } from '$lib/types/network';
-	import type { EthereumChainId } from '$eth/types/network';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -52,10 +51,10 @@
 	 */
 
 	export let destination = '';
-	export let network: Network | undefined = undefined;
+	export let sourceNetwork: EthereumNetwork;
+	export let targetNetwork: Network | undefined = undefined;
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
-	export let chainId: EthereumChainId;
 
 	let destinationEditable = true;
 	$: destinationEditable = sendPurpose !== 'convert-eth-to-cketh';
@@ -91,7 +90,7 @@
 		const { valid } = assertCkEthHelperContractAddressLoaded({
 			tokenStandard: $sendTokenStandard,
 			helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
-			network
+			network: targetNetwork
 		});
 
 		if (!valid) {
@@ -133,11 +132,10 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
-				network: $selectedNetwork,
-				targetNetwork: network,
+				sourceNetwork,
+				targetNetwork,
 				identity: $authStore.identity,
-				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
-				chainId
+				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
 			});
 
 			setTimeout(() => close(), 750);
@@ -155,9 +153,21 @@
 	const back = () => dispatch('icSendBack');
 </script>
 
-<FeeContext {amount} {destination} observe={currentStep?.name !== 'Sending'} {network}>
+<FeeContext
+	{amount}
+	{destination}
+	observe={currentStep?.name !== 'Sending'}
+	network={targetNetwork}
+>
 	{#if currentStep?.name === 'Review'}
-		<SendReview on:icBack on:icSend={send} {destination} {amount} {network} {destinationEditable} />
+		<SendReview
+			on:icBack
+			on:icSend={send}
+			{destination}
+			{amount}
+			{targetNetwork}
+			{destinationEditable}
+		/>
 	{:else if currentStep?.name === 'Sending'}
 		<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
 	{:else if currentStep?.name === 'Send'}
@@ -166,7 +176,7 @@
 			on:icClose={close}
 			bind:destination
 			bind:amount
-			bind:network
+			bind:network={targetNetwork}
 			{destinationEditable}
 		>
 			<svelte:fragment slot="cancel">

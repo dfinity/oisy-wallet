@@ -136,7 +136,7 @@ export const send = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	gas,
-	network,
+	sourceNetwork,
 	targetNetwork,
 	identity,
 	ckEthHelperContractAddress,
@@ -149,7 +149,9 @@ export const send = async ({
 	}): Promise<{ hash: string }> => {
 	progress(SendStep.INITIALIZATION);
 
-	const { sendTransaction, getTransactionCount } = infuraProviders(network.id);
+	const { id: networkId, chainId } = sourceNetwork;
+
+	const { sendTransaction, getTransactionCount } = infuraProviders(networkId);
 
 	const nonce = await getTransactionCount(from);
 
@@ -174,7 +176,8 @@ export const send = async ({
 					gas: gas.toBigInt(),
 					maxFeePerGas: maxFeePerGas.toBigInt(),
 					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-					populate: infuraCkETHProviders(network.id).populateTransaction
+					populate: infuraCkETHProviders(networkId).populateTransaction,
+					chainId
 				})
 			: ethPrepareTransaction({
 					...rest,
@@ -183,7 +186,8 @@ export const send = async ({
 					nonce,
 					gas: gas?.toBigInt(),
 					maxFeePerGas: maxFeePerGas.toBigInt(),
-					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
+					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+					chainId
 				})
 		: erc20PrepareTransaction({
 				...rest,
@@ -196,8 +200,9 @@ export const send = async ({
 				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 				populate:
 					isErc20Icp(token) && isNetworkICP(targetNetwork ?? ETHEREUM_NETWORK)
-						? infuraErc20IcpProviders(network.id).populateTransaction
-						: infuraErc20Providers(network.id).populateTransaction
+						? infuraErc20IcpProviders(networkId).populateTransaction
+						: infuraErc20Providers(networkId).populateTransaction,
+				chainId
 			}));
 
 	progress(SendStep.SIGN);

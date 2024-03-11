@@ -8,19 +8,19 @@
 	import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
 
 	export let destination = '';
-	export let network: Network | undefined = undefined;
+	export let targetNetwork: Network | undefined = undefined;
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 
-	// TODO: chainId for ck test or mainnet
+	// TODO: sourceNetwork for ck test or mainnet
 </script>
 
 <SendTokenWizard
 	{currentStep}
-	chainId={ETHEREUM_NETWORK.chainId}
+	sourceNetwork={ETHEREUM_NETWORK}
 	bind:destination
-	bind:network
+	bind:targetNetwork
 	bind:amount
 	bind:sendProgressStep
 	on:icBack

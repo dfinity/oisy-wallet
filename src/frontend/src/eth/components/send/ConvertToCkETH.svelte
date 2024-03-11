@@ -25,6 +25,6 @@
 {#if $modalConvertETHToCkETH}
 	<SendTokenModal
 		destination={$ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data ?? ''}
-		network={ICP_NETWORK}
+		targetNetwork={ICP_NETWORK}
 	/>
 {/if}
