@@ -157,7 +157,8 @@
 	{amount}
 	{destination}
 	observe={currentStep?.name !== 'Sending'}
-	network={targetNetwork}
+	{sourceNetwork}
+	{targetNetwork}
 >
 	{#if currentStep?.name === 'Review'}
 		<SendReview

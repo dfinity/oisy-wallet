@@ -4,9 +4,9 @@ import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { EthereumNetwork } from '$eth/types/network';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import type { CkEthHelperContractAddressData } from '$icp-eth/stores/cketh.store';
-import { DEFAULT_NETWORK_ID } from '$lib/constants/networks.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import { isNetworkICP } from '$lib/utils/network.utils';
@@ -31,18 +31,20 @@ export const getEthFeeData = async ({
 };
 
 export const getErc20FeeData = async ({
-	network,
+	targetNetwork,
+	sourceNetwork: { id: sourceNetworkId },
 	...rest
 }: GetFeeData & {
 	contract: Erc20ContractAddress;
 	amount: BigNumber;
-	network: Network | undefined;
+	sourceNetwork: EthereumNetwork;
+	targetNetwork: Network | undefined;
 }): Promise<BigNumber> => {
 	try {
 		const { getFeeData: fn } =
-			nonNullish(network) && isNetworkICP(network)
-				? infuraErc20IcpProviders(network.id)
-				: infuraErc20Providers(network?.id ?? DEFAULT_NETWORK_ID);
+			nonNullish(targetNetwork) && isNetworkICP(targetNetwork)
+				? infuraErc20IcpProviders(targetNetwork.id)
+				: infuraErc20Providers(targetNetwork?.id ?? sourceNetworkId);
 		return await fn(rest);
 	} catch (err: unknown) {
 		// We silence the error on purpose.

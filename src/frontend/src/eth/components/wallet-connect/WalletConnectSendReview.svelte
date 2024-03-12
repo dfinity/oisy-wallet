@@ -6,12 +6,12 @@
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import WalletConnectSendData from './WalletConnectSendData.svelte';
-	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { balance } from '$lib/derived/balances.derived';
+	import { ethToken } from '$eth/derived/eth.derived';
 
 	export let amount: BigNumber;
 	export let destination: string;
@@ -26,7 +26,7 @@
 <SendData
 	amount={formatToken({ value: amountDisplay })}
 	{destination}
-	token={ETHEREUM_TOKEN}
+	token={$ethToken}
 	balance={$balance}
 	source={$address ?? ''}
 >

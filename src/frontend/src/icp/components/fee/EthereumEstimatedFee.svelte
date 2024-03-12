@@ -47,6 +47,8 @@
 	const clearTimer = () => clearInterval(timer);
 
 	onDestroy(clearTimer);
+
+	// TODO: sepolia token
 </script>
 
 {#if ckETH && ethNetwork}

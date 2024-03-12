@@ -14,6 +14,8 @@
 	 * Props
 	 */
 
+	// TODO sepolia ID
+
 	let destination = '';
 	$: destination = $ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data ?? '';
 
