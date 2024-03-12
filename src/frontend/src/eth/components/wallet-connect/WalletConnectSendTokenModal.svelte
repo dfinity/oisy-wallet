@@ -141,7 +141,12 @@
 	<WalletConnectModalTitle slot="title">{erc20Approve ? 'Approve' : 'Send'}</WalletConnectModalTitle
 	>
 
-	<FeeContext amount={amount.toString()} {destination} observe={currentStep?.name !== 'Sending'}>
+	<FeeContext
+		amount={amount.toString()}
+		{destination}
+		observe={currentStep?.name !== 'Sending'}
+		sourceNetwork={$selectedEthereumNetwork}
+	>
 		<CkEthLoader>
 			{#if currentStep?.name === 'Sending'}
 				<SendProgress progressStep={sendProgressStep} steps={WALLET_CONNECT_SEND_STEPS} />

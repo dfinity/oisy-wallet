@@ -16,11 +16,13 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { networkId } from '$lib/derived/network.derived';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let observe: boolean;
 	export let destination = '';
 	export let amount: string | number | undefined = undefined;
-	export let network: Network | undefined = undefined;
+	export let sourceNetwork: EthereumNetwork;
+	export let targetNetwork: Network | undefined = undefined;
 
 	const { store }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -61,7 +63,8 @@
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					address: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
 					amount: parseToken({ value: `${amount ?? '1'}` }),
-					network
+					sourceNetwork,
+					targetNetwork
 				})
 			});
 		} catch (err: unknown) {

@@ -13,7 +13,6 @@ import type { NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
-import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
 import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
@@ -199,7 +198,7 @@ export const send = async ({
 				maxFeePerGas: maxFeePerGas.toBigInt(),
 				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 				populate:
-					isErc20Icp(token) && isNetworkICP(targetNetwork ?? ETHEREUM_NETWORK)
+					isErc20Icp(token) && isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
 						? infuraErc20IcpProviders(networkId).populateTransaction
 						: infuraErc20Providers(networkId).populateTransaction,
 				chainId
