@@ -2,7 +2,7 @@ import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
-import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
+import { ETHEREUM_TOKENS, ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -84,13 +84,7 @@ export const loadErc20Balance = async (contract: Erc20Token): Promise<{ success:
 	return { success: true };
 };
 
-export const loadBalances = async ({
-	networkId,
-	tokenId
-}: {
-	networkId: NetworkId;
-	tokenId: TokenId;
-}): Promise<{ success: boolean }> => {
+export const loadBalances = async (): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
@@ -104,7 +98,9 @@ export const loadBalances = async ({
 	const contracts = get(erc20Tokens);
 
 	const results = await Promise.all([
-		loadBalance({ networkId, tokenId }),
+		...ETHEREUM_TOKENS.map(({ network: { id: networkId }, id: tokenId }) =>
+			loadBalance({ networkId, tokenId })
+		),
 		...contracts.map((contract) => loadErc20Balance(contract))
 	]);
 

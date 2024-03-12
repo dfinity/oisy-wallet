@@ -22,7 +22,6 @@
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import { networkEthereum, networkId } from '$lib/derived/network.derived';
 	import { loadBalances } from '$eth/services/balance.services';
-	import { ethTokenId } from '$eth/derived/eth.derived';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
@@ -70,7 +69,7 @@
 
 		// In case of error we want to display the dapp anyway and not get stuck on the loader
 		await Promise.allSettled([
-			loadBalances({ networkId: $networkId, tokenId: $ethTokenId }),
+			loadBalances(),
 			...(loadTransactions && $networkEthereum
 				? [loadEthTransactions({ networkId: $networkId, tokenId: $tokenId })]
 				: []),
