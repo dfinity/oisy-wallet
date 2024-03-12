@@ -2,6 +2,7 @@ import type { _SERVICE as AirdropActor } from '$declarations/airdrop/airdrop.did
 import { idlFactory as idlFactorAirdrop } from '$declarations/airdrop/airdrop.factory.did';
 import type { _SERVICE as BackendActor } from '$declarations/backend/backend.did';
 import { idlFactory as idlFactorBackend } from '$declarations/backend/backend.factory.did';
+import { AIRDOP_CANISTER_ID, BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { Actor, type ActorMethod, type ActorSubclass, type Identity } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
@@ -21,10 +22,8 @@ export const getBackendActor = async ({
 	const { backend } = actors ?? { backend: undefined };
 
 	if (isNullish(backend)) {
-		const canisterId = import.meta.env.VITE_BACKEND_CANISTER_ID;
-
 		const actor = await createActor<BackendActor>({
-			canisterId,
+			canisterId: BACKEND_CANISTER_ID,
 			idlFactory: idlFactorBackend,
 			identity
 		});
@@ -50,10 +49,8 @@ export const getAirdropActor = async ({
 	const { airdrop } = actors ?? { airdrop: undefined };
 
 	if (isNullish(airdrop)) {
-		const canisterId = import.meta.env.VITE_AIRDROP_CANISTER_ID;
-
 		const actor = await createActor<AirdropActor>({
-			canisterId,
+			canisterId: AIRDOP_CANISTER_ID,
 			idlFactory: idlFactorAirdrop,
 			identity
 		});

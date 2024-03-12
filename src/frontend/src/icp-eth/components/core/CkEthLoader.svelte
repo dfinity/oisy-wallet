@@ -2,8 +2,10 @@
 	import { loadCkEthHelperContractAddress } from '$icp-eth/services/cketh.services';
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { icrcTokensStore } from '$icp/stores/icrc.store';
-	import { CKETH_MINTER_CANISTER_ID } from '$icp/constants/icrc.constants';
+	import { IC_CKETH_MINTER_CANISTER_ID } from '$icp/constants/icrc.constants';
 	import { ethTokenId } from '$eth/derived/eth.derived';
+
+	// TODO: pick correct minter ID for network
 
 	const load = async () => {
 		if (!$ethToCkETHEnabled) {
@@ -13,7 +15,7 @@
 		await loadCkEthHelperContractAddress({
 			tokenId: $ethTokenId,
 			canisters: {
-				minterCanisterId: CKETH_MINTER_CANISTER_ID
+				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID
 			}
 		});
 	};
