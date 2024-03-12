@@ -17,7 +17,7 @@
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
-<ConvertETH>
+<ConvertETH convertTokenId={$ethTokenId}>
 	<IconBurn size="28" />
 	<span> Convert to ckETH </span>
 </ConvertETH>
