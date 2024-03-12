@@ -3,24 +3,22 @@
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { icrcTokensStore } from '$icp/stores/icrc.store';
 	import { CKETH_MINTER_CANISTER_ID } from '$icp/constants/icrc.constants';
-	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
+	import { ethTokenId } from '$eth/derived/eth.derived';
 
 	const load = async () => {
 		if (!$ethToCkETHEnabled) {
 			return;
 		}
 
-		// TODO: sepolia ID
-
 		await loadCkEthHelperContractAddress({
-			tokenId: ETHEREUM_TOKEN_ID,
+			tokenId: $ethTokenId,
 			canisters: {
 				minterCanisterId: CKETH_MINTER_CANISTER_ID
 			}
 		});
 	};
 
-	$: $ethToCkETHEnabled, $icrcTokensStore, (async () => await load())();
+	$: $ethToCkETHEnabled, $icrcTokensStore, $ethTokenId, (async () => await load())();
 </script>
 
 <slot />

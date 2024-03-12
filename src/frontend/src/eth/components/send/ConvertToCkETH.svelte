@@ -7,13 +7,13 @@
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
-	import { ethTokenId } from '$eth/derived/eth.derived';
+	import { ethToken, ethTokenId } from '$eth/derived/eth.derived';
 
 	/**
 	 * Send modal context store
 	 */
 
-	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh' });
+	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh', token: $ethToken });
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 

@@ -1,7 +1,7 @@
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$icp-eth/constants/tokens.constants';
 import { icrcTokens } from '$icp/derived/icrc.derived';
-import { DEFAULT_TOKEN } from '$lib/constants/tokens.constants';
+import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { routeToken } from '$lib/derived/nav.derived';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';
@@ -11,7 +11,7 @@ export const token: Readable<Token> = derived(
 	[routeToken, erc20Tokens, icrcTokens],
 	([$routeToken, $erc20Tokens, $icrcTokens]) => {
 		if (isNullish($routeToken)) {
-			return DEFAULT_TOKEN;
+			return DEFAULT_ETHEREUM_TOKEN;
 		}
 
 		if ($routeToken === ICP_TOKEN.name) {
@@ -21,7 +21,7 @@ export const token: Readable<Token> = derived(
 		return (
 			[...$erc20Tokens, ...$icrcTokens, ETHEREUM_TOKEN, SEPOLIA_TOKEN].find(
 				({ name }) => name === $routeToken
-			) ?? DEFAULT_TOKEN
+			) ?? DEFAULT_ETHEREUM_TOKEN
 		);
 	}
 );
