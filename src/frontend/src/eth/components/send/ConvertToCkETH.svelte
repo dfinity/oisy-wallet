@@ -3,11 +3,11 @@
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
-	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+	import { ethTokenId } from '$eth/derived/eth.derived';
 
 	/**
 	 * Send modal context store
@@ -24,7 +24,7 @@
 
 {#if $modalConvertETHToCkETH}
 	<SendTokenModal
-		destination={$ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data ?? ''}
+		destination={$ckEthHelperContractAddressStore?.[$ethTokenId]?.data ?? ''}
 		targetNetwork={ICP_NETWORK}
 	/>
 {/if}

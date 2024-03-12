@@ -11,6 +11,8 @@
 	import { tokenId } from '$lib/derived/token.derived';
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 
+	// TODO ETHEREUM or Sepolia token ID
+
 	// Convert ETH to ckETH can be executed on Ethereum and ckETH pages, therefore we use Ethereum for both statically.
 	const convertTokenId = ETHEREUM_TOKEN_ID;
 

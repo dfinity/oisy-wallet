@@ -10,6 +10,8 @@ export interface SendStore extends Readable<SendData> {
 	set: (token: Token) => void;
 }
 
+// TODO: sepolia?
+
 const initSendStore = (): SendStore => {
 	const { subscribe, set: setStore } = writable<SendData>(ETHEREUM_TOKEN);
 

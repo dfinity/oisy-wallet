@@ -72,6 +72,8 @@
 		});
 	};
 
+	// TODO sepolia ID
+
 	let ckEthHelperContractAddress: string | undefined;
 	$: ckEthHelperContractAddress = $ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data;
 

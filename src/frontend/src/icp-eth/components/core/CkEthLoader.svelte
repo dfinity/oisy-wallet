@@ -10,6 +10,8 @@
 			return;
 		}
 
+		// TODO: sepolia ID
+
 		await loadCkEthHelperContractAddress({
 			tokenId: ETHEREUM_TOKEN_ID,
 			canisters: {
