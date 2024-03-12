@@ -1,7 +1,7 @@
+import { ETH_MAINNET_ENABLED } from '$eth/constants/networks.constants';
 import type { Erc20Contract } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$icp-eth/constants/networks.constants';
-import { LOCAL } from '$lib/constants/app.constants';
 
 const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
 	// Uniswap
@@ -62,9 +62,9 @@ const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 ];
 
 export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = [
-	...(LOCAL
-		? []
-		: ERC20_CONTRACTS_PRODUCTION.map((contract) => ({ ...contract, network: ETHEREUM_NETWORK }))),
+	...(ETH_MAINNET_ENABLED
+		? ERC20_CONTRACTS_PRODUCTION.map((contract) => ({ ...contract, network: ETHEREUM_NETWORK }))
+		: []),
 	...ERC20_CONTRACTS_SEPOLIA.map((contract) => ({ ...contract, network: SEPOLIA_NETWORK }))
 ];
 

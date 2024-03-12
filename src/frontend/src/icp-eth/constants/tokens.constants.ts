@@ -1,3 +1,4 @@
+import { ETH_MAINNET_ENABLED } from '$eth/constants/networks.constants';
 import eth from '$icp-eth/assets/eth.svg';
 import {
 	ETHEREUM_NETWORK,
@@ -11,7 +12,6 @@ import {
 	ICP_TRANSACTION_FEE_E8S
 } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
-import { LOCAL } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 
 /**
@@ -46,7 +46,7 @@ export const SEPOLIA_TOKEN: Required<Token> = {
 };
 
 export const ETHEREUM_TOKENS: [...Required<Token>[], Required<Token>] = [
-	...(LOCAL ? [] : [ETHEREUM_TOKEN]),
+	...(ETH_MAINNET_ENABLED ? [ETHEREUM_TOKEN] : []),
 	SEPOLIA_TOKEN
 ];
 
