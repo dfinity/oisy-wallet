@@ -9,7 +9,7 @@
 	// TODO: if ckETH => SEPOLIA_NETWORK else ETHEREUM_NETWORK
 </script>
 
-<ConvertETH>
+<ConvertETH convertTokenId={ETHEREUM_NETWORK_ID}>
 	<IconBurn size="28" />
 	<span>Convert to ETH</span>
 </ConvertETH>

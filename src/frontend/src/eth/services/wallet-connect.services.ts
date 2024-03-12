@@ -79,9 +79,8 @@ export const send = ({
 	identity,
 	ckEthHelperContractAddress,
 	tokenStandard,
-	network,
+	sourceNetwork,
 	targetNetwork,
-	chainId,
 	...params
 }: WalletConnectSendParams & {
 	tokenStandard: TokenStandard;
@@ -170,8 +169,7 @@ export const send = ({
 					data,
 					identity,
 					ckEthHelperContractAddress,
-					chainId,
-					network,
+					sourceNetwork,
 					targetNetwork
 				});
 

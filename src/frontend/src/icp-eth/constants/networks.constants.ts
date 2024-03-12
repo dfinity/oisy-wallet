@@ -1,7 +1,7 @@
+import { ETH_MAINNET_ENABLED } from '$eth/constants/networks.constants';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
-import { LOCAL } from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 
 /**
@@ -30,7 +30,7 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 export const { chainId: SEPOLIA_NETWORK_CHAIN_ID } = SEPOLIA_NETWORK;
 
 export const ETHEREUM_NETWORKS: [...EthereumNetwork[], EthereumNetwork] = [
-	...(LOCAL ? [] : [ETHEREUM_NETWORK]),
+	...(ETH_MAINNET_ENABLED ? [ETHEREUM_NETWORK] : []),
 	SEPOLIA_NETWORK
 ];
 

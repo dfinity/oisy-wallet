@@ -2,7 +2,7 @@ import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { transactions as transactionsRest } from '$eth/rest/etherscan.rest';
 import { transactionsStore } from '$eth/stores/transactions.store';
-import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
+import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
@@ -17,17 +17,19 @@ export const loadTransactions = async ({
 	tokenId: TokenId;
 	networkId: NetworkId;
 }): Promise<{ success: boolean }> => {
-	if (tokenId === ETHEREUM_TOKEN_ID) {
-		return loadEthTransactions({ networkId });
+	if (ETHEREUM_TOKEN_IDS.includes(tokenId)) {
+		return loadEthTransactions({ networkId, tokenId });
 	}
 
 	return loadErc20Transactions({ tokenId });
 };
 
 const loadEthTransactions = async ({
-	networkId
+	networkId,
+	tokenId
 }: {
 	networkId: NetworkId;
+	tokenId: TokenId;
 }): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
 
@@ -42,7 +44,7 @@ const loadEthTransactions = async ({
 	try {
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({ address });
-		transactionsStore.set({ tokenId: ETHEREUM_TOKEN_ID, transactions });
+		transactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
 		transactionsStore.reset();
 
