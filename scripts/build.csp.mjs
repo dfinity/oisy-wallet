@@ -135,25 +135,10 @@ const updateCSP = (indexHtml) => {
 		indexHashes.push(`'sha256-${createHash('sha256').update(content).digest('base64')}'`);
 	}
 
-	let ethConnectSrc = undefined;
-
-	switch (ENV) {
-		case 'production':
-			ethConnectSrc =
-				'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com https://mainnet.infura.io';
-			break;
-		case undefined:
-		case 'development':
-		case 'staging':
-			const etherscanNetwork = process.env.VITE_ETHERSCAN_NETWORK ?? 'sepolia';
-			const infuraNetwork = process.env.VITE_INFURA_NETWORK ?? 'sepolia';
-			const alchemyNetwork = process.env.VITE_ALCHEMY_NETWORK ?? 'eth-sepolia';
-
-			ethConnectSrc = `https://api-${etherscanNetwork}.etherscan.io https://${infuraNetwork}.infura.io wss://${alchemyNetwork}.g.alchemy.com https://${alchemyNetwork}.g.alchemy.com`;
-			break;
-		default:
-			throw new Error(`Unknown environment (${ENV}) to parse the CSP.`);
-	}
+	const ethMainnetConnectSrc =
+		'https://api.etherscan.io wss://eth-mainnet.g.alchemy.com https://eth-mainnet.g.alchemy.com https://mainnet.infura.io';
+	const ethSepoliaConnectSrc =
+		'https://api-sepolia.etherscan.io https://sepolia.infura.io wss://eth-sepolia.g.alchemy.com https://eth-sepolia.g.alchemy.com';
 
 	const walletConnectSrc = 'wss://relay.walletconnect.com https://verify.walletconnect.com';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
@@ -183,7 +168,7 @@ const updateCSP = (indexHtml) => {
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethConnectSrc} ${walletConnectSrc};
+        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${walletConnectSrc};
         img-src 'self' data: https://${canisterId}.raw.icp0.io;
         frame-src 'self' ${walletConnectFrameSrc};
         manifest-src 'self';

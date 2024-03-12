@@ -6,9 +6,9 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import type { FeeContext } from '$eth/stores/fee.store';
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
-	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { maxGasFee } from '$eth/utils/fee.utils';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { ethToken } from '$eth/derived/eth.derived';
 
 	const { store: feeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -54,7 +54,7 @@
 				value: fee,
 				displayDecimals: EIGHT_DECIMALS
 			})}
-			{ETHEREUM_TOKEN.symbol}
+			{$ethToken.symbol}
 		</div>
 	{/if}
 </div>

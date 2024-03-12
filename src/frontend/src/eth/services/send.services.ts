@@ -1,9 +1,9 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
-import { populateDepositTransaction } from '$eth/providers/infura-cketh.providers';
-import { populateBurnTransaction } from '$eth/providers/infura-erc20-icp.providers';
-import { populateTransaction } from '$eth/providers/infura-erc20.providers';
-import { getTransactionCount, sendTransaction } from '$eth/providers/infura.providers';
+import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
+import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
+import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import type {
 	CkEthPopulateTransaction,
 	Erc20PopulateTransaction
@@ -13,8 +13,7 @@ import type { NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
-import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
-import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
+import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
@@ -136,7 +135,8 @@ export const send = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	gas,
-	network,
+	sourceNetwork,
+	targetNetwork,
 	identity,
 	ckEthHelperContractAddress,
 	...rest
@@ -148,6 +148,10 @@ export const send = async ({
 	}): Promise<{ hash: string }> => {
 	progress(SendStep.INITIALIZATION);
 
+	const { id: networkId, chainId } = sourceNetwork;
+
+	const { sendTransaction, getTransactionCount } = infuraProviders(networkId);
+
 	const nonce = await getTransactionCount(from);
 
 	const principalEthAddress = (): string => {
@@ -155,13 +159,13 @@ export const send = async ({
 		return encodePrincipalToEthAddress(identity.getPrincipal());
 	};
 
-	const transaction = await (token.id === ETHEREUM_TOKEN_ID
+	const transaction = await (ETHEREUM_TOKEN_IDS.includes(token.id)
 		? nonNullish(ckEthHelperContractAddress) &&
 			isCkEthHelperContract({
 				destination: to,
 				helperContractAddress: ckEthHelperContractAddress
 			}) &&
-			isNetworkICP(network ?? DEFAULT_NETWORK)
+			isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
 			? ethContractPrepareTransaction({
 					...rest,
 					contract: { address: ckEthHelperContractAddress.data },
@@ -171,7 +175,8 @@ export const send = async ({
 					gas: gas.toBigInt(),
 					maxFeePerGas: maxFeePerGas.toBigInt(),
 					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-					populate: populateDepositTransaction
+					populate: infuraCkETHProviders(networkId).populateTransaction,
+					chainId
 				})
 			: ethPrepareTransaction({
 					...rest,
@@ -180,7 +185,8 @@ export const send = async ({
 					nonce,
 					gas: gas?.toBigInt(),
 					maxFeePerGas: maxFeePerGas.toBigInt(),
-					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
+					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+					chainId
 				})
 		: erc20PrepareTransaction({
 				...rest,
@@ -192,9 +198,10 @@ export const send = async ({
 				maxFeePerGas: maxFeePerGas.toBigInt(),
 				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 				populate:
-					isErc20Icp(token) && isNetworkICP(network ?? ETHEREUM_NETWORK)
-						? populateBurnTransaction
-						: populateTransaction
+					isErc20Icp(token) && isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
+						? infuraErc20IcpProviders(networkId).populateTransaction
+						: infuraErc20Providers(networkId).populateTransaction,
+				chainId
 			}));
 
 	progress(SendStep.SIGN);

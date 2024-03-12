@@ -1,13 +1,14 @@
-import { getTransaction } from '$eth/providers/alchemy.providers';
-import { transactions as transactionsProviders } from '$eth/providers/etherscan.providers';
-import { populateDepositTransaction } from '$eth/providers/infura-cketh.providers';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { etherscanProviders } from '$eth/providers/etherscan.providers';
+import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { mapCkETHPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
 import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { TokenId } from '$lib/types/token';
+import type { NetworkId } from '$lib/types/network';
+import type { Token, TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish } from '@dfinity/utils';
@@ -16,12 +17,14 @@ export const loadPendingCkEthTransactions = async ({
 	toAddress,
 	tokenId,
 	lastObservedBlockNumber,
-	identity
+	identity,
+	networkId
 }: {
 	toAddress: ETH_ADDRESS;
 	tokenId: TokenId;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
+	networkId: NetworkId;
 }) => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
@@ -34,6 +37,7 @@ export const loadPendingCkEthTransactions = async ({
 	});
 
 	try {
+		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({
 			address: toAddress,
 			startBlock: `${lastObservedBlockNumber}`
@@ -41,7 +45,8 @@ export const loadPendingCkEthTransactions = async ({
 
 		// We compute the data for a transfer of ETH to the ckETH helper contract using the user's principal.
 		// This allows us to use the data to compare with the contract's pending transactions and filter those targeting this user.
-		const { data } = await populateDepositTransaction({
+		const { populateTransaction } = infuraCkETHProviders(networkId);
+		const { data } = await populateTransaction({
 			contract: { address: toAddress },
 			to: encodePrincipalToEthAddress(identity.getPrincipal())
 		});
@@ -79,12 +84,13 @@ export const loadPendingCkEthTransactions = async ({
 
 export const loadPendingCkEthTransaction = async ({
 	hash,
-	tokenId
+	token
 }: {
 	hash: string;
-	tokenId: TokenId;
+	token: Token;
 }) => {
 	try {
+		const { getTransaction } = alchemyProviders(token.network.id);
 		const transaction = await getTransaction(hash);
 
 		if (isNullish(transaction)) {
@@ -97,7 +103,7 @@ export const loadPendingCkEthTransaction = async ({
 		}
 
 		convertEthToCkEthPendingStore.prepend({
-			tokenId,
+			tokenId: token.id,
 			transaction: {
 				data: mapCkETHPendingTransaction({ transaction }),
 				certified: false

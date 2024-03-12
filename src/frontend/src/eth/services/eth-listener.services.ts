@@ -1,4 +1,4 @@
-import { initMinedTransactionsListener as initErc20PendingTransactionsListenerProvider } from '$eth/providers/alchemy-erc20.providers';
+import { alchemyErc20Providers } from '$eth/providers/alchemy-erc20.providers';
 import {
 	initPendingTransactionsListener as initEthPendingTransactionsListenerProvider,
 	initMinedTransactionsListener as initMinedTransactionsListenerProvider
@@ -7,8 +7,9 @@ import { initWalletConnect } from '$eth/providers/wallet-connect.providers';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { WebSocketListener } from '$eth/types/listener';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
-import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
+import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
+import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { processErc20Transaction, processEthTransaction } from './transaction.services';
@@ -20,12 +21,16 @@ export const initTransactionsListener = ({
 	token: Token;
 	address: ETH_ADDRESS;
 }): WebSocketListener => {
-	if (token.id === ETHEREUM_TOKEN_ID) {
+	if (ETHEREUM_TOKEN_IDS.includes(token.id)) {
 		return initEthPendingTransactionsListenerProvider({
 			toAddress: address,
-			listener: async (hash: string) => await processEthTransaction({ hash })
+			listener: async (hash: string) => await processEthTransaction({ hash, token }),
+			networkId: token.network.id
 		});
 	}
+
+	const { initMinedTransactionsListener: initErc20PendingTransactionsListenerProvider } =
+		alchemyErc20Providers(token.network.id);
 
 	return initErc20PendingTransactionsListenerProvider({
 		address,
@@ -35,11 +40,16 @@ export const initTransactionsListener = ({
 	});
 };
 
-export const initMinedTransactionsListener = (
-	callback: (tx: { removed: boolean; transaction: { has: string } }) => Promise<void>
-): WebSocketListener =>
+export const initMinedTransactionsListener = ({
+	callback,
+	networkId
+}: {
+	callback: (tx: { removed: boolean; transaction: { has: string } }) => Promise<void>;
+	networkId: NetworkId;
+}): WebSocketListener =>
 	initMinedTransactionsListenerProvider({
-		listener: callback
+		listener: callback,
+		networkId
 	});
 
 export const initWalletConnectListener = async (params: {

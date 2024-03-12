@@ -1,5 +1,10 @@
+import { ETH_MAINNET_ENABLED } from '$eth/constants/networks.constants';
 import eth from '$icp-eth/assets/eth.svg';
-import { ETHEREUM_NETWORK, ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+import {
+	ETHEREUM_NETWORK,
+	ICP_NETWORK,
+	SEPOLIA_NETWORK
+} from '$icp-eth/constants/networks.constants';
 import icpLight from '$icp/assets/icp_light.svg';
 import {
 	ICP_INDEX_CANISTER_ID,
@@ -12,12 +17,12 @@ import type { Token } from '$lib/types/token';
 /**
  * Ethereum
  */
-export const ETHEREUM_SYMBOL = import.meta.env.VITE_ETHEREUM_SYMBOL;
+const ETHEREUM_SYMBOL = 'ETH';
 
-export const ETHEREUM_TOKEN_ID = Symbol(ETHEREUM_SYMBOL);
+export const ETHEREUM_TOKEN_ID: unique symbol = Symbol(ETHEREUM_SYMBOL);
 
 export const ETHEREUM_TOKEN: Required<Token> = {
-	id: Symbol('ETH'),
+	id: ETHEREUM_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: 'ethereum',
 	name: 'Ethereum',
@@ -25,6 +30,27 @@ export const ETHEREUM_TOKEN: Required<Token> = {
 	decimals: 18,
 	icon: eth
 };
+
+export const SEPOLIA_SYMBOL = 'SepoliaETH';
+
+export const SEPOLIA_TOKEN_ID: unique symbol = Symbol(SEPOLIA_SYMBOL);
+
+export const SEPOLIA_TOKEN: Required<Token> = {
+	id: SEPOLIA_TOKEN_ID,
+	network: SEPOLIA_NETWORK,
+	standard: 'ethereum',
+	name: 'SepoliaETH',
+	symbol: 'SepoliaETH',
+	decimals: 18,
+	icon: eth
+};
+
+export const ETHEREUM_TOKENS: [...Required<Token>[], Required<Token>] = [
+	...(ETH_MAINNET_ENABLED ? [ETHEREUM_TOKEN] : []),
+	SEPOLIA_TOKEN
+];
+
+export const ETHEREUM_TOKEN_IDS: symbol[] = ETHEREUM_TOKENS.map(({ id }) => id);
 
 /**
  * ICP

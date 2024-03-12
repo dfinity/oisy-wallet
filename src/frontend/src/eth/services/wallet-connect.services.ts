@@ -79,8 +79,8 @@ export const send = ({
 	identity,
 	ckEthHelperContractAddress,
 	tokenStandard,
-	network,
-	chainId,
+	sourceNetwork,
+	targetNetwork,
 	...params
 }: WalletConnectSendParams & {
 	tokenStandard: TokenStandard;
@@ -128,7 +128,7 @@ export const send = ({
 			const { valid } = assertCkEthHelperContractAddressLoaded({
 				tokenStandard,
 				helperContractAddress: ckEthHelperContractAddress,
-				network
+				network: targetNetwork
 			});
 
 			if (!valid) {
@@ -169,7 +169,8 @@ export const send = ({
 					data,
 					identity,
 					ckEthHelperContractAddress,
-					chainId
+					sourceNetwork,
+					targetNetwork
 				});
 
 				await listener.approveRequest({ id, topic, message: hash });

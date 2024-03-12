@@ -5,8 +5,7 @@
 	import type { OptionAddress } from '$lib/types/address';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
-	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
-	import { tokenId } from '$lib/derived/token.derived';
+	import { token, tokenId } from '$lib/derived/token.derived';
 	import { address } from '$lib/derived/address.derived';
 	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
 	import { balance } from '$lib/derived/balances.derived';
@@ -17,6 +16,8 @@
 		loadPendingCkEthTransaction,
 		loadPendingCkEthTransactions
 	} from '$icp-eth/services/eth.services';
+	import { networkId } from '$lib/derived/network.derived';
+	import { ethTokenId } from '$eth/derived/eth.derived';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -51,7 +52,8 @@
 			tokenId: $tokenId,
 			lastObservedBlockNumber,
 			identity: $authStore.identity,
-			toAddress
+			toAddress,
+			networkId: $networkId
 		});
 	};
 
@@ -65,13 +67,13 @@
 		listener = initEthPendingTransactionsListenerProvider({
 			toAddress,
 			fromAddress: $address,
-			listener: async (hash: string) =>
-				await loadPendingCkEthTransaction({ hash, tokenId: $tokenId })
+			listener: async (hash: string) => await loadPendingCkEthTransaction({ hash, token: $token }),
+			networkId: $networkId
 		});
 	};
 
 	let ckEthHelperContractAddress: string | undefined;
-	$: ckEthHelperContractAddress = $ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data;
+	$: ckEthHelperContractAddress = $ckEthHelperContractAddressStore?.[$ethTokenId]?.data;
 
 	$: (async () => init({ toAddress: ckEthHelperContractAddress }))();
 

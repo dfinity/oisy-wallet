@@ -1,4 +1,4 @@
-import type { NetworkChainId } from '$eth/types/network';
+import type { EthereumNetwork } from '$eth/types/network';
 import type { CkEthHelperContractAddressData } from '$icp-eth/stores/cketh.store';
 import { SendStep } from '$lib/enums/steps';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -9,7 +9,8 @@ export type SendParams = {
 	progress: (step: SendStep) => void;
 	lastProgressStep?: SendStep;
 	token: Token;
-	network?: Network | undefined;
+	sourceNetwork: EthereumNetwork;
+	targetNetwork?: Network | undefined;
 	identity: OptionIdentity;
 	ckEthHelperContractAddress: CkEthHelperContractAddressData | null | undefined;
-} & NetworkChainId;
+};

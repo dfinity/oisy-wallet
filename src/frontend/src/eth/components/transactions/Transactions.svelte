@@ -20,7 +20,7 @@
 			return;
 		}
 
-		await loadTransactions(tokenId);
+		await loadTransactions({ tokenId, networkId });
 	};
 
 	onMount(async () => await load($token));
