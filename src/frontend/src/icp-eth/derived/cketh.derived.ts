@@ -23,6 +23,9 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
 		$tokenStandard === 'ethereum' || isTokenCkEthLedger($token as IcToken)
 );
 
+/**
+ * On ckETH, we need to know if the target for conversion is Ethereum mainnet or Sepolia.
+ */
 export const ckEthereumToken: Readable<Token> = derived([token], ([$token]) => {
 	const { ledgerCanisterId } = $token as Partial<IcToken>;
 
