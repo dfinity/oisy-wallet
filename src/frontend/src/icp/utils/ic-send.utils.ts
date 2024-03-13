@@ -13,7 +13,6 @@ import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 import { parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import {ETHEREUM_NETWORKS_IDS} from "$icp-eth/constants/networks.constants";
 
 export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
 	if (isNullish(address)) {

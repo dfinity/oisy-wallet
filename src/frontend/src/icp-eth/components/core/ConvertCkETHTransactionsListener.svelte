@@ -82,7 +82,8 @@
 		listener = initEthPendingTransactionsListenerProvider({
 			toAddress,
 			fromAddress: $address,
-			listener: async (hash: string) => await loadPendingCkEthTransaction({ hash, token: $token }),
+			listener: async (hash: string) =>
+				await loadPendingCkEthTransaction({ hash, token: $token, networkId }),
 			networkId
 		});
 	};

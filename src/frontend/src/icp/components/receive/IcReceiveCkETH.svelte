@@ -5,7 +5,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcReceiveCkETHModal from '$icp/components/receive/IcReceiveCkETHModal.svelte';
 	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
-	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { ckEthereumToken } from '$icp-eth/derived/cketh.derived';
 
 	/**

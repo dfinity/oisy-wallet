@@ -8,7 +8,7 @@
 	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
-	import {ckEthereumTokenId} from "$icp-eth/derived/cketh.derived";
+	import { ckEthereumTokenId } from '$icp-eth/derived/cketh.derived';
 
 	/**
 	 * Props

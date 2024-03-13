@@ -13,7 +13,7 @@
 	import { onDestroy } from 'svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import {ckEthereumToken} from "$icp-eth/derived/cketh.derived";
+	import { ckEthereumToken } from '$icp-eth/derived/cketh.derived';
 
 	export let networkId: NetworkId | undefined = undefined;
 

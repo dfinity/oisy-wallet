@@ -8,9 +8,7 @@
 	import HowToConvertETHModal from '$icp/components/convert/HowToConvertETHModal.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
-	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { ckEthereumToken } from '$icp-eth/derived/cketh.derived';
-	import { token } from '$lib/derived/token.derived';
 
 	const openReceive = () => modalStore.openHowToConvertETHToCkETH();
 

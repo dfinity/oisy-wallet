@@ -15,7 +15,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { infuraProviders } from '$eth/providers/infura.providers';
-	import { networkId } from '$lib/derived/network.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let observe: boolean;

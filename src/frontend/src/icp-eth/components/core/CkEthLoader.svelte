@@ -20,7 +20,7 @@
 
 		const { id: tokenId } = $ethToken;
 
-        // TODO: this is relatively ugly. Should we create a derived store or another abstraction that merge EthToken and CkCanisters?
+		// TODO: this is relatively ugly. Should we create a derived store or another abstraction that merge EthToken and CkCanisters?
 
 		const minterCanisterId =
 			tokenId === SEPOLIA_TOKEN_ID
