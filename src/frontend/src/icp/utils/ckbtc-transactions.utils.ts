@@ -29,14 +29,17 @@ export const mapCkBTCTransaction = ({
 } & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
+	const ckBTCExplorerUrl =
+		IC_CKBTC_LEDGER_CANISTER_ID === ledgerCanisterId ? CKBTC_EXPLORER_URL : undefined;
+
 	const tx: IcTransactionUi = {
 		id,
 		from,
 		to,
-		...(notEmptyString(CKBTC_EXPLORER_URL) && {
-			txExplorerUrl: `${CKBTC_EXPLORER_URL}/transaction/${id}`,
-			...(notEmptyString(from) && { fromExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${from}` }),
-			...(notEmptyString(to) && { toExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${to}` })
+		...(notEmptyString(ckBTCExplorerUrl) && {
+			txExplorerUrl: `${ckBTCExplorerUrl}/transaction/${id}`,
+			...(notEmptyString(from) && { fromExplorerUrl: `${ckBTCExplorerUrl}/account/${from}` }),
+			...(notEmptyString(to) && { toExplorerUrl: `${ckBTCExplorerUrl}/account/${to}` })
 		}),
 		...txRest
 	};
