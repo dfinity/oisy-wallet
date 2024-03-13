@@ -4,26 +4,28 @@
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
-	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { isNullish } from '@dfinity/utils';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { tokenId } from '$lib/derived/token.derived';
-	import { BTC_NETWORK_ID } from '$env/networks.btc.env';
+	import { token, tokenId } from '$lib/derived/token.derived';
+	import type { NetworkId } from '$lib/types/network';
+	import type { IcCkToken } from '$icp/types/ic';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
 
 	const isDisabled = (): boolean => isNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
 	const openSend = async () => {
-		if ($tokenCkBtcLedger) {
-			const status = await waitWalletReady(isDisabled);
+		const status = await waitWalletReady(isDisabled);
 
-			if (status === 'timeout') {
-				return;
-			}
+		if (status === 'timeout') {
+			return;
 		}
 
 		modalStore.openConvertCkBTCToBTC();
 	};
+
+	let networkId: NetworkId;
+	$: networkId = ($token as IcCkToken).twinToken?.network.id ?? BTC_MAINNET_NETWORK_ID;
 </script>
 
 <button
@@ -37,5 +39,5 @@
 </button>
 
 {#if $modalConvertCkBTCToBTC}
-	<IcSendModal networkId={BTC_NETWORK_ID} />
+	<IcSendModal {networkId} />
 {/if}

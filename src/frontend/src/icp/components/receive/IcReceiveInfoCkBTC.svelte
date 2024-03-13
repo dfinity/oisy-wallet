@@ -11,7 +11,8 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { fade } from 'svelte/transition';
 	import { btcAddressStore } from '$icp/stores/btc.store';
-	import { BTC_DECIMALS } from '$env/networks.btc.env';
+
+	import { BTC_DECIMALS } from '$env/tokens.btc.env';
 
 	const dispatch = createEventDispatcher();
 

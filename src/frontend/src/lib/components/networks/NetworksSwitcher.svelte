@@ -6,6 +6,7 @@
 	import Network from '$lib/components/networks/Network.svelte';
 	import { NETWORKS } from '$lib/constants/networks.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { nonNullish } from '@dfinity/utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -20,12 +21,14 @@
 	aria-label="Settings, sign-out and external links"
 >
 	<div class="w-full h-full md:w-[28px] md:h-[28px]">
-		<Img
-			src={$selectedNetwork.icon}
-			alt={`${$selectedNetwork.name} logo`}
-			width="100%"
-			height="100%"
-		/>
+		{#if nonNullish($selectedNetwork.icon)}
+			<Img
+				src={$selectedNetwork.icon}
+				alt={`${$selectedNetwork.name} logo`}
+				width="100%"
+				height="100%"
+			/>
+		{/if}
 	</div>
 	<span class="text-black font-bold">{$selectedNetwork.name} <IconChevronDown /></span>
 </button>

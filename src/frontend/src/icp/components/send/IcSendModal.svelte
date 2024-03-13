@@ -24,7 +24,7 @@
 	import BitcoinFeeContext from '$icp/components/fee/IcFeeContext.svelte';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { BTC_NETWORK_ID } from '$env/networks.btc.env';
+	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 
 	/**
 	 * Props
@@ -91,12 +91,11 @@
 	$: steps = [
 		{
 			name: 'Send',
-			title:
-				networkId === BTC_NETWORK_ID
-					? 'Convert to BTC'
-					: isNetworkIdEthereum(networkId)
-						? 'Convert to ETH'
-						: 'Send'
+			title: isNetworkIdBTC(networkId)
+				? 'Convert to BTC'
+				: isNetworkIdEthereum(networkId)
+					? 'Convert to ETH'
+					: 'Send'
 		},
 		{
 			name: 'Review',
