@@ -43,7 +43,7 @@ const mapTransaction = ({
 	}
 
 	if (nonNullish(data) && isTokenCkEthLedger({ ledgerCanisterId: data.ledgerCanisterId })) {
-		return mapCkETHTransaction({ transaction, identity });
+		return mapCkETHTransaction({ transaction, identity, ledgerCanisterId: data.ledgerCanisterId });
 	}
 
 	return mapIcrcTransaction({ transaction, identity });

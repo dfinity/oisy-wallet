@@ -1,8 +1,13 @@
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$icp/constants/icrc.constants';
+import type { IcrcTransaction, IcToken, IcTransactionUi } from '$icp/types/ic';
 import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_REIMBURSE } from '$icp/utils/cketh-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
-import { CKETH_EXPLORER_URL, ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
+import {
+	CKETH_EXPLORER_URL,
+	ETHEREUM_EXPLORER_URL,
+	SEPOLIA_EXPLORER_URL
+} from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import {
 	fromNullable,
@@ -14,11 +19,12 @@ import {
 
 export const mapCkETHTransaction = ({
 	transaction,
-	identity
+	identity,
+	ledgerCanisterId
 }: {
 	transaction: IcrcTransaction;
 	identity: OptionIdentity;
-}): IcTransactionUi => {
+} & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
 	const tx: IcTransactionUi = {
@@ -40,6 +46,9 @@ export const mapCkETHTransaction = ({
 	const mint = fromNullable(rawMint);
 	const burn = fromNullable(rawBurn);
 
+	const ethExplorerUrl =
+		IC_CKETH_LEDGER_CANISTER_ID === ledgerCanisterId ? ETHEREUM_EXPLORER_URL : SEPOLIA_EXPLORER_URL;
+
 	if (nonNullish(mint)) {
 		const memo = fromNullable(mint.memo);
 
@@ -55,9 +64,7 @@ export const mapCkETHTransaction = ({
 			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
 			...(nonNullish(from) && {
 				from,
-				...(notEmptyString(ETHEREUM_EXPLORER_URL) && {
-					fromExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${from}`
-				})
+				fromExplorerUrl: `${ethExplorerUrl}/address/${from}`
 			}),
 			...(isNullish(memoInfo?.fromAddress) && { fromLabel: 'ETH Network' }),
 			status: memoInfo?.reimbursement === true ? 'reimbursed' : 'executed'
@@ -75,11 +82,10 @@ export const mapCkETHTransaction = ({
 		return {
 			...tx,
 			typeLabel: 'ETH Sent',
-			...(notEmptyString(to) &&
-				notEmptyString(ETHEREUM_EXPLORER_URL) && {
-					to,
-					toExplorerUrl: `${ETHEREUM_EXPLORER_URL}/address/${to}`
-				}),
+			...(notEmptyString(to) && {
+				to,
+				toExplorerUrl: `${ethExplorerUrl}/address/${to}`
+			}),
 			...(isNullish(burnMemo?.toAddress) && { toLabel: 'ETH Network' })
 		};
 	}

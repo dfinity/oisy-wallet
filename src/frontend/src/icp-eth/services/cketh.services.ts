@@ -3,7 +3,7 @@ import {
 	ckEthHelperContractAddressStore,
 	type CkEthHelperContractAddressData
 } from '$icp-eth/stores/cketh.store';
-import type { IcCkCanisters } from '$icp/types/ic';
+import type { IcCkMetadata } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -20,7 +20,7 @@ export const loadCkEthHelperContractAddress = async ({
 	canisters: { minterCanisterId }
 }: {
 	tokenId: TokenId;
-	canisters: IcCkCanisters;
+	canisters: IcCkMetadata;
 }) => {
 	const addressInStore = get(ckEthHelperContractAddressStore);
 

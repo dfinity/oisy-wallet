@@ -2,6 +2,7 @@ import { ICP_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type {
+	IcCkToken,
 	IcpTransaction,
 	IcrcTransaction,
 	IcToken,
@@ -36,7 +37,11 @@ export const mapIcTransaction = ({
 	}
 
 	if (isTokenCkEthLedger(token)) {
-		return mapCkETHTransaction({ transaction: transaction as IcrcTransaction, ...rest });
+		return mapCkETHTransaction({
+			transaction: transaction as IcrcTransaction,
+			ledgerCanisterId: (token as IcCkToken).ledgerCanisterId,
+			...rest
+		});
 	}
 
 	return mapIcrcTransaction({ transaction: transaction as IcrcTransaction, ...rest });

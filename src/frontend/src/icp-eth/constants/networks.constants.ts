@@ -2,6 +2,7 @@ import { ETH_MAINNET_ENABLED } from '$eth/constants/networks.constants';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
+import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { Network } from '$lib/types/network';
 
 /**
@@ -13,7 +14,8 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	id: ETHEREUM_NETWORK_ID,
 	name: 'Ethereum',
 	chainId: 1n,
-	icon: eth
+	icon: eth,
+	explorerUrl: ETHEREUM_EXPLORER_URL
 };
 
 export const { chainId: ETHEREUM_NETWORK_CHAIN_ID } = ETHEREUM_NETWORK;
@@ -24,7 +26,8 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	id: SEPOLIA_NETWORK_ID,
 	name: 'Sepolia',
 	chainId: 11155111n,
-	icon: eth
+	icon: eth,
+	explorerUrl: SEPOLIA_EXPLORER_URL
 };
 
 export const { chainId: SEPOLIA_NETWORK_CHAIN_ID } = SEPOLIA_NETWORK;

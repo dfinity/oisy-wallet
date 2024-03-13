@@ -6,4 +6,8 @@ export interface NetworkChainId {
 	chainId: EthereumChainId;
 }
 
-export type EthereumNetwork = Network & NetworkChainId;
+export interface EthereumAppMetadata {
+	explorerUrl: string;
+}
+
+export type EthereumNetwork = Network & NetworkChainId & EthereumAppMetadata;

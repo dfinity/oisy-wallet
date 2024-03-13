@@ -3,12 +3,13 @@ import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { mapCkETHPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
 import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
+import type { IcCkTwinToken, IcToken } from '$icp/types/ic';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import type { Token, TokenId } from '$lib/types/token';
+import type { TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish } from '@dfinity/utils';
@@ -18,14 +19,15 @@ export const loadPendingCkEthTransactions = async ({
 	tokenId,
 	lastObservedBlockNumber,
 	identity,
-	networkId
+	networkId,
+	twinToken
 }: {
 	toAddress: ETH_ADDRESS;
 	tokenId: TokenId;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 	networkId: NetworkId;
-}) => {
+} & IcCkTwinToken) => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
 		return;
@@ -65,7 +67,7 @@ export const loadPendingCkEthTransactions = async ({
 		convertEthToCkEthPendingStore.set({
 			tokenId,
 			data: pendingEthToCkEthTransactions.map((transaction) => ({
-				data: mapCkETHPendingTransaction({ transaction }),
+				data: mapCkETHPendingTransaction({ transaction, twinToken }),
 				certified: false
 			}))
 		});
@@ -85,12 +87,13 @@ export const loadPendingCkEthTransactions = async ({
 export const loadPendingCkEthTransaction = async ({
 	hash,
 	token: { id: tokenId },
+	twinToken,
 	networkId
 }: {
 	hash: string;
-	token: Token;
+	token: IcToken;
 	networkId: NetworkId;
-}) => {
+} & IcCkTwinToken) => {
 	try {
 		const { getTransaction } = alchemyProviders(networkId);
 		const transaction = await getTransaction(hash);
@@ -107,7 +110,10 @@ export const loadPendingCkEthTransaction = async ({
 		convertEthToCkEthPendingStore.prepend({
 			tokenId,
 			transaction: {
-				data: mapCkETHPendingTransaction({ transaction }),
+				data: mapCkETHPendingTransaction({
+					transaction,
+					twinToken
+				}),
 				certified: false
 			}
 		});
