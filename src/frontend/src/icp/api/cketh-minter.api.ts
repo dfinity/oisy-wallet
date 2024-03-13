@@ -5,7 +5,7 @@ import type { MinterInfo } from '@dfinity/cketh';
 import type {
 	Eip1559TransactionPrice,
 	RetrieveEthRequest
-} from '@dfinity/cketh/dist/candid/minter';
+} from '@dfinity/cketh';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
 export const withdrawEth = async ({

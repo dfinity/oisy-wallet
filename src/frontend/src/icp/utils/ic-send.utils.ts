@@ -9,7 +9,7 @@ import { isEthAddress } from '$lib/utils/account.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 import { parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
-import { BtcNetwork } from '@dfinity/ckbtc/dist/types/enums/btc.enums';
+import { BtcNetwork } from '@dfinity/ckbtc';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
