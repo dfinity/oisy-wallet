@@ -158,33 +158,11 @@ const updateCSP = (indexHtml) => {
 	const walletConnectSrc = 'wss://relay.walletconnect.com https://verify.walletconnect.com';
 	const walletConnectFrameSrc = 'https://verify.walletconnect.com https://verify.walletconnect.org';
 
-	// Raw is useful when the dapp get added to iOS home screen because otherwise Apple is not able to fetch the app icons.
-	const readCanisterId = () => {
-		const mainnet = ['production', 'staging'].includes(ENV);
-
-		const jsonFile = mainnet
-			? join(process.cwd(), 'canister_ids.json')
-			: join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
-
-		const { frontend } = JSON.parse(readFileSync(jsonFile, 'utf-8'));
-
-		// Here we want the key ".ic", ".staging" or ".local" - not the environment name
-		const canisterId = frontend[mainnet ? process.env.ENV : 'local'];
-
-		if (canisterId === undefined) {
-			throw new Error('Cannot find canister ID to parse the CSP.');
-		}
-
-		return canisterId;
-	};
-
-	const canisterId = readCanisterId();
-
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
         connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethConnectSrc} ${walletConnectSrc};
-        img-src 'self' data: https://${canisterId}.raw.icp0.io;
+        img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc};
         manifest-src 'self';
         script-src 'unsafe-eval' 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
