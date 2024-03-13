@@ -33,7 +33,11 @@ export const mapIcTransaction = ({
 	}
 
 	if (isTokenCkBtcLedger(token)) {
-		return mapCkBTCTransaction({ transaction: transaction as IcrcTransaction, ...rest });
+		return mapCkBTCTransaction({
+			transaction: transaction as IcrcTransaction,
+			ledgerCanisterId: (token as IcCkToken).ledgerCanisterId,
+			...rest
+		});
 	}
 
 	if (isTokenCkEthLedger(token)) {
