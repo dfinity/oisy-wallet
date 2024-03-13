@@ -1,3 +1,4 @@
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$icp-eth/constants/tokens.constants';
 import type { IcCkInterface } from '$icp/types/ic';
 import { LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -31,7 +32,7 @@ export const LOCAL_CKBTC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKBTC_IN
 export const LOCAL_CKBTC_MINTER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
 
-const CKBTC_LOCAL_CANISTER: IcCkInterface | undefined =
+const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
 	nonNullish(LOCAL_CKBTC_LEDGER_CANISTER_ID) &&
 	nonNullish(LOCAL_CKBTC_INDEX_CANISTER_ID) &&
@@ -45,7 +46,7 @@ const CKBTC_LOCAL_CANISTER: IcCkInterface | undefined =
 			}
 		: undefined;
 
-const CKBTC_STAGING_CANISTER: IcCkInterface | undefined =
+const CKBTC_STAGING_DATA: IcCkInterface | undefined =
 	(STAGING || PROD) &&
 	nonNullish(STAGING_CKBTC_LEDGER_CANISTER_ID) &&
 	nonNullish(STAGING_CKBTC_INDEX_CANISTER_ID) &&
@@ -59,7 +60,7 @@ const CKBTC_STAGING_CANISTER: IcCkInterface | undefined =
 			}
 		: undefined;
 
-const CKBTC_IC_CANISTER: IcCkInterface | undefined =
+const CKBTC_IC_DATA: IcCkInterface | undefined =
 	STAGING || PROD
 		? {
 				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
@@ -108,7 +109,7 @@ export const LOCAL_CKETH_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKETH_IN
 export const LOCAL_CKETH_MINTER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKETH_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
 
-const CKETH_LOCAL_CANISTER: IcCkInterface | undefined =
+const CKETH_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
 	nonNullish(LOCAL_CKETH_LEDGER_CANISTER_ID) &&
 	nonNullish(LOCAL_CKETH_INDEX_CANISTER_ID) &&
@@ -118,11 +119,12 @@ const CKETH_LOCAL_CANISTER: IcCkInterface | undefined =
 				indexCanisterId: LOCAL_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
-				position: 3
+				position: 3,
+				twinToken: SEPOLIA_TOKEN
 			}
 		: undefined;
 
-const CKETH_STAGING_CANISTER: IcCkInterface | undefined =
+const CKETH_STAGING_DATA: IcCkInterface | undefined =
 	(STAGING || PROD) &&
 	nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID) &&
 	nonNullish(STAGING_CKETH_INDEX_CANISTER_ID) &&
@@ -132,18 +134,20 @@ const CKETH_STAGING_CANISTER: IcCkInterface | undefined =
 				indexCanisterId: STAGING_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: STAGING_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
-				position: 2
+				position: 2,
+				twinToken: SEPOLIA_TOKEN
 			}
 		: undefined;
 
-const CKETH_IC_CANISTER: IcCkInterface | undefined =
+const CKETH_IC_DATA: IcCkInterface | undefined =
 	STAGING || PROD
 		? {
 				ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
 				indexCanisterId: IC_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
-				position: 1
+				position: 1,
+				twinToken: ETHEREUM_TOKEN
 			}
 		: undefined;
 
@@ -154,14 +158,14 @@ export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
 ];
 
 /**
- * All ICRC canisters
+ * All ICRC tokens data
  */
 
-export const ICRC_CANISTERS: IcCkInterface[] = [
-	...(nonNullish(CKBTC_LOCAL_CANISTER) ? [CKBTC_LOCAL_CANISTER] : []),
-	...(nonNullish(CKBTC_STAGING_CANISTER) ? [CKBTC_STAGING_CANISTER] : []),
-	...(nonNullish(CKBTC_IC_CANISTER) ? [CKBTC_IC_CANISTER] : []),
-	...(nonNullish(CKETH_LOCAL_CANISTER) ? [CKETH_LOCAL_CANISTER] : []),
-	...(nonNullish(CKETH_STAGING_CANISTER) ? [CKETH_STAGING_CANISTER] : []),
-	...(nonNullish(CKETH_IC_CANISTER) ? [CKETH_IC_CANISTER] : [])
+export const ICRC_TOKENS: IcCkInterface[] = [
+	...(nonNullish(CKBTC_LOCAL_DATA) ? [CKBTC_LOCAL_DATA] : []),
+	...(nonNullish(CKBTC_STAGING_DATA) ? [CKBTC_STAGING_DATA] : []),
+	...(nonNullish(CKBTC_IC_DATA) ? [CKBTC_IC_DATA] : []),
+	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
+	...(nonNullish(CKETH_STAGING_DATA) ? [CKETH_STAGING_DATA] : []),
+	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : [])
 ];

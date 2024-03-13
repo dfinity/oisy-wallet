@@ -5,7 +5,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcReceiveCkETHModal from '$icp/components/receive/IcReceiveCkETHModal.svelte';
 	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
-	import { ckEthereumToken } from '$icp-eth/derived/cketh.derived';
+	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	/**
 	 * Send modal context store
@@ -13,14 +13,14 @@
 
 	const { sendToken, ...rest } = initSendContext({
 		sendPurpose: 'convert-eth-to-cketh',
-		token: $ckEthereumToken
+		token: $ckETHTwinToken
 	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
 		sendToken,
 		...rest
 	});
 
-	$: sendToken.set($ckEthereumToken);
+	$: sendToken.set($ckETHTwinToken);
 </script>
 
 <IcReceiveButton on:click={modalStore.openCkETHReceive} />

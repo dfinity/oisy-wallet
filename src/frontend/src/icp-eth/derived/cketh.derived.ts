@@ -1,11 +1,7 @@
 import type { EthereumNetwork } from '$eth/types/network';
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$icp-eth/constants/networks.constants';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$icp-eth/constants/tokens.constants';
-import {
-	LOCAL_CKETH_LEDGER_CANISTER_ID,
-	STAGING_CKETH_LEDGER_CANISTER_ID
-} from '$icp/constants/icrc.constants';
-import type { IcToken } from '$icp/types/ic';
+import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
+import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
+import type { IcCkToken, IcToken } from '$icp/types/ic';
 import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { token, tokenStandard } from '$lib/derived/token.derived';
 import type { NetworkId } from '$lib/types/network';
@@ -26,33 +22,19 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
 /**
  * On ckETH, we need to know if the target for conversion is Ethereum mainnet or Sepolia.
  */
-export const ckEthereumToken: Readable<Token> = derived([token], ([$token]) => {
-	const { ledgerCanisterId } = $token as Partial<IcToken>;
+export const ckETHTwinToken: Readable<Token> = derived(
+	[token],
+	([$token]) => ($token as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
+);
 
-	switch (ledgerCanisterId) {
-		case LOCAL_CKETH_LEDGER_CANISTER_ID:
-		case STAGING_CKETH_LEDGER_CANISTER_ID:
-			return SEPOLIA_TOKEN;
-		default:
-			return ETHEREUM_TOKEN;
-	}
-});
+export const ckETHTwinTokenId: Readable<TokenId> = derived([ckETHTwinToken], ([{ id }]) => id);
 
-export const ckEthereumTokenId: Readable<TokenId> = derived([ckEthereumToken], ([{ id }]) => id);
+export const ckETHTwinTokenNetwork: Readable<EthereumNetwork> = derived(
+	[ckETHTwinToken],
+	([{ network }]) => (network as EthereumNetwork | undefined) ?? ETHEREUM_NETWORK
+);
 
-export const ckEthereumNetwork: Readable<EthereumNetwork> = derived([token], ([$token]) => {
-	const { ledgerCanisterId } = $token as Partial<IcToken>;
-
-	switch (ledgerCanisterId) {
-		case LOCAL_CKETH_LEDGER_CANISTER_ID:
-		case STAGING_CKETH_LEDGER_CANISTER_ID:
-			return SEPOLIA_NETWORK;
-		default:
-			return ETHEREUM_NETWORK;
-	}
-});
-
-export const ckEthereumNetworkId: Readable<NetworkId> = derived(
-	[ckEthereumNetwork],
+export const ckETHTwinTokenNetworkId: Readable<NetworkId> = derived(
+	[ckETHTwinTokenNetwork],
 	([{ id }]) => id
 );

@@ -7,7 +7,7 @@ import { btcAddressStore } from '$icp/stores/btc.store';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
-import type { IcCkCanisters, IcToken } from '$icp/types/ic';
+import type { IcCkCanisters, IcCkToken, IcToken } from '$icp/types/ic';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
@@ -31,7 +31,7 @@ export const updateBalance = async ({
 	progress,
 	identity
 }: CkBtcUpdateBalanceParams & {
-	token: IcToken & Partial<IcCkCanisters>;
+	token: IcCkToken;
 }): Promise<void> => {
 	assertNonNullish(minterCanisterId, 'A configured minter is required to retrieve BTC.');
 
@@ -90,7 +90,7 @@ export const loadAllCkBtcInfo = async ({
 	id: tokenId,
 	minterCanisterId,
 	...rest
-}: IcToken & Partial<IcCkCanisters> & { identity: OptionIdentity }) => {
+}: IcCkToken & { identity: OptionIdentity }) => {
 	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
 
 	const addressStore = get(btcAddressStore);
@@ -132,9 +132,7 @@ export const loadAllCkBtcInfo = async ({
 	busy.stop();
 };
 
-const loadBtcAddress = async (
-	params: IcToken & Partial<IcCkCanisters> & { identity: OptionIdentity }
-) =>
+const loadBtcAddress = async (params: IcCkToken & { identity: OptionIdentity }) =>
 	loadData({
 		...params,
 		store: btcAddressStore,

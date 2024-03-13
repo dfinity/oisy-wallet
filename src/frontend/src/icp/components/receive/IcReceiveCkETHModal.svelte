@@ -11,14 +11,14 @@
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
-	import { ckEthereumTokenId } from '$icp-eth/derived/cketh.derived';
+	import { ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
 
 	/**
 	 * Props
 	 */
 
 	let destination = '';
-	$: destination = $ckEthHelperContractAddressStore?.[$ckEthereumTokenId]?.data ?? '';
+	$: destination = $ckEthHelperContractAddressStore?.[$ckETHTwinTokenId]?.data ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 
