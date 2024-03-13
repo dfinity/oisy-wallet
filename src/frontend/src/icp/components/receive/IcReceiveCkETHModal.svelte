@@ -3,7 +3,6 @@
 	import { SendStep } from '$lib/enums/steps';
 	import HowToConvertETHInfo from '$icp/components/convert/HowToConvertETHInfo.svelte';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
-	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
@@ -12,15 +11,14 @@
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+	import { ckEthereumTokenId } from '$icp-eth/derived/cketh.derived';
 
 	/**
 	 * Props
 	 */
 
-	// TODO sepolia
-
 	let destination = '';
-	$: destination = $ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data ?? '';
+	$: destination = $ckEthHelperContractAddressStore?.[$ckEthereumTokenId]?.data ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 

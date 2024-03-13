@@ -91,7 +91,7 @@
 		await updateFeeData();
 		listener = initMinedTransactionsListener({
 			callback: async () => debounceUpdateFeeData(),
-			networkId: $networkId
+			networkId: sourceNetwork.id
 		});
 	};
 

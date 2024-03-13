@@ -9,6 +9,8 @@
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
+	import { ckEthereumToken } from '$icp-eth/derived/cketh.derived';
+	import { token } from '$lib/derived/token.derived';
 
 	const openReceive = () => modalStore.openHowToConvertETHToCkETH();
 
@@ -16,10 +18,16 @@
 	 * Send modal context store
 	 */
 
-	// TODO: sepolia token
+	const { sendToken, ...rest } = initSendContext({
+		sendPurpose: 'convert-eth-to-cketh',
+		token: $ckEthereumToken
+	});
+	setContext<SendContext>(SEND_CONTEXT_KEY, {
+		sendToken,
+		...rest
+	});
 
-	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh', token: ETHEREUM_TOKEN });
-	setContext<SendContext>(SEND_CONTEXT_KEY, context);
+	$: sendToken.set($ckEthereumToken);
 </script>
 
 <div class="pr-2">

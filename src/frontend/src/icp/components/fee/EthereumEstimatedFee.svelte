@@ -9,11 +9,11 @@
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { onDestroy } from 'svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import {ckEthereumToken} from "$icp-eth/derived/cketh.derived";
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -47,8 +47,6 @@
 	const clearTimer = () => clearInterval(timer);
 
 	onDestroy(clearTimer);
-
-	// TODO: sepolia token
 </script>
 
 {#if ckETH && ethNetwork}
@@ -64,7 +62,7 @@
 							value: BigNumber.from(maxTransactionFee),
 							displayDecimals: EIGHT_DECIMALS
 						})}
-						{ETHEREUM_TOKEN.symbol}
+						{$ckEthereumToken.symbol}
 					</span>
 				{/if}
 			</div>

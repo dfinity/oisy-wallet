@@ -6,15 +6,22 @@
 	import IcReceiveCkETHModal from '$icp/components/receive/IcReceiveCkETHModal.svelte';
 	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
 	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
+	import { ckEthereumToken } from '$icp-eth/derived/cketh.derived';
 
 	/**
 	 * Send modal context store
 	 */
 
-	// TODO: sepolia token
+	const { sendToken, ...rest } = initSendContext({
+		sendPurpose: 'convert-eth-to-cketh',
+		token: $ckEthereumToken
+	});
+	setContext<SendContext>(SEND_CONTEXT_KEY, {
+		sendToken,
+		...rest
+	});
 
-	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh', token: ETHEREUM_TOKEN });
-	setContext<SendContext>(SEND_CONTEXT_KEY, context);
+	$: sendToken.set($ckEthereumToken);
 </script>
 
 <IcReceiveButton on:click={modalStore.openCkETHReceive} />
