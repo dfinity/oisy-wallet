@@ -1,7 +1,7 @@
 import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
-import { transactions as transactionsRest } from '$eth/rest/etherscan.rest';
+import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { transactionsStore } from '$eth/stores/transactions.store';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -21,7 +21,7 @@ export const loadTransactions = async ({
 		return loadEthTransactions({ networkId, tokenId });
 	}
 
-	return loadErc20Transactions({ tokenId });
+	return loadErc20Transactions({ networkId, tokenId });
 };
 
 const loadEthTransactions = async ({
@@ -59,8 +59,10 @@ const loadEthTransactions = async ({
 };
 
 export const loadErc20Transactions = async ({
+	networkId,
 	tokenId
 }: {
+	networkId: NetworkId;
 	tokenId: TokenId;
 }): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
@@ -85,6 +87,7 @@ export const loadErc20Transactions = async ({
 	}
 
 	try {
+		const { transactions: transactionsRest } = etherscanRests(networkId);
 		const transactions = await transactionsRest({ contract: token, address });
 		transactionsStore.set({ tokenId, transactions });
 	} catch (err: unknown) {
