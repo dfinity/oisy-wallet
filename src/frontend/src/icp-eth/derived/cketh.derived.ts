@@ -1,6 +1,6 @@
+import { ETHEREUM_NETWORK } from '$env/networks.env';
+import { ETHEREUM_TOKEN } from '$env/tokens.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
-import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 import type { IcCkToken, IcToken } from '$icp/types/ic';
 import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { token, tokenStandard } from '$lib/derived/token.derived';

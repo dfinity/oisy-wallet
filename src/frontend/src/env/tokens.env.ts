@@ -1,16 +1,9 @@
-import { ETH_MAINNET_ENABLED } from '$eth/constants/networks.constants';
+import { ETHEREUM_NETWORK, ICP_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
+import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
+import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks.icp.env';
 import eth from '$icp-eth/assets/eth.svg';
-import {
-	ETHEREUM_NETWORK,
-	ICP_NETWORK,
-	SEPOLIA_NETWORK
-} from '$icp-eth/constants/networks.constants';
 import icpLight from '$icp/assets/icp_light.svg';
-import {
-	ICP_INDEX_CANISTER_ID,
-	ICP_LEDGER_CANISTER_ID,
-	ICP_TRANSACTION_FEE_E8S
-} from '$icp/constants/icp.constants';
+import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
 import type { Token } from '$lib/types/token';
 

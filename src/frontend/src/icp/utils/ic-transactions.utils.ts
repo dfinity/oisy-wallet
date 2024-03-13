@@ -1,4 +1,4 @@
-import { ICP_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
+import { ICP_TOKEN_ID } from '$env/tokens.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type {

@@ -22,9 +22,9 @@
 	} from '$icp/stores/ic-fee.store';
 	import { setContext } from 'svelte';
 	import BitcoinFeeContext from '$icp/components/fee/IcFeeContext.svelte';
-	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { BTC_NETWORK_ID } from '$env/networks.btc.env';
 
 	/**
 	 * Props

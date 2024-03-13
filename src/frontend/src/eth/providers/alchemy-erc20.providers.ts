@@ -1,12 +1,9 @@
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
+import { ALCHEMY_JSON_RPC_URL_MAINNET, ALCHEMY_JSON_RPC_URL_SEPOLIA } from '$env/networks.eth.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
-import {
-	ALCHEMY_JSON_RPC_URL_MAINNET,
-	ALCHEMY_JSON_RPC_URL_SEPOLIA
-} from '$eth/constants/networks.constants';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20Transaction } from '$eth/types/erc20-transaction';
 import type { WebSocketListener } from '$eth/types/listener';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$icp-eth/constants/networks.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { assertNonNullish } from '@dfinity/utils';

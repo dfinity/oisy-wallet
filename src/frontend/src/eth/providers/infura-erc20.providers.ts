@@ -1,11 +1,8 @@
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
+import { INFURA_NETWORK_HOMESTEAD, INFURA_NETWORK_SEPOLIA } from '$env/networks.eth.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
-import {
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA
-} from '$eth/constants/networks.constants';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Metadata } from '$eth/types/erc20';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$icp-eth/constants/networks.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { assertNonNullish } from '@dfinity/utils';

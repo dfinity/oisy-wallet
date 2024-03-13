@@ -4,7 +4,7 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalIcSend } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
-	import { ICP_NETWORK_ID } from '$icp-eth/constants/networks.constants';
+	import { ICP_NETWORK_ID } from '$env/networks.env';
 </script>
 
 <button class="hero" on:click={modalStore.openIcSend} disabled={$isBusy} class:opacity-50={$isBusy}>

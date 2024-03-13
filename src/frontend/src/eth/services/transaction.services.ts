@@ -1,7 +1,7 @@
+import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { transactionsStore } from '$eth/stores/transactions.store';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
-import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';

@@ -6,7 +6,7 @@
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
-	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+	import { ICP_NETWORK } from '$env/networks.env';
 	import { ethToken, ethTokenId } from '$eth/derived/eth.derived';
 
 	/**

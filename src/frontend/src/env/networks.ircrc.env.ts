@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$icp-eth/constants/tokens.constants';
+import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import type { IcCkInterface } from '$icp/types/ic';
 import { LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';

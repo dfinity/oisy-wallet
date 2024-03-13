@@ -1,5 +1,5 @@
+import { ETHEREUM_NETWORKS } from '$env/networks.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import { ETHEREUM_NETWORKS } from '$icp-eth/constants/networks.constants';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { networkId } from '$lib/derived/network.derived';
 import { derived, type Readable } from 'svelte/store';

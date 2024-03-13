@@ -1,5 +1,5 @@
+import { ICRC_TOKENS } from '$env/networks.ircrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
-import { ICRC_TOKENS } from '$icp/constants/icrc.constants';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcCkInterface } from '$icp/types/ic';
 import { mapIcrcToken, type IcrcLoadData } from '$icp/utils/icrc.utils';

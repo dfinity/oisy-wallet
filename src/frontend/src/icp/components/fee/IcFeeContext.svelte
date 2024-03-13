@@ -6,10 +6,10 @@
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
-	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { authStore } from '$lib/stores/auth.store';
 	import { queryEstimateFee } from '$icp/services/ckbtc.services';
+	import { BTC_NETWORK_ID } from '$env/networks.btc.env';
 
 	export let amount: string | number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;

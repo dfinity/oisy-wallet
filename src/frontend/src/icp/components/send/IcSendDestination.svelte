@@ -4,8 +4,8 @@
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import { debounce } from '@dfinity/utils';
-	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { BTC_NETWORK_ID } from '$env/networks.btc.env';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;

@@ -1,4 +1,5 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
+import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
@@ -13,7 +14,6 @@ import type { NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
-import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
