@@ -34,9 +34,11 @@ export const mapCkETHTransaction = ({
 		id,
 		from,
 		to,
-		txExplorerUrl: `${ckETHExplorerUrl}/transaction/${id}`,
-		...(notEmptyString(from) && { fromExplorerUrl: `${ckETHExplorerUrl}/account/${from}` }),
-		...(notEmptyString(to) && { toExplorerUrl: `${ckETHExplorerUrl}/account/${to}` }),
+		...(notEmptyString(ckETHExplorerUrl) && {
+			txExplorerUrl: `${ckETHExplorerUrl}/transaction/${id}`,
+			...(notEmptyString(from) && { fromExplorerUrl: `${ckETHExplorerUrl}/account/${from}` }),
+			...(notEmptyString(to) && { toExplorerUrl: `${ckETHExplorerUrl}/account/${to}` })
+		}),
 		...txRest
 	};
 
