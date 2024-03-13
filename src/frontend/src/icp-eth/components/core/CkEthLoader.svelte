@@ -2,25 +2,51 @@
 	import { loadCkEthHelperContractAddress } from '$icp-eth/services/cketh.services';
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { icrcTokensStore } from '$icp/stores/icrc.store';
-	import { IC_CKETH_MINTER_CANISTER_ID } from '$icp/constants/icrc.constants';
-	import { ethTokenId } from '$eth/derived/eth.derived';
-
-	// TODO: pick correct minter ID for network
+	import {
+		IC_CKETH_MINTER_CANISTER_ID,
+		LOCAL_CKETH_MINTER_CANISTER_ID,
+		STAGING_CKETH_MINTER_CANISTER_ID
+	} from '$icp/constants/icrc.constants';
+	import { ethToken } from '$eth/derived/eth.derived';
+	import { SEPOLIA_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
+	import { LOCAL } from '$lib/constants/app.constants';
+	import { isNullish } from '@dfinity/utils';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	const load = async () => {
 		if (!$ethToCkETHEnabled) {
 			return;
 		}
 
+		const { id: tokenId } = $ethToken;
+
+        // TODO: this is relatively ugly. Should we create a derived store or another abstraction that merge EthToken and CkCanisters?
+
+		const minterCanisterId =
+			tokenId === SEPOLIA_TOKEN_ID
+				? LOCAL
+					? LOCAL_CKETH_MINTER_CANISTER_ID
+					: STAGING_CKETH_MINTER_CANISTER_ID
+				: IC_CKETH_MINTER_CANISTER_ID;
+
+		if (isNullish(minterCanisterId)) {
+			toastsError({
+				msg: {
+					text: 'Error while loading the ckETH helper contract address. No minter canister ID has been initialized.'
+				}
+			});
+			return;
+		}
+
 		await loadCkEthHelperContractAddress({
-			tokenId: $ethTokenId,
+			tokenId,
 			canisters: {
-				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID
+				minterCanisterId
 			}
 		});
 	};
 
-	$: $ethToCkETHEnabled, $icrcTokensStore, $ethTokenId, (async () => await load())();
+	$: $ethToCkETHEnabled, $icrcTokensStore, $ethToken, (async () => await load())();
 </script>
 
 <slot />
