@@ -16,8 +16,9 @@
 		loadPendingCkEthTransaction,
 		loadPendingCkEthTransactions
 	} from '$icp-eth/services/eth.services';
-	import { networkId } from '$lib/derived/network.derived';
 	import { ethTokenId } from '$eth/derived/eth.derived';
+	import { ckEthereumToken } from '$icp-eth/derived/cketh.derived';
+	import type { NetworkId } from '$lib/types/network';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -28,6 +29,10 @@
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
 		if (isNullish(toAddress)) {
 			convertEthToCkEthPendingStore.reset($tokenId);
+			return;
+		}
+
+		if (isNullish($ckEthereumToken)) {
 			return;
 		}
 
@@ -53,35 +58,48 @@
 			lastObservedBlockNumber,
 			identity: $authStore.identity,
 			toAddress,
-			networkId: $networkId
+			networkId: $ckEthereumToken.network.id
 		});
 	};
 
-	const init = async ({ toAddress }: { toAddress: OptionAddress }) => {
+	const init = async ({
+		toAddress,
+		networkId
+	}: {
+		toAddress: OptionAddress;
+		networkId: NetworkId | undefined;
+	}) => {
 		await listener?.disconnect();
 
 		if (isNullish(toAddress)) {
 			return;
 		}
 
+		if (isNullish(networkId)) {
+			return;
+		}
+
 		listener = initEthPendingTransactionsListenerProvider({
 			toAddress,
 			fromAddress: $address,
-			listener: async (hash: string) => await loadPendingCkEthTransaction({ hash, token: $token }),
-			networkId: $networkId
+			listener: async (hash: string) =>
+				await loadPendingCkEthTransaction({ hash, token: $token, networkId }),
+			networkId
 		});
 	};
 
 	let ckEthHelperContractAddress: string | undefined;
 	$: ckEthHelperContractAddress = $ckEthHelperContractAddressStore?.[$ethTokenId]?.data;
 
-	$: (async () => init({ toAddress: ckEthHelperContractAddress }))();
+	$: (async () =>
+		init({ toAddress: ckEthHelperContractAddress, networkId: $ckEthereumToken?.network.id }))();
 
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
 	$: $balance,
 		$ckEthMinterInfoStore,
+		$ckEthereumToken,
 		ckEthHelperContractAddress,
 		(async () => await loadPendingTransactions({ toAddress: ckEthHelperContractAddress }))();
 

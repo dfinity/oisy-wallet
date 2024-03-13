@@ -84,13 +84,15 @@ export const loadPendingCkEthTransactions = async ({
 
 export const loadPendingCkEthTransaction = async ({
 	hash,
-	token
+	token: { id: tokenId },
+	networkId
 }: {
 	hash: string;
 	token: Token;
+	networkId: NetworkId;
 }) => {
 	try {
-		const { getTransaction } = alchemyProviders(token.network.id);
+		const { getTransaction } = alchemyProviders(networkId);
 		const transaction = await getTransaction(hash);
 
 		if (isNullish(transaction)) {
@@ -103,7 +105,7 @@ export const loadPendingCkEthTransaction = async ({
 		}
 
 		convertEthToCkEthPendingStore.prepend({
-			tokenId: token.id,
+			tokenId,
 			transaction: {
 				data: mapCkETHPendingTransaction({ transaction }),
 				certified: false
