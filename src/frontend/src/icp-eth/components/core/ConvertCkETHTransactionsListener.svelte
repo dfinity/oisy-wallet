@@ -19,6 +19,7 @@
 	import { ethTokenId } from '$eth/derived/eth.derived';
 	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
 	import type { NetworkId } from '$lib/types/network';
+	import type { IcToken } from '$icp/types/ic';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -58,7 +59,8 @@
 			lastObservedBlockNumber,
 			identity: $authStore.identity,
 			toAddress,
-			networkId: $ckETHTwinToken.network.id
+			networkId: $ckETHTwinToken.network.id,
+			twinToken: $ckETHTwinToken
 		});
 	};
 
@@ -83,7 +85,12 @@
 			toAddress,
 			fromAddress: $address,
 			listener: async (hash: string) =>
-				await loadPendingCkEthTransaction({ hash, token: $token, networkId }),
+				await loadPendingCkEthTransaction({
+					hash,
+					token: $token as IcToken,
+					twinToken: $ckETHTwinToken,
+					networkId
+				}),
 			networkId
 		});
 	};

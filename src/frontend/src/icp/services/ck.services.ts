@@ -2,7 +2,7 @@ import type { BlockIndex } from '$declarations/icp_ledger/icp_ledger.did';
 import { retrieveBtc } from '$icp/api/ckbtc-minter.api';
 import { withdrawEth } from '$icp/api/cketh-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';
-import type { IcCanisters, IcCkCanisters, IcCkToken } from '$icp/types/ic';
+import type { IcCanisters, IcCkMetadata, IcCkToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
@@ -78,7 +78,7 @@ const approveTransfer = async ({
 	amount,
 	identity
 }: Omit<IcTransferParams, 'amount'> & { amount: bigint } & {
-	canisters: Pick<IcCanisters, 'ledgerCanisterId'> & IcCkCanisters;
+	canisters: Pick<IcCanisters, 'ledgerCanisterId'> & IcCkMetadata;
 }): Promise<BlockIndex> => {
 	progress(SendIcStep.APPROVE);
 

@@ -3,14 +3,13 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { address } from '$lib/derived/address.derived';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
 	import { nonNullish } from '@dfinity/utils';
 	import { notEmptyString } from '@dfinity/utils';
+	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 
-	let explorerUrl: string | undefined =
-		notEmptyString(ETHEREUM_EXPLORER_URL) && notEmptyString($address)
-			? `${ETHEREUM_EXPLORER_URL}/address/${$address}`
-			: undefined;
+	let explorerUrl: string | undefined = notEmptyString($address)
+		? `${$explorerUrlStore}/address/${$address}`
+		: undefined;
 </script>
 
 <div>

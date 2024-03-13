@@ -1,6 +1,7 @@
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { IcCkToken } from '$icp/types/ic';
 import { mapCkBTCPendingUtxo } from '$icp/utils/ckbtc-transactions.utils';
 import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 import { token } from '$lib/derived/token.derived';
@@ -24,7 +25,8 @@ export const ckBtcPendingUtxoTransactions: Readable<IcTransactionsData> = derive
 		return ($ckBtcPendingUtxosStore?.[$token.id]?.data ?? []).map((utxo) => ({
 			data: mapCkBTCPendingUtxo({
 				utxo,
-				kytFee
+				kytFee,
+				ledgerCanisterId: ($token as IcCkToken).ledgerCanisterId
 			}),
 			certified: false
 		}));

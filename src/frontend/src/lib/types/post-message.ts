@@ -4,7 +4,7 @@ import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 
 import type { JsonText } from '$icp/types/btc.post-message';
-import type { IcCanisters, IcCkCanisters } from '$icp/types/ic';
+import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
 import type { SyncState } from '$lib/types/sync';
 
 export type PostMessageRequest =
@@ -36,7 +36,7 @@ export interface PostMessageDataRequestExchangeTimer {
 
 export type PostMessageDataRequestIcrc = IcCanisters;
 
-export type PostMessageDataRequestIcCk = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
+export type PostMessageDataRequestIcCk = Partial<Pick<IcCkMetadata, 'minterCanisterId'>>;
 
 export type PostMessageResponseStatus =
 	| 'syncWalletStatus'

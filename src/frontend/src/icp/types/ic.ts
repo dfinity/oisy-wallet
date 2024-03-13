@@ -58,13 +58,16 @@ export type IcCanisters = {
 	indexCanisterId: CanisterIdText;
 };
 
-export type IcCkToken = IcToken & Partial<IcCkCanisters & IcCkTwinToken>;
-export type IcCkInterface = IcInterface & IcCkCanisters & IcCkTwinToken;
-export type IcCkCanisters = {
+export type IcCkToken = IcToken & Partial<IcCkMetadata>;
+
+export type IcCkInterface = IcInterface & IcCkMetadata;
+
+export type IcCkMetadata = {
 	minterCanisterId: CanisterIdText;
-};
+} & Partial<IcCkTwinToken>;
+
 export type IcCkTwinToken = {
-	twinToken?: Token;
+	twinToken: Token;
 };
 
 export type IcAppMetadata = {
