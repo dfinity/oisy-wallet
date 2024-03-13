@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORKS_IDS, ICP_NETWORK_ID } from '$icp-eth/constants/networks.constants';
+import { ETHEREUM_NETWORKS_IDS, ICP_NETWORK_ID } from '$env/networks.env';
 import type { Network, NetworkId } from '$lib/types/network';
 import { nonNullish } from '@dfinity/utils';
 

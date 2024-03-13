@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WebSocketListener } from '$eth/types/listener';
-	import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
+	import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { address } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';

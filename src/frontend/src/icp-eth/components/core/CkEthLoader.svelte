@@ -6,9 +6,9 @@
 		IC_CKETH_MINTER_CANISTER_ID,
 		LOCAL_CKETH_MINTER_CANISTER_ID,
 		STAGING_CKETH_MINTER_CANISTER_ID
-	} from '$icp/constants/icrc.constants';
+	} from '$env/networks.ircrc.env';
 	import { ethToken } from '$eth/derived/eth.derived';
-	import { SEPOLIA_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
+	import { SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { isNullish } from '@dfinity/utils';
 	import { toastsError } from '$lib/stores/toasts.store';

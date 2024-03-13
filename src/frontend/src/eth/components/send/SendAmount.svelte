@@ -9,7 +9,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { slide } from 'svelte/transition';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
+	import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { ethTokenId } from '$eth/derived/eth.derived';
 

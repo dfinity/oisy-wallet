@@ -8,7 +8,6 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
 	import type { NetworkId } from '$lib/types/network';
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
@@ -16,6 +15,7 @@
 	import { assertCkETHUserInputAmount } from '$icp/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { BTC_NETWORK_ID } from '$env/networks.btc.env';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;

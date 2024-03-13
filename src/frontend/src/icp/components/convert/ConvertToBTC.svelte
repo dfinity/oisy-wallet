@@ -2,7 +2,6 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertCkBTCToBTC } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
-	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
@@ -10,6 +9,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { tokenId } from '$lib/derived/token.derived';
+	import { BTC_NETWORK_ID } from '$env/networks.btc.env';
 
 	const isDisabled = (): boolean => isNullish($ckBtcMinterInfoStore?.[$tokenId]);
 

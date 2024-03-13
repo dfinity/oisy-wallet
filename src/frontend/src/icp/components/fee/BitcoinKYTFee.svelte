@@ -6,10 +6,10 @@
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import type { IcToken } from '$icp/types/ic';
 	import type { NetworkId } from '$lib/types/network';
-	import { BTC_DECIMALS, BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { BTC_DECIMALS, BTC_NETWORK_ID } from '$env/networks.btc.env';
 
 	export let networkId: NetworkId | undefined = undefined;
 

@@ -1,3 +1,3 @@
-import { ETHEREUM_TOKENS } from '$icp-eth/constants/tokens.constants';
+import { ETHEREUM_TOKENS } from '$env/tokens.env';
 
 export const [DEFAULT_ETHEREUM_TOKEN, _rest] = ETHEREUM_TOKENS;

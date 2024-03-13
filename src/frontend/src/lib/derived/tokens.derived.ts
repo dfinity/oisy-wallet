@@ -1,5 +1,5 @@
+import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$icp-eth/constants/tokens.constants';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';

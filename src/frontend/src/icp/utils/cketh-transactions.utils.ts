@@ -1,13 +1,13 @@
-import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-import { IC_CKETH_LEDGER_CANISTER_ID } from '$icp/constants/icrc.constants';
-import type { IcrcTransaction, IcToken, IcTransactionUi } from '$icp/types/ic';
-import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_REIMBURSE } from '$icp/utils/cketh-memo.utils';
-import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import {
 	CKETH_EXPLORER_URL,
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
-} from '$lib/constants/explorers.constants';
+} from '$env/explorers.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks.ircrc.env';
+import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
+import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
+import { MINT_MEMO_REIMBURSE, decodeBurnMemo, decodeMintMemo } from '$icp/utils/cketh-memo.utils';
+import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import {
 	fromNullable,

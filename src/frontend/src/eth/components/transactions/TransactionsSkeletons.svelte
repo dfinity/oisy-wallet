@@ -3,7 +3,7 @@
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { transactionsNotInitialized } from '$eth/derived/transactions.derived';
 	import { erc20Tokens, erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
-	import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$icp-eth/constants/tokens.constants';
+	import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 	import { nonNullish } from '@dfinity/utils';
 	import { routeToken } from '$lib/derived/nav.derived';
 

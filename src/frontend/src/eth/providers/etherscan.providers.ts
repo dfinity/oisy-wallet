@@ -1,8 +1,5 @@
-import {
-	ETHERSCAN_NETWORK_HOMESTEAD,
-	ETHERSCAN_NETWORK_SEPOLIA
-} from '$eth/constants/networks.constants';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$icp-eth/constants/networks.constants';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
+import { ETHERSCAN_NETWORK_HOMESTEAD, ETHERSCAN_NETWORK_SEPOLIA } from '$env/networks.eth.env';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { assertNonNullish } from '@dfinity/utils';

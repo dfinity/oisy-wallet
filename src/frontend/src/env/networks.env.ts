@@ -1,8 +1,8 @@
-import { ETH_MAINNET_ENABLED } from '$eth/constants/networks.constants';
+import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
+import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
-import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { Network } from '$lib/types/network';
 
 /**

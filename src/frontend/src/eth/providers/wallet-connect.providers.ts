@@ -1,3 +1,4 @@
+import { SEPOLIA_NETWORK } from '$env/networks.env';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_V4,
@@ -6,7 +7,6 @@ import {
 	WALLET_CONNECT_METADATA
 } from '$eth/constants/wallet-connect.constants';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
-import { SEPOLIA_NETWORK } from '$icp-eth/constants/networks.constants';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import { Core } from '@walletconnect/core';
 import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';

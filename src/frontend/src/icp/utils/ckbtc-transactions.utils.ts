@@ -1,14 +1,14 @@
-import { IC_CKBTC_LEDGER_CANISTER_ID } from '$icp/constants/icrc.constants';
-import type { BtcStatusesData } from '$icp/stores/btc.store';
-import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
-import type { IcrcTransaction, IcToken, IcTransactionUi } from '$icp/types/ic';
-import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_KYT_FAIL } from '$icp/utils/ckbtc-memo.utils';
-import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import {
 	BTC_MAINNET_EXPLORER_URL,
 	BTC_TESTNET_EXPLORER_URL,
 	CKBTC_EXPLORER_URL
-} from '$lib/constants/explorers.constants';
+} from '$env/explorers.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.ircrc.env';
+import type { BtcStatusesData } from '$icp/stores/btc.store';
+import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
+import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
+import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/ckbtc-memo.utils';
+import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import {

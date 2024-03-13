@@ -10,7 +10,7 @@
 	import { tokenId } from '$lib/derived/token.derived';
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import type { TokenId } from '$lib/types/token';
-	import { ETHEREUM_TOKEN_IDS } from '$icp-eth/constants/tokens.constants';
+	import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 
 	export let convertTokenId: TokenId;
 

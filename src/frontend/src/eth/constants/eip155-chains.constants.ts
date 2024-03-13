@@ -1,7 +1,4 @@
-import {
-	ETHEREUM_NETWORK_CHAIN_ID,
-	SEPOLIA_NETWORK_CHAIN_ID
-} from '$icp-eth/constants/networks.constants';
+import { ETHEREUM_NETWORK_CHAIN_ID, SEPOLIA_NETWORK_CHAIN_ID } from '$env/networks.env';
 
 export const EIP155_CHAINS: Record<string, { chainId: number; name: string }> = {
 	'eip155:1': {

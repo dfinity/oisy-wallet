@@ -1,8 +1,5 @@
-import { BTC_NETWORK, BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
-import {
-	CKBTC_LEDGER_CANISTER_IDS,
-	CKETH_LEDGER_CANISTER_IDS
-} from '$icp/constants/icrc.constants';
+import { BTC_NETWORK, BTC_NETWORK_ID } from '$env/networks.btc.env';
+import { CKBTC_LEDGER_CANISTER_IDS, CKETH_LEDGER_CANISTER_IDS } from '$env/networks.ircrc.env';
 import type { IcToken } from '$icp/types/ic';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';

@@ -1,9 +1,6 @@
-import {
-	ALCHEMY_NETWORK_MAINNET,
-	ALCHEMY_NETWORK_SEPOLIA
-} from '$eth/constants/networks.constants';
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
+import { ALCHEMY_NETWORK_MAINNET, ALCHEMY_NETWORK_SEPOLIA } from '$env/networks.eth.env';
 import type { WebSocketListener } from '$eth/types/listener';
-import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$icp-eth/constants/networks.constants';
 import type { ETH_ADDRESS, OptionAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
