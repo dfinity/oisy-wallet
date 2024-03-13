@@ -5,7 +5,7 @@
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { ckEthereumToken } from '$icp-eth/derived/cketh.derived';
+	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	export let networkId: NetworkId | undefined = undefined;
 </script>
@@ -16,7 +16,7 @@
 		{#if isNetworkIdBTC(networkId)}
 			<IcSendBtcNetwork />
 		{:else if isNetworkIdEthereum(networkId)}
-			{$ckEthereumToken.name}
+			{$ckETHTwinToken.name}
 		{:else}
 			Internet Computer
 		{/if}
