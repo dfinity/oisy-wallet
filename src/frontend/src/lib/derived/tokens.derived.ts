@@ -11,7 +11,7 @@ export const sortedIcrcTokens: Readable<Token[]> = derived([icrcTokens], ([$icrc
 			{ name: nameB, position: positionB, exchangeCoinId: exchangeCoinIdB }
 		) =>
 			positionA === positionB
-				? exchangeCoinIdA === exchangeCoinIdA
+				? exchangeCoinIdA === exchangeCoinIdB
 					? nameA.localeCompare(nameB)
 					: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
 				: positionA - positionB
