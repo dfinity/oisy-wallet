@@ -5,7 +5,7 @@
 	},
 	"backend": {
 		"ic": "grghe-syaaa-aaaar-qabyq-cai",
-		"old-backend": "cab24-4qaaa-aaaan-qecca-cai",
+		"old_backend": "cab24-4qaaa-aaaan-qecca-cai",
 		"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
 	},
 	"frontend": {

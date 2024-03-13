@@ -5,20 +5,18 @@
 	import type { Network } from '$lib/types/network';
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
-	import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
+	import { ckEthereumNetwork } from '$icp-eth/derived/cketh.derived';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
-
-	// TODO: sourceNetwork for ck test or mainnet
 </script>
 
 <SendTokenWizard
 	{currentStep}
-	sourceNetwork={ETHEREUM_NETWORK}
+	sourceNetwork={$ckEthereumNetwork}
 	bind:destination
 	bind:targetNetwork
 	bind:amount
