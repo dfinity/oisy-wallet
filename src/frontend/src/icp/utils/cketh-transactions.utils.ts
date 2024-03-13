@@ -27,15 +27,16 @@ export const mapCkETHTransaction = ({
 } & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
+	const ckETHExplorerUrl =
+		IC_CKETH_LEDGER_CANISTER_ID === ledgerCanisterId ? CKETH_EXPLORER_URL : undefined;
+
 	const tx: IcTransactionUi = {
 		id,
 		from,
 		to,
-		...(notEmptyString(CKETH_EXPLORER_URL) && {
-			txExplorerUrl: `${CKETH_EXPLORER_URL}/transaction/${id}`,
-			...(notEmptyString(from) && { fromExplorerUrl: `${CKETH_EXPLORER_URL}/account/${from}` }),
-			...(notEmptyString(to) && { toExplorerUrl: `${CKETH_EXPLORER_URL}/account/${to}` })
-		}),
+		txExplorerUrl: `${ckETHExplorerUrl}/transaction/${id}`,
+		...(notEmptyString(from) && { fromExplorerUrl: `${ckETHExplorerUrl}/account/${from}` }),
+		...(notEmptyString(to) && { toExplorerUrl: `${ckETHExplorerUrl}/account/${to}` }),
 		...txRest
 	};
 
