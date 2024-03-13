@@ -40,7 +40,8 @@ const CKBTC_LOCAL_CANISTER: IcCkInterface | undefined =
 				ledgerCanisterId: LOCAL_CKBTC_LEDGER_CANISTER_ID,
 				indexCanisterId: LOCAL_CKBTC_INDEX_CANISTER_ID,
 				minterCanisterId: LOCAL_CKBTC_MINTER_CANISTER_ID,
-				exchangeCoinId: 'bitcoin'
+				exchangeCoinId: 'bitcoin',
+				position: 3
 			}
 		: undefined;
 
@@ -53,7 +54,8 @@ const CKBTC_STAGING_CANISTER: IcCkInterface | undefined =
 				ledgerCanisterId: STAGING_CKBTC_LEDGER_CANISTER_ID,
 				indexCanisterId: STAGING_CKBTC_INDEX_CANISTER_ID,
 				minterCanisterId: STAGING_CKBTC_MINTER_CANISTER_ID,
-				exchangeCoinId: 'bitcoin'
+				exchangeCoinId: 'bitcoin',
+				position: 2
 			}
 		: undefined;
 
@@ -63,7 +65,8 @@ const CKBTC_IC_CANISTER: IcCkInterface | undefined =
 				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
 				indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID,
 				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
-				exchangeCoinId: 'bitcoin'
+				exchangeCoinId: 'bitcoin',
+				position: 1
 			}
 		: undefined;
 
@@ -114,7 +117,8 @@ const CKETH_LOCAL_CANISTER: IcCkInterface | undefined =
 				ledgerCanisterId: LOCAL_CKETH_LEDGER_CANISTER_ID,
 				indexCanisterId: LOCAL_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
-				exchangeCoinId: 'ethereum'
+				exchangeCoinId: 'ethereum',
+				position: 3
 			}
 		: undefined;
 
@@ -127,7 +131,8 @@ const CKETH_STAGING_CANISTER: IcCkInterface | undefined =
 				ledgerCanisterId: STAGING_CKETH_LEDGER_CANISTER_ID,
 				indexCanisterId: STAGING_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: STAGING_CKETH_MINTER_CANISTER_ID,
-				exchangeCoinId: 'ethereum'
+				exchangeCoinId: 'ethereum',
+				position: 2
 			}
 		: undefined;
 
@@ -137,7 +142,8 @@ const CKETH_IC_CANISTER: IcCkInterface | undefined =
 				ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
 				indexCanisterId: IC_CKETH_INDEX_CANISTER_ID,
 				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID,
-				exchangeCoinId: 'ethereum'
+				exchangeCoinId: 'ethereum',
+				position: 1
 			}
 		: undefined;
 
