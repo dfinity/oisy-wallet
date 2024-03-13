@@ -10,6 +10,8 @@ import type { Token } from '$lib/types/token';
 /**
  * Ethereum
  */
+export const ETHEREUM_DEFAULT_DECIMALS = 18;
+
 const ETHEREUM_SYMBOL = 'ETH';
 
 export const ETHEREUM_TOKEN_ID: unique symbol = Symbol(ETHEREUM_SYMBOL);
@@ -20,7 +22,7 @@ export const ETHEREUM_TOKEN: Required<Token> = {
 	standard: 'ethereum',
 	name: 'Ethereum',
 	symbol: 'ETH',
-	decimals: 18,
+	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth
 };
 
@@ -34,7 +36,7 @@ export const SEPOLIA_TOKEN: Required<Token> = {
 	standard: 'ethereum',
 	name: 'SepoliaETH',
 	symbol: 'SepoliaETH',
-	decimals: 18,
+	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth
 };
 

@@ -2,10 +2,9 @@
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import { tokenStandard } from '$lib/derived/token.derived';
-	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import { isInvalidDestinationIc, isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { debounce } from '@dfinity/utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { BTC_NETWORK_ID } from '$env/networks.btc.env';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -28,7 +27,7 @@
 	let inputPlaceholder: string;
 	$: inputPlaceholder = isNetworkIdEthereum(networkId)
 		? 'Enter public address (0x)'
-		: networkId === BTC_NETWORK_ID
+		: isNetworkIdBTC(networkId)
 			? 'Enter recipient address'
 			: 'Enter wallet address';
 </script>

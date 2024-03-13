@@ -13,8 +13,8 @@
 {#if nonNullish(networkId)}
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">Network</svelte:fragment>
-		{#if isNetworkIdBTC(networkId)}
-			<IcSendBtcNetwork />
+		{#if nonNullish(networkId) && isNetworkIdBTC(networkId)}
+			<IcSendBtcNetwork {networkId} />
 		{:else if isNetworkIdEthereum(networkId)}
 			{$ckETHTwinToken.name}
 		{:else}

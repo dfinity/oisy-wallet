@@ -55,3 +55,24 @@ export const ICP_NETWORK: Network = {
 	name: 'Internet Computer',
 	icon: icpLight
 };
+
+/**
+ * BTC
+ */
+export const BTC_MAINNET_NETWORK_SYMBOL = 'BTC';
+
+export const BTC_MAINNET_NETWORK_ID = Symbol(BTC_MAINNET_NETWORK_SYMBOL);
+
+export const BTC_MAINNET_NETWORK: Network = {
+	id: BTC_MAINNET_NETWORK_ID,
+	name: 'Bitcoin'
+};
+
+export const BTC_TESTNET_NETWORK_SYMBOL = 'BTC (Testnet)';
+
+export const BTC_TESTNET_NETWORK_ID = Symbol(BTC_TESTNET_NETWORK_SYMBOL);
+
+export const BTC_TESTNET_NETWORK: Network = {
+	id: BTC_TESTNET_NETWORK_ID,
+	name: 'Bitcoin'
+};

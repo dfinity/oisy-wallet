@@ -1,3 +1,4 @@
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import type { IcCkInterface } from '$icp/types/ic';
 import { LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
@@ -42,7 +43,8 @@ const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 				indexCanisterId: LOCAL_CKBTC_INDEX_CANISTER_ID,
 				minterCanisterId: LOCAL_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
-				position: 3
+				position: 3,
+				twinToken: BTC_TESTNET_TOKEN
 			}
 		: undefined;
 
@@ -56,7 +58,8 @@ const CKBTC_STAGING_DATA: IcCkInterface | undefined =
 				indexCanisterId: STAGING_CKBTC_INDEX_CANISTER_ID,
 				minterCanisterId: STAGING_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
-				position: 2
+				position: 2,
+				twinToken: BTC_TESTNET_TOKEN
 			}
 		: undefined;
 
@@ -67,7 +70,8 @@ const CKBTC_IC_DATA: IcCkInterface | undefined =
 				indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID,
 				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
-				position: 1
+				position: 1,
+				twinToken: BTC_MAINNET_TOKEN
 			}
 		: undefined;
 

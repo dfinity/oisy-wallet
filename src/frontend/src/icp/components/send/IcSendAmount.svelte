@@ -15,7 +15,7 @@
 	import { assertCkETHUserInputAmount } from '$icp/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { BTC_NETWORK_ID } from '$env/networks.btc.env';
+	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -40,7 +40,7 @@
 			unitName: $tokenDecimals
 		});
 
-		if (networkId === BTC_NETWORK_ID) {
+		if (isNetworkIdBTC(networkId)) {
 			amountError = assertCkBTCUserInputAmount({
 				amount: value,
 				minterInfo: $ckBtcMinterInfoStore?.[$tokenId],
