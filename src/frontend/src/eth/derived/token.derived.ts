@@ -4,6 +4,9 @@ import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import type { Token, TokenId } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
+/**
+ * Ethereum (Ethereum or Sepolia) token - i.e. not ERC20.
+ */
 export const ethereumToken: Readable<Required<Token>> = derived(
 	[ethereumTokens, selectedEthereumNetwork],
 	([$ethTokens, { id }]) =>

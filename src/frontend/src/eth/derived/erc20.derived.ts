@@ -1,11 +1,15 @@
+import { ethereumNetworksIds } from '$eth/derived/networks.derived';
 import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const erc20Tokens: Readable<Erc20Token[]> = derived(
-	[erc20TokensStore],
-	([$erc20TokensStore]) => $erc20TokensStore ?? []
+	[erc20TokensStore, ethereumNetworksIds],
+	([$erc20TokensStore, $ethereumNetworksIds]) =>
+		($erc20TokensStore ?? []).filter(({ network: { id: networkId } }) =>
+			$ethereumNetworksIds.includes(networkId)
+		)
 );
 
 export const erc20TokensInitialized: Readable<boolean> = derived(
