@@ -1,11 +1,11 @@
-import { get, set as setStorage } from '$icp/utils/storage.utils';
+import { del, get, set as setStorage } from '$icp/utils/storage.utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type StorageStoreData<T> = T | null | undefined;
 
 export interface StorageStore<T> extends Readable<StorageStoreData<T>> {
 	set: (params: { key: string; value: T }) => void;
-	reset: () => void;
+	reset: (params: { key: string }) => void;
 }
 
 export const initStorageStore = <T>({ key }: { key: string }): StorageStore<T> => {
@@ -19,6 +19,9 @@ export const initStorageStore = <T>({ key }: { key: string }): StorageStore<T> =
 			set(value);
 		},
 		subscribe,
-		reset: () => set(null)
+		reset: (params) => {
+			del(params);
+			set(null);
+		}
 	};
 };
