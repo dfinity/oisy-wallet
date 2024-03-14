@@ -1,8 +1,12 @@
+import { ETHEREUM_NETWORK, ICP_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
+import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-import { DEFAULT_NETWORK, DEFAULT_NETWORK_ID, NETWORKS } from '$lib/constants/networks.constants';
+import { LOCAL } from '$lib/constants/app.constants';
+import { DEFAULT_NETWORK, DEFAULT_NETWORK_ID } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { tokens } from '$lib/derived/tokens.derived';
+import { testnetsStore } from '$lib/stores/testnets.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -10,10 +14,18 @@ import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const networkId: Readable<NetworkId> = derived([routeNetwork], ([$routeNetwork]) =>
-	nonNullish($routeNetwork)
-		? NETWORKS.find(({ id }) => id.description === $routeNetwork)?.id ?? DEFAULT_NETWORK_ID
-		: DEFAULT_NETWORK_ID
+export const networks: Readable<Network[]> = derived([testnetsStore], ([$testnetsStore]) => [
+	...(ETH_MAINNET_ENABLED ? [ETHEREUM_NETWORK] : []),
+	...($testnetsStore?.enabled ?? LOCAL ? [SEPOLIA_NETWORK] : []),
+	ICP_NETWORK
+]);
+
+export const networkId: Readable<NetworkId> = derived(
+	[networks, routeNetwork],
+	([$networks, $routeNetwork]) =>
+		nonNullish($routeNetwork)
+			? $networks.find(({ id }) => id.description === $routeNetwork)?.id ?? DEFAULT_NETWORK_ID
+			: DEFAULT_NETWORK_ID
 );
 
 export const networkTokens: Readable<Token[]> = derived(
@@ -36,6 +48,6 @@ export const networkAddress: Readable<OptionAddress | string> = derived(
 );
 
 export const selectedNetwork: Readable<Network> = derived(
-	[networkId],
-	([$networkId]) => NETWORKS.find(({ id }) => id === $networkId) ?? DEFAULT_NETWORK
+	[networks, networkId],
+	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId) ?? DEFAULT_NETWORK
 );

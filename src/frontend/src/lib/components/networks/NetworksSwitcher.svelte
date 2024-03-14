@@ -4,8 +4,7 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
-	import { NETWORKS } from '$lib/constants/networks.constants';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { networks, selectedNetwork } from '$lib/derived/network.derived';
 	import { nonNullish } from '@dfinity/utils';
 
 	let visible = false;
@@ -35,7 +34,7 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<ul class="flex flex-col gap-4 list-none">
-		{#each NETWORKS as network}
+		{#each $networks as network}
 			<li>
 				<Network {network} on:icSelected={close} />
 			</li>
