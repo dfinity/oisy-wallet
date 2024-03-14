@@ -8,7 +8,7 @@
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
 	import { maxGasFee } from '$eth/utils/fee.utils';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-	import { ethToken } from '$eth/derived/eth.derived';
+	import { ethereumToken } from '$eth/derived/token.derived';
 
 	const { store: feeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
@@ -54,7 +54,7 @@
 				value: fee,
 				displayDecimals: EIGHT_DECIMALS
 			})}
-			{$ethToken.symbol}
+			{$ethereumToken.symbol}
 		</div>
 	{/if}
 </div>

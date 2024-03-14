@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKENS, ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
+import { SUPPORTED_ETHEREUM_TOKENS, SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
@@ -12,7 +12,7 @@ import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const reloadBalance = async (token: Token): Promise<{ success: boolean }> => {
-	if (ETHEREUM_TOKEN_IDS.includes(token.id)) {
+	if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes(token.id)) {
 		return loadBalance({ networkId: token.network.id, tokenId: token.id });
 	}
 
@@ -98,7 +98,7 @@ export const loadBalances = async (): Promise<{ success: boolean }> => {
 	const contracts = get(erc20Tokens);
 
 	const results = await Promise.all([
-		...ETHEREUM_TOKENS.map(({ network: { id: networkId }, id: tokenId }) =>
+		...SUPPORTED_ETHEREUM_TOKENS.map(({ network: { id: networkId }, id: tokenId }) =>
 			loadBalance({ networkId, tokenId })
 		),
 		...contracts.map((contract) => loadErc20Balance(contract))

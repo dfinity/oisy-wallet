@@ -16,7 +16,7 @@
 		loadPendingCkEthTransaction,
 		loadPendingCkEthTransactions
 	} from '$icp-eth/services/eth.services';
-	import { ethTokenId } from '$eth/derived/eth.derived';
+	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
 	import type { NetworkId } from '$lib/types/network';
 	import type { IcToken } from '$icp/types/ic';
@@ -96,7 +96,7 @@
 	};
 
 	let ckEthHelperContractAddress: string | undefined;
-	$: ckEthHelperContractAddress = $ckEthHelperContractAddressStore?.[$ethTokenId]?.data;
+	$: ckEthHelperContractAddress = $ckEthHelperContractAddressStore?.[$ethereumTokenId]?.data;
 
 	$: (async () =>
 		init({ toAddress: ckEthHelperContractAddress, networkId: $ckETHTwinToken?.network.id }))();
