@@ -4,8 +4,9 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
-	import { networks, selectedNetwork } from '$lib/derived/network.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { nonNullish } from '@dfinity/utils';
+	import { networks } from '$lib/derived/networks.derived';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;

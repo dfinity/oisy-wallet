@@ -1,24 +1,15 @@
-import { ETHEREUM_NETWORK, ICP_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
-import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-import { LOCAL } from '$lib/constants/app.constants';
 import { DEFAULT_NETWORK, DEFAULT_NETWORK_ID } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
+import { networks } from '$lib/derived/networks.derived';
 import { tokens } from '$lib/derived/tokens.derived';
-import { testnetsStore } from '$lib/stores/testnets.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
-
-export const networks: Readable<Network[]> = derived([testnetsStore], ([$testnetsStore]) => [
-	...(ETH_MAINNET_ENABLED ? [ETHEREUM_NETWORK] : []),
-	...($testnetsStore?.enabled ?? LOCAL ? [SEPOLIA_NETWORK] : []),
-	ICP_NETWORK
-]);
 
 export const networkId: Readable<NetworkId> = derived(
 	[networks, routeNetwork],
