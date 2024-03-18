@@ -19,7 +19,7 @@
 	{@const last = i === $tokens.length - 1}
 
 	<div
-		class="flex gap-1"
+		class="flex gap-1 last:mb-8"
 		style={`border-left: 1px solid var(--color-platinum); border-top: 1px solid var(--color-platinum); border-right: 1px solid var(--color-platinum); ${
 			last ? 'border-bottom: 1px solid var(--color-platinum);' : ''
 		}`}
