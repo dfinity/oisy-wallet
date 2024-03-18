@@ -2,8 +2,7 @@
 	import Transaction from './Transaction.svelte';
 	import { sortedTransactions } from '$eth/derived/transactions.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
-	import type { Token } from '$lib/types/token';
-	import { onMount } from 'svelte';
+	import type { TokenId } from '$lib/types/token';
 	import { token } from '$lib/derived/token.derived';
 	import { modalTransaction } from '$lib/derived/modal.derived';
 	import TransactionModal from './TransactionModal.svelte';
@@ -12,18 +11,43 @@
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 
-	const load = async ({ network: { id: networkId }, id: tokenId }: Token) => {
-		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
-		// This prevents the glitch load of ETH transaction with a token ID for ICP.
-		if (!isNetworkIdEthereum(networkId)) {
+	let tokenIdLoaded: TokenId | undefined = undefined;
+
+	const load = async () => {
+		if ($tokenNotInitialized) {
+			tokenIdLoaded = undefined;
 			return;
 		}
 
-		await loadTransactions({ tokenId, networkId });
+		const {
+			network: { id: networkId },
+			id: tokenId
+		} = $token;
+
+		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
+		// This prevents the glitch load of ETH transaction with a token ID for ICP.
+		if (!isNetworkIdEthereum(networkId)) {
+			tokenIdLoaded = undefined;
+			return;
+		}
+
+		// We don't reload the same token in a row.
+		if (tokenIdLoaded === tokenId) {
+			return;
+		}
+
+		tokenIdLoaded = tokenId;
+
+		const { success } = await loadTransactions({ tokenId, networkId });
+
+		if (!success) {
+			tokenIdLoaded = undefined;
+		}
 	};
 
-	onMount(async () => await load($token));
+	$: $token, $tokenNotInitialized, (async () => await load())();
 
 	let selectedTransaction: TransactionType | undefined;
 	$: selectedTransaction = $modalTransaction

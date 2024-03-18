@@ -1,11 +1,11 @@
 import { SUPPORTED_ETHEREUM_TOKENS, SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
-import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { OptionAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';
@@ -16,7 +16,7 @@ export const reloadBalance = async (token: Token): Promise<{ success: boolean }>
 		return loadBalance({ networkId: token.network.id, tokenId: token.id });
 	}
 
-	return loadErc20Balance(token as Erc20Token);
+	return loadErc20Balance({ token: token as Erc20Token });
 };
 
 export const loadBalance = async ({
@@ -55,8 +55,14 @@ export const loadBalance = async ({
 	return { success: true };
 };
 
-export const loadErc20Balance = async (contract: Erc20Token): Promise<{ success: boolean }> => {
-	const address = get(addressStore);
+const loadErc20Balance = async ({
+	token: contract,
+	address: optionAddress
+}: {
+	token: Erc20Token;
+	address?: OptionAddress;
+}): Promise<{ success: boolean }> => {
+	const address = optionAddress ?? get(addressStore);
 
 	if (isNullish(address)) {
 		toastsError({
@@ -85,23 +91,28 @@ export const loadErc20Balance = async (contract: Erc20Token): Promise<{ success:
 };
 
 export const loadBalances = async (): Promise<{ success: boolean }> => {
-	const address = get(addressStore);
-
-	if (isNullish(address)) {
-		toastsError({
-			msg: { text: 'ETH address is unknown.' }
-		});
-
-		return { success: false };
-	}
-
-	const contracts = get(erc20Tokens);
-
 	const results = await Promise.all([
 		...SUPPORTED_ETHEREUM_TOKENS.map(({ network: { id: networkId }, id: tokenId }) =>
 			loadBalance({ networkId, tokenId })
-		),
-		...contracts.map((contract) => loadErc20Balance(contract))
+		)
+	]);
+
+	return { success: results.every(({ success }) => success === true) };
+};
+
+export const loadErc20Balances = async ({
+	address,
+	erc20Tokens,
+	networkId
+}: {
+	address: OptionAddress;
+	erc20Tokens: Erc20Token[];
+	networkId: NetworkId;
+}): Promise<{ success: boolean }> => {
+	const results = await Promise.all([
+		...erc20Tokens
+			.filter(({ network: { id } }) => id === networkId)
+			.map((token) => loadErc20Balance({ token, address }))
 	]);
 
 	return { success: results.every(({ success }) => success === true) };
