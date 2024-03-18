@@ -10,7 +10,6 @@ import {
 	type IcrcSubaccount,
 	type IcrcTokenMetadataResponse
 } from '@dfinity/ledger-icrc';
-import type { BlockIndex } from '@dfinity/ledger-icrc/dist/candid/icrc_ledger';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
 
@@ -67,7 +66,7 @@ export const approve = async ({
 	spender: IcrcAccount;
 	expiresAt: bigint;
 	createdAt?: bigint;
-}): Promise<BlockIndex> => {
+}): Promise<IcrcBlockIndex> => {
 	assertNonNullish(identity, 'No internet identity.');
 
 	const { approve } = await ledgerCanister({ identity, ledgerCanisterId });
