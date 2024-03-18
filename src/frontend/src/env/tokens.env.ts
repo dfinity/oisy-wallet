@@ -43,7 +43,6 @@ export const SEPOLIA_TOKEN: Required<Token> = {
 /**
  * The tokens store is useful for enabling and disabling features based on the testnets flag. However, constants are handy and not too verbose for testing if a token ID belongs to an Ethereum token.
  *
- * TODO: Load balance only for tokens store
  */
 export const SUPPORTED_ETHEREUM_TOKENS: [...Required<Token>[], Required<Token>] = [
 	...(ETH_MAINNET_ENABLED ? [ETHEREUM_TOKEN] : []),
