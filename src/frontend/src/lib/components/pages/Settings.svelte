@@ -7,8 +7,6 @@
 	import { secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
 	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
-	import AddToken from '$lib/components/tokens/AddToken.svelte';
-	import { networkEthereum } from '$lib/derived/network.derived';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import AdminAirdrop from '$airdrop/components/admin/AdminAirdrop.svelte';
 
@@ -53,11 +51,5 @@
 </div>
 
 <TokensMetadata />
-
-{#if $networkEthereum}
-	<div class="mt-6 px-4" style="border-left: 1px solid transparent">
-		<AddToken iconSize="small" />
-	</div>
-{/if}
 
 <AdminAirdrop />
