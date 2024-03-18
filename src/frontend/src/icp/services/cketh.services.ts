@@ -4,7 +4,7 @@ import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AnonymousIdentity } from '@dfinity/agent';
-import type { Eip1559TransactionPrice } from '@dfinity/cketh/dist/candid/minter';
+import type { Eip1559TransactionPrice } from '@dfinity/cketh';
 import { assertNonNullish } from '@dfinity/utils';
 
 export const loadEip1559TransactionPrice = async ({

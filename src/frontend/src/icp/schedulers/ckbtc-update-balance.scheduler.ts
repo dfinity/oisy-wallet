@@ -7,8 +7,8 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
+import type { UtxoStatus } from '@dfinity/ckbtc';
 import { MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
-import type { UtxoStatus } from '@dfinity/ckbtc/dist/candid/minter';
 import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestIcCk> {
