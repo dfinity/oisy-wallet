@@ -9,23 +9,15 @@
 	import banner from '$lib/assets/banner.svg';
 	import { Modal } from '@dfinity/gix-components';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { isRouteTransactions } from '$lib/utils/nav.utils';
-	import { page } from '$app/stores';
 	import { browser } from '$app/environment';
 	import { isNullish } from '@dfinity/utils';
 	import { initAirdrop } from '$airdrop/services/airdrop.services';
-	import { loadTransactions as loadEthTransactions } from '$eth/services/transactions.services';
-	import { tokenId } from '$lib/derived/token.derived';
 	import { AIRDROP } from '$airdrop/constants/airdrop.constants';
 	import { loading } from '$lib/stores/loader.store';
 	import { LoaderStep } from '$lib/enums/steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
-	import { networkEthereum, networkId } from '$lib/derived/network.derived';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
-
-	let loadTransactions = false;
-	$: loadTransactions = isRouteTransactions($page);
 
 	let steps: [ProgressStep, ...ProgressStep[]];
 	$: steps = [
@@ -66,13 +58,7 @@
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
 		await Promise.all([loadErc20Contracts(), loadIcrcTokens()]);
 
-		// In case of error we want to display the dapp anyway and not get stuck on the loader
-		await Promise.allSettled([
-			...(loadTransactions && $networkEthereum
-				? [loadEthTransactions({ networkId: $networkId, tokenId: $tokenId })]
-				: []),
-			...(AIRDROP ? [initAirdrop()] : [])
-		]);
+		await (AIRDROP ? initAirdrop() : Promise.resolve());
 	};
 
 	const progressAndLoad = async () => {
