@@ -33,6 +33,7 @@
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { ethereumTokenId } from '$eth/derived/token.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -147,7 +148,7 @@
 		observe={currentStep?.name !== 'Sending'}
 		sourceNetwork={$selectedEthereumNetwork}
 	>
-		<CkEthLoader>
+		<CkEthLoader convertTokenId={$ethereumTokenId}>
 			{#if currentStep?.name === 'Sending'}
 				<SendProgress progressStep={sendProgressStep} steps={WALLET_CONNECT_SEND_STEPS} />
 			{:else}

@@ -7,18 +7,18 @@
 		LOCAL_CKETH_MINTER_CANISTER_ID,
 		STAGING_CKETH_MINTER_CANISTER_ID
 	} from '$env/networks.ircrc.env';
-	import { ethereumToken } from '$eth/derived/token.derived';
 	import { SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { isNullish } from '@dfinity/utils';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { TokenId } from '$lib/types/token';
+
+	export let convertTokenId: TokenId;
 
 	const load = async () => {
 		if (!$ethToCkETHEnabled) {
 			return;
 		}
-
-		const { id: tokenId } = $ethereumToken;
 
 		// TODO: this is relatively ugly. Should we create a derived store or another abstraction that merge EthToken and CkCanisters?
 
@@ -46,7 +46,7 @@
 		});
 	};
 
-	$: $ethToCkETHEnabled, $icrcTokensStore, $ethereumToken, (async () => await load())();
+	$: $ethToCkETHEnabled, $icrcTokensStore, convertTokenId, (async () => await load())();
 </script>
 
 <slot />

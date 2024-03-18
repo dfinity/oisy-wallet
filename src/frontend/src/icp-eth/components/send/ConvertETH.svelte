@@ -41,7 +41,7 @@
 	};
 </script>
 
-<CkEthLoader>
+<CkEthLoader {convertTokenId}>
 	<button
 		class="hero col-span-2"
 		on:click={async () => await openSend()}
