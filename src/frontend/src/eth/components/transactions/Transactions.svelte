@@ -11,20 +11,12 @@
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { routeToken } from '$lib/derived/nav.derived';
-	import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-
-	let tokenInitialized: boolean;
-	$: tokenInitialized =
-		$routeToken === ETHEREUM_TOKEN.name ||
-		$routeToken === SEPOLIA_TOKEN.name ||
-		nonNullish($erc20Tokens.find(({ name }) => name === $routeToken));
+	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
 	const load = async () => {
-		if (!tokenInitialized) {
+		if ($tokenNotInitialized) {
 			tokenIdLoaded = undefined;
 			return;
 		}
@@ -55,7 +47,7 @@
 		}
 	};
 
-	$: $token, (async () => await load())();
+	$: $token, $tokenNotInitialized, (async () => await load())();
 
 	let selectedTransaction: TransactionType | undefined;
 	$: selectedTransaction = $modalTransaction
