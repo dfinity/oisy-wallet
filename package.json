@@ -30,7 +30,7 @@
 		"@dfinity/agent": "^1.0.1",
 		"@dfinity/auth-client": "^1.0.1",
 		"@dfinity/candid": "^1.0.1",
-		"@dfinity/ckbtc": "^2.3.0",
+		"@dfinity/ckbtc": "^2.3.0-next-2024-03-18.1",
 		"@dfinity/cketh": "^2.0.0",
 		"@dfinity/gix-components": "^4.1.0",
 		"@dfinity/ledger-icp": "^2.2.1",
