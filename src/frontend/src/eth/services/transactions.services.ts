@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
+import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { etherscanRests } from '$eth/rest/etherscan.rest';
@@ -17,7 +17,7 @@ export const loadTransactions = async ({
 	tokenId: TokenId;
 	networkId: NetworkId;
 }): Promise<{ success: boolean }> => {
-	if (ETHEREUM_TOKEN_IDS.includes(tokenId)) {
+	if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes(tokenId)) {
 		return loadEthTransactions({ networkId, tokenId });
 	}
 

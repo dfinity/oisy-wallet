@@ -1,5 +1,8 @@
 import type { Token } from '$declarations/backend/backend.did';
-import { ETHEREUM_NETWORKS, ETHEREUM_NETWORKS_CHAIN_IDS } from '$env/networks.env';
+import {
+	SUPPORTED_ETHEREUM_NETWORKS,
+	SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS
+} from '$env/networks.env';
 import { ERC20_CONTRACTS } from '$env/tokens.erc20.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20TokensStore } from '$eth/stores/erc20.store';
@@ -35,9 +38,9 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 			const contracts = await listUserTokens({ identity });
 
 			return contracts
-				.filter(({ chain_id }) => ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
+				.filter(({ chain_id }) => SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
 				.map(async ({ contract_address: address, chain_id }: Token): Promise<ContractData> => {
-					const network = ETHEREUM_NETWORKS.find(
+					const network = SUPPORTED_ETHEREUM_NETWORKS.find(
 						({ chainId }) => chainId === chain_id
 					) as EthereumNetwork;
 

@@ -7,24 +7,24 @@
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import { ethToken, ethTokenId } from '$eth/derived/eth.derived';
+	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 
 	/**
 	 * Send modal context store
 	 */
 
-	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh', token: $ethToken });
+	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh', token: $ethereumToken });
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
-<ConvertETH convertTokenId={$ethTokenId}>
+<ConvertETH convertTokenId={$ethereumTokenId}>
 	<IconBurn size="28" />
 	<span> Convert to ckETH </span>
 </ConvertETH>
 
 {#if $modalConvertETHToCkETH}
 	<SendTokenModal
-		destination={$ckEthHelperContractAddressStore?.[$ethTokenId]?.data ?? ''}
+		destination={$ckEthHelperContractAddressStore?.[$ethereumTokenId]?.data ?? ''}
 		targetNetwork={ICP_NETWORK}
 	/>
 {/if}

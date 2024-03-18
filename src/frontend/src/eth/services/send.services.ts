@@ -1,5 +1,5 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
-import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
+import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
@@ -159,7 +159,7 @@ export const send = async ({
 		return encodePrincipalToEthAddress(identity.getPrincipal());
 	};
 
-	const transaction = await (ETHEREUM_TOKEN_IDS.includes(token.id)
+	const transaction = await (SUPPORTED_ETHEREUM_TOKEN_IDS.includes(token.id)
 		? nonNullish(ckEthHelperContractAddress) &&
 			isCkEthHelperContract({
 				destination: to,
