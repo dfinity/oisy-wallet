@@ -39,7 +39,7 @@
 		}
 
 		await loadCkEthHelperContractAddress({
-			convertTokenId,
+			tokenId: convertTokenId,
 			canisters: {
 				minterCanisterId
 			}
