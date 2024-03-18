@@ -7,6 +7,7 @@
 	import { airdropAvailable } from '$airdrop/derived/airdrop.derived';
 	import Workers from '$lib/components/core/Workers.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
+	import LoaderBalances from '$lib/components/core/LoaderBalances.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -26,13 +27,15 @@
 <main class="pt-12">
 	<AddressGuard>
 		<Loader>
-			<Workers>
-				{#if $airdropAvailable}
-					<AirdropButton />
-				{/if}
+			<LoaderBalances>
+				<Workers>
+					{#if $airdropAvailable}
+						<AirdropButton />
+					{/if}
 
-				<slot />
-			</Workers>
+					<slot />
+				</Workers>
+			</LoaderBalances>
 		</Loader>
 	</AddressGuard>
 </main>
