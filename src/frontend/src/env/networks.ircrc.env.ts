@@ -75,10 +75,14 @@ const CKBTC_IC_DATA: IcCkInterface | undefined =
 			}
 		: undefined;
 
-export const CKBTC_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = [
-	IC_CKBTC_LEDGER_CANISTER_ID,
+export const CKBTC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(STAGING_CKBTC_LEDGER_CANISTER_ID) ? [STAGING_CKBTC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(LOCAL_CKBTC_LEDGER_CANISTER_ID) ? [LOCAL_CKBTC_LEDGER_CANISTER_ID] : [])
+];
+
+export const CKBTC_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = [
+	IC_CKBTC_LEDGER_CANISTER_ID,
+	...CKBTC_LEDGER_CANISTER_TESTNET_IDS
 ];
 
 /**
@@ -155,10 +159,14 @@ const CKETH_IC_DATA: IcCkInterface | undefined =
 			}
 		: undefined;
 
-export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = [
-	IC_CKETH_LEDGER_CANISTER_ID,
+export const CKETH_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID) ? [STAGING_CKETH_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(LOCAL_CKETH_LEDGER_CANISTER_ID) ? [LOCAL_CKETH_LEDGER_CANISTER_ID] : [])
+];
+
+export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = [
+	IC_CKETH_LEDGER_CANISTER_ID,
+	...CKETH_LEDGER_CANISTER_TESTNET_IDS
 ];
 
 /**

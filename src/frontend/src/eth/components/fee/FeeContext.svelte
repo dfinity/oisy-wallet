@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WebSocketListener } from '$eth/types/listener';
-	import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
+	import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { address } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
@@ -44,7 +44,7 @@
 
 			const { getFeeData } = infuraProviders($sendToken.network.id);
 
-			if (ETHEREUM_TOKEN_IDS.includes($sendTokenId)) {
+			if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes($sendTokenId)) {
 				store.setFee({
 					...(await getFeeData()),
 					gas: await getEthFeeData({

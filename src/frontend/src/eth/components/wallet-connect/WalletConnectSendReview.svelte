@@ -11,7 +11,7 @@
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { balance } from '$lib/derived/balances.derived';
-	import { ethToken } from '$eth/derived/eth.derived';
+	import { ethereumToken } from '$eth/derived/token.derived';
 
 	export let amount: BigNumber;
 	export let destination: string;
@@ -26,7 +26,7 @@
 <SendData
 	amount={formatToken({ value: amountDisplay })}
 	{destination}
-	token={$ethToken}
+	token={$ethereumToken}
 	balance={$balance}
 	source={$address ?? ''}
 >

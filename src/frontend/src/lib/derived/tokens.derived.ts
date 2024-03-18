@@ -1,30 +1,16 @@
-import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
+import { ICP_TOKEN } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { icrcTokens } from '$icp/derived/icrc.derived';
+import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import { sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import type { Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
-export const sortedIcrcTokens: Readable<Token[]> = derived([icrcTokens], ([$icrcTokens]) =>
-	$icrcTokens.sort(
-		(
-			{ name: nameA, position: positionA, exchangeCoinId: exchangeCoinIdA },
-			{ name: nameB, position: positionB, exchangeCoinId: exchangeCoinIdB }
-		) =>
-			positionA === positionB
-				? exchangeCoinIdA === exchangeCoinIdB
-					? nameA.localeCompare(nameB)
-					: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
-				: positionA - positionB
-	)
-);
-
 export const tokens: Readable<Token[]> = derived(
-	[erc20Tokens, sortedIcrcTokens],
-	([$erc20Tokens, $icrcTokens]) => [
+	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens],
+	([$erc20Tokens, $icrcTokens, $enabledEthereumTokens]) => [
 		ICP_TOKEN,
 		...$icrcTokens,
-		ETHEREUM_TOKEN,
-		SEPOLIA_TOKEN,
+		...$enabledEthereumTokens,
 		...$erc20Tokens
 	]
 );

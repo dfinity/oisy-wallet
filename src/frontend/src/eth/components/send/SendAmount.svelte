@@ -9,9 +9,9 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { slide } from 'svelte/transition';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
+	import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { ethTokenId } from '$eth/derived/eth.derived';
+	import { ethereumTokenId } from '$eth/derived/token.derived';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
@@ -40,7 +40,7 @@
 		});
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
-		if (ETHEREUM_TOKEN_IDS.includes($sendTokenId)) {
+		if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes($sendTokenId)) {
 			const total = userAmount.add(minGasFee($storeFeeData));
 
 			if (total.gt($sendBalance ?? BigNumber.from(0n))) {
@@ -60,7 +60,7 @@
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
 		const maxFee = maxGasFee($storeFeeData);
-		const ethBalance = $balancesStore?.[$ethTokenId]?.data ?? BigNumber.from(0n);
+		const ethBalance = $balancesStore?.[$ethereumTokenId]?.data ?? BigNumber.from(0n);
 		if (nonNullish(maxFee) && ethBalance.lt(maxFee)) {
 			insufficientFundsError = 'Insufficient Ethereum funds to cover the fees';
 			return;
