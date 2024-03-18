@@ -23,7 +23,7 @@
 		// TODO: this is relatively ugly. Should we create a derived store or another abstraction that merge EthToken and CkCanisters?
 
 		const minterCanisterId =
-			tokenId === SEPOLIA_TOKEN_ID
+			convertTokenId === SEPOLIA_TOKEN_ID
 				? LOCAL
 					? LOCAL_CKETH_MINTER_CANISTER_ID
 					: STAGING_CKETH_MINTER_CANISTER_ID
@@ -39,7 +39,7 @@
 		}
 
 		await loadCkEthHelperContractAddress({
-			tokenId,
+			convertTokenId,
 			canisters: {
 				minterCanisterId
 			}
