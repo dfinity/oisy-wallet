@@ -7,13 +7,13 @@ onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRe
 	const { msg, data } = dataMsg;
 
 	switch (msg) {
-		case 'stopCkBTCWalletTimer':
+		case 'stopBtcStatusesTimer':
 			scheduler.stop();
 			return;
-		case 'startCkBTCWalletTimer':
+		case 'startBtcStatusesTimer':
 			await scheduler.start(data);
 			return;
-		case 'triggerCkBTCWalletTimer':
+		case 'triggerBtcStatusesTimer':
 			await scheduler.trigger(data);
 			return;
 	}
