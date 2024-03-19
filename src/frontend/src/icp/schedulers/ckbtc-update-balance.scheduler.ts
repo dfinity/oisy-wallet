@@ -10,7 +10,7 @@ import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type {
-	PostMessageDataRequestIcCk,
+	PostMessageDataRequestIcCkBTCUpdateBalance,
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
@@ -22,7 +22,9 @@ import {
 } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
-export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestIcCk> {
+export class CkBTCUpdateBalanceScheduler
+	implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance>
+{
 	private timer = new SchedulerTimer('syncCkBTCUpdateBalanceStatus');
 
 	private btcAddress: string | undefined;
@@ -31,16 +33,16 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		this.timer.stop();
 	}
 
-	async start(data: PostMessageDataRequestIcCk | undefined) {
-		await this.timer.start<PostMessageDataRequestIcCk>({
+	async start(data: PostMessageDataRequestIcCkBTCUpdateBalance | undefined) {
+		await this.timer.start<PostMessageDataRequestIcCkBTCUpdateBalance>({
 			interval: CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS,
 			job: this.updateBalance,
 			data
 		});
 	}
 
-	async trigger(data: PostMessageDataRequestIcCk | undefined) {
-		await this.timer.trigger<PostMessageDataRequestIcCk>({
+	async trigger(data: PostMessageDataRequestIcCkBTCUpdateBalance | undefined) {
+		await this.timer.trigger<PostMessageDataRequestIcCkBTCUpdateBalance>({
 			job: this.updateBalance,
 			data
 		});
@@ -49,7 +51,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 	private updateBalance = async ({
 		identity,
 		data
-	}: SchedulerJobData<PostMessageDataRequestIcCk>) => {
+	}: SchedulerJobData<PostMessageDataRequestIcCkBTCUpdateBalance>) => {
 		const minterCanisterId = data?.minterCanisterId;
 
 		assertNonNullish(
@@ -57,7 +59,10 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			'No data - minterCanisterId - provided to update the BTC balance.'
 		);
 
-		const address = this.btcAddress ?? (await this.loadBtcAddress({ minterCanisterId, identity }));
+		const address =
+			data?.btcAddress ??
+			this.btcAddress ??
+			(await this.loadBtcAddress({ minterCanisterId, identity }));
 
 		assertNonNullish(address, 'No BTC address could be derived from the ckBTC minter.');
 

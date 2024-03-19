@@ -40,6 +40,10 @@ export type PostMessageDataRequestIcrc = IcCanisters;
 
 export type PostMessageDataRequestIcCk = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
 
+export type PostMessageDataRequestIcCkBTCUpdateBalance = PostMessageDataRequestIcCk & {
+	btcAddress: string | undefined;
+};
+
 export type PostMessageResponseStatus =
 	| 'syncWalletStatus'
 	| 'syncBtcStatusesStatus'

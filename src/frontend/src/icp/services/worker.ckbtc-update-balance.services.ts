@@ -1,4 +1,5 @@
 import { syncBtcPendingUtxos, syncCkBTCUpdateOk } from '$icp/services/ckbtc-listener.services';
+import { btcAddressStore } from '$icp/stores/btc.store';
 import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type {
@@ -7,6 +8,7 @@ import type {
 	PostMessageSyncState
 } from '$lib/types/post-message';
 import { emit } from '$lib/utils/events.utils';
+import { get } from 'svelte/store';
 
 export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 	minterCanisterId,
@@ -45,10 +47,14 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 
 	return {
 		start: () => {
+			// We can imperatively get the address because the worker fetches it, and we only provide it to reduce the number of calls. By doing so, we can adhere to our standard component abstraction for interacting with workers.
+			const btcAddress = get(btcAddressStore)?.[tokenId]?.data;
+
 			worker.postMessage({
 				msg: 'startCkBTCUpdateBalanceTimer',
 				data: {
-					minterCanisterId
+					minterCanisterId,
+					btcAddress
 				}
 			});
 		},
