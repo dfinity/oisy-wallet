@@ -1,6 +1,9 @@
 import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { getUtxos } from '$icp/api/ic.api';
-import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
+import {
+	BTC_NETWORK,
+	CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS
+} from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
@@ -11,8 +14,12 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { UtxoStatus } from '@dfinity/ckbtc';
-import { MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
+import {
+	BtcNetwork,
+	MinterNoNewUtxosError,
+	type PendingUtxo,
+	type UtxoStatus
+} from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestIcCk> {
@@ -107,7 +114,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			getUtxos({
 				identity,
 				certified: false,
-				network: 'testnet',
+				network: BTC_NETWORK === BtcNetwork.Testnet ? 'testnet' : 'mainnet',
 				address
 			}),
 			getKnownUtxos({ identity, minterCanisterId })
