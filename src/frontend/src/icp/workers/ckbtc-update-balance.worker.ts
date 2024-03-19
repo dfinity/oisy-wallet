@@ -1,9 +1,14 @@
 import { CkBTCUpdateBalanceScheduler } from '$icp/schedulers/ckbtc-update-balance.scheduler';
-import type { PostMessage, PostMessageDataRequestIcCk } from '$lib/types/post-message';
+import type {
+	PostMessage,
+	PostMessageDataRequestIcCkBTCUpdateBalance
+} from '$lib/types/post-message';
 
 const scheduler = new CkBTCUpdateBalanceScheduler();
 
-onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestIcCk>>) => {
+onmessage = async ({
+	data: dataMsg
+}: MessageEvent<PostMessage<PostMessageDataRequestIcCkBTCUpdateBalance>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {

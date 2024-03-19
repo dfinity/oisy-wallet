@@ -1,33 +1,50 @@
-import { updateBalance } from '$icp/api/ckbtc-minter.api';
-import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
+import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
+import { getUtxos } from '$icp/api/ic.api';
+import {
+	BTC_NETWORK,
+	CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS
+} from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
+import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
+import type { CanisterIdText } from '$lib/types/canister';
+import type { OptionIdentity } from '$lib/types/identity';
 import type {
-	PostMessageDataRequestIcCk,
+	PostMessageDataRequestIcCkBTCUpdateBalance,
+	PostMessageDataResponseBTCAddress,
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { UtxoStatus } from '@dfinity/ckbtc';
-import { MinterNoNewUtxosError, type PendingUtxo } from '@dfinity/ckbtc';
+import {
+	BtcNetwork,
+	MinterNoNewUtxosError,
+	type PendingUtxo,
+	type UtxoStatus
+} from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
-export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestIcCk> {
+export class CkBTCUpdateBalanceScheduler
+	implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance>
+{
 	private timer = new SchedulerTimer('syncCkBTCUpdateBalanceStatus');
+
+	private btcAddress: string | undefined;
 
 	stop() {
 		this.timer.stop();
 	}
 
-	async start(data: PostMessageDataRequestIcCk | undefined) {
-		await this.timer.start<PostMessageDataRequestIcCk>({
+	async start(data: PostMessageDataRequestIcCkBTCUpdateBalance | undefined) {
+		await this.timer.start<PostMessageDataRequestIcCkBTCUpdateBalance>({
 			interval: CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS,
 			job: this.updateBalance,
 			data
 		});
 	}
 
-	async trigger(data: PostMessageDataRequestIcCk | undefined) {
-		await this.timer.trigger<PostMessageDataRequestIcCk>({
+	async trigger(data: PostMessageDataRequestIcCkBTCUpdateBalance | undefined) {
+		await this.timer.trigger<PostMessageDataRequestIcCkBTCUpdateBalance>({
 			job: this.updateBalance,
 			data
 		});
@@ -36,13 +53,31 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 	private updateBalance = async ({
 		identity,
 		data
-	}: SchedulerJobData<PostMessageDataRequestIcCk>) => {
+	}: SchedulerJobData<PostMessageDataRequestIcCkBTCUpdateBalance>) => {
 		const minterCanisterId = data?.minterCanisterId;
 
 		assertNonNullish(
 			minterCanisterId,
 			'No data - minterCanisterId - provided to update the BTC balance.'
 		);
+
+		const address =
+			data?.btcAddress ??
+			this.btcAddress ??
+			(await this.loadBtcAddress({ minterCanisterId, identity }));
+
+		assertNonNullish(address, 'No BTC address could be derived from the ckBTC minter.');
+
+		const pendingUtxos = await this.hasPendingUtxos({
+			minterCanisterId,
+			identity,
+			btcAddress: address
+		});
+
+		// All Utxos have been processed by the ckBTC minter, therefore no update balance call is required to process potential pending utxos - i.e., potential conversion from BTC to ckBTC.
+		if (!pendingUtxos) {
+			return;
+		}
 
 		try {
 			const utxosStatuses = await updateBalance({
@@ -52,8 +87,9 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 
 			this.postUpdateOk(utxosStatuses);
 		} catch (err: unknown) {
+			// Given that we use queries to determine whether an update balance should be triggered, we continue to display only pending Utxos based on potential errors, as these results come from an update call and are therefore known to be accurate.
 			if (err instanceof MinterNoNewUtxosError) {
-				this.postUtxos(err);
+				this.postPendingUtxos(err);
 				return;
 			}
 
@@ -61,6 +97,58 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			console.error(err);
 		}
 	};
+
+	private async loadBtcAddress(params: {
+		identity: OptionIdentity;
+		minterCanisterId: CanisterIdText;
+	}): Promise<string> {
+		const address = await getBtcAddress(params);
+
+		// Save address for next timer
+		this.btcAddress = address;
+
+		// Send it to the UI to save the address in the store. It can be useful for the user when they want to open the "Receive" modal. That way the client does not have to fetch it again.
+		this.postMessageBtcAddress({
+			data: address,
+			certified: true
+		});
+
+		return this.btcAddress;
+	}
+
+	private postMessageBtcAddress(address: BtcAddressData) {
+		this.timer.postMsg<PostMessageDataResponseBTCAddress>({
+			msg: 'syncBtcAddress',
+			data: {
+				address
+			}
+		});
+	}
+
+	private async hasPendingUtxos({
+		identity,
+		minterCanisterId,
+		btcAddress: address
+	}: {
+		identity: OptionIdentity;
+		minterCanisterId: CanisterIdText;
+		btcAddress: string;
+	}): Promise<boolean> {
+		const [{ utxos: allUtxos }, knownUtxos] = await Promise.all([
+			getUtxos({
+				identity,
+				certified: false,
+				network: BTC_NETWORK === BtcNetwork.Testnet ? 'testnet' : 'mainnet',
+				address
+			}),
+			getKnownUtxos({ identity, minterCanisterId })
+		]);
+
+		const allUtxosTxids = allUtxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
+		const knownUtxosTxids = knownUtxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
+
+		return allUtxosTxids.some((txid) => !knownUtxosTxids.includes(txid));
+	}
 
 	private postUpdateOk(utxosStatuses: UtxoStatus[]) {
 		const data: CertifiedData<UtxoTxidText[]> = {
@@ -92,7 +180,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		});
 	}
 
-	private postUtxos(err: MinterNoNewUtxosError) {
+	private postPendingUtxos(err: MinterNoNewUtxosError) {
 		const { pendingUtxos } = err;
 
 		const data: CertifiedData<PendingUtxo[]> = {
