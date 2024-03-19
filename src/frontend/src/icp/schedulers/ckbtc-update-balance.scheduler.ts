@@ -57,7 +57,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 				return;
 			}
 
-			// We only log and continue to poll on purpose. UpdateBalance can fail for various reasons.
+			// We only log and continue to poll on purpose. UpdateBalance can fail for various non UX blocker reasons and user can trigger it again manually.
 			console.error(err);
 		}
 	};
