@@ -5,12 +5,14 @@ import {
 	CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS
 } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
+import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type {
 	PostMessageDataRequestIcCkBTCUpdateBalance,
+	PostMessageDataResponseBTCAddress,
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
@@ -100,10 +102,27 @@ export class CkBTCUpdateBalanceScheduler
 		identity: OptionIdentity;
 		minterCanisterId: CanisterIdText;
 	}): Promise<string> {
+		const address = await getBtcAddress(params);
+
 		// Save address for next timer
-		this.btcAddress = await getBtcAddress(params);
+		this.btcAddress = address;
+
+		// Send it to the UI to save the address in the store. It can be useful for the user when they want to open the "Receive" modal. That way the client does not have to fetch it again.
+		this.postMessageBtcAddress({
+			data: address,
+			certified: true
+		});
 
 		return this.btcAddress;
+	}
+
+	private postMessageBtcAddress(address: BtcAddressData) {
+		this.timer.postMsg<PostMessageDataResponseBTCAddress>({
+			msg: 'syncBtcAddress',
+			data: {
+				address
+			}
+		});
 	}
 
 	private async hasPendingUtxos({

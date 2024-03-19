@@ -3,6 +3,7 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 
+import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import type { IcCanisters, IcCkCanisters } from '$icp/types/ic';
 import type { SyncState } from '$lib/types/sync';
@@ -68,6 +69,7 @@ export type PostMessageResponse =
 	| 'syncCkMinterInfoError'
 	| 'syncBtcPendingUtxos'
 	| 'syncCkBTCUpdateOk'
+	| 'syncBtcAddress'
 	| PostMessageResponseStatus;
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
@@ -107,6 +109,10 @@ export interface PostMessageJsonDataResponse extends PostMessageDataResponse {
 
 export interface PostMessageSyncState extends PostMessageDataResponse {
 	state: SyncState;
+}
+
+export interface PostMessageDataResponseBTCAddress extends PostMessageDataResponse {
+	address: BtcAddressData;
 }
 
 export interface PostMessage<T extends PostMessageDataRequest | PostMessageDataResponse> {

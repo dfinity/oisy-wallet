@@ -1,9 +1,14 @@
-import { syncBtcPendingUtxos, syncCkBTCUpdateOk } from '$icp/services/ckbtc-listener.services';
+import {
+	syncBtcAddress,
+	syncBtcPendingUtxos,
+	syncCkBTCUpdateOk
+} from '$icp/services/ckbtc-listener.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
 import type { IcCkCanisters, IcToken } from '$icp/types/ic';
 import type {
 	PostMessage,
+	PostMessageDataResponseBTCAddress,
 	PostMessageJsonDataResponse,
 	PostMessageSyncState
 } from '$lib/types/post-message';
@@ -19,7 +24,11 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 
 	worker.onmessage = async ({
 		data
-	}: MessageEvent<PostMessage<PostMessageJsonDataResponse | PostMessageSyncState>>) => {
+	}: MessageEvent<
+		PostMessage<
+			PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseBTCAddress
+		>
+	>) => {
 		const { msg } = data;
 
 		switch (msg) {
@@ -29,11 +38,16 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 					data: data.data as PostMessageJsonDataResponse
 				});
 				return;
-
 			case 'syncCkBTCUpdateBalanceStatus':
 				emit({
 					message: 'oisyCkBtcUpdateBalance',
 					detail: (data.data as PostMessageSyncState).state
+				});
+				return;
+			case 'syncBtcAddress':
+				syncBtcAddress({
+					tokenId,
+					data: data.data as PostMessageDataResponseBTCAddress
 				});
 				return;
 			case 'syncCkBTCUpdateOk':
