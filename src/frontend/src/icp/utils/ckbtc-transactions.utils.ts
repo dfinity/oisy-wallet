@@ -7,17 +7,12 @@ import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.ircrc.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/ckbtc-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
-import {
-	fromNullable,
-	isNullish,
-	nonNullish,
-	notEmptyString,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -88,15 +83,17 @@ export const mapCkBTCTransaction = ({
 };
 
 export const mapCkBTCPendingUtxo = ({
-	utxo,
+	utxo: {
+		value,
+		outpoint: { txid, vout }
+	},
 	kytFee,
 	ledgerCanisterId
 }: {
 	utxo: PendingUtxo;
 	kytFee: bigint;
 } & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
-	// Bitcoin txid to text representation requires inverting the array.
-	const id = uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid).toReversed());
+	const id = utxoTxIdToString(txid);
 
 	const bitcoinExplorerUrl =
 		IC_CKBTC_LEDGER_CANISTER_ID === ledgerCanisterId
@@ -104,13 +101,13 @@ export const mapCkBTCPendingUtxo = ({
 			: BTC_TESTNET_EXPLORER_URL;
 
 	return {
-		id: `${id}-${utxo.outpoint.vout}`,
+		id: `${id}-${vout}`,
 		incoming: true,
 		type: 'receive',
 		status: 'pending',
 		fromLabel: 'BTC Network',
 		typeLabel: 'Receiving BTC',
-		value: utxo.value - kytFee,
+		value: value - kytFee,
 		txExplorerUrl: `${bitcoinExplorerUrl}/tx/${id}`
 	};
 };

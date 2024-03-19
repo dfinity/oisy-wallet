@@ -1,4 +1,4 @@
-import { btcStatusesStore } from '$icp/stores/btc.store';
+import { btcAddressStore, btcStatusesStore } from '$icp/stores/btc.store';
 import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
@@ -6,7 +6,10 @@ import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/
 import type { UtxoTxidText } from '$icp/types/ckbtc';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { PostMessageJsonDataResponse } from '$lib/types/post-message';
+import type {
+	PostMessageDataResponseBTCAddress,
+	PostMessageJsonDataResponse
+} from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { SyncState } from '$lib/types/sync';
 import type { TokenId } from '$lib/types/token';
@@ -64,6 +67,19 @@ export const syncBtcPendingUtxos = ({
 	const data: CertifiedData<PendingUtxo[]> = JSON.parse(json, jsonReviver);
 
 	ckBtcPendingUtxosStore.set({
+		tokenId,
+		data
+	});
+};
+
+export const syncBtcAddress = ({
+	data: { address: data },
+	tokenId
+}: {
+	data: PostMessageDataResponseBTCAddress;
+	tokenId: TokenId;
+}) => {
+	btcAddressStore.set({
 		tokenId,
 		data
 	});
