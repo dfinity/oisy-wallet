@@ -3,6 +3,9 @@ import { getUtxos } from '$icp/api/ic.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
+import type { CanisterIdText } from '$lib/types/canister';
+import type { OptionIdentity } from '$lib/types/identity';
 import type {
 	PostMessageDataRequestIcCk,
 	PostMessageJsonDataResponse
@@ -45,13 +48,12 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			'No data - minterCanisterId - provided to update the BTC balance.'
 		);
 
-		// TODO: getUtxos does not work locally
-		const results = await Promise.allSettled([
-			getUtxos({ identity, certified: false, network: 'testnet', address: '' }),
-			getKnownUtxos({ identity, minterCanisterId })
-		]);
+		const pendingUtxos = await this.hasPendingUtxos({ minterCanisterId, identity });
 
-		console.log(results);
+		// All Utxos have been processed by the ckBTC minter, therefore no update balance call is required to process potential pending utxos - i.e., potential conversion from BTC to ckBTC.
+		if (!pendingUtxos) {
+			return;
+		}
 
 		try {
 			const utxosStatuses = await updateBalance({
@@ -61,8 +63,9 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 
 			this.postUpdateOk(utxosStatuses);
 		} catch (err: unknown) {
+			// Given that we use queries to determine whether an update balance should be triggered, we continue to display only pending Utxos based on potential errors, as these results come from an update call and are therefore known to be accurate.
 			if (err instanceof MinterNoNewUtxosError) {
-				this.postUtxos(err);
+				this.postPendingUtxos(err);
 				return;
 			}
 
@@ -70,6 +73,29 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			console.error(err);
 		}
 	};
+
+	private async hasPendingUtxos({
+		identity,
+		minterCanisterId
+	}: {
+		identity: OptionIdentity;
+		minterCanisterId: CanisterIdText;
+	}): Promise<boolean> {
+		const [{ utxos: allUtxos }, knownUtxos] = await Promise.all([
+			getUtxos({
+				identity,
+				certified: false,
+				network: 'testnet',
+				address: 'bcrt1q5eshwxjsz2slgr77qn35er7z0ptwxcaee5d04l'
+			}),
+			getKnownUtxos({ identity, minterCanisterId })
+		]);
+
+		const allUtxosTxids = allUtxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
+		const knownUtxosTxids = knownUtxos.map(({ outpoint: { txid } }) => utxoTxIdToString(txid));
+
+		return allUtxosTxids.some((txid) => !knownUtxosTxids.includes(txid));
+	}
 
 	private postUpdateOk(utxosStatuses: UtxoStatus[]) {
 		const data: CertifiedData<UtxoTxidText[]> = {
@@ -101,7 +127,7 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		});
 	}
 
-	private postUtxos(err: MinterNoNewUtxosError) {
+	private postPendingUtxos(err: MinterNoNewUtxosError) {
 		const { pendingUtxos } = err;
 
 		const data: CertifiedData<PendingUtxo[]> = {
