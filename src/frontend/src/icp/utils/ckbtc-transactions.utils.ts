@@ -1,18 +1,13 @@
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_KYT_FAIL } from '$icp/utils/ckbtc-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { BITCOIN_EXPLORER_URL, CKBTC_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
-import {
-	fromNullable,
-	isNullish,
-	nonNullish,
-	notEmptyString,
-	uint8ArrayToHexString
-} from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,
@@ -76,23 +71,25 @@ export const mapCkBTCTransaction = ({
 };
 
 export const mapCkBTCPendingUtxo = ({
-	utxo,
+	utxo: {
+		value,
+		outpoint: { txid, vout }
+	},
 	kytFee
 }: {
 	utxo: PendingUtxo;
 	kytFee: bigint;
 }): IcTransactionUi => {
-	// Bitcoin txid to text representation requires inverting the array.
-	const id = uint8ArrayToHexString(Uint8Array.from(utxo.outpoint.txid).toReversed());
+	const id = utxoTxIdToString(txid);
 
 	return {
-		id: `${id}-${utxo.outpoint.vout}`,
+		id: `${id}-${vout}`,
 		incoming: true,
 		type: 'receive',
 		status: 'pending',
 		fromLabel: 'BTC Network',
 		typeLabel: 'Receiving BTC',
-		value: utxo.value - kytFee,
+		value: value - kytFee,
 		...(notEmptyString(BITCOIN_EXPLORER_URL) && {
 			txExplorerUrl: `${BITCOIN_EXPLORER_URL}/tx/${id}`
 		})
