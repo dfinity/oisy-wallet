@@ -6,6 +6,7 @@ import {
 import { btcAddressStore } from '$icp/stores/btc.store';
 import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
 import type { IcCkToken } from '$icp/types/ic';
+import { isNetworkIdBTCMainnet } from '$icp/utils/ic-send.utils';
 import type {
 	PostMessage,
 	PostMessageDataResponseBTCAddress,
@@ -17,7 +18,8 @@ import { get } from 'svelte/store';
 
 export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 	minterCanisterId,
-	id: tokenId
+	id: tokenId,
+	network: { id: networkId }
 }: IcCkToken): Promise<IcCkWorkerInitResult> => {
 	const CkBTCUpdateBalanceWorker = await import('$icp/workers/ckbtc-update-balance.worker?worker');
 	const worker: Worker = new CkBTCUpdateBalanceWorker.default();
@@ -68,7 +70,8 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 				msg: 'startCkBTCUpdateBalanceTimer',
 				data: {
 					minterCanisterId,
-					btcAddress
+					btcAddress,
+					bitcoinNetwork: isNetworkIdBTCMainnet(networkId) ? 'mainnet' : 'testnet'
 				}
 			});
 		},
