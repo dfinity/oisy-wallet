@@ -1,4 +1,5 @@
-import { updateBalance } from '$icp/api/ckbtc-minter.api';
+import { getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
+import { getUtxos } from '$icp/api/ic.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
@@ -43,6 +44,14 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			minterCanisterId,
 			'No data - minterCanisterId - provided to update the BTC balance.'
 		);
+
+		// TODO: getUtxos does not work locally
+		const results = await Promise.allSettled([
+			getUtxos({ identity, certified: false, network: 'testnet', address: '' }),
+			getKnownUtxos({ identity, minterCanisterId })
+		]);
+
+		console.log(results);
 
 		try {
 			const utxosStatuses = await updateBalance({
