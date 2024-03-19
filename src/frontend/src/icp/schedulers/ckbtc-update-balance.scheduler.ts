@@ -1,4 +1,4 @@
-import { getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
+import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { getUtxos } from '$icp/api/ic.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
@@ -17,6 +17,8 @@ import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/
 
 export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataRequestIcCk> {
 	private timer = new SchedulerTimer('syncCkBTCUpdateBalanceStatus');
+
+	private btcAddress: string | undefined;
 
 	stop() {
 		this.timer.stop();
@@ -48,7 +50,15 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 			'No data - minterCanisterId - provided to update the BTC balance.'
 		);
 
-		const pendingUtxos = await this.hasPendingUtxos({ minterCanisterId, identity });
+		const address = this.btcAddress ?? (await this.loadBtcAddress({ minterCanisterId, identity }));
+
+		assertNonNullish(address, 'No BTC address could be derived from the ckBTC minter.');
+
+		const pendingUtxos = await this.hasPendingUtxos({
+			minterCanisterId,
+			identity,
+			btcAddress: address
+		});
 
 		// All Utxos have been processed by the ckBTC minter, therefore no update balance call is required to process potential pending utxos - i.e., potential conversion from BTC to ckBTC.
 		if (!pendingUtxos) {
@@ -74,19 +84,31 @@ export class CkBTCUpdateBalanceScheduler implements Scheduler<PostMessageDataReq
 		}
 	};
 
+	private async loadBtcAddress(params: {
+		identity: OptionIdentity;
+		minterCanisterId: CanisterIdText;
+	}): Promise<string> {
+		// Save address for next timer
+		this.btcAddress = await getBtcAddress(params);
+
+		return this.btcAddress;
+	}
+
 	private async hasPendingUtxos({
 		identity,
-		minterCanisterId
+		minterCanisterId,
+		btcAddress: address
 	}: {
 		identity: OptionIdentity;
 		minterCanisterId: CanisterIdText;
+		btcAddress: string;
 	}): Promise<boolean> {
 		const [{ utxos: allUtxos }, knownUtxos] = await Promise.all([
 			getUtxos({
 				identity,
 				certified: false,
 				network: 'testnet',
-				address: 'bcrt1q5eshwxjsz2slgr77qn35er7z0ptwxcaee5d04l'
+				address
 			}),
 			getKnownUtxos({ identity, minterCanisterId })
 		]);
