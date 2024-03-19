@@ -23,6 +23,8 @@ export type PostMessageRequest =
 	| 'stopCkBTCWalletTimer'
 	| 'startCkBTCWalletTimer'
 	| 'triggerCkBTCWalletTimer'
+	| 'stopCkBTCUpdateBalanceTimer'
+	| 'startCkBTCUpdateBalanceTimer'
 	| 'stopCkMinterInfoTimer'
 	| 'startCkMinterInfoTimer'
 	| 'triggerCkMinterInfoTimer';
