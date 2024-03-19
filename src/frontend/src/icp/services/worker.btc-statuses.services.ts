@@ -8,12 +8,12 @@ import type {
 	PostMessageSyncState
 } from '$lib/types/post-message';
 
-export const initCkBTCWalletWorker: IcCkWorker = async ({
+export const initBtcStatusesWorker: IcCkWorker = async ({
 	minterCanisterId,
 	id: tokenId
 }: IcToken & Partial<IcCkCanisters>): Promise<IcCkWorkerInitResult> => {
-	const CkBTCWalletWorker = await import('$icp/workers/ckbtc-wallet.worker?worker');
-	const worker: Worker = new CkBTCWalletWorker.default();
+	const BtcStatusesWorker = await import('$icp/workers/btc-statuses.worker?worker');
+	const worker: Worker = new BtcStatusesWorker.default();
 
 	worker.onmessage = async ({
 		data
@@ -41,7 +41,7 @@ export const initCkBTCWalletWorker: IcCkWorker = async ({
 	return {
 		start: () => {
 			worker.postMessage({
-				msg: 'startCkBTCWalletTimer',
+				msg: 'startBtcStatusesTimer',
 				data: {
 					minterCanisterId
 				}
@@ -49,12 +49,12 @@ export const initCkBTCWalletWorker: IcCkWorker = async ({
 		},
 		stop: () => {
 			worker.postMessage({
-				msg: 'stopCkBTCWalletTimer'
+				msg: 'stopBtcStatusesTimer'
 			});
 		},
 		trigger: () => {
 			worker.postMessage({
-				msg: 'triggerCkBTCWalletTimer',
+				msg: 'triggerBtcStatusesTimer',
 				data: {
 					minterCanisterId
 				}
