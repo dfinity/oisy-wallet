@@ -11,8 +11,9 @@
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { balance } from '$lib/derived/balances.derived';
-	import { ethereumToken } from '$eth/derived/token.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { getContext } from 'svelte';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	export let amount: BigNumber;
 	export let destination: string;
@@ -23,12 +24,14 @@
 
 	let amountDisplay: BigNumber;
 	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
+
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <SendData
 	amount={formatToken({ value: amountDisplay })}
 	{destination}
-	token={$ethereumToken}
+	token={$sendToken}
 	balance={$balance}
 	source={$address ?? ''}
 >

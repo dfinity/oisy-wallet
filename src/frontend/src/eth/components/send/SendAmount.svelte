@@ -10,7 +10,6 @@
 	import { slide } from 'svelte/transition';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 
 	export let amount: number | undefined = undefined;
@@ -60,7 +59,7 @@
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
 		const maxFee = maxGasFee($storeFeeData);
-		const ethBalance = $balancesStore?.[$ethereumTokenId]?.data ?? BigNumber.from(0n);
+		const ethBalance = $balancesStore?.[$sendTokenId]?.data ?? BigNumber.from(0n);
 		if (nonNullish(maxFee) && ethBalance.lt(maxFee)) {
 			insufficientFundsError = 'Insufficient Ethereum funds to cover the fees';
 			return;
