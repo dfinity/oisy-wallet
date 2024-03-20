@@ -16,3 +16,5 @@ export interface TokenMetadata {
 	decimals: number;
 	icon?: string;
 }
+
+export type RequiredToken = Required<Token>;
