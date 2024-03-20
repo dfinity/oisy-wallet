@@ -8,6 +8,7 @@
 	import HowToConvertETHModal from '$icp/components/convert/HowToConvertETHModal.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
+	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	const openReceive = () => modalStore.openHowToConvertETHToCkETH();
 
@@ -15,8 +16,16 @@
 	 * Send modal context store
 	 */
 
-	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh' });
-	setContext<SendContext>(SEND_CONTEXT_KEY, context);
+	const { sendToken, ...rest } = initSendContext({
+		sendPurpose: 'convert-eth-to-cketh',
+		token: $ckETHTwinToken
+	});
+	setContext<SendContext>(SEND_CONTEXT_KEY, {
+		sendToken,
+		...rest
+	});
+
+	$: sendToken.set($ckETHTwinToken);
 </script>
 
 <div class="pr-2">

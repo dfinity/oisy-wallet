@@ -1,4 +1,3 @@
-import { ETH_CHAIN_ID } from '$eth/constants/eth.constants';
 import { METAMASK_DEFAULT_TRANSFER_AMOUNT } from '$eth/constants/metamask.constants';
 import {
 	metamaskAccounts,
@@ -7,7 +6,7 @@ import {
 } from '$eth/providers/metamask.providers';
 import { metamaskStore } from '$eth/stores/metamask.store';
 import type { MetamaskChainId } from '$eth/types/metamask';
-import { ETHEREUM_SYMBOL } from '$icp-eth/constants/tokens.constants';
+import type { EthereumNetwork } from '$eth/types/network';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
@@ -22,9 +21,16 @@ export const initMetamaskSupport = async () => {
 	metamaskStore.set(provider?.isMetaMask ?? false);
 };
 
-export const openMetamaskTransaction = async (
-	address: OptionAddress
-): Promise<{ success: 'ok' | 'error'; err?: unknown }> => {
+export const openMetamaskTransaction = async ({
+	address,
+	network: { chainId, name: networkName }
+}: {
+	address: OptionAddress;
+	network: EthereumNetwork;
+}): Promise<{
+	success: 'ok' | 'error';
+	err?: unknown;
+}> => {
 	if (isNullish(address)) {
 		toastsError({
 			msg: { text: 'ETH destination address is unknown.' }
@@ -55,11 +61,11 @@ export const openMetamaskTransaction = async (
 	}
 
 	try {
-		await switchMetamaskChain(ethers.utils.hexlify(ETH_CHAIN_ID).toString() as MetamaskChainId);
+		await switchMetamaskChain(ethers.utils.hexlify(chainId).toString() as MetamaskChainId);
 	} catch (err: unknown) {
 		toastsError({
 			msg: {
-				text: `Cannot request Metamask to switch to chain ID ${ETH_CHAIN_ID}. Is your Metamask using ${ETHEREUM_SYMBOL}?`
+				text: `Cannot request Metamask to switch to chain ID ${chainId}. Is your Metamask using ${networkName}?`
 			}
 		});
 

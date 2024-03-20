@@ -1,23 +1,42 @@
+import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
+import { ALCHEMY_NETWORK_MAINNET, ALCHEMY_NETWORK_SEPOLIA } from '$env/networks.eth.env';
 import type { WebSocketListener } from '$eth/types/listener';
 import type { ETH_ADDRESS, OptionAddress } from '$lib/types/address';
-import { nonNullish } from '@dfinity/utils';
+import type { NetworkId } from '$lib/types/network';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
-import { Alchemy, AlchemySubscription, type Network } from 'alchemy-sdk';
+import type { AlchemySettings, Network } from 'alchemy-sdk';
+import { Alchemy, AlchemySubscription } from 'alchemy-sdk';
 
 const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
-const NETWORK = import.meta.env.VITE_ALCHEMY_NETWORK;
 
-const config = {
-	apiKey: API_KEY,
-	network: NETWORK as Network
+const configs: Record<NetworkId, AlchemySettings> = {
+	[ETHEREUM_NETWORK_ID]: {
+		apiKey: API_KEY,
+		network: ALCHEMY_NETWORK_MAINNET
+	},
+	[SEPOLIA_NETWORK_ID]: {
+		apiKey: API_KEY,
+		network: ALCHEMY_NETWORK_SEPOLIA
+	}
+};
+
+const alchemyConfig = (networkId: NetworkId): AlchemySettings => {
+	const provider = configs[networkId];
+
+	assertNonNullish(provider, `No Alchemy config for network ${networkId.toString()}`);
+
+	return provider;
 };
 
 export const initMinedTransactionsListener = ({
-	listener
+	listener,
+	networkId
 }: {
 	listener: Listener;
+	networkId: NetworkId;
 }): WebSocketListener => {
-	let provider: Alchemy | null = new Alchemy(config);
+	let provider: Alchemy | null = new Alchemy(alchemyConfig(networkId));
 
 	provider.ws.on(
 		{
@@ -38,13 +57,15 @@ export const initMinedTransactionsListener = ({
 export const initPendingTransactionsListener = ({
 	toAddress,
 	fromAddress,
-	listener
+	listener,
+	networkId
 }: {
 	toAddress: ETH_ADDRESS;
 	fromAddress?: OptionAddress;
 	listener: Listener;
+	networkId: NetworkId;
 }): WebSocketListener => {
-	let provider: Alchemy | null = new Alchemy(config);
+	let provider: Alchemy | null = new Alchemy(alchemyConfig(networkId));
 
 	provider.ws.on(
 		{
@@ -65,7 +86,30 @@ export const initPendingTransactionsListener = ({
 	};
 };
 
-export const getTransaction = (hash: string): Promise<TransactionResponse | null> => {
-	const provider = new Alchemy(config);
-	return provider.core.getTransaction(hash);
+export class AlchemyProvider {
+	private readonly provider: Alchemy;
+
+	constructor(private readonly network: Network) {
+		this.provider = new Alchemy({
+			apiKey: API_KEY,
+			network: this.network
+		});
+	}
+
+	getTransaction = (hash: string): Promise<TransactionResponse | null> => {
+		return this.provider.core.getTransaction(hash);
+	};
+}
+
+const providers: Record<NetworkId, AlchemyProvider> = {
+	[ETHEREUM_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_MAINNET),
+	[SEPOLIA_NETWORK_ID]: new AlchemyProvider(ALCHEMY_NETWORK_SEPOLIA)
+};
+
+export const alchemyProviders = (networkId: NetworkId): AlchemyProvider => {
+	const provider = providers[networkId];
+
+	assertNonNullish(provider, `No Alchemy provider for network ${networkId.toString()}`);
+
+	return provider;
 };

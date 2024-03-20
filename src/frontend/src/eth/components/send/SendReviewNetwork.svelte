@@ -4,13 +4,13 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 
-	export let network: Network | undefined = undefined;
+	export let targetNetwork: Network | undefined = undefined;
 </script>
 
-{#if nonNullish(network)}
+{#if nonNullish(targetNetwork)}
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">Network</svelte:fragment>
-		{#if isNetworkICP(network)}
+		{#if isNetworkICP(targetNetwork)}
 			Convert to native ICP
 		{:else}
 			Ethereum

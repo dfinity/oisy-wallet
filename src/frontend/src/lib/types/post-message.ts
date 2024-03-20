@@ -5,8 +5,9 @@ import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
-import type { IcCanisters, IcCkCanisters } from '$icp/types/ic';
+import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
 import type { SyncState } from '$lib/types/sync';
+import type { BitcoinNetwork } from '@dfinity/ic-management';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
@@ -39,10 +40,11 @@ export interface PostMessageDataRequestExchangeTimer {
 
 export type PostMessageDataRequestIcrc = IcCanisters;
 
-export type PostMessageDataRequestIcCk = Partial<Pick<IcCkCanisters, 'minterCanisterId'>>;
+export type PostMessageDataRequestIcCk = Partial<Pick<IcCkMetadata, 'minterCanisterId'>>;
 
 export type PostMessageDataRequestIcCkBTCUpdateBalance = PostMessageDataRequestIcCk & {
 	btcAddress: string | undefined;
+	bitcoinNetwork: BitcoinNetwork;
 };
 
 export type PostMessageResponseStatus =

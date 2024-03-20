@@ -4,15 +4,14 @@
 	import { modalConvertCkETHToETH } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { address } from '$lib/derived/address.derived';
-
-	import { ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
+	import { ckETHTwinTokenNetworkId, ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
 </script>
 
-<ConvertETH>
+<ConvertETH convertTokenId={$ckETHTwinTokenId}>
 	<IconBurn size="28" />
 	<span>Convert to ETH</span>
 </ConvertETH>
 
 {#if $modalConvertCkETHToETH}
-	<IcSendModal networkId={ETHEREUM_NETWORK_ID} destination={$address ?? ''} />
+	<IcSendModal networkId={$ckETHTwinTokenNetworkId} destination={$address ?? ''} />
 {/if}

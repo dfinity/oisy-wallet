@@ -6,18 +6,18 @@
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import WalletConnectSendData from './WalletConnectSendData.svelte';
-	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { address } from '$lib/derived/address.derived';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { balance } from '$lib/derived/balances.derived';
+	import { ethereumToken } from '$eth/derived/token.derived';
 
 	export let amount: BigNumber;
 	export let destination: string;
 	export let data: string | undefined;
 	export let erc20Approve: boolean;
-	export let network: Network | undefined = undefined;
+	export let targetNetwork: Network | undefined = undefined;
 
 	let amountDisplay: BigNumber;
 	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
@@ -26,7 +26,7 @@
 <SendData
 	amount={formatToken({ value: amountDisplay })}
 	{destination}
-	token={ETHEREUM_TOKEN}
+	token={$ethereumToken}
 	balance={$balance}
 	source={$address ?? ''}
 >
@@ -34,7 +34,7 @@
 
 	<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork {network} slot="network" />
+	<SendReviewNetwork {targetNetwork} slot="network" />
 </SendData>
 
 <WalletConnectActions on:icApprove on:icReject />

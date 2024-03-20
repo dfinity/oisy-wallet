@@ -5,16 +5,14 @@ import uniswap from '$eth/assets/uniswap.svg';
 import usdc from '$eth/assets/usdc.svg';
 import usdt from '$eth/assets/usdt.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
-
-import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
+import type { EthereumNetwork } from '$eth/types/network';
 
 export const mapErc20Token = ({
 	symbol,
 	name,
 	...rest
-}: Erc20Contract & Erc20Metadata): Erc20Token => ({
+}: Erc20Contract & Erc20Metadata & { network: EthereumNetwork }): Erc20Token => ({
 	id: Symbol(symbol),
-	network: ETHEREUM_NETWORK,
 	standard: 'erc20',
 	name,
 	symbol,

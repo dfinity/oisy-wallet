@@ -30,7 +30,10 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+	import { ICP_NETWORK } from '$env/networks.env';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { ethereumTokenId } from '$eth/derived/token.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -61,11 +64,11 @@
 	let destination = '';
 	$: destination = firstTransaction.to ?? '';
 
-	let network: Network | undefined = undefined;
-	$: network =
+	let targetNetwork: Network | undefined = undefined;
+	$: targetNetwork =
 		destination === $ckEthHelperContractAddressStore?.[$sendTokenId]?.data
 			? ICP_NETWORK
-			: ETHEREUM_NETWORK;
+			: $selectedNetwork;
 
 	/**
 	 * Modal
@@ -125,7 +128,8 @@
 			identity: $authStore.identity,
 			ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
 			tokenStandard: $sendTokenStandard,
-			network
+			sourceNetwork: $selectedEthereumNetwork,
+			targetNetwork
 		});
 
 		setTimeout(() => close(), success ? 750 : 0);
@@ -138,8 +142,13 @@
 	<WalletConnectModalTitle slot="title">{erc20Approve ? 'Approve' : 'Send'}</WalletConnectModalTitle
 	>
 
-	<FeeContext amount={amount.toString()} {destination} observe={currentStep?.name !== 'Sending'}>
-		<CkEthLoader>
+	<FeeContext
+		amount={amount.toString()}
+		{destination}
+		observe={currentStep?.name !== 'Sending'}
+		sourceNetwork={$selectedEthereumNetwork}
+	>
+		<CkEthLoader convertTokenId={$ethereumTokenId}>
 			{#if currentStep?.name === 'Sending'}
 				<SendProgress progressStep={sendProgressStep} steps={WALLET_CONNECT_SEND_STEPS} />
 			{:else}
@@ -148,7 +157,7 @@
 					{destination}
 					{data}
 					{erc20Approve}
-					{network}
+					{targetNetwork}
 					on:icApprove={send}
 					on:icReject={reject}
 				/>

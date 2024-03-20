@@ -1,4 +1,4 @@
-import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+import { ICP_NETWORK } from '$env/networks.env';
 import type { IcFee, IcInterface, IcTokenWithoutId } from '$icp/types/ic';
 import type { TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';

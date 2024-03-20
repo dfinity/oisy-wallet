@@ -1,9 +1,9 @@
+import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import type { IcpTransaction, IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
-import { ICP_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
-import { fromNullable, nonNullish, notEmptyString } from '@dfinity/utils';
+import { fromNullable, nonNullish } from '@dfinity/utils';
 
 export const mapTransactionIcpToSelf = (
 	tx: TransactionWithId
@@ -58,9 +58,7 @@ export const mapIcpTransaction = ({
 		id,
 		timestamp: fromNullable(created_at_time)?.timestamp_nanos,
 		status: 'executed',
-		...(notEmptyString(ICP_EXPLORER_URL) && {
-			txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${id}`
-		})
+		txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${id}`
 	};
 
 	const accountIdentifier = nonNullish(identity)
@@ -71,9 +69,7 @@ export const mapIcpTransaction = ({
 		from: string
 	): Pick<IcTransactionUi, 'from' | 'fromExplorerUrl' | 'incoming'> => ({
 		from,
-		...(notEmptyString(ICP_EXPLORER_URL) && {
-			fromExplorerUrl: `${ICP_EXPLORER_URL}/account/${from}`
-		}),
+		fromExplorerUrl: `${ICP_EXPLORER_URL}/account/${from}`,
 		incoming:
 			from?.toLowerCase() !== accountIdentifier?.toHex().toLowerCase() ||
 			transferToSelf === 'receive'
@@ -81,7 +77,7 @@ export const mapIcpTransaction = ({
 
 	const mapTo = (to: string): Pick<IcTransactionUi, 'to' | 'toExplorerUrl'> => ({
 		to,
-		...(notEmptyString(ICP_EXPLORER_URL) && { toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}` })
+		toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}`
 	});
 
 	const mapAmount = ({

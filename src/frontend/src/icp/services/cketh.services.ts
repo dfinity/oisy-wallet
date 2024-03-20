@@ -1,16 +1,13 @@
 import { eip1559TransactionPrice } from '$icp/api/cketh-minter.api';
 import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
-import type { IcCkCanisters, IcToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AnonymousIdentity } from '@dfinity/agent';
 import type { Eip1559TransactionPrice } from '@dfinity/cketh';
 import { assertNonNullish } from '@dfinity/utils';
 
-export const loadEip1559TransactionPrice = async ({
-	id: tokenId,
-	minterCanisterId
-}: IcToken & Partial<IcCkCanisters>) => {
+export const loadEip1559TransactionPrice = async ({ id: tokenId, minterCanisterId }: IcCkToken) => {
 	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
 
 	await queryAndUpdate<Eip1559TransactionPrice>({

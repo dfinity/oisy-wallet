@@ -1,31 +1,40 @@
+import {
+	BTC_MAINNET_EXPLORER_URL,
+	BTC_TESTNET_EXPLORER_URL,
+	CKBTC_EXPLORER_URL
+} from '$env/explorers.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.ircrc.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
-import type { IcrcTransaction, IcTransactionUi } from '$icp/types/ic';
+import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
-import { decodeBurnMemo, decodeMintMemo, MINT_MEMO_KYT_FAIL } from '$icp/utils/ckbtc-memo.utils';
+import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/ckbtc-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
-import { BITCOIN_EXPLORER_URL, CKBTC_EXPLORER_URL } from '$lib/constants/explorers.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,
-	identity
+	identity,
+	ledgerCanisterId
 }: {
 	transaction: IcrcTransaction;
 	identity: OptionIdentity;
-}): IcTransactionUi => {
+} & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
+
+	const ckBTCExplorerUrl =
+		IC_CKBTC_LEDGER_CANISTER_ID === ledgerCanisterId ? CKBTC_EXPLORER_URL : undefined;
 
 	const tx: IcTransactionUi = {
 		id,
 		from,
 		to,
-		...(notEmptyString(CKBTC_EXPLORER_URL) && {
-			txExplorerUrl: `${CKBTC_EXPLORER_URL}/transaction/${id}`,
-			...(notEmptyString(from) && { fromExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${from}` }),
-			...(notEmptyString(to) && { toExplorerUrl: `${CKBTC_EXPLORER_URL}/account/${to}` })
+		...(notEmptyString(ckBTCExplorerUrl) && {
+			txExplorerUrl: `${ckBTCExplorerUrl}/transaction/${id}`,
+			...(notEmptyString(from) && { fromExplorerUrl: `${ckBTCExplorerUrl}/account/${from}` }),
+			...(notEmptyString(to) && { toExplorerUrl: `${ckBTCExplorerUrl}/account/${to}` })
 		}),
 		...txRest
 	};
@@ -36,6 +45,11 @@ export const mapCkBTCTransaction = ({
 
 	const mint = fromNullable(rawMint);
 	const burn = fromNullable(rawBurn);
+
+	const bitcoinExplorerUrl =
+		IC_CKBTC_LEDGER_CANISTER_ID === ledgerCanisterId
+			? BTC_MAINNET_EXPLORER_URL
+			: BTC_TESTNET_EXPLORER_URL;
 
 	if (nonNullish(mint)) {
 		const memo = fromNullable(mint.memo);
@@ -59,9 +73,7 @@ export const mapCkBTCTransaction = ({
 			...tx,
 			...(nonNullish(toAddress) && {
 				to: toAddress,
-				...(notEmptyString(BITCOIN_EXPLORER_URL) && {
-					toExplorerUrl: `${BITCOIN_EXPLORER_URL}/address/${toAddress}`
-				})
+				toExplorerUrl: `${bitcoinExplorerUrl}/address/${toAddress}`
 			}),
 			...(isNullish(toAddress) && { toLabel: 'BTC Network' })
 		};
@@ -75,12 +87,18 @@ export const mapCkBTCPendingUtxo = ({
 		value,
 		outpoint: { txid, vout }
 	},
-	kytFee
+	kytFee,
+	ledgerCanisterId
 }: {
 	utxo: PendingUtxo;
 	kytFee: bigint;
-}): IcTransactionUi => {
+} & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
 	const id = utxoTxIdToString(txid);
+
+	const bitcoinExplorerUrl =
+		IC_CKBTC_LEDGER_CANISTER_ID === ledgerCanisterId
+			? BTC_MAINNET_EXPLORER_URL
+			: BTC_TESTNET_EXPLORER_URL;
 
 	return {
 		id: `${id}-${vout}`,
@@ -90,9 +108,7 @@ export const mapCkBTCPendingUtxo = ({
 		fromLabel: 'BTC Network',
 		typeLabel: 'Receiving BTC',
 		value: value - kytFee,
-		...(notEmptyString(BITCOIN_EXPLORER_URL) && {
-			txExplorerUrl: `${BITCOIN_EXPLORER_URL}/tx/${id}`
-		})
+		txExplorerUrl: `${bitcoinExplorerUrl}/tx/${id}`
 	};
 };
 

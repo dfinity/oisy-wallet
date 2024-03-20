@@ -1,5 +1,5 @@
-import { BTC_NETWORK, BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
-import { CKBTC_LEDGER_CANISTER_ID, CKETH_LEDGER_CANISTER_ID } from '$icp/constants/icrc.constants';
+import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks.env';
+import { CKBTC_LEDGER_CANISTER_IDS, CKETH_LEDGER_CANISTER_IDS } from '$env/networks.ircrc.env';
 import type { IcToken } from '$icp/types/ic';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
@@ -8,7 +8,7 @@ import type { TokenStandard } from '$lib/types/token';
 import { isEthAddress } from '$lib/utils/account.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-import { parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
+import { BtcNetwork, parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
@@ -28,13 +28,16 @@ export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
 	!isBtcAddress(address);
 
 export const isTokenCkBtcLedger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
-	ledgerCanisterId === CKBTC_LEDGER_CANISTER_ID;
+	nonNullish(ledgerCanisterId) && CKBTC_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
 export const isTokenCkEthLedger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
-	ledgerCanisterId === CKETH_LEDGER_CANISTER_ID;
+	nonNullish(ledgerCanisterId) && CKETH_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
 export const isNetworkIdBTC = (networkId: NetworkId | undefined): boolean =>
-	networkId === BTC_NETWORK_ID;
+	nonNullish(networkId) && [BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID].includes(networkId);
+
+export const isNetworkIdBTCMainnet = (networkId: NetworkId | undefined): boolean =>
+	BTC_MAINNET_NETWORK_ID === networkId;
 
 export const isNetworkIdETH = (networkId: NetworkId | undefined): boolean =>
 	nonNullish(networkId) && isNetworkIdEthereum(networkId);
@@ -55,7 +58,7 @@ export const isInvalidDestinationIc = ({
 	if (isNetworkIdBTC(networkId)) {
 		return invalidBtcAddress({
 			address: destination,
-			network: BTC_NETWORK
+			network: isNetworkIdBTCMainnet(networkId) ? BtcNetwork.Mainnet : BtcNetwork.Testnet
 		});
 	}
 

@@ -38,12 +38,14 @@ const mapTransaction = ({
 	transaction: Pick<IcrcTransactionWithId, 'id'> & { transaction: IcrcTransaction };
 	jobData: SchedulerJobData<PostMessageDataRequestIcrc>;
 }): IcTransactionUi => {
-	if (nonNullish(data) && isTokenCkBtcLedger({ ledgerCanisterId: data.ledgerCanisterId })) {
-		return mapCkBTCTransaction({ transaction, identity });
+	const ledgerId = nonNullish(data) ? { ledgerCanisterId: data.ledgerCanisterId } : undefined;
+
+	if (nonNullish(ledgerId) && isTokenCkBtcLedger(ledgerId)) {
+		return mapCkBTCTransaction({ transaction, identity, ...ledgerId });
 	}
 
-	if (nonNullish(data) && isTokenCkEthLedger({ ledgerCanisterId: data.ledgerCanisterId })) {
-		return mapCkETHTransaction({ transaction, identity });
+	if (nonNullish(ledgerId) && isTokenCkEthLedger(ledgerId)) {
+		return mapCkETHTransaction({ transaction, identity, ...ledgerId });
 	}
 
 	return mapIcrcTransaction({ transaction, identity });
