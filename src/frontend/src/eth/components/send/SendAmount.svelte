@@ -19,7 +19,7 @@
 
 	$: insufficientFunds = nonNullish(insufficientFundsError);
 
-	const { store: storeFeeData } = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { feeStore: storeFeeData } = getContext<FeeContext>(FEE_CONTEXT_KEY);
 	const { sendTokenDecimals, sendBalance, sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const validate = () => {

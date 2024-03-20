@@ -18,7 +18,7 @@
 	export let destinationEditable = true;
 	export let amount: number | undefined = undefined;
 
-	const { store: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { feeStore: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let invalid = true;
 	$: invalid =

@@ -23,7 +23,7 @@
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 
-	const { store }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { feeStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -45,7 +45,7 @@
 			const { getFeeData } = infuraProviders($sendToken.network.id);
 
 			if (isSupportedEthTokenId($sendTokenId)) {
-				store.setFee({
+				feeStore.setFee({
 					...(await getFeeData()),
 					gas: await getEthFeeData({
 						...params,
@@ -55,7 +55,7 @@
 				return;
 			}
 
-			store.setFee({
+			feeStore.setFee({
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
 					contract: $sendToken as Erc20Token,

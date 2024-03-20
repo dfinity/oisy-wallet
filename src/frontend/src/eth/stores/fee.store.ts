@@ -1,5 +1,5 @@
 import type { TransactionFeeData } from '$lib/types/transaction';
-import type { Readable } from 'svelte/store';
+import type { Readable, Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
 
 export type FeeStoreData = TransactionFeeData | undefined;
@@ -21,7 +21,8 @@ export const initFeeStore = (): FeeStore => {
 };
 
 export interface FeeContext {
-	store: FeeStore;
+	feeStore: FeeStore;
+	feeSymbolStore: Writable<string | undefined>;
 }
 
 export const FEE_CONTEXT_KEY = Symbol('fee');

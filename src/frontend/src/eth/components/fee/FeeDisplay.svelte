@@ -8,9 +8,8 @@
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
 	import { maxGasFee } from '$eth/utils/fee.utils';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-	import { ethereumToken } from '$eth/derived/token.derived';
 
-	const { store: feeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { feeStore: feeData, feeSymbolStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let fee: BigNumber | undefined | null = undefined;
 
@@ -54,7 +53,7 @@
 				value: fee,
 				displayDecimals: EIGHT_DECIMALS
 			})}
-			{$ethereumToken.symbol}
+			{$feeSymbolStore ?? ''}
 		</div>
 	{/if}
 </div>
