@@ -5,7 +5,7 @@ import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
-import type { Token } from '$lib/types/token';
+import type { RequiredToken } from '$lib/types/token';
 
 /**
  * Ethereum
@@ -16,7 +16,7 @@ const ETHEREUM_SYMBOL = 'ETH';
 
 export const ETHEREUM_TOKEN_ID: unique symbol = Symbol(ETHEREUM_SYMBOL);
 
-export const ETHEREUM_TOKEN: Required<Token> = {
+export const ETHEREUM_TOKEN: RequiredToken = {
 	id: ETHEREUM_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: 'ethereum',
@@ -30,7 +30,7 @@ export const SEPOLIA_SYMBOL = 'SepoliaETH';
 
 export const SEPOLIA_TOKEN_ID: unique symbol = Symbol(SEPOLIA_SYMBOL);
 
-export const SEPOLIA_TOKEN: Required<Token> = {
+export const SEPOLIA_TOKEN: RequiredToken = {
 	id: SEPOLIA_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
 	standard: 'ethereum',
@@ -44,7 +44,7 @@ export const SEPOLIA_TOKEN: Required<Token> = {
  * The tokens store is useful for enabling and disabling features based on the testnets flag. However, constants are handy and not too verbose for testing if a token ID belongs to an Ethereum token.
  *
  */
-export const SUPPORTED_ETHEREUM_TOKENS: [...Required<Token>[], Required<Token>] = [
+export const SUPPORTED_ETHEREUM_TOKENS: [...RequiredToken[], RequiredToken] = [
 	...(ETH_MAINNET_ENABLED ? [ETHEREUM_TOKEN] : []),
 	SEPOLIA_TOKEN
 ];
