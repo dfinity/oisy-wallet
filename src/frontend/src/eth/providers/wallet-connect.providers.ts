@@ -1,4 +1,4 @@
-import { SEPOLIA_NETWORK } from '$env/networks.env';
+import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
 import {
 	SESSION_REQUEST_ETH_SIGN,
 	SESSION_REQUEST_ETH_SIGN_V4,
@@ -73,13 +73,11 @@ export const initWalletConnect = async ({
 	const approveSession = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { params } = proposal;
 
-		const { chainId: sepoliaChainId } = SEPOLIA_NETWORK;
-
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
 			supportedNamespaces: {
 				eip155: {
-					chains: [`eip155:1`, `eip155:${sepoliaChainId}`],
+					chains: EIP155_CHAINS_KEYS,
 					methods: [
 						SESSION_REQUEST_SEND_TRANSACTION,
 						SESSION_REQUEST_ETH_SIGN,
@@ -87,7 +85,7 @@ export const initWalletConnect = async ({
 						SESSION_REQUEST_ETH_SIGN_V4
 					],
 					events: ['accountsChanged', 'chainChanged'],
-					accounts: [`eip155:1:${address}`, `eip155:${sepoliaChainId}:${address}`]
+					accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${address}`)
 				}
 			}
 		});
