@@ -32,11 +32,12 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
+	export let sourceNetwork: EthereumNetwork;
 
 	let erc20Approve = false;
 	$: erc20Approve = isErc20TransactionApprove(firstTransaction.data);
@@ -128,7 +129,7 @@
 			identity: $authStore.identity,
 			ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
 			tokenStandard: $sendTokenStandard,
-			sourceNetwork: $selectedEthereumNetwork,
+			sourceNetwork,
 			targetNetwork
 		});
 
@@ -146,7 +147,7 @@
 		amount={amount.toString()}
 		{destination}
 		observe={currentStep?.name !== 'Sending'}
-		sourceNetwork={$selectedEthereumNetwork}
+		{sourceNetwork}
 	>
 		<CkEthLoader convertTokenId={$ethereumTokenId}>
 			{#if currentStep?.name === 'Sending'}
@@ -157,6 +158,7 @@
 					{destination}
 					{data}
 					{erc20Approve}
+					{sourceNetwork}
 					{targetNetwork}
 					on:icApprove={send}
 					on:icReject={reject}

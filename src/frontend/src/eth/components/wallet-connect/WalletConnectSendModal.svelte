@@ -6,12 +6,14 @@
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
 	} from '$eth/types/wallet-connect';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
+	export let sourceNetwork: EthereumNetwork;
 	export let listener: WalletConnectListener | undefined | null;
 </script>
 
 <SendTokenContext>
-	<WalletConnectSendTokenModal {request} {firstTransaction} {listener} />
+	<WalletConnectSendTokenModal {request} {firstTransaction} {listener} {sourceNetwork} />
 </SendTokenContext>
