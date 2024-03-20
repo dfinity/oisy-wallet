@@ -1,4 +1,3 @@
-import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -10,8 +9,8 @@ export interface SendStore extends Readable<SendData> {
 	set: (token: Token) => void;
 }
 
-const initSendStore = (): SendStore => {
-	const { subscribe, set: setStore } = writable<SendData>(ETHEREUM_TOKEN);
+const initSendStore = (token: Token): SendStore => {
+	const { subscribe, set: setStore } = writable<SendData>(token);
 
 	return {
 		subscribe,
@@ -22,8 +21,11 @@ const initSendStore = (): SendStore => {
 	};
 };
 
-export const initSendContext = (staticContext: Pick<SendContext, 'sendPurpose'>): SendContext => {
-	const sendToken = initSendStore();
+export const initSendContext = ({
+	token,
+	...staticContext
+}: Pick<SendContext, 'sendPurpose'> & { token: Token }): SendContext => {
+	const sendToken = initSendStore(token);
 
 	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
 	const sendTokenId = derived(sendToken, ({ id }) => id);

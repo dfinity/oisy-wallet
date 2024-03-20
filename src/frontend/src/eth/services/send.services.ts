@@ -1,20 +1,21 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
-import { ETH_BASE_FEE, ETH_CHAIN_ID } from '$eth/constants/eth.constants';
-import { populateDepositTransaction } from '$eth/providers/infura-cketh.providers';
-import { populateBurnTransaction } from '$eth/providers/infura-erc20-icp.providers';
-import { populateTransaction } from '$eth/providers/infura-erc20.providers';
-import { getTransactionCount, sendTransaction } from '$eth/providers/infura.providers';
+import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
+import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
+import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
+import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
+import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+import { infuraProviders } from '$eth/providers/infura.providers';
 import type {
 	CkEthPopulateTransaction,
 	Erc20PopulateTransaction
 } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
+import type { NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp } from '$eth/utils/token.utils';
-import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
-import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import { signTransaction } from '$lib/api/backend.api';
+import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
 import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
@@ -31,11 +32,13 @@ const ethPrepareTransaction = async ({
 	maxFeePerGas: max_fee_per_gas,
 	nonce,
 	gas,
-	data
-}: TransferParams & { nonce: number; gas: bigint | undefined }): Promise<SignRequest> => ({
+	data,
+	chainId: chain_id
+}: TransferParams &
+	NetworkChainId & { nonce: number; gas: bigint | undefined }): Promise<SignRequest> => ({
 	to,
 	value: amount.toBigInt(),
-	chain_id: ETH_CHAIN_ID,
+	chain_id,
 	nonce: BigInt(nonce),
 	gas: gas ?? ETH_BASE_FEE,
 	max_fee_per_gas,
@@ -51,11 +54,14 @@ const erc20PrepareTransaction = async ({
 	nonce,
 	token,
 	gas,
-	populate
-}: TransferParams & { nonce: number; gas: bigint; populate: Erc20PopulateTransaction } & Pick<
-		SendParams,
-		'token'
-	>): Promise<SignRequest> => {
+	populate,
+	chainId: chain_id
+}: TransferParams &
+	NetworkChainId & {
+		nonce: number;
+		gas: bigint;
+		populate: Erc20PopulateTransaction;
+	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
 	const { data } = await populate({
 		contract: token as Erc20Token,
 		to,
@@ -70,7 +76,7 @@ const erc20PrepareTransaction = async ({
 
 	return {
 		to: contractAddress,
-		chain_id: ETH_CHAIN_ID,
+		chain_id,
 		nonce: BigInt(nonce),
 		gas,
 		max_fee_per_gas,
@@ -88,13 +94,15 @@ const ethContractPrepareTransaction = async ({
 	maxFeePerGas: max_fee_per_gas,
 	nonce,
 	gas,
-	populate
-}: TransferParams & {
-	nonce: number;
-	gas: bigint;
-	populate: CkEthPopulateTransaction;
-	contract: Erc20ContractAddress;
-}): Promise<SignRequest> => {
+	populate,
+	chainId: chain_id
+}: TransferParams &
+	NetworkChainId & {
+		nonce: number;
+		gas: bigint;
+		populate: CkEthPopulateTransaction;
+		contract: Erc20ContractAddress;
+	}): Promise<SignRequest> => {
 	const { data } = await populate({
 		contract,
 		to
@@ -108,7 +116,7 @@ const ethContractPrepareTransaction = async ({
 
 	return {
 		to: contractAddress,
-		chain_id: ETH_CHAIN_ID,
+		chain_id,
 		nonce: BigInt(nonce),
 		gas,
 		max_fee_per_gas,
@@ -127,7 +135,8 @@ export const send = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	gas,
-	network,
+	sourceNetwork,
+	targetNetwork,
 	identity,
 	ckEthHelperContractAddress,
 	...rest
@@ -139,6 +148,10 @@ export const send = async ({
 	}): Promise<{ hash: string }> => {
 	progress(SendStep.INITIALIZATION);
 
+	const { id: networkId, chainId } = sourceNetwork;
+
+	const { sendTransaction, getTransactionCount } = infuraProviders(networkId);
+
 	const nonce = await getTransactionCount(from);
 
 	const principalEthAddress = (): string => {
@@ -146,13 +159,13 @@ export const send = async ({
 		return encodePrincipalToEthAddress(identity.getPrincipal());
 	};
 
-	const transaction = await (token.id === ETHEREUM_TOKEN_ID
+	const transaction = await (SUPPORTED_ETHEREUM_TOKEN_IDS.includes(token.id)
 		? nonNullish(ckEthHelperContractAddress) &&
 			isCkEthHelperContract({
 				destination: to,
 				helperContractAddress: ckEthHelperContractAddress
 			}) &&
-			isNetworkICP(network ?? ETHEREUM_NETWORK)
+			isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
 			? ethContractPrepareTransaction({
 					...rest,
 					contract: { address: ckEthHelperContractAddress.data },
@@ -162,7 +175,8 @@ export const send = async ({
 					gas: gas.toBigInt(),
 					maxFeePerGas: maxFeePerGas.toBigInt(),
 					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-					populate: populateDepositTransaction
+					populate: infuraCkETHProviders(networkId).populateTransaction,
+					chainId
 				})
 			: ethPrepareTransaction({
 					...rest,
@@ -171,7 +185,8 @@ export const send = async ({
 					nonce,
 					gas: gas?.toBigInt(),
 					maxFeePerGas: maxFeePerGas.toBigInt(),
-					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt()
+					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+					chainId
 				})
 		: erc20PrepareTransaction({
 				...rest,
@@ -183,9 +198,10 @@ export const send = async ({
 				maxFeePerGas: maxFeePerGas.toBigInt(),
 				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 				populate:
-					isErc20Icp(token) && isNetworkICP(network ?? ETHEREUM_NETWORK)
-						? populateBurnTransaction
-						: populateTransaction
+					isErc20Icp(token) && isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
+						? infuraErc20IcpProviders(networkId).populateTransaction
+						: infuraErc20Providers(networkId).populateTransaction,
+				chainId
 			}));
 
 	progress(SendStep.SIGN);

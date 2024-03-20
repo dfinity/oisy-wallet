@@ -1,7 +1,7 @@
-import { getTransaction } from '$eth/providers/alchemy.providers';
+import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { transactionsStore } from '$eth/stores/transactions.store';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
-import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -16,8 +16,8 @@ export const processTransactionSent = async ({
 	token: Token;
 	transaction: TransactionResponse;
 }) => {
-	if (token.id === ETHEREUM_TOKEN_ID) {
-		await processEthTransaction({ hash: transaction.hash });
+	if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes(token.id)) {
+		await processEthTransaction({ hash: transaction.hash, token });
 		return;
 	}
 
@@ -27,7 +27,7 @@ export const processTransactionSent = async ({
 	await processErc20Transaction({ hash: transaction.hash, value, token, type: 'pending' });
 };
 
-export const processEthTransaction = async (params: { hash: string }) =>
+export const processEthTransaction = async (params: { hash: string; token: Token }) =>
 	await processPendingTransaction(params);
 
 export const processErc20Transaction = async ({
@@ -49,13 +49,14 @@ export const processErc20Transaction = async ({
 
 const processPendingTransaction = async ({
 	hash,
-	token = ETHEREUM_TOKEN,
+	token,
 	value
 }: {
 	hash: string;
-	token?: Token;
+	token: Token;
 	value?: BigNumber;
 }) => {
+	const { getTransaction } = alchemyProviders(token.network.id);
 	const transaction = await getTransaction(hash);
 
 	if (isNullish(transaction)) {
@@ -94,6 +95,7 @@ const processMinedTransaction = async ({
 	token: Token;
 	value?: BigNumber;
 }) => {
+	const { getTransaction } = alchemyProviders(token.network.id);
 	const minedTransaction = await getTransaction(hash);
 
 	if (isNullish(minedTransaction)) {

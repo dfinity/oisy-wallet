@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getBlockNumber } from '$eth/providers/infura.providers';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { fade } from 'svelte/transition';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
+	import { infuraProviders } from '$eth/providers/infura.providers';
+	import { networkId } from '$lib/derived/network.derived';
 
 	export let blockNumber: number;
 
@@ -15,6 +16,7 @@
 
 	const loadCurrentBlockNumber = async () => {
 		try {
+			const { getBlockNumber } = infuraProviders($networkId);
 			currentBlockNumber = await getBlockNumber();
 		} catch (err: unknown) {
 			disconnect();
@@ -37,7 +39,10 @@
 	onMount(async () => {
 		await loadCurrentBlockNumber();
 
-		listener = initMinedTransactionsListener(async () => debounceLoadCurrentBlockNumber());
+		listener = initMinedTransactionsListener({
+			callback: async () => debounceLoadCurrentBlockNumber(),
+			networkId: $networkId
+		});
 	});
 
 	onDestroy(disconnect);

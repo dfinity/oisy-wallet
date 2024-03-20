@@ -17,3 +17,13 @@ export type Erc20PopulateTransaction = (
 		amount: BigNumber;
 	}
 ) => Promise<PopulatedTransaction>;
+
+export interface Erc20Provider {
+	populateTransaction: Erc20PopulateTransaction;
+
+	getFeeData(params: {
+		contract: Erc20ContractAddress;
+		address: ETH_ADDRESS;
+		amount: BigNumber;
+	}): Promise<BigNumber>;
+}

@@ -1,6 +1,7 @@
 import { deleteIdbEthAddress } from '$lib/api/idb.api';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
+import { testnetsStore } from '$lib/stores/testnets.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { replaceHistory } from '$lib/utils/route.utils';
@@ -56,7 +57,7 @@ export const idleSignOut = (): Promise<void> =>
 			text: 'You have been logged out because your session has expired.',
 			level: 'warn'
 		},
-		clearIdbAddress: false
+		clearStorages: false
 	});
 
 const emptyIdbEthAddress = async () => {
@@ -75,18 +76,22 @@ const emptyIdbEthAddress = async () => {
 	}
 };
 
+const clearTestnetsOption = async () => {
+	testnetsStore.reset({ key: 'testnets' });
+};
+
 const logout = async ({
 	msg = undefined,
-	clearIdbAddress = true
+	clearStorages = true
 }: {
 	msg?: ToastMsg;
-	clearIdbAddress?: boolean;
+	clearStorages?: boolean;
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
 
-	if (clearIdbAddress) {
-		await emptyIdbEthAddress();
+	if (clearStorages) {
+		await Promise.all([emptyIdbEthAddress(), clearTestnetsOption()]);
 	}
 
 	await authStore.signOut();

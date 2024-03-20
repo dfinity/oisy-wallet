@@ -5,8 +5,7 @@
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-
-	import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
+	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	export let networkId: NetworkId | undefined = undefined;
 </script>
@@ -14,10 +13,10 @@
 {#if nonNullish(networkId)}
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">Network</svelte:fragment>
-		{#if isNetworkIdBTC(networkId)}
-			<IcSendBtcNetwork />
+		{#if nonNullish(networkId) && isNetworkIdBTC(networkId)}
+			<IcSendBtcNetwork {networkId} />
 		{:else if isNetworkIdEthereum(networkId)}
-			{ETHEREUM_NETWORK.name}
+			{$ckETHTwinToken.name}
 		{:else}
 			Internet Computer
 		{/if}

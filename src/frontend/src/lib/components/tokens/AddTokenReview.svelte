@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { metadata as metadataApi } from '$eth/providers/infura-erc20.providers';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import { isNullish } from '@dfinity/utils';
@@ -9,6 +8,8 @@
 	import Warning from '$lib/components/ui/Warning.svelte';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+	import { networkId } from '$lib/derived/network.derived';
 
 	export let contractAddress = '';
 	export let metadata: Erc20Metadata | undefined;
@@ -28,6 +29,7 @@
 		}
 
 		try {
+			const { metadata: metadataApi } = infuraErc20Providers($networkId);
 			metadata = await metadataApi({ address: contractAddress });
 		} catch (err: unknown) {
 			toastsError({

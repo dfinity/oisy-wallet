@@ -5,8 +5,21 @@ export const LOCAL = MODE === 'local';
 export const STAGING = MODE === 'staging';
 export const PROD = MODE === 'ic';
 
-export const INTERNET_IDENTITY_CANISTER_ID: string | null | undefined = import.meta.env
-	.VITE_INTERNET_IDENTITY_CANISTER_ID as string | null | undefined;
+export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_INTERNET_IDENTITY_CANISTER_ID
+	: undefined;
+
+export const BACKEND_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_BACKEND_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
+		: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
+
+export const AIRDOP_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_AIRDOP_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_AIRDOP_CANISTER_ID
+		: import.meta.env.VITE_IC_AIRDOP_CANISTER_ID;
 
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds

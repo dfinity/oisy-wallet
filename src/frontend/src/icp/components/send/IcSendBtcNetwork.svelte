@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { BTC_NETWORK } from '$icp/constants/ckbtc.constants';
-	import { BtcNetwork } from '@dfinity/ckbtc';
+	import type { NetworkId } from '$lib/types/network';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
+
+	export let networkId: NetworkId;
 </script>
 
-{#if BTC_NETWORK === BtcNetwork.Mainnet}
+{#if BTC_MAINNET_NETWORK_ID === networkId}
 	Bitcoin
-{:else if BTC_NETWORK === BtcNetwork.Testnet}
+{:else}
 	Bitcoin (Testnet)
-{:else if BTC_NETWORK === BtcNetwork.Regtest}
-	Bitcoin (Regtest)
 {/if}

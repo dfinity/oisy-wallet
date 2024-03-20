@@ -1,9 +1,6 @@
 import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { getUtxos } from '$icp/api/ic.api';
-import {
-	BTC_NETWORK,
-	CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS
-} from '$icp/constants/ckbtc.constants';
+import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
@@ -16,12 +13,8 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import {
-	BtcNetwork,
-	MinterNoNewUtxosError,
-	type PendingUtxo,
-	type UtxoStatus
-} from '@dfinity/ckbtc';
+import { MinterNoNewUtxosError, type PendingUtxo, type UtxoStatus } from '@dfinity/ckbtc';
+import type { BitcoinNetwork } from '@dfinity/ic-management';
 import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler
@@ -61,6 +54,10 @@ export class CkBTCUpdateBalanceScheduler
 			'No data - minterCanisterId - provided to update the BTC balance.'
 		);
 
+		const bitcoinNetwork = data?.bitcoinNetwork;
+
+		assertNonNullish(bitcoinNetwork, 'No BTC network provided to check for update balance.');
+
 		const address =
 			data?.btcAddress ??
 			this.btcAddress ??
@@ -71,7 +68,8 @@ export class CkBTCUpdateBalanceScheduler
 		const pendingUtxos = await this.hasPendingUtxos({
 			minterCanisterId,
 			identity,
-			btcAddress: address
+			btcAddress: address,
+			bitcoinNetwork
 		});
 
 		// All Utxos have been processed by the ckBTC minter, therefore no update balance call is required to process potential pending utxos - i.e., potential conversion from BTC to ckBTC.
@@ -128,17 +126,19 @@ export class CkBTCUpdateBalanceScheduler
 	private async hasPendingUtxos({
 		identity,
 		minterCanisterId,
-		btcAddress: address
+		btcAddress: address,
+		bitcoinNetwork: network
 	}: {
 		identity: OptionIdentity;
 		minterCanisterId: CanisterIdText;
 		btcAddress: string;
+		bitcoinNetwork: BitcoinNetwork;
 	}): Promise<boolean> {
 		const [{ utxos: allUtxos }, knownUtxos] = await Promise.all([
 			getUtxos({
 				identity,
 				certified: false,
-				network: BTC_NETWORK === BtcNetwork.Testnet ? 'testnet' : 'mainnet',
+				network,
 				address
 			}),
 			getKnownUtxos({ identity, minterCanisterId })

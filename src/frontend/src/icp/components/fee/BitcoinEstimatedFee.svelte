@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import { nonNullish } from '@dfinity/utils';
-	import { BTC_DECIMALS } from '$icp/constants/ckbtc.constants';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { getContext } from 'svelte';
 	import { IC_FEE_CONTEXT_KEY, type IcFeeContext } from '$icp/stores/ic-fee.store';
+	import { BTC_DECIMALS } from '$env/tokens.btc.env';
 
 	const { store: storeFeeData } = getContext<IcFeeContext>(IC_FEE_CONTEXT_KEY);
 

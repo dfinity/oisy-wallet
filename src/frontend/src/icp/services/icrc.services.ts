@@ -1,5 +1,5 @@
+import { ICRC_TOKENS } from '$env/networks.ircrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
-import { ICRC_CANISTERS } from '$icp/constants/icrc.constants';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcCkInterface } from '$icp/types/ic';
 import { mapIcrcToken, type IcrcLoadData } from '$icp/utils/icrc.utils';
@@ -24,7 +24,7 @@ export const loadIcrcTokens = async (): Promise<void> => {
 			identity: new AnonymousIdentity()
 		});
 
-	await Promise.all(ICRC_CANISTERS.map(loadKnownIcrc));
+	await Promise.all(ICRC_TOKENS.map(loadKnownIcrc));
 
 	// TODO: extend with user defined ICRC tokens
 };

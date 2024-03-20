@@ -4,7 +4,7 @@
 	import { Spinner } from '@dfinity/gix-components';
 	import { fade } from 'svelte/transition';
 	import type { ProposalTypes } from '@walletconnect/types';
-	import { EIP155_CHAINS } from '$eth/constants/eip155-chains.constants';
+	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import WalletConnectActions from './WalletConnectActions.svelte';
 	import WalletConnectDomainVerification from './WalletConnectDomainVerification.svelte';
 	import { acceptedContext } from '$eth/utils/wallet-connect.utils';

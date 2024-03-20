@@ -7,11 +7,12 @@
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { nonNullish } from '@dfinity/utils';
-	import { BTC_DECIMALS } from '$icp/constants/ckbtc.constants';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { fade } from 'svelte/transition';
 	import { btcAddressStore } from '$icp/stores/btc.store';
+
+	import { BTC_DECIMALS } from '$env/tokens.btc.env';
 
 	const dispatch = createEventDispatcher();
 

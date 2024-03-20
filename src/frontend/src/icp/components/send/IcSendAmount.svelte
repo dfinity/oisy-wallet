@@ -8,15 +8,14 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { BTC_NETWORK_ID } from '$icp/constants/ckbtc.constants';
 	import type { NetworkId } from '$lib/types/network';
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { assertCkETHUserInputAmount } from '$icp/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
-
-	import { ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -41,7 +40,7 @@
 			unitName: $tokenDecimals
 		});
 
-		if (networkId === BTC_NETWORK_ID) {
+		if (isNetworkIdBTC(networkId)) {
 			amountError = assertCkBTCUserInputAmount({
 				amount: value,
 				minterInfo: $ckBtcMinterInfoStore?.[$tokenId],
@@ -53,7 +52,7 @@
 			}
 		}
 
-		if (networkId === ETHEREUM_NETWORK_ID) {
+		if (isNetworkIdEthereum(networkId)) {
 			amountError = assertCkETHUserInputAmount({
 				amount: value,
 				tokenDecimals: $tokenDecimals,

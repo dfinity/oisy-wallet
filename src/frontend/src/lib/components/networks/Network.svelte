@@ -25,7 +25,7 @@
 
 	let id: NetworkId;
 	let name: string;
-	let icon: string;
+	let icon: string | undefined;
 	$: ({ id, name, icon } = network);
 </script>
 

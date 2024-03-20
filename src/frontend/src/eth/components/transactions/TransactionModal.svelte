@@ -15,8 +15,8 @@
 	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { ETHEREUM_EXPLORER_URL } from '$lib/constants/explorers.constants';
 	import { notEmptyString } from '@dfinity/utils';
+	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 
 	export let transaction: Transaction;
 
@@ -33,21 +33,13 @@
 	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
 
 	let explorerUrl: string | undefined;
-	$: explorerUrl =
-		notEmptyString(ETHEREUM_EXPLORER_URL) && notEmptyString(hash)
-			? `${ETHEREUM_EXPLORER_URL}/tx/${hash}`
-			: undefined;
+	$: explorerUrl = notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined;
 
-	let fromExplorerUrl: string | undefined;
-	$: fromExplorerUrl = notEmptyString(ETHEREUM_EXPLORER_URL)
-		? `${ETHEREUM_EXPLORER_URL}/address/${from}`
-		: undefined;
+	let fromExplorerUrl: string;
+	$: fromExplorerUrl = `${$explorerUrlStore}/address/${from}`;
 
 	let toExplorerUrl: string | undefined;
-	$: toExplorerUrl =
-		notEmptyString(to) && notEmptyString(ETHEREUM_EXPLORER_URL)
-			? `${ETHEREUM_EXPLORER_URL}/address/${to}`
-			: undefined;
+	$: toExplorerUrl = notEmptyString(to) ? `${$explorerUrlStore}/address/${to}` : undefined;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>

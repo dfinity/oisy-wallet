@@ -5,6 +5,7 @@
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { networkEthereum } from '$lib/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 
 	const receiveModal = async () => {
 		if (!$metamaskAvailable) {
@@ -14,7 +15,10 @@
 			return;
 		}
 
-		await openMetamaskTransaction($address);
+		await openMetamaskTransaction({
+			address: $address,
+			network: $selectedEthereumNetwork
+		});
 	};
 </script>
 

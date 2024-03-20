@@ -3,20 +3,21 @@
 	import { SendStep } from '$lib/enums/steps';
 	import HowToConvertETHInfo from '$icp/components/convert/HowToConvertETHInfo.svelte';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
-	import { ETHEREUM_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+	import { ICP_NETWORK } from '$env/networks.env';
+	import { ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
 
 	/**
 	 * Props
 	 */
 
 	let destination = '';
-	$: destination = $ckEthHelperContractAddressStore?.[ETHEREUM_TOKEN_ID]?.data ?? '';
-	let network: Network | undefined = ICP_NETWORK;
+	$: destination = $ckEthHelperContractAddressStore?.[$ckETHTwinTokenId]?.data ?? '';
+
+	let targetNetwork: Network | undefined = ICP_NETWORK;
 
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = SendStep.INITIALIZATION;
@@ -35,7 +36,7 @@
 		closeModal(() => {
 			destination = '';
 			amount = undefined;
-			network = undefined;
+			targetNetwork = undefined;
 
 			sendProgressStep = SendStep.INITIALIZATION;
 
@@ -58,7 +59,7 @@
 		on:icClose={close}
 		on:icSendBack={() => modal.set(0)}
 		bind:destination
-		bind:network
+		bind:targetNetwork
 		bind:amount
 		bind:sendProgressStep
 		{currentStep}

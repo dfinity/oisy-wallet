@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { KeyValuePairInfo } from '@dfinity/gix-components';
+	import { KeyValuePairInfo, Toggle } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
 	import { nonNullish } from '@dfinity/utils';
@@ -9,12 +9,18 @@
 	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import AdminAirdrop from '$airdrop/components/admin/AdminAirdrop.svelte';
+	import { testnetsStore } from '$lib/stores/testnets.store';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
 
 	let principal: Principal | undefined | null;
 	$: principal = $authStore?.identity?.getPrincipal();
+
+	let checked: boolean;
+	$: checked = $testnetsStore?.enabled ?? false;
+
+	const toggleTestnets = () => testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
 </script>
 
 <KeyValuePairInfo>
@@ -47,6 +53,22 @@
 		<svelte:fragment slot="info">
 			All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet
 			Identity.
+		</svelte:fragment>
+	</KeyValuePairInfo>
+</div>
+
+<div class="mt-4">
+	<KeyValuePairInfo>
+		<svelte:fragment slot="key"><span class="font-bold">Show testnets:</span></svelte:fragment>
+		<Toggle
+			slot="value"
+			ariaLabel="Toggle to show or hide testnets"
+			bind:checked
+			on:nnsToggle={toggleTestnets}
+		/>
+
+		<svelte:fragment slot="info">
+			Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>

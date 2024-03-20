@@ -7,7 +7,7 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$icp-eth/constants/networks.constants';
+	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;

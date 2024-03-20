@@ -1,5 +1,5 @@
+import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -19,6 +19,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 
 		return {
 			[ETHEREUM_TOKEN_ID]: ethPrice,
+			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
 				const token = $erc20Tokens.find(

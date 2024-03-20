@@ -12,7 +12,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 
 	export let destination = '';
-	export let network: Network | undefined = undefined;
+	export let targetNetwork: Network | undefined = undefined;
 	export let destinationEditable = true;
 	export let amount: number | undefined = undefined;
 
@@ -40,7 +40,7 @@
 	<FeeDisplay slot="fee" />
 
 	{#if destinationEditable}
-		<SendReviewNetwork {network} slot="network" />
+		<SendReviewNetwork {targetNetwork} slot="network" />
 	{/if}
 </SendData>
 

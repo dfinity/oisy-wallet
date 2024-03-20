@@ -5,7 +5,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { UserConfig } from 'vite';
 import { defineConfig, loadEnv } from 'vite';
-import { dfxCanisterIds, readCanisterIds } from './vite.utils';
+import { readCanisterIds } from './vite.utils';
 
 const file = fileURLToPath(new URL('package.json', import.meta.url));
 const json = readFileSync(file, 'utf8');
@@ -105,8 +105,7 @@ export default defineConfig((): UserConfig => {
 			network === 'ic' ? 'production' : network === 'staging' ? 'staging' : 'development',
 			process.cwd()
 		),
-		...dfxCanisterIds({ prefix: 'VITE_', network }),
-		...readCanisterIds({ prefix: 'VITE_', network })
+		...readCanisterIds({ prefix: 'VITE_' })
 	};
 
 	return {
@@ -114,8 +113,7 @@ export default defineConfig((): UserConfig => {
 		// Backwards compatibility for auto generated types of dfx that are meant for webpack and process.env
 		define: {
 			'process.env': {
-				...dfxCanisterIds({ network }),
-				...readCanisterIds({ network }),
+				...readCanisterIds({}),
 				DFX_NETWORK: network
 			},
 			VITE_APP_VERSION: JSON.stringify(version),

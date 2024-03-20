@@ -1,19 +1,20 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
-	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import type { Network } from '$lib/types/network';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 
 	/**
 	 * Props
 	 */
 
 	export let destination = '';
-	export let network: Network | undefined = undefined;
+	export let targetNetwork: Network | undefined = undefined;
 
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = SendStep.INITIALIZATION;
@@ -46,7 +47,7 @@
 		closeModal(() => {
 			destination = '';
 			amount = undefined;
-			network = undefined;
+			targetNetwork = undefined;
 
 			sendProgressStep = SendStep.INITIALIZATION;
 
@@ -65,8 +66,9 @@
 
 	<SendTokenWizard
 		{currentStep}
+		sourceNetwork={$selectedEthereumNetwork}
 		bind:destination
-		bind:network
+		bind:targetNetwork
 		bind:amount
 		bind:sendProgressStep
 		on:icBack={modal.back}

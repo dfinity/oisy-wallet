@@ -1,11 +1,11 @@
 import { ckEthHelperContractAddress } from '$icp-eth/api/cketh-minter.api';
-import { ETHEREUM_NETWORK } from '$icp-eth/constants/networks.constants';
 import {
 	ckEthHelperContractAddressStore,
 	type CkEthHelperContractAddressData
 } from '$icp-eth/stores/cketh.store';
-import type { IcCkCanisters } from '$icp/types/ic';
+import type { IcCkMetadata } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
@@ -20,7 +20,7 @@ export const loadCkEthHelperContractAddress = async ({
 	canisters: { minterCanisterId }
 }: {
 	tokenId: TokenId;
-	canisters: IcCkCanisters;
+	canisters: IcCkMetadata;
 }) => {
 	const addressInStore = get(ckEthHelperContractAddressStore);
 
@@ -57,7 +57,7 @@ export const assertCkEthHelperContractAddressLoaded = ({
 	tokenStandard: TokenStandard;
 	network: Network | undefined;
 }): { valid: boolean } => {
-	if (tokenStandard !== 'ethereum' || !isNetworkICP(network ?? ETHEREUM_NETWORK)) {
+	if (tokenStandard !== 'ethereum' || !isNetworkICP(network ?? DEFAULT_NETWORK)) {
 		return { valid: true };
 	}
 

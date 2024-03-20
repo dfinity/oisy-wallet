@@ -1,6 +1,6 @@
-import type { IcCkCanisters, IcToken } from '$icp/types/ic';
+import type { IcCkToken } from '$icp/types/ic';
 
-export type IcCkWorkerParams = IcToken & Partial<IcCkCanisters>;
+export type IcCkWorkerParams = Omit<IcCkToken, 'twinToken'>;
 
 export interface IcCkWorkerInitResult {
 	start: () => void;

@@ -9,12 +9,11 @@
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { ETHEREUM_TOKEN } from '$icp-eth/constants/tokens.constants';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { onDestroy } from 'svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-
-	import { ETHEREUM_NETWORK_ID } from '$icp-eth/constants/networks.constants';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -22,7 +21,7 @@
 	$: ckETH = isTokenCkEthLedger($token as IcToken);
 
 	let ethNetwork = false;
-	$: ethNetwork = networkId === ETHEREUM_NETWORK_ID;
+	$: ethNetwork = isNetworkIdEthereum(networkId);
 
 	let maxTransactionFee: bigint | undefined = undefined;
 	$: maxTransactionFee = $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee;
@@ -63,7 +62,7 @@
 							value: BigNumber.from(maxTransactionFee),
 							displayDecimals: EIGHT_DECIMALS
 						})}
-						{ETHEREUM_TOKEN.symbol}
+						{$ckETHTwinToken.symbol}
 					</span>
 				{/if}
 			</div>

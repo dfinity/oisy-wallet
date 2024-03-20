@@ -1,4 +1,4 @@
-import { ICP_TOKEN_ID } from '$icp-eth/constants/tokens.constants';
+import { ICP_TOKEN_ID } from '$env/tokens.env';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp

@@ -52,15 +52,25 @@ export type IcTokenWithoutId = Omit<IcToken, 'id'>;
 
 export type IcFee = { fee: bigint };
 
-export type IcInterface = IcCanisters & IcExchangeCoin;
+export type IcInterface = IcCanisters & IcAppMetadata;
 export type IcCanisters = {
 	ledgerCanisterId: CanisterIdText;
 	indexCanisterId: CanisterIdText;
 };
 
-export type IcCkInterface = IcInterface & IcCkCanisters;
-export type IcCkCanisters = {
+export type IcCkToken = IcToken & Partial<IcCkMetadata>;
+
+export type IcCkInterface = IcInterface & IcCkMetadata;
+
+export type IcCkMetadata = {
 	minterCanisterId: CanisterIdText;
+} & Partial<IcCkTwinToken>;
+
+export type IcCkTwinToken = {
+	twinToken: Token;
 };
 
-export type IcExchangeCoin = { exchangeCoinId: CoingeckoCoinsId };
+export type IcAppMetadata = {
+	exchangeCoinId: CoingeckoCoinsId;
+	position: number;
+};
