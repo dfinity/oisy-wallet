@@ -13,12 +13,13 @@
 	import Banner from '$lib/components/core/Banner.svelte';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import { initAnalytics } from '$lib/services/analytics.services';
 
 	/**
 	 * Init authentication
 	 */
 
-	const init = async () => await Promise.all([syncAuthStore()]);
+	const init = async () => await Promise.all([syncAuthStore(), initAnalytics()]);
 
 	const syncAuthStore = async () => {
 		if (!browser) {
