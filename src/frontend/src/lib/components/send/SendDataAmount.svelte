@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { formatToken } from '$lib/utils/format.utils';
-	import { tokenSymbol } from '$lib/derived/token.derived';
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -29,5 +28,5 @@
 <Value ref="amount" element="div">
 	<svelte:fragment slot="label">Amount</svelte:fragment>
 	{amountDisplay}
-	{$tokenSymbol}
+	{token.symbol}
 </Value>
