@@ -15,3 +15,5 @@ export const EIP155_CHAINS: Record<string, { chainId: number; name: string }> = 
 		name: SEPOLIA_NETWORK.name
 	}
 };
+
+export const EIP155_CHAINS_KEYS = Object.keys(EIP155_CHAINS);
