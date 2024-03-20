@@ -3,7 +3,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { isNetworkICP } from '$lib/utils/network.utils';
+	import type { EthereumNetwork } from '$eth/types/network';
 
+	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 </script>
 
@@ -13,7 +15,7 @@
 		{#if isNetworkICP(targetNetwork)}
 			Convert to native ICP
 		{:else}
-			Ethereum
+			{sourceNetwork.name}
 		{/if}
 	</Value>
 {/if}

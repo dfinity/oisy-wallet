@@ -166,6 +166,7 @@
 			on:icSend={send}
 			{destination}
 			{amount}
+			{sourceNetwork}
 			{targetNetwork}
 			{destinationEditable}
 		/>

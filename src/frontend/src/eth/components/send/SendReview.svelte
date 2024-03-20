@@ -10,9 +10,11 @@
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
+	export let sourceNetwork: EthereumNetwork;
 	export let destinationEditable = true;
 	export let amount: number | undefined = undefined;
 
@@ -40,7 +42,7 @@
 	<FeeDisplay slot="fee" />
 
 	{#if destinationEditable}
-		<SendReviewNetwork {targetNetwork} slot="network" />
+		<SendReviewNetwork {targetNetwork} {sourceNetwork} slot="network" />
 	{/if}
 </SendData>
 
