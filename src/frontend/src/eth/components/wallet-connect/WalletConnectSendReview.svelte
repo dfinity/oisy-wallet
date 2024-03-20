@@ -12,11 +12,13 @@
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let amount: BigNumber;
 	export let destination: string;
 	export let data: string | undefined;
 	export let erc20Approve: boolean;
+	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 
 	let amountDisplay: BigNumber;
@@ -34,7 +36,7 @@
 
 	<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork {targetNetwork} slot="network" />
+	<SendReviewNetwork {sourceNetwork} {targetNetwork} slot="network" />
 </SendData>
 
 <WalletConnectActions on:icApprove on:icReject />
