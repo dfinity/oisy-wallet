@@ -25,6 +25,8 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import type { Network } from '$lib/types/network';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { writable } from 'svelte/store';
+	import { ethereumToken } from '$eth/derived/token.derived';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -33,10 +35,14 @@
 	 * Fee context store
 	 */
 
-	let storeFeeData = initFeeStore();
+	let feeStore = initFeeStore();
+
+	let feeSymbolStore = writable<string | undefined>(undefined);
+	$: feeSymbolStore.set($ethereumToken.symbol);
 
 	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
-		store: storeFeeData
+		feeStore,
+		feeSymbolStore
 	});
 
 	/**
@@ -80,7 +86,7 @@
 			return;
 		}
 
-		if (isNullish($storeFeeData)) {
+		if (isNullish($feeStore)) {
 			toastsError({
 				msg: { text: `Gas fees are not defined.` }
 			});
@@ -98,7 +104,7 @@
 		}
 
 		// https://github.com/ethers-io/ethers.js/discussions/2439#discussioncomment-1857403
-		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $storeFeeData;
+		const { maxFeePerGas, maxPriorityFeePerGas, gas } = $feeStore;
 
 		// https://docs.ethers.org/v5/api/providers/provider/#Provider-getFeeData
 		// exceeds block gas limit

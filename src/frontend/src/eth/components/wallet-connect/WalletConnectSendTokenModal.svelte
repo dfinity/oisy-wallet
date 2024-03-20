@@ -33,6 +33,7 @@
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { writable } from 'svelte/store';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -42,20 +43,24 @@
 	$: erc20Approve = isErc20TransactionApprove(firstTransaction.data);
 
 	/**
-	 * Fee context store
-	 */
-
-	let storeFeeData = initFeeStore();
-
-	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
-		store: storeFeeData
-	});
-
-	/**
 	 * Send context store
 	 */
 
 	const { sendTokenId, sendToken, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	/**
+	 * Fee context store
+	 */
+
+	let feeStore = initFeeStore();
+
+	let feeSymbolStore = writable<string | undefined>(undefined);
+	$: feeSymbolStore.set($sendToken.symbol);
+
+	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
+		feeStore,
+		feeSymbolStore
+	});
 
 	/**
 	 * Network
@@ -121,7 +126,7 @@
 			listener,
 			address: $address,
 			amount,
-			fee: $storeFeeData,
+			fee: $feeStore,
 			modalNext: modal.next,
 			token: $sendToken,
 			progress: (step: SendStep) => (sendProgressStep = step),
