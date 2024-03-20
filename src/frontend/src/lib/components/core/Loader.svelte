@@ -11,8 +11,6 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { browser } from '$app/environment';
 	import { isNullish } from '@dfinity/utils';
-	import { initAirdrop } from '$airdrop/services/airdrop.services';
-	import { AIRDROP } from '$airdrop/constants/airdrop.constants';
 	import { loading } from '$lib/stores/loader.store';
 	import { LoaderStep } from '$lib/enums/steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
@@ -57,8 +55,6 @@
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
 		await Promise.all([loadErc20Contracts(), loadIcrcTokens()]);
-
-		await (AIRDROP ? initAirdrop() : Promise.resolve());
 	};
 
 	const progressAndLoad = async () => {

@@ -8,7 +8,6 @@
 	import type { Principal } from '@dfinity/principal';
 	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
-	import AdminAirdrop from '$airdrop/components/admin/AdminAirdrop.svelte';
 	import { testnetsStore } from '$lib/stores/testnets.store';
 
 	let remainingTimeMilliseconds: number | undefined;
@@ -74,5 +73,3 @@
 </div>
 
 <TokensMetadata />
-
-<AdminAirdrop />

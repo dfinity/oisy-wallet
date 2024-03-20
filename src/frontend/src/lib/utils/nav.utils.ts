@@ -53,7 +53,6 @@ export const back = async ({ pop, networkId }: { pop: boolean; networkId: Networ
 export type RouteParams = {
 	token: string | null | undefined;
 	network: string | null | undefined;
-	airdropCode: string | null | undefined;
 	// WalletConnect URI parameter
 	uri: string | null | undefined;
 };
@@ -63,7 +62,6 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 		return {
 			token: undefined,
 			network: undefined,
-			airdropCode: undefined,
 			uri: undefined
 		};
 	}
@@ -89,7 +87,6 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	return {
 		token: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
 		network: searchParams?.get('network'),
-		airdropCode: searchParams?.get('code'),
 		uri: nonNullish(uri) ? decodeURIComponent(uri) : null
 	};
 };
