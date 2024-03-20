@@ -1,4 +1,3 @@
-import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 import { alchemyErc20Providers } from '$eth/providers/alchemy-erc20.providers';
 import {
 	initPendingTransactionsListener as initEthPendingTransactionsListenerProvider,
@@ -8,6 +7,7 @@ import { initWalletConnect } from '$eth/providers/wallet-connect.providers';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { WebSocketListener } from '$eth/types/listener';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
+import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -21,7 +21,7 @@ export const initTransactionsListener = ({
 	token: Token;
 	address: ETH_ADDRESS;
 }): WebSocketListener => {
-	if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes(token.id)) {
+	if (isSupportedEthTokenId(token.id)) {
 		return initEthPendingTransactionsListenerProvider({
 			toAddress: address,
 			listener: async (hash: string) => await processEthTransaction({ hash, token }),

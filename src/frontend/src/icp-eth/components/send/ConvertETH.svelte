@@ -10,7 +10,7 @@
 	import { tokenId } from '$lib/derived/token.derived';
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import type { TokenId } from '$lib/types/token';
-	import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
+	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 
 	export let convertTokenId: TokenId;
 
@@ -19,7 +19,7 @@
 	const isDisabled = (): boolean =>
 		$addressNotLoaded ||
 		// We can convert to ETH - i.e. we can convert to Ethereum or Sepolia, not an ERC20 token
-		!SUPPORTED_ETHEREUM_TOKEN_IDS.includes(convertTokenId) ||
+		isNotSupportedEthTokenId(convertTokenId) ||
 		isNullish($ckEthHelperContractAddressStore?.[convertTokenId]) ||
 		($networkICP && isNullish($ckEthMinterInfoStore?.[$tokenId]));
 

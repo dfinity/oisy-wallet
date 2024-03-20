@@ -1,6 +1,6 @@
-import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { transactionsStore } from '$eth/stores/transactions.store';
+import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
@@ -16,7 +16,7 @@ export const processTransactionSent = async ({
 	token: Token;
 	transaction: TransactionResponse;
 }) => {
-	if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes(token.id)) {
+	if (isSupportedEthTokenId(token.id)) {
 		await processEthTransaction({ hash: transaction.hash, token });
 		return;
 	}

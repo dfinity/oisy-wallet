@@ -9,9 +9,9 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { slide } from 'svelte/transition';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
@@ -40,7 +40,7 @@
 		});
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
-		if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes($sendTokenId)) {
+		if (isSupportedEthTokenId($sendTokenId)) {
 			const total = userAmount.add(minGasFee($storeFeeData));
 
 			if (total.gt($sendBalance ?? BigNumber.from(0n))) {

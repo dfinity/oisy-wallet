@@ -1,7 +1,8 @@
-import { SUPPORTED_ETHEREUM_TOKENS, SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
+import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
+import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -12,7 +13,7 @@ import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const reloadBalance = async (token: Token): Promise<{ success: boolean }> => {
-	if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes(token.id)) {
+	if (isSupportedEthTokenId(token.id)) {
 		return loadBalance({ networkId: token.network.id, tokenId: token.id });
 	}
 
