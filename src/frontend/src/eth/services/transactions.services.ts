@@ -1,8 +1,8 @@
-import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { transactionsStore } from '$eth/stores/transactions.store';
+import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
@@ -17,7 +17,7 @@ export const loadTransactions = async ({
 	tokenId: TokenId;
 	networkId: NetworkId;
 }): Promise<{ success: boolean }> => {
-	if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes(tokenId)) {
+	if (isSupportedEthTokenId(tokenId)) {
 		return loadEthTransactions({ networkId, tokenId });
 	}
 

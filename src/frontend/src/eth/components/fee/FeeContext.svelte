@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { WebSocketListener } from '$eth/types/listener';
-	import { SUPPORTED_ETHEREUM_TOKEN_IDS } from '$env/tokens.env';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { address } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
@@ -16,6 +15,7 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -44,7 +44,7 @@
 
 			const { getFeeData } = infuraProviders($sendToken.network.id);
 
-			if (SUPPORTED_ETHEREUM_TOKEN_IDS.includes($sendTokenId)) {
+			if (isSupportedEthTokenId($sendTokenId)) {
 				store.setFee({
 					...(await getFeeData()),
 					gas: await getEthFeeData({
