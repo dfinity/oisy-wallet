@@ -7,13 +7,23 @@
 		WalletConnectListener
 	} from '$eth/types/wallet-connect';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { Token } from '$lib/types/token';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
 	export let sourceNetwork: EthereumNetwork;
 	export let listener: WalletConnectListener | undefined | null;
+
+	let token: Token | undefined;
+	$: token = $enabledEthereumTokens.find(
+		({ network: { id: networkId } }) => networkId === sourceNetwork.id
+	);
 </script>
 
-<SendTokenContext>
-	<WalletConnectSendTokenModal {request} {firstTransaction} {listener} {sourceNetwork} />
-</SendTokenContext>
+{#if nonNullish(token)}
+	<SendTokenContext {token}>
+		<WalletConnectSendTokenModal {request} {firstTransaction} {listener} {sourceNetwork} />
+	</SendTokenContext>
+{/if}
