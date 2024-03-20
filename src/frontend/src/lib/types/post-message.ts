@@ -1,4 +1,3 @@
-import type { Result_3 } from '$declarations/airdrop/airdrop.did';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
@@ -56,7 +55,6 @@ export type PostMessageResponseStatus =
 export type PostMessageResponse =
 	| 'signOutIdleTimer'
 	| 'delegationRemainingTime'
-	| 'syncAirdropCode'
 	| 'syncExchange'
 	| 'syncExchangeError'
 	| 'syncIcpWallet'
@@ -76,10 +74,6 @@ export type PostMessageResponse =
 
 export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 	authRemainingTime: number;
-}
-
-export interface PostMessageDataResponseAirdropCode extends PostMessageDataResponse {
-	airdrop: Result_3;
 }
 
 export interface PostMessageDataResponseExchange extends PostMessageDataResponse {

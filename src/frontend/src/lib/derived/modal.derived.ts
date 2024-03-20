@@ -53,10 +53,6 @@ export const modalWalletConnectSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'wallet-connect-send'
 );
-export const modalAirdrop: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'airdrop'
-);
 export const modalTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'transaction'

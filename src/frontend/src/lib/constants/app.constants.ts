@@ -15,12 +15,6 @@ export const BACKEND_CANISTER_ID = LOCAL
 		? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
 		: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
 
-export const AIRDOP_CANISTER_ID = LOCAL
-	? import.meta.env.VITE_LOCAL_AIRDOP_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_AIRDOP_CANISTER_ID
-		: import.meta.env.VITE_IC_AIRDOP_CANISTER_ID;
-
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
