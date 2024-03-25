@@ -67,7 +67,7 @@
 		</ul>
 	{/if}
 
-	<hr class="bg-dark-blue opacity-10 my-4" style="width: 100%; border: 0.05rem solid" />
+	<hr class="bg-dark-blue opacity-10 my-4 w-10/12" style="border: 0.05rem solid" />
 
 	<ul class="flex flex-col gap-4 list-none">
 		<li class="flex justify-between items-center">
