@@ -2,7 +2,7 @@
 	import type { Network } from '$lib/types/network';
 	import { nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { isNetworkICP } from '$lib/utils/network.utils';
+	import { isNetworkEthereum, isNetworkICP } from '$lib/utils/network.utils';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import eth from '$icp-eth/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -15,7 +15,7 @@
 <Value ref="network" element="div">
 	<svelte:fragment slot="label">Network</svelte:fragment>
 	<span class="flex gap-1">
-		{#if nonNullish(targetNetwork) && isNetworkICP(targetNetwork)}
+		{#if nonNullish(targetNetwork) && isNetworkICP(targetNetwork) && isNetworkEthereum(sourceNetwork)}
 			Convert to native ICP <Logo src={icpDark} size="20px" alt={`Internet computer logo`} />
 		{:else}
 			{sourceNetwork.name}
