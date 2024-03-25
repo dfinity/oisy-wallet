@@ -85,7 +85,6 @@
 			zoom: 1.45;
 
 			--card-background-contrast: var(--color-dust);
-			--card-background: var(--color-blue);
 		}
 
 		&.enabled {
