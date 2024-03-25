@@ -34,8 +34,12 @@
 			{#if nonNullish(networkId) && isNetworkIdBTC(networkId)}
 				<IcSendBtcNetwork {networkId} /> <Logo src={bitcoin} size="20px" alt={`Bitcoin logo`} />
 			{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
-				{$ckETHTwinToken.name}
-				<Logo src={$ckETHTwinToken.icon ?? eth} size="20px" alt={`${$ckETHTwinToken.name} logo`} />
+				{$ckETHTwinToken.network.name}
+				<Logo
+					src={$ckETHTwinToken.network.icon ?? eth}
+					size="20px"
+					alt={`${$ckETHTwinToken.network.name} logo`}
+				/>
 			{/if}
 		</span>
 	</Value>
