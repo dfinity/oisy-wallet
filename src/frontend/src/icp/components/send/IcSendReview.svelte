@@ -6,7 +6,7 @@
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import type { NetworkId } from '$lib/types/network';
-	import IcNetwork from '$icp/components/send/IcNetwork.svelte';
+	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import { balance } from '$lib/derived/balances.derived';
 
@@ -31,7 +31,7 @@
 
 <SendData {amount} {destination} token={$token} balance={$balance} {source}>
 	<IcFeeDisplay slot="fee" {networkId} />
-	<IcNetwork {networkId} slot="network" />
+	<IcReviewNetwork {networkId} slot="network" />
 </SendData>
 
 <div class="flex justify-end gap-1">
