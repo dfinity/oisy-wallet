@@ -10,6 +10,7 @@
 	<label for="data" class="font-bold px-4.5">HEX Data:</label>
 	<div id="data" class="font-normal mb-4 px-4.5 flex items-center gap-1">
 		{shortenWithMiddleEllipsis(data)}<Copy
+			inline
 			value={data}
 			text="Raw transaction data copied to clipboard."
 		/>
