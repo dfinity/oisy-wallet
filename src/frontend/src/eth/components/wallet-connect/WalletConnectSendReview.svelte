@@ -25,7 +25,7 @@
 	let amountDisplay: BigNumber;
 	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data) : amount;
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <SendData
@@ -39,7 +39,12 @@
 
 	<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork {sourceNetwork} {targetNetwork} slot="network" />
+	<SendReviewNetwork
+		{sourceNetwork}
+		{targetNetwork}
+		tokenStandard={$sendTokenStandard}
+		slot="network"
+	/>
 </SendData>
 
 <WalletConnectActions on:icApprove on:icReject />
