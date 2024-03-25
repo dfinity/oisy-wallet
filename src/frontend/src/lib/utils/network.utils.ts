@@ -2,8 +2,6 @@ import { ICP_NETWORK_ID, SUPPORTED_ETHEREUM_NETWORKS_IDS } from '$env/networks.e
 import type { Network, NetworkId } from '$lib/types/network';
 import { nonNullish } from '@dfinity/utils';
 
-export const isNetworkEthereum = ({ id }: Network): boolean => isNetworkIdEthereum(id);
-
 export const isNetworkICP = ({ id }: Network): boolean => isNetworkIdICP(id);
 
 export const isNetworkIdICP = (id: NetworkId): boolean => ICP_NETWORK_ID === id;
