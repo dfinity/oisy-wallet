@@ -85,12 +85,12 @@
 			zoom: 1.45;
 
 			--card-background-contrast: var(--color-dust);
+			--card-background: var(--color-white);
 		}
 
 		&.enabled {
 			:global(div.toggle) {
 				--card-background-contrast: var(--color-blue);
-				--card-background: var(--color-white);
 			}
 		}
 	}
