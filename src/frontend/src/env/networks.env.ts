@@ -12,6 +12,7 @@ export const ETHEREUM_NETWORK_ID: unique symbol = Symbol('ETH');
 
 export const ETHEREUM_NETWORK: EthereumNetwork = {
 	id: ETHEREUM_NETWORK_ID,
+	env: 'mainnet',
 	name: 'Ethereum',
 	chainId: 1n,
 	icon: eth,
@@ -24,6 +25,7 @@ export const SEPOLIA_NETWORK_ID: unique symbol = Symbol('SepoliaETH');
 
 export const SEPOLIA_NETWORK: EthereumNetwork = {
 	id: SEPOLIA_NETWORK_ID,
+	env: 'testnet',
 	name: 'Sepolia',
 	chainId: 11155111n,
 	icon: eth,
@@ -58,6 +60,7 @@ export const ICP_NETWORK_ID = Symbol(ICP_NETWORK_SYMBOL);
 
 export const ICP_NETWORK: Network = {
 	id: ICP_NETWORK_ID,
+	env: 'mainnet',
 	name: 'Internet Computer',
 	icon: icpLight
 };
@@ -71,6 +74,7 @@ export const BTC_MAINNET_NETWORK_ID = Symbol(BTC_MAINNET_NETWORK_SYMBOL);
 
 export const BTC_MAINNET_NETWORK: Network = {
 	id: BTC_MAINNET_NETWORK_ID,
+	env: 'mainnet',
 	name: 'Bitcoin'
 };
 
@@ -80,5 +84,6 @@ export const BTC_TESTNET_NETWORK_ID = Symbol(BTC_TESTNET_NETWORK_SYMBOL);
 
 export const BTC_TESTNET_NETWORK: Network = {
 	id: BTC_TESTNET_NETWORK_ID,
+	env: 'testnet',
 	name: 'Bitcoin'
 };

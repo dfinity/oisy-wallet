@@ -7,3 +7,28 @@ export const networks: Readable<Network[]> = derived(
 	[enabledEthereumNetworks],
 	([$enabledEthereumNetworks]) => [...$enabledEthereumNetworks, ICP_NETWORK]
 );
+
+interface NetworksEnvs {
+	mainnets: Network[];
+	testnets: Network[];
+}
+
+const networksEnvs: Readable<NetworksEnvs> = derived([networks], ([$networks]) =>
+	$networks.reduce(
+		({ mainnets, testnets }, network) => ({
+			mainnets: [...mainnets, ...(network.env === 'mainnet' ? [network] : [])],
+			testnets: [...testnets, ...(network.env === 'testnet' ? [network] : [])]
+		}),
+		{ mainnets: [], testnets: [] } as NetworksEnvs
+	)
+);
+
+export const networksMainnets: Readable<Network[]> = derived(
+	[networksEnvs],
+	([{ mainnets }]) => mainnets
+);
+
+export const networksTestnets: Readable<Network[]> = derived(
+	[networksEnvs],
+	([{ testnets }]) => testnets
+);
