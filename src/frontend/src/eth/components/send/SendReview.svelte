@@ -41,9 +41,7 @@
 >
 	<FeeDisplay slot="fee" />
 
-	{#if destinationEditable}
-		<SendReviewNetwork {targetNetwork} {sourceNetwork} slot="network" />
-	{/if}
+	<SendReviewNetwork {targetNetwork} {sourceNetwork} slot="network" />
 </SendData>
 
 <div class="flex justify-end gap-1">
