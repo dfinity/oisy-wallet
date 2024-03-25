@@ -29,7 +29,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <SendData
@@ -41,7 +41,12 @@
 >
 	<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork {targetNetwork} {sourceNetwork} slot="network" />
+	<SendReviewNetwork
+		{targetNetwork}
+		{sourceNetwork}
+		tokenStandard={$sendTokenStandard}
+		slot="network"
+	/>
 </SendData>
 
 <div class="flex justify-end gap-1">
