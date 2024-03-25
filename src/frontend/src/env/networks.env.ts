@@ -14,7 +14,7 @@ export const ETHEREUM_NETWORK_ID: unique symbol = Symbol('ETH');
 export const ETHEREUM_NETWORK: EthereumNetwork = {
 	id: ETHEREUM_NETWORK_ID,
 	env: 'mainnet',
-	name: 'Ethereum',
+	name: 'Ethereum Mainnet',
 	chainId: 1n,
 	icon: eth,
 	explorerUrl: ETHEREUM_EXPLORER_URL
