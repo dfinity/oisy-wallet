@@ -1,5 +1,6 @@
 import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
+import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
@@ -28,7 +29,7 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Sepolia',
 	chainId: 11155111n,
-	icon: eth,
+	icon: sepolia,
 	explorerUrl: SEPOLIA_EXPLORER_URL
 };
 
