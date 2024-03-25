@@ -12,18 +12,31 @@
 	import eth from '$icp-eth/assets/eth.svg';
 
 	export let networkId: NetworkId | undefined = undefined;
+
+	let showDestinationNetwork: boolean;
+	$: showDestinationNetwork =
+		nonNullish(networkId) && (isNetworkIdBTC(networkId) || isNetworkIdEthereum(networkId));
 </script>
 
 <Value ref="network" element="div">
-	<svelte:fragment slot="label">Network</svelte:fragment>
+	<svelte:fragment slot="label"
+		>{#if showDestinationNetwork}Source network{:else}Network{/if}</svelte:fragment
+	>
 	<span class="flex gap-1">
-		{#if nonNullish(networkId) && isNetworkIdBTC(networkId)}
-			<IcSendBtcNetwork {networkId} /> <Logo src={bitcoin} size="20px" alt={`Bitcoin logo`} />
-		{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
-			{$ckETHTwinToken.name}
-			<Logo src={$ckETHTwinToken.icon ?? eth} size="20px" alt={`${$ckETHTwinToken.name} logo`} />
-		{:else}
-			Internet Computer <Logo src={icpLight} size="20px" alt={`Internet Computer logo`} />
-		{/if}
+		Internet Computer <Logo src={icpLight} size="20px" alt={`Internet Computer logo`} />
 	</span>
 </Value>
+
+{#if showDestinationNetwork}
+	<Value ref="network" element="div">
+		<svelte:fragment slot="label">Destination network</svelte:fragment>
+		<span class="flex gap-1">
+			{#if nonNullish(networkId) && isNetworkIdBTC(networkId)}
+				<IcSendBtcNetwork {networkId} /> <Logo src={bitcoin} size="20px" alt={`Bitcoin logo`} />
+			{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
+				{$ckETHTwinToken.name}
+				<Logo src={$ckETHTwinToken.icon ?? eth} size="20px" alt={`${$ckETHTwinToken.name} logo`} />
+			{/if}
+		</span>
+	</Value>
+{/if}

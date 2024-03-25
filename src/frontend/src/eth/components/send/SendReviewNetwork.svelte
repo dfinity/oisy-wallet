@@ -14,17 +14,26 @@
 	export let tokenStandard: TokenStandard;
 </script>
 
-<Value ref="network" element="div">
-	<svelte:fragment slot="label">Network</svelte:fragment>
+<Value ref="source-network" element="div">
+	<svelte:fragment slot="label"
+		>{#if nonNullish(targetNetwork)}Source network{:else}Network{/if}</svelte:fragment
+	>
 	<span class="flex gap-1">
-		{#if nonNullish(targetNetwork) && isNetworkICP(targetNetwork) && tokenStandard === 'erc20'}
-			Convert to native ICP <Logo src={icpDark} size="20px" alt={`Internet computer logo`} />
-		{:else if nonNullish(targetNetwork)}
-			{targetNetwork.name}
-			<Logo src={targetNetwork.icon ?? eth} size="20px" alt={`${targetNetwork.name} logo`} />
-		{:else}
-			{sourceNetwork.name}
-			<Logo src={sourceNetwork.icon ?? eth} size="20px" alt={`${sourceNetwork.name} logo`} />
-		{/if}
+		{sourceNetwork.name}
+		<Logo src={sourceNetwork.icon ?? eth} size="20px" alt={`${sourceNetwork.name} logo`} />
 	</span>
 </Value>
+
+{#if nonNullish(targetNetwork)}
+	<Value ref="target-network" element="div">
+		<svelte:fragment slot="label">Destination network</svelte:fragment>
+		<span class="flex gap-1">
+			{#if isNetworkICP(targetNetwork) && tokenStandard === 'erc20'}
+				Convert to native ICP <Logo src={icpDark} size="20px" alt={`Internet computer logo`} />
+			{:else}
+				{targetNetwork.name}
+				<Logo src={targetNetwork.icon ?? eth} size="20px" alt={`${targetNetwork.name} logo`} />
+			{/if}
+		</span>
+	</Value>
+{/if}
