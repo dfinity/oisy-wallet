@@ -11,7 +11,7 @@
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 	import { isErc20Icp } from '$eth/utils/token.utils';
-	import { networkICP } from '$lib/derived/network.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 
 	export let usdTotal = false;
@@ -19,8 +19,8 @@
 	export let actions = true;
 	export let send = false;
 
-	let background: 'eth' | 'icp';
-	$: background = $networkICP ? 'icp' : 'eth';
+	let background: string;
+	$: background = ($selectedNetwork.id.description ?? 'eth').toLowerCase();
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20TokensInitialized;
@@ -76,6 +76,11 @@
 
 		&.icp {
 			background: radial-gradient(66.11% 97.11% at 50% 115.28%, #300097 0%, #1f005e 100%);
+		}
+
+		&.sepoliaeth {
+			background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.5) 100%),
+				linear-gradient(62deg, #321469 62.5%, #937993 100%);
 		}
 	}
 
