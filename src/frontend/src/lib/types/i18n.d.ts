@@ -3,7 +3,17 @@
  */
 
 interface I18nCore {
-	text: { back_to_wallet: string; test_banner: string; logout: string };
+	text: {
+		test_banner: string;
+		logout: string;
+		cancel: string;
+		next: string;
+		save: string;
+		back: string;
+		name: string;
+		symbol: string;
+		decimals: string;
+	};
 	alt: { close: string; logo: string };
 }
 
@@ -13,6 +23,7 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		manage_internet_identity: string;
+		back_to_wallet: string;
 	};
 	alt: { manage_internet_identity: string; more_settings: string; menu: string };
 }
@@ -54,7 +65,6 @@ interface I18nSettings {
 		testnets_description: string;
 		tokens: string;
 		tokens_description: string;
-		decimals: string;
 	};
 	alt: { testnets_toggle: string };
 }
@@ -63,6 +73,23 @@ interface I18nNetworks {
 	title: string;
 	show_testnets: string;
 	more: string;
+}
+
+interface I18nSend {
+	text: { amount: string; destination: string; source: string; balance: string };
+	assertion: { invalid_destination_address: string };
+}
+
+interface I18nToken {
+	text: { add_new: string; contract_address: string; add: string; review: string; saving: string };
+	placeholder: { enter_contract_address: string };
+	error: {
+		invalid_contract_address: string;
+		no_metadata: string;
+		unexpected: string;
+		already_available: string;
+		loading_metadata: string;
+	};
 }
 
 interface I18n {
@@ -75,4 +102,6 @@ interface I18n {
 	hero: I18nHero;
 	settings: I18nSettings;
 	networks: I18nNetworks;
+	send: I18nSend;
+	token: I18nToken;
 }

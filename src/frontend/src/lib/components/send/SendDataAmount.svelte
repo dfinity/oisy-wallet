@@ -3,6 +3,7 @@
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let amount: string | number | undefined = undefined;
 	export let token: Token;
@@ -26,7 +27,7 @@
 </script>
 
 <Value ref="amount" element="div">
-	<svelte:fragment slot="label">Amount</svelte:fragment>
+	<svelte:fragment slot="label">{$i18n.send.text.amount}</svelte:fragment>
 	{amountDisplay}
 	{token.symbol}
 </Value>

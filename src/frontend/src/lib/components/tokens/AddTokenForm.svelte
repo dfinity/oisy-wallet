@@ -2,6 +2,7 @@
 	import { Input } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let contractAddress = '';
 
@@ -12,20 +13,22 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<label for="destination" class="font-bold px-4.5">Contract address:</label>
+	<label for="destination" class="font-bold px-4.5">{$i18n.token.text.contract_address}:</label>
 	<Input
 		name="contractAddress"
 		inputType="text"
 		required
 		bind:value={contractAddress}
-		placeholder="Enter an ERC20 contract address"
+		placeholder={$i18n.token.placeholder.enter_contract_address}
 		spellcheck={false}
 	/>
 
 	<div class="flex justify-end gap-1">
-		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>
+		<button type="button" class="secondary" on:click={() => dispatch('icClose')}
+			>{$i18n.core.text.cancel}</button
+		>
 		<button class="primary" type="submit" disabled={invalid} class:opacity-10={invalid}>
-			Next
+			{$i18n.core.text.next}
 		</button>
 	</div>
 </form>

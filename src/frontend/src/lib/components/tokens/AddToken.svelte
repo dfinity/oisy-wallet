@@ -5,13 +5,14 @@
 	import IconPlus from '$lib/components/icons/IconPlus.svelte';
 	import { modalAddToken } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$lib/components/tokens/AddTokenModal.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let iconSize: 'big' | 'small' = 'big';
 </script>
 
 <button on:click={() => modalStore.openAddToken()} class="contents">
 	<Card>
-		<span>Add new token</span>
+		<span>{$i18n.token.text.add_new}</span>
 
 		<RoundedIcon
 			slot="icon"

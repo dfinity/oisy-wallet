@@ -39,7 +39,7 @@
 			<p><strong>{token.name}</strong> <small>({token.symbol})</small></p>
 
 			<span class="break-all py-4">
-				<small>{$i18n.settings.text.decimals}: {token.decimals}</small>
+				<small>{$i18n.core.text.decimals}: {token.decimals}</small>
 			</span>
 		</div>
 	</div>

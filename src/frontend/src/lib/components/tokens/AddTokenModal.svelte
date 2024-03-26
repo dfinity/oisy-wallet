@@ -16,19 +16,20 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { ADD_TOKEN_STEPS } from '$lib/constants/steps.constants';
 	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const steps: WizardSteps = [
 		{
 			name: 'Add',
-			title: 'Add token'
+			title: $i18n.token.text.add
 		},
 		{
 			name: 'Review',
-			title: 'Review'
+			title: $i18n.token.text.review
 		},
 		{
 			name: 'Saving',
-			title: 'Saving...'
+			title: $i18n.token.text.saving
 		}
 	];
 
@@ -49,14 +50,14 @@
 	const save = async () => {
 		if (isNullishOrEmpty(contractAddress)) {
 			toastsError({
-				msg: { text: `Contract address is invalid.` }
+				msg: { text: $i18n.token.error.invalid_contract_address }
 			});
 			return;
 		}
 
 		if (isNullish(metadata)) {
 			toastsError({
-				msg: { text: `No metadata were fetched for the contract address.` }
+				msg: { text: $i18n.token.error.no_metadata }
 			});
 			return;
 		}
@@ -97,7 +98,7 @@
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: `Something went wrong while saving the token.` },
+				msg: { text: $i18n.token.error.unexpected },
 				err
 			});
 
