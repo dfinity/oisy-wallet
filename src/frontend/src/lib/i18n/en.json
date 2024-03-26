@@ -1,5 +1,15 @@
 {
 	"core": {
 		"close": "Close"
+	},
+	"settings": {
+		"title": "Settings",
+		"principal": "Your Principal",
+		"principal_copied": "Principal copied to clipboard",
+		"principal_description": "Your ID for the {OISY_NAME}. Created by your Internet Identity.",
+		"session": "Your session expires in",
+		"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
+		"testnets": "Show test networks",
+		"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia)."
 	}
 }
