@@ -3,6 +3,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { slide } from 'svelte/transition';
 	import { debounce } from '@dfinity/utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -17,7 +18,7 @@
 	$: destination, networkId, isInvalidDestination, debounceValidate();
 </script>
 
-<label for="destination" class="font-bold px-4.5">Destination:</label>
+<label for="destination" class="font-bold px-4.5">{$i18n.send.text.destination}:</label>
 <Input
 	name="destination"
 	inputType="text"
@@ -28,5 +29,7 @@
 />
 
 {#if invalidDestination}
-	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">Invalid destination address</p>
+	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">
+		{$i18n.send.assertion.invalid_destination_address}
+	</p>
 {/if}

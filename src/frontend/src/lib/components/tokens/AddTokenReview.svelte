@@ -10,6 +10,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { networkId } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let contractAddress = '';
 	export let metadata: Erc20Metadata | undefined;
@@ -21,7 +22,7 @@
 			)
 		) {
 			toastsError({
-				msg: { text: 'Token is already available.' }
+				msg: { text: $i18n.token.error.already_available }
 			});
 
 			dispatch('icBack');
@@ -33,7 +34,7 @@
 			metadata = await metadataApi({ address: contractAddress });
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: 'Error while loading the ERC20 contract metadata.' },
+				msg: { text: $i18n.token.error.loading_metadata },
 				err
 			});
 
@@ -48,12 +49,12 @@
 </script>
 
 <Value ref="contractAddress" element="div">
-	<svelte:fragment slot="label">Contract address</svelte:fragment>
+	<svelte:fragment slot="label">{$i18n.token.text.contract_address}</svelte:fragment>
 	{contractAddress}
 </Value>
 
 <Value ref="contractName" element="div">
-	<svelte:fragment slot="label">Name</svelte:fragment>
+	<svelte:fragment slot="label">{$i18n.core.text.name}</svelte:fragment>
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
@@ -62,7 +63,7 @@
 </Value>
 
 <Value ref="contractSymbol" element="div">
-	<svelte:fragment slot="label">Symbol</svelte:fragment>
+	<svelte:fragment slot="label">{$i18n.core.text.symbol}</svelte:fragment>
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
@@ -71,7 +72,7 @@
 </Value>
 
 <Value ref="contractDecimals" element="div">
-	<svelte:fragment slot="label">Decimals</svelte:fragment>
+	<svelte:fragment slot="label">{$i18n.core.text.decimals}</svelte:fragment>
 	{#if isNullish(metadata)}
 		&#8203;
 	{:else}
@@ -93,14 +94,14 @@
 </Warning>
 
 <div class="flex justify-end gap-1 mb-2">
-	<button class="secondary" on:click={() => dispatch('icBack')}>Back</button>
+	<button class="secondary" on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button>
 	<button
 		class="primary"
 		disabled={invalid}
 		class:opacity-10={invalid}
 		on:click={() => dispatch('icSave')}
 	>
-		Save
+		{$i18n.core.text.save}
 	</button>
 </div>
 

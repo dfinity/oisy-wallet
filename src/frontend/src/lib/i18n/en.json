@@ -1,9 +1,15 @@
 {
 	"core": {
 		"text": {
-			"back_to_wallet": "Back to Wallet",
 			"test_banner": "For testing purposes only!",
-			"logout": "Logout"
+			"logout": "Logout",
+			"cancel": "Cancel",
+			"next": "Next",
+			"save": "Save",
+			"back": "Back",
+			"name": "Name",
+			"symbol": "Symbol",
+			"decimals": "Decimals"
 		},
 		"alt": {
 			"close": "Close",
@@ -15,7 +21,8 @@
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
-			"manage_internet_identity": "Manage Internet Identity"
+			"manage_internet_identity": "Manage Internet Identity",
+			"back_to_wallet": "Back to Wallet"
 		},
 		"alt": {
 			"manage_internet_identity": "Administrate your Internet Identity",
@@ -55,8 +62,7 @@
 			"testnets": "Show test networks",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
 			"tokens": "Tokens",
-			"tokens_description": "The list of tokens currently supported by your $oisy_name.",
-			"decimals": "Decimals"
+			"tokens_description": "The list of tokens currently supported by your $oisy_name."
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets"
@@ -66,5 +72,35 @@
 		"title": "Current network. Access to selection.",
 		"show_testnets": "Show test networks",
 		"more": "More networks coming soon..."
+	},
+	"send": {
+		"text": {
+			"amount": "Amount",
+			"destination": "Destination",
+			"source": "Source",
+			"balance": "Balance"
+		},
+		"assertion": {
+			"invalid_destination_address": "Invalid destination address"
+		}
+	},
+	"token": {
+		"text": {
+			"add_new": "Add new token",
+			"contract_address": "Contract address",
+			"add": "Add token",
+			"review": "Review",
+			"saving": "Saving..."
+		},
+		"placeholder": {
+			"enter_contract_address": "Enter an ERC20 contract address"
+		},
+		"error": {
+			"invalid_contract_address": "Contract address is invalid.",
+			"no_metadata": "No metadata were fetched for the contract address.",
+			"unexpected": "Something went wrong while saving the token.",
+			"already_available": "Token is already available.",
+			"loading_metadata": "Error while loading the ERC20 contract metadata."
+		}
 	}
 }
