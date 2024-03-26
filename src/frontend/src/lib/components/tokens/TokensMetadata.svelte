@@ -3,14 +3,20 @@
 	import { KeyValuePairInfo } from '@dfinity/gix-components';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
 <div class="mt-4 mb-2">
 	<KeyValuePairInfo>
-		<svelte:fragment slot="key"><span class="font-bold">Tokens:</span></svelte:fragment>
+		<svelte:fragment slot="key"
+			><span class="font-bold">{$i18n.settings.tokens}:</span></svelte:fragment
+		>
 
 		<svelte:fragment slot="info">
-			The list of tokens currently supported by your {OISY_NAME}.
+			{replacePlaceholders($i18n.settings.tokens_description, {
+				[`{OISY_NAME}`]: OISY_NAME
+			})}
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
@@ -36,7 +42,7 @@
 			<p><strong>{token.name}</strong> <small>({token.symbol})</small></p>
 
 			<span class="break-all py-4">
-				<small>Decimals: {token.decimals}</small>
+				<small>{$i18n.settings.decimals}: {token.decimals}</small>
 			</span>
 		</div>
 	</div>

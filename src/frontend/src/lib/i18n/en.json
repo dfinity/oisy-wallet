@@ -10,6 +10,9 @@
 		"session": "Your session expires in",
 		"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
 		"testnets": "Show test networks",
-		"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia)."
+		"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
+		"tokens": "Tokens",
+		"tokens_description": "The list of tokens currently supported by your {OISY_NAME}.",
+		"decimals": "Decimals"
 	}
 }
