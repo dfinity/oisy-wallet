@@ -28,7 +28,7 @@
 	class="user icon desktop-wide"
 	bind:this={button}
 	on:click={() => (visible = true)}
-	aria-label="Settings, sign-out and external links"
+	aria-label={$i18n.menu.alt}
 >
 	<IconWallet /><span><IconChevronDown /></span>
 </button>
@@ -50,21 +50,26 @@
 			class="flex gap-2 items-center no-underline"
 			aria-label={$i18n.links.source_code_on_github}
 		>
-			<IconGitHub /> Source code
+			<IconGitHub />
+			{$i18n.links.source_code}
 		</a>
 
 		<Hr />
 
-		<ExternalLink href="https://identity.ic0.app" ariaLabel="Administrate your Internet Identity">
-			Manage Internet Identity
+		<ExternalLink
+			href="https://identity.ic0.app"
+			ariaLabel={$i18n.links.alt_manage_internet_identity}
+		>
+			{$i18n.links.manage_internet_identity}
 		</ExternalLink>
 
 		<button
 			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label="More settings"
+			aria-label={$i18n.links.alt_more_settings}
 			on:click={gotoSettings}
 		>
-			<IconSettings /> Settings
+			<IconSettings />
+			{$i18n.settings.title}
 		</button>
 
 		<SignOut on:icLogoutTriggered={() => (visible = false)} />

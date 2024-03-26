@@ -12,12 +12,28 @@ interface I18nCore {
 
 interface I18nLinks {
 	source_code_on_github: string;
+	view_on_explorer: string;
+	source_code: string;
+	manage_internet_identity: string;
+	alt_manage_internet_identity: string;
+	alt_more_settings: string;
 }
 
 interface I18nSign_in {
 	title: string;
 	description: string;
 	connect_with: string;
+}
+
+interface I18nMenu {
+	alt: string;
+}
+
+interface I18nWallet {
+	address: string;
+	address_copied: string;
+	icp_deposits: string;
+	alt_open_etherscan: string;
 }
 
 interface I18nInit {
@@ -58,6 +74,8 @@ interface I18n {
 	core: I18nCore;
 	links: I18nLinks;
 	sign_in: I18nSign_in;
+	menu: I18nMenu;
+	wallet: I18nWallet;
 	init: I18nInit;
 	hero: I18nHero;
 	settings: I18nSettings;
