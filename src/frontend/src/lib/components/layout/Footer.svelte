@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <footer class="flex flex-col justify-center items-center pt-8 mt-6 pb-4 px-4 gap-3 z-10">
@@ -10,7 +11,8 @@
 		target="_blank"
 		class="flex gap-1 items-center text-blue font-bold no-underline"
 	>
-		<IconGitHub /> Source code on GitHub
+		<IconGitHub />
+		{$i18n.links.source_code_on_github}
 	</a>
 </footer>
 

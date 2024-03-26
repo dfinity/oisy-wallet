@@ -13,6 +13,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -47,7 +48,7 @@
 			rel="external noopener noreferrer"
 			target="_blank"
 			class="flex gap-2 items-center no-underline"
-			aria-label="Source code on GitHub"
+			aria-label={$i18n.links.source_code_on_github}
 		>
 			<IconGitHub /> Source code
 		</a>

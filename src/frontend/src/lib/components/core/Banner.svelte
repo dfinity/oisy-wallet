@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { IconClose, IconWarning } from '@dfinity/gix-components';
 	import { STAGING } from '$lib/constants/app.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let visible = true;
 
@@ -11,9 +12,9 @@
 	<div class="flex justify-between gap-4">
 		<span class="flex items-center justify-center gap-4">
 			<IconWarning size="48px" />
-			<h3 class="clamp-4">For testing purposes only!</h3>
+			<h3 class="clamp-4">{$i18n.core.test_banner}</h3>
 		</span>
-		<button on:click={close} aria-label="Close"><IconClose /></button>
+		<button on:click={close} aria-label={$i18n.core.close}><IconClose /></button>
 	</div>
 {/if}
 
