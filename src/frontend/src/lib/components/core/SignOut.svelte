@@ -2,6 +2,7 @@
 	import { signOut } from '$lib/services/auth.services';
 	import { createEventDispatcher } from 'svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const dispatch = createEventDispatcher();
 
@@ -13,5 +14,5 @@
 
 <button on:click={logout} class="text gap-2">
 	<IconLogout />
-	Logout
+	{$i18n.core.logout}
 </button>
