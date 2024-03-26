@@ -17,5 +17,5 @@
 <button
 	class="flex gap-0.5 text-white font-bold pointer-events-auto ml-2"
 	on:click={async () => back({ pop: nonNullish(fromRoute), networkId: $networkId })}
-	><IconBack /> {$i18n.core.back_to_wallet}</button
+	><IconBack /> {$i18n.core.text.back_to_wallet}</button
 >

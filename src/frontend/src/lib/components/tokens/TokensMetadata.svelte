@@ -9,11 +9,11 @@
 <div class="mt-4 mb-2">
 	<KeyValuePairInfo>
 		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.settings.tokens}:</span></svelte:fragment
+			><span class="font-bold">{$i18n.settings.text.tokens}:</span></svelte:fragment
 		>
 
 		<svelte:fragment slot="info">
-			{replaceOisyPlaceholders($i18n.settings.tokens_description)}
+			{replaceOisyPlaceholders($i18n.settings.text.tokens_description)}
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
@@ -39,7 +39,7 @@
 			<p><strong>{token.name}</strong> <small>({token.symbol})</small></p>
 
 			<span class="break-all py-4">
-				<small>{$i18n.settings.decimals}: {token.decimals}</small>
+				<small>{$i18n.settings.text.decimals}: {token.decimals}</small>
 			</span>
 		</div>
 	</div>

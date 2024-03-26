@@ -28,7 +28,7 @@
 	class="user icon desktop-wide"
 	bind:this={button}
 	on:click={() => (visible = true)}
-	aria-label={$i18n.menu.alt}
+	aria-label={$i18n.navigation.alt.menu}
 >
 	<IconWallet /><span><IconChevronDown /></span>
 </button>
@@ -48,28 +48,28 @@
 			rel="external noopener noreferrer"
 			target="_blank"
 			class="flex gap-2 items-center no-underline"
-			aria-label={$i18n.links.source_code_on_github}
+			aria-label={$i18n.navigation.text.source_code_on_github}
 		>
 			<IconGitHub />
-			{$i18n.links.source_code}
+			{$i18n.navigation.text.source_code}
 		</a>
 
 		<Hr />
 
 		<ExternalLink
 			href="https://identity.ic0.app"
-			ariaLabel={$i18n.links.alt_manage_internet_identity}
+			ariaLabel={$i18n.navigation.alt.manage_internet_identity}
 		>
-			{$i18n.links.manage_internet_identity}
+			{$i18n.navigation.text.manage_internet_identity}
 		</ExternalLink>
 
 		<button
 			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label={$i18n.links.alt_more_settings}
+			aria-label={$i18n.navigation.alt.more_settings}
 			on:click={gotoSettings}
 		>
 			<IconSettings />
-			{$i18n.settings.title}
+			{$i18n.settings.text.title}
 		</button>
 
 		<SignOut on:icLogoutTriggered={() => (visible = false)} />

@@ -9,4 +9,4 @@
 	const toggleTestnets = () => testnetsStore.set({ key: 'testnets', value: { enabled: !checked } });
 </script>
 
-<Toggle ariaLabel={$i18n.settings.testnets_toggle} bind:checked on:nnsToggle={toggleTestnets} />
+<Toggle ariaLabel={$i18n.settings.alt.testnets_toggle} bind:checked on:nnsToggle={toggleTestnets} />

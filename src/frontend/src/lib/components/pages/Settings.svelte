@@ -20,24 +20,24 @@
 
 <KeyValuePairInfo>
 	<svelte:fragment slot="key"
-		><span class="font-bold">{$i18n.settings.principal}:</span></svelte:fragment
+		><span class="font-bold">{$i18n.settings.text.principal}:</span></svelte:fragment
 	>
 	<svelte:fragment slot="value"
 		><output class="break-all">{shortenWithMiddleEllipsis(principal?.toText() ?? '')}</output><Copy
 			inline
 			value={principal?.toText() ?? ''}
-			text={$i18n.settings.principal_copied}
+			text={$i18n.settings.text.principal_copied}
 		/></svelte:fragment
 	>
 	<svelte:fragment slot="info">
-		{replaceOisyPlaceholders($i18n.settings.principal_description)}
+		{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
 	</svelte:fragment>
 </KeyValuePairInfo>
 
 <div class="mt-4">
 	<KeyValuePairInfo>
 		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.settings.session}:</span></svelte:fragment
+			><span class="font-bold">{$i18n.settings.text.session}:</span></svelte:fragment
 		>
 		<output slot="value" class="mr-1.5">
 			{#if nonNullish(remainingTimeMilliseconds)}
@@ -48,7 +48,7 @@
 		</output>
 
 		<svelte:fragment slot="info">
-			{$i18n.settings.session_description}
+			{$i18n.settings.text.session_description}
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
@@ -56,13 +56,13 @@
 <div class="mt-4">
 	<KeyValuePairInfo>
 		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.settings.testnets}:</span></svelte:fragment
+			><span class="font-bold">{$i18n.settings.text.testnets}:</span></svelte:fragment
 		>
 
 		<NetworksTestnetsToggle slot="value" />
 
 		<svelte:fragment slot="info">
-			{$i18n.settings.testnets_description}
+			{$i18n.settings.text.testnets_description}
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
