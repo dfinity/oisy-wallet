@@ -7,12 +7,26 @@
 		"logout": "Logout"
 	},
 	"links": {
-		"source_code_on_github": "Source code on GitHub"
+		"source_code_on_github": "Source code on GitHub",
+		"view_on_explorer": "View on explorer",
+		"source_code": "Source code",
+		"manage_internet_identity": "Manage Internet Identity",
+		"alt_manage_internet_identity": "Administrate your Internet Identity",
+		"alt_more_settings": "More settings"
 	},
 	"sign_in": {
 		"title": "A browser-based Ethereum wallet secured by the Internet Computer and supporting networked-custody",
 		"description": "{OISY_NAME} provides a seamless on-chain experience to manage your Ethereum assets. Using native web technologies and advanced cryptography, {OISY_NAME} eliminates the need for browser extensions or mobile apps.",
 		"connect_with": "Connect with"
+	},
+	"menu": {
+		"alt": "Your wallet address, settings, sign-out and external links"
+	},
+	"wallet": {
+		"address": "Wallet address",
+		"address_copied": "Address copied to clipboard.",
+		"icp_deposits": "Note: For ICP deposits, use the 'Receive' button in your ICP account to get the right address.",
+		"alt_open_etherscan": "Open your address on Etherscan"
 	},
 	"init": {
 		"initializing_wallet": "Initializing your wallet",
