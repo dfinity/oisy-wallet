@@ -1,26 +1,32 @@
 {
 	"core": {
-		"close": "Close",
-		"back_to_wallet": "Back to Wallet",
-		"logo": "$name logo",
-		"test_banner": "For testing purposes only!",
-		"logout": "Logout"
+		"text": {
+			"back_to_wallet": "Back to Wallet",
+			"test_banner": "For testing purposes only!",
+			"logout": "Logout"
+		},
+		"alt": {
+			"close": "Close",
+			"logo": "$name logo"
+		}
 	},
-	"links": {
-		"source_code_on_github": "Source code on GitHub",
-		"view_on_explorer": "View on explorer",
-		"source_code": "Source code",
-		"manage_internet_identity": "Manage Internet Identity",
-		"alt_manage_internet_identity": "Administrate your Internet Identity",
-		"alt_more_settings": "More settings"
+	"navigation": {
+		"text": {
+			"source_code_on_github": "Source code on GitHub",
+			"view_on_explorer": "View on explorer",
+			"source_code": "Source code",
+			"manage_internet_identity": "Manage Internet Identity"
+		},
+		"alt": {
+			"manage_internet_identity": "Administrate your Internet Identity",
+			"more_settings": "More settings",
+			"menu": "Your wallet address, settings, sign-out and external links"
+		}
 	},
 	"sign_in": {
 		"title": "A browser-based Ethereum wallet secured by the Internet Computer and supporting networked-custody",
 		"description": "{OISY_NAME} provides a seamless on-chain experience to manage your Ethereum assets. Using native web technologies and advanced cryptography, {OISY_NAME} eliminates the need for browser extensions or mobile apps.",
 		"connect_with": "Connect with"
-	},
-	"menu": {
-		"alt": "Your wallet address, settings, sign-out and external links"
 	},
 	"wallet": {
 		"address": "Wallet address",
@@ -39,18 +45,22 @@
 		"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 	},
 	"settings": {
-		"title": "Settings",
-		"principal": "Your Principal",
-		"principal_copied": "Principal copied to clipboard",
-		"principal_description": "Your ID for the {OISY_NAME}. Created by your Internet Identity.",
-		"session": "Your session expires in",
-		"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
-		"testnets": "Show test networks",
-		"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
-		"testnets_toggle": "Toggle to show or hide testnets",
-		"tokens": "Tokens",
-		"tokens_description": "The list of tokens currently supported by your {OISY_NAME}.",
-		"decimals": "Decimals"
+		"text": {
+			"title": "Settings",
+			"principal": "Your Principal",
+			"principal_copied": "Principal copied to clipboard",
+			"principal_description": "Your ID for the {OISY_NAME}. Created by your Internet Identity.",
+			"session": "Your session expires in",
+			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
+			"testnets": "Show test networks",
+			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
+			"tokens": "Tokens",
+			"tokens_description": "The list of tokens currently supported by your {OISY_NAME}.",
+			"decimals": "Decimals"
+		},
+		"alt": {
+			"testnets_toggle": "Toggle to show or hide testnets"
+		}
 	},
 	"networks": {
 		"title": "Current network. Access to selection.",

@@ -23,6 +23,6 @@
 
 {#if nonNullish(explorerUrl)}
 	<ExternalLink href={explorerUrl} ariaLabel={$i18n.wallet.alt_open_etherscan}>
-		{$i18n.links.view_on_explorer}
+		{$i18n.navigation.text.view_on_explorer}
 	</ExternalLink>
 {/if}

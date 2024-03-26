@@ -3,30 +3,24 @@
  */
 
 interface I18nCore {
-	close: string;
-	back_to_wallet: string;
-	logo: string;
-	test_banner: string;
-	logout: string;
+	text: { back_to_wallet: string; test_banner: string; logout: string };
+	alt: { close: string; logo: string };
 }
 
-interface I18nLinks {
-	source_code_on_github: string;
-	view_on_explorer: string;
-	source_code: string;
-	manage_internet_identity: string;
-	alt_manage_internet_identity: string;
-	alt_more_settings: string;
+interface I18nNavigation {
+	text: {
+		source_code_on_github: string;
+		view_on_explorer: string;
+		source_code: string;
+		manage_internet_identity: string;
+	};
+	alt: { manage_internet_identity: string; more_settings: string; menu: string };
 }
 
 interface I18nSign_in {
 	title: string;
 	description: string;
 	connect_with: string;
-}
-
-interface I18nMenu {
-	alt: string;
 }
 
 interface I18nWallet {
@@ -49,18 +43,20 @@ interface I18nHero {
 }
 
 interface I18nSettings {
-	title: string;
-	principal: string;
-	principal_copied: string;
-	principal_description: string;
-	session: string;
-	session_description: string;
-	testnets: string;
-	testnets_description: string;
-	testnets_toggle: string;
-	tokens: string;
-	tokens_description: string;
-	decimals: string;
+	text: {
+		title: string;
+		principal: string;
+		principal_copied: string;
+		principal_description: string;
+		session: string;
+		session_description: string;
+		testnets: string;
+		testnets_description: string;
+		tokens: string;
+		tokens_description: string;
+		decimals: string;
+	};
+	alt: { testnets_toggle: string };
 }
 
 interface I18nNetworks {
@@ -72,9 +68,8 @@ interface I18nNetworks {
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
-	links: I18nLinks;
+	navigation: I18nNavigation;
 	sign_in: I18nSign_in;
-	menu: I18nMenu;
 	wallet: I18nWallet;
 	init: I18nInit;
 	hero: I18nHero;

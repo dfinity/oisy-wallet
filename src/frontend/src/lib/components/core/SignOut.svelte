@@ -14,5 +14,5 @@
 
 <button on:click={logout} class="text gap-2">
 	<IconLogout />
-	{$i18n.core.logout}
+	{$i18n.core.text.logout}
 </button>

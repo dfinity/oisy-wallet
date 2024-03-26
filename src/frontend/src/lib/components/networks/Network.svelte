@@ -36,7 +36,7 @@
 		<Logo
 			src={icon}
 			size="20px"
-			alt={replacePlaceholders($i18n.core.logo, {
+			alt={replacePlaceholders($i18n.core.alt.logo, {
 				$name: name
 			})}
 		/>
