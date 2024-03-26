@@ -12,7 +12,7 @@
 		class="flex gap-1 items-center text-blue font-bold no-underline"
 	>
 		<IconGitHub />
-		{$i18n.links.source_code_on_github}
+		{$i18n.navigation.text.source_code_on_github}
 	</a>
 </footer>
 

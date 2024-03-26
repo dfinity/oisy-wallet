@@ -33,7 +33,7 @@
 		{#if nonNullish($selectedNetwork.icon)}
 			<Img
 				src={$selectedNetwork.icon}
-				alt={replacePlaceholders($i18n.core.logo, {
+				alt={replacePlaceholders($i18n.core.alt.logo, {
 					$name: $selectedNetwork.name
 				})}
 				width="100%"
