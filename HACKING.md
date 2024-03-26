@@ -2,6 +2,13 @@
 
 This document lists a couple of useful information for development and deployment purpose.
 
+**Table of content:**
+
+- [Deployment](#deployment)
+- [Internationalization](#internationalization)
+
+---
+
 ## Deployment
 
 Following terminal commands are useful to deploy `frontend` and `backend`.
@@ -31,6 +38,8 @@ ENV=staging ./scripts/deploy.backend.sh
 ENV=ic dfx deploy frontend --network ic --wallet yit3i-lyaaa-aaaan-qeavq-cai
 ENV=ic ./scripts/deploy.backend.sh
 ```
+
+---
 
 ## Internationalization
 
