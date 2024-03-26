@@ -4,6 +4,7 @@
 
 interface I18nCore {
 	close: string;
+	logo: string;
 }
 
 interface I18nSettings {
@@ -15,13 +16,21 @@ interface I18nSettings {
 	session_description: string;
 	testnets: string;
 	testnets_description: string;
+	testnets_toggle: string;
 	tokens: string;
 	tokens_description: string;
 	decimals: string;
+}
+
+interface I18nNetworks {
+	title: string;
+	show_testnets: string;
+	more: string;
 }
 
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
 	settings: I18nSettings;
+	networks: I18nNetworks;
 }

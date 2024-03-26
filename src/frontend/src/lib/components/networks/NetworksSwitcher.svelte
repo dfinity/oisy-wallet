@@ -11,6 +11,8 @@
 	import { testnetsStore } from '$lib/stores/testnets.store';
 	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -25,13 +27,15 @@
 	class="token icon desktop-wide"
 	bind:this={button}
 	on:click={() => (visible = true)}
-	aria-label="Settings, sign-out and external links"
+	aria-label={$i18n.networks.title}
 >
 	<div class="w-full h-full md:w-[28px] md:h-[28px]">
 		{#if nonNullish($selectedNetwork.icon)}
 			<Img
 				src={$selectedNetwork.icon}
-				alt={`${$selectedNetwork.name} logo`}
+				alt={replacePlaceholders($i18n.core.logo, {
+					$name: $selectedNetwork.name
+				})}
 				width="100%"
 				height="100%"
 			/>
@@ -50,7 +54,7 @@
 	</ul>
 
 	<div class="testnets flex justify-between items-center mt-8 mb-4" class:enabled={testnets}>
-		<span class="font-bold px-4.5">Show test networks</span>
+		<span class="font-bold px-4.5">{$i18n.networks.show_testnets}</span>
 		<NetworksTestnetsToggle />
 	</div>
 
@@ -73,7 +77,7 @@
 		<li class="flex justify-between items-center">
 			<div class="flex gap-2 items-center">
 				<IconMore />
-				<span class="text-grey">More networks coming soon...</span>
+				<span class="text-grey">{$i18n.networks.more}</span>
 			</div>
 		</li>
 	</ul>
