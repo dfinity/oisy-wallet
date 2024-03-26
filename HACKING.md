@@ -51,6 +51,6 @@ To add support for an additional language, proceed as following:
 
 In the future, Oisy might be extended to support multiple languages on production.
 
-## Adding additional keys
+### Adding additional keys
 
 Translations are handled in JSON files but, as we are consuming these through a store, their representation have to exist as interfaces. To ease the process we have developed a script which extracts the declarations automatically. In case you would add new keys, `run npm run i18n` to generate the interfaces.
