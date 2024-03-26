@@ -28,10 +28,10 @@ export const replacePlaceholders = (text: string, substitutions: I18nSubstitutio
 
 export const replaceOisyPlaceholders = (text: string): string =>
 	replacePlaceholders(text, {
-		[`{OISY_NAME}`]: OISY_NAME,
-		[`{OISY_ONELINER}`]: OISY_ONELINER,
-		[`{OISY_DESCRIPTION}`]: OISY_DESCRIPTION,
-		[`{OISY_URL}`]: OISY_URL,
-		[`{OISY_REPO_URL}`]: OISY_REPO_URL,
-		[`{OISY_ALPHA_WARNING_URL}`]: OISY_ALPHA_WARNING_URL
+		$oisy_name: OISY_NAME,
+		$oisy_oneliner: OISY_ONELINER,
+		$oisy_description: OISY_DESCRIPTION,
+		$oisy_url: OISY_URL,
+		$oisy_repo_url: OISY_REPO_URL,
+		$oisy_alpha_warning_url: OISY_ALPHA_WARNING_URL
 	});
