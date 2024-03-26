@@ -9,6 +9,8 @@
 	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -18,23 +20,27 @@
 </script>
 
 <KeyValuePairInfo>
-	<svelte:fragment slot="key"><span class="font-bold">Your Principal:</span></svelte:fragment>
+	<svelte:fragment slot="key"
+		><span class="font-bold">{$i18n.settings.principal}:</span></svelte:fragment
+	>
 	<svelte:fragment slot="value"
 		><output class="break-all">{shortenWithMiddleEllipsis(principal?.toText() ?? '')}</output><Copy
 			inline
 			value={principal?.toText() ?? ''}
-			text="Principal copied to clipboard."
+			text={$i18n.settings.principal_copied}
 		/></svelte:fragment
 	>
 	<svelte:fragment slot="info">
-		Your ID for the {OISY_NAME} Wallet. Created by your Internet Identity.
+		{replacePlaceholders($i18n.settings.principal_description, {
+			[`{OISY_NAME}`]: OISY_NAME
+		})}
 	</svelte:fragment>
 </KeyValuePairInfo>
 
 <div class="mt-4">
 	<KeyValuePairInfo>
 		<svelte:fragment slot="key"
-			><span class="font-bold">Your session expires in:</span></svelte:fragment
+			><span class="font-bold">{$i18n.settings.session}:</span></svelte:fragment
 		>
 		<output slot="value" class="mr-1.5">
 			{#if nonNullish(remainingTimeMilliseconds)}
@@ -45,20 +51,21 @@
 		</output>
 
 		<svelte:fragment slot="info">
-			All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet
-			Identity.
+			{$i18n.settings.session_description}
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
 
 <div class="mt-4">
 	<KeyValuePairInfo>
-		<svelte:fragment slot="key"><span class="font-bold">Show test networks:</span></svelte:fragment>
+		<svelte:fragment slot="key"
+			><span class="font-bold">{$i18n.settings.testnets}:</span></svelte:fragment
+		>
 
 		<NetworksTestnetsToggle slot="value" />
 
 		<svelte:fragment slot="info">
-			Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).
+			{$i18n.settings.testnets_description}
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
