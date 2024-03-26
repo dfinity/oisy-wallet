@@ -2,9 +2,8 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { KeyValuePairInfo } from '@dfinity/gix-components';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
 <div class="mt-4 mb-2">
@@ -14,9 +13,7 @@
 		>
 
 		<svelte:fragment slot="info">
-			{replacePlaceholders($i18n.settings.tokens_description, {
-				[`{OISY_NAME}`]: OISY_NAME
-			})}
+			{replaceOisyPlaceholders($i18n.settings.tokens_description)}
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
