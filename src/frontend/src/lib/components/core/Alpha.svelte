@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconWarning from '$lib/components/icons/IconWarning.svelte';
 	import { OISY_ALPHA_WARNING_URL } from '$lib/constants/oisy.constants';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <a

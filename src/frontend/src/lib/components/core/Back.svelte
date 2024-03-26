@@ -5,6 +5,7 @@
 	import { afterNavigate } from '$app/navigation';
 	import { nonNullish } from '@dfinity/utils';
 	import { networkId } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let fromRoute: NavigationTarget | null;
 
@@ -16,5 +17,5 @@
 <button
 	class="flex gap-0.5 text-white font-bold pointer-events-auto ml-2"
 	on:click={async () => back({ pop: nonNullish(fromRoute), networkId: $networkId })}
-	><IconBack /> Back to Wallet</button
+	><IconBack /> {$i18n.core.back_to_wallet}</button
 >

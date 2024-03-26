@@ -1,10 +1,28 @@
 {
 	"core": {
 		"close": "Close",
-		"logo": "$name logo"
+		"back_to_wallet": "Back to Wallet",
+		"logo": "$name logo",
+		"test_banner": "For testing purposes only!",
+		"logout": "Logout"
+	},
+	"links": {
+		"source_code_on_github": "Source code on GitHub"
+	},
+	"sign_in": {
+		"title": "A browser-based Ethereum wallet secured by the Internet Computer and supporting networked-custody",
+		"description": "{OISY_NAME} provides a seamless on-chain experience to manage your Ethereum assets. Using native web technologies and advanced cryptography, {OISY_NAME} eliminates the need for browser extensions or mobile apps.",
+		"connect_with": "Connect with"
+	},
+	"init": {
+		"initializing_wallet": "Initializing your wallet",
+		"lets_go": "Let's go!",
+		"securing_session": "Securing session with Internet Identity",
+		"retrieving_eth_key": "Retrieving your Ethereum public key"
 	},
 	"hero": {
-		"use_with_caution": "Learn more about this alpha version. Use with caution."
+		"use_with_caution": "Learn more about this alpha version. Use with caution.",
+		"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 	},
 	"settings": {
 		"title": "Settings",
