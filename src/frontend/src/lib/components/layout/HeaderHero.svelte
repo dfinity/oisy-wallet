@@ -1,5 +1,5 @@
 <script lang="ts">
-	import WalletMenu from '$lib/components/core/WalletMenu.svelte';
+	import Menu from '$lib/components/core/Menu.svelte';
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { page } from '$app/stores';
@@ -23,9 +23,9 @@
 		</div>
 	{/if}
 
-	<div class="flex m-4 gap-4 pointer-events-auto" style="margin-left: auto">
+	<div class="flex m-4 gap-4 pointer-events-auto ml-auto">
 		<WalletConnect />
 		<NetworksSwitcher />
-		<WalletMenu />
+		<Menu />
 	</div>
 </header>
