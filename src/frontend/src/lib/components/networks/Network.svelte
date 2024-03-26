@@ -7,6 +7,8 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { back, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let network: Network;
 
@@ -31,7 +33,13 @@
 
 <button class="w-full flex justify-between items-center" on:click={onClick}>
 	<div class="flex gap-2 items-center">
-		<Logo src={icon} size="20px" alt={`${name} logo`} />
+		<Logo
+			src={icon}
+			size="20px"
+			alt={replacePlaceholders($i18n.core.logo, {
+				$name: name
+			})}
+		/>
 		<span>{name}</span>
 	</div>
 

@@ -1,6 +1,7 @@
 {
 	"core": {
-		"close": "Close"
+		"close": "Close",
+		"logo": "$name logo"
 	},
 	"settings": {
 		"title": "Settings",
@@ -11,8 +12,14 @@
 		"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
 		"testnets": "Show test networks",
 		"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
+		"testnets_toggle": "Toggle to show or hide testnets",
 		"tokens": "Tokens",
 		"tokens_description": "The list of tokens currently supported by your {OISY_NAME}.",
 		"decimals": "Decimals"
+	},
+	"networks": {
+		"title": "Current network. Access to selection.",
+		"show_testnets": "Show test networks",
+		"more": "More networks coming soon..."
 	}
 }
