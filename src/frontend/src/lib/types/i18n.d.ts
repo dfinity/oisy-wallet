@@ -7,6 +7,10 @@ interface I18nCore {
 	logo: string;
 }
 
+interface I18nHero {
+	use_with_caution: string;
+}
+
 interface I18nSettings {
 	title: string;
 	principal: string;
@@ -31,6 +35,7 @@ interface I18nNetworks {
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
+	hero: I18nHero;
 	settings: I18nSettings;
 	networks: I18nNetworks;
 }

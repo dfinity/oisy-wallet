@@ -3,6 +3,9 @@
 		"close": "Close",
 		"logo": "$name logo"
 	},
+	"hero": {
+		"use_with_caution": "Learn more about this alpha version. Use with caution."
+	},
 	"settings": {
 		"title": "Settings",
 		"principal": "Your Principal",
