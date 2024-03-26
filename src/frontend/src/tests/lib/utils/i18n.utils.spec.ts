@@ -1,4 +1,12 @@
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import {
+	OISY_ALPHA_WARNING_URL,
+	OISY_DESCRIPTION,
+	OISY_NAME,
+	OISY_ONELINER,
+	OISY_REPO_URL,
+	OISY_URL
+} from '$lib/constants/oisy.constants';
+import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 describe('i18n-utils', () => {
 	describe('replacePlaceholders', () => {
@@ -39,6 +47,20 @@ describe('i18n-utils', () => {
 					'{1}': 'dog'
 				})
 			).toBe('The quick brown fox jumps over the lazy dog');
+		});
+
+		it('should replace Oisy placeholders', () => {
+			expect(
+				replaceOisyPlaceholders(
+					'Lorem Ipsum! {OISY_NAME} {OISY_ONELINER} {OISY_DESCRIPTION} {OISY_ALPHA_WARNING_URL}'
+				)
+			).toBe(
+				`Lorem Ipsum! ${OISY_NAME} ${OISY_ONELINER} ${OISY_DESCRIPTION} ${OISY_ALPHA_WARNING_URL}`
+			);
+
+			expect(replaceOisyPlaceholders('Url: {OISY_URL}')).toBe(`Url: ${OISY_URL}`);
+
+			expect(replaceOisyPlaceholders('Url: {OISY_REPO_URL}')).toBe(`Url: ${OISY_REPO_URL}`);
 		});
 	});
 });

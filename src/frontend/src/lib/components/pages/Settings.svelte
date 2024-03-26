@@ -7,10 +7,9 @@
 	import { secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
 	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
-	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -31,9 +30,7 @@
 		/></svelte:fragment
 	>
 	<svelte:fragment slot="info">
-		{replacePlaceholders($i18n.settings.principal_description, {
-			[`{OISY_NAME}`]: OISY_NAME
-		})}
+		{replaceOisyPlaceholders($i18n.settings.principal_description)}
 	</svelte:fragment>
 </KeyValuePairInfo>
 
