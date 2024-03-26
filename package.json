@@ -25,7 +25,8 @@
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
 		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}'",
 		"generate": "scripts/did.sh && dfx generate && node scripts/update.types.mjs && npm run format",
-		"deploy": "scripts/deploy.sh"
+		"deploy": "scripts/deploy.sh",
+		"i18n": "node scripts/i18n.mjs && prettier --write ./src/frontend/src/lib/types/i18n.d.ts"
 	},
 	"dependencies": {
 		"@dfinity/agent": "^1.0.1",

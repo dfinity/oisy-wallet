@@ -14,12 +14,13 @@
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { initAnalytics } from '$lib/services/analytics.services';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
-	 * Init authentication
+	 * Init dApp
 	 */
 
-	const init = async () => await Promise.all([syncAuthStore(), initAnalytics()]);
+	const init = async () => await Promise.all([syncAuthStore(), initAnalytics(), i18n.init()]);
 
 	const syncAuthStore = async () => {
 		if (!browser) {
