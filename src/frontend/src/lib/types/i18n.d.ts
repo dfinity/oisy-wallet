@@ -83,6 +83,7 @@ interface I18nSend {
 interface I18nToken {
 	text: { add_new: string; contract_address: string; add: string; review: string; saving: string };
 	placeholder: { enter_contract_address: string };
+	warning: { trust_token: string };
 	error: {
 		invalid_contract_address: string;
 		no_metadata: string;

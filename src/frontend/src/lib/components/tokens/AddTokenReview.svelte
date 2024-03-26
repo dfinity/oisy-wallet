@@ -11,6 +11,7 @@
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { Html } from '@dfinity/gix-components';
 
 	export let contractAddress = '';
 	export let metadata: Erc20Metadata | undefined;
@@ -82,14 +83,7 @@
 
 <Warning>
 	<p>
-		Make sure that you trust the token that you are adding. If the token you are adding is
-		controlled by a malicious party, they could try and scam you e.g. by making you believe you
-		received a significant amount of tokens in order to trick you into sending them tokens in return
-		or perform other undesired actions. Learn more about scams and security risks e.g. <a
-			rel="noreferrer noopener"
-			target="_blank"
-			href="https://support.metamask.io/hc/en-us/articles/4403988839451">here</a
-		>.
+		<Html text={$i18n.token.warning.trust_token} />
 	</p>
 </Warning>
 
@@ -106,8 +100,12 @@
 </div>
 
 <style lang="scss">
-	a:active,
-	a:hover {
-		color: var(--color-off-white);
+	p {
+		:global(a) {
+			&:active,
+			&:hover {
+				color: var(--color-off-white);
+			}
+		}
 	}
 </style>
