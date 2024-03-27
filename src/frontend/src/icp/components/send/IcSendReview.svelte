@@ -9,6 +9,7 @@
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import { balance } from '$lib/derived/balances.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -35,13 +36,13 @@
 </SendData>
 
 <div class="flex justify-end gap-1">
-	<button class="secondary" on:click={() => dispatch('icBack')}>Back</button>
+	<button class="secondary" on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button>
 	<button
 		class="primary"
 		disabled={invalid}
 		class:opacity-10={invalid}
 		on:click={() => dispatch('icSend')}
 	>
-		Send
+		{$i18n.send.text.send}
 	</button>
 </div>

@@ -5,6 +5,7 @@
 	import { isInvalidDestinationIc, isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { debounce } from '@dfinity/utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -26,10 +27,10 @@
 
 	let inputPlaceholder: string;
 	$: inputPlaceholder = isNetworkIdEthereum(networkId)
-		? 'Enter public address (0x)'
+		? $i18n.send.placeholder.enter_eth_address
 		: isNetworkIdBTC(networkId)
-			? 'Enter recipient address'
-			: 'Enter wallet address';
+			? $i18n.send.placeholder.enter_recipient_address
+			: $i18n.send.placeholder.enter_wallet_address;
 </script>
 
 <SendInputDestination
