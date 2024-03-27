@@ -5,6 +5,7 @@
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { nonNullish } from '@dfinity/utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let decimals: number;
 	let symbol: string;
@@ -16,7 +17,7 @@
 </script>
 
 <Value ref="fee">
-	<svelte:fragment slot="label">Fee</svelte:fragment>
+	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
 
 	{#if nonNullish(fee)}
 		{formatToken({

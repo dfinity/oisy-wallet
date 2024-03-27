@@ -14,6 +14,7 @@
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -52,7 +53,7 @@
 {#if ckETH && ethNetwork}
 	<div transition:slide={{ duration: 250 }}>
 		<Value ref="kyt-fee">
-			<svelte:fragment slot="label">Estimated Ethereum Fee (Updated ≈30 Seconds)</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.fee.text.estimated_eth}</svelte:fragment>
 
 			<div>
 				&ZeroWidthSpace;

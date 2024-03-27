@@ -5,11 +5,12 @@
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { address } from '$lib/derived/address.derived';
 	import { ckETHTwinTokenNetworkId, ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <ConvertETH convertTokenId={$ckETHTwinTokenId}>
 	<IconBurn size="28" />
-	<span>Convert to ETH</span>
+	<span>{$i18n.convert.text.convert_to_eth}</span>
 </ConvertETH>
 
 {#if $modalConvertCkETHToETH}

@@ -7,12 +7,13 @@
 			"next": "Next",
 			"save": "Save",
 			"back": "Back",
+			"done": "Done",
+			"close": "Close",
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimals": "Decimals"
 		},
 		"alt": {
-			"close": "Close",
 			"logo": "$name logo"
 		}
 	},
@@ -90,6 +91,15 @@
 		}
 	},
 	"convert": {
+		"text": {
+			"convert_to_btc": "Convert to BTC",
+			"convert_to_eth": "Convert to ETH",
+			"convert_eth_to_cketh": "Convert ETH to ckETH",
+			"how_to_convert_eth_to_cketh": "Here is how to can convert ETH to ckETH on $oisy_name",
+			"send_eth": "Send ETH to your $oisy_name address",
+			"wait_eth_current_balance": "Wait for ETH to arrive. Current balance",
+			"set_amount": "Set amount for conversion"
+		},
 		"error": {
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
 		}
@@ -115,6 +125,27 @@
 			"unexpected": "Something went wrong while saving the token.",
 			"already_available": "Token is already available.",
 			"loading_metadata": "Error while loading the ERC20 contract metadata."
+		}
+	},
+	"fee": {
+		"text": {
+			"fee": "Fee",
+			"estimated_btc": "Estimated BTC Network Fee",
+			"estimated_inter_network": "Estimated Inter-network Fee",
+			"estimated_eth": "Estimated Ethereum Fee (Updated ≈30 Seconds)"
+		}
+	},
+	"info": {
+		"bitcoin": {
+			"title": "Receive from Bitcoin Network (BTC)",
+			"description": "ckBTC is a multi-chain bitcoin twin on the Internet Computer created by canister smart contract that directly hold native bitcoin.",
+			"note": "Note that incoming Bitcoin transactions require 12 confirmations. Check status on a block explorer.",
+			"action": "Receive from BTC network"
+		},
+		"ethereum": {
+			"title": "Receive ETH from Ethereum Network and convert to ckETH",
+			"description": "With a few steps, transfer and convert your Ethereum (ETH) to ckETH directly within the $oisy_name.",
+			"action": "How to convert ETH to ckETH"
 		}
 	}
 }

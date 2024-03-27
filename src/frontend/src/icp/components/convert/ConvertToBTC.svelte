@@ -11,6 +11,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { IcCkToken } from '$icp/types/ic';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const isDisabled = (): boolean => isNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
@@ -35,7 +36,7 @@
 	on:click={async () => await openSend()}
 >
 	<IconBurn size="28" />
-	Convert to BTC
+	{$i18n.convert.text.convert_to_btc}
 </button>
 
 {#if $modalConvertCkBTCToBTC}
