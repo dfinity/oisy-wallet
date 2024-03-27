@@ -23,7 +23,7 @@
 	import IcTransactionsCkETHListeners from '$icp/components/transactions/IcTransactionsCkETHListeners.svelte';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import IcReceiveEthereum from '$icp/components/receive/IcReceiveEthereum.svelte';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger
