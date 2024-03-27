@@ -3,14 +3,17 @@ import { INFURA_NETWORK_HOMESTEAD, INFURA_NETWORK_SEPOLIA } from '$env/networks.
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { PopulatedTransaction } from '@ethersproject/contracts';
 import type { Networkish } from '@ethersproject/networks';
 import { InfuraProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
+import { get } from 'svelte/store';
 
 const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
 
@@ -53,7 +56,12 @@ const providers: Record<NetworkId, InfuraCkETHProvider> = {
 export const infuraCkETHProviders = (networkId: NetworkId): InfuraCkETHProvider => {
 	const provider = providers[networkId];
 
-	assertNonNullish(provider, `No Infura CkETH provider for network ${networkId.toString()}`);
+	assertNonNullish(
+		provider,
+		replacePlaceholders(get(i18n).env.error.no_infura_cketh_provider, {
+			$network: networkId.toString()
+		})
+	);
 
 	return provider;
 };

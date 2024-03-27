@@ -293,6 +293,19 @@ interface I18nTransactions {
 	text: { title: string; no_transactions: string };
 }
 
+interface I18nEnv {
+	error: {
+		no_alchemy_config: string;
+		no_alchemy_provider: string;
+		no_alchemy_erc20_provider: string;
+		no_etherscan_provider: string;
+		no_infura_provider: string;
+		no_infura_cketh_provider: string;
+		no_infura_erc20_provider: string;
+		no_infura_erc20_icp_provider: string;
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -312,4 +325,5 @@ interface I18n {
 	wallet_connect: I18nWallet_connect;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
+	env: I18nEnv;
 }
