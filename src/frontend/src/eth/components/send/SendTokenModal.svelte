@@ -30,7 +30,9 @@
 	 * Wizard modal
 	 */
 
-	const [firstStep, ...otherSteps] = SEND_WIZARD_STEPS;
+	let firstStep: WizardStep;
+	let otherSteps: WizardStep[];
+	$: [firstStep, ...otherSteps] = SEND_WIZARD_STEPS($i18n);
 
 	let steps: WizardSteps;
 	$: steps = [
