@@ -1,4 +1,8 @@
-import { BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID } from '$env/networks.env';
+import {
+	BTC_MAINNET_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID,
+	ETHEREUM_NETWORK_ID
+} from '$env/networks.env';
 import { CKBTC_LEDGER_CANISTER_IDS, CKETH_LEDGER_CANISTER_IDS } from '$env/networks.ircrc.env';
 import type { IcToken } from '$icp/types/ic';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
@@ -35,6 +39,9 @@ export const isTokenCkEthLedger = ({ ledgerCanisterId }: Partial<IcToken>): bool
 
 export const isNetworkIdBTC = (networkId: NetworkId | undefined): boolean =>
 	nonNullish(networkId) && [BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID].includes(networkId);
+
+export const isNetworkIdETHMainnet = (networkId: NetworkId | undefined): boolean =>
+	ETHEREUM_NETWORK_ID === networkId;
 
 export const isNetworkIdBTCMainnet = (networkId: NetworkId | undefined): boolean =>
 	BTC_MAINNET_NETWORK_ID === networkId;
