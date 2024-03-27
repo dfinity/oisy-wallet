@@ -75,8 +75,21 @@ interface I18nNetworks {
 	more: string;
 }
 
+interface I18nReceive {
+	text: { receive: string; address: string };
+}
+
 interface I18nSend {
-	text: { amount: string; destination: string; source: string; balance: string };
+	text: {
+		send: string;
+		amount: string;
+		destination: string;
+		source: string;
+		balance: string;
+		review: string;
+		sending: string;
+		signing: string;
+	};
 	assertion: { invalid_destination_address: string };
 }
 
@@ -84,6 +97,7 @@ interface I18nConvert {
 	text: {
 		convert_to_btc: string;
 		convert_to_eth: string;
+		convert_to_cketh: string;
 		convert_eth_to_cketh: string;
 		how_to_convert_eth_to_cketh: string;
 		send_eth: string;
@@ -123,8 +137,12 @@ interface I18nFee {
 }
 
 interface I18nInfo {
-	bitcoin: { title: string; description: string; note: string; action: string };
-	ethereum: { title: string; description: string; action: string };
+	bitcoin: { title: string; description: string; note: string; receive: string };
+	ethereum: { title: string; description: string; how_to: string };
+}
+
+interface I18nWallet_connect {
+	text: { name: string; session_proposal: string };
 }
 
 interface I18n {
@@ -137,9 +155,11 @@ interface I18n {
 	hero: I18nHero;
 	settings: I18nSettings;
 	networks: I18nNetworks;
+	receive: I18nReceive;
 	send: I18nSend;
 	convert: I18nConvert;
 	tokens: I18nTokens;
 	fee: I18nFee;
 	info: I18nInfo;
+	wallet_connect: I18nWallet_connect;
 }

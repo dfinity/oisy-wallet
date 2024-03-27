@@ -4,10 +4,11 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
-	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
+	import { sendWizardSteps } from '$eth/config/send.config';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import type { Network } from '$lib/types/network';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
 	 * Props
@@ -29,13 +30,18 @@
 	 * Wizard modal
 	 */
 
-	const [firstStep, ...otherSteps] = SEND_WIZARD_STEPS;
+	let firstStep: WizardStep;
+	let otherSteps: WizardStep[];
+	$: [firstStep, ...otherSteps] = sendWizardSteps($i18n);
 
 	let steps: WizardSteps;
 	$: steps = [
 		{
 			...firstStep,
-			title: sendPurpose === 'convert-eth-to-cketh' ? 'Convert to ckETH' : 'Send'
+			title:
+				sendPurpose === 'convert-eth-to-cketh'
+					? $i18n.convert.text.convert_to_cketh
+					: $i18n.send.text.send
 		},
 		...otherSteps
 	];

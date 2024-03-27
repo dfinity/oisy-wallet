@@ -5,10 +5,11 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
-	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
+	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
 	 * Props
@@ -27,7 +28,7 @@
 	 */
 
 	let steps: WizardSteps;
-	$: steps = HOW_TO_CONVERT_WIZARD_STEPS;
+	$: steps = howToConvertWizardSteps($i18n);
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
