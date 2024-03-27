@@ -83,14 +83,14 @@
 	$: amount, fee, $ckBtcMinterInfoStore, $ckEthMinterInfoStore, debounceValidate();
 </script>
 
-<label for="amount" class="font-bold px-4.5">{$i18n.send.text.amount}:</label>
+<label for="amount" class="font-bold px-4.5">{$i18n.core.text.amount}:</label>
 <Input
 	name="amount"
 	inputType="currency"
 	required
 	bind:value={amount}
 	decimals={$tokenDecimals}
-	placeholder={$i18n.send.text.amount}
+	placeholder={$i18n.core.text.amount}
 	spellcheck={false}
 />
 
