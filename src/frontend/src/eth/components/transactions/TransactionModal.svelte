@@ -17,6 +17,8 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { notEmptyString } from '@dfinity/utils';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let transaction: Transaction;
 
@@ -43,20 +45,22 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">Transaction details</svelte:fragment>
+	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
 	<div>
 		{#if nonNullish(hash)}
 			<Value ref="hash">
-				<svelte:fragment slot="label">Transaction Hash</svelte:fragment>
+				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
 				<output>{shortenWithMiddleEllipsis(hash)}</output><Copy
 					value={hash}
-					text={`Transaction hash ${hash} copied to clipboard.`}
+					text={replacePlaceholders($i18n.transaction.text.hash_copied, {
+						$hash: hash
+					})}
 					inline
 				/>{#if nonNullish(explorerUrl)}<ExternalLink
 						iconSize="18"
 						href={explorerUrl}
-						ariaLabel="Open this transaction on a block explorer"
+						ariaLabel={$i18n.transaction.alt.open_block_explorer}
 						inline
 						color="blue"
 					/>{/if}
@@ -65,7 +69,7 @@
 
 		{#if nonNullish(blockNumber)}
 			<Value ref="blockNumber">
-				<svelte:fragment slot="label">Block</svelte:fragment>
+				<svelte:fragment slot="label">{$i18n.transaction.text.block}</svelte:fragment>
 				<output>{blockNumber}</output>
 			</Value>
 
@@ -74,26 +78,26 @@
 
 		{#if nonNullish(timestamp)}
 			<Value ref="timestamp">
-				<svelte:fragment slot="label">Timestamp</svelte:fragment>
+				<svelte:fragment slot="label">{$i18n.transaction.text.timestamp}</svelte:fragment>
 				<output>{formatSecondsToDate(timestamp)}</output>
 			</Value>
 		{/if}
 
 		<Value ref="type">
-			<svelte:fragment slot="label">Type</svelte:fragment>
-			{`${type === 'send' ? 'Send' : 'Receive'}`}
+			<svelte:fragment slot="label">{$i18n.transaction.text.type}</svelte:fragment>
+			{`${type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}`}
 		</Value>
 
 		<Value ref="from">
-			<svelte:fragment slot="label">From</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
 			<output>{from}</output><Copy
 				value={from}
-				text="From address copied to clipboard."
+				text={$i18n.transaction.text.from_copied}
 				inline
 			/>{#if nonNullish(fromExplorerUrl)}<ExternalLink
 					iconSize="18"
 					href={fromExplorerUrl}
-					ariaLabel="Open 'From' address on a block explorer"
+					ariaLabel={$i18n.transaction.alt.open_from_block_explorer}
 					inline
 					color="blue"
 				/>{/if}
@@ -101,15 +105,15 @@
 
 		{#if nonNullish(to)}
 			<Value ref="to">
-				<svelte:fragment slot="label">Interacted With (To)</svelte:fragment>
+				<svelte:fragment slot="label">{$i18n.transaction.text.interacted_with}</svelte:fragment>
 				<output>{to}</output><Copy
 					value={to}
-					text="To address copied to clipboard."
+					text={$i18n.transaction.text.to_copied}
 					inline
 				/>{#if nonNullish(toExplorerUrl)}<ExternalLink
 						iconSize="18"
 						href={toExplorerUrl}
-						ariaLabel="Open 'To' address on a block explorer"
+						ariaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						inline
 						color="blue"
 					/>{/if}
@@ -117,7 +121,7 @@
 		{/if}
 
 		<Value ref="amount">
-			<svelte:fragment slot="label">Amount</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
 			<output>
 				{formatToken({
 					value,
@@ -128,6 +132,8 @@
 			</output>
 		</Value>
 
-		<button class="primary full center text-center my-3" on:click={modalStore.close}>Close</button>
+		<button class="primary full center text-center my-3" on:click={modalStore.close}
+			>{$i18n.core.text.close}</button
+		>
 	</div>
 </Modal>

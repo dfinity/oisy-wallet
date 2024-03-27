@@ -12,6 +12,7 @@
 	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
@@ -55,7 +56,7 @@
 		: undefined;
 </script>
 
-<h2 class="text-base mb-6 pb-1">Transactions</h2>
+<h2 class="text-base mb-6 pb-1">{$i18n.transactions.text.title}</h2>
 
 <TransactionsSkeletons>
 	{#each $sortedTransactions as transaction, index (`${transaction.hash}-${index}`)}
@@ -63,7 +64,7 @@
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<p class="mt-4 text-dark opacity-50">You have no transactions.</p>
+		<p class="mt-4 text-dark opacity-50">{$i18n.transactions.text.no_transactions}</p>
 	{/if}
 </TransactionsSkeletons>
 

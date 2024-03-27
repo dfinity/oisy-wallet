@@ -259,6 +259,8 @@
 	"transaction": {
 		"text": {
 			"details": "Transaction details",
+			"hash": "Transaction hash",
+			"hash_copied": "Transaction hash $hash copied to clipboard.",
 			"id": "Transaction ID",
 			"id_copied": "Transaction ID copied to clipboard.",
 			"timestamp": "Timestamp",
@@ -266,12 +268,22 @@
 			"from": "From",
 			"from_copied": "From address copied to clipboard.",
 			"to": "To",
-			"to_copied": "To address copied to clipboard."
+			"to_copied": "To address copied to clipboard.",
+			"block": "Block",
+			"interacted_with": "Interacted With (To)"
+		},
+		"status": {
+			"included": "Included",
+			"safe": "Safe",
+			"finalised": "Finalised"
 		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",
 			"open_from_block_explorer": "Open the 'From' address on a block explorer",
 			"open_to_block_explorer": "Open the 'To' address on a block explorer"
+		},
+		"error": {
+			"get_block_number": "Cannot get block number."
 		}
 	},
 	"transactions": {
