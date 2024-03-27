@@ -22,12 +22,12 @@
 	$: steps = [
 		{
 			step: LoaderStep.INITIALIZATION,
-			text: $i18n.init.securing_session,
+			text: $i18n.init.text.securing_session,
 			state: 'completed'
 		} as ProgressStep,
 		{
 			step: LoaderStep.ETH_ADDRESS,
-			text: $i18n.init.retrieving_eth_key,
+			text: $i18n.init.text.retrieving_eth_key,
 			state: 'in_progress'
 		} as ProgressStep
 	];
@@ -108,7 +108,7 @@
 					<Img width="100%" src={banner} />
 				</div>
 
-				<h3 class="my-3">{$i18n.init.initializing_wallet}</h3>
+				<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
 
 				<InProgress {progressStep} {steps} />
 
@@ -117,7 +117,7 @@
 						on:click={confirmIntroduction}
 						class="primary full center mt-6"
 						disabled={disabledConfirm}
-						class:opacity-0={disabledConfirm}>{$i18n.init.lets_go}</button
+						class:opacity-0={disabledConfirm}>{$i18n.init.text.lets_go}</button
 					>
 				{/if}
 			</Modal>

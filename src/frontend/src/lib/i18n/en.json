@@ -52,14 +52,33 @@
 		}
 	},
 	"init": {
-		"initializing_wallet": "Initializing your wallet",
-		"lets_go": "Let's go!",
-		"securing_session": "Securing session with Internet Identity",
-		"retrieving_eth_key": "Retrieving your Ethereum public key"
+		"text": {
+			"initializing_wallet": "Initializing your wallet",
+			"lets_go": "Let's go!",
+			"securing_session": "Securing session with Internet Identity",
+			"retrieving_eth_key": "Retrieving your Ethereum public key"
+		},
+		"error": {
+			"no_alchemy_config": "No Alchemy config for network $network",
+			"no_alchemy_provider": "No Alchemy provider for network $network",
+			"no_alchemy_erc20_provider": "No Alchemy ERC20 provider for network $network",
+			"no_etherscan_provider": "No Etherscan provider for network $network",
+			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
+			"no_infura_provider": "No Infura provider for network $network",
+			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
+			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
+			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
+			"eth_address_unknown": "ETH address is unknown.",
+			"loading_balance": "Error while loading the ETH balance.",
+			"loading_balance_symbol": "Error while loading $symbol balance.",
+			"erc20_contracts": "Error while loading the ERC20 contracts."
+		}
 	},
 	"hero": {
-		"use_with_caution": "Learn more about this alpha version. Use with caution.",
-		"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
+		"text": {
+			"use_with_caution": "Learn more about this alpha version. Use with caution.",
+			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
+		}
 	},
 	"settings": {
 		"text": {
@@ -185,7 +204,14 @@
 			"address_unknown": "Address is unknown."
 		},
 		"error": {
-			"unexpected": "Something went wrong while sending the transaction."
+			"unexpected": "Something went wrong while sending the transaction.",
+			"destination_address_unknown": "ETH destination address is unknown",
+			"metamask_connected": "Cannot get your accounts. Is your Metamask open and already connected?",
+			"metamask_no_accounts": "No Metamask accounts found.",
+			"metamask_switch_network": "Cannot request Metamask to switch to chain ID $chain_id. Is your Metamask using $network_name?",
+			"erc20_data_undefined": "Erc20 transaction Data cannot be undefined or null.",
+			"data_undefined": "Transaction Data cannot be undefined or null.",
+			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal."
 		}
 	},
 	"convert": {
@@ -284,7 +310,9 @@
 		"info": {
 			"disconnected": "WalletConnect disconnected.",
 			"session_ended": "WalletConnect session was ended.",
-			"connected": "WalletConnect connected."
+			"connected": "WalletConnect connected.",
+			"eth_transaction_executed": "WalletConnect eth_sendTransaction request executed.",
+			"sign_executed": "WalletConnect sign request executed."
 		},
 		"error": {
 			"qr_code_read": "Cannot read QR code.",
@@ -297,7 +325,14 @@
 			"unexpected_pair": "An unexpected error happened while trying to pair the wallet.",
 			"no_connection_opened": "Unexpected error: No connection opened.",
 			"no_session_approval": "Unexpected error: No session proposal available.",
-			"unexpected": "Unexpected error while communicating with WalletConnect."
+			"unexpected": "Unexpected error while communicating with WalletConnect.",
+			"request_rejected": "WalletConnect request rejected",
+			"unknown_parameter": "Unknown parameter.",
+			"wallet_not_initialized": "Unexpected error. Your wallet address is not initialized.",
+			"from_address_not_wallet": "From address requested for the transaction is not the address of this wallet.",
+			"unknown_destination": "Unknown destination address.",
+			"request_not_defined": "Unexpected error: Request is not defined therefore cannot be processed.",
+			"unexpected_processing_request": "Unexpected error while processing the request with WalletConnect."
 		}
 	},
 	"transaction": {
@@ -327,26 +362,20 @@
 			"open_to_block_explorer": "Open the 'To' address on a block explorer"
 		},
 		"error": {
-			"get_block_number": "Cannot get block number."
+			"get_block_number": "Cannot get block number.",
+			"failed_get_transaction": "Failed to get the transaction from the provided (hash: $hash). Please reload the wallet dapp.",
+			"failed_get_mined_transaction": "Failed to get the mined transaction (hash: $hash). Please reload the wallet dapp."
 		}
 	},
 	"transactions": {
 		"text": {
 			"title": "Transactions",
 			"no_transactions": "You have no transactions."
-		}
-	},
-	"env": {
+		},
 		"error": {
-			"no_alchemy_config": "No Alchemy config for network $network",
-			"no_alchemy_provider": "No Alchemy provider for network $network",
-			"no_alchemy_erc20_provider": "No Alchemy ERC20 provider for network $network",
-			"no_etherscan_provider": "No Etherscan provider for network $network",
-			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
-			"no_infura_provider": "No Infura provider for network $network",
-			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
-			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
-			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network"
+			"loading_transactions": "Error while loading the transactions.",
+			"loading_transactions_symbol": "Error while loading the $symbol transactions.",
+			"no_token_loading_transaction": "Token not found. Transactions cannot be loaded."
 		}
 	}
 }

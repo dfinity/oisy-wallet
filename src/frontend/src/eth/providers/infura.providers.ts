@@ -54,7 +54,7 @@ export const infuraProviders = (networkId: NetworkId): InfuraProvider => {
 
 	assertNonNullish(
 		provider,
-		replacePlaceholders(get(i18n).env.error.no_infura_provider, {
+		replacePlaceholders(get(i18n).init.error.no_infura_provider, {
 			$network: networkId.toString()
 		})
 	);

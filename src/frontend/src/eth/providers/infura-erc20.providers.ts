@@ -91,7 +91,7 @@ export const infuraErc20Providers = (networkId: NetworkId): InfuraErc20Provider 
 
 	assertNonNullish(
 		provider,
-		replacePlaceholders(get(i18n).env.error.no_infura_erc20_provider, {
+		replacePlaceholders(get(i18n).init.error.no_infura_erc20_provider, {
 			$network: networkId.toString()
 		})
 	);

@@ -5,10 +5,12 @@ import type { Erc20Token } from '$eth/types/erc20';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -29,9 +31,15 @@ export const loadBalance = async ({
 }): Promise<{ success: boolean }> => {
 	const address = get(addressStore);
 
+	const {
+		init: {
+			error: { eth_address_unknown, loading_balance }
+		}
+	} = get(i18n);
+
 	if (isNullish(address)) {
 		toastsError({
-			msg: { text: 'ETH address is unknown.' }
+			msg: { text: eth_address_unknown }
 		});
 
 		return { success: false };
@@ -46,7 +54,7 @@ export const loadBalance = async ({
 		balancesStore.reset(tokenId);
 
 		toastsError({
-			msg: { text: 'Error while loading the ETH balance.' },
+			msg: { text: loading_balance },
 			err
 		});
 
@@ -65,9 +73,15 @@ const loadErc20Balance = async ({
 }): Promise<{ success: boolean }> => {
 	const address = optionAddress ?? get(addressStore);
 
+	const {
+		init: {
+			error: { eth_address_unknown, loading_balance_symbol }
+		}
+	} = get(i18n);
+
 	if (isNullish(address)) {
 		toastsError({
-			msg: { text: 'ETH address is unknown.' }
+			msg: { text: eth_address_unknown }
 		});
 
 		return { success: false };
@@ -81,7 +95,11 @@ const loadErc20Balance = async ({
 		balancesStore.reset(contract.id);
 
 		toastsError({
-			msg: { text: `Error while loading ${contract.symbol} balance.` },
+			msg: {
+				text: replacePlaceholders(loading_balance_symbol, {
+					$symbol: contract.symbol
+				})
+			},
 			err
 		});
 

@@ -11,7 +11,7 @@
 	class="no-underline inline-flex items-center gap-2 text-center pt-1 pb-3 font-bold text-xs md:text-base"
 >
 	<IconInfo />
-	<span class="pl-1">{$i18n.hero.learn_more_about_erc20_icp}</span>
+	<span class="pl-1">{$i18n.hero.text.learn_more_about_erc20_icp}</span>
 </a>
 
 <style lang="scss">
