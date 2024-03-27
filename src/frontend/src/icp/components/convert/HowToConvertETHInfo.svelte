@@ -2,12 +2,13 @@
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import { address } from '$lib/derived/address.derived';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let formCancelAction: 'back' | 'close' = 'back';
 
@@ -17,7 +18,7 @@
 </script>
 
 <div>
-	<p>Here is how to can convert ETH to ckETH on {OISY_NAME}:</p>
+	<p>{replaceOisyPlaceholders($i18n.convert.text.how_to_convert_eth_to_cketh)}:</p>
 </div>
 
 <div class="grid grid-cols-[1fr_auto] gap-x-4 mt-4">
@@ -37,7 +38,9 @@
 		copyAriaLabel="Wallet address copied to clipboard."
 		on:click={() => dispatch('icQRCode')}
 	>
-		<svelte:fragment slot="title">Send ETH to your {OISY_NAME} address</svelte:fragment>
+		<svelte:fragment slot="title"
+			>{replaceOisyPlaceholders($i18n.convert.text.send_eth)}</svelte:fragment
+		>
 	</ReceiveAddress>
 
 	<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
@@ -51,7 +54,7 @@
 
 	<div>
 		<Value element="div">
-			<svelte:fragment slot="label">Wait for ETH to arrive. Current balance</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.convert.text.wait_eth_current_balance}</svelte:fragment>
 
 			<p class="mb-6">
 				{formatToken({
@@ -71,10 +74,10 @@
 
 	<div>
 		<Value element="div">
-			<svelte:fragment slot="label">Convert ETH to ckETH</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.convert.text.convert_eth_to_cketh}</svelte:fragment>
 
 			<button class="secondary full center mt-3 mb-4" on:click={() => dispatch('icConvert')}>
-				<span class="text-dark-slate-blue font-bold">Set amount for conversion</span>
+				<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
 			</button>
 		</Value>
 	</div>
@@ -85,11 +88,11 @@
 		<button
 			type="button"
 			class="primary full center text-center"
-			on:click={() => dispatch('icBack')}>Back</button
+			on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button
 		>
 	{:else}
 		<button type="button" class="primary full center text-center" on:click={modalStore.close}
-			>Done</button
+			>{$i18n.core.text.done}</button
 		>
 	{/if}
 </div>

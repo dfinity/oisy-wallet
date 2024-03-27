@@ -10,11 +10,13 @@ interface I18nCore {
 		next: string;
 		save: string;
 		back: string;
+		done: string;
+		close: string;
 		name: string;
 		symbol: string;
 		decimals: string;
 	};
-	alt: { close: string; logo: string };
+	alt: { logo: string };
 }
 
 interface I18nNavigation {
@@ -79,6 +81,15 @@ interface I18nSend {
 }
 
 interface I18nConvert {
+	text: {
+		convert_to_btc: string;
+		convert_to_eth: string;
+		convert_eth_to_cketh: string;
+		how_to_convert_eth_to_cketh: string;
+		send_eth: string;
+		wait_eth_current_balance: string;
+		set_amount: string;
+	};
 	error: { loading_cketh_helper: string };
 }
 
@@ -102,6 +113,20 @@ interface I18nTokens {
 	};
 }
 
+interface I18nFee {
+	text: {
+		fee: string;
+		estimated_btc: string;
+		estimated_inter_network: string;
+		estimated_eth: string;
+	};
+}
+
+interface I18nInfo {
+	bitcoin: { title: string; description: string; note: string; action: string };
+	ethereum: { title: string; description: string; action: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -115,4 +140,6 @@ interface I18n {
 	send: I18nSend;
 	convert: I18nConvert;
 	tokens: I18nTokens;
+	fee: I18nFee;
+	info: I18nInfo;
 }

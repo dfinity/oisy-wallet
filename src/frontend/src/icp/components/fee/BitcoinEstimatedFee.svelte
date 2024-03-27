@@ -7,6 +7,7 @@
 	import { getContext } from 'svelte';
 	import { IC_FEE_CONTEXT_KEY, type IcFeeContext } from '$icp/stores/ic-fee.store';
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const { store: storeFeeData } = getContext<IcFeeContext>(IC_FEE_CONTEXT_KEY);
 
@@ -20,7 +21,7 @@
 {#if nonNullish(bitcoinEstimatedFee)}
 	<div transition:slide={{ duration: 250 }}>
 		<Value ref="kyt-fee">
-			<svelte:fragment slot="label">Estimated BTC Network Fee</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.fee.text.estimated_btc}</svelte:fragment>
 
 			{formatToken({
 				value: BigNumber.from(bitcoinEstimatedFee),
