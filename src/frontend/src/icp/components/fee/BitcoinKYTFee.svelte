@@ -11,6 +11,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -27,7 +28,7 @@
 {#if ckBTC && btcNetwork && nonNullish(kytFee)}
 	<div transition:slide={{ duration: 250 }}>
 		<Value ref="kyt-fee">
-			<svelte:fragment slot="label">Estimated Inter-network Fee</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.fee.text.estimated_inter_network}</svelte:fragment>
 
 			{formatToken({
 				value: BigNumber.from(kytFee),

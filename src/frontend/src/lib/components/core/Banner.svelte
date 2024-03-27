@@ -14,7 +14,7 @@
 			<IconWarning size="48px" />
 			<h3 class="clamp-4">{$i18n.core.text.test_banner}</h3>
 		</span>
-		<button on:click={close} aria-label={$i18n.core.alt.close}><IconClose /></button>
+		<button on:click={close} aria-label={$i18n.core.text.close}><IconClose /></button>
 	</div>
 {/if}
 
