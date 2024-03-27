@@ -1,7 +1,6 @@
 {
 	"core": {
 		"text": {
-			"test_banner": "For testing purposes only!",
 			"cancel": "Cancel",
 			"next": "Next",
 			"save": "Save",
@@ -13,6 +12,9 @@
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount"
+		},
+		"info": {
+			"test_banner": "For testing purposes only!"
 		},
 		"alt": {
 			"logo": "$name logo"

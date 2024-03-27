@@ -12,7 +12,7 @@
 	<div class="flex justify-between gap-4">
 		<span class="flex items-center justify-center gap-4">
 			<IconWarning size="48px" />
-			<h3 class="clamp-4">{$i18n.core.text.test_banner}</h3>
+			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
 		</span>
 		<button on:click={close} aria-label={$i18n.core.text.close}><IconClose /></button>
 	</div>
