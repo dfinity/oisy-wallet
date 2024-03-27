@@ -21,15 +21,15 @@
 	const steps: WizardSteps = [
 		{
 			name: 'Add',
-			title: $i18n.token.text.add
+			title: $i18n.tokens.text.add
 		},
 		{
 			name: 'Review',
-			title: $i18n.token.text.review
+			title: $i18n.tokens.text.review
 		},
 		{
 			name: 'Saving',
-			title: $i18n.token.text.saving
+			title: $i18n.tokens.text.saving
 		}
 	];
 
@@ -50,14 +50,14 @@
 	const save = async () => {
 		if (isNullishOrEmpty(contractAddress)) {
 			toastsError({
-				msg: { text: $i18n.token.error.invalid_contract_address }
+				msg: { text: $i18n.tokens.error.invalid_contract_address }
 			});
 			return;
 		}
 
 		if (isNullish(metadata)) {
 			toastsError({
-				msg: { text: $i18n.token.error.no_metadata }
+				msg: { text: $i18n.tokens.error.no_metadata }
 			});
 			return;
 		}
@@ -98,7 +98,7 @@
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: $i18n.token.error.unexpected },
+				msg: { text: $i18n.tokens.error.unexpected },
 				err
 			});
 

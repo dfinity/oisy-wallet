@@ -23,7 +23,7 @@
 			)
 		) {
 			toastsError({
-				msg: { text: $i18n.token.error.already_available }
+				msg: { text: $i18n.tokens.error.already_available }
 			});
 
 			dispatch('icBack');
@@ -35,7 +35,7 @@
 			metadata = await metadataApi({ address: contractAddress });
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: $i18n.token.error.loading_metadata },
+				msg: { text: $i18n.tokens.error.loading_metadata },
 				err
 			});
 
@@ -50,7 +50,7 @@
 </script>
 
 <Value ref="contractAddress" element="div">
-	<svelte:fragment slot="label">{$i18n.token.text.contract_address}</svelte:fragment>
+	<svelte:fragment slot="label">{$i18n.tokens.text.contract_address}</svelte:fragment>
 	{contractAddress}
 </Value>
 
@@ -83,7 +83,7 @@
 
 <Warning>
 	<p>
-		<Html text={$i18n.token.warning.trust_token} />
+		<Html text={$i18n.tokens.warning.trust_token} />
 	</p>
 </Warning>
 

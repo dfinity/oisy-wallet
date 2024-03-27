@@ -12,7 +12,7 @@
 
 <button on:click={() => modalStore.openAddToken()} class="contents">
 	<Card>
-		<span>{$i18n.token.text.add_new}</span>
+		<span>{$i18n.tokens.text.add_new}</span>
 
 		<RoundedIcon
 			slot="icon"
