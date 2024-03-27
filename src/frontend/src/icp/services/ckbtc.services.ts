@@ -14,6 +14,7 @@ import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
 import { waitWalletReady } from '$lib/services/actions.services';
 import { busy } from '$lib/stores/busy.store';
 import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
@@ -33,7 +34,7 @@ export const updateBalance = async ({
 }: CkBtcUpdateBalanceParams & {
 	token: IcCkToken;
 }): Promise<void> => {
-	assertNonNullish(minterCanisterId, 'A configured minter is required to retrieve BTC.');
+	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_btc);
 
 	progress(UpdateBalanceCkBtcStep.RETRIEVE);
 
@@ -47,7 +48,7 @@ export const updateBalance = async ({
 
 		if (ok.length === 0) {
 			toastsShow({
-				text: 'No new confirmed BTC.',
+				text: get(i18n).receive.bitcoin.info.no_new_btc,
 				level: 'info',
 				duration: 3000
 			});
@@ -91,7 +92,7 @@ export const loadAllCkBtcInfo = async ({
 	minterCanisterId,
 	...rest
 }: IcCkToken & { identity: OptionIdentity }) => {
-	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
+	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_ckbtc_info);
 
 	const addressStore = get(btcAddressStore);
 	const minterInfoStore = get(ckBtcMinterInfoStore);
@@ -104,7 +105,7 @@ export const loadAllCkBtcInfo = async ({
 		return;
 	}
 
-	busy.start({ msg: 'Hold tight, we are loading some information...' });
+	busy.start({ msg: get(i18n).init.info.hold_loading });
 
 	const params = {
 		id: tokenId,
@@ -157,7 +158,7 @@ const loadData: LoadData = async <T>({
 	request,
 	identity
 }: LoadDataParams<T>) => {
-	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
+	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_ckbtc_info);
 
 	await queryAndUpdate<T>({
 		request: ({ identity, certified }) =>
@@ -171,7 +172,7 @@ const loadData: LoadData = async <T>({
 			store.reset(tokenId);
 
 			toastsError({
-				msg: { text: 'Error while loading the ckBtc minter information.' },
+				msg: { text: get(i18n).init.error.minter_ckbtc_loading_info },
 				err
 			});
 		},
@@ -190,7 +191,7 @@ export const queryEstimateFee = async ({
 	result: 'success' | 'error';
 	fee?: EstimateWithdrawalFee;
 }> => {
-	assertNonNullish(minterCanisterId, 'A configured minter is required to fetch the ckBTC info.');
+	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_ckbtc_info);
 
 	try {
 		const fee = await estimateFee({
@@ -203,7 +204,7 @@ export const queryEstimateFee = async ({
 		return { result: 'success', fee };
 	} catch (err: unknown) {
 		toastsError({
-			msg: { text: 'Error while querying the estimation of the Btc fees.' },
+			msg: { text: get(i18n).init.error.btc_fees_estimation },
 			err
 		});
 

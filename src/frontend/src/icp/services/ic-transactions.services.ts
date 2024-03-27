@@ -7,10 +7,12 @@ import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { balancesStore } from '$lib/stores/balances.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { Principal } from '@dfinity/principal';
+import { get } from 'svelte/store';
 
 const getTransactions = async ({
 	token: { standard, indexCanisterId },
@@ -95,7 +97,7 @@ export const onLoadTransactionsError = ({
 	balancesStore.reset(tokenId);
 
 	toastsError({
-		msg: { text: 'Something went wrong while fetching the transactions.' },
+		msg: { text: get(i18n).transactions.error.loading_transactions },
 		err
 	});
 };
@@ -105,7 +107,7 @@ export const onTransactionsCleanUp = (data: { tokenId: TokenId; transactionIds: 
 
 	toastsError({
 		msg: {
-			text: 'Several uncertified transactions were identified and subsequently removed from the displayed lists.'
+			text: get(i18n).transactions.error.uncertified_transactions_removed
 		}
 	});
 };

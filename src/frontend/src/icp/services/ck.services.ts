@@ -7,8 +7,10 @@ import type { IcTransferParams } from '$icp/types/ic-send';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { SendIcStep } from '$lib/enums/steps';
+import { i18n } from '$lib/stores/i18n.store';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const convertCkBTCToBtc = async ({
 	token: { ledgerCanisterId, minterCanisterId },
@@ -19,7 +21,7 @@ export const convertCkBTCToBtc = async ({
 }: IcTransferParams & {
 	token: IcCkToken;
 }): Promise<void> => {
-	assertNonNullish(minterCanisterId, 'A configured minter is required to convert ckBTC to BTC.');
+	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_ckbtc_btc);
 
 	const amount = amountBigNumber.toBigInt();
 
@@ -50,7 +52,7 @@ export const convertCkETHToEth = async ({
 }: IcTransferParams & {
 	token: IcCkToken;
 }): Promise<void> => {
-	assertNonNullish(minterCanisterId, 'A configured minter is required to convert ckETH to ETH.');
+	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_cketh_eth);
 
 	const amount = amountBigNumber.toBigInt();
 
