@@ -13,6 +13,7 @@
 	import { btcAddressStore } from '$icp/stores/btc.store';
 
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const dispatch = createEventDispatcher();
 
@@ -28,14 +29,12 @@
 <ReceiveAddress
 	labelRef="wallet-address"
 	address={$icrcAccountIdentifierText ?? ''}
-	qrCodeAriaLabel="Display wallet address as a QR code"
-	copyAriaLabel="Wallet address copied to clipboard."
+	qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
+	copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
-	<svelte:fragment slot="title">Wallet address</svelte:fragment>
-	<svelte:fragment slot="text"
-		>Use this address to transfer ckBTC to and from your wallet.
-	</svelte:fragment>
+	<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
+	<svelte:fragment slot="text">{$i18n.receive.ckbtc.text.use_address_from_to}</svelte:fragment>
 </ReceiveAddress>
 
 {#if nonNullish(btcAddress)}
@@ -46,11 +45,11 @@
 	<ReceiveAddress
 		labelRef="bitcoin-address"
 		address={btcAddress}
-		qrCodeAriaLabel="Display Bitcoin Address as a QR code"
-		copyAriaLabel="Bitcoin Address copied to clipboard."
+		qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+		copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 		on:click={() => displayQRCode(btcAddress ?? '')}
 	>
-		<svelte:fragment slot="title">Bitcoin Address</svelte:fragment>
+		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.bitcoin_address}</svelte:fragment>
 		<svelte:fragment slot="text"
 			>Transfer Bitcoin on the BTC network to this address to receive ckBTC. {#if nonNullish(kytFee)}<span
 					in:fade
@@ -64,4 +63,6 @@
 	</ReceiveAddress>
 {/if}
 
-<button class="primary full center text-center mt-8 mb-6" on:click={modalStore.close}>Done</button>
+<button class="primary full center text-center mt-8 mb-6" on:click={modalStore.close}
+	>{$i18n.core.text.done}</button
+>
