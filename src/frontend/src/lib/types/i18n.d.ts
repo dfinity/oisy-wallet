@@ -16,6 +16,7 @@ interface I18nCore {
 		name: string;
 		symbol: string;
 		decimals: string;
+		amount: string;
 	};
 	alt: { logo: string };
 }
@@ -125,7 +126,6 @@ interface I18nReceive {
 interface I18nSend {
 	text: {
 		send: string;
-		amount: string;
 		destination: string;
 		source: string;
 		balance: string;
@@ -210,6 +210,29 @@ interface I18nWallet_connect {
 	text: { name: string; session_proposal: string };
 }
 
+interface I18nTransaction {
+	text: {
+		details: string;
+		id: string;
+		id_copied: string;
+		timestamp: string;
+		type: string;
+		from: string;
+		from_copied: string;
+		to: string;
+		to_copied: string;
+	};
+	alt: {
+		open_block_explorer: string;
+		open_from_block_explorer: string;
+		open_to_block_explorer: string;
+	};
+}
+
+interface I18nTransactions {
+	text: { title: string; no_transactions: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -227,4 +250,6 @@ interface I18n {
 	fee: I18nFee;
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
+	transaction: I18nTransaction;
+	transactions: I18nTransactions;
 }
