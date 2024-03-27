@@ -4,12 +4,15 @@ import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20Transaction } from '$eth/types/erc20-transaction';
 import type { WebSocketListener } from '$eth/types/listener';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { ethers } from 'ethers';
+import { get } from 'svelte/store';
 
 const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
 
@@ -62,7 +65,12 @@ const providers: Record<NetworkId, AlchemyErc20Provider> = {
 export const alchemyErc20Providers = (networkId: NetworkId): AlchemyErc20Provider => {
 	const provider = providers[networkId];
 
-	assertNonNullish(provider, `No Alchemy ERC20 provider for network ${networkId.toString()}`);
+	assertNonNullish(
+		provider,
+		replacePlaceholders(get(i18n).env.error.no_alchemy_erc20_provider, {
+			$network: networkId.toString()
+		})
+	);
 
 	return provider;
 };

@@ -1,12 +1,15 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { ALCHEMY_NETWORK_MAINNET, ALCHEMY_NETWORK_SEPOLIA } from '$env/networks.eth.env';
 import type { WebSocketListener } from '$eth/types/listener';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ETH_ADDRESS, OptionAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
 import type { AlchemySettings, Network } from 'alchemy-sdk';
 import { Alchemy, AlchemySubscription } from 'alchemy-sdk';
+import { get } from 'svelte/store';
 
 const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;
 
@@ -24,7 +27,12 @@ const configs: Record<NetworkId, AlchemySettings> = {
 const alchemyConfig = (networkId: NetworkId): AlchemySettings => {
 	const provider = configs[networkId];
 
-	assertNonNullish(provider, `No Alchemy config for network ${networkId.toString()}`);
+	assertNonNullish(
+		provider,
+		replacePlaceholders(get(i18n).env.error.no_alchemy_config, {
+			$network: networkId.toString()
+		})
+	);
 
 	return provider;
 };
@@ -109,7 +117,12 @@ const providers: Record<NetworkId, AlchemyProvider> = {
 export const alchemyProviders = (networkId: NetworkId): AlchemyProvider => {
 	const provider = providers[networkId];
 
-	assertNonNullish(provider, `No Alchemy provider for network ${networkId.toString()}`);
+	assertNonNullish(
+		provider,
+		replacePlaceholders(get(i18n).env.error.no_alchemy_provider, {
+			$network: networkId.toString()
+		})
+	);
 
 	return provider;
 };

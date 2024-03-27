@@ -1,7 +1,9 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { INFURA_NETWORK_HOMESTEAD, INFURA_NETWORK_SEPOLIA } from '$env/networks.eth.env';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { Networkish } from '@ethersproject/networks';
@@ -10,6 +12,7 @@ import {
 	type FeeData,
 	type TransactionResponse
 } from '@ethersproject/providers';
+import { get } from 'svelte/store';
 
 const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
 
@@ -49,7 +52,12 @@ const providers: Record<NetworkId, InfuraProvider> = {
 export const infuraProviders = (networkId: NetworkId): InfuraProvider => {
 	const provider = providers[networkId];
 
-	assertNonNullish(provider, `No Infura provider for network ${networkId.toString()}`);
+	assertNonNullish(
+		provider,
+		replacePlaceholders(get(i18n).env.error.no_infura_provider, {
+			$network: networkId.toString()
+		})
+	);
 
 	return provider;
 };
