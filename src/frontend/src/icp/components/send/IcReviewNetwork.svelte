@@ -10,6 +10,7 @@
 	import icpLight from '$icp/assets/icp_light.svg';
 	import bitcoin from '$icp/assets/bitcoin.svg';
 	import eth from '$icp-eth/assets/eth.svg';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -20,7 +21,8 @@
 
 <Value ref="network" element="div">
 	<svelte:fragment slot="label"
-		>{#if showDestinationNetwork}Source network{:else}Network{/if}</svelte:fragment
+		>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
+				.network}{/if}</svelte:fragment
 	>
 	<span class="flex gap-1">
 		Internet Computer <Logo src={icpLight} size="20px" alt={`Internet Computer logo`} />
@@ -29,7 +31,7 @@
 
 {#if showDestinationNetwork}
 	<Value ref="network" element="div">
-		<svelte:fragment slot="label">Destination network</svelte:fragment>
+		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
 		<span class="flex gap-1">
 			{#if nonNullish(networkId) && isNetworkIdBTC(networkId)}
 				<IcSendBtcNetwork {networkId} /> <Logo src={bitcoin} size="20px" alt={`Bitcoin logo`} />

@@ -44,14 +44,14 @@
 	const send = async () => {
 		if (isNullishOrEmpty(destination)) {
 			toastsError({
-				msg: { text: `Destination address is invalid.` }
+				msg: { text: $i18n.send.assertion.destination_address_invalid }
 			});
 			return;
 		}
 
 		if (invalidAmount(amount) || isNullish(amount)) {
 			toastsError({
-				msg: { text: `Amount is invalid.` }
+				msg: { text: $i18n.send.assertion.amount_invalid }
 			});
 			return;
 		}
@@ -80,7 +80,7 @@
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: `Something went wrong while sending the transaction.` },
+				msg: { text: $i18n.send.error.unexpected },
 				err
 			});
 

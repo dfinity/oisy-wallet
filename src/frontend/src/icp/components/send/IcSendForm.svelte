@@ -11,6 +11,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { balance } from '$lib/derived/balances.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -39,9 +40,11 @@
 	<IcFeeDisplay {networkId} />
 
 	<div class="flex justify-end gap-1">
-		<button type="button" class="secondary" on:click={() => dispatch('icClose')}>Cancel</button>
+		<button type="button" class="secondary" on:click={() => dispatch('icClose')}
+			>{$i18n.core.text.cancel}</button
+		>
 		<button class="primary" type="submit" disabled={invalid} class:opacity-10={invalid}>
-			Next
+			{$i18n.core.text.next}
 		</button>
 	</div>
 </form>
