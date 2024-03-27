@@ -9,6 +9,7 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { modalReceive } from '$lib/derived/modal.derived';
+	import {i18n} from "$lib/stores/i18n.store";
 
 	onMount(initMetamaskSupport);
 
@@ -34,7 +35,7 @@
 	on:click={async () => await openReceive()}
 >
 	<IconReceive size="28" />
-	<span>Receive</span></button
+	<span>{$i18n.receive.text.receive}</span></button
 >
 
 {#if $modalReceive}

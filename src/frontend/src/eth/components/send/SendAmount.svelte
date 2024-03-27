@@ -11,6 +11,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import {i18n} from "$lib/stores/i18n.store";
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
@@ -43,7 +44,7 @@
 			const total = userAmount.add(minGasFee($storeFeeData));
 
 			if (total.gt($sendBalance ?? BigNumber.from(0n))) {
-				insufficientFundsError = 'Insufficient funds for gas';
+				insufficientFundsError = $i18n.send.assertion.insufficient_funds_for_gas;
 				return;
 			}
 
@@ -53,7 +54,7 @@
 
 		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the user
 		if (userAmount.gt($sendBalance ?? BigNumber.from(0n))) {
-			insufficientFundsError = 'Insufficient funds for amount';
+			insufficientFundsError = $i18n.send.assertion.insufficient_funds_for_amount;
 			return;
 		}
 
@@ -61,7 +62,7 @@
 		const maxFee = maxGasFee($storeFeeData);
 		const ethBalance = $balancesStore?.[$sendTokenId]?.data ?? BigNumber.from(0n);
 		if (nonNullish(maxFee) && ethBalance.lt(maxFee)) {
-			insufficientFundsError = 'Insufficient Ethereum funds to cover the fees';
+			insufficientFundsError = $i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees;
 			return;
 		}
 
@@ -73,14 +74,14 @@
 	$: amount, $storeFeeData, debounceValidate();
 </script>
 
-<label for="amount" class="font-bold px-4.5">Amount:</label>
+<label for="amount" class="font-bold px-4.5">{$i18n.core.text.amount}:</label>
 <Input
 	name="amount"
 	inputType="currency"
 	required
 	bind:value={amount}
 	decimals={$sendTokenDecimals}
-	placeholder="Amount"
+	placeholder={$i18n.core.text.amount}
 />
 
 {#if insufficientFunds}

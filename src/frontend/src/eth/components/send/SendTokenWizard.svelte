@@ -27,6 +27,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
 	import { ethereumToken } from '$eth/derived/token.derived';
+	import {i18n} from "$lib/stores/i18n.store";
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -74,21 +75,21 @@
 	const send = async () => {
 		if (isNullishOrEmpty(destination)) {
 			toastsError({
-				msg: { text: `Destination address is invalid.` }
+				msg: { text: $i18n.send.assertion.destination_address_invalid }
 			});
 			return;
 		}
 
 		if (invalidAmount(amount) || isNullish(amount)) {
 			toastsError({
-				msg: { text: `Amount is invalid.` }
+				msg: { text: $i18n.send.assertion.amount_invalid }
 			});
 			return;
 		}
 
 		if (isNullish($feeStore)) {
 			toastsError({
-				msg: { text: `Gas fees are not defined.` }
+				msg: { text: $i18n.send.assertion.gas_fees_not_defined }
 			});
 			return;
 		}
@@ -110,7 +111,7 @@
 		// exceeds block gas limit
 		if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
 			toastsError({
-				msg: { text: `Max fee per gas or max priority fee per gas is undefined.` }
+				msg: { text: $i18n.send.assertion.max_gas_gee_per_gas_undefined }
 			});
 			return;
 		}
@@ -118,7 +119,7 @@
 		// Unexpected errors
 		if (isNullish($address)) {
 			toastsError({
-				msg: { text: 'Address is unknown.' }
+				msg: { text: $i18n.send.assertion.address_unknown }
 			});
 			return;
 		}
@@ -147,7 +148,7 @@
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: `Something went wrong while sending the transaction.` },
+				msg: { text: $i18n.send.error.unexpected },
 				err
 			});
 
@@ -189,9 +190,9 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<button type="button" class="secondary" on:click={back}>Back</button>
+					<button type="button" class="secondary" on:click={back}>{$i18n.core.text.back}</button>
 				{:else}
-					<button type="button" class="secondary" on:click={close}>Cancel</button>
+					<button type="button" class="secondary" on:click={close}>{$i18n.core.text.cancel}</button>
 				{/if}
 			</svelte:fragment>
 		</SendForm>
