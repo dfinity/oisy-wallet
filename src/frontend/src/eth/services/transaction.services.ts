@@ -2,11 +2,14 @@ import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { transactionsStore } from '$eth/stores/transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
+import { get } from 'svelte/store';
 import { reloadBalance } from './balance.services';
 
 export const processTransactionSent = async ({
@@ -60,9 +63,17 @@ const processPendingTransaction = async ({
 	const transaction = await getTransaction(hash);
 
 	if (isNullish(transaction)) {
+		const {
+			transaction: {
+				error: { failed_get_transaction }
+			}
+		} = get(i18n);
+
 		toastsError({
 			msg: {
-				text: `Failed to get the transaction from the provided (hash: ${hash}). Please reload the wallet dapp.`
+				text: replacePlaceholders(failed_get_transaction, {
+					$hash: hash
+				})
 			}
 		});
 		return;
@@ -99,9 +110,17 @@ const processMinedTransaction = async ({
 	const minedTransaction = await getTransaction(hash);
 
 	if (isNullish(minedTransaction)) {
+		const {
+			transaction: {
+				error: { failed_get_mined_transaction }
+			}
+		} = get(i18n);
+
 		toastsError({
 			msg: {
-				text: `Failed to get the mined transaction (hash: ${hash}). Please reload the wallet dapp.`
+				text: replacePlaceholders(failed_get_mined_transaction, {
+					$hash: hash
+				})
 			}
 		});
 		return;

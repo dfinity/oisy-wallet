@@ -11,7 +11,7 @@
 	class="no-underline inline-flex items-center gap-2 text-center px-6 py-2 font-bold text-xs md:text-base"
 >
 	<IconWarning inline />
-	<span class="pl-1">{$i18n.hero.use_with_caution}</span>
+	<span class="pl-1">{$i18n.hero.text.use_with_caution}</span>
 </a>
 
 <style lang="scss">

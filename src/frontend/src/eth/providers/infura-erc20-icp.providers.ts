@@ -60,7 +60,7 @@ export const infuraErc20IcpProviders = (networkId: NetworkId): InfuraErc20IcpPro
 
 	assertNonNullish(
 		provider,
-		replacePlaceholders(get(i18n).env.error.no_infura_erc20_icp_provider, {
+		replacePlaceholders(get(i18n).init.error.no_infura_erc20_icp_provider, {
 			$network: networkId.toString()
 		})
 	);

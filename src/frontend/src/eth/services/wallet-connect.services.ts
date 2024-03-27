@@ -11,6 +11,7 @@ import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api
 import { SendStep, SignStep } from '$lib/enums/steps';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { TokenStandard } from '$lib/types/token';
@@ -65,7 +66,7 @@ export const reject = (
 				busy.stop();
 			}
 		},
-		toastMsg: 'WalletConnect request rejected.'
+		toastMsg: get(i18n).wallet_connect.error.request_rejected
 	});
 
 export const send = ({
@@ -95,16 +96,27 @@ export const send = ({
 
 			const firstParam = request?.params.request.params?.[0];
 
+			const {
+				wallet_connect: {
+					error: {
+						unknown_parameter,
+						wallet_not_initialized,
+						from_address_not_wallet,
+						unknown_destination
+					}
+				}
+			} = get(i18n);
+
 			if (isNullish(firstParam)) {
 				toastsError({
-					msg: { text: `Unknown parameter.` }
+					msg: { text: unknown_parameter }
 				});
 				return { success: false };
 			}
 
 			if (isNullish(address)) {
 				toastsError({
-					msg: { text: `Unexpected error. Your wallet address is not initialized.` }
+					msg: { text: wallet_not_initialized }
 				});
 				return { success: false };
 			}
@@ -112,7 +124,7 @@ export const send = ({
 			if (firstParam.from?.toLowerCase() !== address.toLowerCase()) {
 				toastsError({
 					msg: {
-						text: `From address requested for the transaction is not the address of this wallet.`
+						text: from_address_not_wallet
 					}
 				});
 				return { success: false };
@@ -120,7 +132,7 @@ export const send = ({
 
 			if (isNullish(firstParam.to)) {
 				toastsError({
-					msg: { text: `Unknown destination address.` }
+					msg: { text: unknown_destination }
 				});
 				return { success: false };
 			}
@@ -135,9 +147,15 @@ export const send = ({
 				return { success: false };
 			}
 
+			const {
+				send: {
+					assertion: { gas_fees_not_defined, max_gas_gee_per_gas_undefined }
+				}
+			} = get(i18n);
+
 			if (isNullish(fee)) {
 				toastsError({
-					msg: { text: `Gas fees are not defined.` }
+					msg: { text: gas_fees_not_defined }
 				});
 				return { success: false };
 			}
@@ -146,7 +164,7 @@ export const send = ({
 
 			if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
 				toastsError({
-					msg: { text: `Max fee per gas or max priority fee per gas is undefined.` }
+					msg: { text: max_gas_gee_per_gas_undefined }
 				});
 				return { success: false };
 			}
@@ -184,7 +202,7 @@ export const send = ({
 				throw err;
 			}
 		},
-		toastMsg: 'WalletConnect eth_sendTransaction request executed.'
+		toastMsg: get(i18n).wallet_connect.info.eth_transaction_executed
 	});
 
 export const signMessage = ({
@@ -241,7 +259,7 @@ export const signMessage = ({
 				throw err;
 			}
 		},
-		toastMsg: `WalletConnect sign request executed.`
+		toastMsg: get(i18n).wallet_connect.info.sign_executed
 	});
 
 const execute = async ({
@@ -253,16 +271,22 @@ const execute = async ({
 	callback: (params: WalletConnectCallBackParams) => Promise<{ success: boolean; err?: unknown }>;
 	toastMsg: string;
 }): Promise<{ success: boolean; err?: unknown }> => {
+	const {
+		wallet_connect: {
+			error: { no_connection_opened, request_not_defined, unexpected_processing_request }
+		}
+	} = get(i18n);
+
 	if (isNullish(listener)) {
 		toastsError({
-			msg: { text: `Unexpected error: No connection opened.` }
+			msg: { text: no_connection_opened }
 		});
 		return { success: false };
 	}
 
 	if (isNullish(request)) {
 		toastsError({
-			msg: { text: `Unexpected error: Request is not defined therefore cannot be processed.` }
+			msg: { text: request_not_defined }
 		});
 		return { success: false };
 	}
@@ -281,7 +305,7 @@ const execute = async ({
 		});
 	} catch (err: unknown) {
 		toastsError({
-			msg: { text: `Unexpected error while processing the request with WalletConnect.` },
+			msg: { text: unexpected_processing_request },
 			err
 		});
 		return { success: false, err };

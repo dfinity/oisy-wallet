@@ -17,12 +17,14 @@ import { isErc20Icp } from '$eth/utils/token.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
+import { i18n } from '$lib/stores/i18n.store';
 import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+import { get } from 'svelte/store';
 import { processTransactionSent } from './transaction.services';
 
 const ethPrepareTransaction = async ({
@@ -69,7 +71,13 @@ const erc20PrepareTransaction = async ({
 	});
 
 	if (isNullish(data)) {
-		throw new Error('Erc20 transaction Data cannot be undefined or null.');
+		const {
+			send: {
+				error: { erc20_data_undefined }
+			}
+		} = get(i18n);
+
+		throw new Error(erc20_data_undefined);
 	}
 
 	const { address: contractAddress } = token as Erc20Token;
@@ -109,7 +117,13 @@ const ethContractPrepareTransaction = async ({
 	});
 
 	if (isNullish(data)) {
-		throw new Error('Erc20 transaction Data cannot be undefined or null.');
+		const {
+			send: {
+				error: { data_undefined }
+			}
+		} = get(i18n);
+
+		throw new Error(data_undefined);
 	}
 
 	const { address: contractAddress } = contract;
@@ -155,7 +169,13 @@ export const send = async ({
 	const nonce = await getTransactionCount(from);
 
 	const principalEthAddress = (): string => {
-		assertNonNullish(identity, 'No identity provided to calculate the fee for its principal.');
+		const {
+			send: {
+				error: { no_identity_calculate_fee }
+			}
+		} = get(i18n);
+
+		assertNonNullish(identity, no_identity_calculate_fee);
 		return encodePrincipalToEthAddress(identity.getPrincipal());
 	};
 

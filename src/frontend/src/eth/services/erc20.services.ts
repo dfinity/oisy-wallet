@@ -11,6 +11,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
 import { authStore } from '$lib/stores/auth.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -62,8 +63,14 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 	} catch (err: unknown) {
 		erc20TokensStore.reset();
 
+		const {
+			init: {
+				error: { erc20_contracts }
+			}
+		} = get(i18n);
+
 		toastsError({
-			msg: { text: 'Error while loading the ERC20 contracts.' },
+			msg: { text: erc20_contracts },
 			err
 		});
 

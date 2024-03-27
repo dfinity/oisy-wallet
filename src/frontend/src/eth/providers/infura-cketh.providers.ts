@@ -58,7 +58,7 @@ export const infuraCkETHProviders = (networkId: NetworkId): InfuraCkETHProvider 
 
 	assertNonNullish(
 		provider,
-		replacePlaceholders(get(i18n).env.error.no_infura_cketh_provider, {
+		replacePlaceholders(get(i18n).init.error.no_infura_cketh_provider, {
 			$network: networkId.toString()
 		})
 	);

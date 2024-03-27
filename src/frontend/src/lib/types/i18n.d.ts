@@ -51,15 +51,31 @@ interface I18nWallet {
 }
 
 interface I18nInit {
-	initializing_wallet: string;
-	lets_go: string;
-	securing_session: string;
-	retrieving_eth_key: string;
+	text: {
+		initializing_wallet: string;
+		lets_go: string;
+		securing_session: string;
+		retrieving_eth_key: string;
+	};
+	error: {
+		no_alchemy_config: string;
+		no_alchemy_provider: string;
+		no_alchemy_erc20_provider: string;
+		no_etherscan_provider: string;
+		no_etherscan_rest_api: string;
+		no_infura_provider: string;
+		no_infura_cketh_provider: string;
+		no_infura_erc20_provider: string;
+		no_infura_erc20_icp_provider: string;
+		eth_address_unknown: string;
+		loading_balance: string;
+		loading_balance_symbol: string;
+		erc20_contracts: string;
+	};
 }
 
 interface I18nHero {
-	use_with_caution: string;
-	learn_more_about_erc20_icp: string;
+	text: { use_with_caution: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -165,7 +181,16 @@ interface I18nSend {
 		max_gas_gee_per_gas_undefined: string;
 		address_unknown: string;
 	};
-	error: { unexpected: string };
+	error: {
+		unexpected: string;
+		destination_address_unknown: string;
+		metamask_connected: string;
+		metamask_no_accounts: string;
+		metamask_switch_network: string;
+		erc20_data_undefined: string;
+		data_undefined: string;
+		no_identity_calculate_fee: string;
+	};
 }
 
 interface I18nConvert {
@@ -248,7 +273,13 @@ interface I18nWallet_connect {
 		unknown: string;
 		unknown_description: string;
 	};
-	info: { disconnected: string; session_ended: string; connected: string };
+	info: {
+		disconnected: string;
+		session_ended: string;
+		connected: string;
+		eth_transaction_executed: string;
+		sign_executed: string;
+	};
 	error: {
 		qr_code_read: string;
 		missing_uri: string;
@@ -261,6 +292,13 @@ interface I18nWallet_connect {
 		no_connection_opened: string;
 		no_session_approval: string;
 		unexpected: string;
+		request_rejected: string;
+		unknown_parameter: string;
+		wallet_not_initialized: string;
+		from_address_not_wallet: string;
+		unknown_destination: string;
+		request_not_defined: string;
+		unexpected_processing_request: string;
 	};
 }
 
@@ -286,24 +324,19 @@ interface I18nTransaction {
 		open_from_block_explorer: string;
 		open_to_block_explorer: string;
 	};
-	error: { get_block_number: string };
+	error: {
+		get_block_number: string;
+		failed_get_transaction: string;
+		failed_get_mined_transaction: string;
+	};
 }
 
 interface I18nTransactions {
 	text: { title: string; no_transactions: string };
-}
-
-interface I18nEnv {
 	error: {
-		no_alchemy_config: string;
-		no_alchemy_provider: string;
-		no_alchemy_erc20_provider: string;
-		no_etherscan_provider: string;
-		no_etherscan_rest_api: string;
-		no_infura_provider: string;
-		no_infura_cketh_provider: string;
-		no_infura_erc20_provider: string;
-		no_infura_erc20_icp_provider: string;
+		loading_transactions: string;
+		loading_transactions_symbol: string;
+		no_token_loading_transaction: string;
 	};
 }
 
@@ -326,5 +359,4 @@ interface I18n {
 	wallet_connect: I18nWallet_connect;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
-	env: I18nEnv;
 }
