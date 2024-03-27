@@ -8,6 +8,7 @@
 	import { setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
 	 * Send modal context store
@@ -19,7 +20,7 @@
 
 <ConvertETH convertTokenId={$ethereumTokenId}>
 	<IconBurn size="28" />
-	<span> Convert to ckETH </span>
+	<span> {$i18n.convert.text.convert_to_cketh} </span>
 </ConvertETH>
 
 {#if $modalConvertETHToCkETH}

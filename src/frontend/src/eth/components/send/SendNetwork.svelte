@@ -8,6 +8,7 @@
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
@@ -65,16 +66,16 @@
 		})();
 </script>
 
-<label for="network" class="font-bold px-4.5">Network:</label>
+<label for="network" class="font-bold px-4.5">{$i18n.send.text.network}:</label>
 
 <div id="network" class="mb-4 mt-1 pt-0.5">
 	<Dropdown name="network" bind:selectedValue={networkName}>
 		<option disabled selected value={undefined} class="hidden"
-			><span class="description">Select network</span></option
+			><span class="description">{$i18n.send.placeholder.select_network}</span></option
 		>
-		<DropdownItem value={ETHEREUM_NETWORK.name}>Ethereum</DropdownItem>
+		<DropdownItem value={ETHEREUM_NETWORK.name}>{ETHEREUM_NETWORK.name}</DropdownItem>
 
-		<DropdownItem value={ICP_NETWORK.name}>Convert to native ICP</DropdownItem>
+		<DropdownItem value={ICP_NETWORK.name}>{$i18n.send.text.convert_to_native_icp}</DropdownItem>
 	</Dropdown>
 </div>
 
