@@ -3,18 +3,18 @@ import type { WizardSteps } from '@dfinity/gix-components';
 
 const [send, ...rest] = SEND_WIZARD_STEPS;
 
-export const HOW_TO_CONVERT_WIZARD_STEPS: WizardSteps = [
+export const HOW_TO_CONVERT_WIZARD_STEPS = (i18n: I18n): WizardSteps => [
 	{
 		name: 'Info',
-		title: 'How to convert ETH to ckETH'
+		title: i18n.info.ethereum.how_to
 	},
 	{
 		name: 'ETH QR code',
-		title: 'Receive address'
+		title: i18n.receive.text.address
 	},
 	{
 		...send,
-		title: 'Convert to ckETH'
+		title: i18n.convert.text.convert_to_cketh
 	},
 	...rest
 ];

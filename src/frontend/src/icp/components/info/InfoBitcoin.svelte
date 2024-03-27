@@ -23,6 +23,6 @@
 	</p>
 
 	<button class="primary mt-6" disabled={$isBusy} class:opacity-50={$isBusy} on:click={openReceive}>
-		{$i18n.info.bitcoin.action}</button
+		{$i18n.info.bitcoin.receive}</button
 	>
 </div>

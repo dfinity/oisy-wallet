@@ -8,6 +8,7 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import type { Network } from '$lib/types/network';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
 	 * Props
@@ -35,7 +36,10 @@
 	$: steps = [
 		{
 			...firstStep,
-			title: sendPurpose === 'convert-eth-to-cketh' ? 'Convert to ckETH' : 'Send'
+			title:
+				sendPurpose === 'convert-eth-to-cketh'
+					? $i18n.convert.text.convert_to_cketh
+					: $i18n.send.text.send
 		},
 		...otherSteps
 	];

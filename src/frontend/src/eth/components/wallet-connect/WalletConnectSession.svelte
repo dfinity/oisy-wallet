@@ -23,17 +23,18 @@
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { loading } from '$lib/stores/loader.store';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let listener: WalletConnectListener | undefined | null;
 
 	const STEP_CONNECT: WizardStep = {
 		name: 'Connect',
-		title: 'WalletConnect'
+		title: $i18n.wallet_connect.text.name
 	};
 
 	const STEP_REVIEW: WizardStep = {
 		name: 'Review',
-		title: 'Session Proposal'
+		title: $i18n.wallet_connect.text.session_proposal
 	};
 
 	let steps: WizardSteps = [STEP_CONNECT, STEP_REVIEW];

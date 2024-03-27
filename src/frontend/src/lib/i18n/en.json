@@ -79,12 +79,22 @@
 		"show_testnets": "Show test networks",
 		"more": "More networks coming soon..."
 	},
+	"receive": {
+		"text": {
+			"receive": "Receive",
+			"address": "Receive address"
+		}
+	},
 	"send": {
 		"text": {
+			"send": "Send",
 			"amount": "Amount",
 			"destination": "Destination",
 			"source": "Source",
-			"balance": "Balance"
+			"balance": "Balance",
+			"review": "Review",
+			"sending": "Sending...",
+			"signing": "Signing..."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address"
@@ -94,6 +104,7 @@
 		"text": {
 			"convert_to_btc": "Convert to BTC",
 			"convert_to_eth": "Convert to ETH",
+			"convert_to_cketh": "Convert to ckETH",
 			"convert_eth_to_cketh": "Convert ETH to ckETH",
 			"how_to_convert_eth_to_cketh": "Here is how to can convert ETH to ckETH on $oisy_name",
 			"send_eth": "Send ETH to your $oisy_name address",
@@ -140,12 +151,18 @@
 			"title": "Receive from Bitcoin Network (BTC)",
 			"description": "ckBTC is a multi-chain bitcoin twin on the Internet Computer created by canister smart contract that directly hold native bitcoin.",
 			"note": "Note that incoming Bitcoin transactions require 12 confirmations. Check status on a block explorer.",
-			"action": "Receive from BTC network"
+			"receive": "Receive from BTC network"
 		},
 		"ethereum": {
 			"title": "Receive ETH from Ethereum Network and convert to ckETH",
 			"description": "With a few steps, transfer and convert your Ethereum (ETH) to ckETH directly within the $oisy_name.",
-			"action": "How to convert ETH to ckETH"
+			"how_to": "How to convert ETH to ckETH"
+		}
+	},
+	"wallet_connect": {
+		"text": {
+			"name": "WalletConnect",
+			"session_proposal": "Session Proposal"
 		}
 	}
 }

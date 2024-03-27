@@ -9,6 +9,7 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
 	 * Props
@@ -27,7 +28,7 @@
 	 */
 
 	let steps: WizardSteps;
-	$: steps = HOW_TO_CONVERT_WIZARD_STEPS;
+	$: steps = HOW_TO_CONVERT_WIZARD_STEPS($i18n);
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
