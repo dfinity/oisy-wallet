@@ -13,13 +13,13 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<label for="destination" class="font-bold px-4.5">{$i18n.token.text.contract_address}:</label>
+	<label for="destination" class="font-bold px-4.5">{$i18n.tokens.text.contract_address}:</label>
 	<Input
 		name="contractAddress"
 		inputType="text"
 		required
 		bind:value={contractAddress}
-		placeholder={$i18n.token.placeholder.enter_contract_address}
+		placeholder={$i18n.tokens.placeholder.enter_contract_address}
 		spellcheck={false}
 	/>
 

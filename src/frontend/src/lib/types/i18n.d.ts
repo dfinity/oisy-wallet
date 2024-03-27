@@ -35,10 +35,8 @@ interface I18nSign_in {
 }
 
 interface I18nWallet {
-	address: string;
-	address_copied: string;
-	icp_deposits: string;
-	alt_open_etherscan: string;
+	text: { address: string; wallet_address: string; address_copied: string; icp_deposits: string };
+	alt: { open_etherscan: string };
 }
 
 interface I18nInit {
@@ -80,8 +78,19 @@ interface I18nSend {
 	assertion: { invalid_destination_address: string };
 }
 
-interface I18nToken {
-	text: { add_new: string; contract_address: string; add: string; review: string; saving: string };
+interface I18nConvert {
+	error: { loading_cketh_helper: string };
+}
+
+interface I18nTokens {
+	text: {
+		title: string;
+		add_new: string;
+		contract_address: string;
+		add: string;
+		review: string;
+		saving: string;
+	};
 	placeholder: { enter_contract_address: string };
 	warning: { trust_token: string };
 	error: {
@@ -104,5 +113,6 @@ interface I18n {
 	settings: I18nSettings;
 	networks: I18nNetworks;
 	send: I18nSend;
-	token: I18nToken;
+	convert: I18nConvert;
+	tokens: I18nTokens;
 }

@@ -12,6 +12,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { TokenId } from '$lib/types/token';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let convertTokenId: TokenId;
 
@@ -32,7 +33,7 @@
 		if (isNullish(minterCanisterId)) {
 			toastsError({
 				msg: {
-					text: 'Error while loading the ckETH helper contract address. No minter canister ID has been initialized.'
+					text: $i18n.convert.error.loading_cketh_helper
 				}
 			});
 			return;

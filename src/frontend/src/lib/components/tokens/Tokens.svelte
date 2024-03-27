@@ -11,9 +11,10 @@
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 
 	import { networkEthereum, networkId, networkTokens } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<h2 class="text-base mb-6 pb-1">Tokens</h2>
+<h2 class="text-base mb-6 pb-1">{$i18n.tokens.text.title}</h2>
 
 <TokensSkeletons>
 	{#each $networkTokens as token (token.id)}
