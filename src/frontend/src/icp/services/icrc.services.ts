@@ -4,9 +4,11 @@ import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcCkInterface } from '$icp/types/ic';
 import { mapIcrcToken, type IcrcLoadData } from '$icp/utils/icrc.utils';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { AnonymousIdentity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async (): Promise<void> => {
 	const loadKnownIcrc = (data: IcCkInterface): Promise<void> =>
@@ -17,7 +19,7 @@ export const loadIcrcTokens = async (): Promise<void> => {
 				icrcTokensStore.reset(data.ledgerCanisterId);
 
 				toastsError({
-					msg: { text: 'Error while loading the ICRC canisters.' },
+					msg: { text: get(i18n).init.error.icrc_canisters },
 					err
 				});
 			},

@@ -57,6 +57,7 @@ interface I18nInit {
 		securing_session: string;
 		retrieving_eth_key: string;
 	};
+	info: { hold_loading: string };
 	error: {
 		no_alchemy_config: string;
 		no_alchemy_provider: string;
@@ -71,6 +72,17 @@ interface I18nInit {
 		loading_balance: string;
 		loading_balance_symbol: string;
 		erc20_contracts: string;
+		minter_ckbtc_btc: string;
+		minter_cketh_eth: string;
+		minter_btc: string;
+		minter_ckbtc_info: string;
+		minter_cketh_info: string;
+		minter_ckbtc_loading_info: string;
+		minter_cketh_loading_info: string;
+		btc_fees_estimation: string;
+		btc_withdrawal_statuses: string;
+		transaction_price: string;
+		icrc_canisters: string;
 	};
 }
 
@@ -190,6 +202,7 @@ interface I18nSend {
 		erc20_data_undefined: string;
 		data_undefined: string;
 		no_identity_calculate_fee: string;
+		invalid_address: string;
 	};
 }
 
@@ -337,6 +350,7 @@ interface I18nTransactions {
 		loading_transactions: string;
 		loading_transactions_symbol: string;
 		no_token_loading_transaction: string;
+		uncertified_transactions_removed: string;
 	};
 }
 
