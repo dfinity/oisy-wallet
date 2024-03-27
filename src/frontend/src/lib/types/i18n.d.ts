@@ -4,7 +4,6 @@
 
 interface I18nCore {
 	text: {
-		test_banner: string;
 		cancel: string;
 		next: string;
 		save: string;
@@ -17,6 +16,7 @@ interface I18nCore {
 		decimals: string;
 		amount: string;
 	};
+	info: { test_banner: string };
 	alt: { logo: string };
 }
 
