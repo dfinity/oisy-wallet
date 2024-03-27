@@ -5,7 +5,6 @@
 interface I18nCore {
 	text: {
 		test_banner: string;
-		logout: string;
 		cancel: string;
 		next: string;
 		save: string;
@@ -32,10 +31,9 @@ interface I18nNavigation {
 	alt: { manage_internet_identity: string; more_settings: string; menu: string };
 }
 
-interface I18nSign_in {
-	title: string;
-	description: string;
-	connect_with: string;
+interface I18nAuth {
+	text: { title: string; description: string; connect_with: string; logout: string };
+	error: { no_internet_identity: string };
 }
 
 interface I18nWallet {
@@ -358,7 +356,7 @@ interface I18n {
 	lang: Languages;
 	core: I18nCore;
 	navigation: I18nNavigation;
-	sign_in: I18nSign_in;
+	auth: I18nAuth;
 	wallet: I18nWallet;
 	init: I18nInit;
 	hero: I18nHero;

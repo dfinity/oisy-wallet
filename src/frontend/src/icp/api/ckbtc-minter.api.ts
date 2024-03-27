@@ -1,5 +1,6 @@
 import type { MinterInfoParams } from '$icp/types/ck';
 import { getAgent } from '$lib/actors/agents.ic';
+import { i18n } from '$lib/stores/i18n.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
@@ -15,6 +16,7 @@ import type {
 import { CkBTCMinterCanister } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const retrieveBtc = async ({
 	identity,
@@ -26,7 +28,7 @@ export const retrieveBtc = async ({
 	amount: bigint;
 	address: string;
 }): Promise<RetrieveBtcOk> => {
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 	const { retrieveBtcWithApproval } = await minterCanister({ identity, minterCanisterId });
 
@@ -40,7 +42,7 @@ export const updateBalance = async ({
 	identity: OptionIdentity;
 	minterCanisterId: CanisterIdText;
 }): Promise<UpdateBalanceOk> => {
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 	const { updateBalance } = await minterCanister({ identity, minterCanisterId });
 
@@ -52,7 +54,7 @@ export const minterInfo = async ({
 	minterCanisterId,
 	...rest
 }: MinterInfoParams): Promise<MinterInfo> => {
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 	const { getMinterInfo } = await minterCanister({ identity, minterCanisterId });
 
@@ -66,7 +68,7 @@ export const getBtcAddress = async ({
 	identity: OptionIdentity;
 	minterCanisterId: CanisterIdText;
 }): Promise<string> => {
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 	const { getBtcAddress } = await minterCanister({ identity, minterCanisterId });
 
@@ -81,7 +83,7 @@ export const estimateFee = async ({
 	identity: OptionIdentity;
 	minterCanisterId: CanisterIdText;
 } & EstimateWithdrawalFeeParams): Promise<EstimateWithdrawalFee> => {
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 	const { estimateWithdrawalFee } = await minterCanister({ identity, minterCanisterId });
 
@@ -96,7 +98,7 @@ export const withdrawalStatuses = async ({
 	identity: OptionIdentity;
 	minterCanisterId: CanisterIdText;
 } & Required<QueryParams>): Promise<RetrieveBtcStatusV2WithId[]> => {
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 	const { retrieveBtcStatusV2ByAccount } = await minterCanister({ identity, minterCanisterId });
 
@@ -110,7 +112,7 @@ export const getKnownUtxos = async ({
 	identity: OptionIdentity;
 	minterCanisterId: CanisterIdText;
 }): Promise<Utxo[]> => {
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 	const { getKnownUtxos } = await minterCanister({ identity, minterCanisterId });
 

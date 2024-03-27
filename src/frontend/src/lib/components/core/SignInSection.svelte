@@ -10,15 +10,15 @@
 	<OisyWalletLogo size="66" />
 
 	<h1 class="text-center py-8 xs:px-6 sm:px-8 mb-0.5" style="max-width: 600px">
-		{$i18n.sign_in.title}
+		{$i18n.auth.text.title}
 	</h1>
 
 	<p class="text-center pb-8 xs:px-6 sm:px-8 mb-0.5" style="max-width: 600px">
-		{replaceOisyPlaceholders($i18n.sign_in.description)}
+		{replaceOisyPlaceholders($i18n.auth.text.description)}
 	</p>
 
 	<ButtonIC on:click={async () => await signIn({})}>
-		<svelte:fragment slot="action">{$i18n.sign_in.connect_with}</svelte:fragment>
+		<svelte:fragment slot="action">{$i18n.auth.text.connect_with}</svelte:fragment>
 		Internet Identity
 	</ButtonIC>
 </section>
