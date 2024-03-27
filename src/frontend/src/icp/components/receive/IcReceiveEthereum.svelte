@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { blur } from 'svelte/transition';
 	import type { SyncState } from '$lib/types/sync';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let ckEthPendingTransactionsSyncState: SyncState | undefined = undefined;
 	const onSyncPendingState = ({ detail: state }: CustomEvent<SyncState>) =>
@@ -18,6 +19,6 @@
 
 {#if ckEthPendingTransactionsSyncState === 'in_progress' || ckEthMinterInfoSyncState === 'in_progress'}
 	<div class="text-misty-rose animate-pulse">
-		<span transition:blur>Checking ETH status...</span>
+		<span transition:blur>{$i18n.receive.ethereum.text.checking_status}</span>
 	</div>
 {/if}
