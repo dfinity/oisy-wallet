@@ -12,7 +12,8 @@
 			"refresh": "Refresh",
 			"name": "Name",
 			"symbol": "Symbol",
-			"decimals": "Decimals"
+			"decimals": "Decimals",
+			"amount": "Amount"
 		},
 		"alt": {
 			"logo": "$name logo"
@@ -139,7 +140,6 @@
 	"send": {
 		"text": {
 			"send": "Send",
-			"amount": "Amount",
 			"destination": "Destination",
 			"source": "Source",
 			"balance": "Balance",
@@ -239,6 +239,24 @@
 		"text": {
 			"name": "WalletConnect",
 			"session_proposal": "Session Proposal"
+		}
+	},
+	"transaction": {
+		"text": {
+			"details": "Transaction details",
+			"id": "Transaction ID",
+			"id_copied": "Transaction ID copied to clipboard.",
+			"timestamp": "Timestamp",
+			"type": "Type",
+			"from": "From",
+			"from_copied": "From address copied to clipboard.",
+			"to": "To",
+			"to_copied": "To address copied to clipboard."
+		},
+		"alt": {
+			"open_block_explorer": "Open this transaction on a block explorer",
+			"open_from_block_explorer": "Open the 'From' address on a block explorer",
+			"open_to_block_explorer": "Open the 'To' address on a block explorer"
 		}
 	}
 }
