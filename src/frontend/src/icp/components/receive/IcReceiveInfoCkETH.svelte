@@ -5,7 +5,6 @@
 	import { createEventDispatcher } from 'svelte';
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
