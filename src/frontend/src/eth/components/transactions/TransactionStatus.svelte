@@ -7,6 +7,7 @@
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { networkId } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let blockNumber: number;
 
@@ -23,7 +24,7 @@
 			currentBlockNumber = undefined;
 
 			toastsError({
-				msg: { text: 'Cannot get block number.' },
+				msg: { text: $i18n.transaction.error.get_block_number },
 				err
 			});
 		}
@@ -77,7 +78,7 @@
 
 <p id="to" class="font-normal mb-4 px-4.5 break-all" style="text-transform: capitalize;">
 	{#if nonNullish(status)}
-		<span in:fade>{status}</span>
+		<span in:fade>{$i18n.transaction.status[status]}</span>
 	{:else}
 		<span style="visibility: hidden; opacity: 0">&nbsp;</span>
 	{/if}

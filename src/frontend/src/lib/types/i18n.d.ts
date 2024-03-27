@@ -224,6 +224,8 @@ interface I18nWallet_connect {
 interface I18nTransaction {
 	text: {
 		details: string;
+		hash: string;
+		hash_copied: string;
 		id: string;
 		id_copied: string;
 		timestamp: string;
@@ -232,12 +234,16 @@ interface I18nTransaction {
 		from_copied: string;
 		to: string;
 		to_copied: string;
+		block: string;
+		interacted_with: string;
 	};
+	status: { included: string; safe: string; finalised: string };
 	alt: {
 		open_block_explorer: string;
 		open_from_block_explorer: string;
 		open_to_block_explorer: string;
 	};
+	error: { get_block_number: string };
 }
 
 interface I18nTransactions {
