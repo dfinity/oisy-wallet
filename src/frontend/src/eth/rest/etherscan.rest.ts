@@ -2,11 +2,14 @@ import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { ETHERSCAN_API_URL_HOMESTEAD, ETHERSCAN_API_URL_SEPOLIA } from '$env/networks.eth.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
+import { i18n } from '$lib/stores/i18n.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Transaction } from '$lib/types/transaction';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
+import { get } from 'svelte/store';
 
 const API_KEY = import.meta.env.VITE_ETHERSCAN_API_KEY;
 
@@ -84,7 +87,12 @@ const providers: Record<NetworkId, EtherscanRest> = {
 export const etherscanRests = (networkId: NetworkId): EtherscanRest => {
 	const provider = providers[networkId];
 
-	assertNonNullish(provider, `No Etherscan Rest API for network ${networkId.toString()}`);
+	assertNonNullish(
+		provider,
+		replacePlaceholders(get(i18n).env.error.no_etherscan_rest_api, {
+			$network: networkId.toString()
+		})
+	);
 
 	return provider;
 };
