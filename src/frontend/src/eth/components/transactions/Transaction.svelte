@@ -12,6 +12,7 @@
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let transaction: Transaction;
 
@@ -40,7 +41,7 @@
 
 <button on:click={() => modalStore.openTransaction(transaction)} class="contents">
 	<Card {pending}>
-		{`${type === 'send' ? 'Send' : 'Receive'}`}
+		{`${type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}`}
 
 		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-10' : ''} />
 
