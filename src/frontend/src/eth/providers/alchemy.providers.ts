@@ -29,7 +29,7 @@ const alchemyConfig = (networkId: NetworkId): AlchemySettings => {
 
 	assertNonNullish(
 		provider,
-		replacePlaceholders(get(i18n).env.error.no_alchemy_config, {
+		replacePlaceholders(get(i18n).init.error.no_alchemy_config, {
 			$network: networkId.toString()
 		})
 	);
@@ -119,7 +119,7 @@ export const alchemyProviders = (networkId: NetworkId): AlchemyProvider => {
 
 	assertNonNullish(
 		provider,
-		replacePlaceholders(get(i18n).env.error.no_alchemy_provider, {
+		replacePlaceholders(get(i18n).init.error.no_alchemy_provider, {
 			$network: networkId.toString()
 		})
 	);

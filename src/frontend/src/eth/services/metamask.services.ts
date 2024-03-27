@@ -6,10 +6,13 @@ import {
 } from '$eth/providers/metamask.providers';
 import { metamaskStore } from '$eth/stores/metamask.store';
 import type { EthereumNetwork } from '$eth/types/network';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import detectEthereumProvider from '@metamask/detect-provider';
+import { get } from 'svelte/store';
 
 export const initMetamaskSupport = async () => {
 	const provider = await detectEthereumProvider({
@@ -29,9 +32,20 @@ export const openMetamaskTransaction = async ({
 	success: 'ok' | 'error';
 	err?: unknown;
 }> => {
+	const {
+		send: {
+			error: {
+				destination_address_unknown,
+				metamask_connected,
+				metamask_no_accounts,
+				metamask_switch_network
+			}
+		}
+	} = get(i18n);
+
 	if (isNullish(address)) {
 		toastsError({
-			msg: { text: 'ETH destination address is unknown.' }
+			msg: { text: destination_address_unknown }
 		});
 		return { success: 'error' };
 	}
@@ -42,7 +56,7 @@ export const openMetamaskTransaction = async ({
 		accounts = await metamaskAccounts();
 	} catch (err: unknown) {
 		toastsError({
-			msg: { text: 'Cannot get your accounts. Is your Metamask open and already connected?' }
+			msg: { text: metamask_connected }
 		});
 
 		return { success: 'error', err };
@@ -52,7 +66,7 @@ export const openMetamaskTransaction = async ({
 
 	if (isNullish(from)) {
 		toastsError({
-			msg: { text: 'No Metamask accounts found.' }
+			msg: { text: metamask_no_accounts }
 		});
 
 		return { success: 'error' };
@@ -63,7 +77,10 @@ export const openMetamaskTransaction = async ({
 	} catch (err: unknown) {
 		toastsError({
 			msg: {
-				text: `Cannot request Metamask to switch to chain ID ${chainId}. Is your Metamask using ${networkName}?`
+				text: replacePlaceholders(metamask_switch_network, {
+					$chain_id: `${chainId}`,
+					$network_name: networkName
+				})
 			}
 		});
 

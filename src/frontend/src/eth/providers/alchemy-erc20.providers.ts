@@ -67,7 +67,7 @@ export const alchemyErc20Providers = (networkId: NetworkId): AlchemyErc20Provide
 
 	assertNonNullish(
 		provider,
-		replacePlaceholders(get(i18n).env.error.no_alchemy_erc20_provider, {
+		replacePlaceholders(get(i18n).init.error.no_alchemy_erc20_provider, {
 			$network: networkId.toString()
 		})
 	);

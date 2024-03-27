@@ -89,7 +89,7 @@ export const etherscanRests = (networkId: NetworkId): EtherscanRest => {
 
 	assertNonNullish(
 		provider,
-		replacePlaceholders(get(i18n).env.error.no_etherscan_rest_api, {
+		replacePlaceholders(get(i18n).init.error.no_etherscan_rest_api, {
 			$network: networkId.toString()
 		})
 	);
