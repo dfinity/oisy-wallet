@@ -1,8 +1,8 @@
-import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
+import { sendWizardSteps } from '$eth/config/send.config';
 import type { WizardSteps } from '@dfinity/gix-components';
 
-export const HOW_TO_CONVERT_WIZARD_STEPS = (i18n: I18n): WizardSteps => {
-	const [send, ...rest] = SEND_WIZARD_STEPS(i18n);
+export const howToConvertWizardSteps = (i18n: I18n): WizardSteps => {
+	const [send, ...rest] = sendWizardSteps(i18n);
 
 	return [
 		{

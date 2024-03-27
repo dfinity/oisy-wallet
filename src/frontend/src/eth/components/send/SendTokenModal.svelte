@@ -4,7 +4,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
 	import { SendStep } from '$lib/enums/steps';
-	import { SEND_WIZARD_STEPS } from '$eth/constants/send.constants';
+	import { sendWizardSteps } from '$eth/config/send.config';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import type { Network } from '$lib/types/network';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
@@ -32,7 +32,7 @@
 
 	let firstStep: WizardStep;
 	let otherSteps: WizardStep[];
-	$: [firstStep, ...otherSteps] = SEND_WIZARD_STEPS($i18n);
+	$: [firstStep, ...otherSteps] = sendWizardSteps($i18n);
 
 	let steps: WizardSteps;
 	$: steps = [

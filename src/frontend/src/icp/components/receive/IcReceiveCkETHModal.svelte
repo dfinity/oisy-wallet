@@ -5,7 +5,7 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
-	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
+	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import IcReceiveInfoCkETH from '$icp/components/receive/IcReceiveInfoCkETH.svelte';
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -31,7 +31,7 @@
 	 */
 
 	let howToSteps: WizardSteps;
-	$: howToSteps = HOW_TO_CONVERT_WIZARD_STEPS($i18n);
+	$: howToSteps = howToConvertWizardSteps($i18n);
 
 	let steps: WizardSteps;
 	$: steps = [

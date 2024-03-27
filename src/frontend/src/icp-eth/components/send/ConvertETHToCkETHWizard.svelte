@@ -4,7 +4,7 @@
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import type { Network } from '$lib/types/network';
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
-	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
+	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import { ckETHTwinTokenNetwork } from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -15,7 +15,7 @@
 	export let currentStep: WizardStep | undefined;
 
 	let steps: WizardSteps;
-	$: steps = HOW_TO_CONVERT_WIZARD_STEPS($i18n);
+	$: steps = howToConvertWizardSteps($i18n);
 </script>
 
 <SendTokenWizard
