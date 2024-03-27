@@ -132,8 +132,19 @@ interface I18nSend {
 		review: string;
 		sending: string;
 		signing: string;
+		network: string;
+		source_network: string;
+		destination_network: string;
 	};
-	assertion: { invalid_destination_address: string };
+	info: { ckbtc_certified: string; cketh_certified: string };
+	assertion: {
+		invalid_destination_address: string;
+		insufficient_funds: string;
+		unknown_minimum_ckbtc_amount: string;
+		unknown_minimum_cketh_amount: string;
+		minimum_ckbtc_amount: string;
+		minimum_cketh_amount: string;
+	};
 }
 
 interface I18nConvert {

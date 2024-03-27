@@ -145,10 +145,22 @@
 			"balance": "Balance",
 			"review": "Review",
 			"sending": "Sending...",
-			"signing": "Signing..."
+			"signing": "Signing...",
+			"network": "Network",
+			"source_network": "Source network",
+			"destination_network": "Destination network"
+		},
+		"info": {
+			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
+			"cketh_certified": "Please wait until the ckETH parameters have been certified."
 		},
 		"assertion": {
-			"invalid_destination_address": "Invalid destination address"
+			"invalid_destination_address": "Invalid destination address",
+			"insufficient_funds": "Insufficient funds.",
+			"unknown_minimum_ckbtc_amount": "The minimum amount of ckBTC required for converting to BTC is unknown.",
+			"unknown_minimum_cketh_amount": "The minimum amount of ckETH required for converting to ETH is unknown.",
+			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
+			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol."
 		}
 	},
 	"convert": {

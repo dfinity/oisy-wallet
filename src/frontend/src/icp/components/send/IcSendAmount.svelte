@@ -16,6 +16,7 @@
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -44,7 +45,8 @@
 			amountError = assertCkBTCUserInputAmount({
 				amount: value,
 				minterInfo: $ckBtcMinterInfoStore?.[$tokenId],
-				tokenDecimals: $tokenDecimals
+				tokenDecimals: $tokenDecimals,
+				i18n: $i18n
 			});
 
 			if (nonNullish(amountError)) {
@@ -57,7 +59,8 @@
 				amount: value,
 				tokenDecimals: $tokenDecimals,
 				tokenSymbol: $tokenSymbol,
-				minterInfo: $ckEthMinterInfoStore?.[$tokenId]
+				minterInfo: $ckEthMinterInfoStore?.[$tokenId],
+				i18n: $i18n
 			});
 
 			if (nonNullish(amountError)) {
@@ -68,7 +71,7 @@
 		const total = value.add(fee);
 
 		if (total.gt($balance ?? BigNumber.from(0n))) {
-			amountError = new IcAmountAssertionError('Insufficient funds.');
+			amountError = new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			return;
 		}
 
@@ -80,14 +83,14 @@
 	$: amount, fee, $ckBtcMinterInfoStore, $ckEthMinterInfoStore, debounceValidate();
 </script>
 
-<label for="amount" class="font-bold px-4.5">Amount:</label>
+<label for="amount" class="font-bold px-4.5">{$i18n.send.text.amount}:</label>
 <Input
 	name="amount"
 	inputType="currency"
 	required
 	bind:value={amount}
 	decimals={$tokenDecimals}
-	placeholder="Amount"
+	placeholder={$i18n.send.text.amount}
 	spellcheck={false}
 />
 
