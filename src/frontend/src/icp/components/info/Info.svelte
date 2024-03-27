@@ -5,12 +5,20 @@
 	import InfoBox from '$icp/components/info/InfoBox.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import InfoEthereum from '$icp/components/info/InfoEthereum.svelte';
+	import { token } from '$lib/derived/token.derived';
+	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
+	import type { IcCkToken } from '$icp/types/ic';
+
+	let mainnet = false;
+	$: mainnet =
+		isNetworkIdBTCMainnet(($token as IcCkToken).twinToken?.network.id) ||
+		isNetworkIdETHMainnet(($token as IcCkToken).twinToken?.network.id);
 
 	let ckBTC = false;
-	$: ckBTC = $tokenCkBtcLedger;
+	$: ckBTC = mainnet && $tokenCkBtcLedger;
 
 	let ckETH = false;
-	$: ckETH = $tokenCkEthLedger;
+	$: ckETH = mainnet && $tokenCkEthLedger;
 
 	let key: HideInfoKey | undefined = undefined;
 	$: key = ckBTC ? 'oisy_ic_hide_bitcoin_info' : ckETH ? 'oisy_ic_hide_ethereum_info' : undefined;
