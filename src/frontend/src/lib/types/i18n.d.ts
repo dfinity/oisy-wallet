@@ -130,11 +130,19 @@ interface I18nSend {
 		source: string;
 		balance: string;
 		review: string;
+		approving: string;
+		refreshing_ui: string;
 		sending: string;
 		signing: string;
 		network: string;
 		source_network: string;
 		destination_network: string;
+		initializing_transaction: string;
+	};
+	placeholder: {
+		enter_eth_address: string;
+		enter_recipient_address: string;
+		enter_wallet_address: string;
 	};
 	info: { ckbtc_certified: string; cketh_certified: string };
 	assertion: {
@@ -144,7 +152,10 @@ interface I18nSend {
 		unknown_minimum_cketh_amount: string;
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
+		destination_address_invalid: string;
+		amount_invalid: string;
 	};
+	error: { unexpected: string };
 }
 
 interface I18nConvert {

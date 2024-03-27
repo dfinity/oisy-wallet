@@ -144,11 +144,19 @@
 			"source": "Source",
 			"balance": "Balance",
 			"review": "Review",
+			"approving": "Approving...",
+			"refreshing_ui": "Refreshing UI",
 			"sending": "Sending...",
 			"signing": "Signing...",
 			"network": "Network",
 			"source_network": "Source network",
-			"destination_network": "Destination network"
+			"destination_network": "Destination network",
+			"initializing_transaction": "Initializing transaction"
+		},
+		"placeholder": {
+			"enter_eth_address": "Enter public address (0x)",
+			"enter_recipient_address": "Enter recipient address",
+			"enter_wallet_address": "Enter wallet address"
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
@@ -160,7 +168,12 @@
 			"unknown_minimum_ckbtc_amount": "The minimum amount of ckBTC required for converting to BTC is unknown.",
 			"unknown_minimum_cketh_amount": "The minimum amount of ckETH required for converting to ETH is unknown.",
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
-			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol."
+			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
+			"destination_address_invalid": "Destination address is invalid.",
+			"amount_invalid": "Amount is invalid."
+		},
+		"error": {
+			"unexpected": "Something went wrong while sending the transaction."
 		}
 	},
 	"convert": {
