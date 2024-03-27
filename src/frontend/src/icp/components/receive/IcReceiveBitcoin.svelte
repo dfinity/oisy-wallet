@@ -14,6 +14,7 @@
 	import type { SyncState } from '$lib/types/sync';
 	import { blur } from 'svelte/transition';
 	import { debounce, nonNullish } from '@dfinity/utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let receiveProgressStep: string | undefined = undefined;
 
@@ -35,7 +36,7 @@
 		} catch (err: unknown) {
 			if (err instanceof MinterNoNewUtxosError) {
 				toastsShow({
-					text: 'No new confirmed BTC.',
+					text: $i18n.receive.bitcoin.info.no_new_btc,
 					level: 'info',
 					duration: 2000
 				});
@@ -46,7 +47,7 @@
 
 			if (err instanceof MinterAlreadyProcessingError) {
 				toastsShow({
-					text: 'Checking for incoming BTC already in progress.',
+					text: $i18n.receive.bitcoin.info.check_btc_progress,
 					level: 'info',
 					duration: 2000
 				});
@@ -56,7 +57,7 @@
 			}
 
 			toastsError({
-				msg: { text: `Something went wrong while checking for incoming BTC.` },
+				msg: { text: $i18n.receive.bitcoin.error.unexpected_btc },
 				err
 			});
 
@@ -75,19 +76,19 @@
 
 {#if nonNullish(ckBtcUpdateBalanceSyncState)}
 	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="text-misty-rose animate-pulse">
-			<span in:blur>Checking BTC status...</span>
+			<span in:blur>{$i18n.receive.bitcoin.text.checking_status}</span>
 		</div>{:else}
 		<button
 			in:blur
 			class="text text-blue border-0 flex gap-2"
-			on:click={async () => await receive()}><IconSync /> Refresh</button
+			on:click={async () => await receive()}><IconSync /> {$i18n.core.text.refresh}</button
 		>
 	{/if}
 {/if}
 
 {#if $modalReceiveBitcoin}
 	<Modal on:nnsClose={modalStore.close} disablePointerEvents={true}>
-		<svelte:fragment slot="title">Refresh BTC status</svelte:fragment>
+		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.refresh_status}</svelte:fragment>
 
 		<div>
 			<IcReceiveBitcoinProgress bind:receiveProgressStep />

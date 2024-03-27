@@ -9,6 +9,7 @@
 			"back": "Back",
 			"done": "Done",
 			"close": "Close",
+			"refresh": "Refresh",
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimals": "Decimals"
@@ -41,6 +42,8 @@
 			"address": "Address",
 			"wallet_address": "Wallet address",
 			"address_copied": "Address copied to clipboard.",
+			"wallet_address_copied": "Wallet address copied to clipboard.",
+			"display_wallet_address_qr": "Display wallet address as a QR code",
 			"icp_deposits": "Note: For ICP deposits, use the 'Receive' button in your ICP account to get the right address."
 		},
 		"alt": {
@@ -83,6 +86,54 @@
 		"text": {
 			"receive": "Receive",
 			"address": "Receive address"
+		},
+		"icp": {
+			"text": {
+				"account_id": "ICP Account ID",
+				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users or other apps that support this address format.",
+				"use_for_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
+				"display_account_id_qr": "Display ICP Account ID as a QR code",
+				"account_id_copied": "ICP Account ID copied to clipboard."
+			}
+		},
+		"ckbtc": {
+			"text": {
+				"use_address_from_to": "Use this address to transfer ckBTC to and from your wallet."
+			}
+		},
+		"cketh": {
+			"text": {
+				"use_address_from_to": "Use this address to transfer ckETH to and from your wallet."
+			}
+		},
+		"ethereum": {
+			"text": {
+				"checking_status": "Checking ETH status...",
+				"from_network": "Receive from Ethereum Network",
+				"eth_to_cketh_description": "Converting ETH into ckETH requires a call to a smart contract on Ethereum and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
+				"learn_how_to_convert": "Learn how to convert ETH to ckETH"
+			}
+		},
+		"bitcoin": {
+			"text": {
+				"checking_status": "Checking BTC status...",
+				"refresh_status": "Refresh BTC status",
+				"initializing": "Initializing...",
+				"checking_incoming": "Checking for incoming BTC...",
+				"refreshing_wallet": "Refreshing wallet...",
+				"bitcoin_address": "Bitcoin Address",
+				"display_bitcoin_address_qr": "Display Bitcoin Address as a QR code",
+				"bitcoin_address_copied": "Bitcoin Address copied to clipboard.",
+				"from_network": "Transfer Bitcoin on the BTC network to this address to receive ckBTC.",
+				"fee_applied": "Please note that an estimated inter-network fee of $fee BTC will be applied."
+			},
+			"info": {
+				"no_new_btc": "No new confirmed BTC.",
+				"check_btc_progress": "Checking for incoming BTC already in progress."
+			},
+			"error": {
+				"unexpected_btc": "Something went wrong while checking for incoming BTC."
+			}
 		}
 	},
 	"send": {

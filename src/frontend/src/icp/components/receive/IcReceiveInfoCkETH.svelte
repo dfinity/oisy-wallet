@@ -5,7 +5,8 @@
 	import { createEventDispatcher } from 'svelte';
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { OISY_NAME } from '$lib/constants/oisy.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -15,14 +16,12 @@
 <ReceiveAddress
 	labelRef="wallet-address"
 	address={$icrcAccountIdentifierText ?? ''}
-	qrCodeAriaLabel="Display wallet address as a QR code"
-	copyAriaLabel="Wallet address copied to clipboard."
+	qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
+	copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
-	<svelte:fragment slot="title">Wallet address</svelte:fragment>
-	<svelte:fragment slot="text"
-		>Use this address to transfer ckETH to and from your wallet.
-	</svelte:fragment>
+	<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
+	<svelte:fragment slot="text">{$i18n.receive.cketh.text.use_address_from_to}</svelte:fragment>
 </ReceiveAddress>
 
 <div class="mb-6">
@@ -30,17 +29,19 @@
 </div>
 
 <Value ref="ethereum-helper-contract" element="div">
-	<svelte:fragment slot="label">Receive from Ethereum Network</svelte:fragment>
+	<svelte:fragment slot="label">{$i18n.receive.ethereum.text.from_network}</svelte:fragment>
 
 	<p class="text-misty-rose break-normal py-2">
-		Converting ETH into ckETH requires a call to a smart contract on Ethereum and passing your IC
-		principal as argument – {OISY_NAME} simplifies this procedure by enabling you to perform the conversion
-		directly within the wallet.
+		{replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description)}
 	</p>
 </Value>
 
 <button class="secondary full center mt-6 mb-8" on:click={() => dispatch('icConvert')}>
-	<span class="text-dark-slate-blue font-bold">Learn how to convert ETH to ckETH</span>
+	<span class="text-dark-slate-blue font-bold"
+		>{$i18n.receive.ethereum.text.learn_how_to_convert}</span
+	>
 </button>
 
-<button class="primary full center text-center mb-6" on:click={modalStore.close}>Done</button>
+<button class="primary full center text-center mb-6" on:click={modalStore.close}
+	>{$i18n.core.text.done}</button
+>

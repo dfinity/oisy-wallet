@@ -3,17 +3,18 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import type { ComponentType } from 'svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let infoCmp: ComponentType;
 
 	const steps: WizardSteps = [
 		{
 			name: 'Receive',
-			title: 'Receive'
+			title: $i18n.receive.text.receive
 		},
 		{
 			name: 'QR code',
-			title: 'Receive address'
+			title: $i18n.receive.text.address
 		}
 	];
 
@@ -34,7 +35,7 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">Receive</svelte:fragment>
+	<svelte:fragment slot="title">{$i18n.receive.text.receive}</svelte:fragment>
 
 	{#if currentStep?.name === steps[1].name}
 		<ReceiveAddressQRCode on:icBack={displayAddresses} address={qrCodeAddress} />

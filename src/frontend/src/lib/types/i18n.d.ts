@@ -12,6 +12,7 @@ interface I18nCore {
 		back: string;
 		done: string;
 		close: string;
+		refresh: string;
 		name: string;
 		symbol: string;
 		decimals: string;
@@ -37,7 +38,14 @@ interface I18nSign_in {
 }
 
 interface I18nWallet {
-	text: { address: string; wallet_address: string; address_copied: string; icp_deposits: string };
+	text: {
+		address: string;
+		wallet_address: string;
+		address_copied: string;
+		wallet_address_copied: string;
+		display_wallet_address_qr: string;
+		icp_deposits: string;
+	};
 	alt: { open_etherscan: string };
 }
 
@@ -77,6 +85,41 @@ interface I18nNetworks {
 
 interface I18nReceive {
 	text: { receive: string; address: string };
+	icp: {
+		text: {
+			account_id: string;
+			use_for_all_tokens: string;
+			use_for_deposit: string;
+			display_account_id_qr: string;
+			account_id_copied: string;
+		};
+	};
+	ckbtc: { text: { use_address_from_to: string } };
+	cketh: { text: { use_address_from_to: string } };
+	ethereum: {
+		text: {
+			checking_status: string;
+			from_network: string;
+			eth_to_cketh_description: string;
+			learn_how_to_convert: string;
+		};
+	};
+	bitcoin: {
+		text: {
+			checking_status: string;
+			refresh_status: string;
+			initializing: string;
+			checking_incoming: string;
+			refreshing_wallet: string;
+			bitcoin_address: string;
+			display_bitcoin_address_qr: string;
+			bitcoin_address_copied: string;
+			from_network: string;
+			fee_applied: string;
+		};
+		info: { no_new_btc: string; check_btc_progress: string };
+		error: { unexpected_btc: string };
+	};
 }
 
 interface I18nSend {
