@@ -145,7 +145,10 @@
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
 	{@const data = firstTransaction.data}
 
-	<WalletConnectModalTitle slot="title">{erc20Approve ? 'Approve' : 'Send'}</WalletConnectModalTitle
+	<WalletConnectModalTitle slot="title"
+		>{erc20Approve
+			? $i18n.wallet_connect.text.approve
+			: $i18n.send.text.send}</WalletConnectModalTitle
 	>
 
 	<FeeContext

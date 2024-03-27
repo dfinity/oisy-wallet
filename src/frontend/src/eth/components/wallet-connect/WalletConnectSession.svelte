@@ -24,6 +24,7 @@
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { loading } from '$lib/stores/loader.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -54,7 +55,7 @@
 		await disconnectListener();
 
 		toastsShow({
-			text: 'WalletConnect disconnected.',
+			text: $i18n.wallet_connect.info.disconnected,
 			level: 'info',
 			duration: 2000
 		});
@@ -66,7 +67,7 @@
 		} catch (err: unknown) {
 			toastsError({
 				msg: {
-					text: `An unexpected error happened while disconnecting the wallet. Resetting the connection anyway.`
+					text: $i18n.wallet_connect.error.disconnect
 				},
 				err
 			});
@@ -87,7 +88,7 @@
 			// Connect and disconnect buttons are disabled until the address is loaded therefore this should never happens.
 			if (isNullish($address)) {
 				toastsError({
-					msg: { text: 'Address is unknown.' }
+					msg: { text: $i18n.send.assertion.address_unknown }
 				});
 				return;
 			}
@@ -95,7 +96,7 @@
 			listener = await initWalletConnectListener({ uri, address: $address });
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: `An unexpected error happened while trying to connect the wallet.` },
+				msg: { text: $i18n.wallet_connect.error.connect },
 				err
 			});
 
@@ -139,7 +140,7 @@
 		if ($modalWalletConnectAuth) {
 			toastsError({
 				msg: {
-					text: `Please finalize the manual workflow that has already been initiated by opening the WalletConnect modal.`
+					text: $i18n.wallet_connect.error.manual_workflow
 				}
 			});
 			return;
@@ -181,7 +182,7 @@
 			resetListener();
 
 			toastsShow({
-				text: 'WalletConnect session was ended.',
+				text: $i18n.wallet_connect.info.session_ended,
 				level: 'info',
 				duration: 2000
 			});
@@ -199,7 +200,7 @@
 			if (nonNullish($modalStore) && !$modalWalletConnect) {
 				toastsError({
 					msg: {
-						text: 'Skipping the WalletConnect request as another action is currently in progress through an overlay.'
+						text: $i18n.wallet_connect.error.skipping_request
 					}
 				});
 				return;
@@ -228,7 +229,11 @@
 					await listener?.rejectRequest({ topic, id, error: getSdkError('UNSUPPORTED_METHODS') });
 
 					toastsError({
-						msg: { text: `Requested method "${method}" is not supported.` }
+						msg: {
+							text: replacePlaceholders($i18n.wallet_connect.error.method_not_support, {
+								$method: method
+							})
+						}
 					});
 
 					close();
@@ -242,7 +247,7 @@
 			resetListener();
 
 			toastsError({
-				msg: { text: `An unexpected error happened while trying to pair the wallet.` },
+				msg: { text: $i18n.wallet_connect.error.unexpected_pair },
 				err
 			});
 
@@ -275,7 +280,7 @@
 			callback: listener?.approveSession,
 			toast: () =>
 				toastsShow({
-					text: 'WalletConnect connected.',
+					text: $i18n.wallet_connect.info.connected,
 					level: 'success',
 					duration: 2000
 				})
@@ -290,7 +295,7 @@
 	}) => {
 		if (isNullish(listener) || isNullish(callback)) {
 			toastsError({
-				msg: { text: `Unexpected error: No connection opened.` }
+				msg: { text: $i18n.wallet_connect.error.no_connection_opened }
 			});
 
 			close();
@@ -299,7 +304,7 @@
 
 		if (isNullish(proposal)) {
 			toastsError({
-				msg: { text: `Unexpected error: No session proposal available.` }
+				msg: { text: $i18n.wallet_connect.error.no_session_approval }
 			});
 
 			close();
@@ -314,7 +319,7 @@
 			toast?.();
 		} catch (err: unknown) {
 			toastsError({
-				msg: { text: `Unexpected error while communicating with WalletConnect.` },
+				msg: { text: $i18n.wallet_connect.error.unexpected },
 				err
 			});
 
@@ -338,8 +343,8 @@
 		<WalletConnectModalTitle slot="title">
 			{`${
 				currentStep?.name === 'Review' && nonNullish(proposal)
-					? 'Session Proposal'
-					: 'WalletConnect'
+					? $i18n.wallet_connect.text.session_proposal
+					: $i18n.wallet_connect.text.name
 			}`}
 		</WalletConnectModalTitle>
 

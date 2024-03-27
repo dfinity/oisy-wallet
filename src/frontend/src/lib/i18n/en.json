@@ -253,7 +253,51 @@
 	"wallet_connect": {
 		"text": {
 			"name": "WalletConnect",
-			"session_proposal": "Session Proposal"
+			"session_proposal": "Session Proposal",
+			"approve": "Approve",
+			"reject": "Reject",
+			"connect": "Connect",
+			"connecting": "Connecting...",
+			"scan_qr": "Scan QR code",
+			"or_use_uri": "or use WalletConnect uri",
+			"proposer": "Proposer",
+			"review": "Review $chain_name ($key) required permissions",
+			"method": "Method",
+			"methods": "Methods",
+			"events": "Events",
+			"message": "Message",
+			"hex_data": "HEX Data",
+			"raw_copied": "Raw transaction data copied to clipboard.",
+			"sign_message": "Sign Message"
+		},
+		"domain": {
+			"title": "Domain Verification",
+			"valid": "Valid ✅",
+			"valid_description": "The validation of the proposer's domain passed.",
+			"invalid": "Invalid ❌",
+			"invalid_description": "The domain of the proposer's website does not match the sender of the request.",
+			"security_risk": "Security risk ⚠️",
+			"security_risk_description": "The proposer's website is flagged as unsafe.",
+			"unknown": "Unknown ❓",
+			"unknown_description": "The domain of the proposer cannot be verified."
+		},
+		"info": {
+			"disconnected": "WalletConnect disconnected.",
+			"session_ended": "WalletConnect session was ended.",
+			"connected": "WalletConnect connected."
+		},
+		"error": {
+			"qr_code_read": "Cannot read QR code.",
+			"missing_uri": "An uri to connect to should be provided.",
+			"disconnect": "An unexpected error happened while disconnecting the wallet. Resetting the connection anyway.",
+			"connect": "An unexpected error happened while trying to connect the wallet.",
+			"manual_workflow": "Please finalize the manual workflow that has already been initiated by opening the WalletConnect modal.",
+			"skipping_request": "Skipping the WalletConnect request as another action is currently in progress through an overlay.",
+			"method_not_support": "Requested method \"$method\" is not supported.",
+			"unexpected_pair": "An unexpected error happened while trying to pair the wallet.",
+			"no_connection_opened": "Unexpected error: No connection opened.",
+			"no_session_approval": "Unexpected error: No session proposal available.",
+			"unexpected": "Unexpected error while communicating with WalletConnect."
 		}
 	},
 	"transaction": {

@@ -2,6 +2,7 @@
 	import { Input, QRCodeReader } from '@dfinity/gix-components';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { createEventDispatcher } from 'svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let renderQRCodeReader = false;
 
@@ -9,7 +10,7 @@
 		renderQRCodeReader = false;
 
 		toastsError({
-			msg: { text: `Cannot read QR code.` }
+			msg: { text: $i18n.wallet_connect.error.qr_code_read }
 		});
 	};
 
@@ -23,7 +24,7 @@
 	const connect = () => {
 		if (!uri) {
 			toastsError({
-				msg: { text: `An uri to connect to should be provided.` }
+				msg: { text: $i18n.wallet_connect.error.missing_uri }
 			});
 			return;
 		}
@@ -42,12 +43,12 @@
 			type="button"
 			class="wallet-connect inset-center text-white font-bold text-center"
 			style="padding: var(--padding) var(--padding-3x)"
-			on:click={() => (renderQRCodeReader = true)}>Scan QR code</button
+			on:click={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</button
 		>
 	{/if}
 </div>
 
-<p class="text-center pt-4 pb-2">or use WalletConnect uri</p>
+<p class="text-center pt-4 pb-2">{$i18n.wallet_connect.text.or_use_uri}</p>
 
 <Input
 	name="uri"
@@ -59,7 +60,7 @@
 
 <div class="flex justify-end gap-1 mt-4">
 	<button class="primary" disabled={invalid} class:opacity-10={invalid} on:click={connect}>
-		Connect
+		{$i18n.wallet_connect.text.connect}
 	</button>
 </div>
 

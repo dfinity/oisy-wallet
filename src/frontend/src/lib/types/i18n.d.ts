@@ -218,7 +218,50 @@ interface I18nInfo {
 }
 
 interface I18nWallet_connect {
-	text: { name: string; session_proposal: string };
+	text: {
+		name: string;
+		session_proposal: string;
+		approve: string;
+		reject: string;
+		connect: string;
+		connecting: string;
+		scan_qr: string;
+		or_use_uri: string;
+		proposer: string;
+		review: string;
+		method: string;
+		methods: string;
+		events: string;
+		message: string;
+		hex_data: string;
+		raw_copied: string;
+		sign_message: string;
+	};
+	domain: {
+		title: string;
+		valid: string;
+		valid_description: string;
+		invalid: string;
+		invalid_description: string;
+		security_risk: string;
+		security_risk_description: string;
+		unknown: string;
+		unknown_description: string;
+	};
+	info: { disconnected: string; session_ended: string; connected: string };
+	error: {
+		qr_code_read: string;
+		missing_uri: string;
+		disconnect: string;
+		connect: string;
+		manual_workflow: string;
+		skipping_request: string;
+		method_not_support: string;
+		unexpected_pair: string;
+		no_connection_opened: string;
+		no_session_approval: string;
+		unexpected: string;
+	};
 }
 
 interface I18nTransaction {
