@@ -16,6 +16,7 @@
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -71,7 +72,7 @@
 
 			errorMsgs.push(
 				toastsError({
-					msg: { text: `Cannot fetch gas fee.` },
+					msg: { text: $i18n.fee.error.cannot_fetch_gas_fee },
 					err
 				})
 			);

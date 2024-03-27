@@ -103,7 +103,9 @@ interface I18nReceive {
 			from_network: string;
 			eth_to_cketh_description: string;
 			learn_how_to_convert: string;
+			metamask: string;
 		};
+		error: { no_metamask: string };
 	};
 	bitcoin: {
 		text: {
@@ -138,11 +140,13 @@ interface I18nSend {
 		source_network: string;
 		destination_network: string;
 		initializing_transaction: string;
+		convert_to_native_icp: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
+		select_network: string;
 	};
 	info: { ckbtc_certified: string; cketh_certified: string };
 	assertion: {
@@ -154,6 +158,12 @@ interface I18nSend {
 		minimum_cketh_amount: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
+		insufficient_funds_for_gas: string;
+		insufficient_funds_for_amount: string;
+		insufficient_ethereum_funds_to_cover_the_fees: string;
+		gas_fees_not_defined: string;
+		max_gas_gee_per_gas_undefined: string;
+		address_unknown: string;
 	};
 	error: { unexpected: string };
 }
@@ -199,6 +209,7 @@ interface I18nFee {
 		estimated_inter_network: string;
 		estimated_eth: string;
 	};
+	error: { cannot_fetch_gas_fee: string };
 }
 
 interface I18nInfo {

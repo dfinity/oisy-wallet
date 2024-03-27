@@ -112,7 +112,11 @@
 				"checking_status": "Checking ETH status...",
 				"from_network": "Receive from Ethereum Network",
 				"eth_to_cketh_description": "Converting ETH into ckETH requires a call to a smart contract on Ethereum and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
-				"learn_how_to_convert": "Learn how to convert ETH to ckETH"
+				"learn_how_to_convert": "Learn how to convert ETH to ckETH",
+				"metamask": "Receive from Metamask"
+			},
+			"error": {
+				"no_metamask": "Metamask is not available."
 			}
 		},
 		"bitcoin": {
@@ -151,12 +155,14 @@
 			"network": "Network",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
-			"initializing_transaction": "Initializing transaction"
+			"initializing_transaction": "Initializing transaction",
+			"convert_to_native_icp": "Convert to native ICP"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
 			"enter_recipient_address": "Enter recipient address",
-			"enter_wallet_address": "Enter wallet address"
+			"enter_wallet_address": "Enter wallet address",
+			"select_network": "Select network"
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
@@ -170,7 +176,13 @@
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
 			"destination_address_invalid": "Destination address is invalid.",
-			"amount_invalid": "Amount is invalid."
+			"amount_invalid": "Amount is invalid.",
+			"insufficient_funds_for_gas": "Insufficient funds for gas",
+			"insufficient_funds_for_amount": "Insufficient funds for amount",
+			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
+			"gas_fees_not_defined": "Gas fees are not defined.",
+			"max_gas_gee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
+			"address_unknown": "Address is unknown."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction."
@@ -220,6 +232,9 @@
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
 			"estimated_eth": "Estimated Ethereum Fee (Updated ≈30 Seconds)"
+		},
+		"error": {
+			"cannot_fetch_gas_fee": "Cannot fetch gas fee."
 		}
 	},
 	"info": {

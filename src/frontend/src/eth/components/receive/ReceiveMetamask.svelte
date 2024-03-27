@@ -6,11 +6,12 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { networkEthereum } from '$lib/derived/network.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const receiveModal = async () => {
 		if (!$metamaskAvailable) {
 			toastsError({
-				msg: { text: `Metamask is not available.` }
+				msg: { text: $i18n.receive.ethereum.error.no_metamask }
 			});
 			return;
 		}
@@ -25,6 +26,6 @@
 {#if $metamaskAvailable && $networkEthereum}
 	<button class="secondary full center my-4" on:click={receiveModal}>
 		<IconMetamask />
-		<span class="text-dark-slate-blue font-bold">Receive from Metamask</span>
+		<span class="text-dark-slate-blue font-bold">{$i18n.receive.ethereum.text.metamask}</span>
 	</button>
 {/if}

@@ -6,6 +6,7 @@
 	import { modalSend } from '$lib/derived/modal.derived';
 	import SendModal from '$eth/components/send/SendModal.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const isDisabled = (): boolean => $addressNotLoaded;
 
@@ -29,7 +30,7 @@
 	class:opacity-50={$isBusy}
 >
 	<IconSend size="28" />
-	<span>Send</span></button
+	<span>{$i18n.send.text.send}</span></button
 >
 
 {#if $modalSend}
