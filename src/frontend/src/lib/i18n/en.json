@@ -36,10 +36,15 @@
 		"connect_with": "Connect with"
 	},
 	"wallet": {
-		"address": "Wallet address",
-		"address_copied": "Address copied to clipboard.",
-		"icp_deposits": "Note: For ICP deposits, use the 'Receive' button in your ICP account to get the right address.",
-		"alt_open_etherscan": "Open your address on Etherscan"
+		"text": {
+			"address": "Address",
+			"wallet_address": "Wallet address",
+			"address_copied": "Address copied to clipboard.",
+			"icp_deposits": "Note: For ICP deposits, use the 'Receive' button in your ICP account to get the right address."
+		},
+		"alt": {
+			"open_etherscan": "Open your address on Etherscan"
+		}
 	},
 	"init": {
 		"initializing_wallet": "Initializing your wallet",
@@ -84,8 +89,14 @@
 			"invalid_destination_address": "Invalid destination address"
 		}
 	},
-	"token": {
+	"convert": {
+		"error": {
+			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
+		}
+	},
+	"tokens": {
 		"text": {
+			"title": "Tokens",
 			"add_new": "Add new token",
 			"contract_address": "Contract address",
 			"add": "Add token",

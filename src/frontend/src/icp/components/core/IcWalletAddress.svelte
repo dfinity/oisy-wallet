@@ -6,7 +6,9 @@
 </script>
 
 <div>
-	<label class="block text-sm font-bold" for="ic-wallet-address">{$i18n.wallet.address}:</label>
+	<label class="block text-sm font-bold" for="ic-wallet-address"
+		>{$i18n.wallet.text.wallet_address}:</label
+	>
 
 	<output id="ic-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
@@ -14,10 +16,10 @@
 		color="inherit"
 		inline
 		value={$icrcAccountIdentifierText ?? ''}
-		text={$i18n.wallet.address_copied}
+		text={$i18n.wallet.text.address_copied}
 	/>
 
 	<p class="pt-2 text-misty-rose break-normal">
-		{$i18n.wallet.icp_deposits}
+		{$i18n.wallet.text.icp_deposits}
 	</p>
 </div>

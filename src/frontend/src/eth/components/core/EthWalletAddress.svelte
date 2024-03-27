@@ -14,15 +14,17 @@
 </script>
 
 <div>
-	<label class="block text-sm font-bold" for="eth-wallet-address">{$i18n.wallet.address}:</label>
+	<label class="block text-sm font-bold" for="eth-wallet-address"
+		>{$i18n.wallet.text.wallet_address}:</label
+	>
 
 	<output class="break-all" id="eth-wallet-address"
 		>{shortenWithMiddleEllipsis($address ?? '')}</output
-	><Copy inline color="inherit" value={$address ?? ''} text={$i18n.wallet.address_copied} />
+	><Copy inline color="inherit" value={$address ?? ''} text={$i18n.wallet.text.address_copied} />
 </div>
 
 {#if nonNullish(explorerUrl)}
-	<ExternalLink href={explorerUrl} ariaLabel={$i18n.wallet.alt_open_etherscan}>
+	<ExternalLink href={explorerUrl} ariaLabel={$i18n.wallet.alt.open_etherscan}>
 		{$i18n.navigation.text.view_on_explorer}
 	</ExternalLink>
 {/if}

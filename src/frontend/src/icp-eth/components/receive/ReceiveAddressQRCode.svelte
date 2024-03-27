@@ -2,6 +2,7 @@
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let address: undefined | string;
 
@@ -9,19 +10,19 @@
 </script>
 
 <div class="mb-6 container">
-	<p class="font-bold text-center">Address:</p>
+	<p class="font-bold text-center">{$i18n.wallet.text.address}:</p>
 	<p class="mb-4 font-normal text-center px-2">
 		<output class="break-all">{address}</output><Copy
 			inline
 			value={address ?? ''}
-			text="Address copied to clipboard."
+			text={$i18n.wallet.text.address_copied}
 		/>
 	</p>
 
 	<ReceiveQRCode address={address ?? ''} />
 
 	<button class="secondary full center text-center mt-8" on:click={() => dispatch('icBack')}
-		>Back</button
+		>{$i18n.core.text.back}</button
 	>
 </div>
 
