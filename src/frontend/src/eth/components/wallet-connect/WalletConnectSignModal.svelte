@@ -63,7 +63,9 @@
 </script>
 
 <WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	<WalletConnectModalTitle slot="title">Sign Message</WalletConnectModalTitle>
+	<WalletConnectModalTitle slot="title"
+		>{$i18n.wallet_connect.text.sign_message}</WalletConnectModalTitle
+	>
 
 	{#if currentStep?.name === 'Signing'}
 		<SendProgress progressStep={signProgressStep} steps={WALLET_CONNECT_SIGN_STEPS} />

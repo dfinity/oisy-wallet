@@ -11,6 +11,8 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { addressNotCertified } from '$lib/derived/address.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -41,7 +43,7 @@
 
 {#if nonNullish(proposal) && nonNullish(params)}
 	<div in:fade>
-		<p class="font-bold">Proposer: {params.proposer.metadata.name}</p>
+		<p class="font-bold">{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}</p>
 		<p>{params.proposer.metadata.description}</p>
 		<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
 			>{params.proposer.metadata.url}</a
@@ -57,15 +59,18 @@
 				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
 
 				<p class="font-bold mt-6">
-					Review {chainName} ({key}) required permissions:
+					{replacePlaceholders($i18n.wallet_connect.text.review, {
+						$chain_name: chainName,
+						$key: key
+					})}:
 				</p>
 
 				<article class="bg-dust rounded-sm p-4 mt-4">
-					<p class="font-bold">Methods:</p>
+					<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
 
-					<p class="font-bold mt-4">Events:</p>
+					<p class="font-bold mt-4">{$i18n.wallet_connect.text.events}:</p>
 
 					<p>{allEvents.length ? allEvents.join(', ') : '-'}</p>
 				</article>
@@ -79,14 +84,14 @@
 		<div>
 			<Spinner inline />
 		</div>
-		<p>Connecting...</p>
+		<p>{$i18n.wallet_connect.text.connecting}</p>
 
 		{#if displayCancel}
 			<div class="flex justify-end gap-1 mt-8" in:fade>
 				<button
 					class="secondary"
 					on:click={() => dispatch('icCancel')}
-					disabled={$isBusy || $addressNotCertified}>Cancel</button
+					disabled={$isBusy || $addressNotCertified}>{$i18n.core.text.cancel}</button
 				>
 			</div>
 		{/if}

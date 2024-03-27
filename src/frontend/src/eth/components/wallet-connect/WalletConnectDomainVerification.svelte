@@ -2,6 +2,7 @@
 	import type { Verify } from '@walletconnect/types';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { CONTEXT_VALIDATION_ISSCAM } from '$eth/constants/wallet-connect.constants';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -14,26 +15,26 @@
 
 <div class="mt-6">
 	<label for="verification" class="font-bold"
-		>Domain Verification:
+		>{$i18n.wallet_connect.domain.title}:
 		{#if validation === 'VALID'}
-			Valid ✅
+			{$i18n.wallet_connect.domain.valid}
 		{:else if validation === 'INVALID'}
-			Invalid ❌
+			{$i18n.wallet_connect.domain.invalid}
 		{:else if validation?.toUpperCase() === CONTEXT_VALIDATION_ISSCAM}
-			Security risk ⚠️
+			{$i18n.wallet_connect.domain.security_risk}
 		{:else}
-			Unknown ❓
+			{$i18n.wallet_connect.domain.unknown}
 		{/if}</label
 	>
 	<div id="verification" class="font-normal mb-4 break-all">
 		{#if validation === 'VALID'}
-			The validation of the proposer's domain passed.
+			{$i18n.wallet_connect.domain.valid_description}
 		{:else if validation === 'INVALID'}
-			The domain of the proposer's website does not match the sender of the request.
+			{$i18n.wallet_connect.domain.invalid_description}
 		{:else if validation?.toUpperCase() === CONTEXT_VALIDATION_ISSCAM}
-			The proposer's website is flagged as unsafe.
+			{$i18n.wallet_connect.domain.security_risk_description}
 		{:else}
-			The domain of the proposer cannot be verified.
+			{$i18n.wallet_connect.domain.unknown_description}
 		{/if}
 	</div>
 </div>

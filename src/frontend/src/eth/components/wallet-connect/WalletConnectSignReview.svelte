@@ -7,6 +7,7 @@
 	import WalletConnectActions from './WalletConnectActions.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import Json from '$lib/components/ui/Json.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let request: Web3WalletTypes.SessionRequest;
 
@@ -23,12 +24,12 @@
 	})();
 </script>
 
-<p class="font-bold">Method</p>
+<p class="font-bold">{$i18n.wallet_connect.text.method}</p>
 <p class="mb-4 font-normal">
 	{request.params.request.method}
 </p>
 
-<p class="font-bold">Message</p>
+<p class="font-bold">{$i18n.wallet_connect.text.message}</p>
 {#if nonNullish(json)}
 	<div class="bg-dust rounded-sm p-4 mt-4">
 		<Json {json} _collapsed={true} />
