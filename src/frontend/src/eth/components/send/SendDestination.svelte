@@ -2,7 +2,7 @@
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isEthAddress } from '$lib/utils/account.utils';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let destination = '';
 	export let invalidDestination = false;

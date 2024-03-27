@@ -16,7 +16,7 @@
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-    import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let observe: boolean;
 	export let destination = '';

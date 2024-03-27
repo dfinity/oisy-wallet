@@ -8,7 +8,7 @@
 	import { setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
 	 * Send modal context store

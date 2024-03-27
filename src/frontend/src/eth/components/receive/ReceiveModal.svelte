@@ -5,7 +5,7 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { networkAddress, networkEthereum } from '$lib/derived/network.derived';
 	import ReceiveMetamask from '$eth/components/receive/ReceiveMetamask.svelte';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>

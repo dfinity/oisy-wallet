@@ -11,7 +11,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;

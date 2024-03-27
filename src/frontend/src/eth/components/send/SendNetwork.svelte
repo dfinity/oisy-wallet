@@ -8,7 +8,7 @@
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;

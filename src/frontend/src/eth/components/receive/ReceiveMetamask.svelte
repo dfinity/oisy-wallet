@@ -6,7 +6,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { networkEthereum } from '$lib/derived/network.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import {i18n} from "$lib/stores/i18n.store";
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const receiveModal = async () => {
 		if (!$metamaskAvailable) {
