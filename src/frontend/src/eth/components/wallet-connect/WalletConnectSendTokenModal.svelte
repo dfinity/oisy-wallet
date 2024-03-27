@@ -34,6 +34,7 @@
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -82,11 +83,11 @@
 	const steps: WizardSteps = [
 		{
 			name: 'Review',
-			title: 'Review'
+			title: $i18n.send.text.review
 		},
 		{
 			name: 'Sending',
-			title: 'Sending...'
+			title: $i18n.send.text.sending
 		}
 	];
 

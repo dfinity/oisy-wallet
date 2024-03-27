@@ -25,6 +25,7 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
 	 * Props
@@ -92,18 +93,18 @@
 		{
 			name: 'Send',
 			title: isNetworkIdBTC(networkId)
-				? 'Convert to BTC'
+				? $i18n.convert.text.convert_to_btc
 				: isNetworkIdEthereum(networkId)
-					? 'Convert to ETH'
-					: 'Send'
+					? $i18n.convert.text.convert_to_eth
+					: $i18n.send.text.send
 		},
 		{
 			name: 'Review',
-			title: 'Review'
+			title: $i18n.send.text.review
 		},
 		{
 			name: 'Sending',
-			title: 'Sending...'
+			title: $i18n.send.text.sending
 		}
 	];
 

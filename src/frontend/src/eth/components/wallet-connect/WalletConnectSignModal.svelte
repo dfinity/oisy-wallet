@@ -9,6 +9,7 @@
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { signMessage, reject as rejectServices } from '$eth/services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let listener: WalletConnectListener | undefined | null;
 	export let request: Web3WalletTypes.SessionRequest;
@@ -20,11 +21,11 @@
 	const steps: WizardSteps = [
 		{
 			name: 'Review',
-			title: 'Review'
+			title: $i18n.send.text.review
 		},
 		{
 			name: 'Signing',
-			title: 'Signing...'
+			title: $i18n.send.text.signing
 		}
 	];
 

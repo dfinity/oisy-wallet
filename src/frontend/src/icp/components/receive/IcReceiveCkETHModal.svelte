@@ -5,13 +5,14 @@
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
-	import { HOW_TO_CONVERT_WIZARD_STEPS } from '$icp-eth/constants/how-to-convert.constants';
+	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import IcReceiveInfoCkETH from '$icp/components/receive/IcReceiveInfoCkETH.svelte';
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
 	 * Props
@@ -29,17 +30,20 @@
 	 * Wizard modal
 	 */
 
+	let howToSteps: WizardSteps;
+	$: howToSteps = howToConvertWizardSteps($i18n);
+
 	let steps: WizardSteps;
 	$: steps = [
 		{
 			name: 'Receive',
-			title: 'Receive'
+			title: $i18n.receive.text.receive
 		},
 		{
 			name: 'QR Code',
-			title: 'Receive address'
+			title: $i18n.receive.text.address
 		},
-		...HOW_TO_CONVERT_WIZARD_STEPS
+		...howToSteps
 	];
 
 	let currentStep: WizardStep | undefined;
@@ -77,7 +81,7 @@
 		bind:sendProgressStep
 		{currentStep}
 	>
-		{#if currentStep?.name === HOW_TO_CONVERT_WIZARD_STEPS[0].name}
+		{#if currentStep?.name === howToSteps[0].name}
 			<HowToConvertETHInfo
 				on:icBack={() => modal.set(0)}
 				on:icQRCode={modal.next}
