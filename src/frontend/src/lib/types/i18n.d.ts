@@ -229,6 +229,10 @@ interface I18nTransaction {
 	};
 }
 
+interface I18nTransactions {
+	text: { title: string; no_transactions: string };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -247,4 +251,5 @@ interface I18n {
 	info: I18nInfo;
 	wallet_connect: I18nWallet_connect;
 	transaction: I18nTransaction;
+	transactions: I18nTransactions;
 }

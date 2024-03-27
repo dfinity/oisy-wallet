@@ -258,5 +258,11 @@
 			"open_from_block_explorer": "Open the 'From' address on a block explorer",
 			"open_to_block_explorer": "Open the 'To' address on a block explorer"
 		}
+	},
+	"transactions": {
+		"text": {
+			"title": "Transactions",
+			"no_transactions": "You have no transactions."
+		}
 	}
 }

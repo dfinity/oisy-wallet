@@ -23,6 +23,7 @@
 	import IcTransactionsCkETHListeners from '$icp/components/transactions/IcTransactionsCkETHListeners.svelte';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import IcReceiveEthereum from '$icp/components/receive/IcReceiveEthereum.svelte';
+	import {i18n} from "$lib/stores/i18n.store";
 
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger
@@ -71,7 +72,7 @@
 <Info />
 
 <div class="flex justify-between mb-6 pb-1 items-center">
-	<h2 class="text-base">Transactions</h2>
+	<h2 class="text-base">{$i18n.transactions.text.title}</h2>
 
 	{#if $tokenCkBtcLedger}
 		<IcReceiveBitcoin />
@@ -93,7 +94,7 @@
 		{/if}
 
 		{#if $icTransactions.length === 0}
-			<p class="mt-4 text-dark opacity-50">You have no transactions.</p>
+			<p class="mt-4 text-dark opacity-50">{$i18n.transactions.text.no_transactions}</p>
 		{/if}
 	</svelte:component>
 </IcTransactionsSkeletons>
