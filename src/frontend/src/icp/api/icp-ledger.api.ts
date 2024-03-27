@@ -1,12 +1,14 @@
 import { ICP_LEDGER_CANISTER_ID } from '$env/networks.icp.env';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getAgent } from '$lib/actors/agents.ic';
+import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@dfinity/ledger-icp';
 import type { IcrcAccount } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const transfer = async ({
 	identity,
@@ -17,7 +19,7 @@ export const transfer = async ({
 	to: string;
 	amount: bigint;
 }): Promise<BlockHeight> => {
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 	const { transfer } = await ledgerCanister(identity);
 
@@ -38,7 +40,7 @@ export const icrc1Transfer = async ({
 	amount: bigint;
 	createdAt?: bigint;
 }): Promise<BlockHeight> => {
-	assertNonNullish(identity, 'No internet identity.');
+	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 	const { icrc1Transfer } = await ledgerCanister(identity);
 
