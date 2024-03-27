@@ -14,6 +14,7 @@
 
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -51,13 +52,14 @@
 	>
 		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.bitcoin_address}</svelte:fragment>
 		<svelte:fragment slot="text"
-			>Transfer Bitcoin on the BTC network to this address to receive ckBTC. {#if nonNullish(kytFee)}<span
-					in:fade
-					>Please note that an estimated inter-network fee of {formatToken({
-						value: BigNumber.from(kytFee),
-						unitName: BTC_DECIMALS,
-						displayDecimals: BTC_DECIMALS
-					})} BTC will be applied.</span
+			>{$i18n.receive.bitcoin.text.from_network}&nbsp;{#if nonNullish(kytFee)}<span in:fade
+					>{replacePlaceholders($i18n.receive.bitcoin.text.fee_applied, {
+						$fee: formatToken({
+							value: BigNumber.from(kytFee),
+							unitName: BTC_DECIMALS,
+							displayDecimals: BTC_DECIMALS
+						})
+					})}</span
 				>{/if}
 		</svelte:fragment>
 	</ReceiveAddress>

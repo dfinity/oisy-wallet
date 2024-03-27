@@ -123,7 +123,9 @@
 				"refreshing_wallet": "Refreshing wallet...",
 				"bitcoin_address": "Bitcoin Address",
 				"display_bitcoin_address_qr": "Display Bitcoin Address as a QR code",
-				"bitcoin_address_copied": "Bitcoin Address copied to clipboard."
+				"bitcoin_address_copied": "Bitcoin Address copied to clipboard.",
+				"from_network": "Transfer Bitcoin on the BTC network to this address to receive ckBTC.",
+				"fee_applied": "Please note that an estimated inter-network fee of $fee BTC will be applied."
 			},
 			"info": {
 				"no_new_btc": "No new confirmed BTC.",

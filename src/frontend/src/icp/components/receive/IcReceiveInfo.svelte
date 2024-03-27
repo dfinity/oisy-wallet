@@ -14,7 +14,7 @@
 <ReceiveAddress
 	labelRef="wallet-address"
 	address={$icrcAccountIdentifierText ?? ''}
-	qrCodeAriaLabel={$i18n.receive.icp.text.display_wallet_address_qr}
+	qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
 	copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
