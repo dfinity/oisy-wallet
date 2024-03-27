@@ -58,6 +58,9 @@
 			"securing_session": "Securing session with Internet Identity",
 			"retrieving_eth_key": "Retrieving your Ethereum public key"
 		},
+		"info": {
+			"hold_loading": "Hold tight, we are loading some information..."
+		},
 		"error": {
 			"no_alchemy_config": "No Alchemy config for network $network",
 			"no_alchemy_provider": "No Alchemy provider for network $network",
@@ -71,7 +74,18 @@
 			"eth_address_unknown": "ETH address is unknown.",
 			"loading_balance": "Error while loading the ETH balance.",
 			"loading_balance_symbol": "Error while loading $symbol balance.",
-			"erc20_contracts": "Error while loading the ERC20 contracts."
+			"erc20_contracts": "Error while loading the ERC20 contracts.",
+			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
+			"minter_cketh_eth": "A configured minter is required to convert ckETH to ETH.",
+			"minter_btc": "A configured minter is required to retrieve BTC.",
+			"minter_ckbtc_info": "A configured minter is required to fetch the ckBTC info",
+			"minter_cketh_info": "A configured minter is required to fetch the ckETH info",
+			"minter_ckbtc_loading_info": "Error while loading the ckBTC minter information.",
+			"minter_cketh_loading_info": "Error while loading the ckETH minter information.",
+			"btc_fees_estimation": "Error while querying the estimation of the BTC fees.",
+			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
+			"transaction_price": "Error while loading the estimation of the price of a transaction.",
+			"icrc_canisters": "Error while loading the ICRC canisters."
 		}
 	},
 	"hero": {
@@ -211,7 +225,8 @@
 			"metamask_switch_network": "Cannot request Metamask to switch to chain ID $chain_id. Is your Metamask using $network_name?",
 			"erc20_data_undefined": "Erc20 transaction Data cannot be undefined or null.",
 			"data_undefined": "Transaction Data cannot be undefined or null.",
-			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal."
+			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
+			"invalid_address": "The address is invalid. Please try again with a valid address identifier."
 		}
 	},
 	"convert": {
@@ -375,7 +390,8 @@
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
 			"loading_transactions_symbol": "Error while loading the $symbol transactions.",
-			"no_token_loading_transaction": "Token not found. Transactions cannot be loaded."
+			"no_token_loading_transaction": "Token not found. Transactions cannot be loaded.",
+			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists."
 		}
 	}
 }

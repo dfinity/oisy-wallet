@@ -11,9 +11,11 @@ import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { SendIcStep } from '$lib/enums/steps';
+import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
+import { get } from 'svelte/store';
 
 export const sendIc = async ({
 	progress,
@@ -82,7 +84,7 @@ const sendIcrc = async ({
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
 	if (!validIcrcAddress) {
-		throw new Error('The address is invalid. Please try again with a valid address identifier.');
+		throw new Error(get(i18n).send.error.invalid_address);
 	}
 
 	progress(SendIcStep.SEND);
@@ -106,7 +108,7 @@ const sendIcp = async ({
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
 	if (!validIcrcAddress && !validIcpAddress) {
-		throw new Error('The address is invalid. Please try again with a valid address identifier.');
+		throw new Error(get(i18n).send.error.invalid_address);
 	}
 
 	progress(SendIcStep.SEND);
