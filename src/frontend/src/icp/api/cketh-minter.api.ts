@@ -1,10 +1,8 @@
 import { ckEthMinterCanister } from '$icp-eth/api/cketh-minter.api';
-import { i18n } from '$lib/stores/i18n.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Eip1559TransactionPrice, MinterInfo, RetrieveEthRequest } from '@dfinity/cketh';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
 export const withdrawEth = async ({
 	identity,
@@ -16,7 +14,7 @@ export const withdrawEth = async ({
 	amount: bigint;
 	address: string;
 }): Promise<RetrieveEthRequest> => {
-	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+	assertNonNullish(identity);
 
 	const { withdrawEth } = await ckEthMinterCanister({ identity, minterCanisterId });
 
@@ -31,7 +29,7 @@ export const eip1559TransactionPrice = async ({
 	identity: OptionIdentity;
 	minterCanisterId: CanisterIdText;
 } & QueryParams): Promise<Eip1559TransactionPrice> => {
-	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+	assertNonNullish(identity);
 
 	const { eip1559TransactionPrice } = await ckEthMinterCanister({ identity, minterCanisterId });
 
@@ -46,7 +44,7 @@ export const minterInfo = async ({
 	identity: OptionIdentity;
 	minterCanisterId: CanisterIdText;
 } & QueryParams): Promise<MinterInfo> => {
-	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+	assertNonNullish(identity);
 
 	const { getMinterInfo } = await ckEthMinterCanister({ identity, minterCanisterId });
 
