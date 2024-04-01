@@ -3,3 +3,4 @@ members = [
     "src/backend",
     "src/shared"
 ]
+resolver = "2"
