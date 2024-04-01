@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  #####################
+  # The docker builds #
+  #####################
+
+  docker-build-base:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Base Docker Image
+        uses: ./.github/actions/docker-build-base
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: docker-build-base
+    strategy:
+      matrix:
+        include:
+          - name: backend.wasm.gz
+            target: scratch_backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build ${{ matrix.name }}
+        uses: docker/build-push-action@v5
+        with:
+          file: Dockerfile
+          cache-from: type=gha,scope=cached-stage
+          # Exports the artefacts from the final stage
+          outputs: ./out
+          target: ${{ matrix.target }}
+
+      - run: sha256sum out/${{ matrix.name }}
+
+      - run: mv out/${{ matrix.name }} ${{ matrix.name }}
+
+      - name: 'Upload ${{ matrix.name }}'
+        uses: actions/upload-artifact@v4
+        with:
+          # name is the name used to display and retrieve the artifact
+          name: ${{ matrix.name }}
+          # path is the name used as the file to upload and the name of the
+          # downloaded file
+          path: ./${{ matrix.name }}
+
+  candid:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: backend.did
+            target: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 'Upload ${{ matrix.name }}'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: ./src/${{ matrix.target }}/${{ matrix.name }}
+
+  release:
+    runs-on: ubuntu-latest
+    needs: ['docker-build', 'candid']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download backend.wasm.gz
+        uses: actions/download-artifact@v4
+        with:
+          name: backend.wasm.gz
+          path: .
+
+      - name: Download backend.did
+        uses: actions/download-artifact@v4
+        with:
+          name: backend.did
+          path: .
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ./backend*.wasm.gz
+            ./backend*.did
