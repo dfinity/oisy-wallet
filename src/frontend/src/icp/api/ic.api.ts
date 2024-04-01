@@ -1,11 +1,9 @@
 import { createAgent } from '$lib/actors/agents.ic';
-import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork, bitcoin_get_utxos_query_result } from '@dfinity/ic-management';
 import { ICManagementCanister } from '@dfinity/ic-management';
 import { assertNonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
 export const getUtxos = async ({
 	identity,
@@ -17,7 +15,7 @@ export const getUtxos = async ({
 	certified: false;
 	network: BitcoinNetwork;
 }): Promise<bitcoin_get_utxos_query_result> => {
-	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+	assertNonNullish(identity);
 
 	const { bitcoinGetUtxosQuery } = await mgmtCanister({ identity });
 
