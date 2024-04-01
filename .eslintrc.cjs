@@ -7,7 +7,7 @@ module.exports = {
 		'prettier'
 	],
 	parser: '@typescript-eslint/parser',
-	plugins: ['@typescript-eslint'],
+	plugins: ['@typescript-eslint', 'eslint-plugin-local-rules'],
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2020,
@@ -37,7 +37,8 @@ module.exports = {
 				caughtErrorsIgnorePattern: '^_'
 			}
 		],
-		'no-console': ['error', { allow: ['error', 'warn'] }]
+		'no-console': ['error', { allow: ['error', 'warn'] }],
+		'local-rules/no-svelte-store-in-api': 'error'
 	},
 	globals: {
 		NodeJS: true
