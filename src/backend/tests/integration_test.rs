@@ -39,5 +39,6 @@ fn test_caller_eth_address() {
         .update_call(canister_id, caller, method, arg)
         .expect(&format!("Failed to call {}", method));
 
+    // TODO: this fails and has not been developed yet
     assert_eq!(reply, WasmResult::Reply(vec![0, 0, 0, 1]));
 }
