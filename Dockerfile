@@ -25,7 +25,7 @@ ENV RUSTUP_HOME=/opt/rustup \
 COPY ./docker ./docker
 COPY ./rust-toolchain.toml ./rust-toolchain.toml
 
-# Setup toolchain, ic-wasm and candid-extractor
+# Setup toolchain and ic-wasm
 RUN ./docker/bootstrap
 
 # Pre-build all cargo dependencies. Because cargo doesn't have a build option
