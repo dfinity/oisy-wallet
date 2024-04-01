@@ -55,4 +55,3 @@ RUN sha256sum /backend.wasm.gz
 
 FROM scratch AS scratch_backend
 COPY --from=build_backend /backend.wasm.gz /
-COPY --from=build_backend /backend.did /
