@@ -1,6 +1,5 @@
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getAgent } from '$lib/actors/agents.ic';
-import { i18n } from '$lib/stores/i18n.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import { type Identity } from '@dfinity/agent';
@@ -13,7 +12,6 @@ import {
 } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
 export const metadata = async ({
 	certified = true,
@@ -23,7 +21,7 @@ export const metadata = async ({
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
 } & QueryParams): Promise<IcrcTokenMetadataResponse> => {
-	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+	assertNonNullish(identity);
 
 	const { metadata } = await ledgerCanister({ identity, ...rest });
 
@@ -43,7 +41,7 @@ export const transfer = async ({
 	createdAt?: bigint;
 	ledgerCanisterId: CanisterIdText;
 }): Promise<IcrcBlockIndex> => {
-	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+	assertNonNullish(identity);
 
 	const { transfer } = await ledgerCanister({ identity, ledgerCanisterId });
 
@@ -69,7 +67,7 @@ export const approve = async ({
 	expiresAt: bigint;
 	createdAt?: bigint;
 }): Promise<IcrcBlockIndex> => {
-	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
+	assertNonNullish(identity);
 
 	const { approve } = await ledgerCanister({ identity, ledgerCanisterId });
 
