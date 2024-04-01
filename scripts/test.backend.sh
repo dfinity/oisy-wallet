@@ -2,10 +2,10 @@
 
 POCKET_IC_SERVER_VERSION=3.0.1
 
- if [ ! -d "target" ]
-  then
-       mkdir "target"
-  fi
+if [ ! -d "target" ]
+then
+     mkdir "target"
+fi
 
 if [[ $OSTYPE == "linux-gnu"* ]] || [[ $RUNNER_OS == "Linux" ]]
 then
