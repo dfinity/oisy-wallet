@@ -1,16 +1,13 @@
 mod utils;
 
 use candid::Principal;
-use utils::{setup, update_call};
+use utils::{setup, update_call, CALLER};
 
 #[test]
 fn test_caller_eth_address() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(
-        "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae".to_string(),
-    )
-    .unwrap();
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
     let address = update_call::<String>(pic_setup, caller, "caller_eth_address", ())
         .expect("Failed to call eth address.");

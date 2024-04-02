@@ -4,6 +4,8 @@ use serde::Deserialize;
 use shared::types::{Arg, InitArg};
 use std::fs::read;
 
+pub const CALLER: &str = "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae";
+
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
 
 pub fn setup() -> (PocketIc, Principal) {
@@ -33,12 +35,17 @@ pub fn update_call<T>(
 where
     T: for<'a> Deserialize<'a> + CandidType,
 {
-    let reply = pic
-        .update_call(canister_id, caller, method, encode_one(arg).unwrap())
-        .expect(&format!("Failed to call {}", method));
-
-    match reply {
-        WasmResult::Reply(reply) => Ok(decode_one(&reply).unwrap()),
-        WasmResult::Reject(error) => Err(error),
-    }
+    pic.update_call(canister_id, caller, method, encode_one(arg).unwrap())
+        .map_err(|e| {
+            format!(
+                "Update call error. RejectionCode: {:?}, Error: {}",
+                e.code, e.description
+            )
+        })
+        .and_then(|reply| match reply {
+            WasmResult::Reply(reply) => {
+                decode_one(&reply).map_err(|_| "Decoding failed".to_string())
+            }
+            WasmResult::Reject(error) => Err(error),
+        })
 }
