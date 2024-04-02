@@ -23,7 +23,7 @@ pub fn setup() -> (PocketIc, Principal) {
     let backend_wasm_path =
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
-    let wasm_bytes = read(backend_wasm_path).expect(format!(
+    let wasm_bytes = read(backend_wasm_path.clone()).expect(&format!(
         "Could not find the backend wasm: {}",
         backend_wasm_path
     ));
