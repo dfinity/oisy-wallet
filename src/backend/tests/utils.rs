@@ -2,6 +2,7 @@ use candid::{decode_one, encode_one, CandidType, Principal};
 use pocket_ic::{PocketIc, WasmResult};
 use serde::Deserialize;
 use shared::types::{Arg, InitArg};
+use std::env;
 use std::fs::read;
 
 pub const CALLER: &str = "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae";
@@ -19,7 +20,10 @@ pub fn setup() -> (PocketIc, Principal) {
         pic.create_canister_on_subnet(None, None, Principal::from_text(SUBNET_ID).unwrap());
     pic.add_cycles(canister_id, 2_000_000_000_000);
 
-    let wasm_bytes = read(BACKEND_WASM).expect("Could not find the backend wasm.");
+    let backend_wasm_path =
+        env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
+
+    let wasm_bytes = read(backend_wasm_path).expect("Could not find the backend wasm.");
 
     let arg: Arg = Arg::Init(InitArg {
         ecdsa_key_name: format!("master_ecdsa_public_key_{}", SUBNET_ID).to_string(),
