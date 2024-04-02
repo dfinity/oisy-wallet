@@ -32,3 +32,5 @@ internet_identity.wasm
 internet_identity.did
 
 codes.txt
+
+backend.wasm.gz

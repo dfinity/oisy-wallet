@@ -51,6 +51,7 @@ COPY . .
 RUN touch src/*/src/lib.rs
 
 RUN ./docker/build --backend
+
 RUN sha256sum /backend.wasm.gz
 
 FROM scratch AS scratch_backend
