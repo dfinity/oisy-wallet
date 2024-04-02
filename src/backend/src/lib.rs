@@ -19,7 +19,7 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
-use shared::types::{Arg, InitArg};
+use shared::types::{Arg, InitArg, Token, TokenId};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -28,7 +28,6 @@ mod guards;
 
 type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
-type ChainId = u64;
 type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<Token>>, VMem>;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
@@ -102,20 +101,6 @@ where
 pub struct State {
     config: ConfigCell,
     user_token: UserTokenMap,
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct Token {
-    pub contract_address: String,
-    pub chain_id: ChainId,
-    pub symbol: Option<String>,
-    pub decimals: Option<u8>,
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct TokenId {
-    pub contract_address: String,
-    pub chain_id: ChainId,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
