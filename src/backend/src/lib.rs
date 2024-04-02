@@ -19,6 +19,7 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
+use shared::types::{Arg, InitArg};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -144,18 +145,6 @@ pub struct Config {
     pub ecdsa_key_name: String,
     // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
     pub allowed_callers: Vec<Principal>,
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct InitArg {
-    pub ecdsa_key_name: String,
-    pub allowed_callers: Vec<Principal>,
-}
-
-#[derive(CandidType, Deserialize)]
-enum Arg {
-    Init(InitArg),
-    Upgrade,
 }
 
 #[init]
