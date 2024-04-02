@@ -50,7 +50,10 @@ COPY . .
 
 RUN touch src/*/src/lib.rs
 
-RUN ./docker/build --backend
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/home/root/app/target \
+    ./docker/build --backend \
+
 RUN sha256sum /backend.wasm.gz
 
 FROM scratch AS scratch_backend
