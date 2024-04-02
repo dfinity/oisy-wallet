@@ -1,5 +1,6 @@
-use candid::{encode_one, Principal};
-use pocket_ic::PocketIc;
+use candid::{decode_one, encode_one, CandidType, Principal};
+use pocket_ic::{PocketIc, WasmResult};
+use serde::Deserialize;
 use shared::types::{Arg, InitArg};
 use std::fs::read;
 
@@ -28,4 +29,28 @@ pub fn setup() -> (PocketIc, Principal) {
     pic.install_canister(canister_id, wasm_bytes, encode_one(&arg).unwrap(), None);
 
     (pic, canister_id)
+}
+
+pub fn update_call<T>(
+    (pic, canister_id): (PocketIc, Principal),
+    caller: Principal,
+    method: &str,
+    arg: impl CandidType,
+) -> Result<T, String>
+where
+    T: for<'a> Deserialize<'a> + CandidType,
+{
+    pic.update_call(canister_id, caller, method, encode_one(arg).unwrap())
+        .map_err(|e| {
+            format!(
+                "Update call error. RejectionCode: {:?}, Error: {}",
+                e.code, e.description
+            )
+        })
+        .and_then(|reply| match reply {
+            WasmResult::Reply(reply) => {
+                decode_one(&reply).map_err(|_| "Decoding failed".to_string())
+            }
+            WasmResult::Reject(error) => Err(error),
+        })
 }
