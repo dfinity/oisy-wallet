@@ -1,6 +1,7 @@
-use candid::encode_one;
 use candid::Principal;
+use candid::{decode_one, encode_one, CandidType};
 use pocket_ic::{PocketIc, WasmResult};
+use serde::Deserialize;
 use shared::types::{Arg, InitArg};
 use std::fs::read;
 
@@ -15,7 +16,7 @@ fn setup() -> (PocketIc, Principal) {
     let wasm_bytes = read(BACKEND_WASM).expect("Could not find the backend wasm");
 
     let arg: Arg = Arg::Init(InitArg {
-        ecdsa_key_name: "dfx_test_key".to_string(),
+        ecdsa_key_name: "master_ecdsa_public_key_fscpm-uiaaa-aaaaa-aaaap-yai".to_string(),
         allowed_callers: vec![],
     });
 
@@ -26,19 +27,37 @@ fn setup() -> (PocketIc, Principal) {
 
 #[test]
 fn test_caller_eth_address() {
-    let (pic, canister_id) = setup();
+    let pic_setup = setup();
 
     let caller = Principal::from_text(
         "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae".to_string(),
     )
     .unwrap();
-    let method = "caller_eth_address";
-    let arg = encode_one(()).unwrap();
 
+    let address: String = update_call(pic_setup, caller, "caller_eth_address", ());
+
+    assert_eq!(
+        address,
+        "0xdd7fec4C49CD2Dd4eaa884D22D92503EabA5A791".to_string()
+    );
+}
+
+fn update_call<T>(
+    (pic, canister_id): (PocketIc, Principal),
+    caller: Principal,
+    method: &str,
+    arg: impl CandidType,
+) -> T
+where
+    T: for<'a> Deserialize<'a> + CandidType,
+{
     let reply = pic
-        .update_call(canister_id, caller, method, arg)
+        .update_call(canister_id, caller, method, encode_one(arg).unwrap())
         .expect(&format!("Failed to call {}", method));
 
-    // TODO: this fails and has not been developed yet
-    assert_eq!(reply, WasmResult::Reply(vec![0, 0, 0, 1]));
+    let WasmResult::Reply(reply) = reply else {
+        unreachable!()
+    };
+
+    decode_one(&reply).unwrap()
 }
