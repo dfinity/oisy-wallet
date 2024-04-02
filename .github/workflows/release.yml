@@ -32,32 +32,14 @@ jobs:
             target: scratch_backend
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up docker buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build ${{ matrix.name }}
-        uses: docker/build-push-action@v5
+      - name: Build ${{ matrix.name }} canister WASM
+        uses: ./.github/actions/docker-build-backend
         with:
-          file: Dockerfile
-          cache-from: type=gha,scope=cached-stage
-          # Exports the artefacts from the final stage
-          outputs: ./out
-          target: ${{ matrix.target }}
-
-      - run: sha256sum out/${{ matrix.name }}
-
-      - run: mv out/${{ matrix.name }} ${{ matrix.name }}
-
-      - name: 'Upload ${{ matrix.name }}'
-        uses: actions/upload-artifact@v4
-        with:
-          # name is the name used to display and retrieve the artifact
           name: ${{ matrix.name }}
-          # path is the name used as the file to upload and the name of the
-          # downloaded file
-          path: ./${{ matrix.name }}
+          target: ${{ matrix.target }}
 
   candid:
     runs-on: ubuntu-latest
