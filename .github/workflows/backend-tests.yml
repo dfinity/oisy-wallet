@@ -53,6 +53,10 @@ jobs:
           name: backend.wasm.gz
           path: .
 
+      - name: "Debug"
+        working-directory: .
+        run: ls -ltr
+
       - name: "Run backend tests"
         working-directory: .
         run: ./scripts/test.backend.sh

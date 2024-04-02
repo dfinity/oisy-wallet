@@ -23,7 +23,10 @@ pub fn setup() -> (PocketIc, Principal) {
     let backend_wasm_path =
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
-    let wasm_bytes = read(backend_wasm_path).expect("Could not find the backend wasm.");
+    let wasm_bytes = read(backend_wasm_path).expect(format!(
+        "Could not find the backend wasm: {}",
+        backend_wasm_path
+    ));
 
     let arg: Arg = Arg::Init(InitArg {
         ecdsa_key_name: format!("master_ecdsa_public_key_{}", SUBNET_ID).to_string(),
