@@ -7,7 +7,7 @@ POCKET_IC_SERVER_VERSION=3.0.1
 if [ -f "./backend.wasm.gz" ]; then
     # Setting the environment variable will be used in the test to load that particular file. Relative to where the test is.
     echo "Use existing backend.wasm.gz canister."
-    export BACKEND_WASM_PATH=".././backend.wasm.gz"
+    export BACKEND_WASM_PATH="../../backend.wasm.gz"
 else
     echo "Building backend canister."
     cargo build --locked --target wasm32-unknown-unknown --release -p backend
