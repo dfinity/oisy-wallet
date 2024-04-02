@@ -47,4 +47,4 @@ export POCKET_IC_BIN="../../${POCKET_IC_SERVER_PATH}"
 # Run tests
 
 echo "Running backend integration tests."
-cargo test -p backend -- --nocapture
+cargo test -p backend

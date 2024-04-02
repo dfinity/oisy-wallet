@@ -20,9 +20,6 @@ pub fn setup() -> (PocketIc, Principal) {
         pic.create_canister_on_subnet(None, None, Principal::from_text(SUBNET_ID).unwrap());
     pic.add_cycles(canister_id, 2_000_000_000_000);
 
-    let path = env::current_dir().unwrap();
-    println!("-------------------------------> The current directory is {}", path.display());
-
     let backend_wasm_path =
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
