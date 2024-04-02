@@ -2,9 +2,6 @@ name: Backend tests
 
 on:
   pull_request:
-    paths:
-      - 'src/backend/**'
-      - 'src/shared/**'
 
 jobs:
 
