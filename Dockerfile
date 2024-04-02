@@ -50,9 +50,7 @@ COPY . .
 
 RUN touch src/*/src/lib.rs
 
-RUN --mount=type=cache,target=/usr/local/cargo/registry \
-    --mount=type=cache,target=/home/root/app/target \
-    ./docker/build --backend \
+RUN ./docker/build --backend
 
 RUN sha256sum /backend.wasm.gz
 
