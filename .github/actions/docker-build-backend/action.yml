@@ -1,0 +1,45 @@
+name: Build Backend
+
+description: Build Oisy's backend canister WASM
+
+inputs:
+  name:
+    description: Name of the artifact
+    required: true
+  target:
+    description: Build target
+    required: true
+
+outputs: {}
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up docker buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build ${{ inputs.name }}
+      uses: docker/build-push-action@v5
+      with:
+        file: Dockerfile
+        cache-from: type=gha,scope=cached-stage
+        # Exports the artefacts from the final stage
+        outputs: ./out
+        target: ${{ inputs.target }}
+
+    - run: sha256sum out/${{ inputs.name }}
+      shell: bash
+
+    - run: mv out/${{ inputs.name }} ${{ inputs.name }}
+      shell: bash
+
+    - name: 'Upload ${{ inputs.name }}'
+      uses: actions/upload-artifact@v4
+      with:
+        # name is the name used to display and retrieve the artifact
+        name: ${{ inputs.name }}
+        # path is the name used as the file to upload and the name of the
+        # downloaded file
+        path: ./${{ inputs.name }}
