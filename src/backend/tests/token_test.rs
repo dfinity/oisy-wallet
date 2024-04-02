@@ -12,7 +12,7 @@ fn test_add_user_token() {
 
     let token: Token = Token {
         chain_id: 11155111,
-        contract_address: "0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9____".to_string(),
+        contract_address: "0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9".to_string(),
         decimals: Some(18),
         symbol: Some("Weenus".to_string()),
     };
