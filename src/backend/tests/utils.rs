@@ -64,3 +64,30 @@ where
         WasmResult::Reject(error) => Err(error),
     })
 }
+
+pub fn query_call<T>(
+    (pic, canister_id): &(PocketIc, Principal),
+    caller: Principal,
+    method: &str,
+    arg: impl CandidType,
+) -> Result<T, String>
+where
+    T: for<'a> Deserialize<'a> + CandidType,
+{
+    pic.query_call(
+        canister_id.clone(),
+        caller,
+        method,
+        encode_one(arg).unwrap(),
+    )
+    .map_err(|e| {
+        format!(
+            "Query call error. RejectionCode: {:?}, Error: {}",
+            e.code, e.description
+        )
+    })
+    .and_then(|reply| match reply {
+        WasmResult::Reply(reply) => decode_one(&reply).map_err(|_| "Decoding failed".to_string()),
+        WasmResult::Reject(error) => Err(error),
+    })
+}
