@@ -1,5 +1,5 @@
-use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade, CALLER};
 use crate::utils::assertion::assert_tokens_eq;
+use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade, CALLER};
 use candid::Principal;
 use shared::types::Token;
 
