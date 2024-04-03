@@ -1,7 +1,7 @@
 pub mod utils;
 
 use candid::Principal;
-use utils::{setup, update_call, CALLER};
+use utils::pocketic::{setup, update_call, CALLER};
 
 #[test]
 fn test_caller_eth_address() {
