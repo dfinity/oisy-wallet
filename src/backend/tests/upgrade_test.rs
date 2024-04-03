@@ -1,9 +1,8 @@
 pub mod utils;
 
-use crate::utils::{setup_with_custom_wasm, upgrade};
 use candid::Principal;
 use shared::types::Token;
-use utils::{update_call, CALLER};
+use utils::pocketic::{setup_with_custom_wasm, update_call, upgrade, CALLER};
 
 #[test]
 fn test_upgrade_user_token() {

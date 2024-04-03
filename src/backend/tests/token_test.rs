@@ -3,7 +3,7 @@ pub mod utils;
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{Token, TokenId};
-use utils::{query_call, setup, update_call, CALLER};
+use utils::pocketic::{query_call, setup, update_call, CALLER};
 
 lazy_static! {
     static ref MOCK_TOKEN: Token = Token {
