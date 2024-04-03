@@ -29,3 +29,31 @@ fn test_anonymous_cannot_call_eth_address() {
         "Anonymous caller not authorized.".to_string()
     );
 }
+
+#[test]
+fn test_non_allowed_caller_cannot_call_eth_address_of() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let address =
+        update_call::<String>(&pic_setup, Principal::anonymous(), "eth_address_of", caller);
+
+    assert!(address.is_err());
+    assert_eq!(address.unwrap_err(), "Caller is not allowed.".to_string());
+}
+
+#[test]
+fn test_cannot_call_eth_address_of_for_anonymous() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let address =
+        update_call::<String>(&pic_setup, caller, "eth_address_of", Principal::anonymous());
+
+    assert!(address.is_err());
+    assert!(address
+        .unwrap_err()
+        .contains("Anonymous principal is not authorized"));
+}
