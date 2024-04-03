@@ -43,6 +43,7 @@ else
 fi
 
 export POCKET_IC_BIN="../../${POCKET_IC_SERVER_PATH}"
+export POCKET_IC_MUTE_SERVER=""
 
 # Run tests
 
