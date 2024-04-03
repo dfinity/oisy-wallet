@@ -20,7 +20,7 @@ fn test_eth_address_of() {
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let address = update_call::<String>(&pic_setup, caller, "caller_eth_address", caller)
+    let address = update_call::<String>(&pic_setup, caller, "eth_address_of", caller)
         .expect("Failed to call eth address of.");
 
     assert_eq!(address, CALLER_ETH_ADDRESS.to_string());
