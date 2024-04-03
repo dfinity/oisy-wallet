@@ -39,7 +39,7 @@ pub fn setup() -> (PocketIc, Principal) {
 }
 
 pub fn update_call<T>(
-    (pic, canister_id): (PocketIc, Principal),
+    (pic, canister_id): &(PocketIc, Principal),
     caller: Principal,
     method: &str,
     arg: impl CandidType,
@@ -47,17 +47,20 @@ pub fn update_call<T>(
 where
     T: for<'a> Deserialize<'a> + CandidType,
 {
-    pic.update_call(canister_id, caller, method, encode_one(arg).unwrap())
-        .map_err(|e| {
-            format!(
-                "Update call error. RejectionCode: {:?}, Error: {}",
-                e.code, e.description
-            )
-        })
-        .and_then(|reply| match reply {
-            WasmResult::Reply(reply) => {
-                decode_one(&reply).map_err(|_| "Decoding failed".to_string())
-            }
-            WasmResult::Reject(error) => Err(error),
-        })
+    pic.update_call(
+        canister_id.clone(),
+        caller,
+        method,
+        encode_one(arg).unwrap(),
+    )
+    .map_err(|e| {
+        format!(
+            "Update call error. RejectionCode: {:?}, Error: {}",
+            e.code, e.description
+        )
+    })
+    .and_then(|reply| match reply {
+        WasmResult::Reply(reply) => decode_one(&reply).map_err(|_| "Decoding failed".to_string()),
+        WasmResult::Reject(error) => Err(error),
+    })
 }

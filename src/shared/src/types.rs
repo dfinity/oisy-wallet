@@ -14,7 +14,7 @@ pub enum Arg {
 
 pub type ChainId = u64;
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone)]
 pub struct Token {
     pub contract_address: String,
     pub chain_id: ChainId,
@@ -22,7 +22,7 @@ pub struct Token {
     pub decimals: Option<u8>,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone)]
 pub struct TokenId {
     pub contract_address: String,
     pub chain_id: ChainId,

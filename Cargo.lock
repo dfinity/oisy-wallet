@@ -87,6 +87,7 @@ dependencies = [
  "ic-metrics-encoder",
  "ic-stable-structures",
  "k256",
+ "lazy_static",
  "pocket-ic",
  "serde",
  "serde_bytes",
