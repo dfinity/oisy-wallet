@@ -9,7 +9,7 @@ fn test_caller_eth_address() {
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let address = update_call::<String>(pic_setup, caller, "caller_eth_address", ())
+    let address = update_call::<String>(&pic_setup, caller, "caller_eth_address", ())
         .expect("Failed to call eth address.");
 
     assert_eq!(
@@ -23,7 +23,7 @@ fn test_anonymous_cannot_call_eth_address() {
     let pic_setup = setup();
 
     let address =
-        update_call::<String>(pic_setup, Principal::anonymous(), "caller_eth_address", ());
+        update_call::<String>(&pic_setup, Principal::anonymous(), "caller_eth_address", ());
 
     assert!(address.is_err());
     assert_eq!(

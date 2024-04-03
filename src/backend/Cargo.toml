@@ -24,4 +24,5 @@ serde_bytes = "0.11"
 shared = { path = "../shared" }
 
 [dev-dependencies]
+lazy_static = "1.4.0"
 pocket-ic = "2.2.0"
