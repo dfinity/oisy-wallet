@@ -1,6 +1,7 @@
 #!/bin/bash
 
 POCKET_IC_SERVER_VERSION=3.0.1
+OISY_UPGRADE_VERSION=v0.0.13
 
 # If a backend wasm file exists at the root, it will be used for the tests.
 
@@ -9,13 +10,22 @@ if [ -f "./backend.wasm.gz" ]; then
     echo "Use existing backend.wasm.gz canister."
     export BACKEND_WASM_PATH="../../backend.wasm.gz"
 else
+    # If none exist we build the project. The test will resolve the target/wasm32-unknown-unknown/release/backend.wasm automatically as fallback if no exported BACKEND_WASM_PATH variable is set.
     echo "Building backend canister."
     cargo build --locked --target wasm32-unknown-unknown --release -p backend
 fi
 
+# We use a previous version of the release to ensure upgradability
+
+OISY_UPGRADE_PATH="./backend-${OISY_UPGRADE_VERSION}.wasm.gz"
+
+if [ ! -f $OISY_UPGRADE_PATH ]; then
+    curl -sSL https://github.com/dfinity/oisy-wallet/releases/download/${OISY_UPGRADE_VERSION}/backend.wasm.gz -o $OISY_UPGRADE_PATH
+fi
+
 # Download PocketIC server
 
-POCKET_IC_SERVER_PATH=target/pocket-ic
+POCKET_IC_SERVER_PATH="target/pocket-ic"
 
 if [ ! -d "target" ]
 then
