@@ -1,6 +1,6 @@
 use shared::types::Token;
 
-pub fn assert_tokens(results_tokens: Vec<Token>, expected_tokens: Vec<Token>) {
+pub fn assert_tokens_eq(results_tokens: Vec<Token>, expected_tokens: Vec<Token>) {
     assert_eq!(results_tokens.len(), expected_tokens.len());
 
     for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {

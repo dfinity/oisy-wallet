@@ -1,5 +1,5 @@
 use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade, CALLER};
-use crate::utils::assertion::assert_tokens;
+use crate::utils::assertion::assert_tokens_eq;
 use candid::Principal;
 use shared::types::Token;
 
@@ -34,5 +34,5 @@ fn test_upgrade_user_token() {
 
     assert!(results.is_ok());
 
-    assert_tokens(results.unwrap(), expected_tokens);
+    assert_tokens_eq(results.unwrap(), expected_tokens);
 }

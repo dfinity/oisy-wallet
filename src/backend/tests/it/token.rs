@@ -1,5 +1,5 @@
 use crate::utils::pocketic::{query_call, setup, update_call, CALLER};
-use crate::utils::assertion::assert_tokens;
+use crate::utils::assertion::assert_tokens_eq;
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{Token, TokenId};
@@ -71,7 +71,7 @@ fn test_list_user_tokens() {
 
     assert!(results.is_ok());
 
-    assert_tokens(results.unwrap(), expected_tokens);
+    assert_tokens_eq(results.unwrap(), expected_tokens);
 }
 
 #[test]
