@@ -1,4 +1,4 @@
-use candid::{CandidType, Deserialize, Principal};
+use candid::{CandidType, Deserialize, Nat, Principal};
 
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
@@ -26,4 +26,16 @@ pub struct Token {
 pub struct TokenId {
     pub contract_address: String,
     pub chain_id: ChainId,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct SignRequest {
+    pub chain_id: Nat,
+    pub to: String,
+    pub gas: Nat,
+    pub max_fee_per_gas: Nat,
+    pub max_priority_fee_per_gas: Nat,
+    pub value: Nat,
+    pub nonce: Nat,
+    pub data: Option<String>,
 }
