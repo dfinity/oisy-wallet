@@ -1,9 +1,9 @@
-mod utils;
+pub mod utils;
 
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{Token, TokenId};
-use utils::{setup, update_call, CALLER};
+use utils::{query_call, setup, update_call, CALLER};
 
 lazy_static! {
     static ref MOCK_TOKEN: Token = Token {
@@ -47,6 +47,41 @@ fn test_remove_user_token() {
     );
 
     assert!(remove_result.is_ok());
+}
+
+#[test]
+fn test_list_user_tokens() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let _ = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+
+    let another_token: Token = Token {
+        chain_id: 11155111,
+        contract_address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984".to_string(),
+        decimals: Some(18),
+        symbol: Some("Uniswap".to_string()),
+    };
+
+    let _ = update_call::<()>(&pic_setup, caller, "add_user_token", another_token.clone());
+
+    let results = query_call::<Vec<Token>>(&pic_setup, caller, "list_user_tokens", ());
+
+    let expected_tokens: Vec<Token> = vec![MOCK_TOKEN.clone(), another_token.clone()];
+
+    assert!(results.is_ok());
+
+    let results_tokens = results.unwrap();
+
+    assert_eq!(results_tokens.len(), expected_tokens.len());
+
+    for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
+        assert_eq!(token.contract_address, expected.contract_address);
+        assert_eq!(token.chain_id, expected.chain_id);
+        assert_eq!(token.symbol, expected.symbol);
+        assert_eq!(token.decimals, expected.decimals);
+    }
 }
 
 #[test]
@@ -104,4 +139,43 @@ fn test_anonymous_cannot_remove_user_token() {
         result.unwrap_err(),
         "Anonymous caller not authorized.".to_string()
     );
+}
+
+#[test]
+fn test_anonymous_cannot_list_user_tokens() {
+    let pic_setup = setup();
+
+    let result = query_call::<()>(
+        &pic_setup,
+        Principal::anonymous(),
+        "list_user_tokens",
+        MOCK_TOKEN_ID.clone(),
+    );
+
+    assert!(result.is_err());
+    assert_eq!(
+        result.unwrap_err(),
+        "Anonymous caller not authorized.".to_string()
+    );
+}
+
+#[test]
+fn test_user_cannot_list_another_user_tokens() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let _ = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+
+    let another_caller =
+        Principal::from_text("yaa3n-twfur-6xz6e-3z7ep-xln56-222kz-w2b2m-y5wqz-vu6kk-s3fdg-lqe")
+            .unwrap();
+
+    let results = query_call::<Vec<Token>>(&pic_setup, another_caller, "list_user_tokens", ());
+
+    assert!(results.is_ok());
+
+    let results_tokens = results.unwrap();
+
+    assert_eq!(results_tokens.len(), 0);
 }
