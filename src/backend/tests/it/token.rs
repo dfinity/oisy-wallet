@@ -1,5 +1,5 @@
-use crate::utils::pocketic::{query_call, setup, update_call, CALLER};
 use crate::utils::assertion::assert_tokens_eq;
+use crate::utils::pocketic::{query_call, setup, update_call, CALLER};
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{Token, TokenId};
