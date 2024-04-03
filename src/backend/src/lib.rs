@@ -19,7 +19,7 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
-use shared::types::{Arg, InitArg, Token, TokenId};
+use shared::types::{Arg, InitArg, SignRequest, Token, TokenId};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -236,18 +236,6 @@ async fn eth_address_of(p: Principal) -> String {
         ic_cdk::trap("Anonymous principal is not authorized");
     }
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&p).await)
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct SignRequest {
-    pub chain_id: Nat,
-    pub to: String,
-    pub gas: Nat,
-    pub max_fee_per_gas: Nat,
-    pub max_priority_fee_per_gas: Nat,
-    pub value: Nat,
-    pub nonce: Nat,
-    pub data: Option<String>,
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
