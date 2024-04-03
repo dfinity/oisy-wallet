@@ -1,6 +1,8 @@
 use crate::utils::pocketic::{setup, update_call, CALLER};
 use candid::Principal;
 
+const CALLER_ETH_ADDRESS: &str = "0xdd7fec4C49CD2Dd4eaa884D22D92503EabA5A791";
+
 #[test]
 fn test_caller_eth_address() {
     let pic_setup = setup();
@@ -10,10 +12,19 @@ fn test_caller_eth_address() {
     let address = update_call::<String>(&pic_setup, caller, "caller_eth_address", ())
         .expect("Failed to call eth address.");
 
-    assert_eq!(
-        address,
-        "0xdd7fec4C49CD2Dd4eaa884D22D92503EabA5A791".to_string()
-    );
+    assert_eq!(address, CALLER_ETH_ADDRESS.to_string());
+}
+
+#[test]
+fn test_eth_address_of() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let address = update_call::<String>(&pic_setup, caller, "caller_eth_address", caller)
+        .expect("Failed to call eth address of.");
+
+    assert_eq!(address, CALLER_ETH_ADDRESS.to_string());
 }
 
 #[test]
