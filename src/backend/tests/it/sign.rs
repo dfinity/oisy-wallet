@@ -29,6 +29,42 @@ fn test_sign_transaction() {
 }
 
 #[test]
+fn test_personal_sign() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let transaction = update_call::<String>(
+        &pic_setup,
+        caller,
+        "personal_sign",
+        hex::encode("test message".to_string()),
+    );
+
+    assert_eq!(
+        transaction.unwrap(),
+        "0x304e37956709f56327742df8cbb0533407aad95f18fc052c039ac9cee1eea30462d8b68aab6799a70fd9163827b521030679c3c6d7d6027b3c255e34e02695fc00".to_string()
+    );
+}
+
+#[test]
+fn test_cannot_personal_sign_if_message_is_not_hex_string() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let result = update_call::<String>(
+        &pic_setup,
+        caller,
+        "personal_sign",
+        "test message".to_string(),
+    );
+
+    assert!(result.is_err());
+    assert!(result.unwrap_err().contains("failed to decode hex"));
+}
+
+#[test]
 fn test_cannot_sign_transaction_with_invalid_to_address() {
     let pic_setup = setup();
 
@@ -58,6 +94,19 @@ fn test_anonymous_cannot_sign_transaction() {
     let pic_setup = setup();
 
     let result = update_call::<String>(&pic_setup, Principal::anonymous(), "sign_transaction", ());
+
+    assert!(result.is_err());
+    assert_eq!(
+        result.unwrap_err(),
+        "Anonymous caller not authorized.".to_string()
+    );
+}
+
+#[test]
+fn test_anonymous_cannot_personal_sign() {
+    let pic_setup = setup();
+
+    let result = update_call::<String>(&pic_setup, Principal::anonymous(), "personal_sign", ());
 
     assert!(result.is_err());
     assert_eq!(
