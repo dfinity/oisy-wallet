@@ -1,7 +1,5 @@
-pub mod utils;
-
+use crate::utils::pocketic::{setup, update_call, CALLER};
 use candid::Principal;
-use utils::pocketic::{setup, update_call, CALLER};
 
 #[test]
 fn test_caller_eth_address() {
