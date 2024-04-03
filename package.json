@@ -22,6 +22,7 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest",
+		"cargo:test": "POCKET_IC_MUTE_SERVER= POCKET_IC_BIN=../../target/pocket-ic cargo test -p backend",
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
 		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}'",
 		"generate": "scripts/did.sh && dfx generate && node scripts/update.types.mjs && npm run format",
