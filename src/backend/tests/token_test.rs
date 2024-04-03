@@ -140,3 +140,42 @@ fn test_anonymous_cannot_remove_user_token() {
         "Anonymous caller not authorized.".to_string()
     );
 }
+
+#[test]
+fn test_anonymous_cannot_list_user_tokens() {
+    let pic_setup = setup();
+
+    let result = query_call::<()>(
+        &pic_setup,
+        Principal::anonymous(),
+        "list_user_tokens",
+        MOCK_TOKEN_ID.clone(),
+    );
+
+    assert!(result.is_err());
+    assert_eq!(
+        result.unwrap_err(),
+        "Anonymous caller not authorized.".to_string()
+    );
+}
+
+#[test]
+fn test_user_cannot_list_another_user_tokens() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let _ = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+
+    let another_caller =
+        Principal::from_text("yaa3n-twfur-6xz6e-3z7ep-xln56-222kz-w2b2m-y5wqz-vu6kk-s3fdg-lqe")
+            .unwrap();
+
+    let results = query_call::<Vec<Token>>(&pic_setup, another_caller, "list_user_tokens", ());
+
+    assert!(results.is_ok());
+
+    let results_tokens = results.unwrap();
+
+    assert_eq!(results_tokens.len(), 0);
+}
