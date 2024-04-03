@@ -1,7 +1,6 @@
-use crate::utils::pocketic::{setup, update_call, CALLER};
+use crate::utils::mock::{CALLER, CALLER_ETH_ADDRESS};
+use crate::utils::pocketic::{setup, update_call};
 use candid::Principal;
-
-const CALLER_ETH_ADDRESS: &str = "0xdd7fec4C49CD2Dd4eaa884D22D92503EabA5A791";
 
 #[test]
 fn test_caller_eth_address() {
