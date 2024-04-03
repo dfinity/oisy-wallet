@@ -1,4 +1,4 @@
-mod utils;
+pub mod utils;
 
 use candid::Principal;
 use lazy_static::lazy_static;
