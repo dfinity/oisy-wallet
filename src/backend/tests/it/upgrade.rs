@@ -1,5 +1,7 @@
 use crate::utils::assertion::assert_tokens_eq;
-use crate::utils::mock::{CALLER, CALLER_ETH_ADDRESS};
+use crate::utils::mock::{
+    CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
+};
 use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade};
 use candid::Principal;
 use shared::types::Token;
@@ -16,9 +18,9 @@ fn test_upgrade_user_token() {
 
     let token: Token = Token {
         chain_id: 11155111,
-        contract_address: "0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9".to_string(),
-        decimals: Some(18),
-        symbol: Some("Weenus".to_string()),
+        contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
+        decimals: Some(WEENUS_DECIMALS),
+        symbol: Some(WEENUS_SYMBOL.to_string()),
     };
 
     let result = update_call::<()>(&pic_setup, caller, "add_user_token", token.clone());
