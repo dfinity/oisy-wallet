@@ -1,4 +1,5 @@
 use crate::utils::pocketic::{query_call, setup, update_call, CALLER};
+use crate::utils::assertion::assert_tokens_eq;
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{Token, TokenId};
@@ -70,16 +71,7 @@ fn test_list_user_tokens() {
 
     assert!(results.is_ok());
 
-    let results_tokens = results.unwrap();
-
-    assert_eq!(results_tokens.len(), expected_tokens.len());
-
-    for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
-        assert_eq!(token.contract_address, expected.contract_address);
-        assert_eq!(token.chain_id, expected.chain_id);
-        assert_eq!(token.symbol, expected.symbol);
-        assert_eq!(token.decimals, expected.decimals);
-    }
+    assert_tokens_eq(results.unwrap(), expected_tokens);
 }
 
 #[test]
