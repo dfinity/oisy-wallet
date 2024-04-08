@@ -83,7 +83,6 @@ dependencies = [
  "hex",
  "ic-cdk",
  "ic-cdk-macros",
- "ic-metrics-encoder",
  "ic-stable-structures",
  "k256",
  "lazy_static",
