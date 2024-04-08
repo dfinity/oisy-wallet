@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 
 import { existsSync, readdirSync } from 'node:fs';
-import { readFile, rename, writeFile } from 'node:fs/promises';
+import { readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-/**
- * We have to manipulate the types as long as https://github.com/dfinity/sdk/discussions/2761 is not implemented
- */
-const cleanTypes = async ({ dest = `./src/declarations` }) => {
+const deleteIndexes = async ({ dest = `./src/declarations` }) => {
 	const promises = readdirSync(dest).map(
 		(dir) =>
 			new Promise(async (resolve) => {
@@ -18,15 +15,7 @@ const cleanTypes = async ({ dest = `./src/declarations` }) => {
 					return;
 				}
 
-				const content = await readFile(indexPath, 'utf-8');
-				const clean = content.replace(
-					/export const canisterId = process\.env\.\w*_CANISTER_ID;/g,
-					''
-				);
-
-				const valid = clean.replace(/export const idlFactory = \({ IDL }\) => {/g, '');
-
-				await writeFile(indexPath, valid, 'utf-8');
+				await rm(indexPath, { force: true });
 
 				resolve();
 			})
@@ -96,7 +85,7 @@ const renameFactory = async ({ dest = `./src/declarations` }) => {
 
 (async () => {
 	try {
-		await cleanTypes({});
+		await deleteIndexes({});
 
 		await cleanFactory({});
 
