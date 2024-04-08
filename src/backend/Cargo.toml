@@ -3,24 +3,21 @@ name = "backend"
 version = "0.0.2"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-candid.workspace = true
-ethers-core = "= 2.0.11"
-futures = "0.3"
 ic-cdk.workspace = true
 ic-cdk-macros.workspace = true
-ic-stable-structures = "0.6.3"
+candid.workspace = true
 serde.workspace = true
+serde_bytes.workspace = true
+ic-stable-structures = "0.6.3"
+ethers-core = "= 2.0.11"
+futures = "0.3"
 k256 = "0.13"
 hex = "0.4"
 getrandom = { version = "0.2", features = ["custom"] }
-ic-metrics-encoder = "1.1.1"
-serde_bytes.workspace = true
 shared = { path = "../shared" }
 
 [dev-dependencies]
