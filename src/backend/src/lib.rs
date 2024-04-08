@@ -1,4 +1,5 @@
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
+use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
@@ -25,6 +26,7 @@ use std::cell::RefCell;
 use std::str::FromStr;
 
 mod guards;
+mod token;
 
 type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
@@ -34,7 +36,6 @@ const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 
 const MAX_SYMBOL_LENGTH: usize = 20;
-const MAX_TOKEN_LIST_LENGTH: usize = 100;
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -366,42 +367,23 @@ fn add_user_token(token: Token) {
         }
     }
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-    mutate_state(|s| {
-        let Candid(mut tokens) = s.user_token.get(&stored_principal).unwrap_or_default();
-        match tokens.iter().position(|t| {
-            t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
-        }) {
-            Some(p) => {
-                tokens[p] = token;
-            }
-            None => {
-                if tokens.len() == MAX_TOKEN_LIST_LENGTH {
-                    ic_cdk::trap(&format!(
-                        "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
-                    ));
-                }
-                tokens.push(token);
-            }
-        }
-        s.user_token.insert(stored_principal, Candid(tokens))
-    });
+
+    let find =
+        |t: &Token| t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr;
+
+    mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_token, &token, &find));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
 fn remove_user_token(token_id: TokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-    mutate_state(|s| match s.user_token.get(&stored_principal) {
-        None => (),
-        Some(Candid(mut tokens)) => {
-            if let Some(p) = tokens.iter().position(|t| {
-                t.chain_id == token_id.chain_id && parse_eth_address(&t.contract_address) == addr
-            }) {
-                tokens.swap_remove(p);
-                s.user_token.insert(stored_principal, Candid(tokens));
-            }
-        }
-    });
+
+    let find = |t: &Token| {
+        t.chain_id == token_id.chain_id && parse_eth_address(&t.contract_address) == addr
+    };
+
+    mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_token, &find));
 }
 
 #[query(guard = "caller_is_not_anonymous")]
