@@ -4,9 +4,6 @@
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
-			"declarations": {
-				"node_compatibility": true
-			},
 			"optimize": "cycles"
 		},
 		"frontend": {
@@ -14,10 +11,7 @@
 				"entrypoint": "build/index.html"
 			},
 			"source": ["build/"],
-			"type": "assets",
-			"declarations": {
-				"node_compatibility": true
-			}
+			"type": "assets"
 		},
 		"internet_identity": {
 			"type": "custom",
