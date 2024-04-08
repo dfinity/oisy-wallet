@@ -1,4 +1,5 @@
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
+use crate::token::save_user_token;
 use candid::{CandidType, Deserialize, Nat, Principal};
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
@@ -19,22 +20,24 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
-use shared::types::{Arg, InitArg, SignRequest, Token, TokenId};
+use shared::types::{Arg, InitArg, LedgerCanisterId, SignRequest, Token, TokenId};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
 
 mod guards;
+mod token;
 
 type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
 type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<Token>>, VMem>;
+type UserIcrcTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<LedgerCanisterId>>, VMem>;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
+const USER_ICRC_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 
 const MAX_SYMBOL_LENGTH: usize = 20;
-const MAX_TOKEN_LIST_LENGTH: usize = 100;
 
 thread_local! {
     static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> = RefCell::new(
@@ -45,6 +48,7 @@ thread_local! {
         MEMORY_MANAGER.with(|mm| State {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
+            user_icrc_token: UserIcrcTokenMap::init(mm.borrow().get(USER_ICRC_TOKEN_MEMORY_ID)),
         })
     );
 }
@@ -101,6 +105,7 @@ where
 pub struct State {
     config: ConfigCell,
     user_token: UserTokenMap,
+    user_icrc_token: UserIcrcTokenMap,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -368,21 +373,13 @@ fn add_user_token(token: Token) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     mutate_state(|s| {
         let Candid(mut tokens) = s.user_token.get(&stored_principal).unwrap_or_default();
-        match tokens.iter().position(|t| {
+
+        let find = |t: &Token| {
             t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
-        }) {
-            Some(p) => {
-                tokens[p] = token;
-            }
-            None => {
-                if tokens.len() == MAX_TOKEN_LIST_LENGTH {
-                    ic_cdk::trap(&format!(
-                        "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
-                    ));
-                }
-                tokens.push(token);
-            }
-        }
+        };
+
+        save_user_token(&token, &mut tokens, &find);
+
         s.user_token.insert(stored_principal, Candid(tokens))
     });
 }

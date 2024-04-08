@@ -39,3 +39,5 @@ pub struct SignRequest {
     pub nonce: Nat,
     pub data: Option<String>,
 }
+
+pub type LedgerCanisterId = Principal;
