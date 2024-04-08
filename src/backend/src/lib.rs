@@ -20,7 +20,7 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
-use shared::types::{Arg, InitArg, LedgerCanisterId, SignRequest, Token, TokenId};
+use shared::types::{Arg, InitArg, LedgerId, SignRequest, Token, TokenId};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -31,7 +31,7 @@ mod token;
 type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
 type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<Token>>, VMem>;
-type UserIcrcTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<LedgerCanisterId>>, VMem>;
+type UserIcrcTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<LedgerId>>, VMem>;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -394,6 +394,38 @@ fn remove_user_token(token_id: TokenId) {
 fn list_user_tokens() -> Vec<Token> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
+}
+
+/// Adds a new ICRC token to the user.
+#[update(guard = "caller_is_not_anonymous")]
+fn add_user_icrc_token(ledger_id: LedgerId) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    let find = |t: &LedgerId| t.clone() == ledger_id;
+
+    mutate_state(|s| {
+        add_to_user_token(stored_principal, &mut s.user_icrc_token, &ledger_id, &find)
+    });
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+fn remove_user_icrc_token(ledger_id: LedgerId) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    let find = |t: &LedgerId| t.clone() == ledger_id;
+
+    mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_icrc_token, &find));
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+fn list_user_icrc_tokens() -> Vec<LedgerId> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    read_state(|s| {
+        s.user_icrc_token
+            .get(&stored_principal)
+            .unwrap_or_default()
+            .0
+    })
 }
 
 /// API method to get cycle balance and burn rate.

@@ -40,4 +40,4 @@ pub struct SignRequest {
     pub data: Option<String>,
 }
 
-pub type LedgerCanisterId = Principal;
+pub type LedgerId = Principal;
