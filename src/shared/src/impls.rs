@@ -1,7 +1,7 @@
-use crate::types::token::{UserToken, UserTokenId};
+use crate::types::token::{IcrcToken, UserToken, UserTokenId};
 
-impl UserToken {
-    pub fn matches(&self, other: &UserToken) -> bool {
+impl PartialEq for UserToken {
+    fn eq(&self, other: &Self) -> bool {
         let self_id = UserTokenId::from(self.clone());
         let other_id = UserTokenId::from(other.clone());
 
@@ -24,5 +24,11 @@ impl PartialEq for UserTokenId {
                 self_ledger_id == other_ledger_id
             }
         }
+    }
+}
+
+impl PartialEq for IcrcToken {
+    fn eq(&self, other: &Self) -> bool {
+        self.ledger_id == other.ledger_id
     }
 }

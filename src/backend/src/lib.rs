@@ -405,7 +405,7 @@ fn list_user_tokens() -> Vec<Token> {
 fn add_user_custom_token(token: UserToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &UserToken| -> bool { t.matches(&token) };
+    let find = |t: &UserToken| -> bool { t.clone() == token };
 
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find));
 }
