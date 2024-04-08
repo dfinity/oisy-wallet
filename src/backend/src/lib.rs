@@ -104,7 +104,10 @@ where
 
 pub struct State {
     config: ConfigCell,
+    /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the users.
     user_token: UserTokenMap,
+    /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
+    /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
     user_custom_token: UserCustomTokenMap,
 }
 
