@@ -4,7 +4,7 @@ use crate::utils::mock::{
 };
 use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade};
 use candid::Principal;
-use shared::types::Token;
+use shared::types::token::Token;
 
 const BACKEND_V0_0_13_WASM_PATH: &str = "../../backend-v0.0.13.wasm.gz";
 
