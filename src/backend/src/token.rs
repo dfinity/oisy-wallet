@@ -14,7 +14,7 @@ pub fn add_to_user_token<T>(
 {
     let Candid(mut tokens) = user_token.get(&stored_principal).unwrap_or_default();
 
-    match tokens.iter().position(|t| find(t)) {
+    match tokens.iter().position(find) {
         Some(p) => {
             tokens[p] = token.clone();
         }
@@ -41,7 +41,7 @@ pub fn remove_from_user_token<T>(
     match user_token.get(&stored_principal) {
         None => (),
         Some(Candid(mut tokens)) => {
-            if let Some(p) = tokens.iter().position(|t| find(t)) {
+            if let Some(p) = tokens.iter().position(find) {
                 tokens.swap_remove(p);
                 user_token.insert(stored_principal, Candid(tokens));
             }

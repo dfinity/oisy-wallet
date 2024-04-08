@@ -401,7 +401,7 @@ fn list_user_tokens() -> Vec<Token> {
 fn add_user_icrc_token(ledger_id: LedgerId) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &LedgerId| t.clone() == ledger_id;
+    let find = |t: &LedgerId| *t == ledger_id;
 
     mutate_state(|s| {
         add_to_user_token(stored_principal, &mut s.user_icrc_token, &ledger_id, &find)
@@ -412,7 +412,7 @@ fn add_user_icrc_token(ledger_id: LedgerId) {
 fn remove_user_icrc_token(ledger_id: LedgerId) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &LedgerId| t.clone() == ledger_id;
+    let find = |t: &LedgerId| *t == ledger_id;
 
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_icrc_token, &find));
 }
