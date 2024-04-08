@@ -1,5 +1,5 @@
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
-use crate::token::save_user_token;
+use crate::token::extend_user_token;
 use candid::{CandidType, Deserialize, Nat, Principal};
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
@@ -378,7 +378,7 @@ fn add_user_token(token: Token) {
             t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
         };
 
-        save_user_token(&token, &mut tokens, &find);
+        extend_user_token(&token, &mut tokens, &find);
 
         s.user_token.insert(stored_principal, Candid(tokens))
     });

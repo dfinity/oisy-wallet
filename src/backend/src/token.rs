@@ -1,6 +1,6 @@
 const MAX_TOKEN_LIST_LENGTH: usize = 100;
 
-pub fn save_user_token<T: Clone>(token: &T, tokens: &mut Vec<T>, find: &dyn Fn(&T) -> bool) {
+pub fn extend_user_token<T: Clone>(token: &T, tokens: &mut Vec<T>, find: &dyn Fn(&T) -> bool) {
     match tokens.iter().position(|t| find(t)) {
         Some(p) => {
             tokens[p] = token.clone();
