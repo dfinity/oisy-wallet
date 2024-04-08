@@ -1,4 +1,4 @@
-use crate::types::token::{UserToken, UserTokenId};
+use crate::types::custom_token::{UserToken, UserTokenId};
 
 impl From<UserToken> for UserTokenId {
     fn from(token: UserToken) -> Self {

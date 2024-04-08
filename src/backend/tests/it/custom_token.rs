@@ -3,7 +3,7 @@ use crate::utils::mock::CALLER;
 use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::token::{IcrcToken, UserToken, UserTokenId};
+use shared::types::custom_token::{IcrcToken, UserToken, UserTokenId};
 
 lazy_static! {
     static ref ICRC_TOKEN: IcrcToken = IcrcToken {

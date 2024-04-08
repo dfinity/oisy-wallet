@@ -1,5 +1,5 @@
-use shared::types::token::UserToken;
-use shared::types::Token;
+use shared::types::custom_token::UserToken;
+use shared::types::token::Token;
 
 pub fn assert_tokens_eq(results_tokens: Vec<Token>, expected_tokens: Vec<Token>) {
     assert_eq!(results_tokens.len(), expected_tokens.len());
