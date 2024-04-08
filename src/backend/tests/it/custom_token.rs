@@ -43,8 +43,12 @@ fn test_remove_user_custom_token() {
 
     assert!(add_result.is_ok());
 
-    let remove_result =
-        update_call::<()>(&pic_setup, caller, "remove_user_custom_token", USER_TOKEN.clone());
+    let remove_result = update_call::<()>(
+        &pic_setup,
+        caller,
+        "remove_user_custom_token",
+        USER_TOKEN.clone(),
+    );
 
     assert!(remove_result.is_ok());
 }
@@ -70,7 +74,7 @@ fn test_list_user_custom_tokens() {
         &pic_setup,
         caller,
         "add_user_custom_token",
-        another_token.clone(),
+        UserToken::Icrc(another_token.clone()),
     );
 
     let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_custom_tokens", ());
