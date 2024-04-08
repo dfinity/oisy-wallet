@@ -1,4 +1,5 @@
 import type { ActorMethod } from '@dfinity/agent';
+import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
 export type Arg = { Upgrade: null } | { Init: InitArg };
@@ -68,3 +69,5 @@ export interface _SERVICE {
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }
+export declare const idlFactory: IDL.InterfaceFactory;
+export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
