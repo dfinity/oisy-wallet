@@ -61,6 +61,7 @@ export interface TokenId {
 	contract_address: string;
 }
 export type UserToken = { Icrc: IcrcToken };
+export type UserTokenId = { Icrc: Principal };
 export interface _SERVICE {
 	add_user_custom_token: ActorMethod<[UserToken], undefined>;
 	add_user_token: ActorMethod<[Token], undefined>;
@@ -71,7 +72,7 @@ export interface _SERVICE {
 	list_user_custom_tokens: ActorMethod<[], Array<UserToken>>;
 	list_user_tokens: ActorMethod<[], Array<Token>>;
 	personal_sign: ActorMethod<[string], string>;
-	remove_user_custom_token: ActorMethod<[UserToken], undefined>;
+	remove_user_custom_token: ActorMethod<[UserTokenId], undefined>;
 	remove_user_token: ActorMethod<[TokenId], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;

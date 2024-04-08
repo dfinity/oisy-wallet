@@ -47,6 +47,7 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
+	const UserTokenId = IDL.Variant({ Icrc: IDL.Principal });
 	const TokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -71,7 +72,7 @@ export const idlFactory = ({ IDL }) => {
 		list_user_custom_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(Token)], ['query']),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
-		remove_user_custom_token: IDL.Func([UserToken], [], []),
+		remove_user_custom_token: IDL.Func([UserTokenId], [], []),
 		remove_user_token: IDL.Func([TokenId], [], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
