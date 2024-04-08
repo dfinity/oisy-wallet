@@ -32,6 +32,35 @@ fn test_add_user_token() {
 }
 
 #[test]
+fn test_update_user_token() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+
+    assert!(result.is_ok());
+
+    let update_token: Token = Token {
+        symbol: Some("Updated".to_string()),
+        ..MOCK_TOKEN.clone()
+    };
+
+    let update_result =
+        update_call::<()>(&pic_setup, caller, "add_user_token", update_token.clone());
+
+    assert!(update_result.is_ok());
+
+    let results = query_call::<Vec<Token>>(&pic_setup, caller, "list_user_tokens", ());
+
+    let expected_tokens: Vec<Token> = vec![update_token.clone()];
+
+    assert!(results.is_ok());
+
+    assert_tokens_eq(results.unwrap(), expected_tokens);
+}
+
+#[test]
 fn test_remove_user_token() {
     let pic_setup = setup();
 
