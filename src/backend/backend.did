@@ -3,12 +3,12 @@ type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
   freezing_threshold : nat;
-  balance : vec record { vec nat8; nat };
+  balance : vec record { blob; nat };
   memory_size : nat;
   cycles : nat;
   settings : DefiniteCanisterSettingsArgs;
   idle_cycles_burned_per_day : nat;
-  module_hash : opt vec nat8;
+  module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
 type DefiniteCanisterSettingsArgs = record {
@@ -21,11 +21,11 @@ type DefiniteCanisterSettingsArgs = record {
 type HttpRequest = record {
   url : text;
   method : text;
-  body : vec nat8;
+  body : blob;
   headers : vec record { text; text };
 };
 type HttpResponse = record {
-  body : vec nat8;
+  body : blob;
   headers : vec record { text; text };
   status_code : nat16;
 };
@@ -51,13 +51,16 @@ type Token = record {
 };
 type TokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
+  add_user_icrc_token : (principal) -> ();
   add_user_token : (Token) -> ();
   caller_eth_address : () -> (text);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
   http_request : (HttpRequest) -> (HttpResponse) query;
+  list_user_icrc_tokens : () -> (vec principal) query;
   list_user_tokens : () -> (vec Token) query;
   personal_sign : (text) -> (text);
+  remove_user_icrc_token : (principal) -> ();
   remove_user_token : (TokenId) -> ();
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);

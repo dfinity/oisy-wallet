@@ -60,13 +60,16 @@ export const idlFactory = ({ IDL }) => {
 		nonce: IDL.Nat
 	});
 	return IDL.Service({
+		add_user_icrc_token: IDL.Func([IDL.Principal], [], []),
 		add_user_token: IDL.Func([Token], [], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
+		list_user_icrc_tokens: IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(Token)], ['query']),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
+		remove_user_icrc_token: IDL.Func([IDL.Principal], [], []),
 		remove_user_token: IDL.Func([TokenId], [], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])

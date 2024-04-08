@@ -1,4 +1,5 @@
 import type { ActorMethod } from '@dfinity/agent';
+import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
 export type Arg = { Upgrade: null } | { Init: InitArg };
@@ -57,14 +58,19 @@ export interface TokenId {
 	contract_address: string;
 }
 export interface _SERVICE {
+	add_user_icrc_token: ActorMethod<[Principal], undefined>;
 	add_user_token: ActorMethod<[Token], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
+	list_user_icrc_tokens: ActorMethod<[], Array<Principal>>;
 	list_user_tokens: ActorMethod<[], Array<Token>>;
 	personal_sign: ActorMethod<[string], string>;
+	remove_user_icrc_token: ActorMethod<[Principal], undefined>;
 	remove_user_token: ActorMethod<[TokenId], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }
+export declare const idlFactory: IDL.InterfaceFactory;
+export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
