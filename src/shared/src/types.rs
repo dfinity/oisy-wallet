@@ -41,3 +41,13 @@ pub struct SignRequest {
 }
 
 pub type LedgerId = Principal;
+
+#[derive(CandidType, Deserialize, Clone)]
+pub struct Icrc {
+    pub ledger_id: LedgerId,
+}
+
+#[derive(CandidType, Deserialize, Clone)]
+pub enum UserToken {
+    Icrc(Icrc),
+}
