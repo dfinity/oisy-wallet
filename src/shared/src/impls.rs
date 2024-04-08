@@ -5,7 +5,7 @@ impl UserToken {
         let self_id = UserTokenId::from(self.clone());
         let other_id = UserTokenId::from(other.clone());
 
-        self_id.matches(&other_id)
+        self_id == other_id
     }
 }
 
@@ -17,8 +17,8 @@ impl From<UserToken> for UserTokenId {
     }
 }
 
-impl UserTokenId {
-    pub fn matches(&self, other: &UserTokenId) -> bool {
+impl PartialEq for UserTokenId {
+    fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (UserTokenId::Icrc(self_ledger_id), UserTokenId::Icrc(other_ledger_id)) => {
                 self_ledger_id == other_ledger_id

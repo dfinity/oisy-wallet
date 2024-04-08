@@ -414,7 +414,7 @@ fn add_user_custom_token(token: UserToken) {
 fn remove_user_custom_token(token_id: UserTokenId) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &UserToken| -> bool { UserTokenId::from(t.clone()).matches(&token_id) };
+    let find = |t: &UserToken| -> bool { UserTokenId::from(t.clone()) == token_id };
 
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_custom_token, &find));
 }
