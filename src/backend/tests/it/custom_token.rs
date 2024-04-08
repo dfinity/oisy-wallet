@@ -44,7 +44,7 @@ fn test_remove_user_custom_token() {
     assert!(add_result.is_ok());
 
     let remove_result =
-        update_call::<()>(&pic_setup, caller, "remove_user_token", USER_TOKEN.clone());
+        update_call::<()>(&pic_setup, caller, "remove_user_custom_token", USER_TOKEN.clone());
 
     assert!(remove_result.is_ok());
 }
