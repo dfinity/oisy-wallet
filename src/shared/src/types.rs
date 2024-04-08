@@ -45,17 +45,17 @@ pub mod token {
 
     pub type LedgerId = Principal;
 
-    #[derive(CandidType, Deserialize, Clone, Eq)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Eq)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub enum UserToken {
         Icrc(IcrcToken),
     }
 
-    #[derive(CandidType, Deserialize, Eq)]
+    #[derive(CandidType, Deserialize, Eq, PartialEq)]
     pub enum UserTokenId {
         Icrc(LedgerId),
     }
