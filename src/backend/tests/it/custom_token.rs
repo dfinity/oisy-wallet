@@ -3,7 +3,7 @@ use crate::utils::mock::CALLER;
 use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::{IcrcToken, Token, UserToken};
+use shared::types::token::{IcrcToken, UserToken};
 
 lazy_static! {
     static ref ICRC_TOKEN: IcrcToken = IcrcToken {
@@ -192,7 +192,7 @@ fn test_user_cannot_list_another_user_tokens() {
             .unwrap();
 
     let results =
-        query_call::<Vec<Token>>(&pic_setup, another_caller, "list_user_custom_tokens", ());
+        query_call::<Vec<UserToken>>(&pic_setup, another_caller, "list_user_custom_tokens", ());
 
     assert!(results.is_ok());
 

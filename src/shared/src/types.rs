@@ -40,14 +40,23 @@ pub struct SignRequest {
     pub data: Option<String>,
 }
 
-pub type LedgerId = Principal;
+pub mod token {
+    use candid::{CandidType, Deserialize, Principal};
 
-#[derive(CandidType, Deserialize, Clone)]
-pub struct IcrcToken {
-    pub ledger_id: LedgerId,
-}
+    pub type LedgerId = Principal;
 
-#[derive(CandidType, Deserialize, Clone)]
-pub enum UserToken {
-    Icrc(IcrcToken),
+    #[derive(CandidType, Deserialize, Clone)]
+    pub struct IcrcToken {
+        pub ledger_id: LedgerId,
+    }
+
+    #[derive(CandidType, Deserialize, Clone)]
+    pub enum UserToken {
+        Icrc(IcrcToken),
+    }
+
+    #[derive(CandidType, Deserialize)]
+    pub enum UserTokenId {
+        Icrc(LedgerId),
+    }
 }

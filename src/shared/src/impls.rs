@@ -1,9 +1,28 @@
-use crate::types::UserToken;
+use crate::types::token::{UserToken, UserTokenId};
 
 impl UserToken {
     pub fn matches(&self, other: &UserToken) -> bool {
+        let self_id = UserTokenId::from(self.clone());
+        let other_id = UserTokenId::from(other.clone());
+
+        self_id.matches(&other_id)
+    }
+}
+
+impl From<UserToken> for UserTokenId {
+    fn from(token: UserToken) -> Self {
+        match token {
+            UserToken::Icrc(token) => UserTokenId::Icrc(token.ledger_id),
+        }
+    }
+}
+
+impl UserTokenId {
+    pub fn matches(&self, other: &UserTokenId) -> bool {
         match (self, other) {
-            (UserToken::Icrc(t), UserToken::Icrc(token)) => t.ledger_id == token.ledger_id,
+            (UserTokenId::Icrc(self_ledger_id), UserTokenId::Icrc(other_ledger_id)) => {
+                self_ledger_id == other_ledger_id
+            }
         }
     }
 }

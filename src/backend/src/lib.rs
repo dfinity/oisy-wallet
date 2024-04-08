@@ -20,7 +20,8 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
-use shared::types::{Arg, InitArg, SignRequest, Token, TokenId, UserToken};
+use shared::types::token::{UserToken, UserTokenId};
+use shared::types::{Arg, InitArg, SignRequest, Token, TokenId};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -410,10 +411,10 @@ fn add_user_custom_token(token: UserToken) {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-fn remove_user_custom_token(token: UserToken) {
+fn remove_user_custom_token(token_id: UserTokenId) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &UserToken| -> bool { t.matches(&token) };
+    let find = |t: &UserToken| -> bool { UserTokenId::from(t.clone()).matches(&token_id) };
 
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_custom_token, &find));
 }
