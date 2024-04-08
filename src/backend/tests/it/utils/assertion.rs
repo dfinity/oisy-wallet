@@ -16,6 +16,6 @@ pub fn assert_custom_tokens_eq(results_tokens: Vec<UserToken>, expected_tokens: 
     assert_eq!(results_tokens.len(), expected_tokens.len());
 
     for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
-        assert_eq!(expected, token);
+        assert!(expected == token);
     }
 }

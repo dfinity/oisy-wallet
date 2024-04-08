@@ -55,7 +55,7 @@ pub mod token {
         Icrc(IcrcToken),
     }
 
-    #[derive(CandidType, Deserialize, Eq, PartialEq)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub enum UserTokenId {
         Icrc(LedgerId),
     }

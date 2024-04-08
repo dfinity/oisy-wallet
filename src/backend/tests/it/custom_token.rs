@@ -3,13 +3,14 @@ use crate::utils::mock::CALLER;
 use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::token::{IcrcToken, UserToken};
+use shared::types::token::{IcrcToken, UserToken, UserTokenId};
 
 lazy_static! {
     static ref ICRC_TOKEN: IcrcToken = IcrcToken {
         ledger_id: Principal::from_text("gyito-zyaaa-aaaaq-aacpq-cai".to_string()).unwrap()
     };
     static ref USER_TOKEN: UserToken = UserToken::Icrc(ICRC_TOKEN.clone());
+    static ref USER_TOKEN_ID: UserTokenId = UserTokenId::Icrc(ICRC_TOKEN.ledger_id.clone());
 }
 
 #[test]
@@ -70,8 +71,8 @@ fn test_remove_user_custom_token() {
     let add_result = update_call::<()>(
         &pic_setup,
         caller,
-        "add_user_custom_token",
-        USER_TOKEN.clone(),
+        "remove_user_custom_token",
+        USER_TOKEN_ID.clone(),
     );
 
     assert!(add_result.is_ok());
@@ -80,7 +81,7 @@ fn test_remove_user_custom_token() {
         &pic_setup,
         caller,
         "remove_user_custom_token",
-        USER_TOKEN.clone(),
+        USER_TOKEN_ID.clone(),
     );
 
     assert!(remove_result.is_ok());
@@ -146,7 +147,7 @@ fn test_anonymous_cannot_remove_user_token() {
         &pic_setup,
         Principal::anonymous(),
         "remove_user_custom_token",
-        USER_TOKEN.clone(),
+        USER_TOKEN_ID.clone(),
     );
 
     assert!(result.is_err());
