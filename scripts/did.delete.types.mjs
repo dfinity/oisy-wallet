@@ -15,3 +15,5 @@ const promises = Object.keys(canisters)
 	.map(deleteFolder);
 
 await Promise.allSettled(promises);
+
+console.log(`Useless declarations deleted!`);
