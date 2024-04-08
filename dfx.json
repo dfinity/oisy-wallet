@@ -29,9 +29,6 @@
 				"id": {
 					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		},
 		"icp_ledger": {
@@ -42,9 +39,6 @@
 				"id": {
 					"ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		},
 		"icp_index": {
@@ -55,9 +49,6 @@
 				"id": {
 					"ic": "qhbym-qaaaa-aaaaa-aaafq-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		},
 		"ckbtc_minter": {
@@ -69,9 +60,6 @@
 					"ic": "mqygn-kiaaa-aaaar-qaadq-cai",
 					"staging": "ml52i-qqaaa-aaaar-qaaba-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		},
 		"ckbtc_ledger": {
@@ -83,9 +71,6 @@
 					"ic": "mxzaz-hqaaa-aaaar-qaada-cai",
 					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		},
 		"ckbtc_index": {
@@ -97,9 +82,6 @@
 					"ic": "n5wcd-faaaa-aaaar-qaaea-cai",
 					"staging": "mm444-5iaaa-aaaar-qaabq-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		},
 		"ckbtc_kyt": {
@@ -111,9 +93,6 @@
 					"ic": "pjihx-aaaaa-aaaar-qaaka-cai",
 					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		},
 		"cketh_minter": {
@@ -125,9 +104,6 @@
 					"ic": "sv3dd-oaaaa-aaaar-qacoa-cai",
 					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		},
 		"cketh_ledger": {
@@ -139,9 +115,6 @@
 					"ic": "ss2fx-dyaaa-aaaar-qacoq-cai",
 					"staging": "apia6-jaaaa-aaaar-qabma-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		},
 		"cketh_index": {
@@ -153,9 +126,6 @@
 					"ic": "s3zol-vqaaa-aaaar-qacpa-cai",
 					"staging": "sh5u2-cqaaa-aaaar-qacna-cai"
 				}
-			},
-			"declarations": {
-				"node_compatibility": true
 			}
 		}
 	},

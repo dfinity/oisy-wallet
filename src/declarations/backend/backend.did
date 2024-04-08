@@ -1,0 +1,64 @@
+type Arg = variant { Upgrade; Init : InitArg };
+type CanisterStatusResultV2 = record {
+  controller : principal;
+  status : CanisterStatusType;
+  freezing_threshold : nat;
+  balance : vec record { blob; nat };
+  memory_size : nat;
+  cycles : nat;
+  settings : DefiniteCanisterSettingsArgs;
+  idle_cycles_burned_per_day : nat;
+  module_hash : opt blob;
+};
+type CanisterStatusType = variant { stopped; stopping; running };
+type DefiniteCanisterSettingsArgs = record {
+  controller : principal;
+  freezing_threshold : nat;
+  controllers : vec principal;
+  memory_allocation : nat;
+  compute_allocation : nat;
+};
+type HttpRequest = record {
+  url : text;
+  method : text;
+  body : blob;
+  headers : vec record { text; text };
+};
+type HttpResponse = record {
+  body : blob;
+  headers : vec record { text; text };
+  status_code : nat16;
+};
+type InitArg = record {
+  ecdsa_key_name : text;
+  allowed_callers : vec principal;
+};
+type SignRequest = record {
+  to : text;
+  gas : nat;
+  value : nat;
+  max_priority_fee_per_gas : nat;
+  data : opt text;
+  max_fee_per_gas : nat;
+  chain_id : nat;
+  nonce : nat;
+};
+type Token = record {
+  decimals : opt nat8;
+  chain_id : nat64;
+  contract_address : text;
+  symbol : opt text;
+};
+type TokenId = record { chain_id : nat64; contract_address : text };
+service : (Arg) -> {
+  add_user_token : (Token) -> ();
+  caller_eth_address : () -> (text);
+  eth_address_of : (principal) -> (text);
+  get_canister_status : () -> (CanisterStatusResultV2);
+  http_request : (HttpRequest) -> (HttpResponse) query;
+  list_user_tokens : () -> (vec Token) query;
+  personal_sign : (text) -> (text);
+  remove_user_token : (TokenId) -> ();
+  sign_prehash : (text) -> (text);
+  sign_transaction : (SignRequest) -> (text);
+}
