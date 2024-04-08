@@ -1,5 +1,5 @@
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
-use crate::token::{add_to_user_tokens, remove_from_user_token};
+use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
@@ -371,17 +371,11 @@ fn add_user_token(token: Token) {
         }
     }
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-    mutate_state(|s| {
-        let Candid(mut tokens) = s.user_token.get(&stored_principal).unwrap_or_default();
 
-        let find = |t: &Token| {
-            t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
-        };
+    let find =
+        |t: &Token| t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr;
 
-        add_to_user_tokens(&token, &mut tokens, &find);
-
-        s.user_token.insert(stored_principal, Candid(tokens))
-    });
+    mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_token, &token, &find));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
