@@ -1,4 +1,4 @@
-use shared::types::Token;
+use shared::types::{Token, UserToken};
 
 pub fn assert_tokens_eq(results_tokens: Vec<Token>, expected_tokens: Vec<Token>) {
     assert_eq!(results_tokens.len(), expected_tokens.len());
@@ -8,5 +8,13 @@ pub fn assert_tokens_eq(results_tokens: Vec<Token>, expected_tokens: Vec<Token>)
         assert_eq!(token.chain_id, expected.chain_id);
         assert_eq!(token.symbol, expected.symbol);
         assert_eq!(token.decimals, expected.decimals);
+    }
+}
+
+pub fn assert_custom_tokens_eq(results_tokens: Vec<UserToken>, expected_tokens: Vec<UserToken>) {
+    assert_eq!(results_tokens.len(), expected_tokens.len());
+
+    for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
+        assert!(expected.matches(token));
     }
 }
