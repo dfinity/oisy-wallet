@@ -1,4 +1,5 @@
 import type { ActorMethod } from '@dfinity/agent';
+import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
 export type AssetCanisterArgs = { Upgrade: UpgradeArgs } | { Init: InitArgs };
@@ -218,3 +219,5 @@ export interface _SERVICE {
 	validate_revoke_permission: ActorMethod<[RevokePermission], ValidationResult>;
 	validate_take_ownership: ActorMethod<[], ValidationResult>;
 }
+export declare const idlFactory: IDL.InterfaceFactory;
+export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
