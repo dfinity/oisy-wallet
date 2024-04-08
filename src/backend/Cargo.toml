@@ -10,16 +10,16 @@ crate-type = ["cdylib"]
 
 [dependencies]
 candid.workspace = true
-ethers-core = "2"
+ethers-core = "= 2.0.11"
 futures = "0.3"
 ic-cdk.workspace = true
 ic-cdk-macros.workspace = true
-ic-stable-structures = "0.6.0"
+ic-stable-structures = "0.6.3"
 serde.workspace = true
 k256 = "0.13"
 hex = "0.4"
 getrandom = { version = "0.2", features = ["custom"] }
-ic-metrics-encoder = "1.1.0"
+ic-metrics-encoder = "1.1.1"
 serde_bytes.workspace = true
 shared = { path = "../shared" }
 
