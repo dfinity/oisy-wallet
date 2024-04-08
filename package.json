@@ -53,7 +53,7 @@
 	"devDependencies": {
 		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.1",
-		"@sveltejs/kit": "^2.5.4",
+		"@sveltejs/kit": "^2.5.5",
 		"@sveltejs/vite-plugin-svelte": "^3.0.2",
 		"@types/node": "^20.12.5",
 		"@typescript-eslint/eslint-plugin": "^7.2.0",
