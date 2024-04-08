@@ -29,6 +29,39 @@ fn test_add_user_custom_token() {
 }
 
 #[test]
+fn test_update_user_token() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let result = update_call::<()>(
+        &pic_setup,
+        caller,
+        "add_user_custom_token",
+        USER_TOKEN.clone(),
+    );
+
+    assert!(result.is_ok());
+
+    let update_result = update_call::<()>(
+        &pic_setup,
+        caller,
+        "add_user_custom_token",
+        USER_TOKEN.clone(),
+    );
+
+    assert!(update_result.is_ok());
+
+    let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_custom_tokens", ());
+
+    let expected_tokens: Vec<UserToken> = vec![USER_TOKEN.clone()];
+
+    assert!(results.is_ok());
+
+    assert_custom_tokens_eq(results.unwrap(), expected_tokens);
+}
+
+#[test]
 fn test_remove_user_custom_token() {
     let pic_setup = setup();
 
