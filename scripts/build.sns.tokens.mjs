@@ -120,12 +120,18 @@ export const findSnses = async () => {
 			.map(
 				({
 					canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
-					icrc1_metadata
+					icrc1_metadata,
+					meta: { name: alternativeName, url, description }
 				}) => ({
 					ledgerCanisterId: ledger_canister_id,
 					indexCanisterId: index_canister_id,
 					rootCanisterId: root_canister_id,
-					metadata: mapOptionalToken(icrc1_metadata)
+					metadata: {
+						...mapOptionalToken(icrc1_metadata),
+						alternativeName,
+						url,
+						description
+					}
 				})
 			)
 			.filter(({ metadata }) => nonNullish(metadata))
