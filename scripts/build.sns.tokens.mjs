@@ -9,7 +9,7 @@ const AGGREGATOR_CANISTER_VERSION = 'v1';
 
 const AGGREGATOR_URL = `${SNS_AGGREGATOR_CANISTER_URL}/${AGGREGATOR_CANISTER_VERSION}/sns`;
 
-const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp', 'data');
+const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'env');
 const STATIC_FOLDER = join(process.cwd(), 'src', 'frontend', 'static', 'icons', 'snses');
 
 if (!existsSync(DATA_FOLDER)) {
@@ -154,7 +154,7 @@ export const findSnses = async () => {
 				{ tokens: [], icons: [] }
 			);
 
-		writeFileSync(join(DATA_FOLDER, 'sns-tokens.json'), JSON.stringify(tokens, jsonReplacer));
+		writeFileSync(join(DATA_FOLDER, 'tokens.sns.json'), JSON.stringify(tokens, jsonReplacer));
 
 		await saveLogos(icons);
 	} catch (err) {
