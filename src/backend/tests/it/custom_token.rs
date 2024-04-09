@@ -7,7 +7,8 @@ use shared::types::custom_token::{IcrcToken, UserToken, UserTokenId};
 
 lazy_static! {
     static ref ICRC_TOKEN: IcrcToken = IcrcToken {
-        ledger_id: Principal::from_text("gyito-zyaaa-aaaaq-aacpq-cai".to_string()).unwrap()
+        ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai".to_string()).unwrap(),
+        index_id: Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai".to_string()).unwrap(),
     };
     static ref USER_TOKEN: UserToken = UserToken::Icrc(ICRC_TOKEN.clone());
     static ref USER_TOKEN_ID: UserTokenId = UserTokenId::Icrc(ICRC_TOKEN.ledger_id.clone());
@@ -101,7 +102,8 @@ fn test_list_user_custom_tokens() {
     );
 
     let another_token: IcrcToken = IcrcToken {
-        ledger_id: Principal::from_text("uly3p-iqaaa-aaaaq-aabma-cai".to_string()).unwrap(),
+        ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
+        index_id: Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
     };
 
     let _ = update_call::<()>(
