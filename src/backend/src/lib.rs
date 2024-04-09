@@ -20,6 +20,7 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
+use shared::types::custom_token::{UserToken, UserTokenId};
 use shared::types::token::{Token, TokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::{Arg, InitArg};
@@ -33,9 +34,11 @@ mod token;
 type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
 type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<Token>>, VMem>;
+type UserCustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
+const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 
 const MAX_SYMBOL_LENGTH: usize = 20;
 
@@ -48,6 +51,7 @@ thread_local! {
         MEMORY_MANAGER.with(|mm| State {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
+            user_custom_token: UserCustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
         })
     );
 }
@@ -103,7 +107,11 @@ where
 
 pub struct State {
     config: ConfigCell,
+    /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the users.
     user_token: UserTokenMap,
+    /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
+    /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
+    user_custom_token: UserCustomTokenMap,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -392,6 +400,36 @@ fn remove_user_token(token_id: TokenId) {
 fn list_user_tokens() -> Vec<Token> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
+}
+
+/// Adds a new custom token to the user.
+#[update(guard = "caller_is_not_anonymous")]
+fn add_user_custom_token(token: UserToken) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    let find = |t: &UserToken| -> bool { t.clone() == token };
+
+    mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find));
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+fn remove_user_custom_token(token_id: UserTokenId) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    let find = |t: &UserToken| -> bool { UserTokenId::from(t.clone()) == token_id };
+
+    mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_custom_token, &find));
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+fn list_user_custom_tokens() -> Vec<UserToken> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    read_state(|s| {
+        s.user_custom_token
+            .get(&stored_principal)
+            .unwrap_or_default()
+            .0
+    })
 }
 
 /// API method to get cycle balance and burn rate.

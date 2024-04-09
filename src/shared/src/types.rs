@@ -28,6 +28,7 @@ pub mod transaction {
     }
 }
 
+/// Erc20 specific user defined tokens
 pub mod token {
     use candid::{CandidType, Deserialize};
 
@@ -45,5 +46,27 @@ pub mod token {
     pub struct TokenId {
         pub contract_address: String,
         pub chain_id: ChainId,
+    }
+}
+
+/// Extendable custom user defined tokens
+pub mod custom_token {
+    use candid::{CandidType, Deserialize, Principal};
+
+    pub type LedgerId = Principal;
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    pub struct IcrcToken {
+        pub ledger_id: LedgerId,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    pub enum UserToken {
+        Icrc(IcrcToken),
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    pub enum UserTokenId {
+        Icrc(LedgerId),
     }
 }
