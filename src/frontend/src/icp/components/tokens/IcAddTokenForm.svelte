@@ -61,9 +61,10 @@
 		isNullishOrEmpty($filterStore)
 			? []
 			: icrcTokens.filter(
-					({ metadata: { name, symbol } }) =>
+					({ metadata: { name, symbol, alternativeName } }) =>
 						name.toLowerCase().includes($filterStore.toLowerCase()) ||
-						symbol.toLowerCase().includes($filterStore.toLowerCase())
+						symbol.toLowerCase().includes($filterStore.toLowerCase()) ||
+						(alternativeName ?? '').toLowerCase().includes($filterStore.toLowerCase())
 				)
 	);
 </script>
