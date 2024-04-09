@@ -12,9 +12,5 @@
 			"Referrer-Policy": "same-origin",
 			"X-XSS-Protection": "1; mode=block"
 		}
-	},
-	{
-		"match": "**/favicons/**/*",
-		"allow_raw_access": true
 	}
 ]
