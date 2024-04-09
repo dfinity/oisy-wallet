@@ -44,7 +44,7 @@
 		"@dfinity/utils": "^2.1.3",
 		"@junobuild/analytics": "^0.0.21",
 		"@metamask/detect-provider": "^2.0.0",
-		"@walletconnect/web3wallet": "^1.10.2",
+		"@walletconnect/web3wallet": "^1.11.1",
 		"alchemy-sdk": "^3.2.1",
 		"buffer": "^6.0.3",
 		"ethers": "^5.7.0",
