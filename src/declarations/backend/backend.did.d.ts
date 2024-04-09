@@ -33,6 +33,9 @@ export interface HttpResponse {
 	headers: Array<[string, string]>;
 	status_code: number;
 }
+export interface IcrcToken {
+	ledger_id: Principal;
+}
 export interface InitArg {
 	ecdsa_key_name: string;
 	allowed_callers: Array<Principal>;
@@ -57,14 +60,19 @@ export interface TokenId {
 	chain_id: bigint;
 	contract_address: string;
 }
+export type UserToken = { Icrc: IcrcToken };
+export type UserTokenId = { Icrc: Principal };
 export interface _SERVICE {
+	add_user_custom_token: ActorMethod<[UserToken], undefined>;
 	add_user_token: ActorMethod<[Token], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
+	list_user_custom_tokens: ActorMethod<[], Array<UserToken>>;
 	list_user_tokens: ActorMethod<[], Array<Token>>;
 	personal_sign: ActorMethod<[string], string>;
+	remove_user_custom_token: ActorMethod<[UserTokenId], undefined>;
 	remove_user_token: ActorMethod<[TokenId], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
