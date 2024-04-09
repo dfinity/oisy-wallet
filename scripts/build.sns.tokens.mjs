@@ -10,7 +10,7 @@ const AGGREGATOR_CANISTER_VERSION = 'v1';
 const AGGREGATOR_URL = `${SNS_AGGREGATOR_CANISTER_URL}/${AGGREGATOR_CANISTER_VERSION}/sns`;
 
 const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'env');
-const STATIC_FOLDER = join(process.cwd(), 'src', 'frontend', 'static', 'icons', 'snses');
+const STATIC_FOLDER = join(process.cwd(), 'src', 'frontend', 'static', 'icons', 'sns');
 
 if (!existsSync(DATA_FOLDER)) {
 	mkdirSync(DATA_FOLDER, { recursive: true });
