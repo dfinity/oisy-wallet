@@ -42,6 +42,9 @@
 	--animation-time-short: 0.2s;
 	--secondary: var(--color-dark-blue);
 
+	// Segment
+	--segment-selected-background: var(--color-dark);
+
 	// Modal
 
 	--alert-width: calc(100% - var(--padding-8x));
@@ -140,4 +143,10 @@ div.popover {
 div.toggle {
 	--card-background-contrast: var(--color-dust);
 	--card-background: var(--color-dark-blue);
+}
+
+div.segment-button {
+	button.selected {
+		color: var(--color-white);
+	}
 }
