@@ -35,3 +35,5 @@ jobs:
           branch: bot-sns-tokens-update
           delete-branch: true
           title: 'build: Update Sns Tokens'
+          body: |
+            Modifications have been made to the icons and metadata of the Icrc tokens known to the Sns-Aggregator.
