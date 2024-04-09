@@ -2,7 +2,7 @@
 	import AddTokenModal from '$lib/components/tokens/AddTokenModal.svelte';
 	import { AddTokenStep } from '$lib/enums/steps';
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
-	import {modalStore} from "$lib/stores/modal.store";
+	import { modalStore } from '$lib/stores/modal.store';
 
 	let saveProgressStep: string = AddTokenStep.INITIALIZATION;
 

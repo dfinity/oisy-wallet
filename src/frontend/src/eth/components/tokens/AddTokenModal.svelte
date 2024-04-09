@@ -15,7 +15,7 @@
 	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import { mapErc20Token } from '$eth/utils/erc20.utils';
-	import {modalStore} from "$lib/stores/modal.store";
+	import { modalStore } from '$lib/stores/modal.store';
 
 	let saveProgressStep: string = AddTokenStep.INITIALIZATION;
 
