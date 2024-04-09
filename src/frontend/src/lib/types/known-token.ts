@@ -7,7 +7,10 @@ export const knownIcrcToken = z.object({
 		decimals: z.number(),
 		name: z.string(),
 		symbol: z.string(),
-		fee: z.bigint()
+		fee: z.bigint(),
+		alternativeName: z.optional(z.string()),
+		url: z.optional(z.string().url()),
+		description: z.optional(z.string())
 	})
 });
 
