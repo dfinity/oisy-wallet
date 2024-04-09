@@ -26,7 +26,13 @@
 	export let modal: WizardModal;
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose>
+<WizardModal
+	{steps}
+	bind:currentStep
+	bind:this={modal}
+	on:nnsClose
+	disablePointerEvents={currentStep?.name === 'Saving'}
+>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Saving'}
