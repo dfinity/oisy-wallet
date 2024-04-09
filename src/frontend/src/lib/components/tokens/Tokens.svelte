@@ -6,12 +6,17 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import AddToken from '$lib/components/tokens/AddToken.svelte';
+	import AddToken from '$eth/components/tokens/AddToken.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-
-	import { networkEthereum, networkId, networkTokens } from '$lib/derived/network.derived';
+	import {
+		networkEthereum,
+		networkICP,
+		networkId,
+		networkTokens
+	} from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import IcAddToken from '$icp/components/tokens/IcAddToken.svelte';
 </script>
 
 <h2 class="text-base mb-6 pb-1">{$i18n.tokens.text.title}</h2>
@@ -47,5 +52,7 @@
 
 	{#if $networkEthereum}
 		<AddToken />
+	{:else if $networkICP}
+		<IcAddToken />
 	{/if}
 </TokensSkeletons>
