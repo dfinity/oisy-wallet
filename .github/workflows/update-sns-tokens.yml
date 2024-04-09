@@ -16,15 +16,19 @@ jobs:
       - name: Update
         run: npm run build:sns-tokens
 
+      - name: Check for Changes
+        run: |
+          if ! git diff --quiet; then
+            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
+          fi
+
       # This action creates a PR only if there are changes.
       - name: Create Pull Request
+        if: env.CHANGES_DETECTED == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
           base: main
-          add-paths: |
-            src/frontend/src/env/tokens.sns.json
-            $(find src/frontend/static/icons/sns/ -type f)
           commit-message: 'build: Update Sns Tokens'
           committer: GitHub <noreply@github.com>
           author: gix-bot <gix-bot@users.noreply.github.com>
