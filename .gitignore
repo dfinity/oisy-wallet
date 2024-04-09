@@ -35,7 +35,3 @@ codes.txt
 
 backend.wasm.gz
 backend-v*.wasm.gz
-
-# snses
-src/frontend/src/icp/data/**/*
-src/frontend/static/icons/**/*

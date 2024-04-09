@@ -15,3 +15,5 @@ yarn.lock
 /target
 
 .dfx
+
+src/frontend/src/env/tokens.sns.json
