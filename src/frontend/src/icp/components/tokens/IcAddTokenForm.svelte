@@ -1,20 +1,11 @@
 <script lang="ts">
 	import { Input, Segment, SegmentButton } from '@dfinity/gix-components';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import type { IcCanisters } from '$icp/types/ic';
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce } from '@dfinity/utils';
 	import { derived, type Readable, writable } from 'svelte/store';
 	import { knownIcrcToken, knownIcrcTokens, type KnownIcrcTokens } from '$lib/types/known-token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import snsTokens from '$env/tokens.sns.json';
-
-	export let canisters: Partial<IcCanisters> | undefined;
-
-	let invalid = true;
-	$: invalid =
-		isNullish(canisters) ||
-		isNullish(canisters.ledgerCanisterId) ||
-		isNullish(canisters.indexCanisterId);
 
 	const dispatch = createEventDispatcher();
 
@@ -69,23 +60,23 @@
 	);
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST">
-	<Segment bind:selectedSegmentId>
-		<SegmentButton segmentId={snsSegmentId}>Sns</SegmentButton>
-		<SegmentButton segmentId={customSegmentId}>Custom</SegmentButton>
-	</Segment>
+<Segment bind:selectedSegmentId>
+	<SegmentButton segmentId={snsSegmentId}>Sns</SegmentButton>
+	<SegmentButton segmentId={customSegmentId}>Custom</SegmentButton>
+</Segment>
 
-	<label for="filter" class="font-bold px-4.5">Filter:</label>
-	<Input
-		name="filter"
-		inputType="text"
-		required
-		bind:value={filter}
-		placeholder="Filter"
-		spellcheck={false}
-	/>
+<label for="filter" class="font-bold px-4.5">Filter:</label>
+<Input
+	name="filter"
+	inputType="text"
+	required
+	bind:value={filter}
+	placeholder="Filter"
+	spellcheck={false}
+/>
 
-	{#each $tokens as token}
-		<button>{token.ledgerCanisterId} - {token.metadata.name}</button>
-	{/each}
-</form>
+{#each $tokens as token}
+	<button on:click={() => dispatch('icToken', token)}
+		>{token.ledgerCanisterId} - {token.metadata.name}</button
+	>
+{/each}

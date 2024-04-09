@@ -16,4 +16,6 @@ export const knownIcrcToken = z.object({
 
 export const knownIcrcTokens = z.array(knownIcrcToken);
 
+export type KnownIcrcToken = z.infer<typeof knownIcrcToken>;
+
 export type KnownIcrcTokens = z.infer<typeof knownIcrcTokens>;

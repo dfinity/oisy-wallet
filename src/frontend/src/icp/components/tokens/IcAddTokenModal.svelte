@@ -3,8 +3,9 @@
 	import { AddTokenStep } from '$lib/enums/steps';
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
-	import type { IcCanisters } from '$icp/types/ic';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { KnownIcrcToken } from '$lib/types/known-token';
+	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 
 	let saveProgressStep: string = AddTokenStep.INITIALIZATION;
 
@@ -17,9 +18,21 @@
 		saveProgressStep = AddTokenStep.INITIALIZATION;
 	};
 
-	let canisters: Partial<IcCanisters> | undefined;
+	let token: KnownIcrcToken | undefined;
+
+	const selectKnownToken = ({ detail }: CustomEvent<KnownIcrcToken>) => {
+		token = detail;
+
+		modal.next();
+	};
+
+	const save = async () => {};
 </script>
 
 <AddTokenModal bind:saveProgressStep bind:currentStep bind:modal on:icClose={close}>
-	<IcAddTokenForm on:icNext={modal.next} on:icClose={close} bind:canisters />
+	{#if currentStep?.name === 'Review'}
+		<IcAddTokenReview on:icBack={modal.back} on:icSave={save} {token} />
+	{:else}
+		<IcAddTokenForm on:icNext={modal.next} on:icClose={close} on:icToken={selectKnownToken} />
+	{/if}
 </AddTokenModal>
