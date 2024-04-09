@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { AddTokenStep } from '$lib/enums/steps';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ADD_TOKEN_STEPS } from '$lib/constants/steps.constants';
@@ -25,15 +24,15 @@
 
 	export let currentStep: WizardStep | undefined;
 	export let modal: WizardModal;
-
-	const close = () => {
-		modalStore.close();
-
-		saveProgressStep = AddTokenStep.INITIALIZATION;
-	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
+<WizardModal
+	{steps}
+	bind:currentStep
+	bind:this={modal}
+	on:nnsClose
+	disablePointerEvents={currentStep?.name === 'Saving'}
+>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Saving'}
