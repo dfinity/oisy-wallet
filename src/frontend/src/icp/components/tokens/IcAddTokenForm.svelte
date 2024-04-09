@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { Input, Segment, SegmentButton } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import type { IcCanisters } from '$icp/types/ic';
-	import { isNullish } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
+	import { derived, type Readable, writable } from 'svelte/store';
+	import { knownIcrcToken, knownIcrcTokens, type KnownIcrcTokens } from '$lib/types/known-token';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import snsTokens from '$env/tokens.sns.json';
 
 	export let canisters: Partial<IcCanisters> | undefined;
 
@@ -19,7 +23,49 @@
 
 	let selectedSegmentId = snsSegmentId;
 
+	let icrcTokens: KnownIcrcTokens = [];
+	onMount(() => {
+		try {
+			icrcTokens = knownIcrcTokens.parse(
+				snsTokens.map(
+					({
+						metadata: {
+							fee: { __bigint__ },
+							...rest
+						},
+						...ids
+					}) =>
+						knownIcrcToken.parse({
+							...ids,
+							metadata: {
+								...rest,
+								fee: BigInt(__bigint__)
+							}
+						})
+				)
+			);
+		} catch (err: unknown) {
+			console.error(err);
+		}
+	});
+
 	let filter = '';
+
+	const filterStore = writable<string>('');
+	const updateFilter = () => filterStore.set(filter);
+	const debounceUpdateFilter = debounce(updateFilter);
+
+	$: filter, debounceUpdateFilter();
+
+	const tokens: Readable<KnownIcrcTokens> = derived([filterStore], ([$filterStore]) =>
+		isNullishOrEmpty($filterStore)
+			? []
+			: icrcTokens.filter(
+					({ metadata: { name, symbol } }) =>
+						name.toLowerCase().includes($filterStore.toLowerCase()) ||
+						symbol.toLowerCase().includes($filterStore.toLowerCase())
+				)
+	);
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
@@ -37,4 +83,8 @@
 		placeholder="Filter"
 		spellcheck={false}
 	/>
+
+	{#each $tokens as token}
+		<button>{token.ledgerCanisterId} - {token.metadata.name}</button>
+	{/each}
 </form>
