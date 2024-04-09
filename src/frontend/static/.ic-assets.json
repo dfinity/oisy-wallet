@@ -14,7 +14,15 @@
 		}
 	},
 	{
-		"match": "**/favicons/**/*",
-		"allow_raw_access": true
+		"match": "**/icons/**/*",
+		"headers": {
+			"Cache-Control": "max-age=604800"
+		}
+	},
+	{
+		"match": "**/fonts/**/*",
+		"headers": {
+			"Cache-Control": "public, max-age=31536000"
+		}
 	}
 ]
