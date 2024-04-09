@@ -1,0 +1,33 @@
+name: Update Sns Tokens
+
+on:
+  schedule:
+    - cron: '30 3 * * MON'
+  workflow_dispatch:
+
+jobs:
+  update-sns-tokens:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Update
+        run: npm run build:sns-tokens
+
+      # This action creates a PR only if there are changes.
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GIX_BOT_PAT }}
+          base: main
+          add-paths: |
+            src/frontend/src/env/tokens.sns.json
+            src/frontend/src/static/icons/**/*
+          commit-message: 'build: Update Sns Tokens'
+          committer: GitHub <noreply@github.com>
+          author: gix-bot <gix-bot@users.noreply.github.com>
+          branch: bot-sns-tokens-update
+          delete-branch: true
+          title: 'build: Update Sns Tokens'
