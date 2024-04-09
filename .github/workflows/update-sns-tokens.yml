@@ -24,7 +24,7 @@ jobs:
           base: main
           add-paths: |
             src/frontend/src/env/tokens.sns.json
-            src/frontend/src/static/icons/**/*
+            src/frontend/static/icons/sns/**/*
           commit-message: 'build: Update Sns Tokens'
           committer: GitHub <noreply@github.com>
           author: gix-bot <gix-bot@users.noreply.github.com>
