@@ -267,7 +267,8 @@
 			"title": "Token details",
 			"token": "Token",
 			"network": "Network",
-			"contract_address_copied": "Contract address copied to clipboard."
+			"contract_address_copied": "Contract address copied to clipboard.",
+			"twin_token": "Twin token"
 		},
 		"import": {
 			"title": "Import tokens",

@@ -230,7 +230,13 @@ interface I18nTokens {
 		initializing: string;
 		updating_ui: string;
 	};
-	details: { title: string; token: string; network: string; contract_address_copied: string };
+	details: {
+		title: string;
+		token: string;
+		network: string;
+		contract_address_copied: string;
+		twin_token: string;
+	};
 	import: { title: string; review: string; saving: string };
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
 	alt: {

@@ -54,9 +54,9 @@
 		{/if}
 
 		<button
-				class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-				aria-label={$i18n.tokens.details.title}
-				on:click={openToken}
+			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
+			aria-label={$i18n.tokens.details.title}
+			on:click={openToken}
 		>
 			{$i18n.tokens.details.title}
 		</button>
