@@ -145,6 +145,12 @@ div.popover {
 }
 
 div.toggle {
+	zoom: 1.45;
+
 	--card-background-contrast: var(--color-dust);
-	--card-background: var(--color-dark-blue);
+	--card-background: var(--color-white);
+
+	&:has(input[type='checkbox']:checked) {
+		--card-background-contrast: var(--color-blue);
+	}
 }

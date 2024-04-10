@@ -258,7 +258,9 @@
 			"contract_address": "Contract address",
 			"add": "Add token",
 			"review": "Review",
-			"saving": "Saving..."
+			"saving": "Saving...",
+			"balance": "Balance",
+			"hide_zero_balances": "Hide zero balances"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address"

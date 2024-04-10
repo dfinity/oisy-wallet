@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
-	import { testnetsStore } from '$lib/stores/testnets.store';
+	import { testnetsStore } from '$lib/stores/settings.store';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let checked: boolean;
