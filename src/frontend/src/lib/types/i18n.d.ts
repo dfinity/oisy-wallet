@@ -227,8 +227,8 @@ interface I18nTokens {
 		balance: string;
 		hide_zero_balances: string;
 		import_tokens: string;
-		hide_token: string;
 	};
+	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
 	alt: { context_menu: string; open_etherscan: string; open_dashboard: string };
 	placeholder: { enter_contract_address: string };
 	warning: { trust_token: string };
@@ -236,6 +236,7 @@ interface I18nTokens {
 		invalid_contract_address: string;
 		no_metadata: string;
 		unexpected: string;
+		unexpected_hiding: string;
 		already_available: string;
 		loading_metadata: string;
 	};

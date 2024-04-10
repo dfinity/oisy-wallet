@@ -259,8 +259,14 @@
 			"saving": "Saving...",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
-			"import_tokens": "Import tokens",
-			"hide_token": "Hide $token"
+			"import_tokens": "Import tokens"
+		},
+		"hide": {
+			"title": "Hide Token?",
+			"token": "Hide $token",
+			"info": "You can add this token back in the future by going into <strong>“+ Import tokens”</strong> in your wallet view.",
+			"confirm": "Hide",
+			"hiding": "Hiding..."
 		},
 		"alt": {
 			"context_menu": "Context menu for to the selected token",
@@ -277,6 +283,7 @@
 			"invalid_contract_address": "Contract address is invalid.",
 			"no_metadata": "No metadata were fetched for the contract address.",
 			"unexpected": "Something went wrong while saving the token.",
+			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
 			"loading_metadata": "Error while loading the ERC20 contract metadata."
 		}
