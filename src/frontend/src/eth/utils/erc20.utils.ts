@@ -7,14 +7,14 @@ import usdt from '$eth/assets/usdt.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 
-export const mapErc20Token = ({
+export const mapErc20CustomToken = ({
 	symbol,
 	name,
 	...rest
 }: Erc20Contract & Erc20Metadata & { network: EthereumNetwork }): Erc20Token => ({
 	id: Symbol(symbol),
 	standard: 'erc20',
-	category: 'default',
+	category: 'custom',
 	name,
 	symbol,
 	icon: mapErc20Icon(symbol),
