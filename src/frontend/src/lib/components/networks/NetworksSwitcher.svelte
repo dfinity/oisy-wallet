@@ -2,7 +2,7 @@
 	import { Popover } from '@dfinity/gix-components';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import IconMore from '$lib/components/icons/IconMore.svelte';
+	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { nonNullish } from '@dfinity/utils';
@@ -76,7 +76,7 @@
 	<ul class="flex flex-col gap-4 list-none">
 		<li class="flex justify-between items-center">
 			<div class="flex gap-2 items-center">
-				<IconMore />
+				<IconMorePlain />
 				<span class="text-grey">{$i18n.networks.more}</span>
 			</div>
 		</li>
