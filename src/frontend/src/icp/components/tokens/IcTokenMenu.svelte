@@ -35,7 +35,11 @@
 <TokenMenu>
 	{#if nonNullish(explorerUrl)}
 		<div in:fade>
-			<ExternalLink href={explorerUrl} ariaLabel={$i18n.tokens.alt.open_dashboard}>
+			<ExternalLink
+				href={explorerUrl}
+				ariaLabel={$i18n.tokens.alt.open_dashboard}
+				iconVisible={false}
+			>
 				{$i18n.navigation.text.view_on_explorer}
 			</ExternalLink>
 		</div>

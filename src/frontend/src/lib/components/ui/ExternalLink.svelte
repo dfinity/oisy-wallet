@@ -4,6 +4,7 @@
 	export let href: string;
 	export let ariaLabel: string;
 	export let iconSize = '20';
+	export let iconVisible = true;
 	export let inline = false;
 	export let color: 'blue' | 'inherit' = 'inherit';
 </script>
@@ -21,6 +22,8 @@
 	class:hover:text-blue={color === 'inherit'}
 	class:active:text-blue={color === 'inherit'}
 >
-	<IconExternalLink size={iconSize} />
+	{#if iconVisible}
+		<IconExternalLink size={iconSize} />
+	{/if}
 	<slot />
 </a>

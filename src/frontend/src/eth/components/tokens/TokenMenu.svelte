@@ -22,7 +22,11 @@
 <TokenMenu>
 	{#if nonNullish(explorerUrl) && $erc20TokensInitialized}
 		<div in:fade>
-			<ExternalLink href={explorerUrl} ariaLabel={$i18n.tokens.alt.open_etherscan}>
+			<ExternalLink
+				href={explorerUrl}
+				ariaLabel={$i18n.tokens.alt.open_etherscan}
+				iconVisible={false}
+			>
 				{$i18n.navigation.text.view_on_explorer}
 			</ExternalLink>
 		</div>
