@@ -95,7 +95,7 @@
 	{steps}
 	bind:currentStep
 	bind:this={modal}
-	on:nnsClose
+	on:nnsClose={close}
 	disablePointerEvents={currentStep?.name === 'Hiding'}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
