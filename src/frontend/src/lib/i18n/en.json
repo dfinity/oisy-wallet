@@ -262,7 +262,9 @@
 			"import_tokens": "Import tokens"
 		},
 		"alt": {
-			"context_menu": "Context menu for to the selected token"
+			"context_menu": "Context menu for to the selected token",
+			"open_etherscan": "Open the details of the token on Etherscan",
+			"open_dashboard": "Open the details of the token on the ICP Dashboard"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address"
