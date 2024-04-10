@@ -11,14 +11,14 @@
 	let button: HTMLButtonElement | undefined;
 
 	const hideToken = () => {
-		const fn = $networkICP ? modalStore.openIcAddToken : modalStore.openAddToken;
+		const fn = $networkICP ? () => undefined : modalStore.openHideToken;
 		fn();
 
 		visible = false;
 	};
 
 	let hideTokenLabel: string;
-	$: hideTokenLabel = replacePlaceholders($i18n.tokens.text.hide_token, {
+	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
 		$token: $token.name
 	});
 </script>
