@@ -52,9 +52,16 @@ pub mod token {
 /// Extendable custom user defined tokens
 pub mod custom_token {
     use candid::{CandidType, Deserialize, Principal};
+    use phantom_newtype::{Id as PhantomId};
 
-    pub type LedgerId = Principal;
-    pub type IndexId = Principal;
+    /// Currently used as a type marker only.  Can be extended if we need actual data about ledger canisters.
+    pub struct LedgerCanister{}
+    /// Currently used as a type marker only.  Can be extended if needed.
+    pub struct IndexCanister{}
+    /// The canister ID of a ledger canister.
+    pub type LedgerId = PhantomId<LedgerCanister, Principal>;
+    /// The canister ID of an index canister.
+    pub type IndexId = PhantomId<IndexCanister, Principal>;
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub struct IcrcToken {

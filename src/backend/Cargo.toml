@@ -12,6 +12,7 @@ ic-cdk-macros.workspace = true
 candid.workspace = true
 serde.workspace = true
 serde_bytes.workspace = true
+phantom_newtype.workspace = true
 ic-stable-structures = "0.6.3"
 ethers-core = "= 2.0.11"
 futures = "0.3"

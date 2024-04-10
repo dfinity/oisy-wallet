@@ -7,6 +7,7 @@ edition = "2021"
 ic-cdk.workspace = true
 ic-cdk-macros.workspace = true
 candid.workspace = true
+phantom_newtype.workspace = true
 serde.workspace = true
 serde_bytes.workspace = true
 ic-metrics-encoder = "1.1.1"
