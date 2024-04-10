@@ -21,6 +21,7 @@
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import type { Token } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
+	import { fade } from 'svelte/transition';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -47,6 +48,7 @@
 				class="no-underline"
 				href={url}
 				aria-label={`Open the list of ${token.symbol} transactions`}
+				transition:fade
 			>
 				<Card>
 					{token.name}
