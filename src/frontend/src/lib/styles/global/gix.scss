@@ -121,6 +121,10 @@ div.modal {
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
 
+	div.container {
+		max-width: 100%;
+	}
+
 	div.content > div:first-child {
 		padding: var(--padding-1_5x) 0 0;
 	}
