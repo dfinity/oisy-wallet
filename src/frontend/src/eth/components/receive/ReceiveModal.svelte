@@ -12,7 +12,7 @@
 	<svelte:fragment slot="title">{$i18n.receive.text.receive}</svelte:fragment>
 
 	<p class="font-bold text-center">Address:</p>
-	<p class="mb-4 font-normal text-center px-2">
+	<p class="mb-4 font-normal text-center px-2 max-w-xs mx-auto">
 		<output class="break-all">{$networkAddress ?? ''}</output><Copy
 			inline
 			value={$networkAddress ?? ''}
