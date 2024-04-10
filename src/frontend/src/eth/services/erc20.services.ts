@@ -49,6 +49,7 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 						...{
 							address,
 							exchange: 'erc20' as const,
+							category: 'custom' as const,
 							network
 						},
 						...(await infuraErc20Providers(network.id).metadata({ address }))

@@ -3,7 +3,7 @@ import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { routeToken } from '$lib/derived/nav.derived';
-import type { Token, TokenId, TokenStandard } from '$lib/types/token';
+import type { Token, TokenCategory, TokenId, TokenStandard } from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -36,3 +36,8 @@ export const tokenStandard: Readable<TokenStandard> = derived(
 export const tokenSymbol: Readable<string> = derived([token], ([$token]) => $token.symbol);
 
 export const tokenDecimals: Readable<number> = derived([token], ([$token]) => $token.decimals);
+
+export const tokenCategory: Readable<TokenCategory> = derived(
+	[token],
+	([{ category }]) => category
+);

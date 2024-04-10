@@ -28,17 +28,19 @@
 </button>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
-	<TokensZeroBalance />
+	<div class="flex flex-col gap-3">
+		<TokensZeroBalance />
 
-	<div class="my-3">
-		<Hr />
+		<div class="my">
+			<Hr />
+		</div>
+
+		<button
+			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
+			aria-label={$i18n.tokens.text.import_tokens}
+			on:click={importTokens}
+		>
+			+ {$i18n.tokens.text.import_tokens}
+		</button>
 	</div>
-
-	<button
-		class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-		aria-label={$i18n.tokens.text.import_tokens}
-		on:click={importTokens}
-	>
-		+ {$i18n.tokens.text.import_tokens}
-	</button>
 </Popover>
