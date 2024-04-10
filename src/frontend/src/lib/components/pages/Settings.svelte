@@ -6,7 +6,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
-	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -48,20 +47,6 @@
 
 		<svelte:fragment slot="info">
 			{$i18n.settings.text.session_description}
-		</svelte:fragment>
-	</KeyValuePairInfo>
-</div>
-
-<div class="mt-4">
-	<KeyValuePairInfo>
-		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.settings.text.testnets}:</span></svelte:fragment
-		>
-
-		<NetworksTestnetsToggle slot="value" />
-
-		<svelte:fragment slot="info">
-			{$i18n.settings.text.testnets_description}
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>

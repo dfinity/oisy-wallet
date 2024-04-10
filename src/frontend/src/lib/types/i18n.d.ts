@@ -96,8 +96,6 @@ interface I18nSettings {
 		principal_description: string;
 		session: string;
 		session_description: string;
-		testnets: string;
-		testnets_description: string;
 	};
 	alt: { testnets_toggle: string };
 }
