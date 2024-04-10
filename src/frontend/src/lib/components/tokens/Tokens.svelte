@@ -47,7 +47,7 @@
 				class="no-underline"
 				href={url}
 				aria-label={`Open the list of ${token.symbol} transactions`}
-				transition:fade
+				in:fade
 			>
 				<Card>
 					{token.name}
