@@ -5,7 +5,7 @@
 	import type { WalletConnectListener } from '$eth/types/wallet-connect';
 	import { SignStep } from '$lib/enums/steps';
 	import WalletConnectSignReview from './WalletConnectSignReview.svelte';
-	import { WALLET_CONNECT_SIGN_STEPS } from '$eth/constants/steps.constants';
+	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { signMessage, reject as rejectServices } from '$eth/services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
@@ -68,7 +68,7 @@
 	>
 
 	{#if currentStep?.name === 'Signing'}
-		<SendProgress progressStep={signProgressStep} steps={WALLET_CONNECT_SIGN_STEPS} />
+		<SendProgress progressStep={signProgressStep} steps={walletConnectSignSteps($i18n)} />
 	{:else}
 		<WalletConnectSignReview {request} on:icApprove={approve} on:icReject={reject} />
 	{/if}

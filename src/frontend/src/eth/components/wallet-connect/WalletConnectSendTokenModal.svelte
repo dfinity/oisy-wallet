@@ -18,7 +18,7 @@
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
 	import { SendStep } from '$lib/enums/steps';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
-	import { WALLET_CONNECT_SEND_STEPS } from '$eth/constants/steps.constants';
+	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import {
 		send as sendServices,
 		reject as rejectServices
@@ -159,7 +159,7 @@
 	>
 		<CkEthLoader convertTokenId={$sendTokenId}>
 			{#if currentStep?.name === 'Sending'}
-				<SendProgress progressStep={sendProgressStep} steps={WALLET_CONNECT_SEND_STEPS} />
+				<SendProgress progressStep={sendProgressStep} steps={walletConnectSendSteps($i18n)} />
 			{:else}
 				<WalletConnectSendReview
 					{amount}
