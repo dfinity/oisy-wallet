@@ -228,6 +228,7 @@ interface I18nTokens {
 		saving: string;
 		balance: string;
 		hide_zero_balances: string;
+		import_tokens: string;
 	};
 	placeholder: { enter_contract_address: string };
 	warning: { trust_token: string };
