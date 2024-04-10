@@ -13,6 +13,7 @@
 	import { addressNotCertified } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
 
@@ -87,12 +88,14 @@
 		<p>{$i18n.wallet_connect.text.connecting}</p>
 
 		{#if displayCancel}
-			<div class="flex justify-end gap-1 mt-8" in:fade>
-				<button
-					class="secondary"
-					on:click={() => dispatch('icCancel')}
-					disabled={$isBusy || $addressNotCertified}>{$i18n.core.text.cancel}</button
-				>
+			<div class="mt-8" in:fade>
+				<ButtonGroup>
+					<button
+						class="secondary block flex-1"
+						on:click={() => dispatch('icCancel')}
+						disabled={$isBusy || $addressNotCertified}>{$i18n.core.text.cancel}</button
+					>
+				</ButtonGroup>
 			</div>
 		{/if}
 	</div>

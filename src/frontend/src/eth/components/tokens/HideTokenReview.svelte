@@ -4,6 +4,7 @@
 	import { Html } from '@dfinity/gix-components';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -16,12 +17,14 @@
 
 <p class="break-normal py-10"><Html text={$i18n.tokens.hide.info} /></p>
 
-<div class="flex justify-end gap-1 mb-2">
-	<button class="secondary" on:click={() => dispatch('icCancel')}>{$i18n.core.text.cancel}</button>
-	<button class="primary" on:click={() => dispatch('icHide')}>
+<ButtonGroup>
+	<button class="secondary block flex-1" on:click={() => dispatch('icCancel')}
+		>{$i18n.core.text.cancel}</button
+	>
+	<button class="primary block flex-1" on:click={() => dispatch('icHide')}>
 		{$i18n.tokens.hide.confirm}
 	</button>
-</div>
+</ButtonGroup>
 
 <style lang="scss">
 	.icon {

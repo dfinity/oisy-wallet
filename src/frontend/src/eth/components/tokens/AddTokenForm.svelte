@@ -3,6 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	export let contractAddress = '';
 
@@ -23,12 +24,19 @@
 		spellcheck={false}
 	/>
 
-	<div class="flex justify-end gap-1">
-		<button type="button" class="secondary" on:click={() => dispatch('icClose')}
-			>{$i18n.core.text.cancel}</button
-		>
-		<button class="primary" type="submit" disabled={invalid} class:opacity-10={invalid}>
-			{$i18n.core.text.next}
-		</button>
+	<div class="pt-2">
+		<ButtonGroup>
+			<button type="button" class="secondary block flex-1" on:click={() => dispatch('icClose')}
+				>{$i18n.core.text.cancel}</button
+			>
+			<button
+				class="primary block flex-1"
+				type="submit"
+				disabled={invalid}
+				class:opacity-10={invalid}
+			>
+				{$i18n.core.text.next}
+			</button>
+		</ButtonGroup>
 	</div>
 </form>

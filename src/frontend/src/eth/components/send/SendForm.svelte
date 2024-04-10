@@ -11,6 +11,7 @@
 	import SendDestination from '$eth/components/send/SendDestination.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -42,10 +43,15 @@
 
 	<FeeDisplay />
 
-	<div class="flex justify-end gap-1">
+	<ButtonGroup>
 		<slot name="cancel" />
-		<button class="primary" type="submit" disabled={invalid} class:opacity-10={invalid}>
+		<button
+			class="primary block flex-1"
+			type="submit"
+			disabled={invalid}
+			class:opacity-10={invalid}
+		>
 			{$i18n.core.text.next}
 		</button>
-	</div>
+	</ButtonGroup>
 </form>
