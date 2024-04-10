@@ -6,22 +6,18 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import AddToken from '$eth/components/tokens/AddToken.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import {
-		networkEthereum,
-		networkICP,
-		networkId,
-		networkTokens
-	} from '$lib/derived/network.derived';
+	import { networkId, networkTokens } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import IcAddToken from '$icp/components/tokens/IcAddToken.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import type { Token } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
+	import { modalAddToken, modalIcAddToken } from '$lib/derived/modal.derived';
+	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
+	import IcAddTokenModal from '$icp/components/tokens/IcAddTokenModal.svelte';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -69,9 +65,9 @@
 		</Listener>
 	{/each}
 
-	{#if $networkEthereum}
-		<AddToken />
-	{:else if $networkICP}
-		<IcAddToken />
+	{#if $modalAddToken}
+		<AddTokenModal />
+	{:else if $modalIcAddToken}
+		<IcAddTokenModal />
 	{/if}
 </TokensSkeletons>

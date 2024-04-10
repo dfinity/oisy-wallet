@@ -221,9 +221,7 @@ interface I18nConvert {
 interface I18nTokens {
 	text: {
 		title: string;
-		add_new: string;
 		contract_address: string;
-		add: string;
 		review: string;
 		saving: string;
 		balance: string;

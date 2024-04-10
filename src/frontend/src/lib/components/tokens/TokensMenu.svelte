@@ -39,6 +39,6 @@
 		aria-label={$i18n.tokens.text.import_tokens}
 		on:click={importTokens}
 	>
-		{$i18n.tokens.text.import_tokens}
+		+ {$i18n.tokens.text.import_tokens}
 	</button>
 </Popover>

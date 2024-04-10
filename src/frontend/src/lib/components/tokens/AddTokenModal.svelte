@@ -8,7 +8,7 @@
 	const steps: WizardSteps = [
 		{
 			name: 'Add',
-			title: $i18n.tokens.text.add
+			title: $i18n.tokens.text.import_tokens
 		},
 		{
 			name: 'Review',
