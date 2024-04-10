@@ -110,7 +110,8 @@
 			"session": "Your session expires in",
 			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
 			"testnets": "Show test networks",
-			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia)."
+			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
+			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance."
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets"

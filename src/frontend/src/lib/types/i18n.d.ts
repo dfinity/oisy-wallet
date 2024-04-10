@@ -98,6 +98,7 @@ interface I18nSettings {
 		session_description: string;
 		testnets: string;
 		testnets_description: string;
+		hide_zero_balances_description: string;
 	};
 	alt: { testnets_toggle: string };
 }
