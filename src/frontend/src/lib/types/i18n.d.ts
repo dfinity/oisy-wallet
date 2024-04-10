@@ -230,9 +230,15 @@ interface I18nTokens {
 		initializing: string;
 		updating_ui: string;
 	};
+	details: { title: string; token: string; network: string; contract_address_copied: string };
 	import: { title: string; review: string; saving: string };
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
-	alt: { context_menu: string; open_etherscan: string; open_dashboard: string };
+	alt: {
+		context_menu: string;
+		open_etherscan: string;
+		open_dashboard: string;
+		open_contract_address_block_explorer: string;
+	};
 	placeholder: { enter_contract_address: string };
 	warning: { trust_token: string };
 	error: {

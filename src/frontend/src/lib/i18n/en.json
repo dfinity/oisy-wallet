@@ -263,6 +263,12 @@
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI..."
 		},
+		"details": {
+			"title": "Token details",
+			"token": "Token",
+			"network": "Network",
+			"contract_address_copied": "Contract address copied to clipboard."
+		},
 		"import": {
 			"title": "Import tokens",
 			"review": "Review",
@@ -278,7 +284,8 @@
 		"alt": {
 			"context_menu": "Context menu for to the selected token",
 			"open_etherscan": "Open the details of the token on Etherscan",
-			"open_dashboard": "Open the details of the token on the ICP Dashboard"
+			"open_dashboard": "Open the details of the token on the ICP Dashboard",
+			"open_contract_address_block_explorer": "Open the contract address on a block explorer"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address"
