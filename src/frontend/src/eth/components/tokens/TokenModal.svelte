@@ -15,7 +15,7 @@
 
 <TokenModal>
 	{#if nonNullish(contractAddress)}
-		<Value ref="symbol">
+		<Value ref="contractAddress">
 			<svelte:fragment slot="label">{$i18n.tokens.text.contract_address}</svelte:fragment>
 			<output>{contractAddress}</output><Copy
 				value={contractAddress}
