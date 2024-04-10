@@ -26,6 +26,13 @@ export enum AddTokenStep {
 	DONE = 'done'
 }
 
+export enum HideTokenStep {
+	INITIALIZATION = 'initialization',
+	HIDE = 'hide',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
+
 export enum SendIcStep {
 	INITIALIZATION = 'initialization',
 	APPROVE = 'approve',

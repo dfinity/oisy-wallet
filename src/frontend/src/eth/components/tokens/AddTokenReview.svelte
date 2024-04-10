@@ -12,6 +12,7 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Html } from '@dfinity/gix-components';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	export let contractAddress = '';
 	export let metadata: Erc20Metadata | undefined;
@@ -87,17 +88,19 @@
 	</p>
 </Warning>
 
-<div class="flex justify-end gap-1 mb-2">
-	<button class="secondary" on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button>
+<ButtonGroup>
+	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
+		>{$i18n.core.text.back}</button
+	>
 	<button
-		class="primary"
+		class="primary block flex-1"
 		disabled={invalid}
 		class:opacity-10={invalid}
 		on:click={() => dispatch('icSave')}
 	>
 		{$i18n.core.text.save}
 	</button>
-</div>
+</ButtonGroup>
 
 <style lang="scss">
 	p {

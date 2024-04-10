@@ -1,7 +1,7 @@
 import { deleteIdbEthAddress } from '$lib/api/idb.api';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
-import { testnetsStore } from '$lib/stores/testnets.store';
+import { testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { replaceHistory } from '$lib/utils/route.utils';

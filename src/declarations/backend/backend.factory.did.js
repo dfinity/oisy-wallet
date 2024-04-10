@@ -5,7 +5,10 @@ export const idlFactory = ({ IDL }) => {
 		allowed_callers: IDL.Vec(IDL.Principal)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
-	const IcrcToken = IDL.Record({ ledger_id: IDL.Principal });
+	const IcrcToken = IDL.Record({
+		ledger_id: IDL.Principal,
+		index_id: IDL.Principal
+	});
 	const UserToken = IDL.Variant({ Icrc: IcrcToken });
 	const Token = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),

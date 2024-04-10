@@ -6,23 +6,40 @@
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import AddToken from '$eth/components/tokens/AddToken.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import {
-		networkEthereum,
-		networkICP,
-		networkId,
-		networkTokens
-	} from '$lib/derived/network.derived';
+	import { networkId, networkTokens } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import IcAddToken from '$icp/components/tokens/IcAddToken.svelte';
+	import Header from '$lib/components/ui/Header.svelte';
+	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
+	import type { Token } from '$lib/types/token';
+	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
+	import { fade } from 'svelte/transition';
+	import { modalAddToken, modalIcAddToken } from '$lib/derived/modal.derived';
+	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
+	import IcAddTokenModal from '$icp/components/tokens/IcAddTokenModal.svelte';
+	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
+
+	let displayZeroBalance: boolean;
+	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
+
+	let tokens: Token[];
+	$: tokens = $networkTokens.filter(
+		({ id: tokenId }) =>
+			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
+	);
 </script>
 
-<h2 class="text-base mb-6 pb-1">{$i18n.tokens.text.title}</h2>
+<Header>
+	{$i18n.tokens.text.title}{#if $erc20TokensInitialized}&nbsp;<span class="font-normal" in:fade
+			>({tokens.length})</span
+		>{/if}
+
+	<TokensMenu slot="end" />
+</Header>
 
 <TokensSkeletons>
-	{#each $networkTokens as token (token.id)}
+	{#each tokens as token (token.id)}
 		{@const url = transactionsUrl({ token, networkId: $networkId })}
 
 		<Listener {token}>
@@ -30,11 +47,12 @@
 				class="no-underline"
 				href={url}
 				aria-label={`Open the list of ${token.symbol} transactions`}
+				in:fade
 			>
 				<Card>
 					{token.name}
 
-					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" color="white" />
+					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="52px" color="white" />
 
 					<output class="break-all" slot="description">
 						{formatToken({
@@ -50,9 +68,9 @@
 		</Listener>
 	{/each}
 
-	{#if $networkEthereum}
-		<AddToken />
-	{:else if $networkICP}
-		<IcAddToken />
+	{#if $modalAddToken}
+		<AddTokenModal />
+	{:else if $modalIcAddToken}
+		<IcAddTokenModal />
 	{/if}
 </TokensSkeletons>

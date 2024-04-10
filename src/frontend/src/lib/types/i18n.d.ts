@@ -98,8 +98,7 @@ interface I18nSettings {
 		session_description: string;
 		testnets: string;
 		testnets_description: string;
-		tokens: string;
-		tokens_description: string;
+		hide_zero_balances_description: string;
 	};
 	alt: { testnets_toggle: string };
 }
@@ -160,8 +159,11 @@ interface I18nSend {
 		review: string;
 		approving: string;
 		refreshing_ui: string;
+		initializing: string;
+		signing_transaction: string;
 		sending: string;
 		signing: string;
+		signing_message: string;
 		network: string;
 		source_network: string;
 		destination_network: string;
@@ -221,11 +223,26 @@ interface I18nConvert {
 interface I18nTokens {
 	text: {
 		title: string;
-		add_new: string;
 		contract_address: string;
-		add: string;
-		review: string;
-		saving: string;
+		balance: string;
+		hide_zero_balances: string;
+		initializing: string;
+		updating_ui: string;
+	};
+	details: {
+		title: string;
+		token: string;
+		network: string;
+		contract_address_copied: string;
+		twin_token: string;
+	};
+	import: { title: string; review: string; saving: string };
+	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
+	alt: {
+		context_menu: string;
+		open_etherscan: string;
+		open_dashboard: string;
+		open_contract_address_block_explorer: string;
 	};
 	placeholder: { enter_contract_address: string };
 	warning: { trust_token: string };
@@ -233,6 +250,7 @@ interface I18nTokens {
 		invalid_contract_address: string;
 		no_metadata: string;
 		unexpected: string;
+		unexpected_hiding: string;
 		already_available: string;
 		loading_metadata: string;
 	};

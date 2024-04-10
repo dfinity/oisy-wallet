@@ -4,7 +4,7 @@
 	import { loadTransactions } from '$eth/services/transactions.services';
 	import type { TokenId } from '$lib/types/token';
 	import { token } from '$lib/derived/token.derived';
-	import { modalTransaction } from '$lib/derived/modal.derived';
+	import { modalHideToken, modalToken, modalTransaction } from '$lib/derived/modal.derived';
 	import TransactionModal from './TransactionModal.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish } from '@dfinity/utils';
@@ -13,6 +13,9 @@
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import Header from '$lib/components/ui/Header.svelte';
+	import HideTokenModal from '$eth/components/tokens/HideTokenModal.svelte';
+	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
@@ -56,7 +59,7 @@
 		: undefined;
 </script>
 
-<h2 class="text-base mb-6 pb-1">{$i18n.transactions.text.title}</h2>
+<Header>{$i18n.transactions.text.title}</Header>
 
 <TransactionsSkeletons>
 	{#each $sortedTransactions as transaction, index (`${transaction.hash}-${index}`)}
@@ -70,4 +73,8 @@
 
 {#if $modalTransaction && nonNullish(selectedTransaction)}
 	<TransactionModal transaction={selectedTransaction} />
+{:else if $modalHideToken}
+	<HideTokenModal />
+{:else if $modalToken}
+	<TokenModal />
 {/if}

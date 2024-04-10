@@ -6,10 +6,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
-	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -53,7 +53,7 @@
 	</KeyValuePairInfo>
 </div>
 
-<div class="mt-4">
+<div class="mt-2">
 	<KeyValuePairInfo>
 		<svelte:fragment slot="key"
 			><span class="font-bold">{$i18n.settings.text.testnets}:</span></svelte:fragment
@@ -67,4 +67,16 @@
 	</KeyValuePairInfo>
 </div>
 
-<TokensMetadata />
+<div class="mt-2">
+	<KeyValuePairInfo>
+		<svelte:fragment slot="key"
+			><span class="font-bold">{$i18n.tokens.text.hide_zero_balances}:</span></svelte:fragment
+		>
+
+		<TokensZeroBalanceToggle slot="value" />
+
+		<svelte:fragment slot="info">
+			{$i18n.settings.text.hide_zero_balances_description}
+		</svelte:fragment>
+	</KeyValuePairInfo>
+</div>

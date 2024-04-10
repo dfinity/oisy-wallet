@@ -69,6 +69,19 @@ export const modalIcAddToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-add-token'
 );
+export const modalHideToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'hide-token'
+);
+
+export const modalToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'token'
+);
+export const modalIcToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'ic-token'
+);
 export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive-bitcoin'

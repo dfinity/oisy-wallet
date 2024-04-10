@@ -4,10 +4,13 @@ export type TokenId = symbol;
 
 export type TokenStandard = 'ethereum' | 'erc20' | 'icp' | 'icrc' | 'bitcoin';
 
+export type TokenCategory = 'default' | 'custom';
+
 export type Token = {
 	id: TokenId;
 	network: Network;
 	standard: TokenStandard;
+	category: TokenCategory;
 } & TokenMetadata;
 
 export interface TokenMetadata {

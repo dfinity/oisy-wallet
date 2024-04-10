@@ -111,8 +111,7 @@
 			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
 			"testnets": "Show test networks",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
-			"tokens": "Tokens",
-			"tokens_description": "The list of tokens currently supported by your $oisy_name."
+			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance."
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets"
@@ -190,8 +189,11 @@
 			"review": "Review",
 			"approving": "Approving...",
 			"refreshing_ui": "Refreshing UI",
+			"initializing": "Initializing transaction...",
+			"signing_transaction": "'Signing transaction...'",
 			"sending": "Sending...",
 			"signing": "Signing...",
+			"signing_message": "Signing message...",
 			"network": "Network",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
@@ -254,11 +256,36 @@
 	"tokens": {
 		"text": {
 			"title": "Tokens",
-			"add_new": "Add new token",
 			"contract_address": "Contract address",
-			"add": "Add token",
+			"balance": "Balance",
+			"hide_zero_balances": "Hide zero balances",
+			"initializing": "Initializing...",
+			"updating_ui": "Updating the UI..."
+		},
+		"details": {
+			"title": "Token details",
+			"token": "Token",
+			"network": "Network",
+			"contract_address_copied": "Contract address copied to clipboard.",
+			"twin_token": "Twin token"
+		},
+		"import": {
+			"title": "Import tokens",
 			"review": "Review",
 			"saving": "Saving..."
+		},
+		"hide": {
+			"title": "Hide Token?",
+			"token": "Hide $token",
+			"info": "You can add this token back in the future by going into <strong>“+ Import tokens”</strong> in your wallet view.",
+			"confirm": "Hide",
+			"hiding": "Hiding..."
+		},
+		"alt": {
+			"context_menu": "Context menu for to the selected token",
+			"open_etherscan": "Open the details of the token on Etherscan",
+			"open_dashboard": "Open the details of the token on the ICP Dashboard",
+			"open_contract_address_block_explorer": "Open the contract address on a block explorer"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address"
@@ -270,6 +297,7 @@
 			"invalid_contract_address": "Contract address is invalid.",
 			"no_metadata": "No metadata were fetched for the contract address.",
 			"unexpected": "Something went wrong while saving the token.",
+			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
 			"loading_metadata": "Error while loading the ERC20 contract metadata."
 		}

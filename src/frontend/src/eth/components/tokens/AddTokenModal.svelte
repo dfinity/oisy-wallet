@@ -66,6 +66,7 @@
 				mapErc20Token({
 					address: contractAddress,
 					exchange: 'ethereum',
+					category: 'custom',
 					network: $selectedEthereumNetwork,
 					...metadata
 				})
