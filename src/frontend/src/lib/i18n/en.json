@@ -190,8 +190,11 @@
 			"review": "Review",
 			"approving": "Approving...",
 			"refreshing_ui": "Refreshing UI",
+			"initializing": "Initializing transaction...",
+			"signing_transaction": "'Signing transaction...'",
 			"sending": "Sending...",
 			"signing": "Signing...",
+			"signing_message": "Signing message...",
 			"network": "Network",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
@@ -254,11 +257,28 @@
 	"tokens": {
 		"text": {
 			"title": "Tokens",
-			"add_new": "Add new token",
 			"contract_address": "Contract address",
-			"add": "Add token",
+			"balance": "Balance",
+			"hide_zero_balances": "Hide zero balances",
+			"initializing": "Initializing...",
+			"updating_ui": "Updating the UI..."
+		},
+		"import": {
+			"title": "Import tokens",
 			"review": "Review",
 			"saving": "Saving..."
+		},
+		"hide": {
+			"title": "Hide Token?",
+			"token": "Hide $token",
+			"info": "You can add this token back in the future by going into <strong>“+ Import tokens”</strong> in your wallet view.",
+			"confirm": "Hide",
+			"hiding": "Hiding..."
+		},
+		"alt": {
+			"context_menu": "Context menu for to the selected token",
+			"open_etherscan": "Open the details of the token on Etherscan",
+			"open_dashboard": "Open the details of the token on the ICP Dashboard"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address"
@@ -270,6 +290,7 @@
 			"invalid_contract_address": "Contract address is invalid.",
 			"no_metadata": "No metadata were fetched for the contract address.",
 			"unexpected": "Something went wrong while saving the token.",
+			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
 			"loading_metadata": "Error while loading the ERC20 contract metadata."
 		}

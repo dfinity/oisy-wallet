@@ -2,13 +2,13 @@
 	import { Popover } from '@dfinity/gix-components';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import IconMore from '$lib/components/icons/IconMore.svelte';
+	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { nonNullish } from '@dfinity/utils';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
-	import { testnetsStore } from '$lib/stores/testnets.store';
+	import { testnetsStore } from '$lib/stores/settings.store';
 	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -53,7 +53,7 @@
 		{/each}
 	</ul>
 
-	<div class="testnets flex justify-between items-center mt-8 mb-4" class:enabled={testnets}>
+	<div class="flex justify-between items-center mt-8 mb-4">
 		<span class="font-bold px-4.5">{$i18n.networks.show_testnets}</span>
 		<NetworksTestnetsToggle />
 	</div>
@@ -76,26 +76,9 @@
 	<ul class="flex flex-col gap-4 list-none">
 		<li class="flex justify-between items-center">
 			<div class="flex gap-2 items-center">
-				<IconMore />
+				<IconMorePlain />
 				<span class="text-grey">{$i18n.networks.more}</span>
 			</div>
 		</li>
 	</ul>
 </Popover>
-
-<style lang="scss">
-	.testnets {
-		:global(div.toggle) {
-			zoom: 1.45;
-
-			--card-background-contrast: var(--color-dust);
-			--card-background: var(--color-white);
-		}
-
-		&.enabled {
-			:global(div.toggle) {
-				--card-background-contrast: var(--color-blue);
-			}
-		}
-	}
-</style>

@@ -1,120 +1,65 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
+	import {
+		type ProgressStep,
+		WizardModal,
+		type WizardStep,
+		type WizardSteps
+	} from '@dfinity/gix-components';
 	import { AddTokenStep } from '$lib/enums/steps';
-	import AddTokenForm from '$lib/components/tokens/AddTokenForm.svelte';
-	import AddTokenReview from '$lib/components/tokens/AddTokenReview.svelte';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import { isNullish } from '@dfinity/utils';
-	import { authStore } from '$lib/stores/auth.store';
-	import { addUserToken } from '$lib/api/backend.api';
-	import { erc20TokensStore } from '$eth/stores/erc20.store';
-	import type { Erc20Metadata } from '$eth/types/erc20';
-	import { mapErc20Token } from '$eth/utils/erc20.utils';
-	import { nullishSignOut } from '$lib/services/auth.services';
-	import { ADD_TOKEN_STEPS } from '$lib/constants/steps.constants';
-	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	const steps: WizardSteps = [
 		{
 			name: 'Add',
-			title: $i18n.tokens.text.add
+			title: $i18n.tokens.import.title
 		},
 		{
 			name: 'Review',
-			title: $i18n.tokens.text.review
+			title: $i18n.tokens.import.review
 		},
 		{
 			name: 'Saving',
-			title: $i18n.tokens.text.saving
+			title: $i18n.tokens.import.saving
 		}
 	];
 
-	let saveProgressStep: string = AddTokenStep.INITIALIZATION;
+	const ADD_TOKEN_STEPS: [ProgressStep, ...ProgressStep[]] = [
+		{
+			step: AddTokenStep.INITIALIZATION,
+			text: $i18n.tokens.text.initializing,
+			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: AddTokenStep.SAVE,
+			text: $i18n.tokens.import.saving,
+			state: 'next'
+		} as ProgressStep,
+		{
+			step: AddTokenStep.UPDATE_UI,
+			text: $i18n.tokens.text.updating_ui,
+			state: 'next'
+		} as ProgressStep
+	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	export let saveProgressStep: string = AddTokenStep.INITIALIZATION;
 
-	const close = () => {
-		modalStore.close();
-
-		saveProgressStep = AddTokenStep.INITIALIZATION;
-	};
-
-	let contractAddress = '';
-	let metadata: Erc20Metadata | undefined;
-
-	const save = async () => {
-		if (isNullishOrEmpty(contractAddress)) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.invalid_contract_address }
-			});
-			return;
-		}
-
-		if (isNullish(metadata)) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.no_metadata }
-			});
-			return;
-		}
-
-		if (isNullish($authStore.identity)) {
-			await nullishSignOut();
-			return;
-		}
-
-		modal.next();
-
-		try {
-			saveProgressStep = AddTokenStep.SAVE;
-
-			await addUserToken({
-				identity: $authStore.identity,
-				token: {
-					chain_id: $selectedChainId,
-					contract_address: contractAddress,
-					symbol: [],
-					decimals: []
-				}
-			});
-
-			saveProgressStep = AddTokenStep.UPDATE_UI;
-
-			erc20TokensStore.add(
-				mapErc20Token({
-					address: contractAddress,
-					exchange: 'ethereum',
-					network: $selectedEthereumNetwork,
-					...metadata
-				})
-			);
-
-			saveProgressStep = AddTokenStep.DONE;
-
-			setTimeout(() => close(), 750);
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.unexpected },
-				err
-			});
-
-			modal.back();
-		}
-	};
+	export let currentStep: WizardStep | undefined;
+	export let modal: WizardModal;
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={close}>
+<WizardModal
+	{steps}
+	bind:currentStep
+	bind:this={modal}
+	on:nnsClose
+	disablePointerEvents={currentStep?.name === 'Saving'}
+>
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	{#if currentStep?.name === 'Review'}
-		<AddTokenReview on:icBack={modal.back} on:icSave={save} {contractAddress} bind:metadata />
-	{:else if currentStep?.name === 'Saving'}
+	{#if currentStep?.name === 'Saving'}
 		<InProgressWizard progressStep={saveProgressStep} steps={ADD_TOKEN_STEPS} />
 	{:else}
-		<AddTokenForm on:icNext={modal.next} on:icClose={close} bind:contractAddress />
+		<slot />
 	{/if}
 </WizardModal>

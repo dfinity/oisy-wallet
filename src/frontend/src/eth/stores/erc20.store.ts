@@ -1,4 +1,5 @@
 import type { Erc20Token } from '$eth/types/erc20';
+import type { TokenId } from '$lib/types/token';
 import { writable, type Readable } from 'svelte/store';
 
 export type Ecr20TokensData = Erc20Token[] | undefined;
@@ -6,6 +7,7 @@ export type Ecr20TokensData = Erc20Token[] | undefined;
 export interface Ecr20TokensStore extends Readable<Ecr20TokensData> {
 	set: (tokens: Ecr20TokensData) => void;
 	add: (token: Erc20Token) => void;
+	remove: (tokenId: TokenId) => void;
 	reset: () => void;
 }
 
@@ -23,6 +25,8 @@ const initEcr20TokensStore = (): Ecr20TokensStore => {
 				),
 				token
 			]),
+		remove: (tokenId: TokenId) =>
+			update((state) => [...(state ?? []).filter(({ id }) => id !== tokenId)]),
 		reset: () => set(INITIAL),
 		subscribe
 	};

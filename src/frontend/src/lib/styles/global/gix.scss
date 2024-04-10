@@ -24,8 +24,13 @@
 	--progress-color-contrast: var(--color-white);
 	--progress-color-rgb: 137, 105, 213;
 
-	--overlay-background: var(--color-off-white);
+	--overlay-background: var(--color-white);
 	--overlay-background-contrast: var(--color-dark);
+
+	--tooltip-background: var(--overlay-background);
+	--tooltip-background-contrast: var(--overlay-background-contrast);
+	--tooltip-border-size: 1.5px;
+	--tooltip-border-color: #ebedf9;
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
@@ -67,9 +72,9 @@
 	}
 
 	@include media.min-width(medium) {
-		--alert-width: 500px;
+		--alert-width: 464px;
 
-		--dialog-width: 500px;
+		--dialog-width: 464px;
 		--dialog-max-width: var(--alert-max-width);
 		--dialog-min-height: calc(100vh - var(--padding-8x));
 		--dialog-height: initial;
@@ -116,6 +121,10 @@ div.modal {
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
 
+	div.container {
+		max-width: 100%;
+	}
+
 	div.content > div:first-child {
 		padding: var(--padding-1_5x) 0 0;
 	}
@@ -129,6 +138,8 @@ div.popover {
 		padding: var(--padding-2x);
 		--padding: var(--padding-2x);
 
+		--border-radius: 16px;
+
 		max-width: calc(100vw - (2 * var(--padding)));
 
 		@include media.min-width(xsmall) {
@@ -138,6 +149,12 @@ div.popover {
 }
 
 div.toggle {
+	zoom: 1.45;
+
 	--card-background-contrast: var(--color-dust);
-	--card-background: var(--color-dark-blue);
+	--card-background: var(--color-white);
+
+	&:has(input[type='checkbox']:checked) {
+		--card-background-contrast: var(--color-blue);
+	}
 }

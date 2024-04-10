@@ -15,7 +15,7 @@
 	} from '$eth/stores/fee.store';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import { SEND_STEPS } from '$eth/constants/steps.constants';
+	import { sendSteps } from '$eth/constants/steps.constants';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { authStore } from '$lib/stores/auth.store';
@@ -178,7 +178,7 @@
 			{destinationEditable}
 		/>
 	{:else if currentStep?.name === 'Sending'}
-		<InProgressWizard progressStep={sendProgressStep} steps={SEND_STEPS} />
+		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === 'Send'}
 		<SendForm
 			on:icNext
@@ -190,9 +190,13 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<button type="button" class="secondary" on:click={back}>{$i18n.core.text.back}</button>
+					<button type="button" class="secondary block flex-1" on:click={back}
+						>{$i18n.core.text.back}</button
+					>
 				{:else}
-					<button type="button" class="secondary" on:click={close}>{$i18n.core.text.cancel}</button>
+					<button type="button" class="secondary block flex-1" on:click={close}
+						>{$i18n.core.text.cancel}</button
+					>
 				{/if}
 			</svelte:fragment>
 		</SendForm>
