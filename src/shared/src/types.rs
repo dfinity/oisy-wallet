@@ -54,10 +54,12 @@ pub mod custom_token {
     use candid::{CandidType, Deserialize, Principal};
 
     pub type LedgerId = Principal;
+    pub type IndexId = Principal;
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
+        pub index_id: IndexId,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]

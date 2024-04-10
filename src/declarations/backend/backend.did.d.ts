@@ -35,6 +35,7 @@ export interface HttpResponse {
 }
 export interface IcrcToken {
 	ledger_id: Principal;
+	index_id: Principal;
 }
 export interface InitArg {
 	ecdsa_key_name: string;
