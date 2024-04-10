@@ -1,6 +1,5 @@
 <script lang="ts">
-	import AddTokenModal from '$lib/components/tokens/AddTokenModal.svelte';
-	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
 	import type { Erc20Metadata } from '$eth/types/erc20';
@@ -16,6 +15,24 @@
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import { mapErc20Token } from '$eth/utils/erc20.utils';
 	import { modalStore } from '$lib/stores/modal.store';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+
+	import { addTokenSteps } from '$lib/constants/steps.constants';
+
+	const steps: WizardSteps = [
+		{
+			name: 'Add',
+			title: $i18n.tokens.import.title
+		},
+		{
+			name: 'Review',
+			title: $i18n.tokens.import.review
+		},
+		{
+			name: 'Saving',
+			title: $i18n.tokens.import.saving
+		}
+	];
 
 	let saveProgressStep: string = AddTokenStep.INITIALIZATION;
 
@@ -92,10 +109,20 @@
 	};
 </script>
 
-<AddTokenModal bind:saveProgressStep bind:currentStep bind:modal on:icClose={close}>
+<WizardModal
+	{steps}
+	bind:currentStep
+	bind:this={modal}
+	on:nnsClose={close}
+	disablePointerEvents={currentStep?.name === 'Saving'}
+>
+	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+
 	{#if currentStep?.name === 'Review'}
 		<AddTokenReview on:icBack={modal.back} on:icSave={save} {contractAddress} bind:metadata />
+	{:else if currentStep?.name === 'Saving'}
+		<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
 	{:else}
 		<AddTokenForm on:icNext={modal.next} on:icClose={close} bind:contractAddress />
 	{/if}
-</AddTokenModal>
+</WizardModal>

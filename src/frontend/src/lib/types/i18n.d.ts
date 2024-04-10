@@ -237,6 +237,7 @@ interface I18nTokens {
 		twin_token: string;
 	};
 	import: { title: string; review: string; saving: string };
+	manage: { title: string };
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
 	alt: {
 		context_menu: string;
@@ -244,7 +245,7 @@ interface I18nTokens {
 		open_dashboard: string;
 		open_contract_address_block_explorer: string;
 	};
-	placeholder: { enter_contract_address: string };
+	placeholder: { enter_contract_address: string; search_token: string };
 	warning: { trust_token: string };
 	error: {
 		invalid_contract_address: string;
