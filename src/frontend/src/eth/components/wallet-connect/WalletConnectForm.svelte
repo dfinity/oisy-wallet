@@ -3,6 +3,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { createEventDispatcher } from 'svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	let renderQRCodeReader = false;
 
@@ -58,10 +59,17 @@
 	bind:value={uri}
 />
 
-<div class="flex justify-end gap-1 mt-4">
-	<button class="primary" disabled={invalid} class:opacity-10={invalid} on:click={connect}>
-		{$i18n.wallet_connect.text.connect}
-	</button>
+<div class="mt-4">
+	<ButtonGroup>
+		<button
+			class="primary block flex-1"
+			disabled={invalid}
+			class:opacity-10={invalid}
+			on:click={connect}
+		>
+			{$i18n.wallet_connect.text.connect}
+		</button>
+	</ButtonGroup>
 </div>
 
 <style lang="scss">

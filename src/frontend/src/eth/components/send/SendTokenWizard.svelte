@@ -190,9 +190,13 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<button type="button" class="secondary" on:click={back}>{$i18n.core.text.back}</button>
+					<button type="button" class="secondary block flex-1" on:click={back}
+						>{$i18n.core.text.back}</button
+					>
 				{:else}
-					<button type="button" class="secondary" on:click={close}>{$i18n.core.text.cancel}</button>
+					<button type="button" class="secondary block flex-1" on:click={close}
+						>{$i18n.core.text.cancel}</button
+					>
 				{/if}
 			</svelte:fragment>
 		</SendForm>
