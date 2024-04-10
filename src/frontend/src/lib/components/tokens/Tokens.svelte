@@ -18,6 +18,7 @@
 	import { modalAddToken, modalIcAddToken } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
 	import IcAddTokenModal from '$icp/components/tokens/IcAddTokenModal.svelte';
+	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -30,7 +31,9 @@
 </script>
 
 <Header>
-	{$i18n.tokens.text.title} <span class="font-normal">({tokens.length})</span>
+	{$i18n.tokens.text.title}{#if $erc20TokensInitialized}&nbsp;<span class="font-normal" in:fade
+			>({tokens.length})</span
+		>{/if}
 
 	<TokensMenu slot="end" />
 </Header>
