@@ -24,6 +24,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import IcReceiveEthereum from '$icp/components/receive/IcReceiveEthereum.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import Header from '$lib/components/ui/Header.svelte';
 
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger
@@ -71,15 +72,17 @@
 
 <Info />
 
-<div class="flex justify-between mb-6 pb-1 items-center">
+<Header>
 	<h2 class="text-base">{$i18n.transactions.text.title}</h2>
 
-	{#if $tokenCkBtcLedger}
-		<IcReceiveBitcoin />
-	{:else if $tokenCkEthLedger}
-		<IcReceiveEthereum />
-	{/if}
-</div>
+	<svelte:fragment slot="end">
+		{#if $tokenCkBtcLedger}
+			<IcReceiveBitcoin />
+		{:else if $tokenCkEthLedger}
+			<IcReceiveEthereum />
+		{/if}
+	</svelte:fragment>
+</Header>
 
 <IcTransactionsSkeletons>
 	<svelte:component this={additionalListener}>

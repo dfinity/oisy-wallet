@@ -17,11 +17,12 @@
 	} from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import IcAddToken from '$icp/components/tokens/IcAddToken.svelte';
+	import Header from '$lib/components/ui/Header.svelte';
 </script>
 
-<h2 class="text-base mb-6 pb-1">
+<Header>
 	{$i18n.tokens.text.title} <span class="font-normal">({$networkTokens.length})</span>
-</h2>
+</Header>
 
 <TokensSkeletons>
 	{#each $networkTokens as token (token.id)}
