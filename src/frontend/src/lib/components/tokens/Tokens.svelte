@@ -19,7 +19,9 @@
 	import IcAddToken from '$icp/components/tokens/IcAddToken.svelte';
 </script>
 
-<h2 class="text-base mb-6 pb-1">{$i18n.tokens.text.title}</h2>
+<h2 class="text-base mb-6 pb-1">
+	{$i18n.tokens.text.title} <span class="font-normal">({$networkTokens.length})</span>
+</h2>
 
 <TokensSkeletons>
 	{#each $networkTokens as token (token.id)}
