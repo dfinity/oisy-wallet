@@ -160,8 +160,11 @@ interface I18nSend {
 		review: string;
 		approving: string;
 		refreshing_ui: string;
+		initializing: string;
+		signing_transaction: string;
 		sending: string;
 		signing: string;
+		signing_message: string;
 		network: string;
 		source_network: string;
 		destination_network: string;
