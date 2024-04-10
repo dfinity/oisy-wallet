@@ -98,8 +98,6 @@ interface I18nSettings {
 		session_description: string;
 		testnets: string;
 		testnets_description: string;
-		tokens: string;
-		tokens_description: string;
 	};
 	alt: { testnets_toggle: string };
 }
