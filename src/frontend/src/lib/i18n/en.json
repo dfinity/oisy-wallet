@@ -261,6 +261,9 @@
 			"hide_zero_balances": "Hide zero balances",
 			"import_tokens": "Import tokens"
 		},
+		"alt": {
+			"context_menu": "Context menu for to the selected token"
+		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address"
 		},

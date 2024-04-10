@@ -13,6 +13,7 @@
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
+	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -36,14 +37,18 @@
 
 		{#if summary}
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-				<div class="icon flex flex-col items-start mt-6 md:mt-12 mb-0.5 pt-2">
-					{#if displayTokenSymbol}
-						<div in:fade>
-							<Logo src={$token.icon} size="64px" alt={`${$token.name} logo`} color="off-white" />
-						</div>
-					{:else}
-						<SkeletonLogo size="big" />
-					{/if}
+				<div class="icon flex justify-between items-start mt-6 md:mt-12 mb-0.5 pt-2">
+					<div>
+						{#if displayTokenSymbol}
+							<div in:fade>
+								<Logo src={$token.icon} size="64px" alt={`${$token.name} logo`} color="off-white" />
+							</div>
+						{:else}
+							<SkeletonLogo size="big" />
+						{/if}
+					</div>
+
+					<ContextMenu />
 				</div>
 
 				<Balance />
