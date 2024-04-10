@@ -6,7 +6,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
-	import TokensMetadata from '$lib/components/tokens/TokensMetadata.svelte';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -66,5 +65,3 @@
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
-
-<TokensMetadata />
