@@ -14,7 +14,7 @@
 	import { addUserToken } from '$lib/api/backend.api';
 	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
-	import { mapErc20CustomToken } from '$eth/utils/erc20.utils';
+	import { mapErc20Token } from '$eth/utils/erc20.utils';
 	import { modalStore } from '$lib/stores/modal.store';
 
 	let saveProgressStep: string = AddTokenStep.INITIALIZATION;
@@ -63,9 +63,10 @@
 			saveProgressStep = AddTokenStep.UPDATE_UI;
 
 			erc20TokensStore.add(
-				mapErc20CustomToken({
+				mapErc20Token({
 					address: contractAddress,
 					exchange: 'ethereum',
+					category: 'custom',
 					network: $selectedEthereumNetwork,
 					...metadata
 				})
