@@ -11,6 +11,7 @@ export const BTC_MAINNET_TOKEN: Token = {
 	id: BTC_MAINNET_TOKEN_ID,
 	network: BTC_MAINNET_NETWORK,
 	standard: 'bitcoin',
+	category: 'default',
 	name: 'Bitcoin',
 	symbol: 'BTC',
 	decimals: BTC_DECIMALS
@@ -24,6 +25,7 @@ export const BTC_TESTNET_TOKEN: Token = {
 	id: BTC_TESTNET_TOKEN_ID,
 	network: BTC_TESTNET_NETWORK,
 	standard: 'bitcoin',
+	category: 'default',
 	name: 'Bitcoin (Testnet)',
 	symbol: 'BTC (Testnet)',
 	decimals: BTC_DECIMALS

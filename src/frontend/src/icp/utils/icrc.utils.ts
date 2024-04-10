@@ -18,6 +18,7 @@ export const mapIcrcToken = ({ metadata, ...rest }: IcrcLoadData): IcTokenWithou
 	return {
 		network: ICP_NETWORK,
 		standard: 'icrc',
+		category: 'default',
 		symbol,
 		...metadataToken,
 		...rest

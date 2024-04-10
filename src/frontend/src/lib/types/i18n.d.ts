@@ -227,6 +227,7 @@ interface I18nTokens {
 		balance: string;
 		hide_zero_balances: string;
 		import_tokens: string;
+		hide_token: string;
 	};
 	alt: { context_menu: string; open_etherscan: string; open_dashboard: string };
 	placeholder: { enter_contract_address: string };

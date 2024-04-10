@@ -259,7 +259,8 @@
 			"saving": "Saving...",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
-			"import_tokens": "Import tokens"
+			"import_tokens": "Import tokens",
+			"hide_token": "Hide $token"
 		},
 		"alt": {
 			"context_menu": "Context menu for to the selected token",
