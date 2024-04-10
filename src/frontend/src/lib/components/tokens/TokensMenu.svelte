@@ -37,10 +37,10 @@
 
 		<button
 			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label={$i18n.tokens.text.import_tokens}
+			aria-label={$i18n.tokens.import.title}
 			on:click={importTokens}
 		>
-			+ {$i18n.tokens.text.import_tokens}
+			+ {$i18n.tokens.import.title}
 		</button>
 	</div>
 </Popover>

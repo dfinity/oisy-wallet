@@ -222,12 +222,12 @@ interface I18nTokens {
 	text: {
 		title: string;
 		contract_address: string;
-		review: string;
-		saving: string;
 		balance: string;
 		hide_zero_balances: string;
-		import_tokens: string;
+		initializing: string;
+		updating_ui: string;
 	};
+	import: { title: string; review: string; saving: string };
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
 	alt: { context_menu: string; open_etherscan: string; open_dashboard: string };
 	placeholder: { enter_contract_address: string };

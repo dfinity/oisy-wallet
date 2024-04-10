@@ -255,11 +255,15 @@
 		"text": {
 			"title": "Tokens",
 			"contract_address": "Contract address",
-			"review": "Review",
-			"saving": "Saving...",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
-			"import_tokens": "Import tokens"
+			"initializing": "Initializing...",
+			"updating_ui": "Updating the UI..."
+		},
+		"import": {
+			"title": "Import tokens",
+			"review": "Review",
+			"saving": "Saving..."
 		},
 		"hide": {
 			"title": "Hide Token?",
