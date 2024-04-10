@@ -19,16 +19,28 @@
 	import IcAddToken from '$icp/components/tokens/IcAddToken.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
+	import type { Token } from '$lib/types/token';
+	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
+	import { fade } from 'svelte/transition';
+
+	let displayZeroBalance: boolean;
+	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
+
+	let tokens: Token[];
+	$: tokens = $networkTokens.filter(
+		({ id: tokenId }) =>
+			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
+	);
 </script>
 
 <Header>
-	{$i18n.tokens.text.title} <span class="font-normal">({$networkTokens.length})</span>
+	{$i18n.tokens.text.title} <span class="font-normal">({tokens.length})</span>
 
 	<TokensMenu slot="end" />
 </Header>
 
 <TokensSkeletons>
-	{#each $networkTokens as token (token.id)}
+	{#each tokens as token (token.id)}
 		{@const url = transactionsUrl({ token, networkId: $networkId })}
 
 		<Listener {token}>
@@ -36,6 +48,7 @@
 				class="no-underline"
 				href={url}
 				aria-label={`Open the list of ${token.symbol} transactions`}
+				transition:fade
 			>
 				<Card>
 					{token.name}
