@@ -6,7 +6,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
 	import Token from '$lib/components/tokens/Token.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
