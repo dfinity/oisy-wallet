@@ -52,7 +52,7 @@
 				<Card>
 					{token.name}
 
-					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="46px" color="white" />
+					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="52px" color="white" />
 
 					<output class="break-all" slot="description">
 						{formatToken({
