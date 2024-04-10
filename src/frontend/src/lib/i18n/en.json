@@ -260,7 +260,8 @@
 			"review": "Review",
 			"saving": "Saving...",
 			"balance": "Balance",
-			"hide_zero_balances": "Hide zero balances"
+			"hide_zero_balances": "Hide zero balances",
+			"import_tokens": "+ Import tokens"
 		},
 		"placeholder": {
 			"enter_contract_address": "Enter an ERC20 contract address"
