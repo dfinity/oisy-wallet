@@ -8,7 +8,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
-	import { testnetsStore } from '$lib/stores/testnets.store';
+	import { testnetsStore } from '$lib/stores/settings.store';
 	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -53,7 +53,7 @@
 		{/each}
 	</ul>
 
-	<div class="testnets flex justify-between items-center mt-8 mb-4" class:enabled={testnets}>
+	<div class="flex justify-between items-center mt-8 mb-4">
 		<span class="font-bold px-4.5">{$i18n.networks.show_testnets}</span>
 		<NetworksTestnetsToggle />
 	</div>
@@ -82,20 +82,3 @@
 		</li>
 	</ul>
 </Popover>
-
-<style lang="scss">
-	.testnets {
-		:global(div.toggle) {
-			zoom: 1.45;
-
-			--card-background-contrast: var(--color-dust);
-			--card-background: var(--color-white);
-		}
-
-		&.enabled {
-			:global(div.toggle) {
-				--card-background-contrast: var(--color-blue);
-			}
-		}
-	}
-</style>
