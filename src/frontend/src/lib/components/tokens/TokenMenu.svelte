@@ -17,6 +17,13 @@
 		visible = false;
 	};
 
+	const openToken = () => {
+		const fn = $networkICP ? modalStore.openIcToken : modalStore.openToken;
+		fn();
+
+		visible = false;
+	};
+
 	let hideTokenLabel: string;
 	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
 		$token: $token.name
@@ -45,5 +52,13 @@
 				{hideTokenLabel}
 			</button>
 		{/if}
+
+		<button
+			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
+			aria-label={$i18n.tokens.details.title}
+			on:click={openToken}
+		>
+			{$i18n.tokens.details.title}
+		</button>
 	</div>
 </Popover>
