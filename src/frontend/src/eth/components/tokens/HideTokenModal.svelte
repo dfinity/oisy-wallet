@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { i18n } from '$lib/stores/i18n.store';
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import {
+		type ProgressStep,
+		WizardModal,
+		type WizardStep,
+		type WizardSteps
+	} from '@dfinity/gix-components';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { isNullish } from '@dfinity/utils';
@@ -10,7 +15,6 @@
 	import { removeUserToken } from '$lib/api/backend.api';
 	import { selectedChainId } from '$eth/derived/network.derived';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
-	import { HIDE_TOKEN_STEPS } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import HideTokenReview from '$eth/components/tokens/HideTokenReview.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -77,6 +81,24 @@
 			name: 'Hiding',
 			title: $i18n.tokens.hide.hiding
 		}
+	];
+
+	const HIDE_TOKEN_STEPS: [ProgressStep, ...ProgressStep[]] = [
+		{
+			step: HideTokenStep.INITIALIZATION,
+			text: $i18n.tokens.text.initializing,
+			state: 'in_progress'
+		} as ProgressStep,
+		{
+			step: HideTokenStep.HIDE,
+			text: $i18n.tokens.hide.hiding,
+			state: 'next'
+		} as ProgressStep,
+		{
+			step: HideTokenStep.UPDATE_UI,
+			text: $i18n.tokens.text.updating_ui,
+			state: 'next'
+		} as ProgressStep
 	];
 
 	let hideProgressStep: string = HideTokenStep.INITIALIZATION;
