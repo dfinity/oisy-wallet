@@ -8,7 +8,7 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20Contract, Erc20Metadata } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
-import { mapErc20Token } from '$eth/utils/erc20.utils';
+import { mapErc20CustomToken } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -49,7 +49,6 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 						...{
 							address,
 							exchange: 'erc20' as const,
-							category: 'custom' as const,
 							network
 						},
 						...(await infuraErc20Providers(network.id).metadata({ address }))
@@ -60,7 +59,7 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 		const userContracts = await loadUserContracts();
 
 		const contracts = await Promise.all([...loadKnownContracts(), ...userContracts]);
-		erc20TokensStore.set(contracts.map(mapErc20Token));
+		erc20TokensStore.set(contracts.map(mapErc20CustomToken));
 	} catch (err: unknown) {
 		erc20TokensStore.reset();
 
