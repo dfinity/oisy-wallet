@@ -13,6 +13,7 @@
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import Header from '$lib/components/ui/Header.svelte';
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
@@ -56,7 +57,7 @@
 		: undefined;
 </script>
 
-<h2 class="text-base mb-6 pb-1">{$i18n.transactions.text.title}</h2>
+<Header>{$i18n.transactions.text.title}</Header>
 
 <TransactionsSkeletons>
 	{#each $sortedTransactions as transaction, index (`${transaction.hash}-${index}`)}
