@@ -3,7 +3,7 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { debounce } from '@dfinity/utils';
 	import { writable } from 'svelte/store';
-	import type { KnownIcrcTokens } from '$lib/types/known-token';
+	import type { KnownIcrcTokenMetadata } from '$lib/types/known-token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -14,10 +14,12 @@
 	import { fade } from 'svelte/transition';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import { buildKnownIcrcTokens } from '$icp/services/token.service';
+	import type { IcTokenWithoutId } from '$icp/types/ic';
+	import {icrcTokens} from "$icp/derived/icrc.derived";
 
 	const dispatch = createEventDispatcher();
 
-	let icrcTokens: KnownIcrcTokens = [];
+	let knownIcrcTokens: (IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'>)[] = [];
 	onMount(() => {
 		const { result, tokens } = buildKnownIcrcTokens();
 
@@ -25,22 +27,24 @@
 			return;
 		}
 
-		icrcTokens = tokens ?? [];
+		knownIcrcTokens = tokens ?? [];
 	});
 
-	let filter = '';
+	let allIcrcTokens: (IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'>)[] = [];
+	$: allIcrcTokens = [...knownIcrcTokens, ...$icrcTokens];
 
 	const filterStore = writable<string>('');
 	const updateFilter = () => filterStore.set(filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
+	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	let tokens: KnownIcrcTokens = [];
+	let tokens: (IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'>)[] = [];
 	$: tokens = isNullishOrEmpty($filterStore)
-		? icrcTokens
-		: icrcTokens.filter(
-				({ metadata: { name, symbol, alternativeName } }) =>
+		? allIcrcTokens
+		: allIcrcTokens.filter(
+				({ name, symbol, alternativeName }) =>
 					name.toLowerCase().includes($filterStore.toLowerCase()) ||
 					symbol.toLowerCase().includes($filterStore.toLowerCase()) ||
 					(alternativeName ?? '').toLowerCase().includes($filterStore.toLowerCase())
@@ -85,18 +89,18 @@
 	<div class="container mt-4 h-96 pr-2 mb-1 pt-1 overflow-y-auto">
 		{#each tokens as token}
 			<Card>
-				{token.metadata.name}
+				{token.name}
 
 				<Logo
 					src={`/icons/sns/${token.ledgerCanisterId}.png`}
 					slot="icon"
-					alt={`${token.metadata.name} logo`}
+					alt={`${token.name} logo`}
 					size="52px"
 					color="white"
 				/>
 
 				<span class="break-all" slot="description">
-					{token.metadata.symbol}
+					{token.symbol}
 				</span>
 
 				<IcManageTokenToggle slot="action" />

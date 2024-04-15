@@ -1,3 +1,4 @@
+import { ICP_NETWORK } from '$env/networks.env';
 import snsTokens from '$env/tokens.sns.json';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { metadata } from '$icp/api/icrc-ledger.api';
@@ -6,7 +7,12 @@ import { mapIcrcToken } from '$icp/utils/icrc.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import { knownIcrcToken, knownIcrcTokens, type KnownIcrcTokens } from '$lib/types/known-token';
+import {
+	knownIcrcToken,
+	knownIcrcTokens,
+	type KnownIcrcToken,
+	type KnownIcrcTokenMetadata
+} from '$lib/types/known-token';
 import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -101,7 +107,7 @@ const loadBalance = async ({
 
 export const buildKnownIcrcTokens = (): {
 	result: 'success' | 'error';
-	tokens?: KnownIcrcTokens;
+	tokens?: (IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'>)[];
 } => {
 	try {
 		const tokens = knownIcrcTokens.parse(
@@ -123,7 +129,26 @@ export const buildKnownIcrcTokens = (): {
 			)
 		);
 
-		return { result: 'success', tokens };
+		const mapKkownIcrcToken = ({
+			ledgerCanisterId,
+			indexCanisterId,
+			metadata: { name, decimals, symbol, fee }
+		}: KnownIcrcToken): IcTokenWithoutId => ({
+			ledgerCanisterId,
+			indexCanisterId,
+			network: ICP_NETWORK,
+			name,
+			decimals,
+			symbol,
+			exchangeCoinId: undefined,
+			position: Number.MAX_VALUE,
+			standard: 'icrc',
+			category: 'custom',
+			icon: undefined,
+			fee
+		});
+
+		return { result: 'success', tokens: tokens.map(mapKkownIcrcToken) };
 	} catch (err: unknown) {
 		toastsError({
 			msg: { text: get(i18n).tokens.manage.error.unexpected_build },
