@@ -9,6 +9,12 @@
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 
 	let loaded = isNullish(src);
+
+	let loadingError = false;
+	const onError = () => {
+		loadingError = true;
+		loaded = true;
+	};
 </script>
 
 <div
@@ -21,8 +27,15 @@
 		color === 'off-white' ? 'off-white' : 'dust'
 	}); width: calc(${size} + 2px); height: calc(${size} + 2px); transition: opacity 0.15s ease-in;`}
 >
-	{#if nonNullish(src)}
-		<Img {src} {alt} width={size} height={size} on:load={() => (loaded = true)} />
+	{#if nonNullish(src) && !loadingError}
+		<Img
+			{src}
+			{alt}
+			width={size}
+			height={size}
+			on:load={() => (loaded = true)}
+			on:error={onError}
+		/>
 	{:else}
 		<IconRandom {size} text={alt} />
 	{/if}

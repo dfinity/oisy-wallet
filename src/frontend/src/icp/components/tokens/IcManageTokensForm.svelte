@@ -15,7 +15,7 @@
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import { buildKnownIcrcTokens } from '$icp/services/token.service';
 	import type { IcTokenWithoutId } from '$icp/types/ic';
-	import {icrcTokens} from "$icp/derived/icrc.derived";
+	import { icrcTokens } from '$icp/derived/icrc.derived';
 
 	const dispatch = createEventDispatcher();
 
@@ -92,7 +92,7 @@
 				{token.name}
 
 				<Logo
-					src={`/icons/sns/${token.ledgerCanisterId}.png`}
+					src={token.icon ?? `/icons/sns/${token.ledgerCanisterId}.png`}
 					slot="icon"
 					alt={`${token.name} logo`}
 					size="52px"
