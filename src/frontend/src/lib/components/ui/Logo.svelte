@@ -2,13 +2,20 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
+	import { beforeUpdate, onDestroy } from 'svelte';
 
 	export let src: string | undefined;
 	export let alt = '';
 	export let size: string;
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 
-	let loaded = isNullish(src);
+	let loaded = false;
+
+	$: src,
+		(() => {
+			loaded = isNullish(src);
+			loadingError = false;
+		})();
 
 	let loadingError = false;
 	const onError = () => {
