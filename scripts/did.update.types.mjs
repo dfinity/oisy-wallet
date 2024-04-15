@@ -84,25 +84,27 @@ const renameFactory = async ({ dest = `./src/declarations` }) => {
 };
 
 const copyCertifiedFactory = async ({ dest = `./src/declarations` }) => {
-	const promises = readdirSync(dest).map(
-		(dir) =>
-			new Promise(async (resolve) => {
-				const uncertifiedFactoryPath = join(dest, dir, `${dir}.factory.did.js`);
+	const promises = readdirSync(dest)
+		.filter((dir) => !['frontend'].includes(dir))
+		.map(
+			(dir) =>
+				new Promise(async (resolve) => {
+					const uncertifiedFactoryPath = join(dest, dir, `${dir}.factory.did.js`);
 
-				if (!existsSync(uncertifiedFactoryPath)) {
+					if (!existsSync(uncertifiedFactoryPath)) {
+						resolve();
+						return;
+					}
+
+					const content = await readFile(uncertifiedFactoryPath);
+
+					const certifiedFactoryPath = join(dest, dir, `${dir}.factory.certified.did.js`);
+
+					await writeFile(certifiedFactoryPath, content.toString().replace(/\['query']/g, ''));
+
 					resolve();
-					return;
-				}
-
-				const content = await readFile(uncertifiedFactoryPath);
-
-				const certifiedFactoryPath = join(dest, dir, `${dir}.factory.certified.did.js`);
-
-				await writeFile(certifiedFactoryPath, content.toString().replace(/\['query']/g, ''));
-
-				resolve();
-			})
-	);
+				})
+		);
 
 	await Promise.all(promises);
 };
