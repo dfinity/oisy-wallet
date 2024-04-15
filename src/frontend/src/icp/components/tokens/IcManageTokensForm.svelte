@@ -13,6 +13,7 @@
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { fade } from 'svelte/transition';
+	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -71,7 +72,9 @@
 	bind:value={filter}
 	placeholder={$i18n.tokens.placeholder.search_token}
 	spellcheck={false}
-/>
+>
+	<IconSearch slot="inner-end" />
+</Input>
 
 {#if noTokensMatch}
 	<button
