@@ -65,6 +65,6 @@ export const removeUserToken = async ({
 };
 
 export const listUserTokens = async ({ identity }: { identity: Identity }): Promise<Token[]> => {
-	const { list_user_tokens } = await getBackendActor({ identity });
+	const { list_user_tokens } = await getBackendActor({ identity, certified: false });
 	return list_user_tokens();
 };
