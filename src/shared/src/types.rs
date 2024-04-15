@@ -56,6 +56,8 @@ pub mod custom_token {
     pub type LedgerId = Principal;
     pub type IndexId = Principal;
 
+    pub type TimeStamp = u64;
+
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
@@ -63,8 +65,14 @@ pub mod custom_token {
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
-    pub enum UserToken {
+    pub enum CustomToken {
         Icrc(IcrcToken),
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    pub struct UserToken {
+        pub token: CustomToken,
+        pub enabled: bool,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
