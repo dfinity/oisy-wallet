@@ -236,7 +236,19 @@ interface I18nTokens {
 		contract_address_copied: string;
 		twin_token: string;
 	};
-	import: { title: string; review: string; saving: string };
+	import: {
+		text: {
+			title: string;
+			review: string;
+			saving: string;
+			ledger_canister_id: string;
+			index_canister_id: string;
+			verifying: string;
+			add_the_token: string;
+		};
+		error: { loading_metadata: string; no_metadata: string; unexpected_index: string };
+	};
+	manage: { title: string; do_not_see_import: string; clear_filter: string };
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
 	alt: {
 		context_menu: string;
@@ -244,7 +256,7 @@ interface I18nTokens {
 		open_dashboard: string;
 		open_contract_address_block_explorer: string;
 	};
-	placeholder: { enter_contract_address: string };
+	placeholder: { enter_contract_address: string; search_token: string };
 	warning: { trust_token: string };
 	error: {
 		invalid_contract_address: string;

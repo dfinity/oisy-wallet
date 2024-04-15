@@ -19,7 +19,7 @@ export interface Modal<T> {
 		| 'transaction'
 		| 'ic-transaction'
 		| 'add-token'
-		| 'ic-add-token'
+		| 'ic-manage-tokens'
 		| 'hide-token'
 		| 'token'
 		| 'ic-token'
@@ -46,7 +46,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openTransaction: <D extends T>(data: D) => void;
 	openIcTransaction: <D extends T>(data: D) => void;
 	openAddToken: () => void;
-	openIcAddToken: () => void;
+	openIcManageTokens: () => void;
 	openHideToken: () => void;
 	openToken: () => void;
 	openIcToken: () => void;
@@ -74,7 +74,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openTransaction: <D extends T>(data: D) => set({ type: 'transaction', data }),
 		openIcTransaction: <D extends T>(data: D) => set({ type: 'ic-transaction', data }),
 		openAddToken: () => set({ type: 'add-token' }),
-		openIcAddToken: () => set({ type: 'ic-add-token' }),
+		openIcManageTokens: () => set({ type: 'ic-manage-tokens' }),
 		openHideToken: () => set({ type: 'hide-token' }),
 		openToken: () => set({ type: 'token' }),
 		openIcToken: () => set({ type: 'ic-token' }),

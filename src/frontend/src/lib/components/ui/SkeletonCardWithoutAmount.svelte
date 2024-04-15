@@ -4,10 +4,12 @@
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 </script>
 
-<Card>
+<Card noMargin>
 	<span class="inline-block max-w-full w-[120px] sm:w-[200px]"><slot><SkeletonText /></slot></span>
 
-	<span class="inline-block w-full max-w-[100px]" slot="amount"><SkeletonText /></span>
+	<span class="inline-block max-w-full w-[120px] sm:w-[200px] mt-1" slot="description"
+		><SkeletonText /></span
+	>
 
 	<SkeletonLogo slot="icon" />
 </Card>

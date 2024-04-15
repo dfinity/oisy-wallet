@@ -65,9 +65,9 @@ export const modalAddToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'add-token'
 );
-export const modalIcAddToken: Readable<boolean> = derived(
+export const modalIcManageTokens: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'ic-add-token'
+	($modalStore) => $modalStore?.type === 'ic-manage-tokens'
 );
 export const modalHideToken: Readable<boolean> = derived(
 	modalStore,
