@@ -15,6 +15,13 @@ lazy_static! {
         enabled: true
     };
     static ref USER_TOKEN_ID: UserTokenId = UserTokenId::Icrc(ICRC_TOKEN.ledger_id.clone());
+    static ref ANOTHER_USER_TOKEN: UserToken = UserToken {
+        token: CustomToken::Icrc(IcrcToken {
+            ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
+            index_id: Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
+        }),
+        enabled: true,
+    };
 }
 
 #[test]
@@ -81,6 +88,71 @@ fn test_update_user_token() {
 }
 
 #[test]
+fn test_add_many_user_custom_tokens() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let tokens: Vec<UserToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
+
+    let result = update_call::<()>(&pic_setup, caller, "set_many_user_custom_tokens", tokens);
+
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_update_many_user_tokens() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let tokens: Vec<UserToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
+
+    let result = update_call::<()>(
+        &pic_setup,
+        caller,
+        "set_many_user_custom_tokens",
+        tokens.clone(),
+    );
+
+    assert!(result.is_ok());
+
+    let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_custom_tokens", ());
+
+    assert!(results.is_ok());
+
+    assert_custom_tokens_eq(results.unwrap(), tokens.clone());
+
+    let update_token: UserToken = UserToken {
+        enabled: false,
+        token: USER_TOKEN.token.clone(),
+    };
+
+    let update_another_token: UserToken = UserToken {
+        enabled: false,
+        token: ANOTHER_USER_TOKEN.token.clone(),
+    };
+
+    let update_tokens: Vec<UserToken> = vec![update_token.clone(), update_another_token.clone()];
+
+    let update_result = update_call::<()>(
+        &pic_setup,
+        caller,
+        "set_many_user_custom_tokens",
+        update_tokens.clone(),
+    );
+
+    assert!(update_result.is_ok());
+
+    let updated_results =
+        query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_custom_tokens", ());
+
+    assert!(updated_results.is_ok());
+
+    assert_custom_tokens_eq(updated_results.unwrap(), update_tokens);
+}
+
+#[test]
 fn test_remove_user_custom_token() {
     let pic_setup = setup();
 
@@ -118,24 +190,16 @@ fn test_list_user_custom_tokens() {
         USER_TOKEN.clone(),
     );
 
-    let another_token: UserToken = UserToken {
-        token: CustomToken::Icrc(IcrcToken {
-            ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
-            index_id: Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
-        }),
-        enabled: true,
-    };
-
     let _ = update_call::<()>(
         &pic_setup,
         caller,
         "set_user_custom_token",
-        another_token.clone(),
+        ANOTHER_USER_TOKEN.clone(),
     );
 
     let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_custom_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![USER_TOKEN.clone(), another_token.clone()];
+    let expected_tokens: Vec<UserToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
 
     assert!(results.is_ok());
 
