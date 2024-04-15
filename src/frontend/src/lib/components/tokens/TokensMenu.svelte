@@ -11,7 +11,7 @@
 	let button: HTMLButtonElement | undefined;
 
 	const importTokens = () => {
-		const fn = $networkICP ? modalStore.openIcAddToken : modalStore.openAddToken;
+		const fn = $networkICP ? modalStore.openIcManageTokens : modalStore.openAddToken;
 		fn();
 
 		visible = false;

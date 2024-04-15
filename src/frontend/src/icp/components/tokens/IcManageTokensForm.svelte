@@ -14,6 +14,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -71,7 +72,7 @@
 	spellcheck={false}
 />
 
-<div class="container mt-4 h-96 overflow-y-auto">
+<div class="container mt-4 h-96 pr-2 overflow-y-auto">
 	{#each tokens as token}
 		<Card>
 			{token.metadata.name}
@@ -87,6 +88,8 @@
 			<span class="break-all" slot="description">
 				{token.metadata.symbol}
 			</span>
+
+			<IcManageTokenToggle slot="action" />
 		</Card>
 	{/each}
 </div>
