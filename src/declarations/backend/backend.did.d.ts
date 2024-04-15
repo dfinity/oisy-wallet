@@ -15,6 +15,7 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
+export type CustomToken = { Icrc: IcrcToken };
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
 	freezing_threshold: bigint;
@@ -61,10 +62,12 @@ export interface TokenId {
 	chain_id: bigint;
 	contract_address: string;
 }
-export type UserToken = { Icrc: IcrcToken };
+export interface UserToken {
+	token: CustomToken;
+	enabled: boolean;
+}
 export type UserTokenId = { Icrc: Principal };
 export interface _SERVICE {
-	add_user_custom_token: ActorMethod<[UserToken], undefined>;
 	add_user_token: ActorMethod<[Token], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
 	eth_address_of: ActorMethod<[Principal], string>;
@@ -75,6 +78,8 @@ export interface _SERVICE {
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_custom_token: ActorMethod<[UserTokenId], undefined>;
 	remove_user_token: ActorMethod<[TokenId], undefined>;
+	set_many_user_custom_tokens: ActorMethod<[Array<UserToken>], undefined>;
+	set_user_custom_token: ActorMethod<[UserToken], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }
