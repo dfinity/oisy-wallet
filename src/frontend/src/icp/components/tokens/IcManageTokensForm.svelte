@@ -3,9 +3,8 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { debounce } from '@dfinity/utils';
 	import { writable } from 'svelte/store';
-	import { knownIcrcToken, knownIcrcTokens, type KnownIcrcTokens } from '$lib/types/known-token';
+	import type { KnownIcrcTokens } from '$lib/types/known-token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import snsTokens from '$env/tokens.sns.json';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -14,33 +13,19 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { fade } from 'svelte/transition';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
+	import { buildKnownIcrcTokens } from '$icp/services/token.service';
 
 	const dispatch = createEventDispatcher();
 
 	let icrcTokens: KnownIcrcTokens = [];
 	onMount(() => {
-		try {
-			icrcTokens = knownIcrcTokens.parse(
-				snsTokens.map(
-					({
-						metadata: {
-							fee: { __bigint__ },
-							...rest
-						},
-						...ids
-					}) =>
-						knownIcrcToken.parse({
-							...ids,
-							metadata: {
-								...rest,
-								fee: BigInt(__bigint__)
-							}
-						})
-				)
-			);
-		} catch (err: unknown) {
-			console.error(err);
+		const { result, tokens } = buildKnownIcrcTokens();
+
+		if (result === 'error') {
+			return;
 		}
+
+		icrcTokens = tokens ?? [];
 	});
 
 	let filter = '';
@@ -75,7 +60,7 @@
 >
 	<svelte:fragment slot="inner-end">
 		{#if noTokensMatch}
-			<button on:click={() => (filter = '')} aria-label={$i18n.tokens.manage.clear_filter}>
+			<button on:click={() => (filter = '')} aria-label={$i18n.tokens.manage.text.clear_filter}>
 				<IconClose />
 			</button>
 		{:else}
@@ -93,7 +78,7 @@
 		<span class="text-7xl">🤔</span>
 
 		<span class="py-4 text-center text-blue font-bold no-underline"
-			>+ {$i18n.tokens.manage.do_not_see_import}</span
+			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
 {:else}
@@ -123,7 +108,7 @@
 
 	<button
 		class="flex justify-center pt-4 pb-5 text-center w-full text-blue font-bold no-underline"
-		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.do_not_see_import}</button
+		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
 
 	<ButtonGroup>
