@@ -97,7 +97,7 @@
 		>
 	</button>
 {:else}
-	<div class="container mt-4 h-96 pr-2 overflow-y-auto">
+	<div class="container mt-4 h-96 pr-2 mb-1 pt-1 overflow-y-auto">
 		{#each tokens as token}
 			<Card>
 				{token.metadata.name}
