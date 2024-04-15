@@ -11,6 +11,8 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import { fade } from 'svelte/transition';
 
 	const dispatch = createEventDispatcher();
 
@@ -57,6 +59,9 @@
 					symbol.toLowerCase().includes($filterStore.toLowerCase()) ||
 					(alternativeName ?? '').toLowerCase().includes($filterStore.toLowerCase())
 			);
+
+	let noTokensMatch = false;
+	$: noTokensMatch = tokens.length === 0;
 </script>
 
 <Input
@@ -68,41 +73,57 @@
 	spellcheck={false}
 />
 
-<div class="container mt-4 h-96 pr-2 overflow-y-auto">
-	{#each tokens as token}
-		<Card>
-			{token.metadata.name}
-
-			<Logo
-				src={`/icons/sns/${token.ledgerCanisterId}.png`}
-				slot="icon"
-				alt={`${token.metadata.name} logo`}
-				size="52px"
-				color="white"
-			/>
-
-			<span class="break-all" slot="description">
-				{token.metadata.symbol}
-			</span>
-
-			<IcManageTokenToggle slot="action" />
-		</Card>
-	{/each}
-</div>
-
-<button
-	class="flex justify-center pb-4 text-center w-full text-blue font-bold no-underline"
-	on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.do_not_see_import}</button
->
-
-<ButtonGroup>
-	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
-		>{$i18n.core.text.back}</button
+{#if noTokensMatch}
+	<button
+		class="flex flex-col items-center justify-center p-16"
+		in:fade
+		on:click={() => dispatch('icAddToken')}
 	>
-	<button class="primary block flex-1" on:click={() => dispatch('icSave')}>
-		{$i18n.core.text.save}
+		<span class="text-7xl">🤔</span>
+
+		<span class="py-4 text-center text-blue font-bold no-underline"
+			>+ {$i18n.tokens.manage.do_not_see_import}</span
+		>
 	</button>
-</ButtonGroup>
+{:else}
+	<div class="container mt-4 h-96 pr-2 overflow-y-auto">
+		{#each tokens as token}
+			<Card>
+				{token.metadata.name}
+
+				<Logo
+					src={`/icons/sns/${token.ledgerCanisterId}.png`}
+					slot="icon"
+					alt={`${token.metadata.name} logo`}
+					size="52px"
+					color="white"
+				/>
+
+				<span class="break-all" slot="description">
+					{token.metadata.symbol}
+				</span>
+
+				<IcManageTokenToggle slot="action" />
+			</Card>
+		{/each}
+	</div>
+
+	<Hr />
+
+	<button
+		class="flex justify-center pt-4 pb-5 text-center w-full text-blue font-bold no-underline"
+		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.do_not_see_import}</button
+	>
+
+	<ButtonGroup>
+		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
+			>{$i18n.core.text.back}</button
+		>
+		<button class="primary block flex-1" on:click={() => dispatch('icSave')}>
+			{$i18n.core.text.save}
+		</button>
+	</ButtonGroup>
+{/if}
 
 <style lang="scss">
 	.container {
