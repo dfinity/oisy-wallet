@@ -8,7 +8,7 @@ export const knownIcrcTokenMetadata = z.object({
 	alternativeName: z.optional(z.string()),
 	url: z.optional(z.string().url()),
 	description: z.optional(z.string())
-})
+});
 
 export const knownIcrcToken = z.object({
 	ledgerCanisterId: z.string(),
