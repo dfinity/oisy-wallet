@@ -96,14 +96,3 @@
 		{$i18n.tokens.import.text.add_the_token}
 	</button>
 </ButtonGroup>
-
-<style lang="scss">
-	p {
-		:global(a) {
-			&:active,
-			&:hover {
-				color: var(--color-off-white);
-			}
-		}
-	}
-</style>
