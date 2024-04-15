@@ -86,7 +86,7 @@
 
 {#if noTokensMatch}
 	<button
-		class="flex flex-col items-center justify-center p-16"
+		class="flex flex-col items-center justify-center py-16 w-full"
 		in:fade
 		on:click={() => dispatch('icAddToken')}
 	>
