@@ -90,11 +90,16 @@
 	{/each}
 </div>
 
+<button
+	class="flex justify-center pb-4 text-center w-full text-blue font-bold no-underline"
+	on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.do_not_see_import}</button
+>
+
 <ButtonGroup>
 	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 		>{$i18n.core.text.back}</button
 	>
-	<button class="primary block flex-1" on:click={() => dispatch('icSend')}>
+	<button class="primary block flex-1" on:click={() => dispatch('icSave')}>
 		{$i18n.core.text.save}
 	</button>
 </ButtonGroup>

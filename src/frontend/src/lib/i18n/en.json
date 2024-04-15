@@ -270,12 +270,16 @@
 			"twin_token": "Twin token"
 		},
 		"import": {
-			"title": "Import tokens",
+			"title": "Import token",
 			"review": "Review",
-			"saving": "Saving..."
+			"saving": "Saving...",
+			"ledger_canister_id": "Ledger Canister ID",
+			"index_canister_id": "Index Canister ID",
+			"verifying": "Verifying token details..."
 		},
 		"manage": {
-			"title": "Manage tokens"
+			"title": "Manage tokens",
+			"do_not_see_import": "Don’t see your token? Import"
 		},
 		"hide": {
 			"title": "Hide token?",

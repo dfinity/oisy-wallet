@@ -1,36 +1,88 @@
 <script lang="ts">
-	import type { KnownIcrcToken } from '$lib/types/known-token';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { fade, blur } from 'svelte/transition';
+	import { loadAndAssertCustomToken, type ValidateTokenData } from '$icp/services/token.service';
+	import { authStore } from '$lib/stores/auth.store';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import Card from '$lib/components/ui/Card.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
 
-	export let token: KnownIcrcToken | undefined;
+	export let ledgerCanisterId = '';
+	export let indexCanisterId = '';
 
 	let invalid = true;
 	$: invalid = isNullish(token);
 
 	const dispatch = createEventDispatcher();
+	const back = () => dispatch('icBack');
+
+	let token: ValidateTokenData | undefined;
+
+	onMount(async () => {
+		const { result, data } = await loadAndAssertCustomToken({
+			ledgerCanisterId,
+			indexCanisterId,
+			identity: $authStore.identity
+		});
+
+		if (result === 'error' || isNullish(data)) {
+			back();
+			return;
+		}
+
+		token = data;
+	});
 </script>
 
-<Value ref="symbol" element="div">
-	<svelte:fragment slot="label">Symbol</svelte:fragment>
-	{token?.metadata.symbol ?? ''}
-</Value>
+<div class="bg-light-blue p-4 mb-4 rounded-lg">
+	{#if isNullish(token)}
+		<SkeletonCardWithoutAmount>{$i18n.tokens.import.verifying}</SkeletonCardWithoutAmount>
+	{:else}
+		<div in:blur>
+			<Card noMargin>
+				{token.token.name}
 
-<Value ref="ledgerId" element="div">
-	<svelte:fragment slot="label">Ledger ID</svelte:fragment>
-	{token?.ledgerCanisterId ?? ''}
-</Value>
+				<Logo
+					src={token.token.icon}
+					slot="icon"
+					alt={`${token.token.name} logo`}
+					size="52px"
+					color="white"
+				/>
 
-<div class="flex justify-end gap-1 mb-2">
-	<button class="secondary" on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button>
-	<button
-		class="primary"
-		disabled={invalid}
-		class:opacity-10={invalid}
-		on:click={() => dispatch('icSave')}
-	>
-		{$i18n.core.text.save}
-	</button>
+				<span class="break-all" slot="description">
+					{token.token.symbol}
+				</span>
+			</Card>
+		</div>
+	{/if}
 </div>
+
+{#if nonNullish(token)}
+	<div in:fade>
+		<Value ref="ledgerId" element="div">
+			<svelte:fragment slot="label">{$i18n.tokens.import.ledger_canister_id}</svelte:fragment>
+			{token.token.ledgerCanisterId}
+		</Value>
+
+		<Value ref="ledgerId" element="div">
+			<svelte:fragment slot="label">{$i18n.tokens.import.index_canister_id}</svelte:fragment>
+			{token.token.indexCanisterId}
+		</Value>
+
+		<div class="flex justify-end gap-1 mb-2">
+			<button class="secondary" on:click={back}>{$i18n.core.text.back}</button>
+			<button
+				class="primary"
+				disabled={invalid}
+				class:opacity-10={invalid}
+				on:click={() => dispatch('icSave')}
+			>
+				{$i18n.core.text.save}
+			</button>
+		</div>
+	</div>
+{/if}

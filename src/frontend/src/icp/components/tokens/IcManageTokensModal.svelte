@@ -3,11 +3,11 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import IcManageTokensForm from '$icp/components/tokens/IcManageTokensForm.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { KnownIcrcToken } from '$lib/types/known-token';
 	import IcManageTokensReview from '$icp/components/tokens/IcManageTokensReview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
 
 	const steps: WizardSteps = [
 		{
@@ -33,16 +33,6 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	// TODO: move
-
-	let token: KnownIcrcToken | undefined;
-
-	const selectKnownToken = ({ detail }: CustomEvent<KnownIcrcToken>) => {
-		token = detail;
-
-		modal.next();
-	};
-
 	const save = async () => {};
 
 	const close = () => {
@@ -50,6 +40,9 @@
 
 		saveProgressStep = AddTokenStep.INITIALIZATION;
 	};
+
+	let ledgerCanisterId = '';
+	let indexCanisterId = '';
 </script>
 
 <WizardModal
@@ -62,10 +55,22 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<IcManageTokensReview on:icBack={modal.back} on:icSave={save} {token} />
+		<IcManageTokensReview
+			on:icBack={modal.back}
+			on:icSave={save}
+			{ledgerCanisterId}
+			{indexCanisterId}
+		/>
 	{:else if currentStep?.name === 'Saving'}
 		<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
+	{:else if currentStep?.name === 'Import'}
+		<IcAddTokenForm
+			on:icBack={modal.back}
+			on:icNext={modal.next}
+			bind:ledgerCanisterId
+			bind:indexCanisterId
+		/>
 	{:else}
-		<IcManageTokensForm on:icNext={modal.next} on:icClose={close} on:icToken={selectKnownToken} />
+		<IcManageTokensForm on:icSave on:icClose={close} on:icAddToken={modal.next} />
 	{/if}
 </WizardModal>

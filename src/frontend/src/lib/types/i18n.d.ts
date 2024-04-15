@@ -236,8 +236,15 @@ interface I18nTokens {
 		contract_address_copied: string;
 		twin_token: string;
 	};
-	import: { title: string; review: string; saving: string };
-	manage: { title: string };
+	import: {
+		title: string;
+		review: string;
+		saving: string;
+		ledger_canister_id: string;
+		index_canister_id: string;
+		verifying: string;
+	};
+	manage: { title: string; do_not_see_import: string };
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
 	alt: {
 		context_menu: string;
