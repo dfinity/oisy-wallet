@@ -3,7 +3,7 @@ use crate::utils::mock::CALLER;
 use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::custom_token::{CustomToken, IcrcToken, UserToken, UserTokenId};
+use shared::types::custom_token::{CustomToken, IcrcToken, UserToken, CustomTokenId};
 
 lazy_static! {
     static ref ICRC_TOKEN: IcrcToken = IcrcToken {
@@ -14,7 +14,7 @@ lazy_static! {
         token: CustomToken::Icrc(ICRC_TOKEN.clone()),
         enabled: true
     };
-    static ref USER_TOKEN_ID: UserTokenId = UserTokenId::Icrc(ICRC_TOKEN.ledger_id.clone());
+    static ref USER_TOKEN_ID: CustomTokenId = CustomTokenId::Icrc(ICRC_TOKEN.ledger_id.clone());
     static ref ANOTHER_USER_TOKEN: UserToken = UserToken {
         token: CustomToken::Icrc(IcrcToken {
             ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),

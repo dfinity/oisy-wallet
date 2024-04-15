@@ -76,7 +76,7 @@ pub mod custom_token {
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
-    pub enum UserTokenId {
+    pub enum CustomTokenId {
         Icrc(LedgerId),
     }
 }

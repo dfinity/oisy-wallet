@@ -20,7 +20,7 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
-use shared::types::custom_token::{UserToken, UserTokenId};
+use shared::types::custom_token::{UserToken, CustomTokenId};
 use shared::types::token::{Token, TokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::{Arg, InitArg};
@@ -408,7 +408,7 @@ fn set_user_custom_token(token: UserToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &UserToken| -> bool {
-        UserTokenId::from(t.token.clone()) == UserTokenId::from(token.token.clone())
+        CustomTokenId::from(t.token.clone()) == CustomTokenId::from(token.token.clone())
     };
 
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find));
@@ -421,7 +421,7 @@ fn set_many_user_custom_tokens(tokens: Vec<UserToken>) {
     mutate_state(|s| {
         for token in tokens {
             let find = |t: &UserToken| -> bool {
-                UserTokenId::from(t.token.clone()) == UserTokenId::from(token.token.clone())
+                CustomTokenId::from(t.token.clone()) == CustomTokenId::from(token.token.clone())
             };
 
             add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find)
@@ -430,10 +430,10 @@ fn set_many_user_custom_tokens(tokens: Vec<UserToken>) {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-fn remove_user_custom_token(token_id: UserTokenId) {
+fn remove_user_custom_token(token_id: CustomTokenId) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &UserToken| -> bool { UserTokenId::from(t.token.clone()) == token_id };
+    let find = |t: &UserToken| -> bool { CustomTokenId::from(t.token.clone()) == token_id };
 
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_custom_token, &find));
 }
