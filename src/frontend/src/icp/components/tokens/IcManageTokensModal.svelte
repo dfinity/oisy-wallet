@@ -12,7 +12,7 @@
 	const steps: WizardSteps = [
 		{
 			name: 'Manage',
-			title: $i18n.tokens.manage.title
+			title: $i18n.tokens.manage.text.title
 		},
 		{
 			name: 'Import',
