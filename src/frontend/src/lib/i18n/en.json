@@ -270,12 +270,28 @@
 			"twin_token": "Twin token"
 		},
 		"import": {
-			"title": "Import tokens",
-			"review": "Review",
-			"saving": "Saving..."
+			"text": {
+				"title": "Import token",
+				"review": "Review",
+				"saving": "Saving...",
+				"ledger_canister_id": "Ledger Canister ID",
+				"index_canister_id": "Index Canister ID",
+				"verifying": "Verifying token details...",
+				"add_the_token": "Add the token"
+			},
+			"error": {
+				"loading_metadata": "Error while loading the metadata of the token.",
+				"no_metadata": "No metadata for the token are provided. This is unexpected.",
+				"unexpected_index": "Something went wrong while validating the Index canister."
+			}
+		},
+		"manage": {
+			"title": "Manage tokens",
+			"do_not_see_import": "Don’t see your token? Import",
+			"clear_filter": "Clear filter"
 		},
 		"hide": {
-			"title": "Hide Token?",
+			"title": "Hide token?",
 			"token": "Hide $token",
 			"info": "You can add this token back in the future by going into <strong>“+ Import tokens”</strong> in your wallet view.",
 			"confirm": "Hide",
@@ -288,7 +304,8 @@
 			"open_contract_address_block_explorer": "Open the contract address on a block explorer"
 		},
 		"placeholder": {
-			"enter_contract_address": "Enter an ERC20 contract address"
+			"enter_contract_address": "Enter an ERC20 contract address",
+			"search_token": "Search for the token"
 		},
 		"warning": {
 			"trust_token": "Make sure that you trust the token that you are adding. If the token you are adding is controlled by a malicious party, they could try and scam you e.g. by making you believe you received a significant amount of tokens in order to trick you into sending them tokens in return or perform other undesired actions. Learn more about scams and security risks e.g. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">here</a>."

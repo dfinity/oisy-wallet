@@ -15,9 +15,9 @@
 	import type { Token } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
-	import { modalAddToken, modalIcAddToken } from '$lib/derived/modal.derived';
+	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
-	import IcAddTokenModal from '$icp/components/tokens/IcAddTokenModal.svelte';
+	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
 	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
 
 	let displayZeroBalance: boolean;
@@ -62,7 +62,7 @@
 						{token.symbol}
 					</output>
 
-					<ExchangeTokenValue {token} slot="amount" />
+					<ExchangeTokenValue {token} />
 				</Card>
 			</a>
 		</Listener>
@@ -70,7 +70,7 @@
 
 	{#if $modalAddToken}
 		<AddTokenModal />
-	{:else if $modalIcAddToken}
-		<IcAddTokenModal />
+	{:else if $modalIcManageTokens}
+		<IcManageTokensModal />
 	{/if}
 </TokensSkeletons>

@@ -47,6 +47,9 @@
 	--animation-time-short: 0.2s;
 	--secondary: var(--color-dark-blue);
 
+	// Segment
+	--segment-selected-background: var(--color-dark);
+
 	// Modal
 
 	--alert-width: calc(100% - var(--padding-8x));
@@ -156,5 +159,11 @@ div.toggle {
 
 	&:has(input[type='checkbox']:checked) {
 		--card-background-contrast: var(--color-blue);
+	}
+}
+
+div.segment-button {
+	button.selected {
+		color: var(--color-white);
 	}
 }
