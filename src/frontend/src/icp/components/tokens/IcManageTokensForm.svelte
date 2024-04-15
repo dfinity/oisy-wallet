@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { IconClose, Input } from '@dfinity/gix-components';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { writable } from 'svelte/store';
-	import type { KnownIcrcTokenMetadata } from '$lib/types/known-token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -14,12 +13,13 @@
 	import { fade } from 'svelte/transition';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import { buildKnownIcrcTokens } from '$icp/services/token.service';
-	import type { IcTokenWithoutId } from '$icp/types/ic';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { icrcLedgerCanisterIds, sortedIcrcTokens } from '$icp/derived/icrc.derived';
+	import type { IcrcManageableToken } from '$icp/types/token';
+	import type { CanisterIdText } from '$lib/types/canister';
 
 	const dispatch = createEventDispatcher();
 
-	let knownIcrcTokens: (IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'>)[] = [];
+	let knownIcrcTokens: IcrcManageableToken[] = [];
 	onMount(() => {
 		const { result, tokens } = buildKnownIcrcTokens();
 
@@ -27,11 +27,16 @@
 			return;
 		}
 
-		knownIcrcTokens = tokens ?? [];
+		knownIcrcTokens = tokens?.map((token) => ({ ...token, enabled: false })) ?? [];
 	});
 
-	let allIcrcTokens: (IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'>)[] = [];
-	$: allIcrcTokens = [...knownIcrcTokens, ...$icrcTokens];
+	let allIcrcTokens: IcrcManageableToken[] = [];
+	$: allIcrcTokens = [
+		...$sortedIcrcTokens.map((token) => ({ ...token, enabled: true })),
+		...knownIcrcTokens.filter(
+			({ ledgerCanisterId }) => !$icrcLedgerCanisterIds.includes(ledgerCanisterId)
+		)
+	];
 
 	const filterStore = writable<string>('');
 	const updateFilter = () => filterStore.set(filter);
@@ -40,7 +45,7 @@
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	let tokens: (IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'>)[] = [];
+	let tokens: IcrcManageableToken[] = [];
 	$: tokens = isNullishOrEmpty($filterStore)
 		? allIcrcTokens
 		: allIcrcTokens.filter(
@@ -52,6 +57,27 @@
 
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
+
+	let modifiedTokens: Map<CanisterIdText, IcrcManageableToken> = new Map<
+		CanisterIdText,
+		IcrcManageableToken
+	>();
+	const onToggle = ({
+		detail: { ledgerCanisterId, enabled, ...rest }
+	}: CustomEvent<IcrcManageableToken>) => {
+		const current = modifiedTokens.get(ledgerCanisterId);
+
+		if (nonNullish(current) && current.enabled === enabled) {
+			modifiedTokens.delete(ledgerCanisterId);
+			return;
+		}
+
+		modifiedTokens.set(ledgerCanisterId, {
+			ledgerCanisterId,
+			enabled,
+			...rest
+		});
+	};
 </script>
 
 <Input
@@ -103,7 +129,7 @@
 					{token.symbol}
 				</span>
 
-				<IcManageTokenToggle slot="action" />
+				<IcManageTokenToggle slot="action" {token} on:icToken={onToggle} />
 			</Card>
 		{/each}
 	</div>
