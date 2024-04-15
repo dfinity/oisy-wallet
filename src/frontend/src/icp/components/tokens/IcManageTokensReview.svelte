@@ -9,6 +9,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
+	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';
@@ -72,6 +73,8 @@
 			<svelte:fragment slot="label">{$i18n.tokens.import.text.index_canister_id}</svelte:fragment>
 			{token.token.indexCanisterId}
 		</Value>
+
+		<AddTokenWarning />
 
 		<div class="flex justify-end gap-1 mb-2">
 			<button class="secondary" on:click={back}>{$i18n.core.text.back}</button>

@@ -5,14 +5,13 @@
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import Warning from '$lib/components/ui/Warning.svelte';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { Html } from '@dfinity/gix-components';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 
 	export let contractAddress = '';
 	export let metadata: Erc20Metadata | undefined;
@@ -82,11 +81,7 @@
 	{/if}
 </Value>
 
-<Warning>
-	<p>
-		<Html text={$i18n.tokens.warning.trust_token} />
-	</p>
-</Warning>
+<AddTokenWarning />
 
 <ButtonGroup>
 	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
