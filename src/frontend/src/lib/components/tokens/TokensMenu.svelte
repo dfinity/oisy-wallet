@@ -19,10 +19,10 @@
 </script>
 
 <button
-	class="icon"
+	class="icon bg-white border border-dust rounded-md hover:text-blue active:text-blue"
 	bind:this={button}
 	on:click={() => (visible = true)}
-	aria-label={$i18n.navigation.alt.menu}
+	aria-label={$i18n.tokens.alt.context_menu}
 >
 	<IconMore />
 </button>

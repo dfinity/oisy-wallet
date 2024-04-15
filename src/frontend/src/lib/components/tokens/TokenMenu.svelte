@@ -31,7 +31,7 @@
 </script>
 
 <button
-	class="icon text-white"
+	class="icon text-white bg-dark-blue border border-misty-rose rounded-md hover:text-blue active:text-blue"
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.tokens.alt.context_menu}
