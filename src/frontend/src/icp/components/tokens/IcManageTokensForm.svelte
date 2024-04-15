@@ -64,13 +64,13 @@
 	}: CustomEvent<IcrcManageableToken>) => {
 		const { [`${ledgerCanisterId}`]: current, ...tokens } = modifiedTokens;
 
-		if (nonNullish(current) && current.enabled === enabled) {
+		if (nonNullish(current)) {
 			modifiedTokens = { ...tokens };
 			return;
 		}
 
 		modifiedTokens = {
-			ledgerCanisterId: {
+			[`${ledgerCanisterId}`]: {
 				ledgerCanisterId,
 				enabled,
 				...rest
