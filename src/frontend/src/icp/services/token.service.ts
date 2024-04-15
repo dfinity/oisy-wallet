@@ -26,31 +26,27 @@ export const loadAndAssertCustomToken = async ({
 }> => {
 	assertNonNullish(identity);
 
-	const [tokenResult, balanceResult] = await Promise.allSettled([
-		loadMetadata({
-			identity,
-			...rest
-		}),
-		loadBalance({ identity, ...rest })
-	]);
+	try {
+		const [token, balance] = await Promise.all([
+			loadMetadata({
+				identity,
+				...rest
+			}),
+			loadBalance({ identity, ...rest })
+		]);
 
-	if (tokenResult.status === 'rejected' || balanceResult.status === 'rejected') {
+		if (isNullish(token)) {
+			toastsError({
+				msg: { text: get(i18n).tokens.import.error.no_metadata }
+			});
+
+			return { result: 'error' };
+		}
+
+		return { result: 'success', data: { token, balance } };
+	} catch (err: unknown) {
 		return { result: 'error' };
 	}
-
-	const { value: token } = tokenResult;
-
-	if (isNullish(token)) {
-		toastsError({
-			msg: { text: get(i18n).tokens.import.error.no_metadata }
-		});
-
-		return { result: 'error' };
-	}
-
-	const { value: balance } = balanceResult;
-
-	return { result: 'success', data: { token, balance } };
 };
 
 const loadMetadata = async ({
