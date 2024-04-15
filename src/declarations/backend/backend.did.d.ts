@@ -16,6 +16,7 @@ export interface CanisterStatusResultV2 {
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export type CustomToken = { Icrc: IcrcToken };
+export type CustomTokenId = { Icrc: Principal };
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
 	freezing_threshold: bigint;
@@ -66,7 +67,6 @@ export interface UserToken {
 	token: CustomToken;
 	enabled: boolean;
 }
-export type UserTokenId = { Icrc: Principal };
 export interface _SERVICE {
 	add_user_token: ActorMethod<[Token], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
@@ -76,7 +76,7 @@ export interface _SERVICE {
 	list_user_custom_tokens: ActorMethod<[], Array<UserToken>>;
 	list_user_tokens: ActorMethod<[], Array<Token>>;
 	personal_sign: ActorMethod<[string], string>;
-	remove_user_custom_token: ActorMethod<[UserTokenId], undefined>;
+	remove_user_custom_token: ActorMethod<[CustomTokenId], undefined>;
 	remove_user_token: ActorMethod<[TokenId], undefined>;
 	set_many_user_custom_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_user_custom_token: ActorMethod<[UserToken], undefined>;
