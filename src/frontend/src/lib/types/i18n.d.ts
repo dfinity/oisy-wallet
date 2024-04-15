@@ -244,6 +244,7 @@ interface I18nTokens {
 			ledger_canister_id: string;
 			index_canister_id: string;
 			verifying: string;
+			add_the_token: string;
 		};
 		error: { loading_metadata: string; no_metadata: string; unexpected_index: string };
 	};

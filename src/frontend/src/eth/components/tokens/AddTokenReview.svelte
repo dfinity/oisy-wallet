@@ -93,7 +93,7 @@
 		class:opacity-10={invalid}
 		on:click={() => dispatch('icSave')}
 	>
-		{$i18n.core.text.save}
+		{$i18n.tokens.import.text.add_the_token}
 	</button>
 </ButtonGroup>
 

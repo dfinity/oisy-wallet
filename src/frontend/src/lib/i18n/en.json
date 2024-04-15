@@ -276,7 +276,8 @@
 				"saving": "Saving...",
 				"ledger_canister_id": "Ledger Canister ID",
 				"index_canister_id": "Index Canister ID",
-				"verifying": "Verifying token details..."
+				"verifying": "Verifying token details...",
+				"add_the_token": "Add the token"
 			},
 			"error": {
 				"loading_metadata": "Error while loading the metadata of the token.",
