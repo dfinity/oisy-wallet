@@ -6,6 +6,7 @@ import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcToken } from '$icp/types/ic';
 import { testnets } from '$lib/derived/testnets.derived';
 import type { Token } from '$lib/types/token';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const icrcTokens: Readable<IcToken[]> = derived(
@@ -27,7 +28,9 @@ export const sortedIcrcTokens: Readable<Token[]> = derived([icrcTokens], ([$icrc
 			{ name: nameB, position: positionB, exchangeCoinId: exchangeCoinIdB }
 		) =>
 			positionA === positionB
-				? exchangeCoinIdA === exchangeCoinIdB
+				? exchangeCoinIdA === exchangeCoinIdB ||
+					isNullish(exchangeCoinIdA) ||
+					isNullish(exchangeCoinIdB)
 					? nameA.localeCompare(nameB)
 					: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
 				: positionA - positionB
