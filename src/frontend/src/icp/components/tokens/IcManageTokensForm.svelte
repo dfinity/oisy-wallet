@@ -58,26 +58,29 @@
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
 
-	let modifiedTokens: Map<CanisterIdText, IcrcManageableToken> = new Map<
-		CanisterIdText,
-		IcrcManageableToken
-	>();
+	let modifiedTokens: Record<CanisterIdText, IcrcManageableToken> = {};
 	const onToggle = ({
 		detail: { ledgerCanisterId, enabled, ...rest }
 	}: CustomEvent<IcrcManageableToken>) => {
-		const current = modifiedTokens.get(ledgerCanisterId);
+		const { [`${ledgerCanisterId}`]: current, ...tokens } = modifiedTokens;
 
 		if (nonNullish(current) && current.enabled === enabled) {
-			modifiedTokens.delete(ledgerCanisterId);
+			modifiedTokens = { ...tokens };
 			return;
 		}
 
-		modifiedTokens.set(ledgerCanisterId, {
-			ledgerCanisterId,
-			enabled,
-			...rest
-		});
+		modifiedTokens = {
+			ledgerCanisterId: {
+				ledgerCanisterId,
+				enabled,
+				...rest
+			},
+			...tokens
+		};
 	};
+
+	let saveDisabled = true;
+	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
 </script>
 
 <Input
@@ -145,7 +148,12 @@
 		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 			>{$i18n.core.text.back}</button
 		>
-		<button class="primary block flex-1" on:click={() => dispatch('icSave')}>
+		<button
+			class="primary block flex-1"
+			on:click={() => dispatch('icSave')}
+			class:opacity-10={saveDisabled}
+			disabled={saveDisabled}
+		>
 			{$i18n.core.text.save}
 		</button>
 	</ButtonGroup>
