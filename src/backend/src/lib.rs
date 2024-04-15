@@ -408,7 +408,7 @@ fn set_user_custom_token(token: UserToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &UserToken| -> bool {
-        CustomTokenId::from(t.token.clone()) == CustomTokenId::from(token.token.clone())
+        CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
     };
 
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find));
@@ -421,7 +421,7 @@ fn set_many_user_custom_tokens(tokens: Vec<UserToken>) {
     mutate_state(|s| {
         for token in tokens {
             let find = |t: &UserToken| -> bool {
-                CustomTokenId::from(t.token.clone()) == CustomTokenId::from(token.token.clone())
+                CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
             };
 
             add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find)
@@ -433,7 +433,7 @@ fn set_many_user_custom_tokens(tokens: Vec<UserToken>) {
 fn remove_user_custom_token(token_id: CustomTokenId) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &UserToken| -> bool { CustomTokenId::from(t.token.clone()) == token_id };
+    let find = |t: &UserToken| -> bool { CustomTokenId::from(&t.token) == token_id };
 
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_custom_token, &find));
 }
