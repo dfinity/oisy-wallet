@@ -2,7 +2,6 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
-	import { beforeUpdate, onDestroy } from 'svelte';
 
 	export let src: string | undefined;
 	export let alt = '';
