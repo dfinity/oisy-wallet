@@ -132,8 +132,8 @@ export const buildKnownIcrcTokens = (): {
 		const mapKkownIcrcToken = ({
 			ledgerCanisterId,
 			indexCanisterId,
-			metadata: { name, decimals, symbol, fee }
-		}: KnownIcrcToken): IcTokenWithoutId => ({
+			metadata: { name, decimals, symbol, fee, alternativeName }
+		}: KnownIcrcToken): IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'> => ({
 			ledgerCanisterId,
 			indexCanisterId,
 			network: ICP_NETWORK,
@@ -145,7 +145,8 @@ export const buildKnownIcrcTokens = (): {
 			standard: 'icrc',
 			category: 'custom',
 			icon: undefined,
-			fee
+			fee,
+			alternativeName
 		});
 
 		return { result: 'success', tokens: tokens.map(mapKkownIcrcToken) };
