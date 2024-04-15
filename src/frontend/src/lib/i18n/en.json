@@ -287,7 +287,8 @@
 		},
 		"manage": {
 			"title": "Manage tokens",
-			"do_not_see_import": "Don’t see your token? Import"
+			"do_not_see_import": "Don’t see your token? Import",
+			"clear_filter": "Clear filter"
 		},
 		"hide": {
 			"title": "Hide token?",

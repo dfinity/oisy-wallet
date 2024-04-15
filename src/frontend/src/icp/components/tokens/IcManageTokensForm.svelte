@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
+	import { IconClose, Input } from '@dfinity/gix-components';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { debounce } from '@dfinity/utils';
 	import { writable } from 'svelte/store';
@@ -73,7 +73,15 @@
 	placeholder={$i18n.tokens.placeholder.search_token}
 	spellcheck={false}
 >
-	<IconSearch slot="inner-end" />
+	<svelte:fragment slot="inner-end">
+		{#if noTokensMatch}
+			<button on:click={() => (filter = '')} aria-label={$i18n.tokens.manage.clear_filter}>
+				<IconClose />
+			</button>
+		{:else}
+			<IconSearch />
+		{/if}
+	</svelte:fragment>
 </Input>
 
 {#if noTokensMatch}
