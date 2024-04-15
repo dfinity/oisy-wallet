@@ -9,7 +9,7 @@ export const addTokenSteps = (i18n: I18n): [ProgressStep, ...ProgressStep[]] => 
 	} as ProgressStep,
 	{
 		step: AddTokenStep.SAVE,
-		text: i18n.tokens.import.saving,
+		text: i18n.tokens.import.text.saving,
 		state: 'next'
 	} as ProgressStep,
 	{

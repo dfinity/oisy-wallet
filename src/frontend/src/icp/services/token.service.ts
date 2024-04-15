@@ -41,7 +41,10 @@ export const loadAndAssertCustomToken = async ({
 	const { value: token } = tokenResult;
 
 	if (isNullish(token)) {
-		// TODO: toad
+		toastsError({
+			msg: { text: get(i18n).tokens.import.error.no_metadata }
+		});
+
 		return { result: 'error' };
 	}
 
@@ -65,9 +68,8 @@ const loadMetadata = async ({
 			...rest
 		});
 	} catch (err: unknown) {
-		// TODO: label
 		toastsError({
-			msg: { text: get(i18n).init.error.btc_fees_estimation },
+			msg: { text: get(i18n).tokens.import.error.loading_metadata },
 			err
 		});
 
@@ -90,9 +92,8 @@ const loadBalance = async ({
 
 		return balance;
 	} catch (err: unknown) {
-		// TODO: label
 		toastsError({
-			msg: { text: get(i18n).init.error.btc_fees_estimation },
+			msg: { text: get(i18n).tokens.import.error.unexpected_index },
 			err
 		});
 

@@ -22,15 +22,15 @@
 	const steps: WizardSteps = [
 		{
 			name: 'Add',
-			title: $i18n.tokens.import.title
+			title: $i18n.tokens.import.text.title
 		},
 		{
 			name: 'Review',
-			title: $i18n.tokens.import.review
+			title: $i18n.tokens.import.text.review
 		},
 		{
 			name: 'Saving',
-			title: $i18n.tokens.import.saving
+			title: $i18n.tokens.import.text.saving
 		}
 	];
 

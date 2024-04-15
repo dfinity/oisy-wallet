@@ -39,7 +39,7 @@
 
 <div class="bg-light-blue p-4 mb-4 rounded-lg">
 	{#if isNullish(token)}
-		<SkeletonCardWithoutAmount>{$i18n.tokens.import.verifying}</SkeletonCardWithoutAmount>
+		<SkeletonCardWithoutAmount>{$i18n.tokens.import.text.verifying}</SkeletonCardWithoutAmount>
 	{:else}
 		<div in:blur>
 			<Card noMargin>
@@ -64,12 +64,12 @@
 {#if nonNullish(token)}
 	<div in:fade>
 		<Value ref="ledgerId" element="div">
-			<svelte:fragment slot="label">{$i18n.tokens.import.ledger_canister_id}</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.tokens.import.text.ledger_canister_id}</svelte:fragment>
 			{token.token.ledgerCanisterId}
 		</Value>
 
 		<Value ref="ledgerId" element="div">
-			<svelte:fragment slot="label">{$i18n.tokens.import.index_canister_id}</svelte:fragment>
+			<svelte:fragment slot="label">{$i18n.tokens.import.text.index_canister_id}</svelte:fragment>
 			{token.token.indexCanisterId}
 		</Value>
 

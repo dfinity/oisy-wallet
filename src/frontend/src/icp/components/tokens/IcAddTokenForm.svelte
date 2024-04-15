@@ -16,7 +16,7 @@
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<label for="ledgerCanisterId" class="font-bold px-4.5"
-		>{$i18n.tokens.import.ledger_canister_id}:</label
+		>{$i18n.tokens.import.text.ledger_canister_id}:</label
 	>
 	<Input
 		name="ledgerCanisterId"
@@ -28,7 +28,7 @@
 	/>
 
 	<label for="indexCanisterId" class="font-bold px-4.5"
-		>{$i18n.tokens.import.index_canister_id}:</label
+		>{$i18n.tokens.import.text.index_canister_id}:</label
 	>
 	<Input
 		name="indexCanisterId"

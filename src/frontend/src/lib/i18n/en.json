@@ -270,12 +270,19 @@
 			"twin_token": "Twin token"
 		},
 		"import": {
-			"title": "Import token",
-			"review": "Review",
-			"saving": "Saving...",
-			"ledger_canister_id": "Ledger Canister ID",
-			"index_canister_id": "Index Canister ID",
-			"verifying": "Verifying token details..."
+			"text": {
+				"title": "Import token",
+				"review": "Review",
+				"saving": "Saving...",
+				"ledger_canister_id": "Ledger Canister ID",
+				"index_canister_id": "Index Canister ID",
+				"verifying": "Verifying token details..."
+			},
+			"error": {
+				"loading_metadata": "Error while loading the metadata of the token.",
+				"no_metadata": "No metadata for the token are provided. This is unexpected.",
+				"unexpected_index": "Something went wrong while validating the Index canister."
+			}
 		},
 		"manage": {
 			"title": "Manage tokens",

@@ -237,12 +237,15 @@ interface I18nTokens {
 		twin_token: string;
 	};
 	import: {
-		title: string;
-		review: string;
-		saving: string;
-		ledger_canister_id: string;
-		index_canister_id: string;
-		verifying: string;
+		text: {
+			title: string;
+			review: string;
+			saving: string;
+			ledger_canister_id: string;
+			index_canister_id: string;
+			verifying: string;
+		};
+		error: { loading_metadata: string; no_metadata: string; unexpected_index: string };
 	};
 	manage: { title: string; do_not_see_import: string };
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
