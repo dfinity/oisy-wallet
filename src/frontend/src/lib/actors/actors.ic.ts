@@ -1,5 +1,6 @@
 import type { _SERVICE as BackendActor } from '$declarations/backend/backend.did';
-import { idlFactory as idlFactorBackend } from '$declarations/backend/backend.factory.did';
+import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
+import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -13,9 +14,11 @@ import { getAgent } from './agents.ic';
 let actors: { backend?: BackendActor } | undefined | null = undefined;
 
 export const getBackendActor = async ({
-	identity
+	identity,
+	certified = true
 }: {
 	identity: OptionIdentity;
+	certified?: boolean;
 }): Promise<BackendActor> => {
 	assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
@@ -24,7 +27,7 @@ export const getBackendActor = async ({
 	if (isNullish(backend)) {
 		const actor = await createActor<BackendActor>({
 			canisterId: BACKEND_CANISTER_ID,
-			idlFactory: idlFactorBackend,
+			idlFactory: certified ? idlCertifiedFactoryBackend : idlFactoryBackend,
 			identity
 		});
 

@@ -83,6 +83,30 @@ const renameFactory = async ({ dest = `./src/declarations` }) => {
 	await Promise.all(promises);
 };
 
+const copyCertifiedFactory = async ({ dest = `./src/declarations` }) => {
+	const promises = readdirSync(dest).map(
+		(dir) =>
+			new Promise(async (resolve) => {
+				const uncertifiedFactoryPath = join(dest, dir, `${dir}.factory.did.js`);
+
+				if (!existsSync(uncertifiedFactoryPath)) {
+					resolve();
+					return;
+				}
+
+				const content = await readFile(uncertifiedFactoryPath);
+
+				const certifiedFactoryPath = join(dest, dir, `${dir}.factory.certified.did.js`);
+
+				await writeFile(certifiedFactoryPath, content.toString().replace(/\['query']/g, ''));
+
+				resolve();
+			})
+	);
+
+	await Promise.all(promises);
+};
+
 (async () => {
 	try {
 		await deleteIndexes({});
@@ -91,8 +115,10 @@ const renameFactory = async ({ dest = `./src/declarations` }) => {
 
 		await renameFactory({});
 
-		console.log(`Types declarations copied!`);
+		await copyCertifiedFactory({});
+
+		console.log(`Types declarations updated!`);
 	} catch (err) {
-		console.error(`Error while copying the types declarations.`, err);
+		console.error(`Error while updating the types declarations.`, err);
 	}
 })();
