@@ -8,6 +8,13 @@
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import { isNullish } from '@dfinity/utils';
+	import { authStore } from '$lib/stores/auth.store';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { IcrcManageableToken } from '$icp/types/token';
+	import { setManyUserCustomTokens } from '$lib/api/backend.api';
+	import { Principal } from '@dfinity/principal';
 
 	const steps: WizardSteps = [
 		{
@@ -33,7 +40,53 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const save = async () => {};
+	const save = async ({ detail: tokens }: CustomEvent<IcrcManageableToken[]>) => {
+		if (isNullish($authStore.identity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		if (tokens.length === 0) {
+			toastsError({
+				msg: { text: $i18n.tokens.manage.error.empty }
+			});
+			return;
+		}
+
+		modal.set(3);
+
+		try {
+			saveProgressStep = AddTokenStep.SAVE;
+
+			await setManyUserCustomTokens({
+				identity: $authStore.identity,
+				tokens: tokens.map(({ enabled, ledgerCanisterId, indexCanisterId }) => ({
+					enabled,
+					token: {
+						Icrc: {
+							ledger_id: Principal.fromText(ledgerCanisterId),
+							index_id: Principal.fromText(indexCanisterId)
+						}
+					}
+				}))
+			});
+
+			saveProgressStep = AddTokenStep.UPDATE_UI;
+
+			// TODO:
+
+			saveProgressStep = AddTokenStep.DONE;
+
+			setTimeout(() => close(), 750);
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected },
+				err
+			});
+
+			modal.set(0);
+		}
+	};
 
 	const close = () => {
 		modalStore.close();
@@ -71,6 +124,6 @@
 			bind:indexCanisterId
 		/>
 	{:else}
-		<IcManageTokensForm on:icSave on:icClose={close} on:icAddToken={modal.next} />
+		<IcManageTokensForm on:icClose={close} on:icAddToken={modal.next} on:icSave={save} />
 	{/if}
 </WizardModal>

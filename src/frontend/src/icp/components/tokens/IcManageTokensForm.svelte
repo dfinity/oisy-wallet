@@ -81,6 +81,8 @@
 
 	let saveDisabled = true;
 	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
+
+	const save = () => dispatch('icSave', Object.values(modifiedTokens));
 </script>
 
 <Input
@@ -150,7 +152,7 @@
 		>
 		<button
 			class="primary block flex-1"
-			on:click={() => dispatch('icSave')}
+			on:click={save}
 			class:opacity-10={saveDisabled}
 			disabled={saveDisabled}
 		>

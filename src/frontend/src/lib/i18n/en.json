@@ -292,7 +292,8 @@
 				"clear_filter": "Clear filter"
 			},
 			"error": {
-				"unexpected_build": "An unexpected error happened while building the list of known tokens."
+				"unexpected_build": "An unexpected error happened while building the list of known tokens.",
+				"empty": "No tokens to enable or disable have been selected."
 			}
 		},
 		"hide": {
