@@ -1,3 +1,4 @@
+import snsTokens from '$env/tokens.sns.json';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcTokenWithoutId } from '$icp/types/ic';
@@ -5,6 +6,7 @@ import { mapIcrcToken } from '$icp/utils/icrc.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import { knownIcrcToken, knownIcrcTokens, type KnownIcrcTokens } from '$lib/types/known-token';
 import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -94,5 +96,40 @@ const loadBalance = async ({
 		});
 
 		throw err;
+	}
+};
+
+export const buildKnownIcrcTokens = (): {
+	result: 'success' | 'error';
+	tokens?: KnownIcrcTokens;
+} => {
+	try {
+		const tokens = knownIcrcTokens.parse(
+			snsTokens.map(
+				({
+					metadata: {
+						fee: { __bigint__ },
+						...rest
+					},
+					...ids
+				}) =>
+					knownIcrcToken.parse({
+						...ids,
+						metadata: {
+							...rest,
+							fee: BigInt(__bigint__)
+						}
+					})
+			)
+		);
+
+		return { result: 'success', tokens };
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: get(i18n).tokens.manage.error.unexpected_build },
+			err
+		});
+
+		return { result: 'error' };
 	}
 };
