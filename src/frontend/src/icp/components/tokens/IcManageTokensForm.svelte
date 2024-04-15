@@ -1,18 +1,14 @@
 <script lang="ts">
-	import { Input, Segment, SegmentButton } from '@dfinity/gix-components';
+	import { Input } from '@dfinity/gix-components';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { debounce } from '@dfinity/utils';
-	import { derived, type Readable, writable } from 'svelte/store';
+	import { writable } from 'svelte/store';
 	import { knownIcrcToken, knownIcrcTokens, type KnownIcrcTokens } from '$lib/types/known-token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import snsTokens from '$env/tokens.sns.json';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { formatToken } from '$lib/utils/format.utils';
-	import { balancesStore } from '$lib/stores/balances.store';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 
