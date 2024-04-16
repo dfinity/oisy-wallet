@@ -1,130 +1,42 @@
 <script lang="ts">
 	import { i18n } from '$lib/stores/i18n.store';
-	import {
-		type ProgressStep,
-		WizardModal,
-		type WizardStep,
-		type WizardSteps
-	} from '@dfinity/gix-components';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { isNullish } from '@dfinity/utils';
-	import { authStore } from '$lib/stores/auth.store';
-	import { nullishSignOut } from '$lib/services/auth.services';
-	import { HideTokenStep } from '$lib/enums/steps';
 	import { removeUserToken } from '$lib/api/backend.api';
 	import { selectedChainId } from '$eth/derived/network.derived';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import HideTokenReview from '$eth/components/tokens/HideTokenReview.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import { back } from '$lib/utils/nav.utils';
+	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
+	import type { Identity } from '@dfinity/agent';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
 
-	const hide = async () => {
+	const assertHide = (): { valid: boolean } => {
 		const contractAddress = ($token as Erc20Token).address;
 
 		if (isNullishOrEmpty(contractAddress)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.invalid_contract_address }
 			});
-			return;
+			return { valid: false };
 		}
 
-		if (isNullish($authStore.identity)) {
-			await nullishSignOut();
-			return;
-		}
-
-		modal.next();
-
-		try {
-			hideProgressStep = HideTokenStep.HIDE;
-
-			await removeUserToken({
-				identity: $authStore.identity,
-				tokenId: {
-					chain_id: $selectedChainId,
-					contract_address: contractAddress
-				}
-			});
-
-			hideProgressStep = HideTokenStep.UPDATE_UI;
-
-			erc20TokensStore.remove($tokenId);
-
-			hideProgressStep = HideTokenStep.DONE;
-
-			setTimeout(async () => {
-				close();
-
-				await back({ networkId: ETHEREUM_NETWORK_ID, pop: true });
-			}, 750);
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.unexpected_hiding },
-				err
-			});
-
-			modal.back();
-		}
+		return { valid: true };
 	};
 
-	const steps: WizardSteps = [
-		{
-			name: 'Hide',
-			title: $i18n.tokens.hide.title
-		},
-		{
-			name: 'Hiding',
-			title: $i18n.tokens.hide.hiding
-		}
-	];
+	const hideToken = async (params: { identity: Identity }) => {
+		const contractAddress = ($token as Erc20Token).address;
 
-	const HIDE_TOKEN_STEPS: [ProgressStep, ...ProgressStep[]] = [
-		{
-			step: HideTokenStep.INITIALIZATION,
-			text: $i18n.tokens.text.initializing,
-			state: 'in_progress'
-		} as ProgressStep,
-		{
-			step: HideTokenStep.HIDE,
-			text: $i18n.tokens.hide.hiding,
-			state: 'next'
-		} as ProgressStep,
-		{
-			step: HideTokenStep.UPDATE_UI,
-			text: $i18n.tokens.text.updating_ui,
-			state: 'next'
-		} as ProgressStep
-	];
-
-	let hideProgressStep: string = HideTokenStep.INITIALIZATION;
-
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
-
-	const close = () => {
-		modalStore.close();
-
-		hideProgressStep = HideTokenStep.INITIALIZATION;
+		await removeUserToken({
+			...params,
+			tokenId: {
+				chain_id: $selectedChainId,
+				contract_address: contractAddress
+			}
+		});
 	};
+
+	const updateUi = () => erc20TokensStore.remove($tokenId);
 </script>
 
-<WizardModal
-	{steps}
-	bind:currentStep
-	bind:this={modal}
-	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === 'Hiding'}
->
-	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
-
-	{#if currentStep?.name === 'Hiding'}
-		<InProgressWizard progressStep={hideProgressStep} steps={HIDE_TOKEN_STEPS} />
-	{:else}
-		<HideTokenReview on:icCancel={close} on:icHide={hide} />
-	{/if}
-</WizardModal>
+<HideTokenModal backToNetworkId={ETHEREUM_NETWORK_ID} {assertHide} {hideToken} {updateUi} />
