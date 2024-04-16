@@ -25,7 +25,7 @@ export const icrcLedgerCanisterIds: Readable<CanisterIdText[]> = derived(
 	[icrcTokens],
 	([$icrcTokens]) => $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
 );
-//
+
 export const sortedIcrcTokens: Readable<IcToken[]> = derived([icrcTokens], ([$icrcTokens]) =>
 	$icrcTokens.sort(
 		(
