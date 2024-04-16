@@ -73,7 +73,7 @@
 
 			saveProgressStep = AddTokenStep.UPDATE_UI;
 
-			// TODO:
+			// TODO: Reload UI after token are added or removed
 
 			saveProgressStep = AddTokenStep.DONE;
 
