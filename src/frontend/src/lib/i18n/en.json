@@ -288,7 +288,7 @@
 		},
 		"manage": {
 			"text": {
-				"title": "Manage tokens",
+				"title": "Add and hide tokens",
 				"do_not_see_import": "Don’t see your token? Import",
 				"clear_filter": "Clear filter"
 			},
