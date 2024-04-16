@@ -32,7 +32,7 @@
 
 <Header>
 	{$i18n.tokens.text.title}{#if $erc20TokensInitialized}&nbsp;<span class="font-normal" in:fade
-			>({tokens.length})</span
+			>({$networkTokens.length})</span
 		>{/if}
 
 	<TokensMenu slot="end" />
