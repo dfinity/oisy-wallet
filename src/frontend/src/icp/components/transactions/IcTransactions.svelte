@@ -5,7 +5,7 @@
 	import { last } from '$lib/utils/array.utils';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { authStore } from '$lib/stores/auth.store';
-	import { modalIcHideToken, modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
+	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcpTransactionModal from './IcTransactionModal.svelte';
 	import type { IcToken, IcTransactionUi } from '$icp/types/ic';
@@ -26,7 +26,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
-	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger
@@ -106,8 +105,6 @@
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
 	<IcpTransactionModal transaction={selectedTransaction} />
-{:else if $modalIcHideToken}
-	<IcHideTokenModal />
 {:else if $modalIcToken}
 	<IcTokenModal />
 {/if}
