@@ -20,8 +20,8 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
-use shared::types::custom_token::{UserToken, CustomTokenId};
-use shared::types::token::{Token, TokenId};
+use shared::types::custom_token::{CustomToken, CustomTokenId};
+use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::{Arg, InitArg};
 use std::borrow::Cow;
@@ -33,8 +33,8 @@ mod token;
 
 type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
-type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<Token>>, VMem>;
-type UserCustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
+type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
+type CustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<CustomToken>>, VMem>;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -51,7 +51,7 @@ thread_local! {
         MEMORY_MANAGER.with(|mm| State {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
-            user_custom_token: UserCustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
+            user_custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
         })
     );
 }
@@ -111,7 +111,7 @@ pub struct State {
     user_token: UserTokenMap,
     /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
     /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
-    user_custom_token: UserCustomTokenMap,
+    user_custom_token: CustomTokenMap,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -366,7 +366,7 @@ async fn sign_prehash(prehash: String) -> String {
 
 /// Adds a new token to the user.
 #[update(guard = "caller_is_not_anonymous")]
-fn add_user_token(token: Token) {
+fn add_user_token(token: UserToken) {
     let addr = parse_eth_address(&token.contract_address);
 
     if let Some(symbol) = token.symbol.as_ref() {
@@ -378,18 +378,19 @@ fn add_user_token(token: Token) {
     }
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find =
-        |t: &Token| t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr;
+    let find = |t: &UserToken| {
+        t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
+    };
 
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_token, &token, &find));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-fn remove_user_token(token_id: TokenId) {
+fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &Token| {
+    let find = |t: &UserToken| {
         t.chain_id == token_id.chain_id && parse_eth_address(&t.contract_address) == addr
     };
 
@@ -397,17 +398,17 @@ fn remove_user_token(token_id: TokenId) {
 }
 
 #[query(guard = "caller_is_not_anonymous")]
-fn list_user_tokens() -> Vec<Token> {
+fn list_user_tokens() -> Vec<UserToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
 /// Add, remove or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
-fn set_user_custom_token(token: UserToken) {
+fn set_user_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &UserToken| -> bool {
+    let find = |t: &CustomToken| -> bool {
         CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
     };
 
@@ -415,12 +416,12 @@ fn set_user_custom_token(token: UserToken) {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-fn set_many_user_custom_tokens(tokens: Vec<UserToken>) {
+fn set_many_user_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
         for token in tokens {
-            let find = |t: &UserToken| -> bool {
+            let find = |t: &CustomToken| -> bool {
                 CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
             };
 
@@ -433,13 +434,13 @@ fn set_many_user_custom_tokens(tokens: Vec<UserToken>) {
 fn remove_user_custom_token(token_id: CustomTokenId) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &UserToken| -> bool { CustomTokenId::from(&t.token) == token_id };
+    let find = |t: &CustomToken| -> bool { CustomTokenId::from(&t.token) == token_id };
 
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_custom_token, &find));
 }
 
 #[query(guard = "caller_is_not_anonymous")]
-fn list_user_custom_tokens() -> Vec<UserToken> {
+fn list_user_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| {
         s.user_custom_token

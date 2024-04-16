@@ -4,7 +4,7 @@ use crate::utils::mock::{
 };
 use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade};
 use candid::Principal;
-use shared::types::token::Token;
+use shared::types::token::UserToken;
 
 const BACKEND_V0_0_13_WASM_PATH: &str = "../../backend-v0.0.13.wasm.gz";
 
@@ -16,7 +16,7 @@ fn test_upgrade_user_token() {
     // Add a user token
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let token: Token = Token {
+    let token: UserToken = UserToken {
         chain_id: 11155111,
         contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
         decimals: Some(WEENUS_DECIMALS),
@@ -31,9 +31,9 @@ fn test_upgrade_user_token() {
     upgrade(&pic_setup).unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Get the list of token and check that it still contains the one we added before upgrade
-    let results = update_call::<Vec<Token>>(&pic_setup, caller, "list_user_tokens", ());
+    let results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<Token> = vec![token.clone()];
+    let expected_tokens: Vec<UserToken> = vec![token.clone()];
 
     assert!(results.is_ok());
 
