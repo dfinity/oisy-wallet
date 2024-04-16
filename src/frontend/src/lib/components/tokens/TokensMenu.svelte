@@ -6,7 +6,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { erc20TokensInitialized, erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
