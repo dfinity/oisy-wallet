@@ -23,7 +23,7 @@ const loadDefaultIcrcTokens = async () => {
 	await Promise.all(ICRC_TOKENS.map(loadDefaultIcrc));
 };
 
-const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
 	queryAndUpdate<IcrcLoadData[]>({
 		request: (params) => loadCustomIcrcTokens(params),
 		onLoad: loadCustomIcrcData,
