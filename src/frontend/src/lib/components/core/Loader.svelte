@@ -15,6 +15,7 @@
 	import { LoaderStep } from '$lib/enums/steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { authStore } from '$lib/stores/auth.store';
 
 	let progressStep: string = LoaderStep.ETH_ADDRESS;
 
@@ -55,7 +56,12 @@
 
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
-		await Promise.all([loadErc20Contracts(), loadIcrcTokens()]);
+		await Promise.all([
+			loadErc20Contracts(),
+			loadIcrcTokens({
+				identity: $authStore.identity
+			})
+		]);
 	};
 
 	const progressAndLoad = async () => {
