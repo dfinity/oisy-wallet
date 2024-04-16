@@ -5,16 +5,16 @@ use crate::utils::mock::{
 use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::token::{Token, TokenId};
+use shared::types::token::{UserToken, UserTokenId};
 
 lazy_static! {
-    static ref MOCK_TOKEN: Token = Token {
+    static ref MOCK_TOKEN: UserToken = UserToken {
         chain_id: SEPOLIA_CHAIN_ID,
         contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
         decimals: Some(WEENUS_DECIMALS),
         symbol: Some(WEENUS_SYMBOL.to_string()),
     };
-    static ref MOCK_TOKEN_ID: TokenId = TokenId {
+    static ref MOCK_TOKEN_ID: UserTokenId = UserTokenId {
         chain_id: MOCK_TOKEN.chain_id.clone(),
         contract_address: MOCK_TOKEN.contract_address.clone(),
     };
@@ -41,7 +41,7 @@ fn test_update_user_token() {
 
     assert!(result.is_ok());
 
-    let update_token: Token = Token {
+    let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
         ..MOCK_TOKEN.clone()
     };
@@ -51,9 +51,9 @@ fn test_update_user_token() {
 
     assert!(update_result.is_ok());
 
-    let results = query_call::<Vec<Token>>(&pic_setup, caller, "list_user_tokens", ());
+    let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<Token> = vec![update_token.clone()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.clone()];
 
     assert!(results.is_ok());
 
@@ -88,7 +88,7 @@ fn test_list_user_tokens() {
 
     let _ = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
 
-    let another_token: Token = Token {
+    let another_token: UserToken = UserToken {
         chain_id: SEPOLIA_CHAIN_ID,
         contract_address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984".to_string(),
         decimals: Some(18),
@@ -97,9 +97,9 @@ fn test_list_user_tokens() {
 
     let _ = update_call::<()>(&pic_setup, caller, "add_user_token", another_token.clone());
 
-    let results = query_call::<Vec<Token>>(&pic_setup, caller, "list_user_tokens", ());
+    let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<Token> = vec![MOCK_TOKEN.clone(), another_token.clone()];
+    let expected_tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone(), another_token.clone()];
 
     assert!(results.is_ok());
 
@@ -112,7 +112,7 @@ fn test_add_user_token_symbol_max_length() {
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let token: Token = Token {
+    let token: UserToken = UserToken {
         chain_id: SEPOLIA_CHAIN_ID,
         contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
         decimals: Some(WEENUS_DECIMALS),
@@ -193,7 +193,7 @@ fn test_user_cannot_list_another_user_tokens() {
         Principal::from_text("yaa3n-twfur-6xz6e-3z7ep-xln56-222kz-w2b2m-y5wqz-vu6kk-s3fdg-lqe")
             .unwrap();
 
-    let results = query_call::<Vec<Token>>(&pic_setup, another_caller, "list_user_tokens", ());
+    let results = query_call::<Vec<UserToken>>(&pic_setup, another_caller, "list_user_tokens", ());
 
     assert!(results.is_ok());
 

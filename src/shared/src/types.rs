@@ -35,7 +35,7 @@ pub mod token {
     pub type ChainId = u64;
 
     #[derive(CandidType, Deserialize, Clone)]
-    pub struct Token {
+    pub struct UserToken {
         pub contract_address: String,
         pub chain_id: ChainId,
         pub symbol: Option<String>,
@@ -43,7 +43,7 @@ pub mod token {
     }
 
     #[derive(CandidType, Deserialize, Clone)]
-    pub struct TokenId {
+    pub struct UserTokenId {
         pub contract_address: String,
         pub chain_id: ChainId,
     }
@@ -65,13 +65,13 @@ pub mod custom_token {
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
-    pub enum CustomToken {
+    pub enum Token {
         Icrc(IcrcToken),
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
-    pub struct UserToken {
-        pub token: CustomToken,
+    pub struct CustomToken {
+        pub token: Token,
         pub enabled: bool,
     }
 

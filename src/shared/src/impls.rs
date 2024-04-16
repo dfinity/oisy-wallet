@@ -1,9 +1,9 @@
-use crate::types::custom_token::{CustomToken, CustomTokenId};
+use crate::types::custom_token::{CustomTokenId, Token};
 
-impl From<&CustomToken> for CustomTokenId {
-    fn from(token: &CustomToken) -> Self {
+impl From<&Token> for CustomTokenId {
+    fn from(token: &Token) -> Self {
         match token {
-            CustomToken::Icrc(token) => CustomTokenId::Icrc(token.ledger_id),
+            Token::Icrc(token) => CustomTokenId::Icrc(token.ledger_id),
         }
     }
 }
