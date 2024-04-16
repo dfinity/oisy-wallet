@@ -5,6 +5,7 @@ import {
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcToken } from '$icp/types/ic';
 import { testnets } from '$lib/derived/testnets.derived';
+import type { CanisterIdText } from '$lib/types/canister';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -18,6 +19,11 @@ export const icrcTokens: Readable<IcToken[]> = derived(
 					ledgerCanisterId
 				)
 		)
+);
+
+export const icrcLedgerCanisterIds: Readable<CanisterIdText[]> = derived(
+	[icrcTokens],
+	([$icrcTokens]) => $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
 );
 
 export const sortedIcrcTokens: Readable<IcToken[]> = derived([icrcTokens], ([$icrcTokens]) =>
