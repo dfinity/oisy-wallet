@@ -18,7 +18,6 @@
 	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
 	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
-	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
