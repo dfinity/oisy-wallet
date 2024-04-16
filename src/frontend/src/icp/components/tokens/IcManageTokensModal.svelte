@@ -13,8 +13,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { IcrcCustomTokenConfig } from '$icp/types/icrc-custom-token';
-	import { setUserCustomTokens } from '$lib/api/backend.api';
-	import { Principal } from '@dfinity/principal';
+	import { saveCustomTokens } from '$icp/services/ic-custom-tokens.services';
 
 	const steps: WizardSteps = [
 		{
@@ -56,24 +55,11 @@
 		modal.set(3);
 
 		try {
-			saveProgressStep = AddTokenStep.SAVE;
-
-			await setUserCustomTokens({
+			await saveCustomTokens({
 				identity: $authStore.identity,
-				tokens: tokens.map(({ enabled, ledgerCanisterId, indexCanisterId }) => ({
-					enabled,
-					token: {
-						Icrc: {
-							ledger_id: Principal.fromText(ledgerCanisterId),
-							index_id: Principal.fromText(indexCanisterId)
-						}
-					}
-				}))
+				tokens,
+				progress: (step: AddTokenStep) => (saveProgressStep = step)
 			});
-
-			saveProgressStep = AddTokenStep.UPDATE_UI;
-
-			// TODO: Reload UI after token are added or removed
 
 			saveProgressStep = AddTokenStep.DONE;
 
