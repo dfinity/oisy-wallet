@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AddTokenStep, SendIcStep } from '$lib/enums/steps';
+	import { AddTokenStep } from '$lib/enums/steps';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import IcManageTokens from '$icp/components/tokens/IcManageTokens.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -13,8 +13,6 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { IcrcCustomTokenConfig } from '$icp/types/icrc-custom-token';
-	import { setUserCustomTokens } from '$lib/api/backend.api';
-	import { Principal } from '@dfinity/principal';
 	import { saveCustomTokens } from '$icp/services/ic-custom-tokens.services';
 
 	const steps: WizardSteps = [
