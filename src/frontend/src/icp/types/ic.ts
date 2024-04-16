@@ -1,4 +1,8 @@
-import type { CanisterIdText } from '$lib/types/canister';
+import type {
+	IndexCanisterIdText,
+	LedgerCanisterIdText,
+	MinterCanisterIdText
+} from '$icp/types/canister';
 import type { CoingeckoCoinsId } from '$lib/types/coingecko';
 import type { Token } from '$lib/types/token';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
@@ -54,8 +58,8 @@ export type IcFee = { fee: bigint };
 
 export type IcInterface = IcCanisters & IcAppMetadata;
 export type IcCanisters = {
-	ledgerCanisterId: CanisterIdText;
-	indexCanisterId: CanisterIdText;
+	ledgerCanisterId: LedgerCanisterIdText;
+	indexCanisterId: IndexCanisterIdText;
 };
 
 export type IcCkToken = IcToken & Partial<IcCkMetadata>;
@@ -63,7 +67,7 @@ export type IcCkToken = IcToken & Partial<IcCkMetadata>;
 export type IcCkInterface = IcInterface & IcCkMetadata;
 
 export type IcCkMetadata = {
-	minterCanisterId: CanisterIdText;
+	minterCanisterId: MinterCanisterIdText;
 } & Partial<IcCkTwinToken>;
 
 export type IcCkTwinToken = {

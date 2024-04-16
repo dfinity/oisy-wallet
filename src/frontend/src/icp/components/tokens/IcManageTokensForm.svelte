@@ -12,25 +12,20 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { fade } from 'svelte/transition';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
-	import { buildKnownIcrcTokens } from '$icp/services/token.service';
 	import { icrcLedgerCanisterIds, sortedIcrcTokens } from '$icp/derived/icrc.derived';
-	import type { IcrcManageableToken } from '$icp/types/token';
+	import type { IcrcCustomTokenConfig } from '$icp/types/icrc-custom-token';
 	import type { CanisterIdText } from '$lib/types/canister';
+	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 
 	const dispatch = createEventDispatcher();
 
-	let knownIcrcTokens: IcrcManageableToken[] = [];
+	let knownIcrcTokens: IcrcCustomTokenConfig[] = [];
 	onMount(() => {
-		const { result, tokens } = buildKnownIcrcTokens();
-
-		if (result === 'error') {
-			return;
-		}
-
+		const tokens = buildIcrcCustomTokens();
 		knownIcrcTokens = tokens?.map((token) => ({ ...token, enabled: false })) ?? [];
 	});
 
-	let allIcrcTokens: IcrcManageableToken[] = [];
+	let allIcrcTokens: IcrcCustomTokenConfig[] = [];
 	$: allIcrcTokens = [
 		...$sortedIcrcTokens.map((token) => ({ ...token, enabled: true })),
 		...knownIcrcTokens.filter(
@@ -45,7 +40,7 @@
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	let tokens: IcrcManageableToken[] = [];
+	let tokens: IcrcCustomTokenConfig[] = [];
 	$: tokens = isNullishOrEmpty($filterStore)
 		? allIcrcTokens
 		: allIcrcTokens.filter(
@@ -58,10 +53,10 @@
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
 
-	let modifiedTokens: Record<CanisterIdText, IcrcManageableToken> = {};
+	let modifiedTokens: Record<CanisterIdText, IcrcCustomTokenConfig> = {};
 	const onToggle = ({
 		detail: { ledgerCanisterId, enabled, ...rest }
-	}: CustomEvent<IcrcManageableToken>) => {
+	}: CustomEvent<IcrcCustomTokenConfig>) => {
 		const { [`${ledgerCanisterId}`]: current, ...tokens } = modifiedTokens;
 
 		if (nonNullish(current)) {
@@ -122,13 +117,7 @@
 			<Card>
 				{token.name}
 
-				<Logo
-					src={token.icon ?? `/icons/sns/${token.ledgerCanisterId}.png`}
-					slot="icon"
-					alt={`${token.name} logo`}
-					size="52px"
-					color="white"
-				/>
+				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="52px" color="white" />
 
 				<span class="break-all" slot="description">
 					{token.symbol}
