@@ -136,8 +136,8 @@
 	>
 
 	<ButtonGroup>
-		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
-			>{$i18n.core.text.back}</button
+		<button class="secondary block flex-1" on:click={() => dispatch('icClose')}
+			>{$i18n.core.text.cancel}</button
 		>
 		<button
 			class="primary block flex-1"

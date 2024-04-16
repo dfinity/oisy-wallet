@@ -42,7 +42,7 @@
 	<div class="pt-2">
 		<ButtonGroup>
 			<button type="button" class="secondary block flex-1" on:click={() => dispatch('icBack')}
-				>{$i18n.core.text.cancel}</button
+				>{$i18n.core.text.back}</button
 			>
 			<button
 				class="primary block flex-1"
