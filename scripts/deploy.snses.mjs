@@ -179,9 +179,8 @@ const deploySns = async (sns) => {
 	await deployIndex(sns);
 };
 
-for (const sns of snses) {
-	await deploySns(sns);
-
-	// Dfx/the local replica does not like being stressed with too many installation in parallel
-	await new Promise((r) => setTimeout(r, 2000));
-}
+// We just install a subset for local development because dfx/local replica ultimately fails if too many canisters are installed in a row.
+// See: https://forum.dfinity.org/t/too-many-open-files-os-error-24-state-manager-src-lib-rs33/18217/12?u=peterparker
+await Promise.all(
+	snses.filter((symbol) => ['DKP', 'CHAT', 'KINIC'].includes(symbol)).map(deploySns)
+);
