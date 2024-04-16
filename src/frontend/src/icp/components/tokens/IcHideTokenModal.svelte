@@ -14,7 +14,7 @@
 	import { assertNonNullish } from '@dfinity/utils';
 	import { Principal } from '@dfinity/principal';
 	import { icrcTokensStore } from '$icp/stores/icrc.store';
-    import {ETHEREUM_NETWORK_ID, ICP_NETWORK_ID} from "$env/networks.env";
+	import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
 
 	let ledgerCanisterId: LedgerCanisterIdText | undefined;
 	$: ledgerCanisterId = ($token as IcToken).ledgerCanisterId;

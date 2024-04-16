@@ -9,7 +9,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
-    import {ETHEREUM_NETWORK_ID} from "$env/networks.env";
+	import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
 
 	const assertHide = (): { valid: boolean } => {
 		const contractAddress = ($token as Erc20Token).address;

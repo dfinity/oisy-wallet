@@ -5,8 +5,8 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import {networkICP} from "$lib/derived/network.derived";
-	import {replacePlaceholders} from "$lib/utils/i18n.utils";
+	import { networkICP } from '$lib/derived/network.derived';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -17,9 +17,13 @@
 	<p class="font-bold text-center">{$token.name}</p>
 </div>
 
-<p class="break-normal py-10"><Html text={replacePlaceholders($i18n.tokens.hide.info, {
-	$where: $networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title
-})} /></p>
+<p class="break-normal py-10">
+	<Html
+		text={replacePlaceholders($i18n.tokens.hide.info, {
+			$where: $networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title
+		})}
+	/>
+</p>
 
 <ButtonGroup>
 	<button class="secondary block flex-1" on:click={() => dispatch('icCancel')}
