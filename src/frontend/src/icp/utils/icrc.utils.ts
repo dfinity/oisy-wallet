@@ -1,4 +1,5 @@
 import { ICP_NETWORK } from '$env/networks.env';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcFee, IcInterface, IcTokenWithoutId } from '$icp/types/ic';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
@@ -7,21 +8,29 @@ import { isNullish } from '@dfinity/utils';
 export type IcrcLoadData = IcInterface & {
 	metadata: IcrcTokenMetadataResponse;
 	category: TokenCategory;
+	icons?: Record<LedgerCanisterIdText, string>;
 };
 
-export const mapIcrcToken = ({ metadata, ...rest }: IcrcLoadData): IcTokenWithoutId | undefined => {
+export const mapIcrcToken = ({
+	metadata,
+	icons,
+	ledgerCanisterId,
+	...rest
+}: IcrcLoadData): IcTokenWithoutId | undefined => {
 	const token = mapOptionalToken(metadata);
 
 	if (isNullish(token)) {
 		return undefined;
 	}
 
-	const { symbol, ...metadataToken } = token;
+	const { symbol, icon, ...metadataToken } = token;
 
 	return {
 		network: ICP_NETWORK,
 		standard: 'icrc',
 		symbol,
+		icon: icons?.[ledgerCanisterId] ?? icon,
+		ledgerCanisterId,
 		...metadataToken,
 		...rest
 	};

@@ -12,7 +12,7 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { IcrcManageableToken } from '$icp/types/token';
+	import type { IcrcCustomTokenConfig } from '$icp/types/icrc-custom-token';
 	import { setUserCustomTokens } from '$lib/api/backend.api';
 	import { Principal } from '@dfinity/principal';
 
@@ -40,7 +40,7 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const save = async ({ detail: tokens }: CustomEvent<IcrcManageableToken[]>) => {
+	const save = async ({ detail: tokens }: CustomEvent<IcrcCustomTokenConfig[]>) => {
 		if (isNullish($authStore.identity)) {
 			await nullishSignOut();
 			return;
