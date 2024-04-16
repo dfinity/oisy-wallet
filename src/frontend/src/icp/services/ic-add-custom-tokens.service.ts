@@ -14,7 +14,7 @@ export interface ValidateTokenData {
 	balance: bigint;
 }
 
-export const loadAndAssertCustomToken = async ({
+export const loadAndAssertAddCustomToken = async ({
 	identity,
 	...rest
 }: IcCanisters & { identity: OptionIdentity }): Promise<{
