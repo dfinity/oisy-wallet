@@ -20,7 +20,7 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
-use shared::types::custom_token::{UserToken, UserTokenId};
+use shared::types::custom_token::{UserToken, CustomTokenId};
 use shared::types::token::{Token, TokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::{Arg, InitArg};
@@ -402,21 +402,38 @@ fn list_user_tokens() -> Vec<Token> {
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
-/// Adds a new custom token to the user.
+/// Add, remove or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
-fn add_user_custom_token(token: UserToken) {
+fn set_user_custom_token(token: UserToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &UserToken| -> bool { t.clone() == token };
+    let find = |t: &UserToken| -> bool {
+        CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
+    };
 
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-fn remove_user_custom_token(token_id: UserTokenId) {
+fn set_many_user_custom_tokens(tokens: Vec<UserToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
-    let find = |t: &UserToken| -> bool { UserTokenId::from(t.clone()) == token_id };
+    mutate_state(|s| {
+        for token in tokens {
+            let find = |t: &UserToken| -> bool {
+                CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
+            };
+
+            add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find)
+        }
+    });
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+fn remove_user_custom_token(token_id: CustomTokenId) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    let find = |t: &UserToken| -> bool { CustomTokenId::from(&t.token) == token_id };
 
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_custom_token, &find));
 }

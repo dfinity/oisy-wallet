@@ -5,11 +5,6 @@ export const idlFactory = ({ IDL }) => {
 		allowed_callers: IDL.Vec(IDL.Principal)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
-	const IcrcToken = IDL.Record({
-		ledger_id: IDL.Principal,
-		index_id: IDL.Principal
-	});
-	const UserToken = IDL.Variant({ Icrc: IcrcToken });
 	const Token = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
 		chain_id: IDL.Nat64,
@@ -50,7 +45,13 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
-	const UserTokenId = IDL.Variant({ Icrc: IDL.Principal });
+	const IcrcToken = IDL.Record({
+		ledger_id: IDL.Principal,
+		index_id: IDL.Principal
+	});
+	const CustomToken = IDL.Variant({ Icrc: IcrcToken });
+	const UserToken = IDL.Record({ token: CustomToken, enabled: IDL.Bool });
+	const CustomTokenId = IDL.Variant({ Icrc: IDL.Principal });
 	const TokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -66,7 +67,6 @@ export const idlFactory = ({ IDL }) => {
 		nonce: IDL.Nat
 	});
 	return IDL.Service({
-		add_user_custom_token: IDL.Func([UserToken], [], []),
 		add_user_token: IDL.Func([Token], [], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
@@ -75,8 +75,10 @@ export const idlFactory = ({ IDL }) => {
 		list_user_custom_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(Token)], ['query']),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
-		remove_user_custom_token: IDL.Func([UserTokenId], [], []),
+		remove_user_custom_token: IDL.Func([CustomTokenId], [], []),
 		remove_user_token: IDL.Func([TokenId], [], []),
+		set_many_user_custom_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
+		set_user_custom_token: IDL.Func([UserToken], [], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
 	});
