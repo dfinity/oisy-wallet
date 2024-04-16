@@ -6,6 +6,7 @@
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 	import LoaderBalances from '$lib/components/core/LoaderBalances.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
+	import Modals from '$lib/components/core/Modals.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -33,3 +34,5 @@
 		</Loader>
 	</AddressGuard>
 </main>
+
+<Modals />

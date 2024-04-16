@@ -9,14 +9,15 @@
 	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
+	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
 
 	export let send = false;
 
 	let convertEth = false;
-	$: convertEth = send && $ethToCkETHEnabled;
+	$: convertEth = send && $ethToCkETHEnabled && $erc20TokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = send && $tokenCkBtcLedger;
+	$: convertBtc = send && $tokenCkBtcLedger && $erc20TokensInitialized;
 
 	let singleAction = true;
 	$: singleAction = !send && !convertEth;

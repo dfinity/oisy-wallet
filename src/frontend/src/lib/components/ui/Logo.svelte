@@ -24,7 +24,7 @@
 </script>
 
 <div
-	class="flex items-center justify-center rounded-full"
+	class="flex items-center justify-center rounded-full overflow-hidden"
 	class:bg-dust={color === 'dust'}
 	class:bg-off-white={color === 'off-white'}
 	class:bg-white={color === 'white'}
@@ -41,6 +41,7 @@
 			height={size}
 			on:load={() => (loaded = true)}
 			on:error={onError}
+			rounded
 		/>
 	{:else}
 		<IconRandom {size} text={alt} />

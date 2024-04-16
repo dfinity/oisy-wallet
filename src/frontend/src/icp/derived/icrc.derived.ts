@@ -3,9 +3,9 @@ import {
 	CKETH_LEDGER_CANISTER_TESTNET_IDS
 } from '$env/networks.ircrc.env';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic';
 import { testnets } from '$lib/derived/testnets.derived';
-import type { CanisterIdText } from '$lib/types/canister';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -21,7 +21,7 @@ export const icrcTokens: Readable<IcToken[]> = derived(
 		)
 );
 
-export const icrcLedgerCanisterIds: Readable<CanisterIdText[]> = derived(
+export const icrcLedgerCanisterIds: Readable<LedgerCanisterIdText[]> = derived(
 	[icrcTokens],
 	([$icrcTokens]) => $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
 );

@@ -6,12 +6,13 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { token, tokenCategory } from '$lib/derived/token.derived';
+	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
 	const hideToken = () => {
-		const fn = $networkICP ? () => undefined : modalStore.openHideToken;
+		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
 		fn();
 
 		visible = false;
@@ -35,6 +36,8 @@
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.tokens.alt.context_menu}
+	disabled={$erc20TokensNotInitialized}
+	class:opacity-10={$erc20TokensNotInitialized}
 >
 	<IconMore />
 </button>

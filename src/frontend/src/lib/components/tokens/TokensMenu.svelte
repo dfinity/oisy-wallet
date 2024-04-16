@@ -6,6 +6,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -22,7 +23,9 @@
 	class="icon bg-white border border-dust rounded-md hover:text-blue active:text-blue"
 	bind:this={button}
 	on:click={() => (visible = true)}
-	aria-label={$i18n.tokens.alt.context_menu}
+	aria-label={$i18n.navigation.alt.menu}
+	disabled={$erc20TokensNotInitialized}
+	class:opacity-10={$erc20TokensNotInitialized}
 >
 	<IconMore />
 </button>
@@ -37,10 +40,10 @@
 
 		<button
 			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label={$i18n.tokens.import.text.title}
+			aria-label={$networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title}
 			on:click={importTokens}
 		>
-			+ {$i18n.tokens.import.text.title}
+			+ {$networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title}
 		</button>
 	</div>
 </Popover>

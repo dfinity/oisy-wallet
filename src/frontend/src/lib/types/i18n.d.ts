@@ -226,6 +226,7 @@ interface I18nTokens {
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
+		all_tokens_with_zero_hidden: string;
 		initializing: string;
 		updating_ui: string;
 	};
@@ -263,11 +264,14 @@ interface I18nTokens {
 	warning: { trust_token: string };
 	error: {
 		invalid_contract_address: string;
+		invalid_ledger: string;
+		invalid_index: string;
 		no_metadata: string;
 		unexpected: string;
 		unexpected_hiding: string;
 		already_available: string;
 		loading_metadata: string;
+		not_custom: string;
 	};
 }
 

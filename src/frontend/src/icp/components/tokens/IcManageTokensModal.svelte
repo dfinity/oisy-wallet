@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { AddTokenStep } from '$lib/enums/steps';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import IcManageTokensForm from '$icp/components/tokens/IcManageTokensForm.svelte';
+	import IcManageTokens from '$icp/components/tokens/IcManageTokens.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import IcManageTokensReview from '$icp/components/tokens/IcManageTokensReview.svelte';
+	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
@@ -12,9 +12,8 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { IcrcManageableToken } from '$icp/types/token';
-	import { setUserCustomTokens } from '$lib/api/backend.api';
-	import { Principal } from '@dfinity/principal';
+	import type { IcrcCustomTokenConfig } from '$icp/types/icrc-custom-token';
+	import { saveCustomTokens } from '$icp/services/ic-custom-tokens.services';
 
 	const steps: WizardSteps = [
 		{
@@ -40,7 +39,23 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const save = async ({ detail: tokens }: CustomEvent<IcrcManageableToken[]>) => {
+	const saveTokens = async ({ detail: tokens }: CustomEvent<IcrcCustomTokenConfig[]>) => {
+		await save(tokens);
+	};
+
+	const addToken = async () => {
+		await save([
+			{
+				enabled: true,
+				ledgerCanisterId,
+				indexCanisterId
+			}
+		]);
+	};
+
+	const save = async (
+		tokens: Pick<IcrcCustomTokenConfig, 'enabled' | 'ledgerCanisterId' | 'indexCanisterId'>[]
+	) => {
 		if (isNullish($authStore.identity)) {
 			await nullishSignOut();
 			return;
@@ -56,24 +71,11 @@
 		modal.set(3);
 
 		try {
-			saveProgressStep = AddTokenStep.SAVE;
-
-			await setUserCustomTokens({
+			await saveCustomTokens({
 				identity: $authStore.identity,
-				tokens: tokens.map(({ enabled, ledgerCanisterId, indexCanisterId }) => ({
-					enabled,
-					token: {
-						Icrc: {
-							ledger_id: Principal.fromText(ledgerCanisterId),
-							index_id: Principal.fromText(indexCanisterId)
-						}
-					}
-				}))
+				tokens,
+				progress: (step: AddTokenStep) => (saveProgressStep = step)
 			});
-
-			saveProgressStep = AddTokenStep.UPDATE_UI;
-
-			// TODO: Reload UI after token are added or removed
 
 			saveProgressStep = AddTokenStep.DONE;
 
@@ -108,9 +110,9 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<IcManageTokensReview
+		<IcAddTokenReview
 			on:icBack={modal.back}
-			on:icSave={save}
+			on:icSave={addToken}
 			{ledgerCanisterId}
 			{indexCanisterId}
 		/>
@@ -124,6 +126,6 @@
 			bind:indexCanisterId
 		/>
 	{:else}
-		<IcManageTokensForm on:icClose={close} on:icAddToken={modal.next} on:icSave={save} />
+		<IcManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} />
 	{/if}
 </WizardModal>
