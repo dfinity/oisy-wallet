@@ -1,10 +1,13 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import type { IcFee, IcInterface, IcTokenWithoutId } from '$icp/types/ic';
-import type { TokenMetadata } from '$lib/types/token';
+import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
 import { isNullish } from '@dfinity/utils';
 
-export type IcrcLoadData = IcInterface & { metadata: IcrcTokenMetadataResponse };
+export type IcrcLoadData = IcInterface & {
+	metadata: IcrcTokenMetadataResponse;
+	category: TokenCategory;
+};
 
 export const mapIcrcToken = ({ metadata, ...rest }: IcrcLoadData): IcTokenWithoutId | undefined => {
 	const token = mapOptionalToken(metadata);
@@ -18,7 +21,6 @@ export const mapIcrcToken = ({ metadata, ...rest }: IcrcLoadData): IcTokenWithou
 	return {
 		network: ICP_NETWORK,
 		standard: 'icrc',
-		category: 'default',
 		symbol,
 		...metadataToken,
 		...rest
