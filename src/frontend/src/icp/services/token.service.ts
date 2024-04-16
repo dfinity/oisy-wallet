@@ -69,6 +69,7 @@ const loadMetadata = async ({
 			exchangeCoinId: 'internet-computer',
 			// Position does not matter here
 			position: Number.MAX_VALUE,
+			category: 'custom',
 			...rest
 		});
 	} catch (err: unknown) {

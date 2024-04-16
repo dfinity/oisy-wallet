@@ -9,6 +9,7 @@ import { listUserCustomTokens } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { TokenCategory } from '$lib/types/token';
 import { AnonymousIdentity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -42,7 +43,7 @@ export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity })
 
 const loadDefaultIcrc = (data: IcInterface): Promise<void> =>
 	queryAndUpdate<IcrcLoadData>({
-		request: (params) => requestDefaultIcrcData({ ...params, ...data }),
+		request: (params) => requestDefaultIcrcData({ ...params, ...data, category: 'default' }),
 		onLoad: loadIcrcData,
 		onCertifiedError: ({ error: err }) => {
 			icrcTokensStore.reset(data.ledgerCanisterId);
@@ -60,7 +61,8 @@ const requestDefaultIcrcData = async ({
 	identity,
 	certified,
 	...rest
-}: IcInterface & QueryAndUpdateRequestParams): Promise<IcrcLoadData> => ({
+}: IcInterface &
+	QueryAndUpdateRequestParams & { category: TokenCategory }): Promise<IcrcLoadData> => ({
 	...rest,
 	ledgerCanisterId,
 	metadata: await metadata({ ledgerCanisterId, identity, certified })
@@ -115,6 +117,8 @@ const loadUserIcrcTokensData = async ({
 
 				return data;
 			})
-			.map((params) => requestDefaultIcrcData({ ...params, certified, identity }))
+			.map((params) =>
+				requestDefaultIcrcData({ ...params, certified, identity, category: 'custom' })
+			)
 	);
 };
