@@ -405,7 +405,7 @@ fn list_user_tokens() -> Vec<UserToken> {
 
 /// Add, remove or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
-fn set_user_custom_token(token: CustomToken) {
+fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &CustomToken| -> bool {
@@ -416,7 +416,7 @@ fn set_user_custom_token(token: CustomToken) {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-fn set_many_user_custom_tokens(tokens: Vec<CustomToken>) {
+fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -431,7 +431,7 @@ fn set_many_user_custom_tokens(tokens: Vec<CustomToken>) {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-fn remove_user_custom_token(token_id: CustomTokenId) {
+fn remove_custom_token(token_id: CustomTokenId) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &CustomToken| -> bool { CustomTokenId::from(&t.token) == token_id };
@@ -440,7 +440,7 @@ fn remove_user_custom_token(token_id: CustomTokenId) {
 }
 
 #[query(guard = "caller_is_not_anonymous")]
-fn list_user_custom_tokens() -> Vec<CustomToken> {
+fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| {
         s.custom_token
