@@ -97,3 +97,14 @@ export const setUserCustomTokens = async ({
 	const { set_many_custom_tokens } = await getBackendActor({ identity });
 	return set_many_custom_tokens(tokens);
 };
+
+export const setCustomToken = async ({
+	token,
+	identity
+}: {
+	token: CustomToken;
+	identity: Identity;
+}): Promise<void> => {
+	const { set_custom_token } = await getBackendActor({ identity });
+	return set_custom_token(token);
+};

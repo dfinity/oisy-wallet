@@ -21,6 +21,7 @@ export interface Modal<T> {
 		| 'add-token'
 		| 'ic-manage-tokens'
 		| 'hide-token'
+		| 'ic-hide-token'
 		| 'token'
 		| 'ic-token'
 		| 'receive-bitcoin';
@@ -48,6 +49,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openAddToken: () => void;
 	openIcManageTokens: () => void;
 	openHideToken: () => void;
+	openIcHideToken: () => void;
 	openToken: () => void;
 	openIcToken: () => void;
 	openReceiveBitcoin: () => void;
@@ -76,6 +78,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAddToken: () => set({ type: 'add-token' }),
 		openIcManageTokens: () => set({ type: 'ic-manage-tokens' }),
 		openHideToken: () => set({ type: 'hide-token' }),
+		openIcHideToken: () => set({ type: 'ic-hide-token' }),
 		openToken: () => set({ type: 'token' }),
 		openIcToken: () => set({ type: 'ic-token' }),
 		openReceiveBitcoin: () => set({ type: 'receive-bitcoin' }),

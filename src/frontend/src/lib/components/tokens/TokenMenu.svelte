@@ -12,7 +12,7 @@
 	let button: HTMLButtonElement | undefined;
 
 	const hideToken = () => {
-		const fn = $networkICP ? () => undefined : modalStore.openHideToken;
+		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
 		fn();
 
 		visible = false;
