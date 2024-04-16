@@ -13,7 +13,7 @@ export const saveCustomTokens = async ({
 }: {
 	progress: (step: AddTokenStep) => void;
 	identity: Identity;
-	tokens: IcrcCustomTokenConfig[];
+	tokens: Pick<IcrcCustomTokenConfig, 'enabled' | 'ledgerCanisterId' | 'indexCanisterId'>[];
 }) => {
 	progress(AddTokenStep.SAVE);
 
