@@ -248,7 +248,10 @@ interface I18nTokens {
 		};
 		error: { loading_metadata: string; no_metadata: string; unexpected_index: string };
 	};
-	manage: { title: string; do_not_see_import: string; clear_filter: string };
+	manage: {
+		text: { title: string; do_not_see_import: string; clear_filter: string };
+		error: { unexpected_build: string; empty: string };
+	};
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
 	alt: {
 		context_menu: string;

@@ -286,9 +286,15 @@
 			}
 		},
 		"manage": {
-			"title": "Manage tokens",
-			"do_not_see_import": "Don’t see your token? Import",
-			"clear_filter": "Clear filter"
+			"text": {
+				"title": "Manage tokens",
+				"do_not_see_import": "Don’t see your token? Import",
+				"clear_filter": "Clear filter"
+			},
+			"error": {
+				"unexpected_build": "An unexpected error happened while building the list of known tokens.",
+				"empty": "No tokens to enable or disable have been selected."
+			}
 		},
 		"hide": {
 			"title": "Hide token?",

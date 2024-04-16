@@ -5,7 +5,8 @@ import {
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcToken } from '$icp/types/ic';
 import { testnets } from '$lib/derived/testnets.derived';
-import type { Token } from '$lib/types/token';
+import type { CanisterIdText } from '$lib/types/canister';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const icrcTokens: Readable<IcToken[]> = derived(
@@ -20,14 +21,21 @@ export const icrcTokens: Readable<IcToken[]> = derived(
 		)
 );
 
-export const sortedIcrcTokens: Readable<Token[]> = derived([icrcTokens], ([$icrcTokens]) =>
+export const icrcLedgerCanisterIds: Readable<CanisterIdText[]> = derived(
+	[icrcTokens],
+	([$icrcTokens]) => $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
+);
+
+export const sortedIcrcTokens: Readable<IcToken[]> = derived([icrcTokens], ([$icrcTokens]) =>
 	$icrcTokens.sort(
 		(
 			{ name: nameA, position: positionA, exchangeCoinId: exchangeCoinIdA },
 			{ name: nameB, position: positionB, exchangeCoinId: exchangeCoinIdB }
 		) =>
 			positionA === positionB
-				? exchangeCoinIdA === exchangeCoinIdB
+				? exchangeCoinIdA === exchangeCoinIdB ||
+					isNullish(exchangeCoinIdA) ||
+					isNullish(exchangeCoinIdB)
 					? nameA.localeCompare(nameB)
 					: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
 				: positionA - positionB

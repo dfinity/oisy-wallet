@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { IconClose, Input } from '@dfinity/gix-components';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { writable } from 'svelte/store';
-	import { knownIcrcToken, knownIcrcTokens, type KnownIcrcTokens } from '$lib/types/known-token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import snsTokens from '$env/tokens.sns.json';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -14,48 +12,44 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { fade } from 'svelte/transition';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
+	import { buildKnownIcrcTokens } from '$icp/services/token.service';
+	import { icrcLedgerCanisterIds, sortedIcrcTokens } from '$icp/derived/icrc.derived';
+	import type { IcrcManageableToken } from '$icp/types/token';
+	import type { CanisterIdText } from '$lib/types/canister';
 
 	const dispatch = createEventDispatcher();
 
-	let icrcTokens: KnownIcrcTokens = [];
+	let knownIcrcTokens: IcrcManageableToken[] = [];
 	onMount(() => {
-		try {
-			icrcTokens = knownIcrcTokens.parse(
-				snsTokens.map(
-					({
-						metadata: {
-							fee: { __bigint__ },
-							...rest
-						},
-						...ids
-					}) =>
-						knownIcrcToken.parse({
-							...ids,
-							metadata: {
-								...rest,
-								fee: BigInt(__bigint__)
-							}
-						})
-				)
-			);
-		} catch (err: unknown) {
-			console.error(err);
+		const { result, tokens } = buildKnownIcrcTokens();
+
+		if (result === 'error') {
+			return;
 		}
+
+		knownIcrcTokens = tokens?.map((token) => ({ ...token, enabled: false })) ?? [];
 	});
 
-	let filter = '';
+	let allIcrcTokens: IcrcManageableToken[] = [];
+	$: allIcrcTokens = [
+		...$sortedIcrcTokens.map((token) => ({ ...token, enabled: true })),
+		...knownIcrcTokens.filter(
+			({ ledgerCanisterId }) => !$icrcLedgerCanisterIds.includes(ledgerCanisterId)
+		)
+	];
 
 	const filterStore = writable<string>('');
 	const updateFilter = () => filterStore.set(filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
+	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	let tokens: KnownIcrcTokens = [];
+	let tokens: IcrcManageableToken[] = [];
 	$: tokens = isNullishOrEmpty($filterStore)
-		? icrcTokens
-		: icrcTokens.filter(
-				({ metadata: { name, symbol, alternativeName } }) =>
+		? allIcrcTokens
+		: allIcrcTokens.filter(
+				({ name, symbol, alternativeName }) =>
 					name.toLowerCase().includes($filterStore.toLowerCase()) ||
 					symbol.toLowerCase().includes($filterStore.toLowerCase()) ||
 					(alternativeName ?? '').toLowerCase().includes($filterStore.toLowerCase())
@@ -63,6 +57,32 @@
 
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
+
+	let modifiedTokens: Record<CanisterIdText, IcrcManageableToken> = {};
+	const onToggle = ({
+		detail: { ledgerCanisterId, enabled, ...rest }
+	}: CustomEvent<IcrcManageableToken>) => {
+		const { [`${ledgerCanisterId}`]: current, ...tokens } = modifiedTokens;
+
+		if (nonNullish(current)) {
+			modifiedTokens = { ...tokens };
+			return;
+		}
+
+		modifiedTokens = {
+			[`${ledgerCanisterId}`]: {
+				ledgerCanisterId,
+				enabled,
+				...rest
+			},
+			...tokens
+		};
+	};
+
+	let saveDisabled = true;
+	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
+
+	const save = () => dispatch('icSave', Object.values(modifiedTokens));
 </script>
 
 <Input
@@ -75,7 +95,7 @@
 >
 	<svelte:fragment slot="inner-end">
 		{#if noTokensMatch}
-			<button on:click={() => (filter = '')} aria-label={$i18n.tokens.manage.clear_filter}>
+			<button on:click={() => (filter = '')} aria-label={$i18n.tokens.manage.text.clear_filter}>
 				<IconClose />
 			</button>
 		{:else}
@@ -93,28 +113,28 @@
 		<span class="text-7xl">🤔</span>
 
 		<span class="py-4 text-center text-blue font-bold no-underline"
-			>+ {$i18n.tokens.manage.do_not_see_import}</span
+			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
 {:else}
 	<div class="container mt-4 h-96 pr-2 mb-1 pt-1 overflow-y-auto">
 		{#each tokens as token}
 			<Card>
-				{token.metadata.name}
+				{token.name}
 
 				<Logo
-					src={`/icons/sns/${token.ledgerCanisterId}.png`}
+					src={token.icon ?? `/icons/sns/${token.ledgerCanisterId}.png`}
 					slot="icon"
-					alt={`${token.metadata.name} logo`}
+					alt={`${token.name} logo`}
 					size="52px"
 					color="white"
 				/>
 
 				<span class="break-all" slot="description">
-					{token.metadata.symbol}
+					{token.symbol}
 				</span>
 
-				<IcManageTokenToggle slot="action" />
+				<IcManageTokenToggle slot="action" {token} on:icToken={onToggle} />
 			</Card>
 		{/each}
 	</div>
@@ -123,14 +143,19 @@
 
 	<button
 		class="flex justify-center pt-4 pb-5 text-center w-full text-blue font-bold no-underline"
-		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.do_not_see_import}</button
+		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
 
 	<ButtonGroup>
 		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 			>{$i18n.core.text.back}</button
 		>
-		<button class="primary block flex-1" on:click={() => dispatch('icSave')}>
+		<button
+			class="primary block flex-1"
+			on:click={save}
+			class:opacity-10={saveDisabled}
+			disabled={saveDisabled}
+		>
 			{$i18n.core.text.save}
 		</button>
 	</ButtonGroup>

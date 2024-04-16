@@ -1,3 +1,5 @@
+import { ICP_NETWORK } from '$env/networks.env';
+import snsTokens from '$env/tokens.sns.json';
 import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcTokenWithoutId } from '$icp/types/ic';
@@ -5,6 +7,12 @@ import { mapIcrcToken } from '$icp/utils/icrc.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import {
+	knownIcrcToken,
+	knownIcrcTokens,
+	type KnownIcrcToken,
+	type KnownIcrcTokenMetadata
+} from '$lib/types/known-token';
 import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -61,6 +69,7 @@ const loadMetadata = async ({
 			exchangeCoinId: 'internet-computer',
 			// Position does not matter here
 			position: Number.MAX_VALUE,
+			category: 'custom',
 			...rest
 		});
 	} catch (err: unknown) {
@@ -94,5 +103,60 @@ const loadBalance = async ({
 		});
 
 		throw err;
+	}
+};
+
+export const buildKnownIcrcTokens = (): {
+	result: 'success' | 'error';
+	tokens?: (IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'>)[];
+} => {
+	try {
+		const tokens = knownIcrcTokens.parse(
+			snsTokens.map(
+				({
+					metadata: {
+						fee: { __bigint__ },
+						...rest
+					},
+					...ids
+				}) =>
+					knownIcrcToken.parse({
+						...ids,
+						metadata: {
+							...rest,
+							fee: BigInt(__bigint__)
+						}
+					})
+			)
+		);
+
+		const mapKkownIcrcToken = ({
+			ledgerCanisterId,
+			indexCanisterId,
+			metadata: { name, decimals, symbol, fee, alternativeName }
+		}: KnownIcrcToken): IcTokenWithoutId & Pick<KnownIcrcTokenMetadata, 'alternativeName'> => ({
+			ledgerCanisterId,
+			indexCanisterId,
+			network: ICP_NETWORK,
+			name,
+			decimals,
+			symbol,
+			exchangeCoinId: undefined,
+			position: Number.MAX_VALUE,
+			standard: 'icrc',
+			category: 'custom',
+			icon: undefined,
+			fee,
+			alternativeName
+		});
+
+		return { result: 'success', tokens: tokens.map(mapKkownIcrcToken) };
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: get(i18n).tokens.manage.error.unexpected_build },
+			err
+		});
+
+		return { result: 'error' };
 	}
 };
