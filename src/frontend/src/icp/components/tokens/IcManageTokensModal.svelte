@@ -39,7 +39,23 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const save = async ({ detail: tokens }: CustomEvent<IcrcCustomTokenConfig[]>) => {
+	const saveTokens = async ({ detail: tokens }: CustomEvent<IcrcCustomTokenConfig[]>) => {
+		await save(tokens);
+	};
+
+	const addToken = async () => {
+		await save([
+			{
+				enabled: true,
+				ledgerCanisterId,
+				indexCanisterId
+			}
+		]);
+	};
+
+	const save = async (
+		tokens: Pick<IcrcCustomTokenConfig, 'enabled' | 'ledgerCanisterId' | 'indexCanisterId'>[]
+	) => {
 		if (isNullish($authStore.identity)) {
 			await nullishSignOut();
 			return;
@@ -96,7 +112,7 @@
 	{#if currentStep?.name === 'Review'}
 		<IcAddTokenReview
 			on:icBack={modal.back}
-			on:icSave={save}
+			on:icSave={addToken}
 			{ledgerCanisterId}
 			{indexCanisterId}
 		/>
@@ -110,6 +126,6 @@
 			bind:indexCanisterId
 		/>
 	{:else}
-		<IcManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={save} />
+		<IcManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} />
 	{/if}
 </WizardModal>
