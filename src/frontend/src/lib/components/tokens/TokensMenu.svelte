@@ -6,6 +6,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -23,6 +24,8 @@
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.navigation.alt.menu}
+	disabled={$erc20TokensNotInitialized}
+	class:opacity-10={$erc20TokensNotInitialized}
 >
 	<IconMore />
 </button>
