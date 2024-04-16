@@ -51,7 +51,7 @@ thread_local! {
         MEMORY_MANAGER.with(|mm| State {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
-            user_custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
+            custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
         })
     );
 }
@@ -111,7 +111,7 @@ pub struct State {
     user_token: UserTokenMap,
     /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
     /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
-    user_custom_token: CustomTokenMap,
+    custom_token: CustomTokenMap,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -412,7 +412,7 @@ fn set_user_custom_token(token: CustomToken) {
         CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
     };
 
-    mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find));
+    mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
 }
 
 #[update(guard = "caller_is_not_anonymous")]
@@ -425,7 +425,7 @@ fn set_many_user_custom_tokens(tokens: Vec<CustomToken>) {
                 CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
             };
 
-            add_to_user_token(stored_principal, &mut s.user_custom_token, &token, &find)
+            add_to_user_token(stored_principal, &mut s.custom_token, &token, &find)
         }
     });
 }
@@ -436,14 +436,14 @@ fn remove_user_custom_token(token_id: CustomTokenId) {
 
     let find = |t: &CustomToken| -> bool { CustomTokenId::from(&t.token) == token_id };
 
-    mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_custom_token, &find));
+    mutate_state(|s| remove_from_user_token(stored_principal, &mut s.custom_token, &find));
 }
 
 #[query(guard = "caller_is_not_anonymous")]
 fn list_user_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| {
-        s.user_custom_token
+        s.custom_token
             .get(&stored_principal)
             .unwrap_or_default()
             .0
