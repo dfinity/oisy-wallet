@@ -18,7 +18,6 @@
 	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
 	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
-	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -31,9 +30,7 @@
 </script>
 
 <Header>
-	{$i18n.tokens.text.title}{#if $erc20TokensInitialized}&nbsp;<span class="font-normal" in:fade
-			>({$networkTokens.length})</span
-		>{/if}
+	{$i18n.tokens.text.title}
 
 	<TokensMenu slot="end" />
 </Header>
@@ -67,6 +64,10 @@
 			</a>
 		</Listener>
 	{/each}
+
+	{#if tokens.length === 0}
+		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
+	{/if}
 
 	{#if $modalAddToken}
 		<AddTokenModal />

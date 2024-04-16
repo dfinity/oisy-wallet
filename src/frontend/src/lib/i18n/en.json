@@ -259,6 +259,7 @@
 			"contract_address": "Contract address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
+			"all_tokens_with_zero_hidden": "All tokens with zero balance are currently hidden.",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI..."
 		},
