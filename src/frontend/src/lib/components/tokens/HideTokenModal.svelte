@@ -54,15 +54,14 @@
 
 			hideProgressStep = HideTokenStep.UPDATE_UI;
 
+			// We must navigate first otherwise we might land on the default token Ethereum selected while being on network ICP.
+			await back({ networkId: backToNetworkId, pop: true });
+
 			updateUi();
 
 			hideProgressStep = HideTokenStep.DONE;
 
-			setTimeout(async () => {
-				close();
-
-				await back({ networkId: backToNetworkId, pop: true });
-			}, 750);
+			setTimeout(close, 750);
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.unexpected_hiding },

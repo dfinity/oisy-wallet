@@ -12,12 +12,18 @@
 	import { Principal } from '@dfinity/principal';
 	import { icrcTokensStore } from '$icp/stores/icrc.store';
 	import { ICP_NETWORK_ID } from '$env/networks.env';
+	import { onMount } from 'svelte';
+
+	let selectedToken: IcToken | undefined;
+
+	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
+	onMount(() => (selectedToken = $token as IcToken));
 
 	let ledgerCanisterId: LedgerCanisterIdText | undefined;
-	$: ledgerCanisterId = ($token as IcToken).ledgerCanisterId;
+	$: ledgerCanisterId = selectedToken?.ledgerCanisterId;
 
 	let indexCanisterId: LedgerCanisterIdText | undefined;
-	$: indexCanisterId = ($token as IcToken).indexCanisterId;
+	$: indexCanisterId = selectedToken?.indexCanisterId;
 
 	const assertHide = (): { valid: boolean } => {
 		if (isNullishOrEmpty(ledgerCanisterId)) {

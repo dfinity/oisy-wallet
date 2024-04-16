@@ -5,14 +5,21 @@
 	import { removeUserToken } from '$lib/api/backend.api';
 	import { selectedChainId } from '$eth/derived/network.derived';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
-	import { token, tokenId } from '$lib/derived/token.derived';
+	import { token } from '$lib/derived/token.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
+	import { onMount } from 'svelte';
+	import { assertNonNullish } from '@dfinity/utils';
+
+	let selectedToken: Erc20Token | undefined;
+
+	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
+	onMount(() => (selectedToken = $token as Erc20Token));
 
 	const assertHide = (): { valid: boolean } => {
-		const contractAddress = ($token as Erc20Token).address;
+		const contractAddress = selectedToken?.address;
 
 		if (isNullishOrEmpty(contractAddress)) {
 			toastsError({
@@ -36,7 +43,11 @@
 		});
 	};
 
-	const updateUi = () => erc20TokensStore.remove($tokenId);
+	const updateUi = () => {
+		assertNonNullish(selectedToken);
+
+		erc20TokensStore.remove(selectedToken.id);
+	};
 </script>
 
 <HideTokenModal backToNetworkId={ETHEREUM_NETWORK_ID} {assertHide} {hideToken} {updateUi} />
