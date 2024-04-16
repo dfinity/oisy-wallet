@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { AddTokenStep } from '$lib/enums/steps';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import IcManageTokensForm from '$icp/components/tokens/IcManageTokensForm.svelte';
+	import IcManageTokens from '$icp/components/tokens/IcManageTokens.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import IcManageTokensReview from '$icp/components/tokens/IcManageTokensReview.svelte';
+	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
@@ -108,7 +108,7 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<IcManageTokensReview
+		<IcAddTokenReview
 			on:icBack={modal.back}
 			on:icSave={save}
 			{ledgerCanisterId}
@@ -124,6 +124,6 @@
 			bind:indexCanisterId
 		/>
 	{:else}
-		<IcManageTokensForm on:icClose={close} on:icAddToken={modal.next} on:icSave={save} />
+		<IcManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={save} />
 	{/if}
 </WizardModal>
