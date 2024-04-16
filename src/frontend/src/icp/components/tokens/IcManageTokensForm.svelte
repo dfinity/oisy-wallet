@@ -19,7 +19,6 @@
 
 	const dispatch = createEventDispatcher();
 
-	// TODO: fixed in next PR. There were too many modifications, splitting PRs for clarity.
 	let knownIcrcTokens: IcrcManageableToken[] = [];
 	onMount(() => {
 		const { result, tokens } = buildKnownIcrcTokens();
