@@ -3,7 +3,10 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { fade, blur } from 'svelte/transition';
-	import { loadAndAssertCustomToken, type ValidateTokenData } from '$icp/services/token.service';
+	import {
+		loadAndAssertAddCustomToken,
+		type ValidateTokenData
+	} from '$icp/services/ic-add-custom-tokens.service';
 	import { authStore } from '$lib/stores/auth.store';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -23,7 +26,7 @@
 	let token: ValidateTokenData | undefined;
 
 	onMount(async () => {
-		const { result, data } = await loadAndAssertCustomToken({
+		const { result, data } = await loadAndAssertAddCustomToken({
 			ledgerCanisterId,
 			indexCanisterId,
 			identity: $authStore.identity
