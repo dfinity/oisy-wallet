@@ -15,7 +15,10 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
-export type CustomToken = { Icrc: IcrcToken };
+export interface CustomToken {
+	token: Token;
+	enabled: boolean;
+}
 export type CustomTokenId = { Icrc: Principal };
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
@@ -53,33 +56,30 @@ export interface SignRequest {
 	chain_id: bigint;
 	nonce: bigint;
 }
-export interface Token {
+export type Token = { Icrc: IcrcToken };
+export interface UserToken {
 	decimals: [] | [number];
 	chain_id: bigint;
 	contract_address: string;
 	symbol: [] | [string];
 }
-export interface TokenId {
+export interface UserTokenId {
 	chain_id: bigint;
 	contract_address: string;
 }
-export interface UserToken {
-	token: CustomToken;
-	enabled: boolean;
-}
 export interface _SERVICE {
-	add_user_token: ActorMethod<[Token], undefined>;
+	add_user_token: ActorMethod<[UserToken], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
-	list_user_custom_tokens: ActorMethod<[], Array<UserToken>>;
-	list_user_tokens: ActorMethod<[], Array<Token>>;
+	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
+	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	personal_sign: ActorMethod<[string], string>;
-	remove_user_custom_token: ActorMethod<[CustomTokenId], undefined>;
-	remove_user_token: ActorMethod<[TokenId], undefined>;
-	set_many_user_custom_tokens: ActorMethod<[Array<UserToken>], undefined>;
-	set_user_custom_token: ActorMethod<[UserToken], undefined>;
+	remove_custom_token: ActorMethod<[CustomTokenId], undefined>;
+	remove_user_token: ActorMethod<[UserTokenId], undefined>;
+	set_custom_token: ActorMethod<[CustomToken], undefined>;
+	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }
