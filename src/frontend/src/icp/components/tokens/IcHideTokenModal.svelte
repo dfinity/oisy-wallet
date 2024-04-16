@@ -2,11 +2,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { removeUserToken, setCustomToken } from '$lib/api/backend.api';
-	import { selectedChainId } from '$eth/derived/network.derived';
-	import { erc20TokensStore } from '$eth/stores/erc20.store';
-	import { token, tokenId } from '$lib/derived/token.derived';
-	import type { Erc20Token } from '$eth/types/erc20';
+	import { setCustomToken } from '$lib/api/backend.api';
+	import { token } from '$lib/derived/token.derived';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -14,7 +11,7 @@
 	import { assertNonNullish } from '@dfinity/utils';
 	import { Principal } from '@dfinity/principal';
 	import { icrcTokensStore } from '$icp/stores/icrc.store';
-	import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+	import { ICP_NETWORK_ID } from '$env/networks.env';
 
 	let ledgerCanisterId: LedgerCanisterIdText | undefined;
 	$: ledgerCanisterId = ($token as IcToken).ledgerCanisterId;
