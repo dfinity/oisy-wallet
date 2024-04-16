@@ -226,6 +226,7 @@ interface I18nTokens {
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
+		all_tokens_with_zero_hidden: string;
 		initializing: string;
 		updating_ui: string;
 	};
