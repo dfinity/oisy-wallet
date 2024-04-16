@@ -13,7 +13,7 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { IcrcManageableToken } from '$icp/types/token';
-	import { setManyUserCustomTokens } from '$lib/api/backend.api';
+	import { setUserCustomTokens } from '$lib/api/backend.api';
 	import { Principal } from '@dfinity/principal';
 
 	const steps: WizardSteps = [
@@ -58,7 +58,7 @@
 		try {
 			saveProgressStep = AddTokenStep.SAVE;
 
-			await setManyUserCustomTokens({
+			await setUserCustomTokens({
 				identity: $authStore.identity,
 				tokens: tokens.map(({ enabled, ledgerCanisterId, indexCanisterId }) => ({
 					enabled,

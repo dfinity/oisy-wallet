@@ -1,4 +1,4 @@
-import type { Token } from '$declarations/backend/backend.did';
+import type { UserToken } from '$declarations/backend/backend.did';
 import {
 	SUPPORTED_ETHEREUM_NETWORKS,
 	SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS
@@ -42,7 +42,7 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 
 			return contracts
 				.filter(({ chain_id }) => SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
-				.map(async ({ contract_address: address, chain_id }: Token): Promise<ContractData> => {
+				.map(async ({ contract_address: address, chain_id }: UserToken): Promise<ContractData> => {
 					const network = SUPPORTED_ETHEREUM_NETWORKS.find(
 						({ chainId }) => chainId === chain_id
 					) as EthereumNetwork;

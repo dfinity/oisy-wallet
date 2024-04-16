@@ -1,11 +1,11 @@
-import type { UserToken } from '$declarations/backend/backend.did';
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICRC_TOKENS } from '$env/networks.ircrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcInterface } from '$icp/types/ic';
 import { mapIcrcToken, type IcrcLoadData } from '$icp/utils/icrc.utils';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
-import { listUserCustomTokens } from '$lib/api/backend.api';
+import { listCustomTokens } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -84,7 +84,7 @@ const loadUserIcrcTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<IcrcLoadData[]> => {
-	const tokens = await listUserCustomTokens(params);
+	const tokens = await listCustomTokens(params);
 
 	return await loadUserIcrcTokensData({
 		tokens,
@@ -97,7 +97,7 @@ const loadUserIcrcTokensData = async ({
 	certified,
 	identity
 }: {
-	tokens: UserToken[];
+	tokens: CustomToken[];
 	certified: boolean;
 	identity: OptionIdentity;
 }): Promise<IcrcLoadData[]> => {
