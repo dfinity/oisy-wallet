@@ -11,7 +11,7 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
-type CustomToken = variant { Icrc : IcrcToken };
+type CustomToken = record { token : Token; enabled : bool };
 type CustomTokenId = variant { Icrc : principal };
 type DefiniteCanisterSettingsArgs = record {
   controller : principal;
@@ -46,27 +46,27 @@ type SignRequest = record {
   chain_id : nat;
   nonce : nat;
 };
-type Token = record {
+type Token = variant { Icrc : IcrcToken };
+type UserToken = record {
   decimals : opt nat8;
   chain_id : nat64;
   contract_address : text;
   symbol : opt text;
 };
-type TokenId = record { chain_id : nat64; contract_address : text };
-type UserToken = record { token : CustomToken; enabled : bool };
+type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
-  add_user_token : (Token) -> ();
+  add_user_token : (UserToken) -> ();
   caller_eth_address : () -> (text);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
   http_request : (HttpRequest) -> (HttpResponse) query;
-  list_user_custom_tokens : () -> (vec UserToken) query;
-  list_user_tokens : () -> (vec Token) query;
+  list_custom_tokens : () -> (vec CustomToken) query;
+  list_user_tokens : () -> (vec UserToken) query;
   personal_sign : (text) -> (text);
-  remove_user_custom_token : (CustomTokenId) -> ();
-  remove_user_token : (TokenId) -> ();
-  set_many_user_custom_tokens : (vec UserToken) -> ();
-  set_user_custom_token : (UserToken) -> ();
+  remove_custom_token : (CustomTokenId) -> ();
+  remove_user_token : (UserTokenId) -> ();
+  set_custom_token : (CustomToken) -> ();
+  set_many_custom_tokens : (vec CustomToken) -> ();
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
 }
