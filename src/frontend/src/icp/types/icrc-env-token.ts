@@ -6,8 +6,7 @@ export const icrcEnvTokenMetadata = z.object({
 	symbol: z.string(),
 	fee: z.bigint(),
 	alternativeName: z.optional(z.string()),
-	url: z.optional(z.string().url()),
-	description: z.optional(z.string())
+	url: z.optional(z.string().url())
 });
 
 export const icrcEnvToken = z.object({

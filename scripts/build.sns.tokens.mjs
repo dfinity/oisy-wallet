@@ -121,7 +121,7 @@ export const findSnses = async () => {
 				({
 					canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
 					icrc1_metadata,
-					meta: { name: alternativeName, url, description }
+					meta: { name: alternativeName, url }
 				}) => ({
 					ledgerCanisterId: ledger_canister_id,
 					indexCanisterId: index_canister_id,
@@ -129,8 +129,7 @@ export const findSnses = async () => {
 					metadata: {
 						...mapOptionalToken(icrc1_metadata),
 						alternativeName,
-						url,
-						description
+						url
 					}
 				})
 			)
