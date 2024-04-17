@@ -4,6 +4,7 @@ const EXPLORER_URLS = {
 	ICP: 'https://dashboard.internetcomputer.org',
 	CKETH: 'https://dashboard.internetcomputer.org/ethereum',
 	CKBTC: 'https://dashboard.internetcomputer.org/bitcoin',
+	SNS: 'https://dashboard.internetcomputer.org/sns',
 	BTC_MAINNET: 'https://blockstream.info',
 	BTC_TESTNET: 'https://blockstream.info/testnet'
 };
@@ -14,6 +15,7 @@ export const {
 	ICP: ICP_EXPLORER_URL,
 	CKETH: CKETH_EXPLORER_URL,
 	CKBTC: CKBTC_EXPLORER_URL,
+	SNS: SNS_EXPLORER_URL,
 	BTC_MAINNET: BTC_MAINNET_EXPLORER_URL,
 	BTC_TESTNET: BTC_TESTNET_EXPLORER_URL
 } = EXPLORER_URLS;

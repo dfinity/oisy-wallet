@@ -12,6 +12,7 @@ export const icrcEnvTokenMetadata = z.object({
 
 export const icrcEnvToken = z.object({
 	ledgerCanisterId: z.string(),
+	rootCanisterId: z.string(),
 	indexCanisterId: z.string(),
 	metadata: icrcEnvTokenMetadata
 });

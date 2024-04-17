@@ -77,4 +77,5 @@ export type IcCkTwinToken = {
 export type IcAppMetadata = {
 	exchangeCoinId?: CoingeckoCoinsId;
 	position: number;
+	explorerUrl?: string;
 };

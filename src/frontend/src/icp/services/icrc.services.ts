@@ -1,7 +1,7 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICRC_TOKENS } from '$env/networks.ircrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
-import { buildIcrcCustomTokensIcons } from '$icp/services/icrc-custom-tokens.services';
+import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcInterface } from '$icp/types/ic';
 import { mapIcrcToken, type IcrcLoadData } from '$icp/utils/icrc.utils';
@@ -132,13 +132,13 @@ const loadCustomIcrcData = ({
 	certified: boolean;
 	response: IcrcLoadData[];
 }) => {
-	const icrcCustomTokensIcons = buildIcrcCustomTokensIcons();
+	const icrcCustomTokens = buildIndexedIcrcCustomTokens();
 
 	tokens.forEach((token) =>
 		loadIcrcData({
 			response: {
 				...token,
-				icons: icrcCustomTokensIcons
+				icrcCustomTokens
 			},
 			certified
 		})
