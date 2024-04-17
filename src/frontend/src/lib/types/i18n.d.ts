@@ -44,6 +44,7 @@ interface I18nWallet {
 		wallet_address_copied: string;
 		display_wallet_address_qr: string;
 		icp_deposits: string;
+		use_address_from_to: string;
 	};
 	alt: { open_etherscan: string };
 }
@@ -120,8 +121,6 @@ interface I18nReceive {
 			account_id_copied: string;
 		};
 	};
-	ckbtc: { text: { use_address_from_to: string } };
-	cketh: { text: { use_address_from_to: string } };
 	ethereum: {
 		text: {
 			checking_status: string;

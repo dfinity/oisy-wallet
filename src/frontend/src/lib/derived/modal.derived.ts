@@ -9,6 +9,10 @@ export const modalIcpReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'icp-receive'
 );
+export const modalIcrcReceive: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'icrc-receive'
+);
 export const modalCkBTCReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ckbtc-receive'
