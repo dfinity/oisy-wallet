@@ -38,7 +38,7 @@ fn test_add_custom_token() {
 }
 
 #[test]
-fn test_update_user_token() {
+fn test_update_custom_token() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
@@ -93,7 +93,7 @@ fn test_add_many_custom_tokens() {
 }
 
 #[test]
-fn test_update_many_user_tokens() {
+fn test_update_many_custom_tokens() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
@@ -172,7 +172,57 @@ fn test_list_custom_tokens() {
 }
 
 #[test]
-fn test_anonymous_cannot_add_user_token() {
+fn test_cannot_update_custom_token_without_timestamp() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
+
+    assert!(result.is_ok());
+
+    let update_token: CustomToken = CustomToken {
+        enabled: false,
+        token: USER_TOKEN.token.clone(),
+        timestamp: None,
+    };
+
+    let update_result =
+        update_call::<()>(&pic_setup, caller, "set_custom_token", update_token.clone());
+
+    assert!(update_result.is_err());
+    assert!(update_result
+        .unwrap_err()
+        .contains("Timestamp mismatch, token update not allowed"));
+}
+
+#[test]
+fn test_cannot_update_custom_token_with_invalid_timestamp() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
+
+    assert!(result.is_ok());
+
+    let update_token: CustomToken = CustomToken {
+        enabled: false,
+        token: USER_TOKEN.token.clone(),
+        timestamp: Some(123456789),
+    };
+
+    let update_result =
+        update_call::<()>(&pic_setup, caller, "set_custom_token", update_token.clone());
+
+    assert!(update_result.is_err());
+    assert!(update_result
+        .unwrap_err()
+        .contains("Timestamp mismatch, token update not allowed"));
+}
+
+#[test]
+fn test_anonymous_cannot_add_custom_token() {
     let pic_setup = setup();
 
     let result = update_call::<()>(
@@ -190,7 +240,7 @@ fn test_anonymous_cannot_add_user_token() {
 }
 
 #[test]
-fn test_anonymous_cannot_list_user_tokens() {
+fn test_anonymous_cannot_list_custom_tokens() {
     let pic_setup = setup();
 
     let result = query_call::<()>(
@@ -208,7 +258,7 @@ fn test_anonymous_cannot_list_user_tokens() {
 }
 
 #[test]
-fn test_user_cannot_list_another_user_tokens() {
+fn test_user_cannot_list_another_custom_tokens() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
