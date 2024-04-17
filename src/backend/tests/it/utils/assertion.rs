@@ -1,5 +1,6 @@
 use shared::types::custom_token::CustomToken;
 use shared::types::token::UserToken;
+use shared::types::TokenTimestamp;
 
 pub fn assert_tokens_eq(results_tokens: Vec<UserToken>, expected_tokens: Vec<UserToken>) {
     assert_eq!(results_tokens.len(), expected_tokens.len());
@@ -21,5 +22,23 @@ pub fn assert_custom_tokens_eq(
     for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
         assert!(expected.token == token.token);
         assert_eq!(expected.enabled, token.enabled);
+    }
+}
+
+pub fn assert_some_tokens_timestamp<T>(tokens: Vec<T>)
+where
+    T: TokenTimestamp,
+{
+    for token in tokens.iter() {
+        assert!(token.get_timestamp().is_some());
+    }
+}
+
+pub fn assert_none_tokens_timestamp<T>(tokens: Vec<T>)
+where
+    T: TokenTimestamp,
+{
+    for token in tokens.iter() {
+        assert!(token.get_timestamp().is_none());
     }
 }

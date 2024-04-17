@@ -1,4 +1,6 @@
-use crate::utils::assertion::assert_tokens_eq;
+use crate::utils::assertion::{
+    assert_none_tokens_timestamp, assert_some_tokens_timestamp, assert_tokens_eq,
+};
 use crate::utils::mock::{
     CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };
@@ -60,7 +62,10 @@ fn test_upgrade_user_token() {
 
     assert!(results.is_ok());
 
-    assert_tokens_eq(results.unwrap(), expected_tokens);
+    let results_tokens = results.unwrap();
+
+    assert_tokens_eq(results_tokens.clone(), expected_tokens.clone());
+    assert_none_tokens_timestamp(results_tokens);
 }
 
 #[test]
@@ -114,5 +119,55 @@ fn test_add_user_token_after_upgrade() {
 
     assert!(results.is_ok());
 
-    assert_tokens_eq(results.unwrap(), expected_tokens);
+    let results_tokens = results.unwrap();
+
+    assert_tokens_eq(results_tokens.clone(), expected_tokens);
+    assert_some_tokens_timestamp(results_tokens);
+}
+
+#[test]
+fn test_update_user_token_after_upgrade() {
+    // Deploy a released canister
+    let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_13_WASM_PATH);
+
+    // Add a user token
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let result = update_call::<()>(
+        &pic_setup,
+        caller,
+        "add_user_token",
+        PRE_UPGRADE_TOKEN.clone(),
+    );
+
+    assert!(result.is_ok());
+
+    // Upgrade canister with new wasm
+    upgrade(&pic_setup).unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+
+    // Get the list of token and check that it still contains the one we added before upgrade
+    let results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    assert!(results.is_ok());
+
+    let update_token: UserToken = UserToken {
+        symbol: Some("Updated".to_string()),
+        ..results.unwrap().get(0).unwrap().clone()
+    };
+
+    let update_result =
+        update_call::<()>(&pic_setup, caller, "add_user_token", update_token.clone());
+
+    assert!(update_result.is_ok());
+
+    let updated_results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    let expected_tokens: Vec<UserToken> = vec![update_token.clone()];
+
+    assert!(updated_results.is_ok());
+
+    let results_tokens = updated_results.unwrap();
+
+    assert_tokens_eq(results_tokens.clone(), expected_tokens.clone());
+    assert_some_tokens_timestamp(results_tokens);
 }
