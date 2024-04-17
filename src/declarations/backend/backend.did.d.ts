@@ -19,7 +19,6 @@ export interface CustomToken {
 	token: Token;
 	enabled: boolean;
 }
-export type CustomTokenId = { Icrc: Principal };
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
 	freezing_threshold: bigint;
@@ -76,7 +75,6 @@ export interface _SERVICE {
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	personal_sign: ActorMethod<[string], string>;
-	remove_custom_token: ActorMethod<[CustomTokenId], undefined>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;

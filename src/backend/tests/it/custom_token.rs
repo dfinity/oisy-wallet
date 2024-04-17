@@ -153,31 +153,6 @@ fn test_update_many_user_tokens() {
 }
 
 #[test]
-fn test_remove_custom_token() {
-    let pic_setup = setup();
-
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
-
-    let add_result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "remove_custom_token",
-        USER_TOKEN_ID.clone(),
-    );
-
-    assert!(add_result.is_ok());
-
-    let remove_result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "remove_custom_token",
-        USER_TOKEN_ID.clone(),
-    );
-
-    assert!(remove_result.is_ok());
-}
-
-#[test]
 fn test_list_custom_tokens() {
     let pic_setup = setup();
 
@@ -215,24 +190,6 @@ fn test_anonymous_cannot_add_user_token() {
         Principal::anonymous(),
         "set_custom_token",
         USER_TOKEN.clone(),
-    );
-
-    assert!(result.is_err());
-    assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
-    );
-}
-
-#[test]
-fn test_anonymous_cannot_remove_user_token() {
-    let pic_setup = setup();
-
-    let result = update_call::<()>(
-        &pic_setup,
-        Principal::anonymous(),
-        "remove_custom_token",
-        USER_TOKEN_ID.clone(),
     );
 
     assert!(result.is_err());
