@@ -32,7 +32,7 @@
 </script>
 
 <button
-	class="icon text-white"
+	class="icon text-white bg-white/[.15] border border-white/[.05] rounded-md"
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.tokens.alt.context_menu}
