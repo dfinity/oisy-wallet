@@ -1,4 +1,4 @@
-use crate::utils::assertion::assert_custom_tokens_eq;
+use crate::utils::assertion::{assert_custom_tokens_eq, assert_some_tokens_timestamp};
 use crate::utils::mock::CALLER;
 use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
@@ -73,7 +73,10 @@ fn test_update_user_token() {
 
     assert!(updated_results.is_ok());
 
-    assert_custom_tokens_eq(updated_results.unwrap(), expected_updated_tokens);
+    let updated_tokens = updated_results.unwrap();
+
+    assert_custom_tokens_eq(updated_tokens.clone(), expected_updated_tokens);
+    assert_some_tokens_timestamp(updated_tokens);
 }
 
 #[test]
@@ -135,7 +138,10 @@ fn test_update_many_user_tokens() {
 
     assert!(updated_results.is_ok());
 
-    assert_custom_tokens_eq(updated_results.unwrap(), update_tokens);
+    let updated_tokens = updated_results.unwrap();
+
+    assert_custom_tokens_eq(updated_tokens.clone(), update_tokens);
+    assert_some_tokens_timestamp(updated_tokens);
 }
 
 #[test]
@@ -159,7 +165,10 @@ fn test_list_custom_tokens() {
 
     assert!(results.is_ok());
 
-    assert_custom_tokens_eq(results.unwrap(), expected_tokens);
+    let list_tokens = results.unwrap();
+
+    assert_custom_tokens_eq(list_tokens.clone(), expected_tokens);
+    assert_some_tokens_timestamp(list_tokens);
 }
 
 #[test]
