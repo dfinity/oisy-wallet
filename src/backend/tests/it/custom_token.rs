@@ -53,12 +53,12 @@ fn test_update_user_token() {
 
     assert!(results.is_ok());
 
-    assert_custom_tokens_eq(results.unwrap(), expected_tokens);
+    assert_custom_tokens_eq(results.clone().unwrap(), expected_tokens);
 
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: USER_TOKEN.token.clone(),
-        timestamp: None,
+        timestamp: results.unwrap().get(0).unwrap().timestamp,
     };
 
     let update_result =
@@ -105,18 +105,18 @@ fn test_update_many_user_tokens() {
 
     assert!(results.is_ok());
 
-    assert_custom_tokens_eq(results.unwrap(), tokens.clone());
+    assert_custom_tokens_eq(results.clone().unwrap(), tokens.clone());
 
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: USER_TOKEN.token.clone(),
-        timestamp: None,
+        timestamp: results.clone().unwrap().get(0).unwrap().timestamp,
     };
 
     let update_another_token: CustomToken = CustomToken {
         enabled: false,
         token: ANOTHER_USER_TOKEN.token.clone(),
-        timestamp: None,
+        timestamp: results.unwrap().get(1).unwrap().timestamp,
     };
 
     let update_tokens: Vec<CustomToken> = vec![update_token.clone(), update_another_token.clone()];

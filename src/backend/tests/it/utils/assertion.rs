@@ -19,6 +19,7 @@ pub fn assert_custom_tokens_eq(
     assert_eq!(results_tokens.len(), expected_tokens.len());
 
     for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
-        assert!(expected == token);
+        assert!(expected.token == token.token);
+        assert_eq!(expected.enabled, token.enabled);
     }
 }
