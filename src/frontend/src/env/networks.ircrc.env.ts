@@ -1,3 +1,4 @@
+import { CKBTC_EXPLORER_URL, CKETH_EXPLORER_URL } from '$env/explorers.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import type { IcCkInterface } from '$icp/types/ic';
@@ -71,7 +72,8 @@ const CKBTC_IC_DATA: IcCkInterface | undefined =
 				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'bitcoin',
 				position: 1,
-				twinToken: BTC_MAINNET_TOKEN
+				twinToken: BTC_MAINNET_TOKEN,
+				explorerUrl: CKBTC_EXPLORER_URL
 			}
 		: undefined;
 
@@ -155,7 +157,8 @@ const CKETH_IC_DATA: IcCkInterface | undefined =
 				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 1,
-				twinToken: ETHEREUM_TOKEN
+				twinToken: ETHEREUM_TOKEN,
+				explorerUrl: CKETH_EXPLORER_URL
 			}
 		: undefined;
 

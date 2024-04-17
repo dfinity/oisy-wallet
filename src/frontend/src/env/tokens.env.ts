@@ -6,6 +6,7 @@ import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
 import type { RequiredToken } from '$lib/types/token';
+import {ICP_EXPLORER_URL} from "$env/explorers.env";
 
 /**
  * Ethereum
@@ -73,5 +74,6 @@ export const ICP_TOKEN: Required<IcToken> = {
 	icon: icpLight,
 	fee: ICP_TRANSACTION_FEE_E8S,
 	ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
-	indexCanisterId: ICP_INDEX_CANISTER_ID
+	indexCanisterId: ICP_INDEX_CANISTER_ID,
+	explorerUrl: ICP_EXPLORER_URL
 };

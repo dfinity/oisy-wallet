@@ -1,3 +1,4 @@
+import { SNS_EXPLORER_URL } from '$env/explorers.env';
 import { ICP_NETWORK } from '$env/networks.env';
 import snsTokens from '$env/tokens.sns.json';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -5,14 +6,16 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { icrcEnvToken, icrcEnvTokens, type IcrcEnvToken } from '$icp/types/icrc-env-token';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const buildIcrcCustomTokensIcons = (): Record<LedgerCanisterIdText, string> =>
+export const buildIndexedIcrcCustomTokens = (): Record<LedgerCanisterIdText, IcrcCustomToken> =>
 	buildIcrcCustomTokens().reduce(
-		(acc, { ledgerCanisterId, icon }) => ({
+		(acc, { ledgerCanisterId, ...rest }) => ({
 			...acc,
-			...(nonNullish(icon) && { [`${ledgerCanisterId}`]: icon })
+			[`${ledgerCanisterId}`]: {
+				ledgerCanisterId,
+				...rest
+			}
 		}),
 		{}
 	);
@@ -55,6 +58,7 @@ export const buildIcrcCustomTokens = (): IcrcCustomToken[] => {
 const mapIcrcCustomToken = ({
 	ledgerCanisterId,
 	indexCanisterId,
+	rootCanisterId,
 	metadata: { name, decimals, symbol, fee, alternativeName }
 }: IcrcEnvToken): IcrcCustomToken => ({
 	ledgerCanisterId,
@@ -69,5 +73,6 @@ const mapIcrcCustomToken = ({
 	category: 'custom',
 	icon: `/icons/sns/${ledgerCanisterId}.png`,
 	fee,
-	alternativeName
+	alternativeName,
+	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`
 });

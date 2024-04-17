@@ -144,6 +144,7 @@ export const findSnses = async () => {
 						...tokens,
 						{
 							ledgerCanisterId,
+							rootCanisterId,
 							...rest,
 							metadata
 						}
