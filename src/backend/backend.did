@@ -12,7 +12,6 @@ type CanisterStatusResultV2 = record {
 };
 type CanisterStatusType = variant { stopped; stopping; running };
 type CustomToken = record { token : Token; enabled : bool };
-type CustomTokenId = variant { Icrc : principal };
 type DefiniteCanisterSettingsArgs = record {
   controller : principal;
   freezing_threshold : nat;
@@ -63,7 +62,6 @@ service : (Arg) -> {
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
   personal_sign : (text) -> (text);
-  remove_custom_token : (CustomTokenId) -> ();
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
