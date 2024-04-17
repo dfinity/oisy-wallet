@@ -20,7 +20,7 @@
 </script>
 
 <button
-	class="icon bg-white border border-dust rounded-md hover:text-blue active:text-blue"
+	class="icon bg-white border border-dust rounded-md"
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.navigation.alt.menu}
