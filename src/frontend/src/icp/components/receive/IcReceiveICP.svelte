@@ -4,7 +4,7 @@
 	import IcReceiveModal from '$icp/components/receive/IcReceiveModal.svelte';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
-	import IcReceiveInfo from '$icp/components/receive/IcReceiveInfo.svelte';
+	import IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
 	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
 	import { modalIcpReceive } from '$lib/derived/modal.derived';
 
@@ -21,5 +21,5 @@
 <IcReceiveButton on:click={openReceive} />
 
 {#if $modalIcpReceive}
-	<IcReceiveModal infoCmp={IcReceiveInfo} />
+	<IcReceiveModal infoCmp={IcReceiveInfoICP} />
 {/if}

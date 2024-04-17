@@ -5,38 +5,20 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { token } from '$lib/derived/token.derived';
 	import { fade } from 'svelte/transition';
-	import { tokenCkBtcLedger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
-	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import type { IcCkToken } from '$icp/types/ic';
-	import { CKBTC_EXPLORER_URL, CKETH_EXPLORER_URL, ICP_EXPLORER_URL } from '$env/explorers.env';
-
-	// TODO: we can derive mainnet, ckBTC and ckETH code to avoid duplication
-	let mainnet = false;
-	$: mainnet =
-		isNetworkIdBTCMainnet(($token as IcCkToken).twinToken?.network.id) ||
-		isNetworkIdETHMainnet(($token as IcCkToken).twinToken?.network.id);
-
-	let ckBTC = false;
-	$: ckBTC = mainnet && $tokenCkBtcLedger;
-
-	let ckETH = false;
-	$: ckETH = mainnet && $tokenCkEthLedger;
 
 	let explorerUrl: string | undefined;
-	$: explorerUrl = ckBTC
-		? CKBTC_EXPLORER_URL
-		: ckETH
-			? CKETH_EXPLORER_URL
-			: !$tokenCkBtcLedger && !$tokenCkEthLedger
-				? `${ICP_EXPLORER_URL}/transactions`
-				: undefined;
+	$: explorerUrl = ($token as IcCkToken).explorerUrl;
+
+	let transactionsExplorerUrl: string | undefined;
+	$: transactionsExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined;
 </script>
 
 <TokenMenu>
-	{#if nonNullish(explorerUrl)}
+	{#if nonNullish(transactionsExplorerUrl)}
 		<div in:fade>
 			<ExternalLink
-				href={explorerUrl}
+				href={transactionsExplorerUrl}
 				ariaLabel={$i18n.tokens.alt.open_dashboard}
 				iconVisible={false}
 			>
