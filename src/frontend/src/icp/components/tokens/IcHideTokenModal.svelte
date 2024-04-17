@@ -9,11 +9,9 @@
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { assertNonNullish, toNullable } from '@dfinity/utils';
 	import { Principal } from '@dfinity/principal';
-	import { icrcTokensStore } from '$icp/stores/icrc.store';
 	import { ICP_NETWORK_ID } from '$env/networks.env';
 	import { onMount } from 'svelte';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 	import { loadUserTokens } from '$icp/services/icrc.services';
 
 	let selectedToken: IcrcCustomToken | undefined;
