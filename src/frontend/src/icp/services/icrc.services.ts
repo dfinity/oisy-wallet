@@ -2,8 +2,10 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICRC_TOKENS } from '$env/networks.ircrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcInterface } from '$icp/types/ic';
+import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
 import { mapIcrcToken, type IcrcLoadData } from '$icp/utils/icrc.utils';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { listCustomTokens } from '$lib/api/backend.api';
@@ -12,7 +14,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { AnonymousIdentity } from '@dfinity/agent';
-import { nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
@@ -24,10 +26,12 @@ const loadDefaultIcrcTokens = async () => {
 };
 
 export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
-	queryAndUpdate<IcrcLoadData[]>({
-		request: (params) => loadCustomIcrcTokens(params),
-		onLoad: loadCustomIcrcData,
+	queryAndUpdate<IcrcCustomTokenWithoutId[]>({
+		request: (params) => loadIcrcCustomTokens(params),
+		onLoad: loadIcrcCustomData,
 		onCertifiedError: ({ error: err }) => {
+			icrcCustomTokensStore.clear();
+
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
 				err
@@ -75,10 +79,10 @@ const loadIcrcData = ({
 	nonNullish(data) && icrcTokensStore.set({ data, certified });
 };
 
-const loadCustomIcrcTokens = async (params: {
+const loadIcrcCustomTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
-}): Promise<IcrcLoadData[]> => {
+}): Promise<IcrcCustomTokenWithoutId[]> => {
 	const tokens = await listCustomTokens(params);
 
 	const icrcDefaultLedgerIds = ICRC_TOKENS.map(({ ledgerCanisterId }) => ledgerCanisterId);
@@ -87,8 +91,7 @@ const loadCustomIcrcTokens = async (params: {
 	// For example, and for some reason, a user might manually add the ckBTC ledger and index canister again to their list of tokens.
 	// Not an issue per se, but given that the list of tokens is sorted, one token might move, which equals a visual glitch.
 	const icrcTokens = tokens.filter(
-		({ enabled, token }) =>
-			enabled && 'Icrc' in token && !icrcDefaultLedgerIds.includes(token.Icrc.ledger_id.toText())
+		({ token }) => 'Icrc' in token && !icrcDefaultLedgerIds.includes(token.Icrc.ledger_id.toText())
 	);
 
 	return await loadCustomIcrcTokensData({
@@ -105,41 +108,56 @@ const loadCustomIcrcTokensData = async ({
 	tokens: CustomToken[];
 	certified: boolean;
 	identity: OptionIdentity;
-}): Promise<IcrcLoadData[]> => {
-	return await Promise.all(
-		tokens
-			.map(({ token }, i) => {
-				const {
-					Icrc: { ledger_id, index_id }
-				} = token;
+}): Promise<IcrcCustomTokenWithoutId[]> => {
+	const indexedIcrcCustomTokens = buildIndexedIcrcCustomTokens();
 
-				const data: IcInterface = {
-					ledgerCanisterId: ledger_id.toText(),
-					indexCanisterId: index_id.toText(),
-					position: ICRC_TOKENS.length + 1 + i
+	const requestIcrcCustomTokenMetadata = async (
+		token: CustomToken,
+		index: number
+	): Promise<IcrcCustomTokenWithoutId | undefined> => {
+		const {
+			enabled,
+			timestamp: time,
+			token: {
+				Icrc: { ledger_id, index_id }
+			}
+		} = token;
+
+		const data: IcrcLoadData = {
+			metadata: await metadata({ ledgerCanisterId: ledger_id.toText(), identity, certified }),
+			ledgerCanisterId: ledger_id.toText(),
+			indexCanisterId: index_id.toText(),
+			position: ICRC_TOKENS.length + 1 + index,
+			category: 'custom',
+			icrcCustomTokens: indexedIcrcCustomTokens
+		};
+
+		const t = mapIcrcToken(data);
+
+		const timestamp = fromNullable(time);
+
+		return isNullish(t)
+			? undefined
+			: {
+					...t,
+					enabled,
+					...(nonNullish(timestamp) && { timestamp })
 				};
+	};
 
-				return data;
-			})
-			.map((params) => requestIcrcMetadata({ ...params, certified, identity, category: 'custom' }))
-	);
+	return (await Promise.all(tokens.map(requestIcrcCustomTokenMetadata))).filter(nonNullish);
 };
 
-const loadCustomIcrcData = ({
+const loadIcrcCustomData = ({
 	response: tokens,
 	certified
 }: {
 	certified: boolean;
-	response: IcrcLoadData[];
+	response: IcrcCustomTokenWithoutId[];
 }) => {
-	const icrcCustomTokens = buildIndexedIcrcCustomTokens();
-
 	tokens.forEach((token) =>
-		loadIcrcData({
-			response: {
-				...token,
-				icrcCustomTokens
-			},
+		icrcCustomTokensStore.set({
+			data: token,
 			certified
 		})
 	);
