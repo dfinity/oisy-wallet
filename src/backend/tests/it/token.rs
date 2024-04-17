@@ -120,6 +120,56 @@ fn test_list_user_tokens() {
 }
 
 #[test]
+fn test_cannot_update_user_token_without_timestamp() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+
+    assert!(result.is_ok());
+
+    let update_token: UserToken = UserToken {
+        symbol: Some("Updated".to_string()),
+        timestamp: None,
+        ..MOCK_TOKEN.clone()
+    };
+
+    let update_result =
+        update_call::<()>(&pic_setup, caller, "add_user_token", update_token.clone());
+
+    assert!(update_result.is_err());
+    assert!(update_result
+        .unwrap_err()
+        .contains("Timestamp mismatch, token update not allowed"));
+}
+
+#[test]
+fn test_cannot_update_user_token_with_invalid_timestamp() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+
+    assert!(result.is_ok());
+
+    let update_token: UserToken = UserToken {
+        symbol: Some("Updated".to_string()),
+        timestamp: Some(123456789),
+        ..MOCK_TOKEN.clone()
+    };
+
+    let update_result =
+        update_call::<()>(&pic_setup, caller, "add_user_token", update_token.clone());
+
+    assert!(update_result.is_err());
+    assert!(update_result
+        .unwrap_err()
+        .contains("Timestamp mismatch, token update not allowed"));
+}
+
+#[test]
 fn test_add_user_token_symbol_max_length() {
     let pic_setup = setup();
 
