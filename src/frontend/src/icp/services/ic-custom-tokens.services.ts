@@ -1,10 +1,11 @@
 import { loadUserTokens } from '$icp/services/icrc.services';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
-import type { IcrcCustomTokenConfig } from '$icp/types/icrc-custom-token';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setUserCustomTokens } from '$lib/api/backend.api';
 import { AddTokenStep } from '$lib/enums/steps';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
+import { toNullable } from '@dfinity/utils';
 
 export const saveCustomTokens = async ({
 	progress,
@@ -13,15 +14,15 @@ export const saveCustomTokens = async ({
 }: {
 	progress: (step: AddTokenStep) => void;
 	identity: Identity;
-	tokens: Pick<IcrcCustomTokenConfig, 'enabled' | 'ledgerCanisterId' | 'indexCanisterId'>[];
+	tokens: Pick<IcrcCustomToken, 'enabled' | 'timestamp' | 'ledgerCanisterId' | 'indexCanisterId'>[];
 }) => {
 	progress(AddTokenStep.SAVE);
 
 	await setUserCustomTokens({
 		identity,
-		tokens: tokens.map(({ enabled, ledgerCanisterId, indexCanisterId }) => ({
+		tokens: tokens.map(({ enabled, timestamp, ledgerCanisterId, indexCanisterId }) => ({
 			enabled,
-			timestamp: [],
+			timestamp: toNullable(timestamp),
 			token: {
 				Icrc: {
 					ledger_id: Principal.fromText(ledgerCanisterId),
