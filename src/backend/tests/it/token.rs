@@ -13,6 +13,7 @@ lazy_static! {
         contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
         decimals: Some(WEENUS_DECIMALS),
         symbol: Some(WEENUS_SYMBOL.to_string()),
+        timestamp: None,
     };
     static ref MOCK_TOKEN_ID: UserTokenId = UserTokenId {
         chain_id: MOCK_TOKEN.chain_id.clone(),
@@ -93,6 +94,7 @@ fn test_list_user_tokens() {
         contract_address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984".to_string(),
         decimals: Some(18),
         symbol: Some("Uniswap".to_string()),
+        timestamp: None,
     };
 
     let _ = update_call::<()>(&pic_setup, caller, "add_user_token", another_token.clone());
@@ -117,6 +119,7 @@ fn test_add_user_token_symbol_max_length() {
         contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
         decimals: Some(WEENUS_DECIMALS),
         symbol: Some("01234567890123456789_".to_string()),
+        timestamp: None,
     };
 
     let result = update_call::<()>(&pic_setup, caller, "add_user_token", token);

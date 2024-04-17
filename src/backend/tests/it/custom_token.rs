@@ -12,7 +12,8 @@ lazy_static! {
     };
     static ref USER_TOKEN: CustomToken = CustomToken {
         token: Token::Icrc(ICRC_TOKEN.clone()),
-        enabled: true
+        enabled: true,
+        timestamp: None,
     };
     static ref USER_TOKEN_ID: CustomTokenId = CustomTokenId::Icrc(ICRC_TOKEN.ledger_id.clone());
     static ref ANOTHER_USER_TOKEN: CustomToken = CustomToken {
@@ -21,6 +22,7 @@ lazy_static! {
             index_id: Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
         }),
         enabled: true,
+        timestamp: None,
     };
 }
 
@@ -30,12 +32,7 @@ fn test_add_custom_token() {
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "set_custom_token",
-        USER_TOKEN.clone(),
-    );
+    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
 
     assert!(result.is_ok());
 }
@@ -46,12 +43,7 @@ fn test_update_user_token() {
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "set_custom_token",
-        USER_TOKEN.clone(),
-    );
+    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
 
     assert!(result.is_ok());
 
@@ -66,14 +58,11 @@ fn test_update_user_token() {
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: USER_TOKEN.token.clone(),
+        timestamp: None,
     };
 
-    let update_result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "set_custom_token",
-        update_token.clone(),
-    );
+    let update_result =
+        update_call::<()>(&pic_setup, caller, "set_custom_token", update_token.clone());
 
     assert!(update_result.is_ok());
 
@@ -108,12 +97,7 @@ fn test_update_many_user_tokens() {
 
     let tokens: Vec<CustomToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
 
-    let result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "set_many_custom_tokens",
-        tokens.clone(),
-    );
+    let result = update_call::<()>(&pic_setup, caller, "set_many_custom_tokens", tokens.clone());
 
     assert!(result.is_ok());
 
@@ -126,11 +110,13 @@ fn test_update_many_user_tokens() {
     let update_token: CustomToken = CustomToken {
         enabled: false,
         token: USER_TOKEN.token.clone(),
+        timestamp: None,
     };
 
     let update_another_token: CustomToken = CustomToken {
         enabled: false,
         token: ANOTHER_USER_TOKEN.token.clone(),
+        timestamp: None,
     };
 
     let update_tokens: Vec<CustomToken> = vec![update_token.clone(), update_another_token.clone()];
@@ -158,12 +144,7 @@ fn test_list_custom_tokens() {
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let _ = update_call::<()>(
-        &pic_setup,
-        caller,
-        "set_custom_token",
-        USER_TOKEN.clone(),
-    );
+    let _ = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
 
     let _ = update_call::<()>(
         &pic_setup,
@@ -223,12 +204,7 @@ fn test_user_cannot_list_another_user_tokens() {
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let _ = update_call::<()>(
-        &pic_setup,
-        caller,
-        "set_custom_token",
-        USER_TOKEN.clone(),
-    );
+    let _ = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
 
     let another_caller =
         Principal::from_text("yaa3n-twfur-6xz6e-3z7ep-xln56-222kz-w2b2m-y5wqz-vu6kk-s3fdg-lqe")

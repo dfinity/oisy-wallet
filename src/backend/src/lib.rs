@@ -433,12 +433,7 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 #[query(guard = "caller_is_not_anonymous")]
 fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
-    read_state(|s| {
-        s.custom_token
-            .get(&stored_principal)
-            .unwrap_or_default()
-            .0
-    })
+    read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
 /// API method to get cycle balance and burn rate.
