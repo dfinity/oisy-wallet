@@ -14,6 +14,7 @@
 	import { onMount } from 'svelte';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+	import { loadUserTokens } from '$icp/services/icrc.services';
 
 	let selectedToken: IcrcCustomToken | undefined;
 
@@ -66,11 +67,7 @@
 		});
 	};
 
-	const updateUi = () => {
-		assertNonNullish(ledgerCanisterId);
-
-		icrcCustomTokensStore.reset(ledgerCanisterId);
-	};
+	const updateUi = (params: { identity: Identity }): Promise<void> => loadUserTokens(params);
 </script>
 
 <HideTokenModal backToNetworkId={ICP_NETWORK_ID} {assertHide} {hideToken} {updateUi} />

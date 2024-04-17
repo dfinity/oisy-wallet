@@ -43,7 +43,7 @@
 		});
 	};
 
-	const updateUi = () => {
+	const updateUi = async () => {
 		assertNonNullish(selectedToken);
 
 		erc20TokensStore.remove(selectedToken.id);
