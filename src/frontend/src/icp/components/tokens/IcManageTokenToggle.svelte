@@ -28,6 +28,9 @@
 	};
 </script>
 
-<div class:opacity-25={disabled}>
-	<Toggle ariaLabel={$i18n.tokens.text.hide_zero_balances} bind:checked on:nnsToggle={toggle} />
-</div>
+<Toggle
+	ariaLabel={$i18n.tokens.text.hide_zero_balances}
+	{disabled}
+	bind:checked
+	on:nnsToggle={toggle}
+/>
