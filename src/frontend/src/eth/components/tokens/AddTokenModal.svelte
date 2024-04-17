@@ -73,7 +73,8 @@
 					chain_id: $selectedChainId,
 					contract_address: contractAddress,
 					symbol: [],
-					decimals: []
+					decimals: [],
+					timestamp: []
 				}
 			});
 

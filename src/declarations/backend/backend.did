@@ -11,7 +11,11 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
-type CustomToken = record { token : Token; enabled : bool };
+type CustomToken = record {
+  token : Token;
+  enabled : bool;
+  timestamp : opt nat64;
+};
 type DefiniteCanisterSettingsArgs = record {
   controller : principal;
   freezing_threshold : nat;
@@ -49,6 +53,7 @@ type Token = variant { Icrc : IcrcToken };
 type UserToken = record {
   decimals : opt nat8;
   chain_id : nat64;
+  timestamp : opt nat64;
   contract_address : text;
   symbol : opt text;
 };

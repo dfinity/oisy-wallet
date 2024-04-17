@@ -18,6 +18,7 @@ export type CanisterStatusType = { stopped: null } | { stopping: null } | { runn
 export interface CustomToken {
 	token: Token;
 	enabled: boolean;
+	timestamp: [] | [bigint];
 }
 export interface DefiniteCanisterSettingsArgs {
 	controller: Principal;
@@ -59,6 +60,7 @@ export type Token = { Icrc: IcrcToken };
 export interface UserToken {
 	decimals: [] | [number];
 	chain_id: bigint;
+	timestamp: [] | [bigint];
 	contract_address: string;
 	symbol: [] | [string];
 }
