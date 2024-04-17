@@ -17,6 +17,7 @@
 	import type { CanisterIdText } from '$lib/types/canister';
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
+	import { ICP_TOKEN } from '$env/tokens.env';
 
 	const dispatch = createEventDispatcher();
 
@@ -38,6 +39,10 @@
 	// The entire list of tokens to display to the user.
 	let allIcrcTokens: IcrcCustomToken[] = [];
 	$: allIcrcTokens = [
+		{
+			...ICP_TOKEN,
+			enabled: true
+		},
 		...$icrcDefaultTokens.map((token) => ({ ...token, enabled: true })),
 		...$icrcCustomTokens,
 		...icrcEnvTokens.filter(
