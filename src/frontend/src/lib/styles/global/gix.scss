@@ -89,7 +89,7 @@
 	}
 
 	@media (min-width: 768px) and (min-height: 560px) {
-		--dialog-min-height: 460px;
+		--dialog-min-height: fit-content;
 	}
 
 	--backdrop-contrast: var(--color-dark);
