@@ -1,3 +1,4 @@
+import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import { ETHEREUM_NETWORK, ICP_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks.icp.env';
@@ -6,7 +7,6 @@ import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
 import type { RequiredToken } from '$lib/types/token';
-import {ICP_EXPLORER_URL} from "$env/explorers.env";
 
 /**
  * Ethereum
