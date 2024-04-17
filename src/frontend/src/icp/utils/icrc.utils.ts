@@ -1,19 +1,20 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcFee, IcInterface, IcTokenWithoutId } from '$icp/types/ic';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export type IcrcLoadData = IcInterface & {
 	metadata: IcrcTokenMetadataResponse;
 	category: TokenCategory;
-	icons?: Record<LedgerCanisterIdText, string>;
+	icrcCustomTokens?: Record<LedgerCanisterIdText, IcrcCustomToken>;
 };
 
 export const mapIcrcToken = ({
 	metadata,
-	icons,
+	icrcCustomTokens,
 	ledgerCanisterId,
 	...rest
 }: IcrcLoadData): IcTokenWithoutId | undefined => {
@@ -29,7 +30,10 @@ export const mapIcrcToken = ({
 		network: ICP_NETWORK,
 		standard: 'icrc',
 		symbol,
-		icon: icons?.[ledgerCanisterId] ?? icon,
+		icon: icrcCustomTokens?.[ledgerCanisterId]?.icon ?? icon,
+		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
+			explorerUrl: icrcCustomTokens[ledgerCanisterId].explorerUrl
+		}),
 		ledgerCanisterId,
 		...metadataToken,
 		...rest

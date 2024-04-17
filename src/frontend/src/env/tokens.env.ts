@@ -1,3 +1,4 @@
+import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import { ETHEREUM_NETWORK, ICP_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks.icp.env';
@@ -73,5 +74,6 @@ export const ICP_TOKEN: Required<IcToken> = {
 	icon: icpLight,
 	fee: ICP_TRANSACTION_FEE_E8S,
 	ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
-	indexCanisterId: ICP_INDEX_CANISTER_ID
+	indexCanisterId: ICP_INDEX_CANISTER_ID,
+	explorerUrl: ICP_EXPLORER_URL
 };
