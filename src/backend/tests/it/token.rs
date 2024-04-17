@@ -1,4 +1,4 @@
-use crate::utils::assertion::assert_tokens_eq;
+use crate::utils::assertion::{assert_some_tokens_timestamp, assert_tokens_eq};
 use crate::utils::mock::{
     CALLER, SEPOLIA_CHAIN_ID, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };
@@ -63,7 +63,10 @@ fn test_update_user_token() {
 
     assert!(results.is_ok());
 
-    assert_tokens_eq(results.unwrap(), expected_tokens);
+    let updated_tokens = results.unwrap();
+
+    assert_tokens_eq(updated_tokens.clone(), expected_tokens);
+    assert_some_tokens_timestamp(updated_tokens);
 }
 
 #[test]
@@ -110,7 +113,10 @@ fn test_list_user_tokens() {
 
     assert!(results.is_ok());
 
-    assert_tokens_eq(results.unwrap(), expected_tokens);
+    let list_tokens = results.unwrap();
+
+    assert_tokens_eq(list_tokens.clone(), expected_tokens);
+    assert_some_tokens_timestamp(list_tokens);
 }
 
 #[test]
