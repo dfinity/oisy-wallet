@@ -51,7 +51,6 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Token = IDL.Variant({ Icrc: IcrcToken });
 	const CustomToken = IDL.Record({ token: Token, enabled: IDL.Bool });
-	const CustomTokenId = IDL.Variant({ Icrc: IDL.Principal });
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -75,7 +74,6 @@ export const idlFactory = ({ IDL }) => {
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
-		remove_custom_token: IDL.Func([CustomTokenId], [], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
