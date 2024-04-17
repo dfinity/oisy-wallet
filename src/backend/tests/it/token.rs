@@ -42,8 +42,13 @@ fn test_update_user_token() {
 
     assert!(result.is_ok());
 
+    let add_token_result = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    assert!(add_token_result.is_ok());
+
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
+        timestamp: add_token_result.unwrap().get(0).unwrap().timestamp,
         ..MOCK_TOKEN.clone()
     };
 
