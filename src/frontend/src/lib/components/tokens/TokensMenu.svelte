@@ -43,7 +43,7 @@
 			aria-label={$networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title}
 			on:click={importTokens}
 		>
-			+ {$networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title}
+			{$networkICP ? $i18n.tokens.manage.text.title : `+ ${$i18n.tokens.import.text.title}`}
 		</button>
 	</div>
 </Popover>

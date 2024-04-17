@@ -291,7 +291,7 @@
 		"hide": {
 			"title": "Hide token?",
 			"token": "Hide $token",
-			"info": "You can add this token back in the future by going into <strong>“+ $where”</strong> in your wallet view.",
+			"info": "You can add this token back in the future by going into <strong>“$where”</strong> in your wallet view.",
 			"confirm": "Hide",
 			"hiding": "Hiding..."
 		},
