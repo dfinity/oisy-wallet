@@ -52,7 +52,8 @@
 			"address_copied": "Address copied to clipboard.",
 			"wallet_address_copied": "Wallet address copied to clipboard.",
 			"display_wallet_address_qr": "Display wallet address as a QR code",
-			"icp_deposits": "Note: For ICP deposits, use the 'Receive' button in your ICP account to get the right address."
+			"icp_deposits": "Note: For ICP deposits, use the 'Receive' button in your ICP account to get the right address.",
+			"use_address_from_to": "Use this address to transfer $token to and from your wallet."
 		},
 		"alt": {
 			"open_etherscan": "Open your address on Etherscan"
@@ -134,16 +135,6 @@
 				"use_for_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard."
-			}
-		},
-		"ckbtc": {
-			"text": {
-				"use_address_from_to": "Use this address to transfer ckBTC to and from your wallet."
-			}
-		},
-		"cketh": {
-			"text": {
-				"use_address_from_to": "Use this address to transfer ckETH to and from your wallet."
 			}
 		},
 		"ethereum": {

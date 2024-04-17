@@ -5,6 +5,7 @@ export interface Modal<T> {
 	type:
 		| 'receive'
 		| 'icp-receive'
+		| 'icrc-receive'
 		| 'ckbtc-receive'
 		| 'cketh-receive'
 		| 'send'
@@ -33,6 +34,7 @@ export type ModalData<T> = Modal<T> | undefined | null;
 export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReceive: () => void;
 	openIcpReceive: () => void;
+	openIcrcReceive: () => void;
 	openCkBTCReceive: () => void;
 	openCkETHReceive: () => void;
 	openSend: () => void;
@@ -62,6 +64,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 	return {
 		openReceive: () => set({ type: 'receive' }),
 		openIcpReceive: () => set({ type: 'icp-receive' }),
+		openIcrcReceive: () => set({ type: 'icrc-receive' }),
 		openCkBTCReceive: () => set({ type: 'ckbtc-receive' }),
 		openCkETHReceive: () => set({ type: 'cketh-receive' }),
 		openSend: () => set({ type: 'send' }),

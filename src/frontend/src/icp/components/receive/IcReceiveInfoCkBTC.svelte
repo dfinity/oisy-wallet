@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher } from 'svelte';
@@ -11,10 +10,10 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { fade } from 'svelte/transition';
 	import { btcAddressStore } from '$icp/stores/btc.store';
-
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -27,16 +26,7 @@
 	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
 </script>
 
-<ReceiveAddress
-	labelRef="wallet-address"
-	address={$icrcAccountIdentifierText ?? ''}
-	qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
-	copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
-	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
->
-	<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
-	<svelte:fragment slot="text">{$i18n.receive.ckbtc.text.use_address_from_to}</svelte:fragment>
-</ReceiveAddress>
+<IcReceiveWalletAddress on:icQRCode />
 
 {#if nonNullish(btcAddress)}
 	<div class="mb-6">
