@@ -13,8 +13,8 @@ type CanisterStatusResultV2 = record {
 type CanisterStatusType = variant { stopped; stopping; running };
 type CustomToken = record {
   token : Token;
+  version : opt nat64;
   enabled : bool;
-  timestamp : opt nat64;
 };
 type DefiniteCanisterSettingsArgs = record {
   controller : principal;
@@ -52,8 +52,8 @@ type SignRequest = record {
 type Token = variant { Icrc : IcrcToken };
 type UserToken = record {
   decimals : opt nat8;
+  version : opt nat64;
   chain_id : nat64;
-  timestamp : opt nat64;
   contract_address : text;
   symbol : opt text;
 };

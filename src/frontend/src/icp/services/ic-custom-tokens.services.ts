@@ -14,15 +14,15 @@ export const saveCustomTokens = async ({
 }: {
 	progress: (step: AddTokenStep) => void;
 	identity: Identity;
-	tokens: Pick<IcrcCustomToken, 'enabled' | 'timestamp' | 'ledgerCanisterId' | 'indexCanisterId'>[];
+	tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[];
 }) => {
 	progress(AddTokenStep.SAVE);
 
 	await setUserCustomTokens({
 		identity,
-		tokens: tokens.map(({ enabled, timestamp, ledgerCanisterId, indexCanisterId }) => ({
+		tokens: tokens.map(({ enabled, version, ledgerCanisterId, indexCanisterId }) => ({
 			enabled,
-			timestamp: toNullable(timestamp),
+			version: toNullable(version),
 			token: {
 				Icrc: {
 					ledger_id: Principal.fromText(ledgerCanisterId),

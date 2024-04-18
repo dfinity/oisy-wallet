@@ -74,7 +74,7 @@
 					contract_address: contractAddress,
 					symbol: [],
 					decimals: [],
-					timestamp: []
+					version: []
 				}
 			});
 

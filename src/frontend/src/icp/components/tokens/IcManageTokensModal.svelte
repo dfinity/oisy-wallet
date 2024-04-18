@@ -54,10 +54,7 @@
 	};
 
 	const save = async (
-		tokens: Pick<
-			IcrcCustomToken,
-			'enabled' | 'timestamp' | 'ledgerCanisterId' | 'indexCanisterId'
-		>[]
+		tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[]
 	) => {
 		if (isNullish($authStore.identity)) {
 			await nullishSignOut();

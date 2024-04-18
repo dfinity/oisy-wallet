@@ -117,7 +117,7 @@ const loadCustomIcrcTokensData = async ({
 	): Promise<IcrcCustomTokenWithoutId | undefined> => {
 		const {
 			enabled,
-			timestamp: time,
+			version: v,
 			token: {
 				Icrc: { ledger_id, index_id }
 			}
@@ -134,14 +134,14 @@ const loadCustomIcrcTokensData = async ({
 
 		const t = mapIcrcToken(data);
 
-		const timestamp = fromNullable(time);
+		const version = fromNullable(v);
 
 		return isNullish(t)
 			? undefined
 			: {
 					...t,
 					enabled,
-					...(nonNullish(timestamp) && { timestamp })
+					...(nonNullish(version) && { version })
 				};
 	};
 
