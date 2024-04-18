@@ -18,6 +18,7 @@
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { ICP_TOKEN } from '$env/tokens.env';
+	import { sortIcTokens } from '$icp/utils/icrc.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -48,7 +49,7 @@
 		...icrcEnvTokens.filter(
 			({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
 		)
-	];
+	].sort(sortIcTokens);
 
 	const filterStore = writable<string>('');
 	const updateFilter = () => filterStore.set(filter);

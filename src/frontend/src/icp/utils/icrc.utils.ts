@@ -1,6 +1,6 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcFee, IcInterface, IcTokenWithoutId } from '$icp/types/ic';
+import type { IcFee, IcInterface, IcToken, IcTokenWithoutId } from '$icp/types/ic';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
@@ -81,3 +81,15 @@ const mapOptionalToken = (response: IcrcTokenMetadataResponse): IcrcTokenMetadat
 
 	return nullishToken as IcrcTokenMetadata;
 };
+
+export const sortIcTokens = (
+	{ name: nameA, position: positionA, exchangeCoinId: exchangeCoinIdA }: IcToken,
+	{ name: nameB, position: positionB, exchangeCoinId: exchangeCoinIdB }: IcToken
+) =>
+	positionA === positionB
+		? exchangeCoinIdA === exchangeCoinIdB ||
+			isNullish(exchangeCoinIdA) ||
+			isNullish(exchangeCoinIdB)
+			? nameA.localeCompare(nameB)
+			: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
+		: positionA - positionB;
