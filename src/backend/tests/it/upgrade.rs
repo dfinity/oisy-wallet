@@ -64,7 +64,7 @@ fn test_upgrade_user_token() {
 
     let results_tokens = results.unwrap();
 
-    assert_tokens_eq(results_tokens.clone(), expected_tokens.clone());
+    assert_tokens_eq(&results_tokens, &expected_tokens);
     assert_none_tokens_timestamp(results_tokens);
 }
 
