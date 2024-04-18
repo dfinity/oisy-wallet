@@ -7,8 +7,8 @@ export type IcrcCustomTokenConfig = IcTokenWithoutIdExtended & { enabled: boolea
 export type IcTokenWithoutIdExtended = IcTokenWithoutId &
 	Pick<IcrcEnvTokenMetadata, 'alternativeName'>;
 
-export type IcCustomTokenState = Omit<CustomToken, 'token' | 'timestamp'> & {
-	timestamp?: bigint;
+export type IcCustomTokenState = Omit<CustomToken, 'token' | 'version'> & {
+	version?: bigint;
 };
 
 export type IcrcCustomTokenWithoutId = IcCustomTokenState & IcTokenWithoutId;
