@@ -1,6 +1,6 @@
 import { LOCAL } from '$lib/constants/app.constants';
 import { isNullish } from '@dfinity/utils';
-import { initOrbiter } from '@junobuild/analytics';
+import { initOrbiter, trackEvent as trackEventOrbiter } from '@junobuild/analytics';
 
 export const initAnalytics = async () => {
 	if (LOCAL) {
@@ -17,5 +17,22 @@ export const initAnalytics = async () => {
 	await initOrbiter({
 		satelliteId: SATELLITE_ID,
 		orbiterId: ORBITER_ID
+	});
+};
+
+export const trackEvent = async ({
+	name,
+	metadata
+}: {
+	name: string;
+	metadata?: Record<string, string>;
+}) => {
+	if (LOCAL) {
+		return;
+	}
+
+	await trackEventOrbiter({
+		name,
+		metadata
 	});
 };

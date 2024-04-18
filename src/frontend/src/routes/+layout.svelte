@@ -13,8 +13,14 @@
 	import Banner from '$lib/components/core/Banner.svelte';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { initAnalytics } from '$lib/services/analytics.services';
+	import { initAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
+		TRACK_SYNC_AUTH_ERROR_COUNT,
+		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
+	} from '$lib/constants/analytics.contants';
+	import { nonNullish } from '@dfinity/utils';
 
 	/**
 	 * Init dApp
@@ -29,7 +35,17 @@
 
 		try {
 			await authStore.sync();
+
+			await trackEvent({
+				name: nonNullish($authStore.identity)
+					? TRACK_SYNC_AUTH_AUTHENTICATED_COUNT
+					: TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
+			});
 		} catch (err: unknown) {
+			await trackEvent({
+				name: TRACK_SYNC_AUTH_ERROR_COUNT
+			});
+
 			toastsError({
 				msg: { text: 'Unexpected issue while syncing the status of your authentication.' },
 				err
