@@ -76,7 +76,7 @@ fn test_update_custom_token() {
     let updated_tokens = updated_results.unwrap();
 
     assert_custom_tokens_eq(updated_tokens.clone(), expected_updated_tokens);
-    assert_some_tokens_timestamp(updated_tokens);
+    assert_some_tokens_timestamp(&updated_tokens);
 }
 
 #[test]
@@ -141,7 +141,7 @@ fn test_update_many_custom_tokens() {
     let updated_tokens = updated_results.unwrap();
 
     assert_custom_tokens_eq(updated_tokens.clone(), update_tokens);
-    assert_some_tokens_timestamp(updated_tokens);
+    assert_some_tokens_timestamp(&updated_tokens);
 }
 
 #[test]
@@ -168,7 +168,7 @@ fn test_list_custom_tokens() {
     let list_tokens = results.unwrap();
 
     assert_custom_tokens_eq(list_tokens.clone(), expected_tokens);
-    assert_some_tokens_timestamp(list_tokens);
+    assert_some_tokens_timestamp(&list_tokens);
 }
 
 #[test]

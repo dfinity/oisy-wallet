@@ -65,8 +65,8 @@ fn test_update_user_token() {
 
     let updated_tokens = results.unwrap();
 
-    assert_tokens_eq(updated_tokens.clone(), expected_tokens);
-    assert_some_tokens_timestamp(updated_tokens);
+    assert_tokens_eq(&updated_tokens, &expected_tokens);
+    assert_some_tokens_timestamp(&updated_tokens);
 }
 
 #[test]
@@ -115,8 +115,8 @@ fn test_list_user_tokens() {
 
     let list_tokens = results.unwrap();
 
-    assert_tokens_eq(list_tokens.clone(), expected_tokens);
-    assert_some_tokens_timestamp(list_tokens);
+    assert_tokens_eq(&list_tokens, &expected_tokens);
+    assert_some_tokens_timestamp(&list_tokens);
 }
 
 #[test]
