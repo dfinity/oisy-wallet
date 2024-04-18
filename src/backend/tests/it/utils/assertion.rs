@@ -2,7 +2,7 @@ use shared::types::custom_token::CustomToken;
 use shared::types::token::UserToken;
 use shared::types::TokenTimestamp;
 
-pub fn assert_tokens_eq(results_tokens: Vec<UserToken>, expected_tokens: Vec<UserToken>) {
+pub fn assert_tokens_eq(results_tokens: &[UserToken], expected_tokens: &[UserToken]) {
     assert_eq!(results_tokens.len(), expected_tokens.len());
 
     for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
