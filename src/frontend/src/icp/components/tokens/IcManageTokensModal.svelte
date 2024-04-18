@@ -90,8 +90,6 @@
 		}
 	};
 
-	//
-
 	const close = () => {
 		modalStore.close();
 
