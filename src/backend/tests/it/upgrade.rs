@@ -8,6 +8,7 @@ use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade};
 use candid::{CandidType, Deserialize, Principal};
 use lazy_static::lazy_static;
 use shared::types::token::{ChainId, UserToken};
+use shared::types::TokenVersion;
 
 const BACKEND_V0_0_13_WASM_PATH: &str = "../../backend-v0.0.13.wasm.gz";
 
@@ -115,7 +116,7 @@ fn test_add_user_token_after_upgrade() {
     // Get the list of token and check that it still contains the one we added before upgrade
     let results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![POST_UPGRADE_TOKEN.clone()];
+    let expected_tokens: Vec<UserToken> = vec![POST_UPGRADE_TOKEN.clone_with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -162,7 +163,7 @@ fn test_update_user_token_after_upgrade() {
 
     let updated_results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
 
     assert!(updated_results.is_ok());
 

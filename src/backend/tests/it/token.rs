@@ -6,6 +6,7 @@ use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::token::{UserToken, UserTokenId};
+use shared::types::TokenVersion;
 
 lazy_static! {
     static ref MOCK_TOKEN: UserToken = UserToken {
@@ -59,7 +60,7 @@ fn test_update_user_token() {
 
     let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -109,7 +110,10 @@ fn test_list_user_tokens() {
 
     let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone(), another_token.clone()];
+    let expected_tokens: Vec<UserToken> = vec![
+        MOCK_TOKEN.clone_with_incremented_version(),
+        another_token.clone_with_incremented_version(),
+    ];
 
     assert!(results.is_ok());
 
