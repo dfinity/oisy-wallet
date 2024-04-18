@@ -7,6 +7,7 @@ export const idlFactory = ({ IDL }) => {
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const UserToken = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
+		version: IDL.Opt(IDL.Nat64),
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text,
 		symbol: IDL.Opt(IDL.Text)
@@ -50,7 +51,11 @@ export const idlFactory = ({ IDL }) => {
 		index_id: IDL.Principal
 	});
 	const Token = IDL.Variant({ Icrc: IcrcToken });
-	const CustomToken = IDL.Record({ token: Token, enabled: IDL.Bool });
+	const CustomToken = IDL.Record({
+		token: Token,
+		version: IDL.Opt(IDL.Nat64),
+		enabled: IDL.Bool
+	});
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
