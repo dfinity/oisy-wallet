@@ -25,8 +25,8 @@
 	let indexCanisterId: LedgerCanisterIdText | undefined;
 	$: indexCanisterId = selectedToken?.indexCanisterId;
 
-	let timestamp: bigint | undefined;
-	$: timestamp = selectedToken?.timestamp;
+	let version: bigint | undefined;
+	$: version = selectedToken?.version;
 
 	const assertHide = (): { valid: boolean } => {
 		if (isNullishOrEmpty(ledgerCanisterId)) {
@@ -54,7 +54,7 @@
 			...params,
 			token: {
 				enabled: false,
-				timestamp: toNullable(timestamp),
+				version: toNullable(version),
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),

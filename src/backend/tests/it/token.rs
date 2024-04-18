@@ -1,4 +1,4 @@
-use crate::utils::assertion::{assert_some_tokens_timestamp, assert_tokens_eq};
+use crate::utils::assertion::{assert_some_tokens_version, assert_tokens_eq};
 use crate::utils::mock::{
     CALLER, SEPOLIA_CHAIN_ID, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };
@@ -13,7 +13,7 @@ lazy_static! {
         contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
         decimals: Some(WEENUS_DECIMALS),
         symbol: Some(WEENUS_SYMBOL.to_string()),
-        timestamp: None,
+        version: None,
     };
     static ref MOCK_TOKEN_ID: UserTokenId = UserTokenId {
         chain_id: MOCK_TOKEN.chain_id.clone(),
@@ -48,7 +48,7 @@ fn test_update_user_token() {
 
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
-        timestamp: add_token_result.unwrap().get(0).unwrap().timestamp,
+        version: add_token_result.unwrap().get(0).unwrap().version,
         ..MOCK_TOKEN.clone()
     };
 
@@ -65,8 +65,8 @@ fn test_update_user_token() {
 
     let updated_tokens = results.unwrap();
 
-    assert_tokens_eq(updated_tokens.clone(), expected_tokens);
-    assert_some_tokens_timestamp(updated_tokens);
+    assert_tokens_eq(&updated_tokens, &expected_tokens);
+    assert_some_tokens_version(&updated_tokens);
 }
 
 #[test]
@@ -102,7 +102,7 @@ fn test_list_user_tokens() {
         contract_address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984".to_string(),
         decimals: Some(18),
         symbol: Some("Uniswap".to_string()),
-        timestamp: None,
+        version: None,
     };
 
     let _ = update_call::<()>(&pic_setup, caller, "add_user_token", another_token.clone());
@@ -115,12 +115,12 @@ fn test_list_user_tokens() {
 
     let list_tokens = results.unwrap();
 
-    assert_tokens_eq(list_tokens.clone(), expected_tokens);
-    assert_some_tokens_timestamp(list_tokens);
+    assert_tokens_eq(&list_tokens, &expected_tokens);
+    assert_some_tokens_version(&list_tokens);
 }
 
 #[test]
-fn test_cannot_update_user_token_without_timestamp() {
+fn test_cannot_update_user_token_without_version() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
@@ -131,7 +131,7 @@ fn test_cannot_update_user_token_without_timestamp() {
 
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
-        timestamp: None,
+        version: None,
         ..MOCK_TOKEN.clone()
     };
 
@@ -141,11 +141,11 @@ fn test_cannot_update_user_token_without_timestamp() {
     assert!(update_result.is_err());
     assert!(update_result
         .unwrap_err()
-        .contains("Timestamp mismatch, token update not allowed"));
+        .contains("Version mismatch, token update not allowed"));
 }
 
 #[test]
-fn test_cannot_update_user_token_with_invalid_timestamp() {
+fn test_cannot_update_user_token_with_invalid_version() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
@@ -156,7 +156,7 @@ fn test_cannot_update_user_token_with_invalid_timestamp() {
 
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
-        timestamp: Some(123456789),
+        version: Some(123456789),
         ..MOCK_TOKEN.clone()
     };
 
@@ -166,7 +166,7 @@ fn test_cannot_update_user_token_with_invalid_timestamp() {
     assert!(update_result.is_err());
     assert!(update_result
         .unwrap_err()
-        .contains("Timestamp mismatch, token update not allowed"));
+        .contains("Version mismatch, token update not allowed"));
 }
 
 #[test]
@@ -180,7 +180,7 @@ fn test_add_user_token_symbol_max_length() {
         contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
         decimals: Some(WEENUS_DECIMALS),
         symbol: Some("01234567890123456789_".to_string()),
-        timestamp: None,
+        version: None,
     };
 
     let result = update_call::<()>(&pic_setup, caller, "add_user_token", token);
