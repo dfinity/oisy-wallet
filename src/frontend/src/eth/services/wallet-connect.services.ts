@@ -8,7 +8,12 @@ import {
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
+import {
+	TRACK_COUNT_WC_ETH_SEND_ERROR,
+	TRACK_COUNT_WC_ETH_SEND_SUCCESS
+} from '$lib/constants/analytics.contants';
 import { SendStep, SignStep } from '$lib/enums/steps';
+import { trackEvent } from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -195,8 +200,22 @@ export const send = ({
 
 				progress(lastProgressStep);
 
+				await trackEvent({
+					name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
+					metadata: {
+						token: token.symbol
+					}
+				});
+
 				return { success: true };
 			} catch (err: unknown) {
+				await trackEvent({
+					name: TRACK_COUNT_WC_ETH_SEND_ERROR,
+					metadata: {
+						token: token.symbol
+					}
+				});
+
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 
 				throw err;

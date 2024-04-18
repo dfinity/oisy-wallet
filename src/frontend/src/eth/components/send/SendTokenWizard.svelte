@@ -28,6 +28,11 @@
 	import { writable } from 'svelte/store';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		TRACK_COUNT_ETH_SEND_ERROR,
+		TRACK_COUNT_ETH_SEND_SUCCESS
+	} from '$lib/constants/analytics.contants';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -145,8 +150,22 @@
 				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
 			});
 
+			await trackEvent({
+				name: TRACK_COUNT_ETH_SEND_SUCCESS,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
+
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			await trackEvent({
+				name: TRACK_COUNT_ETH_SEND_ERROR,
+				metadata: {
+					token: $sendToken.symbol
+				}
+			});
+
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
 				err
