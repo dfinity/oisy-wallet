@@ -57,8 +57,8 @@
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	let tokens: IcrcCustomToken[] = [];
-	$: tokens = isNullishOrEmpty($filterStore)
+	let filteredTokens: IcrcCustomToken[] = [];
+	$: filteredTokens = isNullishOrEmpty($filterStore)
 		? allIcrcTokens
 		: allIcrcTokens.filter(
 				({ name, symbol, alternativeName }) =>
@@ -66,6 +66,13 @@
 					symbol.toLowerCase().includes($filterStore.toLowerCase()) ||
 					(alternativeName ?? '').toLowerCase().includes($filterStore.toLowerCase())
 			);
+
+	let tokens: IcrcCustomToken[] = [];
+	$: tokens = filteredTokens.map(({ ledgerCanisterId, enabled, ...rest }) => ({
+		ledgerCanisterId,
+		enabled: modifiedTokens[`${ledgerCanisterId}`]?.enabled ?? enabled,
+		...rest
+	}));
 
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
