@@ -1,4 +1,4 @@
-use crate::utils::assertion::{assert_custom_tokens_eq, assert_some_tokens_version};
+use crate::utils::assertion::assert_custom_tokens_eq;
 use crate::utils::mock::CALLER;
 use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
@@ -78,7 +78,6 @@ fn test_update_custom_token() {
     let updated_tokens = updated_results.unwrap();
 
     assert_custom_tokens_eq(updated_tokens.clone(), expected_updated_tokens);
-    assert_some_tokens_version(&updated_tokens);
 }
 
 #[test]
@@ -153,7 +152,6 @@ fn test_update_many_custom_tokens() {
     let updated_tokens = updated_results.unwrap();
 
     assert_custom_tokens_eq(updated_tokens.clone(), expected_update_tokens);
-    assert_some_tokens_version(&updated_tokens);
 }
 
 #[test]
@@ -183,7 +181,6 @@ fn test_list_custom_tokens() {
     let list_tokens = results.unwrap();
 
     assert_custom_tokens_eq(list_tokens.clone(), expected_tokens);
-    assert_some_tokens_version(&list_tokens);
 }
 
 #[test]

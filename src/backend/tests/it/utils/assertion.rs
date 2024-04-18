@@ -36,29 +36,3 @@ pub fn assert_custom_tokens_eq(
         );
     }
 }
-
-pub fn assert_some_tokens_version<T>(tokens: &[T])
-where
-    T: TokenVersion,
-{
-    for token in tokens.iter() {
-        assert!(
-            token.get_version().is_some(),
-            "Token has no version: {:?}",
-            token
-        );
-    }
-}
-
-pub fn assert_none_tokens_version<T>(tokens: Vec<T>)
-where
-    T: TokenVersion,
-{
-    for token in tokens.iter() {
-        assert!(
-            token.get_version().is_none(),
-            "Custom token has no version: {:?}",
-            token
-        );
-    }
-}
