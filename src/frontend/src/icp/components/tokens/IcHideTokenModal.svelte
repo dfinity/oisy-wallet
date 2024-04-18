@@ -51,7 +51,7 @@
 			...params,
 			token: {
 				enabled: false,
-				timestamp: [],
+				version: [],
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),

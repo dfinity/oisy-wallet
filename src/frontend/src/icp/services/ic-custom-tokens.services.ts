@@ -21,7 +21,7 @@ export const saveCustomTokens = async ({
 		identity,
 		tokens: tokens.map(({ enabled, ledgerCanisterId, indexCanisterId }) => ({
 			enabled,
-			timestamp: [],
+			version: [],
 			token: {
 				Icrc: {
 					ledger_id: Principal.fromText(ledgerCanisterId),
