@@ -121,7 +121,7 @@ fn test_add_user_token_after_upgrade() {
 
     let results_tokens = results.unwrap();
 
-    assert_tokens_eq(results_tokens.clone(), expected_tokens);
+    assert_tokens_eq(&results_tokens, &expected_tokens);
     assert_some_tokens_timestamp(results_tokens);
 }
 
