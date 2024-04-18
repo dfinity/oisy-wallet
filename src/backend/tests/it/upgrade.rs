@@ -152,7 +152,7 @@ fn test_update_user_token_after_upgrade() {
 
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
-        ..results.unwrap().get(0).unwrap().clone()
+        ..results.unwrap().swap_remove(0)
     };
 
     let update_result =
