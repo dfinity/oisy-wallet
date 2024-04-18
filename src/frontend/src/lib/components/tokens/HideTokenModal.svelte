@@ -21,7 +21,7 @@
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
-	export let updateUi: () => void;
+	export let updateUi: (params: { identity: Identity }) => Promise<void>;
 	export let backToNetworkId: NetworkId;
 
 	const hide = async () => {
@@ -57,7 +57,9 @@
 			// We must navigate first otherwise we might land on the default token Ethereum selected while being on network ICP.
 			await back({ networkId: backToNetworkId, pop: true });
 
-			updateUi();
+			await updateUi({
+				identity: $authStore.identity
+			});
 
 			hideProgressStep = HideTokenStep.DONE;
 

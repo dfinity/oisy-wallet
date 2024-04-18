@@ -12,24 +12,36 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { fade } from 'svelte/transition';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
-	import { icrcLedgerCanisterIds, sortedIcrcTokens } from '$icp/derived/icrc.derived';
-	import type { IcrcCustomTokenConfig } from '$icp/types/icrc-custom-token';
+	import { icrcCustomTokens, icrcDefaultTokens } from '$icp/derived/icrc.derived';
+	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
+	import type { LedgerCanisterIdText } from '$icp/types/canister';
 
 	const dispatch = createEventDispatcher();
 
-	let knownIcrcTokens: IcrcCustomTokenConfig[] = [];
+	// The list of Icrc tokens initialized as environments variables
+	let icrcEnvTokens: IcrcCustomToken[] = [];
 	onMount(() => {
 		const tokens = buildIcrcCustomTokens();
-		knownIcrcTokens = tokens?.map((token) => ({ ...token, enabled: false })) ?? [];
+		icrcEnvTokens =
+			tokens?.map((token) => ({ ...token, id: Symbol(token.symbol), enabled: false })) ?? [];
 	});
 
-	let allIcrcTokens: IcrcCustomTokenConfig[] = [];
+	// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
+	let knownLedgerCanisterIds: LedgerCanisterIdText[] = [];
+	$: knownLedgerCanisterIds = [
+		...$icrcDefaultTokens.map(({ ledgerCanisterId }) => ledgerCanisterId),
+		...$icrcCustomTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
+	];
+
+	// The entire list of tokens to display to the user.
+	let allIcrcTokens: IcrcCustomToken[] = [];
 	$: allIcrcTokens = [
-		...$sortedIcrcTokens.map((token) => ({ ...token, enabled: true })),
-		...knownIcrcTokens.filter(
-			({ ledgerCanisterId }) => !$icrcLedgerCanisterIds.includes(ledgerCanisterId)
+		...$icrcDefaultTokens.map((token) => ({ ...token, enabled: true })),
+		...$icrcCustomTokens,
+		...icrcEnvTokens.filter(
+			({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
 		)
 	];
 
@@ -40,7 +52,7 @@
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	let tokens: IcrcCustomTokenConfig[] = [];
+	let tokens: IcrcCustomToken[] = [];
 	$: tokens = isNullishOrEmpty($filterStore)
 		? allIcrcTokens
 		: allIcrcTokens.filter(
@@ -53,10 +65,10 @@
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
 
-	let modifiedTokens: Record<CanisterIdText, IcrcCustomTokenConfig> = {};
+	let modifiedTokens: Record<CanisterIdText, IcrcCustomToken> = {};
 	const onToggle = ({
 		detail: { ledgerCanisterId, enabled, ...rest }
-	}: CustomEvent<IcrcCustomTokenConfig>) => {
+	}: CustomEvent<IcrcCustomToken>) => {
 		const { [`${ledgerCanisterId}`]: current, ...tokens } = modifiedTokens;
 
 		if (nonNullish(current)) {

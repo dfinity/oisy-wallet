@@ -12,8 +12,8 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { IcrcCustomTokenConfig } from '$icp/types/icrc-custom-token';
 	import { saveCustomTokens } from '$icp/services/ic-custom-tokens.services';
+	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 
 	const steps: WizardSteps = [
 		{
@@ -39,7 +39,7 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const saveTokens = async ({ detail: tokens }: CustomEvent<IcrcCustomTokenConfig[]>) => {
+	const saveTokens = async ({ detail: tokens }: CustomEvent<IcrcCustomToken[]>) => {
 		await save(tokens);
 	};
 
@@ -54,7 +54,7 @@
 	};
 
 	const save = async (
-		tokens: Pick<IcrcCustomTokenConfig, 'enabled' | 'ledgerCanisterId' | 'indexCanisterId'>[]
+		tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[]
 	) => {
 		if (isNullish($authStore.identity)) {
 			await nullishSignOut();
