@@ -25,7 +25,7 @@ pub fn assert_custom_tokens_eq(
     }
 }
 
-pub fn assert_some_tokens_timestamp<T>(tokens: Vec<T>)
+pub fn assert_some_tokens_timestamp<T>(tokens: &[T])
 where
     T: TokenTimestamp,
 {
