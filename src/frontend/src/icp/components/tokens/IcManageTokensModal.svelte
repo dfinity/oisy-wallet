@@ -88,7 +88,7 @@
 
 			modal.set(0);
 		}
-	};
+	};//
 
 	const close = () => {
 		modalStore.close();
