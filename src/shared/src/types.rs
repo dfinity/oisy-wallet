@@ -28,8 +28,18 @@ pub mod transaction {
     }
 }
 
+pub type Version = u64;
+
+pub trait TokenVersion {
+    fn get_version(&self) -> Option<Version>;
+    fn clone_with_incremented_version(&self) -> Self
+    where
+        Self: Sized + Clone;
+}
+
 /// Erc20 specific user defined tokens
 pub mod token {
+    use crate::types::Version;
     use candid::{CandidType, Deserialize};
 
     pub type ChainId = u64;
@@ -40,6 +50,7 @@ pub mod token {
         pub chain_id: ChainId,
         pub symbol: Option<String>,
         pub decimals: Option<u8>,
+        pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone)]
@@ -51,12 +62,11 @@ pub mod token {
 
 /// Extendable custom user defined tokens
 pub mod custom_token {
+    use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
 
     pub type LedgerId = Principal;
     pub type IndexId = Principal;
-
-    pub type TimeStamp = u64;
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub struct IcrcToken {
@@ -73,6 +83,7 @@ pub mod custom_token {
     pub struct CustomToken {
         pub token: Token,
         pub enabled: bool,
+        pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
