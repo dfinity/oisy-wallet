@@ -1,15 +1,15 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcFee, IcInterface, IcTokenWithoutId } from '$icp/types/ic';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-export type IcrcLoadData = IcInterface & {
+export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;
 	category: TokenCategory;
-	icrcCustomTokens?: Record<LedgerCanisterIdText, IcrcCustomToken>;
+	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
 };
 
 export const mapIcrcToken = ({
