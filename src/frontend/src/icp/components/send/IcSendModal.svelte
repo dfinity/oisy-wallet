@@ -24,8 +24,17 @@
 	import BitcoinFeeContext from '$icp/components/fee/IcFeeContext.svelte';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
+	import { isNetworkIdBTC, isNetworkIdETH } from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR,
+		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS,
+		TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR,
+		TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS,
+		TRACK_COUNT_IC_SEND_ERROR,
+		TRACK_COUNT_IC_SEND_SUCCESS
+	} from '$lib/constants/analytics.contants';
 
 	/**
 	 * Props
@@ -75,10 +84,32 @@
 				targetNetworkId: networkId
 			});
 
+			await trackEvent({
+				name: isNetworkIdBTC(networkId)
+					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
+					: isNetworkIdETH(networkId)
+						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
+						: TRACK_COUNT_IC_SEND_SUCCESS,
+				metadata: {
+					token: $token.symbol
+				}
+			});
+
 			sendProgressStep = SendIcStep.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
+			await trackEvent({
+				name: isNetworkIdBTC(networkId)
+					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
+					: isNetworkIdETH(networkId)
+						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR
+						: TRACK_COUNT_IC_SEND_ERROR,
+				metadata: {
+					token: $token.symbol
+				}
+			});
+
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
 				err
