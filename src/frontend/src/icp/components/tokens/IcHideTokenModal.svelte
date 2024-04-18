@@ -7,23 +7,26 @@
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import type { IcToken } from '$icp/types/ic';
-	import { assertNonNullish } from '@dfinity/utils';
+	import { assertNonNullish, toNullable } from '@dfinity/utils';
 	import { Principal } from '@dfinity/principal';
-	import { icrcTokensStore } from '$icp/stores/icrc.store';
 	import { ICP_NETWORK_ID } from '$env/networks.env';
 	import { onMount } from 'svelte';
+	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+	import { loadUserTokens } from '$icp/services/icrc.services';
 
-	let selectedToken: IcToken | undefined;
+	let selectedToken: IcrcCustomToken | undefined;
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
-	onMount(() => (selectedToken = $token as IcToken));
+	onMount(() => (selectedToken = $token as IcrcCustomToken));
 
 	let ledgerCanisterId: LedgerCanisterIdText | undefined;
 	$: ledgerCanisterId = selectedToken?.ledgerCanisterId;
 
 	let indexCanisterId: LedgerCanisterIdText | undefined;
 	$: indexCanisterId = selectedToken?.indexCanisterId;
+
+	let version: bigint | undefined;
+	$: version = selectedToken?.version;
 
 	const assertHide = (): { valid: boolean } => {
 		if (isNullishOrEmpty(ledgerCanisterId)) {
@@ -51,7 +54,7 @@
 			...params,
 			token: {
 				enabled: false,
-				version: [],
+				version: toNullable(version),
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),
@@ -62,11 +65,7 @@
 		});
 	};
 
-	const updateUi = () => {
-		assertNonNullish(ledgerCanisterId);
-
-		icrcTokensStore.reset(ledgerCanisterId);
-	};
+	const updateUi = (params: { identity: Identity }): Promise<void> => loadUserTokens(params);
 </script>
 
 <HideTokenModal backToNetworkId={ICP_NETWORK_ID} {assertHide} {hideToken} {updateUi} />

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { IcrcCustomTokenConfig } from '$icp/types/icrc-custom-token';
 	import { createEventDispatcher } from 'svelte';
+	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 
-	export let token: IcrcCustomTokenConfig;
+	export let token: IcrcCustomToken;
 
 	let disabled = false;
 	$: disabled = token.category === 'default';
