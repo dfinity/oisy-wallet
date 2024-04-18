@@ -1,4 +1,4 @@
-use crate::utils::assertion::{assert_some_tokens_version, assert_tokens_eq};
+use crate::utils::assertion::{assert_some_tokens_version, assert_tokens_data_eq};
 use crate::utils::mock::{
     CALLER, SEPOLIA_CHAIN_ID, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };
@@ -65,7 +65,7 @@ fn test_update_user_token() {
 
     let updated_tokens = results.unwrap();
 
-    assert_tokens_eq(&updated_tokens, &expected_tokens);
+    assert_tokens_data_eq(&updated_tokens, &expected_tokens);
     assert_some_tokens_version(&updated_tokens);
 }
 
@@ -115,7 +115,7 @@ fn test_list_user_tokens() {
 
     let list_tokens = results.unwrap();
 
-    assert_tokens_eq(&list_tokens, &expected_tokens);
+    assert_tokens_data_eq(&list_tokens, &expected_tokens);
     assert_some_tokens_version(&list_tokens);
 }
 

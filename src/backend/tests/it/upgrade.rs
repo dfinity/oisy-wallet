@@ -1,5 +1,5 @@
 use crate::utils::assertion::{
-    assert_none_tokens_version, assert_some_tokens_version, assert_tokens_eq,
+    assert_none_tokens_version, assert_some_tokens_version, assert_tokens_data_eq,
 };
 use crate::utils::mock::{
     CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
@@ -64,7 +64,7 @@ fn test_upgrade_user_token() {
 
     let results_tokens = results.unwrap();
 
-    assert_tokens_eq(&results_tokens, &expected_tokens);
+    assert_tokens_data_eq(&results_tokens, &expected_tokens);
     assert_none_tokens_version(results_tokens);
 }
 
@@ -121,7 +121,7 @@ fn test_add_user_token_after_upgrade() {
 
     let results_tokens = results.unwrap();
 
-    assert_tokens_eq(&results_tokens, &expected_tokens);
+    assert_tokens_data_eq(&results_tokens, &expected_tokens);
     assert_some_tokens_version(&results_tokens);
 }
 
@@ -168,6 +168,6 @@ fn test_update_user_token_after_upgrade() {
 
     let results_tokens = updated_results.unwrap();
 
-    assert_tokens_eq(&results_tokens, &expected_tokens);
+    assert_tokens_data_eq(&results_tokens, &expected_tokens);
     assert_some_tokens_version(&results_tokens);
 }
