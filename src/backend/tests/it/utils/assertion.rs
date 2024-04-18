@@ -1,6 +1,6 @@
 use shared::types::custom_token::CustomToken;
 use shared::types::token::UserToken;
-use shared::types::TokenTimestamp;
+use shared::types::TokenVersion;
 
 pub fn assert_tokens_eq(results_tokens: &[UserToken], expected_tokens: &[UserToken]) {
     assert_eq!(results_tokens.len(), expected_tokens.len());
@@ -25,20 +25,20 @@ pub fn assert_custom_tokens_eq(
     }
 }
 
-pub fn assert_some_tokens_timestamp<T>(tokens: &[T])
+pub fn assert_some_tokens_version<T>(tokens: &[T])
 where
-    T: TokenTimestamp,
+    T: TokenVersion,
 {
     for token in tokens.iter() {
-        assert!(token.get_timestamp().is_some());
+        assert!(token.get_version().is_some());
     }
 }
 
-pub fn assert_none_tokens_timestamp<T>(tokens: Vec<T>)
+pub fn assert_none_tokens_version<T>(tokens: Vec<T>)
 where
-    T: TokenTimestamp,
+    T: TokenVersion,
 {
     for token in tokens.iter() {
-        assert!(token.get_timestamp().is_none());
+        assert!(token.get_version().is_none());
     }
 }

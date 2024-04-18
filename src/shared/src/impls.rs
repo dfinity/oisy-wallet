@@ -1,7 +1,6 @@
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
 use crate::types::token::UserToken;
-use crate::types::{Timestamp, TokenTimestamp};
-use ic_cdk::api::time;
+use crate::types::{TokenVersion, Version};
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -11,26 +10,26 @@ impl From<&Token> for CustomTokenId {
     }
 }
 
-impl TokenTimestamp for UserToken {
-    fn get_timestamp(&self) -> Option<Timestamp> {
-        self.timestamp
+impl TokenVersion for UserToken {
+    fn get_version(&self) -> Option<Version> {
+        self.version
     }
 
-    fn clone_with_current_timestamp(&self) -> Self {
+    fn clone_with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.timestamp = Some(time());
+        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
         cloned
     }
 }
 
-impl TokenTimestamp for CustomToken {
-    fn get_timestamp(&self) -> Option<Timestamp> {
-        self.timestamp
+impl TokenVersion for CustomToken {
+    fn get_version(&self) -> Option<Version> {
+        self.version
     }
 
-    fn clone_with_current_timestamp(&self) -> Self {
+    fn clone_with_incremented_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.timestamp = Some(time());
+        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
         cloned
     }
 }

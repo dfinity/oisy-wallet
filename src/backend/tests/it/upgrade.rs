@@ -1,5 +1,5 @@
 use crate::utils::assertion::{
-    assert_none_tokens_timestamp, assert_some_tokens_timestamp, assert_tokens_eq,
+    assert_none_tokens_version, assert_some_tokens_version, assert_tokens_eq,
 };
 use crate::utils::mock::{
     CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
@@ -31,7 +31,7 @@ lazy_static! {
         contract_address: PRE_UPGRADE_TOKEN.contract_address.clone(),
         decimals: PRE_UPGRADE_TOKEN.decimals,
         symbol: PRE_UPGRADE_TOKEN.symbol.clone(),
-        timestamp: None
+        version: None
     };
 }
 
@@ -65,7 +65,7 @@ fn test_upgrade_user_token() {
     let results_tokens = results.unwrap();
 
     assert_tokens_eq(&results_tokens, &expected_tokens);
-    assert_none_tokens_timestamp(results_tokens);
+    assert_none_tokens_version(results_tokens);
 }
 
 #[test]
@@ -122,7 +122,7 @@ fn test_add_user_token_after_upgrade() {
     let results_tokens = results.unwrap();
 
     assert_tokens_eq(&results_tokens, &expected_tokens);
-    assert_some_tokens_timestamp(&results_tokens);
+    assert_some_tokens_version(&results_tokens);
 }
 
 #[test]
@@ -169,5 +169,5 @@ fn test_update_user_token_after_upgrade() {
     let results_tokens = updated_results.unwrap();
 
     assert_tokens_eq(&results_tokens, &expected_tokens);
-    assert_some_tokens_timestamp(&results_tokens);
+    assert_some_tokens_version(&results_tokens);
 }
