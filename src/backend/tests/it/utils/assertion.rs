@@ -18,19 +18,22 @@ pub fn assert_tokens_data_eq(results_tokens: &[UserToken], expected_tokens: &[Us
     }
 }
 
-/// Compares two slices of `UserToken` to ensure they are equal in terms of specific fields:
-/// `contract_address`, `chain_id`, `symbol`, and `decimals`.
-///
-/// This function does not compare the `version` field of the tokens.
 pub fn assert_custom_tokens_eq(
     results_tokens: Vec<CustomToken>,
     expected_tokens: Vec<CustomToken>,
 ) {
-    assert_eq!(results_tokens.len(), expected_tokens.len());
+    assert_eq!(
+        results_tokens.len(),
+        expected_tokens.len(),
+        "The number of custom tokens differ."
+    );
 
     for (token, expected) in results_tokens.iter().zip(expected_tokens.iter()) {
-        assert!(expected.token == token.token);
-        assert_eq!(expected.enabled, token.enabled);
+        assert_eq!(
+            token, expected,
+            "Result custom token differs from expected custom token: {:?} vs {:?}",
+            token, expected
+        );
     }
 }
 

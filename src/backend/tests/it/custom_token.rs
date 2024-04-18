@@ -4,6 +4,7 @@ use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::custom_token::{CustomToken, CustomTokenId, IcrcToken, Token};
+use shared::types::TokenVersion;
 
 lazy_static! {
     static ref ICRC_TOKEN: IcrcToken = IcrcToken {
@@ -49,7 +50,7 @@ fn test_update_custom_token() {
 
     let results = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
 
-    let expected_tokens: Vec<CustomToken> = vec![USER_TOKEN.clone()];
+    let expected_tokens: Vec<CustomToken> = vec![USER_TOKEN.clone_with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -69,7 +70,8 @@ fn test_update_custom_token() {
     let updated_results =
         query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
 
-    let expected_updated_tokens: Vec<CustomToken> = vec![update_token.clone()];
+    let expected_updated_tokens: Vec<CustomToken> =
+        vec![update_token.clone_with_incremented_version()];
 
     assert!(updated_results.is_ok());
 
@@ -108,7 +110,12 @@ fn test_update_many_custom_tokens() {
 
     assert!(results.is_ok());
 
-    assert_custom_tokens_eq(results.clone().unwrap(), tokens.clone());
+    let expected_tokens: Vec<CustomToken> = vec![
+        USER_TOKEN.clone_with_incremented_version(),
+        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+    ];
+
+    assert_custom_tokens_eq(results.clone().unwrap(), expected_tokens);
 
     let update_token: CustomToken = CustomToken {
         enabled: false,
@@ -138,9 +145,14 @@ fn test_update_many_custom_tokens() {
 
     assert!(updated_results.is_ok());
 
+    let expected_update_tokens: Vec<CustomToken> = vec![
+        update_token.clone_with_incremented_version(),
+        update_another_token.clone_with_incremented_version(),
+    ];
+
     let updated_tokens = updated_results.unwrap();
 
-    assert_custom_tokens_eq(updated_tokens.clone(), update_tokens);
+    assert_custom_tokens_eq(updated_tokens.clone(), expected_update_tokens);
     assert_some_tokens_version(&updated_tokens);
 }
 
@@ -161,7 +173,10 @@ fn test_list_custom_tokens() {
 
     let results = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
 
-    let expected_tokens: Vec<CustomToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
+    let expected_tokens: Vec<CustomToken> = vec![
+        USER_TOKEN.clone_with_incremented_version(),
+        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+    ];
 
     assert!(results.is_ok());
 
