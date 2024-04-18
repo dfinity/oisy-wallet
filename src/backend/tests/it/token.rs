@@ -1,4 +1,4 @@
-use crate::utils::assertion::{assert_tokens_data_eq};
+use crate::utils::assertion::assert_tokens_data_eq;
 use crate::utils::mock::{
     CALLER, SEPOLIA_CHAIN_ID, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };

@@ -1,6 +1,5 @@
 use shared::types::custom_token::CustomToken;
 use shared::types::token::UserToken;
-use shared::types::TokenVersion;
 
 pub fn assert_tokens_data_eq(results_tokens: &[UserToken], expected_tokens: &[UserToken]) {
     assert_eq!(
