@@ -168,6 +168,6 @@ fn test_update_user_token_after_upgrade() {
 
     let results_tokens = updated_results.unwrap();
 
-    assert_tokens_eq(results_tokens.clone(), expected_tokens.clone());
+    assert_tokens_eq(&results_tokens, &expected_tokens);
     assert_some_tokens_timestamp(results_tokens);
 }
