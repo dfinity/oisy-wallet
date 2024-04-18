@@ -30,7 +30,7 @@ where
     T: TokenTimestamp,
 {
     for token in tokens.iter() {
-        assert!(token.get_timestamp().is_some());
+        assert!(token.get_timestamp().is_some(), "Token has no timestamp: {}", token);
     }
 }
 
