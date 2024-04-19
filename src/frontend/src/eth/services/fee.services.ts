@@ -1,3 +1,4 @@
+import { CKERC20_FEE } from '$eth/constants/ckerc20.constants';
 import { CKETH_FEE } from '$eth/constants/cketh.constants';
 import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
@@ -54,4 +55,29 @@ export const getErc20FeeData = async ({
 
 		return BigNumber.from(ERC20_FALLBACK_FEE);
 	}
+};
+
+export const getCkErc20FeeData = async ({
+	helperContractAddress,
+	address,
+	...rest
+}: GetFeeData & {
+	contract: Erc20ContractAddress;
+	amount: BigNumber;
+	sourceNetwork: EthereumNetwork;
+	helperContractAddress: CkEthHelperContractAddressData | null | undefined;
+}): Promise<BigNumber> => {
+	const estimateGasForApprove = await getErc20FeeData({
+		address,
+		targetNetwork: undefined,
+		...rest
+	});
+
+	const targetCkEthHelper = isCkEthHelperContract({ destination: address, helperContractAddress });
+
+	if (targetCkEthHelper) {
+		return estimateGasForApprove.add(CKERC20_FEE);
+	}
+
+	return estimateGasForApprove;
 };

@@ -8,7 +8,12 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { getErc20FeeData, getEthFeeData, type GetFeeData } from '$eth/services/fee.services';
+	import {
+		getCkErc20FeeData,
+		getErc20FeeData,
+		getEthFeeData,
+		type GetFeeData
+	} from '$eth/services/fee.services';
 	import type { Network } from '$lib/types/network';
 	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
@@ -48,7 +53,7 @@
 
 			const { getFeeData } = infuraProviders($sendToken.network.id);
 
-			if (isSupportedEthTokenId($sendTokenId) || isSupportedErc20TwinTokenId($sendTokenId)) {
+			if (isSupportedEthTokenId($sendTokenId)) {
 				feeStore.setFee({
 					...(await getFeeData()),
 					gas: await getEthFeeData({
@@ -59,19 +64,31 @@
 				return;
 			}
 
-			// TODO: utiliser amount + 10% marge de sécurité
+			const erc20GasFeeParams = {
+				contract: $sendToken as Erc20Token,
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				address: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
+				amount: parseToken({ value: `${amount ?? '1'}` }),
+				sourceNetwork
+			};
 
-			// TODO: erc20 -> ckErc20
-			// getErc20FeeData() (approve) + soit deposit feeData dynamic ou 60_000 (deposit)
+			// TODO: use amount + 10% to estimate fee dynamically to have some buffer
+
+			if (isSupportedErc20TwinTokenId($sendTokenId)) {
+				feeStore.setFee({
+					...(await getFeeData()),
+					gas: await getCkErc20FeeData({
+						...erc20GasFeeParams,
+						helperContractAddress: $ckEthHelperContractAddressStore?.[$ethereumTokenId]
+					})
+				});
+				return;
+			}
 
 			feeStore.setFee({
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
-					contract: $sendToken as Erc20Token,
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					address: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
-					amount: parseToken({ value: `${amount ?? '1'}` }),
-					sourceNetwork,
+					...erc20GasFeeParams,
 					targetNetwork
 				})
 			});
