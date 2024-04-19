@@ -9,12 +9,14 @@ import type { EthereumNetwork } from '$eth/types/network';
 import type { Token } from '$lib/types/token';
 
 export const mapErc20Token = ({
+	id,
 	symbol,
 	name,
 	...rest
 }: Erc20Contract &
-	Erc20Metadata & { network: EthereumNetwork } & Pick<Token, 'category'>): Erc20Token => ({
-	id: Symbol(symbol),
+	Erc20Metadata & { network: EthereumNetwork } & Pick<Token, 'category'> &
+	Partial<Pick<Token, 'id'>>): Erc20Token => ({
+	id: id ?? Symbol(symbol),
 	standard: 'erc20',
 	name,
 	symbol,
