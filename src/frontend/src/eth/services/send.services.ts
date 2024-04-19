@@ -116,6 +116,15 @@ const ethContractPrepareTransaction = async ({
 		to
 	});
 
+	// TODO: approve for erc20
+	// helper_contract erc20_helper_contract_address = opt "0xE1788E4834c896F1932188645cc36c54d1b80AC1";
+	// amount !decimals
+
+	// TODO: deposit for erc20
+	// contract: erc20_contract_address = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+	// amount !decimals
+	// to == same to
+
 	if (isNullish(data)) {
 		const {
 			send: {
@@ -167,6 +176,9 @@ export const send = async ({
 	const { sendTransaction, getTransactionCount } = infuraProviders(networkId);
 
 	const nonce = await getTransactionCount(from);
+
+	// TODO: approve nonce
+	// then send nonce + 1
 
 	const principalEthAddress = (): string => {
 		const {
