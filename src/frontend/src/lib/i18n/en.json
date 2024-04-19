@@ -181,7 +181,7 @@
 			"approving": "Approving...",
 			"refreshing_ui": "Refreshing UI",
 			"initializing": "Initializing transaction...",
-			"signing_transaction": "'Signing transaction...'",
+			"signing_transaction": "Signing transaction...",
 			"sending": "Sending...",
 			"signing": "Signing...",
 			"signing_message": "Signing message...",
