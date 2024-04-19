@@ -23,6 +23,7 @@ import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
 import { i18n } from '$lib/stores/i18n.store';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
@@ -146,7 +147,7 @@ const ethContractPrepareTransaction = async ({
 	};
 };
 
-const erc20ContractPrepareTransaction = async ({
+const ckErc20ContractPrepareTransaction = async ({
 	contract,
 	to,
 	amount,
@@ -202,8 +203,59 @@ const erc20ContractPrepareTransaction = async ({
 	};
 };
 
+const ckErc20PrepareApprove = async ({
+	amount,
+	maxPriorityFeePerGas: max_priority_fee_per_gas,
+	maxFeePerGas: max_fee_per_gas,
+	nonce,
+	token,
+	gas,
+	erc20HelperContractAddress,
+	chainId: chain_id,
+	networkId
+}: Omit<TransferParams, 'to'> &
+	NetworkChainId & {
+		nonce: number;
+		gas: bigint;
+		networkId: NetworkId;
+		erc20HelperContractAddress: ETH_ADDRESS;
+	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
+	const { populateApprove } = infuraErc20Providers(networkId);
+
+	const { data } = await populateApprove({
+		contract: token as Erc20Token,
+		address: erc20HelperContractAddress,
+		amount
+	});
+
+	if (isNullish(data)) {
+		const {
+			send: {
+				error: { erc20_data_undefined }
+			}
+		} = get(i18n);
+
+		throw new Error(erc20_data_undefined);
+	}
+
+	const { address: contractAddress } = token as Erc20Token;
+
+	return {
+		to: contractAddress,
+		chain_id,
+		nonce: BigInt(nonce),
+		gas,
+		max_fee_per_gas,
+		max_priority_fee_per_gas,
+		value: 0n,
+		data: [data]
+	};
+};
+
 export const send = async ({
 	progress,
+	sourceNetwork,
+	from,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
@@ -214,9 +266,23 @@ export const send = async ({
 	// TODO: do we want to display an progress(SendStep.APPROVE); on screen?
 	progress(SendStep.INITIALIZATION);
 
-	await approve(rest);
+	const { id: networkId } = sourceNetwork;
 
-	const transactionSent = await sendTransaction({ progress, ...rest });
+	const { getTransactionCount } = infuraProviders(networkId);
+
+	const nonce = await getTransactionCount(from);
+
+	const { hash: approveHash } = await approve({ from, sourceNetwork, nonce, ...rest });
+
+	const nonceTransaction = nonNullish(approveHash) ? nonce + 1 : nonce;
+
+	const transactionSent = await sendTransaction({
+		progress,
+		from,
+		sourceNetwork,
+		nonce: nonceTransaction,
+		...rest
+	});
 
 	return { hash: transactionSent.hash };
 };
@@ -240,6 +306,7 @@ const sendTransaction = async ({
 	Pick<TransactionFeeData, 'gas'> & {
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
+		nonce: number;
 	}): Promise<{ hash: string }> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
@@ -296,7 +363,7 @@ const sendTransaction = async ({
 					contractAddress: ckErc20HelperContractAddress
 			  }) &&
 			  isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
-			? erc20ContractPrepareTransaction({
+			? ckErc20ContractPrepareTransaction({
 					...rest,
 					contract: { address: ckErc20HelperContractAddress },
 					from,
@@ -343,16 +410,27 @@ const sendTransaction = async ({
 
 const approve = async ({
 	token,
+	from,
 	to,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	gas,
 	sourceNetwork,
+	identity,
 	minterInfo,
-	amount
-}: Pick<TransferParams, 'to' | 'amount'> &
-	Pick<SendParams, 'token' | 'sourceNetwork' | 'minterInfo'>) => {
+	nonce,
+	...rest
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
+	Omit<SendParams, 'targetNetwork' | 'lastProgressStep' | 'progress'> &
+	Pick<TransactionFeeData, 'gas'> & {
+		maxFeePerGas: BigNumber;
+		maxPriorityFeePerGas: BigNumber;
+		nonce: number;
+	}): Promise<{ hash: string | undefined }> => {
 	// Approve happens before send currently only for ckERC20 -> ERC20.
 	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc
 	if (isNotSupportedErc20TwinTokenId(token.id)) {
-		return;
+		return { hash: undefined };
 	}
 
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
@@ -366,7 +444,7 @@ const approve = async ({
 
 	// The Erc20 contract supports conversion to ckErc20 but, it's a standard transaction
 	if (!destinationCkEth) {
-		return;
+		return { hash: undefined };
 	}
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
@@ -385,13 +463,26 @@ const approve = async ({
 	// helper_contract erc20_helper_contract_address = opt "0xE1788E4834c896F1932188645cc36c54d1b80AC1";
 	// amount !decimals
 
-	const { id: networkId } = sourceNetwork;
+	const { id: networkId, chainId } = sourceNetwork;
 
-	const { approve } = infuraErc20Providers(networkId);
-
-	await approve({
-		contract: token as Erc20Token,
-		address: erc20HelperContractAddress,
-		amount
+	const approve = await ckErc20PrepareApprove({
+		...rest,
+		from,
+		nonce,
+		gas: gas.toBigInt(),
+		maxFeePerGas: maxFeePerGas.toBigInt(),
+		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		chainId,
+		networkId,
+		token,
+		erc20HelperContractAddress
 	});
+
+	const rawTransaction = await signTransaction({ identity, transaction: approve });
+
+	const { sendTransaction } = infuraProviders(networkId);
+
+	const transactionSent = await sendTransaction(rawTransaction);
+
+	return transactionSent;
 };
