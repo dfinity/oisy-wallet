@@ -1,6 +1,7 @@
 import { CKBTC_EXPLORER_URL, CKETH_EXPLORER_URL } from '$env/explorers.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
+import { SEPOLIA_USDC_TOKEN } from '$env/tokens.erc20.env';
 import type { IcCkInterface } from '$icp/types/ic';
 import { LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -173,6 +174,92 @@ export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
 ];
 
 /**
+ * ckERC20
+ */
+
+export const IC_CKERC20_USDC_LEDGER_CANISTER_ID =
+	(import.meta.env.VITE_IC_CKERC20_USDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined) ??
+	'ss2fx-dyaaa-aaaar-qacoq-cai';
+
+export const IC_CKERC20_USDC_INDEX_CANISTER_ID =
+	(import.meta.env.VITE_IC_CKERC20_USDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined) ??
+	's3zol-vqaaa-aaaar-qacpa-cai';
+
+export const IC_CKERC20_USDC_MINTER_CANISTER_ID =
+	(import.meta.env.VITE_IC_CKERC20_USDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined) ??
+	'sv3dd-oaaaa-aaaar-qacoa-cai';
+
+export const STAGING_CKERC20_USDC_LEDGER_CANISTER_ID = import.meta.env
+	.VITE_STAGING_CKERC20_USDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
+export const STAGING_CKERC20_USDC_INDEX_CANISTER_ID = import.meta.env
+	.VITE_STAGING_CKERC20_USDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
+export const STAGING_CKERC20_USDC_MINTER_CANISTER_ID = import.meta.env
+	.VITE_STAGING_CKERC20_USDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
+
+export const LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID = import.meta.env
+	.VITE_LOCAL_CKETH_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
+export const LOCAL_CKERC20_USDC_INDEX_CANISTER_ID = import.meta.env
+	.VITE_LOCAL_CKETH_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
+export const LOCAL_CKERC20_USDC_MINTER_CANISTER_ID = import.meta.env
+	.VITE_LOCAL_CKETH_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
+
+const CKERC20_USDC_LOCAL_DATA: IcCkInterface | undefined =
+	LOCAL &&
+	nonNullish(LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID) &&
+	nonNullish(LOCAL_CKERC20_USDC_INDEX_CANISTER_ID) &&
+	nonNullish(LOCAL_CKERC20_USDC_MINTER_CANISTER_ID)
+		? {
+				ledgerCanisterId: LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID,
+				indexCanisterId: LOCAL_CKERC20_USDC_INDEX_CANISTER_ID,
+				minterCanisterId: LOCAL_CKERC20_USDC_MINTER_CANISTER_ID,
+				exchangeCoinId: 'ethereum',
+				position: 4,
+				twinToken: SEPOLIA_USDC_TOKEN
+			}
+		: undefined;
+
+const CKERC20_USDC_STAGING_DATA: IcCkInterface | undefined =
+	(STAGING || PROD) &&
+	nonNullish(STAGING_CKERC20_USDC_LEDGER_CANISTER_ID) &&
+	nonNullish(STAGING_CKERC20_USDC_INDEX_CANISTER_ID) &&
+	nonNullish(STAGING_CKERC20_USDC_MINTER_CANISTER_ID)
+		? {
+				ledgerCanisterId: STAGING_CKERC20_USDC_LEDGER_CANISTER_ID,
+				indexCanisterId: STAGING_CKERC20_USDC_INDEX_CANISTER_ID,
+				minterCanisterId: STAGING_CKERC20_USDC_MINTER_CANISTER_ID,
+				exchangeCoinId: 'ethereum',
+				position: 3,
+				twinToken: SEPOLIA_USDC_TOKEN
+			}
+		: undefined;
+
+const CKERC20_USDC_IC_DATA: IcCkInterface | undefined =
+	STAGING || PROD
+		? {
+				ledgerCanisterId: IC_CKERC20_USDC_LEDGER_CANISTER_ID,
+				indexCanisterId: IC_CKERC20_USDC_INDEX_CANISTER_ID,
+				minterCanisterId: IC_CKERC20_USDC_MINTER_CANISTER_ID,
+				exchangeCoinId: 'ethereum',
+				position: 2,
+				twinToken: SEPOLIA_USDC_TOKEN
+			}
+		: undefined;
+
+export const CKERC20_USDC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
+	...(nonNullish(STAGING_CKERC20_USDC_LEDGER_CANISTER_ID)
+		? [STAGING_CKERC20_USDC_LEDGER_CANISTER_ID]
+		: []),
+	...(nonNullish(LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID)
+		? [LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID]
+		: [])
+];
+
+export const CKERC20_USDC_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = [
+	IC_CKERC20_USDC_LEDGER_CANISTER_ID,
+	...CKERC20_USDC_LEDGER_CANISTER_TESTNET_IDS
+];
+
+/**
  * All ICRC tokens data
  */
 
@@ -182,5 +269,8 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKBTC_IC_DATA) ? [CKBTC_IC_DATA] : []),
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
 	...(nonNullish(CKETH_STAGING_DATA) ? [CKETH_STAGING_DATA] : []),
-	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : [])
+	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : []),
+	...(nonNullish(CKERC20_USDC_LOCAL_DATA) ? [CKERC20_USDC_LOCAL_DATA] : []),
+	...(nonNullish(CKERC20_USDC_STAGING_DATA) ? [CKERC20_USDC_STAGING_DATA] : []),
+	...(nonNullish(CKERC20_USDC_IC_DATA) ? [CKERC20_USDC_IC_DATA] : [])
 ];
