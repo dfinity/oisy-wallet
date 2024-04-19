@@ -11,7 +11,8 @@
 
 ./scripts/download.cketh.sh
 ./scripts/deploy.cketh.sh
+./scripts/deploy.ckerc20.sh
 
 dfx deploy internet_identity --specified-id rdmx6-jaaaa-aaaaa-aaadq-cai
 
-dfx deploy frontend
+
