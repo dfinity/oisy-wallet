@@ -181,25 +181,21 @@ export const STAGING_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CKUSDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
 export const STAGING_CKUSDC_INDEX_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CKUSDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
-export const STAGING_CKUSDC_MINTER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKUSDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
 
 export const LOCAL_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKUSDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
 export const LOCAL_CKUSDC_INDEX_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKUSDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
-export const LOCAL_CKUSDC_MINTER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKUSDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
 
 const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
 	nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) &&
 	nonNullish(LOCAL_CKUSDC_INDEX_CANISTER_ID) &&
-	nonNullish(LOCAL_CKUSDC_MINTER_CANISTER_ID)
+	nonNullish(LOCAL_CKETH_MINTER_CANISTER_ID)
 		? {
 				ledgerCanisterId: LOCAL_CKUSDC_LEDGER_CANISTER_ID,
 				indexCanisterId: LOCAL_CKUSDC_INDEX_CANISTER_ID,
-				minterCanisterId: LOCAL_CKUSDC_MINTER_CANISTER_ID,
+				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 4,
 				twinToken: SEPOLIA_USDC_TOKEN
@@ -210,11 +206,11 @@ const CKUSDC_STAGING_DATA: IcCkInterface | undefined =
 	(STAGING || PROD) &&
 	nonNullish(STAGING_CKUSDC_LEDGER_CANISTER_ID) &&
 	nonNullish(STAGING_CKUSDC_INDEX_CANISTER_ID) &&
-	nonNullish(STAGING_CKUSDC_MINTER_CANISTER_ID)
+	nonNullish(STAGING_CKETH_MINTER_CANISTER_ID)
 		? {
 				ledgerCanisterId: STAGING_CKUSDC_LEDGER_CANISTER_ID,
 				indexCanisterId: STAGING_CKUSDC_INDEX_CANISTER_ID,
-				minterCanisterId: STAGING_CKUSDC_MINTER_CANISTER_ID,
+				minterCanisterId: STAGING_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 3,
 				twinToken: SEPOLIA_USDC_TOKEN
