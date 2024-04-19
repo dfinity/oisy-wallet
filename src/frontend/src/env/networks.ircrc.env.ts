@@ -222,7 +222,9 @@ export const CKUSDC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : [])
 ];
 
-export const CKUSDC_LEDGER_CANISTER_IDS: CanisterIdText[] = [...CKUSDC_LEDGER_CANISTER_TESTNET_IDS];
+export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
+	...CKUSDC_LEDGER_CANISTER_TESTNET_IDS
+];
 
 /**
  * All ICRC tokens data

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { loadCkEthHelperContractAddress } from '$icp-eth/services/cketh.services';
-	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
+	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { icrcTokensStore } from '$icp/stores/icrc.store';
 	import {
 		IC_CKETH_MINTER_CANISTER_ID,
@@ -17,7 +17,7 @@
 	export let convertTokenId: TokenId;
 
 	const load = async () => {
-		if (!$ethToCkETHEnabled) {
+		if (!$ethToCkETHEnabled && !$erc20ToCkErc20Enabled) {
 			return;
 		}
 
@@ -47,7 +47,11 @@
 		});
 	};
 
-	$: $ethToCkETHEnabled, $icrcTokensStore, convertTokenId, (async () => await load())();
+	$: $ethToCkETHEnabled,
+		$erc20ToCkErc20Enabled,
+		$icrcTokensStore,
+		convertTokenId,
+		(async () => await load())();
 </script>
 
 <slot />

@@ -234,6 +234,7 @@
 			"convert_to_btc": "Convert to BTC",
 			"convert_to_eth": "Convert to ETH",
 			"convert_to_cketh": "Convert to ckETH",
+			"convert_to_ckerc20": "Convert to $ckErc20",
 			"convert_eth_to_cketh": "Convert ETH to ckETH",
 			"how_to_convert_eth_to_cketh": "Here is how to can convert ETH to ckETH on $oisy_name",
 			"send_eth": "Send ETH to your $oisy_name address",

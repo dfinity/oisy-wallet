@@ -17,6 +17,9 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isCkEthHelperContract } from '$eth/utils/send.utils';
+	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -45,12 +48,12 @@
 
 			const { getFeeData } = infuraProviders($sendToken.network.id);
 
-			if (isSupportedEthTokenId($sendTokenId)) {
+			if (isSupportedEthTokenId($sendTokenId) || isSupportedErc20TwinTokenId($sendTokenId)) {
 				feeStore.setFee({
 					...(await getFeeData()),
 					gas: await getEthFeeData({
 						...params,
-						helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
+						helperContractAddress: $ckEthHelperContractAddressStore?.[$ethereumTokenId]
 					})
 				});
 				return;

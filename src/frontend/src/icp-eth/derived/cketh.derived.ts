@@ -1,8 +1,9 @@
 import { ETHEREUM_NETWORK } from '$env/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens.env';
+import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens.erc20.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { IcCkToken, IcToken } from '$icp/types/ic';
-import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
+import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { token, tokenStandard } from '$lib/derived/token.derived';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
@@ -17,6 +18,16 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
 	[tokenStandard, token],
 	([$tokenStandard, $token]) =>
 		$tokenStandard === 'ethereum' || isTokenCkEthLedger($token as IcToken)
+);
+
+/**
+ * ERC20 to ckErc20 is supported:
+ * - on network Ethereum if the token is a known Erc20 twin tokens
+ * - on network ICP if the token is ckErc20
+ */
+export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
+	[token],
+	([$token]) => ERC20_TWIN_TOKENS_IDS.includes($token.id) || isTokenCkErc20Ledger($token as IcToken)
 );
 
 /**

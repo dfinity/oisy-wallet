@@ -3,6 +3,7 @@ import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import usdc from '$icp-eth/assets/usdc.svg';
+import type { TokenId } from '$lib/types/token';
 
 const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
 	// Uniswap
@@ -86,7 +87,8 @@ export const USDC_TOKEN: RequiredErc20Token = {
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-	exchange: 'ethereum'
+	exchange: 'ethereum',
+	twinTokenSymbol: 'ckUSDC'
 };
 
 export const SEPOLIA_USDC_SYMBOL = 'SepoliaUSDC';
@@ -103,7 +105,8 @@ export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
-	exchange: 'ethereum'
+	exchange: 'ethereum',
+	twinTokenSymbol: 'ckSepoliaUSDC'
 };
 
 const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [SEPOLIA_USDC_TOKEN];
@@ -112,3 +115,5 @@ export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
 	...(ETH_MAINNET_ENABLED ? [USDC_TOKEN] : []),
 	...ERC20_TWIN_TOKENS_SEPOLIA
 ];
+
+export const ERC20_TWIN_TOKENS_IDS: TokenId[] = ERC20_TWIN_TOKENS.map(({ id }) => id);
