@@ -1,4 +1,4 @@
-import type { CkEthMinterInfoData } from '$icp/stores/cketh.store';
+import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';

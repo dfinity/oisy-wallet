@@ -19,7 +19,7 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { authStore } from '$lib/stores/auth.store';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
@@ -33,7 +33,7 @@
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
-	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -102,7 +102,8 @@
 
 		const { valid } = assertCkEthHelperContractAddressLoaded({
 			tokenStandard: $sendTokenStandard,
-			helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
+			helperContractAddress: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId]),
+			helperContractAddressCertified: $ckEthMinterInfoStore?.[$sendTokenId]?.certified,
 			network: targetNetwork
 		});
 

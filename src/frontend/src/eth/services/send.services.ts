@@ -14,6 +14,7 @@ import type { SendParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp, isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
+import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
@@ -201,18 +202,13 @@ const sendTransaction = async ({
 		return encodePrincipalToEthAddress(identity.getPrincipal());
 	};
 
-	const ckEthHelperContractAddress = fromNullable(
-		minterInfo?.data.eth_helper_contract_address ?? []
-	);
+	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
 
 	const transaction = await (isSupportedEthTokenId(token.id)
 		? nonNullish(ckEthHelperContractAddress) &&
 			isCkEthHelperContract({
 				destination: to,
-				helperContractAddress: {
-					data: ckEthHelperContractAddress,
-					certified: minterInfo?.certified ?? false
-				}
+				helperContractAddress: ckEthHelperContractAddress
 			}) &&
 			isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
 			? ethContractPrepareTransaction({
@@ -283,18 +279,13 @@ const approve = async ({
 		return;
 	}
 
-	const ckEthHelperContractAddress = fromNullable(
-		minterInfo?.data.eth_helper_contract_address ?? []
-	);
+	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
 
 	const destinationCkEth =
 		nonNullish(ckEthHelperContractAddress) &&
 		isCkEthHelperContract({
 			destination: to,
-			helperContractAddress: {
-				data: ckEthHelperContractAddress,
-				certified: minterInfo?.certified ?? false
-			}
+			helperContractAddress: ckEthHelperContractAddress
 		});
 
 	// The Erc20 contract supports conversion to ckErc20 but, it's a standard transaction

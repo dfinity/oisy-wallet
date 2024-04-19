@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { loadCkEthHelperContractAddress } from '$icp-eth/services/cketh.services';
+	import { loadCkEthMinterInfo } from '$icp-eth/services/cketh.services';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { icrcTokensStore } from '$icp/stores/icrc.store';
 	import {
@@ -39,7 +39,9 @@
 			return;
 		}
 
-		await loadCkEthHelperContractAddress({
+		// TODO: this duplicate the ckETH worker, maybe we reuse the work on Ethereum as well?
+
+		await loadCkEthMinterInfo({
 			tokenId: convertTokenId,
 			canisters: {
 				minterCanisterId

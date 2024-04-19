@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { modalConvertETHToCkETH } from '$lib/derived/modal.derived';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
@@ -12,6 +11,8 @@
 	import { token } from '$lib/derived/token.derived';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Erc20Token } from '$eth/types/erc20';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 
 	/**
 	 * Send modal context store
@@ -35,7 +36,7 @@
 
 {#if $modalConvertETHToCkETH}
 	<SendTokenModal
-		destination={$ckEthHelperContractAddressStore?.[$ethereumTokenId]?.data ?? ''}
+		destination={toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId]) ?? ''}
 		targetNetwork={ICP_NETWORK}
 	/>
 {/if}

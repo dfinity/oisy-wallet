@@ -3,25 +3,22 @@
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { isNullish } from '@dfinity/utils';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { networkICP } from '$lib/derived/network.derived';
 	import { tokenId } from '$lib/derived/token.derived';
-	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import type { TokenId } from '$lib/types/token';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 
 	// TODO: rename to withTokenId?
 	export let convertTokenId: TokenId;
-
-	// TODO check ckEthMinterInfoStore for sepolia instead of ckEthHelperContractAddressStore?
 
 	const isDisabled = (): boolean =>
 		$addressNotLoaded ||
 		// We can convert to ETH - i.e. we can convert to Ethereum or Sepolia, not an ERC20 token
 		isNotSupportedEthTokenId(convertTokenId) ||
-		isNullish($ckEthHelperContractAddressStore?.[convertTokenId]) ||
+		isNullish(toCkEthHelperContractAddress($ckEthMinterInfoStore?.[convertTokenId])) ||
 		($networkICP && isNullish($ckEthMinterInfoStore?.[$tokenId]));
 
 	const openSend = async () => {
@@ -42,13 +39,11 @@
 	};
 </script>
 
-<CkEthLoader {convertTokenId}>
-	<button
-		class="hero col-span-2"
-		on:click={async () => await openSend()}
-		disabled={$isBusy}
-		class:opacity-50={$isBusy}
-	>
-		<slot />
-	</button>
-</CkEthLoader>
+<button
+	class="hero col-span-2"
+	on:click={async () => await openSend()}
+	disabled={$isBusy}
+	class:opacity-50={$isBusy}
+>
+	<slot />
+</button>
