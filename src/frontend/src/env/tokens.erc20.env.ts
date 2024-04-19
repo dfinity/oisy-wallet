@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import type { Erc20Contract } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
+import type { Token } from '$lib/types/token';
 
 const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
 	// Uniswap
@@ -10,11 +11,6 @@ const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
 };
 
 const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
-	{
-		// USDC
-		address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
-		exchange: 'ethereum'
-	},
 	{
 		// Weenus
 		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
@@ -71,4 +67,28 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 		? ERC20_CONTRACTS_PRODUCTION.map((contract) => ({ ...contract, network: ETHEREUM_NETWORK }))
 		: []),
 	...ERC20_CONTRACTS_SEPOLIA.map((contract) => ({ ...contract, network: SEPOLIA_NETWORK }))
+];
+
+/**
+ * ERC20 which have ck twin tokens counterparts
+ */
+
+type Erc20TwinToken = Erc20Contract & Pick<Token, 'id'> & { network: EthereumNetwork };
+
+const SEPOLIA_USDC_SYMBOL = 'USDC';
+
+export const SEPOLIA_USDC_TOKEN_ID: unique symbol = Symbol(SEPOLIA_USDC_SYMBOL);
+
+export const SEPOLIA_USDC_TOKEN: Erc20TwinToken = {
+	id: SEPOLIA_USDC_TOKEN_ID,
+	network: SEPOLIA_NETWORK,
+	address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+	exchange: 'ethereum'
+};
+
+const ERC20_TWIN_CONTRACTS_SEPOLIA: Erc20TwinToken[] = [SEPOLIA_USDC_TOKEN];
+
+export const ERC20_TWIN_CONTRACTS: Erc20TwinToken[] = [
+	...(ETH_MAINNET_ENABLED ? [] : []),
+	...ERC20_TWIN_CONTRACTS_SEPOLIA
 ];
