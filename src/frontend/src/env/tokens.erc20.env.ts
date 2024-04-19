@@ -11,6 +11,11 @@ const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
 
 const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	{
+		// USDC
+		address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+		exchange: 'ethereum'
+	},
+	{
 		// Weenus
 		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
 		exchange: 'ethereum'
