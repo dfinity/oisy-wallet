@@ -72,7 +72,10 @@ export const getCkErc20FeeData = async ({
 		...rest
 	});
 
-	const targetCkErc20Helper = isCkEthHelperContract({ destination: address, contractAddress: erc20HelperContractAddress });
+	const targetCkErc20Helper = isCkEthHelperContract({
+		destination: address,
+		contractAddress: erc20HelperContractAddress
+	});
 
 	if (targetCkErc20Helper) {
 		return estimateGasForApprove.add(CKERC20_FEE);

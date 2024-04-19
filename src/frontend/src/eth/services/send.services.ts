@@ -14,7 +14,10 @@ import type { SendParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp, isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
-import {toCkErc20HelperContractAddress, toCkEthHelperContractAddress} from '$icp-eth/utils/cketh.utils';
+import {
+	toCkErc20HelperContractAddress,
+	toCkEthHelperContractAddress
+} from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';

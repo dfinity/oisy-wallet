@@ -8,5 +8,4 @@ export const isCkEthHelperContract = ({
 	contractAddress: ETH_ADDRESS | null | undefined;
 	destination: string | undefined;
 }): boolean =>
-	nonNullish(contractAddress) &&
-	destination?.toLowerCase() === contractAddress.toLowerCase();
+	nonNullish(contractAddress) && destination?.toLowerCase() === contractAddress.toLowerCase();
