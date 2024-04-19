@@ -1,5 +1,6 @@
 import type { SignRequest } from '$declarations/backend/backend.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
+import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
@@ -14,11 +15,15 @@ import type { SendParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp, isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
-import {toCkErc20HelperContractAddress, toCkEthHelperContractAddress} from '$icp-eth/utils/cketh.utils';
+import {
+	toCkErc20HelperContractAddress,
+	toCkEthHelperContractAddress
+} from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
 import { i18n } from '$lib/stores/i18n.store';
+import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNetworkICP } from '$lib/utils/network.utils';
@@ -117,10 +122,61 @@ const ethContractPrepareTransaction = async ({
 		to
 	});
 
-	// TODO: deposit for erc20
+	if (isNullish(data)) {
+		const {
+			send: {
+				error: { data_undefined }
+			}
+		} = get(i18n);
+
+		throw new Error(data_undefined);
+	}
+
+	const { address: contractAddress } = contract;
+
+	return {
+		to: contractAddress,
+		chain_id,
+		nonce: BigInt(nonce),
+		gas,
+		max_fee_per_gas,
+		max_priority_fee_per_gas,
+		value: amount.toBigInt(),
+		data: [data]
+	};
+};
+
+const erc20ContractPrepareTransaction = async ({
+	contract,
+	to,
+	amount,
+	maxPriorityFeePerGas: max_priority_fee_per_gas,
+	maxFeePerGas: max_fee_per_gas,
+	nonce,
+	gas,
+	chainId: chain_id,
+	networkId,
+	token
+}: TransferParams &
+	NetworkChainId & {
+		nonce: number;
+		gas: bigint;
+		contract: Erc20ContractAddress;
+		networkId: NetworkId;
+	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
+	// TODO: remove once tested
 	// contract: erc20_contract_address = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
 	// amount !decimals
 	// to == same to
+
+	const { address: erc20ContractAddress } = token as Erc20Token;
+
+	const { data } = await infuraCkErc20Providers(networkId).populateTransaction({
+		contract,
+		erc20Contract: { address: erc20ContractAddress },
+		to,
+		amount
+	});
 
 	if (isNullish(data)) {
 		const {
@@ -203,6 +259,7 @@ const sendTransaction = async ({
 	};
 
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
+	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
 	const transaction = await (isSupportedEthTokenId(token.id)
 		? nonNullish(ckEthHelperContractAddress) &&
@@ -233,21 +290,40 @@ const sendTransaction = async ({
 					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 					chainId
 				})
-		: erc20PrepareTransaction({
-				...rest,
-				from,
-				to,
-				token,
-				nonce,
-				gas: gas.toBigInt(),
-				maxFeePerGas: maxFeePerGas.toBigInt(),
-				maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-				populate:
-					isErc20Icp(token) && isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
-						? infuraErc20IcpProviders(networkId).populateTransaction
-						: infuraErc20Providers(networkId).populateTransaction,
-				chainId
-			}));
+		: nonNullish(ckErc20HelperContractAddress) &&
+			  isCkEthHelperContract({
+					destination: to,
+					contractAddress: ckErc20HelperContractAddress
+			  }) &&
+			  isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
+			? erc20ContractPrepareTransaction({
+					...rest,
+					contract: { address: ckErc20HelperContractAddress },
+					from,
+					to: principalEthAddress(),
+					nonce,
+					gas: gas.toBigInt(),
+					maxFeePerGas: maxFeePerGas.toBigInt(),
+					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+					chainId,
+					networkId,
+					token
+				})
+			: erc20PrepareTransaction({
+					...rest,
+					from,
+					to,
+					token,
+					nonce,
+					gas: gas.toBigInt(),
+					maxFeePerGas: maxFeePerGas.toBigInt(),
+					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+					populate:
+						isErc20Icp(token) && isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
+							? infuraErc20IcpProviders(networkId).populateTransaction
+							: infuraErc20Providers(networkId).populateTransaction,
+					chainId
+				}));
 
 	progress(SendStep.SIGN);
 
