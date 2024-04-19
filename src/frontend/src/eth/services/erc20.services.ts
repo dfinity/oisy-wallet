@@ -3,7 +3,7 @@ import {
 	SUPPORTED_ETHEREUM_NETWORKS,
 	SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS
 } from '$env/networks.env';
-import { ERC20_CONTRACTS, ERC20_TWIN_CONTRACTS } from '$env/tokens.erc20.env';
+import { ERC20_CONTRACTS, ERC20_TWIN_TOKENS } from '$env/tokens.erc20.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
@@ -23,7 +23,7 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 			Partial<Pick<Erc20Token, 'id'>>;
 
 		const loadKnownContracts = (): Promise<ContractData>[] =>
-			[...ERC20_TWIN_CONTRACTS, ...ERC20_CONTRACTS].map(
+			ERC20_CONTRACTS.map(
 				async ({ network, ...contract }): Promise<ContractData> => ({
 					...contract,
 					network,
@@ -63,7 +63,7 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 		const userContracts = await loadUserContracts();
 
 		const contracts = await Promise.all([...loadKnownContracts(), ...userContracts]);
-		erc20TokensStore.set(contracts.map(mapErc20Token));
+		erc20TokensStore.set([...ERC20_TWIN_TOKENS, ...contracts.map(mapErc20Token)]);
 	} catch (err: unknown) {
 		erc20TokensStore.reset();
 

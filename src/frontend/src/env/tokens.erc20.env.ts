@@ -1,8 +1,8 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
-import type { Erc20Contract } from '$eth/types/erc20';
+import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
-import type { Token } from '$lib/types/token';
+import usdc from '$icp-eth/assets/usdc.svg';
 
 const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
 	// Uniswap
@@ -40,11 +40,6 @@ const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 		exchange: 'icp'
 	},
 	{
-		// USDC
-		address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-		exchange: 'ethereum'
-	},
-	{
 		// USDT
 		address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
 		exchange: 'ethereum'
@@ -70,25 +65,50 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 ];
 
 /**
- * ERC20 which have ck twin tokens counterparts
+ * ERC20 which have twin tokens counterparts.
+ * Because we manage those with ckERC20, we describe their details statically for simplicity reason.
+ * Unlike other Erc20 tokens, for which we load the details at runtime based one their contract address.
  */
 
-type Erc20TwinToken = Erc20Contract & Pick<Token, 'id'> & { network: EthereumNetwork };
+export const USDC_DECIMALS = 6;
 
-const SEPOLIA_USDC_SYMBOL = 'USDC';
+export const USDC_SYMBOL = 'USDC';
+
+export const USDC_TOKEN_ID: unique symbol = Symbol(USDC_SYMBOL);
+
+export const USDC_TOKEN: RequiredErc20Token = {
+	id: USDC_TOKEN_ID,
+	network: ETHEREUM_NETWORK,
+	standard: 'erc20',
+	category: 'default',
+	name: 'USD Coin',
+	symbol: 'USDC',
+	decimals: USDC_DECIMALS,
+	icon: usdc,
+	address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+	exchange: 'ethereum'
+};
+
+export const SEPOLIA_USDC_SYMBOL = 'SepoliaUSDC';
 
 export const SEPOLIA_USDC_TOKEN_ID: unique symbol = Symbol(SEPOLIA_USDC_SYMBOL);
 
-export const SEPOLIA_USDC_TOKEN: Erc20TwinToken = {
+export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	id: SEPOLIA_USDC_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
+	standard: 'erc20',
+	category: 'default',
+	name: 'USDC',
+	symbol: 'USDC',
+	decimals: USDC_DECIMALS,
+	icon: usdc,
 	address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
 	exchange: 'ethereum'
 };
 
-const ERC20_TWIN_CONTRACTS_SEPOLIA: Erc20TwinToken[] = [SEPOLIA_USDC_TOKEN];
+const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [SEPOLIA_USDC_TOKEN];
 
-export const ERC20_TWIN_CONTRACTS: Erc20TwinToken[] = [
-	...(ETH_MAINNET_ENABLED ? [] : []),
-	...ERC20_TWIN_CONTRACTS_SEPOLIA
+export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
+	...(ETH_MAINNET_ENABLED ? [USDC_TOKEN] : []),
+	...ERC20_TWIN_TOKENS_SEPOLIA
 ];
