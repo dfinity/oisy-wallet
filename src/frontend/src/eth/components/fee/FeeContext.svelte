@@ -23,7 +23,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 
 	export let observe: boolean;
@@ -53,16 +56,14 @@
 
 			const { getFeeData } = infuraProviders($sendToken.network.id);
 
-			const helperContractAddress = toCkEthHelperContractAddress(
-				$ckEthMinterInfoStore?.[$ethereumTokenId]
-			);
-
 			if (isSupportedEthTokenId($sendTokenId)) {
 				feeStore.setFee({
 					...(await getFeeData()),
 					gas: await getEthFeeData({
 						...params,
-						helperContractAddress
+						helperContractAddress: toCkEthHelperContractAddress(
+							$ckEthMinterInfoStore?.[$ethereumTokenId]
+						)
 					})
 				});
 				return;
@@ -83,7 +84,9 @@
 					...(await getFeeData()),
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
-						helperContractAddress
+						erc20HelperContractAddress: toCkErc20HelperContractAddress(
+							$ckEthMinterInfoStore?.[$ethereumTokenId]
+						)
 					})
 				});
 				return;

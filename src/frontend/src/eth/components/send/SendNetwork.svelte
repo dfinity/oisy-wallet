@@ -32,7 +32,7 @@
 		if (
 			isCkEthHelperContract({
 				destination,
-				helperContractAddress: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
+				contractAddress: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
 			})
 		) {
 			networkName = ICP_NETWORK.name;

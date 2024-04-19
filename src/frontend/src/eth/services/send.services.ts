@@ -14,7 +14,7 @@ import type { SendParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
 import { isErc20Icp, isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
-import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+import {toCkErc20HelperContractAddress, toCkEthHelperContractAddress} from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
@@ -23,7 +23,7 @@ import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
-import { assertNonNullish, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 import { processTransactionSent } from './transaction.services';
@@ -208,7 +208,7 @@ const sendTransaction = async ({
 		? nonNullish(ckEthHelperContractAddress) &&
 			isCkEthHelperContract({
 				destination: to,
-				helperContractAddress: ckEthHelperContractAddress
+				contractAddress: ckEthHelperContractAddress
 			}) &&
 			isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
 			? ethContractPrepareTransaction({
@@ -285,7 +285,7 @@ const approve = async ({
 		nonNullish(ckEthHelperContractAddress) &&
 		isCkEthHelperContract({
 			destination: to,
-			helperContractAddress: ckEthHelperContractAddress
+			contractAddress: ckEthHelperContractAddress
 		});
 
 	// The Erc20 contract supports conversion to ckErc20 but, it's a standard transaction
@@ -293,9 +293,7 @@ const approve = async ({
 		return;
 	}
 
-	const erc20HelperContractAddress = fromNullable(
-		minterInfo?.data.erc20_helper_contract_address ?? []
-	);
+	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
 	if (isNullish(erc20HelperContractAddress)) {
 		const {
