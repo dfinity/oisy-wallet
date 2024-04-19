@@ -35,6 +35,8 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {ckEthMinterInfoStore} from "$icp/stores/cketh.store";
+	import {ethereumTokenId} from "$eth/derived/token.derived";
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -132,7 +134,7 @@
 			token: $sendToken,
 			progress: (step: SendStep) => (sendProgressStep = step),
 			identity: $authStore.identity,
-			ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
+			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			tokenStandard: $sendTokenStandard,
 			sourceNetwork,
 			targetNetwork
