@@ -177,86 +177,59 @@ export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
  * ckERC20
  */
 
-export const IC_CKERC20_USDC_LEDGER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKERC20_USDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined) ??
-	'ss2fx-dyaaa-aaaar-qacoq-cai';
+export const STAGING_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
+	.VITE_STAGING_CKUSDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
+export const STAGING_CKUSDC_INDEX_CANISTER_ID = import.meta.env
+	.VITE_STAGING_CKUSDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
+export const STAGING_CKUSDC_MINTER_CANISTER_ID = import.meta.env
+	.VITE_STAGING_CKUSDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
 
-export const IC_CKERC20_USDC_INDEX_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKERC20_USDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined) ??
-	's3zol-vqaaa-aaaar-qacpa-cai';
-
-export const IC_CKERC20_USDC_MINTER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKERC20_USDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined) ??
-	'sv3dd-oaaaa-aaaar-qacoa-cai';
-
-export const STAGING_CKERC20_USDC_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKERC20_USDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
-export const STAGING_CKERC20_USDC_INDEX_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKERC20_USDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
-export const STAGING_CKERC20_USDC_MINTER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKERC20_USDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
-
-export const LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID = import.meta.env
+export const LOCAL_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKETH_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
-export const LOCAL_CKERC20_USDC_INDEX_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKETH_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
-export const LOCAL_CKERC20_USDC_MINTER_CANISTER_ID = import.meta.env
+export const LOCAL_CKUSDC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKETH_INDEX_CANISTER_ID as
+	| CanisterIdText
+	| null
+	| undefined;
+export const LOCAL_CKUSDC_MINTER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKETH_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
 
-const CKERC20_USDC_LOCAL_DATA: IcCkInterface | undefined =
+const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
-	nonNullish(LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID) &&
-	nonNullish(LOCAL_CKERC20_USDC_INDEX_CANISTER_ID) &&
-	nonNullish(LOCAL_CKERC20_USDC_MINTER_CANISTER_ID)
+	nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) &&
+	nonNullish(LOCAL_CKUSDC_INDEX_CANISTER_ID) &&
+	nonNullish(LOCAL_CKUSDC_MINTER_CANISTER_ID)
 		? {
-				ledgerCanisterId: LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID,
-				indexCanisterId: LOCAL_CKERC20_USDC_INDEX_CANISTER_ID,
-				minterCanisterId: LOCAL_CKERC20_USDC_MINTER_CANISTER_ID,
+				ledgerCanisterId: LOCAL_CKUSDC_LEDGER_CANISTER_ID,
+				indexCanisterId: LOCAL_CKUSDC_INDEX_CANISTER_ID,
+				minterCanisterId: LOCAL_CKUSDC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 4,
 				twinToken: SEPOLIA_USDC_TOKEN
 			}
 		: undefined;
 
-const CKERC20_USDC_STAGING_DATA: IcCkInterface | undefined =
+const CKUSDC_STAGING_DATA: IcCkInterface | undefined =
 	(STAGING || PROD) &&
-	nonNullish(STAGING_CKERC20_USDC_LEDGER_CANISTER_ID) &&
-	nonNullish(STAGING_CKERC20_USDC_INDEX_CANISTER_ID) &&
-	nonNullish(STAGING_CKERC20_USDC_MINTER_CANISTER_ID)
+	nonNullish(STAGING_CKUSDC_LEDGER_CANISTER_ID) &&
+	nonNullish(STAGING_CKUSDC_INDEX_CANISTER_ID) &&
+	nonNullish(STAGING_CKUSDC_MINTER_CANISTER_ID)
 		? {
-				ledgerCanisterId: STAGING_CKERC20_USDC_LEDGER_CANISTER_ID,
-				indexCanisterId: STAGING_CKERC20_USDC_INDEX_CANISTER_ID,
-				minterCanisterId: STAGING_CKERC20_USDC_MINTER_CANISTER_ID,
+				ledgerCanisterId: STAGING_CKUSDC_LEDGER_CANISTER_ID,
+				indexCanisterId: STAGING_CKUSDC_INDEX_CANISTER_ID,
+				minterCanisterId: STAGING_CKUSDC_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 3,
 				twinToken: SEPOLIA_USDC_TOKEN
 			}
 		: undefined;
 
-const CKERC20_USDC_IC_DATA: IcCkInterface | undefined =
-	STAGING || PROD
-		? {
-				ledgerCanisterId: IC_CKERC20_USDC_LEDGER_CANISTER_ID,
-				indexCanisterId: IC_CKERC20_USDC_INDEX_CANISTER_ID,
-				minterCanisterId: IC_CKERC20_USDC_MINTER_CANISTER_ID,
-				exchangeCoinId: 'ethereum',
-				position: 2,
-				twinToken: SEPOLIA_USDC_TOKEN
-			}
-		: undefined;
-
-export const CKERC20_USDC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
-	...(nonNullish(STAGING_CKERC20_USDC_LEDGER_CANISTER_ID)
-		? [STAGING_CKERC20_USDC_LEDGER_CANISTER_ID]
-		: []),
-	...(nonNullish(LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID)
-		? [LOCAL_CKERC20_USDC_LEDGER_CANISTER_ID]
-		: [])
+export const CKUSDC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
+	...(nonNullish(STAGING_CKUSDC_LEDGER_CANISTER_ID) ? [STAGING_CKUSDC_LEDGER_CANISTER_ID] : []),
+	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : [])
 ];
 
-export const CKERC20_USDC_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = [
-	IC_CKERC20_USDC_LEDGER_CANISTER_ID,
-	...CKERC20_USDC_LEDGER_CANISTER_TESTNET_IDS
+export const CKUSDC_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = [
+	...CKUSDC_LEDGER_CANISTER_TESTNET_IDS
 ];
 
 /**
@@ -270,7 +243,6 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
 	...(nonNullish(CKETH_STAGING_DATA) ? [CKETH_STAGING_DATA] : []),
 	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : []),
-	...(nonNullish(CKERC20_USDC_LOCAL_DATA) ? [CKERC20_USDC_LOCAL_DATA] : []),
-	...(nonNullish(CKERC20_USDC_STAGING_DATA) ? [CKERC20_USDC_STAGING_DATA] : []),
-	...(nonNullish(CKERC20_USDC_IC_DATA) ? [CKERC20_USDC_IC_DATA] : [])
+	...(nonNullish(CKUSDC_LOCAL_DATA) ? [CKUSDC_LOCAL_DATA] : []),
+	...(nonNullish(CKUSDC_STAGING_DATA) ? [CKUSDC_STAGING_DATA] : [])
 ];
