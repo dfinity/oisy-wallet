@@ -11,7 +11,6 @@
 	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import type { TokenId } from '$lib/types/token';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
-	import { isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 
 	// TODO: rename to withTokenId?
 	export let convertTokenId: TokenId;

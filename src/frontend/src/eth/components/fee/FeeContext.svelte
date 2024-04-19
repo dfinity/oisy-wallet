@@ -22,7 +22,6 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isCkEthHelperContract } from '$eth/utils/send.utils';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 
