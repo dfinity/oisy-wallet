@@ -7,7 +7,7 @@
 	import eth from '$icp-eth/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import icpDark from '$eth/assets/icp_dark.svg';
-	import type { Token, TokenStandard } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
