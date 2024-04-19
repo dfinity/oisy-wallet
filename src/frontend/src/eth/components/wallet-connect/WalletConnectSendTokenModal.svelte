@@ -25,6 +25,7 @@
 	} from '$eth/services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
+	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { authStore } from '$lib/stores/auth.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
@@ -158,19 +159,21 @@
 		observe={currentStep?.name !== 'Sending'}
 		{sourceNetwork}
 	>
-		{#if currentStep?.name === 'Sending'}
-			<SendProgress progressStep={sendProgressStep} steps={walletConnectSendSteps($i18n)} />
-		{:else}
-			<WalletConnectSendReview
-				{amount}
-				{destination}
-				{data}
-				{erc20Approve}
-				{sourceNetwork}
-				{targetNetwork}
-				on:icApprove={send}
-				on:icReject={reject}
-			/>
-		{/if}
+		<CkEthLoader convertTokenId={$sendTokenId}>
+			{#if currentStep?.name === 'Sending'}
+				<SendProgress progressStep={sendProgressStep} steps={walletConnectSendSteps($i18n)} />
+			{:else}
+				<WalletConnectSendReview
+					{amount}
+					{destination}
+					{data}
+					{erc20Approve}
+					{sourceNetwork}
+					{targetNetwork}
+					on:icApprove={send}
+					on:icReject={reject}
+				/>
+			{/if}
+		</CkEthLoader>
 	</FeeContext>
 </WizardModal>

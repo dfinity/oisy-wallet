@@ -3,6 +3,7 @@
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
+	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { isNullish } from '@dfinity/utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { networkICP } from '$lib/derived/network.derived';
@@ -39,11 +40,13 @@
 	};
 </script>
 
-<button
-	class="hero col-span-2"
-	on:click={async () => await openSend()}
-	disabled={$isBusy}
-	class:opacity-50={$isBusy}
->
-	<slot />
-</button>
+<CkEthLoader {convertTokenId}>
+	<button
+		class="hero col-span-2"
+		on:click={async () => await openSend()}
+		disabled={$isBusy}
+		class:opacity-50={$isBusy}
+	>
+		<slot />
+	</button>
+</CkEthLoader>
