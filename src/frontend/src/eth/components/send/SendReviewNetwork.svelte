@@ -7,14 +7,24 @@
 	import eth from '$icp-eth/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import icpDark from '$eth/assets/icp_dark.svg';
-	import type { TokenStandard } from '$lib/types/token';
+	import type { Token, TokenStandard } from '$lib/types/token';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
+	import type { Erc20Token } from '$eth/types/erc20';
+	import { ERC20_CONTRACT_ICP, ERC20_CONTRACT_ICP_GOERLI } from '$env/tokens.erc20.env';
 
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
-	export let tokenStandard: TokenStandard;
+	export let token: Token;
+
+	let nativeIcp: boolean;
+	$: nativeIcp =
+		nonNullish(targetNetwork) &&
+		isNetworkICP(targetNetwork) &&
+		[ERC20_CONTRACT_ICP.address, ERC20_CONTRACT_ICP_GOERLI.address].includes(
+			(token as Erc20Token)?.address
+		);
 </script>
 
 <Value ref="source-network" element="div">
@@ -32,7 +42,7 @@
 	<Value ref="target-network" element="div">
 		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
 		<span class="flex gap-1">
-			{#if isNetworkICP(targetNetwork) && tokenStandard === 'erc20'}
+			{#if nativeIcp}
 				{$i18n.send.text.convert_to_native_icp}
 				<Logo
 					src={icpDark}
