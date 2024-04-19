@@ -186,10 +186,8 @@ export const STAGING_CKUSDC_MINTER_CANISTER_ID = import.meta.env
 
 export const LOCAL_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKUSDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
-export const LOCAL_CKUSDC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKUSDC_INDEX_CANISTER_ID as
-	| CanisterIdText
-	| null
-	| undefined;
+export const LOCAL_CKUSDC_INDEX_CANISTER_ID = import.meta.env
+	.VITE_LOCAL_CKUSDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
 export const LOCAL_CKUSDC_MINTER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKUSDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
 
