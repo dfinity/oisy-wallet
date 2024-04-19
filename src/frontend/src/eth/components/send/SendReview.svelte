@@ -43,7 +43,7 @@
 >
 	<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork {targetNetwork} {sourceNetwork} tokenStandard={$sendToken} slot="network" />
+	<SendReviewNetwork {targetNetwork} {sourceNetwork} token={$sendToken} slot="network" />
 </SendData>
 
 <ButtonGroup>

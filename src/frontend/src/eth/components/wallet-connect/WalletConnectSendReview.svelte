@@ -39,12 +39,7 @@
 
 	<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork
-		{sourceNetwork}
-		{targetNetwork}
-		tokenStandard={$sendTokenStandard}
-		slot="network"
-	/>
+	<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
 </SendData>
 
 <WalletConnectActions on:icApprove on:icReject />
