@@ -26,13 +26,14 @@
 	import type { Network } from '$lib/types/network';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -147,7 +148,7 @@
 				sourceNetwork,
 				targetNetwork,
 				identity: $authStore.identity,
-				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
+				minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId]
 			});
 
 			await trackEvent({

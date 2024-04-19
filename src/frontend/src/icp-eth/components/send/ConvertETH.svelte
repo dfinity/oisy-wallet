@@ -16,14 +16,7 @@
 	// TODO: rename to withTokenId?
 	export let convertTokenId: TokenId;
 
-	// TODO check ckEthMinterInfoStore for sepolia
-
-	$: console.log(
-		convertTokenId,
-		isNotSupportedEthTokenId(convertTokenId),
-		isNullish($ckEthHelperContractAddressStore?.[convertTokenId]),
-		isNotSupportedErc20TwinTokenId(convertTokenId)
-	);
+	// TODO check ckEthMinterInfoStore for sepolia instead of ckEthHelperContractAddressStore?
 
 	const isDisabled = (): boolean =>
 		$addressNotLoaded ||

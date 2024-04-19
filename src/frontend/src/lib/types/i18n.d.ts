@@ -65,6 +65,7 @@ interface I18nInit {
 		no_etherscan_rest_api: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
+		no_infura_ckerc20_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
 		eth_address_unknown: string;
@@ -199,6 +200,7 @@ interface I18nSend {
 		metamask_no_accounts: string;
 		metamask_switch_network: string;
 		erc20_data_undefined: string;
+		erc20_helper_contract_address_undefined: string;
 		data_undefined: string;
 		no_identity_calculate_fee: string;
 		invalid_address: string;

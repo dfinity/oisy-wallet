@@ -13,7 +13,7 @@ import type { NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isCkEthHelperContract } from '$eth/utils/send.utils';
-import { isErc20Icp } from '$eth/utils/token.utils';
+import { isErc20Icp, isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { SendStep } from '$lib/enums/steps';
@@ -22,7 +22,7 @@ import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
-import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { assertNonNullish, fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
 import { processTransactionSent } from './transaction.services';
@@ -116,10 +116,6 @@ const ethContractPrepareTransaction = async ({
 		to
 	});
 
-	// TODO: approve for erc20
-	// helper_contract erc20_helper_contract_address = opt "0xE1788E4834c896F1932188645cc36c54d1b80AC1";
-	// amount !decimals
-
 	// TODO: deposit for erc20
 	// contract: erc20_contract_address = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
 	// amount !decimals
@@ -151,6 +147,25 @@ const ethContractPrepareTransaction = async ({
 
 export const send = async ({
 	progress,
+	...rest
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
+	SendParams &
+	Pick<TransactionFeeData, 'gas'> & {
+		maxFeePerGas: BigNumber;
+		maxPriorityFeePerGas: BigNumber;
+	}): Promise<{ hash: string }> => {
+	// TODO: do we want to display an progress(SendStep.APPROVE); on screen?
+	progress(SendStep.INITIALIZATION);
+
+	await approve(rest);
+
+	const transactionSent = await sendTransaction({ progress, ...rest });
+
+	return { hash: transactionSent.hash };
+};
+
+const sendTransaction = async ({
+	progress,
 	lastProgressStep = SendStep.DONE,
 	token,
 	from,
@@ -161,7 +176,7 @@ export const send = async ({
 	sourceNetwork,
 	targetNetwork,
 	identity,
-	ckEthHelperContractAddress,
+	minterInfo,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
@@ -169,16 +184,11 @@ export const send = async ({
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
 	}): Promise<{ hash: string }> => {
-	progress(SendStep.INITIALIZATION);
-
 	const { id: networkId, chainId } = sourceNetwork;
 
 	const { sendTransaction, getTransactionCount } = infuraProviders(networkId);
 
 	const nonce = await getTransactionCount(from);
-
-	// TODO: approve nonce
-	// then send nonce + 1
 
 	const principalEthAddress = (): string => {
 		const {
@@ -191,16 +201,23 @@ export const send = async ({
 		return encodePrincipalToEthAddress(identity.getPrincipal());
 	};
 
+	const ckEthHelperContractAddress = fromNullable(
+		minterInfo?.data.eth_helper_contract_address ?? []
+	);
+
 	const transaction = await (isSupportedEthTokenId(token.id)
 		? nonNullish(ckEthHelperContractAddress) &&
 			isCkEthHelperContract({
 				destination: to,
-				helperContractAddress: ckEthHelperContractAddress
+				helperContractAddress: {
+					data: ckEthHelperContractAddress,
+					certified: minterInfo?.certified ?? false
+				}
 			}) &&
 			isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
 			? ethContractPrepareTransaction({
 					...rest,
-					contract: { address: ckEthHelperContractAddress.data },
+					contract: { address: ckEthHelperContractAddress },
 					from,
 					to: principalEthAddress(),
 					nonce,
@@ -250,4 +267,66 @@ export const send = async ({
 	progress(lastProgressStep);
 
 	return { hash: transactionSent.hash };
+};
+
+const approve = async ({
+	token,
+	to,
+	sourceNetwork,
+	minterInfo,
+	amount
+}: Pick<TransferParams, 'to' | 'amount'> &
+	Pick<SendParams, 'token' | 'sourceNetwork' | 'minterInfo'>) => {
+	// Approve happens before send currently only for ckERC20 -> ERC20.
+	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc
+	if (isNotSupportedErc20TwinTokenId(token.id)) {
+		return;
+	}
+
+	const ckEthHelperContractAddress = fromNullable(
+		minterInfo?.data.eth_helper_contract_address ?? []
+	);
+
+	const destinationCkEth =
+		nonNullish(ckEthHelperContractAddress) &&
+		isCkEthHelperContract({
+			destination: to,
+			helperContractAddress: {
+				data: ckEthHelperContractAddress,
+				certified: minterInfo?.certified ?? false
+			}
+		});
+
+	// The Erc20 contract supports conversion to ckErc20 but, it's a standard transaction
+	if (!destinationCkEth) {
+		return;
+	}
+
+	const erc20HelperContractAddress = fromNullable(
+		minterInfo?.data.erc20_helper_contract_address ?? []
+	);
+
+	if (isNullish(erc20HelperContractAddress)) {
+		const {
+			send: {
+				error: { erc20_helper_contract_address_undefined }
+			}
+		} = get(i18n);
+
+		throw new Error(erc20_helper_contract_address_undefined);
+	}
+
+	// TODO: remove after test
+	// helper_contract erc20_helper_contract_address = opt "0xE1788E4834c896F1932188645cc36c54d1b80AC1";
+	// amount !decimals
+
+	const { id: networkId } = sourceNetwork;
+
+	const { approve } = infuraErc20Providers(networkId);
+
+	await approve({
+		contract: token as Erc20Token,
+		address: erc20HelperContractAddress,
+		amount
+	});
 };

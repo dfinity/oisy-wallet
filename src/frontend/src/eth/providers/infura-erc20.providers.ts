@@ -48,7 +48,6 @@ export class InfuraErc20Provider implements Erc20Provider {
 		address: ETH_ADDRESS;
 	}): Promise<BigNumber> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
-
 		return erc20Contract.balanceOf(address);
 	};
 
@@ -63,6 +62,19 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}): Promise<BigNumber> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.estimateGas.approve(address, amount);
+	};
+
+	approve = ({
+		contract: { address: contractAddress },
+		address,
+		amount
+	}: {
+		contract: Erc20ContractAddress;
+		address: ETH_ADDRESS;
+		amount: BigNumber;
+	}): Promise<BigNumber> => {
+		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
+		return erc20Contract.approve(address, amount);
 	};
 
 	// Transaction send: https://ethereum.stackexchange.com/a/131944

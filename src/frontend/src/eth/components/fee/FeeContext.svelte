@@ -59,10 +59,10 @@
 				return;
 			}
 
-            // TODO: utiliser amount + 10% marge de sécurité
+			// TODO: utiliser amount + 10% marge de sécurité
 
-            // TODO: erc20 -> ckErc20
-            // getErc20FeeData() (approve) + soit deposit feeData dynamic ou 60_000 (deposit)
+			// TODO: erc20 -> ckErc20
+			// getErc20FeeData() (approve) + soit deposit feeData dynamic ou 60_000 (deposit)
 
 			feeStore.setFee({
 				...(await getFeeData()),

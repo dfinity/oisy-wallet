@@ -77,6 +77,7 @@
 			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
+			"no_infura_ckerc20_provider": "No Infura CkErc20 provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
@@ -224,6 +225,7 @@
 			"metamask_no_accounts": "No Metamask accounts found.",
 			"metamask_switch_network": "Cannot request Metamask to switch to chain ID $chain_id. Is your Metamask using $network_name?",
 			"erc20_data_undefined": "Erc20 transaction Data cannot be undefined or null.",
+			"erc20_helper_contract_address_undefined": "Erc20 helper contract address cannot be undefined or null.",
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_address": "The address is invalid. Please try again with a valid address identifier."
