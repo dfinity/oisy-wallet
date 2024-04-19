@@ -122,16 +122,6 @@
 				}
 			}
 		},
-		"ckusdc_minter": {
-			"type": "custom",
-			"candid": "target/ic/cketh_minter.did",
-			"wasm": "target/ic/cketh_minter.wasm",
-			"remote": {
-				"id": {
-					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai"
-				}
-			}
-		},
 		"ckusdc_ledger": {
 			"type": "custom",
 			"candid": "target/ic/cketh_ledger.did",
