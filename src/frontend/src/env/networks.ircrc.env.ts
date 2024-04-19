@@ -185,13 +185,11 @@ export const STAGING_CKUSDC_MINTER_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CKUSDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
 
 export const LOCAL_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKETH_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
-export const LOCAL_CKUSDC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKETH_INDEX_CANISTER_ID as
-	| CanisterIdText
-	| null
-	| undefined;
+	.VITE_LOCAL_CKUSDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
+export const LOCAL_CKUSDC_INDEX_CANISTER_ID = import.meta.env
+	.VITE_LOCAL_CKUSDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
 export const LOCAL_CKUSDC_MINTER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKETH_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_LOCAL_CKUSDC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
 
 const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
