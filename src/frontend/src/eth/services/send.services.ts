@@ -164,9 +164,11 @@ const ckErc20HelperContractPrepareTransaction = async ({
 		amount
 	});
 
+	const { address: contractAddress } = contract;
+
 	return prepare({
 		data,
-		to,
+		to: contractAddress,
 		amount: 0n,
 		...rest
 	});
