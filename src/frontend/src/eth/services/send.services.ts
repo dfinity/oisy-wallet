@@ -430,30 +430,18 @@ const approve = async ({
 		return { transactionApproved: false };
 	}
 
-	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
+	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	const destinationCkEth =
-		nonNullish(ckEthHelperContractAddress) &&
+	const destinationCkErc20 =
+		nonNullish(erc20HelperContractAddress) &&
 		isDestinationContractAddress({
 			destination: to,
-			contractAddress: ckEthHelperContractAddress
+			contractAddress: erc20HelperContractAddress
 		});
 
 	// The Erc20 contract supports conversion to ckErc20 but, it's a standard transaction
-	if (!destinationCkEth) {
+	if (!destinationCkErc20) {
 		return { transactionApproved: false };
-	}
-
-	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
-
-	if (isNullish(erc20HelperContractAddress)) {
-		const {
-			send: {
-				error: { erc20_helper_contract_address_undefined }
-			}
-		} = get(i18n);
-
-		throw new Error(erc20_helper_contract_address_undefined);
 	}
 
 	// TODO: remove after test
