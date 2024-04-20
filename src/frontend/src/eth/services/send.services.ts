@@ -183,7 +183,7 @@ const ckErc20HelperContractPrepareTransaction = async ({
 const erc20ContractPrepareApprove = async ({
 	amount,
 	token,
-	address,
+	spender,
 	networkId,
 	...rest
 }: Omit<TransferParams, 'to' | 'from'> &
@@ -191,13 +191,13 @@ const erc20ContractPrepareApprove = async ({
 		nonce: number;
 		gas: bigint;
 		networkId: NetworkId;
-		address: ETH_ADDRESS;
+		spender: ETH_ADDRESS;
 	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
 	const { populateApprove } = infuraErc20Providers(networkId);
 
 	const { data } = await populateApprove({
 		contract: token as Erc20Token,
-		address,
+		spender,
 		amount
 	});
 
@@ -471,7 +471,7 @@ const approve = async ({
 		chainId,
 		networkId,
 		token,
-		address: erc20HelperContractAddress
+		spender: erc20HelperContractAddress
 	});
 
 	const rawTransaction = await signTransaction({ identity, transaction: approve });

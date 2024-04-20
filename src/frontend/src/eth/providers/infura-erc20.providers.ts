@@ -81,15 +81,15 @@ export class InfuraErc20Provider implements Erc20Provider {
 
 	populateApprove = ({
 		contract: { address: contractAddress },
-		address,
+		spender,
 		amount
 	}: {
 		contract: Erc20ContractAddress;
-		address: ETH_ADDRESS;
+		spender: ETH_ADDRESS;
 		amount: BigNumber;
 	}): Promise<PopulatedTransaction> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
-		return erc20Contract.populateTransaction.approve(address, amount);
+		return erc20Contract.populateTransaction.approve(spender, amount);
 	};
 }
 
