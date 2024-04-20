@@ -4,11 +4,12 @@
 	import type { Network } from '$lib/types/network';
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
 	import { isCkEthHelperContract } from '$eth/utils/send.utils';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
@@ -31,7 +32,7 @@
 		if (
 			isCkEthHelperContract({
 				destination,
-				helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
+				contractAddress: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
 			})
 		) {
 			networkName = ICP_NETWORK.name;

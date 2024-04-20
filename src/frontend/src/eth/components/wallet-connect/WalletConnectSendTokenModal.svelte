@@ -27,7 +27,7 @@
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { authStore } from '$lib/stores/auth.store';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ICP_NETWORK } from '$env/networks.env';
@@ -35,8 +35,8 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {ckEthMinterInfoStore} from "$icp/stores/cketh.store";
-	import {ethereumTokenId} from "$eth/derived/token.derived";
+	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -74,7 +74,7 @@
 
 	let targetNetwork: Network | undefined = undefined;
 	$: targetNetwork =
-		destination === $ckEthHelperContractAddressStore?.[$sendTokenId]?.data
+		destination === toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
 			? ICP_NETWORK
 			: $selectedNetwork;
 

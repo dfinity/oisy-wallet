@@ -4,20 +4,18 @@
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { OptionAddress } from '$lib/types/address';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { address } from '$lib/derived/address.derived';
 	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import { authStore } from '$lib/stores/auth.store';
 	import {
 		loadPendingCkEthTransaction,
 		loadPendingCkEthTransactions
 	} from '$icp-eth/services/eth.services';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
-	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
+	import { ckEthHelperContractAddress, ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
 	import type { NetworkId } from '$lib/types/network';
 	import type { IcToken } from '$icp/types/ic';
 
@@ -95,11 +93,8 @@
 		});
 	};
 
-	let ckEthHelperContractAddress: string | undefined;
-	$: ckEthHelperContractAddress = $ckEthHelperContractAddressStore?.[$ethereumTokenId]?.data;
-
 	$: (async () =>
-		init({ toAddress: ckEthHelperContractAddress, networkId: $ckETHTwinToken?.network.id }))();
+		init({ toAddress: $ckEthHelperContractAddress, networkId: $ckETHTwinToken?.network.id }))();
 
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
@@ -107,8 +102,8 @@
 	$: $balance,
 		$ckEthMinterInfoStore,
 		$ckETHTwinToken,
-		ckEthHelperContractAddress,
-		(async () => await loadPendingTransactions({ toAddress: ckEthHelperContractAddress }))();
+		$ckEthHelperContractAddress,
+		(async () => await loadPendingTransactions({ toAddress: $ckEthHelperContractAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>

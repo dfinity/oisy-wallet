@@ -1,12 +1,11 @@
-import type { CkEthHelperContractAddressData } from '$icp-eth/stores/cketh.store';
+import type { ETH_ADDRESS } from '$lib/types/address';
 import { nonNullish } from '@dfinity/utils';
 
 export const isCkEthHelperContract = ({
-	helperContractAddress,
+	contractAddress,
 	destination
 }: {
-	helperContractAddress: CkEthHelperContractAddressData | null | undefined;
+	contractAddress: ETH_ADDRESS | null | undefined;
 	destination: string | undefined;
 }): boolean =>
-	nonNullish(helperContractAddress) &&
-	destination?.toLowerCase() === helperContractAddress.data.toLowerCase();
+	nonNullish(contractAddress) && destination?.toLowerCase() === contractAddress.toLowerCase();

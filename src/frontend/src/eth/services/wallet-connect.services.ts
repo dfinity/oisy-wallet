@@ -148,12 +148,8 @@ export const send = ({
 
 			const { valid } = assertCkEthHelperContractAddressLoaded({
 				tokenStandard,
-				helperContractAddress: nonNullish(ckEthHelperContractAddress)
-					? {
-							data: ckEthHelperContractAddress,
-							certified: minterInfo?.certified ?? false
-						}
-					: undefined,
+				helperContractAddress: ckEthHelperContractAddress,
+				helperContractAddressCertified: minterInfo?.certified,
 				network: targetNetwork
 			});
 
