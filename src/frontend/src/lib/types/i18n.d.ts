@@ -200,7 +200,6 @@ interface I18nSend {
 		metamask_no_accounts: string;
 		metamask_switch_network: string;
 		erc20_data_undefined: string;
-		erc20_helper_contract_address_undefined: string;
 		data_undefined: string;
 		no_identity_calculate_fee: string;
 		invalid_address: string;
