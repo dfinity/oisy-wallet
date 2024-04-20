@@ -22,7 +22,7 @@ export const loadCkEthMinterInfo = async ({
 }) => {
 	const minterInfoInStore = get(ckEthMinterInfoStore);
 
-	// We try to load only once per session the help contract address
+	// We try to load only once per session the helpers (ckETH and ckErc20) contract addresses
 	if (minterInfoInStore?.[tokenId] !== undefined) {
 		return;
 	}
