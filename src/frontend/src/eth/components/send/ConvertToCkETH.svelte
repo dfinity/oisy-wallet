@@ -8,8 +8,7 @@
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
 
 	/**
 	 * Send modal context store
@@ -25,8 +24,5 @@
 </ConvertETH>
 
 {#if $modalConvertETHToCkETH}
-	<SendTokenModal
-		destination={toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId]) ?? ''}
-		targetNetwork={ICP_NETWORK}
-	/>
+	<SendTokenModal destination={$ckEthHelperContractAddress ?? ''} targetNetwork={ICP_NETWORK} />
 {/if}

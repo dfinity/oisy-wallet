@@ -21,13 +21,12 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
-	import {
-		toCkErc20HelperContractAddress,
-		toCkEthHelperContractAddress
-	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import {
+		ckErc20HelperContractAddress,
+		ckEthHelperContractAddress
+	} from '$icp-eth/derived/cketh.derived';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -61,9 +60,7 @@
 					...(await getFeeData()),
 					gas: await getEthFeeData({
 						...params,
-						helperContractAddress: toCkEthHelperContractAddress(
-							$ckEthMinterInfoStore?.[$ethereumTokenId]
-						)
+						helperContractAddress: $ckEthHelperContractAddress
 					})
 				});
 				return;
@@ -84,9 +81,7 @@
 					...(await getFeeData()),
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
-						erc20HelperContractAddress: toCkErc20HelperContractAddress(
-							$ckEthMinterInfoStore?.[$ethereumTokenId]
-						)
+						erc20HelperContractAddress: $ckErc20HelperContractAddress
 					})
 				});
 				return;

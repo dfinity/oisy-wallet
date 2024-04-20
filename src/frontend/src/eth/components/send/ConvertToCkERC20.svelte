@@ -11,8 +11,7 @@
 	import { token } from '$lib/derived/token.derived';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
 
 	/**
 	 * Send modal context store
@@ -35,8 +34,5 @@
 </ConvertETH>
 
 {#if $modalConvertETHToCkETH}
-	<SendTokenModal
-		destination={toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId]) ?? ''}
-		targetNetwork={ICP_NETWORK}
-	/>
+	<SendTokenModal destination={$ckEthHelperContractAddress ?? ''} targetNetwork={ICP_NETWORK} />
 {/if}
