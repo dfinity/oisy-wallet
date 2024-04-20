@@ -1,11 +1,11 @@
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { OptionAddress } from '$lib/types/address';
 import { nonNullish } from '@dfinity/utils';
 
-export const isCkEthHelperContract = ({
+export const isDestinationContractAddress = ({
 	contractAddress,
 	destination
 }: {
-	contractAddress: ETH_ADDRESS | null | undefined;
-	destination: string | undefined;
+	contractAddress: OptionAddress;
+	destination: OptionAddress;
 }): boolean =>
 	nonNullish(contractAddress) && destination?.toLowerCase() === contractAddress.toLowerCase();

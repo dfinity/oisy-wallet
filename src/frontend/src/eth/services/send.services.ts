@@ -13,7 +13,7 @@ import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { isCkEthHelperContract } from '$eth/utils/send.utils';
+import { isDestinationContractAddress } from '$eth/utils/send.utils';
 import { isErc20Icp, isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 import {
 	toCkErc20HelperContractAddress,
@@ -325,7 +325,7 @@ const sendTransaction = async ({
 	const transaction = await (isSupportedEthTokenId(token.id)
 		? // Case Ethereum or Sepolia
 			nonNullish(ckEthHelperContractAddress) &&
-			isCkEthHelperContract({
+			isDestinationContractAddress({
 				destination: to,
 				contractAddress: ckEthHelperContractAddress
 			}) &&
@@ -354,7 +354,7 @@ const sendTransaction = async ({
 				})
 		: // Case Erc20
 			nonNullish(ckErc20HelperContractAddress) &&
-			  isCkEthHelperContract({
+			  isDestinationContractAddress({
 					destination: to,
 					contractAddress: ckErc20HelperContractAddress
 			  }) &&
@@ -432,7 +432,7 @@ const approve = async ({
 
 	const destinationCkEth =
 		nonNullish(ckEthHelperContractAddress) &&
-		isCkEthHelperContract({
+		isDestinationContractAddress({
 			destination: to,
 			contractAddress: ckEthHelperContractAddress
 		});

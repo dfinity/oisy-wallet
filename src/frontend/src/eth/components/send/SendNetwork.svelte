@@ -3,7 +3,7 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Network } from '$lib/types/network';
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
-	import { isCkEthHelperContract } from '$eth/utils/send.utils';
+	import { isDestinationContractAddress } from '$eth/utils/send.utils';
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
@@ -30,7 +30,7 @@
 		}
 
 		if (
-			isCkEthHelperContract({
+			isDestinationContractAddress({
 				destination,
 				contractAddress: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
 			})
