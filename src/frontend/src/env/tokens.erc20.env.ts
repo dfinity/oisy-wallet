@@ -91,7 +91,7 @@ export const USDC_TOKEN: RequiredErc20Token = {
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-	exchange: 'ethereum',
+	exchange: 'erc20',
 	twinTokenSymbol: 'ckUSDC'
 };
 
@@ -109,7 +109,7 @@ export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
-	exchange: 'ethereum',
+	exchange: 'erc20',
 	twinTokenSymbol: 'ckSepoliaUSDC'
 };
 
