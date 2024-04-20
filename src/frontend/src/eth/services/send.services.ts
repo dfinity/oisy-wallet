@@ -58,13 +58,9 @@ const ethPrepareTransaction = async ({
 const erc20PrepareTransaction = async ({
 	to,
 	amount,
-	maxPriorityFeePerGas: max_priority_fee_per_gas,
-	maxFeePerGas: max_fee_per_gas,
-	nonce,
 	token,
-	gas,
 	populate,
-	chainId: chain_id
+	...rest
 }: TransferParams &
 	NetworkChainId & {
 		nonce: number;
@@ -89,28 +85,20 @@ const erc20PrepareTransaction = async ({
 
 	const { address: contractAddress } = token as Erc20Token;
 
-	return {
+	return prepare({
+		data,
 		to: contractAddress,
-		chain_id,
-		nonce: BigInt(nonce),
-		gas,
-		max_fee_per_gas,
-		max_priority_fee_per_gas,
-		value: 0n,
-		data: [data]
-	};
+		amount: 0n,
+		...rest
+	});
 };
 
-const ethContractPrepareTransaction = async ({
+const ethHelperContractPrepareTransaction = async ({
 	contract,
 	to,
 	amount,
-	maxPriorityFeePerGas: max_priority_fee_per_gas,
-	maxFeePerGas: max_fee_per_gas,
-	nonce,
-	gas,
 	populate,
-	chainId: chain_id
+	...rest
 }: TransferParams &
 	NetworkChainId & {
 		nonce: number;
@@ -135,29 +123,24 @@ const ethContractPrepareTransaction = async ({
 
 	const { address: contractAddress } = contract;
 
-	return {
+	return prepare({
+		data,
 		to: contractAddress,
-		chain_id,
-		nonce: BigInt(nonce),
-		gas,
-		max_fee_per_gas,
-		max_priority_fee_per_gas,
-		value: amount.toBigInt(),
-		data: [data]
-	};
+		amount: amount.toBigInt(),
+		...rest
+	});
 };
 
-const ckErc20ContractPrepareTransaction = async ({
+/**
+ * {@link https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#deposit-erc20-to-ckerc20}
+ */
+const ckErc20HelperContractPrepareTransaction = async ({
 	contract,
 	to,
 	amount,
-	maxPriorityFeePerGas: max_priority_fee_per_gas,
-	maxFeePerGas: max_fee_per_gas,
-	nonce,
-	gas,
-	chainId: chain_id,
 	networkId,
-	token
+	token,
+	...rest
 }: TransferParams &
 	NetworkChainId & {
 		nonce: number;
@@ -172,62 +155,75 @@ const ckErc20ContractPrepareTransaction = async ({
 
 	const { address: erc20ContractAddress } = token as Erc20Token;
 
-	const { data } = await infuraCkErc20Providers(networkId).populateTransaction({
+	const { populateTransaction } = infuraCkErc20Providers(networkId);
+
+	const { data } = await populateTransaction({
 		contract,
 		erc20Contract: { address: erc20ContractAddress },
 		to,
 		amount
 	});
 
-	if (isNullish(data)) {
-		const {
-			send: {
-				error: { data_undefined }
-			}
-		} = get(i18n);
-
-		throw new Error(data_undefined);
-	}
-
-	const { address: contractAddress } = contract;
-
-	return {
-		to: contractAddress,
-		chain_id,
-		nonce: BigInt(nonce),
-		gas,
-		max_fee_per_gas,
-		max_priority_fee_per_gas,
-		value: amount.toBigInt(),
-		data: [data]
-	};
+	return prepare({
+		data,
+		to,
+		amount: 0n,
+		...rest
+	});
 };
 
-const ckErc20PrepareApprove = async ({
+/**
+ * Prepare an Erc20 contract to approve a transaction from another contract (address).
+ * i.e. tell an Erc20 contract to approve a transaction from the ckErc20 helper.
+ *
+ * {@link https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#deposit-erc20-to-ckerc20}
+ */
+const erc20ContractPrepareApprove = async ({
 	amount,
-	maxPriorityFeePerGas: max_priority_fee_per_gas,
-	maxFeePerGas: max_fee_per_gas,
-	nonce,
 	token,
-	gas,
-	erc20HelperContractAddress,
-	chainId: chain_id,
-	networkId
-}: Omit<TransferParams, 'to'> &
+	address,
+	networkId,
+	...rest
+}: Omit<TransferParams, 'to' | 'from'> &
 	NetworkChainId & {
 		nonce: number;
 		gas: bigint;
 		networkId: NetworkId;
-		erc20HelperContractAddress: ETH_ADDRESS;
+		address: ETH_ADDRESS;
 	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
 	const { populateApprove } = infuraErc20Providers(networkId);
 
 	const { data } = await populateApprove({
 		contract: token as Erc20Token,
-		address: erc20HelperContractAddress,
+		address,
 		amount
 	});
 
+	const { address: to } = token as Erc20Token;
+
+	return prepare({
+		data,
+		to,
+		amount: 0n,
+		...rest
+	});
+};
+
+const prepare = async ({
+	maxPriorityFeePerGas: max_priority_fee_per_gas,
+	maxFeePerGas: max_fee_per_gas,
+	nonce,
+	gas,
+	chainId: chain_id,
+	data,
+	to,
+	amount
+}: Omit<TransferParams, 'amount' | 'from'> &
+	NetworkChainId & {
+		nonce: number;
+		gas: bigint;
+		amount: bigint;
+	}): Promise<SignRequest> => {
 	if (isNullish(data)) {
 		const {
 			send: {
@@ -238,16 +234,14 @@ const ckErc20PrepareApprove = async ({
 		throw new Error(erc20_data_undefined);
 	}
 
-	const { address: contractAddress } = token as Erc20Token;
-
 	return {
-		to: contractAddress,
+		to,
 		chain_id,
 		nonce: BigInt(nonce),
 		gas,
 		max_fee_per_gas,
 		max_priority_fee_per_gas,
-		value: 0n,
+		value: amount,
 		data: [data]
 	};
 };
@@ -263,7 +257,7 @@ export const send = async ({
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
 	}): Promise<{ hash: string }> => {
-	// TODO: do we want to display an progress(SendStep.APPROVE); on screen?
+	// TODO: do we want to display an progress(SendStep.APPROVE); on screen? yes we want
 	progress(SendStep.INITIALIZATION);
 
 	const { id: networkId } = sourceNetwork;
@@ -272,9 +266,10 @@ export const send = async ({
 
 	const nonce = await getTransactionCount(from);
 
-	const { hash: approveHash } = await approve({ from, sourceNetwork, nonce, ...rest });
+	const { transactionApproved } = await approve({ sourceNetwork, nonce, ...rest });
 
-	const nonceTransaction = nonNullish(approveHash) ? nonce + 1 : nonce;
+	// If we approved a transaction - as for example in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
+	const nonceTransaction = transactionApproved ? nonce + 1 : nonce;
 
 	const transactionSent = await sendTransaction({
 		progress,
@@ -300,6 +295,7 @@ const sendTransaction = async ({
 	targetNetwork,
 	identity,
 	minterInfo,
+	nonce,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
 	SendParams &
@@ -310,9 +306,7 @@ const sendTransaction = async ({
 	}): Promise<{ hash: string }> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
-	const { sendTransaction, getTransactionCount } = infuraProviders(networkId);
-
-	const nonce = await getTransactionCount(from);
+	const { sendTransaction } = infuraProviders(networkId);
 
 	const principalEthAddress = (): string => {
 		const {
@@ -329,13 +323,14 @@ const sendTransaction = async ({
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
 	const transaction = await (isSupportedEthTokenId(token.id)
-		? nonNullish(ckEthHelperContractAddress) &&
+		? // Case Ethereum or Sepolia
+			nonNullish(ckEthHelperContractAddress) &&
 			isCkEthHelperContract({
 				destination: to,
 				contractAddress: ckEthHelperContractAddress
 			}) &&
 			isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
-			? ethContractPrepareTransaction({
+			? ethHelperContractPrepareTransaction({
 					...rest,
 					contract: { address: ckEthHelperContractAddress },
 					from,
@@ -357,13 +352,14 @@ const sendTransaction = async ({
 					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 					chainId
 				})
-		: nonNullish(ckErc20HelperContractAddress) &&
+		: // Case Erc20
+			nonNullish(ckErc20HelperContractAddress) &&
 			  isCkEthHelperContract({
 					destination: to,
 					contractAddress: ckErc20HelperContractAddress
 			  }) &&
 			  isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
-			? ckErc20ContractPrepareTransaction({
+			? ckErc20HelperContractPrepareTransaction({
 					...rest,
 					contract: { address: ckErc20HelperContractAddress },
 					from,
@@ -410,7 +406,6 @@ const sendTransaction = async ({
 
 const approve = async ({
 	token,
-	from,
 	to,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
@@ -420,17 +415,17 @@ const approve = async ({
 	minterInfo,
 	nonce,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from'> &
 	Omit<SendParams, 'targetNetwork' | 'lastProgressStep' | 'progress'> &
 	Pick<TransactionFeeData, 'gas'> & {
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
 		nonce: number;
-	}): Promise<{ hash: string | undefined }> => {
+	}): Promise<{ transactionApproved: boolean; hash?: string }> => {
 	// Approve happens before send currently only for ckERC20 -> ERC20.
 	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc
 	if (isNotSupportedErc20TwinTokenId(token.id)) {
-		return { hash: undefined };
+		return { transactionApproved: false };
 	}
 
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
@@ -444,7 +439,7 @@ const approve = async ({
 
 	// The Erc20 contract supports conversion to ckErc20 but, it's a standard transaction
 	if (!destinationCkEth) {
-		return { hash: undefined };
+		return { transactionApproved: false };
 	}
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
@@ -465,9 +460,8 @@ const approve = async ({
 
 	const { id: networkId, chainId } = sourceNetwork;
 
-	const approve = await ckErc20PrepareApprove({
+	const approve = await erc20ContractPrepareApprove({
 		...rest,
-		from,
 		nonce,
 		gas: gas.toBigInt(),
 		maxFeePerGas: maxFeePerGas.toBigInt(),
@@ -475,14 +469,14 @@ const approve = async ({
 		chainId,
 		networkId,
 		token,
-		erc20HelperContractAddress
+		address: erc20HelperContractAddress
 	});
 
 	const rawTransaction = await signTransaction({ identity, transaction: approve });
 
 	const { sendTransaction } = infuraProviders(networkId);
 
-	const transactionSent = await sendTransaction(rawTransaction);
+	const { hash } = await sendTransaction(rawTransaction);
 
-	return transactionSent;
+	return { transactionApproved: true, hash };
 };
