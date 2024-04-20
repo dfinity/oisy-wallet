@@ -4,7 +4,7 @@ import type { IcFee, IcInterface, IcToken, IcTokenWithoutId } from '$icp/types/i
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;
@@ -24,13 +24,15 @@ export const mapIcrcToken = ({
 		return undefined;
 	}
 
-	const { symbol, icon, ...metadataToken } = token;
+	const { symbol, icon: tokenIcon, ...metadataToken } = token;
+
+	const icon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
 
 	return {
 		network: ICP_NETWORK,
 		standard: 'icrc',
 		symbol,
-		icon: icrcCustomTokens?.[ledgerCanisterId]?.icon ?? icon,
+		...(notEmptyString(icon) && { icon }),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
 			explorerUrl: icrcCustomTokens[ledgerCanisterId].explorerUrl
 		}),
