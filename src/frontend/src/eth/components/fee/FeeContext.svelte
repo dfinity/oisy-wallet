@@ -22,7 +22,6 @@
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import {
 		ckErc20HelperContractAddress,
 		ckEthHelperContractAddress
@@ -130,7 +129,11 @@
 
 	$: obverseFeeData(observe);
 
-	$: amount, destination, $ckEthMinterInfoStore, debounceUpdateFeeData();
+	$: amount,
+		destination,
+		$ckEthHelperContractAddress,
+		$ckErc20HelperContractAddress,
+		debounceUpdateFeeData();
 </script>
 
 <slot />
