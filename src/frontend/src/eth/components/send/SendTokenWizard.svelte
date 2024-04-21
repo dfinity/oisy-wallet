@@ -74,7 +74,7 @@
 	export let sendProgressStep: string;
 
 	let destinationEditable = true;
-	$: destinationEditable = sendPurpose !== 'convert-eth-to-cketh';
+	$: destinationEditable = sendPurpose === 'send';
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
