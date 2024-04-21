@@ -101,7 +101,7 @@ export const sortIcTokens = (
 			: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
 		: positionA - positionB;
 
-export const buildIcrcCustomTokenMetadata = ({
+export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	icrcCustomTokens,
 	ledgerCanisterId
 }: {

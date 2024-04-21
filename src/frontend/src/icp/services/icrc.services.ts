@@ -7,7 +7,7 @@ import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcInterface } from '$icp/types/ic';
 import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
 import {
-	buildIcrcCustomTokenMetadata,
+	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
@@ -130,7 +130,7 @@ const loadCustomIcrcTokensData = async ({
 		const ledgerCanisterId = ledger_id.toText();
 
 		// For performance reasons, if we can build the token metadata using the known custom tokens from the environments, we do so and save a call to the ledger to fetch the metadata.
-		const meta = buildIcrcCustomTokenMetadata({
+		const meta = buildIcrcCustomTokenMetadataPseudoResponse({
 			icrcCustomTokens: indexedIcrcCustomTokens,
 			ledgerCanisterId
 		});
