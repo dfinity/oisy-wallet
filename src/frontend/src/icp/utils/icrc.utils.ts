@@ -2,8 +2,13 @@ import { ICP_NETWORK } from '$env/networks.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcFee, IcInterface, IcToken, IcTokenWithoutId } from '$icp/types/ic';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
+import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
-import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
+import {
+	IcrcMetadataResponseEntries,
+	type IcrcTokenMetadataResponse,
+	type IcrcValue
+} from '@dfinity/ledger-icrc';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
@@ -95,3 +100,31 @@ export const sortIcTokens = (
 			? nameA.localeCompare(nameB)
 			: exchangeCoinIdA.localeCompare(exchangeCoinIdB)
 		: positionA - positionB;
+
+export const buildIcrcCustomTokenMetadataPseudoResponse = ({
+	icrcCustomTokens,
+	ledgerCanisterId
+}: {
+	ledgerCanisterId: CanisterIdText;
+	icrcCustomTokens: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
+}): IcrcTokenMetadataResponse | undefined => {
+	const token = icrcCustomTokens[ledgerCanisterId];
+
+	if (isNullish(token)) {
+		return undefined;
+	}
+
+	const { symbol, icon: tokenIcon, name, fee, decimals } = token;
+
+	const icon: [IcrcMetadataResponseEntries.LOGO, IcrcValue] | undefined = nonNullish(tokenIcon)
+		? [IcrcMetadataResponseEntries.LOGO, { Text: tokenIcon }]
+		: undefined;
+
+	return [
+		[IcrcMetadataResponseEntries.SYMBOL, { Text: symbol }],
+		[IcrcMetadataResponseEntries.NAME, { Text: name }],
+		[IcrcMetadataResponseEntries.FEE, { Nat: fee }],
+		[IcrcMetadataResponseEntries.DECIMALS, { Nat: BigInt(decimals) }],
+		...(nonNullish(icon) ? [icon] : [])
+	];
+};
