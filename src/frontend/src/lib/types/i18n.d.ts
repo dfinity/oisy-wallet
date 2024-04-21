@@ -194,6 +194,8 @@ interface I18nSend {
 		gas_fees_not_defined: string;
 		max_gas_gee_per_gas_undefined: string;
 		address_unknown: string;
+		minter_info_not_loaded: string;
+		minter_info_not_certified: string;
 	};
 	error: {
 		unexpected: string;

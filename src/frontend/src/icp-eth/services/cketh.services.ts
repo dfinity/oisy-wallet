@@ -1,12 +1,13 @@
 import { minterInfo } from '$icp-eth/api/cketh-minter.api';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import type { IcCkMetadata } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionAddress } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
-import type { TokenId, TokenStandard } from '$lib/types/token';
+import type { TokenId } from '$lib/types/token';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
 import type { MinterInfo } from '@dfinity/cketh';
@@ -46,36 +47,42 @@ export const loadCkEthMinterInfo = async ({
 	});
 };
 
-export const assertCkEthHelperContractAddressLoaded = ({
-	helperContractAddress,
-	tokenStandard,
-	network,
-	helperContractAddressCertified
+export const assertCkEthMinterInfoLoaded = ({
+	minterInfo,
+	network
 }: {
-	helperContractAddress: OptionAddress;
-	helperContractAddressCertified: boolean | undefined;
-	tokenStandard: TokenStandard;
+	minterInfo: OptionCertifiedMinterInfo;
 	network: Network | undefined;
 }): { valid: boolean } => {
-	if (tokenStandard !== 'ethereum' || !isNetworkICP(network ?? DEFAULT_NETWORK)) {
+	if (!isNetworkICP(network ?? DEFAULT_NETWORK)) {
 		return { valid: true };
 	}
 
-	// TODO: extract i18n
+	if (isNullish(minterInfo)) {
+		const {
+			send: {
+				assertion: { minter_info_not_loaded }
+			}
+		} = get(i18n);
 
-	if (isNullish(helperContractAddress)) {
 		toastsError({
 			msg: {
-				text: `Try again in few seconds, a ckETH configuration parameter is not yet loaded.`
+				text: minter_info_not_loaded
 			}
 		});
 		return { valid: false };
 	}
 
-	if (helperContractAddressCertified !== true) {
+	if (!minterInfo.certified) {
+		const {
+			send: {
+				assertion: { minter_info_not_certified }
+			}
+		} = get(i18n);
+
 		toastsError({
 			msg: {
-				text: `Try again in few seconds, a ckETH configuration parameter has not yet certified.`
+				text: minter_info_not_certified
 			}
 		});
 		return { valid: false };

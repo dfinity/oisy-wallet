@@ -20,7 +20,7 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { authStore } from '$lib/stores/auth.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
+	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import type { Network } from '$lib/types/network';
@@ -33,7 +33,6 @@
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
 
@@ -58,7 +57,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken, sendTokenStandard, sendPurpose } =
+	const { sendTokenDecimals, sendTokenId, sendToken, sendPurpose } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
@@ -109,10 +108,8 @@
 			return;
 		}
 
-		const { valid } = assertCkEthHelperContractAddressLoaded({
-			tokenStandard: $sendTokenStandard,
-			helperContractAddress: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId]),
-			helperContractAddressCertified: $ckEthMinterInfoStore?.[$sendTokenId]?.certified,
+		const { valid } = assertCkEthMinterInfoLoaded({
+			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			network: targetNetwork
 		});
 
