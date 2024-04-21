@@ -218,7 +218,9 @@
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
 			"gas_fees_not_defined": "Gas fees are not defined.",
 			"max_gas_gee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
-			"address_unknown": "Address is unknown."
+			"address_unknown": "Address is unknown.",
+			"minter_info_not_loaded": "Try again in few seconds, a ckETH configuration parameter is not yet loaded.",
+			"minter_info_not_certified": "Try again in few seconds, a ckETH configuration parameter has not yet certified."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",

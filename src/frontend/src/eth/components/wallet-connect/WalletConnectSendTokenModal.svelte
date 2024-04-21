@@ -51,7 +51,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenId, sendToken, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Fee context store
@@ -144,7 +144,6 @@
 			progress: (step: SendStep) => (sendProgressStep = step),
 			identity: $authStore.identity,
 			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
-			tokenStandard: $sendTokenStandard,
 			sourceNetwork,
 			targetNetwork
 		});
