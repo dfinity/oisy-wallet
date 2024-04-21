@@ -129,7 +129,7 @@ const loadCustomIcrcTokensData = async ({
 
 		const ledgerCanisterId = ledger_id.toText();
 
-		// For performance reason, if we are able to build the token metadata with the known custom tokens from the environments, we do so and saves a call to the ledger to fetch the metadata.
+		// For performance reasons, if we can build the token metadata using the known custom tokens from the environments, we do so and save a call to the ledger to fetch the metadata.
 		const meta = buildIcrcCustomTokenMetadata({
 			icrcCustomTokens: indexedIcrcCustomTokens,
 			ledgerCanisterId
