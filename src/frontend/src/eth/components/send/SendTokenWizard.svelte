@@ -34,7 +34,7 @@
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
-	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -77,7 +77,7 @@
 	$: sendWithApproval = shouldSendWithApproval({
 		to: destination,
 		tokenId: $sendTokenId,
-		erc20HelperContractAddress: $ckEthHelperContractAddress
+		erc20HelperContractAddress: $ckErc20HelperContractAddress
 	});
 
 	/**
