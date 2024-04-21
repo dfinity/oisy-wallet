@@ -3,6 +3,7 @@ import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import usdc from '$icp-eth/assets/usdc.svg';
+import type { TokenId } from '$lib/types/token';
 
 const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
 	// Uniswap
@@ -19,12 +20,14 @@ const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	ERC20_CONTRACT_ADDRESS_UNISWAP
 ];
 
+export const ERC20_CONTRACT_ICP_GOERLI: Erc20Contract = {
+	// ICP
+	address: '0x8c283B98Edeb405816FD1D321005dF4d3AA956ba',
+	exchange: 'icp'
+};
+
 const _ERC20_CONTRACTS_GOERLI: Erc20Contract[] = [
-	{
-		// ICP
-		address: '0x8c283B98Edeb405816FD1D321005dF4d3AA956ba',
-		exchange: 'icp'
-	},
+	ERC20_CONTRACT_ICP_GOERLI,
 	{
 		// Weenus
 		address: '0xaFF4481D10270F50f203E0763e2597776068CBc5',
@@ -33,12 +36,14 @@ const _ERC20_CONTRACTS_GOERLI: Erc20Contract[] = [
 	ERC20_CONTRACT_ADDRESS_UNISWAP
 ];
 
+export const ERC20_CONTRACT_ICP: Erc20Contract = {
+	// ICP
+	address: '0x054B8f99D15cC5B35a42a926635977d62692F25b',
+	exchange: 'icp'
+};
+
 const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
-	{
-		// ICP
-		address: '0x054B8f99D15cC5B35a42a926635977d62692F25b',
-		exchange: 'icp'
-	},
+	ERC20_CONTRACT_ICP,
 	{
 		// USDT
 		address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
@@ -86,7 +91,8 @@ export const USDC_TOKEN: RequiredErc20Token = {
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-	exchange: 'ethereum'
+	exchange: 'erc20',
+	twinTokenSymbol: 'ckUSDC'
 };
 
 export const SEPOLIA_USDC_SYMBOL = 'SepoliaUSDC';
@@ -103,7 +109,8 @@ export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	decimals: USDC_DECIMALS,
 	icon: usdc,
 	address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
-	exchange: 'ethereum'
+	exchange: 'erc20',
+	twinTokenSymbol: 'ckSepoliaUSDC'
 };
 
 const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [SEPOLIA_USDC_TOKEN];
@@ -112,3 +119,5 @@ export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
 	...(ETH_MAINNET_ENABLED ? [USDC_TOKEN] : []),
 	...ERC20_TWIN_TOKENS_SEPOLIA
 ];
+
+export const ERC20_TWIN_TOKENS_IDS: TokenId[] = ERC20_TWIN_TOKENS.map(({ id }) => id);

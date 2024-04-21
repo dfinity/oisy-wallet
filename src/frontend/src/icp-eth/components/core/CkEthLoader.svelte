@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { loadCkEthHelperContractAddress } from '$icp-eth/services/cketh.services';
-	import { ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
+	import { loadCkEthMinterInfo } from '$icp-eth/services/cketh.services';
+	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { icrcTokensStore } from '$icp/stores/icrc.store';
 	import {
 		IC_CKETH_MINTER_CANISTER_ID,
@@ -17,7 +17,7 @@
 	export let convertTokenId: TokenId;
 
 	const load = async () => {
-		if (!$ethToCkETHEnabled) {
+		if (!$ethToCkETHEnabled && !$erc20ToCkErc20Enabled) {
 			return;
 		}
 
@@ -39,7 +39,9 @@
 			return;
 		}
 
-		await loadCkEthHelperContractAddress({
+		// TODO: this duplicate the ckETH worker, maybe we reuse the work on Ethereum as well?
+
+		await loadCkEthMinterInfo({
 			tokenId: convertTokenId,
 			canisters: {
 				minterCanisterId
@@ -47,7 +49,11 @@
 		});
 	};
 
-	$: $ethToCkETHEnabled, $icrcTokensStore, convertTokenId, (async () => await load())();
+	$: $ethToCkETHEnabled,
+		$erc20ToCkErc20Enabled,
+		$icrcTokensStore,
+		convertTokenId,
+		(async () => await load())();
 </script>
 
 <slot />

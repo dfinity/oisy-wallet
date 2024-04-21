@@ -8,15 +8,24 @@
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { getErc20FeeData, getEthFeeData, type GetFeeData } from '$eth/services/fee.services';
+	import {
+		getCkErc20FeeData,
+		getErc20FeeData,
+		getEthFeeData,
+		type GetFeeData
+	} from '$eth/services/fee.services';
 	import type { Network } from '$lib/types/network';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
+	import {
+		ckErc20HelperContractAddress,
+		ckEthHelperContractAddress
+	} from '$icp-eth/derived/cketh.derived';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -50,7 +59,28 @@
 					...(await getFeeData()),
 					gas: await getEthFeeData({
 						...params,
-						helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
+						helperContractAddress: $ckEthHelperContractAddress
+					})
+				});
+				return;
+			}
+
+			const erc20GasFeeParams = {
+				contract: $sendToken as Erc20Token,
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				address: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
+				amount: parseToken({ value: `${amount ?? '1'}` }),
+				sourceNetwork
+			};
+
+			// TODO: use amount + 10% to estimate fee dynamically to have some buffer
+
+			if (isSupportedErc20TwinTokenId($sendTokenId)) {
+				feeStore.setFee({
+					...(await getFeeData()),
+					gas: await getCkErc20FeeData({
+						...erc20GasFeeParams,
+						erc20HelperContractAddress: $ckErc20HelperContractAddress
 					})
 				});
 				return;
@@ -59,11 +89,7 @@
 			feeStore.setFee({
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
-					contract: $sendToken as Erc20Token,
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					address: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
-					amount: parseToken({ value: `${amount ?? '1'}` }),
-					sourceNetwork,
+					...erc20GasFeeParams,
 					targetNetwork
 				})
 			});
@@ -103,7 +129,11 @@
 
 	$: obverseFeeData(observe);
 
-	$: amount, destination, $ckEthHelperContractAddressStore, debounceUpdateFeeData();
+	$: amount,
+		destination,
+		$ckEthHelperContractAddress,
+		$ckErc20HelperContractAddress,
+		debounceUpdateFeeData();
 </script>
 
 <slot />

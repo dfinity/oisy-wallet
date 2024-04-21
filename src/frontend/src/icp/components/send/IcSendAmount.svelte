@@ -13,10 +13,10 @@
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { assertCkETHUserInputAmount } from '$icp/utils/cketh.utils';
-	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;

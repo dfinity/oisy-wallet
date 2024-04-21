@@ -29,6 +29,7 @@ export const modalConvertCkBTCToBTC: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-ckbtc-btc'
 );
+// TODO: rename to modalConvertToCkETH
 export const modalConvertETHToCkETH: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-eth-cketh'

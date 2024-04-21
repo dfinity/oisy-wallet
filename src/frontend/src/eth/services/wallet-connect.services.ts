@@ -20,7 +20,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { TokenStandard } from '$lib/types/token';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
@@ -83,7 +83,7 @@ export const send = ({
 	amount,
 	lastProgressStep = SendStep.DONE,
 	identity,
-	ckEthHelperContractAddress,
+	minterInfo,
 	tokenStandard,
 	sourceNetwork,
 	targetNetwork,
@@ -142,9 +142,14 @@ export const send = ({
 				return { success: false };
 			}
 
+			const ckEthHelperContractAddress = fromNullable(
+				minterInfo?.data.eth_helper_contract_address ?? []
+			);
+
 			const { valid } = assertCkEthHelperContractAddressLoaded({
 				tokenStandard,
 				helperContractAddress: ckEthHelperContractAddress,
+				helperContractAddressCertified: minterInfo?.certified,
 				network: targetNetwork
 			});
 
@@ -191,7 +196,7 @@ export const send = ({
 					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
 					data,
 					identity,
-					ckEthHelperContractAddress,
+					minterInfo,
 					sourceNetwork,
 					targetNetwork
 				});

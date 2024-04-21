@@ -65,6 +65,7 @@ interface I18nInit {
 		no_etherscan_rest_api: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
+		no_infura_ckerc20_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
 		eth_address_unknown: string;
@@ -210,6 +211,7 @@ interface I18nConvert {
 		convert_to_btc: string;
 		convert_to_eth: string;
 		convert_to_cketh: string;
+		convert_to_ckerc20: string;
 		convert_eth_to_cketh: string;
 		how_to_convert_eth_to_cketh: string;
 		send_eth: string;

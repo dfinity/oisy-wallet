@@ -1,4 +1,4 @@
-import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
+import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
