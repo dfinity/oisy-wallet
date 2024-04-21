@@ -259,7 +259,6 @@ export const send = async ({
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
 	}): Promise<{ hash: string }> => {
-	// TODO: do we want to display an progress(SendStep.APPROVE); on screen? yes we want
 	progress(SendStep.INITIALIZATION);
 
 	const { id: networkId } = sourceNetwork;
@@ -268,7 +267,7 @@ export const send = async ({
 
 	const nonce = await getTransactionCount(from);
 
-	const { transactionApproved } = await approve({ sourceNetwork, nonce, ...rest });
+	const { transactionApproved } = await approve({ progress, sourceNetwork, nonce, ...rest });
 
 	// If we approved a transaction - as for example in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
 	const nonceTransaction = transactionApproved ? nonce + 1 : nonce;
@@ -407,6 +406,7 @@ const sendTransaction = async ({
 };
 
 const approve = async ({
+	progress,
 	token,
 	to,
 	maxFeePerGas,
@@ -418,7 +418,7 @@ const approve = async ({
 	nonce,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from'> &
-	Omit<SendParams, 'targetNetwork' | 'lastProgressStep' | 'progress'> &
+	Omit<SendParams, 'targetNetwork' | 'lastProgressStep'> &
 	Pick<TransactionFeeData, 'gas'> & {
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
@@ -457,7 +457,11 @@ const approve = async ({
 		spender: erc20HelperContractAddress
 	});
 
+	progress(SendStep.SIGN_APPROVE);
+
 	const rawTransaction = await signTransaction({ identity, transaction: approve });
+
+	progress(SendStep.APPROVE);
 
 	const { sendTransaction } = infuraProviders(networkId);
 
