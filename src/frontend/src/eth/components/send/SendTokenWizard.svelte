@@ -19,20 +19,21 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { authStore } from '$lib/stores/auth.store';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import type { Network } from '$lib/types/network';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -101,7 +102,8 @@
 
 		const { valid } = assertCkEthHelperContractAddressLoaded({
 			tokenStandard: $sendTokenStandard,
-			helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
+			helperContractAddress: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId]),
+			helperContractAddressCertified: $ckEthMinterInfoStore?.[$sendTokenId]?.certified,
 			network: targetNetwork
 		});
 
@@ -147,7 +149,7 @@
 				sourceNetwork,
 				targetNetwork,
 				identity: $authStore.identity,
-				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
+				minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId]
 			});
 
 			await trackEvent({

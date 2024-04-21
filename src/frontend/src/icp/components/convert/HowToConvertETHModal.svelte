@@ -2,7 +2,6 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { SendStep } from '$lib/enums/steps';
 	import HowToConvertETHInfo from '$icp/components/convert/HowToConvertETHInfo.svelte';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
@@ -10,13 +9,15 @@
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 
 	/**
 	 * Props
 	 */
 
 	let destination = '';
-	$: destination = $ckEthHelperContractAddressStore?.[$ckETHTwinTokenId]?.data ?? '';
+	$: destination = toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckETHTwinTokenId]) ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 

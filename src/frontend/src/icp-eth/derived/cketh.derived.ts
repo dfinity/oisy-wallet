@@ -1,9 +1,17 @@
 import { ETHEREUM_NETWORK } from '$env/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens.env';
+import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens.erc20.env';
+import { ethereumTokenId } from '$eth/derived/token.derived';
 import type { EthereumNetwork } from '$eth/types/network';
+import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+import {
+	toCkErc20HelperContractAddress,
+	toCkEthHelperContractAddress
+} from '$icp-eth/utils/cketh.utils';
 import type { IcCkToken, IcToken } from '$icp/types/ic';
-import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
+import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { token, tokenStandard } from '$lib/derived/token.derived';
+import type { OptionAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
@@ -17,6 +25,16 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
 	[tokenStandard, token],
 	([$tokenStandard, $token]) =>
 		$tokenStandard === 'ethereum' || isTokenCkEthLedger($token as IcToken)
+);
+
+/**
+ * ERC20 to ckErc20 is supported:
+ * - on network Ethereum if the token is a known Erc20 twin tokens
+ * - on network ICP if the token is ckErc20
+ */
+export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
+	[token],
+	([$token]) => ERC20_TWIN_TOKENS_IDS.includes($token.id) || isTokenCkErc20Ledger($token as IcToken)
 );
 
 /**
@@ -37,4 +55,16 @@ export const ckETHTwinTokenNetwork: Readable<EthereumNetwork> = derived(
 export const ckETHTwinTokenNetworkId: Readable<NetworkId> = derived(
 	[ckETHTwinTokenNetwork],
 	([{ id }]) => id
+);
+
+export const ckEthHelperContractAddress: Readable<OptionAddress> = derived(
+	[ckEthMinterInfoStore, ethereumTokenId],
+	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
+		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
+);
+
+export const ckErc20HelperContractAddress: Readable<OptionAddress> = derived(
+	[ckEthMinterInfoStore, ethereumTokenId],
+	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
+		toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
 );
