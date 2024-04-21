@@ -1,8 +1,10 @@
 export enum SendStep {
 	INITIALIZATION = 'initialization',
-	SIGN = 'sign',
-	SEND = 'send',
+	SIGN_APPROVE = 'sign_approve',
 	APPROVE = 'approve',
+	SIGN_TRANSFER = 'sign_transfer',
+	TRANSFER = 'transfer',
+	APPROVE_WALLET_CONNECT = 'approve_wallet_connect',
 	DONE = 'done'
 }
 

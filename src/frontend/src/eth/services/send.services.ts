@@ -13,8 +13,8 @@ import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { isDestinationContractAddress } from '$eth/utils/send.utils';
-import { isErc20Icp, isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
+import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
+import { isErc20Icp } from '$eth/utils/token.utils';
 import {
 	toCkErc20HelperContractAddress,
 	toCkEthHelperContractAddress
@@ -390,11 +390,11 @@ const sendTransaction = async ({
 					chainId
 				}));
 
-	progress(SendStep.SIGN);
+	progress(SendStep.SIGN_TRANSFER);
 
 	const rawTransaction = await signTransaction({ identity, transaction });
 
-	progress(SendStep.SEND);
+	progress(SendStep.TRANSFER);
 
 	const transactionSent = await sendTransaction(rawTransaction);
 
@@ -426,21 +426,16 @@ const approve = async ({
 	}): Promise<{ transactionApproved: boolean; hash?: string }> => {
 	// Approve happens before send currently only for ckERC20 -> ERC20.
 	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc
-	if (isNotSupportedErc20TwinTokenId(token.id)) {
-		return { transactionApproved: false };
-	}
-
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	const destinationCkErc20 =
-		nonNullish(erc20HelperContractAddress) &&
-		isDestinationContractAddress({
-			destination: to,
-			contractAddress: erc20HelperContractAddress
-		});
-
-	// The Erc20 contract supports conversion to ckErc20 but, it's a standard transaction
-	if (!destinationCkErc20) {
+	if (
+		isNullish(erc20HelperContractAddress) ||
+		!shouldSendWithApproval({
+			to,
+			tokenId: token.id,
+			erc20HelperContractAddress
+		})
+	) {
 		return { transactionApproved: false };
 	}
 
