@@ -10,7 +10,7 @@ import type {
 	Erc20PopulateTransaction
 } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
-import type { NetworkChainId } from '$eth/types/network';
+import type { EthereumNetwork, NetworkChainId } from '$eth/types/network';
 import type { SendParams } from '$eth/types/send';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { isDestinationContractAddress, shouldSendWithApproval } from '$eth/utils/send.utils';
@@ -331,70 +331,77 @@ const sendTransaction = async ({
 	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo);
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
-	const transaction = await (isSupportedEthTokenId(token.id)
+	const transferStandard: 'ethereum' | 'erc20' = isSupportedEthTokenId(token.id)
+		? 'ethereum'
+		: 'erc20';
+
+	const networkICP = isNetworkICP(targetNetwork ?? DEFAULT_NETWORK);
+
+	const convertEthToCkEth =
+		transferStandard === 'ethereum' &&
+		nonNullish(ckEthHelperContractAddress) &&
+		isDestinationContractAddress({
+			destination: to,
+			contractAddress: ckEthHelperContractAddress
+		}) &&
+		networkICP;
+
+	const convertErc20ToCkErc20 =
+		transferStandard === 'erc20' &&
+		nonNullish(ckErc20HelperContractAddress) &&
+		isDestinationContractAddress({
+			destination: to,
+			contractAddress: ckErc20HelperContractAddress
+		}) &&
+		networkICP;
+
+	const signParams: Pick<TransferParams, 'from'> &
+		Pick<EthereumNetwork, 'chainId'> & {
+			gas: bigint;
+			nonce: number;
+		} & Pick<TransferParams, 'maxFeePerGas' | 'maxPriorityFeePerGas'> = {
+		from,
+		nonce,
+		gas: gas.toBigInt(),
+		maxFeePerGas: maxFeePerGas.toBigInt(),
+		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		chainId
+	};
+
+	const transaction = await (transferStandard === 'ethereum'
 		? // Case Ethereum or Sepolia
-			nonNullish(ckEthHelperContractAddress) &&
-			isDestinationContractAddress({
-				destination: to,
-				contractAddress: ckEthHelperContractAddress
-			}) &&
-			isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
+			convertEthToCkEth
 			? ethHelperContractPrepareTransaction({
+					...signParams,
 					...rest,
 					contract: { address: ckEthHelperContractAddress },
-					from,
 					to: principalEthAddress(),
-					nonce,
-					gas: gas.toBigInt(),
-					maxFeePerGas: maxFeePerGas.toBigInt(),
-					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-					populate: infuraCkETHProviders(networkId).populateTransaction,
-					chainId
+					populate: infuraCkETHProviders(networkId).populateTransaction
 				})
 			: ethPrepareTransaction({
 					...rest,
-					from,
-					to,
-					nonce,
-					gas: gas?.toBigInt(),
-					maxFeePerGas: maxFeePerGas.toBigInt(),
-					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-					chainId
+					...signParams,
+					to
 				})
 		: // Case Erc20
-			nonNullish(ckErc20HelperContractAddress) &&
-			  isDestinationContractAddress({
-					destination: to,
-					contractAddress: ckErc20HelperContractAddress
-			  }) &&
-			  isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
+			convertErc20ToCkErc20
 			? ckErc20HelperContractPrepareTransaction({
 					...rest,
+					...signParams,
 					contract: { address: ckErc20HelperContractAddress },
-					from,
 					to: principalEthAddress(),
-					nonce,
-					gas: gas.toBigInt(),
-					maxFeePerGas: maxFeePerGas.toBigInt(),
-					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-					chainId,
 					networkId,
 					token
 				})
 			: erc20PrepareTransaction({
 					...rest,
-					from,
+					...signParams,
 					to,
 					token,
-					nonce,
-					gas: gas.toBigInt(),
-					maxFeePerGas: maxFeePerGas.toBigInt(),
-					maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 					populate:
-						isErc20Icp(token) && isNetworkICP(targetNetwork ?? DEFAULT_NETWORK)
+						isErc20Icp(token) && networkICP
 							? infuraErc20IcpProviders(networkId).populateTransaction
-							: infuraErc20Providers(networkId).populateTransaction,
-					chainId
+							: infuraErc20Providers(networkId).populateTransaction
 				}));
 
 	progress(SendStep.SIGN_TRANSFER);
