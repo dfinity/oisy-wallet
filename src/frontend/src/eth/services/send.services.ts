@@ -31,6 +31,7 @@ import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
+import type { TransactionResponse } from '@ethersproject/providers';
 import { get } from 'svelte/store';
 import { processTransactionSent } from './transaction.services';
 
@@ -249,8 +250,10 @@ const prepare = async ({
 };
 
 export const send = async ({
+	lastProgressStep = SendStep.DONE,
 	progress,
 	sourceNetwork,
+	token,
 	from,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
@@ -267,7 +270,7 @@ export const send = async ({
 
 	const nonce = await getTransactionCount(from);
 
-	const { transactionApproved } = await approve({ progress, sourceNetwork, nonce, ...rest });
+	const { transactionApproved } = await approve({ progress, sourceNetwork, nonce, token, ...rest });
 
 	// If we approved a transaction - as for example in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
 	const nonceTransaction = transactionApproved ? nonce + 1 : nonce;
@@ -277,15 +280,20 @@ export const send = async ({
 		from,
 		sourceNetwork,
 		nonce: nonceTransaction,
+		token,
 		...rest
 	});
+
+	// Explicitly do not await to proceed in the background and allow the UI to continue
+	processTransactionSent({ token, transaction: transactionSent });
+
+	progress(lastProgressStep);
 
 	return { hash: transactionSent.hash };
 };
 
 const sendTransaction = async ({
 	progress,
-	lastProgressStep = SendStep.DONE,
 	token,
 	from,
 	to,
@@ -299,12 +307,12 @@ const sendTransaction = async ({
 	nonce,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
-	SendParams &
+	Omit<SendParams, 'lastProgressStep'> &
 	Pick<TransactionFeeData, 'gas'> & {
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
 		nonce: number;
-	}): Promise<{ hash: string }> => {
+	}): Promise<TransactionResponse> => {
 	const { id: networkId, chainId } = sourceNetwork;
 
 	const { sendTransaction } = infuraProviders(networkId);
@@ -395,14 +403,7 @@ const sendTransaction = async ({
 
 	progress(SendStep.TRANSFER);
 
-	const transactionSent = await sendTransaction(rawTransaction);
-
-	// Explicitly do not await to proceed in the background and allow the UI to continue
-	processTransactionSent({ token, transaction: transactionSent });
-
-	progress(lastProgressStep);
-
-	return { hash: transactionSent.hash };
+	return await sendTransaction(rawTransaction);
 };
 
 const approve = async ({
