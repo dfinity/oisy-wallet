@@ -36,11 +36,9 @@
 	import { writable } from 'svelte/store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
-	import {
-		toCkErc20HelperContractAddress,
-		toCkEthHelperContractAddress
-	} from '$icp-eth/utils/cketh.utils';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
+	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -86,9 +84,7 @@
 	$: sendWithApproval = shouldSendWithApproval({
 		to: destination,
 		tokenId: $sendTokenId,
-		erc20HelperContractAddress: toCkErc20HelperContractAddress(
-			$ckEthMinterInfoStore?.[$sendTokenId]
-		)
+		erc20HelperContractAddress: $ckEthHelperContractAddress
 	});
 
 	/**
