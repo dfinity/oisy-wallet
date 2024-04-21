@@ -38,7 +38,7 @@
 	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
-	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -84,7 +84,7 @@
 	$: sendWithApproval = shouldSendWithApproval({
 		to: destination,
 		tokenId: $sendTokenId,
-		erc20HelperContractAddress: $ckEthHelperContractAddress
+		erc20HelperContractAddress: $ckErc20HelperContractAddress
 	});
 
 	/**
