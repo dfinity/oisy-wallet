@@ -4,7 +4,7 @@ import type { IcCkMetadata } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { OptionAddress } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
 import { isNetworkICP } from '$lib/utils/network.utils';
@@ -52,7 +52,7 @@ export const assertCkEthHelperContractAddressLoaded = ({
 	network,
 	helperContractAddressCertified
 }: {
-	helperContractAddress: ETH_ADDRESS | null | undefined;
+	helperContractAddress: OptionAddress;
 	helperContractAddressCertified: boolean | undefined;
 	tokenStandard: TokenStandard;
 	network: Network | undefined;

@@ -157,7 +157,9 @@ interface I18nSend {
 		source: string;
 		balance: string;
 		review: string;
+		signing_approval: string;
 		approving: string;
+		approving_wallet_connect: string;
 		refreshing_ui: string;
 		initializing: string;
 		signing_transaction: string;

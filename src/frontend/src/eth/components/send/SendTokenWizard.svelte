@@ -33,7 +33,11 @@
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
+	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -71,6 +75,15 @@
 
 	let destinationEditable = true;
 	$: destinationEditable = sendPurpose !== 'convert-eth-to-cketh';
+
+	let sendWithApproval: boolean;
+	$: sendWithApproval = shouldSendWithApproval({
+		to: destination,
+		tokenId: $sendTokenId,
+		erc20HelperContractAddress: toCkErc20HelperContractAddress(
+			$ckEthMinterInfoStore?.[$sendTokenId]
+		)
+	});
 
 	/**
 	 * Send
@@ -199,7 +212,10 @@
 			{destinationEditable}
 		/>
 	{:else if currentStep?.name === 'Sending'}
-		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
+		<InProgressWizard
+			progressStep={sendProgressStep}
+			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
+		/>
 	{:else if currentStep?.name === 'Send'}
 		<SendForm
 			on:icNext
