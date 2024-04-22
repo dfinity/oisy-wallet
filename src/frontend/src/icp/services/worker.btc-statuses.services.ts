@@ -1,6 +1,5 @@
 import { onLoadBtcStatusesError, syncBtcStatuses } from '$icp/services/ckbtc-listener.services';
-import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,
@@ -10,8 +9,8 @@ import type {
 
 export const initBtcStatusesWorker: IcCkWorker = async ({
 	minterCanisterId,
-	id: tokenId
-}: IcCkToken): Promise<IcCkWorkerInitResult> => {
+	token: { id: tokenId }
+}: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
 	const BtcStatusesWorker = await import('$icp/workers/btc-statuses.worker?worker');
 	const worker: Worker = new BtcStatusesWorker.default();
 
