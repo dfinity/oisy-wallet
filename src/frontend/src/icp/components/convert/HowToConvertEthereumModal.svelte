@@ -1,15 +1,22 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { SendStep } from '$lib/enums/steps';
-	import HowToConvertETHInfo from '$icp/components/convert/HowToConvertETHInfo.svelte';
+	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import { ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumTwinTokenStandard,
+		ckEthereumTwinTokenId,
+		ckEthereumTwinToken
+	} from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 
 	/**
@@ -17,7 +24,10 @@
 	 */
 
 	let destination = '';
-	$: destination = toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckETHTwinTokenId]) ?? '';
+	$: destination =
+		$ckEthereumTwinTokenStandard === 'erc20'
+			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumTwinTokenId]) ?? ''
+			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumTwinTokenId]) ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 
@@ -29,7 +39,7 @@
 	 */
 
 	let steps: WizardSteps;
-	$: steps = howToConvertWizardSteps($i18n);
+	$: steps = howToConvertWizardSteps({ i18n: $i18n, twinToken: $ckEthereumTwinToken });
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -66,7 +76,7 @@
 		bind:sendProgressStep
 		{currentStep}
 	>
-		<HowToConvertETHInfo
+		<HowToConvertEthereumInfo
 			on:icQRCode={modal.next}
 			on:icConvert={() => modal.set(2)}
 			formCancelAction="close"
