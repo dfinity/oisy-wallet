@@ -10,6 +10,7 @@
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { Erc20Token } from '$eth/types/erc20';
 
 	/**
 	 * Props
@@ -44,7 +45,7 @@
 					? $i18n.convert.text.convert_to_cketh
 					: sendPurpose === 'convert-erc20-to-ckerc20'
 						? replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
-								$ckErc20: $sendToken.name
+								$ckErc20: ($sendToken as Erc20Token).twinTokenSymbol ?? 'ckETH'
 							})
 						: $i18n.send.text.send
 		},
