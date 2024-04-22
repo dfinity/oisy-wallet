@@ -70,7 +70,7 @@
 		modal.next();
 
 		try {
-			let params: IcTransferParams = {
+			const params: IcTransferParams = {
 				to: destination,
 				amount: parseToken({
 					value: `${amount}`,

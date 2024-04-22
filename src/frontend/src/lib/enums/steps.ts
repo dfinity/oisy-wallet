@@ -37,7 +37,8 @@ export enum HideTokenStep {
 
 export enum SendIcStep {
 	INITIALIZATION = 'initialization',
-	APPROVE = 'approve',
+	APPROVE_FEES = 'approve_fees',
+	APPROVE_TRANSFER = 'approve_transfer',
 	SEND = 'send',
 	RELOAD = 'reload',
 	DONE = 'done'
