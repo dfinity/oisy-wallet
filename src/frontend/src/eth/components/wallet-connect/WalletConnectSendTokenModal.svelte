@@ -167,7 +167,7 @@
 		observe={currentStep?.name !== 'Sending'}
 		{sourceNetwork}
 	>
-		<CkEthLoader convertTokenId={$sendTokenId}>
+		<CkEthLoader nativeTokenId={$sendTokenId}>
 			{#if currentStep?.name === 'Sending'}
 				<SendProgress
 					progressStep={sendProgressStep}

@@ -14,7 +14,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let convertTokenId: TokenId;
+	export let nativeTokenId: TokenId;
 
 	const load = async () => {
 		if (!$ethToCkETHEnabled && !$erc20ToCkErc20Enabled) {
@@ -24,7 +24,7 @@
 		// TODO: this is relatively ugly. Should we create a derived store or another abstraction that merge EthToken and CkCanisters?
 
 		const minterCanisterId =
-			convertTokenId === SEPOLIA_TOKEN_ID
+			nativeTokenId === SEPOLIA_TOKEN_ID
 				? LOCAL
 					? LOCAL_CKETH_MINTER_CANISTER_ID
 					: STAGING_CKETH_MINTER_CANISTER_ID
@@ -42,7 +42,7 @@
 		// TODO: this duplicate the ckETH worker, maybe we reuse the work on Ethereum as well?
 
 		await loadCkEthMinterInfo({
-			tokenId: convertTokenId,
+			tokenId: nativeTokenId,
 			canisters: {
 				minterCanisterId
 			}
@@ -52,7 +52,7 @@
 	$: $ethToCkETHEnabled,
 		$erc20ToCkErc20Enabled,
 		$icrcTokensStore,
-		convertTokenId,
+		nativeTokenId,
 		(async () => await load())();
 </script>
 

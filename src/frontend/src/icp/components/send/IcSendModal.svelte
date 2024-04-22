@@ -35,6 +35,8 @@
 		TRACK_COUNT_IC_SEND_ERROR,
 		TRACK_COUNT_IC_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	/**
 	 * Props
@@ -126,7 +128,9 @@
 			title: isNetworkIdBTC(networkId)
 				? $i18n.convert.text.convert_to_btc
 				: isNetworkIdEthereum(networkId)
-					? $i18n.convert.text.convert_to_eth
+					? replacePlaceholders($i18n.convert.text.convert_to_token, {
+							$token: $ckEthereumTwinToken.symbol
+						})
 					: $i18n.send.text.send
 		},
 		{

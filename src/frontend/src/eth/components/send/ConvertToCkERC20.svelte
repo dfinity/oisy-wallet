@@ -28,7 +28,7 @@
 	$: converToSymbol = ($token as Erc20Token).twinTokenSymbol ?? 'ckETH';
 </script>
 
-<ConvertETH convertTokenId={$ethereumTokenId}>
+<ConvertETH nativeTokenId={$ethereumTokenId}>
 	<IconBurn size="28" />
 	<span>
 		{replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
