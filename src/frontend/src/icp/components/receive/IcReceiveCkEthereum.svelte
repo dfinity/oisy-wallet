@@ -3,7 +3,7 @@
 	import { setContext } from 'svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import IcReceiveCkETHModal from '$icp/components/receive/IcReceiveCkETHModal.svelte';
+	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
 	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 
@@ -26,5 +26,5 @@
 <IcReceiveButton on:click={modalStore.openCkETHReceive} />
 
 {#if $modalCkETHReceive}
-	<IcReceiveCkETHModal />
+	<IcReceiveCkEthereumModal />
 {/if}
