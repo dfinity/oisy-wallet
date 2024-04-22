@@ -23,9 +23,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 	import {
-		ckErc20HelperContractAddress,
-		ckEthHelperContractAddress
-	} from '$icp-eth/derived/cketh.derived';
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -35,7 +36,7 @@
 
 	const { feeStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
-	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId, sendToken, nativeEthereumToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee
@@ -59,7 +60,9 @@
 					...(await getFeeData()),
 					gas: await getEthFeeData({
 						...params,
-						helperContractAddress: $ckEthHelperContractAddress
+						helperContractAddress: toCkEthHelperContractAddress(
+							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+						)
 					})
 				});
 				return;
@@ -80,7 +83,9 @@
 					...(await getFeeData()),
 					gas: await getCkErc20FeeData({
 						...erc20GasFeeParams,
-						erc20HelperContractAddress: $ckErc20HelperContractAddress
+						erc20HelperContractAddress: toCkErc20HelperContractAddress(
+							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+						)
 					})
 				});
 				return;
@@ -129,11 +134,7 @@
 
 	$: obverseFeeData(observe);
 
-	$: amount,
-		destination,
-		$ckEthHelperContractAddress,
-		$ckErc20HelperContractAddress,
-		debounceUpdateFeeData();
+	$: amount, destination, $ckEthMinterInfoStore, debounceUpdateFeeData();
 </script>
 
 <slot />
