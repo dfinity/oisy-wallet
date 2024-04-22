@@ -11,8 +11,8 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import {
+		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
-		ckEthereumTwinTokenId,
 		ckEthereumTwinTokenStandard
 	} from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -29,8 +29,8 @@
 	let destination = '';
 	$: destination =
 		$ckEthereumTwinTokenStandard === 'erc20'
-			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumTwinTokenId]) ?? ''
-			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumTwinTokenId]) ?? '';
+			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
+			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 

@@ -1,6 +1,7 @@
-import type { IcCkToken } from '$icp/types/ic';
+import type { PostMessageDataRequestIcCk } from '$lib/types/post-message';
+import type { Token } from '$lib/types/token';
 
-export type IcCkWorkerParams = Omit<IcCkToken, 'twinToken'>;
+export type IcCkWorkerParams = PostMessageDataRequestIcCk & { token: Token };
 
 export interface IcCkWorkerInitResult {
 	start: () => void;

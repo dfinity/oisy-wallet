@@ -1,14 +1,23 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import type { IcToken } from '$icp/types/ic';
+	import type { IcCkToken } from '$icp/types/ic';
 	import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
-	import { token } from '$lib/derived/token.derived';
+	import type { Token } from '$lib/types/token';
+	import type { CanisterIdText } from '$lib/types/canister';
 
 	export let initFn: IcCkWorker;
+	export let token: Token;
+	export let minterCanisterId: CanisterIdText | undefined = undefined;
 
 	let worker: IcCkWorkerInitResult | undefined;
 
-	onMount(async () => (worker = await initFn($token as IcToken)));
+	onMount(
+		async () =>
+			(worker = await initFn({
+				minterCanisterId: minterCanisterId ?? (token as IcCkToken).minterCanisterId,
+				token
+			}))
+	);
 
 	onDestroy(() => worker?.stop());
 
