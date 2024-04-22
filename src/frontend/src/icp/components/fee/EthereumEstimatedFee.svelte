@@ -13,7 +13,7 @@
 	import { onDestroy } from 'svelte';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let networkId: NetworkId | undefined = undefined;
@@ -63,7 +63,7 @@
 							value: BigNumber.from(maxTransactionFee),
 							displayDecimals: EIGHT_DECIMALS
 						})}
-						{$ckETHTwinToken.symbol}
+						{$ckEthereumTwinToken.symbol}
 					</span>
 				{/if}
 			</div>

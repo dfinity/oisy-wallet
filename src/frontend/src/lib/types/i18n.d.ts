@@ -221,6 +221,7 @@ interface I18nConvert {
 		send_eth: string;
 		wait_eth_current_balance: string;
 		set_amount: string;
+		send_fee: string;
 	};
 	error: { loading_cketh_helper: string };
 }
@@ -292,7 +293,7 @@ interface I18nFee {
 
 interface I18nInfo {
 	bitcoin: { title: string; description: string; note: string; receive: string };
-	ethereum: { title: string; description: string; how_to: string };
+	ethereum: { title: string; description: string; how_to: string; how_to_short: string };
 }
 
 interface I18nWallet_connect {

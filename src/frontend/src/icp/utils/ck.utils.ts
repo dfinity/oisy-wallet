@@ -1,6 +1,9 @@
 import { browser } from '$app/environment';
 
-export type HideInfoKey = 'oisy_ic_hide_bitcoin_info' | 'oisy_ic_hide_ethereum_info';
+export type HideInfoKey =
+	| 'oisy_ic_hide_bitcoin_info'
+	| 'oisy_ic_hide_ethereum_info'
+	| 'oisy_ic_hide_erc20_info';
 
 export const saveHideInfo = (key: HideInfoKey) => {
 	try {

@@ -5,7 +5,7 @@
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import icpLight from '$icp/assets/icp_light.svg';
 	import bitcoin from '$icp/assets/bitcoin.svg';
@@ -36,11 +36,11 @@
 			{#if nonNullish(networkId) && isNetworkIdBTC(networkId)}
 				<IcSendBtcNetwork {networkId} /> <Logo src={bitcoin} size="20px" alt={`Bitcoin logo`} />
 			{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
-				{$ckETHTwinToken.network.name}
+				{$ckEthereumTwinToken.network.name}
 				<Logo
-					src={$ckETHTwinToken.network.icon ?? eth}
+					src={$ckEthereumTwinToken.network.icon ?? eth}
 					size="20px"
-					alt={`${$ckETHTwinToken.network.name} logo`}
+					alt={`${$ckEthereumTwinToken.network.name} logo`}
 				/>
 			{/if}
 		</span>
