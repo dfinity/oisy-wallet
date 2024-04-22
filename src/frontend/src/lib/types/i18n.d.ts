@@ -56,7 +56,7 @@ interface I18nInit {
 		securing_session: string;
 		retrieving_eth_key: string;
 	};
-	info: { hold_loading: string };
+	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
 		no_alchemy_provider: string;
@@ -83,6 +83,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		loading_wallet_timeout: string;
 	};
 }
 
