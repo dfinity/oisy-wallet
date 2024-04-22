@@ -14,7 +14,11 @@
 	 * Send modal context store
 	 */
 
-	const context = initSendContext({ sendPurpose: 'convert-eth-to-cketh', token: $ethereumToken });
+	const context = initSendContext({
+		sendPurpose: 'convert-eth-to-cketh',
+		token: $ethereumToken,
+		nativeEthereumToken: $ethereumToken
+	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
