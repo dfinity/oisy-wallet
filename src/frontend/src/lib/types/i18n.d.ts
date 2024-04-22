@@ -74,6 +74,8 @@ interface I18nInit {
 		erc20_contracts: string;
 		minter_ckbtc_btc: string;
 		minter_cketh_eth: string;
+		minter_ckerc20_erc20: string;
+		ledger_cketh_eth: string;
 		minter_btc: string;
 		minter_ckbtc_info: string;
 		minter_cketh_info: string;
