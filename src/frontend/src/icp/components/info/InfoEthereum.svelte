@@ -7,7 +7,11 @@
 	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
-	import { ckEthereumTwinToken, ckEthereumTwinTokenNetwork } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumNativeToken,
+		ckEthereumTwinToken,
+		ckEthereumTwinTokenNetwork
+	} from '$icp-eth/derived/cketh.derived';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/derived/token.derived';
@@ -23,7 +27,8 @@
 			$ckEthereumTwinToken.standard === 'erc20'
 				? 'convert-erc20-to-ckerc20'
 				: 'convert-eth-to-cketh',
-		token: $ckEthereumTwinToken
+		token: $ckEthereumTwinToken,
+		nativeEthereumToken: $ckEthereumNativeToken
 	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
 		sendToken,

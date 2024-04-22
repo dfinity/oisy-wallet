@@ -26,7 +26,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
-	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
@@ -40,25 +39,25 @@
 	export let formCancelAction: 'back' | 'close' = 'close';
 
 	/**
+	 * Send context store
+	 */
+
+	const { sendTokenDecimals, sendTokenId, sendToken, sendPurpose, nativeEthereumToken } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	/**
 	 * Fee context store
 	 */
 
 	let feeStore = initFeeStore();
 
 	let feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set($ethereumToken.symbol);
+	$: feeSymbolStore.set(nativeEthereumToken.symbol);
 
 	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
 		feeStore,
 		feeSymbolStore
 	});
-
-	/**
-	 * Send context store
-	 */
-
-	const { sendTokenDecimals, sendTokenId, sendToken, sendPurpose } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Props
@@ -109,7 +108,7 @@
 		}
 
 		const { valid } = assertCkEthMinterInfoLoaded({
-			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
+			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
 			network: targetNetwork
 		});
 
@@ -155,7 +154,7 @@
 				sourceNetwork,
 				targetNetwork,
 				identity: $authStore.identity,
-				minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId]
+				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
 
 			await trackEvent({
