@@ -47,7 +47,7 @@
 		{/if}
 	{/if}
 
-	{#if convertEth || convertErc20}
+	{#if convertEth}
 		{#if $networkICP}
 			<ConvertToEthereum />
 		{:else}
@@ -57,7 +57,7 @@
 
 	{#if convertErc20}
 		{#if $networkICP}
-			&ZeroWidthSpace;
+			<ConvertToEthereum />
 		{:else}
 			<ConvertToCkERC20 />
 		{/if}
