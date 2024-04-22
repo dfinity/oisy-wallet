@@ -67,7 +67,8 @@
 			"retrieving_eth_key": "Retrieving your Ethereum public key"
 		},
 		"info": {
-			"hold_loading": "Hold tight, we are loading some information..."
+			"hold_loading": "Hold tight, we are loading some information...",
+			"hold_loading_wallet": "Hold tight, we are loading some initial data for your wallet..."
 		},
 		"error": {
 			"no_alchemy_config": "No Alchemy config for network $network",
@@ -94,7 +95,8 @@
 			"btc_fees_estimation": "Error while querying the estimation of the BTC fees.",
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
-			"icrc_canisters": "Error while loading the ICRC canisters."
+			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again."
 		}
 	},
 	"hero": {
