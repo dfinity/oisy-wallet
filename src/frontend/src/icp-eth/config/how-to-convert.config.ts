@@ -1,3 +1,4 @@
+import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import { sendWizardSteps } from '$eth/config/send.config';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -12,11 +13,13 @@ export const howToConvertWizardSteps = ({
 }): WizardSteps => {
 	const [send, ...rest] = sendWizardSteps(i18n);
 
+	const { id: tokenId, symbol } = twinToken;
+
 	return [
 		{
 			name: 'Info',
 			title: replacePlaceholders(i18n.info.ethereum.how_to_short, {
-				$token: twinToken.symbol
+				$token: symbol
 			})
 		},
 		{
@@ -25,7 +28,11 @@ export const howToConvertWizardSteps = ({
 		},
 		{
 			...send,
-			title: i18n.convert.text.convert_to_cketh
+			title: [SEPOLIA_TOKEN_ID, ETHEREUM_TOKEN_ID].includes(tokenId)
+				? i18n.convert.text.convert_to_cketh
+				: replacePlaceholders(i18n.convert.text.convert_to_ckerc20, {
+						$ckErc20: symbol
+					})
 		},
 		...rest
 	];
