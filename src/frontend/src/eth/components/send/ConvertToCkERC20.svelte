@@ -6,7 +6,7 @@
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/derived/token.derived';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -17,7 +17,11 @@
 	 * Send modal context store
 	 */
 
-	const context = initSendContext({ sendPurpose: 'convert-erc20-to-ckerc20', token: $token });
+	const context = initSendContext({
+		sendPurpose: 'convert-erc20-to-ckerc20',
+		token: $token,
+		nativeEthereumToken: $ethereumToken
+	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 
 	let converToSymbol: string;
