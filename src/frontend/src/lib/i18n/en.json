@@ -141,9 +141,9 @@
 		"ethereum": {
 			"text": {
 				"checking_status": "Checking ETH status...",
-				"from_network": "Receive from Ethereum Network",
-				"eth_to_cketh_description": "Converting ETH into ckETH requires a call to a smart contract on Ethereum and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
-				"learn_how_to_convert": "Learn how to convert ETH to ckETH",
+				"from_network": "Receive from $network Network",
+				"eth_to_cketh_description": "Converting $token into $ckToken requires a call to a smart contract on $network and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
+				"learn_how_to_convert": "Learn how to convert $token to $ckToken",
 				"metamask": "Receive from Metamask"
 			},
 			"error": {
