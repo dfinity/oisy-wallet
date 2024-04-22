@@ -77,6 +77,8 @@ export const convertCkErc20ToErc20 = async ({
 
 	assertNonNullish(ckEthledgerCanisterId, get(i18n).init.error.ledger_cketh_eth);
 
+	// 1. Approve fees on ckETH Ledger for minter
+
 	await approveTransfer({
 		canisters: { ledgerCanisterId: ckEthledgerCanisterId, minterCanisterId },
 		identity,
@@ -85,6 +87,8 @@ export const convertCkErc20ToErc20 = async ({
 		amount: CKERC20_TO_ERC20_MAX_TRANSACTION_FEE,
 		to
 	});
+
+	// 2. Approve amount on ckErc20 Ledger for minter
 
 	const amount = amountBigNumber.toBigInt();
 
@@ -95,6 +99,8 @@ export const convertCkErc20ToErc20 = async ({
 		amount,
 		to
 	});
+
+	// 3. Withdraw Erc20
 
 	progress(SendIcStep.SEND);
 
