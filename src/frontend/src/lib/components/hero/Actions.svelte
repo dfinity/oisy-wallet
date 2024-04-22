@@ -6,7 +6,7 @@
 	import { networkICP } from '$lib/derived/network.derived';
 	import IcSend from '$icp/components/send/IcSend.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
-	import ConvertToETH from '$icp/components/convert/ConvertToETH.svelte';
+	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
@@ -47,9 +47,9 @@
 		{/if}
 	{/if}
 
-	{#if convertEth}
+	{#if convertEth || convertErc20}
 		{#if $networkICP}
-			<ConvertToETH />
+			<ConvertToEthereum />
 		{:else}
 			<ConvertToCkETH />
 		{/if}
