@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tokenId } from '$lib/derived/token.derived';
+	import { token, tokenId } from '$lib/derived/token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { initBtcStatusesWorker } from '$icp/services/worker.btc-statuses.services';
@@ -10,11 +10,11 @@
 	$: minterInfoLoaded = $ckBtcMinterInfoStore?.[$tokenId]?.certified === true;
 </script>
 
-<IcCkListener initFn={initBtcStatusesWorker} />
-<IcCkListener initFn={initCkBTCUpdateBalanceWorker} />
+<IcCkListener initFn={initBtcStatusesWorker} token={$token} />
+<IcCkListener initFn={initCkBTCUpdateBalanceWorker} token={$token} />
 
 {#if !minterInfoLoaded}
-	<IcCkListener initFn={initCkBTCMinterInfoWorker} />
+	<IcCkListener initFn={initCkBTCMinterInfoWorker} token={$token} />
 {/if}
 
 <slot />

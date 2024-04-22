@@ -10,8 +10,8 @@
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
-		ckEthereumFeeToken,
-		ckEthereumFeeTokenBalance,
+		ckEthereumNativeToken,
+		ckEthereumNativeTokenBalance,
 		ckEthereumTwinToken
 	} from '$icp-eth/derived/cketh.derived';
 	import { token } from '$lib/derived/token.derived';
@@ -102,17 +102,17 @@
 			<Value element="div">
 				<svelte:fragment slot="label"
 					>{replacePlaceholders($i18n.convert.text.send_fee, {
-						$token: $ckEthereumFeeToken.symbol
+						$token: $ckEthereumNativeToken.symbol
 					})}</svelte:fragment
 				>
 
 				<p class="mb-6">
 					{formatToken({
-						value: $ckEthereumFeeTokenBalance ?? BigNumber.from(0n),
-						unitName: $ckEthereumFeeToken.decimals,
-						displayDecimals: $ckEthereumFeeToken.decimals
+						value: $ckEthereumNativeTokenBalance ?? BigNumber.from(0n),
+						unitName: $ckEthereumNativeToken.decimals,
+						displayDecimals: $ckEthereumNativeToken.decimals
 					})}
-					{$ckEthereumFeeToken.symbol}
+					{$ckEthereumNativeToken.symbol}
 				</p>
 			</Value>
 		</div>

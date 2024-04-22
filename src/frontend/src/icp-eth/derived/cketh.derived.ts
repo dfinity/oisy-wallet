@@ -71,16 +71,22 @@ export const ckEthereumTwinTokenNetworkId: Readable<NetworkId> = derived(
 
 /**
  * The fees to convert from Erc20 to ckErc20 or Eth to ckEth are covered by Ethereum (mainnet or sepolia) - i.e. not in erc20 value.
+ * Likewise, when we load ckEth minter information we only load those once per network for any ckErc20 and ckEth given that it contains the information for all Ethereum related tokens.
  */
-export const ckEthereumFeeToken: Readable<Token> = derived(
+export const ckEthereumNativeToken: Readable<Token> = derived(
 	[enabledEthereumTokens, ckEthereumTwinToken],
 	([$enabledEthereumTokens, { id }]) =>
 		$enabledEthereumTokens.find(({ network: { id: networkId } }) => id === networkId) ??
 		DEFAULT_ETHEREUM_TOKEN
 );
 
-export const ckEthereumFeeTokenBalance: Readable<BigNumber | undefined | null> = derived(
-	[balancesStore, ckEthereumFeeToken],
+export const ckEthereumNativeTokenId: Readable<TokenId> = derived(
+	[ckEthereumNativeToken],
+	([{ id }]) => id
+);
+
+export const ckEthereumNativeTokenBalance: Readable<BigNumber | undefined | null> = derived(
+	[balancesStore, ckEthereumNativeToken],
 	([$balanceStore, { id }]) => $balanceStore?.[id]?.data
 );
 
