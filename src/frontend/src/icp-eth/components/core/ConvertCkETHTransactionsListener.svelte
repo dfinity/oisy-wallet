@@ -15,7 +15,7 @@
 		loadPendingCkEthTransaction,
 		loadPendingCkEthTransactions
 	} from '$icp-eth/services/eth.services';
-	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import type { NetworkId } from '$lib/types/network';
 	import type { IcToken } from '$icp/types/ic';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
@@ -32,7 +32,7 @@
 			return;
 		}
 
-		if (isNullish($ckETHTwinToken)) {
+		if (isNullish($ckEthereumTwinToken)) {
 			return;
 		}
 
@@ -58,8 +58,8 @@
 			lastObservedBlockNumber,
 			identity: $authStore.identity,
 			toAddress,
-			networkId: $ckETHTwinToken.network.id,
-			twinToken: $ckETHTwinToken
+			networkId: $ckEthereumTwinToken.network.id,
+			twinToken: $ckEthereumTwinToken
 		});
 	};
 
@@ -87,7 +87,7 @@
 				await loadPendingCkEthTransaction({
 					hash,
 					token: $token as IcToken,
-					twinToken: $ckETHTwinToken,
+					twinToken: $ckEthereumTwinToken,
 					networkId
 				}),
 			networkId
@@ -96,18 +96,18 @@
 
 	let ckEthHelperContractAddress: OptionAddress;
 	$: ckEthHelperContractAddress = toCkEthHelperContractAddress(
-		$ckEthMinterInfoStore?.[$ckETHTwinToken.id]
+		$ckEthMinterInfoStore?.[$ckEthereumTwinToken.id]
 	);
 
 	$: (async () =>
-		init({ toAddress: ckEthHelperContractAddress, networkId: $ckETHTwinToken?.network.id }))();
+		init({ toAddress: ckEthHelperContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();
 
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
 	$: $balance,
 		$ckEthMinterInfoStore,
-		$ckETHTwinToken,
+		$ckEthereumTwinToken,
 		ckEthHelperContractAddress,
 		(async () => await loadPendingTransactions({ toAddress: ckEthHelperContractAddress }))();
 
