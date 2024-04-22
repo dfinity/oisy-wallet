@@ -9,6 +9,7 @@
 	import type { Network } from '$lib/types/network';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	/**
 	 * Props
@@ -24,7 +25,7 @@
 	 * Send context store
 	 */
 
-	const { sendPurpose } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendPurpose, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Wizard modal
@@ -41,7 +42,11 @@
 			title:
 				sendPurpose === 'convert-eth-to-cketh'
 					? $i18n.convert.text.convert_to_cketh
-					: $i18n.send.text.send
+					: sendPurpose === 'convert-erc20-to-ckerc20'
+						? replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
+								$ckErc20: $sendToken.name
+							})
+						: $i18n.send.text.send
 		},
 		...otherSteps
 	];
