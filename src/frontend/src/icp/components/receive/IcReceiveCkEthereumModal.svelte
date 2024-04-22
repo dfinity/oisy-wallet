@@ -5,7 +5,7 @@
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
-	import IcReceiveInfoCkETH from '$icp/components/receive/IcReceiveInfoCkETH.svelte';
+	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
@@ -101,7 +101,7 @@
 		{:else if currentStep?.name === steps[1].name}
 			<ReceiveAddressQRCode on:icBack={modal.back} address={$icrcAccountIdentifierText ?? ''} />
 		{:else}
-			<IcReceiveInfoCkETH on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
+			<IcReceiveInfoCkEthereum on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
 		{/if}
 	</ConvertETHToCkETHWizard>
 </WizardModal>
