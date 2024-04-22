@@ -16,6 +16,7 @@
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { CKERC20_TO_ERC20_MAX_TRANSACTION_FEE } from '$icp/constants/cketh.constants';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -31,10 +32,19 @@
 	let maxTransactionFeeEth: bigint | undefined = undefined;
 	$: maxTransactionFeeEth = $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee;
 
-	let maxTransactionFee: bigint | undefined = undefined;
-	$: maxTransactionFee = nonNullish(maxTransactionFeeEth)
-		? maxTransactionFeeEth + CKERC20_TO_ERC20_MAX_TRANSACTION_FEE
+	let tokenCkEth: IcToken | undefined;
+	$: tokenCkEth = $icrcTokens.find(isTokenCkEthLedger);
+
+	let maxTransactionFeePlusEthLedgerApprove: bigint | undefined = undefined;
+	$: maxTransactionFeePlusEthLedgerApprove = nonNullish(maxTransactionFeeEth)
+		? maxTransactionFeeEth + CKERC20_TO_ERC20_MAX_TRANSACTION_FEE + (tokenCkEth?.fee ?? 0n)
 		: undefined;
+
+	let maxTransactionFee: bigint | undefined = undefined;
+	$: maxTransactionFee =
+		nonNullish(maxTransactionFeePlusEthLedgerApprove) && ckEr20
+			? maxTransactionFeePlusEthLedgerApprove + CKERC20_TO_ERC20_MAX_TRANSACTION_FEE
+			: maxTransactionFeePlusEthLedgerApprove;
 
 	const loadFee = async () => {
 		clearTimer();
