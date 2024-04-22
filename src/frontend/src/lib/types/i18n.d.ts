@@ -214,7 +214,7 @@ interface I18nSend {
 interface I18nConvert {
 	text: {
 		convert_to_btc: string;
-		convert_to_eth: string;
+		convert_to_token: string;
 		convert_to_cketh: string;
 		convert_to_ckerc20: string;
 		convert_eth_to_cketh: string;
