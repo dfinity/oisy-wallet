@@ -160,6 +160,7 @@ interface I18nSend {
 		review: string;
 		signing_approval: string;
 		approving: string;
+		approving_fees: string;
 		approving_wallet_connect: string;
 		refreshing_ui: string;
 		initializing: string;
