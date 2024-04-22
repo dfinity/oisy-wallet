@@ -40,7 +40,7 @@
 
 	const debounceLoad = debounce(load);
 
-	$: $address, $erc20Tokens, $networkId, debounceLoad();
+	$: $address, $erc20Tokens, $networkId, $erc20ToCkErc20Enabled, debounceLoad();
 </script>
 
 <slot />
