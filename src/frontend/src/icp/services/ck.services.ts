@@ -1,3 +1,8 @@
+import {
+	IC_CKETH_LEDGER_CANISTER_ID,
+	LOCAL_CKETH_LEDGER_CANISTER_ID,
+	STAGING_CKETH_LEDGER_CANISTER_ID
+} from '$env/networks.ircrc.env';
 import { retrieveBtc } from '$icp/api/ckbtc-minter.api';
 import { withdrawEth } from '$icp/api/cketh-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';
@@ -5,7 +10,7 @@ import { CKERC20_TO_ERC20_MAX_TRANSACTION_FEE } from '$icp/constants/cketh.const
 import type { IcCanisters, IcCkMetadata, IcCkToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
+import { LOCAL, NANO_SECONDS_IN_MINUTE, STAGING } from '$lib/constants/app.constants';
 import { SendIcStep } from '$lib/enums/steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { IcrcBlockIndex } from '@dfinity/ledger-icrc';
@@ -53,9 +58,19 @@ export const convertCkErc20ToErc20 = async ({
 }: IcTransferParams & {
 	token: IcCkToken;
 }): Promise<void> => {
-	const { ledgerCanisterId, minterCanisterId } = token;
+	const { minterCanisterId } = token;
 
-	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_cketh_eth);
+	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_ckerc20_erc20);
+
+	// TODO: this is relatively ugly. We should find a way to derive those information cleany.
+
+	const ledgerCanisterId = LOCAL
+		? LOCAL_CKETH_LEDGER_CANISTER_ID
+		: STAGING
+			? STAGING_CKETH_LEDGER_CANISTER_ID
+			: IC_CKETH_LEDGER_CANISTER_ID;
+
+	assertNonNullish(ledgerCanisterId, get(i18n).init.error.ledger_cketh_eth);
 
 	await approveTransfer({
 		canisters: { ledgerCanisterId, minterCanisterId },
