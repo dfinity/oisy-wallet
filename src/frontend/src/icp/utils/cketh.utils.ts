@@ -5,7 +5,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { fromNullable, isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
-export const assertCkETHUserInputAmount = ({
+export const assertCkETHMinWithdrawalAmount = ({
 	amount,
 	tokenDecimals,
 	tokenSymbol,

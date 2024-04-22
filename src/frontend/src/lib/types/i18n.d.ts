@@ -188,6 +188,7 @@ interface I18nSend {
 		unknown_minimum_cketh_amount: string;
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
+		minimum_ledger_fees: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
 		insufficient_funds_for_gas: string;
