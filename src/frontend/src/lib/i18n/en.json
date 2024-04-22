@@ -214,7 +214,7 @@
 			"unknown_minimum_cketh_amount": "The minimum amount of ckETH required for converting to ETH is unknown.",
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
-			"minimum_ledger_fees": "The amount falls below the ledger fees of $amount $symbol.",
+			"minimum_ledger_fees": "The amount falls below the ledger fees $symbol.",
 			"destination_address_invalid": "Destination address is invalid.",
 			"amount_invalid": "Amount is invalid.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
