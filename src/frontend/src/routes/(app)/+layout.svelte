@@ -4,7 +4,7 @@
 	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
-	import LoaderBalances from '$lib/components/core/LoaderBalances.svelte';
+	import LoaderBalances from '$icp-eth/components/core/LoaderBalances.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 
