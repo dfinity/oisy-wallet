@@ -34,6 +34,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import type { Token } from '$lib/types/token';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -42,8 +43,33 @@
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken, sendPurpose, nativeEthereumToken } =
+	const { sendTokenDecimals, sendTokenId, sendToken, sendPurpose } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	/**
+	 * Props
+	 */
+
+	export let destination = '';
+	export let sourceNetwork: EthereumNetwork;
+	export let targetNetwork: Network | undefined = undefined;
+	export let amount: number | undefined = undefined;
+	export let sendProgressStep: string;
+	// Required for the fee and also to retrieve ck minter information.
+	// i.e. Ethereum or Sepolia "main" token.
+	export let nativeEthereumToken: Token;
+
+	let destinationEditable = true;
+	$: destinationEditable = sendPurpose === 'send';
+
+	let sendWithApproval: boolean;
+	$: sendWithApproval = shouldSendWithApproval({
+		to: destination,
+		tokenId: $sendTokenId,
+		erc20HelperContractAddress: toCkErc20HelperContractAddress(
+			$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+		)
+	});
 
 	/**
 	 * Fee context store
@@ -57,28 +83,6 @@
 	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
 		feeStore,
 		feeSymbolStore
-	});
-
-	/**
-	 * Props
-	 */
-
-	export let destination = '';
-	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
-	export let amount: number | undefined = undefined;
-	export let sendProgressStep: string;
-
-	let destinationEditable = true;
-	$: destinationEditable = sendPurpose === 'send';
-
-	let sendWithApproval: boolean;
-	$: sendWithApproval = shouldSendWithApproval({
-		to: destination,
-		tokenId: $sendTokenId,
-		erc20HelperContractAddress: toCkErc20HelperContractAddress(
-			$ckEthMinterInfoStore?.[nativeEthereumToken.id]
-		)
 	});
 
 	/**
@@ -194,6 +198,7 @@
 	observe={currentStep?.name !== 'Sending'}
 	{sourceNetwork}
 	{targetNetwork}
+	{nativeEthereumToken}
 >
 	{#if currentStep?.name === 'Review'}
 		<SendReview
@@ -217,6 +222,7 @@
 			bind:destination
 			bind:amount
 			bind:network={targetNetwork}
+			{nativeEthereumToken}
 			{destinationEditable}
 		>
 			<svelte:fragment slot="cancel">

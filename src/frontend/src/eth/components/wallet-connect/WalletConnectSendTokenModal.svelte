@@ -35,7 +35,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
@@ -166,6 +166,7 @@
 		{destination}
 		observe={currentStep?.name !== 'Sending'}
 		{sourceNetwork}
+		nativeEthereumToken={$ethereumToken}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
 			{#if currentStep?.name === 'Sending'}

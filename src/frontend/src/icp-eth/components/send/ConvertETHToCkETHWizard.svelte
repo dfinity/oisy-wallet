@@ -5,7 +5,11 @@
 	import type { Network } from '$lib/types/network';
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
-	import { ckEthereumTwinToken, ckEthereumTwinTokenNetwork } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumNativeToken,
+		ckEthereumTwinToken,
+		ckEthereumTwinTokenNetwork
+	} from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let destination = '';
@@ -21,6 +25,7 @@
 <SendTokenWizard
 	{currentStep}
 	sourceNetwork={$ckEthereumTwinTokenNetwork}
+	nativeEthereumToken={$ckEthereumNativeToken}
 	bind:destination
 	bind:targetNetwork
 	bind:amount

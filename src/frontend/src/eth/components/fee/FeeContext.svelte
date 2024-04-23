@@ -27,16 +27,18 @@
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import type { Token } from '$lib/types/token';
 
 	export let observe: boolean;
 	export let destination = '';
 	export let amount: string | number | undefined = undefined;
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
+	export let nativeEthereumToken: Token;
 
 	const { feeStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
-	const { sendTokenId, sendToken, nativeEthereumToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee

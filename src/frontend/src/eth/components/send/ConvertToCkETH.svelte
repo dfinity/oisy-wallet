@@ -16,8 +16,7 @@
 
 	const context = initSendContext({
 		sendPurpose: 'convert-eth-to-cketh',
-		token: $ethereumToken,
-		nativeEthereumToken: $ethereumToken
+		token: $ethereumToken
 	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
