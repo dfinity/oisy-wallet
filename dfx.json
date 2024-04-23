@@ -96,7 +96,7 @@
 			"remote": {
 				"id": {
 					"ic": "sv3dd-oaaaa-aaaar-qacoa-cai",
-					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai"
+					"staging": "34enl-iqaaa-aaaar-qaecq-cai"
 				}
 			}
 		},
@@ -107,7 +107,7 @@
 			"remote": {
 				"id": {
 					"ic": "ss2fx-dyaaa-aaaar-qacoq-cai",
-					"staging": "apia6-jaaaa-aaaar-qabma-cai"
+					"staging": "33fl7-fiaaa-aaaar-qaeca-cai"
 				}
 			}
 		},
@@ -118,7 +118,7 @@
 			"remote": {
 				"id": {
 					"ic": "s3zol-vqaaa-aaaar-qacpa-cai",
-					"staging": "sh5u2-cqaaa-aaaar-qacna-cai"
+					"staging": "3oc2s-eaaaa-aaaar-qaebq-cai"
 				}
 			}
 		},
@@ -128,7 +128,7 @@
 			"wasm": "target/ic/cketh_ledger.wasm",
 			"remote": {
 				"id": {
-					"staging": "yfumr-cyaaa-aaaar-qaela-cai"
+					"staging": "3sgad-taaaa-aaaar-qaedq-cai"
 				}
 			}
 		},
@@ -138,7 +138,7 @@
 			"wasm": "target/ic/cketh_index.wasm",
 			"remote": {
 				"id": {
-					"staging": "ycvkf-paaaa-aaaar-qaelq-cai"
+					"staging": "27ien-4iaaa-aaaar-qaeea-cai"
 				}
 			}
 		}
