@@ -3,7 +3,7 @@ import {
 	decodeBurnMemo,
 	decodeMintMemo,
 	MINT_MEMO_CONVERT,
-	MINT_MEMO_REIMBURSE
+	MINT_MEMO_REIMBURSE_TRANSACTION
 } from '$icp/utils/cketh-memo.utils';
 import { uint8ArrayToHexString } from '@dfinity/utils';
 import { expect } from 'vitest';
@@ -26,7 +26,7 @@ describe('cketh-memo.utils', () => {
 			expect(uint8ArrayToHexString(from_address as Uint8Array)).toEqual(
 				'dd2851cdd40ae6536831558dd46db62fac7a844d'
 			);
-			expect(uint8ArrayToHexString(tx_hash)).toEqual(
+			expect(uint8ArrayToHexString(tx_hash as Uint8Array)).toEqual(
 				'705f826861c802b407843e99af986cfde8749b669e5e0a5a150f4350bcaa9bc3'
 			);
 			expect(log_index).toEqual(39);
@@ -40,7 +40,7 @@ describe('cketh-memo.utils', () => {
 
 			const [type, values] = decodeMintMemo(memo);
 
-			expect(type).toEqual(MINT_MEMO_REIMBURSE);
+			expect(type).toEqual(MINT_MEMO_REIMBURSE_TRANSACTION);
 
 			const [withdrawalId, from_address] = values;
 
