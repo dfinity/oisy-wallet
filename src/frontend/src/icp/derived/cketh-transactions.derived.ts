@@ -2,7 +2,7 @@ import {
 	icPendingTransactionsStore,
 	type IcPendingTransactionsData
 } from '$icp/stores/ic-pending-transactions.store';
-import {isTokenCkErc20Ledger, isTokenCkEthLedger} from '$icp/utils/ic-send.utils';
+import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { token } from '$lib/derived/token.derived';
 import { derived, type Readable } from 'svelte/store';
 
