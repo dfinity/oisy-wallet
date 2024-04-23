@@ -80,6 +80,7 @@ const loadCkErc20PendingTransactions = async ({
 	toAddress: ETH_ADDRESS;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
+	tokenId: TokenId;
 } & IcCkTwinToken) => {
 	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
 		RECEIVED_ERC20_EVENT_SIGNATURE,
@@ -101,12 +102,14 @@ const loadPendingTransactions = async ({
 	lastObservedBlockNumber,
 	identity,
 	twinToken,
-	logsTopics
+	logsTopics,
+	tokenId
 }: {
 	toAddress: ETH_ADDRESS;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 	logsTopics: (to: ETH_ADDRESS) => (string | null)[];
+	tokenId: TokenId;
 } & IcCkTwinToken) => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
@@ -119,12 +122,11 @@ const loadPendingTransactions = async ({
 	});
 
 	const {
-		id: tokenId,
-		network: { id: networkId }
+		network: { id: twinTokenNetworkId }
 	} = twinToken;
 
 	try {
-		const { getLogs } = infuraCkETHProviders(networkId);
+		const { getLogs } = infuraCkETHProviders(twinTokenNetworkId);
 		const pendingLogs = await getLogs({
 			contract: { address: toAddress },
 			startBlock: Number(lastObservedBlockNumber),
@@ -138,10 +140,9 @@ const loadPendingTransactions = async ({
 			return;
 		}
 
-		const loadTransaction = ({ transactionHash }: Log): Promise<TransactionResponse | null> => {
-			const { getTransaction } = alchemyProviders(networkId);
-			return getTransaction(transactionHash);
-		};
+		const { getTransaction } = alchemyProviders(twinTokenNetworkId);
+		const loadTransaction = ({ transactionHash }: Log): Promise<TransactionResponse | null> =>
+			getTransaction(transactionHash);
 
 		const pendingTransactions = await Promise.all(pendingLogs.map(loadTransaction));
 
