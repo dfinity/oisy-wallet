@@ -3,7 +3,7 @@ import type { SchedulerJobData, SchedulerJobParams } from '$icp/schedulers/sched
 import { WalletScheduler } from '$icp/schedulers/wallet.scheduler';
 import type { IcTransactionUi } from '$icp/types/ic';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
-import { mapCkETHTransaction } from '$icp/utils/cketh-transactions.utils';
+import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
 import { isTokenCkBtcLedger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { mapIcrcTransaction, mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import type { PostMessage, PostMessageDataRequestIcrc } from '$lib/types/post-message';
@@ -45,7 +45,7 @@ const mapTransaction = ({
 	}
 
 	if (nonNullish(ledgerId) && isTokenCkEthLedger(ledgerId)) {
-		return mapCkETHTransaction({ transaction, identity, ...ledgerId });
+		return mapCkEthereumTransaction({ transaction, identity, ...ledgerId });
 	}
 
 	return mapIcrcTransaction({ transaction, identity });
