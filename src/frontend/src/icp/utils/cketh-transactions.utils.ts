@@ -6,7 +6,12 @@ import {
 import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks.ircrc.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
-import { MINT_MEMO_REIMBURSE, decodeBurnMemo, decodeMintMemo } from '$icp/utils/cketh-memo.utils';
+import {
+	MINT_MEMO_REIMBURSE_TRANSACTION,
+	MINT_MEMO_REIMBURSE_WITHDRAWAL,
+	decodeBurnMemo,
+	decodeMintMemo
+} from '$icp/utils/cketh-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import {
@@ -104,7 +109,9 @@ const mintMemoInfo = (
 		return {
 			fromAddress:
 				fromAddress instanceof Uint8Array ? uint8ArrayToHexString(fromAddress) : undefined,
-			reimbursement: mintType === MINT_MEMO_REIMBURSE
+			reimbursement: [MINT_MEMO_REIMBURSE_TRANSACTION, MINT_MEMO_REIMBURSE_WITHDRAWAL].includes(
+				mintType
+			)
 		};
 	} catch (err: unknown) {
 		console.error('Failed to decode ckETH mint memo', memo, err);
@@ -112,10 +119,14 @@ const mintMemoInfo = (
 	}
 };
 
-const burnMemoInfo = (memo: Uint8Array | number[]): { toAddress: string } | undefined => {
+const burnMemoInfo = (
+	memo: Uint8Array | number[]
+): { toAddress: string | undefined } | undefined => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
-		return { toAddress: uint8ArrayToHexString(toAddress) };
+		return {
+			toAddress: toAddress instanceof Uint8Array ? uint8ArrayToHexString(toAddress) : undefined
+		};
 	} catch (err: unknown) {
 		console.error('Failed to decode ckETH burn memo', memo, err);
 		return undefined;
