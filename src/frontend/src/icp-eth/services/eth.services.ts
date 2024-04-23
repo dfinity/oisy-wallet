@@ -151,11 +151,15 @@ const loadPendingTransactions = async ({
 			'Logs ----------------------------------->',
 			await getLogs({
 				contract: { address: toAddress },
-				to: encodePrincipalToEthAddress(identity.getPrincipal()),
-				firstTopicEventSignature: isSupportedEthTokenId(twinToken.id)
-					? RECEIVED_ETH_EVENT_SIGNATURE
-					: RECEIVED_ERC20_EVENT_SIGNATURE,
-				startBlock: Number(lastObservedBlockNumber)
+				startBlock: Number(lastObservedBlockNumber),
+				topics: [
+					isSupportedEthTokenId(twinToken.id)
+						? RECEIVED_ETH_EVENT_SIGNATURE
+						: RECEIVED_ERC20_EVENT_SIGNATURE,
+					null,
+					...(isSupportedEthTokenId(twinToken.id) ? [] : [null]),
+					encodePrincipalToEthAddress(identity.getPrincipal())
+				]
 			})
 		);
 

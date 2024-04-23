@@ -53,19 +53,17 @@ export class InfuraCkETHProvider implements Erc20Provider {
 	getLogs = async ({
 		contract: { address: contractAddress },
 		startBlock: fromBlock,
-		to,
-		firstTopicEventSignature
+		topics
 	}: {
 		contract: ContractAddress;
 		startBlock?: BlockTag;
-		to: ETH_ADDRESS;
-		firstTopicEventSignature: string;
+		topics: (string | null)[];
 	}): Promise<Log[]> => {
 		return this.provider.getLogs({
 			fromBlock,
 			toBlock: 'latest',
 			address: contractAddress,
-			topics: [firstTopicEventSignature, null, to]
+			topics
 		});
 	};
 }
