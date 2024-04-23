@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { initCkETHMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
-	import ConvertCkEthereumTransactionsListener from '$icp-eth/components/core/ConvertCkEthereumTransactionsListener.svelte';
+	import CkEthereumPendingTransactionsListener from '$icp-eth/components/core/CkEthereumPendingTransactionsListener.svelte';
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { IcCkToken } from '$icp/types/ic';
@@ -17,6 +17,6 @@
 	{minterCanisterId}
 />
 
-<ConvertCkEthereumTransactionsListener />
+<CkEthereumPendingTransactionsListener />
 
 <slot />

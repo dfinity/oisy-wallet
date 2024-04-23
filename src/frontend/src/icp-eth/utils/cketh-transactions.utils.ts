@@ -1,17 +1,17 @@
 import type { EthereumNetwork } from '$eth/types/network';
 import type { IcCkTwinToken, IcTransactionUi } from '$icp/types/ic';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
+import type { Transaction } from '$lib/types/transaction';
 
-export const mapCkETHPendingTransaction = ({
+export const mapCkEthereumPendingTransaction = ({
 	transaction: { hash, from, to, value },
 	twinToken
 }: {
-	transaction: TransactionResponse;
+	transaction: Transaction;
 } & IcCkTwinToken): IcTransactionUi => {
 	const explorerUrl = (twinToken.network as EthereumNetwork).explorerUrl;
 
 	return {
-		id: hash,
+		id: `${hash}`,
 		incoming: false,
 		type: 'burn',
 		status: 'pending',
