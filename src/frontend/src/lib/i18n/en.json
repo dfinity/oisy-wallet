@@ -459,7 +459,10 @@
 			"loading_transactions": "Error while loading the transactions.",
 			"loading_transactions_symbol": "Error while loading the $symbol transactions.",
 			"no_token_loading_transaction": "Token not found. Transactions cannot be loaded.",
-			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists."
+			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists.",
+			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
+			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
+			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
 		}
 	}
 }
