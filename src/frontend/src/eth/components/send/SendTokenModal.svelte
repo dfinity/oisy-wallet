@@ -11,6 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Erc20Token } from '$eth/types/erc20';
+	import { ethereumToken } from '$eth/derived/token.derived';
 
 	/**
 	 * Props
@@ -79,6 +80,7 @@
 	<SendTokenWizard
 		{currentStep}
 		sourceNetwork={$selectedEthereumNetwork}
+		nativeEthereumToken={$ethereumToken}
 		bind:destination
 		bind:targetNetwork
 		bind:amount

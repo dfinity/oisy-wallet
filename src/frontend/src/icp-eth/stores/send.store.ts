@@ -24,7 +24,7 @@ const initSendStore = (token: Token): SendStore => {
 export const initSendContext = ({
 	token,
 	...staticContext
-}: Pick<SendContext, 'sendPurpose' | 'nativeEthereumToken'> & { token: Token }): SendContext => {
+}: Pick<SendContext, 'sendPurpose'> & { token: Token }): SendContext => {
 	const sendToken = initSendStore(token);
 
 	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
@@ -55,10 +55,6 @@ export interface SendContext {
 	sendTokenStandard: Readable<TokenStandard>;
 	sendBalance: Readable<BigNumber | undefined | null>;
 	sendPurpose: SendContextPurpose;
-
-	// Required for the fee and also to retrieve ck minter information.
-	// i.e. Ethereum or Sepolia "main" token.
-	nativeEthereumToken: Token;
 }
 
 export const SEND_CONTEXT_KEY = Symbol('send');

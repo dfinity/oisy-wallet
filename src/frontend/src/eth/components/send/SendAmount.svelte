@@ -12,17 +12,18 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
+	export let nativeEthereumToken: Token;
 
 	let insufficientFundsError: string | undefined;
 
 	$: insufficientFunds = nonNullish(insufficientFundsError);
 
 	const { feeStore: storeFeeData } = getContext<FeeContext>(FEE_CONTEXT_KEY);
-	const { sendTokenDecimals, sendBalance, sendTokenId, nativeEthereumToken } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenDecimals, sendBalance, sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const validate = () => {
 		if (invalidAmount(amount)) {
