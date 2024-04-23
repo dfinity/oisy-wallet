@@ -30,7 +30,9 @@
 			? [
 					{
 						step: SendIcStep.APPROVE_TRANSFER,
-						text: $i18n.send.text.approving,
+						text: $tokenCkErc20Ledger
+							? $i18n.send.text.approving_transfer
+							: $i18n.send.text.approving,
 						state: 'next'
 					} as ProgressStep
 				]
