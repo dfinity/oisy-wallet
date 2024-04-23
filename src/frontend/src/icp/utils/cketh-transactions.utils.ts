@@ -22,7 +22,7 @@ import {
 	uint8ArrayToHexString
 } from '@dfinity/utils';
 
-export const mapCkETHTransaction = ({
+export const mapCkEthereumTransaction = ({
 	transaction,
 	identity,
 	ledgerCanisterId
