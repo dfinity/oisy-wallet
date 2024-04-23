@@ -7,18 +7,25 @@
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { address } from '$lib/derived/address.derived';
-	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { authStore } from '$lib/stores/auth.store';
 	import {
-		loadPendingCkEthTransaction,
-		loadPendingCkEthTransactions
+		loadPendingCkEthereumTransaction,
+		loadCkEthereumPendingTransactions
 	} from '$icp-eth/services/eth.services';
-	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumNativeTokenId,
+		ckEthereumTwinToken,
+		ckEthereumTwinTokenStandard
+	} from '$icp-eth/derived/cketh.derived';
 	import type { NetworkId } from '$lib/types/network';
 	import type { IcToken } from '$icp/types/ic';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -28,7 +35,7 @@
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
 		if (isNullish(toAddress)) {
-			convertEthToCkEthPendingStore.reset($tokenId);
+			icPendingTransactionsStore.reset($tokenId);
 			return;
 		}
 
@@ -53,12 +60,11 @@
 
 		loadBalance = $balance;
 
-		await loadPendingCkEthTransactions({
+		await loadCkEthereumPendingTransactions({
 			tokenId: $tokenId,
 			lastObservedBlockNumber,
 			identity: $authStore.identity,
 			toAddress,
-			networkId: $ckEthereumTwinToken.network.id,
 			twinToken: $ckEthereumTwinToken
 		});
 	};
@@ -84,7 +90,7 @@
 			toAddress,
 			fromAddress: $address,
 			listener: async (hash: string) =>
-				await loadPendingCkEthTransaction({
+				await loadPendingCkEthereumTransaction({
 					hash,
 					token: $token as IcToken,
 					twinToken: $ckEthereumTwinToken,
@@ -94,13 +100,14 @@
 		});
 	};
 
-	let ckEthHelperContractAddress: OptionAddress;
-	$: ckEthHelperContractAddress = toCkEthHelperContractAddress(
-		$ckEthMinterInfoStore?.[$ckEthereumTwinToken.id]
-	);
+	let toContractAddress = '';
+	$: toContractAddress =
+		$ckEthereumTwinTokenStandard === 'erc20'
+			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
+			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '';
 
 	$: (async () =>
-		init({ toAddress: ckEthHelperContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();
+		init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();
 
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
@@ -108,8 +115,8 @@
 	$: $balance,
 		$ckEthMinterInfoStore,
 		$ckEthereumTwinToken,
-		ckEthHelperContractAddress,
-		(async () => await loadPendingTransactions({ toAddress: ckEthHelperContractAddress }))();
+		toContractAddress,
+		(async () => await loadPendingTransactions({ toAddress: toContractAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>

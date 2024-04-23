@@ -21,7 +21,7 @@ declare namespace svelteHTML {
 		'on:oisyCkBtcUpdateBalance'?: (event: CustomEvent<any>) => void;
 		'on:oisyCkBtcMinterInfoStatus'?: (event: CustomEvent<any>) => void;
 		'on:oisyCkEthMinterInfoStatus'?: (event: CustomEvent<any>) => void;
-		'on:oisyCkEthPendingTransactions'?: (event: CustomEvent<any>) => void;
+		'on:oisyCkEthereumPendingTransactions'?: (event: CustomEvent<any>) => void;
 	}
 }
 
