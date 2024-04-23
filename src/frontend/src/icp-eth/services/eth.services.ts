@@ -9,16 +9,19 @@ import { mapCkEthereumPendingTransaction } from '$icp-eth/utils/cketh-transactio
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import type { IcCkTwinToken, IcToken } from '$icp/types/ic';
 import { nullishSignOut } from '$lib/services/auth.services';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { Log } from 'alchemy-sdk';
+import { get } from 'svelte/store';
 
 export const loadCkEthereumPendingTransactions = async ({
 	twinToken,
@@ -150,8 +153,22 @@ const loadPendingTransactions = async ({
 			}))
 		});
 	} catch (err: unknown) {
+		const {
+			network: { name: networkName }
+		} = twinToken;
+
+		const {
+			transactions: {
+				error: { loading_pending_ck_ethereum_transactions }
+			}
+		} = get(i18n);
+
 		toastsError({
-			msg: { text: 'Something went wrong while fetching the pending Ethereum transactions.' },
+			msg: {
+				text: replacePlaceholders(loading_pending_ck_ethereum_transactions, {
+					$network: networkName
+				})
+			},
 			err
 		});
 	} finally {
@@ -177,9 +194,17 @@ export const loadPendingCkEthereumTransaction = async ({
 		const transaction = await getTransaction(hash);
 
 		if (isNullish(transaction)) {
+			const {
+				transactions: {
+					error: { get_transaction_for_hash }
+				}
+			} = get(i18n);
+
 			toastsError({
 				msg: {
-					text: `Failed to get the transaction from the provided (hash: ${hash}). Please reload the wallet dapp.`
+					text: replacePlaceholders(get_transaction_for_hash, {
+						$hash: hash
+					})
 				}
 			});
 			return;
@@ -196,8 +221,18 @@ export const loadPendingCkEthereumTransaction = async ({
 			}
 		});
 	} catch (err: unknown) {
+		const {
+			transactions: {
+				error: { unexpected_transaction_for_hash }
+			}
+		} = get(i18n);
+
 		toastsError({
-			msg: { text: 'Something went wrong while loading the pending ETH <> ckETH transaction.' },
+			msg: {
+				text: replacePlaceholders(unexpected_transaction_for_hash, {
+					$hash: hash
+				})
+			},
 			err
 		});
 	}
