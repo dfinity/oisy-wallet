@@ -44,7 +44,7 @@
 		}
 
 		const lastObservedBlockNumber = fromNullable(
-			$ckEthMinterInfoStore?.[$tokenId]?.data.last_observed_block_number ?? []
+			$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.last_observed_block_number ?? []
 		);
 
 		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
