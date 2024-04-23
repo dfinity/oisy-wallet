@@ -13,7 +13,7 @@
 </script>
 
 <svelte:window
-	on:oisyCkEthPendingTransactions={onSyncPendingState}
+	on:oisyCkEthereumPendingTransactions={onSyncPendingState}
 	on:oisyCkEthMinterInfoStatus={onSyncMinterInfoState}
 />
 

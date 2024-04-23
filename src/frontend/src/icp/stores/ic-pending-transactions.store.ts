@@ -1,22 +1,21 @@
+import { type IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic';
 import { initCertifiedStore, type CertifiedStore } from '$lib/stores/certified.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
-export type ConvertEthToCkEthPendingTransaction = CertifiedData<IcTransactionUi>;
+export type IcCertifiedPendingTransaction = IcCertifiedTransaction;
 
-export type ConvertEthToCkEthPendingTransactionsData = ConvertEthToCkEthPendingTransaction[];
+export type IcPendingTransactionsData = IcCertifiedPendingTransaction[];
 
-export interface ConvertEthToCkEthPendingStore
-	extends CertifiedStore<ConvertEthToCkEthPendingTransactionsData> {
+export interface IcPendingTransactionsStore extends CertifiedStore<IcPendingTransactionsData> {
 	prepend: (params: { tokenId: TokenId; transaction: CertifiedData<IcTransactionUi> }) => void;
-	set: (params: { tokenId: TokenId; data: ConvertEthToCkEthPendingTransactionsData }) => void;
+	set: (params: { tokenId: TokenId; data: IcPendingTransactionsData }) => void;
 }
 
-const initConvertEthToCkEthPendingStore = (): ConvertEthToCkEthPendingStore => {
-	const { subscribe, update, reset } =
-		initCertifiedStore<ConvertEthToCkEthPendingTransactionsData>();
+const initIcPendingTransactionsStore = (): IcPendingTransactionsStore => {
+	const { subscribe, update, reset } = initCertifiedStore<IcPendingTransactionsData>();
 
 	return {
 		prepend: ({
@@ -33,13 +32,7 @@ const initConvertEthToCkEthPendingStore = (): ConvertEthToCkEthPendingStore => {
 					...((state ?? {})[tokenId] ?? []).filter(({ data: { id } }) => transaction.data.id !== id)
 				]
 			})),
-		set: ({
-			tokenId,
-			data
-		}: {
-			tokenId: TokenId;
-			data: ConvertEthToCkEthPendingTransactionsData;
-		}) =>
+		set: ({ tokenId, data }: { tokenId: TokenId; data: IcPendingTransactionsData }) =>
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: data
@@ -49,4 +42,4 @@ const initConvertEthToCkEthPendingStore = (): ConvertEthToCkEthPendingStore => {
 	};
 };
 
-export const convertEthToCkEthPendingStore = initConvertEthToCkEthPendingStore();
+export const icPendingTransactionsStore = initIcPendingTransactionsStore();
