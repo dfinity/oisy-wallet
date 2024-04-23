@@ -1,3 +1,7 @@
+import {
+	RECEIVED_ERC20_EVENT_SIGNATURE,
+	RECEIVED_ETH_EVENT_SIGNATURE
+} from '$eth/constants/cketh.constants';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
@@ -141,6 +145,20 @@ const loadPendingTransactions = async ({
 	});
 
 	try {
+		// TODO
+		const { getLogs } = infuraCkETHProviders(networkId);
+		console.log(
+			'Logs ----------------------------------->',
+			await getLogs({
+				contract: { address: toAddress },
+				to: encodePrincipalToEthAddress(identity.getPrincipal()),
+				firstTopicEventSignature: isSupportedEthTokenId(twinToken.id)
+					? RECEIVED_ETH_EVENT_SIGNATURE
+					: RECEIVED_ERC20_EVENT_SIGNATURE,
+				startBlock: `${lastObservedBlockNumber}`
+			})
+		);
+
 		const { transactions: transactionsProviders } = etherscanProviders(networkId);
 		const transactions = await transactionsProviders({
 			address: toAddress,
