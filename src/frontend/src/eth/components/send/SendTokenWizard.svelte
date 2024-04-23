@@ -53,9 +53,11 @@
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
-	export let nativeEthereumToken: Token;
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
+	// Required for the fee and also to retrieve ck minter information.
+	// i.e. Ethereum or Sepolia "main" token.
+	export let nativeEthereumToken: Token;
 
 	let destinationEditable = true;
 	$: destinationEditable = sendPurpose === 'send';
