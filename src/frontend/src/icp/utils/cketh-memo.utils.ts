@@ -62,7 +62,7 @@ const BurnMemoConvert = z.tuple([
 
 const BurnMemoErc20GasFee = z.tuple([
 	z.literal(BURN_MEMO_ERC20_GAS_FEE),
-	z.tuple([z.instanceof(Uint8Array), z.instanceof(Uint8Array), z.instanceof(Uint8Array)])
+	z.tuple([z.string(), z.number(), z.instanceof(Uint8Array)])
 ]);
 
 const BurnMemoErc20Convert = z.tuple([
