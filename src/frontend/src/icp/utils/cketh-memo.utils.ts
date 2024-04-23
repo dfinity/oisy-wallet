@@ -9,7 +9,7 @@ export const MINT_MEMO_CONVERT = 0;
 
 export const MINT_MEMO_REIMBURSE_TRANSACTION = 1;
 
-export const MINT_MEMO_REIMBURSE_WITHDRAWAL = 1;
+export const MINT_MEMO_REIMBURSE_WITHDRAWAL = 2;
 
 const MintMemoConvert = z.tuple([
 	z.literal(MINT_MEMO_CONVERT),
