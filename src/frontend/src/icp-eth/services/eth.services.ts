@@ -14,7 +14,6 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import type { TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
@@ -28,7 +27,7 @@ export const loadCkEthereumPendingTransactions = async ({
 	...rest
 }: {
 	toAddress: ETH_ADDRESS;
-	tokenId: TokenId;
+	token: IcToken;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 } & IcCkTwinToken) => {
@@ -54,7 +53,7 @@ const loadCkETHPendingTransactions = async ({
 	...rest
 }: {
 	toAddress: ETH_ADDRESS;
-	tokenId: TokenId;
+	token: IcToken;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 } & IcCkTwinToken) => {
@@ -80,7 +79,7 @@ const loadCkErc20PendingTransactions = async ({
 	toAddress: ETH_ADDRESS;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
-	tokenId: TokenId;
+	token: IcToken;
 } & IcCkTwinToken) => {
 	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
 		RECEIVED_ERC20_EVENT_SIGNATURE,
@@ -103,13 +102,13 @@ const loadPendingTransactions = async ({
 	identity,
 	twinToken,
 	logsTopics,
-	tokenId
+	token
 }: {
 	toAddress: ETH_ADDRESS;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 	logsTopics: (to: ETH_ADDRESS) => (string | null)[];
-	tokenId: TokenId;
+	token: IcToken;
 } & IcCkTwinToken) => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
@@ -133,6 +132,8 @@ const loadPendingTransactions = async ({
 			topics: logsTopics(encodePrincipalToEthAddress(identity.getPrincipal()))
 		});
 
+		const { id: tokenId } = token;
+
 		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore we reset the store.
 		// This can be useful if there was a previous pending transactions displayed and the transaction has now been processed.
 		if (pendingLogs.length === 0) {
@@ -149,7 +150,7 @@ const loadPendingTransactions = async ({
 		icPendingTransactionsStore.set({
 			tokenId,
 			data: pendingTransactions.filter(nonNullish).map((transaction) => ({
-				data: mapCkEthereumPendingTransaction({ transaction, twinToken }),
+				data: mapCkEthereumPendingTransaction({ transaction, twinToken, token }),
 				certified: false
 			}))
 		});
@@ -182,7 +183,7 @@ const loadPendingTransactions = async ({
 
 export const loadPendingCkEthereumTransaction = async ({
 	hash,
-	token: { id: tokenId },
+	token,
 	twinToken,
 	networkId
 }: {
@@ -211,12 +212,15 @@ export const loadPendingCkEthereumTransaction = async ({
 			return;
 		}
 
+		const { id: tokenId } = token;
+
 		icPendingTransactionsStore.prepend({
 			tokenId,
 			transaction: {
 				data: mapCkEthereumPendingTransaction({
 					transaction,
-					twinToken
+					twinToken,
+					token
 				}),
 				certified: false
 			}

@@ -128,6 +128,7 @@ interface I18nReceive {
 	ethereum: {
 		text: {
 			checking_status: string;
+			converting: string;
 			from_network: string;
 			eth_to_cketh_description: string;
 			learn_how_to_convert: string;
