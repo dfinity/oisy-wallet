@@ -155,7 +155,7 @@ const loadPendingTransactions = async ({
 				firstTopicEventSignature: isSupportedEthTokenId(twinToken.id)
 					? RECEIVED_ETH_EVENT_SIGNATURE
 					: RECEIVED_ERC20_EVENT_SIGNATURE,
-				startBlock: `0x${lastObservedBlockNumber}`
+				startBlock: Number(lastObservedBlockNumber)
 			})
 		);
 
