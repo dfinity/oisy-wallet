@@ -18,7 +18,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { tokenCkEthLedger } from '$icp/derived/ic-token.derived';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
