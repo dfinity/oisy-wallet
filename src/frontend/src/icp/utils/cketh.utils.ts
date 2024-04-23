@@ -55,3 +55,31 @@ export const assertCkETHMinWithdrawalAmount = ({
 
 	return undefined;
 };
+
+export const assertCkETHMinFee = ({
+	amount,
+	fee,
+	tokenSymbol,
+	i18n
+}: {
+	amount: BigNumber;
+	fee: bigint;
+	tokenSymbol: string;
+	i18n: I18n;
+}): IcAmountAssertionError | undefined => {
+	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
+	// e.g. user enters 0. and an error gets displayed.
+	if (amount.isZero()) {
+		return undefined;
+	}
+
+	if (BigNumber.from(fee).gt(amount)) {
+		return new IcAmountAssertionError(
+			replacePlaceholders(i18n.send.assertion.minimum_ledger_fees, {
+				$symbol: tokenSymbol
+			})
+		);
+	}
+
+	return undefined;
+};
