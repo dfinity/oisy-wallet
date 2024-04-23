@@ -1,6 +1,8 @@
 import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
+import type { Erc20Token } from '$eth/types/erc20';
 import { icrcTokens } from '$icp/derived/icrc.derived';
+import type { IcCkToken } from '$icp/types/ic';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import { nonNullish } from '@dfinity/utils';
@@ -40,20 +42,25 @@ export const exchanges: Readable<ExchangesData> = derived(
 					}),
 					{}
 				),
-			...$icrcTokens.reduce(
-				(acc, { id, exchangeCoinId }) => ({
+			...$icrcTokens.reduce((acc, token) => {
+				const { id, exchangeCoinId } = token;
+
+				const { twinToken } = token as Partial<IcCkToken>;
+				const { address } = (twinToken as Partial<Erc20Token>) ?? { address: undefined };
+				const ckEthereumPrice = nonNullish(address) ? $exchangeStore?.[address] : ethPrice;
+
+				return {
 					...acc,
 					[id]:
 						exchangeCoinId === 'ethereum'
-							? ethPrice
+							? ckEthereumPrice
 							: exchangeCoinId === 'bitcoin'
 								? btcPrice
 								: exchangeCoinId === 'internet-computer'
 									? icpPrice
 									: undefined
-				}),
-				{}
-			)
+				};
+			}, {})
 		};
 	}
 );
