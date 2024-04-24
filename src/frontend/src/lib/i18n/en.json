@@ -144,7 +144,7 @@
 		},
 		"ethereum": {
 			"text": {
-				"checking_status": "Checking ETH status...",
+				"checking_status": "Checking $token status...",
 				"from_network": "Receive from $network Network",
 				"eth_to_cketh_description": "Converting $token into $ckToken requires a call to a smart contract on $network and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
 				"learn_how_to_convert": "Learn how to convert $token to $ckToken",
@@ -252,7 +252,9 @@
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
 			"set_amount": "Set amount for conversion",
-			"send_fee": "Ensure you have also $token to cover the fee. Current balance"
+			"check_balance_for_fees": "Check $token balance for conversion fees",
+			"fees_explanation": "You need enough $token to cover the smart contract execution fees.",
+			"current_balance": "👉 Current balance:"
 		},
 		"error": {
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
@@ -439,6 +441,16 @@
 			"safe": "Safe",
 			"finalised": "Finalised"
 		},
+		"label": {
+			"reimbursement": "Reimbursement",
+			"twin_token_received": "$twinToken received",
+			"twin_token_sent": "$twinToken sent",
+			"receiving_twin_token": "Receiving $twinToken",
+			"sending_twin_token": "Sending $twinToken",
+			"sending_twin_token_failed": "Sending $twinToken failed",
+			"converting_twin_token": "Converting $twinToken to $ckToken",
+			"twin_network": "$twinNetwork network"
+		},
 		"alt": {
 			"open_block_explorer": "Open this transaction on a block explorer",
 			"open_from_block_explorer": "Open the 'From' address on a block explorer",
@@ -459,7 +471,10 @@
 			"loading_transactions": "Error while loading the transactions.",
 			"loading_transactions_symbol": "Error while loading the $symbol transactions.",
 			"no_token_loading_transaction": "Token not found. Transactions cannot be loaded.",
-			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists."
+			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists.",
+			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
+			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
+			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
 		}
 	}
 }

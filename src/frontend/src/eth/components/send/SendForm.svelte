@@ -13,12 +13,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import type { Token } from '$lib/types/token';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
 	export let amount: number | undefined = undefined;
 	export let nativeEthereumToken: Token;
+	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
+	export let sourceNetwork: EthereumNetwork;
 
 	let insufficientFunds: boolean;
 	let invalidDestination: boolean;
@@ -36,7 +39,7 @@
 	{#if destinationEditable}
 		<SendDestination bind:destination bind:invalidDestination />
 
-		<SendNetworkICP {destination} bind:network />
+		<SendNetworkICP {destination} {sourceNetwork} bind:network />
 	{/if}
 
 	<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />

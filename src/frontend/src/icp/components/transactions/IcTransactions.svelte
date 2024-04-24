@@ -31,10 +31,13 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
 
+	let ckEthereum: boolean;
+	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
+
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger
 		? IcTransactionsBtcListeners
-		: $tokenCkEthLedger || $tokenCkErc20Ledger
+		: ckEthereum
 			? IcTransactionsCkEthereumListeners
 			: IcTransactionsNoListener;
 
@@ -83,7 +86,7 @@
 	<svelte:fragment slot="end">
 		{#if $tokenCkBtcLedger}
 			<IcReceiveBitcoin />
-		{:else if $tokenCkEthLedger}
+		{:else if ckEthereum}
 			<IcReceiveEthereum />
 		{/if}
 	</svelte:fragment>

@@ -16,6 +16,7 @@
 		loadCkEthereumPendingTransactions
 	} from '$icp-eth/services/eth.services';
 	import {
+		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
@@ -44,7 +45,7 @@
 		}
 
 		const lastObservedBlockNumber = fromNullable(
-			$ckEthMinterInfoStore?.[$tokenId]?.data.last_observed_block_number ?? []
+			$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.last_observed_block_number ?? []
 		);
 
 		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
@@ -61,7 +62,7 @@
 		loadBalance = $balance;
 
 		await loadCkEthereumPendingTransactions({
-			tokenId: $tokenId,
+			token: $token as IcToken,
 			lastObservedBlockNumber,
 			identity: $authStore.identity,
 			toAddress,
@@ -104,7 +105,10 @@
 	$: toContractAddress =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
-			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '';
+			: toCkEthHelperContractAddress(
+					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
+					$ckEthereumNativeToken.network.id
+				) ?? '';
 
 	$: (async () =>
 		init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();

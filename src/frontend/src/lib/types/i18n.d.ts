@@ -227,7 +227,9 @@ interface I18nConvert {
 		send_eth: string;
 		wait_eth_current_balance: string;
 		set_amount: string;
-		send_fee: string;
+		check_balance_for_fees: string;
+		fees_explanation: string;
+		current_balance: string;
 	};
 	error: { loading_cketh_helper: string };
 }
@@ -379,6 +381,16 @@ interface I18nTransaction {
 		interacted_with: string;
 	};
 	status: { included: string; safe: string; finalised: string };
+	label: {
+		reimbursement: string;
+		twin_token_received: string;
+		twin_token_sent: string;
+		receiving_twin_token: string;
+		sending_twin_token: string;
+		sending_twin_token_failed: string;
+		converting_twin_token: string;
+		twin_network: string;
+	};
 	alt: {
 		open_block_explorer: string;
 		open_from_block_explorer: string;
@@ -398,6 +410,9 @@ interface I18nTransactions {
 		loading_transactions_symbol: string;
 		no_token_loading_transaction: string;
 		uncertified_transactions_removed: string;
+		loading_pending_ck_ethereum_transactions: string;
+		get_transaction_for_hash: string;
+		unexpected_transaction_for_hash: string;
 	};
 }
 

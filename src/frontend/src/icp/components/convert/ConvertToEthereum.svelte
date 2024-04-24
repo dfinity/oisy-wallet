@@ -7,13 +7,17 @@
 	import {
 		ckEthereumTwinTokenNetworkId,
 		ckEthereumTwinToken,
-		ckEthereumNativeTokenId
+		ckEthereumNativeTokenId,
+		ckEthereumNativeToken
 	} from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
-<ConvertETH nativeTokenId={$ckEthereumNativeTokenId}>
+<ConvertETH
+	nativeTokenId={$ckEthereumNativeTokenId}
+	nativeNetworkId={$ckEthereumNativeToken.network.id}
+>
 	<IconBurn size="28" />
 	<span
 		>{replacePlaceholders($i18n.convert.text.convert_to_token, {
