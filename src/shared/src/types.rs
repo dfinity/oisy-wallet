@@ -72,7 +72,7 @@ pub mod custom_token {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
-        pub index_id: IndexId,
+        pub index_id: Option<IndexId>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

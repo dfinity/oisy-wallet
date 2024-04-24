@@ -48,7 +48,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const IcrcToken = IDL.Record({
 		ledger_id: IDL.Principal,
-		index_id: IDL.Principal
+		index_id: IDL.Opt(IDL.Principal)
 	});
 	const Token = IDL.Variant({ Icrc: IcrcToken });
 	const CustomToken = IDL.Record({
