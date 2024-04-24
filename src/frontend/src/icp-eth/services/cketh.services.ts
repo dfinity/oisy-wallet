@@ -1,79 +1,88 @@
-import { ckEthHelperContractAddress } from '$icp-eth/api/cketh-minter.api';
-import {
-	ckEthHelperContractAddressStore,
-	type CkEthHelperContractAddressData
-} from '$icp-eth/stores/cketh.store';
+import { minterInfo } from '$icp-eth/api/cketh-minter.api';
+import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import type { IcCkMetadata } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
-import type { TokenId, TokenStandard } from '$lib/types/token';
+import type { TokenId } from '$lib/types/token';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
+import type { MinterInfo } from '@dfinity/cketh';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadCkEthHelperContractAddress = async ({
+export const loadCkEthMinterInfo = async ({
 	tokenId,
 	canisters: { minterCanisterId }
 }: {
 	tokenId: TokenId;
 	canisters: IcCkMetadata;
 }) => {
-	const addressInStore = get(ckEthHelperContractAddressStore);
+	const minterInfoInStore = get(ckEthMinterInfoStore);
 
-	// We try to load only once per session the help contract address
-	if (addressInStore?.[tokenId] !== undefined) {
+	// We try to load only once per session the helpers (ckETH and ckErc20) contract addresses
+	if (minterInfoInStore?.[tokenId] !== undefined) {
 		return;
 	}
 
-	await queryAndUpdate<ETH_ADDRESS>({
+	await queryAndUpdate<MinterInfo>({
 		request: ({ identity: _, certified }) =>
-			ckEthHelperContractAddress({
+			minterInfo({
 				minterCanisterId,
 				identity: new AnonymousIdentity(),
 				certified
 			}),
 		onLoad: ({ response: data, certified }) =>
-			ckEthHelperContractAddressStore.set({ tokenId, data: { data, certified } }),
+			ckEthMinterInfoStore.set({ tokenId, data: { data, certified } }),
 		onCertifiedError: ({ error }) => {
 			// We silence the error here because we display a visual error when we try to effectively use the information
 			console.error(error);
 
-			ckEthHelperContractAddressStore.reset(tokenId);
+			ckEthMinterInfoStore.reset(tokenId);
 		},
 		identity: new AnonymousIdentity()
 	});
 };
 
-export const assertCkEthHelperContractAddressLoaded = ({
-	helperContractAddress,
-	tokenStandard,
+export const assertCkEthMinterInfoLoaded = ({
+	minterInfo,
 	network
 }: {
-	helperContractAddress: CkEthHelperContractAddressData | null | undefined;
-	tokenStandard: TokenStandard;
+	minterInfo: OptionCertifiedMinterInfo;
 	network: Network | undefined;
 }): { valid: boolean } => {
-	if (tokenStandard !== 'ethereum' || !isNetworkICP(network ?? DEFAULT_NETWORK)) {
+	if (!isNetworkICP(network ?? DEFAULT_NETWORK)) {
 		return { valid: true };
 	}
 
-	if (isNullish(helperContractAddress)) {
+	if (isNullish(minterInfo)) {
+		const {
+			send: {
+				assertion: { minter_info_not_loaded }
+			}
+		} = get(i18n);
+
 		toastsError({
 			msg: {
-				text: `Try again in few seconds, a ckETH configuration parameter is not yet loaded.`
+				text: minter_info_not_loaded
 			}
 		});
 		return { valid: false };
 	}
 
-	if (helperContractAddress?.certified !== true) {
+	if (!minterInfo.certified) {
+		const {
+			send: {
+				assertion: { minter_info_not_certified }
+			}
+		} = get(i18n);
+
 		toastsError({
 			msg: {
-				text: `Try again in few seconds, a ckETH configuration parameter has not yet certified.`
+				text: minter_info_not_certified
 			}
 		});
 		return { valid: false };

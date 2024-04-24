@@ -12,11 +12,13 @@
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { assertCkETHUserInputAmount } from '$icp/utils/cketh.utils';
-	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
+	import { assertCkETHMinFee, assertCkETHMinWithdrawalAmount } from '$icp/utils/cketh.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { tokenCkEthLedger } from '$icp/derived/ic-token.derived';
+	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -54,18 +56,28 @@
 			}
 		}
 
-		if (isNetworkIdEthereum(networkId)) {
-			amountError = assertCkETHUserInputAmount({
+		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
+			amountError = assertCkETHMinWithdrawalAmount({
 				amount: value,
 				tokenDecimals: $tokenDecimals,
 				tokenSymbol: $tokenSymbol,
-				minterInfo: $ckEthMinterInfoStore?.[$tokenId],
+				minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
 				i18n: $i18n
 			});
 
 			if (nonNullish(amountError)) {
 				return;
 			}
+		}
+
+		if (isNetworkIdEthereum(networkId)) {
+			amountError = assertCkETHMinFee({
+				amount: value,
+				tokenSymbol: $tokenSymbol,
+				fee,
+				i18n: $i18n
+			});
+			return;
 		}
 
 		const total = value.add(fee);

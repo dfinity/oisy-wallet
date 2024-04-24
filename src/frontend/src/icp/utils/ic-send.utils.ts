@@ -3,7 +3,11 @@ import {
 	BTC_TESTNET_NETWORK_ID,
 	ETHEREUM_NETWORK_ID
 } from '$env/networks.env';
-import { CKBTC_LEDGER_CANISTER_IDS, CKETH_LEDGER_CANISTER_IDS } from '$env/networks.ircrc.env';
+import {
+	CKBTC_LEDGER_CANISTER_IDS,
+	CKERC20_LEDGER_CANISTER_IDS,
+	CKETH_LEDGER_CANISTER_IDS
+} from '$env/networks.ircrc.env';
 import type { IcToken } from '$icp/types/ic';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
@@ -36,6 +40,9 @@ export const isTokenCkBtcLedger = ({ ledgerCanisterId }: Partial<IcToken>): bool
 
 export const isTokenCkEthLedger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
 	nonNullish(ledgerCanisterId) && CKETH_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
+
+export const isTokenCkErc20Ledger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
+	nonNullish(ledgerCanisterId) && CKERC20_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
 export const isNetworkIdBTC = (networkId: NetworkId | undefined): boolean =>
 	nonNullish(networkId) && [BTC_MAINNET_NETWORK_ID, BTC_TESTNET_NETWORK_ID].includes(networkId);

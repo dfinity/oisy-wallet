@@ -2,6 +2,8 @@
 	import { blur } from 'svelte/transition';
 	import type { SyncState } from '$lib/types/sync';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	let ckEthPendingTransactionsSyncState: SyncState | undefined = undefined;
 	const onSyncPendingState = ({ detail: state }: CustomEvent<SyncState>) =>
@@ -13,12 +15,16 @@
 </script>
 
 <svelte:window
-	on:oisyCkEthPendingTransactions={onSyncPendingState}
+	on:oisyCkEthereumPendingTransactions={onSyncPendingState}
 	on:oisyCkEthMinterInfoStatus={onSyncMinterInfoState}
 />
 
 {#if ckEthPendingTransactionsSyncState === 'in_progress' || ckEthMinterInfoSyncState === 'in_progress'}
 	<div class="text-misty-rose animate-pulse">
-		<span transition:blur>{$i18n.receive.ethereum.text.checking_status}</span>
+		<span transition:blur
+			>{replacePlaceholders($i18n.receive.ethereum.text.checking_status, {
+				$token: $ckEthereumTwinToken.symbol
+			})}</span
+		>
 	</div>
 {/if}

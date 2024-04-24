@@ -1,32 +1,114 @@
+import {
+	RECEIVED_ERC20_EVENT_SIGNATURE,
+	RECEIVED_ETH_EVENT_SIGNATURE
+} from '$eth/constants/cketh.constants';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
-import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
-import { mapCkETHPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
-import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
+import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+import { mapCkEthereumPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
+import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import type { IcCkTwinToken, IcToken } from '$icp/types/ic';
 import { nullishSignOut } from '$lib/services/auth.services';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import type { TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import type { TransactionResponse } from '@ethersproject/abstract-provider';
+import type { Log } from 'alchemy-sdk';
+import { get } from 'svelte/store';
 
-export const loadPendingCkEthTransactions = async ({
-	toAddress,
-	tokenId,
-	lastObservedBlockNumber,
-	identity,
-	networkId,
-	twinToken
+export const loadCkEthereumPendingTransactions = async ({
+	twinToken,
+	...rest
 }: {
 	toAddress: ETH_ADDRESS;
-	tokenId: TokenId;
+	token: IcToken;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
-	networkId: NetworkId;
+} & IcCkTwinToken) => {
+	const { id: twinTokenId } = twinToken;
+
+	if (isSupportedEthTokenId(twinTokenId)) {
+		await loadCkETHPendingTransactions({
+			twinToken,
+			...rest
+		});
+		return;
+	}
+
+	await loadCkErc20PendingTransactions({
+		twinToken,
+		...rest
+	});
+};
+
+const loadCkETHPendingTransactions = async ({
+	toAddress,
+	twinToken,
+	...rest
+}: {
+	toAddress: ETH_ADDRESS;
+	token: IcToken;
+	lastObservedBlockNumber: bigint;
+	identity: OptionIdentity;
+} & IcCkTwinToken) => {
+	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
+		RECEIVED_ETH_EVENT_SIGNATURE,
+		null,
+		to
+	];
+
+	await loadPendingTransactions({
+		toAddress,
+		twinToken,
+		logsTopics,
+		...rest
+	});
+};
+
+const loadCkErc20PendingTransactions = async ({
+	toAddress,
+	twinToken,
+	...rest
+}: {
+	toAddress: ETH_ADDRESS;
+	lastObservedBlockNumber: bigint;
+	identity: OptionIdentity;
+	token: IcToken;
+} & IcCkTwinToken) => {
+	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
+		RECEIVED_ERC20_EVENT_SIGNATURE,
+		null,
+		null,
+		to
+	];
+
+	await loadPendingTransactions({
+		toAddress,
+		twinToken,
+		logsTopics,
+		...rest
+	});
+};
+
+const loadPendingTransactions = async ({
+	toAddress,
+	lastObservedBlockNumber,
+	identity,
+	twinToken,
+	logsTopics,
+	token
+}: {
+	toAddress: ETH_ADDRESS;
+	lastObservedBlockNumber: bigint;
+	identity: OptionIdentity;
+	logsTopics: (to: ETH_ADDRESS) => (string | null)[];
+	token: IcToken;
 } & IcCkTwinToken) => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
@@ -34,59 +116,74 @@ export const loadPendingCkEthTransactions = async ({
 	}
 
 	emit({
-		message: 'oisyCkEthPendingTransactions',
+		message: 'oisyCkEthereumPendingTransactions',
 		detail: 'in_progress'
 	});
 
+	const {
+		network: { id: twinTokenNetworkId }
+	} = twinToken;
+
 	try {
-		const { transactions: transactionsProviders } = etherscanProviders(networkId);
-		const transactions = await transactionsProviders({
-			address: toAddress,
-			startBlock: `${lastObservedBlockNumber}`
-		});
-
-		// We compute the data for a transfer of ETH to the ckETH helper contract using the user's principal.
-		// This allows us to use the data to compare with the contract's pending transactions and filter those targeting this user.
-		const { populateTransaction } = infuraCkETHProviders(networkId);
-		const { data } = await populateTransaction({
+		const { getLogs } = infuraCkETHProviders(twinTokenNetworkId);
+		const pendingLogs = await getLogs({
 			contract: { address: toAddress },
-			to: encodePrincipalToEthAddress(identity.getPrincipal())
+			startBlock: Number(lastObservedBlockNumber),
+			topics: logsTopics(encodePrincipalToEthAddress(identity.getPrincipal()))
 		});
 
-		const pendingEthToCkEthTransactions = transactions.filter(
-			({ data: txData }) => txData === data
-		);
+		const { id: tokenId } = token;
 
-		// There are no pending ETH -> ckETH transactions, therefore we reset the store.
+		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore we reset the store.
 		// This can be useful if there was a previous pending transactions displayed and the transaction has now been processed.
-		if (pendingEthToCkEthTransactions.length === 0) {
-			convertEthToCkEthPendingStore.reset(tokenId);
+		if (pendingLogs.length === 0) {
+			icPendingTransactionsStore.reset(tokenId);
 			return;
 		}
 
-		convertEthToCkEthPendingStore.set({
+		const { getTransaction } = alchemyProviders(twinTokenNetworkId);
+		const loadTransaction = ({ transactionHash }: Log): Promise<TransactionResponse | null> =>
+			getTransaction(transactionHash);
+
+		const pendingTransactions = await Promise.all(pendingLogs.map(loadTransaction));
+
+		icPendingTransactionsStore.set({
 			tokenId,
-			data: pendingEthToCkEthTransactions.map((transaction) => ({
-				data: mapCkETHPendingTransaction({ transaction, twinToken }),
+			data: pendingTransactions.filter(nonNullish).map((transaction) => ({
+				data: mapCkEthereumPendingTransaction({ transaction, twinToken, token }),
 				certified: false
 			}))
 		});
 	} catch (err: unknown) {
+		const {
+			network: { name: networkName }
+		} = twinToken;
+
+		const {
+			transactions: {
+				error: { loading_pending_ck_ethereum_transactions }
+			}
+		} = get(i18n);
+
 		toastsError({
-			msg: { text: 'Something went wrong while fetching the pending ETH <> ckETH transactions.' },
+			msg: {
+				text: replacePlaceholders(loading_pending_ck_ethereum_transactions, {
+					$network: networkName
+				})
+			},
 			err
 		});
 	} finally {
 		emit({
-			message: 'oisyCkEthPendingTransactions',
+			message: 'oisyCkEthereumPendingTransactions',
 			detail: 'idle'
 		});
 	}
 };
 
-export const loadPendingCkEthTransaction = async ({
+export const loadPendingCkEthereumTransaction = async ({
 	hash,
-	token: { id: tokenId },
+	token,
 	twinToken,
 	networkId
 }: {
@@ -99,27 +196,48 @@ export const loadPendingCkEthTransaction = async ({
 		const transaction = await getTransaction(hash);
 
 		if (isNullish(transaction)) {
+			const {
+				transactions: {
+					error: { get_transaction_for_hash }
+				}
+			} = get(i18n);
+
 			toastsError({
 				msg: {
-					text: `Failed to get the transaction from the provided (hash: ${hash}). Please reload the wallet dapp.`
+					text: replacePlaceholders(get_transaction_for_hash, {
+						$hash: hash
+					})
 				}
 			});
 			return;
 		}
 
-		convertEthToCkEthPendingStore.prepend({
+		const { id: tokenId } = token;
+
+		icPendingTransactionsStore.prepend({
 			tokenId,
 			transaction: {
-				data: mapCkETHPendingTransaction({
+				data: mapCkEthereumPendingTransaction({
 					transaction,
-					twinToken
+					twinToken,
+					token
 				}),
 				certified: false
 			}
 		});
 	} catch (err: unknown) {
+		const {
+			transactions: {
+				error: { unexpected_transaction_for_hash }
+			}
+		} = get(i18n);
+
 		toastsError({
-			msg: { text: 'Something went wrong while loading the pending ETH <> ckETH transaction.' },
+			msg: {
+				text: replacePlaceholders(unexpected_transaction_for_hash, {
+					$hash: hash
+				})
+			},
 			err
 		});
 	}

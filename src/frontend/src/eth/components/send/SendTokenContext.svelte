@@ -8,7 +8,10 @@
 	/**
 	 * Send modal context store
 	 */
-	const { sendToken, ...rest } = initSendContext({ sendPurpose: 'send', token });
+	const { sendToken, ...rest } = initSendContext({
+		sendPurpose: 'send',
+		token
+	});
 
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
 		sendToken,

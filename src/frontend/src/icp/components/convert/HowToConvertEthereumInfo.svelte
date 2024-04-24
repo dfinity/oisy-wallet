@@ -7,10 +7,20 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		ckEthereumNativeToken,
+		ckEthereumNativeTokenBalance,
+		ckEthereumTwinToken
+	} from '$icp-eth/derived/cketh.derived';
+	import { token } from '$lib/derived/token.derived';
+	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 
 	export let formCancelAction: 'back' | 'close' = 'back';
+
+	let ckErc20 = false;
+	$: ckErc20 = $tokenCkErc20Ledger;
 
 	const dispatch = createEventDispatcher();
 
@@ -18,7 +28,12 @@
 </script>
 
 <div>
-	<p>{replaceOisyPlaceholders($i18n.convert.text.how_to_convert_eth_to_cketh)}:</p>
+	<p>
+		{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.how_to_convert_eth_to_cketh), {
+			$token: $ckEthereumTwinToken.symbol,
+			$ckToken: $token.symbol
+		})}:
+	</p>
 </div>
 
 <div class="grid grid-cols-[1fr_auto] gap-x-4 mt-4">
@@ -34,12 +49,14 @@
 	<ReceiveAddress
 		labelRef="eth-wallet-address"
 		address={$address ?? ''}
-		qrCodeAriaLabel="Display wallet address as a QR code"
-		copyAriaLabel="Wallet address copied to clipboard."
+		qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
+		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 		on:click={() => dispatch('icQRCode')}
 	>
 		<svelte:fragment slot="title"
-			>{replaceOisyPlaceholders($i18n.convert.text.send_eth)}</svelte:fragment
+			>{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
+				$token: $ckEthereumTwinToken.symbol
+			})}</svelte:fragment
 		>
 	</ReceiveAddress>
 
@@ -54,7 +71,11 @@
 
 	<div>
 		<Value element="div">
-			<svelte:fragment slot="label">{$i18n.convert.text.wait_eth_current_balance}</svelte:fragment>
+			<svelte:fragment slot="label"
+				>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
+					$token: $ckEthereumTwinToken.symbol
+				})}</svelte:fragment
+			>
 
 			<p class="mb-6">
 				{formatToken({
@@ -67,14 +88,49 @@
 		</Value>
 	</div>
 
+	{#if ckErc20}
+		<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
+			<span
+				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				>3</span
+			>
+
+			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+		</div>
+
+		<div>
+			<Value element="div">
+				<svelte:fragment slot="label"
+					>{replacePlaceholders($i18n.convert.text.send_fee, {
+						$token: $ckEthereumNativeToken.symbol
+					})}</svelte:fragment
+				>
+
+				<p class="mb-6">
+					{formatToken({
+						value: $ckEthereumNativeTokenBalance ?? BigNumber.from(0n),
+						unitName: $ckEthereumNativeToken.decimals,
+						displayDecimals: $ckEthereumNativeToken.decimals
+					})}
+					{$ckEthereumNativeToken.symbol}
+				</p>
+			</Value>
+		</div>
+	{/if}
+
 	<span
 		class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
-		>3</span
+		>{#if ckErc20}4{:else}3{/if}</span
 	>
 
 	<div>
 		<Value element="div">
-			<svelte:fragment slot="label">{$i18n.convert.text.convert_eth_to_cketh}</svelte:fragment>
+			<svelte:fragment slot="label"
+				>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
+					$token: $ckEthereumTwinToken.symbol,
+					$ckToken: $token.symbol
+				})}</svelte:fragment
+			>
 
 			<button class="secondary full center mt-3 mb-4" on:click={() => dispatch('icConvert')}>
 				<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>

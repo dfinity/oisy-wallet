@@ -1,25 +1,36 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { SendStep } from '$lib/enums/steps';
-	import HowToConvertETHInfo from '$icp/components/convert/HowToConvertETHInfo.svelte';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
-	import IcReceiveInfoCkETH from '$icp/components/receive/IcReceiveInfoCkETH.svelte';
+	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import { ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumNativeTokenId,
+		ckEthereumTwinToken,
+		ckEthereumTwinTokenStandard
+	} from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 
 	/**
 	 * Props
 	 */
 
 	let destination = '';
-	$: destination = $ckEthHelperContractAddressStore?.[$ckETHTwinTokenId]?.data ?? '';
+	$: destination =
+		$ckEthereumTwinTokenStandard === 'erc20'
+			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
+			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 
@@ -31,7 +42,7 @@
 	 */
 
 	let howToSteps: WizardSteps;
-	$: howToSteps = howToConvertWizardSteps($i18n);
+	$: howToSteps = howToConvertWizardSteps({ i18n: $i18n, twinToken: $ckEthereumTwinToken });
 
 	let steps: WizardSteps;
 	$: steps = [
@@ -82,7 +93,7 @@
 		{currentStep}
 	>
 		{#if currentStep?.name === howToSteps[0].name}
-			<HowToConvertETHInfo
+			<HowToConvertEthereumInfo
 				on:icBack={() => modal.set(0)}
 				on:icQRCode={modal.next}
 				on:icConvert={() => modal.set(4)}
@@ -90,7 +101,7 @@
 		{:else if currentStep?.name === steps[1].name}
 			<ReceiveAddressQRCode on:icBack={modal.back} address={$icrcAccountIdentifierText ?? ''} />
 		{:else}
-			<IcReceiveInfoCkETH on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
+			<IcReceiveInfoCkEthereum on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} />
 		{/if}
 	</ConvertETHToCkETHWizard>
 </WizardModal>

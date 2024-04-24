@@ -4,8 +4,7 @@ import {
 	syncCkBTCUpdateOk
 } from '$icp/services/ckbtc-listener.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
-import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import { isNetworkIdBTCMainnet } from '$icp/utils/ic-send.utils';
 import type {
 	PostMessage,
@@ -18,9 +17,11 @@ import { get } from 'svelte/store';
 
 export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 	minterCanisterId,
-	id: tokenId,
-	network: { id: networkId }
-}: IcCkToken): Promise<IcCkWorkerInitResult> => {
+	token: {
+		id: tokenId,
+		network: { id: networkId }
+	}
+}: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
 	const CkBTCUpdateBalanceWorker = await import('$icp/workers/ckbtc-update-balance.worker?worker');
 	const worker: Worker = new CkBTCUpdateBalanceWorker.default();
 
