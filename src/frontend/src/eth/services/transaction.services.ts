@@ -1,7 +1,7 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { transactionsStore } from '$eth/stores/transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
+import { decodeErc20AbiDataValue } from '$icp-eth/utils/transactions.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';

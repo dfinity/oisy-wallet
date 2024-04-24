@@ -1,12 +1,16 @@
 import type { EthereumNetwork } from '$eth/types/network';
+import {
+	decodeErc20AbiDataValue,
+	isErc20TransactionApprove
+} from '$icp-eth/utils/transactions.utils';
 import type { IcCkTwinToken, IcToken, IcTransactionUi } from '$icp/types/ic';
 import { i18n } from '$lib/stores/i18n.store';
-import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import type { Transaction } from '@ethersproject/transactions';
 import { get } from 'svelte/store';
 
 export const mapCkEthereumPendingTransaction = ({
-	transaction: { hash, from, to, value },
+	transaction: { hash, from, to, value, data },
 	twinToken,
 	token
 }: {
@@ -17,6 +21,8 @@ export const mapCkEthereumPendingTransaction = ({
 
 	const { symbol: twinTokenSymbol } = twinToken;
 	const { symbol } = token;
+
+	const erc20Approve = isErc20TransactionApprove(data);
 
 	const {
 		transaction: {
@@ -35,7 +41,7 @@ export const mapCkEthereumPendingTransaction = ({
 			$token: twinTokenSymbol,
 			$ckToken: symbol
 		}),
-		value: value.toBigInt(),
+		value: (erc20Approve ? decodeErc20AbiDataValue(data) : value).toBigInt(),
 		fromExplorerUrl: `${explorerUrl}/address/${from}`,
 		toExplorerUrl: `${explorerUrl}/address/${to}`,
 		txExplorerUrl: `${explorerUrl}/tx/${hash}`

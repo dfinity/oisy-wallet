@@ -24,7 +24,6 @@
 		reject as rejectServices
 	} from '$eth/services/wallet-connect.services';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
-	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { authStore } from '$lib/stores/auth.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -39,6 +38,7 @@
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import { isErc20TransactionApprove } from '$icp-eth/utils/transactions.utils';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
