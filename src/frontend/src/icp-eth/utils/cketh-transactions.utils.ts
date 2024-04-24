@@ -1,23 +1,42 @@
 import type { EthereumNetwork } from '$eth/types/network';
-import type { IcCkTwinToken, IcTransactionUi } from '$icp/types/ic';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
+import type { IcCkTwinToken, IcToken, IcTransactionUi } from '$icp/types/ic';
+import { i18n } from '$lib/stores/i18n.store';
+import type { Transaction } from '$lib/types/transaction';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { get } from 'svelte/store';
 
-export const mapCkETHPendingTransaction = ({
+export const mapCkEthereumPendingTransaction = ({
 	transaction: { hash, from, to, value },
-	twinToken
+	twinToken,
+	token
 }: {
-	transaction: TransactionResponse;
+	transaction: Transaction;
+	token: IcToken;
 } & IcCkTwinToken): IcTransactionUi => {
 	const explorerUrl = (twinToken.network as EthereumNetwork).explorerUrl;
 
+	const { symbol: twinTokenSymbol } = twinToken;
+	const { symbol } = token;
+
+	const {
+		receive: {
+			ethereum: {
+				text: { converting }
+			}
+		}
+	} = get(i18n);
+
 	return {
-		id: hash,
+		id: `${hash}`,
 		incoming: false,
 		type: 'burn',
 		status: 'pending',
 		from,
 		to,
-		typeLabel: 'Converting ETH to ckETH',
+		typeLabel: replacePlaceholders(converting, {
+			$token: twinTokenSymbol,
+			$ckToken: symbol
+		}),
 		value: value.toBigInt(),
 		fromExplorerUrl: `${explorerUrl}/address/${from}`,
 		toExplorerUrl: `${explorerUrl}/address/${to}`,

@@ -10,8 +10,12 @@ import type {
 	IcTransactionUi
 } from '$icp/types/ic';
 import { extendCkBTCTransaction, mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
-import { mapCkETHTransaction } from '$icp/utils/cketh-transactions.utils';
-import { isTokenCkBtcLedger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
+import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
+import {
+	isTokenCkBtcLedger,
+	isTokenCkErc20Ledger,
+	isTokenCkEthLedger
+} from '$icp/utils/ic-send.utils';
 import { mapIcpTransaction } from '$icp/utils/icp-transactions.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -40,8 +44,8 @@ export const mapIcTransaction = ({
 		});
 	}
 
-	if (isTokenCkEthLedger(token)) {
-		return mapCkETHTransaction({
+	if (isTokenCkEthLedger(token) || isTokenCkErc20Ledger(token)) {
+		return mapCkEthereumTransaction({
 			transaction: transaction as IcrcTransaction,
 			ledgerCanisterId: (token as IcCkToken).ledgerCanisterId,
 			...rest

@@ -56,7 +56,7 @@ interface I18nInit {
 		securing_session: string;
 		retrieving_eth_key: string;
 	};
-	info: { hold_loading: string };
+	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
 		no_alchemy_provider: string;
@@ -65,6 +65,7 @@ interface I18nInit {
 		no_etherscan_rest_api: string;
 		no_infura_provider: string;
 		no_infura_cketh_provider: string;
+		no_infura_ckerc20_provider: string;
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
 		eth_address_unknown: string;
@@ -73,6 +74,8 @@ interface I18nInit {
 		erc20_contracts: string;
 		minter_ckbtc_btc: string;
 		minter_cketh_eth: string;
+		minter_ckerc20_erc20: string;
+		ledger_cketh_eth: string;
 		minter_btc: string;
 		minter_ckbtc_info: string;
 		minter_cketh_info: string;
@@ -82,6 +85,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		loading_wallet_timeout: string;
 	};
 }
 
@@ -124,6 +128,7 @@ interface I18nReceive {
 	ethereum: {
 		text: {
 			checking_status: string;
+			converting: string;
 			from_network: string;
 			eth_to_cketh_description: string;
 			learn_how_to_convert: string;
@@ -156,7 +161,11 @@ interface I18nSend {
 		source: string;
 		balance: string;
 		review: string;
+		signing_approval: string;
 		approving: string;
+		approving_fees: string;
+		approving_transfer: string;
+		approving_wallet_connect: string;
 		refreshing_ui: string;
 		initializing: string;
 		signing_transaction: string;
@@ -183,6 +192,7 @@ interface I18nSend {
 		unknown_minimum_cketh_amount: string;
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
+		minimum_ledger_fees: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
 		insufficient_funds_for_gas: string;
@@ -191,6 +201,8 @@ interface I18nSend {
 		gas_fees_not_defined: string;
 		max_gas_gee_per_gas_undefined: string;
 		address_unknown: string;
+		minter_info_not_loaded: string;
+		minter_info_not_certified: string;
 	};
 	error: {
 		unexpected: string;
@@ -208,13 +220,15 @@ interface I18nSend {
 interface I18nConvert {
 	text: {
 		convert_to_btc: string;
-		convert_to_eth: string;
+		convert_to_token: string;
 		convert_to_cketh: string;
+		convert_to_ckerc20: string;
 		convert_eth_to_cketh: string;
 		how_to_convert_eth_to_cketh: string;
 		send_eth: string;
 		wait_eth_current_balance: string;
 		set_amount: string;
+		send_fee: string;
 	};
 	error: { loading_cketh_helper: string };
 }
@@ -286,7 +300,7 @@ interface I18nFee {
 
 interface I18nInfo {
 	bitcoin: { title: string; description: string; note: string; receive: string };
-	ethereum: { title: string; description: string; how_to: string };
+	ethereum: { title: string; description: string; how_to: string; how_to_short: string };
 }
 
 interface I18nWallet_connect {
@@ -385,6 +399,9 @@ interface I18nTransactions {
 		loading_transactions_symbol: string;
 		no_token_loading_transaction: string;
 		uncertified_transactions_removed: string;
+		loading_pending_ck_ethereum_transactions: string;
+		get_transaction_for_hash: string;
+		unexpected_transaction_for_hash: string;
 	};
 }
 

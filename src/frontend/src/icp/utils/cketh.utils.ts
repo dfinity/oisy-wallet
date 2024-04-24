@@ -1,11 +1,11 @@
-import type { CkEthMinterInfoData } from '$icp/stores/cketh.store';
+import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { fromNullable, isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
-export const assertCkETHUserInputAmount = ({
+export const assertCkETHMinWithdrawalAmount = ({
 	amount,
 	tokenDecimals,
 	tokenSymbol,
@@ -51,6 +51,34 @@ export const assertCkETHUserInputAmount = ({
 
 	if (!infoCertified) {
 		return new IcAmountAssertionError(i18n.send.info.cketh_certified);
+	}
+
+	return undefined;
+};
+
+export const assertCkETHMinFee = ({
+	amount,
+	fee,
+	tokenSymbol,
+	i18n
+}: {
+	amount: BigNumber;
+	fee: bigint;
+	tokenSymbol: string;
+	i18n: I18n;
+}): IcAmountAssertionError | undefined => {
+	// We skip validation checks here for zero because it makes the UI/UX ungraceful.
+	// e.g. user enters 0. and an error gets displayed.
+	if (amount.isZero()) {
+		return undefined;
+	}
+
+	if (BigNumber.from(fee).gt(amount)) {
+		return new IcAmountAssertionError(
+			replacePlaceholders(i18n.send.assertion.minimum_ledger_fees, {
+				$symbol: tokenSymbol
+			})
+		);
 	}
 
 	return undefined;

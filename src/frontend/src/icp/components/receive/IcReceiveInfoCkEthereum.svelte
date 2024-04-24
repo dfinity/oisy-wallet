@@ -3,9 +3,11 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import { ckEthereumTwinToken, ckEthereumTwinTokenNetwork } from '$icp-eth/derived/cketh.derived';
+	import { token } from '$lib/derived/token.derived';
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -17,16 +19,33 @@
 </div>
 
 <Value ref="ethereum-helper-contract" element="div">
-	<svelte:fragment slot="label">{$i18n.receive.ethereum.text.from_network}</svelte:fragment>
+	<svelte:fragment slot="label"
+		>{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
+			$network: $ckEthereumTwinTokenNetwork.name
+		})}</svelte:fragment
+	>
 
 	<p class="text-misty-rose break-normal py-2">
-		{replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description)}
+		{replacePlaceholders(
+			replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
+			{
+				$token: $ckEthereumTwinToken.symbol,
+				$ckToken: $token.symbol,
+				$network: $ckEthereumTwinTokenNetwork.name
+			}
+		)}
 	</p>
 </Value>
 
 <button class="secondary full center mt-6 mb-8" on:click={() => dispatch('icConvert')}>
 	<span class="text-dark-slate-blue font-bold"
-		>{$i18n.receive.ethereum.text.learn_how_to_convert}</span
+		>{replacePlaceholders(
+			replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
+			{
+				$token: $ckEthereumTwinToken.symbol,
+				$ckToken: $token.symbol
+			}
+		)}</span
 	>
 </button>
 

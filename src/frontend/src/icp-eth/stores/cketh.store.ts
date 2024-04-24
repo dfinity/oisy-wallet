@@ -1,8 +1,6 @@
 import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
+import type { MinterInfo } from '@dfinity/cketh';
 
-export type CkEthHelperContractAddressData = CertifiedData<ETH_ADDRESS>;
-
-export const ckEthHelperContractAddressStore =
-	initCertifiedSetterStore<CkEthHelperContractAddressData>();
+export type CkEthMinterInfoData = CertifiedData<MinterInfo>;
+export const ckEthMinterInfoStore = initCertifiedSetterStore<CkEthMinterInfoData>();

@@ -19,43 +19,31 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { authStore } from '$lib/stores/auth.store';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
-	import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import type { Network } from '$lib/types/network';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
-	import { ethereumToken } from '$eth/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { shouldSendWithApproval } from '$eth/utils/send.utils';
+	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import type { Token } from '$lib/types/token';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
 
 	/**
-	 * Fee context store
-	 */
-
-	let feeStore = initFeeStore();
-
-	let feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set($ethereumToken.symbol);
-
-	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
-		feeStore,
-		feeSymbolStore
-	});
-
-	/**
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken, sendTokenStandard, sendPurpose } =
+	const { sendTokenDecimals, sendTokenId, sendToken, sendPurpose } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
@@ -67,9 +55,35 @@
 	export let targetNetwork: Network | undefined = undefined;
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
+	// Required for the fee and also to retrieve ck minter information.
+	// i.e. Ethereum or Sepolia "main" token.
+	export let nativeEthereumToken: Token;
 
 	let destinationEditable = true;
-	$: destinationEditable = sendPurpose !== 'convert-eth-to-cketh';
+	$: destinationEditable = sendPurpose === 'send';
+
+	let sendWithApproval: boolean;
+	$: sendWithApproval = shouldSendWithApproval({
+		to: destination,
+		tokenId: $sendTokenId,
+		erc20HelperContractAddress: toCkErc20HelperContractAddress(
+			$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+		)
+	});
+
+	/**
+	 * Fee context store
+	 */
+
+	let feeStore = initFeeStore();
+
+	let feeSymbolStore = writable<string | undefined>(undefined);
+	$: feeSymbolStore.set(nativeEthereumToken.symbol);
+
+	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
+		feeStore,
+		feeSymbolStore
+	});
 
 	/**
 	 * Send
@@ -99,9 +113,8 @@
 			return;
 		}
 
-		const { valid } = assertCkEthHelperContractAddressLoaded({
-			tokenStandard: $sendTokenStandard,
-			helperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
+		const { valid } = assertCkEthMinterInfoLoaded({
+			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
 			network: targetNetwork
 		});
 
@@ -147,7 +160,7 @@
 				sourceNetwork,
 				targetNetwork,
 				identity: $authStore.identity,
-				ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId]
+				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
 
 			await trackEvent({
@@ -185,6 +198,7 @@
 	observe={currentStep?.name !== 'Sending'}
 	{sourceNetwork}
 	{targetNetwork}
+	{nativeEthereumToken}
 >
 	{#if currentStep?.name === 'Review'}
 		<SendReview
@@ -197,7 +211,10 @@
 			{destinationEditable}
 		/>
 	{:else if currentStep?.name === 'Sending'}
-		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
+		<InProgressWizard
+			progressStep={sendProgressStep}
+			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
+		/>
 	{:else if currentStep?.name === 'Send'}
 		<SendForm
 			on:icNext
@@ -205,6 +222,7 @@
 			bind:destination
 			bind:amount
 			bind:network={targetNetwork}
+			{nativeEthereumToken}
 			{destinationEditable}
 		>
 			<svelte:fragment slot="cancel">

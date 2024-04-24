@@ -12,11 +12,13 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import type { Token } from '$lib/types/token';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
 	export let amount: number | undefined = undefined;
+	export let nativeEthereumToken: Token;
 
 	let insufficientFunds: boolean;
 	let invalidDestination: boolean;
@@ -37,7 +39,7 @@
 		<SendNetworkICP {destination} bind:network />
 	{/if}
 
-	<SendAmount bind:amount bind:insufficientFunds />
+	<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
 	<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
 

@@ -4,22 +4,28 @@
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { OptionAddress } from '$lib/types/address';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import { address } from '$lib/derived/address.derived';
-	import { convertEthToCkEthPendingStore } from '$icp/stores/cketh-transactions.store';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { ckEthMinterInfoStore } from '$icp/stores/cketh.store';
 	import { authStore } from '$lib/stores/auth.store';
 	import {
-		loadPendingCkEthTransaction,
-		loadPendingCkEthTransactions
+		loadPendingCkEthereumTransaction,
+		loadCkEthereumPendingTransactions
 	} from '$icp-eth/services/eth.services';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
-	import { ckETHTwinToken } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumNativeTokenId,
+		ckEthereumTwinToken,
+		ckEthereumTwinTokenStandard
+	} from '$icp-eth/derived/cketh.derived';
 	import type { NetworkId } from '$lib/types/network';
 	import type { IcToken } from '$icp/types/ic';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress
+	} from '$icp-eth/utils/cketh.utils';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -29,16 +35,16 @@
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
 		if (isNullish(toAddress)) {
-			convertEthToCkEthPendingStore.reset($tokenId);
+			icPendingTransactionsStore.reset($tokenId);
 			return;
 		}
 
-		if (isNullish($ckETHTwinToken)) {
+		if (isNullish($ckEthereumTwinToken)) {
 			return;
 		}
 
 		const lastObservedBlockNumber = fromNullable(
-			$ckEthMinterInfoStore?.[$tokenId]?.data.last_observed_block_number ?? []
+			$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]?.data.last_observed_block_number ?? []
 		);
 
 		// The ckETH minter info has not yet been fetched. We require this information to query all transactions above a certain block index. These can be considered as pending, given that they have not yet been seen by the minter.
@@ -54,13 +60,12 @@
 
 		loadBalance = $balance;
 
-		await loadPendingCkEthTransactions({
-			tokenId: $tokenId,
+		await loadCkEthereumPendingTransactions({
+			token: $token as IcToken,
 			lastObservedBlockNumber,
 			identity: $authStore.identity,
 			toAddress,
-			networkId: $ckETHTwinToken.network.id,
-			twinToken: $ckETHTwinToken
+			twinToken: $ckEthereumTwinToken
 		});
 	};
 
@@ -85,30 +90,33 @@
 			toAddress,
 			fromAddress: $address,
 			listener: async (hash: string) =>
-				await loadPendingCkEthTransaction({
+				await loadPendingCkEthereumTransaction({
 					hash,
 					token: $token as IcToken,
-					twinToken: $ckETHTwinToken,
+					twinToken: $ckEthereumTwinToken,
 					networkId
 				}),
 			networkId
 		});
 	};
 
-	let ckEthHelperContractAddress: string | undefined;
-	$: ckEthHelperContractAddress = $ckEthHelperContractAddressStore?.[$ethereumTokenId]?.data;
+	let toContractAddress = '';
+	$: toContractAddress =
+		$ckEthereumTwinTokenStandard === 'erc20'
+			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
+			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '';
 
 	$: (async () =>
-		init({ toAddress: ckEthHelperContractAddress, networkId: $ckETHTwinToken?.network.id }))();
+		init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();
 
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
 	$: $balance,
 		$ckEthMinterInfoStore,
-		$ckETHTwinToken,
-		ckEthHelperContractAddress,
-		(async () => await loadPendingTransactions({ toAddress: ckEthHelperContractAddress }))();
+		$ckEthereumTwinToken,
+		toContractAddress,
+		(async () => await loadPendingTransactions({ toAddress: toContractAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>
