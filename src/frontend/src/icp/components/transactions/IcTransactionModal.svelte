@@ -10,6 +10,7 @@
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 
 	export let transaction: IcTransactionUi;
 
@@ -79,7 +80,7 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
 
 				{#if nonNullish(fromLabel)}
-					<p class="capitalize mb-0.5">{fromLabel}</p>
+					<p class="capitalize mb-0.5"><IcTransactionLabel label={fromLabel} /></p>
 				{/if}
 
 				{#if nonNullish(from)}
@@ -107,7 +108,7 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.to}</svelte:fragment>
 
 				{#if nonNullish(toLabel)}
-					<p class="capitalize mb-0.5">{toLabel}</p>
+					<p class="capitalize mb-0.5"><IcTransactionLabel label={toLabel} /></p>
 				{/if}
 
 				{#if nonNullish(to)}

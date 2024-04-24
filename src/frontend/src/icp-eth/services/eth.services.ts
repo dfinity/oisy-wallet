@@ -1,13 +1,18 @@
 import {
-	RECEIVED_ERC20_EVENT_SIGNATURE,
-	RECEIVED_ETH_EVENT_SIGNATURE
-} from '$eth/constants/cketh.constants';
+	CKERC20_HELPER_CONTRACT_SIGNATURE,
+	CKETH_HELPER_CONTRACT_SIGNATURE
+} from '$env/networks.cketh.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { mapCkEthereumPendingTransaction } from '$icp-eth/utils/cketh-transactions.utils';
+
+import {
+	mapCkErc20PendingTransaction,
+	mapCkEthPendingTransaction,
+	type MapCkEthereumPendingTransactionParams
+} from '$icp-eth/utils/cketh-transactions.utils';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-import type { IcCkTwinToken, IcToken } from '$icp/types/ic';
+import type { IcCkTwinToken, IcToken, IcTransactionUi } from '$icp/types/ic';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -58,7 +63,7 @@ const loadCkETHPendingTransactions = async ({
 	identity: OptionIdentity;
 } & IcCkTwinToken) => {
 	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
-		RECEIVED_ETH_EVENT_SIGNATURE,
+		CKETH_HELPER_CONTRACT_SIGNATURE,
 		null,
 		to
 	];
@@ -67,6 +72,7 @@ const loadCkETHPendingTransactions = async ({
 		toAddress,
 		twinToken,
 		logsTopics,
+		mapPendingTransaction: mapCkEthPendingTransaction,
 		...rest
 	});
 };
@@ -82,7 +88,7 @@ const loadCkErc20PendingTransactions = async ({
 	token: IcToken;
 } & IcCkTwinToken) => {
 	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
-		RECEIVED_ERC20_EVENT_SIGNATURE,
+		CKERC20_HELPER_CONTRACT_SIGNATURE,
 		null,
 		null,
 		to
@@ -92,6 +98,7 @@ const loadCkErc20PendingTransactions = async ({
 		toAddress,
 		twinToken,
 		logsTopics,
+		mapPendingTransaction: mapCkErc20PendingTransaction,
 		...rest
 	});
 };
@@ -102,13 +109,15 @@ const loadPendingTransactions = async ({
 	identity,
 	twinToken,
 	logsTopics,
-	token
+	token,
+	mapPendingTransaction
 }: {
 	toAddress: ETH_ADDRESS;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 	logsTopics: (to: ETH_ADDRESS) => (string | null)[];
 	token: IcToken;
+	mapPendingTransaction: (params: MapCkEthereumPendingTransactionParams) => IcTransactionUi;
 } & IcCkTwinToken) => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
@@ -150,7 +159,7 @@ const loadPendingTransactions = async ({
 		icPendingTransactionsStore.set({
 			tokenId,
 			data: pendingTransactions.filter(nonNullish).map((transaction) => ({
-				data: mapCkEthereumPendingTransaction({ transaction, twinToken, token }),
+				data: mapPendingTransaction({ transaction, twinToken, token }),
 				certified: false
 			}))
 		});
@@ -214,10 +223,14 @@ export const loadPendingCkEthereumTransaction = async ({
 
 		const { id: tokenId } = token;
 
+		const mapPendingTransaction = isSupportedEthTokenId(twinToken.id)
+			? mapCkEthPendingTransaction
+			: mapCkErc20PendingTransaction;
+
 		icPendingTransactionsStore.prepend({
 			tokenId,
 			transaction: {
-				data: mapCkEthereumPendingTransaction({
+				data: mapPendingTransaction({
 					transaction,
 					twinToken,
 					token

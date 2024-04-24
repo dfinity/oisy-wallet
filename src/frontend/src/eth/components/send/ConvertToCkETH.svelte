@@ -9,6 +9,7 @@
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 
 	/**
 	 * Send modal context store
@@ -21,7 +22,7 @@
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
-<ConvertETH nativeTokenId={$ethereumTokenId}>
+<ConvertETH nativeTokenId={$ethereumTokenId} nativeNetworkId={$selectedEthereumNetwork.id}>
 	<IconBurn size="28" />
 	<span> {$i18n.convert.text.convert_to_cketh} </span>
 </ConvertETH>
