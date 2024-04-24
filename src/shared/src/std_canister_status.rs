@@ -42,7 +42,7 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
 
         let controller = *settings
             .controllers
-            .get(0)
+            .first()
             .ok_or("This canister has not even one controller")?;
         let balance = vec![(vec![0], cycles.clone())];
         let freezing_threshold = settings.freezing_threshold.clone();
@@ -82,7 +82,7 @@ impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
         } = value;
         Ok(Self {
             controller: *controllers
-                .get(0)
+                .first()
                 .ok_or("This canister has not even one controller")?,
             controllers,
             compute_allocation,
