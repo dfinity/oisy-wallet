@@ -13,7 +13,6 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 
 	export let amount: BigNumber;

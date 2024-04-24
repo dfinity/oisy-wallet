@@ -38,7 +38,6 @@
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
-
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 
 	export let request: Web3WalletTypes.SessionRequest;
