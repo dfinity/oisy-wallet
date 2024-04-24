@@ -1,6 +1,4 @@
-use crate::utils::assertion::{
-    assert_none_tokens_version, assert_some_tokens_version, assert_tokens_eq,
-};
+use crate::utils::assertion::assert_tokens_data_eq;
 use crate::utils::mock::{
     CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };
@@ -8,6 +6,7 @@ use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade};
 use candid::{CandidType, Deserialize, Principal};
 use lazy_static::lazy_static;
 use shared::types::token::{ChainId, UserToken};
+use shared::types::TokenVersion;
 
 const BACKEND_V0_0_13_WASM_PATH: &str = "../../backend-v0.0.13.wasm.gz";
 
@@ -64,8 +63,7 @@ fn test_upgrade_user_token() {
 
     let results_tokens = results.unwrap();
 
-    assert_tokens_eq(&results_tokens, &expected_tokens);
-    assert_none_tokens_version(results_tokens);
+    assert_tokens_data_eq(&results_tokens, &expected_tokens);
 }
 
 #[test]
@@ -115,14 +113,13 @@ fn test_add_user_token_after_upgrade() {
     // Get the list of token and check that it still contains the one we added before upgrade
     let results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![POST_UPGRADE_TOKEN.clone()];
+    let expected_tokens: Vec<UserToken> = vec![POST_UPGRADE_TOKEN.clone_with_incremented_version()];
 
     assert!(results.is_ok());
 
     let results_tokens = results.unwrap();
 
-    assert_tokens_eq(&results_tokens, &expected_tokens);
-    assert_some_tokens_version(&results_tokens);
+    assert_tokens_data_eq(&results_tokens, &expected_tokens);
 }
 
 #[test]
@@ -162,12 +159,11 @@ fn test_update_user_token_after_upgrade() {
 
     let updated_results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![update_token.clone()];
+    let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
 
     assert!(updated_results.is_ok());
 
     let results_tokens = updated_results.unwrap();
 
-    assert_tokens_eq(&results_tokens, &expected_tokens);
-    assert_some_tokens_version(&results_tokens);
+    assert_tokens_data_eq(&results_tokens, &expected_tokens);
 }
