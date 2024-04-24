@@ -1,4 +1,5 @@
 use candid::{CandidType, Deserialize, Principal};
+use std::fmt::Debug;
 
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
@@ -30,7 +31,7 @@ pub mod transaction {
 
 pub type Version = u64;
 
-pub trait TokenVersion {
+pub trait TokenVersion: Debug {
     fn get_version(&self) -> Option<Version>;
     fn clone_with_incremented_version(&self) -> Self
     where
@@ -44,7 +45,7 @@ pub mod token {
 
     pub type ChainId = u64;
 
-    #[derive(CandidType, Deserialize, Clone)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserToken {
         pub contract_address: String,
         pub chain_id: ChainId,
@@ -68,18 +69,18 @@ pub mod custom_token {
     pub type LedgerId = Principal;
     pub type IndexId = Principal;
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct IcrcToken {
         pub ledger_id: LedgerId,
         pub index_id: IndexId,
     }
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum Token {
         Icrc(IcrcToken),
     }
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct CustomToken {
         pub token: Token,
         pub enabled: bool,
