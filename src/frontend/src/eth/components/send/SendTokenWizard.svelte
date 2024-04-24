@@ -224,6 +224,7 @@
 			bind:network={targetNetwork}
 			{nativeEthereumToken}
 			{destinationEditable}
+			{sourceNetwork}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}

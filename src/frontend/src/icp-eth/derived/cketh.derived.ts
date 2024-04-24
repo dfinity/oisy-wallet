@@ -1,7 +1,7 @@
 import { ETHEREUM_NETWORK } from '$env/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens.env';
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens.erc20.env';
-import { ethereumTokenId } from '$eth/derived/token.derived';
+import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -99,9 +99,12 @@ export const ckEthereumNativeTokenBalance: Readable<BigNumber | undefined | null
  * The contract helper used to convert ETH -> ckETH.
  */
 export const ckEthHelperContractAddress: Readable<OptionAddress> = derived(
-	[ckEthMinterInfoStore, ethereumTokenId],
-	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
-		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
+	[ckEthMinterInfoStore, ethereumTokenId, ethereumToken],
+	([$ckEthMinterInfoStore, $ethereumTokenId, $ethereumToken]) =>
+		toCkEthHelperContractAddress(
+			$ckEthMinterInfoStore?.[$ethereumTokenId],
+			$ethereumToken.network.id
+		)
 );
 
 /**

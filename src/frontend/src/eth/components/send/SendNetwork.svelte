@@ -10,9 +10,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
+	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
+	export let sourceNetwork: EthereumNetwork;
 
 	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -32,7 +35,10 @@
 		if (
 			isDestinationContractAddress({
 				destination,
-				contractAddress: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
+				contractAddress: toCkEthHelperContractAddress(
+					$ckEthMinterInfoStore?.[$sendTokenId],
+					sourceNetwork.id
+				)
 			})
 		) {
 			networkName = ICP_NETWORK.name;

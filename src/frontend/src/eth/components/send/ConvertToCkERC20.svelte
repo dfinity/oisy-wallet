@@ -12,6 +12,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 
 	/**
 	 * Send modal context store
@@ -27,7 +28,7 @@
 	$: converToSymbol = ($token as Erc20Token).twinTokenSymbol ?? 'ckETH';
 </script>
 
-<ConvertETH nativeTokenId={$ethereumTokenId}>
+<ConvertETH nativeTokenId={$ethereumTokenId} nativeNetworkId={$selectedEthereumNetwork.id}>
 	<IconBurn size="28" />
 	<span>
 		{replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {

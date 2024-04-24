@@ -16,6 +16,7 @@
 		loadCkEthereumPendingTransactions
 	} from '$icp-eth/services/eth.services';
 	import {
+		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
@@ -104,7 +105,10 @@
 	$: toContractAddress =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
-			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '';
+			: toCkEthHelperContractAddress(
+					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
+					$ckEthereumNativeToken.network.id
+				) ?? '';
 
 	$: (async () =>
 		init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();
