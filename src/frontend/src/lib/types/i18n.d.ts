@@ -227,7 +227,9 @@ interface I18nConvert {
 		send_eth: string;
 		wait_eth_current_balance: string;
 		set_amount: string;
-		send_fee: string;
+		check_balance_for_fees: string;
+		fees_explanation: string;
+		current_balance: string;
 	};
 	error: { loading_cketh_helper: string };
 }
