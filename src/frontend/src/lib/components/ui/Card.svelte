@@ -17,17 +17,17 @@
 	<div class="flex-1 flex flex-col justify-center">
 		<div class="flex font-bold gap-1" class:items-center={!description}>
 			<span
-				class="clamp-4 inline-flex items-start text-left"
+				class="clamp-4 inline-flex items-center text-left"
 				style={amount ? 'max-width: 60%' : undefined}><slot /></span
 			>
 
 			{#if amount}
-				<span class="flex-1 text-right inline-flex justify-end items-end"
+				<span class="flex-1 text-right inline-flex justify-end items-center"
 					><slot name="amount" /></span
 				>
 			{/if}
 		</div>
-		<p class="text-misty-rose text-left inline-flex items-start" class:text-goldenrod={pending}>
+		<p class="text-misty-rose text-left inline-flex items-center" class:text-goldenrod={pending}>
 			<slot name="description" />
 
 			{#if pending}
