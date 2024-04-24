@@ -58,8 +58,10 @@ export const mapCkBTCTransaction = ({
 
 		return {
 			...tx,
-			fromLabel: 'BTC Network',
-			typeLabel: isReimbursement ? 'Reimbursement' : 'BTC Received',
+			fromLabel: 'transaction.label.twin_network',
+			typeLabel: isReimbursement
+				? 'transaction.label.reimbursement'
+				: 'transaction.label.twin_token_received',
 			status: isReimbursement ? 'reimbursed' : 'executed'
 		};
 	}
@@ -75,7 +77,7 @@ export const mapCkBTCTransaction = ({
 				to: toAddress,
 				toExplorerUrl: `${bitcoinExplorerUrl}/address/${toAddress}`
 			}),
-			...(isNullish(toAddress) && { toLabel: 'BTC Network' })
+			...(isNullish(toAddress) && { toLabel: 'transaction.label.twin_network' })
 		};
 	}
 
@@ -105,8 +107,8 @@ export const mapCkBTCPendingUtxo = ({
 		incoming: true,
 		type: 'receive',
 		status: 'pending',
-		fromLabel: 'BTC Network',
-		typeLabel: 'Receiving BTC',
+		fromLabel: 'transaction.label.twin_network',
+		typeLabel: 'transaction.label.receiving_twin_token',
 		value: value - kytFee,
 		txExplorerUrl: `${bitcoinExplorerUrl}/tx/${id}`
 	};
@@ -141,7 +143,7 @@ const burnStatus = (
 	if (nonNullish(retrieveBtcStatus)) {
 		if ('Reimbursed' in retrieveBtcStatus || 'AmountTooLow' in retrieveBtcStatus) {
 			return {
-				typeLabel: 'Sending BTC failed',
+				typeLabel: 'transaction.label.sending_twin_token_failed',
 				status: 'failed'
 			};
 		} else if (
@@ -152,7 +154,7 @@ const burnStatus = (
 			'WillReimburse' in retrieveBtcStatus
 		) {
 			return {
-				typeLabel: 'Sending BTC',
+				typeLabel: 'transaction.label.sending_twin_token',
 				status: 'pending'
 			};
 		} else if (!('Confirmed' in retrieveBtcStatus)) {
@@ -161,7 +163,7 @@ const burnStatus = (
 	}
 
 	return {
-		typeLabel: 'BTC Sent',
+		typeLabel: 'transaction.label.twin_token_sent',
 		status: 'executed'
 	};
 };
