@@ -252,7 +252,9 @@
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
 			"set_amount": "Set amount for conversion",
-			"send_fee": "Ensure you have also $token to cover the fee. Current balance"
+			"check_balance_for_fees": "Check $token balance for conversion fees",
+			"fees_explanation": "You need enough $token to cover the smart contract execution fees.",
+			"current_balance": "👉 Current balance:"
 		},
 		"error": {
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
