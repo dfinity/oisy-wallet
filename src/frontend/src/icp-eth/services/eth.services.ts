@@ -1,7 +1,7 @@
 import {
-	RECEIVED_ERC20_EVENT_SIGNATURE,
-	RECEIVED_ETH_EVENT_SIGNATURE
-} from '$eth/constants/cketh.constants';
+	CKERC20_HELPER_CONTRACT_SIGNATURE,
+	CKETH_HELPER_CONTRACT_SIGNATURE
+} from '$env/networks.cketh.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -58,7 +58,7 @@ const loadCkETHPendingTransactions = async ({
 	identity: OptionIdentity;
 } & IcCkTwinToken) => {
 	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
-		RECEIVED_ETH_EVENT_SIGNATURE,
+		CKETH_HELPER_CONTRACT_SIGNATURE,
 		null,
 		to
 	];
@@ -82,7 +82,7 @@ const loadCkErc20PendingTransactions = async ({
 	token: IcToken;
 } & IcCkTwinToken) => {
 	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
-		RECEIVED_ERC20_EVENT_SIGNATURE,
+		CKERC20_HELPER_CONTRACT_SIGNATURE,
 		null,
 		null,
 		to

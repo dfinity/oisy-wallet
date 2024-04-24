@@ -1,4 +1,3 @@
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
 import {
 	OISY_ALPHA_WARNING_URL,
 	OISY_DESCRIPTION,
@@ -7,7 +6,9 @@ import {
 	OISY_REPO_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
 const escapeRegExp = (regExpText: string): string =>
 	regExpText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 
@@ -35,3 +36,18 @@ export const replaceOisyPlaceholders = (text: string): string =>
 		$oisy_repo_url: OISY_REPO_URL,
 		$oisy_alpha_warning_url: OISY_ALPHA_WARNING_URL
 	});
+
+interface MaybeI18n extends I18n {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	[key: string]: any;
+}
+
+export const resolveText = (i18n: MaybeI18n, path: string | undefined): string | undefined => {
+	// For simplicity reason, we defer this checks within that function that way we can keep our components concise and use optional chaining within those.
+	if (isNullish(path)) {
+		return undefined;
+	}
+
+	const text = path.split('.').reduce((prev, current) => prev?.[current], i18n);
+	return nonNullish(text) && typeof text !== 'object' ? text : path;
+};

@@ -19,10 +19,8 @@ export const mapCkEthereumPendingTransaction = ({
 	const { symbol } = token;
 
 	const {
-		receive: {
-			ethereum: {
-				text: { converting }
-			}
+		transaction: {
+			label: { converting_twin_token }
 		}
 	} = get(i18n);
 
@@ -33,7 +31,7 @@ export const mapCkEthereumPendingTransaction = ({
 		status: 'pending',
 		from,
 		to,
-		typeLabel: replacePlaceholders(converting, {
+		typeLabel: replacePlaceholders(converting_twin_token, {
 			$token: twinTokenSymbol,
 			$ckToken: symbol
 		}),
