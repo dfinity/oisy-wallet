@@ -12,6 +12,7 @@
 	import IconMint from '$lib/components/icons/IconMint.svelte';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 
 	export let transaction: IcTransactionUi;
 
@@ -47,7 +48,9 @@
 
 <button on:click={() => modalStore.openIcTransaction(transaction)} class="block w-full border-0">
 	<Card {pending}>
-		<span class="capitalize">{transactionTypeLabel ?? transactionType}</span>
+		<span class="capitalize"
+			><IcTransactionLabel label={transactionTypeLabel} fallback={transactionType} /></span
+		>
 
 		<RoundedIcon slot="icon" {icon} />
 

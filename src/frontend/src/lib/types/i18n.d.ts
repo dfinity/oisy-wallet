@@ -128,7 +128,6 @@ interface I18nReceive {
 	ethereum: {
 		text: {
 			checking_status: string;
-			converting: string;
 			from_network: string;
 			eth_to_cketh_description: string;
 			learn_how_to_convert: string;
@@ -380,6 +379,16 @@ interface I18nTransaction {
 		interacted_with: string;
 	};
 	status: { included: string; safe: string; finalised: string };
+	label: {
+		reimbursement: string;
+		twin_token_received: string;
+		twin_token_sent: string;
+		receiving_twin_token: string;
+		sending_twin_token: string;
+		sending_twin_token_failed: string;
+		converting_twin_token: string;
+		twin_network: string;
+	};
 	alt: {
 		open_block_explorer: string;
 		open_from_block_explorer: string;
