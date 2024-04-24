@@ -1,7 +1,7 @@
 import {
-	RECEIVED_ERC20_EVENT_SIGNATURE,
-	RECEIVED_ETH_EVENT_SIGNATURE
-} from '$eth/constants/cketh.constants';
+	CKERC20_HELPER_CONTRACT_SIGNATURES,
+	CKETH_HELPER_CONTRACT_SIGNATURES
+} from '$env/networks.cketh.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -47,6 +47,38 @@ export const loadCkEthereumPendingTransactions = async ({
 	});
 };
 
+const contractSignature = ({
+	env,
+	twinToken
+}: { env: Record<NetworkId, string> } & IcCkTwinToken): string | undefined => {
+	const {
+		symbol,
+		network: { id: twinTokenNetworkId }
+	} = twinToken;
+
+	const signature = env[twinTokenNetworkId];
+
+	if (isNullish(signature)) {
+		const {
+			transactions: {
+				error: { helper_signature_missing }
+			}
+		} = get(i18n);
+
+		toastsError({
+			msg: {
+				text: replacePlaceholders(helper_signature_missing, {
+					$token: symbol
+				})
+			}
+		});
+
+		return undefined;
+	}
+
+	return signature;
+};
+
 const loadCkETHPendingTransactions = async ({
 	toAddress,
 	twinToken,
@@ -57,11 +89,16 @@ const loadCkETHPendingTransactions = async ({
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 } & IcCkTwinToken) => {
-	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
-		RECEIVED_ETH_EVENT_SIGNATURE,
-		null,
-		to
-	];
+	const signature = contractSignature({
+		env: CKETH_HELPER_CONTRACT_SIGNATURES,
+		twinToken
+	});
+
+	if (isNullish(signature)) {
+		return;
+	}
+
+	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [signature, null, to];
 
 	await loadPendingTransactions({
 		toAddress,
@@ -81,12 +118,16 @@ const loadCkErc20PendingTransactions = async ({
 	identity: OptionIdentity;
 	token: IcToken;
 } & IcCkTwinToken) => {
-	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
-		RECEIVED_ERC20_EVENT_SIGNATURE,
-		null,
-		null,
-		to
-	];
+	const signature = contractSignature({
+		env: CKERC20_HELPER_CONTRACT_SIGNATURES,
+		twinToken
+	});
+
+	if (isNullish(signature)) {
+		return;
+	}
+
+	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [signature, null, null, to];
 
 	await loadPendingTransactions({
 		toAddress,

@@ -472,7 +472,8 @@
 			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists.",
 			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
 			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
-			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
+			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash.",
+			"helper_signature_missing": "Error the signature for the $token helper contract is not configured."
 		}
 	}
 }
