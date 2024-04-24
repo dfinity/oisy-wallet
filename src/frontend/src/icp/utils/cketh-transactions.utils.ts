@@ -69,12 +69,15 @@ export const mapCkEthereumTransaction = ({
 
 		return {
 			...tx,
-			typeLabel: memoInfo?.reimbursement === true ? 'Reimbursement' : 'ETH Received',
+			typeLabel:
+				memoInfo?.reimbursement === true
+					? 'transaction.label.reimbursement'
+					: 'transaction.label.twin_token_received',
 			...(nonNullish(from) && {
 				from,
 				fromExplorerUrl: `${ethExplorerUrl}/address/${from}`
 			}),
-			...(isNullish(memoInfo?.fromAddress) && { fromLabel: 'ETH Network' }),
+			...(isNullish(memoInfo?.fromAddress) && { fromLabel: 'transaction.label.twin_network' }),
 			status: memoInfo?.reimbursement === true ? 'reimbursed' : 'executed'
 		};
 	}
@@ -89,12 +92,12 @@ export const mapCkEthereumTransaction = ({
 
 		return {
 			...tx,
-			typeLabel: 'ETH Sent',
+			typeLabel: 'transaction.label.twin_token_sent',
 			...(notEmptyString(to) && {
 				to,
 				toExplorerUrl: `${ethExplorerUrl}/address/${to}`
 			}),
-			...(isNullish(burnMemo?.toAddress) && { toLabel: 'ETH Network' })
+			...(isNullish(burnMemo?.toAddress) && { toLabel: 'transaction.label.twin_network' })
 		};
 	}
 
