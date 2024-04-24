@@ -3,7 +3,6 @@
 	import SendData from '$lib/components/send/SendData.svelte';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectActions from './WalletConnectActions.svelte';
-	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import WalletConnectSendData from './WalletConnectSendData.svelte';
 	import { address } from '$lib/derived/address.derived';
@@ -14,6 +13,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 
 	export let amount: BigNumber;
 	export let destination: string;
