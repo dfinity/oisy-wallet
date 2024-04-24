@@ -10,7 +10,8 @@
 	import {
 		ckEthereumTwinTokenStandard,
 		ckEthereumTwinToken,
-		ckEthereumNativeTokenId
+		ckEthereumNativeTokenId,
+		ckEthereumNativeToken
 	} from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -27,7 +28,10 @@
 	$: destination =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
-			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '';
+			: toCkEthHelperContractAddress(
+					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
+					$ckEthereumNativeToken.network.id
+				) ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 
