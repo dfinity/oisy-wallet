@@ -11,6 +11,7 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import {
+		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
@@ -30,7 +31,10 @@
 	$: destination =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
-			: toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '';
+			: toCkEthHelperContractAddress(
+					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
+					$ckEthereumNativeToken.network.id
+				) ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 
