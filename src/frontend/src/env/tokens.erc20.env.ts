@@ -124,7 +124,6 @@ const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [SEPOLIA_USDC_TOKEN];
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
 	// TODO: uncomment to enable USD_TOKEN with twin token support
 	// TODO: do not forget to removed USD_TOKEN in ERC20_CONTRACTS_PRODUCTION
-	// TODO: do not forget to remove the logo eth/assets/usdc.svg as well
 	// ...(ETH_MAINNET_ENABLED ? [USDC_TOKEN] : []),
 	...(ETH_MAINNET_ENABLED ? [] : []),
 	...ERC20_TWIN_TOKENS_SEPOLIA
