@@ -2,7 +2,7 @@ import oneInch from '$eth/assets/1inch.svg';
 import dai from '$eth/assets/dai.svg';
 import icpDark from '$eth/assets/icp_dark.svg';
 import uniswap from '$eth/assets/uniswap.svg';
-import usdc from '$eth/assets/usdc.svg';
+import usdc from '$icp-eth/assets/usdc.svg';
 import usdt from '$eth/assets/usdt.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
