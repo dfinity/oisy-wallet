@@ -57,11 +57,11 @@ thread_local! {
 }
 
 pub fn read_state<R>(f: impl FnOnce(&State) -> R) -> R {
-    STATE.with(|cell| f(&*cell.borrow()))
+    STATE.with(|cell| f(&cell.borrow()))
 }
 
 pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
-    STATE.with(|cell| f(&mut *cell.borrow_mut()))
+    STATE.with(|cell| f(&mut cell.borrow_mut()))
 }
 
 pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
