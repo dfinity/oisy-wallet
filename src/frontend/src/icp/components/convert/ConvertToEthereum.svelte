@@ -4,15 +4,24 @@
 	import { modalConvertCkETHToETH } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { address } from '$lib/derived/address.derived';
-	import { ckETHTwinTokenNetworkId, ckETHTwinTokenId } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumTwinTokenNetworkId,
+		ckEthereumTwinToken,
+		ckEthereumNativeTokenId
+	} from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
-<ConvertETH convertTokenId={$ckETHTwinTokenId}>
+<ConvertETH nativeTokenId={$ckEthereumNativeTokenId}>
 	<IconBurn size="28" />
-	<span>{$i18n.convert.text.convert_to_eth}</span>
+	<span
+		>{replacePlaceholders($i18n.convert.text.convert_to_token, {
+			$token: $ckEthereumTwinToken.symbol
+		})}</span
+	>
 </ConvertETH>
 
 {#if $modalConvertCkETHToETH}
-	<IcSendModal networkId={$ckETHTwinTokenNetworkId} destination={$address ?? ''} />
+	<IcSendModal networkId={$ckEthereumTwinTokenNetworkId} destination={$address ?? ''} />
 {/if}

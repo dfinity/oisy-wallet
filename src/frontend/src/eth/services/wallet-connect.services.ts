@@ -6,7 +6,7 @@ import {
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash
 } from '$eth/utils/wallet-connect.utils';
-import { assertCkEthHelperContractAddressLoaded } from '$icp-eth/services/cketh.services';
+import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
 import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
@@ -19,7 +19,6 @@ import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionAddress } from '$lib/types/address';
-import type { TokenStandard } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
@@ -83,14 +82,11 @@ export const send = ({
 	amount,
 	lastProgressStep = SendStep.DONE,
 	identity,
-	ckEthHelperContractAddress,
-	tokenStandard,
+	minterInfo,
 	sourceNetwork,
 	targetNetwork,
 	...params
-}: WalletConnectSendParams & {
-	tokenStandard: TokenStandard;
-}): Promise<{ success: boolean; err?: unknown }> =>
+}: WalletConnectSendParams): Promise<{ success: boolean; err?: unknown }> =>
 	execute({
 		params,
 		callback: async ({
@@ -142,9 +138,8 @@ export const send = ({
 				return { success: false };
 			}
 
-			const { valid } = assertCkEthHelperContractAddressLoaded({
-				tokenStandard,
-				helperContractAddress: ckEthHelperContractAddress,
+			const { valid } = assertCkEthMinterInfoLoaded({
+				minterInfo,
 				network: targetNetwork
 			});
 
@@ -191,7 +186,7 @@ export const send = ({
 					gas: nonNullish(gasWC) ? BigNumber.from(gasWC) : gas,
 					data,
 					identity,
-					ckEthHelperContractAddress,
+					minterInfo,
 					sourceNetwork,
 					targetNetwork
 				});

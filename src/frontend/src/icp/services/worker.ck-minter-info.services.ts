@@ -9,8 +9,8 @@ import {
 	syncCkEthMinterStatus
 } from '$icp/services/cketh-listener.services';
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
-import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
-import type { IcCkMetadata, IcToken } from '$icp/types/ic';
+import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
+import type { IcCkMetadata } from '$icp/types/ic';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,
@@ -51,12 +51,12 @@ export const initCkETHMinterInfoWorker: IcCkWorker = async (
 
 const initCkMinterInfoWorker = async ({
 	minterCanisterId,
-	id: tokenId,
+	token: { id: tokenId },
 	worker,
 	onSyncSuccess,
 	onSyncError,
 	onSyncStatus
-}: IcToken &
+}: IcCkWorkerParams &
 	Partial<IcCkMetadata> & {
 		worker: Worker;
 		onSyncSuccess: (params: SyncCkMinterInfoSuccess) => void;

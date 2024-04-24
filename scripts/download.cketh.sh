@@ -8,7 +8,7 @@ if [ ! -d "$DIR" ]; then
   mkdir "$DIR"
 fi
 
-IC_COMMIT="8001dd214e4d6cbab2a68f6da7b931d11a073715"
+IC_COMMIT="83462faa39fe9b5c020edd6a3bf2b3660ad19fca"
 
 curl -sSL https://download.dfinity.systems/ic/$IC_COMMIT/canisters/ic-cketh-minter.wasm.gz -o "$DIR"/cketh_minter.wasm.gz
 gunzip "$DIR"/cketh_minter.wasm.gz

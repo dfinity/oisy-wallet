@@ -15,23 +15,30 @@
 	import Info from '$icp/components/info/Info.svelte';
 	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 	import type { ComponentType } from 'svelte';
-	import { tokenCkBtcLedger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
+	import {
+		tokenCkBtcLedger,
+		tokenCkErc20Ledger,
+		tokenCkEthLedger
+	} from '$icp/derived/ic-token.derived';
 	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { slide } from 'svelte/transition';
-	import IcTransactionsCkETHListeners from '$icp/components/transactions/IcTransactionsCkETHListeners.svelte';
+	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import IcReceiveEthereum from '$icp/components/receive/IcReceiveEthereum.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
 
+	let ckEthereum: boolean;
+	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
+
 	let additionalListener: ComponentType;
 	$: additionalListener = $tokenCkBtcLedger
 		? IcTransactionsBtcListeners
-		: $tokenCkEthLedger
-			? IcTransactionsCkETHListeners
+		: ckEthereum
+			? IcTransactionsCkEthereumListeners
 			: IcTransactionsNoListener;
 
 	let disableInfiniteScroll = false;
@@ -79,7 +86,7 @@
 	<svelte:fragment slot="end">
 		{#if $tokenCkBtcLedger}
 			<IcReceiveBitcoin />
-		{:else if $tokenCkEthLedger}
+		{:else if ckEthereum}
 			<IcReceiveEthereum />
 		{/if}
 	</svelte:fragment>

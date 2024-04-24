@@ -1,5 +1,5 @@
 import type { EthereumNetwork } from '$eth/types/network';
-import type { CkEthHelperContractAddressData } from '$icp-eth/stores/cketh.store';
+import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import { SendStep } from '$lib/enums/steps';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
@@ -12,5 +12,5 @@ export type SendParams = {
 	sourceNetwork: EthereumNetwork;
 	targetNetwork?: Network | undefined;
 	identity: OptionIdentity;
-	ckEthHelperContractAddress: CkEthHelperContractAddressData | null | undefined;
+	minterInfo: OptionCertifiedMinterInfo;
 };

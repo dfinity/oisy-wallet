@@ -1,13 +1,26 @@
+import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import { sendWizardSteps } from '$eth/config/send.config';
+import type { Token } from '$lib/types/token';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { WizardSteps } from '@dfinity/gix-components';
 
-export const howToConvertWizardSteps = (i18n: I18n): WizardSteps => {
+export const howToConvertWizardSteps = ({
+	i18n,
+	twinToken
+}: {
+	i18n: I18n;
+	twinToken: Token;
+}): WizardSteps => {
 	const [send, ...rest] = sendWizardSteps(i18n);
+
+	const { id: tokenId, symbol } = twinToken;
 
 	return [
 		{
 			name: 'Info',
-			title: i18n.info.ethereum.how_to
+			title: replacePlaceholders(i18n.info.ethereum.how_to_short, {
+				$token: symbol
+			})
 		},
 		{
 			name: 'ETH QR code',
@@ -15,7 +28,11 @@ export const howToConvertWizardSteps = (i18n: I18n): WizardSteps => {
 		},
 		{
 			...send,
-			title: i18n.convert.text.convert_to_cketh
+			title: [SEPOLIA_TOKEN_ID, ETHEREUM_TOKEN_ID].includes(tokenId)
+				? i18n.convert.text.convert_to_cketh
+				: replacePlaceholders(i18n.convert.text.convert_to_ckerc20, {
+						$ckErc20: symbol
+					})
 		},
 		...rest
 	];

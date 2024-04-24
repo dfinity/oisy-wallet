@@ -6,6 +6,7 @@ This document lists a couple of useful information for development and deploymen
 
 - [Deployment](#deployment)
 - [Internationalization](#internationalization)
+- [Faucets](#faucets)
 
 ## Deployment
 
@@ -54,3 +55,11 @@ In the future, Oisy might be extended to support multiple languages on productio
 ### Adding additional keys
 
 Translations are handled in JSON files but, as we are consuming these through a store, their representation have to exist as interfaces. To ease the process we have developed a script which extracts the declarations automatically. In case you would add new keys, `run npm run i18n` to generate the interfaces.
+
+## Faucets
+
+A list of useful faucets and ERC20 tokens on Sepolia:
+
+- ETH: [Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia) from Alchemy
+- USDC: [Circle faucet](https://faucet.circle.com/)
+- ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)

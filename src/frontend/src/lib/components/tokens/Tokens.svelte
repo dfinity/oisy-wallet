@@ -59,7 +59,7 @@
 						{token.symbol}
 					</output>
 
-					<ExchangeTokenValue {token} />
+					<ExchangeTokenValue {token} slot="amount" />
 				</Card>
 			</a>
 		</Listener>

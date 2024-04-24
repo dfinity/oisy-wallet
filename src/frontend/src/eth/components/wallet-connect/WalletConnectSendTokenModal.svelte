@@ -27,7 +27,7 @@
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { authStore } from '$lib/stores/auth.store';
-	import { ckEthHelperContractAddressStore } from '$icp-eth/stores/cketh.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ICP_NETWORK } from '$env/networks.env';
@@ -35,6 +35,10 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import { shouldSendWithApproval } from '$eth/utils/send.utils';
+	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -47,7 +51,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenId, sendToken, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Fee context store
@@ -72,9 +76,16 @@
 
 	let targetNetwork: Network | undefined = undefined;
 	$: targetNetwork =
-		destination === $ckEthHelperContractAddressStore?.[$sendTokenId]?.data
+		destination === toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
 			? ICP_NETWORK
 			: $selectedNetwork;
+
+	let sendWithApproval: boolean;
+	$: sendWithApproval = shouldSendWithApproval({
+		to: destination,
+		tokenId: $sendTokenId,
+		erc20HelperContractAddress: $ckErc20HelperContractAddress
+	});
 
 	/**
 	 * Modal
@@ -132,8 +143,7 @@
 			token: $sendToken,
 			progress: (step: SendStep) => (sendProgressStep = step),
 			identity: $authStore.identity,
-			ckEthHelperContractAddress: $ckEthHelperContractAddressStore?.[$sendTokenId],
-			tokenStandard: $sendTokenStandard,
+			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			sourceNetwork,
 			targetNetwork
 		});
@@ -156,10 +166,14 @@
 		{destination}
 		observe={currentStep?.name !== 'Sending'}
 		{sourceNetwork}
+		nativeEthereumToken={$ethereumToken}
 	>
-		<CkEthLoader convertTokenId={$sendTokenId}>
+		<CkEthLoader nativeTokenId={$sendTokenId}>
 			{#if currentStep?.name === 'Sending'}
-				<SendProgress progressStep={sendProgressStep} steps={walletConnectSendSteps($i18n)} />
+				<SendProgress
+					progressStep={sendProgressStep}
+					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
+				/>
 			{:else}
 				<WalletConnectSendReview
 					{amount}

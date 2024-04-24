@@ -67,7 +67,8 @@
 			"retrieving_eth_key": "Retrieving your Ethereum public key"
 		},
 		"info": {
-			"hold_loading": "Hold tight, we are loading some information..."
+			"hold_loading": "Hold tight, we are loading some information...",
+			"hold_loading_wallet": "Hold tight, we are loading some initial data for your wallet..."
 		},
 		"error": {
 			"no_alchemy_config": "No Alchemy config for network $network",
@@ -77,6 +78,7 @@
 			"no_etherscan_rest_api": "No Etherscan Rest API for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
+			"no_infura_ckerc20_provider": "No Infura CkErc20 provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
@@ -85,6 +87,8 @@
 			"erc20_contracts": "Error while loading the ERC20 contracts.",
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
 			"minter_cketh_eth": "A configured minter is required to convert ckETH to ETH.",
+			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to Erc20.",
+			"ledger_cketh_eth": "A configured ckETH ledger is required to convert ckErc20 to Erc20.",
 			"minter_btc": "A configured minter is required to retrieve BTC.",
 			"minter_ckbtc_info": "A configured minter is required to fetch the ckBTC info",
 			"minter_cketh_info": "A configured minter is required to fetch the ckETH info",
@@ -93,7 +97,8 @@
 			"btc_fees_estimation": "Error while querying the estimation of the BTC fees.",
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
-			"icrc_canisters": "Error while loading the ICRC canisters."
+			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again."
 		}
 	},
 	"hero": {
@@ -139,10 +144,11 @@
 		},
 		"ethereum": {
 			"text": {
-				"checking_status": "Checking ETH status...",
-				"from_network": "Receive from Ethereum Network",
-				"eth_to_cketh_description": "Converting ETH into ckETH requires a call to a smart contract on Ethereum and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
-				"learn_how_to_convert": "Learn how to convert ETH to ckETH",
+				"checking_status": "Checking $token status...",
+				"converting": "Converting $token to $ckToken",
+				"from_network": "Receive from $network Network",
+				"eth_to_cketh_description": "Converting $token into $ckToken requires a call to a smart contract on $network and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
+				"learn_how_to_convert": "Learn how to convert $token to $ckToken",
 				"metamask": "Receive from Metamask"
 			},
 			"error": {
@@ -178,10 +184,14 @@
 			"source": "Source",
 			"balance": "Balance",
 			"review": "Review",
+			"signing_approval": "Signing approval...",
 			"approving": "Approving...",
+			"approving_fees": "Approving fees...",
+			"approving_transfer": "Approving transfer...",
+			"approving_wallet_connect": "Approving WalletConnect request...",
 			"refreshing_ui": "Refreshing UI",
 			"initializing": "Initializing transaction...",
-			"signing_transaction": "'Signing transaction...'",
+			"signing_transaction": "Signing transaction...",
 			"sending": "Sending...",
 			"signing": "Signing...",
 			"signing_message": "Signing message...",
@@ -208,6 +218,7 @@
 			"unknown_minimum_cketh_amount": "The minimum amount of ckETH required for converting to ETH is unknown.",
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
+			"minimum_ledger_fees": "The amount falls below the ledger fees $symbol.",
 			"destination_address_invalid": "Destination address is invalid.",
 			"amount_invalid": "Amount is invalid.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
@@ -215,7 +226,9 @@
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
 			"gas_fees_not_defined": "Gas fees are not defined.",
 			"max_gas_gee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
-			"address_unknown": "Address is unknown."
+			"address_unknown": "Address is unknown.",
+			"minter_info_not_loaded": "Try again in few seconds, a ckETH configuration parameter is not yet loaded.",
+			"minter_info_not_certified": "Try again in few seconds, a ckETH configuration parameter has not yet certified."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -232,13 +245,15 @@
 	"convert": {
 		"text": {
 			"convert_to_btc": "Convert to BTC",
-			"convert_to_eth": "Convert to ETH",
+			"convert_to_token": "Convert to $token",
 			"convert_to_cketh": "Convert to ckETH",
-			"convert_eth_to_cketh": "Convert ETH to ckETH",
-			"how_to_convert_eth_to_cketh": "Here is how to can convert ETH to ckETH on $oisy_name",
-			"send_eth": "Send ETH to your $oisy_name address",
-			"wait_eth_current_balance": "Wait for ETH to arrive. Current balance",
-			"set_amount": "Set amount for conversion"
+			"convert_to_ckerc20": "Convert to $ckErc20",
+			"convert_eth_to_cketh": "Convert $token to $ckToken",
+			"how_to_convert_eth_to_cketh": "Here is how to can convert $token to $ckToken on $oisy_name",
+			"send_eth": "Send $token to your $oisy_name address",
+			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
+			"set_amount": "Set amount for conversion",
+			"send_fee": "Ensure you have also $token to cover the fee. Current balance"
 		},
 		"error": {
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
@@ -339,9 +354,10 @@
 			"receive": "Receive from BTC network"
 		},
 		"ethereum": {
-			"title": "Receive ETH from Ethereum Network and convert to ckETH",
-			"description": "With a few steps, transfer and convert your Ethereum (ETH) to ckETH directly within the $oisy_name.",
-			"how_to": "How to convert ETH to ckETH"
+			"title": "Receive $token and convert to $ckToken",
+			"description": "With a few steps, transfer and convert your $tkName ($token) from the $network Network to $ckToken directly within the $oisy_name.",
+			"how_to": "How to convert $token to $ckToken",
+			"how_to_short": "How to convert $token"
 		}
 	},
 	"wallet_connect": {
@@ -444,7 +460,10 @@
 			"loading_transactions": "Error while loading the transactions.",
 			"loading_transactions_symbol": "Error while loading the $symbol transactions.",
 			"no_token_loading_transaction": "Token not found. Transactions cannot be loaded.",
-			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists."
+			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists.",
+			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
+			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
+			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
 		}
 	}
 }
