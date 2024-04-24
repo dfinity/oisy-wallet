@@ -44,6 +44,12 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 
 const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
+	// TODO: remove when enabling USD_TOKEN with twin token support
+	{
+		// USDC
+		address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+		exchange: 'ethereum'
+	},
 	{
 		// USDT
 		address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
@@ -116,7 +122,10 @@ export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [SEPOLIA_USDC_TOKEN];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
-	...(ETH_MAINNET_ENABLED ? [USDC_TOKEN] : []),
+	// TODO: uncomment to enable USD_TOKEN with twin token support
+	// TODO: do not forget to removed USD_TOKEN in ERC20_CONTRACTS_PRODUCTION
+	// ...(ETH_MAINNET_ENABLED ? [USDC_TOKEN] : []),
+	...(ETH_MAINNET_ENABLED ? [] : []),
 	...ERC20_TWIN_TOKENS_SEPOLIA
 ];
 
