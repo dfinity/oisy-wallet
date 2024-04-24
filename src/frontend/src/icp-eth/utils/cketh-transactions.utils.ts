@@ -1,8 +1,5 @@
 import type { EthereumNetwork } from '$eth/types/network';
-import {
-	decodeErc20AbiDataValue,
-	isErc20TransactionApprove
-} from '$icp-eth/utils/transactions.utils';
+import { decodeErc20AbiDataValue, isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 import type { IcCkTwinToken, IcToken, IcTransactionUi } from '$icp/types/ic';
 import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
