@@ -36,6 +36,32 @@
 	</p>
 </div>
 
+{#if ckErc20}
+	<div class="bg-light-blue p-4 mt-2 mb-4 rounded-lg">
+		<p class="break-normal font-bold">
+			{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
+				$token: $ckEthereumNativeToken.symbol
+			})}
+		</p>
+
+		<p class="break-normal">
+			{replacePlaceholders($i18n.convert.text.fees_explanation, {
+				$token: $ckEthereumNativeToken.symbol
+			})}
+		</p>
+
+		<p class="break-normal pt-4">
+			{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
+				>{formatToken({
+					value: $ckEthereumNativeTokenBalance ?? BigNumber.from(0n),
+					unitName: $ckEthereumNativeToken.decimals
+				})}
+				{$ckEthereumNativeToken.symbol}</output
+			>
+		</p>
+	</div>
+{/if}
+
 <div class="grid grid-cols-[1fr_auto] gap-x-4 mt-4">
 	<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
 		<span
@@ -88,39 +114,9 @@
 		</Value>
 	</div>
 
-	{#if ckErc20}
-		<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
-			<span
-				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
-				>3</span
-			>
-
-			<div class="h-full w-[1.5px] bg-misty-rose"></div>
-		</div>
-
-		<div>
-			<Value element="div">
-				<svelte:fragment slot="label"
-					>{replacePlaceholders($i18n.convert.text.send_fee, {
-						$token: $ckEthereumNativeToken.symbol
-					})}</svelte:fragment
-				>
-
-				<p class="mb-6">
-					{formatToken({
-						value: $ckEthereumNativeTokenBalance ?? BigNumber.from(0n),
-						unitName: $ckEthereumNativeToken.decimals,
-						displayDecimals: $ckEthereumNativeToken.decimals
-					})}
-					{$ckEthereumNativeToken.symbol}
-				</p>
-			</Value>
-		</div>
-	{/if}
-
 	<span
 		class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
-		>{#if ckErc20}4{:else}3{/if}</span
+		>3</span
 	>
 
 	<div>
