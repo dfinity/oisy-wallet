@@ -97,7 +97,7 @@
 			listener: async ({ hash, from }: TransactionResponse) => {
 				// Filtering from and to with Alchemy (see initEthPendingTransactionsListenerProvider) at the same time does not work according our observations.
 				// Therefore, we are observing the `to` address and filtering the `from` on each event.
-				if ($address !== from) {
+				if ($address?.toLowerCase() !== from.toLowerCase()) {
 					return;
 				}
 
