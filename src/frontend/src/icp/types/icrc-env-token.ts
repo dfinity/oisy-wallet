@@ -9,11 +9,14 @@ export const icrcEnvTokenMetadata = z.object({
 	url: z.optional(z.string().url())
 });
 
+const indexCanisterVersion = z.union([z.literal('up-to-date'), z.literal('outdated')]);
+
 export const icrcEnvToken = z.object({
 	ledgerCanisterId: z.string(),
 	rootCanisterId: z.string(),
 	indexCanisterId: z.string(),
-	metadata: icrcEnvTokenMetadata
+	metadata: icrcEnvTokenMetadata,
+	indexCanisterVersion
 });
 
 export const icrcEnvTokens = z.array(icrcEnvToken);
