@@ -1,5 +1,8 @@
-import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
-import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import { AnonymousIdentity } from '@dfinity/agent';
+import { Ed25519KeyIdentity } from '@dfinity/identity';
+import { IcrcIndexNgCanister, IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
+import { Principal } from '@dfinity/principal';
+import { createAgent, fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -103,6 +106,30 @@ const mapOptionalToken = (response) => {
 	return nullishToken;
 };
 
+const assertIndexCanister = async (indexCanisterId) => {
+	try {
+		const agent = await createAgent({
+			identity: new AnonymousIdentity(),
+			host: 'https://icp-api.io'
+		});
+
+		const { getTransactions } = IcrcIndexNgCanister.create({
+			agent,
+			canisterId: Principal.fromText(indexCanisterId)
+		});
+
+		const { balance } = await getTransactions({
+			certified: true,
+			max_results: 0n,
+			account: { owner: Ed25519KeyIdentity.generate().getPrincipal() }
+		});
+
+		return balance >= 0n;
+	} catch (_err) {
+		return false;
+	}
+};
+
 export const findSnses = async () => {
 	try {
 		const data = await querySnsAggregator();
@@ -160,7 +187,23 @@ export const findSnses = async () => {
 				{ tokens: [], icons: [] }
 			);
 
-		writeFileSync(join(DATA_FOLDER, 'tokens.sns.json'), JSON.stringify(tokens, jsonReplacer));
+		const indexCanisterVersion = async (token) => {
+			const { indexCanisterId } = token;
+
+			const valid = await assertIndexCanister(indexCanisterId);
+
+			return {
+				...token,
+				indexCanisterVersion: valid ? 'up-to-date' : 'outdated'
+			};
+		};
+
+		const enhancedTokens = await Promise.all(tokens.map(indexCanisterVersion));
+
+		writeFileSync(
+			join(DATA_FOLDER, 'tokens.sns.json'),
+			JSON.stringify(enhancedTokens, jsonReplacer)
+		);
 
 		await saveLogos(icons);
 	} catch (err) {
