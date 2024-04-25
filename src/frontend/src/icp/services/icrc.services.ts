@@ -127,18 +127,27 @@ const loadCustomIcrcTokensData = async ({
 			}
 		} = token;
 
-		const ledgerCanisterId = ledger_id.toText();
+		const indexCanisterId = fromNullable(index_id);
+
+		// Index canister ID currently mandatory in Oisy's frontend
+		if (isNullish(indexCanisterId)) {
+			return undefined;
+		}
+
+		const ledgerCanisterIdText = ledger_id.toText();
 
 		// For performance reasons, if we can build the token metadata using the known custom tokens from the environments, we do so and save a call to the ledger to fetch the metadata.
 		const meta = buildIcrcCustomTokenMetadataPseudoResponse({
 			icrcCustomTokens: indexedIcrcCustomTokens,
-			ledgerCanisterId
+			ledgerCanisterId: ledgerCanisterIdText
 		});
 
 		const data: IcrcLoadData = {
-			metadata: nonNullish(meta) ? meta : await metadata({ ledgerCanisterId, identity, certified }),
-			ledgerCanisterId: ledger_id.toText(),
-			indexCanisterId: index_id.toText(),
+			metadata: nonNullish(meta)
+				? meta
+				: await metadata({ ledgerCanisterId: ledgerCanisterIdText, identity, certified }),
+			ledgerCanisterId: ledgerCanisterIdText,
+			indexCanisterId: indexCanisterId.toText(),
 			position: ICRC_TOKENS.length + 1 + index,
 			category: 'custom',
 			icrcCustomTokens: indexedIcrcCustomTokens

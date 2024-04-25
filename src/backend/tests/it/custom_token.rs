@@ -9,7 +9,7 @@ use shared::types::TokenVersion;
 lazy_static! {
     static ref ICRC_TOKEN: IcrcToken = IcrcToken {
         ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai".to_string()).unwrap(),
-        index_id: Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai".to_string()).unwrap(),
+        index_id: Some(Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai".to_string()).unwrap()),
     };
     static ref USER_TOKEN: CustomToken = CustomToken {
         token: Token::Icrc(ICRC_TOKEN.clone()),
@@ -20,7 +20,17 @@ lazy_static! {
     static ref ANOTHER_USER_TOKEN: CustomToken = CustomToken {
         token: Token::Icrc(IcrcToken {
             ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
-            index_id: Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
+            index_id: Some(
+                Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap()
+            ),
+        }),
+        enabled: true,
+        version: None,
+    };
+    static ref USER_TOKEN_NO_INDEX: CustomToken = CustomToken {
+        token: Token::Icrc(IcrcToken {
+            ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai".to_string()).unwrap(),
+            index_id: None,
         }),
         enabled: true,
         version: None,
@@ -28,29 +38,47 @@ lazy_static! {
 }
 
 #[test]
-fn test_add_custom_token() {
+fn test_add_custom_token_with_index() {
+    test_add_custom_token(&USER_TOKEN)
+}
+
+#[test]
+fn test_add_custom_token_without_index() {
+    test_add_custom_token(&USER_TOKEN_NO_INDEX)
+}
+
+fn test_add_custom_token(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
+    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
 
     assert!(result.is_ok());
 }
 
 #[test]
-fn test_update_custom_token() {
+fn test_update_custom_token_with_index() {
+    test_update_custom_token(&USER_TOKEN);
+}
+
+#[test]
+fn test_update_custom_token_without_index() {
+    test_update_custom_token(&USER_TOKEN_NO_INDEX);
+}
+
+fn test_update_custom_token(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
+    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
 
     assert!(result.is_ok());
 
     let results = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
 
-    let expected_tokens: Vec<CustomToken> = vec![USER_TOKEN.clone_with_incremented_version()];
+    let expected_tokens: Vec<CustomToken> = vec![user_token.clone_with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -58,7 +86,7 @@ fn test_update_custom_token() {
 
     let update_token: CustomToken = CustomToken {
         enabled: false,
-        token: USER_TOKEN.token.clone(),
+        token: user_token.token.clone(),
         version: results.unwrap().get(0).unwrap().version,
     };
 
@@ -81,12 +109,21 @@ fn test_update_custom_token() {
 }
 
 #[test]
-fn test_add_many_custom_tokens() {
+fn test_add_many_custom_tokens_with_index() {
+    test_add_many_custom_tokens(&USER_TOKEN);
+}
+
+#[test]
+fn test_add_many_custom_tokens_without_index() {
+    test_add_many_custom_tokens(&USER_TOKEN_NO_INDEX);
+}
+
+fn test_add_many_custom_tokens(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let tokens: Vec<CustomToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
+    let tokens: Vec<CustomToken> = vec![user_token.clone(), ANOTHER_USER_TOKEN.clone()];
 
     let result = update_call::<()>(&pic_setup, caller, "set_many_custom_tokens", tokens);
 
@@ -94,12 +131,21 @@ fn test_add_many_custom_tokens() {
 }
 
 #[test]
-fn test_update_many_custom_tokens() {
+fn test_update_many_custom_tokens_with_index() {
+    test_update_many_custom_tokens(&USER_TOKEN);
+}
+
+#[test]
+fn test_update_many_custom_tokens_without_index() {
+    test_update_many_custom_tokens(&USER_TOKEN_NO_INDEX);
+}
+
+fn test_update_many_custom_tokens(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let tokens: Vec<CustomToken> = vec![USER_TOKEN.clone(), ANOTHER_USER_TOKEN.clone()];
+    let tokens: Vec<CustomToken> = vec![user_token.clone(), ANOTHER_USER_TOKEN.clone()];
 
     let result = update_call::<()>(&pic_setup, caller, "set_many_custom_tokens", tokens.clone());
 
@@ -110,7 +156,7 @@ fn test_update_many_custom_tokens() {
     assert!(results.is_ok());
 
     let expected_tokens: Vec<CustomToken> = vec![
-        USER_TOKEN.clone_with_incremented_version(),
+        user_token.clone_with_incremented_version(),
         ANOTHER_USER_TOKEN.clone_with_incremented_version(),
     ];
 
@@ -118,7 +164,7 @@ fn test_update_many_custom_tokens() {
 
     let update_token: CustomToken = CustomToken {
         enabled: false,
-        token: USER_TOKEN.token.clone(),
+        token: user_token.token.clone(),
         version: results.clone().unwrap().get(0).unwrap().version,
     };
 
@@ -184,18 +230,27 @@ fn test_list_custom_tokens() {
 }
 
 #[test]
-fn test_cannot_update_custom_token_without_version() {
+fn test_cannot_update_custom_token_without_version_with_index() {
+    test_cannot_update_custom_token_without_version(&USER_TOKEN);
+}
+
+#[test]
+fn test_cannot_update_custom_token_without_version_without_index() {
+    test_cannot_update_custom_token_without_version(&USER_TOKEN_NO_INDEX);
+}
+
+fn test_cannot_update_custom_token_without_version(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
+    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
 
     assert!(result.is_ok());
 
     let update_token: CustomToken = CustomToken {
         enabled: false,
-        token: USER_TOKEN.token.clone(),
+        token: user_token.token.clone(),
         version: None,
     };
 
@@ -209,18 +264,27 @@ fn test_cannot_update_custom_token_without_version() {
 }
 
 #[test]
-fn test_cannot_update_custom_token_with_invalid_version() {
+fn test_cannot_update_custom_token_with_invalid_version_with_index() {
+    test_cannot_update_custom_token_with_invalid_version(&USER_TOKEN);
+}
+
+#[test]
+fn test_cannot_update_custom_token_with_invalid_version_without_index() {
+    test_cannot_update_custom_token_with_invalid_version(&USER_TOKEN_NO_INDEX);
+}
+
+fn test_cannot_update_custom_token_with_invalid_version(user_token: &CustomToken) {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
+    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
 
     assert!(result.is_ok());
 
     let update_token: CustomToken = CustomToken {
         enabled: false,
-        token: USER_TOKEN.token.clone(),
+        token: user_token.token.clone(),
         version: Some(123456789),
     };
 
