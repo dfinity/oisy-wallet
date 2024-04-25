@@ -87,7 +87,7 @@ export const listCustomTokens = async ({
 	return list_custom_tokens();
 };
 
-export const setUserCustomTokens = async ({
+export const setManyCustomTokens = async ({
 	tokens,
 	identity
 }: {
