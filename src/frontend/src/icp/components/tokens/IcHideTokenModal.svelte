@@ -58,7 +58,7 @@
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),
-						index_id: Principal.fromText(indexCanisterId)
+						index_id: toNullable(Principal.fromText(indexCanisterId))
 					}
 				}
 			}
