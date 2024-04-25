@@ -61,6 +61,7 @@ export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 const mapIcrcCustomToken = ({
 	ledgerCanisterId,
 	indexCanisterId,
+	indexCanisterVersion,
 	rootCanisterId,
 	metadata: { name, decimals, symbol, fee, alternativeName }
 }: IcrcEnvToken): IcTokenWithoutIdExtended => ({
@@ -77,5 +78,6 @@ const mapIcrcCustomToken = ({
 	icon: `/icons/sns/${ledgerCanisterId}.png`,
 	fee,
 	alternativeName,
-	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`
+	explorerUrl: `${SNS_EXPLORER_URL}/${rootCanisterId}`,
+	indexCanisterVersion
 });
