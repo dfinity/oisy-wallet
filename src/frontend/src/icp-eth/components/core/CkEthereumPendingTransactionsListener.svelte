@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {fromNullable, isNullish, nonNullish, notEmptyString} from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { OptionAddress } from '$lib/types/address';
