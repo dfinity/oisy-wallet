@@ -265,6 +265,7 @@ interface I18nTokens {
 	};
 	manage: {
 		text: { title: string; do_not_see_import: string; clear_filter: string };
+		info: { outdated_index_canister: string };
 		error: { unexpected_build: string; empty: string };
 	};
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };

@@ -1,9 +1,11 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
 import type { IcToken, IcTokenWithoutId } from '$icp/types/ic';
-import type { IcrcEnvTokenMetadata } from '$icp/types/icrc-env-token';
+import type { IcrcEnvToken, IcrcEnvTokenMetadata } from '$icp/types/icrc-env-token';
 
-export type IcTokenWithoutIdExtended = IcTokenWithoutId &
-	Pick<IcrcEnvTokenMetadata, 'alternativeName'>;
+export type IcrcCustomTokenExtra = Pick<IcrcEnvTokenMetadata, 'alternativeName'> &
+	Partial<Pick<IcrcEnvToken, 'indexCanisterVersion'>>;
+
+export type IcTokenWithoutIdExtended = IcTokenWithoutId & IcrcCustomTokenExtra;
 
 export type IcCustomTokenState = Omit<CustomToken, 'token' | 'version'> & {
 	version?: bigint;
@@ -11,6 +13,4 @@ export type IcCustomTokenState = Omit<CustomToken, 'token' | 'version'> & {
 
 export type IcrcCustomTokenWithoutId = IcCustomTokenState & IcTokenWithoutIdExtended;
 
-export type IcrcCustomToken = IcCustomTokenState &
-	IcToken &
-	Pick<IcrcEnvTokenMetadata, 'alternativeName'>;
+export type IcrcCustomToken = IcCustomTokenState & IcToken & IcrcCustomTokenExtra;

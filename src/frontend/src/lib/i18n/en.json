@@ -299,6 +299,9 @@
 				"do_not_see_import": "Don’t see your token? Import",
 				"clear_filter": "Clear filter"
 			},
+			"info": {
+				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade."
+			},
 			"error": {
 				"unexpected_build": "An unexpected error happened while building the list of known tokens.",
 				"empty": "No tokens to enable or disable have been selected."
