@@ -1,7 +1,7 @@
 import { loadUserTokens } from '$icp/services/icrc.services';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { setUserCustomTokens } from '$lib/api/backend.api';
+import { setManyCustomTokens } from '$lib/api/backend.api';
 import { AddTokenStep } from '$lib/enums/steps';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -18,7 +18,7 @@ export const saveCustomTokens = async ({
 }) => {
 	progress(AddTokenStep.SAVE);
 
-	await setUserCustomTokens({
+	await setManyCustomTokens({
 		identity,
 		tokens: tokens.map(({ enabled, version, ledgerCanisterId, indexCanisterId }) => ({
 			enabled,
