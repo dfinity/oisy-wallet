@@ -1,6 +1,6 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcFee, IcInterface, IcToken, IcTokenWithoutId } from '$icp/types/ic';
+import type { IcFee, IcInterface, IcToken } from '$icp/types/ic';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
@@ -22,7 +22,7 @@ export const mapIcrcToken = ({
 	icrcCustomTokens,
 	ledgerCanisterId,
 	...rest
-}: IcrcLoadData): IcTokenWithoutId | undefined => {
+}: IcrcLoadData): IcTokenWithoutIdExtended | undefined => {
 	const token = mapOptionalToken(metadata);
 
 	if (isNullish(token)) {
@@ -43,6 +43,9 @@ export const mapIcrcToken = ({
 		}),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.alternativeName) && {
 			alternativeName: icrcCustomTokens[ledgerCanisterId].alternativeName
+		}),
+		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.indexCanisterVersion) && {
+			indexCanisterVersion: icrcCustomTokens[ledgerCanisterId].indexCanisterVersion
 		}),
 		ledgerCanisterId,
 		...metadataToken,
