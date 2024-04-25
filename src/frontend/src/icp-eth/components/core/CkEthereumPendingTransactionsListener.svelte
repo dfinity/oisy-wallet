@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { OptionAddress } from '$lib/types/address';
@@ -27,6 +27,7 @@
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
+	import type { TransactionResponse } from '@ethersproject/abstract-provider';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -79,7 +80,7 @@
 	}) => {
 		await listener?.disconnect();
 
-		if (isNullish(toAddress)) {
+		if (isNullish(toAddress) || !notEmptyString(toAddress)) {
 			return;
 		}
 
@@ -87,16 +88,26 @@
 			return;
 		}
 
+		if (isNullish($address)) {
+			return;
+		}
+
 		listener = initEthPendingTransactionsListenerProvider({
 			toAddress,
-			fromAddress: $address,
-			listener: async (hash: string) =>
+			listener: async ({ hash, from }: TransactionResponse) => {
+				// Filtering from and to with Alchemy (see initEthPendingTransactionsListenerProvider) at the same time does not work according our observations.
+				// Therefore, we are observing the `to` address and filtering the `from` on each event.
+				if ($address?.toLowerCase() !== from.toLowerCase()) {
+					return;
+				}
+
 				await loadPendingCkEthereumTransaction({
 					hash,
 					token: $token as IcToken,
 					twinToken: $ckEthereumTwinToken,
 					networkId
-				}),
+				});
+			},
 			networkId
 		});
 	};
