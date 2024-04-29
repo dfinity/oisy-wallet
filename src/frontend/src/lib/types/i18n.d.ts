@@ -250,6 +250,7 @@ interface I18nTokens {
 		network: string;
 		contract_address_copied: string;
 		twin_token: string;
+		standard: string;
 	};
 	import: {
 		text: {

@@ -275,7 +275,8 @@
 			"token": "Token",
 			"network": "Network",
 			"contract_address_copied": "Contract address copied to clipboard.",
-			"twin_token": "Twin token"
+			"twin_token": "Twin token",
+			"standard": "Standard"
 		},
 		"import": {
 			"text": {
