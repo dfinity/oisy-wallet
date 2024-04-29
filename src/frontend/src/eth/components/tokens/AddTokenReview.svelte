@@ -20,7 +20,7 @@
 		if (
 			$erc20TokensStore?.find(
 				({ address }) => address.toLowerCase() === contractAddress.toLowerCase()
-			)
+			) !== undefined
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.already_available }
