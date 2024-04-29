@@ -1,6 +1,6 @@
 import { BTC_MAINNET_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks.env';
-import type { Token } from '$lib/types/token';
 import bitcoin from '$icp/assets/bitcoin.svg';
+import type { Token } from '$lib/types/token';
 
 export const BTC_DECIMALS = 8;
 
