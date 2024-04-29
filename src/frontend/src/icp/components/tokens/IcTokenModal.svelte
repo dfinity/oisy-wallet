@@ -9,9 +9,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
 
 	let twinToken: TokenType | undefined;
 	$: twinToken = ($token as IcCkToken).twinToken;
+
+	let ckToken: IcCkToken | undefined;
+	$: ckToken = $token as IcCkToken;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -26,6 +30,47 @@
 					<Logo src={twinToken.icon} alt={`${twinToken.name} logo`} size="20px" color="white" />
 				</span>
 			</Value>
+		{/if}
+
+		{#if nonNullish(ckToken)}
+			{#if nonNullish(ckToken.ledgerCanisterId)}
+				<Value ref="name">
+					<svelte:fragment slot="label"
+						>{$i18n.tokens.import.text.ledger_canister_id}</svelte:fragment
+					>
+					<output class="break-all">{ckToken.ledgerCanisterId}</output><Copy
+						value={ckToken.ledgerCanisterId}
+						text={$i18n.tokens.import.text.ledger_canister_id_copied}
+						inline
+					/>
+				</Value>
+			{/if}
+
+			{#if nonNullish(ckToken.indexCanisterId)}
+				<Value ref="name">
+					<svelte:fragment slot="label"
+						>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
+					>
+					<output>{ckToken.indexCanisterId}</output><Copy
+						value={ckToken.indexCanisterId}
+						text={$i18n.tokens.import.text.index_canister_id_copied}
+						inline
+					/>
+				</Value>
+			{/if}
+
+			{#if nonNullish(ckToken.minterCanisterId)}
+				<Value ref="name">
+					<svelte:fragment slot="label"
+						>{$i18n.tokens.import.text.minter_canister_id}</svelte:fragment
+					>
+					<output>{ckToken.minterCanisterId}</output><Copy
+						value={ckToken.minterCanisterId}
+						text={$i18n.tokens.import.text.minter_canister_id_copied}
+						inline
+					/>
+				</Value>
+			{/if}
 		{/if}
 	</Token>
 

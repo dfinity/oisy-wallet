@@ -25,6 +25,13 @@
 
 <slot />
 
+{#if ['icrc', 'erc20'].includes(token.standard)}
+	<Value ref="symbol">
+		<svelte:fragment slot="label">{$i18n.tokens.details.standard}</svelte:fragment>
+		<output class="capitalize">{token.standard}</output>
+	</Value>
+{/if}
+
 <Value ref="symbol">
 	<svelte:fragment slot="label">{$i18n.core.text.symbol}</svelte:fragment>
 	<output>{token.symbol}</output>
