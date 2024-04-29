@@ -34,6 +34,21 @@ export const getTransactions = async ({
 	});
 };
 
+export const getLedgerId = async ({
+	identity,
+	indexCanisterId,
+	certified = true
+}: {
+	identity: OptionIdentity;
+	indexCanisterId: CanisterIdText;
+} & QueryParams): Promise<Principal> => {
+	assertNonNullish(identity);
+
+	const { ledgerId } = await indexNgCanister({ identity, indexCanisterId });
+
+	return ledgerId({ certified });
+};
+
 const indexNgCanister = async ({
 	identity,
 	indexCanisterId
