@@ -292,6 +292,8 @@ interface I18nTokens {
 		already_available: string;
 		loading_metadata: string;
 		not_custom: string;
+		incomplete_metadata: string;
+		duplicate_metadata: string;
 	};
 }
 

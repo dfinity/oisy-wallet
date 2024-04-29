@@ -33,6 +33,30 @@
 		try {
 			const { metadata: metadataApi } = infuraErc20Providers($networkId);
 			metadata = await metadataApi({ address: contractAddress });
+
+			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
+				toastsError({
+					msg: { text: $i18n.tokens.error.incomplete_metadata }
+				});
+
+				dispatch('icBack');
+				return;
+			}
+
+			if (
+				$erc20TokensStore?.find(
+					({ symbol, name }) =>
+						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
+						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
+				) !== undefined
+			) {
+				toastsError({
+					msg: { text: $i18n.tokens.error.duplicate_metadata }
+				});
+
+				dispatch('icBack');
+				return;
+			}
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.loading_metadata },
