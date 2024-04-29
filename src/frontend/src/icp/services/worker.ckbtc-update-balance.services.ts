@@ -17,10 +17,8 @@ import { get } from 'svelte/store';
 
 export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 	minterCanisterId,
-	token: {
-		id: tokenId,
-		network: { id: networkId }
-	}
+	token: { id: tokenId },
+	twinToken
 }: IcCkWorkerParams): Promise<IcCkWorkerInitResult> => {
 	const CkBTCUpdateBalanceWorker = await import('$icp/workers/ckbtc-update-balance.worker?worker');
 	const worker: Worker = new CkBTCUpdateBalanceWorker.default();
@@ -72,7 +70,7 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 				data: {
 					minterCanisterId,
 					btcAddress,
-					bitcoinNetwork: isNetworkIdBTCMainnet(networkId) ? 'mainnet' : 'testnet'
+					bitcoinNetwork: isNetworkIdBTCMainnet(twinToken?.network.id) ? 'mainnet' : 'testnet'
 				}
 			});
 		},
