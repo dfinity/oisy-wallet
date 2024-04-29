@@ -9,15 +9,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { icrcDefaultTokens } from '$icp/derived/icrc.derived';
 
 	let twinToken: TokenType | undefined;
 	$: twinToken = ($token as IcCkToken).twinToken;
-
-	let icon: string | undefined;
-	$: icon = nonNullish(twinToken)
-		? $icrcDefaultTokens.find(({ id }) => id === twinToken?.id)?.icon ?? twinToken?.icon
-		: undefined;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -29,7 +23,7 @@
 				<svelte:fragment slot="label">{$i18n.tokens.details.twin_token}</svelte:fragment>
 				<span class="flex gap-1 items-center">
 					<output>{twinToken.name}</output>
-					<Logo src={icon} alt={`${twinToken.name} logo`} size="20px" color="white" />
+					<Logo src={twinToken.icon} alt={`${twinToken.name} logo`} size="20px" color="white" />
 				</span>
 			</Value>
 		{/if}
