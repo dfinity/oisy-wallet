@@ -4,7 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<footer class="flex flex-col justify-center items-center pt-8 mt-6 pb-4 px-4 gap-3 z-10">
+<footer class="hidden sm:flex flex-col justify-center items-center pt-8 mt-6 pb-4 px-4 gap-3 z-10">
 	<a
 		href={OISY_REPO_URL}
 		rel="external noopener noreferrer"
