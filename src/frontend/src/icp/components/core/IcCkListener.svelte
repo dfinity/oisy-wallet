@@ -7,7 +7,7 @@
 
 	export let initFn: IcCkWorker;
 	export let token: Token;
-	export let twinToken: Token | undefined;
+	export let twinToken: Token | undefined = undefined;
 	export let minterCanisterId: CanisterIdText | undefined = undefined;
 
 	let worker: IcCkWorkerInitResult | undefined;
