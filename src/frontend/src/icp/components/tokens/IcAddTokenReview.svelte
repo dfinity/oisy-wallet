@@ -13,6 +13,8 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';
@@ -26,6 +28,15 @@
 	let token: ValidateTokenData | undefined;
 
 	onMount(async () => {
+		if ($icrcTokens?.find(({ ledgerCanisterId: id }) => id === ledgerCanisterId) !== undefined) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.already_available }
+			});
+
+			back();
+			return;
+		}
+
 		const { result, data } = await loadAndAssertAddCustomToken({
 			ledgerCanisterId,
 			indexCanisterId,
