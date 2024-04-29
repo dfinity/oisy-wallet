@@ -250,6 +250,7 @@ interface I18nTokens {
 		network: string;
 		contract_address_copied: string;
 		twin_token: string;
+		standard: string;
 	};
 	import: {
 		text: {
@@ -258,6 +259,10 @@ interface I18nTokens {
 			saving: string;
 			ledger_canister_id: string;
 			index_canister_id: string;
+			minter_canister_id: string;
+			ledger_canister_id_copied: string;
+			index_canister_id_copied: string;
+			minter_canister_id_copied: string;
 			verifying: string;
 			add_the_token: string;
 		};
