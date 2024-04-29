@@ -266,7 +266,13 @@ interface I18nTokens {
 			verifying: string;
 			add_the_token: string;
 		};
-		error: { loading_metadata: string; no_metadata: string; unexpected_index: string };
+		error: {
+			loading_metadata: string;
+			no_metadata: string;
+			unexpected_index: string;
+			unexpected_index_ledger: string;
+			invalid_ledger_id: string;
+		};
 	};
 	manage: {
 		text: { title: string; do_not_see_import: string; clear_filter: string };
