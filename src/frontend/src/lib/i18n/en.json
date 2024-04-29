@@ -285,6 +285,10 @@
 				"saving": "Saving...",
 				"ledger_canister_id": "Ledger Canister ID",
 				"index_canister_id": "Index Canister ID",
+				"minter_canister_id": "Minter Canister ID",
+				"ledger_canister_id_copied": "Ledger Canister ID copied to clipboard.",
+				"index_canister_id_copied": "Index Canister ID copied to clipboard.",
+				"minter_canister_id_copied": "Minter Canister ID copied to clipboard.",
 				"verifying": "Verifying token details...",
 				"add_the_token": "Add the token"
 			},

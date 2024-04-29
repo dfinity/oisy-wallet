@@ -259,6 +259,10 @@ interface I18nTokens {
 			saving: string;
 			ledger_canister_id: string;
 			index_canister_id: string;
+			minter_canister_id: string;
+			ledger_canister_id_copied: string;
+			index_canister_id_copied: string;
+			minter_canister_id_copied: string;
 			verifying: string;
 			add_the_token: string;
 		};
