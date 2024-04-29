@@ -1,4 +1,4 @@
-import { getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
+import { getLedgerId, getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic';
 import { mapIcrcToken } from '$icp/utils/icrc.utils';
@@ -33,6 +33,15 @@ export const loadAndAssertAddCustomToken = async ({
 	});
 
 	if (alreadyAvailable) {
+		return { result: 'error' };
+	}
+
+	const { valid } = await assertLedgerId({
+		identity,
+		...rest
+	});
+
+	if (!valid) {
 		return { result: 'error' };
 	}
 
@@ -152,5 +161,36 @@ const loadBalance = async ({
 		});
 
 		throw err;
+	}
+};
+
+const assertLedgerId = async ({
+	identity,
+	indexCanisterId,
+	ledgerCanisterId
+}: IcCanisters & { identity: Identity }): Promise<{ valid: boolean }> => {
+	try {
+		const ledgerId = await getLedgerId({
+			indexCanisterId,
+			identity,
+			certified: true
+		});
+
+		if (ledgerCanisterId !== ledgerId.toText()) {
+			toastsError({
+				msg: { text: get(i18n).tokens.import.error.invalid_ledger_id }
+			});
+
+			return { valid: false };
+		}
+
+		return { valid: true };
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: get(i18n).tokens.import.error.unexpected_index_ledger },
+			err
+		});
+
+		return { valid: false };
 	}
 };
