@@ -36,8 +36,8 @@
 	},
 	"auth": {
 		"text": {
-			"title": "A browser-based Ethereum wallet secured by the Internet Computer and supporting networked-custody",
-			"description": "$oisy_name provides a seamless on-chain experience to manage your Ethereum assets. Using native web technologies and advanced cryptography, $oisy_name eliminates the need for browser extensions or mobile apps.",
+			"title": "A multi-chain wallet powered by chainfusion",
+			"description": "$oisy_name provides a seamless on-chain experience to manage your Ethereum and ICP assets. By leveraging native web technologies and advanced cryptography, it eliminates the need for browser extensions or mobile apps. And accessing the wallet is easy using passkeys on a computer or mobile device.",
 			"connect_with": "Connect with",
 			"logout": "Logout"
 		},
