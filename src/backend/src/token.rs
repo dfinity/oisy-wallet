@@ -15,24 +15,22 @@ pub fn add_to_user_token<T>(
 {
     let Candid(mut tokens) = user_token.get(&stored_principal).unwrap_or_default();
 
-    match tokens.iter().position(find) {
-        Some(p) => match tokens[p].get_version() {
-            None => tokens[p] = token.clone_with_incremented_version(),
-            Some(existing_version) => {
-                if token.get_version() == Some(existing_version) {
-                    tokens[p] = token.clone_with_incremented_version()
-                } else {
-                    ic_cdk::trap("Version mismatch, token update not allowed");
-                }
+    match tokens.iter_mut().find(|token| find(*token)) {
+        Some(existing_token) => {
+            if token.get_version() == existing_token.get_version() {
+                *existing_token = token.clone_with_incremented_version();
+            } else {
+                ic_cdk::trap("Version mismatch, token update not allowed");
             }
-        },
+        }
         None => {
             if tokens.len() == MAX_TOKEN_LIST_LENGTH {
                 ic_cdk::trap(&format!(
                     "Token list length should not exceed {MAX_TOKEN_LIST_LENGTH}"
                 ));
             }
-            tokens.push(token.clone_with_incremented_version());
+
+            tokens.push(token.clone_with_zero_version());
         }
     }
 
