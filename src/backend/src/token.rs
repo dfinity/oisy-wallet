@@ -30,7 +30,7 @@ pub fn add_to_user_token<T>(
                 ));
             }
 
-            tokens.push(token.clone_with_zero_version());
+            tokens.push(token.clone_with_initial_version());
         }
     }
 

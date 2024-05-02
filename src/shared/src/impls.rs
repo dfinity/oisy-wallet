@@ -21,9 +21,9 @@ impl TokenVersion for UserToken {
         cloned
     }
 
-    fn clone_with_zero_version(&self) -> Self {
+    fn clone_with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(0);
+        cloned.version = Some(1);
         cloned
     }
 }
@@ -39,9 +39,9 @@ impl TokenVersion for CustomToken {
         cloned
     }
 
-    fn clone_with_zero_version(&self) -> Self {
+    fn clone_with_initial_version(&self) -> Self {
         let mut cloned = self.clone();
-        cloned.version = Some(0);
+        cloned.version = Some(1);
         cloned
     }
 }
