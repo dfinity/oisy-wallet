@@ -1,4 +1,4 @@
-// https://sepolia.etherscan.io/address/0xE1788E4834c896F1932188645cc36c54d1b80AC1#code
+// https://sepolia.etherscan.io/address/0x70e02Abf44E62Da8206130Cd7ca5279a8F6d6241#code
 export const CKERC20_ABI = [
 	{
 		inputs: [{ internalType: 'address', name: '_cketh_minter_main_address', type: 'address' }],
