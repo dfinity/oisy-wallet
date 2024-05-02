@@ -149,11 +149,6 @@ const ckErc20HelperContractPrepareTransaction = async ({
 		contract: Erc20ContractAddress;
 		networkId: NetworkId;
 	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
-	// TODO: remove once tested
-	// contract: erc20_contract_address = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
-	// amount !decimals
-	// to == same to
-
 	const { address: erc20ContractAddress } = token as Erc20Token;
 
 	const { populateTransaction } = infuraCkErc20Providers(networkId);
@@ -446,10 +441,6 @@ const approve = async ({
 	) {
 		return { transactionApproved: false };
 	}
-
-	// TODO: remove after test
-	// helper_contract erc20_helper_contract_address = opt "0xE1788E4834c896F1932188645cc36c54d1b80AC1";
-	// amount !decimals
 
 	const { id: networkId, chainId } = sourceNetwork;
 
