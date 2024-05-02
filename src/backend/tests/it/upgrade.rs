@@ -89,6 +89,24 @@ fn test_upgrade_allowed_caller_eth_address_of() {
 
 #[test]
 fn test_add_user_token_after_upgrade() {
+    test_add_user_token_after_upgrade_with_options(AddUserTokenAfterUpgradeOptions::default());
+}
+
+#[test]
+fn test_add_user_token_after_upgrade_should_ignore_premature_increments() {
+    test_add_user_token_after_upgrade_with_options(AddUserTokenAfterUpgradeOptions {
+        premature_increments: 3,
+    });
+}
+
+/// Options for unusual add_user_token behaviour.
+#[derive(Default)]
+struct AddUserTokenAfterUpgradeOptions {
+    /// The version number should be None but we can set it to Some(n) for a few small values to check that.
+    premature_increments: u8,
+}
+
+fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgradeOptions) {
     // Deploy a released canister
     let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_13_WASM_PATH);
 
@@ -100,12 +118,13 @@ fn test_add_user_token_after_upgrade() {
     // Add a user token
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
-    let result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "add_user_token",
-        POST_UPGRADE_TOKEN.clone(),
-    );
+    let mut token = POST_UPGRADE_TOKEN.clone();
+    // The version number should be ignored but we can check that.
+    for _ in 0..options.premature_increments {
+        token = token.clone_with_incremented_version();
+    }
+
+    let result = update_call::<()>(&pic_setup, caller, "add_user_token", token);
 
     // Add user token still works after upgrade?
     assert!(result.is_ok());

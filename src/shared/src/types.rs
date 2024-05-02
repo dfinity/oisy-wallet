@@ -36,6 +36,9 @@ pub trait TokenVersion: Debug {
     fn clone_with_incremented_version(&self) -> Self
     where
         Self: Sized + Clone;
+    fn clone_with_initial_version(&self) -> Self
+    where
+        Self: Sized + Clone;
 }
 
 /// Erc20 specific user defined tokens
