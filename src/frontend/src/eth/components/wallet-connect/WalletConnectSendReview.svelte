@@ -28,18 +28,20 @@
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<SendData
-	amount={formatToken({ value: amountDisplay })}
-	{destination}
-	token={$sendToken}
-	balance={$balance}
-	source={$address ?? ''}
->
-	<WalletConnectSendData {data} />
+<div class="stretch">
+	<SendData
+		amount={formatToken({ value: amountDisplay })}
+		{destination}
+		token={$sendToken}
+		balance={$balance}
+		source={$address ?? ''}
+	>
+		<WalletConnectSendData {data} />
 
-	<FeeDisplay slot="fee" />
+		<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
-</SendData>
+		<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
+	</SendData>
+</div>
 
 <WalletConnectActions on:icApprove on:icReject />

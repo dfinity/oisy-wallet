@@ -12,32 +12,34 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<IcReceiveWalletAddress on:icQRCode />
+<div class="stretch">
+	<IcReceiveWalletAddress on:icQRCode />
 
-<div class="mb-6">
-	<Hr />
+	<div class="mb-6">
+		<Hr />
+	</div>
+
+	<Value ref="ethereum-helper-contract" element="div">
+		<svelte:fragment slot="label"
+			>{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
+				$network: $ckEthereumTwinTokenNetwork.name
+			})}</svelte:fragment
+		>
+
+		<p class="text-misty-rose break-normal py-2">
+			{replacePlaceholders(
+				replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
+				{
+					$token: $ckEthereumTwinToken.symbol,
+					$ckToken: $token.symbol,
+					$network: $ckEthereumTwinTokenNetwork.name
+				}
+			)}
+		</p>
+	</Value>
 </div>
 
-<Value ref="ethereum-helper-contract" element="div">
-	<svelte:fragment slot="label"
-		>{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
-			$network: $ckEthereumTwinTokenNetwork.name
-		})}</svelte:fragment
-	>
-
-	<p class="text-misty-rose break-normal py-2">
-		{replacePlaceholders(
-			replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
-			{
-				$token: $ckEthereumTwinToken.symbol,
-				$ckToken: $token.symbol,
-				$network: $ckEthereumTwinTokenNetwork.name
-			}
-		)}
-	</p>
-</Value>
-
-<button class="secondary full center mt-6 mb-8" on:click={() => dispatch('icConvert')}>
+<button class="secondary full center mb-8" on:click={() => dispatch('icConvert')}>
 	<span class="text-dark-slate-blue font-bold"
 		>{replacePlaceholders(
 			replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
@@ -49,6 +51,6 @@
 	>
 </button>
 
-<button class="primary full center text-center mb-6" on:click={modalStore.close}
+<button class="primary full center text-center" on:click={modalStore.close}
 	>{$i18n.core.text.done}</button
 >

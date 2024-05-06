@@ -26,9 +26,11 @@
 		})();
 </script>
 
-<Warning>
-	<p>This may take a few seconds.</p>
-	<p>Please do not close your browser tab.</p>
-</Warning>
+<div class="stretch">
+	<Warning>
+		<p>This may take a few seconds.</p>
+		<p>Please do not close your browser tab.</p>
+	</Warning>
 
-<InProgress {progressStep} {steps} />
+	<InProgress {progressStep} {steps} />
+</div>

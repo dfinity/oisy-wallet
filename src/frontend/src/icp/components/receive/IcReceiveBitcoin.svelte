@@ -90,7 +90,7 @@
 	<Modal on:nnsClose={modalStore.close} disablePointerEvents={true}>
 		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.refresh_status}</svelte:fragment>
 
-		<div>
+		<div class="stretch">
 			<IcReceiveBitcoinProgress bind:receiveProgressStep />
 		</div>
 	</Modal>

@@ -11,22 +11,24 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.receive.text.receive}</svelte:fragment>
 
-	<p class="font-bold text-center">Address:</p>
-	<p class="mb-4 font-normal text-center px-2 max-w-xs mx-auto">
-		<output class="break-all">{$networkAddress ?? ''}</output><Copy
-			inline
-			value={$networkAddress ?? ''}
-			text={$i18n.wallet.text.address_copied}
-		/>
-	</p>
+	<div class="stretch">
+		<p class="font-bold text-center">Address:</p>
+		<p class="mb-4 font-normal text-center px-2 max-w-xs mx-auto">
+			<output class="break-all">{$networkAddress ?? ''}</output><Copy
+				inline
+				value={$networkAddress ?? ''}
+				text={$i18n.wallet.text.address_copied}
+			/>
+		</p>
 
-	<ReceiveQRCode address={$networkAddress ?? ''} />
+		<ReceiveQRCode address={$networkAddress ?? ''} />
 
-	{#if $networkEthereum}
-		<ReceiveMetamask />
-	{/if}
+		{#if $networkEthereum}
+			<ReceiveMetamask />
+		{/if}
+	</div>
 
-	<button class="primary full center text-center mt-12 mb-6" on:click={modalStore.close}
+	<button class="primary full center text-center" on:click={modalStore.close}
 		>{$i18n.core.text.done}</button
 	>
 </Modal>

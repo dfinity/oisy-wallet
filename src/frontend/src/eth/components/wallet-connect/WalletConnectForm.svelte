@@ -34,43 +34,43 @@
 	};
 </script>
 
-<div class="rounded-lg qr-code">
-	{#if renderQRCodeReader}
-		<QRCodeReader on:nnsQRCode={async ({ detail }) => (uri = detail)} on:nnsQRCodeError={error} />
-	{/if}
+<div class="stretch">
+	<div class="rounded-lg qr-code">
+		{#if renderQRCodeReader}
+			<QRCodeReader on:nnsQRCode={async ({ detail }) => (uri = detail)} on:nnsQRCodeError={error} />
+		{/if}
 
-	{#if !renderQRCodeReader}
-		<button
-			type="button"
-			class="wallet-connect inset-center text-white font-bold text-center"
-			style="padding: var(--padding) var(--padding-3x)"
-			on:click={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</button
-		>
-	{/if}
+		{#if !renderQRCodeReader}
+			<button
+				type="button"
+				class="wallet-connect inset-center text-white font-bold text-center"
+				style="padding: var(--padding) var(--padding-3x)"
+				on:click={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</button
+			>
+		{/if}
+	</div>
+
+	<p class="text-center pt-4 pb-2">{$i18n.wallet_connect.text.or_use_uri}</p>
+
+	<Input
+		name="uri"
+		required
+		inputType="text"
+		placeholder="e.g. wc:a281567bb3e4..."
+		bind:value={uri}
+	/>
 </div>
 
-<p class="text-center pt-4 pb-2">{$i18n.wallet_connect.text.or_use_uri}</p>
-
-<Input
-	name="uri"
-	required
-	inputType="text"
-	placeholder="e.g. wc:a281567bb3e4..."
-	bind:value={uri}
-/>
-
-<div class="mt-4">
-	<ButtonGroup>
-		<button
-			class="primary block flex-1"
-			disabled={invalid}
-			class:opacity-10={invalid}
-			on:click={connect}
-		>
-			{$i18n.wallet_connect.text.connect}
-		</button>
-	</ButtonGroup>
-</div>
+<ButtonGroup>
+	<button
+		class="primary block flex-1"
+		disabled={invalid}
+		class:opacity-10={invalid}
+		on:click={connect}
+	>
+		{$i18n.wallet_connect.text.connect}
+	</button>
+</ButtonGroup>
 
 <style lang="scss">
 	.qr-code {
@@ -85,11 +85,6 @@
 
 		width: 100%;
 		max-width: calc(100% - var(--padding-3x));
-
-		@include media.min-width(small) {
-			width: calc(var(--dialog-width) - (4 * var(--padding-8x)));
-			max-width: inherit;
-		}
 
 		@media only screen and (hover: none) and (pointer: coarse) {
 			aspect-ratio: 1 / 1;

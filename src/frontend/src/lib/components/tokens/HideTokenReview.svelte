@@ -11,19 +11,21 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="icon flex flex-col items-center gap-3">
-	<Logo src={$token.icon} size="64px" alt={`${$token.name} logo`} color="off-white" />
+<div class="stretch">
+	<div class="icon flex flex-col items-center gap-3">
+		<Logo src={$token.icon} size="64px" alt={`${$token.name} logo`} color="off-white" />
 
-	<p class="font-bold text-center">{$token.name}</p>
+		<p class="font-bold text-center">{$token.name}</p>
+	</div>
+
+	<p class="break-normal py-10">
+		<Html
+			text={replacePlaceholders($i18n.tokens.hide.info, {
+				$where: $networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title
+			})}
+		/>
+	</p>
 </div>
-
-<p class="break-normal py-10">
-	<Html
-		text={replacePlaceholders($i18n.tokens.hide.info, {
-			$where: $networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title
-		})}
-	/>
-</p>
 
 <ButtonGroup>
 	<button class="secondary block flex-1" on:click={() => dispatch('icCancel')}

@@ -43,7 +43,7 @@
 </script>
 
 {#if nonNullish(proposal) && nonNullish(params)}
-	<div in:fade>
+	<div class="stretch" in:fade>
 		<p class="font-bold">{$i18n.wallet_connect.text.proposer}: {params.proposer.metadata.name}</p>
 		<p>{params.proposer.metadata.description}</p>
 		<a href={params.proposer.metadata.url} rel="external noopener noreferrer" target="_blank"
@@ -77,26 +77,30 @@
 				</article>
 			{/each}
 		{/each}
+	</div>
 
+	<div in:fade>
 		<WalletConnectActions {approve} on:icApprove on:icReject />
 	</div>
 {:else}
-	<div class="flex flex-col items-center justify-center my-2">
-		<div>
-			<Spinner inline />
-		</div>
-		<p>{$i18n.wallet_connect.text.connecting}</p>
-
-		{#if displayCancel}
-			<div class="mt-8" in:fade>
-				<ButtonGroup>
-					<button
-						class="secondary block flex-1"
-						on:click={() => dispatch('icCancel')}
-						disabled={$isBusy || $addressNotCertified}>{$i18n.core.text.cancel}</button
-					>
-				</ButtonGroup>
+	<div class="stretch">
+		<div class="flex flex-col items-center justify-center h-[100%] gap-2 min-h-[30vh] pt-8">
+			<div>
+				<Spinner inline />
 			</div>
-		{/if}
+			<p>{$i18n.wallet_connect.text.connecting}</p>
+		</div>
 	</div>
+
+	{#if displayCancel}
+		<div class="mt-8" in:fade>
+			<ButtonGroup>
+				<button
+					class="secondary block flex-1"
+					on:click={() => dispatch('icCancel')}
+					disabled={$isBusy || $addressNotCertified}>{$i18n.core.text.cancel}</button
+				>
+			</ButtonGroup>
+		</div>
+	{/if}
 {/if}
