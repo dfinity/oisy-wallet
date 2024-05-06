@@ -124,6 +124,10 @@ div.modal {
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
 
+	div.wrapper.dialog div.container-wrapper {
+		margin: var(--padding-1_5x) var(--padding-1_5x) auto;
+	}
+
 	div.container {
 		max-width: 100%;
 
