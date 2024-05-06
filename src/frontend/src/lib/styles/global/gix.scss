@@ -55,7 +55,7 @@
 	--alert-width: calc(100% - var(--padding-8x));
 	--alert-max-width: calc(100vw - var(--padding-4x));
 	--alert-max-height: calc(100vh - var(--padding-4x));
-	--alert-border-radius: var(--border-radius-sm);
+	--alert-border-radius: var(--border-radius-md);
 	--alert-padding-y: var(--padding-4x);
 	--alert-padding-x: var(--padding-2x);
 
@@ -126,6 +126,10 @@ div.modal {
 
 	div.container {
 		max-width: 100%;
+
+		div.content {
+			border-radius: var(--padding-0_75x);
+		}
 	}
 
 	div.content:not(:has(+ div.transition)),
