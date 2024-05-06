@@ -9,20 +9,14 @@
 	export let approve = true;
 </script>
 
-<div class="mt-8">
-	<ButtonGroup>
-		<button class="secondary block flex-1" on:click={() => dispatch('icReject')} disabled={$isBusy}
-			>{$i18n.wallet_connect.text.reject}</button
-		>
+<ButtonGroup>
+	<button class="secondary block flex-1" on:click={() => dispatch('icReject')} disabled={$isBusy}
+		>{$i18n.wallet_connect.text.reject}</button
+	>
 
-		{#if approve}
-			<button
-				class="primary block flex-1"
-				on:click={() => dispatch('icApprove')}
-				disabled={$isBusy}
-			>
-				{$i18n.wallet_connect.text.approve}
-			</button>
-		{/if}
-	</ButtonGroup>
-</div>
+	{#if approve}
+		<button class="primary block flex-1" on:click={() => dispatch('icApprove')} disabled={$isBusy}>
+			{$i18n.wallet_connect.text.approve}
+		</button>
+	{/if}
+</ButtonGroup>

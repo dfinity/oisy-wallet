@@ -133,7 +133,7 @@
 		</Value>
 	</div>
 
-	<button class="primary full center text-center mt-6" on:click={modalStore.close}
+	<button class="primary full center text-center" on:click={modalStore.close}
 		>{$i18n.core.text.close}</button
 	>
 </Modal>

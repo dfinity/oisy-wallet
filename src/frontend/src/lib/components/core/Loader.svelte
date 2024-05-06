@@ -123,7 +123,7 @@
 				{#if confirm}
 					<button
 						on:click={confirmIntroduction}
-						class="primary full center mt-6"
+						class="primary full center"
 						disabled={disabledConfirm}
 						class:opacity-0={disabledConfirm}>{$i18n.init.text.lets_go}</button
 					>
