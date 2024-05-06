@@ -51,12 +51,12 @@ jobs:
         if: ${{ steps.update.outputs.updated == '1' }}
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GIX_BOT_PAT }}
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
           base: main
-          add-paths: ./rust-toolchain.toml
-          commit-message: Update rust version
+          commit-message: 'build: Update Rust version'
           committer: GitHub <noreply@github.com>
           author: gix-bot <gix-bot@users.noreply.github.com>
           branch: bot-rust-update
           delete-branch: true
-          title: 'Update rust version'
+          add-paths: ./rust-toolchain.toml
+          title: 'build: Update Rust version'
