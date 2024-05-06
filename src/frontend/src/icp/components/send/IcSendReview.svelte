@@ -10,6 +10,7 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import { balance } from '$lib/derived/balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -30,19 +31,23 @@
 	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
-<SendData {amount} {destination} token={$token} balance={$balance} {source}>
-	<IcFeeDisplay slot="fee" {networkId} />
-	<IcReviewNetwork {networkId} slot="network" />
-</SendData>
+<div class="stretch">
+	<SendData {amount} {destination} token={$token} balance={$balance} {source}>
+		<IcFeeDisplay slot="fee" {networkId} />
+		<IcReviewNetwork {networkId} slot="network" />
+	</SendData>
+</div>
 
-<div class="flex justify-end gap-1">
-	<button class="secondary" on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button>
+<ButtonGroup>
+	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
+		>{$i18n.core.text.back}</button
+	>
 	<button
-		class="primary"
+		class="primary block flex-1"
 		disabled={invalid}
 		class:opacity-10={invalid}
 		on:click={() => dispatch('icSend')}
 	>
 		{$i18n.send.text.send}
 	</button>
-</div>
+</ButtonGroup>

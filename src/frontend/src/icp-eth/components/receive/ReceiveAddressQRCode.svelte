@@ -9,7 +9,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="mb-6 container">
+<div class="stretch min-h-[50vh]">
 	<p class="font-bold text-center">{$i18n.wallet.text.address}:</p>
 	<p class="mb-4 font-normal text-center px-2">
 		<output class="break-all">{address}</output><Copy
@@ -25,9 +25,3 @@
 		>{$i18n.core.text.back}</button
 	>
 </div>
-
-<style lang="scss">
-	.container {
-		min-height: 470px;
-	}
-</style>

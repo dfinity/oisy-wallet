@@ -4,8 +4,10 @@
 	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
 </script>
 
-<IcReceiveWalletAddress on:icQRCode />
+<div class="stretch">
+	<IcReceiveWalletAddress on:icQRCode />
+</div>
 
-<button class="primary full center text-center mt-8 mb-6" on:click={modalStore.close}
+<button class="primary full center text-center" on:click={modalStore.close}
 	>{$i18n.core.text.done}</button
 >

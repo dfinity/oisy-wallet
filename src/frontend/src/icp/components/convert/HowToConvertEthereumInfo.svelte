@@ -27,115 +27,122 @@
 	const { sendBalance, sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<div>
-	<p>
-		{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.how_to_convert_eth_to_cketh), {
-			$token: $ckEthereumTwinToken.symbol,
-			$ckToken: $token.symbol
-		})}:
-	</p>
-</div>
-
-{#if ckErc20}
-	<div class="bg-light-blue p-4 mt-2 mb-4 rounded-lg">
-		<p class="break-normal font-bold">
-			{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
-				$token: $ckEthereumNativeToken.symbol
-			})}
-		</p>
-
-		<p class="break-normal">
-			{replacePlaceholders($i18n.convert.text.fees_explanation, {
-				$token: $ckEthereumNativeToken.symbol
-			})}
-		</p>
-
-		<p class="break-normal pt-4">
-			{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
-				>{formatToken({
-					value: $ckEthereumNativeTokenBalance ?? BigNumber.from(0n),
-					unitName: $ckEthereumNativeToken.decimals
-				})}
-				{$ckEthereumNativeToken.symbol}</output
-			>
-		</p>
-	</div>
-{/if}
-
-<div class="grid grid-cols-[1fr_auto] gap-x-4 mt-4">
-	<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
-		<span
-			class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
-			>1</span
-		>
-
-		<div class="h-full w-[1.5px] bg-misty-rose"></div>
-	</div>
-
-	<ReceiveAddress
-		labelRef="eth-wallet-address"
-		address={$address ?? ''}
-		qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
-		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
-		on:click={() => dispatch('icQRCode')}
-	>
-		<svelte:fragment slot="title"
-			>{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
-				$token: $ckEthereumTwinToken.symbol
-			})}</svelte:fragment
-		>
-	</ReceiveAddress>
-
-	<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
-		<span
-			class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
-			>2</span
-		>
-
-		<div class="h-full w-[1.5px] bg-misty-rose"></div>
-	</div>
-
+<div class="stretch">
 	<div>
-		<Value element="div">
-			<svelte:fragment slot="label"
-				>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
+		<p>
+			{replacePlaceholders(
+				replaceOisyPlaceholders($i18n.convert.text.how_to_convert_eth_to_cketh),
+				{
+					$token: $ckEthereumTwinToken.symbol,
+					$ckToken: $token.symbol
+				}
+			)}:
+		</p>
+	</div>
+
+	{#if ckErc20}
+		<div class="bg-light-blue p-4 mt-2 mb-4 rounded-lg">
+			<p class="break-normal font-bold">
+				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
+					$token: $ckEthereumNativeToken.symbol
+				})}
+			</p>
+
+			<p class="break-normal">
+				{replacePlaceholders($i18n.convert.text.fees_explanation, {
+					$token: $ckEthereumNativeToken.symbol
+				})}
+			</p>
+
+			<p class="break-normal pt-4">
+				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
+					>{formatToken({
+						value: $ckEthereumNativeTokenBalance ?? BigNumber.from(0n),
+						unitName: $ckEthereumNativeToken.decimals
+					})}
+					{$ckEthereumNativeToken.symbol}</output
+				>
+			</p>
+		</div>
+	{/if}
+
+	<div class="grid grid-cols-[1fr_auto] gap-x-4 mt-4">
+		<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
+			<span
+				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				>1</span
+			>
+
+			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+		</div>
+
+		<ReceiveAddress
+			labelRef="eth-wallet-address"
+			address={$address ?? ''}
+			qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
+			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+			on:click={() => dispatch('icQRCode')}
+		>
+			<svelte:fragment slot="title"
+				>{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
 					$token: $ckEthereumTwinToken.symbol
 				})}</svelte:fragment
 			>
+		</ReceiveAddress>
 
-			<p class="mb-6">
-				{formatToken({
-					value: $sendBalance ?? BigNumber.from(0n),
-					unitName: $sendTokenDecimals,
-					displayDecimals: $sendTokenDecimals
-				})}
-				{$sendToken.symbol}
-			</p>
-		</Value>
-	</div>
-
-	<span
-		class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
-		>3</span
-	>
-
-	<div>
-		<Value element="div">
-			<svelte:fragment slot="label"
-				>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
-					$token: $ckEthereumTwinToken.symbol,
-					$ckToken: $token.symbol
-				})}</svelte:fragment
+		<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
+			<span
+				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				>2</span
 			>
 
-			<button class="secondary full center mt-3 mb-4" on:click={() => dispatch('icConvert')}>
-				<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
-			</button>
-		</Value>
+			<div class="h-full w-[1.5px] bg-misty-rose"></div>
+		</div>
+
+		<div>
+			<Value element="div">
+				<svelte:fragment slot="label"
+					>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
+						$token: $ckEthereumTwinToken.symbol
+					})}</svelte:fragment
+				>
+
+				<p class="mb-6">
+					{formatToken({
+						value: $sendBalance ?? BigNumber.from(0n),
+						unitName: $sendTokenDecimals,
+						displayDecimals: $sendTokenDecimals
+					})}
+					{$sendToken.symbol}
+				</p>
+			</Value>
+		</div>
+
+		<div class="flex justify-center">
+			<span
+				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				>3</span
+			>
+		</div>
+
+		<div>
+			<Value element="div">
+				<svelte:fragment slot="label"
+					>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
+						$token: $ckEthereumTwinToken.symbol,
+						$ckToken: $token.symbol
+					})}</svelte:fragment
+				>
+
+				<button class="secondary full center mt-3 mb-4" on:click={() => dispatch('icConvert')}>
+					<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
+				</button>
+			</Value>
+		</div>
 	</div>
 </div>
 
-<div class="mt-8 mb-6">
+<div>
 	{#if formCancelAction === 'back'}
 		<button
 			type="button"
