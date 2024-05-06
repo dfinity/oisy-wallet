@@ -128,8 +128,17 @@ div.modal {
 		max-width: 100%;
 	}
 
-	div.content > div:first-child {
-		padding: var(--padding-1_5x) 0 0;
+	div.content:not(:has(+ div.transition)),
+	div.transition:not(:has(+ form)),
+	div.transition > form {
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
+
+		> div.stretch {
+			flex: 1;
+			margin: 0 0 var(--padding-3x);
+		}
 	}
 }
 

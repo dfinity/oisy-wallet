@@ -108,20 +108,22 @@
 	{#if progressModal}
 		<div in:fade={{ delay: 0, duration: 250 }}>
 			<Modal>
-				<div
-					style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
-				>
-					<Img width="100%" src={banner} />
+				<div class="stretch">
+					<div
+						style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
+					>
+						<Img width="100%" src={banner} />
+					</div>
+
+					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
+
+					<InProgress {progressStep} {steps} />
 				</div>
-
-				<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
-
-				<InProgress {progressStep} {steps} />
 
 				{#if confirm}
 					<button
 						on:click={confirmIntroduction}
-						class="primary full center mt-6"
+						class="primary full center"
 						disabled={disabledConfirm}
 						class:opacity-0={disabledConfirm}>{$i18n.init.text.lets_go}</button
 					>

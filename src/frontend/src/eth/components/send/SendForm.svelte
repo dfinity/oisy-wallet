@@ -36,17 +36,19 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	{#if destinationEditable}
-		<SendDestination bind:destination bind:invalidDestination />
+	<div class="stretch">
+		{#if destinationEditable}
+			<SendDestination bind:destination bind:invalidDestination />
 
-		<SendNetworkICP {destination} {sourceNetwork} bind:network />
-	{/if}
+			<SendNetworkICP {destination} {sourceNetwork} bind:network />
+		{/if}
 
-	<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
+		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-	<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
+		<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
 
-	<FeeDisplay />
+		<FeeDisplay />
+	</div>
 
 	<ButtonGroup>
 		<slot name="cancel" />

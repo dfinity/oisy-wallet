@@ -44,7 +44,7 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
-	<div>
+	<div class="stretch">
 		<Value ref="id" element="div">
 			<svelte:fragment slot="label">{$i18n.transaction.text.id}</svelte:fragment>
 			<output>{id}</output><Copy
@@ -144,9 +144,9 @@
 				</output>
 			</Value>
 		{/if}
-
-		<button class="primary full center text-center my-3" on:click={modalStore.close}
-			>{$i18n.core.text.close}</button
-		>
 	</div>
+
+	<button class="primary full center text-center" on:click={modalStore.close}
+		>{$i18n.core.text.close}</button
+	>
 </Modal>
