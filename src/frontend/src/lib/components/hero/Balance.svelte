@@ -12,11 +12,12 @@
 	>
 		{#if nonNullish($balance) && !$balanceZero}
 			<span class="amount font-bold"><Amount amount={$balance} /></span>
-			{#if $erc20TokensInitialized}
-				<span class="opacity-100">{$tokenSymbol}</span>
-			{/if}
 		{:else}
 			<span class="amount font-bold" class:animate-pulse={isNullish($balance)}>0.00</span>
+		{/if}
+
+		{#if $erc20TokensInitialized}
+			<span class="opacity-100">{$tokenSymbol}</span>
 		{/if}
 	</output>
 </span>
