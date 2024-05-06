@@ -60,3 +60,5 @@ jobs:
           delete-branch: true
           add-paths: ./rust-toolchain.toml
           title: 'build: Update Rust version'
+          body: |
+            A new Rust version available.
