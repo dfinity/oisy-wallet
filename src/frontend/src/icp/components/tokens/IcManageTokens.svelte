@@ -2,7 +2,6 @@
 	import { IconClose, Input } from '@dfinity/gix-components';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import { writable } from 'svelte/store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -51,21 +50,21 @@
 		)
 	].sort(sortIcTokens);
 
-	const filterStore = writable<string>('');
-	const updateFilter = () => filterStore.set(filter);
+	let filterTokens = "";
+	const updateFilter = () => (filterTokens = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
 	let filteredTokens: IcrcCustomToken[] = [];
-	$: filteredTokens = isNullishOrEmpty($filterStore)
+	$: filteredTokens = isNullishOrEmpty(filterTokens)
 		? allIcrcTokens
 		: allIcrcTokens.filter(
 				({ name, symbol, alternativeName }) =>
-					name.toLowerCase().includes($filterStore.toLowerCase()) ||
-					symbol.toLowerCase().includes($filterStore.toLowerCase()) ||
-					(alternativeName ?? '').toLowerCase().includes($filterStore.toLowerCase())
+					name.toLowerCase().includes(filterTokens.toLowerCase()) ||
+					symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
+					(alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase())
 			);
 
 	let tokens: IcrcCustomToken[] = [];
@@ -108,7 +107,6 @@
 <Input
 	name="filter"
 	inputType="text"
-	required
 	bind:value={filter}
 	placeholder={$i18n.tokens.placeholder.search_token}
 	spellcheck={false}
