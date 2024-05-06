@@ -4,6 +4,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';
@@ -14,8 +15,19 @@
 	const dispatch = createEventDispatcher();
 </script>
 
+<p class="text-misty-rose mb-2">{$i18n.tokens.import.text.info}</p>
+
+<p class="text-blue font-bold">
+	<ExternalLink
+		href="https://github.com/dfinity/oisy-wallet/blob/main/HOW-TO.md#custom-icrc-token-integration"
+		ariaLabel={$i18n.tokens.import.text.open_github_howto}
+	>
+		{$i18n.tokens.import.text.github_howto}
+	</ExternalLink>
+</p>
+
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<div class="stretch">
+	<div class="stretch pt-8">
 		<label for="ledgerCanisterId" class="font-bold px-4.5"
 			>{$i18n.tokens.import.text.ledger_canister_id}:</label
 		>
