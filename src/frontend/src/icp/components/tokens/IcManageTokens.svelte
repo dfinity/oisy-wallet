@@ -106,11 +106,11 @@
 
 <div class="mb-4">
 	<Input
-			name="filter"
-			inputType="text"
-			bind:value={filter}
-			placeholder={$i18n.tokens.placeholder.search_token}
-			spellcheck={false}
+		name="filter"
+		inputType="text"
+		bind:value={filter}
+		placeholder={$i18n.tokens.placeholder.search_token}
+		spellcheck={false}
 	>
 		<svelte:fragment slot="inner-end">
 			{#if noTokensMatch}
