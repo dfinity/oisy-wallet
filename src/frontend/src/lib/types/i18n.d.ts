@@ -265,6 +265,9 @@ interface I18nTokens {
 			minter_canister_id_copied: string;
 			verifying: string;
 			add_the_token: string;
+			info: string;
+			github_howto: string;
+			open_github_howto: string;
 		};
 		error: {
 			loading_metadata: string;

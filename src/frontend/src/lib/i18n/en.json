@@ -290,7 +290,10 @@
 				"index_canister_id_copied": "Index Canister ID copied to clipboard.",
 				"minter_canister_id_copied": "Minter Canister ID copied to clipboard.",
 				"verifying": "Verifying token details...",
-				"add_the_token": "Add the token"
+				"add_the_token": "Add the token",
+				"info": "To display custom token information correctly, Oisy Wallet requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
+				"github_howto": "Read how ICRC token Integration works",
+				"open_github_howto": "Open information about ICRC token integration on GitHub"
 			},
 			"error": {
 				"loading_metadata": "Error while loading the metadata of the token.",
