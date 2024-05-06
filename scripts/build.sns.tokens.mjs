@@ -125,90 +125,91 @@ const assertIndexCanister = async (indexCanisterId) => {
 		});
 
 		return balance >= 0n;
-	} catch (_err) {
+	} catch (err) {
+		if (err.response?.body?.reject_message?.includes('out of cycles')) {
+			throw new Error(err.response.body.reject_message);
+		}
+
 		return false;
 	}
 };
 
 export const findSnses = async () => {
-	try {
-		const data = await querySnsAggregator();
+	const data = await querySnsAggregator();
 
-		// 3 === Committed
-		const snses = data.filter(
+	// 3 === Committed
+	const snses = data.filter(
+		({
+			swap_state: {
+				swap: { lifecycle }
+			}
+		}) => lifecycle === 3
+	);
+
+	const { tokens, icons } = snses
+		.map(
 			({
-				swap_state: {
-					swap: { lifecycle }
+				canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
+				icrc1_metadata,
+				meta: { name: alternativeName, url }
+			}) => ({
+				ledgerCanisterId: ledger_canister_id,
+				indexCanisterId: index_canister_id,
+				rootCanisterId: root_canister_id,
+				metadata: {
+					...mapOptionalToken(icrc1_metadata),
+					alternativeName,
+					url
 				}
-			}) => lifecycle === 3
-		);
-
-		const { tokens, icons } = snses
-			.map(
-				({
-					canister_ids: { ledger_canister_id, index_canister_id, root_canister_id },
-					icrc1_metadata,
-					meta: { name: alternativeName, url }
-				}) => ({
-					ledgerCanisterId: ledger_canister_id,
-					indexCanisterId: index_canister_id,
-					rootCanisterId: root_canister_id,
-					metadata: {
-						...mapOptionalToken(icrc1_metadata),
-						alternativeName,
-						url
+			})
+		)
+		.filter(({ metadata }) => nonNullish(metadata))
+		.reduce(
+			(
+				{ tokens, icons },
+				{ metadata: { icon, ...metadata }, ledgerCanisterId, rootCanisterId, ...rest }
+			) => ({
+				tokens: [
+					...tokens,
+					{
+						ledgerCanisterId,
+						rootCanisterId,
+						...rest,
+						metadata
 					}
-				})
-			)
-			.filter(({ metadata }) => nonNullish(metadata))
-			.reduce(
-				(
-					{ tokens, icons },
-					{ metadata: { icon, ...metadata }, ledgerCanisterId, rootCanisterId, ...rest }
-				) => ({
-					tokens: [
-						...tokens,
-						{
-							ledgerCanisterId,
-							rootCanisterId,
-							...rest,
-							metadata
-						}
-					],
-					icons: [
-						...icons,
-						{
-							ledgerCanisterId,
-							rootCanisterId,
-							icon
-						}
-					]
-				}),
-				{ tokens: [], icons: [] }
-			);
-
-		const indexCanisterVersion = async (token) => {
-			const { indexCanisterId } = token;
-
-			const valid = await assertIndexCanister(indexCanisterId);
-
-			return {
-				...token,
-				indexCanisterVersion: valid ? 'up-to-date' : 'outdated'
-			};
-		};
-
-		const enhancedTokens = await Promise.all(tokens.map(indexCanisterVersion));
-
-		writeFileSync(
-			join(DATA_FOLDER, 'tokens.sns.json'),
-			JSON.stringify(enhancedTokens, jsonReplacer)
+				],
+				icons: [
+					...icons,
+					{
+						ledgerCanisterId,
+						rootCanisterId,
+						icon
+					}
+				]
+			}),
+			{ tokens: [], icons: [] }
 		);
 
-		await saveLogos(icons);
-	} catch (err) {
-		throw new Error('Error querying Snses', err);
-	}
+	const indexCanisterVersion = async (token) => {
+		const { indexCanisterId } = token;
+
+		const valid = await assertIndexCanister(indexCanisterId);
+
+		return {
+			...token,
+			indexCanisterVersion: valid ? 'up-to-date' : 'outdated'
+		};
+	};
+
+	const enhancedTokens = await Promise.all(tokens.map(indexCanisterVersion));
+
+	writeFileSync(join(DATA_FOLDER, 'tokens.sns.json'), JSON.stringify(enhancedTokens, jsonReplacer));
+
+	await saveLogos(icons);
 };
 
-await findSnses();
+try {
+	await findSnses();
+} catch (err) {
+	console.error(err);
+}
