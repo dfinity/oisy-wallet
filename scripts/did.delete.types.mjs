@@ -2,7 +2,7 @@ import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const { canisters } = JSON.parse(
-	(await readFile(join(process.cwd(), 'dfx.json'))).toString('utf-8')
+	(await readFile(join(process.cwd(), 'dfx.json'))).toString('utf8')
 );
 
 const deleteFolder = async (canister) => {

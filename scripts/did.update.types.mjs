@@ -41,7 +41,7 @@ const cleanFactory = async ({ dest = `./src/declarations` }) => {
 					return;
 				}
 
-				const content = await readFile(factoryPath, 'utf-8');
+				const content = await readFile(factoryPath, 'utf8');
 				const cleanFactory = content.replace(
 					/export const idlFactory = \({ IDL }\) => {/g,
 					`// @ts-ignore
@@ -53,7 +53,7 @@ export const idlFactory = ({ IDL }) => {`
 export const init = ({ IDL }) => {`
 				);
 
-				await writeFile(factoryPath, cleanInit, 'utf-8');
+				await writeFile(factoryPath, cleanInit, 'utf8');
 
 				resolve();
 			})

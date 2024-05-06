@@ -13,7 +13,7 @@ const replaceEnv = ({ html, pattern, value }) => {
 };
 
 const parseMetadata = (targetFile) => {
-	let content = readFileSync(targetFile, 'utf-8');
+	let content = readFileSync(targetFile, 'utf8');
 
 	const METADATA_KEYS = [
 		'VITE_OISY_NAME',
@@ -39,7 +39,7 @@ const parseMetadata = (targetFile) => {
 };
 
 const parseUrl = (filePath) => {
-	let content = readFileSync(filePath, 'utf-8');
+	let content = readFileSync(filePath, 'utf8');
 
 	content = replaceEnv({
 		html: content,
@@ -68,7 +68,7 @@ const removeMetaRobots = (targetFile) => {
 		return;
 	}
 
-	let content = readFileSync(targetFile, 'utf-8');
+	let content = readFileSync(targetFile, 'utf8');
 
 	const update = content.replace(/<meta\s+name="robots"\s+content="noindex"\s*\/>/, '');
 
