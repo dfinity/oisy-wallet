@@ -50,7 +50,7 @@
 		)
 	].sort(sortIcTokens);
 
-	let filterTokens = "";
+	let filterTokens = '';
 	const updateFilter = () => (filterTokens = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
 
