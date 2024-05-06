@@ -40,7 +40,7 @@
 			{/if}
 
 			{#if nonNullish($busy.msg)}
-				<p class="text-off-white text-sm">{$busy.msg}</p>
+				<p class="text-off-white text-sm text-center">{$busy.msg}</p>
 			{/if}
 
 			{#if $busy.close}
