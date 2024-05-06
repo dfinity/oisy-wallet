@@ -74,7 +74,7 @@ checksum = "f1fdabc7756949593fe60f30ec81974b613357de856987752631dea1e3394c80"
 
 [[package]]
 name = "backend"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "candid",
  "ethers-core",
@@ -1833,7 +1833,7 @@ dependencies = [
 
 [[package]]
 name = "shared"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "candid",
  "ic-cdk",
