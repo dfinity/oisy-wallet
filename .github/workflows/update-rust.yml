@@ -1,6 +1,6 @@
 # A GitHub Actions workflow that regularly checks for new Rust toolchain release
 # and creates a PR on new versions.
-name: Rust Update
+name: Update Rust
 
 on:
   schedule:
