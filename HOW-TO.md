@@ -4,7 +4,7 @@ This document provides valuable information regarding Oisy Wallet integration an
 
 ## SNS Token Support
 
-The SNS aggregator is used to pre-populate the list of available SNSes. This information is not fetched at runtime because it does not change frequently. Moreover, this approach is best suited for a smoother UI/UX experience.
+The [SNS aggregator](https://3r4gx-wqaaa-aaaaq-aaaia-cai.icp0.io/) is used to pre-populate the list of available SNSes. This information is not fetched at runtime because it does not change frequently. Moreover, this approach is best suited for a smoother UI/UX experience.
 
 > Note: Some SNSes may not be enabled due to their related Index canister version being outdated and therefore not compatible with Oisy Wallet. If you wish to use these, contact the related project to propose an upgrade to their canister.
 
