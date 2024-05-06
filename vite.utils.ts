@@ -15,7 +15,7 @@ const readIds = ({
 			local?: string;
 		};
 
-		const config: Record<string, Details> = JSON.parse(readFileSync(filePath, 'utf-8'));
+		const config: Record<string, Details> = JSON.parse(readFileSync(filePath, 'utf8'));
 
 		return Object.entries(config).reduce((acc, current: [string, Details]) => {
 			const [canisterName, canisterDetails] = current;
@@ -83,7 +83,7 @@ const readRemoteCanisterIds = ({ prefix }: { prefix?: string }): Record<string, 
 			canisters: Record<string, Details>;
 		};
 
-		const { canisters }: DfxJson = JSON.parse(readFileSync(dfxJsonFile, 'utf-8'));
+		const { canisters }: DfxJson = JSON.parse(readFileSync(dfxJsonFile, 'utf8'));
 
 		return Object.entries(canisters).reduce((acc, current: [string, Details]) => {
 			const [canisterName, canisterDetails] = current;

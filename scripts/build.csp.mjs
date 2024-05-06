@@ -94,7 +94,7 @@ const injectLinkPreloader = (indexHtml) => {
  * 3. we use our custom script loader to load the main.js script
  */
 const extractStartScript = (htmlFile) => {
-	const indexHtml = readFileSync(htmlFile, 'utf-8');
+	const indexHtml = readFileSync(htmlFile, 'utf8');
 
 	const svelteKitStartScript = /(<script>)([\s\S]*?)(<\/script>)/gm;
 
@@ -114,7 +114,7 @@ const extractStartScript = (htmlFile) => {
 		.replaceAll('document.currentScript.parentElement', "document.querySelector('body')")
 		.replaceAll(/__sveltekit_(.*)\s=/g, 'window.$&');
 
-	writeFileSync(join(folderPath, 'main.js'), moduleScript, 'utf-8');
+	writeFileSync(join(folderPath, 'main.js'), moduleScript, 'utf8');
 
 	// 3. Replace original SvelteKit script tag content with empty
 	return indexHtml.replace(svelteKitStartScript, '$1$3');
