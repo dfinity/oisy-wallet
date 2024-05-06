@@ -47,7 +47,7 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
-	<div>
+	<div class="stretch">
 		{#if nonNullish(hash)}
 			<Value ref="hash">
 				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
@@ -131,9 +131,9 @@
 				{$token.symbol}
 			</output>
 		</Value>
-
-		<button class="primary full center text-center my-3" on:click={modalStore.close}
-			>{$i18n.core.text.close}</button
-		>
 	</div>
+
+	<button class="primary full center text-center mt-6" on:click={modalStore.close}
+		>{$i18n.core.text.close}</button
+	>
 </Modal>

@@ -128,8 +128,14 @@ div.modal {
 		max-width: 100%;
 	}
 
-	div.content > div:first-child {
-		padding: var(--padding-1_5x) 0 0;
+	div.content {
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
+
+		> div.stretch {
+			flex: 1;
+		}
 	}
 }
 
