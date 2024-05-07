@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { copyText } from '$lib/utils/share.utils';
-	import IconCopy from "$lib/components/icons/IconCopy.svelte";
+	import IconCopy from '$lib/components/icons/IconCopy.svelte';
 
 	export let value: string;
 	export let text: string;
