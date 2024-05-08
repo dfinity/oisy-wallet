@@ -7,13 +7,13 @@
 <svg
 	width={size}
 	height={size}
+	class={styleClass}
 	viewBox="0 0 24 24"
 	fill="none"
 	xmlns="http://www.w3.org/2000/svg"
-	class={styleClass}
 >
 	<path
-		d="M6.68629 9.65686L12.3431 15.3137M12.3431 15.3137L18 9.65686M12.3431 15.3137V4.00001"
+		d="M6.68629 9.65685L12.3431 15.3137M12.3431 15.3137L18 9.65685M12.3431 15.3137V4"
 		stroke="currentColor"
 		stroke-width="2"
 		stroke-linecap="round"
