@@ -1,11 +1,7 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
-	import { slide } from 'svelte/transition';
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { invalidAmount } from '$lib/utils/input.utils';
+	import { isNullish } from '@dfinity/utils';
 	import { token, tokenDecimals, tokenId, tokenSymbol } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
-	import { parseToken } from '$lib/utils/parse.utils';
 	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { NetworkId } from '$lib/types/network';
@@ -19,6 +15,8 @@
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
+	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
+	import { invalidAmount } from '$lib/utils/input.utils';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -27,21 +25,16 @@
 	let fee: bigint | undefined;
 	$: fee = ($token as IcToken).fee;
 
-	const validate = () => {
+	const validate = (value: BigNumber) => {
 		if (invalidAmount(amount)) {
-			amountError = undefined;
 			return;
 		}
 
 		if (isNullish(fee)) {
-			amountError = undefined;
 			return;
 		}
 
-		const value = parseToken({
-			value: `${amount}`,
-			unitName: $tokenDecimals
-		});
+		amountError = undefined;
 
 		if (isNetworkIdBTC(networkId)) {
 			amountError = assertCkBTCUserInputAmount({
@@ -50,62 +43,42 @@
 				tokenDecimals: $tokenDecimals,
 				i18n: $i18n
 			});
-
-			if (nonNullish(amountError)) {
-				return;
+		} else if (isNetworkIdEthereum(networkId)) {
+			if ($tokenCkEthLedger) {
+				amountError = assertCkETHMinWithdrawalAmount({
+					amount: value,
+					tokenDecimals: $tokenDecimals,
+					tokenSymbol: $tokenSymbol,
+					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
+					i18n: $i18n
+				});
+			} else {
+				amountError = assertCkETHMinFee({
+					amount: value,
+					tokenSymbol: $tokenSymbol,
+					fee,
+					i18n: $i18n
+				});
+			}
+		} else {
+			const total = value.add(fee);
+			if (total.gt($balance ?? BigNumber.from(0n))) {
+				amountError = new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
 		}
 
-		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
-			amountError = assertCkETHMinWithdrawalAmount({
-				amount: value,
-				tokenDecimals: $tokenDecimals,
-				tokenSymbol: $tokenSymbol,
-				minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-				i18n: $i18n
-			});
-
-			if (nonNullish(amountError)) {
-				return;
-			}
-		}
-
-		if (isNetworkIdEthereum(networkId)) {
-			amountError = assertCkETHMinFee({
-				amount: value,
-				tokenSymbol: $tokenSymbol,
-				fee,
-				i18n: $i18n
-			});
-			return;
-		}
-
-		const total = value.add(fee);
-
-		if (total.gt($balance ?? BigNumber.from(0n))) {
-			amountError = new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
-			return;
-		}
-
-		amountError = undefined;
+		return amountError;
 	};
 
-	const debounceValidate = debounce(validate);
+	const customValidations = [validate];
 
-	$: amount, fee, $ckBtcMinterInfoStore, $ckEthMinterInfoStore, debounceValidate();
+	let reactivityVariables: (unknown | undefined)[];
+	$: reactivityVariables = [fee, $ckBtcMinterInfoStore, $ckEthMinterInfoStore];
 </script>
 
-<label for="amount" class="font-bold px-4.5">{$i18n.core.text.amount}:</label>
-<Input
-	name="amount"
-	inputType="currency"
-	required
-	bind:value={amount}
-	decimals={$tokenDecimals}
-	placeholder={$i18n.core.text.amount}
-	spellcheck={false}
+<SendInputAmount
+	bind:amount
+	tokenDecimals={$tokenDecimals}
+	{customValidations}
+	{reactivityVariables}
 />
-
-{#if nonNullish(amountError)}
-	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">{amountError.message}</p>
-{/if}

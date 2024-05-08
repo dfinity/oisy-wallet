@@ -81,7 +81,7 @@
 		"ckbtc_kyt": {
 			"type": "custom",
 			"candid": "target/ic/ckbtc_kyt.did",
-			"wasm": "target/ic/ckbtc_kyt.wasm",
+			"wasm": "target/iyc/ckbtc_kyt.wasm",
 			"remote": {
 				"id": {
 					"ic": "pjihx-aaaaa-aaaar-qaaka-cai",
