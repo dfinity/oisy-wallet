@@ -73,6 +73,8 @@ export const initWalletConnect = async ({
 	const approveSession = async (proposal: Web3WalletTypes.SessionProposal) => {
 		const { params } = proposal;
 
+		console.log()
+
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
 			supportedNamespaces: {
