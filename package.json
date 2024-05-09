@@ -42,7 +42,7 @@
 		"@dfinity/ledger-icrc": "^2.3.0",
 		"@dfinity/principal": "^1.2.1",
 		"@dfinity/utils": "^2.2.0",
-		"@junobuild/analytics": "^0.0.21",
+		"@junobuild/analytics": "^0.0.22",
 		"@metamask/detect-provider": "^2.0.0",
 		"@walletconnect/web3wallet": "^1.11.1",
 		"alchemy-sdk": "^3.2.1",
