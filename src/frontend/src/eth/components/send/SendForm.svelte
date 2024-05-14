@@ -12,16 +12,17 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import type { Token } from '$lib/types/token';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { BigNumber } from '@ethersproject/bignumber';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
 	export let destinationEditable = true;
 	export let amount: number | undefined = undefined;
-	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
+
+	let fee: BigNumber | undefined | null = undefined;
 
 	let insufficientFunds: boolean;
 	let invalidDestination: boolean;
@@ -43,11 +44,11 @@
 			<SendNetworkICP {destination} {sourceNetwork} bind:network />
 		{/if}
 
-		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
+		<SendAmount bind:amount {fee} bind:insufficientFunds />
 
 		<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
 
-		<FeeDisplay />
+		<FeeDisplay bind:fee />
 	</div>
 
 	<ButtonGroup>
