@@ -11,7 +11,8 @@
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimals": "Decimals",
-			"amount": "Amount"
+			"amount": "Amount",
+			"max": "Max"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
