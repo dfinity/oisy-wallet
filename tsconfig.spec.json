@@ -1,20 +1,38 @@
 {
-	"extends": "./tsconfig.json",
+	"extends": "./.svelte-kit/tsconfig.json",
 	"compilerOptions": {
-		"types": ["vitest/globals"]
+		"allowJs": true,
+		"checkJs": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": false,
+		"allowArbitraryExtensions": true,
+		"baseUrl": "./src/frontend/",
+		"paths": {
+			"$lib": ["src/lib"],
+			"$lib/*": ["src/lib/*"],
+			"$routes": ["src/routes"],
+			"$routes/*": ["src/routes/*"],
+			"$tests": ["src/tests"],
+			"$tests/*": ["src/tests/*"]
+		},
+		"types": ["vitest/globals", "node", "@testing-library/jest-dom"]
 	},
 	"exclude": [],
 	"include": [
-		"ambient.d.ts",
-		"./types/**/$types.d.ts",
+		".svelte-kit/ambient.d.ts",
 		"./vite.config.ts",
+		"./vitest.config.ts",
+		"./vitest.setup.ts",
 		"./src/**/*.js",
 		"./src/**/*.ts",
 		"./src/**/*.svelte",
 		"./tests/**/*.js",
 		"./tests/**/*.ts",
 		"./tests/**/*.svelte",
-		"./vitest.config.ts",
-		"./vitest.setup.ts"
+		"./src/frontend/src/tests/**/*"
 	]
 }

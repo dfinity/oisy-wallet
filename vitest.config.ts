@@ -39,9 +39,11 @@ export default defineConfig(
 			]
 		},
 		test: {
+			environment: 'jsdom',
 			globals: true,
 			watch: false,
-			silent: true
+			silent: true,
+			setupFiles: ['./vitest.setup.ts']
 		}
 	})
 );
