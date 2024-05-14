@@ -15,6 +15,7 @@ interface I18nCore {
 		symbol: string;
 		decimals: string;
 		amount: string;
+		max: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string };
