@@ -37,7 +37,7 @@
 			return;
 		}
 
-		clearInterval(timer);
+		clearTimeout(timer);
 		timer = undefined;
 	});
 </script>

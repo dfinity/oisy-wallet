@@ -39,7 +39,7 @@
 			return;
 		}
 
-		clearInterval(timer);
+		clearTimeout(timer);
 	});
 </script>
 
