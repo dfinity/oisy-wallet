@@ -52,7 +52,9 @@
 		try {
 			const params: GetFeeData = {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				address: mapAddressStartsWith0x(destination !== '' ? destination : $address!)
+				to: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				from: mapAddressStartsWith0x($address!)
 			};
 
 			const { getFeeData } = infuraProviders($sendToken.network.id);
@@ -73,10 +75,9 @@
 
 			const erc20GasFeeParams = {
 				contract: $sendToken as Erc20Token,
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				address: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
 				amount: parseToken({ value: `${amount ?? '1'}` }),
-				sourceNetwork
+				sourceNetwork,
+				...params
 			};
 
 			// TODO: use amount + 10% to estimate fee dynamically to have some buffer

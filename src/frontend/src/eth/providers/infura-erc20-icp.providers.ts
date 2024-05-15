@@ -26,15 +26,17 @@ export class InfuraErc20IcpProvider implements Erc20Provider {
 
 	getFeeData = ({
 		contract: { address: contractAddress },
-		address,
+		from,
+		to,
 		amount
 	}: {
 		contract: Erc20ContractAddress;
-		address: ETH_ADDRESS;
+		to: ETH_ADDRESS;
+		from: ETH_ADDRESS;
 		amount: BigNumber;
 	}): Promise<BigNumber> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, this.provider);
-		return erc20Contract.estimateGas.burnToAccountId(amount, address);
+		return erc20Contract.estimateGas.burnToAccountId(amount, to, { from });
 	};
 
 	/**

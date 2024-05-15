@@ -29,14 +29,16 @@ export class InfuraCkETHProvider implements Erc20Provider {
 
 	getFeeData = ({
 		contract: { address: contractAddress },
-		address
+		from,
+		to
 	}: {
 		contract: Erc20ContractAddress;
-		address: ETH_ADDRESS;
+		from: ETH_ADDRESS;
+		to: ETH_ADDRESS;
 		amount: BigNumber;
 	}): Promise<BigNumber> => {
 		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
-		return ckEthContract.estimateGas.deposit(address);
+		return ckEthContract.estimateGas.deposit(to, { from });
 	};
 
 	populateTransaction = ({

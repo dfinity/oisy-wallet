@@ -14,18 +14,17 @@ import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export interface GetFeeData {
-	address: ETH_ADDRESS;
+	from: ETH_ADDRESS;
+	to: ETH_ADDRESS;
 }
 
 export const getEthFeeData = async ({
-	address,
+	to,
 	helperContractAddress
 }: GetFeeData & {
 	helperContractAddress: OptionAddress;
 }): Promise<BigNumber> => {
-	if (
-		isDestinationContractAddress({ destination: address, contractAddress: helperContractAddress })
-	) {
+	if (isDestinationContractAddress({ destination: to, contractAddress: helperContractAddress })) {
 		return BigNumber.from(CKETH_FEE);
 	}
 
@@ -60,7 +59,7 @@ export const getErc20FeeData = async ({
 
 export const getCkErc20FeeData = async ({
 	erc20HelperContractAddress,
-	address,
+	to,
 	...rest
 }: GetFeeData & {
 	contract: Erc20ContractAddress;
@@ -69,13 +68,13 @@ export const getCkErc20FeeData = async ({
 	erc20HelperContractAddress: OptionAddress;
 }): Promise<BigNumber> => {
 	const estimateGasForApprove = await getErc20FeeData({
-		address,
+		to,
 		targetNetwork: undefined,
 		...rest
 	});
 
 	const targetCkErc20Helper = isDestinationContractAddress({
-		destination: address,
+		destination: to,
 		contractAddress: erc20HelperContractAddress
 	});
 

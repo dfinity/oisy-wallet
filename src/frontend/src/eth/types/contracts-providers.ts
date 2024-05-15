@@ -23,7 +23,8 @@ export interface Erc20Provider {
 
 	getFeeData(params: {
 		contract: Erc20ContractAddress;
-		address: ETH_ADDRESS;
+		from: ETH_ADDRESS;
+		to: ETH_ADDRESS;
 		amount: BigNumber;
 	}): Promise<BigNumber>;
 }
