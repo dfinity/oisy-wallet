@@ -137,7 +137,7 @@
 		>
 	</button>
 {:else}
-	<div class="container stretch md:max-h-96 pr-2 mb-1 pt-1 overflow-y-auto">
+	<div class="container md:max-h-96 pr-2 pt-1 overflow-y-auto">
 		{#each tokens as token (token.symbol)}
 			<Card>
 				{token.name}
