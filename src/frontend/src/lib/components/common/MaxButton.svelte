@@ -6,6 +6,7 @@
 
 <button
 	data-tid="max-button"
+	type="button"
 	on:click|preventDefault
 	class="text-blue hover:text-dark-blue active:text-dark-blue font-medium"
 	{disabled}
