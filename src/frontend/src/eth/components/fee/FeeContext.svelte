@@ -28,6 +28,7 @@
 	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { Token } from '$lib/types/token';
+	import { BigNumber } from '@ethersproject/bignumber';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -74,11 +75,12 @@
 			}
 
 			// As recommended by the cross-chain team, we add 10% to the amount to calculate the fee, providing some buffer for when the transaction is effectively executed.
-			const amountForFee = parseToken({ value: `${amount ?? '1'}` }).mul(0.1);
+			const baseAmount = parseToken({ value: `${amount ?? '1'}` });
+			const additionalAmount = baseAmount.mul(BigNumber.from('1')).div(BigNumber.from('10'));
 
 			const erc20GasFeeParams = {
 				contract: $sendToken as Erc20Token,
-				amount: amountForFee,
+				amount: baseAmount.add(additionalAmount),
 				sourceNetwork,
 				...params
 			};
