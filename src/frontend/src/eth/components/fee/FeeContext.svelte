@@ -80,8 +80,6 @@
 				...params
 			};
 
-			// TODO: use amount + 10% to estimate fee dynamically to have some buffer
-
 			if (isSupportedErc20TwinTokenId($sendTokenId)) {
 				feeStore.setFee({
 					...(await getFeeData()),
