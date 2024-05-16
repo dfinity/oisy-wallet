@@ -73,14 +73,15 @@
 				return;
 			}
 
+			// As recommended by the cross-chain team, we add 10% to the amount to calculate the fee, providing some buffer for when the transaction is effectively executed.
+			const amountForFee = parseToken({ value: `${amount ?? '1'}` }).mul(0.1);
+
 			const erc20GasFeeParams = {
 				contract: $sendToken as Erc20Token,
-				amount: parseToken({ value: `${amount ?? '1'}` }),
+				amount: amountForFee,
 				sourceNetwork,
 				...params
 			};
-
-			// TODO: use amount + 10% to estimate fee dynamically to have some buffer
 
 			if (isSupportedErc20TwinTokenId($sendTokenId)) {
 				feeStore.setFee({
