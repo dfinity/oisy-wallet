@@ -146,7 +146,9 @@ const burnStatus = (
 				typeLabel: 'transaction.label.sending_twin_token_failed',
 				status: 'failed'
 			};
-		} else if (
+		}
+
+		if (
 			'Pending' in retrieveBtcStatus ||
 			'Signing' in retrieveBtcStatus ||
 			'Sending' in retrieveBtcStatus ||
@@ -157,7 +159,9 @@ const burnStatus = (
 				typeLabel: 'transaction.label.sending_twin_token',
 				status: 'pending'
 			};
-		} else if (!('Confirmed' in retrieveBtcStatus)) {
+		}
+
+		if (!('Confirmed' in retrieveBtcStatus)) {
 			console.error('Unknown retrieveBtcStatusV2:', retrieveBtcStatus);
 		}
 	}
