@@ -46,7 +46,13 @@ export const getErc20FeeData = async ({
 			nonNullish(targetNetwork) && isNetworkICP(targetNetwork)
 				? infuraErc20IcpProviders(targetNetwork.id)
 				: infuraErc20Providers(targetNetwork?.id ?? sourceNetworkId);
-		return await fn(rest);
+		const fee = await fn(rest);
+
+		// The cross-chain team recommended adding 10% to the fee to provide some buffer for when the transaction is effectively executed.
+		// However, according to our observations, we noticed that ERC20 transactions require even more fees. That is why we actually add 25%.
+		const additionalAmount = BigNumber.from(fee.toBigInt() / 4n);
+
+		return fee.add(additionalAmount);
 	} catch (err: unknown) {
 		// We silence the error on purpose.
 		// The queries above often produce errors on mainnet, even when all parameters are correctly set.

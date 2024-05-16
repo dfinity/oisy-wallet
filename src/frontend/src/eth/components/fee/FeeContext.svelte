@@ -28,7 +28,6 @@
 	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { Token } from '$lib/types/token';
-	import { amountForFeePlusTenPercent } from '$eth/utils/send.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -76,7 +75,7 @@
 
 			const erc20GasFeeParams = {
 				contract: $sendToken as Erc20Token,
-				amount: amountForFeePlusTenPercent(amount),
+				amount: parseToken({ value: `${amount ?? '1'}` }),
 				sourceNetwork,
 				...params
 			};
