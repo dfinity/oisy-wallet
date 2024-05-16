@@ -51,5 +51,6 @@ export const shouldSendWithApproval = ({
  */
 export const amountForFeePlusTenPercent = (amount: string | number | undefined): BigNumber => {
 	const baseAmount = parseToken({ value: `${amount ?? '1'}` });
-	return baseAmount.mul(BigNumber.from('1')).div(BigNumber.from('10'));
+	const additionalAmount = baseAmount.div(BigNumber.from('10'));
+	return baseAmount.add(additionalAmount);
 };
