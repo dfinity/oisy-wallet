@@ -222,7 +222,6 @@
 			bind:destination
 			bind:amount
 			bind:network={targetNetwork}
-			{nativeEthereumToken}
 			{destinationEditable}
 			{sourceNetwork}
 		>
