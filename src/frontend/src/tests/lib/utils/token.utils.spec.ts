@@ -10,6 +10,14 @@ vi.mock('$eth/utils/eth.utils', () => ({
 	isSupportedEthTokenId: vi.fn((id: symbol) => id === tokenId)
 }));
 
+vi.mock('$icp/utils/ic.utils', () => ({
+	isSupportedIcTokenId: vi.fn((id: symbol) => id === tokenId)
+}));
+
+vi.mock('$icp/utils/icrc.utils', () => ({
+	isSupportedIcrcTokenId: vi.fn((id: symbol) => id === tokenId)
+}));
+
 describe('getMaxTransactionAmount', () => {
 	it('should return the correct maximum amount for a transaction', () => {
 		const result = getMaxTransactionAmount({
@@ -59,7 +67,7 @@ describe('getMaxTransactionAmount', () => {
 		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 	});
 
-	it('should return the untouched amount if the token is not ETH supported', () => {
+	it('should return the untouched amount if the token is ERC20', () => {
 		const result = getMaxTransactionAmount({
 			balance,
 			fee,
