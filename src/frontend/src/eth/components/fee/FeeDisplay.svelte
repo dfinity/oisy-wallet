@@ -11,7 +11,9 @@
 
 	const { feeStore: feeData, feeSymbolStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
-	let fee: BigNumber | undefined | null = undefined;
+	// TODO: This is a shortcut to provide the fee to the input amount component to calculate the
+	// max amount. This should be refactored, maybe to use a store.
+	export let fee: BigNumber | undefined | null = undefined;
 
 	let timer: NodeJS.Timeout | undefined;
 

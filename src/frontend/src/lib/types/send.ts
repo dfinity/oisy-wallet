@@ -8,3 +8,5 @@ export interface TransferParams {
 	maxFeePerGas: bigint;
 	data?: string;
 }
+
+export class InsufficientFundsError extends Error {}
