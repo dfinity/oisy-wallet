@@ -12,7 +12,6 @@
 
 	let fee: BigNumber | undefined | null = undefined;
 
-	// The time is used to animate the UI - i.e. displays a fade animation each time the fee is updated
 	let timer: NodeJS.Timeout | undefined;
 
 	$: $maxGasFee,
