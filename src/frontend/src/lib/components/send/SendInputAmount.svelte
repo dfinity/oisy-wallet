@@ -14,10 +14,16 @@
 	export let customValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
 	export let calculateMax: (() => number | undefined) | undefined = undefined;
 	export let error: Error | undefined;
+	export let amountSetToMax = false;
+
+	export const triggerCalculateMax = () => (amount = calculateMax?.());
 
 	let onMax = () => {
+		amountSetToMax = true;
 		amount = calculateMax?.();
 	};
+
+	const onInput = () => (amountSetToMax = false);
 
 	const validate = () => {
 		if (invalidAmount(amount)) {
@@ -48,6 +54,7 @@
 	{placeholder}
 	spellcheck={false}
 	testId="amount-input"
+	on:nnsInput={onInput}
 >
 	<svelte:fragment slot="inner-end">
 		{#if nonNullish(calculateMax)}
