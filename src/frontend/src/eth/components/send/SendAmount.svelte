@@ -55,14 +55,16 @@
 		}
 	};
 
-	$: calculateMax = (): number => {
-		return getMaxTransactionAmount({
-			balance: $sendBalance?.toBigInt(),
-			fee: fee?.toBigInt(),
-			tokenDecimals: $sendTokenDecimals,
-			tokenId: $sendTokenId
-		});
-	};
+	let calculateMax: (() => number | undefined) | undefined;
+	$: calculateMax = isNullish(fee)
+		? undefined
+		: (): number =>
+				getMaxTransactionAmount({
+					balance: $sendBalance?.toBigInt(),
+					fee: fee?.toBigInt(),
+					tokenDecimals: $sendTokenDecimals,
+					tokenId: $sendTokenId
+				});
 </script>
 
 <SendInputAmount
