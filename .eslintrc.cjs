@@ -38,6 +38,7 @@ module.exports = {
 			}
 		],
 		'no-console': ['error', { allow: ['error', 'warn'] }],
+		'no-else-return': ['warn', { allowElseIf: false }],
 		'local-rules/no-svelte-store-in-api': 'error'
 	},
 	globals: {
