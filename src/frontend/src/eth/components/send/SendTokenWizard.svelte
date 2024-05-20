@@ -80,9 +80,13 @@
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(nativeEthereumToken.symbol);
 
+	let feeContext: FeeContext | undefined;
+	const evaluateFee = () => feeContext?.triggerUpdateFee();
+
 	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
 		feeStore,
-		feeSymbolStore
+		feeSymbolStore,
+		evaluateFee
 	});
 
 	/**
@@ -193,6 +197,7 @@
 </script>
 
 <FeeContext
+	bind:this={feeContext}
 	{amount}
 	{destination}
 	observe={currentStep?.name !== 'Sending'}

@@ -5,7 +5,7 @@
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
-	import { getContext, onDestroy } from 'svelte';
+	import { getContext, onDestroy, onMount } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import {
@@ -121,13 +121,14 @@
 			return;
 		}
 
-		await updateFeeData();
+		debounceUpdateFeeData();
 		listener = initMinedTransactionsListener({
 			callback: async () => debounceUpdateFeeData(),
 			networkId: sourceNetwork.id
 		});
 	};
 
+	onMount(() => debounceUpdateFeeData());
 	onDestroy(() => listener?.disconnect());
 
 	/**
@@ -136,7 +137,12 @@
 
 	$: obverseFeeData(observe);
 
-	$: amount, destination, $ckEthMinterInfoStore, debounceUpdateFeeData();
+	$: $ckEthMinterInfoStore, debounceUpdateFeeData();
+
+	/**
+	 * Expose call to evaluate the that way consumers can re-evaluate those imperatively for example when amount or destination are manually updated by the user.
+	 */
+	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>
 
 <slot />

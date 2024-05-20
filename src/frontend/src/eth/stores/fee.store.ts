@@ -23,6 +23,7 @@ export const initFeeStore = (): FeeStore => {
 export interface FeeContext {
 	feeStore: FeeStore;
 	feeSymbolStore: Writable<string | undefined>;
+	evaluateFee?: () => void;
 }
 
 export const FEE_CONTEXT_KEY = Symbol('fee');

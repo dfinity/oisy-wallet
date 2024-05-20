@@ -48,6 +48,7 @@
 	{placeholder}
 	spellcheck={false}
 	testId="amount-input"
+	on:nnsInput
 >
 	<svelte:fragment slot="inner-end">
 		{#if nonNullish(calculateMax)}

@@ -20,7 +20,7 @@
 
 	$: insufficientFunds = nonNullish(insufficientFundsError);
 
-	const { feeStore: storeFeeData } = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { feeStore: storeFeeData, evaluateFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -63,6 +63,8 @@
 			tokenId: $sendTokenId
 		});
 	};
+
+	const onInput = () => evaluateFee?.();
 </script>
 
 <SendInputAmount
@@ -71,4 +73,5 @@
 	{customValidate}
 	{calculateMax}
 	bind:error={insufficientFundsError}
+	on:nnsInput={onInput}
 />
