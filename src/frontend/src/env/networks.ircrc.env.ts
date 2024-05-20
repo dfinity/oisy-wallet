@@ -233,7 +233,8 @@ const CKUSDC_IC_DATA: IcCkInterface | undefined =
 				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 3,
-				twinToken: USDC_TOKEN
+				twinToken: USDC_TOKEN,
+				explorerUrl: `${CKETH_EXPLORER_URL}/${IC_CKUSDC_LEDGER_CANISTER_ID}`
 			}
 		: undefined;
 
