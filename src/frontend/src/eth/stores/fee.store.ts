@@ -1,6 +1,8 @@
+import { maxGasFee as maxGasFeeUtils, minGasFee as minGasFeeUtils } from '$eth/utils/fee.utils';
 import type { TransactionFeeData } from '$lib/types/transaction';
-import type { Readable, Writable } from 'svelte/store';
-import { writable } from 'svelte/store';
+import { nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
+import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export type FeeStoreData = TransactionFeeData | undefined;
 
@@ -23,7 +25,28 @@ export const initFeeStore = (): FeeStore => {
 export interface FeeContext {
 	feeStore: FeeStore;
 	feeSymbolStore: Writable<string | undefined>;
-	evaluateFee?: () => void;
+	maxGasFee: Readable<BigNumber | undefined>;
+	minGasFee: Readable<BigNumber | undefined>;
+    evaluateFee?: () => void;
 }
+
+export const initFeeContext = ({
+	feeStore,
+	...rest
+}: Omit<FeeContext, 'maxGasFee' | 'minGasFee'>): FeeContext => {
+	const maxGasFee = derived(feeStore, (feeData) =>
+		nonNullish(feeData) ? maxGasFeeUtils(feeData) : undefined
+	);
+	const minGasFee = derived(feeStore, (feeData) =>
+		nonNullish(feeData) ? minGasFeeUtils(feeData) : undefined
+	);
+
+	return {
+		feeStore,
+		maxGasFee,
+		minGasFee,
+		...rest
+	};
+};
 
 export const FEE_CONTEXT_KEY = Symbol('fee');

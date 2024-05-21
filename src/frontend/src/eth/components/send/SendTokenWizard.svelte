@@ -11,6 +11,7 @@
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
+		initFeeContext,
 		initFeeStore
 	} from '$eth/stores/fee.store';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
@@ -80,14 +81,17 @@
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(nativeEthereumToken.symbol);
 
-	let feeContext: FeeContext | undefined;
-	const evaluateFee = () => feeContext?.triggerUpdateFee();
+    let feeContext: FeeContext | undefined;
+    const evaluateFee = () => feeContext?.triggerUpdateFee();
 
-	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
-		feeStore,
-		feeSymbolStore,
-		evaluateFee
-	});
+	setContext<FeeContextType>(
+		FEE_CONTEXT_KEY,
+		initFeeContext({
+			feeStore,
+			feeSymbolStore,
+            evaluateFee
+		})
+	);
 
 	/**
 	 * Send
