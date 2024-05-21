@@ -22,8 +22,6 @@
 		amount = calculateMax?.();
 	};
 
-	export const triggerCalculateMax = onMax;
-
 	const dispatch = createEventDispatcher();
 
 	const onInput = () => {
