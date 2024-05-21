@@ -13,7 +13,7 @@
 	export let placeholder: string = $i18n.core.text.amount;
 	export let customValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
 	export let calculateMax: (() => number | undefined) | undefined = undefined;
-	export let error: Error | undefined;
+	export let error: Error | undefined = undefined;
 
 	let onMax = () => {
 		amount = calculateMax?.();
