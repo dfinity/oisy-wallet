@@ -1,6 +1,6 @@
 import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 import { assertNonNullish } from '@dfinity/utils';
-import {fireEvent, render, waitFor} from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { expect } from 'vitest';
 import en from '../../mocks/i18n.mock';
 
@@ -63,7 +63,7 @@ describe('SendInputAmount', () => {
 		await waitFor(() => {
 			const input: HTMLInputElement | null = container.querySelector(inputSelector);
 			expect(input?.value).toBe(props.calculateMax().toString());
-		})
+		});
 	});
 
 	it('should raise an error when the amount is not valid', async () => {
