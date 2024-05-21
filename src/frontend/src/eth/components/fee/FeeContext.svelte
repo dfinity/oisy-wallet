@@ -140,7 +140,7 @@
 	$: $ckEthMinterInfoStore, debounceUpdateFeeData();
 
 	/**
-	 * Expose call to evaluate the that way consumers can re-evaluate those imperatively for example when amount or destination are manually updated by the user.
+	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.
 	 */
 	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>
