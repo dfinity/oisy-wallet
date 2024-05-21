@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { getContext } from 'svelte';
-	import {debounce, isNullish, nonNullish} from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -68,22 +68,21 @@
 
 	const onInput = () => evaluateFee?.();
 
-    /**
-     * Reevaluate max amount if user has used the "Max" button and the fees are changing.
-     */
-    let amountSetToMax = false;
-    let sendInputAmount: SendInputAmount | undefined;
+	/**
+	 * Reevaluate max amount if user has used the "Max" button and the fees are changing.
+	 */
+	let amountSetToMax = false;
+	let sendInputAmount: SendInputAmount | undefined;
 
-    $: $storeFeeData,
-        (() => {
-            if (!amountSetToMax) {
-                return;
-            }
+	$: $maxGasFee,
+		(() => {
+			if (!amountSetToMax) {
+				return;
+			}
 
-            // TODO: we need the PR that provides the derivation of the fee in the context here
-            // Debounce to sync the UI given that the fees' display is animated with a short fade effect.
-            debounce(() => sendInputAmount?.triggerCalculateMax(), 1000)();
-        })();
+			// Debounce to sync the UI given that the fees' display is animated with a short fade effect.
+			debounce(() => sendInputAmount?.triggerCalculateMax(), 500)();
+		})();
 </script>
 
 <SendInputAmount

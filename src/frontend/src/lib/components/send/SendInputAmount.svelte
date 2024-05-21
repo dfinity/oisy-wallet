@@ -17,12 +17,12 @@
 	export let error: Error | undefined = undefined;
 	export let amountSetToMax = false;
 
-	export const triggerCalculateMax = () => (amount = calculateMax?.());
-
 	let onMax = () => {
 		amountSetToMax = true;
 		amount = calculateMax?.();
 	};
+
+	export const triggerCalculateMax = onMax;
 
 	const dispatch = createEventDispatcher();
 
