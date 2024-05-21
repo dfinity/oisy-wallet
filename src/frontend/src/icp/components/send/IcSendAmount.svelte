@@ -81,7 +81,7 @@
 		return;
 	};
 
-	$:  calculateMax = (): number => {
+	$: calculateMax = (): number => {
 		return getMaxTransactionAmount({
 			balance: $balance?.toBigInt(),
 			fee: fee,

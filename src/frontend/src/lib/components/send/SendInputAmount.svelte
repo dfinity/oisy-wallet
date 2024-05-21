@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { slide } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,6 +21,10 @@
 		amountSetToMax = true;
 		amount = calculateMax?.();
 	};
+
+	// This function is used for test scopes to forcibly trigger the onMax function.
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	export const triggerCalculateMax = onMax;
 
 	const dispatch = createEventDispatcher();
 
@@ -62,11 +66,7 @@
 	testId="amount-input"
 	on:nnsInput={onInput}
 >
-	<svelte:fragment slot="inner-end">
-		{#if nonNullish(calculateMax)}
-			<MaxButton on:click={onMax} />
-		{/if}
-	</svelte:fragment>
+	<MaxButton slot="inner-end" on:click={onMax} disabled={isNullish(calculateMax)} />
 </Input>
 
 {#if nonNullish(error)}
