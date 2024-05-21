@@ -10,9 +10,9 @@ export interface Modal<T> {
 		| 'cketh-receive'
 		| 'send'
 		| 'convert-ckbtc-btc'
-		| 'convert-eth-cketh'
-		| 'convert-cketh-eth'
-		| 'how-to-convert-eth-cketh'
+		| 'convert-to-twin-token-cketh'
+		| 'convert-to-twin-token-eth'
+		| 'how-to-convert-to-twin-token-eth'
 		| 'ic-send'
 		| 'wallet-connect-auth'
 		| 'wallet-connect-sign'
@@ -39,9 +39,9 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openCkETHReceive: () => void;
 	openSend: () => void;
 	openConvertCkBTCToBTC: () => void;
-	openConvertETHToCkETH: () => void;
-	openConvertCkETHToETH: () => void;
-	openHowToConvertETHToCkETH: () => void;
+	openConvertToTwinTokenCkEth: () => void;
+	openConvertToTwinTokenEth: () => void;
+	openHowToConvertToTwinTokenEth: () => void;
 	openIcSend: () => void;
 	openWalletConnectAuth: () => void;
 	openWalletConnectSign: <D extends T>(data: D) => void;
@@ -69,9 +69,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openCkETHReceive: () => set({ type: 'cketh-receive' }),
 		openSend: () => set({ type: 'send' }),
 		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
-		openConvertETHToCkETH: () => set({ type: 'convert-eth-cketh' }),
-		openConvertCkETHToETH: () => set({ type: 'convert-cketh-eth' }),
-		openHowToConvertETHToCkETH: () => set({ type: 'how-to-convert-eth-cketh' }),
+		openConvertToTwinTokenCkEth: () => set({ type: 'convert-to-twin-token-cketh' }),
+		openConvertToTwinTokenEth: () => set({ type: 'convert-to-twin-token-eth' }),
+		openHowToConvertToTwinTokenEth: () => set({ type: 'how-to-convert-to-twin-token-eth' }),
 		openIcSend: () => set({ type: 'ic-send' }),
 		openWalletConnectAuth: () => set({ type: 'wallet-connect-auth' }),
 		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),

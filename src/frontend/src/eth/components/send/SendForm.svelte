@@ -13,7 +13,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import type { BigNumber } from '@ethersproject/bignumber';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -21,8 +20,6 @@
 	export let amount: number | undefined = undefined;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
-
-	let fee: BigNumber | undefined | null = undefined;
 
 	let insufficientFunds: boolean;
 	let invalidDestination: boolean;
@@ -44,11 +41,11 @@
 			<SendNetworkICP {destination} {sourceNetwork} bind:network />
 		{/if}
 
-		<SendAmount bind:amount {fee} bind:insufficientFunds />
+		<SendAmount bind:amount bind:insufficientFunds />
 
 		<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
 
-		<FeeDisplay bind:fee />
+		<FeeDisplay />
 	</div>
 
 	<ButtonGroup>
