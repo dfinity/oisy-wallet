@@ -24,7 +24,7 @@
 		maxGasFee,
 		evaluateFee
 	} = getContext<FeeContext>(FEE_CONTEXT_KEY);
-	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken } =
+	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenStandard } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber) => {
@@ -65,7 +65,7 @@
 					balance: $sendBalance?.toBigInt(),
 					fee: $maxGasFee.toBigInt(),
 					tokenDecimals: $sendTokenDecimals,
-					tokenId: $sendTokenId
+                    tokenStandard: $sendTokenStandard
 				});
 
 	const onInput = () => evaluateFee?.();
