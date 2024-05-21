@@ -14,6 +14,7 @@
 
 	let timer: NodeJS.Timeout | undefined;
 
+    // The time is used to animate the UI - i.e. displays a fade animation each time the fee is updated
 	$: $maxGasFee,
 		(() => {
 			fee = undefined;
@@ -47,7 +48,7 @@
 >
 <div id="balance" class="font-normal px-4.5 mb-4 break-all" style="min-height: 24px">
 	{#if nonNullish(fee)}
-		<div in:fade>
+		<div transition:fade>
 			{formatToken({
 				value: fee,
 				displayDecimals: EIGHT_DECIMALS
