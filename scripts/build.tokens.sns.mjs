@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { AnonymousIdentity } from '@dfinity/agent';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { IcrcIndexNgCanister, IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
