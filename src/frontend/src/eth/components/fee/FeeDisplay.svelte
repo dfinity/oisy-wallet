@@ -14,7 +14,7 @@
 
 	let timer: NodeJS.Timeout | undefined;
 
-    // The time is used to animate the UI - i.e. displays a fade animation each time the fee is updated
+	// The time is used to animate the UI - i.e. displays a fade animation each time the fee is updated
 	$: $maxGasFee,
 		(() => {
 			fee = undefined;
