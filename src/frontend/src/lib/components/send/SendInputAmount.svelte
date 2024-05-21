@@ -22,8 +22,6 @@
 		amount = calculateMax?.();
 	};
 
-	// This function is used for test scopes to forcibly trigger the onMax function.
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	export const triggerCalculateMax = onMax;
 
 	const dispatch = createEventDispatcher();

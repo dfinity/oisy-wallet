@@ -31,7 +31,7 @@
 	let fee: bigint | undefined;
 	$: fee = ($token as IcToken).fee;
 
-	$: customValidate = (userAmount: BigNumber) => {
+	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (isNullish(fee)) {
 			return;
 		}
