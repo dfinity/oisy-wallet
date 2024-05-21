@@ -1,70 +1,75 @@
+import type { TokenStandard } from '$lib/types/token';
 import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 const tokenDecimals = 8;
-const tokenId = Symbol('mock');
+const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
 
 const balance = 1000000000n;
 const fee = 10000000n;
 
-vi.mock('$eth/utils/eth.utils', () => ({
-	isSupportedEthTokenId: vi.fn((id: symbol) => id === tokenId)
-}));
-
 describe('getMaxTransactionAmount', () => {
-	it('should return the correct maximum amount for a transaction', () => {
-		const result = getMaxTransactionAmount({
-			balance,
-			fee,
-			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
+	it('should return the correct maximum amount for a transaction for each token standard', () => {
+		tokenStandards.forEach((tokenStandard) => {
+			const result = getMaxTransactionAmount({
+				balance,
+				fee,
+				tokenDecimals,
+				tokenStandard
+			});
+			expect(result).toBe(Number(balance - fee) / 10 ** tokenDecimals);
 		});
-		expect(result).toBe(Number(balance - fee) / 10 ** tokenDecimals);
 	});
 
 	it('should return 0 if balance is less than fee', () => {
-		const result = getMaxTransactionAmount({
-			balance: fee,
-			fee: balance,
-			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
+		tokenStandards.forEach((tokenStandard) => {
+			const result = getMaxTransactionAmount({
+				balance: fee,
+				fee: balance,
+				tokenDecimals,
+				tokenStandard
+			});
+			expect(result).toBe(0);
 		});
-		expect(result).toBe(0);
 	});
 
 	it('should return 0 if balance and fee are undefined', () => {
-		const result = getMaxTransactionAmount({
-			balance: undefined,
-			fee: undefined,
-			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
+		tokenStandards.forEach((tokenStandard) => {
+			const result = getMaxTransactionAmount({
+				balance: undefined,
+				fee: undefined,
+				tokenDecimals,
+				tokenStandard
+			});
+			expect(result).toBe(0);
 		});
-		expect(result).toBe(0);
 	});
 
 	it('should handle balance or fee being undefined', () => {
-		let result = getMaxTransactionAmount({
-			balance: undefined,
-			fee,
-			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
-		});
-		expect(result).toBe(0);
+		tokenStandards.forEach((tokenStandard) => {
+			let result = getMaxTransactionAmount({
+				balance: undefined,
+				fee,
+				tokenDecimals,
+				tokenStandard
+			});
+			expect(result).toBe(0);
 
-		result = getMaxTransactionAmount({
-			balance,
-			fee: undefined,
-			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
+			result = getMaxTransactionAmount({
+				balance,
+				fee: undefined,
+				tokenDecimals,
+				tokenStandard
+			});
+			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 		});
-		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 	});
 
-	it('should return the untouched amount if the token is not ETH supported', () => {
+	it('should return the untouched amount if the token is ERC20', () => {
 		const result = getMaxTransactionAmount({
 			balance,
 			fee,
 			tokenDecimals: tokenDecimals,
-			tokenId: Symbol('otherMock')
+			tokenStandard: 'erc20'
 		});
 		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 	});
