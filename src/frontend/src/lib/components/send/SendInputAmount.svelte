@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { slide } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -64,11 +64,7 @@
 	testId="amount-input"
 	on:nnsInput={onInput}
 >
-	<svelte:fragment slot="inner-end">
-		{#if nonNullish(calculateMax)}
-			<MaxButton on:click={onMax} />
-		{/if}
-	</svelte:fragment>
+	<MaxButton slot="inner-end" on:click={onMax} disabled={isNullish(calculateMax)} />
 </Input>
 
 {#if nonNullish(error)}
