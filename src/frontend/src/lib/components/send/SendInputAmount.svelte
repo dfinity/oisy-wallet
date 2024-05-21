@@ -7,6 +7,7 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import MaxButton from '$lib/components/common/MaxButton.svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	export let amount: number | undefined = undefined;
 	export let tokenDecimals: number | undefined = undefined;
@@ -14,9 +15,22 @@
 	export let customValidate: (userAmount: BigNumber) => Error | undefined = () => undefined;
 	export let calculateMax: (() => number | undefined) | undefined = undefined;
 	export let error: Error | undefined = undefined;
+	export let amountSetToMax = false;
 
 	let onMax = () => {
+		amountSetToMax = true;
 		amount = calculateMax?.();
+	};
+
+	export const triggerCalculateMax = onMax;
+
+	const dispatch = createEventDispatcher();
+
+	const onInput = () => {
+		amountSetToMax = false;
+
+		// Bubble nnsInput as consumers might require the event as well (which is the case in Oisy).
+		dispatch('nnsInput');
 	};
 
 	const validate = () => {
@@ -48,7 +62,7 @@
 	{placeholder}
 	spellcheck={false}
 	testId="amount-input"
-	on:nnsInput
+	on:nnsInput={onInput}
 >
 	<svelte:fragment slot="inner-end">
 		{#if nonNullish(calculateMax)}
