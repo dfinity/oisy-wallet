@@ -28,8 +28,9 @@ const buildOrchestratorInfo = async (orchestratorId) => {
 		const ledgerCanister = fromNullable(ledger);
 		const indexCanister = fromNullable(index);
 
+		// Skip tokens without Ledger or Index (by definition, this can happen).
 		if (isNullish(ledgerCanister) || isNullish(indexCanister)) {
-			return undefined;
+			return acc;
 		}
 
 		const { canister_id: ledgerCanisterId } =
