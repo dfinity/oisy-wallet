@@ -6,31 +6,29 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import type { FeeContext } from '$eth/stores/fee.store';
 	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
-	import { maxGasFee } from '$eth/utils/fee.utils';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 
-	const { feeStore: feeData, feeSymbolStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { maxGasFee, feeSymbolStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
 
-	// TODO: This is a shortcut to provide the fee to the input amount component to calculate the
-	// max amount. This should be refactored, maybe to use a store.
-	export let fee: BigNumber | undefined | null = undefined;
+	let fee: BigNumber | undefined | null = undefined;
 
 	let timer: NodeJS.Timeout | undefined;
 
-	$: $feeData,
+	// The time is used to animate the UI - i.e. displays a fade animation each time the fee is updated
+	$: $maxGasFee,
 		(() => {
 			fee = undefined;
 
-			if (isNullish($feeData) || isNullish($feeData?.maxFeePerGas)) {
+			if (isNullish($maxGasFee)) {
 				return;
 			}
 
 			const calculateFee = () => {
-				if (isNullish($feeData) || isNullish($feeData?.maxFeePerGas)) {
+				if (isNullish($maxGasFee)) {
 					return;
 				}
 
-				fee = maxGasFee($feeData);
+				fee = $maxGasFee;
 			};
 
 			timer = setTimeout(calculateFee, 500);
@@ -50,7 +48,7 @@
 >
 <div id="balance" class="font-normal px-4.5 mb-4 break-all" style="min-height: 24px">
 	{#if nonNullish(fee)}
-		<div in:fade>
+		<div transition:fade>
 			{formatToken({
 				value: fee,
 				displayDecimals: EIGHT_DECIMALS
