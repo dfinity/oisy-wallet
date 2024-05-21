@@ -10,6 +10,7 @@
 	on:click|preventDefault
 	class="text-blue hover:text-dark-blue active:text-dark-blue font-medium"
 	{disabled}
+	class:opacity-50={disabled}
 >
 	{$i18n.core.text.max}
 </button>

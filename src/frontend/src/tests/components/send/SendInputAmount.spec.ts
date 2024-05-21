@@ -24,14 +24,14 @@ describe('SendInputAmount', () => {
 		expect(input?.value).toBe(props.amount.toString());
 	});
 
-	it('should not render a max button if calculateMax is not provided', () => {
+	it('should render a max button disabled if calculateMax is not provided', () => {
 		const { calculateMax: _, ...newProps } = props;
 		const { container } = render(SendInputAmount, { props: newProps });
 
 		const button: HTMLButtonElement | null = container.querySelector(
 			'button[data-tid="max-button"]'
 		);
-		expect(button).toBeNull();
+		expect(button).toBeDisabled();
 	});
 
 	it('should render a max button if calculateMax is provided', () => {
