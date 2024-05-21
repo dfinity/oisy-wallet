@@ -1,6 +1,7 @@
 import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 import { assertNonNullish } from '@dfinity/utils';
-import { fireEvent, render } from '@testing-library/svelte';
+import {fireEvent, render, waitFor} from '@testing-library/svelte';
+import { expect } from 'vitest';
 import en from '../../mocks/i18n.mock';
 
 describe('SendInputAmount', () => {
@@ -54,6 +55,17 @@ describe('SendInputAmount', () => {
 		expect(input?.value).toBe(props.calculateMax().toString());
 	});
 
+	it('should imperatively trigger max value', async () => {
+		const { container, component } = render(SendInputAmount, { props });
+
+		component.$$.ctx[component.$$.props['triggerCalculateMax']]();
+
+		await waitFor(() => {
+			const input: HTMLInputElement | null = container.querySelector(inputSelector);
+			expect(input?.value).toBe(props.calculateMax().toString());
+		})
+	});
+
 	it('should raise an error when the amount is not valid', async () => {
 		const { container } = render(SendInputAmount, { props });
 
@@ -66,5 +78,39 @@ describe('SendInputAmount', () => {
 
 		await fireEvent.input(input, { target: { value: '-1' } });
 		expect(input?.value).toBe(props.amount.toString());
+	});
+
+	describe('amountSetToMax', () => {
+		const renderSetAndAssertMax = async (): Promise<{
+			container: HTMLElement;
+			component: SendInputAmount;
+		}> => {
+			const { container, component } = render(SendInputAmount, { props });
+
+			expect(component.$$.ctx[component.$$.props['amountSetToMax']]).toBeFalsy();
+
+			const button: HTMLButtonElement | null = container.querySelector(buttonSelector);
+			assertNonNullish(button, 'Max button not found');
+
+			await fireEvent.click(button);
+
+			expect(component.$$.ctx[component.$$.props['amountSetToMax']]).toBeTruthy();
+
+			return { component, container };
+		};
+
+		it('should expose a truthy amountSetToMax property when max value was triggered', async () => {
+			await renderSetAndAssertMax();
+		});
+
+		it('should reset amountSetToMax when max value was triggered but amount was manually updated afterwards', async () => {
+			const { container, component } = await renderSetAndAssertMax();
+
+			const input: HTMLInputElement | null = container.querySelector(inputSelector);
+			assertNonNullish(input, 'Input not found');
+			await fireEvent.input(input, { target: { value: '0.1' } });
+
+			expect(component.$$.ctx[component.$$.props['amountSetToMax']]).toBeFalsy();
+		});
 	});
 });
