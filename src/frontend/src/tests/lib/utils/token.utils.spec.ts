@@ -1,22 +1,10 @@
 import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 const tokenDecimals = 8;
-const tokenId = Symbol('mock');
+const tokenStandard = 'erc20';
 
 const balance = 1000000000n;
 const fee = 10000000n;
-
-vi.mock('$eth/utils/eth.utils', () => ({
-	isSupportedEthTokenId: vi.fn((id: symbol) => id === tokenId)
-}));
-
-vi.mock('$icp/utils/ic.utils', () => ({
-	isSupportedIcTokenId: vi.fn((id: symbol) => id === tokenId)
-}));
-
-vi.mock('$icp/utils/icrc.utils', () => ({
-	isSupportedIcrcTokenId: vi.fn((id: symbol) => id === tokenId)
-}));
 
 describe('getMaxTransactionAmount', () => {
 	it('should return the correct maximum amount for a transaction', () => {
@@ -24,7 +12,7 @@ describe('getMaxTransactionAmount', () => {
 			balance,
 			fee,
 			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
+			tokenStandard: tokenStandard
 		});
 		expect(result).toBe(Number(balance - fee) / 10 ** tokenDecimals);
 	});
@@ -34,7 +22,7 @@ describe('getMaxTransactionAmount', () => {
 			balance: fee,
 			fee: balance,
 			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
+			tokenStandard: tokenStandard
 		});
 		expect(result).toBe(0);
 	});
@@ -44,7 +32,7 @@ describe('getMaxTransactionAmount', () => {
 			balance: undefined,
 			fee: undefined,
 			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
+			tokenStandard: tokenStandard
 		});
 		expect(result).toBe(0);
 	});
@@ -54,7 +42,7 @@ describe('getMaxTransactionAmount', () => {
 			balance: undefined,
 			fee,
 			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
+			tokenStandard: tokenStandard
 		});
 		expect(result).toBe(0);
 
@@ -62,17 +50,17 @@ describe('getMaxTransactionAmount', () => {
 			balance,
 			fee: undefined,
 			tokenDecimals: tokenDecimals,
-			tokenId: tokenId
+			tokenStandard: tokenStandard
 		});
 		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 	});
 
-	it('should return the untouched amount if the token is ERC20', () => {
+	it('should return the untouched amount if the token is not ERC20', () => {
 		const result = getMaxTransactionAmount({
 			balance,
 			fee,
 			tokenDecimals: tokenDecimals,
-			tokenId: Symbol('otherMock')
+			tokenStandard: 'not-erc20'
 		});
 		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
 	});
