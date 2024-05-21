@@ -57,14 +57,16 @@
 		}
 	};
 
-	$: calculateMax = (): number => {
-		return getMaxTransactionAmount({
-			balance: $sendBalance?.toBigInt(),
-			fee: $maxGasFee?.toBigInt(),
-			tokenDecimals: $sendTokenDecimals,
-			tokenStandard: $sendTokenStandard
-		});
-	};
+	let calculateMax: (() => number | undefined) | undefined;
+	$: calculateMax = isNullish($maxGasFee)
+		? undefined
+		: (): number =>
+				getMaxTransactionAmount({
+					balance: $sendBalance?.toBigInt(),
+					fee: $maxGasFee.toBigInt(),
+					tokenDecimals: $sendTokenDecimals,
+					tokenStandard: $sendTokenStandard
+				});
 
 	const onInput = () => evaluateFee?.();
 
