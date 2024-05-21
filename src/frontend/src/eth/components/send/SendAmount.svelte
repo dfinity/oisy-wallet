@@ -58,15 +58,15 @@
 	};
 
 	let calculateMax: (() => number | undefined) | undefined;
-    $: calculateMax = isNullish($maxGasFee)
-        ? undefined
-        : (): number =>
-            getMaxTransactionAmount({
-                balance: $sendBalance?.toBigInt(),
-                fee: $maxGasFee.toBigInt(),
-                tokenDecimals: $sendTokenDecimals,
-                tokenId: $sendTokenId
-            });
+	$: calculateMax = isNullish($maxGasFee)
+		? undefined
+		: (): number =>
+				getMaxTransactionAmount({
+					balance: $sendBalance?.toBigInt(),
+					fee: $maxGasFee.toBigInt(),
+					tokenDecimals: $sendTokenDecimals,
+					tokenId: $sendTokenId
+				});
 
 	const onInput = () => evaluateFee?.();
 </script>
