@@ -2,7 +2,6 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { getContext } from 'svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { maxGasFee, minGasFee } from '$eth/utils/fee.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -13,14 +12,13 @@
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let amount: number | undefined = undefined;
-	export let fee: BigNumber | undefined | null = undefined;
 	export let insufficientFunds: boolean;
 
 	let insufficientFundsError: InsufficientFundsError | undefined = undefined;
 
 	$: insufficientFunds = nonNullish(insufficientFundsError);
 
-	const { feeStore: storeFeeData } = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { feeStore: storeFeeData, minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -31,7 +29,7 @@
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId)) {
-			const total = userAmount.add(minGasFee($storeFeeData));
+			const total = userAmount.add($minGasFee ?? BigNumber.from(0));
 
 			if (total.gt($sendBalance ?? BigNumber.from(0n))) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
@@ -46,9 +44,8 @@
 		}
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
-		const maxFee = maxGasFee($storeFeeData);
 		const ethBalance = $balancesStore?.[$sendToken.id]?.data ?? BigNumber.from(0n);
-		if (nonNullish(maxFee) && ethBalance.lt(maxFee)) {
+		if (nonNullish($maxGasFee) && ethBalance.lt($maxGasFee)) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees
 			);
@@ -58,7 +55,7 @@
 	$: calculateMax = (): number => {
 		return getMaxTransactionAmount({
 			balance: $sendBalance?.toBigInt(),
-			fee: fee?.toBigInt(),
+			fee: $maxGasFee?.toBigInt(),
 			tokenDecimals: $sendTokenDecimals,
 			tokenId: $sendTokenId
 		});
