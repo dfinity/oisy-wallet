@@ -26,6 +26,7 @@
 	bind:value={destination}
 	placeholder={inputPlaceholder}
 	spellcheck={false}
+	on:nnsInput
 />
 
 {#if invalidDestination}
