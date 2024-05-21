@@ -35,11 +35,11 @@
 		}
 
 		if ($networkICP) {
-			modalStore.openConvertCkETHToETH();
+			modalStore.openConvertToTwinTokenEth();
 			return;
 		}
 
-		modalStore.openConvertETHToCkETH();
+		modalStore.openConvertToTwinTokenCkEth();
 	};
 </script>
 

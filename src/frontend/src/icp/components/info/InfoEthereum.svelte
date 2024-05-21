@@ -3,7 +3,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { modalHowToConvertETHToCkETH } from '$lib/derived/modal.derived';
+	import { modalHowToConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
@@ -12,7 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/derived/token.derived';
 
-	const openReceive = () => modalStore.openHowToConvertETHToCkETH();
+	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth();
 
 	/**
 	 * Send modal context store
@@ -67,6 +67,6 @@
 	>
 </div>
 
-{#if $modalHowToConvertETHToCkETH}
+{#if $modalHowToConvertToTwinTokenEth}
 	<HowToConvertEthereumModal />
 {/if}

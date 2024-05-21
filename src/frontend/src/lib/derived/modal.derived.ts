@@ -29,18 +29,17 @@ export const modalConvertCkBTCToBTC: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-ckbtc-btc'
 );
-// TODO: rename to modalConvertToCkETH
-export const modalConvertETHToCkETH: Readable<boolean> = derived(
+export const modalConvertToTwinTokenCkEth: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'convert-eth-cketh'
+	($modalStore) => $modalStore?.type === 'convert-to-twin-token-cketh'
 );
-export const modalConvertCkETHToETH: Readable<boolean> = derived(
+export const modalConvertToTwinTokenEth: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'convert-cketh-eth'
+	($modalStore) => $modalStore?.type === 'convert-to-twin-token-eth'
 );
-export const modalHowToConvertETHToCkETH: Readable<boolean> = derived(
+export const modalHowToConvertToTwinTokenEth: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'how-to-convert-eth-cketh'
+	($modalStore) => $modalStore?.type === 'how-to-convert-to-twin-token-eth'
 );
 export const modalIcSend: Readable<boolean> = derived(
 	modalStore,

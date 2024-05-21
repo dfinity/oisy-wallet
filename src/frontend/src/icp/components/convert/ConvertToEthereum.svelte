@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
-	import { modalConvertCkETHToETH } from '$lib/derived/modal.derived';
+	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { address } from '$lib/derived/address.derived';
 	import {
@@ -26,6 +26,6 @@
 	>
 </ConvertETH>
 
-{#if $modalConvertCkETHToETH}
+{#if $modalConvertToTwinTokenEth}
 	<IcSendModal networkId={$ckEthereumTwinTokenNetworkId} destination={$address ?? ''} />
 {/if}
