@@ -65,7 +65,7 @@
 					balance: $sendBalance?.toBigInt(),
 					fee: $maxGasFee.toBigInt(),
 					tokenDecimals: $sendTokenDecimals,
-                    tokenStandard: $sendTokenStandard
+					tokenStandard: $sendTokenStandard
 				});
 
 	const onInput = () => evaluateFee?.();
