@@ -84,7 +84,7 @@
 				{/if}
 
 				{#if nonNullish(from)}
-					<p class="capitalize">
+					<p>
 						<output>{from}</output><Copy
 							value={from}
 							text={$i18n.transaction.text.from_copied}
@@ -112,7 +112,7 @@
 				{/if}
 
 				{#if nonNullish(to)}
-					<p class="capitalize">
+					<p>
 						<output>{to}</output><Copy
 							value={to}
 							text={$i18n.transaction.text.to_copied}
