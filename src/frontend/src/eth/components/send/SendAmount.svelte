@@ -18,7 +18,12 @@
 
 	$: insufficientFunds = nonNullish(insufficientFundsError);
 
-	const { feeStore: storeFeeData, minGasFee, maxGasFee, evaluateFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const {
+		feeStore: storeFeeData,
+		minGasFee,
+		maxGasFee,
+		evaluateFee
+	} = getContext<FeeContext>(FEE_CONTEXT_KEY);
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 

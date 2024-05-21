@@ -27,7 +27,7 @@ export interface FeeContext {
 	feeSymbolStore: Writable<string | undefined>;
 	maxGasFee: Readable<BigNumber | undefined>;
 	minGasFee: Readable<BigNumber | undefined>;
-    evaluateFee?: () => void;
+	evaluateFee?: () => void;
 }
 
 export const initFeeContext = ({
