@@ -131,7 +131,7 @@
 	};
 
 	let sendInputAmount: SendInputAmount | undefined;
-	$: $ethereumFeeStore, (() => sendInputAmount?.triggerDebounceValidate())();
+	$: $ethereumFeeStore, (() => sendInputAmount?.triggerValidate())();
 </script>
 
 <SendInputAmount
