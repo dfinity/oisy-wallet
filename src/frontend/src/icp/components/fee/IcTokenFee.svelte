@@ -6,14 +6,26 @@
 	import type { IcToken } from '$icp/types/ic';
 	import { nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
+
+	// IC network fees for ckErc20 tokens have to be paid in ckEth.
+	let ckEr20 = false;
+	$: ckEr20 = isTokenCkErc20Ledger($token as IcToken);
+
+	let tokenCkEth: IcToken | undefined;
+	$: tokenCkEth = ckEr20 ? $icrcTokens.find(isTokenCkEthLedger) : undefined;
+
+	let feeToken: IcToken;
+	$: feeToken = tokenCkEth ?? ($token as IcToken);
 
 	let decimals: number;
 	let symbol: string;
 
-	$: ({ decimals, symbol } = $token);
+	$: ({ decimals, symbol } = feeToken);
 
 	let fee: bigint | undefined;
-	$: fee = ($token as IcToken).fee;
+	$: fee = feeToken.fee;
 </script>
 
 <Value ref="fee">
