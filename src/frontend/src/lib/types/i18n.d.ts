@@ -178,6 +178,7 @@ interface I18nSend {
 		initializing_transaction: string;
 		convert_to_native_icp: string;
 		open_qr_modal: string;
+		scan_qr: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -215,6 +216,7 @@ interface I18nSend {
 		data_undefined: string;
 		no_identity_calculate_fee: string;
 		invalid_address: string;
+		incompatible_token: string;
 	};
 }
 

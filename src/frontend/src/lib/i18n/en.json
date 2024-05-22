@@ -200,7 +200,8 @@
 			"destination_network": "Destination network",
 			"initializing_transaction": "Initializing transaction",
 			"convert_to_native_icp": "Convert to native ICP",
-			"open_qr_modal": "Start QR Code scan for transaction details"
+			"open_qr_modal": "Start QR Code scan for transaction details",
+			"scan_qr": "Scan QR Code"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -240,7 +241,8 @@
 			"erc20_data_undefined": "Erc20 transaction Data cannot be undefined or null.",
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
-			"invalid_address": "The address is invalid. Please try again with a valid address identifier."
+			"invalid_address": "The address is invalid. Please try again with a valid address identifier.",
+			"incompatible_token": "The token is incompatible. Please try again with a compatible token."
 		}
 	},
 	"convert": {
