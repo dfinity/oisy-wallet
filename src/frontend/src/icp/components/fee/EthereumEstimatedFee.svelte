@@ -17,16 +17,16 @@
 	import type { IcToken } from '$icp/types/ic';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 
-    let ckEr20 = false;
-    $: ckEr20 = isTokenCkErc20Ledger($token as IcToken);
+	let ckEr20 = false;
+	$: ckEr20 = isTokenCkErc20Ledger($token as IcToken);
 
-    let tokenCkEth: IcToken | undefined;
-    $: tokenCkEth = $icrcTokens.find(isTokenCkEthLedger);
+	let tokenCkEth: IcToken | undefined;
+	$: tokenCkEth = $icrcTokens.find(isTokenCkEthLedger);
 
-    let feeSymbol: string;
-    $: feeSymbol = ckEr20
-        ? tokenCkEth?.symbol ?? $ckEthereumNativeToken.symbol
-        : $ckEthereumNativeToken.symbol;
+	let feeSymbol: string;
+	$: feeSymbol = ckEr20
+		? tokenCkEth?.symbol ?? $ckEthereumNativeToken.symbol
+		: $ckEthereumNativeToken.symbol;
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
