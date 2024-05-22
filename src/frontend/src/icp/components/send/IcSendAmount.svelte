@@ -52,7 +52,7 @@
 		}
 
 		if (isNetworkIdBTC(networkId)) {
-			let error = assertCkBTCUserInputAmount({
+			const error = assertCkBTCUserInputAmount({
 				amount: userAmount,
 				minterInfo: $ckBtcMinterInfoStore?.[$tokenId],
 				tokenDecimals: $tokenDecimals,
@@ -64,8 +64,9 @@
 			}
 		}
 
+		// if CkEth, asset the minimal withdrawal amount is met and the amount should at least be bigger than the fee.
 		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
-			let error = assertCkETHMinWithdrawalAmount({
+			const error = assertCkETHMinWithdrawalAmount({
 				amount: userAmount,
 				tokenDecimals: $tokenDecimals,
 				tokenSymbol: $tokenSymbol,
@@ -76,23 +77,7 @@
 			if (nonNullish(error)) {
 				return error;
 			}
-		}
 
-		if (isNetworkIdEthereum(networkId) && $tokenCkErc20Ledger) {
-			let error = assertCkETHBalanceEstimatedFee({
-				balance: $ckEthereumNativeTokenBalance,
-				tokenDecimals: $ckEthereumNativeToken.decimals,
-				tokenSymbol: $ckEthereumNativeToken.symbol,
-				feeStoreData: $ethereumFeeStore,
-				i18n: $i18n
-			});
-
-			if (nonNullish(error)) {
-				return error;
-			}
-		}
-
-		if (isNetworkIdEthereum(networkId)) {
 			return assertCkETHMinFee({
 				amount: userAmount,
 				tokenSymbol: $tokenSymbol,
@@ -101,13 +86,40 @@
 			});
 		}
 
-		const total = userAmount.add(fee);
+		const assertBalance = (): IcAmountAssertionError | undefined => {
+			const total = userAmount.add(fee ?? BigNumber.from(0n));
 
-		if (total.gt($balance ?? BigNumber.from(0n))) {
-			return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
+			if (total.gt($balance ?? BigNumber.from(0n))) {
+				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
+			}
+
+			return undefined;
+		};
+
+		// if CkErc20, the entered amount should be covered by fee + balance and the ckEth balance should cover the estimated fee.
+		if (isNetworkIdEthereum(networkId) && $tokenCkErc20Ledger) {
+			const error = assertBalance();
+
+			if (nonNullish(error)) {
+				return error;
+			}
+
+			const errorEstimatedFee = assertCkETHBalanceEstimatedFee({
+				balance: $ckEthereumNativeTokenBalance,
+				tokenDecimals: $ckEthereumNativeToken.decimals,
+				tokenSymbol: $ckEthereumNativeToken.symbol,
+				feeStoreData: $ethereumFeeStore,
+				i18n: $i18n
+			});
+
+			if (nonNullish(errorEstimatedFee)) {
+				return errorEstimatedFee;
+			}
+
+			return undefined;
 		}
 
-		return;
+		return assertBalance();
 	};
 
 	$: calculateMax = (): number => {
