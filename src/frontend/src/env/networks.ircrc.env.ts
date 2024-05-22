@@ -181,13 +181,12 @@ export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
 
 const ckErc20 = envTokensCkErc20.safeParse(ckErc20Tokens);
 
-export const IC_CKUSDC_LEDGER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKETH_LEDGER_CANISTER_ID as CanisterIdText | null | undefined) ??
-	'ss2fx-dyaaa-aaaar-qacoq-cai';
-
-export const IC_CKUSDC_INDEX_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKETH_INDEX_CANISTER_ID as CanisterIdText | null | undefined) ??
-	's3zol-vqaaa-aaaar-qacpa-cai';
+export const IC_CKUSDC_LEDGER_CANISTER_ID = ckErc20.success
+	? ckErc20.data.production.ckUSDC?.ledgerCanisterId
+	: undefined;
+export const IC_CKUSDC_INDEX_CANISTER_ID = ckErc20.success
+	? ckErc20.data.production.ckUSDC?.indexCanisterId
+	: undefined;
 
 export const STAGING_CKUSDC_LEDGER_CANISTER_ID = ckErc20.success
 	? ckErc20.data.staging.ckSepoliaUSDC?.ledgerCanisterId
@@ -232,7 +231,10 @@ const CKUSDC_STAGING_DATA: IcCkInterface | undefined =
 		: undefined;
 
 const CKUSDC_IC_DATA: IcCkInterface | undefined =
-	STAGING || PROD
+	(STAGING || PROD) &&
+	nonNullish(IC_CKUSDC_LEDGER_CANISTER_ID) &&
+	nonNullish(IC_CKUSDC_INDEX_CANISTER_ID) &&
+	nonNullish(IC_CKETH_MINTER_CANISTER_ID)
 		? {
 				ledgerCanisterId: IC_CKUSDC_LEDGER_CANISTER_ID,
 				indexCanisterId: IC_CKUSDC_INDEX_CANISTER_ID,
@@ -250,7 +252,7 @@ export const CKUSDC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 ];
 
 export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
-	IC_CKUSDC_LEDGER_CANISTER_ID,
+	...(nonNullish(IC_CKUSDC_LEDGER_CANISTER_ID) ? [IC_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...CKUSDC_LEDGER_CANISTER_TESTNET_IDS
 ];
 
