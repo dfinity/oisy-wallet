@@ -14,12 +14,12 @@
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { assertCkETHMinFee, assertCkETHMinWithdrawalAmount } from '$icp/utils/cketh.utils';
+	import { assertCkEthereumMinFee, assertCkETHMinWithdrawalAmount } from '$icp/utils/cketh.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { tokenCkEthLedger } from '$icp/derived/ic-token.derived';
+	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
@@ -63,8 +63,13 @@
 			}
 		}
 
+		if (isNetworkIdEthereum(networkId) && $tokenCkErc20Ledger) {
+			// TODO: if ckErc20 -> balance de ckETH >= fee ledger ckEth + estimated ethereum fee
+			// maxTransactionFeePlusEthLedgerApprove
+		}
+
 		if (isNetworkIdEthereum(networkId)) {
-			return assertCkETHMinFee({
+			return assertCkEthereumMinFee({
 				amount: userAmount,
 				tokenSymbol: $tokenSymbol,
 				fee,

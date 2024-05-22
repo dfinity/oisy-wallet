@@ -56,7 +56,7 @@ export const assertCkETHMinWithdrawalAmount = ({
 	return undefined;
 };
 
-export const assertCkETHMinFee = ({
+export const assertCkEthereumMinFee = ({
 	amount,
 	fee,
 	tokenSymbol,
