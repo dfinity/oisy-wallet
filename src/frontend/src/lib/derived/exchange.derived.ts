@@ -47,7 +47,9 @@ export const exchanges: Readable<ExchangesData> = derived(
 
 				const { twinToken } = token as Partial<IcCkToken>;
 				const { address } = (twinToken as Partial<Erc20Token>) ?? { address: undefined };
-				const ckEthereumPrice = nonNullish(address) ? $exchangeStore?.[address] : ethPrice;
+				const ckEthereumPrice = nonNullish(address)
+					? $exchangeStore?.[address.toLowerCase()]
+					: ethPrice;
 
 				return {
 					...acc,
