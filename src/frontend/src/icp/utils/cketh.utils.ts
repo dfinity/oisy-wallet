@@ -1,5 +1,6 @@
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { EthereumFeeStoreData } from '$icp/stores/ethereum-fee.store';
+import type { IcToken } from '$icp/types/ic';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -87,14 +88,12 @@ export const assertCkETHMinFee = ({
 
 export const assertCkETHBalanceEstimatedFee = ({
 	balance,
-	tokenDecimals,
-	tokenSymbol,
+	tokenCkEth,
 	feeStoreData,
 	i18n
 }: {
 	balance: BigNumber | undefined | null;
-	tokenDecimals: number;
-	tokenSymbol: string;
+	tokenCkEth: IcToken | undefined;
 	feeStoreData: EthereumFeeStoreData;
 	i18n: I18n;
 }): IcAmountAssertionError | undefined => {
@@ -105,17 +104,23 @@ export const assertCkETHBalanceEstimatedFee = ({
 		return undefined;
 	}
 
+	if (isNullish(tokenCkEth)) {
+		return new IcAmountAssertionError(i18n.send.assertion.unknown_cketh);
+	}
+
+	const { decimals, symbol } = tokenCkEth;
+
 	const estimatedFee = BigNumber.from(feeStoreData?.maxTransactionFee ?? 0n);
 
 	if (estimatedFee.gt(ethBalance)) {
 		return new IcAmountAssertionError(
-			replacePlaceholders(i18n.send.assertion.minimum_eth_balance, {
+			replacePlaceholders(i18n.send.assertion.minimum_cketh_balance, {
 				$amount: formatToken({
 					value: estimatedFee,
-					unitName: tokenDecimals,
-					displayDecimals: tokenDecimals
+					unitName: decimals,
+					displayDecimals: decimals
 				}),
-				$symbol: tokenSymbol
+				$symbol: symbol
 			})
 		);
 	}

@@ -6,12 +6,12 @@
 	import IcSendReview from './IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import { authStore } from '$lib/stores/auth.store';
-	import type { IcToken } from '$icp/types/ic';
+	import type { IcCkToken, IcToken } from '$icp/types/ic';
 	import type { NetworkId } from '$lib/types/network';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import type { IcTransferParams } from '$icp/types/ic-send';
@@ -43,6 +43,9 @@
 		initEthereumFeeStore,
 		type EthereumFeeContext as EthereumFeeContextType
 	} from '$icp/stores/ethereum-fee.store';
+	import { writable } from 'svelte/store';
+	import type { LedgerCanisterIdText } from '$icp/types/canister';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
 
 	/**
 	 * Props
@@ -171,8 +174,20 @@
 		store: initBitcoinFeeStore()
 	});
 
+	let feeLedgerCanisterId: LedgerCanisterIdText | undefined;
+	$: feeLedgerCanisterId = ($token as IcCkToken).feeLedgerCanisterId;
+
+	let tokenCkEth: IcToken | undefined;
+	$: tokenCkEth = nonNullish(feeLedgerCanisterId)
+		? $icrcTokens.find(({ ledgerCanisterId }) => ledgerCanisterId === feeLedgerCanisterId)
+		: undefined;
+
+	let tokenCkEthStore = writable<IcToken | undefined>(undefined);
+	$: tokenCkEthStore.set(tokenCkEth);
+
 	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
-		store: initEthereumFeeStore()
+		store: initEthereumFeeStore(),
+		tokenCkEthStore
 	});
 </script>
 
