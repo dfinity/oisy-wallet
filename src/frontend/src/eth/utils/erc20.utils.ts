@@ -5,7 +5,6 @@ import uniswap from '$eth/assets/uniswap.svg';
 import usdt from '$eth/assets/usdt.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
-import usdc from '$icp-eth/assets/usdc.svg';
 import type { Token } from '$lib/types/token';
 
 export const mapErc20Token = ({
@@ -28,9 +27,6 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 	switch (symbol.toLowerCase()) {
 		case 'uni':
 			return uniswap;
-		case 'usdc':
-			// TODO: to be removed when USDC with twin token is proposed on mainnet
-			return usdc;
 		case 'usdt':
 			return usdt;
 		case 'dai':
