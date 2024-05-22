@@ -2,7 +2,7 @@ import { CKBTC_EXPLORER_URL, CKETH_EXPLORER_URL } from '$env/explorers.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import ckErc20Tokens from '$env/tokens.ckerc20.json';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import { SEPOLIA_USDC_TOKEN } from '$env/tokens.erc20.env';
+import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens.erc20.env';
 import { envTokensCkErc20 } from '$icp/types/env-token-ckerc20';
 import type { IcCkInterface } from '$icp/types/ic';
 import { LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
@@ -181,6 +181,13 @@ export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
 
 const ckErc20 = envTokensCkErc20.safeParse(ckErc20Tokens);
 
+export const IC_CKUSDC_LEDGER_CANISTER_ID = ckErc20.success
+	? ckErc20.data.production.ckUSDC?.ledgerCanisterId
+	: undefined;
+export const IC_CKUSDC_INDEX_CANISTER_ID = ckErc20.success
+	? ckErc20.data.production.ckUSDC?.indexCanisterId
+	: undefined;
+
 export const STAGING_CKUSDC_LEDGER_CANISTER_ID = ckErc20.success
 	? ckErc20.data.staging.ckSepoliaUSDC?.ledgerCanisterId
 	: undefined;
@@ -203,7 +210,7 @@ const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 				indexCanisterId: LOCAL_CKUSDC_INDEX_CANISTER_ID,
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
-				position: 4,
+				position: 3,
 				twinToken: SEPOLIA_USDC_TOKEN
 			}
 		: undefined;
@@ -218,8 +225,24 @@ const CKUSDC_STAGING_DATA: IcCkInterface | undefined =
 				indexCanisterId: STAGING_CKUSDC_INDEX_CANISTER_ID,
 				minterCanisterId: STAGING_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
-				position: 3,
+				position: 2,
 				twinToken: SEPOLIA_USDC_TOKEN
+			}
+		: undefined;
+
+const CKUSDC_IC_DATA: IcCkInterface | undefined =
+	(STAGING || PROD) &&
+	nonNullish(IC_CKUSDC_LEDGER_CANISTER_ID) &&
+	nonNullish(IC_CKUSDC_INDEX_CANISTER_ID) &&
+	nonNullish(IC_CKETH_MINTER_CANISTER_ID)
+		? {
+				ledgerCanisterId: IC_CKUSDC_LEDGER_CANISTER_ID,
+				indexCanisterId: IC_CKUSDC_INDEX_CANISTER_ID,
+				minterCanisterId: IC_CKETH_MINTER_CANISTER_ID,
+				exchangeCoinId: 'ethereum',
+				position: 1,
+				twinToken: USDC_TOKEN,
+				explorerUrl: `${CKETH_EXPLORER_URL}/${IC_CKUSDC_LEDGER_CANISTER_ID}`
 			}
 		: undefined;
 
@@ -229,6 +252,7 @@ export const CKUSDC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 ];
 
 export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
+	...(nonNullish(IC_CKUSDC_LEDGER_CANISTER_ID) ? [IC_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...CKUSDC_LEDGER_CANISTER_TESTNET_IDS
 ];
 
@@ -244,5 +268,6 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKETH_STAGING_DATA) ? [CKETH_STAGING_DATA] : []),
 	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : []),
 	...(nonNullish(CKUSDC_LOCAL_DATA) ? [CKUSDC_LOCAL_DATA] : []),
-	...(nonNullish(CKUSDC_STAGING_DATA) ? [CKUSDC_STAGING_DATA] : [])
+	...(nonNullish(CKUSDC_STAGING_DATA) ? [CKUSDC_STAGING_DATA] : []),
+	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : [])
 ];
