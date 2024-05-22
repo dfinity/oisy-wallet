@@ -16,7 +16,7 @@
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import {
 		assertCkETHBalanceEstimatedFee,
-		assertCkEthMinFee,
+		assertCkETHMinFee,
 		assertCkETHMinWithdrawalAmount
 	} from '$icp/utils/cketh.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
@@ -93,7 +93,7 @@
 		}
 
 		if (isNetworkIdEthereum(networkId)) {
-			return assertCkEthMinFee({
+			return assertCkETHMinFee({
 				amount: userAmount,
 				tokenSymbol: $tokenSymbol,
 				fee,
