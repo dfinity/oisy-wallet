@@ -38,6 +38,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
+	import {
+		ETHEREUM_FEE_CONTEXT_KEY,
+		initEthereumFeeStore,
+		type EthereumFeeContext as EthereumFeeContextType
+	} from '$icp/stores/ethereum-fee.store';
 
 	/**
 	 * Props
@@ -159,13 +164,15 @@
 		});
 
 	/**
-	 * Btc Fee context store
+	 * Init bitcoin and Ethereum fee context stores
 	 */
 
-	let storeFeeData = initBitcoinFeeStore();
-
 	setContext<BitcoinFeeContextType>(BITCOIN_FEE_CONTEXT_KEY, {
-		store: storeFeeData
+		store: initBitcoinFeeStore()
+	});
+
+	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
+		store: initEthereumFeeStore()
 	});
 </script>
 
