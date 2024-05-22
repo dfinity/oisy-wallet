@@ -1,35 +1,35 @@
-import type { QrResponse, QrResult } from '$lib/types/qr-code';
+import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 import { decodePayment } from '@dfinity/ledger-icrc';
 import { isNullish, nonNullish, type Token } from '@dfinity/utils';
 
 export const decodeQrCode = ({
-	result,
+	status,
 	code,
-	requiredToken
+	expectedToken
 }: {
-	result: QrResult;
+	status: QrStatus;
 	code?: string | undefined;
-	requiredToken?: Token | undefined;
+	expectedToken?: Token;
 }): QrResponse => {
-	if (result !== 'success') {
-		return { result };
+	if (status !== 'success') {
+		return { status };
 	}
 
 	if (isNullish(code)) {
-		return { result: 'cancelled' };
+		return { status: 'cancelled' };
 	}
 
 	const payment = decodePayment(code);
 
 	if (isNullish(payment)) {
-		return { result: 'success', identifier: code };
+		return { status: 'success', destination: code };
 	}
 
-	const { token, identifier, amount } = payment;
+	const { token, identifier: destination, amount } = payment;
 
-	if (nonNullish(requiredToken) && token.toLowerCase() !== requiredToken.symbol.toLowerCase()) {
-		return { result: 'token_incompatible' };
+	if (nonNullish(expectedToken) && token.toLowerCase() !== expectedToken.symbol.toLowerCase()) {
+		return { status: 'token_incompatible' };
 	}
 
-	return { result: 'success', identifier, token, amount };
+	return { status: 'success', destination, token, amount };
 };

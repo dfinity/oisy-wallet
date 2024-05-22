@@ -20,25 +20,25 @@ describe('decodeQrCode', () => {
 	});
 
 	it('should return { result } when result is not success', () => {
-		const response = decodeQrCode({ result: 'cancelled' });
-		expect(response).toEqual({ result: 'cancelled' });
+		const response = decodeQrCode({ status: 'cancelled' });
+		expect(response).toEqual({ status: 'cancelled' });
 	});
 
-	it('should return { result: "cancelled" } when code is nullish', () => {
-		const response = decodeQrCode({ result: 'success', code: undefined });
-		expect(response).toEqual({ result: 'cancelled' });
+	it('should return { status: "cancelled" } when code is nullish', () => {
+		const response = decodeQrCode({ status: 'success', code: undefined });
+		expect(response).toEqual({ status: 'cancelled' });
 	});
 
-	it('should return { result: "success", identifier: code } when payment is nullish', () => {
+	it('should return { status: "success", identifier: code } when payment is nullish', () => {
 		mockDecodePayment.mockReturnValue(undefined);
 
-		const response = decodeQrCode({ result: 'success', code });
-		expect(response).toEqual({ result: 'success', identifier: code });
+		const response = decodeQrCode({ status: 'success', code });
+		expect(response).toEqual({ status: 'success', destination: code });
 
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);
 	});
 
-	it('should return { result: "token_incompatible" } when tokens do not match', () => {
+	it('should return { status: "token_incompatible" } when tokens do not match', () => {
 		const payment = {
 			token: `not-${token.symbol}`,
 			identifier: address,
@@ -46,12 +46,12 @@ describe('decodeQrCode', () => {
 		};
 		mockDecodePayment.mockReturnValue(payment);
 
-		const response = decodeQrCode({ result: 'success', code: code, requiredToken: token });
-		expect(response).toEqual({ result: 'token_incompatible' });
+		const response = decodeQrCode({ status: 'success', code: code, expectedToken: token });
+		expect(response).toEqual({ status: 'token_incompatible' });
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);
 	});
 
-	it('should return { result: "success", identifier, token, amount } when everything matches', () => {
+	it('should return { status: "success", identifier, token, amount } when everything matches', () => {
 		const payment = {
 			token: token.symbol,
 			identifier: address,
@@ -59,11 +59,10 @@ describe('decodeQrCode', () => {
 		};
 		mockDecodePayment.mockReturnValue(payment);
 
-		const requiredToken = token;
-		const response = decodeQrCode({ result: 'success', code: code, requiredToken });
+		const response = decodeQrCode({ status: 'success', code: code, expectedToken: token });
 		expect(response).toEqual({
-			result: 'success',
-			identifier: address,
+			status: 'success',
+			destination: address,
 			token: token.symbol,
 			amount: amount
 		});

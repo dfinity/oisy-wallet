@@ -1,8 +1,8 @@
-export type QrResult = 'success' | 'cancelled' | 'token_incompatible';
+export type QrStatus = 'success' | 'cancelled' | 'token_incompatible';
 
 export type QrResponse = {
-	result: QrResult;
-	identifier?: string;
+	status: QrStatus;
+	destination?: string;
 	token?: string;
 	amount?: number;
 };
