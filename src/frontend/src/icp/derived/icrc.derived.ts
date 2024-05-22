@@ -1,6 +1,7 @@
 import {
 	CKBTC_LEDGER_CANISTER_TESTNET_IDS,
-	CKETH_LEDGER_CANISTER_TESTNET_IDS
+	CKETH_LEDGER_CANISTER_TESTNET_IDS,
+	CKUSDC_LEDGER_CANISTER_TESTNET_IDS
 } from '$env/networks.ircrc.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
@@ -16,9 +17,11 @@ export const icrcDefaultTokens: Readable<IcToken[]> = derived(
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
 			({ ledgerCanisterId }) =>
 				$testnets ||
-				![...CKBTC_LEDGER_CANISTER_TESTNET_IDS, ...CKETH_LEDGER_CANISTER_TESTNET_IDS].includes(
-					ledgerCanisterId
-				)
+				![
+					...CKBTC_LEDGER_CANISTER_TESTNET_IDS,
+					...CKETH_LEDGER_CANISTER_TESTNET_IDS,
+					...CKUSDC_LEDGER_CANISTER_TESTNET_IDS
+				].includes(ledgerCanisterId)
 		)
 );
 
