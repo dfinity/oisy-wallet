@@ -1,7 +1,9 @@
 import { CKBTC_EXPLORER_URL, CKETH_EXPLORER_URL } from '$env/explorers.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
+import ckErc20Tokens from '$env/tokens.ckerc20.json';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens.erc20.env';
+import {SEPOLIA_USDC_TOKEN, USDC_TOKEN} from '$env/tokens.erc20.env';
+import { envTokensCkErc20 } from '$icp/types/env-token-ckerc20';
 import type { IcCkInterface } from '$icp/types/ic';
 import { LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -177,18 +179,22 @@ export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
  * ckERC20
  */
 
+const ckErc20 = envTokensCkErc20.safeParse(ckErc20Tokens);
+
 export const IC_CKUSDC_LEDGER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKETH_LEDGER_CANISTER_ID as CanisterIdText | null | undefined) ??
-	'ss2fx-dyaaa-aaaar-qacoq-cai';
+    (import.meta.env.VITE_IC_CKETH_LEDGER_CANISTER_ID as CanisterIdText | null | undefined) ??
+    'ss2fx-dyaaa-aaaar-qacoq-cai';
 
 export const IC_CKUSDC_INDEX_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKETH_INDEX_CANISTER_ID as CanisterIdText | null | undefined) ??
-	's3zol-vqaaa-aaaar-qacpa-cai';
+    (import.meta.env.VITE_IC_CKETH_INDEX_CANISTER_ID as CanisterIdText | null | undefined) ??
+    's3zol-vqaaa-aaaar-qacpa-cai';
 
-export const STAGING_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKUSDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
-export const STAGING_CKUSDC_INDEX_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKUSDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
+export const STAGING_CKUSDC_LEDGER_CANISTER_ID = ckErc20.success
+    ? ckErc20.data.staging.ckSepoliaUSDC?.ledgerCanisterId
+    : undefined;
+export const STAGING_CKUSDC_INDEX_CANISTER_ID = ckErc20.success
+    ? ckErc20.data.staging.ckSepoliaUSDC?.indexCanisterId
+    : undefined;
 
 export const LOCAL_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKUSDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;

@@ -1,0 +1,61 @@
+name: Update Tokens
+
+on:
+  schedule:
+    - cron: '30 3 * * MON'
+  workflow_dispatch:
+
+jobs:
+  update-tokens-sns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Update
+        run: npm run build:tokens-sns
+
+      - name: Check for Changes
+        run: |
+          if ! git diff --quiet; then
+            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
+          fi
+
+      # This action creates a PR only if there are changes.
+      - name: Create Pull Request
+        if: env.CHANGES_DETECTED == 'true'
+        uses: ./.github/actions/create-pr
+        with:
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+          branch: bot-tokens-sns-update
+          title: 'build: Update Sns Tokens'
+          body: |
+            Modifications have been made to the icons and metadata of the Icrc tokens known to the Sns-Aggregator.
+
+  update-tokens-ckerc20:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Update
+        run: npm run build:tokens-ckerc20
+
+      - name: Check for Changes
+        run: |
+          if ! git diff --quiet; then
+            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
+          fi
+
+      # This action creates a PR only if there are changes.
+      - name: Create Pull Request
+        if: env.CHANGES_DETECTED == 'true'
+        uses: ./.github/actions/create-pr
+        with:
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+          branch: bot-tokens-ckerc20-update
+          title: 'build: Update ckErc20 Tokens'
+          body: |
+            Modifications have been made to the list of ckErc20 tokens deployed by the Orchestrator.

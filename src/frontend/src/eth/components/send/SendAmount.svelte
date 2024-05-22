@@ -63,7 +63,7 @@
 		: (): number =>
 				getMaxTransactionAmount({
 					balance: $sendBalance?.toBigInt(),
-					fee: $maxGasFee.toBigInt(),
+					fee: $maxGasFee?.toBigInt(),
 					tokenDecimals: $sendTokenDecimals,
 					tokenStandard: $sendTokenStandard
 				});
