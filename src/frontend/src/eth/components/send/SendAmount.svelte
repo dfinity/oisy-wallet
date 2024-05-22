@@ -26,7 +26,7 @@
 		maxGasFee,
 		evaluateFee
 	} = getContext<FeeContext>(FEE_CONTEXT_KEY);
-	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenStandard } =
+	const { sendTokenDecimals, sendBalance, sendTokenId, sendTokenStandard } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
