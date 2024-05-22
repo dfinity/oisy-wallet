@@ -24,11 +24,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
-	import {
-		ckEthereumNativeToken,
-		ckEthereumNativeTokenBalance,
-		ckEthereumNativeTokenId
-	} from '$icp-eth/derived/cketh.derived';
+	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import { getContext } from 'svelte';
