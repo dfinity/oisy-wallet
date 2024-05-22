@@ -68,11 +68,10 @@ export type IcCkInterface = IcInterface & IcCkMetadata;
 
 export type IcCkMetadata = {
 	minterCanisterId: MinterCanisterIdText;
-} & Partial<IcCkLinkedAssets>;
+} & Partial<IcCkTwinToken>;
 
-export type IcCkLinkedAssets = {
+export type IcCkTwinToken = {
 	twinToken: Token;
-	feeLedgerCanisterId?: LedgerCanisterIdText;
 };
 
 export type IcAppMetadata = {
