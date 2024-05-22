@@ -125,22 +125,12 @@
 		"ckusdc_ledger": {
 			"type": "custom",
 			"candid": "target/ic/cketh_ledger.did",
-			"wasm": "target/ic/cketh_ledger.wasm",
-			"remote": {
-				"id": {
-					"staging": "yfumr-cyaaa-aaaar-qaela-cai"
-				}
-			}
+			"wasm": "target/ic/cketh_ledger.wasm"
 		},
 		"ckusdc_index": {
 			"type": "custom",
 			"candid": "target/ic/cketh_index.did",
-			"wasm": "target/ic/cketh_index.wasm",
-			"remote": {
-				"id": {
-					"staging": "ycvkf-paaaa-aaaar-qaelq-cai"
-				}
-			}
+			"wasm": "target/ic/cketh_index.wasm"
 		}
 	},
 	"defaults": {
