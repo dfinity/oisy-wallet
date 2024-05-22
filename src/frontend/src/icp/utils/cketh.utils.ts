@@ -1,4 +1,5 @@
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
+import type { EthereumFeeStoreData } from '$icp/stores/ethereum-fee.store';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -76,6 +77,44 @@ export const assertCkEthereumMinFee = ({
 	if (BigNumber.from(fee).gt(amount)) {
 		return new IcAmountAssertionError(
 			replacePlaceholders(i18n.send.assertion.minimum_ledger_fees, {
+				$symbol: tokenSymbol
+			})
+		);
+	}
+
+	return undefined;
+};
+
+export const assertCkETHBalanceEstimatedFee = ({
+	balance,
+	tokenDecimals,
+	tokenSymbol,
+	feeStoreData,
+	i18n
+}: {
+	balance: BigNumber | undefined | null;
+	tokenDecimals: number;
+	tokenSymbol: string;
+	feeStoreData: EthereumFeeStoreData;
+	i18n: I18n;
+}): IcAmountAssertionError | undefined => {
+	const ethBalance = balance ?? BigNumber.from(0n);
+
+	// We skip validation checks here for zero balance because it makes the UI/UX ungraceful if the balance is just not yet loaded.
+	if (ethBalance.isZero()) {
+		return undefined;
+	}
+
+	const estimatedFee = BigNumber.from(feeStoreData?.maxTransactionFee ?? 0n);
+
+	if (estimatedFee.gt(ethBalance)) {
+		return new IcAmountAssertionError(
+			replacePlaceholders(i18n.send.assertion.minimum_eth_balance, {
+				$amount: formatToken({
+					value: estimatedFee,
+					unitName: tokenDecimals,
+					displayDecimals: tokenDecimals
+				}),
 				$symbol: tokenSymbol
 			})
 		);

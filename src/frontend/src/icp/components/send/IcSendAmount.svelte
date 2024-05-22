@@ -14,15 +14,28 @@
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { assertCkEthereumMinFee, assertCkETHMinWithdrawalAmount } from '$icp/utils/cketh.utils';
+	import {
+		assertCkETHBalanceEstimatedFee,
+		assertCkEthereumMinFee,
+		assertCkETHMinWithdrawalAmount
+	} from '$icp/utils/cketh.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
-	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumNativeToken,
+		ckEthereumNativeTokenBalance,
+		ckEthereumNativeTokenId
+	} from '$icp-eth/derived/cketh.derived';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import { getContext } from 'svelte';
+	import {
+		ETHEREUM_FEE_CONTEXT_KEY,
+		type EthereumFeeContext
+	} from '$icp/stores/ethereum-fee.store';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -30,6 +43,8 @@
 
 	let fee: bigint | undefined;
 	$: fee = ($token as IcToken).fee;
+
+	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (isNullish(fee)) {
@@ -64,8 +79,17 @@
 		}
 
 		if (isNetworkIdEthereum(networkId) && $tokenCkErc20Ledger) {
-			// TODO: if ckErc20 -> balance de ckETH >= fee ledger ckEth + estimated ethereum fee
-			// maxTransactionFeePlusEthLedgerApprove
+			let error = assertCkETHBalanceEstimatedFee({
+				balance: $ckEthereumNativeTokenBalance,
+				tokenDecimals: $ckEthereumNativeToken.decimals,
+				tokenSymbol: $ckEthereumNativeToken.symbol,
+				feeStoreData: $store,
+				i18n: $i18n
+			});
+
+			if (nonNullish(error)) {
+				return error;
+			}
 		}
 
 		if (isNetworkIdEthereum(networkId)) {
