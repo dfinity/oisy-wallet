@@ -5,15 +5,6 @@ import { expect } from 'vitest';
 import en from '../../mocks/i18n.mock';
 
 describe('SendInputAmount', () => {
-	beforeEach(() => {
-		vi.useFakeTimers();
-	});
-
-	afterEach(() => {
-		vi.runOnlyPendingTimers();
-		vi.useRealTimers();
-	});
-
 	const amount = 10.25;
 
 	const props = {
@@ -88,8 +79,6 @@ describe('SendInputAmount', () => {
 		await waitFor(() => {
 			expect(customValidate).toHaveBeenCalledTimes(1);
 		});
-
-		vi.advanceTimersByTime(300);
 
 		component.$$.ctx[component.$$.props['triggerValidate']]();
 
