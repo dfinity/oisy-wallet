@@ -27,7 +27,7 @@
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenStandard } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	$: customValidate = (userAmount: BigNumber) => {
+	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (isNullish($storeFeeData)) {
 			return;
 		}
