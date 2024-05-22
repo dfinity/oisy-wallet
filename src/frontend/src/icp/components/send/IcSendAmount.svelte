@@ -44,7 +44,7 @@
 	let fee: bigint | undefined;
 	$: fee = ($token as IcToken).fee;
 
-	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
+	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (isNullish(fee)) {
@@ -83,7 +83,7 @@
 				balance: $ckEthereumNativeTokenBalance,
 				tokenDecimals: $ckEthereumNativeToken.decimals,
 				tokenSymbol: $ckEthereumNativeToken.symbol,
-				feeStoreData: $store,
+				feeStoreData: $ethereumFeeStore,
 				i18n: $i18n
 			});
 
@@ -118,10 +118,14 @@
 			tokenStandard: $tokenStandard
 		});
 	};
+
+	let sendInputAmount: SendInputAmount | undefined;
+	$: $ethereumFeeStore, (() => sendInputAmount?.triggerDebounceValidate())();
 </script>
 
 <SendInputAmount
 	bind:amount
+	bind:this={sendInputAmount}
 	tokenDecimals={$tokenDecimals}
 	{customValidate}
 	{calculateMax}

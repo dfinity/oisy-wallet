@@ -50,6 +50,8 @@
 	const debounceValidate = debounce(validate, 300);
 
 	$: amount, tokenDecimals, debounceValidate();
+
+	export const triggerDebounceValidate = debounceValidate;
 </script>
 
 <label for="amount" class="font-bold px-4.5">{$i18n.core.text.amount}</label>
