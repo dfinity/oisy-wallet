@@ -16,12 +16,12 @@
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import {
-		IC_FEE_CONTEXT_KEY,
-		type IcFeeContext as IcFeeContextType,
+		BITCOIN_FEE_CONTEXT_KEY,
+		type BitcoinFeeContext as BitcoinFeeContextType,
 		initBitcoinFeeStore
-	} from '$icp/stores/ic-fee.store';
+	} from '$icp/stores/bitcoin-fee.store';
 	import { setContext } from 'svelte';
-	import BitcoinFeeContext from '$icp/components/fee/IcFeeContext.svelte';
+	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { isNetworkIdBTC, isNetworkIdETH } from '$icp/utils/ic-send.utils';
@@ -37,6 +37,12 @@
 	} from '$lib/constants/analytics.contants';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
+	import {
+		ETHEREUM_FEE_CONTEXT_KEY,
+		initEthereumFeeStore,
+		type EthereumFeeContext as EthereumFeeContextType
+	} from '$icp/stores/ethereum-fee.store';
 
 	/**
 	 * Props
@@ -158,13 +164,15 @@
 		});
 
 	/**
-	 * Btc Fee context store
+	 * Init bitcoin and Ethereum fee context stores
 	 */
 
-	let storeFeeData = initBitcoinFeeStore();
+	setContext<BitcoinFeeContextType>(BITCOIN_FEE_CONTEXT_KEY, {
+		store: initBitcoinFeeStore()
+	});
 
-	setContext<IcFeeContextType>(IC_FEE_CONTEXT_KEY, {
-		store: storeFeeData
+	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
+		store: initEthereumFeeStore()
 	});
 </script>
 
@@ -177,19 +185,21 @@
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<BitcoinFeeContext {amount} {networkId}>
-		{#if currentStep?.name === 'Review'}
-			<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
-		{:else if currentStep?.name === 'Sending'}
-			<IcSendProgress bind:sendProgressStep {networkId} />
-		{:else}
-			<IcSendForm
-				on:icNext={modal.next}
-				on:icClose={close}
-				bind:destination
-				bind:amount
-				bind:networkId
-			/>
-		{/if}
-	</BitcoinFeeContext>
+	<EthereumFeeContext {networkId}>
+		<BitcoinFeeContext {amount} {networkId}>
+			{#if currentStep?.name === 'Review'}
+				<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
+			{:else if currentStep?.name === 'Sending'}
+				<IcSendProgress bind:sendProgressStep {networkId} />
+			{:else}
+				<IcSendForm
+					on:icNext={modal.next}
+					on:icClose={close}
+					bind:destination
+					bind:amount
+					bind:networkId
+				/>
+			{/if}
+		</BitcoinFeeContext>
+	</EthereumFeeContext>
 </WizardModal>
