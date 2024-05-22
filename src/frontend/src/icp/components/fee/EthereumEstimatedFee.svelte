@@ -46,6 +46,11 @@
 			? maxTransactionFeePlusEthLedgerApprove + CKERC20_TO_ERC20_MAX_TRANSACTION_FEE
 			: maxTransactionFeePlusEthLedgerApprove;
 
+	let feeSymbol: string;
+	$: feeSymbol = ckEr20
+		? tokenCkEth?.symbol ?? $ckEthereumNativeToken.symbol
+		: $ckEthereumNativeToken.symbol;
+
 	const loadFee = async () => {
 		clearTimer();
 
@@ -82,7 +87,7 @@
 							value: BigNumber.from(maxTransactionFee),
 							displayDecimals: EIGHT_DECIMALS
 						})}
-						{$ckEthereumNativeToken.symbol}
+						{feeSymbol}
 					</span>
 				{/if}
 			</div>
