@@ -177,6 +177,7 @@ interface I18nSend {
 		destination_network: string;
 		initializing_transaction: string;
 		convert_to_native_icp: string;
+		open_qr_modal: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
