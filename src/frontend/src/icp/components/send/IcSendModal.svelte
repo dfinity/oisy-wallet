@@ -37,6 +37,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
 
 	/**
 	 * Props
@@ -177,19 +178,21 @@
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<BitcoinFeeContext {amount} {networkId}>
-		{#if currentStep?.name === 'Review'}
-			<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
-		{:else if currentStep?.name === 'Sending'}
-			<IcSendProgress bind:sendProgressStep {networkId} />
-		{:else}
-			<IcSendForm
-				on:icNext={modal.next}
-				on:icClose={close}
-				bind:destination
-				bind:amount
-				bind:networkId
-			/>
-		{/if}
-	</BitcoinFeeContext>
+	<EthereumFeeContext {networkId}>
+		<BitcoinFeeContext {amount} {networkId}>
+			{#if currentStep?.name === 'Review'}
+				<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
+			{:else if currentStep?.name === 'Sending'}
+				<IcSendProgress bind:sendProgressStep {networkId} />
+			{:else}
+				<IcSendForm
+					on:icNext={modal.next}
+					on:icClose={close}
+					bind:destination
+					bind:amount
+					bind:networkId
+				/>
+			{/if}
+		</BitcoinFeeContext>
+	</EthereumFeeContext>
 </WizardModal>
