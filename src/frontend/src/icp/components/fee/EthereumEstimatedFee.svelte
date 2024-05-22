@@ -12,6 +12,21 @@
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
+	import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
+	import { token } from '$lib/derived/token.derived';
+	import type { IcToken } from '$icp/types/ic';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
+
+	let ckEr20 = false;
+	$: ckEr20 = isTokenCkErc20Ledger($token as IcToken);
+
+	let tokenCkEth: IcToken | undefined;
+	$: tokenCkEth = $icrcTokens.find(isTokenCkEthLedger);
+
+	let feeSymbol: string;
+	$: feeSymbol = ckEr20
+		? tokenCkEth?.symbol ?? $ckEthereumNativeToken.symbol
+		: $ckEthereumNativeToken.symbol;
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
@@ -32,7 +47,7 @@
 							value: BigNumber.from(maxTransactionFee),
 							displayDecimals: EIGHT_DECIMALS
 						})}
-						{$ckEthereumNativeToken.symbol}
+						{feeSymbol}
 					</span>
 				{/if}
 			</div>
