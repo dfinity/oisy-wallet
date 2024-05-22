@@ -47,6 +47,9 @@
 	--animation-time-short: 0.2s;
 	--secondary: var(--color-dark-blue);
 
+	// Toast message max height is calculated based on the font-size.
+	--font-size-standard: 1rem;
+
 	// Segment
 	--segment-selected-background: var(--color-dark);
 
