@@ -1,5 +1,5 @@
 import type { EthereumNetwork } from '$eth/types/network';
-import type { IcCkTwinToken, IcToken, IcTransactionUi } from '$icp/types/ic';
+import type { IcCkLinkedAssets, IcToken, IcTransactionUi } from '$icp/types/ic';
 import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -11,7 +11,7 @@ import { get } from 'svelte/store';
 export type MapCkEthereumPendingTransactionParams = {
 	transaction: Transaction;
 	token: IcToken;
-} & IcCkTwinToken;
+} & IcCkLinkedAssets;
 
 export const mapCkEthPendingTransaction = ({
 	transaction: { value, ...transaction },
@@ -42,7 +42,7 @@ const mapPendingTransaction = ({
 	transaction: Omit<Transaction, 'value' | 'data'>;
 	token: IcToken;
 	value: BigNumber;
-} & IcCkTwinToken): IcTransactionUi => {
+} & IcCkLinkedAssets): IcTransactionUi => {
 	const explorerUrl = (twinToken.network as EthereumNetwork).explorerUrl;
 
 	const { symbol: twinTokenSymbol } = twinToken;

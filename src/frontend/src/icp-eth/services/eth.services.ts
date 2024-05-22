@@ -12,7 +12,7 @@ import {
 	type MapCkEthereumPendingTransactionParams
 } from '$icp-eth/utils/cketh-transactions.utils';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-import type { IcCkTwinToken, IcToken, IcTransactionUi } from '$icp/types/ic';
+import type { IcCkLinkedAssets, IcToken, IcTransactionUi } from '$icp/types/ic';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -35,7 +35,7 @@ export const loadCkEthereumPendingTransactions = async ({
 	token: IcToken;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
-} & IcCkTwinToken) => {
+} & IcCkLinkedAssets) => {
 	const { id: twinTokenId } = twinToken;
 
 	if (isSupportedEthTokenId(twinTokenId)) {
@@ -61,7 +61,7 @@ const loadCkETHPendingTransactions = async ({
 	token: IcToken;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
-} & IcCkTwinToken) => {
+} & IcCkLinkedAssets) => {
 	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
 		CKETH_HELPER_CONTRACT_SIGNATURE,
 		null,
@@ -86,7 +86,7 @@ const loadCkErc20PendingTransactions = async ({
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 	token: IcToken;
-} & IcCkTwinToken) => {
+} & IcCkLinkedAssets) => {
 	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
 		CKERC20_HELPER_CONTRACT_SIGNATURE,
 		null,
@@ -118,7 +118,7 @@ const loadPendingTransactions = async ({
 	logsTopics: (to: ETH_ADDRESS) => (string | null)[];
 	token: IcToken;
 	mapPendingTransaction: (params: MapCkEthereumPendingTransactionParams) => IcTransactionUi;
-} & IcCkTwinToken) => {
+} & IcCkLinkedAssets) => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
 		return;
@@ -199,7 +199,7 @@ export const loadPendingCkEthereumTransaction = async ({
 	hash: string;
 	token: IcToken;
 	networkId: NetworkId;
-} & IcCkTwinToken) => {
+} & IcCkLinkedAssets) => {
 	try {
 		const { getTransaction } = alchemyProviders(networkId);
 		const transaction = await getTransaction(hash);
