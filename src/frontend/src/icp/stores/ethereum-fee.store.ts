@@ -1,4 +1,5 @@
-import type { Readable } from 'svelte/store';
+import type { IcToken } from '$icp/types/ic';
+import type { Readable, Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
 
 export type EthereumFeeStoreData =
@@ -26,6 +27,7 @@ export const initEthereumFeeStore = (): EthereumFeeStore => {
 
 export interface EthereumFeeContext {
 	store: EthereumFeeStore;
+	tokenCkEthStore: Writable<IcToken | undefined>;
 }
 
 export const ETHEREUM_FEE_CONTEXT_KEY = Symbol('ethereum-fee');
