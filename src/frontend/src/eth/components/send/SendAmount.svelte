@@ -10,9 +10,11 @@
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { InsufficientFundsError } from '$lib/types/send';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import type { Token } from '$lib/types/token';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
+	export let nativeEthereumToken: Token;
 
 	let insufficientFundsError: InsufficientFundsError | undefined = undefined;
 
@@ -49,7 +51,7 @@
 		}
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
-		const ethBalance = $balancesStore?.[$sendToken.id]?.data ?? BigNumber.from(0n);
+		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? BigNumber.from(0n);
 		if (nonNullish($maxGasFee) && ethBalance.lt($maxGasFee)) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees
