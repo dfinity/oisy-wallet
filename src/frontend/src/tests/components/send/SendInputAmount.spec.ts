@@ -66,6 +66,27 @@ describe('SendInputAmount', () => {
 		});
 	});
 
+	it('should imperatively trigger validation', async () => {
+		const customValidate = vi.fn();
+
+		const { component } = render(SendInputAmount, {
+			props: {
+				...props,
+				customValidate
+			}
+		});
+
+		await waitFor(() => {
+			expect(customValidate).toHaveBeenCalledTimes(1);
+		});
+
+		component.$$.ctx[component.$$.props['triggerValidate']]();
+
+		await waitFor(() => {
+			expect(customValidate).toHaveBeenCalledTimes(2);
+		});
+	});
+
 	it('should raise an error when the amount is not valid', async () => {
 		const { container } = render(SendInputAmount, { props });
 
