@@ -211,7 +211,10 @@ const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 				minterCanisterId: LOCAL_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 3,
-				twinToken: SEPOLIA_USDC_TOKEN
+				twinToken: SEPOLIA_USDC_TOKEN,
+				...(nonNullish(LOCAL_CKETH_LEDGER_CANISTER_ID) && {
+					feeLedgerCanisterId: LOCAL_CKETH_LEDGER_CANISTER_ID
+				})
 			}
 		: undefined;
 
@@ -226,7 +229,10 @@ const CKUSDC_STAGING_DATA: IcCkInterface | undefined =
 				minterCanisterId: STAGING_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 2,
-				twinToken: SEPOLIA_USDC_TOKEN
+				twinToken: SEPOLIA_USDC_TOKEN,
+				...(nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID) && {
+					feeLedgerCanisterId: STAGING_CKETH_LEDGER_CANISTER_ID
+				})
 			}
 		: undefined;
 
@@ -242,7 +248,10 @@ const CKUSDC_IC_DATA: IcCkInterface | undefined =
 				exchangeCoinId: 'ethereum',
 				position: 1,
 				twinToken: USDC_TOKEN,
-				explorerUrl: `${CKETH_EXPLORER_URL}/${IC_CKUSDC_LEDGER_CANISTER_ID}`
+				explorerUrl: `${CKETH_EXPLORER_URL}/${IC_CKUSDC_LEDGER_CANISTER_ID}`,
+				...(nonNullish(IC_CKETH_LEDGER_CANISTER_ID) && {
+					feeLedgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID
+				})
 			}
 		: undefined;
 
