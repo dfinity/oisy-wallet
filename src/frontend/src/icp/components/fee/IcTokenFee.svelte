@@ -3,18 +3,20 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
-	import type { IcToken } from '$icp/types/ic';
+	import type { IcCkToken, IcToken } from '$icp/types/ic';
 	import { nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import type { LedgerCanisterIdText } from '$icp/types/canister';
 
 	// IC network fees for ckErc20 tokens have to be paid in ckEth.
-	let ckEr20 = false;
-	$: ckEr20 = isTokenCkErc20Ledger($token as IcToken);
+	let feeLedgerCanisterId: LedgerCanisterIdText | undefined;
+	$: feeLedgerCanisterId = ($token as IcCkToken).feeLedgerCanisterId;
 
 	let tokenCkEth: IcToken | undefined;
-	$: tokenCkEth = ckEr20 ? $icrcTokens.find(isTokenCkEthLedger) : undefined;
+	$: tokenCkEth = nonNullish(feeLedgerCanisterId)
+		? $icrcTokens.find(({ ledgerCanisterId }) => ledgerCanisterId === feeLedgerCanisterId)
+		: undefined;
 
 	let feeToken: IcToken;
 	$: feeToken = tokenCkEth ?? ($token as IcToken);
