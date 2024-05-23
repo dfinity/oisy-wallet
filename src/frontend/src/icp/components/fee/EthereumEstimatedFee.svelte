@@ -15,15 +15,16 @@
 	import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
 	import { token } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
+	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 
 	let ckEr20 = false;
 	$: ckEr20 = isTokenCkErc20Ledger($token as IcToken);
 
-	const { store, tokenCkEthStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
+	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	let feeSymbol: string;
 	$: feeSymbol = ckEr20
-		? $tokenCkEthStore?.symbol ?? $ckEthereumNativeToken.symbol
+		? $ethereumFeeTokenCkEth?.symbol ?? $ckEthereumNativeToken.symbol
 		: $ckEthereumNativeToken.symbol;
 
 	let maxTransactionFee: bigint | undefined | null = undefined;
