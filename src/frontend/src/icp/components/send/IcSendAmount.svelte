@@ -33,6 +33,7 @@
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
 	import { balancesStore } from '$lib/stores/balances.store';
+	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -41,8 +42,7 @@
 	let fee: bigint | undefined;
 	$: fee = ($token as IcToken).fee;
 
-	const { store: ethereumFeeStore, tokenCkEthStore } =
-		getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
+	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (isNullish(fee)) {
@@ -103,10 +103,10 @@
 			}
 
 			const errorEstimatedFee = assertCkETHBalanceEstimatedFee({
-				balance: nonNullish($tokenCkEthStore)
-					? $balancesStore?.[$tokenCkEthStore.id]?.data
+				balance: nonNullish($ethereumFeeTokenCkEth)
+					? $balancesStore?.[$ethereumFeeTokenCkEth.id]?.data
 					: undefined,
-				tokenCkEth: $tokenCkEthStore,
+				tokenCkEth: $ethereumFeeTokenCkEth,
 				feeStoreData: $ethereumFeeStore,
 				i18n: $i18n
 			});
