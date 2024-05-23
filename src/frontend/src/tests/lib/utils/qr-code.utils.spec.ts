@@ -1,7 +1,56 @@
-import { decodeQrCode } from '$lib/utils/qr-code.utils';
+import type { EthereumNetwork } from '$eth/types/network';
+import { tokens } from '$lib/derived/tokens.derived';
+import type { DecodedUrn } from '$lib/types/qr-code';
+import { decodeQrCode, decodeUrn } from '$lib/utils/qr-code.utils';
 import { decodePayment } from '@dfinity/ledger-icrc';
+import { assertNonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 import type { MockedFunction } from 'vitest';
+import { generateUrn } from '../../mocks/qr-generator.mock';
 import { ICP_TOKEN } from '../../mocks/tokens.mock';
+
+describe('decodeUrn', () => {
+	const tokenList = get(tokens);
+	const destination = 'some-destination';
+	const amount = 1.23;
+
+	it('should return undefined for an invalid URN', () => {
+		const urn = 'invalidURN';
+		const result = decodeUrn(urn);
+		expect(result).toBeUndefined();
+	});
+
+	tokenList.forEach((token) => {
+		it(`should decode a basic URN for the token ${token.name}`, () => {
+			const urn = generateUrn(token, destination, { amount });
+			assertNonNullish(urn);
+
+			const result = decodeUrn(urn);
+
+			const standard = token.standard;
+			const expectedPrefix =
+				standard === 'erc20'
+					? 'ethereum'
+					: standard === 'icrc'
+						? token.name.toLowerCase()
+						: standard;
+			const expectedResult: DecodedUrn = {
+				prefix: expectedPrefix,
+				destination: destination,
+				amount: amount
+			};
+			if (standard === 'ethereum' || standard === 'erc20') {
+				expectedResult.networkId = (token.network as EthereumNetwork).chainId.toString();
+			}
+			if (standard === 'erc20' && 'address' in token) {
+				expectedResult.functionName = 'transfer';
+				expectedResult.address = token.address as string;
+			}
+
+			expect(result).toEqual(expectedResult);
+		});
+	});
+});
 
 const token = ICP_TOKEN;
 const address = 'some-address';
