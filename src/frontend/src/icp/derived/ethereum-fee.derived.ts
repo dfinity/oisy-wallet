@@ -5,7 +5,7 @@ import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * Ethereum fee for converting ckErc20 in ckEth are paid in ckEth.
+ * Ethereum fees for converting ckErc20 in ckEth are paid in ckEth.
  */
 export const ethereumFeeTokenCkEth: Readable<IcToken | undefined> = derived(
 	[token, icrcTokens],
