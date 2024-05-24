@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const readIds = ({
 	filePath,
@@ -119,3 +120,25 @@ export const readCanisterIds = (params: { prefix?: string }): Record<string, str
 	...readOisyCanisterIds(params),
 	...readRemoteCanisterIds(params)
 });
+
+export const defineViteReplacements = (): {
+	VITE_APP_VERSION: string;
+	VITE_DFX_NETWORK: string;
+} => {
+	const file = fileURLToPath(new URL('package.json', import.meta.url));
+	const json = readFileSync(file, 'utf8');
+	const { version } = JSON.parse(json);
+
+	// npm run dev = local
+	// npm run build = local
+	// npm run test = local
+	// dfx deploy = local
+	// dfx deploy --network ic = ic
+	// dfx deploy --network staging = staging
+	const network = process.env.DFX_NETWORK ?? 'local';
+
+	return {
+		VITE_APP_VERSION: JSON.stringify(version),
+		VITE_DFX_NETWORK: JSON.stringify(network)
+	};
+};

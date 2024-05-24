@@ -1,8 +1,9 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
-import type { UserConfig } from 'vite';
+import { type UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
+import { defineViteReplacements } from './vite.utils';
 
 export default defineConfig(
 	(): UserConfig => ({
@@ -38,6 +39,9 @@ export default defineConfig(
 					replacement: resolve(__dirname, 'src/frontend/src/env')
 				}
 			]
+		},
+		define: {
+			...defineViteReplacements()
 		},
 		test: {
 			environment: 'jsdom',
