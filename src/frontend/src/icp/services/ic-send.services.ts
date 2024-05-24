@@ -101,7 +101,7 @@ const sendIcrc = async ({
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
 	if (!validIcrcAddress) {
-		throw new Error(get(i18n).send.error.invalid_address);
+		throw new Error(get(i18n).send.error.invalid_destination);
 	}
 
 	progress(SendIcStep.SEND);
@@ -125,7 +125,7 @@ const sendIcp = async ({
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
 	if (!validIcrcAddress && !validIcpAddress) {
-		throw new Error(get(i18n).send.error.invalid_address);
+		throw new Error(get(i18n).send.error.invalid_destination);
 	}
 
 	progress(SendIcStep.SEND);

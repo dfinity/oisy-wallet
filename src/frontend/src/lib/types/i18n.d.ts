@@ -216,7 +216,7 @@ interface I18nSend {
 		erc20_data_undefined: string;
 		data_undefined: string;
 		no_identity_calculate_fee: string;
-		invalid_address: string;
+		invalid_destination: string;
 	};
 }
 
