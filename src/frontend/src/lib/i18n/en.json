@@ -242,7 +242,7 @@
 			"erc20_data_undefined": "Erc20 transaction Data cannot be undefined or null.",
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
-			"invalid_address": "The address is invalid. Please try again with a valid address identifier."
+			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination."
 		}
 	},
 	"convert": {
