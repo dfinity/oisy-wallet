@@ -1,16 +1,9 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { svelteTesting } from '@testing-library/svelte/vite';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { resolve } from 'path';
-import type { UserConfig } from 'vite';
+import { type UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
-
-const file = fileURLToPath(new URL('package.json', import.meta.url));
-const json = readFileSync(file, 'utf8');
-const { version } = JSON.parse(json);
-
-const network = process.env.DFX_NETWORK ?? 'local';
+import { defineViteReplacements } from './vite.utils';
 
 export default defineConfig(
 	(): UserConfig => ({
@@ -48,8 +41,7 @@ export default defineConfig(
 			]
 		},
 		define: {
-			VITE_APP_VERSION: JSON.stringify(version),
-			VITE_DFX_NETWORK: JSON.stringify(network)
+			...defineViteReplacements()
 		},
 		test: {
 			environment: 'jsdom',
