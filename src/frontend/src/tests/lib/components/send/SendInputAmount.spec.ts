@@ -2,7 +2,7 @@ import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { expect } from 'vitest';
-import en from '../../mocks/i18n.mock';
+import en from '../../../mocks/i18n.mock';
 
 describe('SendInputAmount', () => {
 	const amount = 10.25;
@@ -63,6 +63,27 @@ describe('SendInputAmount', () => {
 		await waitFor(() => {
 			const input: HTMLInputElement | null = container.querySelector(inputSelector);
 			expect(input?.value).toBe(props.calculateMax().toString());
+		});
+	});
+
+	it('should imperatively trigger validation', async () => {
+		const customValidate = vi.fn();
+
+		const { component } = render(SendInputAmount, {
+			props: {
+				...props,
+				customValidate
+			}
+		});
+
+		await waitFor(() => {
+			expect(customValidate).toHaveBeenCalledTimes(1);
+		});
+
+		component.$$.ctx[component.$$.props['triggerValidate']]();
+
+		await waitFor(() => {
+			expect(customValidate).toHaveBeenCalledTimes(2);
 		});
 	});
 

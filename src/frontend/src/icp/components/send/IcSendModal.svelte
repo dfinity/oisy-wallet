@@ -164,12 +164,16 @@
 		});
 
 	/**
-	 * Init bitcoin and Ethereum fee context stores
+	 * Bitcoin fee context store
 	 */
 
 	setContext<BitcoinFeeContextType>(BITCOIN_FEE_CONTEXT_KEY, {
 		store: initBitcoinFeeStore()
 	});
+
+	/**
+	 * Ethereum fee context store
+	 */
 
 	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
 		store: initEthereumFeeStore()

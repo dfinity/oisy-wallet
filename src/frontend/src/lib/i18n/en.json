@@ -221,6 +221,8 @@
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
 			"minimum_ledger_fees": "The amount falls below the ledger fees $symbol.",
+			"minimum_cketh_balance": "The $symbol balance falls below the estimated fee of $amount.",
+			"unknown_cketh": "The ckETH token cannot be retrieved.",
 			"destination_address_invalid": "Destination address is invalid.",
 			"amount_invalid": "Amount is invalid.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
@@ -241,7 +243,7 @@
 			"erc20_data_undefined": "Erc20 transaction Data cannot be undefined or null.",
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
-			"invalid_address": "The address is invalid. Please try again with a valid address identifier.",
+			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
 			"incompatible_token": "The token is incompatible. Please try again with a compatible token."
 		}
 	},

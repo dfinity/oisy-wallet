@@ -195,6 +195,8 @@ interface I18nSend {
 		minimum_ckbtc_amount: string;
 		minimum_cketh_amount: string;
 		minimum_ledger_fees: string;
+		minimum_cketh_balance: string;
+		unknown_cketh: string;
 		destination_address_invalid: string;
 		amount_invalid: string;
 		insufficient_funds_for_gas: string;
@@ -215,7 +217,7 @@ interface I18nSend {
 		erc20_data_undefined: string;
 		data_undefined: string;
 		no_identity_calculate_fee: string;
-		invalid_address: string;
+		invalid_destination: string;
 		incompatible_token: string;
 	};
 }
