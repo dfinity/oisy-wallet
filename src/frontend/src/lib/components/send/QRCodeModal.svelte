@@ -14,13 +14,13 @@
 	export let steps: WizardSteps;
 	export let currentStep: WizardStep | undefined = undefined;
 
-	const STEP_QRCODE = 'QRCode';
+	let qrCodeStep = 'Scan QR Code';
 
 	let stepsPlusQr: WizardSteps;
 	$: stepsPlusQr = [
 		...steps,
 		{
-			name: STEP_QRCODE,
+			name: qrCodeStep,
 			title: $i18n.send.text.scan_qr
 		}
 	];
@@ -28,7 +28,10 @@
 	let modal: WizardModal;
 
 	const goToStep = (stepName: string) => {
-		const stepNumber = stepsPlusQr.findIndex(({ name }) => name === stepName);
+		const stepNumber = Math.max(
+			stepsPlusQr.findIndex(({ name }) => name === stepName),
+			0
+		);
 		modal.set(stepNumber);
 	};
 
@@ -36,13 +39,9 @@
 		| (({ status, code }: { status: QrStatus; code?: string }) => void)
 		| undefined = undefined;
 
-	export const scanQrCode = async ({
-		expectedToken
-	}: {
-		expectedToken: Token;
-	}): Promise<QrResponse> => {
+	export const scanQrCode = ({ expectedToken }: { expectedToken: Token }): Promise<QrResponse> => {
 		const prevStep = currentStep;
-		goToStep(STEP_QRCODE);
+		goToStep(qrCodeStep);
 
 		return new Promise<{ status: QrStatus; code?: string | undefined }>((resolve) => {
 			resolveQrCodePromise = resolve;
@@ -52,7 +51,7 @@
 					toastsError({
 						msg: { text: $i18n.send.error.incompatible_token }
 					});
-					return Promise.reject(new Error('Token incompatible'));
+					return Promise.reject(new Error($i18n.send.error.incompatible_token));
 				}
 				return decodeQrCode({ status, code, expectedToken });
 			})
@@ -79,7 +78,7 @@
 	disablePointerEvents={currentStep?.name === 'Sending'}
 >
 	<svelte:fragment slot="title">{$i18n.send.text.scan_qr}</svelte:fragment>
-	{#if currentStep?.name === STEP_QRCODE}
+	{#if currentStep?.name === qrCodeStep}
 		<QRCodeReaderModal on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
 	{/if}
 </WizardModal>
