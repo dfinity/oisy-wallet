@@ -1,13 +1,13 @@
+import { ICP_TOKEN } from '$env/tokens.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';
-import { decodeQrCode, decodeUrn } from '$lib/utils/qr-code.utils';
+import { decodeQrCode, decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { decodePayment } from '@dfinity/ledger-icrc';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import type { MockedFunction } from 'vitest';
 import { generateUrn } from '../../mocks/qr-generator.mock';
-import { ICP_TOKEN } from '../../mocks/tokens.mock';
 
 describe('decodeUrn', () => {
 	const tokenList = get(tokens);
@@ -16,7 +16,7 @@ describe('decodeUrn', () => {
 
 	it('should return undefined for an invalid URN', () => {
 		const urn = 'invalidURN';
-		const result = decodeUrn(urn);
+		const result = decodeQrCodeUrn(urn);
 		expect(result).toBeUndefined();
 	});
 
@@ -25,7 +25,7 @@ describe('decodeUrn', () => {
 			const urn = generateUrn(token, destination, { amount });
 			assertNonNullish(urn);
 
-			const result = decodeUrn(urn);
+			const result = decodeQrCodeUrn(urn);
 
 			const standard = token.standard;
 			const expectedPrefix =

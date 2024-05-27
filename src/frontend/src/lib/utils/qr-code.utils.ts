@@ -1,6 +1,7 @@
 import {
-	urnNumericParams,
-	urnStringParams,
+	DecodedUrnSchema,
+	URN_NUMERIC_PARAMS,
+	URN_STRING_PARAMS,
 	type DecodedUrn,
 	type QrResponse,
 	type QrStatus
@@ -8,7 +9,21 @@ import {
 import { decodePayment } from '@dfinity/ledger-icrc';
 import { isNullish, nonNullish, type Token } from '@dfinity/utils';
 
-export const decodeUrn = (urn: string): DecodedUrn | undefined => {
+/**
+ * Decodes a URN string into a DecodedUrn object, breaking it down into its components.
+ *
+ * The URN string is expected to follow the pattern defined by the regex:
+ * /^([a-zA-Z]+):([a-zA-Z0-9\-.]+)(@(\d+))?(\/([a-zA-Z]+))?(\?(.*))?$/
+ *
+ * This regex pattern is inspired by multiple sources with each respective URN scheme:
+ * - For IC: https://github.com/dfinity/ICRC/issues/22
+ * - For ETH: https://eips.ethereum.org/EIPS/eip-681
+ * - For BTC: https://github.com/bitcoin/bips/blob/master/bip-0021.mediawiki
+ *
+ * @param {string} urn - The URN string to decode.
+ * @returns {DecodedUrn | undefined} The decoded URN object, or undefined if the URN string does not match the expected pattern.
+ */
+export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 	const regex = /^([a-zA-Z]+):([a-zA-Z0-9\-.]+)(@(\d+))?(\/([a-zA-Z]+))?(\?(.*))?$/;
 
 	const match = urn.match(regex);
@@ -18,30 +33,50 @@ export const decodeUrn = (urn: string): DecodedUrn | undefined => {
 
 	const [_, prefix, destination, , networkId, , functionName, , queryString] = match;
 
-	const params: { [key: string]: string | number | undefined } = {};
+	const processParam = ([key, value]: [string, string]) => {
+		if ((URN_NUMERIC_PARAMS as readonly string[]).includes(key)) {
+			return { [key]: parseFloat(value) };
+		}
+		if ((URN_STRING_PARAMS as readonly string[]).includes(key)) {
+			return { [key]: value };
+		}
+		if (!isNaN(parseFloat(value))) {
+			return { [key]: parseFloat(value) };
+		}
+		return { [key]: value };
+	};
 
-	if (queryString) {
-		const queryParams = new URLSearchParams(queryString);
-		queryParams.forEach((value, key) => {
-			if ((urnNumericParams as readonly string[]).includes(key)) {
-				params[key] = parseFloat(value);
-			} else if ((urnStringParams as readonly string[]).includes(key)) {
-				params[key] = value;
-			} else if (!isNaN(parseFloat(value))) {
-				params[key] = parseFloat(value);
-			} else {
-				params[key] = value;
-			}
-		});
-	}
+	const parseQueryString = (qs: string): { [key: string]: string | number | undefined } => {
+		try {
+			return [...new URLSearchParams(qs).entries()].reduce(
+				(acc, entry) => ({
+					...acc,
+					...processParam(entry)
+				}),
+				{}
+			);
+		} catch (error) {
+			console.error('Invalid query string:', error);
+			return {};
+		}
+	};
 
-	return {
+	const params = nonNullish(queryString) ? parseQueryString(queryString) : {};
+
+	const decodedUrn = {
 		prefix,
 		destination,
 		...(networkId && { networkId }),
 		...(functionName && { functionName }),
 		...params
 	};
+
+	const result = DecodedUrnSchema.safeParse(decodedUrn);
+	if (!result.success) {
+		console.error(result.error);
+		return undefined;
+	}
+	return result.data;
 };
 
 export const decodeQrCode = ({
