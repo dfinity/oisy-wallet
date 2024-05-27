@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AddTokenStep } from '$lib/enums/steps';
+	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import IcManageTokens from '$icp/components/tokens/IcManageTokens.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -34,7 +34,7 @@
 		}
 	];
 
-	let saveProgressStep: string = AddTokenStep.INITIALIZATION;
+	let saveProgressStep: string = ProgressStepsAddToken.INITIALIZATION;
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -74,10 +74,10 @@
 			await saveCustomTokens({
 				identity: $authStore.identity,
 				tokens,
-				progress: (step: AddTokenStep) => (saveProgressStep = step)
+				progress: (step: ProgressStepsAddToken) => (saveProgressStep = step)
 			});
 
-			saveProgressStep = AddTokenStep.DONE;
+			saveProgressStep = ProgressStepsAddToken.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
@@ -93,7 +93,7 @@
 	const close = () => {
 		modalStore.close();
 
-		saveProgressStep = AddTokenStep.INITIALIZATION;
+		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
 	};
 
 	let ledgerCanisterId = '';

@@ -12,29 +12,29 @@
 	import { browser } from '$app/environment';
 	import { isNullish } from '@dfinity/utils';
 	import { loading } from '$lib/stores/loader.store';
-	import { LoaderStep } from '$lib/enums/steps';
+	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authStore } from '$lib/stores/auth.store';
 
-	let progressStep: string = LoaderStep.ETH_ADDRESS;
+	let progressStep: string = ProgressStepsLoader.ETH_ADDRESS;
 
 	let steps: [ProgressStep, ...ProgressStep[]];
 	$: steps = [
 		{
-			step: LoaderStep.INITIALIZATION,
+			step: ProgressStepsLoader.INITIALIZATION,
 			text: $i18n.init.text.securing_session,
 			state: 'completed'
 		} as ProgressStep,
 		{
-			step: LoaderStep.ETH_ADDRESS,
+			step: ProgressStepsLoader.ETH_ADDRESS,
 			text: $i18n.init.text.retrieving_eth_key,
 			state: 'in_progress'
 		} as ProgressStep
 	];
 
 	$: (() => {
-		if (progressStep !== LoaderStep.DONE) {
+		if (progressStep !== ProgressStepsLoader.DONE) {
 			return;
 		}
 
@@ -52,7 +52,7 @@
 	const confirm = isNullish(oisy_introduction);
 
 	let disabledConfirm = true;
-	$: disabledConfirm = progressStep !== LoaderStep.DONE;
+	$: disabledConfirm = progressStep !== ProgressStepsLoader.DONE;
 
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
@@ -65,7 +65,7 @@
 	};
 
 	const progressAndLoad = async () => {
-		progressStep = LoaderStep.DONE;
+		progressStep = ProgressStepsLoader.DONE;
 
 		// Once the address initialized, we load the data without displaying a progress step.
 		// Instead, we use effect, placeholders and skeleton until those data are loaded.

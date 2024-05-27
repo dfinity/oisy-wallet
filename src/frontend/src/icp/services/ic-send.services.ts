@@ -19,7 +19,7 @@ import {
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
-import { SendIcStep } from '$lib/enums/steps';
+import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import type { BlockHeight } from '@dfinity/ledger-icp';
@@ -38,7 +38,7 @@ export const sendIc = async ({
 		...rest
 	});
 
-	progress(SendIcStep.RELOAD);
+	progress(ProgressStepsSendIc.RELOAD);
 
 	await waitAndTriggerWallet();
 };
@@ -104,7 +104,7 @@ const sendIcrc = async ({
 		throw new Error(get(i18n).send.error.invalid_destination);
 	}
 
-	progress(SendIcStep.SEND);
+	progress(ProgressStepsSendIc.SEND);
 
 	return transferIcrc({
 		identity,
@@ -128,7 +128,7 @@ const sendIcp = async ({
 		throw new Error(get(i18n).send.error.invalid_destination);
 	}
 
-	progress(SendIcStep.SEND);
+	progress(ProgressStepsSendIc.SEND);
 
 	return validIcrcAddress
 		? icrc1TransferIcp({

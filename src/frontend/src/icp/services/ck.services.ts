@@ -11,7 +11,7 @@ import type { IcCanisters, IcCkMetadata, IcCkToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { LOCAL, NANO_SECONDS_IN_MINUTE, STAGING } from '$lib/constants/app.constants';
-import { SendIcStep } from '$lib/enums/steps';
+import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { IcrcBlockIndex } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
@@ -39,7 +39,7 @@ export const convertCkBTCToBtc = async ({
 		to
 	});
 
-	progress(SendIcStep.SEND);
+	progress(ProgressStepsSendIc.SEND);
 
 	await retrieveBtc({
 		identity,
@@ -83,7 +83,7 @@ export const convertCkErc20ToErc20 = async ({
 		canisters: { ledgerCanisterId: ckEthledgerCanisterId, minterCanisterId },
 		identity,
 		progress,
-		progressStep: SendIcStep.APPROVE_FEES,
+		progressStep: ProgressStepsSendIc.APPROVE_FEES,
 		amount: CKERC20_TO_ERC20_MAX_TRANSACTION_FEE,
 		to
 	});
@@ -102,7 +102,7 @@ export const convertCkErc20ToErc20 = async ({
 
 	// 3. Withdraw Erc20
 
-	progress(SendIcStep.SEND);
+	progress(ProgressStepsSendIc.SEND);
 
 	await withdrawErc20({
 		identity,
@@ -134,7 +134,7 @@ export const convertCkETHToEth = async ({
 		to
 	});
 
-	progress(SendIcStep.SEND);
+	progress(ProgressStepsSendIc.SEND);
 
 	await withdrawEth({
 		identity,
@@ -147,10 +147,10 @@ export const convertCkETHToEth = async ({
 const approveTransfer = async ({
 	canisters: { ledgerCanisterId, minterCanisterId },
 	progress,
-	progressStep = SendIcStep.APPROVE_TRANSFER,
+	progressStep = ProgressStepsSendIc.APPROVE_TRANSFER,
 	amount,
 	identity
-}: Omit<IcTransferParams, 'amount'> & { amount: bigint; progressStep?: SendIcStep } & {
+}: Omit<IcTransferParams, 'amount'> & { amount: bigint; progressStep?: ProgressStepsSendIc } & {
 	canisters: Pick<IcCanisters, 'ledgerCanisterId'> & IcCkMetadata;
 }): Promise<IcrcBlockIndex> => {
 	progress(progressStep);
