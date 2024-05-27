@@ -46,7 +46,9 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 		return { [key]: value };
 	};
 
-	const parseQueryString = (qs: string): { [key: string]: string | number | undefined } => {
+	const parseQueryString = (
+		qs: string
+	): { [key: string]: string | number | undefined } | undefined => {
 		try {
 			return [...new URLSearchParams(qs).entries()].reduce(
 				(acc, entry) => ({
@@ -55,13 +57,17 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 				}),
 				{}
 			);
-		} catch (error) {
-			console.error('Invalid query string:', error);
-			return {};
+		} catch (error: unknown) {
+			console.warn('Invalid query string:', error);
+			return undefined;
 		}
 	};
 
 	const params = nonNullish(queryString) ? parseQueryString(queryString) : {};
+	// Conservatively, it returns nothing if the function is unable to decipher the query parameters
+	if (params === undefined) {
+		return undefined;
+	}
 
 	const decodedUrn = {
 		prefix,
@@ -73,7 +79,7 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 
 	const result = DecodedUrnSchema.safeParse(decodedUrn);
 	if (!result.success) {
-		console.error(result.error);
+		console.warn('QR code cannot be correctly parsed:', result.error);
 		return undefined;
 	}
 	return result.data;
