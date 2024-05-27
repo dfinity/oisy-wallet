@@ -3,7 +3,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import type { WalletConnectListener } from '$eth/types/wallet-connect';
-	import { SignStep } from '$lib/enums/steps';
+	import { ProgressStepsSign } from '$lib/enums/progress-steps';
 	import WalletConnectSignReview from './WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
@@ -38,7 +38,7 @@
 	 * WalletConnect
 	 */
 
-	let signProgressStep: string = SignStep.INITIALIZATION;
+	let signProgressStep: string = ProgressStepsSign.INITIALIZATION;
 
 	/**
 	 * Reject a message
@@ -55,7 +55,7 @@
 			request,
 			listener,
 			modalNext: modal.next,
-			progress: (step: SignStep) => (signProgressStep = step)
+			progress: (step: ProgressStepsSign) => (signProgressStep = step)
 		});
 
 		setTimeout(() => close(), success ? 750 : 0);

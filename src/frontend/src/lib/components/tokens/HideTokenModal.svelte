@@ -10,7 +10,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { authStore } from '$lib/stores/auth.store';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { HideTokenStep } from '$lib/enums/steps';
+	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -46,13 +46,13 @@
 		modal.next();
 
 		try {
-			hideProgressStep = HideTokenStep.HIDE;
+			hideProgressStep = ProgressStepsHideToken.HIDE;
 
 			await hideToken({
 				identity: $authStore.identity
 			});
 
-			hideProgressStep = HideTokenStep.UPDATE_UI;
+			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
 
 			// We must navigate first otherwise we might land on the default token Ethereum selected while being on network ICP.
 			await back({ networkId: backToNetworkId, pop: true });
@@ -61,7 +61,7 @@
 				identity: $authStore.identity
 			});
 
-			hideProgressStep = HideTokenStep.DONE;
+			hideProgressStep = ProgressStepsHideToken.DONE;
 
 			setTimeout(close, 750);
 		} catch (err: unknown) {
@@ -87,23 +87,23 @@
 
 	const HIDE_TOKEN_STEPS: [ProgressStep, ...ProgressStep[]] = [
 		{
-			step: HideTokenStep.INITIALIZATION,
+			step: ProgressStepsHideToken.INITIALIZATION,
 			text: $i18n.tokens.text.initializing,
 			state: 'in_progress'
 		} as ProgressStep,
 		{
-			step: HideTokenStep.HIDE,
+			step: ProgressStepsHideToken.HIDE,
 			text: $i18n.tokens.hide.hiding,
 			state: 'next'
 		} as ProgressStep,
 		{
-			step: HideTokenStep.UPDATE_UI,
+			step: ProgressStepsHideToken.UPDATE_UI,
 			text: $i18n.tokens.text.updating_ui,
 			state: 'next'
 		} as ProgressStep
 	];
 
-	let hideProgressStep: string = HideTokenStep.INITIALIZATION;
+	let hideProgressStep: string = ProgressStepsHideToken.INITIALIZATION;
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -111,7 +111,7 @@
 	const close = () => {
 		modalStore.close();
 
-		hideProgressStep = HideTokenStep.INITIALIZATION;
+		hideProgressStep = ProgressStepsHideToken.INITIALIZATION;
 	};
 </script>
 
