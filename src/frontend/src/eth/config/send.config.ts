@@ -1,16 +1,17 @@
+import { ProgressStepsSendStepName } from '$lib/enums/progress-steps';
 import type { WizardSteps } from '@dfinity/gix-components';
 
 export const sendWizardSteps = (i18n: I18n): WizardSteps => [
 	{
-		name: 'Send',
+		name: ProgressStepsSendStepName.SEND,
 		title: i18n.send.text.send
 	},
 	{
-		name: 'Review',
+		name: ProgressStepsSendStepName.REVIEW,
 		title: i18n.send.text.review
 	},
 	{
-		name: 'Sending',
+		name: ProgressStepsSendStepName.SENDING,
 		title: i18n.send.text.sending
 	}
 ];

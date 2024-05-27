@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import type { WizardSteps } from '@dfinity/gix-components';
-	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendIc, ProgressStepsSendStepName } from '$lib/enums/progress-steps';
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -130,7 +130,7 @@
 	let steps: WizardSteps;
 	$: steps = [
 		{
-			name: 'Send',
+			name: ProgressStepsSendStepName.SEND,
 			title: isNetworkIdBTC(networkId)
 				? $i18n.convert.text.convert_to_btc
 				: isNetworkIdEthereum(networkId)
@@ -140,11 +140,11 @@
 					: $i18n.send.text.send
 		},
 		{
-			name: 'Review',
+			name: ProgressStepsSendStepName.REVIEW,
 			title: $i18n.send.text.review
 		},
 		{
-			name: 'Sending',
+			name: ProgressStepsSendStepName.SENDING,
 			title: $i18n.send.text.sending
 		}
 	];
@@ -185,15 +185,15 @@
 	bind:currentStep
 	bind:this={modal}
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === 'Sending'}
+	disablePointerEvents={currentStep?.name === ProgressStepsSendStepName.SENDING}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	<EthereumFeeContext {networkId}>
 		<BitcoinFeeContext {amount} {networkId}>
-			{#if currentStep?.name === 'Review'}
+			{#if currentStep?.name === ProgressStepsSendStepName.REVIEW}
 				<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
-			{:else if currentStep?.name === 'Sending'}
+			{:else if currentStep?.name === ProgressStepsSendStepName.SENDING}
 				<IcSendProgress bind:sendProgressStep {networkId} />
 			{:else}
 				<IcSendForm

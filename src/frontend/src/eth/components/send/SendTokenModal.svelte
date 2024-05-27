@@ -3,7 +3,7 @@
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendStepName, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { sendWizardSteps } from '$eth/config/send.config';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import type { Network } from '$lib/types/network';
@@ -73,7 +73,7 @@
 	bind:currentStep
 	bind:this={modal}
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === 'Sending'}
+	disablePointerEvents={currentStep?.name === ProgressStepsSendStepName.SENDING}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 

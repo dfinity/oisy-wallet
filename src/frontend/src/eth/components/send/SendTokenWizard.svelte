@@ -6,7 +6,7 @@
 	import SendForm from './SendForm.svelte';
 	import SendReview from './SendReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { ProgressStepsSendStepName, ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { address } from '$lib/derived/address.derived';
 	import {
 		FEE_CONTEXT_KEY,
@@ -204,12 +204,12 @@
 	bind:this={feeContext}
 	{amount}
 	{destination}
-	observe={currentStep?.name !== 'Sending'}
+	observe={currentStep?.name !== ProgressStepsSendStepName.SENDING}
 	{sourceNetwork}
 	{targetNetwork}
 	{nativeEthereumToken}
 >
-	{#if currentStep?.name === 'Review'}
+	{#if currentStep?.name === ProgressStepsSendStepName.REVIEW}
 		<SendReview
 			on:icBack
 			on:icSend={send}
@@ -219,12 +219,12 @@
 			{targetNetwork}
 			{destinationEditable}
 		/>
-	{:else if currentStep?.name === 'Sending'}
+	{:else if currentStep?.name === ProgressStepsSendStepName.SENDING}
 		<InProgressWizard
 			progressStep={sendProgressStep}
 			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
 		/>
-	{:else if currentStep?.name === 'Send'}
+	{:else if currentStep?.name === ProgressStepsSendStepName.SEND}
 		<SendForm
 			on:icNext
 			on:icClose={close}

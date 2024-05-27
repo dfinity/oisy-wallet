@@ -17,7 +17,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { ProgressStepsSend, ProgressStepsSendStepName } from '$lib/enums/progress-steps';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import {
@@ -98,11 +98,11 @@
 
 	const steps: WizardSteps = [
 		{
-			name: 'Review',
+			name: ProgressStepsSendStepName.REVIEW,
 			title: $i18n.send.text.review
 		},
 		{
-			name: 'Sending',
+			name: ProgressStepsSendStepName.SENDING,
 			title: $i18n.send.text.sending
 		}
 	];
@@ -169,12 +169,12 @@
 	<FeeContext
 		amount={amount.toString()}
 		{destination}
-		observe={currentStep?.name !== 'Sending'}
+		observe={currentStep?.name !== ProgressStepsSendStepName.SENDING}
 		{sourceNetwork}
 		nativeEthereumToken={$ethereumToken}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
-			{#if currentStep?.name === 'Sending'}
+			{#if currentStep?.name === ProgressStepsSendStepName.SENDING}
 				<SendProgress
 					progressStep={sendProgressStep}
 					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}

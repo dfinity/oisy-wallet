@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { ProgressStepsSend, ProgressStepsSendStepName } from '$lib/enums/progress-steps';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
 	import type { Network } from '$lib/types/network';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
@@ -65,7 +65,7 @@
 	bind:currentStep
 	bind:this={modal}
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === 'Sending'}
+	disablePointerEvents={currentStep?.name === ProgressStepsSendStepName.SENDING}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
