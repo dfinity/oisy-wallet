@@ -1,25 +1,25 @@
 <script lang="ts">
-	import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
+	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import type { ProgressStep } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let receiveProgressStep: string = UpdateBalanceCkBtcStep.INITIALIZATION;
+	export let receiveProgressStep: string = ProgressStepsUpdateBalanceCkBtc.INITIALIZATION;
 
 	let steps: [ProgressStep, ...ProgressStep[]];
 	$: steps = [
 		{
-			step: UpdateBalanceCkBtcStep.INITIALIZATION,
+			step: ProgressStepsUpdateBalanceCkBtc.INITIALIZATION,
 			text: $i18n.receive.bitcoin.text.initializing,
 			state: 'in_progress'
 		} as ProgressStep,
 		{
-			step: UpdateBalanceCkBtcStep.RETRIEVE,
+			step: ProgressStepsUpdateBalanceCkBtc.RETRIEVE,
 			text: $i18n.receive.bitcoin.text.checking_incoming,
 			state: 'next'
 		} as ProgressStep,
 		{
-			step: UpdateBalanceCkBtcStep.RELOAD,
+			step: ProgressStepsUpdateBalanceCkBtc.RELOAD,
 			text: $i18n.receive.bitcoin.text.refreshing_wallet,
 			state: 'next'
 		} as ProgressStep

@@ -1,4 +1,7 @@
-export enum SendStep {
+// A collection of enums used in Oisy's various wizards when the effective actions are being executed.
+// For example, in an Ethereum transfer, when the message is first signed and then effectively sent.
+
+export enum ProgressStepsSend {
 	INITIALIZATION = 'initialization',
 	SIGN_APPROVE = 'sign_approve',
 	APPROVE = 'approve',
@@ -8,34 +11,34 @@ export enum SendStep {
 	DONE = 'done'
 }
 
-export enum SignStep {
+export enum ProgressStepsSign {
 	INITIALIZATION = 'initialization',
 	SIGN = 'sign',
 	APPROVE = 'approve',
 	DONE = 'done'
 }
 
-export enum LoaderStep {
+export enum ProgressStepsLoader {
 	INITIALIZATION = 'initialization',
 	ETH_ADDRESS = 'eth_address',
 	DONE = 'done'
 }
 
-export enum AddTokenStep {
+export enum ProgressStepsAddToken {
 	INITIALIZATION = 'initialization',
 	SAVE = 'save',
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }
 
-export enum HideTokenStep {
+export enum ProgressStepsHideToken {
 	INITIALIZATION = 'initialization',
 	HIDE = 'hide',
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }
 
-export enum SendIcStep {
+export enum ProgressStepsSendIc {
 	INITIALIZATION = 'initialization',
 	APPROVE_FEES = 'approve_fees',
 	APPROVE_TRANSFER = 'approve_transfer',
@@ -44,7 +47,7 @@ export enum SendIcStep {
 	DONE = 'done'
 }
 
-export enum UpdateBalanceCkBtcStep {
+export enum ProgressStepsUpdateBalanceCkBtc {
 	INITIALIZATION = 'initialization',
 	RETRIEVE = 'retrieve',
 	RELOAD = 'reload',

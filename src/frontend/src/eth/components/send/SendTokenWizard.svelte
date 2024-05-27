@@ -6,7 +6,7 @@
 	import SendForm from './SendForm.svelte';
 	import SendReview from './SendReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import { SendStep } from '$lib/enums/steps';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { address } from '$lib/derived/address.derived';
 	import {
 		FEE_CONTEXT_KEY,
@@ -156,7 +156,7 @@
 			await executeSend({
 				from: $address,
 				to: mapAddressStartsWith0x(destination),
-				progress: (step: SendStep) => (sendProgressStep = step),
+				progress: (step: ProgressStepsSend) => (sendProgressStep = step),
 				token: $sendToken,
 				amount: parseToken({
 					value: `${amount}`,

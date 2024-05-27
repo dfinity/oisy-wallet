@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SendIcStep } from '$lib/enums/steps';
+	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import type { ProgressStep } from '@dfinity/gix-components';
 	import type { NetworkId } from '$lib/types/network';
@@ -7,20 +7,20 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 
-	export let sendProgressStep: string = SendIcStep.INITIALIZATION;
+	export let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;
 	export let networkId: NetworkId | undefined = undefined;
 
 	let steps: [ProgressStep, ...ProgressStep[]];
 	$: steps = [
 		{
-			step: SendIcStep.INITIALIZATION,
+			step: ProgressStepsSendIc.INITIALIZATION,
 			text: $i18n.send.text.initializing_transaction,
 			state: 'in_progress'
 		} as ProgressStep,
 		...($tokenCkErc20Ledger
 			? [
 					{
-						step: SendIcStep.APPROVE_FEES,
+						step: ProgressStepsSendIc.APPROVE_FEES,
 						text: $i18n.send.text.approving_fees,
 						state: 'next'
 					} as ProgressStep
@@ -29,7 +29,7 @@
 		...(isNetworkIdBTC(networkId) || isNetworkIdETH(networkId)
 			? [
 					{
-						step: SendIcStep.APPROVE_TRANSFER,
+						step: ProgressStepsSendIc.APPROVE_TRANSFER,
 						text: $tokenCkErc20Ledger
 							? $i18n.send.text.approving_transfer
 							: $i18n.send.text.approving,
@@ -38,12 +38,12 @@
 				]
 			: []),
 		{
-			step: SendIcStep.SEND,
+			step: ProgressStepsSendIc.SEND,
 			text: $i18n.send.text.sending,
 			state: 'next'
 		} as ProgressStep,
 		{
-			step: SendIcStep.RELOAD,
+			step: ProgressStepsSendIc.RELOAD,
 			text: $i18n.send.text.refreshing_ui,
 			state: 'next'
 		} as ProgressStep

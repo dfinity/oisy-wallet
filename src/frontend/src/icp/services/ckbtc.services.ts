@@ -10,7 +10,7 @@ import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkMetadata, IcCkToken, IcToken } from '$icp/types/ic';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
-import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
+import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 import { waitWalletReady } from '$lib/services/actions.services';
 import { busy } from '$lib/stores/busy.store';
 import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
@@ -36,7 +36,7 @@ export const updateBalance = async ({
 }): Promise<void> => {
 	assertNonNullish(minterCanisterId, get(i18n).init.error.minter_btc);
 
-	progress(UpdateBalanceCkBtcStep.RETRIEVE);
+	progress(ProgressStepsUpdateBalanceCkBtc.RETRIEVE);
 
 	try {
 		const ok = await updateBalanceApi({
@@ -64,7 +64,7 @@ export const updateBalance = async ({
 		populatePendingUtxos({ tokenId, pendingUtxos });
 	}
 
-	progress(UpdateBalanceCkBtcStep.RELOAD);
+	progress(ProgressStepsUpdateBalanceCkBtc.RELOAD);
 
 	await waitAndTriggerWallet();
 };

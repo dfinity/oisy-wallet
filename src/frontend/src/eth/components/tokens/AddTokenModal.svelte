@@ -9,7 +9,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { authStore } from '$lib/stores/auth.store';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { AddTokenStep } from '$lib/enums/steps';
+	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { addUserToken } from '$lib/api/backend.api';
 	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
@@ -34,7 +34,7 @@
 		}
 	];
 
-	let saveProgressStep: string = AddTokenStep.INITIALIZATION;
+	let saveProgressStep: string = ProgressStepsAddToken.INITIALIZATION;
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -65,7 +65,7 @@
 		modal.next();
 
 		try {
-			saveProgressStep = AddTokenStep.SAVE;
+			saveProgressStep = ProgressStepsAddToken.SAVE;
 
 			await addUserToken({
 				identity: $authStore.identity,
@@ -78,7 +78,7 @@
 				}
 			});
 
-			saveProgressStep = AddTokenStep.UPDATE_UI;
+			saveProgressStep = ProgressStepsAddToken.UPDATE_UI;
 
 			erc20TokensStore.add(
 				mapErc20Token({
@@ -90,7 +90,7 @@
 				})
 			);
 
-			saveProgressStep = AddTokenStep.DONE;
+			saveProgressStep = ProgressStepsAddToken.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
@@ -106,7 +106,7 @@
 	const close = () => {
 		modalStore.close();
 
-		saveProgressStep = AddTokenStep.INITIALIZATION;
+		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
 	};
 </script>
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import type { WizardSteps } from '@dfinity/gix-components';
-	import { SendIcStep } from '$lib/enums/steps';
+	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -56,7 +56,7 @@
 	 * Send
 	 */
 
-	let sendProgressStep: string = SendIcStep.INITIALIZATION;
+	let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;
 
 	const send = async () => {
 		if (isNullishOrEmpty(destination)) {
@@ -83,7 +83,7 @@
 					unitName: $tokenDecimals
 				}),
 				identity: $authStore.identity,
-				progress: (step: SendIcStep) => (sendProgressStep = step)
+				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
 			};
 
 			await sendIc({
@@ -103,7 +103,7 @@
 				}
 			});
 
-			sendProgressStep = SendIcStep.DONE;
+			sendProgressStep = ProgressStepsSendIc.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
@@ -158,7 +158,7 @@
 			amount = undefined;
 			networkId = undefined;
 
-			sendProgressStep = SendIcStep.INITIALIZATION;
+			sendProgressStep = ProgressStepsSendIc.INITIALIZATION;
 
 			currentStep = undefined;
 		});

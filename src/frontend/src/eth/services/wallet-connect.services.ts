@@ -12,7 +12,7 @@ import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
 	TRACK_COUNT_WC_ETH_SEND_SUCCESS
 } from '$lib/constants/analytics.contants';
-import { SendStep, SignStep } from '$lib/enums/steps';
+import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
@@ -46,7 +46,7 @@ export type WalletConnectSendParams = WalletConnectExecuteParams & {
 export type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
 	listener: WalletConnectListener | null | undefined;
 	modalNext: () => void;
-	progress: (step: SignStep) => void;
+	progress: (step: ProgressStepsSign) => void;
 };
 
 export const reject = (
@@ -80,7 +80,7 @@ export const send = ({
 	token,
 	progress,
 	amount,
-	lastProgressStep = SendStep.DONE,
+	lastProgressStep = ProgressStepsSend.DONE,
 	identity,
 	minterInfo,
 	sourceNetwork,
@@ -178,7 +178,7 @@ export const send = ({
 					from: address,
 					to,
 					progress,
-					lastProgressStep: SendStep.APPROVE,
+					lastProgressStep: ProgressStepsSend.APPROVE,
 					token,
 					amount,
 					maxFeePerGas,
@@ -241,7 +241,7 @@ export const signMessage = ({
 			modalNext();
 
 			try {
-				progress(SignStep.SIGN);
+				progress(ProgressStepsSign.SIGN);
 
 				const sign = (params: string[]): Promise<string> => {
 					const { identity } = get(authStore);
@@ -260,11 +260,11 @@ export const signMessage = ({
 
 				const signedMessage = await sign(params);
 
-				progress(SignStep.APPROVE);
+				progress(ProgressStepsSign.APPROVE);
 
 				await listener.approveRequest({ topic, id, message: signedMessage });
 
-				progress(SignStep.DONE);
+				progress(ProgressStepsSign.DONE);
 
 				return { success: true };
 			} catch (err: unknown) {

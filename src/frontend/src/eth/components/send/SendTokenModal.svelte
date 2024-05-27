@@ -3,7 +3,7 @@
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
-	import { SendStep } from '$lib/enums/steps';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { sendWizardSteps } from '$eth/config/send.config';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import type { Network } from '$lib/types/network';
@@ -21,7 +21,7 @@
 	export let targetNetwork: Network | undefined = undefined;
 
 	let amount: number | undefined = undefined;
-	let sendProgressStep: string = SendStep.INITIALIZATION;
+	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	/**
 	 * Send context store
@@ -62,7 +62,7 @@
 			amount = undefined;
 			targetNetwork = undefined;
 
-			sendProgressStep = SendStep.INITIALIZATION;
+			sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
 			currentStep = undefined;
 		});

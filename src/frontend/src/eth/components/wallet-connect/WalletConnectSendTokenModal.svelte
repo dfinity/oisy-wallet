@@ -17,7 +17,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
-	import { SendStep } from '$lib/enums/steps';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import {
@@ -132,7 +132,7 @@
 	 * Send and approve
 	 */
 
-	let sendProgressStep: string = SendStep.INITIALIZATION;
+	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let amount: BigNumber;
 	$: amount = BigNumber.from(firstTransaction?.value ?? '0');
@@ -146,7 +146,7 @@
 			fee: $feeStore,
 			modalNext: modal.next,
 			token: $sendToken,
-			progress: (step: SendStep) => (sendProgressStep = step),
+			progress: (step: ProgressStepsSend) => (sendProgressStep = step),
 			identity: $authStore.identity,
 			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			sourceNetwork,
