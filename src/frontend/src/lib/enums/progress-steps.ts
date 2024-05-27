@@ -53,9 +53,3 @@ export enum ProgressStepsUpdateBalanceCkBtc {
 	RELOAD = 'reload',
 	DONE = 'done'
 }
-
-export enum ProgressStepsSendStepName {
-	SEND = 'Send',
-	REVIEW = 'Review',
-	SENDING = 'Sending'
-}

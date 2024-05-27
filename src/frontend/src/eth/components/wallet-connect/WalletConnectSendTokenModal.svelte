@@ -17,7 +17,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
-	import { ProgressStepsSend, ProgressStepsSendStepName } from '$lib/enums/progress-steps';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import {
@@ -40,6 +40,7 @@
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -98,11 +99,11 @@
 
 	const steps: WizardSteps = [
 		{
-			name: ProgressStepsSendStepName.REVIEW,
+			name: WizardStepsSend.REVIEW,
 			title: $i18n.send.text.review
 		},
 		{
-			name: ProgressStepsSendStepName.SENDING,
+			name: WizardStepsSend.SENDING,
 			title: $i18n.send.text.sending
 		}
 	];
@@ -169,12 +170,12 @@
 	<FeeContext
 		amount={amount.toString()}
 		{destination}
-		observe={currentStep?.name !== ProgressStepsSendStepName.SENDING}
+		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		{sourceNetwork}
 		nativeEthereumToken={$ethereumToken}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
-			{#if currentStep?.name === ProgressStepsSendStepName.SENDING}
+			{#if currentStep?.name === WizardStepsSend.SENDING}
 				<SendProgress
 					progressStep={sendProgressStep}
 					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
