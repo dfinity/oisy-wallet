@@ -36,6 +36,7 @@
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import type { Token } from '$lib/types/token';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -204,12 +205,12 @@
 	bind:this={feeContext}
 	{amount}
 	{destination}
-	observe={currentStep?.name !== 'Sending'}
+	observe={currentStep?.name !== WizardStepsSend.SENDING}
 	{sourceNetwork}
 	{targetNetwork}
 	{nativeEthereumToken}
 >
-	{#if currentStep?.name === 'Review'}
+	{#if currentStep?.name === WizardStepsSend.REVIEW}
 		<SendReview
 			on:icBack
 			on:icSend={send}
@@ -219,12 +220,12 @@
 			{targetNetwork}
 			{destinationEditable}
 		/>
-	{:else if currentStep?.name === 'Sending'}
+	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
 			progressStep={sendProgressStep}
 			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
 		/>
-	{:else if currentStep?.name === 'Send'}
+	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<SendForm
 			on:icNext
 			on:icClose={close}

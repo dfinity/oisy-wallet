@@ -43,6 +43,7 @@
 		initEthereumFeeStore,
 		type EthereumFeeContext as EthereumFeeContextType
 	} from '$icp/stores/ethereum-fee.store';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 
 	/**
 	 * Props
@@ -130,7 +131,7 @@
 	let steps: WizardSteps;
 	$: steps = [
 		{
-			name: 'Send',
+			name: WizardStepsSend.SEND,
 			title: isNetworkIdBTC(networkId)
 				? $i18n.convert.text.convert_to_btc
 				: isNetworkIdEthereum(networkId)
@@ -140,11 +141,11 @@
 					: $i18n.send.text.send
 		},
 		{
-			name: 'Review',
+			name: WizardStepsSend.REVIEW,
 			title: $i18n.send.text.review
 		},
 		{
-			name: 'Sending',
+			name: WizardStepsSend.SENDING,
 			title: $i18n.send.text.sending
 		}
 	];
@@ -185,15 +186,15 @@
 	bind:currentStep
 	bind:this={modal}
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === 'Sending'}
+	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	<EthereumFeeContext {networkId}>
 		<BitcoinFeeContext {amount} {networkId}>
-			{#if currentStep?.name === 'Review'}
+			{#if currentStep?.name === WizardStepsSend.REVIEW}
 				<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
-			{:else if currentStep?.name === 'Sending'}
+			{:else if currentStep?.name === WizardStepsSend.SENDING}
 				<IcSendProgress bind:sendProgressStep {networkId} />
 			{:else}
 				<IcSendForm
