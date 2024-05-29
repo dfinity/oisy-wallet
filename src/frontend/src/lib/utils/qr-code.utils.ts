@@ -2,12 +2,9 @@ import {
 	DecodedUrnSchema,
 	URN_NUMERIC_PARAMS,
 	URN_STRING_PARAMS,
-	type DecodedUrn,
-	type QrResponse,
-	type QrStatus
+	type DecodedUrn
 } from '$lib/types/qr-code';
-import { decodePayment } from '@dfinity/ledger-icrc';
-import { isNullish, nonNullish, type Token } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Decodes a URN string into a DecodedUrn object, breaking it down into its components.
@@ -83,36 +80,4 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 		return undefined;
 	}
 	return result.data;
-};
-
-export const decodeQrCode = ({
-	status,
-	code,
-	expectedToken
-}: {
-	status: QrStatus;
-	code?: string | undefined;
-	expectedToken?: Token;
-}): QrResponse => {
-	if (status !== 'success') {
-		return { status };
-	}
-
-	if (isNullish(code)) {
-		return { status: 'cancelled' };
-	}
-
-	const payment = decodePayment(code);
-
-	if (isNullish(payment)) {
-		return { status: 'success', destination: code };
-	}
-
-	const { token, identifier: destination, amount } = payment;
-
-	if (nonNullish(expectedToken) && token.toLowerCase() !== expectedToken.symbol.toLowerCase()) {
-		return { status: 'token_incompatible' };
-	}
-
-	return { status: 'success', destination, token, amount };
 };
