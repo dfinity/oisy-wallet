@@ -7,6 +7,10 @@ export const sendWizardSteps = (i18n: I18n): WizardSteps => [
 		title: i18n.send.text.send
 	},
 	{
+		name: WizardStepsSend.QR_CODE_SCAN,
+		title: i18n.send.text.scan_qr
+	},
+	{
 		name: WizardStepsSend.REVIEW,
 		title: i18n.send.text.review
 	},

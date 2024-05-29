@@ -57,6 +57,27 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
+	const goToStep = (stepName: WizardStepsSend) => {
+		const stepNumber = steps.findIndex(({ name }) => name === stepName);
+		modal.set(stepNumber);
+	};
+
+	const onIcBack = () => {
+		if (currentStep?.name === WizardStepsSend.REVIEW) {
+			goToStep(WizardStepsSend.SEND);
+			return;
+		}
+		modal.back();
+	};
+
+	const onIcNext = () => {
+		if (currentStep?.name === WizardStepsSend.SEND) {
+			goToStep(WizardStepsSend.REVIEW);
+			return;
+		}
+		modal.next();
+	};
+
 	const close = () =>
 		closeModal(() => {
 			destination = '';
@@ -86,8 +107,8 @@
 		bind:targetNetwork
 		bind:amount
 		bind:sendProgressStep
-		on:icBack={modal.back}
-		on:icNext={modal.next}
+		on:icBack={onIcBack}
+		on:icNext={onIcNext}
 		on:icClose={close}
 	/>
 </WizardModal>
