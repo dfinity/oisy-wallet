@@ -37,6 +37,7 @@
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import type { Token } from '$lib/types/token';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import QRCodeScan from '$lib/components/send/QRCodeScan.svelte';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -248,6 +249,8 @@
 				{/if}
 			</svelte:fragment>
 		</SendForm>
+	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+		<QRCodeScan on:icBack expectedToken={$sendToken} bind:destination bind:amount />
 	{:else}
 		<slot />
 	{/if}
