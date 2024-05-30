@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { QRCodeReader } from '@dfinity/gix-components';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Token } from '@dfinity/utils';
 	import type { QrStatus } from '$lib/types/qr-code';
@@ -12,6 +11,11 @@
 	export let expectedToken: Token;
 	export let destination: string | undefined;
 	export let amount: number | undefined;
+	export let decodeQrCode: (args: {
+		status: QrStatus;
+		code?: string;
+		expectedToken: Token;
+	}) => { status: QrStatus; destination?: string; amount?: number };
 
 	const dispatch = createEventDispatcher();
 
