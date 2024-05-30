@@ -219,6 +219,7 @@ interface I18nSend {
 		no_identity_calculate_fee: string;
 		invalid_destination: string;
 		incompatible_token: string;
+		qr_scan_timeout: string;
 	};
 }
 

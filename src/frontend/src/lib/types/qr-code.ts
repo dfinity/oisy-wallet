@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type QrStatus = 'success' | 'cancelled' | 'token_incompatible';
+export type QrStatus = 'success' | 'cancelled' | 'token_incompatible' | 'timeout';
 
 export type QrResponse = {
 	status: QrStatus;

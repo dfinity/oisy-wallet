@@ -244,7 +244,8 @@
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
-			"incompatible_token": "The token is incompatible. Please try again with a compatible token."
+			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
+			"qr_scan_timeout": "No QR code found. Please try again."
 		}
 	},
 	"convert": {

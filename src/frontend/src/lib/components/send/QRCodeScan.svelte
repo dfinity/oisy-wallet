@@ -5,7 +5,7 @@
 	import type { Token } from '@dfinity/utils';
 	import type { QrStatus } from '$lib/types/qr-code';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	export let expectedToken: Token;
@@ -19,6 +19,7 @@
 
 	const dispatch = createEventDispatcher();
 
+	let timeoutId: NodeJS.Timeout | undefined;
 	let resolveQrCodePromise:
 		| (({ status, code }: { status: QrStatus; code?: string }) => void)
 		| undefined = undefined;
@@ -27,12 +28,32 @@
 		await scanQrCode();
 	});
 
+	onDestroy(() => {
+		if (nonNullish(timeoutId)) {
+			clearTimeout(timeoutId);
+		}
+	});
+
 	const scanQrCode = async () => {
 		const result = await new Promise<{ status: QrStatus; code?: string | undefined }>((resolve) => {
 			resolveQrCodePromise = resolve;
+			timeoutId = setTimeout(() => {
+				resolve({ status: 'timeout' });
+			}, 30000);
+
+			resolveQrCodePromise = ({ status, code }) => {
+				clearTimeout(timeoutId);
+				resolve({ status, code });
+			};
 		});
 
 		const { status, code } = result;
+
+		if (status === 'timeout') {
+			toastsError({ msg: { text: $i18n.send.error.qr_scan_timeout } });
+			back();
+			return;
+		}
 
 		const qrResponse = decodeQrCode({ status, code, expectedToken });
 
