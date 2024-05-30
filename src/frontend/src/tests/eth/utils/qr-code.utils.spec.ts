@@ -1,19 +1,20 @@
-import { ICP_TOKEN } from '$env/tokens.env';
+import { SEPOLIA_TOKEN } from '$env/tokens.env';
+import type { EthereumNetwork } from '$eth/types/network';
 import { decodeQrCode } from '$eth/utils/qr-code.utils';
-import { decodePayment } from '@dfinity/ledger-icrc';
-import type { MockedFunction } from 'vitest';
+import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
+import { expect, type MockedFunction } from 'vitest';
 
-const token = ICP_TOKEN;
-const address = 'some-address';
-const amount = 1.23;
-const code = 'some-qr-code';
-
-vi.mock('@dfinity/ledger-icrc', () => ({
-	decodePayment: vi.fn()
+vi.mock('$lib/utils/qr-code.utils', () => ({
+	decodeQrCodeUrn: vi.fn()
 }));
 
 describe('decodeQrCode', () => {
-	const mockDecodePayment = decodePayment as MockedFunction<typeof decodePayment>;
+	const token = SEPOLIA_TOKEN;
+	const destination = 'some-address';
+	const amount = 1.23;
+	const urn = 'some-urn';
+
+	const mockDecodeQrCodeUrn = decodeQrCodeUrn as MockedFunction<typeof decodeQrCodeUrn>;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -29,43 +30,46 @@ describe('decodeQrCode', () => {
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
-	it('should return { status: "success", identifier: code } when payment is nullish', () => {
-		mockDecodePayment.mockReturnValue(undefined);
+	it('should return { status: "success", destination: code } when payment is nullish', () => {
+		mockDecodeQrCodeUrn.mockReturnValue(undefined);
 
-		const response = decodeQrCode({ status: 'success', code });
-		expect(response).toEqual({ status: 'success', destination: code });
+		const response = decodeQrCode({ status: 'success', code: urn });
+		expect(response).toEqual({ status: 'success', destination: urn });
 
-		expect(mockDecodePayment).toHaveBeenCalledWith(code);
+		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
 	});
 
 	it('should return { status: "token_incompatible" } when tokens do not match', () => {
 		const payment = {
-			token: `not-${token.symbol}`,
-			identifier: address,
+			prefix: `not-${token.symbol}`,
+			destination: destination,
 			amount: amount
 		};
-		mockDecodePayment.mockReturnValue(payment);
+		mockDecodeQrCodeUrn.mockReturnValue(payment);
 
-		const response = decodeQrCode({ status: 'success', code: code, expectedToken: token });
+		const response = decodeQrCode({ status: 'success', code: urn, expectedToken: token });
 		expect(response).toEqual({ status: 'token_incompatible' });
-		expect(mockDecodePayment).toHaveBeenCalledWith(code);
+
+		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
 	});
 
-	it('should return { status: "success", identifier, token, amount } when everything matches', () => {
+	it('should return { status: "success", destination, token, amount } when everything matches', () => {
 		const payment = {
-			token: token.symbol,
-			identifier: address,
-			amount: amount
+			prefix: 'ethereum',
+			destination: destination,
+			amount: amount,
+			ethereumChainId: (token.network as EthereumNetwork).chainId.toString()
 		};
-		mockDecodePayment.mockReturnValue(payment);
+		mockDecodeQrCodeUrn.mockReturnValue(payment);
 
-		const response = decodeQrCode({ status: 'success', code: code, expectedToken: token });
+		const response = decodeQrCode({ status: 'success', code: urn, expectedToken: token });
 		expect(response).toEqual({
 			status: 'success',
-			destination: address,
+			destination: destination,
 			token: token.symbol,
 			amount: amount
 		});
-		expect(mockDecodePayment).toHaveBeenCalledWith(code);
+
+		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
 	});
 });
