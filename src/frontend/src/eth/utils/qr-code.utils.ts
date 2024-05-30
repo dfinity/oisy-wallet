@@ -1,19 +1,22 @@
-import { erc20Tokens } from '$eth/derived/erc20.derived';
-import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { type QrResponse, type QrStatus } from '$lib/types/qr-code';
+import type { Token } from '$lib/types/token';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
-import { isNullish, nonNullish, type Token } from '@dfinity/utils';
-import { get } from 'svelte/store';
+import { hexStringToUint8Array, isNullish, nonNullish } from '@dfinity/utils';
 
 export const decodeQrCode = ({
 	status,
 	code,
-	expectedToken
+	expectedToken,
+	ethereumTokens,
+	erc20Tokens
 }: {
 	status: QrStatus;
 	code?: string | undefined;
-	expectedToken?: Token;
+	expectedToken: Token;
+	ethereumTokens: Token[];
+	erc20Tokens: Erc20Token[];
 }): QrResponse => {
 	if (status !== 'success') {
 		return { status };
@@ -33,52 +36,59 @@ export const decodeQrCode = ({
 
 	const normalizeChainId = (chainId: string): string => {
 		if (chainId.startsWith('0x')) {
-			return parseInt(chainId, 16).toString();
+			return hexStringToUint8Array(chainId).toString();
 		}
 		return chainId;
 	};
 
-	const matchEthereumToken = (
-		address: string | undefined,
-		functionName: string | undefined,
-		ethereumChainId: string | undefined
-	): string | undefined => {
+	const matchEthereumToken = ({
+		address,
+		functionName,
+		ethereumChainId
+	}: {
+		address: string | undefined;
+		functionName: string | undefined;
+		ethereumChainId: string | undefined;
+	}): Token | undefined => {
 		const parsedEthereumChainId = nonNullish(ethereumChainId)
 			? normalizeChainId(ethereumChainId)
 			: 1n;
-		console.warn('parsedEthereumChainId', parsedEthereumChainId);
 
 		if (nonNullish(address) && functionName === 'transfer') {
-			const erc20TokensList = get(erc20Tokens);
 			return (
-				erc20TokensList.find(
+				erc20Tokens.find(
 					(token) =>
 						token.address.toLowerCase() === address.toLowerCase() &&
 						(token.network as EthereumNetwork).chainId.toString() ===
 							parsedEthereumChainId.toString()
-				)?.symbol || undefined
+				) || undefined
 			);
 		}
 
-		const enabledEthereumTokensList = get(enabledEthereumTokens);
 		return (
-			enabledEthereumTokensList.find(
+			ethereumTokens.find(
 				(token) =>
 					(token.network as EthereumNetwork).chainId.toString() === parsedEthereumChainId.toString()
-			)?.symbol || undefined
+			) || undefined
 		);
 	};
 
 	const token =
-		prefix === 'ethereum' ? matchEthereumToken(address, functionName, ethereumChainId) : undefined;
+		prefix === 'ethereum'
+			? matchEthereumToken({ address, functionName, ethereumChainId })
+			: undefined;
 
 	if (isNullish(token)) {
 		return { status: 'token_incompatible' };
 	}
 
-	if (nonNullish(expectedToken) && token.toLowerCase() !== expectedToken.symbol.toLowerCase()) {
+	if (
+		token.symbol.toLowerCase() !== expectedToken.symbol.toLowerCase() &&
+		(token.network as EthereumNetwork).chainId.toString() !==
+			(expectedToken.network as EthereumNetwork).chainId.toString()
+	) {
 		return { status: 'token_incompatible' };
 	}
 
-	return { status: 'success', destination, token, amount };
+	return { status: 'success', destination, token: token.symbol, amount };
 };

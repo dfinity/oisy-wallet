@@ -1,7 +1,10 @@
 import { SEPOLIA_TOKEN } from '$env/tokens.env';
+import { erc20Tokens } from '$eth/derived/erc20.derived';
+import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
 import { decodeQrCode } from '$eth/utils/qr-code.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
+import { get } from 'svelte/store';
 import { expect, type MockedFunction } from 'vitest';
 
 vi.mock('$lib/utils/qr-code.utils', () => ({
@@ -14,6 +17,12 @@ describe('decodeQrCode', () => {
 	const amount = 1.23;
 	const urn = 'some-urn';
 
+	const otherProps = {
+		expectedToken: token,
+		ethereumTokens: get(enabledEthereumTokens),
+		erc20Tokens: get(erc20Tokens)
+	};
+
 	const mockDecodeQrCodeUrn = decodeQrCodeUrn as MockedFunction<typeof decodeQrCodeUrn>;
 
 	beforeEach(() => {
@@ -21,19 +30,19 @@ describe('decodeQrCode', () => {
 	});
 
 	it('should return { result } when result is not success', () => {
-		const response = decodeQrCode({ status: 'cancelled' });
+		const response = decodeQrCode({ status: 'cancelled', ...otherProps });
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
 	it('should return { status: "cancelled" } when code is nullish', () => {
-		const response = decodeQrCode({ status: 'success', code: undefined });
+		const response = decodeQrCode({ status: 'success', code: undefined, ...otherProps });
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
 	it('should return { status: "success", destination: code } when payment is nullish', () => {
 		mockDecodeQrCodeUrn.mockReturnValue(undefined);
 
-		const response = decodeQrCode({ status: 'success', code: urn });
+		const response = decodeQrCode({ status: 'success', code: urn, ...otherProps });
 		expect(response).toEqual({ status: 'success', destination: urn });
 
 		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
@@ -47,7 +56,11 @@ describe('decodeQrCode', () => {
 		};
 		mockDecodeQrCodeUrn.mockReturnValue(payment);
 
-		const response = decodeQrCode({ status: 'success', code: urn, expectedToken: token });
+		const response = decodeQrCode({
+			status: 'success',
+			code: urn,
+			...otherProps
+		});
 		expect(response).toEqual({ status: 'token_incompatible' });
 
 		expect(mockDecodeQrCodeUrn).toHaveBeenCalledWith(urn);
@@ -62,7 +75,11 @@ describe('decodeQrCode', () => {
 		};
 		mockDecodeQrCodeUrn.mockReturnValue(payment);
 
-		const response = decodeQrCode({ status: 'success', code: urn, expectedToken: token });
+		const response = decodeQrCode({
+			status: 'success',
+			code: urn,
+			...otherProps
+		});
 		expect(response).toEqual({
 			status: 'success',
 			destination: destination,
