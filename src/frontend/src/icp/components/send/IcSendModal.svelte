@@ -44,6 +44,7 @@
 		type EthereumFeeContext as EthereumFeeContextType
 	} from '$icp/stores/ethereum-fee.store';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { icSendWizardSteps } from '$icp/config/ic-send.config';
 
 	/**
 	 * Props
@@ -128,10 +129,14 @@
 		}
 	};
 
+	let firstStep: WizardStep;
+	let otherSteps: WizardStep[];
+	$: [firstStep, ...otherSteps] = icSendWizardSteps($i18n);
+
 	let steps: WizardSteps;
 	$: steps = [
 		{
-			name: WizardStepsSend.SEND,
+			...firstStep,
 			title: isNetworkIdBTC(networkId)
 				? $i18n.convert.text.convert_to_btc
 				: isNetworkIdEthereum(networkId)
@@ -140,14 +145,7 @@
 						})
 					: $i18n.send.text.send
 		},
-		{
-			name: WizardStepsSend.REVIEW,
-			title: $i18n.send.text.review
-		},
-		{
-			name: WizardStepsSend.SENDING,
-			title: $i18n.send.text.sending
-		}
+		...otherSteps
 	];
 
 	let currentStep: WizardStep | undefined;
