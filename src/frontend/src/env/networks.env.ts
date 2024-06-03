@@ -88,3 +88,7 @@ export const BTC_TESTNET_NETWORK: Network = {
 	env: 'testnet',
 	name: 'Bitcoin'
 };
+
+export const BITCOIN_NETWORKS: Network[] = [BTC_MAINNET_NETWORK, BTC_TESTNET_NETWORK];
+
+export const BITCOIN_NETWORKS_IDS: symbol[] = BITCOIN_NETWORKS.map(({ id }) => id);

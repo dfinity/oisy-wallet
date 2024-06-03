@@ -19,8 +19,7 @@
 		assertCkETHMinFee,
 		assertCkETHMinWithdrawalAmount
 	} from '$icp/utils/cketh.utils';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
@@ -49,7 +48,7 @@
 			return;
 		}
 
-		if (isNetworkIdBTC(networkId)) {
+		if (isNetworkIdBitcoin(networkId)) {
 			const error = assertCkBTCUserInputAmount({
 				amount: userAmount,
 				minterInfo: $ckBtcMinterInfoStore?.[$tokenId],
