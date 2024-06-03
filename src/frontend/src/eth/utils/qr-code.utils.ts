@@ -44,15 +44,17 @@ export const decodeQrCode = ({
 	const matchEthereumToken = ({
 		address,
 		functionName,
-		ethereumChainId
+		ethereumChainId,
+		fallbackEthereumChainId
 	}: {
 		address: string | undefined;
 		functionName: string | undefined;
 		ethereumChainId: string | undefined;
+		fallbackEthereumChainId: string | bigint | number;
 	}): Token | undefined => {
 		const parsedEthereumChainId = nonNullish(ethereumChainId)
 			? normalizeChainId(ethereumChainId)
-			: 1n;
+			: fallbackEthereumChainId;
 
 		if (nonNullish(address) && functionName === 'transfer') {
 			return (
@@ -75,7 +77,12 @@ export const decodeQrCode = ({
 
 	const token =
 		prefix === 'ethereum'
-			? matchEthereumToken({ address, functionName, ethereumChainId })
+			? matchEthereumToken({
+					address,
+					functionName,
+					ethereumChainId,
+					fallbackEthereumChainId: (expectedToken.network as EthereumNetwork).chainId
+				})
 			: undefined;
 
 	if (isNullish(token)) {
