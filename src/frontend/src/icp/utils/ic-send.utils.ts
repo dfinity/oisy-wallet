@@ -40,9 +40,6 @@ export const isTokenCkEthLedger = ({ ledgerCanisterId }: Partial<IcToken>): bool
 export const isTokenCkErc20Ledger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
 	nonNullish(ledgerCanisterId) && CKERC20_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
-export const isNetworkIdBTC = (networkId: NetworkId | undefined): boolean =>
-	nonNullish(networkId) && isNetworkIdBitcoin(networkId);
-
 export const isNetworkIdETHMainnet = (networkId: NetworkId | undefined): boolean =>
 	ETHEREUM_NETWORK_ID === networkId;
 
@@ -65,7 +62,7 @@ export const isInvalidDestinationIc = ({
 		return false;
 	}
 
-	if (isNetworkIdBTC(networkId)) {
+	if (isNetworkIdBitcoin(networkId)) {
 		return invalidBtcAddress({
 			address: destination,
 			network: isNetworkIdBTCMainnet(networkId) ? BtcNetwork.Mainnet : BtcNetwork.Testnet

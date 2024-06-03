@@ -23,8 +23,8 @@
 	import { setContext } from 'svelte';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { isNetworkIdBTC, isNetworkIdETH } from '$icp/utils/ic-send.utils';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
@@ -95,7 +95,7 @@
 			});
 
 			await trackEvent({
-				name: isNetworkIdBTC(networkId)
+				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
 					: isNetworkIdETH(networkId)
 						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
@@ -110,7 +110,7 @@
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			await trackEvent({
-				name: isNetworkIdBTC(networkId)
+				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
 					: isNetworkIdETH(networkId)
 						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR
@@ -137,7 +137,7 @@
 	$: steps = [
 		{
 			...firstStep,
-			title: isNetworkIdBTC(networkId)
+			title: isNetworkIdBitcoin(networkId)
 				? $i18n.convert.text.convert_to_btc
 				: isNetworkIdEthereum(networkId)
 					? replacePlaceholders($i18n.convert.text.convert_to_token, {
