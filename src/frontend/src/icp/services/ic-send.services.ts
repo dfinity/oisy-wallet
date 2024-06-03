@@ -10,18 +10,14 @@ import {
 } from '$icp/services/ck.services';
 import type { IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
-import {
-	isNetworkIdBTC,
-	isNetworkIdETH,
-	isTokenCkErc20Ledger,
-	isTokenCkEthLedger
-} from '$icp/utils/ic-send.utils';
+import { isNetworkIdETH, isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
+import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
 import { get } from 'svelte/store';
@@ -51,7 +47,7 @@ const send = async ({
 	token: IcToken;
 	targetNetworkId: NetworkId | undefined;
 }): Promise<void> => {
-	if (isNetworkIdBTC(targetNetworkId)) {
+	if (isNetworkIdBitcoin(targetNetworkId)) {
 		await convertCkBTCToBtc({
 			...rest,
 			token

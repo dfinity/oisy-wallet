@@ -3,9 +3,10 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import type { ProgressStep } from '@dfinity/gix-components';
 	import type { NetworkId } from '$lib/types/network';
-	import { isNetworkIdBTC, isNetworkIdETH } from '$icp/utils/ic-send.utils';
+	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
+	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 
 	export let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;
 	export let networkId: NetworkId | undefined = undefined;
@@ -26,7 +27,7 @@
 					} as ProgressStep
 				]
 			: []),
-		...(isNetworkIdBTC(networkId) || isNetworkIdETH(networkId)
+		...(isNetworkIdBitcoin(networkId) || isNetworkIdETH(networkId)
 			? [
 					{
 						step: ProgressStepsSendIc.APPROVE_TRANSFER,

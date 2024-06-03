@@ -3,8 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
-	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import icpLight from '$icp/assets/icp_light.svg';
@@ -16,7 +15,7 @@
 
 	let showDestinationNetwork: boolean;
 	$: showDestinationNetwork =
-		nonNullish(networkId) && (isNetworkIdBTC(networkId) || isNetworkIdEthereum(networkId));
+		nonNullish(networkId) && (isNetworkIdBitcoin(networkId) || isNetworkIdEthereum(networkId));
 </script>
 
 <Value ref="network" element="div">
@@ -33,7 +32,7 @@
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
 		<span class="flex gap-1">
-			{#if nonNullish(networkId) && isNetworkIdBTC(networkId)}
+			{#if nonNullish(networkId) && isNetworkIdBitcoin(networkId)}
 				<IcSendBtcNetwork {networkId} /> <Logo src={bitcoin} size="20px" alt={`Bitcoin logo`} />
 			{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
 				{$ckEthereumTwinToken.network.name}
