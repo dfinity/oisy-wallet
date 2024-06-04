@@ -6,10 +6,13 @@
 	import { debounce } from '@dfinity/utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { createEventDispatcher } from 'svelte';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
 	export let invalidDestination = false;
+
+	const dispatch = createEventDispatcher();
 
 	let isInvalidDestination: () => boolean;
 
@@ -38,4 +41,6 @@
 	bind:invalidDestination
 	{isInvalidDestination}
 	{inputPlaceholder}
+	on:icQRCodeScan
+	onQRButtonClick={() => dispatch('icQRCodeScan')}
 />
