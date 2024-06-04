@@ -15,3 +15,11 @@ export const sendWizardSteps = (i18n: I18n): WizardSteps => [
 		title: i18n.send.text.sending
 	}
 ];
+
+export const sendWizardStepsWithQrCodeScan = (i18n: I18n): WizardSteps => [
+	...sendWizardSteps(i18n),
+	{
+		name: WizardStepsSend.QR_CODE_SCAN,
+		title: i18n.send.text.scan_qr
+	}
+];
