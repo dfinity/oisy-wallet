@@ -15,7 +15,8 @@ import type {
 import type { CertifiedData } from '$lib/types/store';
 import { MinterNoNewUtxosError, type PendingUtxo, type UtxoStatus } from '@dfinity/ckbtc';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
+import {assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString} from '@dfinity/utils';
+import {BITCOIN_CANISTER_IDS} from "$env/networks.btc.env";
 
 export class CkBTCUpdateBalanceScheduler
 	implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance>
@@ -134,12 +135,22 @@ export class CkBTCUpdateBalanceScheduler
 		btcAddress: string;
 		bitcoinNetwork: BitcoinNetwork;
 	}): Promise<boolean> {
+		const bitcoinCanisterId = BITCOIN_CANISTER_IDS[minterCanisterId];
+
+		// TODO: Deploy Bitcoin canister for local development.
+		// We currently do not deploy locally the Bitcoin canister. That is why we do not throw an error if undefined.
+		// Not checking if there are pending Utxos is not an issue for the user flow, it "just" has for effect to stress the ckBTC minter more as it will lead to calling "update balance" more often. Per extension, it consumes more cycles.
+		if (isNullish((bitcoinCanisterId))) {
+			return true;
+		}
+
 		const [{ utxos: allUtxos }, knownUtxos] = await Promise.all([
 			getUtxos({
 				identity,
 				certified: false,
 				network,
-				address
+				address,
+				bitcoinCanisterId
 			}),
 			getKnownUtxos({ identity, minterCanisterId })
 		]);
