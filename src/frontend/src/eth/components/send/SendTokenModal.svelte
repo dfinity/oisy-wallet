@@ -70,7 +70,7 @@
 
 	const goToWizardStep = (stepName: WizardStepsSend) => {
 		const stepNumber = steps.findIndex(({ name }) => name === stepName);
-		modal.set(stepNumber);
+		modal.set(Math.max(stepNumber, 0));
 	};
 </script>
 
