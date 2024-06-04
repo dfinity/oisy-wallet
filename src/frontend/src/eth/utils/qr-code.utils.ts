@@ -34,7 +34,21 @@ export const decodeQrCode = ({
 		return { status: 'success', destination: code };
 	}
 
-	const { prefix, destination, value, uint256, address, ethereumChainId, functionName } = payment;
+	const {
+		prefix,
+		destination: destinationOrTokenAddress,
+		value,
+		uint256,
+		address,
+		ethereumChainId,
+		functionName
+	} = payment;
+
+	const destination = functionName === 'transfer' ? address : destinationOrTokenAddress;
+
+	if (isNullish(destination)) {
+		return { status: 'success', destination };
+	}
 
 	const normalizeChainId = (chainId: string): string => {
 		if (chainId.startsWith('0x')) {
@@ -44,12 +58,12 @@ export const decodeQrCode = ({
 	};
 
 	const matchEthereumToken = ({
-		address,
+		tokenAddress,
 		functionName,
 		ethereumChainId,
 		fallbackEthereumChainId
 	}: {
-		address: string | undefined;
+		tokenAddress: string | undefined;
 		functionName: string | undefined;
 		ethereumChainId: string | undefined;
 		fallbackEthereumChainId: string | bigint | number;
@@ -58,11 +72,11 @@ export const decodeQrCode = ({
 			? normalizeChainId(ethereumChainId)
 			: fallbackEthereumChainId;
 
-		if (nonNullish(address) && functionName === 'transfer') {
+		if (nonNullish(tokenAddress) && functionName === 'transfer') {
 			return (
 				erc20Tokens.find(
 					(token) =>
-						token.address.toLowerCase() === address.toLowerCase() &&
+						token.address.toLowerCase() === tokenAddress.toLowerCase() &&
 						(token.network as EthereumNetwork).chainId.toString() ===
 							parsedEthereumChainId.toString()
 				) ?? undefined
@@ -80,7 +94,7 @@ export const decodeQrCode = ({
 	const token =
 		prefix === 'ethereum'
 			? matchEthereumToken({
-					address,
+					tokenAddress: functionName === 'transfer' ? destinationOrTokenAddress : undefined,
 					functionName,
 					ethereumChainId,
 					fallbackEthereumChainId: (expectedToken.network as EthereumNetwork).chainId
