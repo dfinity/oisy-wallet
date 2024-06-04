@@ -8,6 +8,7 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { address } from '$lib/derived/address.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
@@ -39,6 +40,8 @@
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import QRCodeScan from '$lib/components/send/QRCodeScan.svelte';
 	import { decodeQrCode } from '$eth/utils/qr-code.utils';
+	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -201,6 +204,23 @@
 
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
+
+	$: onDecodeQrCode = ({
+		status,
+		code,
+		expectedToken
+	}: {
+		status: QrStatus;
+		code?: string;
+		expectedToken: Token;
+	}): QrResponse =>
+		decodeQrCode({
+			status,
+			code,
+			expectedToken,
+			ethereumTokens: $enabledEthereumTokens,
+			erc20Tokens: $erc20Tokens
+		});
 </script>
 
 <FeeContext
@@ -251,7 +271,12 @@
 			</svelte:fragment>
 		</SendForm>
 	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-		<QRCodeScan expectedToken={$sendToken} bind:destination bind:amount {decodeQrCode} />
+		<QRCodeScan
+			expectedToken={$sendToken}
+			bind:destination
+			bind:amount
+			decodeQrCode={onDecodeQrCode}
+		/>
 	{:else}
 		<slot />
 	{/if}
