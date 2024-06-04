@@ -63,7 +63,7 @@ export const decodeQrCode = ({
 						token.address.toLowerCase() === address.toLowerCase() &&
 						(token.network as EthereumNetwork).chainId.toString() ===
 							parsedEthereumChainId.toString()
-				) || undefined
+				) ?? undefined
 			);
 		}
 
@@ -71,7 +71,7 @@ export const decodeQrCode = ({
 			ethereumTokens.find(
 				(token) =>
 					(token.network as EthereumNetwork).chainId.toString() === parsedEthereumChainId.toString()
-			) || undefined
+			) ?? undefined
 		);
 	};
 
