@@ -70,7 +70,7 @@ describe('decodeQrCode', () => {
 		const payment = {
 			prefix: 'ethereum',
 			destination: destination,
-			amount: amount,
+			value: amount * 10 ** token.decimals,
 			ethereumChainId: (token.network as EthereumNetwork).chainId.toString()
 		};
 		mockDecodeQrCodeUrn.mockReturnValue(payment);
