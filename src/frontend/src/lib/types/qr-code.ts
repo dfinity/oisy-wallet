@@ -9,7 +9,7 @@ export type QrResponse = {
 	amount?: number;
 };
 
-export const URN_NUMERIC_PARAMS = ['amount', 'value'] as const;
+export const URN_NUMERIC_PARAMS = ['amount', 'value', 'uint256'] as const;
 
 export const URN_STRING_PARAMS = ['address'] as const;
 

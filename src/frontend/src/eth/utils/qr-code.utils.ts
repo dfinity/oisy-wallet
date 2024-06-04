@@ -4,6 +4,7 @@ import { type QrResponse, type QrStatus } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { hexStringToUint8Array, isNullish, nonNullish } from '@dfinity/utils';
+import { formatEther } from 'ethers/lib/utils';
 
 export const decodeQrCode = ({
 	status,
@@ -32,7 +33,7 @@ export const decodeQrCode = ({
 		return { status: 'success', destination: code };
 	}
 
-	const { prefix, destination, amount, address, ethereumChainId, functionName } = payment;
+	const { prefix, destination, value, uint256, address, ethereumChainId, functionName } = payment;
 
 	const normalizeChainId = (chainId: string): string => {
 		if (chainId.startsWith('0x')) {
@@ -96,6 +97,13 @@ export const decodeQrCode = ({
 	) {
 		return { status: 'token_incompatible' };
 	}
+
+	const amount =
+		functionName === 'transfer'
+			? uint256
+			: nonNullish(value)
+				? +formatEther(value.toString())
+				: undefined;
 
 	return { status: 'success', destination, token: token.symbol, amount };
 };
