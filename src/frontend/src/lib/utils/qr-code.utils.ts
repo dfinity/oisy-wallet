@@ -62,7 +62,7 @@ export const decodeQrCodeUrn = (urn: string): DecodedUrn | undefined => {
 
 	const params = nonNullish(queryString) ? parseQueryString(queryString) : {};
 	// Conservatively, it returns nothing if the function is unable to decipher the query parameters
-	if (isNullish(params)) {
+	if (params === undefined) {
 		return undefined;
 	}
 
