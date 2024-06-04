@@ -33,7 +33,7 @@
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<div class="stretch">
-		<IcSendDestination bind:destination bind:invalidDestination {networkId} />
+		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
 
 		<IcSendAmount bind:amount bind:amountError {networkId} />
 

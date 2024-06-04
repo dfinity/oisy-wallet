@@ -44,7 +44,9 @@
 		type EthereumFeeContext as EthereumFeeContextType
 	} from '$icp/stores/ethereum-fee.store';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { icSendWizardSteps } from '$icp/config/ic-send.config';
+	import { icSendWizardStepsWithQrCodeScan } from '$icp/config/ic-send.config';
+	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
+	import QRCodeScan from '$lib/components/send/QRCodeScan.svelte';
 
 	/**
 	 * Props
@@ -131,7 +133,7 @@
 
 	let firstStep: WizardStep;
 	let otherSteps: WizardStep[];
-	$: [firstStep, ...otherSteps] = icSendWizardSteps($i18n);
+	$: [firstStep, ...otherSteps] = icSendWizardStepsWithQrCodeScan($i18n);
 
 	let steps: WizardSteps;
 	$: steps = [
@@ -177,6 +179,11 @@
 	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
 		store: initEthereumFeeStore()
 	});
+
+	const goToWizardStep = (stepName: WizardStepsSend) => {
+		const stepNumber = steps.findIndex(({ name }) => name === stepName);
+		modal.set(Math.max(stepNumber, 0));
+	};
 </script>
 
 <WizardModal
@@ -194,14 +201,25 @@
 				<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
 			{:else if currentStep?.name === WizardStepsSend.SENDING}
 				<IcSendProgress bind:sendProgressStep {networkId} />
-			{:else}
+			{:else if currentStep?.name === WizardStepsSend.SEND}
 				<IcSendForm
 					on:icNext={modal.next}
 					on:icClose={close}
 					bind:destination
 					bind:amount
 					bind:networkId
+					on:icQRCodeScan={() => goToWizardStep(WizardStepsSend.QR_CODE_SCAN)}
 				/>
+			{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+				<QRCodeScan
+					expectedToken={$token}
+					bind:destination
+					bind:amount
+					decodeQrCode={icDecodeQrCode}
+					on:icQRCodeBack={() => goToWizardStep(WizardStepsSend.SEND)}
+				/>
+			{:else}
+				<slot />
 			{/if}
 		</BitcoinFeeContext>
 	</EthereumFeeContext>
