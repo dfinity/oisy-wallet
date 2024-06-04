@@ -94,7 +94,7 @@
 		on:icBack={modal.back}
 		on:icNext={modal.next}
 		on:icClose={close}
-		on:qrCodeScan={() => goToWizardStep(WizardStepsSend.QR_CODE_SCAN)}
-		on:qrCodeBack={() => goToWizardStep(WizardStepsSend.SEND)}
+		on:icQRCodeScan={() => goToWizardStep(WizardStepsSend.QR_CODE_SCAN)}
+		on:icQRCodeBack={() => goToWizardStep(WizardStepsSend.SEND)}
 	/>
 </WizardModal>

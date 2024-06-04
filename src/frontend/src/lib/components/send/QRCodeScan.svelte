@@ -68,7 +68,7 @@
 	};
 
 	const back = () => {
-		dispatch('qrCodeBack');
+		dispatch('icQRCodeBack');
 	};
 </script>
 

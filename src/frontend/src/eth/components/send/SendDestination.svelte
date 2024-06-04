@@ -30,6 +30,6 @@
 	{isInvalidDestination}
 	inputPlaceholder={$i18n.send.placeholder.enter_eth_address}
 	on:nnsInput={onInput}
-	on:qrCodeScan
-	onQRButtonClick={() => dispatch('qrCodeScan')}
+	on:icQRCodeScan
+	onQRButtonClick={() => dispatch('icQRCodeScan')}
 />
