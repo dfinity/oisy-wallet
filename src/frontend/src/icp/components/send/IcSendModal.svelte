@@ -47,7 +47,7 @@
 	import { icSendWizardStepsWithQrCodeScan } from '$icp/config/ic-send.config';
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
 	import QRCodeScan from '$lib/components/send/QRCodeScan.svelte';
-	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 
 	/**
 	 * Props
@@ -205,7 +205,7 @@
 					bind:amount
 					bind:networkId
 					on:icQRCodeScan={() =>
-						goToWizardStep({
+						goToWizardSendStep({
 							modal,
 							steps,
 							stepName: WizardStepsSend.QR_CODE_SCAN
@@ -218,7 +218,7 @@
 					bind:amount
 					decodeQrCode={icDecodeQrCode}
 					on:icQRCodeBack={() =>
-						goToWizardStep({
+						goToWizardSendStep({
 							modal,
 							steps,
 							stepName: WizardStepsSend.SEND

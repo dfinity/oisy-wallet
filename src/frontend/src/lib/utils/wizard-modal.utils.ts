@@ -1,7 +1,7 @@
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import { WizardModal, type WizardSteps } from '@dfinity/gix-components';
 
-export const goToWizardStep = ({
+export const goToWizardSendStep = ({
 	modal,
 	steps,
 	stepName

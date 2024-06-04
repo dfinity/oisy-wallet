@@ -13,7 +13,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 
 	/**
 	 * Props
@@ -91,13 +91,13 @@
 		on:icNext={modal.next}
 		on:icClose={close}
 		on:icQRCodeScan={() =>
-			goToWizardStep({
+			goToWizardSendStep({
 				modal,
 				steps,
 				stepName: WizardStepsSend.QR_CODE_SCAN
 			})}
 		on:icQRCodeBack={() =>
-			goToWizardStep({
+			goToWizardSendStep({
 				modal,
 				steps,
 				stepName: WizardStepsSend.SEND

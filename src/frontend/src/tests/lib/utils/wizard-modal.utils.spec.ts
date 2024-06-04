@@ -1,5 +1,5 @@
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
-import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 import { WizardModal, type WizardSteps } from '@dfinity/gix-components';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -22,7 +22,7 @@ describe('goToWizardStep', () => {
 	it('should set the modal to the correct step number for each step', () => {
 		mockSteps.forEach((step, index) => {
 			mockModal.set.mockClear();
-			goToWizardStep({
+			goToWizardSendStep({
 				modal: mockModal as unknown as WizardModal,
 				steps: mockSteps,
 				stepName: step.name as WizardStepsSend
@@ -33,7 +33,7 @@ describe('goToWizardStep', () => {
 	});
 
 	it('should set the modal to 0 if step name is not found', () => {
-		goToWizardStep({
+		goToWizardSendStep({
 			modal: mockModal as unknown as WizardModal,
 			steps: mockSteps,
 			stepName: 'nonExistentStep' as WizardStepsSend
