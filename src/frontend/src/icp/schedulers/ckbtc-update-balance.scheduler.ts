@@ -1,5 +1,6 @@
-import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
+import { BITCOIN_CANISTER_IDS } from '$env/networks.btc.env';
 import { getUtxos } from '$icp/api/bitcoin.api';
+import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { BtcAddressData } from '$icp/stores/btc.store';
@@ -13,10 +14,9 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { MinterNoNewUtxosError, type PendingUtxo, type UtxoStatus } from '@dfinity/ckbtc';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import {assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString} from '@dfinity/utils';
-import {BITCOIN_CANISTER_IDS} from "$env/networks.btc.env";
+import { MinterNoNewUtxosError, type PendingUtxo, type UtxoStatus } from '@dfinity/ckbtc';
+import { assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler
 	implements Scheduler<PostMessageDataRequestIcCkBTCUpdateBalance>
@@ -140,7 +140,7 @@ export class CkBTCUpdateBalanceScheduler
 		// TODO: Deploy Bitcoin canister for local development.
 		// We currently do not deploy locally the Bitcoin canister. That is why we do not throw an error if undefined.
 		// Not checking if there are pending Utxos is not an issue for the user flow, it "just" has for effect to stress the ckBTC minter more as it will lead to calling "update balance" more often. Per extension, it consumes more cycles.
-		if (isNullish((bitcoinCanisterId))) {
+		if (isNullish(bitcoinCanisterId)) {
 			return true;
 		}
 
