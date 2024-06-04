@@ -6,7 +6,7 @@ import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
 import type { SyncState } from '$lib/types/sync';
-import type { BitcoinNetwork } from '@dfinity/ic-management';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 
 export type PostMessageRequest =
 	| 'startIdleTimer'
