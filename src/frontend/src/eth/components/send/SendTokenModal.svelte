@@ -13,6 +13,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 
 	/**
 	 * Props
@@ -67,11 +68,6 @@
 
 			currentStep = undefined;
 		});
-
-	const goToWizardStep = (stepName: WizardStepsSend) => {
-		const stepNumber = steps.findIndex(({ name }) => name === stepName);
-		modal.set(Math.max(stepNumber, 0));
-	};
 </script>
 
 <WizardModal
@@ -94,7 +90,17 @@
 		on:icBack={modal.back}
 		on:icNext={modal.next}
 		on:icClose={close}
-		on:icQRCodeScan={() => goToWizardStep(WizardStepsSend.QR_CODE_SCAN)}
-		on:icQRCodeBack={() => goToWizardStep(WizardStepsSend.SEND)}
+		on:icQRCodeScan={() =>
+			goToWizardSendStep({
+				modal,
+				steps,
+				stepName: WizardStepsSend.QR_CODE_SCAN
+			})}
+		on:icQRCodeBack={() =>
+			goToWizardSendStep({
+				modal,
+				steps,
+				stepName: WizardStepsSend.SEND
+			})}
 	/>
 </WizardModal>
