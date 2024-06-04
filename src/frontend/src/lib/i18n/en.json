@@ -372,7 +372,7 @@
 		"bitcoin": {
 			"title": "Receive from Bitcoin Network (BTC)",
 			"description": "ckBTC is a multi-chain bitcoin twin on the Internet Computer created by canister smart contract that directly hold native bitcoin.",
-			"note": "Note that incoming Bitcoin transactions require 12 confirmations. Check status on a block explorer.",
+			"note": "Note that incoming Bitcoin transactions require 6 confirmations. Check status on a block explorer.",
 			"receive": "Receive from BTC network"
 		},
 		"ethereum": {

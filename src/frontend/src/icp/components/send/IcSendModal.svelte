@@ -23,8 +23,8 @@
 	import { setContext } from 'svelte';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { isNetworkIdBTC, isNetworkIdETH } from '$icp/utils/ic-send.utils';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
@@ -44,6 +44,7 @@
 		type EthereumFeeContext as EthereumFeeContextType
 	} from '$icp/stores/ethereum-fee.store';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { icSendWizardSteps } from '$icp/config/ic-send.config';
 
 	/**
 	 * Props
@@ -94,7 +95,7 @@
 			});
 
 			await trackEvent({
-				name: isNetworkIdBTC(networkId)
+				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
 					: isNetworkIdETH(networkId)
 						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
@@ -109,7 +110,7 @@
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			await trackEvent({
-				name: isNetworkIdBTC(networkId)
+				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
 					: isNetworkIdETH(networkId)
 						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR
@@ -128,11 +129,15 @@
 		}
 	};
 
+	let firstStep: WizardStep;
+	let otherSteps: WizardStep[];
+	$: [firstStep, ...otherSteps] = icSendWizardSteps($i18n);
+
 	let steps: WizardSteps;
 	$: steps = [
 		{
-			name: WizardStepsSend.SEND,
-			title: isNetworkIdBTC(networkId)
+			...firstStep,
+			title: isNetworkIdBitcoin(networkId)
 				? $i18n.convert.text.convert_to_btc
 				: isNetworkIdEthereum(networkId)
 					? replacePlaceholders($i18n.convert.text.convert_to_token, {
@@ -140,14 +145,7 @@
 						})
 					: $i18n.send.text.send
 		},
-		{
-			name: WizardStepsSend.REVIEW,
-			title: $i18n.send.text.review
-		},
-		{
-			name: WizardStepsSend.SENDING,
-			title: $i18n.send.text.sending
-		}
+		...otherSteps
 	];
 
 	let currentStep: WizardStep | undefined;

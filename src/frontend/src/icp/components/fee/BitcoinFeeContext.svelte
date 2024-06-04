@@ -3,12 +3,13 @@
 	import { getContext } from 'svelte';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import { debounce, isNullish } from '@dfinity/utils';
-	import { isNetworkIdBTC, isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
+	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { authStore } from '$lib/stores/auth.store';
 	import { queryEstimateFee } from '$icp/services/ckbtc.services';
+	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 
 	export let amount: string | number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
@@ -23,7 +24,7 @@
 			return;
 		}
 
-		if (!isNetworkIdBTC(networkId)) {
+		if (!isNetworkIdBitcoin(networkId)) {
 			store.setFee(null);
 			return;
 		}
