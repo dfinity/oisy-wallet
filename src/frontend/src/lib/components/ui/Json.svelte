@@ -56,7 +56,7 @@
 	$: title = valueType === 'hash' ? (json as number[]).join() : undefined;
 
 	let collapsed = true;
-	$: collapsed = _collapsed === undefined ? defaultExpandedLevel < _level : _collapsed;
+	$: collapsed = _collapsed ?? defaultExpandedLevel < _level;
 
 	const toggle = () => (collapsed = !collapsed);
 </script>
