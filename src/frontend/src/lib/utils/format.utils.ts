@@ -75,7 +75,7 @@ export const formatUSD = (
 		maxFraction = 2,
 		maximumSignificantDigits,
 		symbol = true
-	} = options || {};
+	} = options ?? {};
 
 	return new Intl.NumberFormat('en-US', {
 		...(symbol && { style: 'currency', currency: 'USD' }),
