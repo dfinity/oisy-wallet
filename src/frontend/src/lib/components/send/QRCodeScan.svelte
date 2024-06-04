@@ -2,20 +2,24 @@
 	import { QRCodeReader } from '@dfinity/gix-components';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { nonNullish } from '@dfinity/utils';
-	import type { Token } from '@dfinity/utils';
-	import type { QrStatus } from '$lib/types/qr-code';
+	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import type { Token } from '$lib/types/token';
 
 	export let expectedToken: Token;
 	export let destination: string | undefined;
 	export let amount: number | undefined;
-	export let decodeQrCode: (args: {
+	export let decodeQrCode: ({
+		status,
+		code,
+		expectedToken
+	}: {
 		status: QrStatus;
 		code?: string;
 		expectedToken: Token;
-	}) => { status: QrStatus; destination?: string; amount?: number };
+	}) => QrResponse;
 
 	const dispatch = createEventDispatcher();
 
