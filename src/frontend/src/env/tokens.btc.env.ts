@@ -32,6 +32,3 @@ export const BTC_TESTNET_TOKEN: Token = {
 	symbol: 'BTC (Testnet)',
 	decimals: BTC_DECIMALS
 };
-
-// TODO: remove test
-const tmp = 5;
