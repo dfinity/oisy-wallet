@@ -1,5 +1,5 @@
 import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
-import { getUtxos } from '$icp/api/ic.api';
+import { getUtxos } from '$icp/api/bitcoin.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
 import type { BtcAddressData } from '$icp/stores/btc.store';
@@ -14,7 +14,7 @@ import type {
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import { MinterNoNewUtxosError, type PendingUtxo, type UtxoStatus } from '@dfinity/ckbtc';
-import type { BitcoinNetwork } from '@dfinity/ic-management';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { assertNonNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler
