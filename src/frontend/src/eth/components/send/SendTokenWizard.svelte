@@ -251,6 +251,7 @@
 		<SendForm
 			on:icNext
 			on:icClose={close}
+			on:icQRCodeScan
 			bind:destination
 			bind:amount
 			bind:network={targetNetwork}
@@ -276,6 +277,7 @@
 			bind:destination
 			bind:amount
 			decodeQrCode={onDecodeQrCode}
+			on:icQRCodeBack
 		/>
 	{:else}
 		<slot />
