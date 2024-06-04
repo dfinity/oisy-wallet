@@ -2,9 +2,10 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { type QrResponse, type QrStatus } from '$lib/types/qr-code';
 import type { Token } from '$lib/types/token';
+import { formatToken } from '$lib/utils/format.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { hexStringToUint8Array, isNullish, nonNullish } from '@dfinity/utils';
-import { formatEther } from 'ethers/lib/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export const decodeQrCode = ({
 	status,
@@ -102,7 +103,7 @@ export const decodeQrCode = ({
 		functionName === 'transfer'
 			? uint256
 			: nonNullish(value)
-				? +formatEther(value.toString())
+				? +formatToken({ value: BigNumber.from(value.toString()), unitName: token.decimals })
 				: undefined;
 
 	return { status: 'success', destination, token: token.symbol, amount };
