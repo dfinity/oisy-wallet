@@ -67,6 +67,11 @@
 
 			currentStep = undefined;
 		});
+
+	const goToWizardStep = (stepName: WizardStepsSend) => {
+		const stepNumber = steps.findIndex(({ name }) => name === stepName);
+		modal.set(stepNumber);
+	};
 </script>
 
 <WizardModal
@@ -89,5 +94,7 @@
 		on:icBack={modal.back}
 		on:icNext={modal.next}
 		on:icClose={close}
+		on:qrCodeScan={() => goToWizardStep(WizardStepsSend.QR_CODE_SCAN)}
+		on:qrCodeBack={() => goToWizardStep(WizardStepsSend.SEND)}
 	/>
 </WizardModal>
