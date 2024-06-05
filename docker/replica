@@ -6,7 +6,8 @@ source /home/apprunner/.bashrc
 # turn on bash's job control
 set -m
 
-dfx start --quiet &
+# The default bind address of dfx is 127.0.0.1:4943. We have to use 0.0.0.0:4943 otherwise Docker cannot expose the port.
+dfx start --host 0.0.0.0:"$DFX_PORT" --quiet &
 
 ./docker/wait-port "$DFX_PORT"
 
