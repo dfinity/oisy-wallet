@@ -25,11 +25,11 @@ export const icDecodeQrCode = ({
 		return { status: 'success', destination: code };
 	}
 
-	const { token, identifier: destination, amount } = payment;
+	const { token: symbol, identifier: destination, amount } = payment;
 
-	if (nonNullish(expectedToken) && token.toLowerCase() !== expectedToken.symbol.toLowerCase()) {
+	if (nonNullish(expectedToken) && symbol.toLowerCase() !== expectedToken.symbol.toLowerCase()) {
 		return { status: 'token_incompatible' };
 	}
 
-	return { status: 'success', destination, token, amount };
+	return { status: 'success', destination, symbol, amount };
 };
