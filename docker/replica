@@ -8,9 +8,9 @@ set -m
 
 dfx start --quiet &
 
-# TODO wait-for another port?
 ./docker/wait-port "$DFX_PORT"
 
+# TODO wait-for another port?
 sleep 10
 
 dfx deploy backend
