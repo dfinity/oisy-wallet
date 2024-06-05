@@ -34,6 +34,14 @@ export const decodeQrCode = ({
 		return { status: 'success', destination: code };
 	}
 
+	// According to ETH standard EIP-681, the prop defined as 'destinationOrTokenAddress' can be:
+	// - 'destination' when the QR code refers to the native token ETH (mainnet or testnet),
+	// 		so it refers to the destination wallet.
+	// - 'tokenAddress' when the QR code refers to an ERC20 token, so it refers to the address of
+	// 		the ERC20 token.
+	// To differentiate the two cases, there is the 'functionName' parameter equal to 'transfer' in
+	// the QR code.
+	// Source https://eips.ethereum.org/EIPS/eip-681
 	const {
 		prefix,
 		destination: destinationOrTokenAddress,
@@ -59,12 +67,10 @@ export const decodeQrCode = ({
 
 	const matchEthereumToken = ({
 		tokenAddress,
-		functionName,
 		ethereumChainId,
 		fallbackEthereumChainId
 	}: {
 		tokenAddress: string | undefined;
-		functionName: string | undefined;
 		ethereumChainId: string | undefined;
 		fallbackEthereumChainId: string | bigint | number;
 	}): Token | undefined => {
@@ -72,7 +78,7 @@ export const decodeQrCode = ({
 			? normalizeChainId(ethereumChainId)
 			: fallbackEthereumChainId;
 
-		if (nonNullish(tokenAddress) && functionName === 'transfer') {
+		if (nonNullish(tokenAddress)) {
 			return (
 				erc20Tokens.find(
 					(token) =>
@@ -94,8 +100,10 @@ export const decodeQrCode = ({
 	const token =
 		prefix === 'ethereum'
 			? matchEthereumToken({
+					// If 'functionName' is 'transfer', 'destinationOrTokenAddress' refers to an ERC20 token
+					// and is set as 'tokenAddress'. Otherwise, it should be 'undefined', to avoid passing
+					// the address of the destination wallet as the address of the token.
 					tokenAddress: functionName === 'transfer' ? destinationOrTokenAddress : undefined,
-					functionName,
 					ethereumChainId,
 					fallbackEthereumChainId: (expectedToken.network as EthereumNetwork).chainId
 				})
