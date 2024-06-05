@@ -30,7 +30,8 @@ export const generateUrn = (
 
 	if (standard === 'erc20') {
 		urn += `/transfer`;
-		params.address = tokenAddress;
+		params.address = destination;
+		params.destination = tokenAddress;
 	}
 
 	const queryString = new URLSearchParams();
