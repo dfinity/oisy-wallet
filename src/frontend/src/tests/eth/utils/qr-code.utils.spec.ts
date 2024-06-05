@@ -83,7 +83,7 @@ describe('decodeQrCode', () => {
 		expect(response).toEqual({
 			status: 'success',
 			destination: destination,
-			tokenSymbol: token.symbol,
+			symbol: token.symbol,
 			amount: amount
 		});
 

@@ -63,7 +63,7 @@ describe('icDecodeQrCode', () => {
 		expect(response).toEqual({
 			status: 'success',
 			destination: address,
-			tokenSymbol: token.symbol,
+			symbol: token.symbol,
 			amount: amount
 		});
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);

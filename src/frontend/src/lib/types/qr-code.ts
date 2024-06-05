@@ -1,3 +1,4 @@
+import type { TokenMetadata } from '$lib/types/token';
 import { z } from 'zod';
 
 export type QrStatus = 'success' | 'cancelled' | 'token_incompatible';
@@ -5,9 +6,8 @@ export type QrStatus = 'success' | 'cancelled' | 'token_incompatible';
 export type QrResponse = {
 	status: QrStatus;
 	destination?: string;
-	tokenSymbol?: string;
 	amount?: number;
-};
+} & Partial<Pick<TokenMetadata, 'symbol'>>;
 
 export const URN_NUMERIC_PARAMS = ['amount', 'value', 'uint256'] as const;
 
