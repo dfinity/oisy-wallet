@@ -10,10 +10,10 @@ dfx start --quiet &
 
 ./docker/wait-port "$DFX_PORT"
 
-# TODO wait-for another port?
-sleep 10
+REPLICA_PORT="$(dfx info replica-port)"
+./docker/wait-port "$REPLICA_PORT"
 
-dfx deploy backend
+# In case we ever want to re-deploy or configure anything when the image is running. This can be implemented here.
 
 # now we bring the primary process back into the foreground
 # and leave it there
