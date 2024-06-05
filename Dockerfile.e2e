@@ -1,0 +1,54 @@
+FROM ubuntu:22.04 as deps
+
+ENV TZ=UTC
+
+# Install required tools
+RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
+    curl \
+    libunwind-dev \
+    netcat \
+    ca-certificates \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install NodeJS
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
+RUN apt-get install nodejs -y
+
+# Create and use a user instead of using root
+RUN useradd -ms /bin/bash apprunner
+USER apprunner
+
+# Define working directories
+WORKDIR /oisy-wallet
+
+# Install Rust and Cargo as apprunner
+ENV RUSTUP_HOME=/home/apprunner/.rustup \
+    CARGO_HOME=/home/apprunner/.cargo \
+    PATH=/home/apprunner/.cargo/bin:$PATH
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN /bin/bash -c "source /home/apprunner/.cargo/env && rustc --version && cargo --version"
+
+# Add wasm32-unknown-unknown target
+RUN /bin/bash -c "source /home/apprunner/.cargo/env && rustup target add wasm32-unknown-unknown"
+
+# Install dfx
+ENV DFX_PORT=4943
+ENV DFX_VERSION=0.20.0
+RUN DFXVM_INIT_YES=true DFX_VERSION=$DFX_VERSION sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+
+# Set permission to .config folder so that dfx can write whatever files are needed
+RUN mkdir -p /home/apprunner/.config/dfx && chmod -R 700 /home/apprunner/.config
+
+# Add dfx to path
+ENV PATH="/home/apprunner/.local/share/dfx/bin:$PATH"
+
+# Copy resources
+COPY --chown=apprunner:apprunner . .
+
+# Deploy
+RUN ./docker/deploy
+
+ENTRYPOINT ["./docker/replica"]
+
+EXPOSE ${DFX_PORT}

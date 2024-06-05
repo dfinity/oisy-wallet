@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+source /home/apprunner/.bashrc
+
+# https://docs.docker.com/config/containers/multi-service_container/
+# turn on bash's job control
+set -m
+
+dfx start --quiet &
+
+# TODO wait-for another port?
+./docker/wait-port "$DFX_PORT"
+
+sleep 10
+
+dfx deploy backend
+
+# now we bring the primary process back into the foreground
+# and leave it there
+fg %1
