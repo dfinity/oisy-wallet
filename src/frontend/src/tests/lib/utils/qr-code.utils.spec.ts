@@ -41,7 +41,8 @@ describe('decodeUrn', () => {
 			}
 			if (standard === 'erc20' && 'address' in token) {
 				expectedResult.functionName = 'transfer';
-				expectedResult.address = token.address as string;
+				expectedResult.address = destination;
+				expectedResult.destination = token.address as string;
 			}
 
 			expect(result).toEqual(expectedResult);
