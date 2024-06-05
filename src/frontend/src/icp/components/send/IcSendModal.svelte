@@ -46,7 +46,8 @@
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { icSendWizardStepsWithQrCodeScan } from '$icp/config/ic-send.config';
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
-	import QRCodeScan from '$lib/components/send/QRCodeScan.svelte';
+	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 
 	/**
 	 * Props
@@ -179,11 +180,6 @@
 	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
 		store: initEthereumFeeStore()
 	});
-
-	const goToWizardStep = (stepName: WizardStepsSend) => {
-		const stepNumber = steps.findIndex(({ name }) => name === stepName);
-		modal.set(Math.max(stepNumber, 0));
-	};
 </script>
 
 <WizardModal
@@ -208,15 +204,25 @@
 					bind:destination
 					bind:amount
 					bind:networkId
-					on:icQRCodeScan={() => goToWizardStep(WizardStepsSend.QR_CODE_SCAN)}
+					on:icQRCodeScan={() =>
+						goToWizardSendStep({
+							modal,
+							steps,
+							stepName: WizardStepsSend.QR_CODE_SCAN
+						})}
 				/>
 			{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-				<QRCodeScan
+				<SendQRCodeScan
 					expectedToken={$token}
 					bind:destination
 					bind:amount
 					decodeQrCode={icDecodeQrCode}
-					on:icQRCodeBack={() => goToWizardStep(WizardStepsSend.SEND)}
+					on:icQRCodeBack={() =>
+						goToWizardSendStep({
+							modal,
+							steps,
+							stepName: WizardStepsSend.SEND
+						})}
 				/>
 			{:else}
 				<slot />
