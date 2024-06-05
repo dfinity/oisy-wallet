@@ -91,11 +91,7 @@ export const decodeQrCode = ({
 		return { status: 'token_incompatible' };
 	}
 
-	if (
-		token.symbol.toLowerCase() !== expectedToken.symbol.toLowerCase() &&
-		(token.network as EthereumNetwork).chainId.toString() !==
-			(expectedToken.network as EthereumNetwork).chainId.toString()
-	) {
+	if (token.id !== expectedToken.id) {
 		return { status: 'token_incompatible' };
 	}
 
