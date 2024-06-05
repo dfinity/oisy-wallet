@@ -72,7 +72,7 @@
 	};
 </script>
 
-<div class="stretch">
+<div class="stretch md:min-h-[300px] qr-code-wrapper">
 	<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
 </div>
 
@@ -81,3 +81,10 @@
 		{$i18n.core.text.back}
 	</button>
 </ButtonGroup>
+
+<style lang="scss">
+	.qr-code-wrapper {
+		--primary-rgb: 50, 20, 105;
+		color: rgba(var(--primary-rgb), 0.6);
+	}
+</style>
