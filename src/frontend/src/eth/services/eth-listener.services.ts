@@ -25,7 +25,8 @@ export const initTransactionsListener = ({
 		return initEthPendingTransactionsListenerProvider({
 			toAddress: address,
 			listener: async (hash: string) => await processEthTransaction({ hash, token }),
-			networkId: token.network.id
+			networkId: token.network.id,
+			hashesOnly: true
 		});
 	}
 
