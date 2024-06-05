@@ -102,5 +102,5 @@ export const decodeQrCode = ({
 				? +formatToken({ value: BigNumber.from(value.toString()), unitName: token.decimals })
 				: undefined;
 
-	return { status: 'success', destination, token: token.symbol, amount };
+	return { status: 'success', destination, symbol: token.symbol, amount };
 };

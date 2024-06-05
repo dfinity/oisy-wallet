@@ -46,7 +46,7 @@
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { icSendWizardStepsWithQrCodeScan } from '$icp/config/ic-send.config';
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
-	import QRCodeScan from '$lib/components/send/QRCodeScan.svelte';
+	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 
 	/**
@@ -212,7 +212,7 @@
 						})}
 				/>
 			{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-				<QRCodeScan
+				<SendQRCodeScan
 					expectedToken={$token}
 					bind:destination
 					bind:amount
