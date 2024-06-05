@@ -38,7 +38,7 @@
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import type { Token } from '$lib/types/token';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import QRCodeScan from '$lib/components/send/QRCodeScan.svelte';
+	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import { decodeQrCode } from '$eth/utils/qr-code.utils';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -272,7 +272,7 @@
 			</svelte:fragment>
 		</SendForm>
 	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-		<QRCodeScan
+		<SendQRCodeScan
 			expectedToken={$sendToken}
 			bind:destination
 			bind:amount
