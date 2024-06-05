@@ -1,5 +1,6 @@
 import { BTC_MAINNET_NETWORK, BTC_TESTNET_NETWORK } from '$env/networks.env';
 import bitcoin from '$icp/assets/bitcoin.svg';
+import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import type { Token } from '$lib/types/token';
 
 export const BTC_DECIMALS = 8;
@@ -30,5 +31,6 @@ export const BTC_TESTNET_TOKEN: Token = {
 	category: 'default',
 	name: 'Bitcoin (Testnet)',
 	symbol: 'BTC (Testnet)',
-	decimals: BTC_DECIMALS
+	decimals: BTC_DECIMALS,
+	icon: bitcoinTestnet
 };
