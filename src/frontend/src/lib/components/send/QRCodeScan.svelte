@@ -72,7 +72,7 @@
 	};
 </script>
 
-<div class="stretch">
+<div class="stretch md:min-h-[300px]">
 	<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
 </div>
 
