@@ -17,3 +17,6 @@ export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> 
 
 export const BTC_MAINNET_ENABLED =
 	JSON.parse(import.meta.env.VITE_BITCOIN_MAINNET ?? false) === true;
+
+export const BTC_UNIVERSE_ENABLED =
+	JSON.parse(import.meta.env.VITE_BITCOIN_UNIVERSE ?? false) === true;
