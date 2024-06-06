@@ -6,8 +6,7 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
-	import { networkICP, networkId } from '$lib/derived/network.derived';
-	import { networkParam } from '$lib/utils/nav.utils';
+	import { networkICP } from '$lib/derived/network.derived';
 	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
 	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -20,7 +19,7 @@
 
 	const gotoSettings = async () => {
 		visible = false;
-		await goto(`/settings?${networkParam($networkId)}`);
+		await goto(`/settings`);
 	};
 </script>
 
