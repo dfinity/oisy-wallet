@@ -20,7 +20,7 @@ export const simplePrice = async ({
 	ids,
 	...rest
 }: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse | null> =>
-	fetchCoingecko({
+	fetchCoingecko<CoingeckoSimplePriceResponse>({
 		endpointPath: 'simple/price',
 		queryParams: joinParams([
 			`ids=${Array.isArray(ids) ? ids.join(',') : ids}`,
@@ -40,7 +40,7 @@ export const simpleTokenPrice = async ({
 	contract_addresses,
 	...rest
 }: CoingeckoSimpleTokenPriceParams): Promise<CoingeckoSimplePriceResponse | null> =>
-	fetchCoingecko({
+	fetchCoingecko<CoingeckoSimplePriceResponse>({
 		endpointPath: `simple/token_price/${id}`,
 		queryParams: joinParams([
 			`contract_addresses=${
@@ -50,18 +50,21 @@ export const simpleTokenPrice = async ({
 		])
 	});
 
-const fetchCoingecko = async ({
+const fetchCoingecko = async <T>({
 	endpointPath,
 	queryParams
 }: {
 	endpointPath: string;
-	queryParams: string;
-}): Promise<CoingeckoSimplePriceResponse | null> => {
-	const response = await fetch(`${API_URL}/${endpointPath}?${queryParams}`, {
-		headers: {
-			...(nonNullish(API_KEY) && { ['x-cg-pro-api-key']: API_KEY })
+	queryParams?: string;
+}): Promise<T | null> => {
+	const response = await fetch(
+		`${API_URL}/${endpointPath}${nonNullish(queryParams) ? `?${queryParams}` : ''}`,
+		{
+			headers: {
+				...(nonNullish(API_KEY) && { ['x-cg-pro-api-key']: API_KEY })
+			}
 		}
-	});
+	);
 
 	if (!response.ok) {
 		throw new Error('Goincecko API response not ok.');
