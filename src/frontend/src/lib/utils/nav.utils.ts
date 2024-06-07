@@ -5,13 +5,8 @@ import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { LoadEvent, Page } from '@sveltejs/kit';
 
-export const transactionsUrl = ({
-	token,
-	networkId
-}: {
-	token: Token;
-	networkId: NetworkId;
-}): string => tokenUrl({ path: '/transactions/', token, networkId });
+export const transactionsUrl = ({ token }: { token: Token }): string =>
+	tokenUrl({ path: '/transactions/', token });
 
 export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
 	id === '/(app)/transactions';
@@ -24,17 +19,15 @@ export const isSubRoute = (page: Page): boolean =>
 	isRouteTransactions(page) || isRouteSettings(page);
 
 const tokenUrl = ({
-	token: { name },
-	networkId,
+	token: { name, network },
 	path
 }: {
 	token: Token;
-	networkId: NetworkId;
 	path: '/transactions/' | '/';
 }): string =>
 	`${path}?token=${encodeURIComponent(
 		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
-	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
+	)}${nonNullish(network.id.description) ? `&${networkParam(network.id)}` : ''}`;
 
 export const networkParam = (networkId: NetworkId): string =>
 	`network=${networkId.description ?? ''}`;
