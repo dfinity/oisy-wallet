@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import type { WizardSteps } from '@dfinity/gix-components';
-	import { SendIcStep } from '$lib/enums/steps';
+	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -16,15 +16,15 @@
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import {
-		IC_FEE_CONTEXT_KEY,
-		type IcFeeContext as IcFeeContextType,
+		BITCOIN_FEE_CONTEXT_KEY,
+		type BitcoinFeeContext as BitcoinFeeContextType,
 		initBitcoinFeeStore
-	} from '$icp/stores/ic-fee.store';
+	} from '$icp/stores/bitcoin-fee.store';
 	import { setContext } from 'svelte';
-	import BitcoinFeeContext from '$icp/components/fee/IcFeeContext.svelte';
+	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { isNetworkIdBTC, isNetworkIdETH } from '$icp/utils/ic-send.utils';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
@@ -37,6 +37,17 @@
 	} from '$lib/constants/analytics.contants';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
+	import {
+		ETHEREUM_FEE_CONTEXT_KEY,
+		initEthereumFeeStore,
+		type EthereumFeeContext as EthereumFeeContextType
+	} from '$icp/stores/ethereum-fee.store';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { icSendWizardStepsWithQrCodeScan } from '$icp/config/ic-send.config';
+	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
+	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 
 	/**
 	 * Props
@@ -50,7 +61,7 @@
 	 * Send
 	 */
 
-	let sendProgressStep: string = SendIcStep.INITIALIZATION;
+	let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;
 
 	const send = async () => {
 		if (isNullishOrEmpty(destination)) {
@@ -77,7 +88,7 @@
 					unitName: $tokenDecimals
 				}),
 				identity: $authStore.identity,
-				progress: (step: SendIcStep) => (sendProgressStep = step)
+				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
 			};
 
 			await sendIc({
@@ -87,7 +98,7 @@
 			});
 
 			await trackEvent({
-				name: isNetworkIdBTC(networkId)
+				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
 					: isNetworkIdETH(networkId)
 						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
@@ -97,12 +108,12 @@
 				}
 			});
 
-			sendProgressStep = SendIcStep.DONE;
+			sendProgressStep = ProgressStepsSendIc.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			await trackEvent({
-				name: isNetworkIdBTC(networkId)
+				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
 					: isNetworkIdETH(networkId)
 						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR
@@ -121,11 +132,15 @@
 		}
 	};
 
+	let firstStep: WizardStep;
+	let otherSteps: WizardStep[];
+	$: [firstStep, ...otherSteps] = icSendWizardStepsWithQrCodeScan($i18n);
+
 	let steps: WizardSteps;
 	$: steps = [
 		{
-			name: 'Send',
-			title: isNetworkIdBTC(networkId)
+			...firstStep,
+			title: isNetworkIdBitcoin(networkId)
 				? $i18n.convert.text.convert_to_btc
 				: isNetworkIdEthereum(networkId)
 					? replacePlaceholders($i18n.convert.text.convert_to_token, {
@@ -133,14 +148,7 @@
 						})
 					: $i18n.send.text.send
 		},
-		{
-			name: 'Review',
-			title: $i18n.send.text.review
-		},
-		{
-			name: 'Sending',
-			title: $i18n.send.text.sending
-		}
+		...otherSteps
 	];
 
 	let currentStep: WizardStep | undefined;
@@ -152,19 +160,25 @@
 			amount = undefined;
 			networkId = undefined;
 
-			sendProgressStep = SendIcStep.INITIALIZATION;
+			sendProgressStep = ProgressStepsSendIc.INITIALIZATION;
 
 			currentStep = undefined;
 		});
 
 	/**
-	 * Btc Fee context store
+	 * Bitcoin fee context store
 	 */
 
-	let storeFeeData = initBitcoinFeeStore();
+	setContext<BitcoinFeeContextType>(BITCOIN_FEE_CONTEXT_KEY, {
+		store: initBitcoinFeeStore()
+	});
 
-	setContext<IcFeeContextType>(IC_FEE_CONTEXT_KEY, {
-		store: storeFeeData
+	/**
+	 * Ethereum fee context store
+	 */
+
+	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
+		store: initEthereumFeeStore()
 	});
 </script>
 
@@ -173,23 +187,46 @@
 	bind:currentStep
 	bind:this={modal}
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === 'Sending'}
+	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<BitcoinFeeContext {amount} {networkId}>
-		{#if currentStep?.name === 'Review'}
-			<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
-		{:else if currentStep?.name === 'Sending'}
-			<IcSendProgress bind:sendProgressStep {networkId} />
-		{:else}
-			<IcSendForm
-				on:icNext={modal.next}
-				on:icClose={close}
-				bind:destination
-				bind:amount
-				bind:networkId
-			/>
-		{/if}
-	</BitcoinFeeContext>
+	<EthereumFeeContext {networkId}>
+		<BitcoinFeeContext {amount} {networkId}>
+			{#if currentStep?.name === WizardStepsSend.REVIEW}
+				<IcSendReview on:icBack={modal.back} on:icSend={send} {destination} {amount} {networkId} />
+			{:else if currentStep?.name === WizardStepsSend.SENDING}
+				<IcSendProgress bind:sendProgressStep {networkId} />
+			{:else if currentStep?.name === WizardStepsSend.SEND}
+				<IcSendForm
+					on:icNext={modal.next}
+					on:icClose={close}
+					bind:destination
+					bind:amount
+					bind:networkId
+					on:icQRCodeScan={() =>
+						goToWizardSendStep({
+							modal,
+							steps,
+							stepName: WizardStepsSend.QR_CODE_SCAN
+						})}
+				/>
+			{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+				<SendQRCodeScan
+					expectedToken={$token}
+					bind:destination
+					bind:amount
+					decodeQrCode={icDecodeQrCode}
+					on:icQRCodeBack={() =>
+						goToWizardSendStep({
+							modal,
+							steps,
+							stepName: WizardStepsSend.SEND
+						})}
+				/>
+			{:else}
+				<slot />
+			{/if}
+		</BitcoinFeeContext>
+	</EthereumFeeContext>
 </WizardModal>

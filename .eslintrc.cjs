@@ -11,7 +11,8 @@ module.exports = {
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2020,
-		extraFileExtensions: ['.svelte']
+		extraFileExtensions: ['.svelte'],
+		project: ['./tsconfig.eslint.json'],
 	},
 	env: {
 		browser: true,
@@ -38,7 +39,9 @@ module.exports = {
 			}
 		],
 		'no-console': ['error', { allow: ['error', 'warn'] }],
-		'local-rules/no-svelte-store-in-api': 'error'
+		'no-else-return': ['warn', { allowElseIf: false }],
+		'local-rules/no-svelte-store-in-api': 'error',
+		"@typescript-eslint/prefer-nullish-coalescing": "error"
 	},
 	globals: {
 		NodeJS: true

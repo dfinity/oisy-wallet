@@ -5,7 +5,7 @@
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
-	import { getContext, onDestroy } from 'svelte';
+	import { getContext, onDestroy, onMount } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import {
@@ -52,7 +52,9 @@
 		try {
 			const params: GetFeeData = {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				address: mapAddressStartsWith0x(destination !== '' ? destination : $address!)
+				to: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				from: mapAddressStartsWith0x($address!)
 			};
 
 			const { getFeeData } = infuraProviders($sendToken.network.id);
@@ -73,13 +75,10 @@
 
 			const erc20GasFeeParams = {
 				contract: $sendToken as Erc20Token,
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				address: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
 				amount: parseToken({ value: `${amount ?? '1'}` }),
-				sourceNetwork
+				sourceNetwork,
+				...params
 			};
-
-			// TODO: use amount + 10% to estimate fee dynamically to have some buffer
 
 			if (isSupportedErc20TwinTokenId($sendTokenId)) {
 				feeStore.setFee({
@@ -122,13 +121,14 @@
 			return;
 		}
 
-		await updateFeeData();
+		debounceUpdateFeeData();
 		listener = initMinedTransactionsListener({
 			callback: async () => debounceUpdateFeeData(),
 			networkId: sourceNetwork.id
 		});
 	};
 
+	onMount(() => debounceUpdateFeeData());
 	onDestroy(() => listener?.disconnect());
 
 	/**
@@ -137,7 +137,12 @@
 
 	$: obverseFeeData(observe);
 
-	$: amount, destination, $ckEthMinterInfoStore, debounceUpdateFeeData();
+	$: $ckEthMinterInfoStore, debounceUpdateFeeData();
+
+	/**
+	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.
+	 */
+	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>
 
 <slot />

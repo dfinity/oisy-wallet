@@ -21,7 +21,7 @@ import {
 } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/backend.api';
 import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
-import { SendStep } from '$lib/enums/steps';
+import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -149,11 +149,6 @@ const ckErc20HelperContractPrepareTransaction = async ({
 		contract: Erc20ContractAddress;
 		networkId: NetworkId;
 	} & Pick<SendParams, 'token'>): Promise<SignRequest> => {
-	// TODO: remove once tested
-	// contract: erc20_contract_address = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
-	// amount !decimals
-	// to == same to
-
 	const { address: erc20ContractAddress } = token as Erc20Token;
 
 	const { populateTransaction } = infuraCkErc20Providers(networkId);
@@ -250,7 +245,7 @@ const prepare = async ({
 };
 
 export const send = async ({
-	lastProgressStep = SendStep.DONE,
+	lastProgressStep = ProgressStepsSend.DONE,
 	progress,
 	sourceNetwork,
 	token,
@@ -262,7 +257,7 @@ export const send = async ({
 		maxFeePerGas: BigNumber;
 		maxPriorityFeePerGas: BigNumber;
 	}): Promise<{ hash: string }> => {
-	progress(SendStep.INITIALIZATION);
+	progress(ProgressStepsSend.INITIALIZATION);
 
 	const { id: networkId } = sourceNetwork;
 
@@ -404,11 +399,11 @@ const sendTransaction = async ({
 							: infuraErc20Providers(networkId).populateTransaction
 				}));
 
-	progress(SendStep.SIGN_TRANSFER);
+	progress(ProgressStepsSend.SIGN_TRANSFER);
 
 	const rawTransaction = await signTransaction({ identity, transaction });
 
-	progress(SendStep.TRANSFER);
+	progress(ProgressStepsSend.TRANSFER);
 
 	return await sendTransaction(rawTransaction);
 };
@@ -447,10 +442,6 @@ const approve = async ({
 		return { transactionApproved: false };
 	}
 
-	// TODO: remove after test
-	// helper_contract erc20_helper_contract_address = opt "0xE1788E4834c896F1932188645cc36c54d1b80AC1";
-	// amount !decimals
-
 	const { id: networkId, chainId } = sourceNetwork;
 
 	const approve = await erc20ContractPrepareApprove({
@@ -465,11 +456,11 @@ const approve = async ({
 		spender: erc20HelperContractAddress
 	});
 
-	progress(SendStep.SIGN_APPROVE);
+	progress(ProgressStepsSend.SIGN_APPROVE);
 
 	const rawTransaction = await signTransaction({ identity, transaction: approve });
 
-	progress(SendStep.APPROVE);
+	progress(ProgressStepsSend.APPROVE);
 
 	const { sendTransaction } = infuraProviders(networkId);
 

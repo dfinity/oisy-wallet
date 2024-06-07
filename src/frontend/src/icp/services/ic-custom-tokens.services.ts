@@ -2,7 +2,7 @@ import { loadUserTokens } from '$icp/services/icrc.services';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setManyCustomTokens } from '$lib/api/backend.api';
-import { AddTokenStep } from '$lib/enums/steps';
+import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
@@ -12,11 +12,11 @@ export const saveCustomTokens = async ({
 	identity,
 	tokens
 }: {
-	progress: (step: AddTokenStep) => void;
+	progress: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
 	tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[];
 }) => {
-	progress(AddTokenStep.SAVE);
+	progress(ProgressStepsAddToken.SAVE);
 
 	await setManyCustomTokens({
 		identity,
@@ -32,7 +32,7 @@ export const saveCustomTokens = async ({
 		}))
 	});
 
-	progress(AddTokenStep.UPDATE_UI);
+	progress(ProgressStepsAddToken.UPDATE_UI);
 
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled }) => !enabled);

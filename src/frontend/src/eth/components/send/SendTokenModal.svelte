@@ -3,8 +3,8 @@
 	import { getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
-	import { SendStep } from '$lib/enums/steps';
-	import { sendWizardSteps } from '$eth/config/send.config';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { sendWizardStepsWithQrCodeScan } from '$eth/config/send.config';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import type { Network } from '$lib/types/network';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
@@ -12,6 +12,8 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { ethereumToken } from '$eth/derived/token.derived';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 
 	/**
 	 * Props
@@ -21,7 +23,7 @@
 	export let targetNetwork: Network | undefined = undefined;
 
 	let amount: number | undefined = undefined;
-	let sendProgressStep: string = SendStep.INITIALIZATION;
+	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	/**
 	 * Send context store
@@ -35,7 +37,7 @@
 
 	let firstStep: WizardStep;
 	let otherSteps: WizardStep[];
-	$: [firstStep, ...otherSteps] = sendWizardSteps($i18n);
+	$: [firstStep, ...otherSteps] = sendWizardStepsWithQrCodeScan($i18n);
 
 	let steps: WizardSteps;
 	$: steps = [
@@ -62,7 +64,7 @@
 			amount = undefined;
 			targetNetwork = undefined;
 
-			sendProgressStep = SendStep.INITIALIZATION;
+			sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
 			currentStep = undefined;
 		});
@@ -73,7 +75,7 @@
 	bind:currentStep
 	bind:this={modal}
 	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === 'Sending'}
+	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING}
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
@@ -88,5 +90,17 @@
 		on:icBack={modal.back}
 		on:icNext={modal.next}
 		on:icClose={close}
+		on:icQRCodeScan={() =>
+			goToWizardSendStep({
+				modal,
+				steps,
+				stepName: WizardStepsSend.QR_CODE_SCAN
+			})}
+		on:icQRCodeBack={() =>
+			goToWizardSendStep({
+				modal,
+				steps,
+				stepName: WizardStepsSend.SEND
+			})}
 	/>
 </WizardModal>

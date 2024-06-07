@@ -11,7 +11,8 @@
 			"name": "Name",
 			"symbol": "Symbol",
 			"decimals": "Decimals",
-			"amount": "Amount"
+			"amount": "Amount",
+			"max": "Max"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -198,7 +199,9 @@
 			"source_network": "Source network",
 			"destination_network": "Destination network",
 			"initializing_transaction": "Initializing transaction",
-			"convert_to_native_icp": "Convert to native ICP"
+			"convert_to_native_icp": "Convert to native ICP",
+			"open_qr_modal": "Start QR Code scan for transaction details",
+			"scan_qr": "Scan QR Code"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x)",
@@ -218,6 +221,8 @@
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
 			"minimum_ledger_fees": "The amount falls below the ledger fees $symbol.",
+			"minimum_cketh_balance": "The $symbol balance falls below the estimated fee of $amount.",
+			"unknown_cketh": "The ckETH token cannot be retrieved.",
 			"destination_address_invalid": "Destination address is invalid.",
 			"amount_invalid": "Amount is invalid.",
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
@@ -238,7 +243,8 @@
 			"erc20_data_undefined": "Erc20 transaction Data cannot be undefined or null.",
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
-			"invalid_address": "The address is invalid. Please try again with a valid address identifier."
+			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
+			"incompatible_token": "The token is incompatible. Please try again with a compatible token."
 		}
 	},
 	"convert": {
@@ -290,7 +296,10 @@
 				"index_canister_id_copied": "Index Canister ID copied to clipboard.",
 				"minter_canister_id_copied": "Minter Canister ID copied to clipboard.",
 				"verifying": "Verifying token details...",
-				"add_the_token": "Add the token"
+				"add_the_token": "Add the token",
+				"info": "To display custom token information correctly, Oisy Wallet requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
+				"github_howto": "Read how ICRC token Integration works",
+				"open_github_howto": "Open information about ICRC token integration on GitHub"
 			},
 			"error": {
 				"loading_metadata": "Error while loading the metadata of the token.",
@@ -363,7 +372,7 @@
 		"bitcoin": {
 			"title": "Receive from Bitcoin Network (BTC)",
 			"description": "ckBTC is a multi-chain bitcoin twin on the Internet Computer created by canister smart contract that directly hold native bitcoin.",
-			"note": "Note that incoming Bitcoin transactions require 12 confirmations. Check status on a block explorer.",
+			"note": "Note that incoming Bitcoin transactions require 6 confirmations. Check status on a block explorer.",
 			"receive": "Receive from BTC network"
 		},
 		"ethereum": {

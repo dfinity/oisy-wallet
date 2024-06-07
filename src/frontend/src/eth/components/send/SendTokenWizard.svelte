@@ -6,11 +6,13 @@
 	import SendForm from './SendForm.svelte';
 	import SendReview from './SendReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import { SendStep } from '$lib/enums/steps';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { address } from '$lib/derived/address.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
+		initFeeContext,
 		initFeeStore
 	} from '$eth/stores/fee.store';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
@@ -35,6 +37,11 @@
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import type { Token } from '$lib/types/token';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import { decodeQrCode } from '$eth/utils/qr-code.utils';
+	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -80,10 +87,17 @@
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(nativeEthereumToken.symbol);
 
-	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
-		feeStore,
-		feeSymbolStore
-	});
+	let feeContext: FeeContext | undefined;
+	const evaluateFee = () => feeContext?.triggerUpdateFee();
+
+	setContext<FeeContextType>(
+		FEE_CONTEXT_KEY,
+		initFeeContext({
+			feeStore,
+			feeSymbolStore,
+			evaluateFee
+		})
+	);
 
 	/**
 	 * Send
@@ -148,7 +162,7 @@
 			await executeSend({
 				from: $address,
 				to: mapAddressStartsWith0x(destination),
-				progress: (step: SendStep) => (sendProgressStep = step),
+				progress: (step: ProgressStepsSend) => (sendProgressStep = step),
 				token: $sendToken,
 				amount: parseToken({
 					value: `${amount}`,
@@ -190,17 +204,35 @@
 
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
+
+	$: onDecodeQrCode = ({
+		status,
+		code,
+		expectedToken
+	}: {
+		status: QrStatus;
+		code?: string;
+		expectedToken: Token;
+	}): QrResponse =>
+		decodeQrCode({
+			status,
+			code,
+			expectedToken,
+			ethereumTokens: $enabledEthereumTokens,
+			erc20Tokens: $erc20Tokens
+		});
 </script>
 
 <FeeContext
+	bind:this={feeContext}
 	{amount}
 	{destination}
-	observe={currentStep?.name !== 'Sending'}
+	observe={currentStep?.name !== WizardStepsSend.SENDING}
 	{sourceNetwork}
 	{targetNetwork}
 	{nativeEthereumToken}
 >
-	{#if currentStep?.name === 'Review'}
+	{#if currentStep?.name === WizardStepsSend.REVIEW}
 		<SendReview
 			on:icBack
 			on:icSend={send}
@@ -210,15 +242,16 @@
 			{targetNetwork}
 			{destinationEditable}
 		/>
-	{:else if currentStep?.name === 'Sending'}
+	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
 			progressStep={sendProgressStep}
 			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
 		/>
-	{:else if currentStep?.name === 'Send'}
+	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<SendForm
 			on:icNext
 			on:icClose={close}
+			on:icQRCodeScan
 			bind:destination
 			bind:amount
 			bind:network={targetNetwork}
@@ -238,6 +271,14 @@
 				{/if}
 			</svelte:fragment>
 		</SendForm>
+	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+		<SendQRCodeScan
+			expectedToken={$sendToken}
+			bind:destination
+			bind:amount
+			decodeQrCode={onDecodeQrCode}
+			on:icQRCodeBack
+		/>
 	{:else}
 		<slot />
 	{/if}

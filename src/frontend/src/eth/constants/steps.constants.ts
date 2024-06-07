@@ -1,4 +1,4 @@
-import { SendStep } from '$lib/enums/steps';
+import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import type { ProgressStep } from '@dfinity/gix-components';
 
 export const sendSteps = ({
@@ -9,31 +9,31 @@ export const sendSteps = ({
 	sendWithApproval: boolean;
 }): [ProgressStep, ...ProgressStep[]] => [
 	{
-		step: SendStep.INITIALIZATION,
+		step: ProgressStepsSend.INITIALIZATION,
 		text: i18n.send.text.initializing_transaction,
 		state: 'in_progress'
 	} as ProgressStep,
 	...(sendWithApproval
 		? [
 				{
-					step: SendStep.SIGN_APPROVE,
+					step: ProgressStepsSend.SIGN_APPROVE,
 					text: i18n.send.text.signing_approval,
 					state: 'next'
 				} as ProgressStep,
 				{
-					step: SendStep.APPROVE,
+					step: ProgressStepsSend.APPROVE,
 					text: i18n.send.text.approving,
 					state: 'next'
 				} as ProgressStep
 			]
 		: []),
 	{
-		step: SendStep.SIGN_TRANSFER,
+		step: ProgressStepsSend.SIGN_TRANSFER,
 		text: i18n.send.text.signing_transaction,
 		state: 'next'
 	} as ProgressStep,
 	{
-		step: SendStep.TRANSFER,
+		step: ProgressStepsSend.TRANSFER,
 		text: i18n.send.text.sending,
 		state: 'next'
 	} as ProgressStep
@@ -51,7 +51,7 @@ export const walletConnectSendSteps = ({
 		...rest
 	}),
 	{
-		step: SendStep.APPROVE_WALLET_CONNECT,
+		step: ProgressStepsSend.APPROVE_WALLET_CONNECT,
 		text: i18n.send.text.approving_wallet_connect,
 		state: 'next'
 	}
@@ -59,17 +59,17 @@ export const walletConnectSendSteps = ({
 
 export const walletConnectSignSteps = (i18n: I18n): [ProgressStep, ...ProgressStep[]] => [
 	{
-		step: SendStep.INITIALIZATION,
+		step: ProgressStepsSend.INITIALIZATION,
 		text: i18n.send.text.initializing,
 		state: 'in_progress'
 	} as ProgressStep,
 	{
-		step: SendStep.SIGN_TRANSFER,
+		step: ProgressStepsSend.SIGN_TRANSFER,
 		text: i18n.send.text.signing_message,
 		state: 'next'
 	} as ProgressStep,
 	{
-		step: SendStep.TRANSFER,
+		step: ProgressStepsSend.TRANSFER,
 		text: i18n.send.text.approving,
 		state: 'next'
 	} as ProgressStep

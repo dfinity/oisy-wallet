@@ -24,20 +24,22 @@
 	})();
 </script>
 
-<p class="font-bold">{$i18n.wallet_connect.text.method}</p>
-<p class="mb-4 font-normal">
-	{request.params.request.method}
-</p>
-
-<p class="font-bold">{$i18n.wallet_connect.text.message}</p>
-{#if nonNullish(json)}
-	<div class="bg-dust rounded-sm p-4 mt-4">
-		<Json {json} _collapsed={true} />
-	</div>
-{:else}
+<div class="stretch">
+	<p class="font-bold">{$i18n.wallet_connect.text.method}</p>
 	<p class="mb-4 font-normal">
-		<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
+		{request.params.request.method}
 	</p>
-{/if}
+
+	<p class="font-bold">{$i18n.wallet_connect.text.message}</p>
+	{#if nonNullish(json)}
+		<div class="bg-dust rounded-sm p-4 mt-4">
+			<Json {json} _collapsed={true} />
+		</div>
+	{:else}
+		<p class="mb-4 font-normal">
+			<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
+		</p>
+	{/if}
+</div>
 
 <WalletConnectActions on:icApprove on:icReject />

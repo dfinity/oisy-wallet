@@ -1,11 +1,13 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
-import type { UserConfig } from 'vite';
+import { type UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
+import { defineViteReplacements } from './vite.utils';
 
 export default defineConfig(
 	(): UserConfig => ({
-		plugins: [sveltekit()],
+		plugins: [sveltekit(), svelteTesting()],
 		resolve: {
 			alias: [
 				{
@@ -38,10 +40,15 @@ export default defineConfig(
 				}
 			]
 		},
+		define: {
+			...defineViteReplacements()
+		},
 		test: {
+			environment: 'jsdom',
 			globals: true,
 			watch: false,
-			silent: true
+			silent: true,
+			setupFiles: ['./vitest.setup.ts']
 		}
 	})
 );

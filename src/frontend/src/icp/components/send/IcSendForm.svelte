@@ -32,13 +32,15 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<IcSendDestination bind:destination bind:invalidDestination {networkId} />
+	<div class="stretch">
+		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
 
-	<IcSendAmount bind:amount bind:amountError {networkId} />
+		<IcSendAmount bind:amount bind:amountError {networkId} />
 
-	<SendSource token={$token} balance={$balance} source={$icrcAccountIdentifierText ?? ''} />
+		<SendSource token={$token} balance={$balance} source={$icrcAccountIdentifierText ?? ''} />
 
-	<IcFeeDisplay {networkId} />
+		<IcFeeDisplay {networkId} />
+	</div>
 
 	<ButtonGroup>
 		<button type="button" class="secondary block flex-1" on:click={() => dispatch('icClose')}

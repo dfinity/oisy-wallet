@@ -26,35 +26,37 @@
 	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
 </script>
 
-<IcReceiveWalletAddress on:icQRCode />
+<div class="stretch">
+	<IcReceiveWalletAddress on:icQRCode />
 
-{#if nonNullish(btcAddress)}
-	<div class="mb-6">
-		<Hr />
-	</div>
+	{#if nonNullish(btcAddress)}
+		<div class="mb-6">
+			<Hr />
+		</div>
 
-	<ReceiveAddress
-		labelRef="bitcoin-address"
-		address={btcAddress}
-		qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
-		copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
-		on:click={() => displayQRCode(btcAddress ?? '')}
-	>
-		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.bitcoin_address}</svelte:fragment>
-		<svelte:fragment slot="text"
-			>{$i18n.receive.bitcoin.text.from_network}&nbsp;{#if nonNullish(kytFee)}<span in:fade
-					>{replacePlaceholders($i18n.receive.bitcoin.text.fee_applied, {
-						$fee: formatToken({
-							value: BigNumber.from(kytFee),
-							unitName: BTC_DECIMALS,
-							displayDecimals: BTC_DECIMALS
-						})
-					})}</span
-				>{/if}
-		</svelte:fragment>
-	</ReceiveAddress>
-{/if}
+		<ReceiveAddress
+			labelRef="bitcoin-address"
+			address={btcAddress}
+			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			on:click={() => displayQRCode(btcAddress ?? '')}
+		>
+			<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.bitcoin_address}</svelte:fragment>
+			<svelte:fragment slot="text"
+				>{$i18n.receive.bitcoin.text.from_network}&nbsp;{#if nonNullish(kytFee)}<span in:fade
+						>{replacePlaceholders($i18n.receive.bitcoin.text.fee_applied, {
+							$fee: formatToken({
+								value: BigNumber.from(kytFee),
+								unitName: BTC_DECIMALS,
+								displayDecimals: BTC_DECIMALS
+							})
+						})}</span
+					>{/if}
+			</svelte:fragment>
+		</ReceiveAddress>
+	{/if}
+</div>
 
-<button class="primary full center text-center mt-8 mb-6" on:click={modalStore.close}
+<button class="primary full center text-center" on:click={modalStore.close}
 	>{$i18n.core.text.done}</button
 >

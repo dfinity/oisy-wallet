@@ -18,24 +18,26 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.tokens.details.title}</svelte:fragment>
 
-	<Token token={$token}>
-		{#if nonNullish(contractAddress)}
-			<Value ref="contractAddress">
-				<svelte:fragment slot="label">{$i18n.tokens.text.contract_address}</svelte:fragment>
-				<output>{contractAddress}</output><Copy
-					value={contractAddress}
-					text={$i18n.tokens.details.contract_address_copied}
-					inline
-				/><ExternalLink
-					iconSize="18"
-					href={`${$explorerUrlStore}/address/${contractAddress}`}
-					ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
-					inline
-					color="blue"
-				/>
-			</Value>
-		{/if}
-	</Token>
+	<div class="stretch">
+		<Token token={$token}>
+			{#if nonNullish(contractAddress)}
+				<Value ref="contractAddress">
+					<svelte:fragment slot="label">{$i18n.tokens.text.contract_address}</svelte:fragment>
+					<output>{contractAddress}</output><Copy
+						value={contractAddress}
+						text={$i18n.tokens.details.contract_address_copied}
+						inline
+					/><ExternalLink
+						iconSize="18"
+						href={`${$explorerUrlStore}/address/${contractAddress}`}
+						ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
+						inline
+						color="blue"
+					/>
+				</Value>
+			{/if}
+		</Token>
+	</div>
 
 	<button class="primary full center text-center" on:click={modalStore.close}
 		>{$i18n.core.text.done}</button

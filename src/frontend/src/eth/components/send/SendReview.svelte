@@ -34,17 +34,19 @@
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<SendData
-	{amount}
-	destination={destinationEditable ? destination : null}
-	token={$sendToken}
-	balance={$sendBalance}
-	source={$address ?? ''}
->
-	<FeeDisplay slot="fee" />
+<div class="stretch">
+	<SendData
+		{amount}
+		destination={destinationEditable ? destination : null}
+		token={$sendToken}
+		balance={$sendBalance}
+		source={$address ?? ''}
+	>
+		<FeeDisplay slot="fee" />
 
-	<SendReviewNetwork {targetNetwork} {sourceNetwork} token={$sendToken} slot="network" />
-</SendData>
+		<SendReviewNetwork {targetNetwork} {sourceNetwork} token={$sendToken} slot="network" />
+	</SendData>
+</div>
 
 <ButtonGroup>
 	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}

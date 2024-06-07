@@ -5,7 +5,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { updateBalance } from '$icp/services/ckbtc.services';
 	import { authStore } from '$lib/stores/auth.store';
-	import { UpdateBalanceCkBtcStep } from '$lib/enums/steps';
+	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
@@ -19,7 +19,7 @@
 	let receiveProgressStep: string | undefined = undefined;
 
 	const receive = async () => {
-		receiveProgressStep = UpdateBalanceCkBtcStep.INITIALIZATION;
+		receiveProgressStep = ProgressStepsUpdateBalanceCkBtc.INITIALIZATION;
 
 		modalStore.openReceiveBitcoin();
 
@@ -27,10 +27,10 @@
 			await updateBalance({
 				token: $token as IcToken,
 				identity: $authStore.identity,
-				progress: (step: UpdateBalanceCkBtcStep) => (receiveProgressStep = step)
+				progress: (step: ProgressStepsUpdateBalanceCkBtc) => (receiveProgressStep = step)
 			});
 
-			receiveProgressStep = UpdateBalanceCkBtcStep.DONE;
+			receiveProgressStep = ProgressStepsUpdateBalanceCkBtc.DONE;
 
 			setTimeout(() => modalStore.close(), 750);
 		} catch (err: unknown) {
@@ -90,7 +90,7 @@
 	<Modal on:nnsClose={modalStore.close} disablePointerEvents={true}>
 		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.refresh_status}</svelte:fragment>
 
-		<div>
+		<div class="stretch">
 			<IcReceiveBitcoinProgress bind:receiveProgressStep />
 		</div>
 	</Modal>

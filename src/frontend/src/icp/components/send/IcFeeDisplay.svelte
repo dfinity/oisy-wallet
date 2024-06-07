@@ -12,4 +12,4 @@
 
 <BitcoinEstimatedFee />
 <BitcoinKYTFee {networkId} />
-<EthereumEstimatedFee {networkId} />
+<EthereumEstimatedFee />

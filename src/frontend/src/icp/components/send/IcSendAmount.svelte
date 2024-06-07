@@ -1,24 +1,38 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
-	import { slide } from 'svelte/transition';
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { invalidAmount } from '$lib/utils/input.utils';
-	import { token, tokenDecimals, tokenId, tokenSymbol } from '$lib/derived/token.derived';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import {
+		token,
+		tokenDecimals,
+		tokenId,
+		tokenSymbol,
+		tokenStandard
+	} from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
-	import { parseToken } from '$lib/utils/parse.utils';
 	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { NetworkId } from '$lib/types/network';
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { assertCkETHMinFee, assertCkETHMinWithdrawalAmount } from '$icp/utils/cketh.utils';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { isNetworkIdBTC } from '$icp/utils/ic-send.utils';
+	import {
+		assertCkETHBalanceEstimatedFee,
+		assertCkETHMinFee,
+		assertCkETHMinWithdrawalAmount
+	} from '$icp/utils/cketh.utils';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { tokenCkEthLedger } from '$icp/derived/ic-token.derived';
+	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
+	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
+	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+	import { getContext } from 'svelte';
+	import {
+		ETHEREUM_FEE_CONTEXT_KEY,
+		type EthereumFeeContext
+	} from '$icp/stores/ethereum-fee.store';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -27,85 +41,103 @@
 	let fee: bigint | undefined;
 	$: fee = ($token as IcToken).fee;
 
-	const validate = () => {
-		if (invalidAmount(amount)) {
-			amountError = undefined;
-			return;
-		}
+	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
+	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (isNullish(fee)) {
-			amountError = undefined;
 			return;
 		}
 
-		const value = parseToken({
-			value: `${amount}`,
-			unitName: $tokenDecimals
-		});
-
-		if (isNetworkIdBTC(networkId)) {
-			amountError = assertCkBTCUserInputAmount({
-				amount: value,
+		if (isNetworkIdBitcoin(networkId)) {
+			const error = assertCkBTCUserInputAmount({
+				amount: userAmount,
 				minterInfo: $ckBtcMinterInfoStore?.[$tokenId],
 				tokenDecimals: $tokenDecimals,
 				i18n: $i18n
 			});
 
-			if (nonNullish(amountError)) {
-				return;
+			if (nonNullish(error)) {
+				return error;
 			}
 		}
 
+		// if CkEth, asset the minimal withdrawal amount is met and the amount should at least be bigger than the fee.
 		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
-			amountError = assertCkETHMinWithdrawalAmount({
-				amount: value,
+			const error = assertCkETHMinWithdrawalAmount({
+				amount: userAmount,
 				tokenDecimals: $tokenDecimals,
 				tokenSymbol: $tokenSymbol,
 				minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
 				i18n: $i18n
 			});
 
-			if (nonNullish(amountError)) {
-				return;
+			if (nonNullish(error)) {
+				return error;
 			}
-		}
 
-		if (isNetworkIdEthereum(networkId)) {
-			amountError = assertCkETHMinFee({
-				amount: value,
+			return assertCkETHMinFee({
+				amount: userAmount,
 				tokenSymbol: $tokenSymbol,
 				fee,
 				i18n: $i18n
 			});
-			return;
 		}
 
-		const total = value.add(fee);
+		const assertBalance = (): IcAmountAssertionError | undefined => {
+			const total = userAmount.add(fee ?? BigNumber.from(0n));
 
-		if (total.gt($balance ?? BigNumber.from(0n))) {
-			amountError = new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
-			return;
+			if (total.gt($balance ?? BigNumber.from(0n))) {
+				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
+			}
+
+			return undefined;
+		};
+
+		// if CkErc20, the entered amount should be covered by fee + balance and the ckEth balance should cover the estimated fee.
+		if (isNetworkIdEthereum(networkId) && $tokenCkErc20Ledger) {
+			const error = assertBalance();
+
+			if (nonNullish(error)) {
+				return error;
+			}
+
+			const errorEstimatedFee = assertCkETHBalanceEstimatedFee({
+				balance: nonNullish($ethereumFeeTokenCkEth)
+					? $balancesStore?.[$ethereumFeeTokenCkEth.id]?.data
+					: undefined,
+				tokenCkEth: $ethereumFeeTokenCkEth,
+				feeStoreData: $ethereumFeeStore,
+				i18n: $i18n
+			});
+
+			if (nonNullish(errorEstimatedFee)) {
+				return errorEstimatedFee;
+			}
+
+			return undefined;
 		}
 
-		amountError = undefined;
+		return assertBalance();
 	};
 
-	const debounceValidate = debounce(validate);
+	$: calculateMax = (): number => {
+		return getMaxTransactionAmount({
+			balance: $balance?.toBigInt(),
+			fee: fee,
+			tokenDecimals: $tokenDecimals,
+			tokenStandard: $tokenStandard
+		});
+	};
 
-	$: amount, fee, $ckBtcMinterInfoStore, $ckEthMinterInfoStore, debounceValidate();
+	let sendInputAmount: SendInputAmount | undefined;
+	$: $ethereumFeeStore, (() => sendInputAmount?.triggerValidate())();
 </script>
 
-<label for="amount" class="font-bold px-4.5">{$i18n.core.text.amount}:</label>
-<Input
-	name="amount"
-	inputType="currency"
-	required
-	bind:value={amount}
-	decimals={$tokenDecimals}
-	placeholder={$i18n.core.text.amount}
-	spellcheck={false}
+<SendInputAmount
+	bind:amount
+	bind:this={sendInputAmount}
+	tokenDecimals={$tokenDecimals}
+	{customValidate}
+	{calculateMax}
+	bind:error={amountError}
 />
-
-{#if nonNullish(amountError)}
-	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">{amountError.message}</p>
-{/if}

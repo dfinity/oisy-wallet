@@ -3,6 +3,8 @@ import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
+import bitcoin from '$icp/assets/bitcoin.svg';
+import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import type { Network } from '$lib/types/network';
 
@@ -76,7 +78,8 @@ export const BTC_MAINNET_NETWORK_ID = Symbol(BTC_MAINNET_NETWORK_SYMBOL);
 export const BTC_MAINNET_NETWORK: Network = {
 	id: BTC_MAINNET_NETWORK_ID,
 	env: 'mainnet',
-	name: 'Bitcoin'
+	name: 'Bitcoin',
+	icon: bitcoin
 };
 
 export const BTC_TESTNET_NETWORK_SYMBOL = 'BTC (Testnet)';
@@ -86,5 +89,10 @@ export const BTC_TESTNET_NETWORK_ID = Symbol(BTC_TESTNET_NETWORK_SYMBOL);
 export const BTC_TESTNET_NETWORK: Network = {
 	id: BTC_TESTNET_NETWORK_ID,
 	env: 'testnet',
-	name: 'Bitcoin'
+	name: 'Bitcoin',
+	icon: bitcoinTestnet
 };
+
+export const BITCOIN_NETWORKS: Network[] = [BTC_MAINNET_NETWORK, BTC_TESTNET_NETWORK];
+
+export const BITCOIN_NETWORKS_IDS: symbol[] = BITCOIN_NETWORKS.map(({ id }) => id);

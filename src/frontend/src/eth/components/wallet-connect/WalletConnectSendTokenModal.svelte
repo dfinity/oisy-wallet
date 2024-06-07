@@ -11,12 +11,13 @@
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
+		initFeeContext,
 		initFeeStore
 	} from '$eth/stores/fee.store';
 	import { address } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
-	import { SendStep } from '$lib/enums/steps';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import {
@@ -39,6 +40,7 @@
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -62,10 +64,13 @@
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set($sendToken.symbol);
 
-	setContext<FeeContextType>(FEE_CONTEXT_KEY, {
-		feeStore,
-		feeSymbolStore
-	});
+	setContext<FeeContextType>(
+		FEE_CONTEXT_KEY,
+		initFeeContext({
+			feeStore,
+			feeSymbolStore
+		})
+	);
 
 	/**
 	 * Network
@@ -94,11 +99,11 @@
 
 	const steps: WizardSteps = [
 		{
-			name: 'Review',
+			name: WizardStepsSend.REVIEW,
 			title: $i18n.send.text.review
 		},
 		{
-			name: 'Sending',
+			name: WizardStepsSend.SENDING,
 			title: $i18n.send.text.sending
 		}
 	];
@@ -128,7 +133,7 @@
 	 * Send and approve
 	 */
 
-	let sendProgressStep: string = SendStep.INITIALIZATION;
+	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let amount: BigNumber;
 	$: amount = BigNumber.from(firstTransaction?.value ?? '0');
@@ -142,7 +147,7 @@
 			fee: $feeStore,
 			modalNext: modal.next,
 			token: $sendToken,
-			progress: (step: SendStep) => (sendProgressStep = step),
+			progress: (step: ProgressStepsSend) => (sendProgressStep = step),
 			identity: $authStore.identity,
 			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			sourceNetwork,
@@ -165,12 +170,12 @@
 	<FeeContext
 		amount={amount.toString()}
 		{destination}
-		observe={currentStep?.name !== 'Sending'}
+		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		{sourceNetwork}
 		nativeEthereumToken={$ethereumToken}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
-			{#if currentStep?.name === 'Sending'}
+			{#if currentStep?.name === WizardStepsSend.SENDING}
 				<SendProgress
 					progressStep={sendProgressStep}
 					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}

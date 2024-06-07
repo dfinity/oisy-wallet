@@ -12,29 +12,29 @@
 	import { browser } from '$app/environment';
 	import { isNullish } from '@dfinity/utils';
 	import { loading } from '$lib/stores/loader.store';
-	import { LoaderStep } from '$lib/enums/steps';
+	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authStore } from '$lib/stores/auth.store';
 
-	let progressStep: string = LoaderStep.ETH_ADDRESS;
+	let progressStep: string = ProgressStepsLoader.ETH_ADDRESS;
 
 	let steps: [ProgressStep, ...ProgressStep[]];
 	$: steps = [
 		{
-			step: LoaderStep.INITIALIZATION,
+			step: ProgressStepsLoader.INITIALIZATION,
 			text: $i18n.init.text.securing_session,
 			state: 'completed'
 		} as ProgressStep,
 		{
-			step: LoaderStep.ETH_ADDRESS,
+			step: ProgressStepsLoader.ETH_ADDRESS,
 			text: $i18n.init.text.retrieving_eth_key,
 			state: 'in_progress'
 		} as ProgressStep
 	];
 
 	$: (() => {
-		if (progressStep !== LoaderStep.DONE) {
+		if (progressStep !== ProgressStepsLoader.DONE) {
 			return;
 		}
 
@@ -52,7 +52,7 @@
 	const confirm = isNullish(oisy_introduction);
 
 	let disabledConfirm = true;
-	$: disabledConfirm = progressStep !== LoaderStep.DONE;
+	$: disabledConfirm = progressStep !== ProgressStepsLoader.DONE;
 
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
@@ -65,7 +65,7 @@
 	};
 
 	const progressAndLoad = async () => {
-		progressStep = LoaderStep.DONE;
+		progressStep = ProgressStepsLoader.DONE;
 
 		// Once the address initialized, we load the data without displaying a progress step.
 		// Instead, we use effect, placeholders and skeleton until those data are loaded.
@@ -108,20 +108,22 @@
 	{#if progressModal}
 		<div in:fade={{ delay: 0, duration: 250 }}>
 			<Modal>
-				<div
-					style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
-				>
-					<Img width="100%" src={banner} />
+				<div class="stretch">
+					<div
+						style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
+					>
+						<Img width="100%" src={banner} />
+					</div>
+
+					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
+
+					<InProgress {progressStep} {steps} />
 				</div>
-
-				<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
-
-				<InProgress {progressStep} {steps} />
 
 				{#if confirm}
 					<button
 						on:click={confirmIntroduction}
-						class="primary full center mt-6"
+						class="primary full center"
 						disabled={disabledConfirm}
 						class:opacity-0={disabledConfirm}>{$i18n.init.text.lets_go}</button
 					>

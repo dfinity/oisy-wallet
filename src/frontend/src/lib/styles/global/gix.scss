@@ -42,10 +42,13 @@
 	// Input
 	--input-background: var(--color-white);
 	--focus-background: var(--color-white);
-	--input-border-color: var(--color-dark);
-	--input-border-size: 2px;
+	--input-border-color: var(--color-grey);
+	--input-border-size: 1px;
 	--animation-time-short: 0.2s;
 	--secondary: var(--color-dark-blue);
+
+	// Toast message max height is calculated based on the font-size.
+	--font-size-standard: 1rem;
 
 	// Segment
 	--segment-selected-background: var(--color-dark);
@@ -55,7 +58,7 @@
 	--alert-width: calc(100% - var(--padding-8x));
 	--alert-max-width: calc(100vw - var(--padding-4x));
 	--alert-max-height: calc(100vh - var(--padding-4x));
-	--alert-border-radius: var(--border-radius-sm);
+	--alert-border-radius: var(--border-radius-md);
 	--alert-padding-y: var(--padding-4x);
 	--alert-padding-x: var(--padding-2x);
 
@@ -124,12 +127,29 @@ div.modal {
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
 
-	div.container {
-		max-width: 100%;
+	div.wrapper.dialog div.container-wrapper {
+		margin: var(--padding-1_5x) var(--padding-1_5x) auto;
 	}
 
-	div.content > div:first-child {
-		padding: var(--padding-1_5x) 0 0;
+	div.container {
+		max-width: 100%;
+
+		div.content {
+			border-radius: var(--padding-0_75x);
+		}
+	}
+
+	div.content:not(:has(+ div.transition)),
+	div.transition:not(:has(+ form)),
+	div.transition > form {
+		display: flex;
+		flex-direction: column;
+		min-height: 100%;
+
+		> div.stretch {
+			flex: 1;
+			margin: 0 0 var(--padding-3x);
+		}
 	}
 }
 

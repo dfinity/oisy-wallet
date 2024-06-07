@@ -14,18 +14,17 @@ import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export interface GetFeeData {
-	address: ETH_ADDRESS;
+	from: ETH_ADDRESS;
+	to: ETH_ADDRESS;
 }
 
 export const getEthFeeData = async ({
-	address,
+	to,
 	helperContractAddress
 }: GetFeeData & {
 	helperContractAddress: OptionAddress;
 }): Promise<BigNumber> => {
-	if (
-		isDestinationContractAddress({ destination: address, contractAddress: helperContractAddress })
-	) {
+	if (isDestinationContractAddress({ destination: to, contractAddress: helperContractAddress })) {
 		return BigNumber.from(CKETH_FEE);
 	}
 
@@ -47,7 +46,13 @@ export const getErc20FeeData = async ({
 			nonNullish(targetNetwork) && isNetworkICP(targetNetwork)
 				? infuraErc20IcpProviders(targetNetwork.id)
 				: infuraErc20Providers(targetNetwork?.id ?? sourceNetworkId);
-		return await fn(rest);
+		const fee = await fn(rest);
+
+		// The cross-chain team recommended adding 10% to the fee to provide some buffer for when the transaction is effectively executed.
+		// However, according to our observations, we noticed that ERC20 transactions require even more fees. That is why we actually add 25%.
+		const additionalAmount = BigNumber.from(fee.toBigInt() / 4n);
+
+		return fee.add(additionalAmount);
 	} catch (err: unknown) {
 		// We silence the error on purpose.
 		// The queries above often produce errors on mainnet, even when all parameters are correctly set.
@@ -60,7 +65,7 @@ export const getErc20FeeData = async ({
 
 export const getCkErc20FeeData = async ({
 	erc20HelperContractAddress,
-	address,
+	to,
 	...rest
 }: GetFeeData & {
 	contract: Erc20ContractAddress;
@@ -69,13 +74,13 @@ export const getCkErc20FeeData = async ({
 	erc20HelperContractAddress: OptionAddress;
 }): Promise<BigNumber> => {
 	const estimateGasForApprove = await getErc20FeeData({
-		address,
+		to,
 		targetNetwork: undefined,
 		...rest
 	});
 
 	const targetCkErc20Helper = isDestinationContractAddress({
-		destination: address,
+		destination: to,
 		contractAddress: erc20HelperContractAddress
 	});
 

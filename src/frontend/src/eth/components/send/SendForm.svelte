@@ -12,8 +12,8 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import type { Token } from '$lib/types/token';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { Token } from '$lib/types/token';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -36,17 +36,19 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	{#if destinationEditable}
-		<SendDestination bind:destination bind:invalidDestination />
+	<div class="stretch">
+		{#if destinationEditable}
+			<SendDestination bind:destination bind:invalidDestination on:icQRCodeScan />
 
-		<SendNetworkICP {destination} {sourceNetwork} bind:network />
-	{/if}
+			<SendNetworkICP {destination} {sourceNetwork} bind:network />
+		{/if}
 
-	<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
+		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-	<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
+		<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
 
-	<FeeDisplay />
+		<FeeDisplay />
+	</div>
 
 	<ButtonGroup>
 		<slot name="cancel" />
