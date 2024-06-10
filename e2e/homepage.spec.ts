@@ -1,9 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from '@playwright/test';
 
-const testUrl = "/";
+const testUrl = '/';
 
-test("should display not logged in homepage", async ({ page }) => {
-    await page.goto(testUrl);
+test('should display not logged in homepage', async ({ page }) => {
+	await page.goto(testUrl);
 
-    await expect(page).toHaveScreenshot();
+	await expect(page).toHaveScreenshot();
 });
