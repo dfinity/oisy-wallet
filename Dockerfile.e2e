@@ -46,6 +46,9 @@ ENV PATH="/home/apprunner/.local/share/dfx/bin:$PATH"
 # Copy resources
 COPY --chown=apprunner:apprunner . .
 
+# Explicitly install locate-project to ensure we can build the backend canister as apprunner
+RUN /bin/bash -c "source /home/apprunner/.cargo/env && cargo locate-project"
+
 # Deploy
 RUN ./docker/deploy
 
