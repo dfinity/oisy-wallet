@@ -19,7 +19,10 @@ export const isSubRoute = (page: Page): boolean =>
 	isRouteTransactions(page) || isRouteSettings(page);
 
 const tokenUrl = ({
-	token: { name, network },
+	token: {
+		name,
+		network: { id: networkId }
+	},
 	path
 }: {
 	token: Token;
@@ -27,7 +30,7 @@ const tokenUrl = ({
 }): string =>
 	`${path}?token=${encodeURIComponent(
 		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
-	)}${nonNullish(network.id.description) ? `&${networkParam(network.id)}` : ''}`;
+	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
 export const networkParam = (networkId: NetworkId): string =>
 	`network=${networkId.description ?? ''}`;
