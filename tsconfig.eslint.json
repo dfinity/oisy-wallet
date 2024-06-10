@@ -13,7 +13,10 @@
 		"./vitest.config.ts",
 		"./tailwind.config.js",
 		"./svelte.config.js",
-		"./postcss.config.js"
+		"./postcss.config.js",
+		"./playwright.config.ts",
+		"./e2e/**/*.js",
+		"./e2e/**/*.ts"
 	],
 	"exclude": [
 		"./node_modules/**",
