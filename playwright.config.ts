@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
+
 export default defineConfig({
 	webServer: {
 		command: 'npm run build && npm run preview',
@@ -16,15 +18,18 @@ export default defineConfig({
 			name: 'chromium',
 			use: { ...devices['Desktop Chrome'] }
 		},
+		...(!DEV
+			? [
+					{
+						name: 'firefox',
+						use: { ...devices['Desktop Firefox'] }
+					},
 
-		{
-			name: 'firefox',
-			use: { ...devices['Desktop Firefox'] }
-		},
-
-		{
-			name: 'webkit',
-			use: { ...devices['Desktop Safari'] }
-		}
+					{
+						name: 'webkit',
+						use: { ...devices['Desktop Safari'] }
+					}
+				]
+			: [])
 	]
 });

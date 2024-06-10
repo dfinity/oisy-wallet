@@ -31,6 +31,7 @@
 		"deploy": "scripts/deploy.sh",
 		"i18n": "node scripts/i18n.mjs && prettier --write ./src/frontend/src/lib/types/i18n.d.ts",
 		"e2e": "playwright test",
+		"e2e:dev": "NODE_ENV=development playwright test",
 		"e2e:ci": "playwright test --reporter=html",
 		"e2e:snapshots": "npx playwright test --update-snapshots --reporter=list",
 		"e2e:report": "npx playwright show-report"
