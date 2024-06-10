@@ -17,5 +17,7 @@ export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR = 'ic_ckbtc_to_btc_error_count';
 export const TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS = 'ic_cketh_to_eth_success_count';
 export const TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR = 'ic_cketh_to_eth_error_count';
+export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS = 'ic_ckerc20_to_erc20_success_count';
+export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR = 'ic_ckerc20_to_erc20_error_count';
 export const TRACK_COUNT_IC_SEND_SUCCESS = 'ic_send_success_count';
 export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';

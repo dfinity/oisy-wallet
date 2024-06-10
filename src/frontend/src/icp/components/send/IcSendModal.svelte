@@ -24,12 +24,18 @@
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
+	import {
+		isNetworkIdETH,
+		isTokenCkErc20Ledger,
+		isTokenCkEthLedger
+	} from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import {
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR,
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS,
+		TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR,
+		TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS,
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR,
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS,
 		TRACK_COUNT_IC_SEND_ERROR,
@@ -100,9 +106,11 @@
 			await trackEvent({
 				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
-					: isNetworkIdETH(networkId)
+					: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
 						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
-						: TRACK_COUNT_IC_SEND_SUCCESS,
+						: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
+							? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS
+							: TRACK_COUNT_IC_SEND_SUCCESS,
 				metadata: {
 					token: $token.symbol
 				}
@@ -115,9 +123,11 @@
 			await trackEvent({
 				name: isNetworkIdBitcoin(networkId)
 					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
-					: isNetworkIdETH(networkId)
+					: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
 						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR
-						: TRACK_COUNT_IC_SEND_ERROR,
+						: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
+							? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR
+							: TRACK_COUNT_IC_SEND_ERROR,
 				metadata: {
 					token: $token.symbol
 				}
