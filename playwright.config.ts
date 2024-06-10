@@ -24,10 +24,17 @@ export default defineConfig({
 						name: 'firefox',
 						use: { ...devices['Desktop Firefox'] }
 					},
-
 					{
 						name: 'webkit',
 						use: { ...devices['Desktop Safari'] }
+					},
+					{
+						name: 'iphone',
+						use: { ...devices['iPhone 14'] }
+					},
+					{
+						name: 'android',
+						use: { ...devices['Galaxy S9+'] }
 					}
 				]
 			: [])

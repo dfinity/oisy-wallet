@@ -7,6 +7,7 @@ This document lists a couple of useful information for development and deploymen
 - [Deployment](#deployment)
 - [Internationalization](#internationalization)
 - [Faucets](#faucets)
+- [Testing](#testing)
 
 ## Deployment
 
@@ -63,3 +64,27 @@ A list of useful faucets and ERC20 tokens on Sepolia:
 - ETH: [Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia) from Alchemy
 - USDC: [Circle faucet](https://faucet.circle.com/)
 - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
+
+## Testing
+
+This section provides information about testing procedures.
+
+### E2E visual comparisons
+
+To implement a test that compares snapshots, follow these steps:
+
+1. Add an e2e test in the `./e2e` directory.
+2. Implement the test using `await expect(page).toHaveScreenshot()` to compare screenshots.
+3. Run the e2e test locally using `npm run e2e:snapshots` to generate the screenshots.
+4. Run the e2e test locally again using `npm run e2e` to validate the test.
+5. Add the generated screenshots to Git.
+6. Create a PR for your changes.
+7. Open the GitHub Actions page and navigate to [Update E2E snapshots](https://github.com/dfinity/oisy-wallet/actions/workflows/update-snapshots.yml).
+8. Manually trigger the generation of screenshots for the CI by running the workflow using your PR or branch.
+
+This last step will generate the screenshots for the CI and add them to your PR. You can trigger this job again anytime you make changes, regardless of whether the test itself changes.
+
+#### Notes
+
+- We develop on macOS, while GitHub Actions use Linux. Therefore, there are two sets of screenshots: `darwin` for macOS and `linux` for Linux.
+- For more information, refer to the Playwright [documentation](https://playwright.dev/docs/test-snapshots).
