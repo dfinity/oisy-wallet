@@ -88,3 +88,5 @@ This last step will generate the screenshots for the CI and add them to your PR.
 
 - We develop on macOS, while GitHub Actions use Linux. Therefore, there are two sets of screenshots: `darwin` for macOS and `linux` for Linux.
 - For more information, refer to the Playwright [documentation](https://playwright.dev/docs/test-snapshots).
+
+// TODO: remove comment
