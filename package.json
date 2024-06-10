@@ -29,7 +29,11 @@
 		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}'",
 		"generate": "scripts/did.sh && dfx generate && node scripts/did.update.types.mjs && node scripts/did.delete.types.mjs && npm run format",
 		"deploy": "scripts/deploy.sh",
-		"i18n": "node scripts/i18n.mjs && prettier --write ./src/frontend/src/lib/types/i18n.d.ts"
+		"i18n": "node scripts/i18n.mjs && prettier --write ./src/frontend/src/lib/types/i18n.d.ts",
+		"e2e": "playwright test",
+		"e2e:ci": "playwright test --reporter=html",
+		"e2e:snapshots": "npx playwright test --update-snapshots --reporter=list",
+		"e2e:report": "npx playwright show-report"
 	},
 	"dependencies": {
 		"@dfinity/agent": "^1.3.0",
@@ -54,6 +58,7 @@
 	},
 	"devDependencies": {
 		"@dfinity/identity-secp256k1": "^1.3.0",
+		"@playwright/test": "^1.44.1",
 		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.1",
 		"@sveltejs/kit": "^2.5.10",
