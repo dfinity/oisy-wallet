@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+source /home/apprunner/.bashrc
+
+dfx start --background --quiet
+
+./docker/wait-port "$DFX_PORT"
+
+npm run deploy
+
+dfx stop
