@@ -4,14 +4,16 @@ const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
 export default defineConfig({
 	webServer: {
-		command: 'npm run build && npm run preview',
-		port: 4173
+		command: DEV ? 'npm run dev' : 'npm run build && npm run preview',
+		reuseExistingServer: true,
+		port: DEV ? 5173 : 4173
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
 		testIdAttribute: 'data-tid',
-		trace: 'on'
+		trace: 'on',
+		...(DEV && { headless: false })
 	},
 	projects: [
 		{
