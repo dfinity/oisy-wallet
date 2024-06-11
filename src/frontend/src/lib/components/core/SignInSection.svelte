@@ -17,7 +17,7 @@
 		{replaceOisyPlaceholders($i18n.auth.text.description)}
 	</p>
 
-	<ButtonIC on:click={async () => await signIn({})}>
+	<ButtonIC on:click={async () => await signIn({})} testId="login-button">
 		<svelte:fragment slot="action">{$i18n.auth.text.connect_with}</svelte:fragment>
 		Internet Identity
 	</ButtonIC>
