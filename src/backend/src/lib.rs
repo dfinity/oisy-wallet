@@ -1,10 +1,12 @@
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
+use crate::bitcoin_utils::network_to_derivation_path;
 use candid::{CandidType, Deserialize, Nat, Principal};
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
+use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
@@ -30,6 +32,7 @@ use std::str::FromStr;
 
 mod guards;
 mod token;
+mod bitcoin_utils;
 
 type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
@@ -434,6 +437,22 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
+}
+
+async fn bitcoin_ecdsa_public_key_of(canister_id: Principal, network: BitcoinNetwork) -> Vec<u8> {
+    let name = read_config(|s| s.ecdsa_key_name.clone());
+    let derivation_path = network_to_derivation_path(network)?;
+    let (key, ) = ecdsa_public_key(EcdsaPublicKeyArgument {
+        canister_id: Some(canister_id),
+        derivation_path,
+        key_id: EcdsaKeyId {
+            curve: EcdsaCurve::Secp256k1,
+            name,
+        },
+    })
+        .await
+        .expect("failed to get public key");
+    key.public_key
 }
 
 /// API method to get cycle balance and burn rate.
