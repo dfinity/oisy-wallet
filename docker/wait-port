@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#source https://stackoverflow.com/a/70181222/5404186
+
+for _ in `seq 1 20`; do
+    echo -n .
+    if nc -z localhost $1; then
+        echo "✅ Connection to port $1 succeeded."
+        exit 0
+    fi
+    sleep 0.5
+done
+
+echo "❌ Connection to port $1 failed!"
+
+exit 1

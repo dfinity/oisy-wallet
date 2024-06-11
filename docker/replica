@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+source /home/apprunner/.bashrc
+
+# https://docs.docker.com/config/containers/multi-service_container/
+# turn on bash's job control
+set -m
+
+# The default bind address of dfx is 127.0.0.1:4943. We have to use 0.0.0.0:4943 otherwise Docker cannot expose the port.
+dfx start --host 0.0.0.0:"$DFX_PORT" --quiet &
+
+./docker/wait-port "$DFX_PORT"
+
+REPLICA_PORT="$(dfx info replica-port)"
+./docker/wait-port "$REPLICA_PORT"
+
+# In case we ever want to re-deploy or configure anything when the image is running. This can be implemented here.
+
+# now we bring the primary process back into the foreground
+# and leave it there
+fg %1

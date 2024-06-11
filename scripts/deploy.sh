@@ -2,6 +2,8 @@
 
 ./scripts/deploy.backend.sh
 
+mkdir -p ./target/ic
+
 ./scripts/download.icp.sh
 ./scripts/deploy.icp_ledger.sh
 ./scripts/deploy.icp_index.sh
