@@ -19,8 +19,6 @@
 
 	export let token: Token;
 
-	setContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY, initReceiveTokenContext(token));
-
 	let ckEthereum = false;
 	$: ckEthereum = isTokenCkEthLedger(token as IcToken) || isTokenCkErc20Ledger(token as IcToken);
 
@@ -29,6 +27,15 @@
 
 	let icrc = false;
 	$: icrc = token.standard === 'icrc';
+
+	/**
+	 * Context for the IC receive modals: We initialize with a token, ensuring that the information is never undefined.
+	 */
+	const context = initReceiveTokenContext(token);
+	setContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY, context);
+
+	// At boot time, if the context is derived globally, the token might be updated a few times. That's why we also update it with an auto-subscriber.
+	$: token, (() => context.token.set(token as IcToken))();
 </script>
 
 {#if ckEthereum}
