@@ -97,16 +97,17 @@ export const BITCOIN_NETWORKS: Network[] = [BTC_MAINNET_NETWORK, BTC_TESTNET_NET
 
 export const BITCOIN_NETWORKS_IDS: symbol[] = BITCOIN_NETWORKS.map(({ id }) => id);
 
-export const CHAIN_FUSION_MAINNET_NETWORK_SYMBOL = 'Chain Fusion (all mainnets)';
+export const CHAIN_FUSION_MAINNET_NETWORK_SYMBOL = 'ChainFusion';
 
 export const CHAIN_FUSION_MAINNET_NETWORK_ID = Symbol(CHAIN_FUSION_MAINNET_NETWORK_SYMBOL);
 
 export const CHAIN_FUSION_MAINNET_NETWORK: Network = {
 	id: CHAIN_FUSION_MAINNET_NETWORK_ID,
 	env: 'mainnet',
-	name: 'Chain Fusion (all mainnets)'
+	name: 'Chain Fusion'
 };
 
+// TODO: remove this when we have finished implementing the single-page view with Chain Fusion
 export const CHAIN_FUSION_ENABLED =
 	JSON.parse(import.meta.env.VITE_CHAIN_FUSION_ENABLED ?? false) === true;
 
