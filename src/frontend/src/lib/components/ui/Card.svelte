@@ -8,6 +8,9 @@
 
 	let amount = true;
 	$: amount = nonNullish($$slots.amount);
+
+	let actions = false;
+	$: actions = nonNullish($$slots.actions);
 </script>
 
 <div class="flex items-center gap-4" class:mb-6={!noMargin}>
@@ -26,9 +29,17 @@
 				>
 			{/if}
 		</div>
-		<p class="text-misty-rose text-left inline-flex items-center">
-			<slot name="description" />
-		</p>
+		<div class="flex justify-between gap-4">
+			<p class="text-misty-rose text-left inline-flex items-center">
+				<slot name="description" />
+			</p>
+
+			{#if actions}
+				<div class="min-w-fit">
+					<slot name="actions" />
+				</div>
+			{/if}
+		</div>
 	</div>
 	<slot name="action" />
 </div>
