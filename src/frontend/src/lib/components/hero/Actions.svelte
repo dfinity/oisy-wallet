@@ -11,6 +11,7 @@
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
 	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
+	import { token } from '$lib/derived/token.derived';
 
 	export let send = false;
 
@@ -34,7 +35,7 @@
 	class:grid={!singleAction}
 >
 	{#if $networkICP}
-		<IcReceive />
+		<IcReceive token={$token} />
 	{:else}
 		<Receive />
 	{/if}
