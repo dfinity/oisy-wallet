@@ -11,6 +11,7 @@
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
 	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
+	import { token } from '$lib/derived/token.derived';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20TokensInitialized;
@@ -24,7 +25,7 @@
 
 <div role="toolbar" class="grid grid-cols-2 gap-4 text-deep-violet font-bold pt-10 pb-3">
 	{#if $networkICP}
-		<IcReceive />
+		<IcReceive token={$token} />
 		<IcSend />
 	{:else}
 		<Receive />
