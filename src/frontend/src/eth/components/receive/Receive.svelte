@@ -4,14 +4,10 @@
 	import { addressNotCertified } from '$lib/derived/address.derived';
 	import ReceiveModal from '$eth/components/receive/ReceiveModal.svelte';
 	import { metamaskNotInitialized } from '$eth/derived/metamask.derived';
-	import { onMount } from 'svelte';
-	import { initMetamaskSupport } from '$eth/services/metamask.services';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-
-	onMount(initMetamaskSupport);
 
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
