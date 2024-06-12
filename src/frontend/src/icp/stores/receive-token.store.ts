@@ -1,4 +1,4 @@
-import type {IcCkToken, IcToken} from '$icp/types/ic';
+import type { IcCkToken, IcToken } from '$icp/types/ic';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { derived, writable, type Readable } from 'svelte/store';
 
@@ -24,7 +24,7 @@ export const initReceiveTokenContext = (token: Token): ReceiveTokenContext => {
 	const tokenStore = initReceiveTokenStore(token as IcToken);
 	const tokenId = derived(tokenStore, ({ id }) => id);
 	const tokenStandard = derived(tokenStore, ({ standard }) => standard);
-	const twinToken = derived(tokenStore,token => (token as IcCkToken).twinToken)
+	const twinToken = derived(tokenStore, (token) => (token as IcCkToken).twinToken);
 
 	return { token: tokenStore, tokenId, tokenStandard, twinToken };
 };
