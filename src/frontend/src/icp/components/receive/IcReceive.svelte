@@ -10,8 +10,16 @@
 		isTokenCkEthLedger
 	} from '$icp/utils/ic-send.utils';
 	import type { IcToken } from '$icp/types/ic';
+	import { setContext } from 'svelte';
+	import {
+		initReceiveTokenContext,
+		RECEIVE_TOKEN_CONTEXT_KEY,
+		type ReceiveTokenContext
+	} from '$icp/stores/receive-token.store';
 
 	export let token: Token;
+
+	setContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY, initReceiveTokenContext(token));
 
 	let ckEthereum = false;
 	$: ckEthereum = isTokenCkEthLedger(token as IcToken) || isTokenCkErc20Ledger(token as IcToken);
