@@ -6,8 +6,11 @@
 	import IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
 	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
 	import { modalIcpReceive } from '$lib/derived/modal.derived';
-	import {getContext} from "svelte";
-	import {RECEIVE_TOKEN_CONTEXT_KEY, type ReceiveTokenContext} from "$icp/stores/receive-token.store";
+	import { getContext } from 'svelte';
+	import {
+		RECEIVE_TOKEN_CONTEXT_KEY,
+		type ReceiveTokenContext
+	} from '$icp/stores/receive-token.store';
 
 	const { tokenStandard } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 

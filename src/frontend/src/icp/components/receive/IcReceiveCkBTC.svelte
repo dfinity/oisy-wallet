@@ -7,8 +7,11 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
 	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
-	import {getContext} from "svelte";
-	import {RECEIVE_TOKEN_CONTEXT_KEY, type ReceiveTokenContext} from "$icp/stores/receive-token.store";
+	import { getContext } from 'svelte';
+	import {
+		RECEIVE_TOKEN_CONTEXT_KEY,
+		type ReceiveTokenContext
+	} from '$icp/stores/receive-token.store';
 
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
