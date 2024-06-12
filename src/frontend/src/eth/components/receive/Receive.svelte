@@ -7,6 +7,8 @@
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 
+	const modalId = Symbol();
+
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
 	const openReceive = async () => {
@@ -18,12 +20,12 @@
 			}
 		}
 
-		modalStore.openReceive();
+		modalStore.openReceive(modalId);
 	};
 </script>
 
 <ReceiveButton on:click={async () => await openReceive()} />
 
-{#if $modalReceive}
+{#if $modalReceive && $modalStore?.data === modalId}
 	<ReceiveModal />
 {/if}
