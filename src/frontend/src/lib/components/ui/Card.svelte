@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 
-	export let pending = false;
 	export let noMargin = false;
 
 	let description = false;
@@ -27,12 +26,8 @@
 				>
 			{/if}
 		</div>
-		<p class="text-misty-rose text-left inline-flex items-center" class:text-goldenrod={pending}>
+		<p class="text-misty-rose text-left inline-flex items-center">
 			<slot name="description" />
-
-			{#if pending}
-				Pending...
-			{/if}
 		</p>
 	</div>
 	<slot name="action" />

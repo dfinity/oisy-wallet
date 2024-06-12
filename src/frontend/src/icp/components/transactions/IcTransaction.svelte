@@ -13,6 +13,7 @@
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
+	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
 
 	export let transaction: IcTransactionUi;
 
@@ -47,7 +48,7 @@
 </script>
 
 <button on:click={() => modalStore.openIcTransaction(transaction)} class="block w-full border-0">
-	<Card {pending}>
+	<Card>
 		<span class="capitalize"
 			><IcTransactionLabel label={transactionTypeLabel} fallback={transactionType} /></span
 		>
@@ -64,6 +65,8 @@
 			{#if nonNullish(timestamp)}
 				{formatNanosecondsToDate(timestamp)}
 			{/if}
+
+			<TransactionPending {pending} />
 		</svelte:fragment>
 	</Card>
 </button>
