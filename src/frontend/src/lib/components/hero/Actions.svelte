@@ -22,7 +22,7 @@
 	$: convertBtc = $tokenCkBtcLedger && $erc20TokensInitialized;
 </script>
 
-<div role="toolbar" class="grid grid-cols-2 gap-4 text-deep-violet font-bold pt-10 pb-7">
+<div role="toolbar" class="grid grid-cols-2 gap-4 text-deep-violet font-bold pt-10 pb-3">
 	{#if $networkICP}
 		<IcReceive />
 		<IcSend />
