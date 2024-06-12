@@ -96,3 +96,23 @@ export const BTC_TESTNET_NETWORK: Network = {
 export const BITCOIN_NETWORKS: Network[] = [BTC_MAINNET_NETWORK, BTC_TESTNET_NETWORK];
 
 export const BITCOIN_NETWORKS_IDS: symbol[] = BITCOIN_NETWORKS.map(({ id }) => id);
+
+export const CHAIN_FUSION_MAINNET_NETWORK_SYMBOL = 'Chain Fusion (all mainnets)';
+
+export const CHAIN_FUSION_MAINNET_NETWORK_ID = Symbol(CHAIN_FUSION_MAINNET_NETWORK_SYMBOL);
+
+export const CHAIN_FUSION_MAINNET_NETWORK: Network = {
+	id: CHAIN_FUSION_MAINNET_NETWORK_ID,
+	env: 'mainnet',
+	name: 'Chain Fusion (all mainnets)'
+};
+
+export const CHAIN_FUSION_TESTNET_NETWORK_SYMBOL = 'Chain Fusion (all testnets)';
+
+export const CHAIN_FUSION_TESTNET_NETWORK_ID = Symbol(CHAIN_FUSION_TESTNET_NETWORK_SYMBOL);
+
+export const CHAIN_FUSION_TESTNET_NETWORK: Network = {
+	id: CHAIN_FUSION_TESTNET_NETWORK_ID,
+	env: 'testnet',
+	name: 'Chain Fusion (all testnets)'
+};
