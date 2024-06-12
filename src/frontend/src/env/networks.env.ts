@@ -108,10 +108,10 @@ export const CHAIN_FUSION_MAINNET_NETWORK: Network = {
 };
 
 // TODO: remove this when we have finished implementing the single-page view with Chain Fusion
-export const CHAIN_FUSION_ENABLED =
-	JSON.parse(import.meta.env.VITE_CHAIN_FUSION_ENABLED ?? false) === true;
+export const NETWORK_CHAIN_FUSION_ENABLED =
+	JSON.parse(import.meta.env.VITE_NETWORK_CHAIN_FUSION_ENABLED ?? false) === true;
 
-export const CHAIN_FUSION_NETWORKS: Network[] = CHAIN_FUSION_ENABLED
+export const CHAIN_FUSION_NETWORKS: Network[] = NETWORK_CHAIN_FUSION_ENABLED
 	? [CHAIN_FUSION_MAINNET_NETWORK]
 	: [];
 
