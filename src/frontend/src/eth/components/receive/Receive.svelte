@@ -9,6 +9,8 @@
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
+	const modalId = Symbol();
+
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
 	const openReceive = async () => {
@@ -20,7 +22,7 @@
 			}
 		}
 
-		modalStore.openReceive();
+		modalStore.openReceive(modalId);
 	};
 </script>
 
@@ -34,6 +36,6 @@
 	<span>{$i18n.receive.text.receive}</span></button
 >
 
-{#if $modalReceive}
+{#if $modalReceive && $modalStore?.data === modalId}
 	<ReceiveModal />
 {/if}

@@ -19,6 +19,8 @@
 
 	const { token, tokenId, twinToken } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
+	const modalId = Symbol();
+
 	let minterInfoLoaded = false;
 
 	const openReceive = async () => {
@@ -34,7 +36,7 @@
 			identity: $authStore.identity
 		});
 
-		modalStore.openCkBTCReceive();
+		modalStore.openCkBTCReceive(modalId);
 		return;
 	};
 </script>
@@ -47,6 +49,6 @@
 	<IcCkListener initFn={initCkBTCMinterInfoWorker} token={$token} twinToken={$twinToken} />
 {/if}
 
-{#if $modalCkBTCReceive}
+{#if $modalCkBTCReceive && $modalStore?.data === modalId}
 	<IcReceiveModal infoCmp={IcReceiveInfoCkBTC} />
 {/if}

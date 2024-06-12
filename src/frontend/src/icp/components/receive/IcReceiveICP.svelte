@@ -12,20 +12,22 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 
+	const modalId = Symbol();
+
 	const { tokenStandard } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const openReceive = () => {
 		if ($tokenStandard === 'icp' || isRouteTokens($page)) {
-			modalStore.openIcpReceive();
+			modalStore.openIcpReceive(modalId);
 			return;
 		}
 
-		modalStore.openReceive();
+		modalStore.openReceive(modalId);
 	};
 </script>
 
 <ReceiveButton on:click={openReceive} />
 
-{#if $modalIcpReceive}
+{#if $modalIcpReceive && $modalStore?.data === modalId}
 	<IcReceiveModal infoCmp={IcReceiveInfoICP} />
 {/if}
