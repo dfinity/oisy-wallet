@@ -1,3 +1,4 @@
+import { CHAIN_FUSION_NETWORKS_IDS } from '$env/networks.env';
 import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 import { DEFAULT_NETWORK, DEFAULT_NETWORK_ID } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
@@ -19,6 +20,11 @@ export const networkId: Readable<NetworkId> = derived(
 			: DEFAULT_NETWORK_ID
 );
 
+export const selectedNetwork: Readable<Network> = derived(
+	[networks, networkId],
+	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId) ?? DEFAULT_NETWORK
+);
+
 export const networkTokens: Readable<Token[]> = derived(
 	[tokens, networkId],
 	([$tokens, $networkId]) => $tokens.filter(({ network: { id } }) => id === $networkId)
@@ -36,9 +42,4 @@ export const networkAddress: Readable<OptionAddress | string> = derived(
 	[address, icrcAccountIdentifierText, networkICP],
 	([$address, $icrcAccountIdentifierStore, $networkICP]) =>
 		$networkICP ? $icrcAccountIdentifierStore : $address
-);
-
-export const selectedNetwork: Readable<Network> = derived(
-	[networks, networkId],
-	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId) ?? DEFAULT_NETWORK
 );
