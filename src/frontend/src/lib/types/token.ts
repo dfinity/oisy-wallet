@@ -1,4 +1,4 @@
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkEnvironment } from '$lib/types/network';
 
 export type TokenId = symbol;
 
@@ -11,6 +11,7 @@ export type Token = {
 	network: Network;
 	standard: TokenStandard;
 	category: TokenCategory;
+	overrideNetworkEnv?: NetworkEnvironment;
 } & TokenMetadata;
 
 export interface TokenMetadata {

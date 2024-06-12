@@ -280,3 +280,13 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKUSDC_STAGING_DATA) ? [CKUSDC_STAGING_DATA] : []),
 	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : [])
 ];
+
+/**
+ * All ICRC testnet ledger canister IDs
+ */
+
+export const ICRC_TESTNET_LEDGER_CANISTER_IDS: CanisterIdText[] = [
+	...CKBTC_LEDGER_CANISTER_TESTNET_IDS,
+	...CKETH_LEDGER_CANISTER_TESTNET_IDS,
+	...CKUSDC_LEDGER_CANISTER_TESTNET_IDS
+];
