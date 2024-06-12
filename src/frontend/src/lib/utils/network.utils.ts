@@ -1,5 +1,6 @@
 import {
 	BITCOIN_NETWORKS_IDS,
+	CHAIN_FUSION_NETWORKS_IDS,
 	ICP_NETWORK_ID,
 	SUPPORTED_ETHEREUM_NETWORKS_IDS
 } from '$env/networks.env';
@@ -15,3 +16,6 @@ export const isNetworkIdEthereum = (id: NetworkId | undefined): boolean =>
 
 export const isNetworkIdBitcoin = (id: NetworkId | undefined): boolean =>
 	nonNullish(id) && BITCOIN_NETWORKS_IDS.includes(id);
+
+export const isNetworkIdChainFusion = (id: NetworkId | undefined): boolean =>
+	nonNullish(id) && CHAIN_FUSION_NETWORKS_IDS.includes(id);
