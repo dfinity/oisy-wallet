@@ -4,7 +4,7 @@
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
-	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
+	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	/**
@@ -23,7 +23,7 @@
 	$: sendToken.set($ckEthereumTwinToken);
 </script>
 
-<IcReceiveButton on:click={modalStore.openCkETHReceive} />
+<ReceiveButton on:click={modalStore.openCkETHReceive} />
 
 {#if $modalCkETHReceive}
 	<IcReceiveCkEthereumModal />
