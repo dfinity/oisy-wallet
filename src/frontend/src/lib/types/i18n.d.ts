@@ -402,6 +402,7 @@ interface I18nTransaction {
 		to_copied: string;
 		block: string;
 		interacted_with: string;
+		pending: string;
 	};
 	status: { included: string; safe: string; finalised: string };
 	label: {
