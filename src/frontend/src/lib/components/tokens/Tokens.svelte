@@ -18,6 +18,7 @@
 	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
 	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
+	import TokenReceive from "$lib/components/tokens/TokenReceive.svelte";
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -60,6 +61,8 @@
 					</output>
 
 					<ExchangeTokenValue {token} slot="amount" />
+
+					<TokenReceive {token} slot="actions" />
 				</Card>
 			</a>
 		</Listener>
