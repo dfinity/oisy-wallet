@@ -6,7 +6,7 @@
 	import type { IcToken } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
-	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
+	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { getContext } from 'svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -41,7 +41,7 @@
 
 <svelte:window on:oisyReceiveCkBTC={openReceive} />
 
-<IcReceiveButton on:click={async () => await openReceive()} />
+<ReceiveButton on:click={async () => await openReceive()} />
 
 {#if !minterInfoLoaded && nonNullish($twinToken)}
 	<IcCkListener initFn={initCkBTCMinterInfoWorker} token={$token} twinToken={$twinToken} />
