@@ -1,5 +1,7 @@
 use std::str::FromStr;
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork};
+use k256::sha2;
+use k256::sha2::Digest;
 
 fn parse_derivation_path(path: &str) -> Vec<Vec<u8>> {
     let re = regex::Regex::new(r"^m/44'(/\d+'?){2}/[01]/\d+$").unwrap();
@@ -31,4 +33,38 @@ pub fn network_to_derivation_path(network: BitcoinNetwork) -> Vec<Vec<u8>> {
     };
     let path = format!("m/44'/{}'/0'/0/0", coin_type);
     parse_derivation_path(&path)
+}
+
+
+
+
+fn sha256(data: &[u8]) -> Vec<u8> {
+    let mut hasher = sha2::Sha256::new();
+    hasher.update(data);
+    hasher.finalize().to_vec()
+}
+fn ripemd160(data: &[u8]) -> Vec<u8> {
+    let mut hasher = ripemd::Ripemd160::new();
+    hasher.update(data);
+    hasher.finalize().to_vec()
+}
+
+// Converts a public key to a P2PKH address.
+pub fn public_key_to_p2pkh_address(public_key: &[u8], network: BitcoinNetwork) -> String {
+    // SHA-256 & RIPEMD-160
+    let result = ripemd160(&sha256(public_key));
+
+    let prefix = match network {
+        BitcoinNetwork::Testnet | BitcoinNetwork::Regtest => 0x6f,
+        BitcoinNetwork::Mainnet => 0x00,
+    };
+    let mut data_with_prefix = vec![prefix];
+    data_with_prefix.extend(result);
+
+    let checksum = &sha256(&sha256(&data_with_prefix.clone()))[..4];
+
+    let mut full_address = data_with_prefix;
+    full_address.extend(checksum);
+
+    bs58::encode(full_address).into_string()
 }
