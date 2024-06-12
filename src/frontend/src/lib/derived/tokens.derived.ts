@@ -9,8 +9,8 @@ export const tokens: Readable<Token[]> = derived(
 	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens],
 	([$erc20Tokens, $icrcTokens, $enabledEthereumTokens]) => [
 		ICP_TOKEN,
-		...$icrcTokens,
 		...$enabledEthereumTokens,
+		...$icrcTokens,
 		...$erc20Tokens
 	]
 );
