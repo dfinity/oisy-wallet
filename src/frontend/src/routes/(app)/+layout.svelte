@@ -7,6 +7,7 @@
 	import LoaderBalances from '$icp-eth/components/core/LoaderBalances.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import LoaderMetamask from "$lib/components/core/LoaderMetamask.svelte";
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -28,7 +29,9 @@
 		<Loader>
 			<LoaderBalances>
 				<ExchangeWorker>
-					<slot />
+					<LoaderMetamask>
+						<slot />
+					</LoaderMetamask>
 				</ExchangeWorker>
 			</LoaderBalances>
 		</Loader>
