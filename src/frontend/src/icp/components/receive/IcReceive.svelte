@@ -1,21 +1,33 @@
 <script lang="ts">
-	import {
-		tokenCkBtcLedger,
-		tokenCkErc20Ledger,
-		tokenCkEthLedger
-	} from '$icp/derived/ic-token.derived';
 	import IcReceiveCkEthereum from '$icp/components/receive/IcReceiveCkEthereum.svelte';
 	import IcReceiveIcp from '$icp/components/receive/IcReceiveICP.svelte';
 	import IcReceiveCkBTC from '$icp/components/receive/IcReceiveCkBTC.svelte';
-	import { tokenStandard } from '$lib/derived/token.derived';
 	import IcReceiveIcrc from '$icp/components/receive/IcReceiveIcrc.svelte';
+	import type { Token } from '$lib/types/token';
+	import {
+		isTokenCkBtcLedger,
+		isTokenCkErc20Ledger,
+		isTokenCkEthLedger
+	} from '$icp/utils/ic-send.utils';
+	import type { IcToken } from '$icp/types/ic';
+
+	export let token: Token;
+
+	let ckEthereum = false;
+	$: ckEthereum = isTokenCkEthLedger(token as IcToken) || isTokenCkErc20Ledger(token as IcToken);
+
+	let ckBTC = false;
+	$: ckBTC = isTokenCkBtcLedger(token as IcToken);
+
+	let icrc = false;
+	$: icrc = token.standard === 'icrc';
 </script>
 
-{#if $tokenCkEthLedger || $tokenCkErc20Ledger}
+{#if ckEthereum}
 	<IcReceiveCkEthereum />
-{:else if $tokenCkBtcLedger}
+{:else if ckBTC}
 	<IcReceiveCkBTC />
-{:else if $tokenStandard === 'icrc'}
+{:else if icrc}
 	<IcReceiveIcrc />
 {:else}
 	<IcReceiveIcp />
