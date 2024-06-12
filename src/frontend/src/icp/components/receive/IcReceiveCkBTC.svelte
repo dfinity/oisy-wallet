@@ -15,6 +15,8 @@
 
 	export let compact = false;
 
+	const modalId = Symbol();
+
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const openReceive = async () => {
@@ -23,7 +25,7 @@
 			identity: $authStore.identity
 		});
 
-		modalStore.openCkBTCReceive();
+		modalStore.openCkBTCReceive(modalId);
 		return;
 	};
 </script>
@@ -32,6 +34,6 @@
 
 <ReceiveButton {compact} on:click={async () => await openReceive()} />
 
-{#if $modalCkBTCReceive}
+{#if $modalCkBTCReceive && $modalStore?.data === modalId}
 	<IcReceiveModal infoCmp={IcReceiveInfoCkBTC} />
 {/if}

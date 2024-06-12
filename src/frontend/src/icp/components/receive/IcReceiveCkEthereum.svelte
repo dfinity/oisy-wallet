@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { modalCkETHReceive } from '$lib/derived/modal.derived';
-	import { setContext } from 'svelte';
+	import {setContext} from 'svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
@@ -8,6 +8,8 @@
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 
 	export let compact = false;
+
+	const modalId = Symbol();
 
 	/**
 	 * Send modal context store
@@ -25,8 +27,8 @@
 	$: sendToken.set($ckEthereumTwinToken);
 </script>
 
-<ReceiveButton {compact} on:click={modalStore.openCkETHReceive} />
+<ReceiveButton {compact} on:click={() => modalStore.openCkETHReceive(modalId)} />
 
-{#if $modalCkETHReceive}
+{#if $modalCkETHReceive && $modalStore?.data === modalId}
 	<IcReceiveCkEthereumModal />
 {/if}

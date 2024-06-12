@@ -6,10 +6,12 @@
 	import { modalIcrcReceive } from '$lib/derived/modal.derived';
 
 	export let compact = false;
+
+	const modalId = Symbol();
 </script>
 
-<ReceiveButton {compact} on:click={modalStore.openIcrcReceive} />
+<ReceiveButton {compact} on:click={() => modalStore.openIcrcReceive(modalId)} />
 
-{#if $modalIcrcReceive}
+{#if $modalIcrcReceive && $modalStore?.data === modalId}
 	<IcReceiveModal infoCmp={IcReceiveInfoIcrc} />
 {/if}

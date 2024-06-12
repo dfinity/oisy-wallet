@@ -9,6 +9,8 @@
 
 	export let compact = false;
 
+	const modalId = Symbol();
+
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
 	const openReceive = async () => {
@@ -20,12 +22,12 @@
 			}
 		}
 
-		modalStore.openReceive();
+		modalStore.openReceive(modalId);
 	};
 </script>
 
 <ReceiveButton {compact} on:click={async () => await openReceive()} />
 
-{#if $modalReceive}
+{#if $modalReceive && $modalStore?.data === modalId}
 	<ReceiveModal />
 {/if}
