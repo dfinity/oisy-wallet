@@ -11,6 +11,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { IcCkToken } from '$icp/types/ic';
 	import { ETHEREUM_TOKEN } from '$env/tokens.env';
+	import ReceiveButton from "$lib/components/receive/ReceiveButton.svelte";
 
 	export let compact = false;
 
