@@ -19,6 +19,7 @@ k256 = "0.13"
 hex = "0.4"
 getrandom = { version = "0.2", features = ["custom"] }
 shared = { path = "../shared" }
+regex = "1.10.4"
 
 [dev-dependencies]
 lazy_static = "1.4.0"

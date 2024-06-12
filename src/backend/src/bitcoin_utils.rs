@@ -2,6 +2,9 @@ use std::str::FromStr;
 use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork};
 
 fn parse_derivation_path(path: &str) -> Vec<Vec<u8>> {
+    let re = regex::Regex::new(r"^m/44'(/\d+'?){2}/[01]/\d+$").unwrap();
+    assert!(re.is_match(path), "Invalid BIP-44 derivation path format");
+
     path.split('/')
         .skip(1) // Skip the leading 'm'
         .map(|s| {
@@ -27,6 +30,5 @@ pub fn network_to_derivation_path(network: BitcoinNetwork) -> Vec<Vec<u8>> {
         BitcoinNetwork::Regtest => "1",
     };
     let path = format!("m/44'/{}'/0'/0/0", coin_type);
-    let path_segments: Vec<Vec<u8>> = parse_derivation_path(&path);
-    path_segments
+    parse_derivation_path(&path)
 }

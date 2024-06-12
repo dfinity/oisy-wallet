@@ -87,6 +87,7 @@ dependencies = [
  "k256",
  "lazy_static",
  "pocket-ic",
+ "regex",
  "serde",
  "serde_bytes",
  "shared",

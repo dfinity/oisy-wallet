@@ -224,7 +224,7 @@ async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
         },
     })
     .await
-    .expect("failed to get public key");
+    .expect("failed to get Ethereum public key");
     key.public_key
 }
 
@@ -451,7 +451,7 @@ async fn bitcoin_ecdsa_public_key_of(canister_id: Principal, network: BitcoinNet
         },
     })
         .await
-        .expect("failed to get public key");
+        .expect("failed to get Bitcoin public key");
     key.public_key
 }
 
