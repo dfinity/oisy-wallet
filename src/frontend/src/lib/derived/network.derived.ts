@@ -26,8 +26,13 @@ export const selectedNetwork: Readable<Network> = derived(
 );
 
 export const networkTokens: Readable<Token[]> = derived(
-	[tokens, networkId],
-	([$tokens, $networkId]) => $tokens.filter(({ network: { id } }) => id === $networkId)
+	[tokens, selectedNetwork],
+	([$tokens, $selectedNetwork]) => {
+		if (CHAIN_FUSION_NETWORKS_IDS.includes($selectedNetwork.id)) {
+			return $tokens.filter(({ network: { env } }) => env === $selectedNetwork.env);
+		}
+		return $tokens.filter(({ network: { id } }) => id === $selectedNetwork.id);
+	}
 );
 
 export const networkICP: Readable<boolean> = derived([networkId], ([$networkId]) =>
