@@ -7,6 +7,8 @@
 	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 
+	const modalId = Symbol();
+
 	/**
 	 * Send modal context store
 	 */
@@ -23,8 +25,8 @@
 	$: sendToken.set($ckEthereumTwinToken);
 </script>
 
-<ReceiveButton on:click={modalStore.openCkETHReceive} />
+<ReceiveButton on:click={() => modalStore.openCkETHReceive(modalId)} />
 
-{#if $modalCkETHReceive}
+{#if $modalCkETHReceive && $modalStore?.data === modalId}
 	<IcReceiveCkEthereumModal />
 {/if}

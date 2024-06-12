@@ -32,11 +32,11 @@ export interface Modal<T> {
 export type ModalData<T> = Modal<T> | undefined | null;
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
-	openReceive: () => void;
-	openIcpReceive: () => void;
-	openIcrcReceive: () => void;
-	openCkBTCReceive: () => void;
-	openCkETHReceive: () => void;
+	openReceive: <D extends T>(data: D) => void;
+	openIcpReceive: <D extends T>(data: D) => void;
+	openIcrcReceive: <D extends T>(data: D) => void;
+	openCkBTCReceive: <D extends T>(data: D) => void;
+	openCkETHReceive: <D extends T>(data: D) => void;
 	openSend: () => void;
 	openConvertCkBTCToBTC: () => void;
 	openConvertToTwinTokenCkEth: () => void;
@@ -62,11 +62,11 @@ const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
 	return {
-		openReceive: () => set({ type: 'receive' }),
-		openIcpReceive: () => set({ type: 'icp-receive' }),
-		openIcrcReceive: () => set({ type: 'icrc-receive' }),
-		openCkBTCReceive: () => set({ type: 'ckbtc-receive' }),
-		openCkETHReceive: () => set({ type: 'cketh-receive' }),
+		openReceive: <D extends T>(data: D) => set({ type: 'receive', data }),
+		openIcpReceive: <D extends T>(data: D) => set({ type: 'icp-receive', data }),
+		openIcrcReceive: <D extends T>(data: D) => set({ type: 'icrc-receive', data }),
+		openCkBTCReceive: <D extends T>(data: D) => set({ type: 'ckbtc-receive', data }),
+		openCkETHReceive: <D extends T>(data: D) => set({ type: 'cketh-receive', data }),
 		openSend: () => set({ type: 'send' }),
 		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
 		openConvertToTwinTokenCkEth: () => set({ type: 'convert-to-twin-token-cketh' }),
