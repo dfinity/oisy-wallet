@@ -135,3 +135,6 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 
 export const isIcrcTestLedgerCanister = (ledgerCanisterId: LedgerCanisterIdText) =>
 	ICRC_TESTNET_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
+
+export const determineIcrcLedgerCanisterEnvironment = (ledgerCanisterId: LedgerCanisterIdText) =>
+	isIcrcTestLedgerCanister(ledgerCanisterId) ? 'testnet' : 'mainnet';

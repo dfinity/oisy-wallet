@@ -1,4 +1,6 @@
 import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import { determineIcrcLedgerCanisterEnvironment } from '$icp/utils/icrc.utils';
 import { DEFAULT_NETWORK, DEFAULT_NETWORK_ID } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
@@ -32,9 +34,18 @@ export const networkTokens: Readable<Token[]> = derived(
 	[tokens, selectedNetwork],
 	([$tokens, $selectedNetwork]) =>
 		$tokens.filter(
-			({ network: { id, env } }) =>
-				(isNetworkIdChainFusion($selectedNetwork.id) && env === $selectedNetwork.env) ||
-				id === $selectedNetwork.id
+			({
+				network: { id, env },
+				ledgerCanisterId
+			}: {
+				network: Network;
+				ledgerCanisterId?: LedgerCanisterIdText;
+			}) =>
+				isNetworkIdChainFusion($selectedNetwork.id)
+					? nonNullish(ledgerCanisterId)
+						? determineIcrcLedgerCanisterEnvironment(ledgerCanisterId) === $selectedNetwork.env
+						: env === $selectedNetwork.env
+					: id === $selectedNetwork.id
 		)
 );
 
