@@ -12,6 +12,9 @@ fn parse_derivation_path(path: &str) -> Vec<Vec<u8>> {
         .map(|s| {
             if s.ends_with('\'') {
                 // Handle hardened derivation (apostrophe indicates hardened)
+                // Value 0x80000000 is added to represent a hardened key.
+                // It is the hexadecimal of the smallest 32-bit value with the high-order bit set
+                // More details: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#Extended_keys
                 let index = u32::from_str(&s[..s.len() - 1]).unwrap() + 0x80000000;
                 index.to_be_bytes().to_vec()
             } else {
@@ -26,6 +29,8 @@ pub fn network_to_derivation_path(network: BitcoinNetwork) -> Vec<Vec<u8>> {
     // This is a simplified version of the complete flow to create a derivation path.
     // The documentation on the complete flow can be found at https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
     // For the current implementation and to spare computation workload, we are using the default account 0, change 0, and address index 0.
+    // For the Regtest network, we are using the Testnet derivation path, even if it is not necessary to conform to BIP-44, since it is a local node.
+    // However, we do that because we would like to have the same behavior of the Testnet network.
     let coin_type = match network {
         BitcoinNetwork::Mainnet => "0",
         BitcoinNetwork::Testnet => "1",
