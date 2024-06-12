@@ -1,13 +1,8 @@
-import {
-	CKBTC_LEDGER_CANISTER_TESTNET_IDS,
-	CKETH_LEDGER_CANISTER_TESTNET_IDS,
-	CKUSDC_LEDGER_CANISTER_TESTNET_IDS
-} from '$env/networks.ircrc.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcToken } from '$icp/types/ic';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { sortIcTokens } from '$icp/utils/icrc.utils';
+import { isIcrcTestLedgerCanister, sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnets } from '$lib/derived/testnets.derived';
 import { derived, type Readable } from 'svelte/store';
 
@@ -15,13 +10,7 @@ export const icrcDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcTokensStore, testnets],
 	([$icrcTokensStore, $testnets]) =>
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
-			({ ledgerCanisterId }) =>
-				$testnets ||
-				![
-					...CKBTC_LEDGER_CANISTER_TESTNET_IDS,
-					...CKETH_LEDGER_CANISTER_TESTNET_IDS,
-					...CKUSDC_LEDGER_CANISTER_TESTNET_IDS
-				].includes(ledgerCanisterId)
+			({ ledgerCanisterId }) => $testnets || !isIcrcTestLedgerCanister(ledgerCanisterId)
 		)
 );
 

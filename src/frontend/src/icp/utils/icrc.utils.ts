@@ -1,4 +1,5 @@
 import { ICP_NETWORK } from '$env/networks.env';
+import { ICRC_TESTNET_LEDGER_CANISTER_IDS } from '$env/networks.ircrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcFee, IcInterface, IcToken } from '$icp/types/ic';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
@@ -131,3 +132,6 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 		...(nonNullish(icon) ? [icon] : [])
 	];
 };
+
+export const isIcrcTestLedgerCanister = (ledgerCanisterId: LedgerCanisterIdText) =>
+	ICRC_TESTNET_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
