@@ -18,7 +18,7 @@
 	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
 	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
-	import TokenReceive from "$lib/components/tokens/TokenReceive.svelte";
+	import TokenReceive from '$lib/components/tokens/TokenReceive.svelte';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -41,30 +41,38 @@
 		{@const url = transactionsUrl({ token })}
 
 		<Listener {token}>
-			<a
-				class="no-underline"
-				href={url}
-				aria-label={`Open the list of ${token.symbol} transactions`}
-				in:fade
-			>
-				<Card>
-					{token.name}
+			<div class="flex gap-8 mb-6">
+				<a
+					class="no-underline flex-1"
+					href={url}
+					aria-label={`Open the list of ${token.symbol} transactions`}
+					in:fade
+				>
+					<Card noMargin>
+						{token.name}
 
-					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="52px" color="white" />
+						<Logo
+							src={token.icon}
+							slot="icon"
+							alt={`${token.name} logo`}
+							size="52px"
+							color="white"
+						/>
 
-					<output class="break-all" slot="description">
-						{formatToken({
-							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
-							unitName: token.decimals
-						})}
-						{token.symbol}
-					</output>
+						<output class="break-all" slot="description">
+							{formatToken({
+								value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
+								unitName: token.decimals
+							})}
+							{token.symbol}
+						</output>
 
-					<ExchangeTokenValue {token} slot="amount" />
+						<ExchangeTokenValue {token} slot="amount" />
+					</Card>
+				</a>
 
-					<TokenReceive {token} slot="actions" />
-				</Card>
-			</a>
+				<TokenReceive {token} />
+			</div>
 		</Listener>
 	{/each}
 

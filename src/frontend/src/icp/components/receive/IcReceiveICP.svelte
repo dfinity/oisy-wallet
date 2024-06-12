@@ -4,13 +4,15 @@
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
-	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
+	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { modalIcpReceive } from '$lib/derived/modal.derived';
 	import { getContext } from 'svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+
+	export let compact = false;
 
 	const { tokenStandard } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -24,7 +26,7 @@
 	};
 </script>
 
-<IcReceiveButton on:click={openReceive} />
+<ReceiveButton {compact} on:click={openReceive} />
 
 {#if $modalIcpReceive}
 	<IcReceiveModal infoCmp={IcReceiveInfoICP} />

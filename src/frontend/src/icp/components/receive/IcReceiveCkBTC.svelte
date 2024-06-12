@@ -6,12 +6,14 @@
 	import type { IcToken } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
-	import IcReceiveButton from '$icp/components/receive/IcReceiveButton.svelte';
+	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { getContext } from 'svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+
+	export let compact = false;
 
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -28,7 +30,7 @@
 
 <svelte:window on:oisyReceiveCkBTC={openReceive} />
 
-<IcReceiveButton on:click={async () => await openReceive()} />
+<ReceiveButton {compact} on:click={async () => await openReceive()} />
 
 {#if $modalCkBTCReceive}
 	<IcReceiveModal infoCmp={IcReceiveInfoCkBTC} />
