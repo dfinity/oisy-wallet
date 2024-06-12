@@ -9,7 +9,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
-	import IcReceiveBitcoinProgress from '$icp/components/receive/IcReceiveBitcoinProgress.svelte';
+	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
 	import type { SyncState } from '$lib/types/sync';
 	import { blur } from 'svelte/transition';
@@ -91,7 +91,7 @@
 		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.refresh_status}</svelte:fragment>
 
 		<div class="stretch">
-			<IcReceiveBitcoinProgress bind:receiveProgressStep />
+			<IcTransactionsBitcoinStatus bind:receiveProgressStep />
 		</div>
 	</Modal>
 {/if}
