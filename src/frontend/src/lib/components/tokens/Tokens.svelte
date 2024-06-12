@@ -8,7 +8,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import { networkTokens } from '$lib/derived/network.derived';
+	import { networkId, networkTokens } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
@@ -18,6 +18,7 @@
 	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
 	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
+	import { isNetworkIdChainFusion } from '$lib/utils/network.utils';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -49,7 +50,17 @@
 				<Card>
 					{token.name}
 
-					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="52px" color="white" />
+					<Logo
+						src={token.icon}
+						slot="icon"
+						alt={`${token.name} logo`}
+						size="52px"
+						color="white"
+						{...isNetworkIdChainFusion($networkId) && {
+							cornerLogoSrc: token.network.icon,
+							cornerLogoAlt: `${token.network.name} logo`
+						}}
+					/>
 
 					<output class="break-all" slot="description">
 						{formatToken({
