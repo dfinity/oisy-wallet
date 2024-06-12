@@ -116,3 +116,12 @@ export const CHAIN_FUSION_TESTNET_NETWORK: Network = {
 	env: 'testnet',
 	name: 'Chain Fusion (all testnets)'
 };
+
+export const CHAIN_FUSION_ENABLED =
+	JSON.parse(import.meta.env.VITE_CHAIN_FUSION_ENABLED ?? false) === true;
+
+export const CHAIN_FUSION_NETWORKS: Network[] = CHAIN_FUSION_ENABLED
+	? [CHAIN_FUSION_MAINNET_NETWORK, CHAIN_FUSION_TESTNET_NETWORK]
+	: [];
+
+export const CHAIN_FUSION_NETWORKS_IDS: symbol[] = CHAIN_FUSION_NETWORKS.map(({ id }) => id);
