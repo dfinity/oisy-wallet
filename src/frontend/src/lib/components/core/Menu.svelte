@@ -14,13 +14,16 @@
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isNetworkIdChainFusion } from '$lib/utils/network.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
 	const gotoSettings = async () => {
 		visible = false;
-		await goto(`/settings?${networkParam($networkId)}`);
+		await goto(
+			`/settings${isNetworkIdChainFusion($networkId) ? '' : `?${networkParam($networkId)}`}`
+		);
 	};
 </script>
 

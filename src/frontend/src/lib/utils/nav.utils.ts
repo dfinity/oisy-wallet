@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import { isNetworkIdChainFusion } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { LoadEvent, Page } from '@sveltejs/kit';
 
@@ -98,7 +99,11 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 export const switchNetwork = async (networkId: NetworkId | undefined | null) => {
 	const url = new URL(window.location.href);
 
-	if (isNullish(networkId) || isNullish(networkId.description)) {
+	if (
+		isNullish(networkId) ||
+		isNullish(networkId.description) ||
+		isNetworkIdChainFusion(networkId)
+	) {
 		url.searchParams.delete('network');
 	} else {
 		url.searchParams.set('network', networkId.description);
