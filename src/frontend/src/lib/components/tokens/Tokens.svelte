@@ -49,7 +49,7 @@
 				<Card>
 					{token.name}
 
-					<TokenLogo {token} slot="icon" size="52px" color="white" />
+					<TokenLogo {token} slot="icon" color="white" />
 
 					<output class="break-all" slot="description">
 						{formatToken({

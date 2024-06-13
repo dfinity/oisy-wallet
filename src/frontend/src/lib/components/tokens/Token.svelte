@@ -11,7 +11,7 @@
 	<svelte:fragment slot="label">{$i18n.tokens.details.network}</svelte:fragment>
 	<span class="flex gap-1 items-center">
 		<output>{token.network.name}</output>
-		<Logo src={token.network.icon} alt={`${token.network.name} logo`} size="20px" color="white" />
+		<Logo src={token.network.icon} alt={`${token.network.name} logo`} size="small" color="white" />
 	</span>
 </Value>
 
@@ -19,7 +19,7 @@
 	<svelte:fragment slot="label">{$i18n.tokens.details.token}</svelte:fragment>
 	<span class="flex gap-1 items-center">
 		<output>{token.name}</output>
-		<Logo src={token.icon} alt={`${token.name} logo`} size="20px" color="white" />
+		<Logo src={token.icon} alt={`${token.name} logo`} size="small" color="white" />
 	</span>
 </Value>
 

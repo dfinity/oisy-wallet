@@ -35,7 +35,7 @@
 	<div class="flex gap-2 items-center">
 		<Logo
 			src={icon}
-			size="20px"
+			size="small"
 			alt={replacePlaceholders($i18n.core.alt.logo, {
 				$name: name
 			})}

@@ -53,13 +53,7 @@
 				<Card noMargin>
 					{token.token.name}
 
-					<Logo
-						src={token.token.icon}
-						slot="icon"
-						alt={`${token.token.name} logo`}
-						size="52px"
-						color="white"
-					/>
+					<Logo src={token.token.icon} slot="icon" alt={`${token.token.name} logo`} color="white" />
 
 					<span class="break-all" slot="description">
 						{token.token.symbol}
