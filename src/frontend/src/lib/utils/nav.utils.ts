@@ -34,7 +34,7 @@ const tokenUrl = ({
 	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
 export const networkParam = (networkId: NetworkId): string =>
-	`network=${networkId.description ?? ''}`;
+	isNetworkIdChainFusion(networkId) ? '' : `network=${networkId.description ?? ''}`;
 
 export const back = async ({
 	pop,
