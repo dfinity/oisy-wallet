@@ -10,20 +10,11 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-	import type { Token } from '$lib/types/token';
-	import type { IcCkToken } from '$icp/types/ic';
-	import { ETHEREUM_TOKEN } from '$env/tokens.env';
-	import type { Network } from '$lib/types/network';
 
-	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	const { token, ckEthereumTwinToken, ckEthereumTwinTokenNetwork } =
+		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
-
-	let twinToken: Token;
-	$: twinToken = ($token as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN;
-
-	let twinTokenNetwork: Network;
-	$: twinTokenNetwork = twinToken.network;
 </script>
 
 <div class="stretch">
@@ -36,7 +27,7 @@
 	<Value ref="ethereum-helper-contract" element="div">
 		<svelte:fragment slot="label"
 			>{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
-				$network: twinTokenNetwork.name
+				$network: $ckEthereumTwinTokenNetwork.name
 			})}</svelte:fragment
 		>
 
@@ -44,9 +35,9 @@
 			{replacePlaceholders(
 				replaceOisyPlaceholders($i18n.receive.ethereum.text.eth_to_cketh_description),
 				{
-					$token: twinToken.symbol,
+					$token: $ckEthereumTwinToken.symbol,
 					$ckToken: $token.symbol,
-					$network: twinTokenNetwork.name
+					$network: $ckEthereumTwinTokenNetwork.name
 				}
 			)}
 		</p>
@@ -58,7 +49,7 @@
 		>{replacePlaceholders(
 			replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
 			{
-				$token: twinToken.symbol,
+				$token: $ckEthereumTwinToken.symbol,
 				$ckToken: $token.symbol
 			}
 		)}</span
