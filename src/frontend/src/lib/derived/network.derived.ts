@@ -28,6 +28,7 @@ export const selectedNetwork: Readable<Network> = derived(
 	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId) ?? DEFAULT_NETWORK
 );
 
+// TODO: move me to a separate module to express the dependency on tokens
 export const networkTokens: Readable<Token[]> = derived(
 	[tokens, selectedNetwork],
 	([$tokens, $selectedNetwork]) =>
