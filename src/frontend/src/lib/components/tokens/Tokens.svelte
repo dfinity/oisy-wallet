@@ -8,7 +8,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import { networkTokens } from '$lib/derived/network.derived';
+	import { networkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
