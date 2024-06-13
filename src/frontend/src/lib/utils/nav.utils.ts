@@ -35,23 +35,10 @@ const tokenUrl = ({
 export const networkParam = (networkId: NetworkId): string =>
 	`network=${networkId.description ?? ''}`;
 
-export const back = async ({
-	pop,
-	networkId,
-	fromUrl
-}: {
-	pop: boolean;
-	networkId: NetworkId;
-	fromUrl?: URL;
-}) => {
+export const back = async (params: { networkId: NetworkId; fromUrl?: URL }) => {
+	const { networkId, fromUrl } = params;
 	const rootUrl = fromUrl?.toString() ?? `/?${networkParam(networkId)}`;
-
-	if (!pop) {
-		await goto(rootUrl);
-		return;
-	}
-
-	await goto(rootUrl, { replaceState: true });
+	await goto(rootUrl, { replaceState: 'fromUrl' in params ? nonNullish(fromUrl) : true });
 };
 
 export type RouteParams = {

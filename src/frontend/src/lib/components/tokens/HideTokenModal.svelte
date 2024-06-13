@@ -55,7 +55,7 @@
 			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
 
 			// We must navigate first otherwise we might land on the default token Ethereum selected while being on network ICP.
-			await back({ networkId: backToNetworkId, pop: true });
+			await back({ networkId: backToNetworkId });
 
 			await updateUi({
 				identity: $authStore.identity
