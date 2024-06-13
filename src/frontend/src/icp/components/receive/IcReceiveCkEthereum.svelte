@@ -4,6 +4,7 @@
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
+	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
@@ -11,16 +12,15 @@
 	import type { Token } from '$lib/types/token';
 	import type { IcCkToken } from '$icp/types/ic';
 	import { ETHEREUM_TOKEN } from '$env/tokens.env';
-	import ReceiveButton from "$lib/components/receive/ReceiveButton.svelte";
 
 	export let compact = false;
-
-	const modalId = Symbol();
 
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	let twinToken: Token;
 	$: twinToken = ($token as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN;
+
+	const modalId = Symbol();
 
 	/**
 	 * Send modal context store
