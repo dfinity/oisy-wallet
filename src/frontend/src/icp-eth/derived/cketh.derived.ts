@@ -24,6 +24,7 @@ import { derived, type Readable } from 'svelte/store';
  * ETH to ckETH is supported:
  * - on network Ethereum if the token is Ethereum (and not some ERC20 token)
  * - on network ICP if the token is ckETH
+ * @deprecated ChainFusion - probably deprecated, to be double checked
  */
 export const ethToCkETHEnabled: Readable<boolean> = derived(
 	[tokenStandard, token],
@@ -35,6 +36,7 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
  * ERC20 to ckErc20 is supported:
  * - on network Ethereum if the token is a known Erc20 twin tokens
  * - on network ICP if the token is ckErc20
+ * @deprecated ChainFusion - probably deprecated, to be double checked
  */
 export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
 	[token],
@@ -43,27 +45,40 @@ export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
 
 /**
  * On ckETH, we need to know if the target for conversion is Ethereum mainnet or Sepolia.
+ * @deprecated ChainFusion
  */
 export const ckEthereumTwinToken: Readable<Token> = derived(
 	[token],
 	([$token]) => ($token as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
 );
 
+/**
+ * @deprecated ChainFusion
+ */
 export const ckEthereumTwinTokenId: Readable<TokenId> = derived(
 	[ckEthereumTwinToken],
 	([{ id }]) => id
 );
 
+/**
+ * @deprecated ChainFusion
+ */
 export const ckEthereumTwinTokenStandard: Readable<TokenStandard> = derived(
 	[ckEthereumTwinToken],
 	([{ standard }]) => standard
 );
 
+/**
+ * @deprecated ChainFusion
+ */
 export const ckEthereumTwinTokenNetwork: Readable<EthereumNetwork> = derived(
 	[ckEthereumTwinToken],
 	([{ network }]) => (network as EthereumNetwork | undefined) ?? ETHEREUM_NETWORK
 );
 
+/**
+ * @deprecated ChainFusion
+ */
 export const ckEthereumTwinTokenNetworkId: Readable<NetworkId> = derived(
 	[ckEthereumTwinTokenNetwork],
 	([{ id }]) => id
@@ -72,6 +87,7 @@ export const ckEthereumTwinTokenNetworkId: Readable<NetworkId> = derived(
 /**
  * The fees to convert from Erc20 to ckErc20 or Eth to ckEth are covered by Ethereum (mainnet or sepolia) - i.e. not in erc20 value.
  * Likewise, when we load ckEth minter information we only load those once per network for any ckErc20 and ckEth given that it contains the information for all Ethereum related tokens.
+ * @deprecated ChainFusion
  */
 export const ckEthereumNativeToken: Readable<Token> = derived(
 	[enabledEthereumTokens, ckEthereumTwinToken],
@@ -85,11 +101,17 @@ export const ckEthereumNativeToken: Readable<Token> = derived(
 		DEFAULT_ETHEREUM_TOKEN
 );
 
+/**
+ * @deprecated ChainFusion
+ */
 export const ckEthereumNativeTokenId: Readable<TokenId> = derived(
 	[ckEthereumNativeToken],
 	([{ id }]) => id
 );
 
+/**
+ * @deprecated ChainFusion
+ */
 export const ckEthereumNativeTokenBalance: Readable<BigNumber | undefined | null> = derived(
 	[balancesStore, ckEthereumNativeToken],
 	([$balanceStore, { id }]) => $balanceStore?.[id]?.data
@@ -97,6 +119,7 @@ export const ckEthereumNativeTokenBalance: Readable<BigNumber | undefined | null
 
 /**
  * The contract helper used to convert ETH -> ckETH.
+ * @deprecated ChainFusion
  */
 export const ckEthHelperContractAddress: Readable<OptionAddress> = derived(
 	[ckEthMinterInfoStore, ethereumTokenId, ethereumToken],
@@ -109,6 +132,7 @@ export const ckEthHelperContractAddress: Readable<OptionAddress> = derived(
 
 /**
  * The contract helper used to convert Erc20 -> ckErc20.
+ * @deprecated ChainFusion
  */
 export const ckErc20HelperContractAddress: Readable<OptionAddress> = derived(
 	[ckEthMinterInfoStore, ethereumTokenId],
