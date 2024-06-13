@@ -5,7 +5,6 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import Listener from '$lib/components/core/Listener.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import { networkTokens } from '$lib/derived/network-tokens.derived';
@@ -18,6 +17,7 @@
 	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
 	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -49,7 +49,7 @@
 				<Card>
 					{token.name}
 
-					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="52px" color="white" />
+					<TokenLogo {token} slot="icon" color="white" />
 
 					<output class="break-all" slot="description">
 						{formatToken({

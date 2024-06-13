@@ -57,7 +57,7 @@
 						src={token.token.icon}
 						slot="icon"
 						alt={`${token.token.name} logo`}
-						size="52px"
+						size="medium"
 						color="white"
 					/>
 

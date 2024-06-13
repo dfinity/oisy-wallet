@@ -41,7 +41,7 @@
 					<div>
 						{#if displayTokenSymbol}
 							<div in:fade>
-								<Logo src={$token.icon} size="64px" alt={`${$token.name} logo`} color="off-white" />
+								<Logo src={$token.icon} size="big" alt={`${$token.name} logo`} color="off-white" />
 							</div>
 						{:else}
 							<SkeletonLogo size="big" />
