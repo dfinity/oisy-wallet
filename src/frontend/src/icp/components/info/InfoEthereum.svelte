@@ -37,7 +37,6 @@
 	<h4 class="flex gap-2 items-center font-medium">
 		<Logo
 			src={eth}
-			size="20px"
 			alt={replacePlaceholders($i18n.core.alt.logo, {
 				$name: $ckEthereumTwinToken.name
 			})}
