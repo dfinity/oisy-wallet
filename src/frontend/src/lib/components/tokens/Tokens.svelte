@@ -17,7 +17,7 @@
 	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
 	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
-	import LogoWithCorner from '$lib/components/ui/LogoWithCorner.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -49,7 +49,7 @@
 				<Card>
 					{token.name}
 
-					<LogoWithCorner {token} slot="icon" size="52px" color="white" />
+					<TokenLogo {token} slot="icon" size="52px" color="white" />
 
 					<output class="break-all" slot="description">
 						{formatToken({
