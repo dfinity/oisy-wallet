@@ -35,8 +35,16 @@ const tokenUrl = ({
 export const networkParam = (networkId: NetworkId): string =>
 	`network=${networkId.description ?? ''}`;
 
-export const back = async ({ pop, networkId }: { pop: boolean; networkId: NetworkId }) => {
-	const rootUrl = `/?${networkParam(networkId)}`;
+export const back = async ({
+	pop,
+	networkId,
+	fromUrl
+}: {
+	pop: boolean;
+	networkId: NetworkId;
+	fromUrl?: URL;
+}) => {
+	const rootUrl = fromUrl?.toString() ?? `/?${networkParam(networkId)}`;
 
 	if (!pop) {
 		await goto(rootUrl);
