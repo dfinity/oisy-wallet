@@ -14,6 +14,8 @@
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -41,7 +43,12 @@
 					<div>
 						{#if displayTokenSymbol}
 							<div in:fade>
-								<Logo src={$token.icon} size="big" alt={`${$token.name} logo`} color="off-white" />
+								<Logo
+									src={$token.icon}
+									size="big"
+									alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
+									color="off-white"
+								/>
 							</div>
 						{:else}
 							<SkeletonLogo size="big" />

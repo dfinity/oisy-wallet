@@ -10,6 +10,7 @@
 	import bitcoin from '$icp/assets/bitcoin.svg';
 	import eth from '$icp-eth/assets/eth.svg';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -38,7 +39,9 @@
 				{$ckEthereumTwinToken.network.name}
 				<Logo
 					src={$ckEthereumTwinToken.network.icon ?? eth}
-					alt={`${$ckEthereumTwinToken.network.name} logo`}
+					alt={replacePlaceholders($i18n.core.alt.logo, {
+						$name: $ckEthereumTwinToken.network.name
+					})}
 				/>
 			{/if}
 		</span>
