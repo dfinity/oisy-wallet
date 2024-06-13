@@ -1,17 +1,13 @@
 <script lang="ts">
-	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { addressNotCertified } from '$lib/derived/address.derived';
 	import ReceiveModal from '$eth/components/receive/ReceiveModal.svelte';
 	import { metamaskNotInitialized } from '$eth/derived/metamask.derived';
-	import { onMount } from 'svelte';
-	import { initMetamaskSupport } from '$eth/services/metamask.services';
-	import { isBusy } from '$lib/derived/busy.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { modalReceive } from '$lib/derived/modal.derived';
-	import { i18n } from '$lib/stores/i18n.store';
+	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 
-	onMount(initMetamaskSupport);
+	const modalId = Symbol();
 
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
@@ -24,20 +20,12 @@
 			}
 		}
 
-		modalStore.openReceive();
+		modalStore.openReceive(modalId);
 	};
 </script>
 
-<button
-	class="flex-1 hero"
-	disabled={$isBusy}
-	class:opacity-50={$isBusy}
-	on:click={async () => await openReceive()}
->
-	<IconReceive size="28" />
-	<span>{$i18n.receive.text.receive}</span></button
->
+<ReceiveButton on:click={async () => await openReceive()} />
 
-{#if $modalReceive}
+{#if $modalReceive && $modalStore?.data === modalId}
 	<ReceiveModal />
 {/if}

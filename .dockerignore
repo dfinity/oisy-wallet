@@ -35,7 +35,3 @@ codes.txt
 
 backend.wasm.gz
 backend-v*.wasm.gz
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
