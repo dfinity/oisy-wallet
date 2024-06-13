@@ -5,7 +5,6 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import Listener from '$lib/components/core/Listener.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import { networkTokens } from '$lib/derived/network.derived';
