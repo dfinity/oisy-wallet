@@ -5,7 +5,7 @@
 
 	export let src: string | undefined;
 	export let alt = '';
-	export let size: 'small' | 'medium' | 'big' = 'medium';
+	export let size: 'small' | 'medium' | 'big' = 'small';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 
 	const sizes = {
@@ -13,7 +13,7 @@
 		medium: '52px',
 		big: '64px'
 	};
-	const sizePx = sizes[size];
+	let sizePx = sizes[size];
 
 	let loaded = false;
 

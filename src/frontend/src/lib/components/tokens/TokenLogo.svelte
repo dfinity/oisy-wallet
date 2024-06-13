@@ -14,10 +14,10 @@
 </script>
 
 <div class="relative">
-	<Logo src={icon} alt={`${name} logo`} {color} />
+	<Logo src={icon} alt={`${name} logo`} size="medium" {color} />
 	{#if showNetworkIcon}
 		<div class="absolute bottom-0 right-0">
-			<Logo src={networkIcon} alt={`${networkName} logo`} size="small" {color} />
+			<Logo src={networkIcon} alt={`${networkName} logo`} {color} />
 		</div>
 	{/if}
 </div>

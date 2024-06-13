@@ -24,7 +24,7 @@
 				.network}{/if}</svelte:fragment
 	>
 	<span class="flex gap-1">
-		Internet Computer <Logo src={icpLight} size="small" alt={`Internet Computer logo`} />
+		Internet Computer <Logo src={icpLight} alt={`Internet Computer logo`} />
 	</span>
 </Value>
 
@@ -33,12 +33,11 @@
 		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
 		<span class="flex gap-1">
 			{#if nonNullish(networkId) && isNetworkIdBitcoin(networkId)}
-				<IcSendBtcNetwork {networkId} /> <Logo src={bitcoin} size="small" alt={`Bitcoin logo`} />
+				<IcSendBtcNetwork {networkId} /> <Logo src={bitcoin} alt={`Bitcoin logo`} />
 			{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
 				{$ckEthereumTwinToken.network.name}
 				<Logo
 					src={$ckEthereumTwinToken.network.icon ?? eth}
-					size="small"
 					alt={`${$ckEthereumTwinToken.network.name} logo`}
 				/>
 			{/if}

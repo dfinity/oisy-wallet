@@ -142,7 +142,7 @@
 			<Card>
 				{token.name}
 
-				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} color="white" />
+				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="medium" color="white" />
 
 				<span class="break-all" slot="description">
 					{token.symbol}
