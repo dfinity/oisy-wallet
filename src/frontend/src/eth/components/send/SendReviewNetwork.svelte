@@ -34,7 +34,10 @@
 	>
 	<span class="flex gap-1">
 		{sourceNetwork.name}
-		<Logo src={sourceNetwork.icon ?? eth} alt={`${sourceNetwork.name} logo`} />
+		<Logo
+			src={sourceNetwork.icon ?? eth}
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: sourceNetwork.name })}
+		/>
 	</span>
 </Value>
 

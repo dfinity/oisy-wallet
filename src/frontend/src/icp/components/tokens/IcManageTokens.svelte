@@ -18,6 +18,7 @@
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import { sortIcTokens } from '$icp/utils/icrc.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -142,7 +143,13 @@
 			<Card>
 				{token.name}
 
-				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="medium" color="white" />
+				<Logo
+					src={token.icon}
+					slot="icon"
+					alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
+					size="medium"
+					color="white"
+				/>
 
 				<span class="break-all" slot="description">
 					{token.symbol}

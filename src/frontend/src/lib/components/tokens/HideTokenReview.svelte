@@ -13,7 +13,12 @@
 
 <div class="stretch">
 	<div class="icon flex flex-col items-center gap-3">
-		<Logo src={$token.icon} size="big" alt={`${$token.name} logo`} color="off-white" />
+		<Logo
+			src={$token.icon}
+			size="big"
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
+			color="off-white"
+		/>
 
 		<p class="font-bold text-center">{$token.name}</p>
 	</div>
