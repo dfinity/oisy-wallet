@@ -13,7 +13,7 @@
 	import type { ManageableToken, TokenId } from '$lib/types/token';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { manageableNetworkTokens } from '$lib/derived/network.derived';
+	import { manageableNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	const dispatch = createEventDispatcher();
 
