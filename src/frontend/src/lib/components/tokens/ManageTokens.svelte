@@ -13,6 +13,7 @@
 	import type { ManageableToken, TokenId } from '$lib/types/token';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { NetworkId } from '$lib/types/network.js';
 	import { manageableNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	const dispatch = createEventDispatcher();
@@ -38,31 +39,47 @@
 			);
 
 	let tokens: ManageableToken[] = [];
-	$: tokens = filteredTokens.map(({ id, enabled, ...rest }) => ({
+	$: tokens = filteredTokens.map(({ id, network, enabled, ...rest }) => ({
 		id,
-		enabled: modifiedTokens[id]?.enabled ?? enabled,
+		network,
+		enabled: modifiedTokens[network.id]?.[id]?.enabled ?? enabled,
 		...rest
 	}));
 
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
 
-	let modifiedTokens: Record<TokenId, ManageableToken> = {};
-	const onToggle = ({ detail: { id, enabled, ...rest } }: CustomEvent<ManageableToken>) => {
-		const { [id]: current, ...tokens } = modifiedTokens;
+	let modifiedTokens: Record<NetworkId, Record<TokenId, ManageableToken>> = {};
+	const onToggle = ({
+		detail: { id, network, enabled, ...rest }
+	}: CustomEvent<ManageableToken>) => {
+		const { id: networkId } = network;
+
+		if (!modifiedTokens[networkId]) {
+			modifiedTokens[networkId] = {};
+		}
+
+		const { [id]: current } = modifiedTokens[networkId];
 
 		if (nonNullish(current)) {
-			modifiedTokens = { ...tokens };
+			delete modifiedTokens[networkId][id];
+			if (Object.keys(modifiedTokens[networkId]).length === 0) {
+				delete modifiedTokens[networkId];
+			}
 			return;
 		}
 
 		modifiedTokens = {
-			[id]: {
-				id,
-				enabled,
-				...rest
-			},
-			...tokens
+			...modifiedTokens,
+			[networkId]: {
+				...modifiedTokens[networkId],
+				[id]: {
+					id,
+					network,
+					enabled,
+					...rest
+				}
+			}
 		};
 	};
 
@@ -106,7 +123,7 @@
 	</button>
 {:else}
 	<div class="container md:max-h-96 pr-2 pt-1 overflow-y-auto">
-		{#each tokens as token (token.symbol)}
+		{#each tokens as token (`${token.network.id.toString()}-${token.id.toString()}`)}
 			<Card>
 				{token.name}
 
