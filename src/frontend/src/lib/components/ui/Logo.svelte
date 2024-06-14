@@ -5,8 +5,15 @@
 
 	export let src: string | undefined;
 	export let alt = '';
-	export let size: string;
+	export let size: 'small' | 'medium' | 'big' = 'small';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
+
+	const sizes = {
+		small: '20px',
+		medium: '52px',
+		big: '64px'
+	};
+	let sizePx = sizes[size];
 
 	let loaded = false;
 
@@ -31,19 +38,19 @@
 	class:opacity-10={!loaded}
 	style={`border: 1px solid var(--color-${
 		color === 'off-white' ? 'off-white' : 'dust'
-	}); width: calc(${size} + 2px); height: calc(${size} + 2px); transition: opacity 0.15s ease-in;`}
+	}); width: calc(${sizePx} + 2px); height: calc(${sizePx} + 2px); transition: opacity 0.15s ease-in;`}
 >
 	{#if nonNullish(src) && !loadingError}
 		<Img
 			{src}
 			{alt}
-			width={size}
-			height={size}
+			width={sizePx}
+			height={sizePx}
 			on:load={() => (loaded = true)}
 			on:error={onError}
 			rounded
 		/>
 	{:else}
-		<IconRandom {size} text={alt} />
+		<IconRandom size={sizePx} text={alt} />
 	{/if}
 </div>

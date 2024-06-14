@@ -10,6 +10,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let twinToken: TokenType | undefined;
 	$: twinToken = ($token as IcCkToken).twinToken;
@@ -28,7 +29,11 @@
 					<svelte:fragment slot="label">{$i18n.tokens.details.twin_token}</svelte:fragment>
 					<span class="flex gap-1 items-center">
 						<output>{twinToken.name}</output>
-						<Logo src={twinToken.icon} alt={`${twinToken.name} logo`} size="20px" color="white" />
+						<Logo
+							src={twinToken.icon}
+							alt={replacePlaceholders($i18n.core.alt.logo, { $name: twinToken.name })}
+							color="white"
+						/>
 					</span>
 				</Value>
 			{/if}
