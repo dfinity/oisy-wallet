@@ -1,4 +1,4 @@
-import type { TokenStandard } from '$lib/types/token';
+import type { Token, TokenStandard } from '$lib/types/token';
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -24,4 +24,17 @@ export const getMaxTransactionAmount = ({
 	return (
 		Math.max(Number(balance - (tokenStandard !== 'erc20' ? fee : 0n)), 0) / 10 ** tokenDecimals
 	);
+};
+
+export const mergeTokenLists = <T extends Token>(tokens: T[], additionalTokens: T[]): T[] => {
+	const knownIdsAndNetworks = new Set(tokens.map((t) => [t.id, t.network.id]));
+	return [
+		...tokens,
+		...additionalTokens.filter(
+			(token) =>
+				!Array.from(knownIdsAndNetworks).some(
+					([id, networkId]) => id === token.id && networkId === token.network.id
+				)
+		)
+	];
 };

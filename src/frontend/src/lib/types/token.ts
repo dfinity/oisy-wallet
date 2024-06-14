@@ -21,3 +21,7 @@ export interface TokenMetadata {
 }
 
 export type RequiredToken = Required<Token>;
+
+export type ManageableToken = Token & {
+	enabled: boolean;
+};
