@@ -1,6 +1,6 @@
-import { DEFAULT_ETHEREUM_NETWORK } from '$eth/constants/networks.constants';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import type { EthereumNetwork } from '$eth/types/network';
+import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { networkId } from '$lib/derived/network.derived';
 import { derived, type Readable } from 'svelte/store';
 
