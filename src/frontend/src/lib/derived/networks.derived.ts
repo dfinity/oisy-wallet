@@ -2,11 +2,13 @@ import { CHAIN_FUSION_NETWORKS, ICP_NETWORK } from '$env/networks.env';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import type { Network } from '$lib/types/network';
 import { derived, type Readable } from 'svelte/store';
+import { enabledBitcoinNetworks } from '../../btc/derived/networks.derived';
 
 export const networks: Readable<Network[]> = derived(
-	[enabledEthereumNetworks],
-	([$enabledEthereumNetworks]) => [
+	[enabledBitcoinNetworks, enabledEthereumNetworks],
+	([$enabledBitcoinNetworks, $enabledEthereumNetworks]) => [
 		...CHAIN_FUSION_NETWORKS,
+		...$enabledBitcoinNetworks,
 		...$enabledEthereumNetworks,
 		ICP_NETWORK
 	]
