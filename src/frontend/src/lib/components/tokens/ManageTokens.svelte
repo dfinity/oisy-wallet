@@ -10,10 +10,10 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { fade } from 'svelte/transition';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
-	import { manageableTokens } from '$lib/derived/tokens.derived';
 	import type { ManageableToken, TokenId } from '$lib/types/token';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { manageableNetworkTokens } from '$lib/derived/network.derived';
 
 	const dispatch = createEventDispatcher();
 
@@ -26,8 +26,8 @@
 
 	let filteredTokens: ManageableToken[] = [];
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
-		? $manageableTokens
-		: $manageableTokens.filter(
+		? $manageableNetworkTokens
+		: $manageableNetworkTokens.filter(
 				({ name, symbol, ...rest }) =>
 					name.toLowerCase().includes(filterTokens.toLowerCase()) ||
 					symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
