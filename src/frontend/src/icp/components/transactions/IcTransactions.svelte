@@ -62,6 +62,11 @@
 			return;
 		}
 
+		if (isNullish($token)) {
+			// Prevent unlikely events. UI wise if we are about to load the next transactions, it's probably because transactions for a loaded token have been fetched.
+			return;
+		}
+
 		await loadNextTransactions({
 			owner: $authStore.identity.getPrincipal(),
 			identity: $authStore.identity,

@@ -11,7 +11,7 @@
 	import InfoEthereum from '$icp/components/info/InfoEthereum.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
-	import type {OptionIcCkToken} from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic';
 
 	let mainnet = true;
 	$: mainnet =

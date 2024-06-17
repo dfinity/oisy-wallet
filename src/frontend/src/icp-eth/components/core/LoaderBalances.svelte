@@ -6,7 +6,7 @@
 	import { debounce } from '@dfinity/utils';
 	import { ERC20_TWIN_TOKENS } from '$env/tokens.erc20.env';
 	import { ckEthereumNativeToken, erc20ToCkErc20Enabled } from '$icp-eth/derived/cketh.derived';
-    import { tokenWithFallback} from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	const load = async () => {
 		await Promise.allSettled([

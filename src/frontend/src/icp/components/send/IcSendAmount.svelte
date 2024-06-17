@@ -121,12 +121,14 @@
 	};
 
 	$: calculateMax = (): number | undefined => {
-		return isNullish($token) ? undefined : getMaxTransactionAmount({
-			balance: $balance?.toBigInt(),
-			fee: fee,
-			tokenDecimals: $token.decimals,
-			tokenStandard: $token.standard
-		});
+		return isNullish($token)
+			? undefined
+			: getMaxTransactionAmount({
+					balance: $balance?.toBigInt(),
+					fee: fee,
+					tokenDecimals: $token.decimals,
+					tokenStandard: $token.standard
+				});
 	};
 
 	let sendInputAmount: SendInputAmount | undefined;

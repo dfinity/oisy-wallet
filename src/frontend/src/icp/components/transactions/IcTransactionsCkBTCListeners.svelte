@@ -7,19 +7,23 @@
 	import { initCkBTCUpdateBalanceWorker } from '$icp/services/worker.ckbtc-update-balance.services';
 	import type { IcCkToken } from '$icp/types/ic';
 	import type { Token } from '$lib/types/token';
+	import { nonNullish } from '@dfinity/utils';
 
 	let minterInfoLoaded: boolean;
-	$: minterInfoLoaded = $ckBtcMinterInfoStore?.[$tokenId]?.certified === true;
+	$: minterInfoLoaded =
+		nonNullish($tokenId) && $ckBtcMinterInfoStore?.[$tokenId]?.certified === true;
 
 	let twinToken: Token | undefined;
 	$: twinToken = ($token as IcCkToken).twinToken;
 </script>
 
-<IcCkListener initFn={initBtcStatusesWorker} token={$token} {twinToken} />
-<IcCkListener initFn={initCkBTCUpdateBalanceWorker} token={$token} {twinToken} />
+{#if nonNullish($token)}
+	<IcCkListener initFn={initBtcStatusesWorker} token={$token} {twinToken} />
+	<IcCkListener initFn={initCkBTCUpdateBalanceWorker} token={$token} {twinToken} />
 
-{#if !minterInfoLoaded}
-	<IcCkListener initFn={initCkBTCMinterInfoWorker} token={$token} {twinToken} />
+	{#if !minterInfoLoaded}
+		<IcCkListener initFn={initCkBTCMinterInfoWorker} token={$token} {twinToken} />
+	{/if}
 {/if}
 
 <slot />

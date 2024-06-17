@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import {tokenId, tokenWithFallback} from '$lib/derived/token.derived';
+	import { tokenId, tokenWithFallback } from '$lib/derived/token.derived';
 	import { nonNullish } from '@dfinity/utils';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import type { IcToken } from '$icp/types/ic';

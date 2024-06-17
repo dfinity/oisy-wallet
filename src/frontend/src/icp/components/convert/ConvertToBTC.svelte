@@ -9,11 +9,12 @@
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { token, tokenId } from '$lib/derived/token.derived';
 	import type { NetworkId } from '$lib/types/network';
-	import type { OptionIcCkToken} from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	const isDisabled = (): boolean => isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);
+	const isDisabled = (): boolean =>
+		isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
 	const openSend = async () => {
 		const status = await waitWalletReady(isDisabled);

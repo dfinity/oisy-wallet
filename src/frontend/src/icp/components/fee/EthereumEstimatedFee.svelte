@@ -15,7 +15,7 @@
 	import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
 	import type { IcToken } from '$icp/types/ic';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
-	import {tokenWithFallback} from "$lib/derived/token.derived";
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	let ckEr20 = false;
 	$: ckEr20 = isTokenCkErc20Ledger($tokenWithFallback as IcToken);

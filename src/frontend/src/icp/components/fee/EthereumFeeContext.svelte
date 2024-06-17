@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { NetworkId } from '$lib/types/network';
 	import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
-    import {token, tokenId, tokenWithFallback} from '$lib/derived/token.derived';
+	import { token, tokenId, tokenWithFallback } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
-    import {isNullish, nonNullish} from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { CKERC20_TO_ERC20_MAX_TRANSACTION_FEE } from '$icp/constants/cketh.constants';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { getContext, onDestroy } from 'svelte';
@@ -27,7 +27,9 @@
 	$: ethNetwork = isNetworkIdEthereum(networkId);
 
 	let maxTransactionFeeEth: bigint | undefined = undefined;
-	$: maxTransactionFeeEth = nonNullish($tokenId) ? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee : undefined;
+	$: maxTransactionFeeEth = nonNullish($tokenId)
+		? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee
+		: undefined;
 
 	let tokenCkEth: IcToken | undefined;
 	$: tokenCkEth = $icrcTokens.find(isTokenCkEthLedger);
@@ -65,11 +67,11 @@
 			return;
 		}
 
-        //
-        if (isNullish($token)) {
-            updateContext();
-            return;
-        }
+		//
+		if (isNullish($token)) {
+			updateContext();
+			return;
+		}
 
 		const load = async () => await loadEip1559TransactionPrice($token as IcToken);
 
