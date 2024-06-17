@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { IcToken } from '$icp/types/ic';
-	import { token } from '$lib/derived/token.derived';
 	import IconSync from '$lib/components/icons/IconSync.svelte';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { updateBalance } from '$icp/services/ckbtc.services';
@@ -15,6 +14,7 @@
 	import { blur } from 'svelte/transition';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
 
 	let receiveProgressStep: string | undefined = undefined;
 

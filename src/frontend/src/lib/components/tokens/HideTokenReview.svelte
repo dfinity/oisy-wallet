@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { token } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Html } from '@dfinity/gix-components';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -8,6 +7,7 @@
 	import { networkICP } from '$lib/derived/network.derived';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { nonNullish } from '@dfinity/utils';
+	import { token } from '$lib/stores/token.store';
 
 	const dispatch = createEventDispatcher();
 </script>

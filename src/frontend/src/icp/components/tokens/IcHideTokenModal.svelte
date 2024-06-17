@@ -3,7 +3,6 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { setCustomToken } from '$lib/api/backend.api';
-	import { token } from '$lib/derived/token.derived';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -13,6 +12,7 @@
 	import { onMount } from 'svelte';
 	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { loadUserTokens } from '$icp/services/icrc.services';
+	import { token } from '$lib/stores/token.store';
 
 	let selectedToken: OptionIcrcCustomToken;
 

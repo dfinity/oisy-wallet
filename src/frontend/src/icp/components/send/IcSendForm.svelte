@@ -1,7 +1,6 @@
 <script lang="ts">
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import { token } from '$lib/derived/token.derived';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
 	import type { NetworkId } from '$lib/types/network';
@@ -13,6 +12,7 @@
 	import { balance } from '$lib/derived/balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { token } from '$lib/stores/token.store';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;

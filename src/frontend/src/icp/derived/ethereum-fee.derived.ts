@@ -1,6 +1,6 @@
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcToken, OptionIcCkToken } from '$icp/types/ic';
-import { token } from '$lib/derived/token.derived';
+import { token } from '$lib/stores/token.store';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 

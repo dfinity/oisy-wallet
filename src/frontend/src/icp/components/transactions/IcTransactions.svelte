@@ -9,7 +9,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcpTransactionModal from './IcTransactionModal.svelte';
 	import type { IcToken, IcTransactionUi } from '$icp/types/ic';
-	import { token } from '$lib/derived/token.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
 	import Info from '$icp/components/info/Info.svelte';
@@ -30,6 +29,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import { token } from '$lib/stores/token.store';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;

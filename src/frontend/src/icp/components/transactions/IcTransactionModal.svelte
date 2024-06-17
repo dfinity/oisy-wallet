@@ -5,12 +5,12 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
-	import { token } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
+	import { token } from '$lib/stores/token.store';
 
 	export let transaction: IcTransactionUi;
 
