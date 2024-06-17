@@ -12,8 +12,8 @@
 	import { quintOut } from 'svelte/easing';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
+	import ChainFusionButton from '$lib/components/networks/ChainFusionButton.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -49,12 +49,7 @@
 <Popover bind:visible anchor={button} direction="rtl">
 	<ul class="flex flex-col gap-4 list-none">
 		<li>
-			<NetworkButton
-				id={undefined}
-				name={$i18n.networks.chain_fusion}
-				icon={chainFusion}
-				on:icSelected={close}
-			/>
+			<ChainFusionButton isTestnet={false} on:icSelected={close} />
 		</li>
 
 		{#each $networksMainnets as network}
