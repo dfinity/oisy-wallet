@@ -1,4 +1,4 @@
-import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks.ircrc.env';
+import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic';
 import { nonNullish } from '@dfinity/utils';
 

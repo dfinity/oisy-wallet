@@ -3,7 +3,7 @@ import {
 	BTC_TESTNET_EXPLORER_URL,
 	CKBTC_EXPLORER_URL
 } from '$env/explorers.env';
-import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.ircrc.env';
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { IcCertifiedTransaction } from '$icp/stores/ic-transactions.store';
 import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
