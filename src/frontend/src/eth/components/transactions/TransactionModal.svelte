@@ -120,17 +120,19 @@
 			</Value>
 		{/if}
 
-		<Value ref="amount">
-			<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-			<output>
-				{formatToken({
-					value,
-					unitName: $token.decimals,
-					displayDecimals: $token.decimals
-				})}
-				{$token.symbol}
-			</output>
-		</Value>
+		{#if nonNullish($token)}
+			<Value ref="amount">
+				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
+				<output>
+					{formatToken({
+						value,
+						unitName: $token.decimals,
+						displayDecimals: $token.decimals
+					})}
+					{$token.symbol}
+				</output>
+			</Value>
+		{/if}
 	</div>
 
 	<button class="primary full center text-center" on:click={modalStore.close}
