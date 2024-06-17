@@ -1,8 +1,7 @@
 <script lang="ts">
-	import type { Token } from '$lib/types/token';
+	import type { OptionToken } from '$lib/types/token';
 
-	// eslint-disable-next-line
-	export let token: Token;
+	export const token: OptionToken = undefined;
 </script>
 
 <slot />

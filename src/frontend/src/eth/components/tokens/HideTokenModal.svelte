@@ -34,6 +34,8 @@
 	const hideToken = async (params: { identity: Identity }) => {
 		const contractAddress = ($token as OptionErc20Token)?.address;
 
+		assertNonNullish(contractAddress);
+
 		await removeUserToken({
 			...params,
 			tokenId: {

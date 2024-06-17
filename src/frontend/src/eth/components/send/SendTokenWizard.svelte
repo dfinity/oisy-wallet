@@ -36,7 +36,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import type {OptionToken, Token} from '$lib/types/token';
+	import type { OptionToken, Token } from '$lib/types/token';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import { decodeQrCode } from '$eth/utils/qr-code.utils';

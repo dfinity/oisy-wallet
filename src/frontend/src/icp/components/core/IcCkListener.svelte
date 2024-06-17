@@ -2,11 +2,11 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { OptionIcCkToken } from '$icp/types/ic';
 	import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
 	import type { CanisterIdText } from '$lib/types/canister';
 
 	export let initFn: IcCkWorker;
-	export let token: OptionToken;
+	export let token: Token;
 	export let twinToken: Token | undefined = undefined;
 	export let minterCanisterId: CanisterIdText | undefined = undefined;
 
