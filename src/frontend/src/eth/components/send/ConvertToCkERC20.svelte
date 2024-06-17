@@ -13,6 +13,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 
 	/**
 	 * Send modal context store
@@ -20,12 +21,12 @@
 
 	const context = initSendContext({
 		sendPurpose: 'convert-erc20-to-ckerc20',
-		token: $token
+		token: $token ?? DEFAULT_ETHEREUM_TOKEN
 	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 
 	let converToSymbol: string;
-	$: converToSymbol = ($token as Erc20Token).twinTokenSymbol ?? 'ckETH';
+	$: converToSymbol = ($token as Erc20Token | undefined)?.twinTokenSymbol ?? 'ckETH';
 </script>
 
 <ConvertETH nativeTokenId={$ethereumTokenId} nativeNetworkId={$selectedEthereumNetwork.id}>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { token, tokenStandard } from '$lib/derived/token.derived';
-	import type { Erc20Token } from '$eth/types/erc20';
+	import type {OptionErc20Token} from '$eth/types/erc20';
 	import { nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -12,7 +12,7 @@
 	import Token from '$lib/components/tokens/Token.svelte';
 
 	let contractAddress: string | undefined;
-	$: contractAddress = $tokenStandard === 'erc20' ? ($token as Erc20Token).address : undefined;
+	$: contractAddress = $tokenStandard === 'erc20' ? ($token as OptionErc20Token)?.address : undefined;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>

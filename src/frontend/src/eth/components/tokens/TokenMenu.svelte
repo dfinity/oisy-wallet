@@ -12,7 +12,7 @@
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl =
-		$tokenStandard === 'erc20'
+		$tokenStandard === 'erc20' && nonNullish($token)
 			? `${$explorerUrlStore}/token/${($token as Erc20Token).address}`
 			: notEmptyString($address)
 				? `${$explorerUrlStore}/address/${$address}`
