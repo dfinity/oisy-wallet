@@ -8,6 +8,8 @@
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import LoaderMetamask from '$lib/components/core/LoaderMetamask.svelte';
+	import { pageToken } from '$lib/derived/page-token.derived';
+	import { token } from '$lib/stores/token.store';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -15,6 +17,8 @@
 		: isRouteTransactions($page)
 			? 'transactions'
 			: 'tokens';
+
+	$: token.set($pageToken);
 </script>
 
 <Hero
