@@ -127,7 +127,8 @@
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"show_testnets": "Show test networks",
-		"more": "More networks coming soon..."
+		"more": "More networks coming soon...",
+		"chain_fusion": "Chain Fusion"
 	},
 	"receive": {
 		"text": {
