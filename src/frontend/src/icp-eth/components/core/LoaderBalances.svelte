@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { loadBalances, loadErc20Balances } from '$eth/services/balance.services';
 	import { address } from '$lib/derived/address.derived';
-	import { networkEthereum, networkId } from '$lib/derived/network.derived';
+	import { networkEthereum } from '$lib/derived/network.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { debounce } from '@dfinity/utils';
 	import { ERC20_TWIN_TOKENS } from '$env/tokens.erc20.env';
 	import { ckEthereumNativeToken, erc20ToCkErc20Enabled } from '$icp-eth/derived/cketh.derived';
+	import { token } from '$lib/derived/token.derived';
 
 	const load = async () => {
 		await Promise.allSettled([
@@ -17,7 +18,7 @@
 							loadErc20Balances({
 								address: $address,
 								erc20Tokens: $erc20Tokens,
-								networkId: $networkId
+								networkId: $token.network.id
 							})
 						]
 					: []
@@ -40,7 +41,7 @@
 
 	const debounceLoad = debounce(load);
 
-	$: $address, $erc20Tokens, $networkId, $erc20ToCkErc20Enabled, debounceLoad();
+	$: $address, $erc20Tokens, $token, $erc20ToCkErc20Enabled, debounceLoad();
 </script>
 
 <slot />
