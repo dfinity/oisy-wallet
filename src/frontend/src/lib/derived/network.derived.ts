@@ -1,5 +1,5 @@
 import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-import { DEFAULT_NETWORK, DEFAULT_NETWORK_ID } from '$lib/constants/networks.constants';
+import { DEFAULT_ETHEREUM_NETWORK, DEFAULT_NETWORK_ID } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { networks } from '$lib/derived/networks.derived';
@@ -19,7 +19,8 @@ export const networkId: Readable<NetworkId> = derived(
 
 export const selectedNetwork: Readable<Network> = derived(
 	[networks, networkId],
-	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId) ?? DEFAULT_NETWORK
+	([$networks, $networkId]) =>
+		$networks.find(({ id }) => id === $networkId) ?? DEFAULT_ETHEREUM_NETWORK
 );
 
 export const networkICP: Readable<boolean> = derived([networkId], ([$networkId]) =>

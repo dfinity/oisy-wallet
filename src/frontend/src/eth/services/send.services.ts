@@ -20,7 +20,7 @@ import {
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { signTransaction } from '$lib/api/backend.api';
-import { DEFAULT_NETWORK } from '$lib/constants/networks.constants';
+import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { ETH_ADDRESS } from '$lib/types/address';
@@ -330,7 +330,7 @@ const sendTransaction = async ({
 		? 'ethereum'
 		: 'erc20';
 
-	const networkICP = isNetworkICP(targetNetwork ?? DEFAULT_NETWORK);
+	const networkICP = isNetworkICP(targetNetwork ?? DEFAULT_ETHEREUM_NETWORK);
 
 	const convertEthToCkEth =
 		transferStandard === 'ethereum' &&
