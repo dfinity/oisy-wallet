@@ -2,7 +2,6 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
-import { isNetworkIdChainFusion } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { LoadEvent, Page } from '@sveltejs/kit';
 
@@ -33,12 +32,13 @@ const tokenUrl = ({
 		name.replace(/\p{Emoji}/gu, (m, _idx) => `\\u${m.codePointAt(0)?.toString(16)}`)
 	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
-export const networkParam = (networkId: NetworkId): string =>
-	isNetworkIdChainFusion(networkId) ? '' : `network=${networkId.description ?? ''}`;
+export const networkParam = (networkId: NetworkId | undefined): string =>
+	isNullish(networkId) ? '' : `network=${networkId.description ?? ''}`;
 
-export const back = async (params: { networkId: NetworkId; fromUrl?: URL }) => {
+export const back = async (params: { networkId: NetworkId | undefined; fromUrl?: URL }) => {
 	const { networkId, fromUrl } = params;
-	const rootUrl = fromUrl?.toString() ?? `/?${networkParam(networkId)}`;
+	const rootUrl =
+		fromUrl?.toString() ?? `/${nonNullish(networkId) ? `?${networkParam(networkId)}` : ''}`;
 	await goto(rootUrl, { replaceState: 'fromUrl' in params ? nonNullish(fromUrl) : true });
 };
 
@@ -86,11 +86,7 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 export const switchNetwork = async (networkId: NetworkId | undefined | null) => {
 	const url = new URL(window.location.href);
 
-	if (
-		isNullish(networkId) ||
-		isNullish(networkId.description) ||
-		isNetworkIdChainFusion(networkId)
-	) {
+	if (isNullish(networkId) || isNullish(networkId.description)) {
 		url.searchParams.delete('network');
 	} else {
 		url.searchParams.set('network', networkId.description);

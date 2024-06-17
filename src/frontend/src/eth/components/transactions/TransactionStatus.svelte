@@ -6,8 +6,8 @@
 	import type { WebSocketListener } from '$eth/types/listener';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import { infuraProviders } from '$eth/providers/infura.providers';
-	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/derived/token.derived';
 
 	export let blockNumber: number;
 
@@ -17,7 +17,7 @@
 
 	const loadCurrentBlockNumber = async () => {
 		try {
-			const { getBlockNumber } = infuraProviders($networkId);
+			const { getBlockNumber } = infuraProviders($token.network.id);
 			currentBlockNumber = await getBlockNumber();
 		} catch (err: unknown) {
 			disconnect();
@@ -42,7 +42,7 @@
 
 		listener = initMinedTransactionsListener({
 			callback: async () => debounceLoadCurrentBlockNumber(),
-			networkId: $networkId
+			networkId: $token.network.id
 		});
 	});
 

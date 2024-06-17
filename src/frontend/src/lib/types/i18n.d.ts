@@ -113,6 +113,7 @@ interface I18nNetworks {
 	title: string;
 	show_testnets: string;
 	more: string;
+	chain_fusion: string;
 }
 
 interface I18nReceive {
