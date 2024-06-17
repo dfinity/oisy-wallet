@@ -2,6 +2,7 @@ import { CKBTC_EXPLORER_URL, CKETH_EXPLORER_URL } from '$env/explorers.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import ckErc20Tokens from '$env/tokens.ckerc20.json';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
+import { SEPOLIA_LINK_TOKEN } from '$env/tokens.link.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens.usdc.env';
 import {
 	envTokensCkErc20,
@@ -263,6 +264,16 @@ const CKUSDC_STAGING_DATA: IcCkInterface | undefined = nonNullish(
 		}
 	: undefined;
 
+const CKLINK_STAGING_DATA: IcCkInterface | undefined = nonNullish(
+	CKERC20_STAGING_DATA?.ckSepoliaLINK
+)
+	? {
+			...CKERC20_STAGING_DATA.ckSepoliaLINK,
+			position: 3,
+			twinToken: SEPOLIA_LINK_TOKEN
+		}
+	: undefined;
+
 const CKUSDC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDC)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDC,
@@ -271,16 +282,19 @@ const CKUSDC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 		}
 	: undefined;
 
-export const CKUSDC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
+export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
+	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
 		? [CKUSDC_STAGING_DATA.ledgerCanisterId]
 		: []),
-	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : [])
+	...(nonNullish(CKLINK_STAGING_DATA?.ledgerCanisterId)
+		? [CKLINK_STAGING_DATA.ledgerCanisterId]
+		: [])
 ];
 
 export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
 	...(nonNullish(CKUSDC_IC_DATA?.ledgerCanisterId) ? [CKUSDC_IC_DATA.ledgerCanisterId] : []),
-	...CKUSDC_LEDGER_CANISTER_TESTNET_IDS
+	...CKERC20_LEDGER_CANISTER_TESTNET_IDS
 ];
 
 /**
@@ -296,11 +310,12 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : []),
 	...(nonNullish(CKUSDC_LOCAL_DATA) ? [CKUSDC_LOCAL_DATA] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA) ? [CKUSDC_STAGING_DATA] : []),
-	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : [])
+	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : []),
+	...(nonNullish(CKLINK_STAGING_DATA) ? [CKLINK_STAGING_DATA] : [])
 ];
 
 export const ICRC_LEDGER_CANISTER_TESTNET_IDS = [
 	...CKBTC_LEDGER_CANISTER_TESTNET_IDS,
 	...CKETH_LEDGER_CANISTER_TESTNET_IDS,
-	...CKUSDC_LEDGER_CANISTER_TESTNET_IDS
+	...CKERC20_LEDGER_CANISTER_TESTNET_IDS
 ];
