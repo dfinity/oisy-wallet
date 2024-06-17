@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
+import { SEPOLIA_PEPE_TOKEN } from '$env/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens.usdc.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -75,7 +76,7 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
  * Unlike other Erc20 tokens, for which we load the details at runtime based one their contract address.
  */
 
-const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [SEPOLIA_USDC_TOKEN];
+const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [SEPOLIA_USDC_TOKEN, SEPOLIA_PEPE_TOKEN];
 
 const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [USDC_TOKEN];
 
