@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { token } from '$lib/derived/token.derived';
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
 	import type { Token as TokenType } from '$lib/types/token';
@@ -11,6 +10,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { token } from '$lib/stores/token.store';
 
 	let twinToken: TokenType | undefined;
 	$: twinToken = ($token as OptionIcCkToken)?.twinToken;

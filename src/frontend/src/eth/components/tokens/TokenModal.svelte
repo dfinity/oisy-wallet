@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { token, tokenStandard } from '$lib/derived/token.derived';
+	import { tokenStandard } from '$lib/derived/token.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import { nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,6 +10,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
 	import Token from '$lib/components/tokens/Token.svelte';
+	import { token } from '$lib/stores/token.store';
 
 	let contractAddress: string | undefined;
 	$: contractAddress =

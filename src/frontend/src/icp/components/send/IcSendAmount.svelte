@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { token, tokenDecimals } from '$lib/derived/token.derived';
+	import { tokenDecimals } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
@@ -27,6 +27,7 @@
 	} from '$icp/stores/ethereum-fee.store';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
+	import { token } from '$lib/stores/token.store';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;

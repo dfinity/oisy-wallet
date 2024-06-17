@@ -5,8 +5,9 @@
 	import { networkICP } from '$lib/derived/network.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { token, tokenCategory } from '$lib/derived/token.derived';
+	import { tokenCategory } from '$lib/derived/token.derived';
 	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { token } from '$lib/stores/token.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;

@@ -9,9 +9,9 @@
 	import InfoBox from '$icp/components/info/InfoBox.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import InfoEthereum from '$icp/components/info/InfoEthereum.svelte';
-	import { token } from '$lib/derived/token.derived';
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
+	import { token } from '$lib/stores/token.store';
 
 	let mainnet = true;
 	$: mainnet =

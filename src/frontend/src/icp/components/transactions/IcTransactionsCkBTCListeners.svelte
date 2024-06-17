@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { token, tokenId } from '$lib/derived/token.derived';
+	import { tokenId } from '$lib/derived/token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { initBtcStatusesWorker } from '$icp/services/worker.btc-statuses.services';
@@ -8,6 +8,7 @@
 	import type { IcCkToken } from '$icp/types/ic';
 	import type { Token } from '$lib/types/token';
 	import { nonNullish } from '@dfinity/utils';
+	import { token } from '$lib/stores/token.store';
 
 	let minterInfoLoaded: boolean;
 	$: minterInfoLoaded =

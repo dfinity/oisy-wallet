@@ -2,10 +2,11 @@
 	import { formatToken } from '$lib/utils/format.utils.js';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { token, tokenDecimals } from '$lib/derived/token.derived';
+	import { tokenDecimals } from '$lib/derived/token.derived';
 	import type { OptionIcToken } from '$icp/types/ic';
 	import { nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
 
 	let decimals: number | undefined;
 	$: decimals = $token?.decimals;

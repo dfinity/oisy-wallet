@@ -1,5 +1,5 @@
-import { token } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import { token } from '$lib/stores/token.store';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
