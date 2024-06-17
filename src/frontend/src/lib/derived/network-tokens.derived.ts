@@ -14,7 +14,9 @@ export const networkTokens: Readable<Token[]> = derived(
 			} = token;
 
 			return (
-				(isNullish($selectedNetwork) && !isTokenIcrcTestnet(token)) ||
+				(isNullish($selectedNetwork) &&
+					!isTokenIcrcTestnet(token) &&
+					token.network.env !== 'testnet') ||
 				$selectedNetwork?.id === networkId
 			);
 		})
