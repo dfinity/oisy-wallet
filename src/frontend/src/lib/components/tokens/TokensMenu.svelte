@@ -4,14 +4,31 @@
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { networkEthereum, networkICP } from '$lib/derived/network.derived';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
-	import { additionalMenuItem } from '$lib/derived/tokens-menu.derived';
+	import type { AdditionalMenuItem } from '$lib/types/tokens-menu';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	let additionalMenuItem: AdditionalMenuItem | undefined = undefined;
+	$: additionalMenuItem = $networkICP
+		? {
+				openModal: modalStore.openIcManageTokens,
+				label: $i18n.tokens.manage.text.title,
+				ariaLabel: $i18n.tokens.manage.text.title
+			}
+		: $networkEthereum
+			? {
+					openModal: modalStore.openAddToken,
+					label: `+ ${$i18n.tokens.import.text.title}`,
+					ariaLabel: $i18n.tokens.import.text.title
+				}
+			: undefined;
+
 	const importTokens = () => {
-		$additionalMenuItem?.openModal();
+		additionalMenuItem?.openModal();
 
 		visible = false;
 	};
@@ -32,17 +49,17 @@
 	<div class="flex flex-col gap-3">
 		<TokensZeroBalance />
 
-		{#if $additionalMenuItem}
+		{#if additionalMenuItem}
 			<div class="my">
 				<Hr />
 			</div>
 
 			<button
 				class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-				aria-label={$additionalMenuItem?.ariaLabel}
+				aria-label={additionalMenuItem?.ariaLabel}
 				on:click={importTokens}
 			>
-				{$additionalMenuItem?.label}
+				{additionalMenuItem?.label}
 			</button>
 		{/if}
 	</div>
