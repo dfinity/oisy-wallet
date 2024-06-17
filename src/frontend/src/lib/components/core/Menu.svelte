@@ -14,6 +14,7 @@
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -63,14 +64,13 @@
 			{$i18n.navigation.text.manage_internet_identity}
 		</ExternalLink>
 
-		<button
-			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label={$i18n.navigation.alt.more_settings}
-			on:click={gotoSettings}
+		<ButtonMenu
+			label={$i18n.settings.text.title}
+			onClick={gotoSettings}
+			ariaLabel={$i18n.navigation.alt.more_settings}
 		>
-			<IconSettings />
-			{$i18n.settings.text.title}
-		</button>
+			<IconSettings slot="before-label" />
+		</ButtonMenu>
 
 		<SignOut on:icLogoutTriggered={() => (visible = false)} />
 	</div>

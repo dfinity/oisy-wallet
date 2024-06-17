@@ -7,6 +7,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { token, tokenCategory } from '$lib/derived/token.derived';
 	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
+	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -47,21 +48,9 @@
 		<slot />
 
 		{#if $tokenCategory === 'custom'}
-			<button
-				class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-				aria-label={hideTokenLabel}
-				on:click={hideToken}
-			>
-				{hideTokenLabel}
-			</button>
+			<ButtonMenu label={hideTokenLabel} onClick={hideToken} />
 		{/if}
 
-		<button
-			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label={$i18n.tokens.details.title}
-			on:click={openToken}
-		>
-			{$i18n.tokens.details.title}
-		</button>
+		<ButtonMenu label={$i18n.tokens.details.title} onClick={openToken} />
 	</div>
 </Popover>
