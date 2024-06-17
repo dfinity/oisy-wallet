@@ -21,3 +21,5 @@ export interface TokenMetadata {
 }
 
 export type RequiredToken = Required<Token>;
+
+export type TokenInList = Token & { enabled: boolean };
