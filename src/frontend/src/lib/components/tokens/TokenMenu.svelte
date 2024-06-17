@@ -48,9 +48,9 @@
 		<slot />
 
 		{#if $tokenCategory === 'custom'}
-			<ButtonMenu label={hideTokenLabel} onClick={hideToken} />
+			<ButtonMenu label={hideTokenLabel} on:click={hideToken} />
 		{/if}
 
-		<ButtonMenu label={$i18n.tokens.details.title} onClick={openToken} />
+		<ButtonMenu label={$i18n.tokens.details.title} on:click={openToken} />
 	</div>
 </Popover>

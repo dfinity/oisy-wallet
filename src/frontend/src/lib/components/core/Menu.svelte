@@ -66,7 +66,7 @@
 
 		<ButtonMenu
 			label={$i18n.settings.text.title}
-			onClick={gotoSettings}
+			on:click={gotoSettings}
 			ariaLabel={$i18n.navigation.alt.more_settings}
 		>
 			<IconSettings slot="before-label" />

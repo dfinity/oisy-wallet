@@ -8,6 +8,6 @@
 	<ButtonMenu
 		label={`+ ${$i18n.tokens.import.text.title}`}
 		ariaLabel={$i18n.tokens.import.text.title}
-		onClick={modalStore.openAddToken}
+		on:click={modalStore.openAddToken}
 	/>
 </div>
