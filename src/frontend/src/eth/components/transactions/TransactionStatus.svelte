@@ -7,7 +7,7 @@
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	export let blockNumber: number;
 
@@ -17,7 +17,7 @@
 
 	const loadCurrentBlockNumber = async () => {
 		try {
-			const { getBlockNumber } = infuraProviders($token.network.id);
+			const { getBlockNumber } = infuraProviders($tokenWithFallback.network.id);
 			currentBlockNumber = await getBlockNumber();
 		} catch (err: unknown) {
 			disconnect();

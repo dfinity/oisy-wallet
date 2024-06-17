@@ -12,7 +12,7 @@
 	} from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import TransactionStatus from './TransactionStatus.svelte';
-	import { token } from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { notEmptyString } from '@dfinity/utils';
@@ -120,19 +120,17 @@
 			</Value>
 		{/if}
 
-		{#if nonNullish($token)}
-			<Value ref="amount">
-				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-				<output>
-					{formatToken({
-						value,
-						unitName: $token.decimals,
-						displayDecimals: $token.decimals
-					})}
-					{$token.symbol}
-				</output>
-			</Value>
-		{/if}
+		<Value ref="amount">
+			<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
+			<output>
+				{formatToken({
+					value,
+					unitName: $tokenWithFallback.decimals,
+					displayDecimals: $tokenWithFallback.decimals
+				})}
+				{$tokenWithFallbacksymbol}
+			</output>
+		</Value>
 	</div>
 
 	<button class="primary full center text-center" on:click={modalStore.close}

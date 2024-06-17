@@ -80,3 +80,6 @@ export type IcAppMetadata = {
 	position: number;
 	explorerUrl?: string;
 };
+
+export type OptionIcToken = IcToken | undefined | null;
+export type OptionIcCkToken = IcCkToken | undefined | null;
