@@ -1,4 +1,5 @@
-import type { TokenStandard } from '$lib/types/token';
+import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
+import type { Token, TokenStandard } from '$lib/types/token';
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -25,3 +26,6 @@ export const getMaxTransactionAmount = ({
 		Math.max(Number(balance - (tokenStandard !== 'erc20' ? fee : 0n)), 0) / 10 ** tokenDecimals
 	);
 };
+
+export const isTokenTestnet = (token: Token): boolean =>
+	isTokenIcrcTestnet(token) || token.network.env === 'testnet';
