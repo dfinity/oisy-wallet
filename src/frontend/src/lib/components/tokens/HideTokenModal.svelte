@@ -31,7 +31,7 @@
 			return;
 		}
 
-		if ($token.category !== 'custom') {
+		if ($token?.category !== 'custom') {
 			toastsError({
 				msg: { text: $i18n.tokens.error.not_custom }
 			});

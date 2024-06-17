@@ -134,14 +134,18 @@
 		{#if nonNullish(value)}
 			<Value ref="amount">
 				<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-				<output>
-					{formatToken({
-						value: BigNumber.from(value),
-						unitName: $token.decimals,
-						displayDecimals: $token.decimals
-					})}
-					{$token.symbol}
-				</output>
+				{#if nonNullish($token)}
+					<output>
+						{formatToken({
+							value: BigNumber.from(value),
+							unitName: $token.decimals,
+							displayDecimals: $token.decimals
+						})}
+						{$token.symbol}
+					</output>
+				{:else}
+					&ZeroWidthSpace;
+				{/if}
 			</Value>
 		{/if}
 	</div>

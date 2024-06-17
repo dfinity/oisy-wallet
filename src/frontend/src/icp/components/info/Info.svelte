@@ -11,12 +11,12 @@
 	import InfoEthereum from '$icp/components/info/InfoEthereum.svelte';
 	import { token } from '$lib/derived/token.derived';
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
-	import type { IcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic';
 
 	let mainnet = true;
 	$: mainnet =
-		isNetworkIdBTCMainnet(($token as IcCkToken).twinToken?.network.id) ||
-		isNetworkIdETHMainnet(($token as IcCkToken).twinToken?.network.id);
+		isNetworkIdBTCMainnet(($token as OptionIcCkToken)?.twinToken?.network.id) ||
+		isNetworkIdETHMainnet(($token as OptionIcCkToken)?.twinToken?.network.id);
 
 	let ckBTC = false;
 	$: ckBTC = mainnet && $tokenCkBtcLedger;

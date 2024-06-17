@@ -3,41 +3,59 @@ import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { icrcTokens } from '$icp/derived/icrc.derived';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { routeToken } from '$lib/derived/nav.derived';
-import type { Token, TokenCategory, TokenId, TokenStandard } from '$lib/types/token';
+import type {
+	OptionToken,
+	OptionTokenId,
+	OptionTokenStandard,
+	Token,
+	TokenCategory
+} from '$lib/types/token';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const token: Readable<Token> = derived(
+export const token: Readable<OptionToken> = derived(
 	[routeToken, erc20Tokens, icrcTokens],
 	([$routeToken, $erc20Tokens, $icrcTokens]) => {
 		if (isNullish($routeToken)) {
-			return DEFAULT_ETHEREUM_TOKEN;
+			return undefined;
 		}
 
 		if ($routeToken === ICP_TOKEN.name) {
 			return ICP_TOKEN;
 		}
 
-		return (
-			[...$erc20Tokens, ...$icrcTokens, ETHEREUM_TOKEN, SEPOLIA_TOKEN].find(
-				({ name }) => name === $routeToken
-			) ?? DEFAULT_ETHEREUM_TOKEN
+		return [...$erc20Tokens, ...$icrcTokens, ETHEREUM_TOKEN, SEPOLIA_TOKEN].find(
+			({ name }) => name === $routeToken
 		);
 	}
 );
 
-export const tokenId: Readable<TokenId> = derived([token], ([{ id }]) => id);
-
-export const tokenStandard: Readable<TokenStandard> = derived(
+/**
+ * A derived store which can be used for code convenience reasons.
+ */
+export const tokenWithFallback: Readable<Token> = derived(
 	[token],
-	([{ standard }]) => standard
+	([$token]) => $token ?? DEFAULT_ETHEREUM_TOKEN
 );
 
-export const tokenSymbol: Readable<string> = derived([token], ([$token]) => $token.symbol);
+export const tokenId: Readable<OptionTokenId> = derived([token], ([$token]) => $token?.id);
 
-export const tokenDecimals: Readable<number> = derived([token], ([$token]) => $token.decimals);
-
-export const tokenCategory: Readable<TokenCategory> = derived(
+export const tokenStandard: Readable<OptionTokenStandard> = derived(
 	[token],
-	([{ category }]) => category
+	([$token]) => $token?.standard
+);
+
+export const tokenSymbol: Readable<string | undefined> = derived(
+	[token],
+	([$token]) => $token?.symbol
+);
+
+export const tokenDecimals: Readable<number | undefined> = derived(
+	[token],
+	([$token]) => $token?.decimals
+);
+
+export const tokenCategory: Readable<TokenCategory | undefined> = derived(
+	[token],
+	([$token]) => $token?.category
 );

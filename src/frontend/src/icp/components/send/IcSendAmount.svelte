@@ -1,12 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import {
-		token,
-		tokenDecimals,
-		tokenId,
-		tokenSymbol,
-		tokenStandard
-	} from '$lib/derived/token.derived';
+	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
@@ -44,15 +38,15 @@
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
-		if (isNullish(fee)) {
+		if (isNullish(fee) || isNullish($token)) {
 			return;
 		}
 
 		if (isNetworkIdBitcoin(networkId)) {
 			const error = assertCkBTCUserInputAmount({
 				amount: userAmount,
-				minterInfo: $ckBtcMinterInfoStore?.[$tokenId],
-				tokenDecimals: $tokenDecimals,
+				minterInfo: $ckBtcMinterInfoStore?.[$token.id],
+				tokenDecimals: $token.decimals,
 				i18n: $i18n
 			});
 
@@ -65,8 +59,8 @@
 		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
 			const error = assertCkETHMinWithdrawalAmount({
 				amount: userAmount,
-				tokenDecimals: $tokenDecimals,
-				tokenSymbol: $tokenSymbol,
+				tokenDecimals: $token.decimals,
+				tokenSymbol: $token.symbol,
 				minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
 				i18n: $i18n
 			});
@@ -77,7 +71,7 @@
 
 			return assertCkETHMinFee({
 				amount: userAmount,
-				tokenSymbol: $tokenSymbol,
+				tokenSymbol: $token.symbol,
 				fee,
 				i18n: $i18n
 			});
@@ -120,13 +114,15 @@
 		return assertBalance();
 	};
 
-	$: calculateMax = (): number => {
-		return getMaxTransactionAmount({
-			balance: $balance?.toBigInt(),
-			fee: fee,
-			tokenDecimals: $tokenDecimals,
-			tokenStandard: $tokenStandard
-		});
+	$: calculateMax = (): number | undefined => {
+		return isNullish($token)
+			? undefined
+			: getMaxTransactionAmount({
+					balance: $balance?.toBigInt(),
+					fee: fee,
+					tokenDecimals: $token.decimals,
+					tokenStandard: $token.standard
+				});
 	};
 
 	let sendInputAmount: SendInputAmount | undefined;

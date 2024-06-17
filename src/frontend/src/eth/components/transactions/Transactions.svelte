@@ -3,7 +3,7 @@
 	import { sortedTransactions } from '$eth/derived/transactions.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
 	import type { TokenId } from '$lib/types/token';
-	import { token } from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { modalToken, modalTransaction } from '$lib/derived/modal.derived';
 	import TransactionModal from './TransactionModal.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -27,7 +27,7 @@
 		const {
 			network: { id: networkId },
 			id: tokenId
-		} = $token;
+		} = $tokenWithFallback;
 
 		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
 		// This prevents the glitch load of ETH transaction with a token ID for ICP.
@@ -50,7 +50,7 @@
 		}
 	};
 
-	$: $token, $tokenNotInitialized, (async () => await load())();
+	$: $tokenWithFallback, $tokenNotInitialized, (async () => await load())();
 
 	let selectedTransaction: TransactionType | undefined;
 	$: selectedTransaction = $modalTransaction
