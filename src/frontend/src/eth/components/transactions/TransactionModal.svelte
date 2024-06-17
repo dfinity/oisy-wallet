@@ -128,7 +128,7 @@
 					unitName: $tokenWithFallback.decimals,
 					displayDecimals: $tokenWithFallback.decimals
 				})}
-				{$tokenWithFallbacksymbol}
+				{$tokenWithFallback.symbol}
 			</output>
 		</Value>
 	</div>

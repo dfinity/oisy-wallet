@@ -42,7 +42,7 @@
 
 		listener = initMinedTransactionsListener({
 			callback: async () => debounceLoadCurrentBlockNumber(),
-			networkId: $token.network.id
+			networkId: $tokenWithFallback.network.id
 		});
 	});
 

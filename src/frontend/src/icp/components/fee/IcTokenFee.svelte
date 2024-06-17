@@ -3,7 +3,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { token, tokenDecimals } from '$lib/derived/token.derived';
-	import type { IcToken, OptionIcToken } from '$icp/types/ic';
+	import type { OptionIcToken } from '$icp/types/ic';
 	import { nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
 

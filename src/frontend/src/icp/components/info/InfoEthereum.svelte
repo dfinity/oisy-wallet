@@ -10,7 +10,7 @@
 	import { ckEthereumTwinToken, ckEthereumTwinTokenNetwork } from '$icp-eth/derived/cketh.derived';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token, tokenWithFallback } from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth();
 

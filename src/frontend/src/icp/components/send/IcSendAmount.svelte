@@ -1,12 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import {
-		token,
-		tokenDecimals,
-		tokenId,
-		tokenSymbol,
-		tokenStandard
-	} from '$lib/derived/token.derived';
+	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
