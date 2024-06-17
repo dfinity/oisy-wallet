@@ -11,7 +11,6 @@
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 	import { isErc20Icp } from '$eth/utils/token.utils';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -23,7 +22,7 @@
 	export let send = false;
 
 	let background: string;
-	$: background = ($selectedNetwork.id.description ?? 'eth').toLowerCase();
+	$: background = ($token.network.id.description ?? 'eth').toLowerCase();
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20TokensInitialized;

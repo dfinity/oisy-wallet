@@ -8,10 +8,10 @@
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
-	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
+	import { token } from '$lib/derived/token.derived';
 
 	export let contractAddress = '';
 	export let metadata: Erc20Metadata | undefined;
@@ -31,7 +31,7 @@
 		}
 
 		try {
-			const { metadata: metadataApi } = infuraErc20Providers($networkId);
+			const { metadata: metadataApi } = infuraErc20Providers($token.network.id);
 			metadata = await metadataApi({ address: contractAddress });
 
 			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
