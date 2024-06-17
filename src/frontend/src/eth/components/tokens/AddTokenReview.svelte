@@ -11,7 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
-	import { token } from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	export let contractAddress = '';
 	export let metadata: Erc20Metadata | undefined;
@@ -31,7 +31,7 @@
 		}
 
 		try {
-			const { metadata: metadataApi } = infuraErc20Providers($token.network.id);
+			const { metadata: metadataApi } = infuraErc20Providers($tokenWithFallback.network.id);
 			metadata = await metadataApi({ address: contractAddress });
 
 			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
