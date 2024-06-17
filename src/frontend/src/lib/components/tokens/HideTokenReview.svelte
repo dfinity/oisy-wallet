@@ -7,6 +7,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { nonNullish } from '@dfinity/utils';
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -14,13 +15,19 @@
 <div class="stretch">
 	<div class="icon flex flex-col items-center gap-3">
 		<Logo
-			src={$token.icon}
+			src={$token?.icon}
 			size="big"
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
 			color="off-white"
 		/>
 
-		<p class="font-bold text-center">{$token.name}</p>
+		<p class="font-bold text-center">
+			{#if nonNullish($token)}
+				{$token.name}
+			{:else}
+				&ZeroWidthSpace;
+			{/if}
+		</p>
 	</div>
 
 	<p class="break-normal py-10">

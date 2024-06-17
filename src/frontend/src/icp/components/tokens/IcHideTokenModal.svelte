@@ -11,13 +11,13 @@
 	import { Principal } from '@dfinity/principal';
 	import { ICP_NETWORK_ID } from '$env/networks.env';
 	import { onMount } from 'svelte';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { loadUserTokens } from '$icp/services/icrc.services';
 
-	let selectedToken: IcrcCustomToken | undefined;
+	let selectedToken: OptionIcrcCustomToken;
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
-	onMount(() => (selectedToken = $token as IcrcCustomToken));
+	onMount(() => (selectedToken = $token as OptionIcrcCustomToken));
 
 	let ledgerCanisterId: LedgerCanisterIdText | undefined;
 	$: ledgerCanisterId = selectedToken?.ledgerCanisterId;

@@ -14,3 +14,5 @@ export type IcCustomTokenState = Omit<CustomToken, 'token' | 'version'> & {
 export type IcrcCustomTokenWithoutId = IcCustomTokenState & IcTokenWithoutIdExtended;
 
 export type IcrcCustomToken = IcCustomTokenState & IcToken & IcrcCustomTokenExtra;
+
+export type OptionIcrcCustomToken = IcrcCustomToken | undefined | null;

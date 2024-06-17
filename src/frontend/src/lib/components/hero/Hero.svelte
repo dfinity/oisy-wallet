@@ -22,7 +22,7 @@
 	export let send = false;
 
 	let background: string;
-	$: background = ($token.network.id.description ?? 'eth').toLowerCase();
+	$: background = ($token?.network.id.description ?? 'eth').toLowerCase();
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20TokensInitialized;
@@ -43,9 +43,9 @@
 						{#if displayTokenSymbol}
 							<div in:fade>
 								<Logo
-									src={$token.icon}
+									src={$token?.icon}
 									size="big"
-									alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
+									alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
 									color="off-white"
 								/>
 							</div>

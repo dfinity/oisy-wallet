@@ -36,6 +36,10 @@
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
+		if (isNullish($tokenId) || isNullish($token)) {
+			return;
+		}
+
 		if (isNullish(toAddress)) {
 			icPendingTransactionsStore.reset($tokenId);
 			return;

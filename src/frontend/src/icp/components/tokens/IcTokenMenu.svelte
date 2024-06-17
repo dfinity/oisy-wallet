@@ -5,10 +5,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { token } from '$lib/derived/token.derived';
 	import { fade } from 'svelte/transition';
-	import type { IcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic';
 
 	let explorerUrl: string | undefined;
-	$: explorerUrl = ($token as IcCkToken).explorerUrl;
+	$: explorerUrl = ($token as OptionIcCkToken)?.explorerUrl;
 
 	let transactionsExplorerUrl: string | undefined;
 	$: transactionsExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined;

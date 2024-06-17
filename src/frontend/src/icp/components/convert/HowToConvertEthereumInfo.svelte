@@ -14,7 +14,7 @@
 		ckEthereumNativeTokenBalance,
 		ckEthereumTwinToken
 	} from '$icp-eth/derived/cketh.derived';
-	import { token } from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 
 	export let formCancelAction: 'back' | 'close' = 'back';
@@ -34,7 +34,7 @@
 				replaceOisyPlaceholders($i18n.convert.text.how_to_convert_eth_to_cketh),
 				{
 					$token: $ckEthereumTwinToken.symbol,
-					$ckToken: $token.symbol
+					$ckToken: $tokenWithFallback.symbol
 				}
 			)}:
 		</p>
@@ -130,7 +130,7 @@
 				<svelte:fragment slot="label"
 					>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
 						$token: $ckEthereumTwinToken.symbol,
-						$ckToken: $token.symbol
+						$ckToken: $tokenWithFallback.symbol
 					})}</svelte:fragment
 				>
 

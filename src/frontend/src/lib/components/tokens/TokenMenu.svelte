@@ -27,7 +27,7 @@
 
 	let hideTokenLabel: string;
 	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
-		$token: $token.name
+		$token: $token?.name ?? ''
 	});
 </script>
 

@@ -10,3 +10,5 @@ export type Erc20ContractAddress = ContractAddress;
 export type Erc20Contract = Erc20ContractAddress & { exchange: Exchange; twinTokenSymbol?: string };
 
 export type Erc20Metadata = TokenMetadata;
+
+export type OptionErc20Token = Erc20Token | undefined | null;

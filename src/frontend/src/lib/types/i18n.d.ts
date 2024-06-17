@@ -310,6 +310,7 @@ interface I18nTokens {
 		not_custom: string;
 		incomplete_metadata: string;
 		duplicate_metadata: string;
+		unexpected_undefined: string;
 	};
 }
 

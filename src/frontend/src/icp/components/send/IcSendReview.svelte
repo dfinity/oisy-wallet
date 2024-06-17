@@ -11,6 +11,7 @@
 	import { balance } from '$lib/derived/balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -19,11 +20,13 @@
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
 	$: invalid =
+		isNullish($tokenStandard) ||
 		isInvalidDestinationIc({
 			destination,
 			tokenStandard: $tokenStandard,
 			networkId
-		}) || invalidAmount(amount);
+		}) ||
+		invalidAmount(amount);
 
 	const dispatch = createEventDispatcher();
 
@@ -32,10 +35,12 @@
 </script>
 
 <div class="stretch">
-	<SendData {amount} {destination} token={$token} balance={$balance} {source}>
-		<IcFeeDisplay slot="fee" {networkId} />
-		<IcReviewNetwork {networkId} slot="network" />
-	</SendData>
+	{#if nonNullish($token)}
+		<SendData {amount} {destination} token={$token} balance={$balance} {source}>
+			<IcFeeDisplay slot="fee" {networkId} />
+			<IcReviewNetwork {networkId} slot="network" />
+		</SendData>
+	{/if}
 </div>
 
 <ButtonGroup>

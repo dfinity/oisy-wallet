@@ -1,13 +1,13 @@
 import { transactionsStore } from '$eth/stores/transactions.store';
-import { tokenId } from '$lib/derived/token.derived';
+import { tokenWithFallback } from '$lib/derived/token.derived';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Readable } from 'svelte/store';
 import { derived } from 'svelte/store';
 
 export const sortedTransactions: Readable<Transaction[]> = derived(
-	[transactionsStore, tokenId],
-	([$transactionsStore, $tokenId]) =>
+	[transactionsStore, tokenWithFallback],
+	([$transactionsStore, { id: $tokenId }]) =>
 		($transactionsStore?.[$tokenId] ?? []).sort(
 			(
 				{ blockNumber: blockNumberA, pendingTimestamp: pendingTimestampA },
@@ -35,8 +35,8 @@ export const sortedTransactions: Readable<Transaction[]> = derived(
 );
 
 export const transactionsInitialized: Readable<boolean> = derived(
-	[transactionsStore, tokenId],
-	([$transactionsStore, $tokenId]) => nonNullish($transactionsStore?.[$tokenId])
+	[transactionsStore, tokenWithFallback],
+	([$transactionsStore, { id: $tokenId }]) => nonNullish($transactionsStore?.[$tokenId])
 );
 
 export const transactionsNotInitialized: Readable<boolean> = derived(
