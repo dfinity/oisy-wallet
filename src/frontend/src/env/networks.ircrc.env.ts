@@ -224,7 +224,8 @@ const mapCkErc20Data = ({
 	Object.entries(ckErc20Tokens).reduce(
 		(acc, [key, value]) => ({
 			...acc,
-			...(nonNullish(value) &&
+			...((STAGING || PROD) &&
+				nonNullish(value) &&
 				nonNullish(minterCanisterId) && {
 					[key]: {
 						...value,
@@ -252,23 +253,23 @@ const CKERC20_PRODUCTION_DATA = mapCkErc20Data({
 	ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID
 });
 
-const CKUSDC_STAGING_DATA: IcCkInterface | undefined =
-	(STAGING || PROD) && nonNullish(CKERC20_STAGING_DATA?.ckSepoliaUSDC)
-		? {
-				...CKERC20_STAGING_DATA.ckSepoliaUSDC,
-				position: 2,
-				twinToken: SEPOLIA_USDC_TOKEN
-			}
-		: undefined;
+const CKUSDC_STAGING_DATA: IcCkInterface | undefined = nonNullish(
+	CKERC20_STAGING_DATA?.ckSepoliaUSDC
+)
+	? {
+			...CKERC20_STAGING_DATA.ckSepoliaUSDC,
+			position: 2,
+			twinToken: SEPOLIA_USDC_TOKEN
+		}
+	: undefined;
 
-const CKUSDC_IC_DATA: IcCkInterface | undefined =
-	(STAGING || PROD) && nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDC)
-		? {
-				...CKERC20_PRODUCTION_DATA.ckUSDC,
-				position: 1,
-				twinToken: USDC_TOKEN
-			}
-		: undefined;
+const CKUSDC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDC)
+	? {
+			...CKERC20_PRODUCTION_DATA.ckUSDC,
+			position: 1,
+			twinToken: USDC_TOKEN
+		}
+	: undefined;
 
 export const CKUSDC_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
