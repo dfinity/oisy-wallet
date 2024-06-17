@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
-	import { token, tokenStandard } from '$lib/derived/token.derived';
+	import { tokenStandard } from '$lib/derived/token.derived';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
@@ -12,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { token } from '$lib/stores/token.store';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;

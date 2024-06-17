@@ -5,13 +5,13 @@
 	import { removeUserToken } from '$lib/api/backend.api';
 	import { selectedChainId } from '$eth/derived/network.derived';
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
-	import { token } from '$lib/derived/token.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
 	import { onMount } from 'svelte';
 	import { assertNonNullish } from '@dfinity/utils';
+	import { token } from '$lib/stores/token.store';
 
 	let selectedToken: OptionErc20Token;
 

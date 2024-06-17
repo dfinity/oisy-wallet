@@ -8,11 +8,12 @@
 	import { ICP_NETWORK } from '$env/networks.env';
 	import { ethereumTokenId } from '$eth/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token, tokenWithFallback } from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { token } from '$lib/stores/token.store';
 
 	/**
 	 * Send modal context store

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { NetworkId } from '$lib/types/network';
 	import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
-	import { token, tokenId, tokenWithFallback } from '$lib/derived/token.derived';
+	import { tokenId, tokenWithFallback } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
@@ -14,6 +14,7 @@
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
+	import { token } from '$lib/stores/token.store';
 
 	export let networkId: NetworkId | undefined = undefined;
 
