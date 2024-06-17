@@ -6,7 +6,6 @@
 	import { fade, slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { token } from '$lib/derived/token.derived';
 	import Balance from '$lib/components/hero/Balance.svelte';
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
@@ -15,6 +14,7 @@
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -22,7 +22,7 @@
 	export let send = false;
 
 	let background: string;
-	$: background = ($token.network.id.description ?? 'eth').toLowerCase();
+	$: background = ($token?.network.id.description ?? 'eth').toLowerCase();
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20TokensInitialized;
@@ -43,9 +43,9 @@
 						{#if displayTokenSymbol}
 							<div in:fade>
 								<Logo
-									src={$token.icon}
+									src={$token?.icon}
 									size="big"
-									alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
+									alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
 									color="off-white"
 								/>
 							</div>

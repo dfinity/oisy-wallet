@@ -9,7 +9,6 @@
 	import { isNullish } from '@dfinity/utils';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { token, tokenDecimals } from '$lib/derived/token.derived';
 	import { authStore } from '$lib/stores/auth.store';
 	import type { IcToken } from '$icp/types/ic';
 	import type { NetworkId } from '$lib/types/network';
@@ -54,6 +53,7 @@
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
+	import { token } from '$lib/stores/token.store';
 
 	/**
 	 * Props
@@ -84,6 +84,13 @@
 			return;
 		}
 
+		if (isNullish($token)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected_undefined }
+			});
+			return;
+		}
+
 		modal.next();
 
 		try {
@@ -91,7 +98,7 @@
 				to: destination,
 				amount: parseToken({
 					value: `${amount}`,
-					unitName: $tokenDecimals
+					unitName: $token.decimals
 				}),
 				identity: $authStore.identity,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
