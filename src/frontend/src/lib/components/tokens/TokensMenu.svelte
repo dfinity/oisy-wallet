@@ -4,19 +4,13 @@
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { networkICP } from '$lib/derived/network.derived';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
+	import IcTokensManage from '$icp/components/tokens/IcTokensManage.svelte';
+	import TokensManage from '$eth/components/tokens/TokensManage.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
-
-	const importTokens = () => {
-		const fn = $networkICP ? modalStore.openIcManageTokens : modalStore.openAddToken;
-		fn();
-
-		visible = false;
-	};
 </script>
 
 <button
@@ -34,16 +28,16 @@
 	<div class="flex flex-col gap-3">
 		<TokensZeroBalance />
 
-		<div class="my">
-			<Hr />
-		</div>
+		{#if $networkICP || $networkEthereum}
+			<div class="my">
+				<Hr />
+			</div>
 
-		<button
-			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label={$networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title}
-			on:click={importTokens}
-		>
-			{$networkICP ? $i18n.tokens.manage.text.title : `+ ${$i18n.tokens.import.text.title}`}
-		</button>
+			{#if $networkICP}
+				<IcTokensManage />
+			{:else if $networkEthereum}
+				<TokensManage />
+			{/if}
+		{/if}
 	</div>
 </Popover>
