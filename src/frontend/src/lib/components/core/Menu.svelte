@@ -64,12 +64,9 @@
 			{$i18n.navigation.text.manage_internet_identity}
 		</ExternalLink>
 
-		<ButtonMenu
-			label={$i18n.settings.text.title}
-			on:click={gotoSettings}
-			ariaLabel={$i18n.navigation.alt.more_settings}
-		>
-			<IconSettings slot="before-label" />
+		<ButtonMenu ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
+			<IconSettings />
+			{$i18n.settings.text.title}
 		</ButtonMenu>
 
 		<SignOut on:icLogoutTriggered={() => (visible = false)} />

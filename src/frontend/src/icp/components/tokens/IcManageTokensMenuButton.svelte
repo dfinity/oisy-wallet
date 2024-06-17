@@ -5,5 +5,7 @@
 </script>
 
 <div class="content">
-	<ButtonMenu label={$i18n.tokens.manage.text.title} on:click={modalStore.openIcManageTokens} />
+	<ButtonMenu ariaLabel={$i18n.tokens.manage.text.title} on:click={modalStore.openIcManageTokens}>
+		{$i18n.tokens.manage.text.title}
+	</ButtonMenu>
 </div>

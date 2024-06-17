@@ -5,9 +5,7 @@
 </script>
 
 <div class="content">
-	<ButtonMenu
-		label={`+ ${$i18n.tokens.import.text.title}`}
-		ariaLabel={$i18n.tokens.import.text.title}
-		on:click={modalStore.openAddToken}
-	/>
+	<ButtonMenu ariaLabel={$i18n.tokens.import.text.title} on:click={modalStore.openAddToken}>
+		{`+ ${$i18n.tokens.import.text.title}`}
+	</ButtonMenu>
 </div>

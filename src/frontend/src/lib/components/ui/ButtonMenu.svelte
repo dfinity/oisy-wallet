@@ -1,14 +1,11 @@
 <script lang="ts">
-	export let label: string;
-	export let ariaLabel: string | undefined = undefined;
+	export let ariaLabel: string;
 </script>
 
 <button
 	class={`flex gap-2 items-center no-underline hover:text-blue active:text-blue`}
-	aria-label={ariaLabel ?? label}
+	aria-label={ariaLabel}
 	on:click
 >
-	<slot name="before-label"></slot>
-	{label}
-	<slot name="after-label"></slot>
+	<slot></slot>
 </button>
