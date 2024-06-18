@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -58,6 +58,8 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
+	const dispatch = createEventDispatcher();
+
 	const close = () =>
 		closeModal(() => {
 			destination = '';
@@ -67,6 +69,8 @@
 			sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
 			currentStep = undefined;
+
+			dispatch('nnsClose');
 		});
 </script>
 

@@ -42,9 +42,9 @@
 
 	{#if send}
 		{#if $networkICP}
-			<IcSend />
+			<IcSend token={$tokenWithFallback} />
 		{:else}
-			<Send />
+			<Send token={$tokenWithFallback} />
 		{/if}
 	{/if}
 

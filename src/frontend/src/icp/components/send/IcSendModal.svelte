@@ -19,7 +19,7 @@
 		type BitcoinFeeContext as BitcoinFeeContextType,
 		initBitcoinFeeStore
 	} from '$icp/stores/bitcoin-fee.store';
-	import { setContext } from 'svelte';
+	import { createEventDispatcher, setContext } from 'svelte';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
@@ -171,6 +171,8 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
+	const dispatch = createEventDispatcher();
+
 	const close = () =>
 		closeModal(() => {
 			destination = '';
@@ -180,6 +182,8 @@
 			sendProgressStep = ProgressStepsSendIc.INITIALIZATION;
 
 			currentStep = undefined;
+
+			dispatch('nnsClose');
 		});
 
 	/**
