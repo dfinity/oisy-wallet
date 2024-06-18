@@ -18,7 +18,7 @@
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
 	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TokenReceive from '$lib/components/tokens/TokenReceive.svelte';
+	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -65,7 +65,7 @@
 					</Card>
 				</a>
 
-				<TokenReceive {token} />
+				<TokenReceiveSend {token} />
 			</div>
 		</Listener>
 	{/each}
