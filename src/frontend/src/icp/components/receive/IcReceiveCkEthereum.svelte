@@ -13,6 +13,8 @@
 	import type { IcCkToken } from '$icp/types/ic';
 	import { ETHEREUM_TOKEN } from '$env/tokens.env';
 
+	export let compact = false;
+
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	let twinToken: Token;
@@ -36,7 +38,7 @@
 	$: sendToken.set(twinToken);
 </script>
 
-<ReceiveButton on:click={() => modalStore.openCkETHReceive(modalId)} />
+<ReceiveButton {compact} on:click={() => modalStore.openCkETHReceive(modalId)} />
 
 {#if $modalCkETHReceive && $modalStore?.data === modalId}
 	<IcReceiveCkEthereumModal />
