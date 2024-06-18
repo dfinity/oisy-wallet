@@ -19,6 +19,7 @@
 	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
+	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -61,7 +62,9 @@
 							{token.symbol}
 						</output>
 
-						<ExchangeTokenValue {token} slot="amount" />
+						<CardAmount slot="action">
+							<ExchangeTokenValue {token} />
+						</CardAmount>
 					</Card>
 				</a>
 
