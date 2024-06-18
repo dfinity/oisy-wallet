@@ -3,6 +3,8 @@
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import Receive from '$eth/components/receive/Receive.svelte';
+	import Send from '$eth/components/send/Send.svelte';
+	import IcSend from '$icp/components/send/IcSend.svelte';
 
 	export let token: Token;
 
@@ -10,10 +12,12 @@
 	$: networkIcp = isNetworkIdICP(token?.network.id);
 </script>
 
-<div class="flex flex-col justify-center mr-1">
+<div class="flex justify-center mr-1">
 	{#if networkIcp}
 		<IcReceive compact {token} />
+		<IcSend compact />
 	{:else}
 		<Receive compact />
+		<Send compact />
 	{/if}
 </div>
