@@ -100,8 +100,8 @@ The steps are as follows:
 2. **Verify the SVG asset size** is acceptable (small) and **copy** it into [src/frontend/src/icp-eth/assets].
 3. Create a new source environment file in [src/frontend/src/env] by cloning [src/frontend/src/env/tokens.usdc.env.ts] and renaming `usdc` to the token's name.
 4. **Adapt the content of the tokens:**
-   a. Find the contract address on the ckETH dashboard [production](https://sv3dd-oaaaa-aaaar-qacoa-cai.raw.icp0.io/dashboard) or [testnet](https://jzenf-aiaaa-aaaar-qaa7q-cai.raw.icp0.io/dashboard) in the table "Supported ckERC20 tokens".
-   b. Obtain the token name, decimals, and symbol on Etherscan using the contract address (Select "Contract > Read contract" to query various information from the ABI).
+   1. Find the contract address on the ckETH dashboard [production](https://sv3dd-oaaaa-aaaar-qacoa-cai.raw.icp0.io/dashboard) or [testnet](https://jzenf-aiaaa-aaaar-qaa7q-cai.raw.icp0.io/dashboard) in the table "Supported ckERC20 tokens". 
+   2. Obtain the token name, decimals, and symbol on Etherscan using the contract address (Select "Contract > Read contract" to query various information from the ABI).
 5. **Set up the token** for the Ethereum network by listing the new token in the twin tokens arrays of [src/frontend/src/env/tokens.erc20.env.ts].
 6. **Create the mapping for the new token** in [src/frontend/src/env/networks.icrc.env.ts]. This step sets up the token as a ck token, statically establishes the link between the token on the Ethereum network and its twin token on the IC network, and lists the token in the ICRC tokens and ledgers.
 
