@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 
 	export let noMargin = false;
 
@@ -21,9 +22,7 @@
 			>
 
 			{#if amount}
-				<span class="flex-1 text-right inline-flex justify-end items-start"
-					><slot name="amount" /></span
-				>
+				<CardAmount><slot name="amount" /></CardAmount>
 			{/if}
 		</div>
 		<p class="text-misty-rose text-left inline-flex items-center">
