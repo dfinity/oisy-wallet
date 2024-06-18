@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
-	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalSend } from '$lib/derived/modal.derived';
 	import SendModal from '$eth/components/send/SendModal.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import { i18n } from '$lib/stores/i18n.store';
+	import SendButton from '$lib/components/send/SendButton.svelte';
 
 	const isDisabled = (): boolean => $addressNotLoaded;
 
@@ -23,15 +21,7 @@
 	};
 </script>
 
-<button
-	class="hero"
-	on:click={async () => await openSend()}
-	disabled={$isBusy}
-	class:opacity-50={$isBusy}
->
-	<IconSend size="28" />
-	<span>{$i18n.send.text.send}</span></button
->
+<SendButton on:click={async () => await openSend()} />
 
 {#if $modalSend}
 	<SendModal />
