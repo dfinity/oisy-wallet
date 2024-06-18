@@ -3,7 +3,6 @@
 	import { modalCkBTCReceive } from '$lib/derived/modal.derived';
 	import IcReceiveModal from '$icp/components/receive/IcReceiveModal.svelte';
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
-	import type { IcToken } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
 	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
@@ -35,7 +34,7 @@
 		minterInfoLoaded = nonNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
 		await loadAllCkBtcInfo({
-			...($token as IcToken),
+			...$token,
 			identity: $authStore.identity
 		});
 

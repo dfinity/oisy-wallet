@@ -68,7 +68,6 @@
 			return;
 		}
 
-		//
 		if (isNullish($token)) {
 			updateContext();
 			return;
