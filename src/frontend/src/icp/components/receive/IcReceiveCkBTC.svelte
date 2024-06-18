@@ -19,8 +19,7 @@
 
 	export let compact = false;
 
-	const { token, tokenId, ckEthereumTwinToken } =
-		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	const { token, tokenId, twinToken } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const modalId = Symbol();
 
@@ -48,12 +47,8 @@
 
 <ReceiveButton {compact} on:click={async () => await openReceive()} />
 
-{#if !minterInfoLoaded}
-	<IcCkListener
-		initFn={initCkBTCMinterInfoWorker}
-		token={$token}
-		twinToken={$ckEthereumTwinToken}
-	/>
+{#if !minterInfoLoaded && nonNullish($twinToken)}
+	<IcCkListener initFn={initCkBTCMinterInfoWorker} token={$token} twinToken={$twinToken} />
 {/if}
 
 {#if $modalCkBTCReceive && $modalStore?.data === modalId}
