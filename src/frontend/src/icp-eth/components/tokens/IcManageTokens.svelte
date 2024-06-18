@@ -105,8 +105,10 @@
 	const save = () =>
 		dispatch(
 			'icSave',
-			Object.values(modifiedTokens).flatMap((subObject) =>
-				Object.values(subObject as Record<TokenId, IcrcCustomToken>)
+			Object.getOwnPropertySymbols(modifiedTokens).flatMap((networkId) =>
+				Object.getOwnPropertySymbols(modifiedTokens[networkId]).map(
+					(tokenId) => modifiedTokens[networkId][tokenId]
+				)
 			)
 		);
 </script>
