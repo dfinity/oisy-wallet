@@ -10,6 +10,7 @@
 	class:text-blue={compact}
 	class:hover:text-dark-blue={compact}
 	class:active:text-dark-blue={compact}
+	class:p-2={compact}
 	{disabled}
 	class:opacity-50={disabled}
 	on:click

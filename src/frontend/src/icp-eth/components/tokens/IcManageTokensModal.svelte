@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import IcManageTokens from '$icp/components/tokens/IcManageTokens.svelte';
+	import IcManageTokens from '$icp-eth/components/tokens/IcManageTokens.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
