@@ -26,6 +26,12 @@ module.exports = {
 			parserOptions: {
 				parser: '@typescript-eslint/parser'
 			}
+		},
+		{
+			files: ['scripts/**/*.mjs'],
+			rules: {
+				'no-console': 'off',
+			}
 		}
 	],
 	rules: {
