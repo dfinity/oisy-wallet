@@ -8,6 +8,8 @@
 
 	export let compact = false;
 
+	const modalId = Symbol();
+
 	const isDisabled = (): boolean => $addressNotLoaded;
 
 	const openSend = async () => {
@@ -19,12 +21,12 @@
 			}
 		}
 
-		modalStore.openSend();
+		modalStore.openSend(modalId);
 	};
 </script>
 
 <SendButton on:click={async () => await openSend()} {compact} />
 
-{#if $modalSend}
+{#if $modalSend && $modalStore?.data === modalId}
 	<SendModal />
 {/if}

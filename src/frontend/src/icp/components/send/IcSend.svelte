@@ -6,10 +6,12 @@
 	import SendButton from '$lib/components/send/SendButton.svelte';
 
 	export let compact = false;
+
+	const modalId = Symbol();
 </script>
 
-<SendButton on:click={modalStore.openIcSend} {compact} />
+<SendButton on:click={() => modalStore.openIcSend(modalId)} {compact} />
 
-{#if $modalIcSend}
+{#if $modalIcSend && $modalStore?.data === modalId}
 	<IcSendModal networkId={ICP_NETWORK_ID} />
 {/if}
