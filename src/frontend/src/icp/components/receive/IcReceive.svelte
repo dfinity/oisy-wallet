@@ -10,7 +10,7 @@
 		isTokenCkEthLedger
 	} from '$icp/utils/ic-send.utils';
 	import type { IcToken } from '$icp/types/ic';
-	import { setContext } from 'svelte';
+	import { createEventDispatcher, setContext } from 'svelte';
 	import {
 		type CloseModalAndResetToken,
 		initReceiveTokenContext,
@@ -18,8 +18,8 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-	import { token as tokenStore } from '$lib/stores/token.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { loadTokenAndRun } from '$icp/services/token.services';
 
 	export let token: Token;
 	export let compact = false;
@@ -34,13 +34,15 @@
 	$: icrc = token.standard === 'icrc';
 
 	const open: LoadTokenAndOpenModal = async (callback: () => Promise<void>) => {
-		tokenStore.set(token);
-		await callback();
+		await loadTokenAndRun({ token, callback });
 	};
+
+	const dispatch = createEventDispatcher();
 
 	const close: CloseModalAndResetToken = () => {
 		modalStore.close();
-		tokenStore.set(null);
+		// We are resetting the token in the parent. That way we can know if we are using a global page $token or a selected token.
+		dispatch('nnsClose');
 	};
 
 	/**
