@@ -113,6 +113,7 @@ interface I18nNetworks {
 	title: string;
 	show_testnets: string;
 	more: string;
+	chain_fusion: string;
 }
 
 interface I18nReceive {
@@ -309,6 +310,7 @@ interface I18nTokens {
 		not_custom: string;
 		incomplete_metadata: string;
 		duplicate_metadata: string;
+		unexpected_undefined: string;
 	};
 }
 

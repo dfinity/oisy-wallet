@@ -1,6 +1,7 @@
 import type { QrResponse, QrStatus } from '$lib/types/qr-code';
+import type { OptionToken } from '$lib/types/token';
 import { decodePayment } from '@dfinity/ledger-icrc';
-import { isNullish, nonNullish, type Token } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const icDecodeQrCode = ({
 	status,
@@ -9,7 +10,7 @@ export const icDecodeQrCode = ({
 }: {
 	status: QrStatus;
 	code?: string | undefined;
-	expectedToken?: Token;
+	expectedToken?: OptionToken;
 }): QrResponse => {
 	if (status !== 'success') {
 		return { status };
