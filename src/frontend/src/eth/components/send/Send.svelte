@@ -6,6 +6,8 @@
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import SendButton from '$lib/components/send/SendButton.svelte';
 
+	export let compact = false;
+
 	const isDisabled = (): boolean => $addressNotLoaded;
 
 	const openSend = async () => {
@@ -21,7 +23,7 @@
 	};
 </script>
 
-<SendButton on:click={async () => await openSend()} />
+<SendButton on:click={async () => await openSend()} {compact} />
 
 {#if $modalSend}
 	<SendModal />

@@ -9,7 +9,7 @@
 </script>
 
 <ButtonDualMode on:click disabled={$isBusy} alt={$i18n.receive.text.receive} {compact}>
-	<IconQRCodeScanner slot="icon-only" />
+	<IconQRCodeScanner size="24" slot="icon-only" />
 	<IconReceive size="28" slot="text-icon" />
 	{$i18n.receive.text.receive}
 </ButtonDualMode>
