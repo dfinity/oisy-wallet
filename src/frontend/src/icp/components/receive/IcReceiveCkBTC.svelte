@@ -17,6 +17,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 
+	export let compact = false;
+
 	const { token, tokenId, twinToken } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const modalId = Symbol();
@@ -43,7 +45,7 @@
 
 <svelte:window on:oisyReceiveCkBTC={openReceive} />
 
-<ReceiveButton on:click={async () => await openReceive()} />
+<ReceiveButton {compact} on:click={async () => await openReceive()} />
 
 {#if !minterInfoLoaded && nonNullish($twinToken)}
 	<IcCkListener initFn={initCkBTCMinterInfoWorker} token={$token} twinToken={$twinToken} />

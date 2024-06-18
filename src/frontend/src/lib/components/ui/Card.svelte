@@ -21,7 +21,7 @@
 			>
 
 			{#if amount}
-				<span class="flex-1 text-right inline-flex justify-end items-center"
+				<span class="flex-1 text-right inline-flex justify-end items-start"
 					><slot name="amount" /></span
 				>
 			{/if}

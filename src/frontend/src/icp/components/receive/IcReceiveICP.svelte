@@ -12,6 +12,8 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 
+	export let compact = false;
+
 	const modalId = Symbol();
 
 	const { tokenStandard } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
@@ -26,7 +28,7 @@
 	};
 </script>
 
-<ReceiveButton on:click={openReceive} />
+<ReceiveButton {compact} on:click={openReceive} />
 
 {#if $modalIcpReceive && $modalStore?.data === modalId}
 	<IcReceiveModal infoCmp={IcReceiveInfoICP} />
