@@ -5,7 +5,7 @@
 	import SendModal from '$eth/components/send/SendModal.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import SendButton from '$lib/components/send/SendButton.svelte';
-	import { loadTokenAndRun, runAndResetToken } from '$icp/services/token.services';
+	import { loadTokenAndRun } from '$icp/services/token.services';
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;

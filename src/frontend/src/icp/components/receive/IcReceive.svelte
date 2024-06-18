@@ -19,7 +19,7 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { loadTokenAndRun, runAndResetToken } from '$icp/services/token.services';
+	import { loadTokenAndRun } from '$icp/services/token.services';
 
 	export let token: Token;
 	export let compact = false;
