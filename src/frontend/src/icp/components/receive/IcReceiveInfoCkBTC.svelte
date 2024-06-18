@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
@@ -18,7 +17,7 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 
-	const { tokenId } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	const { tokenId, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
@@ -62,6 +61,4 @@
 	{/if}
 </div>
 
-<button class="primary full center text-center" on:click={modalStore.close}
-	>{$i18n.core.text.done}</button
->
+<button class="primary full center text-center" on:click={close}>{$i18n.core.text.done}</button>

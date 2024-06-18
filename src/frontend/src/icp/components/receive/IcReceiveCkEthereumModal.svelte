@@ -23,6 +23,7 @@
 	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { createEventDispatcher } from 'svelte';
 
 	/**
 	 * Props
@@ -65,6 +66,8 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
+	const dispatch = createEventDispatcher();
+
 	const close = () =>
 		closeModal(() => {
 			destination = '';
@@ -74,6 +77,8 @@
 			sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
 			currentStep = undefined;
+
+			dispatch('nnsClose');
 		});
 </script>
 

@@ -23,7 +23,14 @@ const initReceiveTokenStore = (token: IcToken): ReceiveTokenStore => {
 	};
 };
 
-export const initReceiveTokenContext = (token: Token): ReceiveTokenContext => {
+export const initReceiveTokenContext = ({
+	token,
+	...rest
+}: {
+	token: Token;
+	open: LoadTokenAndOpenModal;
+	close: CloseModalAndResetToken;
+}): ReceiveTokenContext => {
 	const tokenStore = initReceiveTokenStore(token as IcToken);
 	const tokenId = derived(tokenStore, ({ id }) => id);
 	const tokenStandard = derived(tokenStore, ({ standard }) => standard);
@@ -43,9 +50,13 @@ export const initReceiveTokenContext = (token: Token): ReceiveTokenContext => {
 		tokenId,
 		tokenStandard,
 		ckEthereumTwinToken,
-		ckEthereumTwinTokenNetwork
+		ckEthereumTwinTokenNetwork,
+		...rest
 	};
 };
+
+export type LoadTokenAndOpenModal = (openModal: () => Promise<void>) => Promise<void>;
+export type CloseModalAndResetToken = () => void;
 
 export interface ReceiveTokenContext {
 	token: ReceiveTokenStore;
@@ -54,6 +65,9 @@ export interface ReceiveTokenContext {
 
 	ckEthereumTwinToken: Readable<Token>;
 	ckEthereumTwinTokenNetwork: Readable<EthereumNetwork>;
+
+	open: LoadTokenAndOpenModal;
+	close: CloseModalAndResetToken;
 }
 
 export const RECEIVE_TOKEN_CONTEXT_KEY = Symbol('receive-token');

@@ -12,7 +12,8 @@
 
 	export let compact = false;
 
-	const { ckEthereumTwinToken } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	const { ckEthereumTwinToken, open, close } =
+		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const modalId = Symbol();
 
@@ -30,10 +31,12 @@
 	});
 
 	$: sendToken.set($ckEthereumTwinToken);
+
+	const openReceive = async () => modalStore.openCkETHReceive(modalId);
 </script>
 
-<ReceiveButton {compact} on:click={() => modalStore.openCkETHReceive(modalId)} />
+<ReceiveButton {compact} on:click={async () => await open(openReceive)} />
 
 {#if $modalCkETHReceive && $modalStore?.data === modalId}
-	<IcReceiveCkEthereumModal />
+	<IcReceiveCkEthereumModal on:nnsClose={close} />
 {/if}

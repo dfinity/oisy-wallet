@@ -16,9 +16,9 @@
 
 	const modalId = Symbol();
 
-	const { tokenStandard } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	const { tokenStandard, open, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	const openReceive = () => {
+	const openReceive = async () => {
 		if ($tokenStandard === 'icp' || isRouteTokens($page)) {
 			modalStore.openIcpReceive(modalId);
 			return;
@@ -28,8 +28,8 @@
 	};
 </script>
 
-<ReceiveButton {compact} on:click={openReceive} />
+<ReceiveButton {compact} on:click={async () => await open(openReceive)} />
 
 {#if $modalIcpReceive && $modalStore?.data === modalId}
-	<IcReceiveModal infoCmp={IcReceiveInfoICP} />
+	<IcReceiveModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} />
 {/if}

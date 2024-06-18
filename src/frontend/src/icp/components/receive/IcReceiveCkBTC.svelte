@@ -19,7 +19,7 @@
 
 	export let compact = false;
 
-	const { token, tokenId, ckEthereumTwinToken } =
+	const { token, tokenId, ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const modalId = Symbol();
@@ -44,9 +44,9 @@
 	};
 </script>
 
-<svelte:window on:oisyReceiveCkBTC={openReceive} />
+<svelte:window on:oisyReceiveCkBTC={async () => await open(openReceive)} />
 
-<ReceiveButton {compact} on:click={async () => await openReceive()} />
+<ReceiveButton {compact} on:click={async () => await open(openReceive)} />
 
 {#if !minterInfoLoaded}
 	<IcCkListener
@@ -57,5 +57,5 @@
 {/if}
 
 {#if $modalCkBTCReceive && $modalStore?.data === modalId}
-	<IcReceiveModal infoCmp={IcReceiveInfoCkBTC} />
+	<IcReceiveModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} />
 {/if}
