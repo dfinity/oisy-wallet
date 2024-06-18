@@ -16,7 +16,7 @@
 	const close = () => runAndResetToken(modalStore.close);
 </script>
 
-<div class="flex justify-center gap-1 mr-1">
+<div class="flex justify-center gap-1 -mr-2">
 	{#if networkIcp}
 		<IcReceive compact {token} on:nnsClose={close} />
 		<IcSend compact {token} on:nnsClose={close} />
