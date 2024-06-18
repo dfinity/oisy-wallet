@@ -7,7 +7,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
+	import IcManageTokenToggle from '$icp-eth/components/tokens/IcManageTokenToggle.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { fade } from 'svelte/transition';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';

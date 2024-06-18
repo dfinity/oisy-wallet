@@ -27,6 +27,7 @@ const initTokenStore = (): TokenStore => {
  * Unfortunately, this architecture is not ideal. If the global token store is used for other features on the main screen in the future, conflicts may arise.
  * Therefore, this store is deprecated and should eventually be replaced with a method that passes down the selected token, ideally through contexts.
  * In other words, for the Hero, Receive, and Send features, we should avoid accessing a global store and instead use a dedicated state.
+ * TODO: pass down token with context instead of global store.
  * @deprecated This approach works for now but does not align with the new architectural requirements.
  */
 export const token = initTokenStore();
