@@ -10,7 +10,7 @@
 	import { ckEthereumTwinToken, ckEthereumTwinTokenNetwork } from '$icp-eth/derived/cketh.derived';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth();
 
@@ -37,7 +37,6 @@
 	<h4 class="flex gap-2 items-center font-medium">
 		<Logo
 			src={eth}
-			size="20px"
 			alt={replacePlaceholders($i18n.core.alt.logo, {
 				$name: $ckEthereumTwinToken.name
 			})}
@@ -45,7 +44,7 @@
 		<span class="w-[70%]"
 			>{replacePlaceholders($i18n.info.ethereum.title, {
 				$token: $ckEthereumTwinToken.symbol,
-				$ckToken: $token.symbol
+				$ckToken: $tokenWithFallback.symbol
 			})}</span
 		>
 	</h4>
@@ -54,7 +53,7 @@
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.description), {
 			$token: $ckEthereumTwinToken.symbol,
 			$tkName: $ckEthereumTwinToken.name,
-			$ckToken: $token.symbol,
+			$ckToken: $tokenWithFallback.symbol,
 			$network: $ckEthereumTwinTokenNetwork.name
 		})}
 	</p>
@@ -62,7 +61,7 @@
 	<button class="primary mt-6" disabled={$isBusy} class:opacity-50={$isBusy} on:click={openReceive}>
 		{replacePlaceholders($i18n.info.ethereum.how_to, {
 			$token: $ckEthereumTwinToken.symbol,
-			$ckToken: $token.symbol
+			$ckToken: $tokenWithFallback.symbol
 		})}</button
 	>
 </div>

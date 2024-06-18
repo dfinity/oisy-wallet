@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { IcToken } from '$icp/types/ic';
-	import { token } from '$lib/derived/token.derived';
 	import IconSync from '$lib/components/icons/IconSync.svelte';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { updateBalance } from '$icp/services/ckbtc.services';
@@ -13,12 +12,20 @@
 	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
 	import type { SyncState } from '$lib/types/sync';
 	import { blur } from 'svelte/transition';
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
 
 	let receiveProgressStep: string | undefined = undefined;
 
 	const receive = async () => {
+		if (isNullish($token)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected_undefined }
+			});
+			return;
+		}
+
 		receiveProgressStep = ProgressStepsUpdateBalanceCkBtc.INITIALIZATION;
 
 		modalStore.openReceiveBitcoin();

@@ -12,7 +12,7 @@ import {
 import type { IcCkToken, IcToken } from '$icp/types/ic';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-import { token, tokenStandard } from '$lib/derived/token.derived';
+import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -27,9 +27,9 @@ import { derived, type Readable } from 'svelte/store';
  * @deprecated ChainFusion - probably deprecated, to be double checked
  */
 export const ethToCkETHEnabled: Readable<boolean> = derived(
-	[tokenStandard, token],
-	([$tokenStandard, $token]) =>
-		$tokenStandard === 'ethereum' || isTokenCkEthLedger($token as IcToken)
+	[tokenStandard, tokenWithFallback],
+	([$tokenStandard, $tokenWithFallback]) =>
+		$tokenStandard === 'ethereum' || isTokenCkEthLedger($tokenWithFallback as IcToken)
 );
 
 /**
@@ -39,8 +39,10 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
  * @deprecated ChainFusion - probably deprecated, to be double checked
  */
 export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
-	[token],
-	([$token]) => ERC20_TWIN_TOKENS_IDS.includes($token.id) || isTokenCkErc20Ledger($token as IcToken)
+	[tokenWithFallback],
+	([$tokenWithFallback]) =>
+		ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallback.id) ||
+		isTokenCkErc20Ledger($tokenWithFallback as IcToken)
 );
 
 /**
@@ -48,8 +50,8 @@ export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
  * @deprecated ChainFusion
  */
 export const ckEthereumTwinToken: Readable<Token> = derived(
-	[token],
-	([$token]) => ($token as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
+	[tokenWithFallback],
+	([$tokenWithFallback]) => ($tokenWithFallback as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
 );
 
 /**

@@ -7,13 +7,15 @@
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { isNullish } from '@dfinity/utils';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { token, tokenId } from '$lib/derived/token.derived';
+	import { tokenId } from '$lib/derived/token.derived';
 	import type { NetworkId } from '$lib/types/network';
-	import type { IcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
 
-	const isDisabled = (): boolean => isNullish($ckBtcMinterInfoStore?.[$tokenId]);
+	const isDisabled = (): boolean =>
+		isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
 	const openSend = async () => {
 		const status = await waitWalletReady(isDisabled);
@@ -26,7 +28,7 @@
 	};
 
 	let networkId: NetworkId;
-	$: networkId = ($token as IcCkToken).twinToken?.network.id ?? BTC_MAINNET_NETWORK_ID;
+	$: networkId = ($token as OptionIcCkToken)?.twinToken?.network.id ?? BTC_MAINNET_NETWORK_ID;
 </script>
 
 <button

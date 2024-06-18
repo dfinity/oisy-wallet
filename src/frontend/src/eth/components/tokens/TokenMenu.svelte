@@ -5,14 +5,15 @@
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import { address } from '$lib/derived/address.derived';
-	import { token, tokenStandard } from '$lib/derived/token.derived';
+	import { tokenStandard } from '$lib/derived/token.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
 	import { fade } from 'svelte/transition';
+	import { token } from '$lib/stores/token.store';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl =
-		$tokenStandard === 'erc20'
+		$tokenStandard === 'erc20' && nonNullish($token)
 			? `${$explorerUrlStore}/token/${($token as Erc20Token).address}`
 			: notEmptyString($address)
 				? `${$explorerUrlStore}/address/${$address}`

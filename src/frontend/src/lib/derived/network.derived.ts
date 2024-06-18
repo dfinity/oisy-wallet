@@ -1,41 +1,24 @@
 import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-import { DEFAULT_NETWORK, DEFAULT_NETWORK_ID } from '$lib/constants/networks.constants';
 import { address } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { networks } from '$lib/derived/networks.derived';
-import { tokens } from '$lib/derived/tokens.derived';
 import type { OptionAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
-import type { Token } from '$lib/types/token';
-import {
-	isNetworkIdChainFusion,
-	isNetworkIdEthereum,
-	isNetworkIdICP
-} from '$lib/utils/network.utils';
+import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const networkId: Readable<NetworkId> = derived(
+export const networkId: Readable<NetworkId | undefined> = derived(
 	[networks, routeNetwork],
 	([$networks, $routeNetwork]) =>
 		nonNullish($routeNetwork)
-			? $networks.find(({ id }) => id.description === $routeNetwork)?.id ?? DEFAULT_NETWORK_ID
-			: DEFAULT_NETWORK_ID
+			? $networks.find(({ id }) => id.description === $routeNetwork)?.id
+			: undefined
 );
 
-export const selectedNetwork: Readable<Network> = derived(
+export const selectedNetwork: Readable<Network | undefined> = derived(
 	[networks, networkId],
-	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId) ?? DEFAULT_NETWORK
-);
-
-export const networkTokens: Readable<Token[]> = derived(
-	[tokens, selectedNetwork],
-	([$tokens, $selectedNetwork]) =>
-		$tokens.filter(
-			({ network: { id, env } }) =>
-				(isNetworkIdChainFusion($selectedNetwork.id) && env === $selectedNetwork.env) ||
-				id === $selectedNetwork.id
-		)
+	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId)
 );
 
 export const networkICP: Readable<boolean> = derived([networkId], ([$networkId]) =>

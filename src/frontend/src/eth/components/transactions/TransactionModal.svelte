@@ -12,7 +12,7 @@
 	} from '$lib/utils/format.utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import TransactionStatus from './TransactionStatus.svelte';
-	import { token } from '$lib/derived/token.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { notEmptyString } from '@dfinity/utils';
@@ -125,10 +125,10 @@
 			<output>
 				{formatToken({
 					value,
-					unitName: $token.decimals,
-					displayDecimals: $token.decimals
+					unitName: $tokenWithFallback.decimals,
+					displayDecimals: $tokenWithFallback.decimals
 				})}
-				{$token.symbol}
+				{$tokenWithFallback.symbol}
 			</output>
 		</Value>
 	</div>
