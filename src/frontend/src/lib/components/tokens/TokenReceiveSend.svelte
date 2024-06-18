@@ -12,7 +12,7 @@
 	$: networkIcp = isNetworkIdICP(token?.network.id);
 </script>
 
-<div class="flex justify-center mr-1">
+<div class="flex justify-center gap-1 mr-1">
 	{#if networkIcp}
 		<IcReceive compact {token} />
 		<IcSend compact />
