@@ -16,7 +16,7 @@
 	import { fade } from 'svelte/transition';
 	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
-	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
+	import IcManageTokensModal from '$icp-eth/components/tokens/IcManageTokensModal.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
 
