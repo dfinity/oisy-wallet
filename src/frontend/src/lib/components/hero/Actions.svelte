@@ -26,10 +26,10 @@
 <div role="toolbar" class="grid grid-cols-2 gap-4 text-deep-violet font-bold pt-10 pb-3">
 	{#if $networkICP}
 		<IcReceive token={$tokenWithFallback} />
-		<IcSend />
+		<IcSend token={$tokenWithFallback} />
 	{:else}
 		<Receive />
-		<Send />
+		<Send token={$tokenWithFallback} />
 	{/if}
 
 	{#if convertEth}

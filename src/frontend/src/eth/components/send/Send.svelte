@@ -5,7 +5,10 @@
 	import SendModal from '$eth/components/send/SendModal.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import SendButton from '$lib/components/send/SendButton.svelte';
+	import { loadTokenAndRun } from '$icp/services/token.services';
+	import type { Token } from '$lib/types/token';
 
+	export let token: Token;
 	export let compact = false;
 
 	const modalId = Symbol();
@@ -21,12 +24,13 @@
 			}
 		}
 
-		modalStore.openSend(modalId);
+		const callback = async () => modalStore.openSend(modalId);
+		await loadTokenAndRun({ token, callback });
 	};
 </script>
 
 <SendButton on:click={async () => await openSend()} {compact} />
 
 {#if $modalSend && $modalStore?.data === modalId}
-	<SendModal />
+	<SendModal on:nnsClose />
 {/if}
