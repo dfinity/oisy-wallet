@@ -12,12 +12,17 @@
 	import type { IcToken } from '$icp/types/ic';
 	import { setContext } from 'svelte';
 	import {
+		type CloseModalAndResetToken,
 		initReceiveTokenContext,
+		type LoadTokenAndOpenModal,
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import { token as tokenStore } from '$lib/stores/token.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	export let token: Token;
+	export let compact = false;
 
 	let ckEthereum = false;
 	$: ckEthereum = isTokenCkEthLedger(token as IcToken) || isTokenCkErc20Ledger(token as IcToken);
@@ -28,10 +33,20 @@
 	let icrc = false;
 	$: icrc = token.standard === 'icrc';
 
+	const open: LoadTokenAndOpenModal = async (callback: () => Promise<void>) => {
+		tokenStore.set(token);
+		await callback();
+	};
+
+	const close: CloseModalAndResetToken = () => {
+		modalStore.close();
+		tokenStore.set(null);
+	};
+
 	/**
 	 * Context for the IC receive modals: We initialize with a token, ensuring that the information is never undefined.
 	 */
-	const context = initReceiveTokenContext(token);
+	const context = initReceiveTokenContext({ token, open, close });
 	setContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY, context);
 
 	// At boot time, if the context is derived globally, the token might be updated a few times. That's why we also update it with an auto-subscriber.
@@ -39,11 +54,11 @@
 </script>
 
 {#if ckEthereum}
-	<IcReceiveCkEthereum />
+	<IcReceiveCkEthereum {compact} />
 {:else if ckBTC}
-	<IcReceiveCkBTC />
+	<IcReceiveCkBTC {compact} />
 {:else if icrc}
-	<IcReceiveIcrc />
+	<IcReceiveIcrc {compact} />
 {:else}
-	<IcReceiveIcp />
+	<IcReceiveIcp {compact} />
 {/if}
