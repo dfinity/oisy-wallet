@@ -51,7 +51,7 @@
 					<Card noMargin>
 						{token.name}
 
-                        <TokenLogo {token} slot="icon" color="white" />
+						<TokenLogo {token} slot="icon" color="white" />
 
 						<output class="break-all" slot="description">
 							{formatToken({
