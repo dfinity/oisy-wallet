@@ -13,12 +13,13 @@
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import { icrcCustomTokens, icrcDefaultTokens } from '$icp/derived/icrc.derived';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import type { CanisterIdText } from '$lib/types/canister';
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import { sortIcTokens } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { TokenId } from '$lib/types/token';
+	import type { NetworkId } from '$lib/types/network';
 
 	const dispatch = createEventDispatcher();
 
@@ -69,40 +70,45 @@
 			);
 
 	let tokens: IcrcCustomToken[] = [];
-	$: tokens = filteredTokens.map(({ ledgerCanisterId, enabled, ...rest }) => ({
-		ledgerCanisterId,
-		enabled: modifiedTokens[`${ledgerCanisterId}`]?.enabled ?? enabled,
+	$: tokens = filteredTokens.map(({ id, network, enabled, ...rest }) => ({
+		id,
+		network,
+		enabled: modifiedTokens[network.id]?.[id]?.enabled ?? enabled,
 		...rest
 	}));
 
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
 
-	let modifiedTokens: Record<CanisterIdText, IcrcCustomToken> = {};
-	const onToggle = ({
-		detail: { ledgerCanisterId, enabled, ...rest }
-	}: CustomEvent<IcrcCustomToken>) => {
-		const { [`${ledgerCanisterId}`]: current, ...tokens } = modifiedTokens;
+	let modifiedTokens: Record<NetworkId, Record<TokenId, IcrcCustomToken>> = {};
+	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<IcrcCustomToken>) => {
+		const { id: networkId } = network;
 
-		if (nonNullish(current)) {
-			modifiedTokens = { ...tokens };
+		modifiedTokens[networkId] = modifiedTokens[networkId] || {};
+
+		if (nonNullish(modifiedTokens[networkId][id])) {
+			delete modifiedTokens[networkId][id];
+			if (Object.getOwnPropertySymbols(modifiedTokens[networkId]).length === 0) {
+				delete modifiedTokens[networkId];
+			}
 			return;
 		}
 
-		modifiedTokens = {
-			[`${ledgerCanisterId}`]: {
-				ledgerCanisterId,
-				enabled,
-				...rest
-			},
-			...tokens
-		};
+		modifiedTokens[networkId][id] = { id, network, ...rest };
 	};
 
 	let saveDisabled = true;
-	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
+	$: saveDisabled = Object.getOwnPropertySymbols(modifiedTokens).every(
+		(networkId) => Object.getOwnPropertySymbols(modifiedTokens[networkId]).length === 0
+	);
 
-	const save = () => dispatch('icSave', Object.values(modifiedTokens));
+	const save = () =>
+		dispatch(
+			'icSave',
+			Object.values(modifiedTokens).flatMap((subObject) =>
+				Object.values(subObject as Record<TokenId, IcrcCustomToken>)
+			)
+		);
 </script>
 
 <div class="mb-4">
