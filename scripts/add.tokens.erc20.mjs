@@ -1,36 +1,32 @@
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { load } from 'cheerio';
 import dotenv from 'dotenv';
 import { ethers } from 'ethers';
 import fs from 'fs/promises';
-import fetch from 'node-fetch';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import path from 'path';
+import { ENV } from './build.utils.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const rootPath = resolve(__dirname, '../');
 
-const envFile = process.env.NODE_ENV === 'production' ? '.env' : '.env.development';
-const envPath = resolve(rootPath, envFile);
-dotenv.config({ path: envPath });
+dotenv.config({ path: `.env.${ENV}` });
 
 const getArgValue = (argName) => {
 	const argIndex = process.argv.indexOf(argName);
-	return argIndex > -1 && argIndex < process.argv.length - 1 ? process.argv[argIndex + 1] : null;
+	return argIndex > -1 ? process.argv[argIndex + 1] : null;
 };
 
-const ETHERSCAN_API_KEY = getArgValue('--etherscan-api-key') || process.env.VITE_ETHERSCAN_API_KEY;
+const ETHERSCAN_API_KEY = getArgValue('--etherscan-api-key') ?? process.env.VITE_ETHERSCAN_API_KEY;
 
-if (!ETHERSCAN_API_KEY) {
+if (isNullish(ETHERSCAN_API_KEY)) {
 	console.error(
-		`Missing VITE_ETHERSCAN_API_KEY. Please provide it in ${envFile} or via --etherscan-api-key argument.`
+		`Missing VITE_ETHERSCAN_API_KEY. Please provide it in .env.${ENV} or via --etherscan-api-key argument.`
 	);
 	process.exit(1);
 }
-
-const PROD_DASHBOARD_URL = 'https://sv3dd-oaaaa-aaaar-qacoa-cai.raw.icp0.io/dashboard';
-const TESTNET_DASHBOARD_URL = 'https://jzenf-aiaaa-aaaar-qaa7q-cai.raw.icp0.io/dashboard';
 
 const SRC_DIR = 'src/frontend/src/env';
 const SRC_PATH = resolve(rootPath, SRC_DIR);
@@ -64,7 +60,11 @@ const fetchTokenDetails = async (contractAddress) => {
 	return { name, symbol, decimals };
 };
 
-const createEnvFile = async (tokenName, tokenDetails, contractAddress, testnetContractAddress) => {
+const createEnvFile = async (token) => {
+	const { tokenName, contractAddress, testnetContractAddress } = token;
+
+	const tokenDetails = await fetchTokenDetails(contractAddress);
+
 	const newFileName = `tokens.${tokenName.toLowerCase()}.env.ts`;
 	const newFilePath = path.join(SRC_PATH, newFileName);
 
@@ -132,29 +132,28 @@ const updateTokensErc20Env = async (newFileName, mainnetToken, testnetToken) => 
 	const filePath = path.join(SRC_PATH, 'tokens.erc20.env.ts');
 	let content = await fs.readFile(filePath, 'utf8');
 
-	const mainnetRegex = /const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token\[] = \[([\s\S]*?)];/;
-	const sepoliaRegex = /const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token\[] = \[([\s\S]*?)];/;
+	const regexList = [
+		{
+			regex: /const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token\[] = \[([\s\S]*?)];/,
+			token: mainnetToken
+		},
+		{
+			regex: /const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token\[] = \[([\s\S]*?)];/,
+			token: testnetToken
+		}
+	];
 
-	const mainnetMatch = content.match(mainnetRegex);
-	const sepoliaMatch = content.match(sepoliaRegex);
-
-	if (mainnetMatch) {
-		const tokensList = mainnetMatch[1].trim();
-		const updatedTokensList = tokensList ? `${tokensList}, ${mainnetToken}` : mainnetToken;
-		content = content.replace(
-			mainnetRegex,
-			`const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [${updatedTokensList}];`
-		);
-	}
-
-	if (sepoliaMatch) {
-		const tokensList = sepoliaMatch[1].trim();
-		const updatedTokensList = tokensList ? `${tokensList}, ${testnetToken}` : testnetToken;
-		content = content.replace(
-			sepoliaRegex,
-			`const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [${updatedTokensList}];`
-		);
-	}
+	regexList.forEach(({ regex, token }) => {
+		const match = content.match(regex);
+		if (match) {
+			const tokensList = match[1].trim();
+			const updatedTokensList = tokensList ? `${tokensList}, ${token}` : token;
+			content = content.replace(
+				regex,
+				`${match[0].split(':')[0]}: RequiredErc20Token[] = [${updatedTokensList}];`
+			);
+		}
+	});
 
 	const importStatement = `import { ${mainnetToken}, ${testnetToken} } from '$env/${newFileName.replace('.ts', '')}';\n`;
 	content = importStatement + content;
@@ -163,7 +162,7 @@ const updateTokensErc20Env = async (newFileName, mainnetToken, testnetToken) => 
 	console.log(`Updated ${filePath}`);
 };
 
-const fetchSupportedTokens = async (url) => {
+const fetchSupportedTokensByUrl = async (url) => {
 	try {
 		const html = await fetchHtml(url);
 		const $ = load(html);
@@ -186,52 +185,81 @@ const fetchSupportedTokens = async (url) => {
 	}
 };
 
-const main = async () => {
-	const prodTokens = await fetchSupportedTokens(PROD_DASHBOARD_URL);
-	const testnetTokens = await fetchSupportedTokens(TESTNET_DASHBOARD_URL);
+const getCanisterId = async (network) => {
+	const dfxJsonPath = path.resolve(rootPath, 'dfx.json');
+	const dfxJson = JSON.parse(await fs.readFile(dfxJsonPath, 'utf-8'));
+	return dfxJson.canisters.cketh_minter.remote.id[network];
+};
 
+const fetchTokensForEnvironment = async (network) => {
+	const canisterId = await getCanisterId(network);
+	const dashboardUrl = `https://${canisterId}.raw.icp0.io/dashboard`;
+	return await fetchSupportedTokensByUrl(dashboardUrl);
+};
+
+const fetchSupportedTokens = async () => {
+	const [prodTokens, testnetTokens] = await Promise.all([
+		fetchTokensForEnvironment('ic'),
+		fetchTokensForEnvironment('staging')
+	]);
+
+	return { prodTokens, testnetTokens };
+};
+
+const filterTokens = async (prodTokens, testnetTokens) => {
 	const testnetTokenMap = new Map(
 		testnetTokens.map((token) => [token.symbol.replace('ckSepolia', 'ck'), token.contractAddress])
 	);
 
-	const tokensToProcess = [];
+	const results = await Promise.all(
+		prodTokens
+			.filter((token) => nonNullish(testnetTokenMap.get(token.symbol)))
+			.map(async (token) => {
+				const tokenName = token.symbol.slice(2);
+				const tokenFilePath = path.join(SRC_PATH, `tokens.${tokenName.toLowerCase()}.env.ts`);
+				try {
+					await fs.access(tokenFilePath);
+					return null; // File already exists, filter it out
+				} catch (err) {
+					if (err.code === 'ENOENT') {
+						return token; // File doesn't exist, process this token
+					} else {
+						throw err;
+					}
+				}
+			})
+	);
 
-	for (const token of prodTokens) {
-		const testnetContractAddress = testnetTokenMap.get(token.symbol);
-		if (!testnetContractAddress) {
-			continue;
-		}
+	return results.filter(nonNullish).map((token) => {
+		return {
+			tokenName: token.symbol.slice(2),
+			symbol: token.symbol,
+			contractAddress: token.contractAddress,
+			testnetContractAddress: testnetTokenMap.get(token.symbol)
+		};
+	});
+};
 
-		const tokenName = token.symbol.slice(2);
-		const tokenFilePath = path.join(SRC_PATH, `tokens.${tokenName.toLowerCase()}.env.ts`);
-		try {
-			await fs.access(tokenFilePath);
-		} catch (err) {
-			tokensToProcess.push({
-				tokenName,
-				symbol: token.symbol,
-				contractAddress: token.contractAddress,
-				testnetContractAddress
-			});
-		}
-	}
+const main = async () => {
+	const { prodTokens, testnetTokens } = await fetchSupportedTokens();
+
+	const tokensToProcess = await filterTokens(prodTokens, testnetTokens);
 
 	if (tokensToProcess.length === 0) {
-		console.log('All prod tokens that have a test token are set.');
+		console.log('No new token found to process.');
+		console.log(
+			'Be aware that the script only processes tokens that are not already in the env directory and that have a testnet counterpart.'
+		);
 		return;
 	}
 
-	for (const { tokenName, contractAddress, testnetContractAddress } of tokensToProcess) {
+	for (const token of tokensToProcess) {
+		const { tokenName } = token;
+
 		console.log('--------------------------------');
 		console.log(`Creating file for token ${tokenName}`);
-		const tokenDetails = await fetchTokenDetails(contractAddress);
 
-		const { newFileName, mainnetToken, testnetToken } = await createEnvFile(
-			tokenName,
-			tokenDetails,
-			contractAddress,
-			testnetContractAddress
-		);
+		const { newFileName, mainnetToken, testnetToken } = await createEnvFile(token);
 
 		await updateTokensErc20Env(newFileName, mainnetToken, testnetToken);
 
@@ -261,4 +289,9 @@ const main = async () => {
 	});
 };
 
-main().catch(console.error);
+try {
+	await main();
+} catch (err) {
+	console.error(`Error in main function:\n${err}`);
+	process.exit(1);
+}
