@@ -31,7 +31,6 @@
 	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -41,6 +40,7 @@
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -84,7 +84,7 @@
 		destination ===
 		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId], sourceNetwork.id)
 			? ICP_NETWORK
-			: $selectedNetwork;
+			: $tokenWithFallback.network;
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({

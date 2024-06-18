@@ -4,11 +4,11 @@
 	import CkEthereumPendingTransactionsListener from '$icp-eth/components/core/CkEthereumPendingTransactionsListener.svelte';
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import type { CanisterIdText } from '$lib/types/canister';
-	import type { IcCkToken } from '$icp/types/ic';
-	import { token } from '$lib/derived/token.derived';
+	import type { OptionIcCkToken } from '$icp/types/ic';
+	import { token } from '$lib/stores/token.store';
 
 	let minterCanisterId: CanisterIdText | undefined = undefined;
-	$: minterCanisterId = ($token as IcCkToken).minterCanisterId;
+	$: minterCanisterId = ($token as OptionIcCkToken)?.minterCanisterId;
 </script>
 
 <IcCkListener

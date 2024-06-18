@@ -127,7 +127,8 @@
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"show_testnets": "Show test networks",
-		"more": "More networks coming soon..."
+		"more": "More networks coming soon...",
+		"chain_fusion": "Chain Fusion"
 	},
 	"receive": {
 		"text": {
@@ -354,7 +355,8 @@
 			"loading_metadata": "Error while loading the ERC20 contract metadata.",
 			"not_custom": "Only custom token can be hidden.",
 			"incomplete_metadata": "No name or symbol are provided in the metadata.",
-			"duplicate_metadata": "A token with a similar name or symbol already exists."
+			"duplicate_metadata": "A token with a similar name or symbol already exists.",
+			"unexpected_undefined": "Token is undefined. This is unexpected."
 		}
 	},
 	"fee": {

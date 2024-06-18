@@ -15,6 +15,7 @@
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';
@@ -56,8 +57,8 @@
 					<Logo
 						src={token.token.icon}
 						slot="icon"
-						alt={`${token.token.name} logo`}
-						size="52px"
+						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.token.name })}
+						size="medium"
 						color="white"
 					/>
 

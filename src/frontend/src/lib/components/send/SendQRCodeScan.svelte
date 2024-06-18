@@ -6,9 +6,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import type { Token } from '$lib/types/token';
+	import type { OptionToken } from '$lib/types/token';
 
-	export let expectedToken: Token;
+	export let expectedToken: OptionToken;
 	export let destination: string | undefined;
 	export let amount: number | undefined;
 	export let decodeQrCode: ({
@@ -18,7 +18,7 @@
 	}: {
 		status: QrStatus;
 		code?: string;
-		expectedToken: Token;
+		expectedToken: OptionToken;
 	}) => QrResponse;
 
 	const dispatch = createEventDispatcher();
