@@ -18,6 +18,7 @@
 	} from '$icp/stores/receive-token.store';
 
 	export let token: Token;
+	export let compact = false;
 
 	let ckEthereum = false;
 	$: ckEthereum = isTokenCkEthLedger(token as IcToken) || isTokenCkErc20Ledger(token as IcToken);
@@ -39,11 +40,11 @@
 </script>
 
 {#if ckEthereum}
-	<IcReceiveCkEthereum />
+	<IcReceiveCkEthereum {compact} />
 {:else if ckBTC}
-	<IcReceiveCkBTC />
+	<IcReceiveCkBTC {compact} />
 {:else if icrc}
-	<IcReceiveIcrc />
+	<IcReceiveIcrc {compact} />
 {:else}
-	<IcReceiveIcp />
+	<IcReceiveIcp {compact} />
 {/if}

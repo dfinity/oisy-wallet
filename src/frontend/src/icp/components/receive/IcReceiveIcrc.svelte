@@ -5,10 +5,12 @@
 	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { modalIcrcReceive } from '$lib/derived/modal.derived';
 
+	export let compact = false;
+
 	const modalId = Symbol();
 </script>
 
-<ReceiveButton on:click={() => modalStore.openIcrcReceive(modalId)} />
+<ReceiveButton {compact} on:click={() => modalStore.openIcrcReceive(modalId)} />
 
 {#if $modalIcrcReceive && $modalStore?.data === modalId}
 	<IcReceiveModal infoCmp={IcReceiveInfoIcrc} />
