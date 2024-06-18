@@ -40,7 +40,6 @@
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -84,7 +83,7 @@
 		destination ===
 		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId], sourceNetwork.id)
 			? ICP_NETWORK
-			: $tokenWithFallback.network;
+			: $sendToken.network;
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
