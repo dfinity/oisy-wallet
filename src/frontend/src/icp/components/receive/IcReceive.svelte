@@ -41,8 +41,6 @@
 	const close: CloseModalAndResetToken = () => {
 		modalStore.close();
 		tokenStore.set(null);
-
-		console.log('here');
 	};
 
 	/**
