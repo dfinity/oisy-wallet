@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { tokenDecimals } from '$lib/derived/token.derived';
-	import type { IcToken } from '$icp/types/ic';
+	import type { OptionIcToken } from '$icp/types/ic';
 	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { NetworkId } from '$lib/types/network';
@@ -34,7 +34,7 @@
 	export let networkId: NetworkId | undefined = undefined;
 
 	let fee: bigint | undefined;
-	$: fee = ($token as IcToken).fee;
+	$: fee = ($token as OptionIcToken)?.fee;
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
