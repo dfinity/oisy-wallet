@@ -9,16 +9,10 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-	import type { Token } from '$lib/types/token';
-	import type { IcCkToken } from '$icp/types/ic';
-	import { ETHEREUM_TOKEN } from '$env/tokens.env';
 
 	export let compact = false;
 
-	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
-
-	let twinToken: Token;
-	$: twinToken = ($token as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN;
+	const { ckEthereumTwinToken } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const modalId = Symbol();
 
@@ -28,14 +22,14 @@
 
 	const { sendToken, ...rest } = initSendContext({
 		sendPurpose: 'convert-eth-to-cketh',
-		token: twinToken
+		token: $ckEthereumTwinToken
 	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
 		sendToken,
 		...rest
 	});
 
-	$: sendToken.set(twinToken);
+	$: sendToken.set($ckEthereumTwinToken);
 </script>
 
 <ReceiveButton {compact} on:click={() => modalStore.openCkETHReceive(modalId)} />
