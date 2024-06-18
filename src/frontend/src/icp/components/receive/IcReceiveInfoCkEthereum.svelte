@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -11,7 +10,7 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 
-	const { token, ckEthereumTwinToken, ckEthereumTwinTokenNetwork } =
+	const { token, ckEthereumTwinToken, ckEthereumTwinTokenNetwork, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
@@ -56,6 +55,4 @@
 	>
 </button>
 
-<button class="primary full center text-center" on:click={modalStore.close}
-	>{$i18n.core.text.done}</button
->
+<button class="primary full center text-center" on:click={close}>{$i18n.core.text.done}</button>
