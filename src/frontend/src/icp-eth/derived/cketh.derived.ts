@@ -78,11 +78,11 @@ export const ckEthereumTwinTokenNetworkId: Readable<NetworkId> = derived(
 export const ckEthereumNativeToken: Readable<Token> = derived(
 	[enabledEthereumTokens, ckEthereumTwinToken],
 	([
-		 $enabledEthereumTokens,
-		 {
-			 network: { id }
-		 }
-	 ]) =>
+		$enabledEthereumTokens,
+		{
+			network: { id }
+		}
+	]) =>
 		$enabledEthereumTokens.find(({ network: { id: networkId } }) => id === networkId) ??
 		DEFAULT_ETHEREUM_TOKEN
 );
