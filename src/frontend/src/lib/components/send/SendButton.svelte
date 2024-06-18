@@ -8,7 +8,6 @@
 </script>
 
 <ButtonDualMode on:click disabled={$isBusy} alt={$i18n.send.text.send} {compact}>
-	<IconSend size="24" slot="icon-only" />
-	<IconSend size="28" slot="text-icon" />
+	<IconSend size={compact ? '24' : '28'} slot="icon" />
 	{$i18n.send.text.send}
 </ButtonDualMode>

@@ -15,9 +15,7 @@
 	on:click
 	aria-label={alt}
 >
-	{#if compact}
-		<slot name="icon-only" />
-	{:else}
-		<slot name="text-icon" />
+	<slot name="icon" />
+	{#if !compact}
 		<span><slot /></span>{/if}</button
 >
