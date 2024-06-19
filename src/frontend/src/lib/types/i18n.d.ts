@@ -250,6 +250,7 @@ interface I18nTokens {
 		all_tokens_with_zero_hidden: string;
 		initializing: string;
 		updating_ui: string;
+		show_hide_token: string;
 	};
 	details: {
 		title: string;
