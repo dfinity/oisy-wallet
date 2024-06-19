@@ -1,0 +1,42 @@
+<script lang="ts">
+	import { Toggle } from '@dfinity/gix-components';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { createEventDispatcher } from 'svelte';
+	import type { DisplayToken } from '$lib/types/token';
+
+	export let token: DisplayToken;
+
+	let disabled = false;
+	$: disabled = token.category === 'default';
+
+	let checked: boolean;
+	$: checked = token.show ?? false;
+
+	const dispatch = createEventDispatcher();
+
+	const toggle = () => {
+		if (disabled) {
+			return;
+		}
+
+		checked = !checked;
+
+		dispatch('icShowOrHideToken', {
+			...token,
+			show: checked
+		});
+	};
+
+	const onClick = () => {};
+</script>
+
+<!-- svelte-ignore a11y-interactive-supports-focus -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div role="button" on:click={onClick}>
+	<Toggle
+		ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
+		{disabled}
+		bind:checked
+		on:nnsToggle={toggle}
+	/>
+</div>
