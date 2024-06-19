@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import IcManageTokens from '$icp-eth/components/tokens/IcManageTokens.svelte';
+	import ManageTokens from '$icp-eth/components/tokens/ManageTokens.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -126,6 +126,6 @@
 			bind:indexCanisterId
 		/>
 	{:else}
-		<IcManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} />
+		<ManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} />
 	{/if}
 </WizardModal>
