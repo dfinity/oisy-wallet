@@ -19,6 +19,7 @@
 	import { icTokenContainsEnabled, sortIcTokens } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Token } from '$lib/types/token';
+	import { networkTokens } from '$lib/derived/network-tokens.derived';
 
 	const dispatch = createEventDispatcher();
 
@@ -50,6 +51,22 @@
 			({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
 		)
 	].sort(sortIcTokens);
+
+	let allTokens: Token[] = [];
+	$: allTokens = [
+		...$networkTokens.map(
+			(token) =>
+				allIcrcTokens.find(
+					(icrcToken) => token.id === icrcToken.id && token.network.id === icrcToken.network.id
+				) ?? { ...token, show: true }
+		),
+		...allIcrcTokens.filter(
+			(icrcToken) =>
+				!$networkTokens.some(
+					(token) => icrcToken.id === token.id && icrcToken.network.id === token.network.id
+				)
+		)
+	];
 
 	let filterTokens = '';
 	const updateFilter = () => (filterTokens = filter);
