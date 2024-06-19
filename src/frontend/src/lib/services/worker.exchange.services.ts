@@ -33,7 +33,7 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 			const text =
 				'An error occurred while attempting to retrieve the USD exchange rates.' as const;
 
-			const msg = (value as PostMessageDataResponseExchangeError | undefined)?.err;
+			const msg = value?.err;
 
 			if (isNullish(msg)) {
 				toastsError({
@@ -68,7 +68,7 @@ export const initExchangeWorker = async (): Promise<ExchangeWorker> => {
 
 			toastsError({
 				msg: { text },
-				err: (value as PostMessageDataResponseExchangeError | undefined)?.err
+				err: value?.err
 			});
 		};
 
