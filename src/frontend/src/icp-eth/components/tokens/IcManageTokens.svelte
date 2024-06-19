@@ -18,8 +18,6 @@
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import { sortIcTokens } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { TokenId } from '$lib/types/token';
-	import type { NetworkId } from '$lib/types/network';
 
 	const dispatch = createEventDispatcher();
 
@@ -73,44 +71,33 @@
 	$: tokens = filteredTokens.map(({ id, network, enabled, ...rest }) => ({
 		id,
 		network,
-		enabled: modifiedTokens[network.id]?.[id]?.enabled ?? enabled,
+		enabled: modifiedTokens[`${network.id.description}-${id.description}`]?.enabled ?? enabled,
 		...rest
 	}));
 
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
 
-	let modifiedTokens: Record<NetworkId, Record<TokenId, IcrcCustomToken>> = {};
+	let modifiedTokens: Record<string, IcrcCustomToken> = {};
 	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<IcrcCustomToken>) => {
 		const { id: networkId } = network;
+		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 
-		modifiedTokens[networkId] = modifiedTokens[networkId] || {};
-
-		if (nonNullish(modifiedTokens[networkId][id])) {
-			delete modifiedTokens[networkId][id];
-			if (Object.getOwnPropertySymbols(modifiedTokens[networkId]).length === 0) {
-				delete modifiedTokens[networkId];
-			}
+		if (nonNullish(current)) {
+			modifiedTokens = { ...tokens };
 			return;
 		}
 
-		modifiedTokens[networkId][id] = { id, network, ...rest };
+		modifiedTokens = {
+			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
+			...tokens
+		};
 	};
 
 	let saveDisabled = true;
-	$: saveDisabled = Object.getOwnPropertySymbols(modifiedTokens).every(
-		(networkId) => Object.getOwnPropertySymbols(modifiedTokens[networkId]).length === 0
-	);
+	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
 
-	const save = () =>
-		dispatch(
-			'icSave',
-			Object.getOwnPropertySymbols(modifiedTokens).flatMap((networkId) =>
-				Object.getOwnPropertySymbols(modifiedTokens[networkId]).map(
-					(tokenId) => modifiedTokens[networkId][tokenId]
-				)
-			)
-		);
+	const save = () => dispatch('icSave', Object.values(modifiedTokens));
 </script>
 
 <div class="mb-4">
