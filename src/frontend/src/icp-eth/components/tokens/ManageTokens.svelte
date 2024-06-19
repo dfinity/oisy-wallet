@@ -157,7 +157,6 @@
 					{token.symbol}
 				</span>
 
-				<!-- We had to separate the slot from the components, because it was rendering incorrectly with the IF statement -->
 				<svelte:fragment slot="action">
 					{#if isIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />

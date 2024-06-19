@@ -133,4 +133,4 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 };
 
 export const isIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
-	nonNullish(token.ledgerCanisterId) && nonNullish(token.enabled);
+	token.standard === 'icrc' && 'enabled' in token;
