@@ -133,4 +133,4 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 };
 
 export const isIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
-	token.standard === 'icrc' && 'enabled' in token;
+	(token.standard === 'icp' || token.standard === 'icrc') && 'enabled' in token;
