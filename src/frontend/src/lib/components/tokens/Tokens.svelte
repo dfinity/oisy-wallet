@@ -16,7 +16,7 @@
 	import { fade } from 'svelte/transition';
 	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
-	import IcManageTokensModal from '$icp-eth/components/tokens/IcManageTokensModal.svelte';
+	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
@@ -80,6 +80,6 @@
 	{#if $modalAddToken}
 		<AddTokenModal />
 	{:else if $modalIcManageTokens}
-		<IcManageTokensModal />
+		<ManageTokensModal />
 	{/if}
 </TokensSkeletons>
