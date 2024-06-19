@@ -1,7 +1,7 @@
 import { ICP_NETWORK } from '$env/networks.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcFee, IcInterface, IcToken } from '$icp/types/ic';
-import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
+import type { IcTokenWithoutIdExtended, IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import {
@@ -131,3 +131,6 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 		...(nonNullish(icon) ? [icon] : [])
 	];
 };
+
+export const isIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
+	nonNullish(token.ledgerCanisterId) && nonNullish(token.enabled);
