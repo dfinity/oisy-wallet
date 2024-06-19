@@ -276,7 +276,8 @@
 			"all_tokens_with_zero_hidden": "All tokens with zero balance are currently hidden.",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
-			"show_hide_token": "Show or hide token"
+			"show_token": "Show token",
+			"hide_token": "Hide token"
 		},
 		"details": {
 			"title": "Token details",

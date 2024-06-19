@@ -51,7 +51,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class:outdated role="button" on:click={onClick}>
 	<Toggle
-		ariaLabel={$i18n.tokens.text.show_hide_token}
+		ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
 		{disabled}
 		bind:checked
 		on:nnsToggle={toggle}
