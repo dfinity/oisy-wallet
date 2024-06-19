@@ -77,12 +77,13 @@
 
 	let filteredTokens: Token[] = [];
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
-		? allIcrcTokens
-		: allIcrcTokens.filter(
-				({ name, symbol, alternativeName }) =>
-					name.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					(alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase())
+		? allTokens
+		: allTokens.filter(
+				(token) =>
+					token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
+					token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
+					(icTokenContainsEnabled(token) &&
+						(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()))
 			);
 
 	let tokens: Token[] = [];
