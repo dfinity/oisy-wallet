@@ -2,7 +2,7 @@
 	import { Toggle } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { createEventDispatcher } from 'svelte';
-	import type { DisplayToken } from '$lib/types/token';
+	import type { DisplayToken } from '$lib/types/manage-token';
 
 	export let token: DisplayToken;
 
