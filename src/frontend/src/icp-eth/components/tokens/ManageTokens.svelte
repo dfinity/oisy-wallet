@@ -16,8 +16,9 @@
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { ICP_TOKEN } from '$env/tokens.env';
-	import { sortIcTokens } from '$icp/utils/icrc.utils';
+	import { isIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { Token } from '$lib/types/token';
 
 	const dispatch = createEventDispatcher();
 
@@ -57,7 +58,7 @@
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	let filteredTokens: IcrcCustomToken[] = [];
+	let filteredTokens: Token[] = [];
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
 		? allIcrcTokens
 		: allIcrcTokens.filter(
@@ -67,19 +68,25 @@
 					(alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase())
 			);
 
-	let tokens: IcrcCustomToken[] = [];
-	$: tokens = filteredTokens.map(({ id, network, enabled, ...rest }) => ({
-		id,
-		network,
-		enabled: modifiedTokens[`${network.id.description}-${id.description}`]?.enabled ?? enabled,
-		...rest
-	}));
+	let tokens: Token[] = [];
+	$: tokens = filteredTokens.map((token) => {
+		const modifiedToken = modifiedTokens[`${token.network.id.description}-${token.id.description}`];
+
+		return {
+			...token,
+			...(isIcrcCustomToken(token)
+				? {
+						enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
+					}
+				: {})
+		};
+	});
 
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
 
-	let modifiedTokens: Record<string, IcrcCustomToken> = {};
-	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<IcrcCustomToken>) => {
+	let modifiedTokens: Record<string, Token> = {};
+	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 
@@ -150,7 +157,11 @@
 					{token.symbol}
 				</span>
 
-				<IcManageTokenToggle slot="action" {token} on:icToken={onToggle} />
+				<svelte:fragment slot="action">
+					{#if isIcrcCustomToken(token)}
+						<IcManageTokenToggle {token} on:icToken={onToggle} />
+					{/if}
+				</svelte:fragment>
 			</Card>
 		{/each}
 	</div>
