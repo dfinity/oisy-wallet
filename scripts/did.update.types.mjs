@@ -5,21 +5,17 @@ import { readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const deleteIndexes = async ({ dest = `./src/declarations` }) => {
-	const promises = readdirSync(dest).map(
-		(dir) =>
-			new Promise(async (resolve) => {
-				const indexPath = join(dest, dir, 'index.js');
+	const rmIndex = async (dir) => {
+		const indexPath = join(dest, dir, 'index.js');
 
-				if (!existsSync(indexPath)) {
-					resolve();
-					return;
-				}
+		if (!existsSync(indexPath)) {
+			return;
+		}
 
-				await rm(indexPath, { force: true });
+		await rm(indexPath, { force: true });
+	};
 
-				resolve();
-			})
-	);
+	const promises = readdirSync(dest).map(rmIndex);
 
 	await Promise.all(promises);
 };
