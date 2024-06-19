@@ -13,7 +13,6 @@
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import { icrcCustomTokens, icrcDefaultTokens } from '$icp/derived/icrc.derived';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import type { CanisterIdText } from '$lib/types/canister';
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { ICP_TOKEN } from '$env/tokens.env';
@@ -69,20 +68,20 @@
 			);
 
 	let tokens: IcrcCustomToken[] = [];
-	$: tokens = filteredTokens.map(({ ledgerCanisterId, enabled, ...rest }) => ({
-		ledgerCanisterId,
-		enabled: modifiedTokens[`${ledgerCanisterId}`]?.enabled ?? enabled,
+	$: tokens = filteredTokens.map(({ id, network, enabled, ...rest }) => ({
+		id,
+		network,
+		enabled: modifiedTokens[`${network.id.description}-${id.description}`]?.enabled ?? enabled,
 		...rest
 	}));
 
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
 
-	let modifiedTokens: Record<CanisterIdText, IcrcCustomToken> = {};
-	const onToggle = ({
-		detail: { ledgerCanisterId, enabled, ...rest }
-	}: CustomEvent<IcrcCustomToken>) => {
-		const { [`${ledgerCanisterId}`]: current, ...tokens } = modifiedTokens;
+	let modifiedTokens: Record<string, IcrcCustomToken> = {};
+	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<IcrcCustomToken>) => {
+		const { id: networkId } = network;
+		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 
 		if (nonNullish(current)) {
 			modifiedTokens = { ...tokens };
@@ -90,11 +89,7 @@
 		}
 
 		modifiedTokens = {
-			[`${ledgerCanisterId}`]: {
-				ledgerCanisterId,
-				enabled,
-				...rest
-			},
+			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
 			...tokens
 		};
 	};
