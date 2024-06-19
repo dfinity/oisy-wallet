@@ -34,9 +34,9 @@
 			</div>
 
 			{#if $networkICP}
-				<IcManageTokensMenuButton />
+				<IcManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
 			{:else if $networkEthereum}
-				<ManageTokensMenuButton />
+				<ManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
 			{/if}
 		{/if}
 	</div>
