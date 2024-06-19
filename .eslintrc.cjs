@@ -50,6 +50,7 @@ module.exports = {
 		'@typescript-eslint/prefer-nullish-coalescing': 'error',
 		'no-continue': 'warn',
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
+		'no-delete-var': 'error',
 	},
 	globals: {
 		NodeJS: true
