@@ -20,6 +20,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Token } from '$lib/types/token';
 	import { networkTokens } from '$lib/derived/network-tokens.derived';
+	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -178,6 +179,8 @@
 				<svelte:fragment slot="action">
 					{#if icTokenContainsEnabled(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
+					{:else}
+						<ManageTokenToggle {token} />
 					{/if}
 				</svelte:fragment>
 			</Card>
