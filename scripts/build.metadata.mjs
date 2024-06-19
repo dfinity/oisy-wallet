@@ -31,7 +31,7 @@ const parseMetadata = (targetFile) => {
 	// Special use case. We need to build the dapp with a real URL within app.html other build fails.
 	content = replaceEnv({
 		html: content,
-		pattern: `https:\/\/oisy\.com`,
+		pattern: `https://oisy.com`,
 		value: process.env.VITE_OISY_URL
 	});
 
@@ -43,7 +43,7 @@ const parseUrl = (filePath) => {
 
 	content = replaceEnv({
 		html: content,
-		pattern: `https:\/\/oisy\.com`,
+		pattern: `https://oisy.com`,
 		value: process.env.VITE_OISY_URL
 	});
 
