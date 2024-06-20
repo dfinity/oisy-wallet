@@ -14,6 +14,16 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { saveCustomTokens } from '$icp/services/ic-custom-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { addUserToken } from '$lib/api/backend.api';
+	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { erc20TokensStore } from '$eth/stores/erc20.store';
+	import { mapErc20Token } from '$eth/utils/erc20.utils';
+	import type { Erc20Metadata } from '$eth/types/erc20';
+	import type { Network } from '$lib/types/network';
 
 	const steps: WizardSteps = [
 		{
@@ -90,6 +100,69 @@
 		}
 	};
 
+	let erc20Metadata: Erc20Metadata | undefined;
+
+	const saveErc20Token = async () => {
+		if (isNullishOrEmpty(erc20ContractAddress)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.invalid_contract_address }
+			});
+			return;
+		}
+
+		if (isNullish(erc20Metadata)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.no_metadata }
+			});
+			return;
+		}
+
+		if (isNullish($authStore.identity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		modal.next();
+
+		try {
+			saveProgressStep = ProgressStepsAddToken.SAVE;
+
+			await addUserToken({
+				identity: $authStore.identity,
+				token: {
+					chain_id: $selectedChainId,
+					contract_address: erc20ContractAddress,
+					symbol: [],
+					decimals: [],
+					version: []
+				}
+			});
+
+			saveProgressStep = ProgressStepsAddToken.UPDATE_UI;
+
+			erc20TokensStore.add(
+				mapErc20Token({
+					address: erc20ContractAddress,
+					exchange: 'ethereum',
+					category: 'custom',
+					network: $selectedEthereumNetwork,
+					...erc20Metadata
+				})
+			);
+
+			saveProgressStep = ProgressStepsAddToken.DONE;
+
+			setTimeout(() => close(), 750);
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected },
+				err
+			});
+
+			modal.back();
+		}
+	};
+
 	const close = () => {
 		modalStore.close();
 
@@ -98,6 +171,9 @@
 
 	let ledgerCanisterId = '';
 	let indexCanisterId = '';
+	let erc20ContractAddress = '';
+
+	let network: Network | undefined = $selectedNetwork;
 </script>
 
 <WizardModal
@@ -110,12 +186,21 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<IcAddTokenReview
-			on:icBack={modal.back}
-			on:icSave={addToken}
-			{ledgerCanisterId}
-			{indexCanisterId}
-		/>
+		{#if network?.id === ICP_NETWORK_ID}
+			<IcAddTokenReview
+				on:icBack={modal.back}
+				on:icSave={addToken}
+				{ledgerCanisterId}
+				{indexCanisterId}
+			/>
+		{:else if network?.id === ETHEREUM_NETWORK_ID}
+			<AddTokenReview
+				on:icBack={modal.back}
+				on:icSave={saveErc20Token}
+				contractAddress={erc20ContractAddress}
+				bind:metadata={erc20Metadata}
+			/>
+		{/if}
 	{:else if currentStep?.name === 'Saving'}
 		<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
 	{:else if currentStep?.name === 'Import'}
