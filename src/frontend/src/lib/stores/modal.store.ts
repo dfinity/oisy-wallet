@@ -20,7 +20,7 @@ export interface Modal<T> {
 		| 'transaction'
 		| 'ic-transaction'
 		| 'add-token'
-		| 'ic-manage-tokens'
+		| 'manage-tokens'
 		| 'hide-token'
 		| 'ic-hide-token'
 		| 'token'
@@ -37,19 +37,19 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openIcrcReceive: <D extends T>(data: D) => void;
 	openCkBTCReceive: <D extends T>(data: D) => void;
 	openCkETHReceive: <D extends T>(data: D) => void;
-	openSend: () => void;
+	openSend: <D extends T>(data: D) => void;
 	openConvertCkBTCToBTC: () => void;
 	openConvertToTwinTokenCkEth: () => void;
 	openConvertToTwinTokenEth: () => void;
 	openHowToConvertToTwinTokenEth: () => void;
-	openIcSend: () => void;
+	openIcSend: <D extends T>(data: D) => void;
 	openWalletConnectAuth: () => void;
 	openWalletConnectSign: <D extends T>(data: D) => void;
 	openWalletConnectSend: <D extends T>(data: D) => void;
 	openTransaction: <D extends T>(data: D) => void;
 	openIcTransaction: <D extends T>(data: D) => void;
 	openAddToken: () => void;
-	openIcManageTokens: () => void;
+	openManageTokens: () => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
 	openToken: () => void;
@@ -67,19 +67,19 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openIcrcReceive: <D extends T>(data: D) => set({ type: 'icrc-receive', data }),
 		openCkBTCReceive: <D extends T>(data: D) => set({ type: 'ckbtc-receive', data }),
 		openCkETHReceive: <D extends T>(data: D) => set({ type: 'cketh-receive', data }),
-		openSend: () => set({ type: 'send' }),
+		openSend: <D extends T>(data: D) => set({ type: 'send', data }),
 		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
 		openConvertToTwinTokenCkEth: () => set({ type: 'convert-to-twin-token-cketh' }),
 		openConvertToTwinTokenEth: () => set({ type: 'convert-to-twin-token-eth' }),
 		openHowToConvertToTwinTokenEth: () => set({ type: 'how-to-convert-to-twin-token-eth' }),
-		openIcSend: () => set({ type: 'ic-send' }),
+		openIcSend: <D extends T>(data: D) => set({ type: 'ic-send', data }),
 		openWalletConnectAuth: () => set({ type: 'wallet-connect-auth' }),
 		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),
 		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),
 		openTransaction: <D extends T>(data: D) => set({ type: 'transaction', data }),
 		openIcTransaction: <D extends T>(data: D) => set({ type: 'ic-transaction', data }),
 		openAddToken: () => set({ type: 'add-token' }),
-		openIcManageTokens: () => set({ type: 'ic-manage-tokens' }),
+		openManageTokens: () => set({ type: 'manage-tokens' }),
 		openHideToken: () => set({ type: 'hide-token' }),
 		openIcHideToken: () => set({ type: 'ic-hide-token' }),
 		openToken: () => set({ type: 'token' }),

@@ -15,14 +15,14 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
-	export let send = false;
 
 	let background: string;
-	$: background = ($token?.network.id.description ?? 'eth').toLowerCase();
+	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20TokensInitialized;
@@ -69,7 +69,7 @@
 
 		{#if actions}
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-				<Actions {send} />
+				<Actions />
 			</div>
 		{/if}
 
@@ -92,6 +92,15 @@
 		&.sepoliaeth {
 			background: linear-gradient(0deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.5) 100%),
 				linear-gradient(62deg, #321469 62.5%, #937993 100%);
+		}
+
+		&.chainfusion {
+			background: radial-gradient(
+				90.18% 135.69% at 50% 135.69%,
+				#3653cb 0%,
+				#5331a6 40.06%,
+				#191e86 100%
+			);
 		}
 	}
 

@@ -3,7 +3,6 @@
 	import { modalCkBTCReceive } from '$lib/derived/modal.derived';
 	import IcReceiveModal from '$icp/components/receive/IcReceiveModal.svelte';
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
-	import type { IcToken } from '$icp/types/ic';
 	import { authStore } from '$lib/stores/auth.store';
 	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
 	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
@@ -17,7 +16,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 
-	const { token, tokenId, twinToken } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
+	export let compact = false;
+
+	const { token, tokenId, ckEthereumTwinToken, open, close } =
+		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const modalId = Symbol();
 
@@ -32,7 +34,7 @@
 		minterInfoLoaded = nonNullish($ckBtcMinterInfoStore?.[$tokenId]);
 
 		await loadAllCkBtcInfo({
-			...($token as IcToken),
+			...$token,
 			identity: $authStore.identity
 		});
 
@@ -41,14 +43,18 @@
 	};
 </script>
 
-<svelte:window on:oisyReceiveCkBTC={openReceive} />
+<svelte:window on:oisyReceiveCkBTC={async () => await open(openReceive)} />
 
-<ReceiveButton on:click={async () => await openReceive()} />
+<ReceiveButton {compact} on:click={async () => await open(openReceive)} />
 
-{#if !minterInfoLoaded && nonNullish($twinToken)}
-	<IcCkListener initFn={initCkBTCMinterInfoWorker} token={$token} twinToken={$twinToken} />
+{#if !minterInfoLoaded}
+	<IcCkListener
+		initFn={initCkBTCMinterInfoWorker}
+		token={$token}
+		twinToken={$ckEthereumTwinToken}
+	/>
 {/if}
 
 {#if $modalCkBTCReceive && $modalStore?.data === modalId}
-	<IcReceiveModal infoCmp={IcReceiveInfoCkBTC} />
+	<IcReceiveModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} />
 {/if}

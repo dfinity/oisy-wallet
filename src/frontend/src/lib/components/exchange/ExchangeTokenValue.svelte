@@ -22,7 +22,7 @@
 <output class="break-all">
 	{#if $exchangeInitialized}
 		{#if hasExchangeValue}
-			{formatUSD(usd)}
+			{formatUSD(usd, { notation: 'compact' })}
 		{:else}
 			{formatUSD(0, { minFraction: 0, maxFraction: 0 }).replace('0', '-')}
 		{/if}

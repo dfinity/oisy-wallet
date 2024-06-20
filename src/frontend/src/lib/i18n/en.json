@@ -275,7 +275,9 @@
 			"hide_zero_balances": "Hide zero balances",
 			"all_tokens_with_zero_hidden": "All tokens with zero balance are currently hidden.",
 			"initializing": "Initializing...",
-			"updating_ui": "Updating the UI..."
+			"updating_ui": "Updating the UI...",
+			"show_token": "Show token",
+			"hide_token": "Hide token"
 		},
 		"details": {
 			"title": "Token details",
@@ -314,7 +316,8 @@
 			"text": {
 				"title": "Add and hide tokens",
 				"do_not_see_import": "Don’t see your token? Import",
-				"clear_filter": "Clear filter"
+				"clear_filter": "Clear filter",
+				"manage_for_network": "Managing tokens for $network"
 			},
 			"info": {
 				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade."

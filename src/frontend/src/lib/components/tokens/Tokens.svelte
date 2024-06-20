@@ -14,10 +14,12 @@
 	import type { Token } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
-	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
+	import { modalAddToken, modalManageTokens } from '$lib/derived/modal.derived';
 	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
-	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
+	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
+	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -40,28 +42,34 @@
 		{@const url = transactionsUrl({ token })}
 
 		<Listener {token}>
-			<a
-				class="no-underline"
-				href={url}
-				aria-label={`Open the list of ${token.symbol} transactions`}
-				in:fade
-			>
-				<Card>
-					{token.name}
+			<div class="flex gap-8 mb-6">
+				<a
+					class="no-underline flex-1"
+					href={url}
+					aria-label={`Open the list of ${token.symbol} transactions`}
+					in:fade
+				>
+					<Card noMargin>
+						{token.name}
 
-					<TokenLogo {token} slot="icon" color="white" />
+						<TokenLogo {token} slot="icon" color="white" />
 
-					<output class="break-all" slot="description">
-						{formatToken({
-							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
-							unitName: token.decimals
-						})}
-						{token.symbol}
-					</output>
+						<output class="break-all" slot="description">
+							{formatToken({
+								value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
+								unitName: token.decimals
+							})}
+							{token.symbol}
+						</output>
 
-					<ExchangeTokenValue {token} slot="amount" />
-				</Card>
-			</a>
+						<CardAmount slot="action">
+							<ExchangeTokenValue {token} />
+						</CardAmount>
+					</Card>
+				</a>
+
+				<TokenReceiveSend {token} />
+			</div>
 		</Listener>
 	{/each}
 
@@ -71,7 +79,7 @@
 
 	{#if $modalAddToken}
 		<AddTokenModal />
-	{:else if $modalIcManageTokens}
-		<IcManageTokensModal />
+	{:else if $modalManageTokens}
+		<ManageTokensModal />
 	{/if}
 </TokensSkeletons>

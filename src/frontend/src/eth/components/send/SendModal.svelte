@@ -5,5 +5,5 @@
 </script>
 
 <SendTokenContext token={$token}>
-	<SendTokenModal />
+	<SendTokenModal on:nnsClose />
 </SendTokenContext>

@@ -250,6 +250,8 @@ interface I18nTokens {
 		all_tokens_with_zero_hidden: string;
 		initializing: string;
 		updating_ui: string;
+		show_token: string;
+		hide_token: string;
 	};
 	details: {
 		title: string;
@@ -285,7 +287,12 @@ interface I18nTokens {
 		};
 	};
 	manage: {
-		text: { title: string; do_not_see_import: string; clear_filter: string };
+		text: {
+			title: string;
+			do_not_see_import: string;
+			clear_filter: string;
+			manage_for_network: string;
+		};
 		info: { outdated_index_canister: string };
 		error: { unexpected_build: string; empty: string };
 	};
