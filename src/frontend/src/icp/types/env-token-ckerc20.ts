@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 const envTokenData = z.object({
 	ledgerCanisterId: z.string(),
-	indexCanisterId: z.string()
+	indexCanisterId: z.string(),
+	erc20ContractAddress: z.string()
 });
 
 const envTokenSymbol = z.string();
