@@ -160,7 +160,7 @@
 	</button>
 {:else}
 	<div class="container md:max-h-96 pr-2 pt-1 overflow-y-auto">
-		{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
+		{#each tokens as token (token.symbol)}
 			<Card>
 				{token.name}
 
