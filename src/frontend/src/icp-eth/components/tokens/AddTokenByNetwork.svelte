@@ -10,9 +10,9 @@
 	export let dropdownNetwork: string | undefined;
 	export let tokenData: Record<string, string>;
 
-	let ledgerCanisterId: string = '';
-	let indexCanisterId: string = '';
-	let contractAddress: string = '';
+	let ledgerCanisterId: string;
+	let indexCanisterId: string;
+	let contractAddress: string;
 
 	$: tokenData = {
 		ledgerCanisterId,
