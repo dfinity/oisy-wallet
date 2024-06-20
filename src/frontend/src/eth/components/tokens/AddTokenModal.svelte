@@ -2,18 +2,8 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
-	import type { Erc20Metadata } from '$eth/types/erc20';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isNullish } from '@dfinity/utils';
-	import { authStore } from '$lib/stores/auth.store';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-	import { addUserToken } from '$lib/api/backend.api';
-	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { erc20TokensStore } from '$eth/stores/erc20.store';
-	import { mapErc20Token } from '$eth/utils/erc20.utils';
 	import { modalStore } from '$lib/stores/modal.store';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 
@@ -34,74 +24,12 @@
 		}
 	];
 
-	let saveProgressStep: string = ProgressStepsAddToken.INITIALIZATION;
+	let saveProgressStep: ProgressStepsAddToken = ProgressStepsAddToken.INITIALIZATION;
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
 	let contractAddress = '';
-	let metadata: Erc20Metadata | undefined;
-
-	const save = async () => {
-		if (isNullishOrEmpty(contractAddress)) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.invalid_contract_address }
-			});
-			return;
-		}
-
-		if (isNullish(metadata)) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.no_metadata }
-			});
-			return;
-		}
-
-		if (isNullish($authStore.identity)) {
-			await nullishSignOut();
-			return;
-		}
-
-		modal.next();
-
-		try {
-			saveProgressStep = ProgressStepsAddToken.SAVE;
-
-			await addUserToken({
-				identity: $authStore.identity,
-				token: {
-					chain_id: $selectedChainId,
-					contract_address: contractAddress,
-					symbol: [],
-					decimals: [],
-					version: []
-				}
-			});
-
-			saveProgressStep = ProgressStepsAddToken.UPDATE_UI;
-
-			erc20TokensStore.add(
-				mapErc20Token({
-					address: contractAddress,
-					exchange: 'ethereum',
-					category: 'custom',
-					network: $selectedEthereumNetwork,
-					...metadata
-				})
-			);
-
-			saveProgressStep = ProgressStepsAddToken.DONE;
-
-			setTimeout(() => close(), 750);
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.unexpected },
-				err
-			});
-
-			modal.back();
-		}
-	};
 
 	const close = () => {
 		modalStore.close();
@@ -120,7 +48,13 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<AddTokenReview on:icBack={modal.back} on:icSave={save} {contractAddress} bind:metadata />
+		<AddTokenReview
+			on:icBack={modal.back}
+			on:icClose={close}
+			{contractAddress}
+			bind:modal
+			bind:saveProgressStep
+		/>
 	{:else if currentStep?.name === 'Saving'}
 		<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
 	{:else}
