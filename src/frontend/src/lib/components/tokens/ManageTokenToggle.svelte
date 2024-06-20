@@ -7,7 +7,8 @@
 	export let token: DisplayToken;
 
 	let disabled = false;
-	$: disabled = token.category === 'default';
+	// TODO: remove '|| true' once we are OK with flow of show/hide ERC20 tokens
+	$: disabled = token.category === 'default' || true;
 
 	let checked: boolean;
 	$: checked = token.show ?? false;
