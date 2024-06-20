@@ -317,6 +317,7 @@
 				"title": "Add and hide tokens",
 				"do_not_see_import": "Don’t see your token? Import",
 				"clear_filter": "Clear filter",
+				"manage_for_network": "Managing tokens for $network",
 				"network": "Network"
 			},
 			"placeholder": {

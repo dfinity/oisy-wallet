@@ -287,7 +287,13 @@ interface I18nTokens {
 		};
 	};
 	manage: {
-		text: { title: string; do_not_see_import: string; clear_filter: string; network: string };
+		text: {
+			title: string;
+			do_not_see_import: string;
+			clear_filter: string;
+			manage_for_network: string;
+			network: string;
+		};
 		placeholder: { select_network: string };
 		info: { outdated_index_canister: string };
 		error: { unexpected_build: string; empty: string };
