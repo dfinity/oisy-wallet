@@ -34,7 +34,7 @@
 		}
 	];
 
-	let saveProgressStep: string = ProgressStepsAddToken.INITIALIZATION;
+	let saveProgressStep: ProgressStepsAddToken = ProgressStepsAddToken.INITIALIZATION;
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
