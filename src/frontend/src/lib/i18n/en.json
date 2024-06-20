@@ -317,7 +317,11 @@
 				"title": "Add and hide tokens",
 				"do_not_see_import": "Don’t see your token? Import",
 				"clear_filter": "Clear filter",
-				"manage_for_network": "Managing tokens for $network"
+				"manage_for_network": "Managing tokens for $network",
+				"network": "Network"
+			},
+			"placeholder": {
+				"select_network": "Select network"
 			},
 			"info": {
 				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade."
