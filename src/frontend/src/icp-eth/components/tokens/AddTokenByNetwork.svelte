@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
-	import { networks, networksMainnets } from '$lib/derived/networks.derived';
+	import { networks } from '$lib/derived/networks.derived';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
 	import { fade } from 'svelte/transition';
@@ -16,7 +16,7 @@
 	let networkName: string | undefined = network?.name;
 	$: networkName,
 		(network = nonNullish(networkName)
-			? $networksMainnets.find(({ name }) => name === networkName)
+			? $networks.find(({ name }) => name === networkName)
 			: undefined);
 
 	let ledgerCanisterId: string;
