@@ -21,6 +21,7 @@
 	import type { Token } from '$lib/types/token';
 	import { networkTokens } from '$lib/derived/network-tokens.derived';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	const dispatch = createEventDispatcher();
 
@@ -145,6 +146,16 @@
 		</svelte:fragment>
 	</Input>
 </div>
+
+{#if nonNullish($selectedNetwork)}
+	<div class="mb-4">
+		<p class="text-misty-rose">
+			{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
+				$network: $selectedNetwork.name
+			})}
+		</p>
+	</div>
+{/if}
 
 {#if noTokensMatch}
 	<button
