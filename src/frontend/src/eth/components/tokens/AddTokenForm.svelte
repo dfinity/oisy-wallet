@@ -6,6 +6,8 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	export let contractAddress = '';
+
+	// TODO: remove this variable as soon as we deprecate AddTokenModal that is specific to Ethereum network
 	export let isFirstWizardStep: boolean = false;
 
 	let invalid = true;
