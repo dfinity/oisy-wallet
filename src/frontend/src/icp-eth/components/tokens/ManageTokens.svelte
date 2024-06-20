@@ -19,6 +19,9 @@
 	import { icTokenContainsEnabled, sortIcTokens } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Token } from '$lib/types/token';
+	import { networkTokens } from '$lib/derived/network-tokens.derived';
+	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	const dispatch = createEventDispatcher();
 
@@ -51,6 +54,22 @@
 		)
 	].sort(sortIcTokens);
 
+	let allTokens: Token[] = [];
+	$: allTokens = [
+		...$networkTokens.map(
+			(token) =>
+				allIcrcTokens.find(
+					(icrcToken) => token.id === icrcToken.id && token.network.id === icrcToken.network.id
+				) ?? { ...token, show: true }
+		),
+		...allIcrcTokens.filter(
+			(icrcToken) =>
+				!$networkTokens.some(
+					(token) => icrcToken.id === token.id && icrcToken.network.id === token.network.id
+				)
+		)
+	];
+
 	let filterTokens = '';
 	const updateFilter = () => (filterTokens = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
@@ -60,12 +79,13 @@
 
 	let filteredTokens: Token[] = [];
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
-		? allIcrcTokens
-		: allIcrcTokens.filter(
-				({ name, symbol, alternativeName }) =>
-					name.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					(alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase())
+		? allTokens
+		: allTokens.filter(
+				(token) =>
+					token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
+					token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
+					(icTokenContainsEnabled(token) &&
+						(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()))
 			);
 
 	let tokens: Token[] = [];
@@ -127,6 +147,16 @@
 	</Input>
 </div>
 
+{#if nonNullish($selectedNetwork)}
+	<div class="mb-4">
+		<p class="text-misty-rose">
+			{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
+				$network: $selectedNetwork.name
+			})}
+		</p>
+	</div>
+{/if}
+
 {#if noTokensMatch}
 	<button
 		class="flex flex-col items-center justify-center py-16 w-full"
@@ -160,6 +190,8 @@
 				<svelte:fragment slot="action">
 					{#if icTokenContainsEnabled(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
+					{:else}
+						<ManageTokenToggle {token} />
 					{/if}
 				</svelte:fragment>
 			</Card>
