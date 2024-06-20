@@ -1,16 +1,13 @@
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { load } from 'cheerio';
 import dotenv from 'dotenv';
 import { ethers } from 'ethers';
 import fs from 'fs/promises';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import path from 'path';
 import { ENV } from './build.utils.mjs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const rootPath = resolve(__dirname, '../');
+const rootPath = process.cwd();
 
 dotenv.config({ path: `.env.${ENV}` });
 
@@ -28,8 +25,8 @@ if (isNullish(ETHERSCAN_API_KEY)) {
 	process.exit(1);
 }
 
-const SRC_DIR = 'src/frontend/src/env';
-const SRC_PATH = resolve(rootPath, SRC_DIR);
+const DATA_DIR = 'src/frontend/src/env';
+const DATA_DIR_PATH = resolve(rootPath, DATA_DIR);
 
 const fetchHtml = async (url) => {
 	const response = await fetch(url);
@@ -66,7 +63,7 @@ const createEnvFile = async (token) => {
 	const tokenDetails = await fetchTokenDetails(contractAddress);
 
 	const newFileName = `tokens.${tokenName.toLowerCase()}.env.ts`;
-	const newFilePath = path.join(SRC_PATH, newFileName);
+	const newFilePath = path.join(DATA_DIR_PATH, newFileName);
 
 	try {
 		await fs.access(newFilePath);
@@ -122,15 +119,15 @@ export const ${testnetToken}: RequiredErc20Token = {
 };
 `;
 
-	await fs.writeFile(newFilePath, newContent);
+	writeFileSync(newFilePath, newContent);
 	console.log(`Created ${newFilePath}`);
 
 	return { newFileName, mainnetToken, testnetToken };
 };
 
-const updateTokensErc20Env = async (newFileName, mainnetToken, testnetToken) => {
-	const filePath = path.join(SRC_PATH, 'tokens.erc20.env.ts');
-	let content = await fs.readFile(filePath, 'utf8');
+const updateTokensErc20Env = (newFileName, mainnetToken, testnetToken) => {
+	const filePath = path.join(DATA_DIR_PATH, 'tokens.erc20.env.ts');
+	let content = readFileSync(filePath, 'utf8');
 
 	const regexList = [
 		{
@@ -158,65 +155,40 @@ const updateTokensErc20Env = async (newFileName, mainnetToken, testnetToken) => 
 	const importStatement = `import { ${mainnetToken}, ${testnetToken} } from '$env/${newFileName.replace('.ts', '')}';\n`;
 	content = importStatement + content;
 
-	await fs.writeFile(filePath, content);
+	writeFileSync(filePath, content);
 	console.log(`Updated ${filePath}`);
 };
 
-const fetchSupportedTokensByUrl = async (url) => {
-	try {
-		const html = await fetchHtml(url);
-		const $ = load(html);
-
-		const tokens = [];
-		$('#supported-ckerc20-tokens + table tbody tr').each((index, element) => {
-			const symbol = $(element).find('td').eq(0).text().trim();
-			const contractAddress = $(element).find('td').eq(2).text().trim();
-			tokens.push({ symbol, contractAddress });
-		});
-
-		console.log(
-			`Found ${tokens.length} tokens on ${url}: ${tokens.map((t) => t.symbol).join(', ')}`
-		);
-
-		return tokens;
-	} catch (err) {
-		console.error(`Error fetching supported tokens on ${url}:\n${err}`);
-		process.exit(1);
-	}
+const flattenData = (data) => {
+	return Object.keys(data).map(symbol => ({
+		symbol,
+		...data[symbol]
+	}));
 };
 
-const getCanisterId = async (network) => {
-	const dfxJsonPath = path.resolve(rootPath, 'dfx.json');
-	const dfxJson = JSON.parse(await fs.readFile(dfxJsonPath, 'utf-8'));
-	return dfxJson.canisters.cketh_minter.remote.id[network];
+const flattenEnvironmentData = (data) => {
+	return Object.entries(data).reduce((acc, [environment, values]) => ({
+		...acc,
+		[environment]: flattenData(values)
+	}), {});
 };
 
-const fetchTokensForEnvironment = async (network) => {
-	const canisterId = await getCanisterId(network);
-	const dashboardUrl = `https://${canisterId}.raw.icp0.io/dashboard`;
-	return await fetchSupportedTokensByUrl(dashboardUrl);
-};
-
-const fetchSupportedTokens = async () => {
-	const [prodTokens, testnetTokens] = await Promise.all([
-		fetchTokensForEnvironment('ic'),
-		fetchTokensForEnvironment('staging')
-	]);
-
-	return { prodTokens, testnetTokens };
+const loadSupportedTokens = () => {
+	const jsonPath = path.resolve(DATA_DIR_PATH, 'tokens.ckerc20.json');
+	return flattenEnvironmentData(JSON.parse(readFileSync(jsonPath, 'utf-8')));
 };
 
 const filterTokens = async (prodTokens, testnetTokens) => {
 	const testnetTokenMap = new Map(
-		testnetTokens.map((token) => [token.symbol.replace('ckSepolia', 'ck'), token.contractAddress])
+		testnetTokens.map(({symbol, erc20ContractAddress}) => [symbol.replace('ckSepolia', 'ck'), erc20ContractAddress])
 	);
 
 	const results = await Promise.all(
 		prodTokens
-			.filter((token) => nonNullish(testnetTokenMap.get(token.symbol)))
+			.filter(({ symbol }) => nonNullish(testnetTokenMap.get(symbol)))
 			.map(async (token) => {
 				const tokenName = token.symbol.slice(2);
-				const tokenFilePath = path.join(SRC_PATH, `tokens.${tokenName.toLowerCase()}.env.ts`);
+				const tokenFilePath = path.join(DATA_DIR_PATH, `tokens.${tokenName.toLowerCase()}.env.ts`);
 				try {
 					await fs.access(tokenFilePath);
 					return null; // File already exists, filter it out
@@ -230,18 +202,18 @@ const filterTokens = async (prodTokens, testnetTokens) => {
 			})
 	);
 
-	return results.filter(nonNullish).map((token) => {
+	return results.filter(nonNullish).map(({ symbol, erc20ContractAddress }) => {
 		return {
-			tokenName: token.symbol.slice(2),
-			symbol: token.symbol,
-			contractAddress: token.contractAddress,
-			testnetContractAddress: testnetTokenMap.get(token.symbol)
+			tokenName: symbol.slice(2),
+			symbol: symbol,
+			contractAddress: erc20ContractAddress,
+			testnetContractAddress: testnetTokenMap.get(symbol)
 		};
 	});
 };
 
 const main = async () => {
-	const { prodTokens, testnetTokens } = await fetchSupportedTokens();
+	const { production: prodTokens, staging: testnetTokens } = await loadSupportedTokens();
 
 	const tokensToProcess = await filterTokens(prodTokens, testnetTokens);
 
@@ -261,7 +233,7 @@ const main = async () => {
 
 		const { newFileName, mainnetToken, testnetToken } = await createEnvFile(token);
 
-		await updateTokensErc20Env(newFileName, mainnetToken, testnetToken);
+		updateTokensErc20Env(newFileName, mainnetToken, testnetToken);
 
 		console.log(`Finished for token ${tokenName}`);
 	}
@@ -270,7 +242,7 @@ const main = async () => {
 	console.log(
 		'Final Step: To complete the integration of the new tokens, you need to create SVG icon files for each token and place them in the correct directory.'
 	);
-	console.log(`Navigate to the following directory: ${path.join(SRC_DIR)}`);
+	console.log(`Navigate to the following directory: ${path.join(DATA_DIR)}`);
 
 	tokensToProcess.forEach(({ tokenName }) => {
 		console.log(
@@ -284,7 +256,7 @@ const main = async () => {
 
 	tokensToProcess.forEach(({ tokenName }) => {
 		console.log(
-			`Example: For token ${tokenName}, the SVG file should be: ${SRC_DIR}/${tokenName.toLowerCase()}.svg`
+			`Example: For token ${tokenName}, the SVG file should be: ${DATA_DIR}/${tokenName.toLowerCase()}.svg`
 		);
 	});
 };
