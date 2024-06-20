@@ -24,10 +24,12 @@ const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
 const buildOrchestratorInfo = async (orchestratorId) => {
 	const { managed_canisters } = await orchestratorInfo({ orchestratorId });
 
-	const mapManagedCanisters = (acc, { ledger, index, ckerc20_token_symbol, erc20_contract }) => {
+	const mapManagedCanisters = (
+		acc,
+		{ ledger, index, ckerc20_token_symbol, erc20_contract: { address: erc20ContractAddress } }
+	) => {
 		const ledgerCanister = fromNullable(ledger);
 		const indexCanister = fromNullable(index);
-		const erc20ContractAddress = erc20_contract.address;
 
 		// Skip tokens without Ledger or Index (by definition, this can happen).
 		if (isNullish(ledgerCanister) || isNullish(indexCanister)) {
