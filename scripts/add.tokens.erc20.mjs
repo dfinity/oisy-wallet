@@ -7,8 +7,6 @@ import { resolve } from 'node:path';
 import path from 'path';
 import { ENV } from './build.utils.mjs';
 
-const rootPath = process.cwd();
-
 dotenv.config({ path: `.env.${ENV}` });
 
 const getArgValue = (argName) => {
@@ -26,12 +24,7 @@ if (isNullish(ETHERSCAN_API_KEY)) {
 }
 
 const DATA_DIR = 'src/frontend/src/env';
-const DATA_DIR_PATH = resolve(rootPath, DATA_DIR);
-
-const fetchHtml = async (url) => {
-	const response = await fetch(url);
-	return await response.text();
-};
+const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
 
 const fetchTokenDetails = async (contractAddress) => {
 	const provider = new ethers.providers.EtherscanProvider('homestead', ETHERSCAN_API_KEY);
