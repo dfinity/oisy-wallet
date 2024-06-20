@@ -9,6 +9,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils.js';
+	import { onDestroy } from 'svelte';
 
 	export let network: Network | undefined;
 	export let tokenData: Record<string, string>;
@@ -23,11 +24,13 @@
 	let indexCanisterId: string;
 	let erc20ContractAddress: string;
 
-	$: tokenData = {
-		ledgerCanisterId,
-		indexCanisterId,
-		erc20ContractAddress
-	};
+	onDestroy(() => {
+		tokenData = isNetworkIdICP(network?.id)
+			? { ledgerCanisterId, indexCanisterId }
+			: isNetworkIdEthereum(network?.id)
+				? { erc20ContractAddress }
+				: {};
+	});
 </script>
 
 <div class="stretch pt-8">
