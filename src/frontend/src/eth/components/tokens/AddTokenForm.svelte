@@ -7,6 +7,9 @@
 
 	export let contractAddress = '';
 
+	// TODO: remove this variable as soon as we deprecate AddTokenModal that is specific to Ethereum network
+	export let isFirstWizardStep: boolean = false;
+
 	let invalid = true;
 	$: invalid = isNullishOrEmpty(contractAddress);
 
@@ -26,8 +29,11 @@
 
 	<div class="pt-2">
 		<ButtonGroup>
-			<button type="button" class="secondary block flex-1" on:click={() => dispatch('icClose')}
-				>{$i18n.core.text.cancel}</button
+			<button
+				type="button"
+				class="secondary block flex-1"
+				on:click={() => dispatch(isFirstWizardStep ? 'icClose' : 'icBack')}
+				>{isFirstWizardStep ? $i18n.core.text.cancel : $i18n.core.text.back}</button
 			>
 			<button
 				class="primary block flex-1"
