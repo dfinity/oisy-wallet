@@ -20,12 +20,12 @@
 
 	let ledgerCanisterId: string;
 	let indexCanisterId: string;
-	let contractAddress: string;
+	let erc20ContractAddress: string;
 
 	$: tokenData = {
 		ledgerCanisterId,
 		indexCanisterId,
-		contractAddress
+		erc20ContractAddress
 	};
 </script>
 
@@ -50,7 +50,7 @@
 			</div>
 		{:else if network?.id === ETHEREUM_NETWORK_ID}
 			<div in:fade>
-				<AddTokenForm on:icBack on:icNext bind:contractAddress />
+				<AddTokenForm on:icBack on:icNext bind:contractAddress={erc20ContractAddress} />
 			</div>
 		{/if}
 	</div>
