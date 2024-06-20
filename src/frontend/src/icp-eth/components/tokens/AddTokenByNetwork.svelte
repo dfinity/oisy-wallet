@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
-	import { networksMainnets } from '$lib/derived/networks.derived';
-	import { ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+	import { networks, networksMainnets } from '$lib/derived/networks.derived';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
 	import { fade } from 'svelte/transition';
 	import type { Network } from '$lib/types/network';
 	import { nonNullish } from '@dfinity/utils';
+	import { isNetworkIdICP } from '$lib/utils/network.utils';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils.js';
 
 	export let network: Network | undefined;
 	export let tokenData: Record<string, string>;
@@ -37,23 +38,25 @@
 			<option disabled selected value={undefined} class="hidden"
 				><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
 			>
-			{#each $networksMainnets as network}
+			{#each $networks as network}
 				<DropdownItem value={network.name}>{network.name}</DropdownItem>
 			{/each}
 		</Dropdown>
 	</div>
 
-	<div class="mt-8">
-		{#if network?.id === ICP_NETWORK_ID}
-			<div in:fade>
-				<IcAddTokenForm on:icBack on:icNext bind:ledgerCanisterId bind:indexCanisterId />
-			</div>
-		{:else if network?.id === ETHEREUM_NETWORK_ID}
-			<div in:fade>
-				<AddTokenForm on:icBack on:icNext bind:contractAddress={erc20ContractAddress} />
-			</div>
-		{/if}
-	</div>
+	{#if nonNullish(network)}
+		<div class="mt-8">
+			{#if isNetworkIdICP(network?.id)}
+				<div in:fade>
+					<IcAddTokenForm on:icBack on:icNext bind:ledgerCanisterId bind:indexCanisterId />
+				</div>
+			{:else if isNetworkIdEthereum(network?.id)}
+				<div in:fade>
+					<AddTokenForm on:icBack on:icNext bind:contractAddress={erc20ContractAddress} />
+				</div>
+			{/if}
+		</div>
+	{/if}
 </div>
 
 <style lang="scss">
