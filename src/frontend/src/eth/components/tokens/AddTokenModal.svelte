@@ -124,6 +124,11 @@
 	{:else if currentStep?.name === 'Saving'}
 		<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
 	{:else}
-		<AddTokenForm on:icNext={modal.next} on:icClose={close} bind:contractAddress />
+		<AddTokenForm
+			on:icNext={modal.next}
+			on:icClose={close}
+			bind:contractAddress
+			isFirstWizardStep={true}
+		/>
 	{/if}
 </WizardModal>
