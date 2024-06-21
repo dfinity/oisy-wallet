@@ -8,11 +8,8 @@
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
-	import { isNullish } from '@dfinity/utils';
 	import { authStore } from '$lib/stores/auth.store';
-	import { nullishSignOut } from '$lib/services/auth.services';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import { saveCustomTokens } from '$icp/services/ic-custom-tokens.services';
+	import { saveIcrcCustomToken } from '$icp/services/ic-custom-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 
 	const steps: WizardSteps = [
@@ -53,41 +50,19 @@
 		]);
 	};
 
+	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
+
 	const save = async (
 		tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[]
 	) => {
-		if (isNullish($authStore.identity)) {
-			await nullishSignOut();
-			return;
-		}
-
-		if (tokens.length === 0) {
-			toastsError({
-				msg: { text: $i18n.tokens.manage.error.empty }
-			});
-			return;
-		}
-
-		modal.set(3);
-
-		try {
-			await saveCustomTokens({
-				identity: $authStore.identity,
-				tokens,
-				progress: (step: ProgressStepsAddToken) => (saveProgressStep = step)
-			});
-
-			saveProgressStep = ProgressStepsAddToken.DONE;
-
-			setTimeout(() => close(), 750);
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.unexpected },
-				err
-			});
-
-			modal.set(0);
-		}
+		await saveIcrcCustomToken({
+			tokens,
+			progress,
+			modalNext: () => modal.set(3),
+			onSuccess: close,
+			onError: () => modal.set(0),
+			identity: $authStore.identity
+		});
 	};
 
 	const close = () => {
