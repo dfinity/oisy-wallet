@@ -24,7 +24,10 @@ const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
 const buildOrchestratorInfo = async (orchestratorId) => {
 	const { managed_canisters } = await orchestratorInfo({ orchestratorId });
 
-	const mapManagedCanisters = (acc, { ledger, index, ckerc20_token_symbol }) => {
+	const mapManagedCanisters = (
+		acc,
+		{ ledger, index, ckerc20_token_symbol, erc20_contract: { address: erc20ContractAddress } }
+	) => {
 		const ledgerCanister = fromNullable(ledger);
 		const indexCanister = fromNullable(index);
 
@@ -44,7 +47,8 @@ const buildOrchestratorInfo = async (orchestratorId) => {
 				...(acc[ckerc20_token_symbol] ?? []),
 				{
 					ledgerCanisterId: ledgerCanisterId.toText(),
-					indexCanisterId: indexCanisterId.toText()
+					indexCanisterId: indexCanisterId.toText(),
+					erc20ContractAddress
 				}
 			]
 		};
