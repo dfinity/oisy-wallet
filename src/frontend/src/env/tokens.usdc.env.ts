@@ -31,7 +31,7 @@ export const SEPOLIA_USDC_TOKEN: RequiredErc20Token = {
 	network: SEPOLIA_NETWORK,
 	standard: 'erc20',
 	category: 'default',
-	name: 'USDC',
+	name: 'USD Coin',
 	symbol: 'USDC',
 	decimals: USDC_DECIMALS,
 	icon: usdc,
