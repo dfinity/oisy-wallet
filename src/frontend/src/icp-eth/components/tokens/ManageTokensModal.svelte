@@ -16,8 +16,8 @@
 	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 	import { saveErc20Contract } from '$eth/services/erc20.services';
-	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	const steps: WizardSteps = [
 		{
@@ -61,8 +61,8 @@
 		await saveErc20Contract({
 			contractAddress: erc20ContractAddress,
 			metadata: erc20Metadata,
-			chainId: $selectedChainId,
-			network: $selectedEthereumNetwork,
+			chainId: (network as EthereumNetwork).chainId,
+			network: network as EthereumNetwork,
 			updateSaveProgressStep: progress,
 			modalNext: modal.next,
 			onSuccess: close,
