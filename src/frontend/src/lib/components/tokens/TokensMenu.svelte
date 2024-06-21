@@ -5,7 +5,7 @@
 	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IcManageTokensMenuButton from '$icp/components/tokens/IcManageTokensMenuButton.svelte';
+	import ManageTokensMenuButton from '$icp-eth/components/tokens/ManageTokensMenuButton.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -30,6 +30,6 @@
 			<Hr />
 		</div>
 
-		<IcManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
+		<ManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
 	</div>
 </Popover>
