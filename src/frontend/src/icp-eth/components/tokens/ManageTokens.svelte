@@ -191,7 +191,7 @@
 					{#if icTokenContainsEnabled(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
 					{:else}
-						<ManageTokenToggle {token} />
+						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
 					{/if}
 				</svelte:fragment>
 			</Card>
