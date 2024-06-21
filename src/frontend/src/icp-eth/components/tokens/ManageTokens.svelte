@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconClose, Input } from '@dfinity/gix-components';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -21,7 +21,7 @@
 	import type { Token } from '$lib/types/token';
 	import { networkTokens } from '$lib/derived/network-tokens.derived';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { networkICP, selectedNetwork } from '$lib/derived/network.derived';
 
 	const dispatch = createEventDispatcher();
 
@@ -62,12 +62,14 @@
 					(icrcToken) => token.id === icrcToken.id && token.network.id === icrcToken.network.id
 				) ?? { ...token, show: true }
 		),
-		...allIcrcTokens.filter(
-			(icrcToken) =>
-				!$networkTokens.some(
-					(token) => icrcToken.id === token.id && icrcToken.network.id === token.network.id
+		...(isNullish($selectedNetwork) || $networkICP
+			? allIcrcTokens.filter(
+					(icrcToken) =>
+						!$networkTokens.some(
+							(token) => icrcToken.id === token.id && icrcToken.network.id === token.network.id
+						)
 				)
-		)
+			: [])
 	];
 
 	let filterTokens = '';
