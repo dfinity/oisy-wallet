@@ -4,10 +4,8 @@
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { networkEthereum, networkICP } from '$lib/derived/network.derived';
 	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IcManageTokensMenuButton from '$icp/components/tokens/IcManageTokensMenuButton.svelte';
-	import ManageTokensMenuButton from '$eth/components/tokens/ManageTokensMenuButton.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -28,16 +26,10 @@
 	<div class="flex flex-col gap-3">
 		<TokensZeroBalance />
 
-		{#if $networkICP || $networkEthereum}
-			<div class="my">
-				<Hr />
-			</div>
+		<div class="my">
+			<Hr />
+		</div>
 
-			{#if $networkICP}
-				<IcManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
-			{:else if $networkEthereum}
-				<ManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
-			{/if}
-		{/if}
+		<IcManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
 	</div>
 </Popover>
