@@ -14,8 +14,7 @@
 	import type { Token } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
-	import { modalAddToken, modalManageTokens } from '$lib/derived/modal.derived';
-	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
+	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
@@ -77,9 +76,7 @@
 		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
 	{/if}
 
-	{#if $modalAddToken}
-		<AddTokenModal />
-	{:else if $modalManageTokens}
+	{#if $modalManageTokens}
 		<ManageTokensModal />
 	{/if}
 </TokensSkeletons>
