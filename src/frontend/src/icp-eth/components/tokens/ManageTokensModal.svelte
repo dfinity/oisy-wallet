@@ -61,7 +61,6 @@
 		await saveErc20Contract({
 			contractAddress: erc20ContractAddress,
 			metadata: erc20Metadata,
-			chainId: (network as EthereumNetwork).chainId,
 			network: network as EthereumNetwork,
 			updateSaveProgressStep: progress,
 			modalNext: modal.next,
