@@ -47,7 +47,7 @@
 			modalNext: modal.next,
 			onSuccess: close,
 			onError: modal.back,
-			identity: $authStore.identity,
+			identity: $authStore.identity
 		});
 	};
 
