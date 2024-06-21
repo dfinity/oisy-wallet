@@ -23,11 +23,17 @@
 	let indexCanisterId: string;
 	let erc20ContractAddress: string;
 
-	$: tokenData = {
-		ledgerCanisterId,
-		indexCanisterId,
-		erc20ContractAddress
-	};
+	// Since we persist the values of relevant variables when switching networks, this ensures that
+	// only the data related to the selected network is passed.
+	$: {
+		if (isNetworkIdICP(network?.id)) {
+			tokenData = { ledgerCanisterId, indexCanisterId };
+		} else if (isNetworkIdEthereum(network?.id)) {
+			tokenData = { erc20ContractAddress };
+		} else {
+			tokenData = {};
+		}
+	}
 </script>
 
 <div class="stretch pt-8">
