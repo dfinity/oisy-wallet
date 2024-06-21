@@ -19,7 +19,6 @@ export interface Modal<T> {
 		| 'wallet-connect-send'
 		| 'transaction'
 		| 'ic-transaction'
-		| 'add-token'
 		| 'manage-tokens'
 		| 'hide-token'
 		| 'ic-hide-token'
@@ -48,7 +47,6 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openWalletConnectSend: <D extends T>(data: D) => void;
 	openTransaction: <D extends T>(data: D) => void;
 	openIcTransaction: <D extends T>(data: D) => void;
-	openAddToken: () => void;
 	openManageTokens: () => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
@@ -78,7 +76,6 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),
 		openTransaction: <D extends T>(data: D) => set({ type: 'transaction', data }),
 		openIcTransaction: <D extends T>(data: D) => set({ type: 'ic-transaction', data }),
-		openAddToken: () => set({ type: 'add-token' }),
 		openManageTokens: () => set({ type: 'manage-tokens' }),
 		openHideToken: () => set({ type: 'hide-token' }),
 		openIcHideToken: () => set({ type: 'ic-hide-token' }),
