@@ -6,5 +6,3 @@ if [ -n "$1" ]; then
 else
   node ./scripts/add.tokens.erc20.mjs
 fi
-
-#npm run format && npm run lint

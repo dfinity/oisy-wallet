@@ -1,4 +1,5 @@
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { execSync } from 'child_process';
 import dotenv from 'dotenv';
 import { ethers } from 'ethers';
 import fs from 'fs/promises';
@@ -49,6 +50,8 @@ const fetchTokenDetails = async (contractAddress) => {
 
 	return { name, symbol, decimals };
 };
+
+let newFilesCreated = false;
 
 const createEnvFile = async (token) => {
 	const { tokenName, contractAddress, testnetContractAddress } = token;
@@ -149,21 +152,25 @@ const updateTokensErc20Env = (newFileName, mainnetToken, testnetToken) => {
 	content = importStatement + content;
 
 	writeFileSync(filePath, content);
+	newFilesCreated = true;
 	console.log(`Updated ${filePath}`);
 };
 
 const flattenData = (data) => {
-	return Object.keys(data).map(symbol => ({
+	return Object.keys(data).map((symbol) => ({
 		symbol,
 		...data[symbol]
 	}));
 };
 
 const flattenEnvironmentData = (data) => {
-	return Object.entries(data).reduce((acc, [environment, values]) => ({
-		...acc,
-		[environment]: flattenData(values)
-	}), {});
+	return Object.entries(data).reduce(
+		(acc, [environment, values]) => ({
+			...acc,
+			[environment]: flattenData(values)
+		}),
+		{}
+	);
 };
 
 const readSupportedTokens = () => {
@@ -173,7 +180,10 @@ const readSupportedTokens = () => {
 
 const filterTokens = async (prodTokens, testnetTokens) => {
 	const testnetTokenMap = new Map(
-		testnetTokens.map(({symbol, erc20ContractAddress}) => [symbol.replace('ckSepolia', 'ck'), erc20ContractAddress])
+		testnetTokens.map(({ symbol, erc20ContractAddress }) => [
+			symbol.replace('ckSepolia', 'ck'),
+			erc20ContractAddress
+		])
 	);
 
 	const results = await Promise.all(
@@ -188,9 +198,8 @@ const filterTokens = async (prodTokens, testnetTokens) => {
 				} catch (err) {
 					if (err.code === 'ENOENT') {
 						return token; // File doesn't exist, process this token
-					} else {
-						throw err;
 					}
+					throw err;
 				}
 			})
 	);
@@ -252,6 +261,11 @@ const main = async () => {
 			`Example: For token ${tokenName}, the SVG file should be: ${DATA_DIR}/${tokenName.toLowerCase()}.svg`
 		);
 	});
+
+	if (newFilesCreated) {
+		console.log('Running npm run format && npm run lint');
+		execSync('npm run format && npm run lint', { stdio: 'inherit' });
+	}
 };
 
 try {
