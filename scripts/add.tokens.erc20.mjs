@@ -166,7 +166,7 @@ const flattenEnvironmentData = (data) => {
 	}), {});
 };
 
-const loadSupportedTokens = () => {
+const readSupportedTokens = () => {
 	const jsonPath = path.resolve(DATA_DIR_PATH, 'tokens.ckerc20.json');
 	return flattenEnvironmentData(JSON.parse(readFileSync(jsonPath, 'utf-8')));
 };
@@ -206,7 +206,7 @@ const filterTokens = async (prodTokens, testnetTokens) => {
 };
 
 const main = async () => {
-	const { production: prodTokens, staging: testnetTokens } = await loadSupportedTokens();
+	const { production: prodTokens, staging: testnetTokens } = await readSupportedTokens();
 
 	const tokensToProcess = await filterTokens(prodTokens, testnetTokens);
 
