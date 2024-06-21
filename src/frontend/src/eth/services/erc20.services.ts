@@ -4,11 +4,10 @@ import {
 	SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS
 } from '$env/networks.env';
 import { ERC20_CONTRACTS, ERC20_TWIN_TOKENS } from '$env/tokens.erc20.env';
-import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
-import type { EthereumNetwork } from '$eth/types/network';
+import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token } from '$eth/utils/erc20.utils';
 import { addUserToken, listUserTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -16,6 +15,7 @@ import { nullishSignOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import type { OptionIdentity } from '$lib/types/identity';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -91,22 +91,25 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 export const saveErc20Contract = async ({
 	contractAddress,
 	metadata,
+	chainId,
+	network,
 	updateSaveProgressStep,
 	modalNext,
 	onSuccess,
-	onError
+	onError,
+	identity
 }: {
 	contractAddress: string;
 	metadata: Erc20Metadata | undefined;
+	chainId: EthereumChainId;
+	network: EthereumNetwork;
 	updateSaveProgressStep: (step: ProgressStepsAddToken) => void;
 	modalNext: () => void;
 	onSuccess: () => void;
 	onError: () => void;
+	identity: OptionIdentity;
 }): Promise<void> => {
 	const $i18n = get(i18n);
-	const $authStore = get(authStore);
-	const $selectedChainId = get(selectedChainId);
-	const $selectedEthereumNetwork = get(selectedEthereumNetwork);
 
 	if (isNullishOrEmpty(contractAddress)) {
 		toastsError({
@@ -122,7 +125,7 @@ export const saveErc20Contract = async ({
 		return;
 	}
 
-	if (isNullish($authStore.identity)) {
+	if (isNullish(identity)) {
 		await nullishSignOut();
 		return;
 	}
@@ -133,9 +136,9 @@ export const saveErc20Contract = async ({
 		updateSaveProgressStep(ProgressStepsAddToken.SAVE);
 
 		await addUserToken({
-			identity: $authStore.identity,
+			identity,
 			token: {
-				chain_id: $selectedChainId,
+				chain_id: chainId,
 				contract_address: contractAddress,
 				symbol: [],
 				decimals: [],
@@ -150,7 +153,7 @@ export const saveErc20Contract = async ({
 				address: contractAddress,
 				exchange: 'ethereum',
 				category: 'custom',
-				network: $selectedEthereumNetwork,
+				network: network,
 				...metadata
 			})
 		);
