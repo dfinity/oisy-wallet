@@ -7,13 +7,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
-	import { isNullish } from '@dfinity/utils';
 	import { authStore } from '$lib/stores/auth.store';
-	import { nullishSignOut } from '$lib/services/auth.services';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import { saveCustomTokens } from '$icp/services/ic-custom-tokens.services';
+	import { saveIcrcCustomToken } from '$icp/services/ic-custom-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+	import type { Erc20Metadata } from '$eth/types/erc20';
+	import AddTokenByNetwork from '$icp-eth/components/tokens/AddTokenByNetwork.svelte';
+	import type { Network } from '$lib/types/network';
+	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
+	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import { saveErc20Contract } from '$eth/services/erc20.services';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import type { EthereumNetwork } from '$eth/types/network';
 
 	const steps: WizardSteps = [
 		{
@@ -34,7 +38,7 @@
 		}
 	];
 
-	let saveProgressStep: string = ProgressStepsAddToken.INITIALIZATION;
+	let saveProgressStep: ProgressStepsAddToken = ProgressStepsAddToken.INITIALIZATION;
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -53,41 +57,32 @@
 		]);
 	};
 
+	const saveErc20Token = async () => {
+		await saveErc20Contract({
+			contractAddress: erc20ContractAddress,
+			metadata: erc20Metadata,
+			network: network as EthereumNetwork,
+			updateSaveProgressStep: progress,
+			modalNext: modal.next,
+			onSuccess: close,
+			onError: modal.back,
+			identity: $authStore.identity
+		});
+	};
+
+	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
+
 	const save = async (
 		tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[]
 	) => {
-		if (isNullish($authStore.identity)) {
-			await nullishSignOut();
-			return;
-		}
-
-		if (tokens.length === 0) {
-			toastsError({
-				msg: { text: $i18n.tokens.manage.error.empty }
-			});
-			return;
-		}
-
-		modal.set(3);
-
-		try {
-			await saveCustomTokens({
-				identity: $authStore.identity,
-				tokens,
-				progress: (step: ProgressStepsAddToken) => (saveProgressStep = step)
-			});
-
-			saveProgressStep = ProgressStepsAddToken.DONE;
-
-			setTimeout(() => close(), 750);
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.tokens.error.unexpected },
-				err
-			});
-
-			modal.set(0);
-		}
+		await saveIcrcCustomToken({
+			tokens,
+			progress,
+			modalNext: () => modal.set(3),
+			onSuccess: close,
+			onError: () => modal.set(0),
+			identity: $authStore.identity
+		});
 	};
 
 	const close = () => {
@@ -98,6 +93,14 @@
 
 	let ledgerCanisterId = '';
 	let indexCanisterId = '';
+
+	let erc20ContractAddress = '';
+	let erc20Metadata: Erc20Metadata | undefined;
+
+	let network: Network | undefined = $selectedNetwork;
+	let tokenData: Record<string, string> = {};
+
+	$: tokenData, ({ ledgerCanisterId, indexCanisterId, erc20ContractAddress } = tokenData);
 </script>
 
 <WizardModal
@@ -110,21 +113,25 @@
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
 	{#if currentStep?.name === 'Review'}
-		<IcAddTokenReview
-			on:icBack={modal.back}
-			on:icSave={addToken}
-			{ledgerCanisterId}
-			{indexCanisterId}
-		/>
+		{#if isNetworkIdICP(network?.id)}
+			<IcAddTokenReview
+				on:icBack={modal.back}
+				on:icSave={addToken}
+				{ledgerCanisterId}
+				{indexCanisterId}
+			/>
+		{:else if isNetworkIdEthereum(network?.id)}
+			<AddTokenReview
+				on:icBack={modal.back}
+				on:icSave={saveErc20Token}
+				contractAddress={erc20ContractAddress}
+				bind:metadata={erc20Metadata}
+			/>
+		{/if}
 	{:else if currentStep?.name === 'Saving'}
 		<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
 	{:else if currentStep?.name === 'Import'}
-		<IcAddTokenForm
-			on:icBack={modal.back}
-			on:icNext={modal.next}
-			bind:ledgerCanisterId
-			bind:indexCanisterId
-		/>
+		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}
 		<ManageTokens on:icClose={close} on:icAddToken={modal.next} on:icSave={saveTokens} />
 	{/if}
