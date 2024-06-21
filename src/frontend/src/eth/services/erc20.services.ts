@@ -7,7 +7,7 @@ import { ERC20_CONTRACTS, ERC20_TWIN_TOKENS } from '$env/tokens.erc20.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
-import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
+import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token } from '$eth/utils/erc20.utils';
 import { addUserToken, listUserTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -91,7 +91,6 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 export const saveErc20Contract = async ({
 	contractAddress,
 	metadata,
-	chainId,
 	network,
 	updateSaveProgressStep,
 	modalNext,
@@ -101,7 +100,6 @@ export const saveErc20Contract = async ({
 }: {
 	contractAddress: string;
 	metadata: Erc20Metadata | undefined;
-	chainId: EthereumChainId;
 	network: EthereumNetwork;
 	updateSaveProgressStep: (step: ProgressStepsAddToken) => void;
 	modalNext: () => void;
@@ -138,7 +136,7 @@ export const saveErc20Contract = async ({
 		await addUserToken({
 			identity,
 			token: {
-				chain_id: chainId,
+				chain_id: network.chainId,
 				contract_address: contractAddress,
 				symbol: [],
 				decimals: [],

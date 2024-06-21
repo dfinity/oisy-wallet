@@ -6,7 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authStore } from '$lib/stores/auth.store';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-	import { selectedChainId, selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
@@ -41,7 +41,6 @@
 		await saveErc20Contract({
 			contractAddress,
 			metadata,
-			chainId: $selectedChainId,
 			network: $selectedEthereumNetwork,
 			updateSaveProgressStep,
 			modalNext: modal.next,
