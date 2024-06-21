@@ -8,6 +8,7 @@
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
+	import { authStore } from '$lib/stores/auth.store';
 	import { saveIcrcCustomToken } from '$icp/services/ic-custom-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 
@@ -49,17 +50,18 @@
 		]);
 	};
 
-	const updateSaveProgressStep = (step: ProgressStepsAddToken) => (saveProgressStep = step);
+	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
 	const save = async (
 		tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[]
 	) => {
 		await saveIcrcCustomToken({
 			tokens,
-			updateSaveProgressStep,
+			progress,
 			modalNext: () => modal.set(3),
 			onSuccess: close,
-			onError: () => modal.set(0)
+			onError: () => modal.set(0),
+			identity: $authStore.identity
 		});
 	};
 
