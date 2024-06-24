@@ -4,7 +4,6 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { networkICP } from '$lib/derived/network.derived';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import { token } from '$lib/stores/token.store';
@@ -31,11 +30,7 @@
 	</div>
 
 	<p class="break-normal py-10">
-		<Html
-			text={replacePlaceholders($i18n.tokens.hide.info, {
-				$where: $networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title
-			})}
-		/>
+		<Html text={$i18n.tokens.hide.info} />
 	</p>
 </div>
 
