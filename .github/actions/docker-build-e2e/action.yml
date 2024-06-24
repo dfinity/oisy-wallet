@@ -1,6 +1,6 @@
-name: Build Base Docker Image
+name: Build Docker Image for E2E tests
 
-description: An image that sets up a local replica, installs all necessary canisters, and configures the environment.
+description: An image that runs a local replica, installed all required canisters and environment
 
 outputs: {}
 
