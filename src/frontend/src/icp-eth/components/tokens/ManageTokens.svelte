@@ -22,6 +22,7 @@
 	import { networkTokens } from '$lib/derived/network-tokens.derived';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import { networkICP, selectedNetwork } from '$lib/derived/network.derived';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -175,13 +176,7 @@
 			<Card>
 				{token.name}
 
-				<Logo
-					src={token.icon}
-					slot="icon"
-					alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
-					size="medium"
-					color="white"
-				/>
+				<TokenLogo slot="icon" color="white" {token} />
 
 				<span class="break-all" slot="description">
 					{token.symbol}
