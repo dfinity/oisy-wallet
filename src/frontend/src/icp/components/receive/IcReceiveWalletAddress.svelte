@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived.js';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';

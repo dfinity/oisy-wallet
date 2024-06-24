@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { modalHideToken, modalIcHideToken } from '$lib/derived/modal.derived.js';
+	import { modalHideToken, modalIcHideToken } from '$lib/derived/modal.derived';
 	import IcHideTokenModal from '$icp/components/tokens/IcHideTokenModal.svelte';
 	import HideTokenModal from '$eth/components/tokens/HideTokenModal.svelte';
 

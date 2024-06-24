@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store.js';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';

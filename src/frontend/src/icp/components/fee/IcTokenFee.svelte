@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { formatToken } from '$lib/utils/format.utils.js';
+	import { formatToken } from '$lib/utils/format.utils';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { tokenDecimals } from '$lib/derived/token.derived';
