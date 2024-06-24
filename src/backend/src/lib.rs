@@ -1,3 +1,4 @@
+use crate::assertions::assert_token_symbol_length;
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
@@ -28,6 +29,7 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
 
+mod assertions;
 mod guards;
 mod token;
 
@@ -365,18 +367,19 @@ async fn sign_prehash(prehash: String) -> String {
 }
 
 /// Adds a new token to the user.
+#[deprecated(since = "0.0.4", note = "Use set_user_token")]
 #[update(guard = "caller_is_not_anonymous")]
 fn add_user_token(token: UserToken) {
-    let addr = parse_eth_address(&token.contract_address);
+    set_user_token(token);
+}
 
-    if let Some(symbol) = token.symbol.as_ref() {
-        if symbol.len() > MAX_SYMBOL_LENGTH {
-            ic_cdk::trap(&format!(
-                "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
-            ));
-        }
-    }
+#[update(guard = "caller_is_not_anonymous")]
+fn set_user_token(token: UserToken) {
+    assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
+
     let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    let addr = parse_eth_address(&token.contract_address);
 
     let find = |t: &UserToken| {
         t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
@@ -385,6 +388,29 @@ fn add_user_token(token: UserToken) {
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_token, &token, &find));
 }
 
+#[update(guard = "caller_is_not_anonymous")]
+fn set_many_user_tokens(tokens: Vec<UserToken>) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        for token in tokens {
+            assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
+
+            let addr = parse_eth_address(&token.contract_address);
+
+            let find = |t: &UserToken| {
+                t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
+            };
+
+            add_to_user_token(stored_principal, &mut s.user_token, &token, &find)
+        }
+    });
+}
+
+#[deprecated(
+    since = "0.0.4",
+    note = "Tokens are deleted anymore. Use set_user_token to disable token."
+)]
 #[update(guard = "caller_is_not_anonymous")]
 fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);

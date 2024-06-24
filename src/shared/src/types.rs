@@ -43,6 +43,7 @@ pub trait TokenVersion: Debug {
 
 /// Erc20 specific user defined tokens
 pub mod token {
+    use crate::serializers::deserialize_default_as_true;
     use crate::types::Version;
     use candid::{CandidType, Deserialize};
 
@@ -55,6 +56,8 @@ pub mod token {
         pub symbol: Option<String>,
         pub decimals: Option<u8>,
         pub version: Option<Version>,
+        #[serde(default = "deserialize_default_as_true")]
+        pub enabled: Option<bool>,
     }
 
     #[derive(CandidType, Deserialize, Clone)]
