@@ -150,13 +150,11 @@
 </div>
 
 {#if nonNullish($selectedNetwork)}
-	<div class="mb-4">
-		<p class="text-misty-rose">
-			{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
-				$network: $selectedNetwork.name
-			})}
-		</p>
-	</div>
+	<p class="text-misty-rose pt-1 pb-2 mb-4">
+		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
+			$network: $selectedNetwork.name
+		})}
+	</p>
 {/if}
 
 {#if noTokensMatch}
