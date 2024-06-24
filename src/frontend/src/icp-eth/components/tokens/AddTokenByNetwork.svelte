@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { i18n } from '$lib/stores/i18n.store';
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
-	import { networks } from '$lib/derived/networks.derived';
+	import { networks, networksMainnets } from '$lib/derived/networks.derived';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
 	import { fade } from 'svelte/transition';
@@ -52,6 +52,9 @@
 
 	let disabledNetworkSelector = false;
 	$: disabledNetworkSelector = nonNullish($selectedNetwork);
+
+	let availableNetworks: Network[] = [];
+	$: availableNetworks = $selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets;
 </script>
 
 <label for="network" class="font-bold px-4.5">{$i18n.tokens.manage.text.network}:</label>
@@ -61,7 +64,7 @@
 		<option disabled selected value={undefined} class="hidden"
 			><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
 		>
-		{#each $networks as network}
+		{#each availableNetworks as network}
 			<DropdownItem value={network.name}>{network.name}</DropdownItem>
 		{/each}
 	</Dropdown>
