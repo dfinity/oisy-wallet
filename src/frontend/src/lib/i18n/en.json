@@ -311,7 +311,8 @@
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
 				"invalid_ledger_id": "The Ledger ID is not related the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
-				"missing_index_id": "The Index ID is missing. Did you provide a value?"
+				"missing_index_id": "The Index ID is missing. Did you provide a value?",
+				"missing_contract_address": "The contract address is missing. Did you provide a value?"
 			}
 		},
 		"manage": {
