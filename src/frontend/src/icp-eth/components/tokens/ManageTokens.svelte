@@ -5,7 +5,6 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Card from '$lib/components/ui/Card.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
