@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import AddTokenByNetworkToolbar from '$icp-eth/components/tokens/AddTokenByNetworkToolbar.svelte';
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';
 
 	let invalid = true;
 	$: invalid = isNullishOrEmpty(ledgerCanisterId) || isNullishOrEmpty(indexCanisterId);
-
-	const dispatch = createEventDispatcher();
 </script>
 
 <p class="text-misty-rose my-2">{$i18n.tokens.import.text.info}</p>
@@ -52,11 +49,4 @@
 	/>
 </div>
 
-<ButtonGroup>
-	<button type="button" class="secondary block flex-1" on:click={() => dispatch('icBack')}
-		>{$i18n.core.text.back}</button
-	>
-	<button class="primary block flex-1" type="submit" disabled={invalid} class:opacity-10={invalid}>
-		{$i18n.core.text.next}
-	</button>
-</ButtonGroup>
+<AddTokenByNetworkToolbar {invalid} on:icBack />
