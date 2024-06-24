@@ -11,6 +11,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import AddTokenByNetworkToolbar from '$icp-eth/components/tokens/AddTokenByNetworkToolbar.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	export let network: Network | undefined;
 	export let tokenData: Record<string, string>;
@@ -47,12 +48,15 @@
 
 	let invalid = true;
 	$: invalid = isNetworkIdEthereum(network?.id) ? invalidIc : invalidErc20;
+
+	let disabledNetworkSelector = false;
+	$: disabledNetworkSelector = nonNullish($selectedNetwork);
 </script>
 
 <label for="network" class="font-bold px-4.5">{$i18n.tokens.manage.text.network}:</label>
 
-<div id="network" class="mb-6 mt-1 pt-0.5">
-	<Dropdown name="network" bind:selectedValue={networkName}>
+<div id="network" class="mb-6 mt-1 pt-0.5 network" class:opacity-50={disabledNetworkSelector}>
+	<Dropdown name="network" bind:selectedValue={networkName} disabled={disabledNetworkSelector}>
 		<option disabled selected value={undefined} class="hidden"
 			><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
 		>
@@ -75,5 +79,9 @@
 <style lang="scss">
 	.hidden {
 		display: none;
+	}
+
+	.network {
+		--disable-contrast: rgba(0, 0, 0, 0.5);
 	}
 </style>
