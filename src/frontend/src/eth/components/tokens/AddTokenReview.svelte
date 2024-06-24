@@ -11,15 +11,25 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import type { Network } from '$lib/types/network';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
+	export let network: Network | undefined;
 
 	onMount(async () => {
 		if (isNullish(contractAddress)) {
 			toastsError({
 				msg: { text: $i18n.tokens.import.error.missing_contract_address }
+			});
+
+			dispatch('icBack');
+			return;
+		}
+
+		if (isNullish(network)) {
+			toastsError({
+				msg: { text: $i18n.tokens.import.error.no_network }
 			});
 
 			dispatch('icBack');
@@ -40,7 +50,7 @@
 		}
 
 		try {
-			const { metadata: metadataApi } = infuraErc20Providers($tokenWithFallback.network.id);
+			const { metadata: metadataApi } = infuraErc20Providers(network.id);
 			metadata = await metadataApi({ address: contractAddress });
 
 			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
