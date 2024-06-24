@@ -98,7 +98,7 @@ export const saveErc20Contract = async ({
 	onError,
 	identity
 }: {
-	contractAddress: string;
+	contractAddress: string | undefined;
 	metadata: Erc20Metadata | undefined;
 	network: EthereumNetwork;
 	updateSaveProgressStep: (step: ProgressStepsAddToken) => void;

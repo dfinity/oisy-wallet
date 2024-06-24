@@ -17,8 +17,8 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let ledgerCanisterId = '';
-	export let indexCanisterId = '';
+	export let ledgerCanisterId: string | undefined;
+	export let indexCanisterId: string | undefined;
 
 	let invalid = true;
 	$: invalid = isNullish(token);
