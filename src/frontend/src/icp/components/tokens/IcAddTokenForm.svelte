@@ -15,9 +15,9 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<p class="text-misty-rose mb-2">{$i18n.tokens.import.text.info}</p>
+<p class="text-misty-rose my-2">{$i18n.tokens.import.text.info}</p>
 
-<p class="text-blue font-bold mb-6">
+<p class="text-blue font-bold mb-4">
 	<ExternalLink
 		href="https://github.com/dfinity/oisy-wallet/blob/main/HOW-TO.md#custom-icrc-token-integration"
 		ariaLabel={$i18n.tokens.import.text.open_github_howto}
@@ -26,7 +26,7 @@
 	</ExternalLink>
 </p>
 
-<form on:submit={() => dispatch('icNext')} method="POST">
+<div class="stretch">
 	<label for="ledgerCanisterId" class="font-bold px-4.5"
 		>{$i18n.tokens.import.text.ledger_canister_id}:</label
 	>
@@ -50,18 +50,13 @@
 		placeholder="_____-_____-_____-_____-cai"
 		spellcheck={false}
 	/>
+</div>
 
-	<ButtonGroup>
-		<button type="button" class="secondary block flex-1" on:click={() => dispatch('icBack')}
-			>{$i18n.core.text.back}</button
-		>
-		<button
-			class="primary block flex-1"
-			type="submit"
-			disabled={invalid}
-			class:opacity-10={invalid}
-		>
-			{$i18n.core.text.next}
-		</button>
-	</ButtonGroup>
-</form>
+<ButtonGroup>
+	<button type="button" class="secondary block flex-1" on:click={() => dispatch('icBack')}
+		>{$i18n.core.text.back}</button
+	>
+	<button class="primary block flex-1" type="submit" disabled={invalid} class:opacity-10={invalid}>
+		{$i18n.core.text.next}
+	</button>
+</ButtonGroup>
