@@ -144,6 +144,7 @@
 				on:icBack={modal.back}
 				on:icSave={saveErc20Token}
 				contractAddress={erc20ContractAddress}
+				{network}
 				bind:metadata={erc20Metadata}
 			/>
 		{/if}

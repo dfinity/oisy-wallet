@@ -287,6 +287,7 @@ interface I18nTokens {
 			missing_ledger_id: string;
 			missing_index_id: string;
 			missing_contract_address: string;
+			no_network: string;
 		};
 	};
 	manage: {
