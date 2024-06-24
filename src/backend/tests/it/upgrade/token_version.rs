@@ -1,50 +1,14 @@
+use crate::upgrade::constants::{BACKEND_V0_0_13_WASM_PATH, BACKEND_V0_0_19_WASM_PATH};
+use crate::upgrade::types::{AddUserTokenAfterUpgradeOptions, UserTokenV0_0_13, UserTokenV0_0_19};
 use crate::utils::assertion::assert_tokens_data_eq;
 use crate::utils::mock::{
     CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };
 use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade, upgrade_latest};
-use candid::{CandidType, Deserialize, Principal};
+use candid::Principal;
 use lazy_static::lazy_static;
-use shared::types::token::{ChainId, UserToken};
-use shared::types::{TokenVersion, Version};
-
-const BACKEND_V0_0_13_WASM_PATH: &str = "../../backend-v0.0.13.wasm.gz";
-const BACKEND_V0_0_19_WASM_PATH: &str = "../../backend-v0.0.19.wasm.gz";
-
-#[derive(CandidType, Deserialize, Clone)]
-pub struct UserTokenV0_0_13 {
-    pub contract_address: String,
-    pub chain_id: ChainId,
-    pub symbol: Option<String>,
-    pub decimals: Option<u8>,
-}
-
-#[derive(CandidType, Deserialize, Clone, PartialEq, Debug)]
-pub struct UserTokenV0_0_19 {
-    pub contract_address: String,
-    pub chain_id: ChainId,
-    pub symbol: Option<String>,
-    pub decimals: Option<u8>,
-    pub version: Option<Version>,
-}
-
-impl TokenVersion for UserTokenV0_0_19 {
-    fn get_version(&self) -> Option<Version> {
-        self.version
-    }
-
-    fn clone_with_incremented_version(&self) -> Self {
-        let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
-        cloned
-    }
-
-    fn clone_with_initial_version(&self) -> Self {
-        let mut cloned = self.clone();
-        cloned.version = Some(1);
-        cloned
-    }
-}
+use shared::types::token::UserToken;
+use shared::types::TokenVersion;
 
 lazy_static! {
     static ref PRE_UPGRADE_TOKEN: UserTokenV0_0_13 = UserTokenV0_0_13 {
@@ -127,13 +91,6 @@ fn test_add_user_token_after_upgrade_should_ignore_premature_increments() {
     test_add_user_token_after_upgrade_with_options(AddUserTokenAfterUpgradeOptions {
         premature_increments: 3,
     });
-}
-
-/// Options for unusual add_user_token behaviour.
-#[derive(Default)]
-struct AddUserTokenAfterUpgradeOptions {
-    /// The version number should be None but we can set it to Some(n) for a few small values to check that.
-    premature_increments: u8,
 }
 
 fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgradeOptions) {
