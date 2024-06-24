@@ -47,7 +47,7 @@
 	$: invalidIc = isNullishOrEmpty(ledgerCanisterId) || isNullishOrEmpty(indexCanisterId);
 
 	let invalid = true;
-	$: invalid = isNetworkIdEthereum(network?.id) ? invalidIc : invalidErc20;
+	$: invalid = isNetworkIdEthereum(network?.id) ? invalidErc20 : invalidIc;
 
 	let disabledNetworkSelector = false;
 	$: disabledNetworkSelector = nonNullish($selectedNetwork);
