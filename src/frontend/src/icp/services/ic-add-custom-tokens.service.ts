@@ -17,8 +17,9 @@ export interface ValidateTokenData {
 export const loadAndAssertAddCustomToken = async ({
 	identity,
 	icrcTokens,
-	...rest
-}: IcCanisters & { identity: OptionIdentity; icrcTokens: IcToken[] }): Promise<{
+	ledgerCanisterId,
+	indexCanisterId
+}: Partial<IcCanisters> & { identity: OptionIdentity; icrcTokens: IcToken[] }): Promise<{
 	result: 'success' | 'error';
 	data?: {
 		token: IcTokenWithoutId;
@@ -27,9 +28,25 @@ export const loadAndAssertAddCustomToken = async ({
 }> => {
 	assertNonNullish(identity);
 
+	if (isNullish(ledgerCanisterId)) {
+		toastsError({
+			msg: { text: get(i18n).tokens.import.error.missing_ledger_id }
+		});
+		return { result: 'error' };
+	}
+
+	if (isNullish(indexCanisterId)) {
+		toastsError({
+			msg: { text: get(i18n).tokens.import.error.missing_index_id }
+		});
+		return { result: 'error' };
+	}
+
+	const canisterIds = { ledgerCanisterId, indexCanisterId };
+
 	const { alreadyAvailable } = assertAlreadyAvailable({
 		icrcTokens,
-		...rest
+		...canisterIds
 	});
 
 	if (alreadyAvailable) {
@@ -38,7 +55,7 @@ export const loadAndAssertAddCustomToken = async ({
 
 	const { valid } = await assertLedgerId({
 		identity,
-		...rest
+		...canisterIds
 	});
 
 	if (!valid) {
@@ -49,9 +66,9 @@ export const loadAndAssertAddCustomToken = async ({
 		const [token, balance] = await Promise.all([
 			loadMetadata({
 				identity,
-				...rest
+				...canisterIds
 			}),
-			loadBalance({ identity, ...rest })
+			loadBalance({ identity, ...canisterIds })
 		]);
 
 		if (isNullish(token)) {

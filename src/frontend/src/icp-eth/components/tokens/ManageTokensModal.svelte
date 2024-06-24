@@ -18,6 +18,10 @@
 	import { saveErc20Contract } from '$eth/services/erc20.services';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import { isNullish } from '@dfinity/utils';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import { get } from 'svelte/store';
 
 	const steps: WizardSteps = [
 		{
@@ -48,6 +52,20 @@
 	};
 
 	const addToken = async () => {
+		if (isNullish(ledgerCanisterId)) {
+			toastsError({
+				msg: { text: get(i18n).tokens.import.error.missing_ledger_id }
+			});
+			return;
+		}
+
+		if (isNullish(indexCanisterId)) {
+			toastsError({
+				msg: { text: get(i18n).tokens.import.error.missing_index_id }
+			});
+			return;
+		}
+
 		await save([
 			{
 				enabled: true,
@@ -91,16 +109,17 @@
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
 	};
 
-	let ledgerCanisterId = '';
-	let indexCanisterId = '';
+	let ledgerCanisterId: string | undefined;
+	let indexCanisterId: string | undefined;
 
-	let erc20ContractAddress = '';
+	let erc20ContractAddress: string | undefined;
 	let erc20Metadata: Erc20Metadata | undefined;
 
 	let network: Network | undefined = $selectedNetwork;
-	let tokenData: Record<string, string> = {};
+	let tokenData: Partial<AddTokenData> = {};
 
-	$: tokenData, ({ ledgerCanisterId, indexCanisterId, erc20ContractAddress } = tokenData);
+	$: tokenData,
+		({ ledgerCanisterId, indexCanisterId, contractAddress: erc20ContractAddress } = tokenData);
 </script>
 
 <WizardModal

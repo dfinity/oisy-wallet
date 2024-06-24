@@ -284,6 +284,8 @@ interface I18nTokens {
 			unexpected_index: string;
 			unexpected_index_ledger: string;
 			invalid_ledger_id: string;
+			missing_ledger_id: string;
+			missing_index_id: string;
 		};
 	};
 	manage: {
