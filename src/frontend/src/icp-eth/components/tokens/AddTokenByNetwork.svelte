@@ -7,8 +7,8 @@
 	import { fade } from 'svelte/transition';
 	import type { Network } from '$lib/types/network';
 	import { nonNullish } from '@dfinity/utils';
-	import { isNetworkIdICP } from '$lib/utils/network.utils';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils.js';
+	import { isNetworkIdICP, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { createEventDispatcher } from 'svelte';
 
 	export let network: Network | undefined;
 	export let tokenData: Record<string, string>;
@@ -34,36 +34,32 @@
 			tokenData = {};
 		}
 	}
+
+	const dispatch = createEventDispatcher();
 </script>
 
-<div class="stretch">
-	<label for="network" class="font-bold px-4.5">{$i18n.tokens.manage.text.network}:</label>
+<label for="network" class="font-bold px-4.5">{$i18n.tokens.manage.text.network}:</label>
 
-	<div id="network" class="mb-4 mt-1 pt-0.5">
-		<Dropdown name="network" bind:selectedValue={networkName}>
-			<option disabled selected value={undefined} class="hidden"
-				><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
-			>
-			{#each $networks as network}
-				<DropdownItem value={network.name}>{network.name}</DropdownItem>
-			{/each}
-		</Dropdown>
-	</div>
-
-	{#if nonNullish(network)}
-		<div class="mt-8">
-			{#if isNetworkIdICP(network?.id)}
-				<div in:fade>
-					<IcAddTokenForm on:icBack on:icNext bind:ledgerCanisterId bind:indexCanisterId />
-				</div>
-			{:else if isNetworkIdEthereum(network?.id)}
-				<div in:fade>
-					<AddTokenForm on:icBack on:icNext bind:contractAddress={erc20ContractAddress} />
-				</div>
-			{/if}
-		</div>
-	{/if}
+<div id="network" class="mb-4 mt-1 pt-0.5">
+	<Dropdown name="network" bind:selectedValue={networkName}>
+		<option disabled selected value={undefined} class="hidden"
+			><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
+		>
+		{#each $networks as network}
+			<DropdownItem value={network.name}>{network.name}</DropdownItem>
+		{/each}
+	</Dropdown>
 </div>
+
+{#if isNetworkIdICP(network?.id) || isNetworkIdEthereum(network?.id)}
+	<form on:submit={() => dispatch('icNext')} method="POST" in:fade>
+		{#if isNetworkIdICP(network?.id)}
+			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
+		{:else}
+			<AddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
+		{/if}
+	</form>
+{/if}
 
 <style lang="scss">
 	.hidden {
