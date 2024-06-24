@@ -1,18 +1,13 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import AddTokenByNetworkToolbar from '$icp-eth/components/tokens/AddTokenByNetworkToolbar.svelte';
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';
-
-	let invalid = true;
-	$: invalid = isNullishOrEmpty(ledgerCanisterId) || isNullishOrEmpty(indexCanisterId);
 </script>
 
-<p class="text-misty-rose my-2">{$i18n.tokens.import.text.info}</p>
+<p class="text-misty-rose mb-2">{$i18n.tokens.import.text.info}</p>
 
 <p class="text-blue font-bold mb-4">
 	<ExternalLink
@@ -48,5 +43,3 @@
 		spellcheck={false}
 	/>
 </div>
-
-<AddTokenByNetworkToolbar {invalid} on:icBack />

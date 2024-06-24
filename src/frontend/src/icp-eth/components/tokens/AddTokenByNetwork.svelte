@@ -9,6 +9,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { isNetworkIdICP, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { createEventDispatcher } from 'svelte';
+	import AddTokenByNetworkToolbar from '$icp-eth/components/tokens/AddTokenByNetworkToolbar.svelte';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let network: Network | undefined;
 	export let tokenData: Record<string, string>;
@@ -36,11 +38,20 @@
 	}
 
 	const dispatch = createEventDispatcher();
+
+	let invalidErc20 = true;
+	$: invalidErc20 = isNullishOrEmpty(erc20ContractAddress);
+
+	let invalidIc = true;
+	$: invalidIc = isNullishOrEmpty(ledgerCanisterId) || isNullishOrEmpty(indexCanisterId);
+
+	let invalid = true;
+	$: invalid = isNetworkIdEthereum(network?.id) ? invalidIc : invalidErc20;
 </script>
 
 <label for="network" class="font-bold px-4.5">{$i18n.tokens.manage.text.network}:</label>
 
-<div id="network" class="mb-4 mt-1 pt-0.5">
+<div id="network" class="mb-6 mt-1 pt-0.5">
 	<Dropdown name="network" bind:selectedValue={networkName}>
 		<option disabled selected value={undefined} class="hidden"
 			><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
@@ -51,15 +62,15 @@
 	</Dropdown>
 </div>
 
-{#if isNetworkIdICP(network?.id) || isNetworkIdEthereum(network?.id)}
-	<form on:submit={() => dispatch('icNext')} method="POST" in:fade>
-		{#if isNetworkIdICP(network?.id)}
-			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
-		{:else}
-			<AddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
-		{/if}
-	</form>
-{/if}
+<form on:submit={() => dispatch('icNext')} method="POST" in:fade>
+	{#if isNetworkIdICP(network?.id)}
+		<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
+	{:else if isNetworkIdEthereum(network?.id)}
+		<AddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
+	{/if}
+
+	<AddTokenByNetworkToolbar {invalid} on:icBack />
+</form>
 
 <style lang="scss">
 	.hidden {
