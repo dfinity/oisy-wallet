@@ -12,9 +12,10 @@
 	import AddTokenByNetworkToolbar from '$icp-eth/components/tokens/AddTokenByNetworkToolbar.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import type { AddTokenData } from '$icp-eth/types/add-token';
 
 	export let network: Network | undefined;
-	export let tokenData: Record<string, string>;
+	export let tokenData: Partial<AddTokenData>;
 
 	let networkName: string | undefined = network?.name;
 	$: networkName,
@@ -32,7 +33,7 @@
 		if (isNetworkIdICP(network?.id)) {
 			tokenData = { ledgerCanisterId, indexCanisterId };
 		} else if (isNetworkIdEthereum(network?.id)) {
-			tokenData = { erc20ContractAddress };
+			tokenData = { contractAddress: erc20ContractAddress };
 		} else {
 			tokenData = {};
 		}
