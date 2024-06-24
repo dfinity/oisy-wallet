@@ -43,10 +43,17 @@ pub fn setup_with_custom_wasm(wasm_path: &str) -> (PocketIc, Principal) {
     (pic, canister_id)
 }
 
-pub fn upgrade((pic, canister_id): &(PocketIc, Principal)) -> Result<(), String> {
+pub fn upgrade_latest(pocket_ic: &(PocketIc, Principal)) -> Result<(), String> {
     let backend_wasm_path =
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
+    upgrade(pocket_ic, &backend_wasm_path)
+}
+
+pub fn upgrade(
+    (pic, canister_id): &(PocketIc, Principal),
+    backend_wasm_path: &String,
+) -> Result<(), String> {
     let wasm_bytes = read(backend_wasm_path.clone()).expect(&format!(
         "Could not find the backend wasm: {}",
         backend_wasm_path

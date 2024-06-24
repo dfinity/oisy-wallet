@@ -46,10 +46,11 @@ pub mod token {
     use crate::serializers::deserialize_default_as_true;
     use crate::types::Version;
     use candid::{CandidType, Deserialize};
+    use serde::Serialize;
 
     pub type ChainId = u64;
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserToken {
         pub contract_address: String,
         pub chain_id: ChainId,

@@ -2,13 +2,14 @@ use crate::utils::assertion::assert_tokens_data_eq;
 use crate::utils::mock::{
     CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };
-use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade};
+use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade, upgrade_latest};
 use candid::{CandidType, Deserialize, Principal};
 use lazy_static::lazy_static;
 use shared::types::token::{ChainId, UserToken};
-use shared::types::TokenVersion;
+use shared::types::{TokenVersion, Version};
 
 const BACKEND_V0_0_13_WASM_PATH: &str = "../../backend-v0.0.13.wasm.gz";
+const BACKEND_V0_0_19_WASM_PATH: &str = "../../backend-v0.0.19.wasm.gz";
 
 #[derive(CandidType, Deserialize, Clone)]
 pub struct UserTokenV0_0_13 {
@@ -18,6 +19,33 @@ pub struct UserTokenV0_0_13 {
     pub decimals: Option<u8>,
 }
 
+#[derive(CandidType, Deserialize, Clone, PartialEq, Debug)]
+pub struct UserTokenV0_0_19 {
+    pub contract_address: String,
+    pub chain_id: ChainId,
+    pub symbol: Option<String>,
+    pub decimals: Option<u8>,
+    pub version: Option<Version>,
+}
+
+impl TokenVersion for UserTokenV0_0_19 {
+    fn get_version(&self) -> Option<Version> {
+        self.version
+    }
+
+    fn clone_with_incremented_version(&self) -> Self {
+        let mut cloned = self.clone();
+        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned
+    }
+
+    fn clone_with_initial_version(&self) -> Self {
+        let mut cloned = self.clone();
+        cloned.version = Some(1);
+        cloned
+    }
+}
+
 lazy_static! {
     static ref PRE_UPGRADE_TOKEN: UserTokenV0_0_13 = UserTokenV0_0_13 {
         chain_id: 11155111,
@@ -25,7 +53,7 @@ lazy_static! {
         decimals: Some(WEENUS_DECIMALS),
         symbol: Some(WEENUS_SYMBOL.to_string()),
     };
-    static ref POST_UPGRADE_TOKEN: UserToken = UserToken {
+    static ref POST_UPGRADE_TOKEN: UserTokenV0_0_19 = UserTokenV0_0_19 {
         chain_id: PRE_UPGRADE_TOKEN.chain_id,
         contract_address: PRE_UPGRADE_TOKEN.contract_address.clone(),
         decimals: PRE_UPGRADE_TOKEN.decimals,
@@ -52,12 +80,13 @@ fn test_upgrade_user_token() {
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade(&pic_setup).unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+    upgrade(&pic_setup, &BACKEND_V0_0_19_WASM_PATH.to_string())
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Get the list of token and check that it still contains the one we added before upgrade
-    let results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+    let results = update_call::<Vec<UserTokenV0_0_19>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![POST_UPGRADE_TOKEN.clone()];
+    let expected_tokens: Vec<UserTokenV0_0_19> = vec![POST_UPGRADE_TOKEN.clone()];
 
     assert!(results.is_ok());
 
@@ -78,7 +107,8 @@ fn test_upgrade_allowed_caller_eth_address_of() {
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade(&pic_setup).unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+    upgrade_latest(&pic_setup)
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Caller is still allowed to call eth_address_of
     let post_upgrade_result = update_call::<String>(&pic_setup, caller, "eth_address_of", caller);
@@ -113,7 +143,8 @@ fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgr
     pic_setup.0.tick();
 
     // Upgrade canister with new wasm
-    upgrade(&pic_setup).unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+    upgrade(&pic_setup, &BACKEND_V0_0_19_WASM_PATH.to_string())
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Add a user token
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
@@ -130,9 +161,10 @@ fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgr
     assert!(result.is_ok());
 
     // Get the list of token and check that it still contains the one we added before upgrade
-    let results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+    let results = update_call::<Vec<UserTokenV0_0_19>>(&pic_setup, caller, "list_user_tokens", ());
 
-    let expected_tokens: Vec<UserToken> = vec![POST_UPGRADE_TOKEN.clone_with_incremented_version()];
+    let expected_tokens: Vec<UserTokenV0_0_19> =
+        vec![POST_UPGRADE_TOKEN.clone_with_incremented_version()];
 
     assert!(results.is_ok());
 
@@ -159,7 +191,8 @@ fn test_update_user_token_after_upgrade() {
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade(&pic_setup).unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
+    upgrade_latest(&pic_setup)
+        .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Get the list of token and check that it still contains the one we added before upgrade
     let results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
