@@ -13,13 +13,22 @@
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 
-	export let contractAddress = '';
+	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
 
 	onMount(async () => {
+		if (isNullish(contractAddress)) {
+			toastsError({
+				msg: { text: $i18n.tokens.import.error.missing_contract_address }
+			});
+
+			dispatch('icBack');
+			return;
+		}
+
 		if (
 			$erc20TokensStore?.find(
-				({ address }) => address.toLowerCase() === contractAddress.toLowerCase()
+				({ address }) => address.toLowerCase() === contractAddress?.toLowerCase()
 			) !== undefined
 		) {
 			toastsError({
