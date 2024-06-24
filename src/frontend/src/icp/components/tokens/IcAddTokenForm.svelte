@@ -17,7 +17,7 @@
 
 <p class="text-misty-rose mb-2">{$i18n.tokens.import.text.info}</p>
 
-<p class="text-blue font-bold">
+<p class="text-blue font-bold mb-6">
 	<ExternalLink
 		href="https://github.com/dfinity/oisy-wallet/blob/main/HOW-TO.md#custom-icrc-token-integration"
 		ariaLabel={$i18n.tokens.import.text.open_github_howto}
@@ -27,31 +27,29 @@
 </p>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<div class="stretch pt-8">
-		<label for="ledgerCanisterId" class="font-bold px-4.5"
-			>{$i18n.tokens.import.text.ledger_canister_id}:</label
-		>
-		<Input
-			name="ledgerCanisterId"
-			inputType="text"
-			required
-			bind:value={ledgerCanisterId}
-			placeholder="_____-_____-_____-_____-cai"
-			spellcheck={false}
-		/>
+	<label for="ledgerCanisterId" class="font-bold px-4.5"
+		>{$i18n.tokens.import.text.ledger_canister_id}:</label
+	>
+	<Input
+		name="ledgerCanisterId"
+		inputType="text"
+		required
+		bind:value={ledgerCanisterId}
+		placeholder="_____-_____-_____-_____-cai"
+		spellcheck={false}
+	/>
 
-		<label for="indexCanisterId" class="font-bold px-4.5"
-			>{$i18n.tokens.import.text.index_canister_id}:</label
-		>
-		<Input
-			name="indexCanisterId"
-			inputType="text"
-			required
-			bind:value={indexCanisterId}
-			placeholder="_____-_____-_____-_____-cai"
-			spellcheck={false}
-		/>
-	</div>
+	<label for="indexCanisterId" class="font-bold px-4.5"
+		>{$i18n.tokens.import.text.index_canister_id}:</label
+	>
+	<Input
+		name="indexCanisterId"
+		inputType="text"
+		required
+		bind:value={indexCanisterId}
+		placeholder="_____-_____-_____-_____-cai"
+		spellcheck={false}
+	/>
 
 	<ButtonGroup>
 		<button type="button" class="secondary block flex-1" on:click={() => dispatch('icBack')}

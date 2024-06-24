@@ -36,7 +36,7 @@
 	}
 </script>
 
-<div class="stretch pt-8">
+<div class="stretch">
 	<label for="network" class="font-bold px-4.5">{$i18n.tokens.manage.text.network}:</label>
 
 	<div id="network" class="mb-4 mt-1 pt-0.5">
