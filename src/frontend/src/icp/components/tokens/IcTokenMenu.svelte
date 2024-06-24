@@ -3,12 +3,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { nonNullish } from '@dfinity/utils';
-	import { token } from '$lib/derived/token.derived';
 	import { fade } from 'svelte/transition';
-	import type { IcCkToken } from '$icp/types/ic';
+	import type { OptionIcCkToken } from '$icp/types/ic';
+	import { token } from '$lib/stores/token.store';
 
 	let explorerUrl: string | undefined;
-	$: explorerUrl = ($token as IcCkToken).explorerUrl;
+	$: explorerUrl = ($token as OptionIcCkToken)?.explorerUrl;
 
 	let transactionsExplorerUrl: string | undefined;
 	$: transactionsExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/transactions` : undefined;

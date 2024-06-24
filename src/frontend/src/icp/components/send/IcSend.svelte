@@ -1,18 +1,25 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalIcSend } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ICP_NETWORK_ID } from '$env/networks.env';
-	import { i18n } from '$lib/stores/i18n.store';
+	import SendButton from '$lib/components/send/SendButton.svelte';
+	import type { Token } from '$lib/types/token';
+	import { loadTokenAndRun } from '$icp/services/token.services';
+
+	export let token: Token;
+	export let compact = false;
+
+	const modalId = Symbol();
+
+	const openSend = async () => {
+		const callback = async () => modalStore.openIcSend(modalId);
+		await loadTokenAndRun({ token, callback });
+	};
 </script>
 
-<button class="hero" on:click={modalStore.openIcSend} disabled={$isBusy} class:opacity-50={$isBusy}>
-	<IconSend size="28" />
-	<span>{$i18n.send.text.send}</span></button
->
+<SendButton on:click={openSend} {compact} />
 
-{#if $modalIcSend}
-	<IcSendModal networkId={ICP_NETWORK_ID} />
+{#if $modalIcSend && $modalStore?.data === modalId}
+	<IcSendModal networkId={ICP_NETWORK_ID} on:nnsClose />
 {/if}

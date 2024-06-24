@@ -13,6 +13,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
 
 	export let transaction: Transaction;
 
@@ -40,7 +41,7 @@
 </script>
 
 <button on:click={() => modalStore.openTransaction(transaction)} class="contents">
-	<Card {pending}>
+	<Card>
 		{`${type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}`}
 
 		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-10' : ''} />
@@ -51,6 +52,8 @@
 			{#if nonNullish(transactionDate)}
 				{formatSecondsToDate(transactionDate)}
 			{/if}
+
+			<TransactionPending {pending} />
 		</svelte:fragment>
 	</Card>
 </button>

@@ -11,7 +11,9 @@ import type { Network } from '$lib/types/network';
 /**
  * Ethereum
  */
-export const ETHEREUM_NETWORK_ID: unique symbol = Symbol('ETH');
+export const ETHEREUM_NETWORK_SYMBOL = 'ETH';
+
+export const ETHEREUM_NETWORK_ID: unique symbol = Symbol(ETHEREUM_NETWORK_SYMBOL);
 
 export const ETHEREUM_NETWORK: EthereumNetwork = {
 	id: ETHEREUM_NETWORK_ID,
@@ -24,7 +26,9 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 
 export const { chainId: ETHEREUM_NETWORK_CHAIN_ID } = ETHEREUM_NETWORK;
 
-export const SEPOLIA_NETWORK_ID: unique symbol = Symbol('SepoliaETH');
+export const SEPOLIA_NETWORK_SYMBOL = 'SepoliaETH';
+
+export const SEPOLIA_NETWORK_ID: unique symbol = Symbol(SEPOLIA_NETWORK_SYMBOL);
 
 export const SEPOLIA_NETWORK: EthereumNetwork = {
 	id: SEPOLIA_NETWORK_ID,

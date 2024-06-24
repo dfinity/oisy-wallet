@@ -34,7 +34,10 @@
 	>
 	<span class="flex gap-1">
 		{sourceNetwork.name}
-		<Logo src={sourceNetwork.icon ?? eth} size="20px" alt={`${sourceNetwork.name} logo`} />
+		<Logo
+			src={sourceNetwork.icon ?? eth}
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: sourceNetwork.name })}
+		/>
 	</span>
 </Value>
 
@@ -46,7 +49,6 @@
 				{$i18n.send.text.convert_to_native_icp}
 				<Logo
 					src={icpDark}
-					size="20px"
 					alt={replacePlaceholders($i18n.core.alt.logo, {
 						$name: ICP_NETWORK.name
 					})}
@@ -55,7 +57,6 @@
 				{targetNetwork.name}
 				<Logo
 					src={targetNetwork.icon ?? eth}
-					size="20px"
 					alt={replacePlaceholders($i18n.core.alt.logo, {
 						$name: targetNetwork.name
 					})}

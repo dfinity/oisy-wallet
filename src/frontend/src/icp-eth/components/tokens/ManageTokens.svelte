@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { IconClose, Input } from '@dfinity/gix-components';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Card from '$lib/components/ui/Card.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -13,11 +12,16 @@
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import { icrcCustomTokens, icrcDefaultTokens } from '$icp/derived/icrc.derived';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import type { CanisterIdText } from '$lib/types/canister';
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { ICP_TOKEN } from '$env/tokens.env';
-	import { sortIcTokens } from '$icp/utils/icrc.utils';
+	import { icTokenContainsEnabled, sortIcTokens } from '$icp/utils/icrc.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { Token } from '$lib/types/token';
+	import { networkTokens } from '$lib/derived/network-tokens.derived';
+	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
+	import { networkICP, selectedNetwork } from '$lib/derived/network.derived';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -50,6 +54,24 @@
 		)
 	].sort(sortIcTokens);
 
+	let allTokens: Token[] = [];
+	$: allTokens = [
+		...$networkTokens.map(
+			(token) =>
+				allIcrcTokens.find(
+					(icrcToken) => token.id === icrcToken.id && token.network.id === icrcToken.network.id
+				) ?? { ...token, show: true }
+		),
+		...(isNullish($selectedNetwork) || $networkICP
+			? allIcrcTokens.filter(
+					(icrcToken) =>
+						!$networkTokens.some(
+							(token) => icrcToken.id === token.id && icrcToken.network.id === token.network.id
+						)
+				)
+			: [])
+	];
+
 	let filterTokens = '';
 	const updateFilter = () => (filterTokens = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
@@ -57,31 +79,38 @@
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
-	let filteredTokens: IcrcCustomToken[] = [];
+	let filteredTokens: Token[] = [];
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
-		? allIcrcTokens
-		: allIcrcTokens.filter(
-				({ name, symbol, alternativeName }) =>
-					name.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					(alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase())
+		? allTokens
+		: allTokens.filter(
+				(token) =>
+					token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
+					token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
+					(icTokenContainsEnabled(token) &&
+						(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()))
 			);
 
-	let tokens: IcrcCustomToken[] = [];
-	$: tokens = filteredTokens.map(({ ledgerCanisterId, enabled, ...rest }) => ({
-		ledgerCanisterId,
-		enabled: modifiedTokens[`${ledgerCanisterId}`]?.enabled ?? enabled,
-		...rest
-	}));
+	let tokens: Token[] = [];
+	$: tokens = filteredTokens.map((token) => {
+		const modifiedToken = modifiedTokens[`${token.network.id.description}-${token.id.description}`];
+
+		return {
+			...token,
+			...(icTokenContainsEnabled(token)
+				? {
+						enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
+					}
+				: {})
+		};
+	});
 
 	let noTokensMatch = false;
 	$: noTokensMatch = tokens.length === 0;
 
-	let modifiedTokens: Record<CanisterIdText, IcrcCustomToken> = {};
-	const onToggle = ({
-		detail: { ledgerCanisterId, enabled, ...rest }
-	}: CustomEvent<IcrcCustomToken>) => {
-		const { [`${ledgerCanisterId}`]: current, ...tokens } = modifiedTokens;
+	let modifiedTokens: Record<string, Token> = {};
+	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+		const { id: networkId } = network;
+		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 
 		if (nonNullish(current)) {
 			modifiedTokens = { ...tokens };
@@ -89,11 +118,7 @@
 		}
 
 		modifiedTokens = {
-			[`${ledgerCanisterId}`]: {
-				ledgerCanisterId,
-				enabled,
-				...rest
-			},
+			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
 			...tokens
 		};
 	};
@@ -124,6 +149,14 @@
 	</Input>
 </div>
 
+{#if nonNullish($selectedNetwork)}
+	<p class="text-misty-rose pt-1 pb-2 mb-4">
+		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
+			$network: $selectedNetwork.name
+		})}
+	</p>
+{/if}
+
 {#if noTokensMatch}
 	<button
 		class="flex flex-col items-center justify-center py-16 w-full"
@@ -138,17 +171,23 @@
 	</button>
 {:else}
 	<div class="container md:max-h-96 pr-2 pt-1 overflow-y-auto">
-		{#each tokens as token (token.symbol)}
+		{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 			<Card>
 				{token.name}
 
-				<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="52px" color="white" />
+				<TokenLogo slot="icon" color="white" {token} />
 
 				<span class="break-all" slot="description">
 					{token.symbol}
 				</span>
 
-				<IcManageTokenToggle slot="action" {token} on:icToken={onToggle} />
+				<svelte:fragment slot="action">
+					{#if icTokenContainsEnabled(token)}
+						<IcManageTokenToggle {token} on:icToken={onToggle} />
+					{:else}
+						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
+					{/if}
+				</svelte:fragment>
 			</Card>
 		{/each}
 	</div>

@@ -127,7 +127,8 @@
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"show_testnets": "Show test networks",
-		"more": "More networks coming soon..."
+		"more": "More networks coming soon...",
+		"chain_fusion": "Chain Fusion"
 	},
 	"receive": {
 		"text": {
@@ -274,7 +275,9 @@
 			"hide_zero_balances": "Hide zero balances",
 			"all_tokens_with_zero_hidden": "All tokens with zero balance are currently hidden.",
 			"initializing": "Initializing...",
-			"updating_ui": "Updating the UI..."
+			"updating_ui": "Updating the UI...",
+			"show_token": "Show token",
+			"hide_token": "Hide token"
 		},
 		"details": {
 			"title": "Token details",
@@ -306,14 +309,23 @@
 				"no_metadata": "No metadata for the token are provided. This is unexpected.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
-				"invalid_ledger_id": "The Ledger ID is not related the Index canister."
+				"invalid_ledger_id": "The Ledger ID is not related the Index canister.",
+				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
+				"missing_index_id": "The Index ID is missing. Did you provide a value?",
+				"missing_contract_address": "The contract address is missing. Did you provide a value?",
+				"no_network": "No network is selected. This is unexpected."
 			}
 		},
 		"manage": {
 			"text": {
-				"title": "Add and hide tokens",
+				"title": "Manage tokens",
 				"do_not_see_import": "Don’t see your token? Import",
-				"clear_filter": "Clear filter"
+				"clear_filter": "Clear filter",
+				"manage_for_network": "Managing tokens for $network",
+				"network": "Network"
+			},
+			"placeholder": {
+				"select_network": "Select the network"
 			},
 			"info": {
 				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade."
@@ -326,7 +338,7 @@
 		"hide": {
 			"title": "Hide token?",
 			"token": "Hide $token",
-			"info": "You can add this token back in the future by going into <strong>“$where”</strong> in your wallet view.",
+			"info": "You can add this token back in the future by going into <strong>“Manage tokens”</strong> in your wallet view.",
 			"confirm": "Hide",
 			"hiding": "Hiding..."
 		},
@@ -354,7 +366,8 @@
 			"loading_metadata": "Error while loading the ERC20 contract metadata.",
 			"not_custom": "Only custom token can be hidden.",
 			"incomplete_metadata": "No name or symbol are provided in the metadata.",
-			"duplicate_metadata": "A token with a similar name or symbol already exists."
+			"duplicate_metadata": "A token with a similar name or symbol already exists.",
+			"unexpected_undefined": "Token is undefined. This is unexpected."
 		}
 	},
 	"fee": {
@@ -455,7 +468,8 @@
 			"to": "To",
 			"to_copied": "To address copied to clipboard.",
 			"block": "Block",
-			"interacted_with": "Interacted With (To)"
+			"interacted_with": "Interacted With (To)",
+			"pending": "Pending..."
 		},
 		"status": {
 			"included": "Included",

@@ -48,7 +48,8 @@ export default defineConfig(
 			globals: true,
 			watch: false,
 			silent: true,
-			setupFiles: ['./vitest.setup.ts']
+			setupFiles: ['./vitest.setup.ts'],
+			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)']
 		}
 	})
 );

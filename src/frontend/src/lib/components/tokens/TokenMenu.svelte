@@ -5,8 +5,10 @@
 	import { networkICP } from '$lib/derived/network.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { token, tokenCategory } from '$lib/derived/token.derived';
+	import { tokenCategory } from '$lib/derived/token.derived';
 	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
+	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
+	import { token } from '$lib/stores/token.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -27,7 +29,7 @@
 
 	let hideTokenLabel: string;
 	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
-		$token: $token.name
+		$token: $token?.name ?? ''
 	});
 </script>
 
@@ -47,21 +49,13 @@
 		<slot />
 
 		{#if $tokenCategory === 'custom'}
-			<button
-				class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-				aria-label={hideTokenLabel}
-				on:click={hideToken}
-			>
+			<ButtonMenu ariaLabel={hideTokenLabel} on:click={hideToken}>
 				{hideTokenLabel}
-			</button>
+			</ButtonMenu>
 		{/if}
 
-		<button
-			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label={$i18n.tokens.details.title}
-			on:click={openToken}
-		>
+		<ButtonMenu ariaLabel={$i18n.tokens.details.title} on:click={openToken}>
 			{$i18n.tokens.details.title}
-		</button>
+		</ButtonMenu>
 	</div>
 </Popover>

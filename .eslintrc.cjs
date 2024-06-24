@@ -26,6 +26,12 @@ module.exports = {
 			parserOptions: {
 				parser: '@typescript-eslint/parser'
 			}
+		},
+		{
+			files: ['scripts/**/*.mjs'],
+			rules: {
+				'no-console': 'off',
+			}
 		}
 	],
 	rules: {
@@ -41,7 +47,10 @@ module.exports = {
 		'no-console': ['error', { allow: ['error', 'warn'] }],
 		'no-else-return': ['warn', { allowElseIf: false }],
 		'local-rules/no-svelte-store-in-api': 'error',
-		"@typescript-eslint/prefer-nullish-coalescing": "error"
+		'@typescript-eslint/prefer-nullish-coalescing': 'error',
+		'no-continue': 'warn',
+		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
+		'no-delete-var': 'error',
 	},
 	globals: {
 		NodeJS: true
