@@ -72,7 +72,7 @@
 		<Value ref="type" element="div">
 			<svelte:fragment slot="label">{$i18n.transaction.text.type}</svelte:fragment>
 
-			<p class="capitalize">{type}</p>
+			<p class="first-letter:capitalize">{type}</p>
 		</Value>
 
 		{#if nonNullish(from) || nonNullish(fromLabel)}
@@ -80,7 +80,7 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.from}</svelte:fragment>
 
 				{#if nonNullish(fromLabel)}
-					<p class="capitalize mb-0.5"><IcTransactionLabel label={fromLabel} /></p>
+					<p class="first-letter:capitalize mb-0.5"><IcTransactionLabel label={fromLabel} /></p>
 				{/if}
 
 				{#if nonNullish(from)}
@@ -108,7 +108,7 @@
 				<svelte:fragment slot="label">{$i18n.transaction.text.to}</svelte:fragment>
 
 				{#if nonNullish(toLabel)}
-					<p class="capitalize mb-0.5"><IcTransactionLabel label={toLabel} /></p>
+					<p class="first-letter:capitalize mb-0.5"><IcTransactionLabel label={toLabel} /></p>
 				{/if}
 
 				{#if nonNullish(to)}
