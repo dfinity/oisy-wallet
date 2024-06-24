@@ -137,7 +137,7 @@ export class WalletScheduler<
 					(acc: Record<string, CertifiedData<IndexedTransaction<T>>>, { id, transaction }) => ({
 						...acc,
 						[`${id}`]: {
-							data: transaction as IndexedTransaction<T>,
+							data: transaction,
 							certified
 						}
 					}),

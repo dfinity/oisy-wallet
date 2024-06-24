@@ -4,13 +4,15 @@ import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import type { Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
+import { enabledBitcoinTokens } from '../../btc/derived/tokens.derived';
 
 export const tokens: Readable<Token[]> = derived(
-	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens],
-	([$erc20Tokens, $icrcTokens, $enabledEthereumTokens]) => [
-		ICP_TOKEN,
-		...$icrcTokens,
+	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens, enabledBitcoinTokens],
+	([$erc20Tokens, $icrcTokens, $enabledEthereumTokens, $enabledBitcoinTokens]) => [
 		...$enabledEthereumTokens,
-		...$erc20Tokens
+		ICP_TOKEN,
+		...$enabledBitcoinTokens,
+		...$erc20Tokens,
+		...$icrcTokens
 	]
 );

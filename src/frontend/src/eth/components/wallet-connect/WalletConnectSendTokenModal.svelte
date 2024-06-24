@@ -31,7 +31,6 @@
 	import type { Network } from '$lib/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -84,7 +83,7 @@
 		destination ===
 		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId], sourceNetwork.id)
 			? ICP_NETWORK
-			: $selectedNetwork;
+			: $sendToken.network;
 
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({

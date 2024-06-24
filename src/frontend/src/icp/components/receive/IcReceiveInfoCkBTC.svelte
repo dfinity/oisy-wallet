@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { tokenId } from '$lib/derived/token.derived';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
@@ -14,6 +12,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
+	import {
+		RECEIVE_TOKEN_CONTEXT_KEY,
+		type ReceiveTokenContext
+	} from '$icp/stores/receive-token.store';
+
+	const { tokenId, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
@@ -57,6 +61,4 @@
 	{/if}
 </div>
 
-<button class="primary full center text-center" on:click={modalStore.close}
-	>{$i18n.core.text.done}</button
->
+<button class="primary full center text-center" on:click={close}>{$i18n.core.text.done}</button>

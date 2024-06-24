@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
 	import type { ComponentType } from 'svelte';
@@ -34,7 +33,7 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={modalStore.close}>
+<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose>
 	<svelte:fragment slot="title">{$i18n.receive.text.receive}</svelte:fragment>
 
 	{#if currentStep?.name === steps[1].name}

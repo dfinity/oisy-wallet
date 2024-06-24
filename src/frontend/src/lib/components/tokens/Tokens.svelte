@@ -5,19 +5,20 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import Listener from '$lib/components/core/Listener.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import { networkTokens } from '$lib/derived/network.derived';
+	import { networkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import type { Token } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
-	import { modalAddToken, modalIcManageTokens } from '$lib/derived/modal.derived';
-	import AddTokenModal from '$eth/components/tokens/AddTokenModal.svelte';
-	import IcManageTokensModal from '$icp/components/tokens/IcManageTokensModal.svelte';
+	import { modalManageTokens } from '$lib/derived/modal.derived';
+	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
+	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -40,28 +41,34 @@
 		{@const url = transactionsUrl({ token })}
 
 		<Listener {token}>
-			<a
-				class="no-underline"
-				href={url}
-				aria-label={`Open the list of ${token.symbol} transactions`}
-				in:fade
-			>
-				<Card>
-					{token.name}
+			<div class="flex gap-8 mb-6">
+				<a
+					class="no-underline flex-1"
+					href={url}
+					aria-label={`Open the list of ${token.symbol} transactions`}
+					in:fade
+				>
+					<Card noMargin>
+						{token.name}
 
-					<Logo src={token.icon} slot="icon" alt={`${token.name} logo`} size="52px" color="white" />
+						<TokenLogo {token} slot="icon" color="white" />
 
-					<output class="break-all" slot="description">
-						{formatToken({
-							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
-							unitName: token.decimals
-						})}
-						{token.symbol}
-					</output>
+						<output class="break-all" slot="description">
+							{formatToken({
+								value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
+								unitName: token.decimals
+							})}
+							{token.symbol}
+						</output>
 
-					<ExchangeTokenValue {token} slot="amount" />
-				</Card>
-			</a>
+						<CardAmount slot="action">
+							<ExchangeTokenValue {token} />
+						</CardAmount>
+					</Card>
+				</a>
+
+				<TokenReceiveSend {token} />
+			</div>
 		</Listener>
 	{/each}
 
@@ -69,9 +76,7 @@
 		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
 	{/if}
 
-	{#if $modalAddToken}
-		<AddTokenModal />
-	{:else if $modalIcManageTokens}
-		<IcManageTokensModal />
+	{#if $modalManageTokens}
+		<ManageTokensModal />
 	{/if}
 </TokensSkeletons>

@@ -4,19 +4,11 @@
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { networkICP } from '$lib/derived/network.derived';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
+	import ManageTokensMenuButton from '$icp-eth/components/tokens/ManageTokensMenuButton.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
-
-	const importTokens = () => {
-		const fn = $networkICP ? modalStore.openIcManageTokens : modalStore.openAddToken;
-		fn();
-
-		visible = false;
-	};
 </script>
 
 <button
@@ -38,12 +30,6 @@
 			<Hr />
 		</div>
 
-		<button
-			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label={$networkICP ? $i18n.tokens.manage.text.title : $i18n.tokens.import.text.title}
-			on:click={importTokens}
-		>
-			{$networkICP ? $i18n.tokens.manage.text.title : `+ ${$i18n.tokens.import.text.title}`}
-		</button>
+		<ManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
 	</div>
 </Popover>

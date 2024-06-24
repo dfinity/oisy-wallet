@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let token: Token;
 </script>
@@ -11,7 +12,11 @@
 	<svelte:fragment slot="label">{$i18n.tokens.details.network}</svelte:fragment>
 	<span class="flex gap-1 items-center">
 		<output>{token.network.name}</output>
-		<Logo src={token.network.icon} alt={`${token.network.name} logo`} size="20px" color="white" />
+		<Logo
+			src={token.network.icon}
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.network.name })}
+			color="white"
+		/>
 	</span>
 </Value>
 
@@ -19,7 +24,11 @@
 	<svelte:fragment slot="label">{$i18n.tokens.details.token}</svelte:fragment>
 	<span class="flex gap-1 items-center">
 		<output>{token.name}</output>
-		<Logo src={token.icon} alt={`${token.name} logo`} size="20px" color="white" />
+		<Logo
+			src={token.icon}
+			alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
+			color="white"
+		/>
 	</span>
 </Value>
 

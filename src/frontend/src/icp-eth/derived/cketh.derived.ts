@@ -12,7 +12,7 @@ import {
 import type { IcCkToken, IcToken } from '$icp/types/ic';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-import { token, tokenStandard } from '$lib/derived/token.derived';
+import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -26,9 +26,9 @@ import { derived, type Readable } from 'svelte/store';
  * - on network ICP if the token is ckETH
  */
 export const ethToCkETHEnabled: Readable<boolean> = derived(
-	[tokenStandard, token],
-	([$tokenStandard, $token]) =>
-		$tokenStandard === 'ethereum' || isTokenCkEthLedger($token as IcToken)
+	[tokenStandard, tokenWithFallback],
+	([$tokenStandard, $tokenWithFallback]) =>
+		$tokenStandard === 'ethereum' || isTokenCkEthLedger($tokenWithFallback as IcToken)
 );
 
 /**
@@ -37,16 +37,18 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
  * - on network ICP if the token is ckErc20
  */
 export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
-	[token],
-	([$token]) => ERC20_TWIN_TOKENS_IDS.includes($token.id) || isTokenCkErc20Ledger($token as IcToken)
+	[tokenWithFallback],
+	([$tokenWithFallback]) =>
+		ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallback.id) ||
+		isTokenCkErc20Ledger($tokenWithFallback as IcToken)
 );
 
 /**
  * On ckETH, we need to know if the target for conversion is Ethereum mainnet or Sepolia.
  */
 export const ckEthereumTwinToken: Readable<Token> = derived(
-	[token],
-	([$token]) => ($token as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
+	[tokenWithFallback],
+	([$tokenWithFallback]) => ($tokenWithFallback as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
 );
 
 export const ckEthereumTwinTokenId: Readable<TokenId> = derived(

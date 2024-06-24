@@ -8,18 +8,37 @@
 	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
-	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
+	import type { Network } from '$lib/types/network';
 
-	export let contractAddress = '';
+	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
+	export let network: Network | undefined;
 
 	onMount(async () => {
+		if (isNullish(contractAddress)) {
+			toastsError({
+				msg: { text: $i18n.tokens.import.error.missing_contract_address }
+			});
+
+			dispatch('icBack');
+			return;
+		}
+
+		if (isNullish(network)) {
+			toastsError({
+				msg: { text: $i18n.tokens.import.error.no_network }
+			});
+
+			dispatch('icBack');
+			return;
+		}
+
 		if (
 			$erc20TokensStore?.find(
-				({ address }) => address.toLowerCase() === contractAddress.toLowerCase()
+				({ address }) => address.toLowerCase() === contractAddress?.toLowerCase()
 			) !== undefined
 		) {
 			toastsError({
@@ -31,7 +50,7 @@
 		}
 
 		try {
-			const { metadata: metadataApi } = infuraErc20Providers($networkId);
+			const { metadata: metadataApi } = infuraErc20Providers(network.id);
 			metadata = await metadataApi({ address: contractAddress });
 
 			if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {

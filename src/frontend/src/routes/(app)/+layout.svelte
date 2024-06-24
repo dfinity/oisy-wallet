@@ -7,6 +7,9 @@
 	import LoaderBalances from '$icp-eth/components/core/LoaderBalances.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import LoaderMetamask from '$lib/components/core/LoaderMetamask.svelte';
+	import { pageToken } from '$lib/derived/page-token.derived';
+	import { token } from '$lib/stores/token.store';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -14,13 +17,14 @@
 		: isRouteTransactions($page)
 			? 'transactions'
 			: 'tokens';
+
+	$: token.set($pageToken);
 </script>
 
 <Hero
 	usdTotal={route === 'tokens'}
 	summary={route === 'transactions'}
-	send={route === 'transactions'}
-	actions={route !== 'settings'}
+	actions={route === 'transactions'}
 />
 
 <main class="pt-12">
@@ -28,7 +32,9 @@
 		<Loader>
 			<LoaderBalances>
 				<ExchangeWorker>
-					<slot />
+					<LoaderMetamask>
+						<slot />
+					</LoaderMetamask>
 				</ExchangeWorker>
 			</LoaderBalances>
 		</Loader>

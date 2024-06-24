@@ -113,6 +113,7 @@ interface I18nNetworks {
 	title: string;
 	show_testnets: string;
 	more: string;
+	chain_fusion: string;
 }
 
 interface I18nReceive {
@@ -249,6 +250,8 @@ interface I18nTokens {
 		all_tokens_with_zero_hidden: string;
 		initializing: string;
 		updating_ui: string;
+		show_token: string;
+		hide_token: string;
 	};
 	details: {
 		title: string;
@@ -281,10 +284,21 @@ interface I18nTokens {
 			unexpected_index: string;
 			unexpected_index_ledger: string;
 			invalid_ledger_id: string;
+			missing_ledger_id: string;
+			missing_index_id: string;
+			missing_contract_address: string;
+			no_network: string;
 		};
 	};
 	manage: {
-		text: { title: string; do_not_see_import: string; clear_filter: string };
+		text: {
+			title: string;
+			do_not_see_import: string;
+			clear_filter: string;
+			manage_for_network: string;
+			network: string;
+		};
+		placeholder: { select_network: string };
 		info: { outdated_index_canister: string };
 		error: { unexpected_build: string; empty: string };
 	};
@@ -309,6 +323,7 @@ interface I18nTokens {
 		not_custom: string;
 		incomplete_metadata: string;
 		duplicate_metadata: string;
+		unexpected_undefined: string;
 	};
 }
 
@@ -402,6 +417,7 @@ interface I18nTransaction {
 		to_copied: string;
 		block: string;
 		interacted_with: string;
+		pending: string;
 	};
 	status: { included: string; safe: string; finalised: string };
 	label: {
