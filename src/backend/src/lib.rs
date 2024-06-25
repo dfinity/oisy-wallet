@@ -422,7 +422,7 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
                 CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
             };
 
-            add_to_user_token(stored_principal, &mut s.custom_token, &token, &find)
+            add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
         }
     });
 }
@@ -450,7 +450,7 @@ fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
         let recovered_key = VerifyingKey::recover_from_prehash(prehash, &signature, recid)
             .expect("failed to recover key");
         if recovered_key == orig_key {
-            return parity as u64;
+            return u64::from(parity);
         }
     }
 
