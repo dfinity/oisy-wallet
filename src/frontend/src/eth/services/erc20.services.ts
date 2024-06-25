@@ -11,6 +11,7 @@ import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20'
 import type { Erc20UserToken, Erc20UserTokenState } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
+import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { addUserToken, listUserTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -93,11 +94,19 @@ const loadErc20UserTokens = async (params: {
 
 	type ContractDataWithCustomToken = ContractData & Erc20UserTokenState;
 
+	const erc20DefaultContractAddresses = ERC20_CONTRACTS.map(({ address }) =>
+		mapAddressStartsWith0x(address)
+	);
+
 	const loadUserContracts = async (): Promise<Promise<ContractDataWithCustomToken>[]> => {
 		const contracts = await listUserTokens(params);
 
 		return contracts
-			.filter(({ chain_id }) => SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
+			.filter(
+				({ chain_id, contract_address }) =>
+					SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id) &&
+					!erc20DefaultContractAddresses.includes(mapAddressStartsWith0x(contract_address))
+			)
 			.map(
 				async ({
 					contract_address: address,
