@@ -10,12 +10,13 @@ use serde_bytes::ByteBuf;
 /// The Wasm page size as defined in [the Wasm Spec](https://webassembly.github.io/spec/core/exec/runtime.html#memory-instances).
 #[cfg(target_arch = "wasm32")]
 const WASM_PAGE_SIZE: u64 = 65536;
-const GIBIBYTE: u64 = 1 << 30;
+const GIBIBYTE: u32 = 1 << 30;
 
 /// Returns the metrics in the Prometheus format.
+#[must_use]
 pub fn get_metrics() -> HttpResponse {
     let now = ic_cdk::api::time();
-    let mut writer = MetricsEncoder::new(vec![], (now / 1_000_000) as i64);
+    let mut writer = MetricsEncoder::new(vec![], i64::try_from(now / 1_000_000).unwrap_or_else(|_| unreachable!("u64::MAX / 1_000_000 is smaller than i64::MAX")));
     match encode_metrics(&mut writer) {
         Ok(()) => {
             let body = writer.into_inner();
@@ -34,7 +35,7 @@ pub fn get_metrics() -> HttpResponse {
         Err(err) => HttpResponse {
             status_code: 500,
             headers: vec![],
-            body: ByteBuf::from(format!("Failed to encode metrics: {}", err)),
+            body: ByteBuf::from(format!("Failed to encode metrics: {err}")),
         },
     }
 }
@@ -81,6 +82,7 @@ fn wasm_memory_size_bytes() -> u64 {
 }
 
 /// Convert bytes to binary gigabytes
+#[allow(clippy::cast_precision_loss)]
 fn gibibytes(bytes: u64) -> f64 {
-    (bytes as f64) / (GIBIBYTE as f64)
+    (bytes as f64) / f64::from(GIBIBYTE)
 }

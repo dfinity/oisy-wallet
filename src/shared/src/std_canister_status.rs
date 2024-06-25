@@ -92,19 +92,21 @@ impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
     }
 }
 
+/// Gets status information about the canister.
+///
+/// See [IC method `canister_status`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-canister_status).
+/// 
+/// # Panics
+/// - If the call to the management canister fails.
+/// - If the response cannot be converted to `CanisterStatusResultV2`.  For example, it looks as if it will panic if the canister has no controllers.
 pub async fn get_canister_status_v2() -> CanisterStatusResultV2 {
     let canister_id = ic_cdk::api::id(); // Own canister ID.
     canister_status(CanisterIdRecord { canister_id })
         .await
-        .map_err(|err| format!("Failed to get status: {:#?}", err))
+        .map_err(|err| format!("Failed to get status: {err:#?}"))
         .and_then(|(canister_status_response,)| {
             CanisterStatusResultV2::try_from(canister_status_response)
-                .map_err(|str| format!("CanisterStatusResultV2::try_from failed: {}", str))
+                .map_err(|str| format!("CanisterStatusResultV2::try_from failed: {str}"))
         })
-        .unwrap_or_else(|err| {
-            panic!(
-                "Couldn't get canister_status of {}. Err: {}",
-                canister_id, err
-            )
-        })
+        .unwrap_or_else(|err| panic!("Couldn't get canister_status of {canister_id}. Err: {err}"))
 }
