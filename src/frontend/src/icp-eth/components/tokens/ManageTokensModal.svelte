@@ -22,7 +22,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { get } from 'svelte/store';
-	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
+	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 
 	const steps: WizardSteps = [
 		{
