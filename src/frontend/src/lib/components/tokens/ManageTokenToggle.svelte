@@ -2,16 +2,15 @@
 	import { Toggle } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { createEventDispatcher } from 'svelte';
-	import type { DisplayToken } from '$lib/types/manage-token';
+	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 
-	export let token: DisplayToken;
+	export let token: EthereumUserToken;
 
-	// TODO: set to false and uncomment once we are OK with flow of show/hide ERC20 tokens
-	let disabled = true;
-	// $: disabled = !['icrc', 'erc20'].includes(token.standard);
+	let disabled = false;
+	$: disabled = token.category === 'default';
 
 	let checked: boolean;
-	$: checked = token.show ?? false;
+	$: checked = token.enabled ?? false;
 
 	const dispatch = createEventDispatcher();
 
