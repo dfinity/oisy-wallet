@@ -1,9 +1,4 @@
-import type {
-	CustomToken,
-	SignRequest,
-	UserToken,
-	UserTokenId
-} from '$declarations/backend/backend.did';
+import type { CustomToken, SignRequest, UserToken } from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -60,20 +55,6 @@ export const addUserToken = async ({
 }): Promise<void> => {
 	const { add_user_token } = await getBackendActor({ identity });
 	return add_user_token(token);
-};
-
-/**
- * @deprecated
- */
-export const removeUserToken = async ({
-	tokenId,
-	identity
-}: {
-	tokenId: UserTokenId;
-	identity: Identity;
-}): Promise<void> => {
-	const { remove_user_token } = await getBackendActor({ identity });
-	return remove_user_token(tokenId);
 };
 
 export const listUserTokens = async ({
