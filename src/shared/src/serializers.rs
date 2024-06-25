@@ -6,6 +6,7 @@
 ///
 /// # Returns
 /// Returns `Some(true)`, indicating the default value to use.
+#[allow(clippy::unnecessary_wraps)]
 pub fn deserialize_default_as_true() -> Option<bool> {
     // https://github.com/serde-rs/serde/issues/1030#issuecomment-522278006
 
