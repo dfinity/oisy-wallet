@@ -1,8 +1,7 @@
 #!/bin/bash
 
 POCKET_IC_SERVER_VERSION=3.0.1
-OISY_UPGRADE_VERSION_v0_0_13=v0.0.13
-OISY_UPGRADE_VERSION_v0_0_19=v0.0.19
+OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
 
 # If a backend wasm file exists at the root, it will be used for the tests.
 
@@ -18,17 +17,15 @@ fi
 
 # We use a previous version of the release to ensure upgradability
 
-OISY_UPGRADE_PATH_v0_0_13="./backend-${OISY_UPGRADE_VERSION_v0_0_13}.wasm.gz"
+IFS=',' read -r -a versions <<< "$OISY_UPGRADE_VERSIONS"
 
-if [ ! -f $OISY_UPGRADE_PATH_v0_0_13 ]; then
-    curl -sSL https://github.com/dfinity/oisy-wallet/releases/download/${OISY_UPGRADE_VERSION_v0_0_13}/backend.wasm.gz -o $OISY_UPGRADE_PATH_v0_0_13
-fi
+for version in "${versions[@]}"; do
+    OISY_UPGRADE_PATH="./backend-${version}.wasm.gz"
 
-OISY_UPGRADE_PATH_v0_0_19="./backend-${OISY_UPGRADE_VERSION_v0_0_19}.wasm.gz"
-
-if [ ! -f $OISY_UPGRADE_PATH_v0_0_19 ]; then
-    curl -sSL https://github.com/dfinity/oisy-wallet/releases/download/${OISY_UPGRADE_VERSION_v0_0_19}/backend.wasm.gz -o $OISY_UPGRADE_PATH_v0_0_19
-fi
+    if [ ! -f "$OISY_UPGRADE_PATH" ]; then
+        curl -sSL "https://github.com/dfinity/oisy-wallet/releases/download/${version}/backend.wasm.gz" -o "$OISY_UPGRADE_PATH"
+    fi
+done
 
 # Download PocketIC server
 
