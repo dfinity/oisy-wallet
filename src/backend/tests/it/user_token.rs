@@ -21,15 +21,36 @@ lazy_static! {
         chain_id: MOCK_TOKEN.chain_id.clone(),
         contract_address: MOCK_TOKEN.contract_address.clone(),
     };
+    static ref ANOTHER_TOKEN: UserToken = UserToken {
+        chain_id: SEPOLIA_CHAIN_ID,
+        contract_address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984".to_string(),
+        decimals: Some(18),
+        symbol: Some("Uniswap".to_string()),
+        version: None,
+        enabled: Some(false),
+    };
 }
 
 #[test]
-fn test_set_user_token() {
+fn test_add_user_token() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER.to_string()).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
+
+    assert!(result.is_ok());
+}
+
+#[test]
+fn test_add_many_custom_tokens() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone(), ANOTHER_TOKEN.clone()];
+
+    let result = update_call::<()>(&pic_setup, caller, "set_many_user_tokens", tokens);
 
     assert!(result.is_ok());
 }
@@ -62,6 +83,67 @@ fn test_update_user_token() {
     let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
+
+    assert!(results.is_ok());
+
+    let updated_tokens = results.unwrap();
+
+    assert_tokens_data_eq(&updated_tokens, &expected_tokens);
+}
+
+#[test]
+fn test_update_many_user_tokens() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone(), ANOTHER_TOKEN.clone()];
+
+    let result = update_call::<()>(&pic_setup, caller, "set_many_user_tokens", tokens.clone());
+
+    assert!(result.is_ok());
+
+    let add_token_results =
+        query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    assert!(add_token_results.is_ok());
+
+    let expected_tokens: Vec<UserToken> = vec![
+        MOCK_TOKEN.clone_with_incremented_version(),
+        ANOTHER_TOKEN.clone_with_incremented_version(),
+    ];
+
+    assert_tokens_data_eq(&add_token_results.clone().unwrap(), &expected_tokens);
+
+    let update_token: UserToken = UserToken {
+        enabled: Some(false),
+        version: add_token_results.clone().unwrap().get(0).unwrap().version,
+        ..MOCK_TOKEN.clone()
+    };
+
+    let update_another_token: UserToken = UserToken {
+        enabled: Some(true),
+        version: add_token_results.clone().unwrap().get(1).unwrap().version,
+        ..ANOTHER_TOKEN.clone()
+    };
+
+    let update_tokens: Vec<UserToken> = vec![update_token.clone(), update_another_token.clone()];
+
+    let update_result = update_call::<()>(
+        &pic_setup,
+        caller,
+        "set_many_user_tokens",
+        update_tokens.clone(),
+    );
+
+    assert!(update_result.is_ok());
+
+    let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    let expected_tokens: Vec<UserToken> = vec![
+        update_token.clone_with_incremented_version(),
+        update_another_token.clone_with_incremented_version(),
+    ];
 
     assert!(results.is_ok());
 
@@ -114,22 +196,13 @@ fn test_list_user_tokens() {
 
     let _ = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
-    let another_token: UserToken = UserToken {
-        chain_id: SEPOLIA_CHAIN_ID,
-        contract_address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984".to_string(),
-        decimals: Some(18),
-        symbol: Some("Uniswap".to_string()),
-        version: None,
-        enabled: Some(false),
-    };
-
-    let _ = update_call::<()>(&pic_setup, caller, "set_user_token", another_token.clone());
+    let _ = update_call::<()>(&pic_setup, caller, "set_user_token", ANOTHER_TOKEN.clone());
 
     let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserToken> = vec![
         MOCK_TOKEN.clone_with_incremented_version(),
-        another_token.clone_with_incremented_version(),
+        ANOTHER_TOKEN.clone_with_incremented_version(),
     ];
 
     assert!(results.is_ok());
