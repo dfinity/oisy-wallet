@@ -23,10 +23,10 @@
 	import { get } from 'svelte/store';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 	import {
-		type IcrcCustomTokenData,
 		saveErc20UserTokens,
 		saveIcrcCustomTokens
 	} from '$icp-eth/services/manage-tokens.services';
+	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 
 	const steps: WizardSteps = [
 		{
@@ -111,7 +111,7 @@
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
-	const saveIcrc = (tokens: IcrcCustomTokenData[]): Promise<void> =>
+	const saveIcrc = (tokens: SaveCustomToken[]): Promise<void> =>
 		saveIcrcCustomTokens({
 			tokens,
 			progress,

@@ -1,7 +1,6 @@
 import { saveUserTokens } from '$eth/services/erc20-user-tokens-services';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-import { saveCustomTokens } from '$icp/services/ic-custom-tokens.services';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { saveCustomTokens, type SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -10,11 +9,6 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-
-export type IcrcCustomTokenData = Pick<
-	IcrcCustomToken,
-	'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'
->;
 
 export interface ManageTokensSaveParams {
 	progress: (step: ProgressStepsAddToken) => void;
@@ -47,12 +41,12 @@ export const saveIcrcCustomTokens = async ({
 	tokens,
 	...rest
 }: {
-	tokens: IcrcCustomTokenData[];
+	tokens: SaveCustomToken[];
 } & ManageTokensSaveParams) => {
 	const save = (params: {
 		progress: (step: ProgressStepsAddToken) => void;
 		identity: Identity;
-		tokens: [IcrcCustomTokenData, ...IcrcCustomTokenData[]];
+		tokens: [SaveCustomToken, ...SaveCustomToken[]];
 	}): Promise<void> => saveCustomTokens(params);
 
 	await saveTokens({

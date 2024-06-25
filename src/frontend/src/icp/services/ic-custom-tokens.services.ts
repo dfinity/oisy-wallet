@@ -7,6 +7,11 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 
+export type SaveCustomToken = Pick<
+	IcrcCustomToken,
+	'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'
+>;
+
 export const saveCustomTokens = async ({
 	progress,
 	identity,
@@ -14,7 +19,7 @@ export const saveCustomTokens = async ({
 }: {
 	progress: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
-	tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[];
+	tokens: SaveCustomToken[];
 }) => {
 	progress(ProgressStepsAddToken.SAVE);
 
