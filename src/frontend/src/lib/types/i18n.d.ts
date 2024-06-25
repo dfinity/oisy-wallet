@@ -86,6 +86,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		erc20_user_tokens: string;
 		loading_wallet_timeout: string;
 	};
 }

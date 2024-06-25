@@ -5,22 +5,32 @@ import {
 } from '$env/networks.env';
 import { ERC20_CONTRACTS, ERC20_TWIN_TOKENS } from '$env/tokens.erc20.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
+import type { Erc20UserToken, Erc20UserTokenState } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
-import { mapErc20Token } from '$eth/utils/erc20.utils';
+import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
+import { queryAndUpdate } from '$lib/actors/query.ic';
 import { addUserToken, listUserTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { nullishSignOut } from '$lib/services/auth.services';
-import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { isNullish } from '@dfinity/utils';
+import { fromNullable, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
+export const loadErc20Contracts = async ({
+	identity
+}: {
+	identity: OptionIdentity;
+}): Promise<void> => {
+	await Promise.all([loadDefaultErc20Contracts(), loadUserTokens({ identity })]);
+};
+
+const loadDefaultErc20Contracts = async (): Promise<{ success: boolean }> => {
 	try {
 		type ContractData = Erc20Contract &
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
@@ -36,37 +46,7 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 				})
 			);
 
-		const loadUserContracts = async (): Promise<Promise<ContractData>[]> => {
-			const { identity } = get(authStore);
-
-			if (isNullish(identity)) {
-				return [];
-			}
-
-			const contracts = await listUserTokens({ identity });
-
-			return contracts
-				.filter(({ chain_id }) => SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
-				.map(async ({ contract_address: address, chain_id }: UserToken): Promise<ContractData> => {
-					const network = SUPPORTED_ETHEREUM_NETWORKS.find(
-						({ chainId }) => chainId === chain_id
-					) as EthereumNetwork;
-
-					return {
-						...{
-							address,
-							exchange: 'erc20' as const,
-							category: 'custom' as const,
-							network
-						},
-						...(await infuraErc20Providers(network.id).metadata({ address }))
-					};
-				});
-		};
-
-		const userContracts = await loadUserContracts();
-
-		const contracts = await Promise.all([...loadKnownContracts(), ...userContracts]);
+		const contracts = await Promise.all(loadKnownContracts());
 		erc20TokensStore.set([...ERC20_TWIN_TOKENS, ...contracts.map(mapErc20Token)]);
 	} catch (err: unknown) {
 		erc20TokensStore.reset();
@@ -86,6 +66,68 @@ export const loadErc20Contracts = async (): Promise<{ success: boolean }> => {
 	}
 
 	return { success: true };
+};
+
+const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+	queryAndUpdate<Erc20UserToken[]>({
+		request: (params) => loadErc20UserTokens(params),
+		onLoad: loadErc20UserTokenData,
+		onCertifiedError: ({ error: err }) => {
+			erc20UserTokensStore.clear();
+
+			toastsError({
+				msg: { text: get(i18n).init.error.erc20_user_tokens },
+				err
+			});
+		},
+		identity
+	});
+
+const loadErc20UserTokens = async (params: {
+	identity: OptionIdentity;
+	certified: boolean;
+}): Promise<Erc20UserToken[]> => {
+	type ContractData = Erc20Contract &
+		Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
+		Partial<Pick<Erc20Token, 'id'>>;
+
+	type ContractDataWithCustomToken = ContractData & Erc20UserTokenState;
+
+	const loadUserContracts = async (): Promise<Promise<ContractDataWithCustomToken>[]> => {
+		const contracts = await listUserTokens(params);
+
+		return contracts
+			.filter(({ chain_id }) => SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
+			.map(
+				async ({
+					contract_address: address,
+					chain_id,
+					version,
+					enabled
+				}: UserToken): Promise<ContractDataWithCustomToken> => {
+					const network = SUPPORTED_ETHEREUM_NETWORKS.find(
+						({ chainId }) => chainId === chain_id
+					) as EthereumNetwork;
+
+					return {
+						...{
+							address,
+							exchange: 'erc20' as const,
+							category: 'custom' as const,
+							network,
+							version: fromNullable(version),
+							enabled: fromNullable(enabled) ?? true
+						},
+						...(await infuraErc20Providers(network.id).metadata({ address }))
+					};
+				}
+			);
+	};
+
+	const userContracts = await loadUserContracts();
+
+	const contracts = await Promise.all(userContracts);
+	return contracts.map(mapErc20UserToken);
 };
 
 export const saveErc20Contract = async ({
@@ -140,7 +182,9 @@ export const saveErc20Contract = async ({
 				contract_address: contractAddress,
 				symbol: [],
 				decimals: [],
-				version: []
+				version: [],
+				// TODO: this should be a parameter
+				enabled: [true]
 			}
 		});
 
@@ -167,4 +211,19 @@ export const saveErc20Contract = async ({
 
 		onError();
 	}
+};
+
+const loadErc20UserTokenData = ({
+	response: tokens,
+	certified
+}: {
+	certified: boolean;
+	response: Erc20UserToken[];
+}) => {
+	tokens.forEach((token) =>
+		erc20UserTokensStore.set({
+			data: token,
+			certified
+		})
+	);
 };
