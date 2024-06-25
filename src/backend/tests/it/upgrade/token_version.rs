@@ -4,7 +4,9 @@ use crate::utils::assertion::assert_tokens_data_eq;
 use crate::utils::mock::{
     CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };
-use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade_with_wasm, upgrade_latest_wasm};
+use crate::utils::pocketic::{
+    setup_with_custom_wasm, update_call, upgrade_latest_wasm, upgrade_with_wasm,
+};
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::token::UserToken;
