@@ -3,7 +3,6 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { setUserToken } from '$lib/api/backend.api';
-	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
 	import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
@@ -12,6 +11,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { loadUserTokens } from '$eth/services/erc20.services';
 
 	let selectedToken: OptionErc20UserToken;
 
@@ -50,11 +50,7 @@
 		});
 	};
 
-	const updateUi = async () => {
-		assertNonNullish(selectedToken);
-
-		erc20TokensStore.remove(selectedToken.id);
-	};
+	const updateUi = (params: { identity: Identity }): Promise<void> => loadUserTokens(params);
 </script>
 
 <HideTokenModal backToNetworkId={ETHEREUM_NETWORK_ID} {assertHide} {hideToken} {updateUi} />
