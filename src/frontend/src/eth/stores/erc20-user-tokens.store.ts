@@ -6,7 +6,7 @@ import { writable, type Readable } from 'svelte/store';
 export type CertifiedErc20UserTokensData = CertifiedData<Erc20UserToken>[] | undefined | null;
 
 export interface CertifiedErc20UserTokensStore extends Readable<CertifiedErc20UserTokensData> {
-	set: (token: CertifiedData<Erc20UserToken>) => void;
+	set: (token: CertifiedData<Omit<Erc20UserToken, 'id'>>) => void;
 	reset: (tokenId: TokenId) => void;
 	clear: () => void;
 }
@@ -15,18 +15,18 @@ export const initCertifiedErc20UserTokensStore = (): CertifiedErc20UserTokensSto
 	const { subscribe, update, set } = writable<CertifiedErc20UserTokensData>(undefined);
 
 	return {
-		set: ({ data, certified }: CertifiedData<Erc20UserToken>) =>
+		set: ({ data, certified }: CertifiedData<Omit<Erc20UserToken, 'id'>>) =>
 			update((state) => [
-				...(state ?? []).filter(({ data: { id } }) => id !== data.id),
+				...(state ?? []).filter(({ data: { address } }) => address !== data.address),
 				{
 					certified,
 					data: {
-						...data,
 						// We are using Symbols as key IDs for the ETH and ICP tokens, which is ideal for our use case due to their uniqueness. This ensures that even if two coins fetched dynamically have the same symbol or name, they will be used correctly.
 						// However, this approach presents a challenge with ERC20 tokens, which need to be loaded twice - once with a query and once with an update. When they are loaded the second time, the existing Symbol should be reused to ensure they are identified as the same token.
 						id:
 							(state ?? []).find(({ data: { address } }) => address === data.address)?.data.id ??
-							Symbol(data.symbol)
+							Symbol(data.symbol),
+						...data
 					}
 				}
 			]),

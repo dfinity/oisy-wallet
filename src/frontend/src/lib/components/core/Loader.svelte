@@ -16,6 +16,7 @@
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authStore } from '$lib/stores/auth.store';
+	import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 
 	let progressStep: string = ProgressStepsLoader.ETH_ADDRESS;
 
@@ -65,6 +66,8 @@
 			})
 		]);
 	};
+
+	$: console.log($erc20UserTokensStore);
 
 	const progressAndLoad = async () => {
 		progressStep = ProgressStepsLoader.DONE;
