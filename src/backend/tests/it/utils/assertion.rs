@@ -1,7 +1,9 @@
 use shared::types::custom_token::CustomToken;
-use shared::types::token::UserToken;
 
-pub fn assert_tokens_data_eq(results_tokens: &[UserToken], expected_tokens: &[UserToken]) {
+pub fn assert_tokens_data_eq<T: PartialEq + std::fmt::Debug>(
+    results_tokens: &[T],
+    expected_tokens: &[T],
+) {
     assert_eq!(
         results_tokens.len(),
         expected_tokens.len(),
