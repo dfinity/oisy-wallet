@@ -11,7 +11,7 @@
 	import { ICP_NETWORK_ID } from '$env/networks.env';
 	import { onMount } from 'svelte';
 	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { loadUserTokens } from '$icp/services/icrc.services';
+	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { token } from '$lib/stores/token.store';
 
 	let selectedToken: OptionIcrcCustomToken;
@@ -65,7 +65,7 @@
 		});
 	};
 
-	const updateUi = (params: { identity: Identity }): Promise<void> => loadUserTokens(params);
+	const updateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
 <HideTokenModal backToNetworkId={ICP_NETWORK_ID} {assertHide} {hideToken} {updateUi} />
