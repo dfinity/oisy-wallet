@@ -1,4 +1,4 @@
-import { erc20DefaultTokens } from '$eth/derived/erc20.derived';
+import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { transactionsStore } from '$eth/stores/transactions.store';
@@ -95,7 +95,7 @@ export const loadErc20Transactions = async ({
 		return { success: false };
 	}
 
-	const tokens = get(erc20DefaultTokens);
+	const tokens = get(erc20Tokens);
 	const token = tokens.find(({ id }) => id === tokenId);
 
 	if (isNullish(token)) {
