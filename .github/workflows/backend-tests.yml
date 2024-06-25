@@ -3,8 +3,17 @@ name: Backend Tests
 on:
   pull_request:
     paths:
-      - 'src/backend/**'
+      - # Scripts, GitHub actions that contain 'backend' in their path.
+        '**/*backend*'
+      - # The backend source code
+        'src/backend/**'
       - 'src/shared/**'
+      - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
+        '**/Cargo*'
+      - '**/*rust*'
+      - # The dockerfile used in this CI run, and the scripts it COPY's.
+        'Dockerfile'
+      - 'docker/**'
   workflow_dispatch:
 
 jobs:
