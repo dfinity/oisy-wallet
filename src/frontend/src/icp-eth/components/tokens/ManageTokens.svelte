@@ -30,6 +30,7 @@
 	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { erc20DefaultTokens, erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -206,7 +207,7 @@
 				<svelte:fragment slot="action">
 					{#if icTokenContainsEnabled(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else}
+					{:else if icTokenEthereumUserToken(token)}
 						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
 					{/if}
 				</svelte:fragment>
