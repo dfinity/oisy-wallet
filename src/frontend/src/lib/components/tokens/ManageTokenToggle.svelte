@@ -23,7 +23,7 @@
 
 		dispatch('icShowOrHideToken', {
 			...token,
-			show: checked
+			enabled: checked
 		});
 	};
 
