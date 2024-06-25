@@ -6,7 +6,7 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
-	import { networkICP, networkId } from '$lib/derived/network.derived';
+	import { networkEthereum, networkICP, networkId } from '$lib/derived/network.derived';
 	import { networkParam } from '$lib/utils/nav.utils';
 	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
 	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
@@ -38,11 +38,13 @@
 	<div class="flex flex-col gap-4">
 		{#if $networkICP}
 			<IcWalletAddress />
-		{:else}
+		{:else if $networkEthereum}
 			<EthWalletAddress />
 		{/if}
 
-		<Hr />
+		{#if $networkICP || $networkEthereum}
+			<Hr />
+		{/if}
 
 		<a
 			href={OISY_REPO_URL}
