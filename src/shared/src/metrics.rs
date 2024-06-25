@@ -16,7 +16,11 @@ const GIBIBYTE: u32 = 1 << 30;
 #[must_use]
 pub fn get_metrics() -> HttpResponse {
     let now = ic_cdk::api::time();
-    let mut writer = MetricsEncoder::new(vec![], i64::try_from(now / 1_000_000).unwrap_or_else(|_| unreachable!("u64::MAX / 1_000_000 is smaller than i64::MAX")));
+    let mut writer = MetricsEncoder::new(
+        vec![],
+        i64::try_from(now / 1_000_000)
+            .unwrap_or_else(|_| unreachable!("u64::MAX / 1_000_000 is smaller than i64::MAX")),
+    );
     match encode_metrics(&mut writer) {
         Ok(()) => {
             let body = writer.into_inner();

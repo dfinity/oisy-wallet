@@ -95,7 +95,7 @@ impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
 /// Gets status information about the canister.
 ///
 /// See [IC method `canister_status`](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-canister_status).
-/// 
+///
 /// # Panics
 /// - If the call to the management canister fails.
 /// - If the response cannot be converted to `CanisterStatusResultV2`.  For example, it looks as if it will panic if the canister has no controllers.
