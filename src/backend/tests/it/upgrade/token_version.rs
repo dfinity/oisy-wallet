@@ -160,6 +160,8 @@ fn test_update_user_token_after_upgrade() {
 
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
+        // TODO: deserialization should be true per default.
+        enabled: Some(true),
         ..results.unwrap().swap_remove(0)
     };
 

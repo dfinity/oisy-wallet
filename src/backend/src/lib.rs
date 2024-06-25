@@ -1,4 +1,4 @@
-use crate::assertions::assert_token_symbol_length;
+use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
@@ -376,6 +376,7 @@ fn add_user_token(token: UserToken) {
 #[update(guard = "caller_is_not_anonymous")]
 fn set_user_token(token: UserToken) {
     assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
+    assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
 
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 

@@ -263,6 +263,25 @@ fn test_cannot_update_user_token_with_invalid_version() {
 }
 
 #[test]
+fn test_set_user_token_enabled_none() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let token: UserToken = UserToken {
+        enabled: None,
+        ..MOCK_TOKEN.clone()
+    };
+
+    let result = update_call::<()>(&pic_setup, caller, "set_user_token", token);
+
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .contains("Token should either be enabled or disabled"));
+}
+
+#[test]
 fn test_set_user_token_symbol_max_length() {
     let pic_setup = setup();
 
