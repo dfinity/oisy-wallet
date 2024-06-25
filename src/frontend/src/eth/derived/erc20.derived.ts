@@ -14,7 +14,7 @@ const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
 		)
 );
 
-const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
+export const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
 	[erc20UserTokensStore],
 	([$erc20UserTokensStore]) => $erc20UserTokensStore?.map(({ data: token }) => token) ?? []
 );
