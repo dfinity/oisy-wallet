@@ -60,6 +60,7 @@ export type Token = { Icrc: IcrcToken };
 export interface UserToken {
 	decimals: [] | [number];
 	version: [] | [bigint];
+	enabled: [] | [boolean];
 	chain_id: bigint;
 	contract_address: string;
 	symbol: [] | [string];
@@ -80,6 +81,8 @@ export interface _SERVICE {
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
+	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
+	set_user_token: ActorMethod<[UserToken], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }

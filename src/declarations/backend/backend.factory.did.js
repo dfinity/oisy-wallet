@@ -8,6 +8,7 @@ export const idlFactory = ({ IDL }) => {
 	const UserToken = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
 		version: IDL.Opt(IDL.Nat64),
+		enabled: IDL.Opt(IDL.Bool),
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text,
 		symbol: IDL.Opt(IDL.Text)
@@ -82,6 +83,8 @@ export const idlFactory = ({ IDL }) => {
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
+		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
+		set_user_token: IDL.Func([UserToken], [], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
 	});
