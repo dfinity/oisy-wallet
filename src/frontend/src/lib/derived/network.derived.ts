@@ -5,7 +5,7 @@ import { networks } from '$lib/derived/networks.derived';
 import type { OptionAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const networkId: Readable<NetworkId | undefined> = derived(
@@ -27,6 +27,11 @@ export const networkICP: Readable<boolean> = derived([networkId], ([$networkId])
 
 export const networkEthereum: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdEthereum($networkId)
+);
+
+export const pseudoNetworkChainFusion: Readable<boolean> = derived(
+	[selectedNetwork],
+	([$selectedNetwork]) => isNullish($selectedNetwork)
 );
 
 export const networkAddress: Readable<OptionAddress | string> = derived(
