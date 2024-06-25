@@ -67,8 +67,6 @@
 		]);
 	};
 
-	$: console.log($erc20UserTokensStore);
-
 	const progressAndLoad = async () => {
 		progressStep = ProgressStepsLoader.DONE;
 
