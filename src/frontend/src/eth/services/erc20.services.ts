@@ -140,7 +140,9 @@ export const saveErc20Contract = async ({
 				contract_address: contractAddress,
 				symbol: [],
 				decimals: [],
-				version: []
+				version: [],
+				// TODO: set_user_token
+				enabled: [true]
 			}
 		});
 
