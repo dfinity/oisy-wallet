@@ -43,20 +43,6 @@ export const signPrehash = async ({
 	return sign_prehash(hash);
 };
 
-/**
- * @deprecated
- */
-export const addUserToken = async ({
-	token,
-	identity
-}: {
-	token: UserToken;
-	identity: Identity;
-}): Promise<void> => {
-	const { add_user_token } = await getBackendActor({ identity });
-	return add_user_token(token);
-};
-
 export const listUserTokens = async ({
 	identity,
 	certified = true

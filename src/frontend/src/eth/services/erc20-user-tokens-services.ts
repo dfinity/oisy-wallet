@@ -5,7 +5,13 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { setManyUserTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import type { Identity } from '@dfinity/agent';
-import { toNullable } from '@dfinity/utils';
+import { nonNullish, toNullable } from '@dfinity/utils';
+
+export type SaveUserToken = Pick<
+	Erc20UserToken,
+	'enabled' | 'version' | 'symbol' | 'decimals' | 'address' | 'network'
+> &
+	Partial<Pick<Erc20UserToken, 'id'>>;
 
 export const saveUserTokens = async ({
 	progress,
@@ -14,7 +20,7 @@ export const saveUserTokens = async ({
 }: {
 	progress: (step: ProgressStepsAddToken) => void;
 	identity: Identity;
-	tokens: Erc20UserToken[];
+	tokens: SaveUserToken[];
 }) => {
 	progress(ProgressStepsAddToken.SAVE);
 
@@ -35,8 +41,8 @@ export const saveUserTokens = async ({
 	progress(ProgressStepsAddToken.UPDATE_UI);
 
 	// Hide tokens that have been disabled
-	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
-	disabledTokens.forEach(({ id }) => erc20UserTokensStore.reset(id));
+	const disabledTokens = tokens.filter(({ enabled, id }) => !enabled && nonNullish(id));
+	disabledTokens.forEach(({ id }) => erc20UserTokensStore.reset(id as symbol));
 
 	// Reload all user tokens for simplicity reason.
 	await loadUserTokens({ identity });
