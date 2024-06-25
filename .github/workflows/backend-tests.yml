@@ -84,7 +84,7 @@ jobs:
       - name: Install cargo dependency sorter
         run: cargo install cargo-sort@1.0.9
       - name: Format
-        run: ./scripts/format.rust.sh
+        run: ./scripts/format.sh
       - name: Check formatted
         run: |
           test -z "$(git status --porcelain)" || {
