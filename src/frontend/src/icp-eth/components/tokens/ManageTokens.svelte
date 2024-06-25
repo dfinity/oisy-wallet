@@ -27,10 +27,10 @@
 		selectedNetwork
 	} from '$lib/derived/network.derived';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
+	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { erc20DefaultTokens, erc20UserTokens } from '$eth/derived/erc20.derived';
-	import { icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -149,16 +149,19 @@
 	let saveDisabled = true;
 	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
 
-	let groupModifiedTokens: { icrc: IcrcCustomToken[]; erc20: EthereumUserToken[] } = {
+	let groupModifiedTokens: { icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] } = {
 		icrc: [],
 		erc20: []
 	};
 	$: groupModifiedTokens = Object.values(modifiedTokens).reduce(
 		({ icrc, erc20 }, token) => ({
 			icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
-			erc20: [...erc20, ...(token.standard === 'erc20' ? [token as EthereumUserToken] : [])]
+			erc20: [
+				...erc20,
+				...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
+			]
 		}),
-		{ icrc: [], erc20: [] } as { icrc: IcrcCustomToken[]; erc20: EthereumUserToken[] }
+		{ icrc: [], erc20: [] } as { icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] }
 	);
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.

@@ -60,3 +60,6 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 
 export const icTokenEthereumUserToken = (token: Token): token is EthereumUserToken =>
 	(token.standard === 'ethereum' || token.standard === 'erc20') && 'enabled' in token;
+
+export const icTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
+	token.standard === 'erc20'&& 'enabled' in token && 'address' in token && 'exchange' in token;

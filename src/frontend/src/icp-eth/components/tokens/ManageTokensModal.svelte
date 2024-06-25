@@ -22,7 +22,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { get } from 'svelte/store';
-	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
+	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 
 	const steps: WizardSteps = [
 		{
@@ -50,7 +50,7 @@
 
 	const saveTokens = async ({
 		detail: { icrc, erc20 }
-	}: CustomEvent<{ icrc: IcrcCustomToken[]; erc20: EthereumUserToken[] }>) => {
+	}: CustomEvent<{ icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] }>) => {
 		if (icrc.length === 0 && erc20.length === 0) {
 			toastsShow({
 				text: $i18n.tokens.manage.info.no_changes,
