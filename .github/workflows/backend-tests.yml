@@ -3,16 +3,23 @@ name: Backend Tests
 on:
   pull_request:
     paths:
-      - 'src/backend/**'
+      - # Scripts, GitHub actions that contain 'backend' in their path.
+        '**/*backend*'
+      - # The backend source code
+        'src/backend/**'
       - 'src/shared/**'
-
-env:
-  RUNNER_OS: ubuntu-20.04
+      - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
+        '**/Cargo*'
+      - '**/*rust*'
+      - # The dockerfile used in this CI run, and the scripts it COPY's.
+        'Dockerfile'
+      - 'docker/**'
+  workflow_dispatch:
 
 jobs:
 
   docker-build-base:
-    runs-on: ${{ env.RUNNER_OS }}
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,7 +28,7 @@ jobs:
         uses: ./.github/actions/docker-build-base
 
   docker-build:
-    runs-on: ${{ env.RUNNER_OS }}
+    runs-on: ubuntu-20.04
     needs: docker-build-base
     strategy:
       matrix:
@@ -40,7 +47,7 @@ jobs:
           target: ${{ matrix.target }}
 
   tests:
-    runs-on: ${{ env.RUNNER_OS }}
+    runs-on: ubuntu-20.04
     needs: [ 'docker-build' ]
     steps:
       - uses: actions/checkout@v4
@@ -65,7 +72,7 @@ jobs:
 
   may-merge:
     needs: [ 'tests' ]
-    runs-on: ${{ env.RUNNER_OS }}
+    runs-on: ubuntu-20.04
     steps:
       - name: Cleared for merging
         run: echo OK

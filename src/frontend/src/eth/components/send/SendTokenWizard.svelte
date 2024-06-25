@@ -41,7 +41,7 @@
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import { decodeQrCode } from '$eth/utils/qr-code.utils';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { erc20DefaultTokens } from '$eth/derived/erc20.derived';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -219,7 +219,7 @@
 			code,
 			expectedToken,
 			ethereumTokens: $enabledEthereumTokens,
-			erc20Tokens: $erc20Tokens
+			erc20Tokens: $erc20DefaultTokens
 		});
 </script>
 

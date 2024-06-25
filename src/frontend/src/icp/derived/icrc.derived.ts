@@ -7,7 +7,6 @@ import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnets } from '$lib/derived/testnets.derived';
 import { derived, type Readable } from 'svelte/store';
 
-// TODO: rename me enabledIcrcTokens
 export const icrcDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcTokensStore, testnets],
 	([$icrcTokensStore, $testnets]) =>
