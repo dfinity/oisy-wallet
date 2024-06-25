@@ -1,0 +1,49 @@
+name: Backend Checks
+
+on:
+  pull_request:
+    paths:
+      - # Scripts, GitHub actions that contain 'backend' in their path.
+        '**/*backend*'
+      - # The backend source code
+        'src/backend/**'
+      - 'src/shared/**'
+      - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
+        '**/Cargo*'
+      - '**/*rust*'
+      - # The dockerfile used in this CI run, and the scripts it COPY's.
+        'Dockerfile'
+      - 'docker/**'
+  workflow_dispatch:
+
+jobs:
+
+  format:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+      - name: Install cargo dependency sorter
+        run: cargo install cargo-sort@1.0.9
+      - name: Format
+        run: ./scripts/format.sh
+      - name: Check formatted
+        run: |
+          test -z "$(git status --porcelain)" || {
+                  echo "FIX: Please run ./scripts/format.sh"
+                  git diff
+                  exit 1
+          }
+
+  may-merge:
+    needs: [ 'format' ]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cleared for merging
+        run: echo OK
