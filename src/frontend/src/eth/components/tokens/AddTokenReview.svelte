@@ -5,7 +5,6 @@
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -64,7 +63,7 @@
 			}
 
 			if (
-				$erc20TokensStore?.find(
+				$erc20Tokens?.find(
 					({ symbol, name }) =>
 						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
 						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
