@@ -1,3 +1,4 @@
+use crate::assertions::assert_token_symbol_length;
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
@@ -28,6 +29,7 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
 
+mod assertions;
 mod guards;
 mod token;
 
@@ -367,15 +369,10 @@ async fn sign_prehash(prehash: String) -> String {
 /// Adds a new token to the user.
 #[update(guard = "caller_is_not_anonymous")]
 fn add_user_token(token: UserToken) {
+    assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
+
     let addr = parse_eth_address(&token.contract_address);
 
-    if let Some(symbol) = token.symbol.as_ref() {
-        if symbol.len() > MAX_SYMBOL_LENGTH {
-            ic_cdk::trap(&format!(
-                "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
-            ));
-        }
-    }
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &UserToken| {

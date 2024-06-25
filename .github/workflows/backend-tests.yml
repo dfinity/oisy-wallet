@@ -5,6 +5,7 @@ on:
     paths:
       - 'src/backend/**'
       - 'src/shared/**'
+  workflow_dispatch:
 
 jobs:
 
