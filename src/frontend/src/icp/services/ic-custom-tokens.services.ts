@@ -1,4 +1,4 @@
-import { loadUserTokens } from '$icp/services/icrc.services';
+import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcTokensStore } from '$icp/stores/icrc.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setManyCustomTokens } from '$lib/api/backend.api';
@@ -44,7 +44,7 @@ export const saveCustomTokens = async ({
 	disabledTokens.forEach(({ ledgerCanisterId }) => icrcTokensStore.reset(ledgerCanisterId));
 
 	// Reload all custom tokens for simplicity reason.
-	await loadUserTokens({ identity });
+	await loadCustomTokens({ identity });
 };
 
 export const saveIcrcCustomToken = async ({
