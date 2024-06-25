@@ -149,7 +149,21 @@
 	let saveDisabled = true;
 	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
 
-	const save = () => dispatch('icSave', Object.values(modifiedTokens));
+	let groupModifiedTokens: { icrc: IcrcCustomToken[]; erc20: EthereumUserToken[] } = {
+		icrc: [],
+		erc20: []
+	};
+	$: groupModifiedTokens = Object.values(modifiedTokens).reduce(
+		({ icrc, erc20 }, token) => ({
+			icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
+			erc20: [...erc20, ...(token.standard === 'erc20' ? [token as EthereumUserToken] : [])]
+		}),
+		{ icrc: [], erc20: [] } as { icrc: IcrcCustomToken[]; erc20: EthereumUserToken[] }
+	);
+
+	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
+	// We might want to improve this in the future.
+	const save = () => dispatch('icSave', groupModifiedTokens);
 </script>
 
 <div class="mb-4">

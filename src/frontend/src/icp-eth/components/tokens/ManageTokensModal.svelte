@@ -20,8 +20,9 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import { isNullish } from '@dfinity/utils';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { get } from 'svelte/store';
+	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 
 	const steps: WizardSteps = [
 		{
@@ -47,8 +48,24 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const saveTokens = async ({ detail: tokens }: CustomEvent<IcrcCustomToken[]>) => {
-		await save(tokens);
+	const saveTokens = async ({
+		detail: { icrc, erc20 }
+	}: CustomEvent<{ icrc: IcrcCustomToken[]; erc20: EthereumUserToken[] }>) => {
+		if (icrc.length === 0 && erc20.length === 0) {
+			toastsShow({
+				text: $i18n.tokens.manage.info.no_changes,
+				level: 'info',
+				duration: 5000
+			});
+
+			return;
+		}
+
+		await Promise.allSettled([
+			...(icrc.length > 0 ? [save(icrc)] : []),
+			// TODO: erc20 save
+			...(erc20.length > 0 ? [] : [])
+		]);
 	};
 
 	const addToken = async () => {

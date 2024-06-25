@@ -329,7 +329,8 @@
 				"select_network": "Select the network"
 			},
 			"info": {
-				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade."
+				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade.",
+				"no_changes": "No changes need to be saved."
 			},
 			"error": {
 				"unexpected_build": "An unexpected error happened while building the list of known tokens.",
