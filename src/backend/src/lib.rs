@@ -420,7 +420,7 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
                 t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
             };
 
-            add_to_user_token(stored_principal, &mut s.user_token, &token, &find)
+            add_to_user_token(stored_principal, &mut s.user_token, &token, &find);
         }
     });
 }
