@@ -22,6 +22,7 @@ lazy_static! {
         decimals: PRE_UPGRADE_TOKEN.decimals,
         symbol: PRE_UPGRADE_TOKEN.symbol.clone(),
         version: PRE_UPGRADE_TOKEN.version.clone(),
+        // TODO: this is unexpected. Should be Some(true).
         enabled: None
     };
 }
