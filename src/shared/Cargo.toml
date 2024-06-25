@@ -4,9 +4,9 @@ version = "0.0.2"
 edition = "2021"
 
 [dependencies]
-ic-cdk.workspace = true
-ic-cdk-macros.workspace = true
-candid.workspace = true
-serde.workspace = true
-serde_bytes.workspace = true
+candid = { workspace = true }
+ic-cdk = { workspace = true }
+ic-cdk-macros = { workspace = true }
 ic-metrics-encoder = "1.1.1"
+serde = { workspace = true }
+serde_bytes = { workspace = true }
