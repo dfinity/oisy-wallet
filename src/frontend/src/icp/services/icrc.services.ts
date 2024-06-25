@@ -22,14 +22,14 @@ import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultIcrcTokens(), loadUserTokens({ identity })]);
+	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity })]);
 };
 
 const loadDefaultIcrcTokens = async () => {
 	await Promise.all(ICRC_TOKENS.map(loadDefaultIcrc));
 };
 
-export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
 	queryAndUpdate<IcrcCustomTokenWithoutId[]>({
 		request: (params) => loadIcrcCustomTokens(params),
 		onLoad: loadIcrcCustomData,
