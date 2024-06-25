@@ -15,7 +15,7 @@
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { ICP_TOKEN } from '$env/tokens.env';
-	import { icTokenContainsEnabled, sortIcTokens } from '$icp/utils/icrc.utils';
+	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Token } from '$lib/types/token';
 	import { networkTokens } from '$lib/derived/network-tokens.derived';
@@ -109,7 +109,7 @@
 				(token) =>
 					token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
 					token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					(icTokenContainsEnabled(token) &&
+					(icTokenIcrcCustomToken(token) &&
 						(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()))
 			);
 
@@ -119,7 +119,7 @@
 
 		return {
 			...token,
-			...(icTokenContainsEnabled(token)
+			...(icTokenIcrcCustomToken(token)
 				? {
 						enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
 					}
@@ -205,7 +205,7 @@
 				</span>
 
 				<svelte:fragment slot="action">
-					{#if icTokenContainsEnabled(token)}
+					{#if icTokenIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
 					{:else if icTokenEthereumUserToken(token)}
 						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
