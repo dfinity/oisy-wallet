@@ -16,13 +16,12 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { back } from '$lib/utils/nav.utils';
 	import type { Identity } from '@dfinity/agent';
-	import type { NetworkId } from '$lib/types/network';
 	import { token } from '$lib/stores/token.store';
+	import {networkId} from "$lib/derived/network.derived";
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
 	export let updateUi: (params: { identity: Identity }) => Promise<void>;
-	export let backToNetworkId: NetworkId;
 
 	const hide = async () => {
 		const { valid } = assertHide();
@@ -55,7 +54,7 @@
 			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
 
 			// We must navigate first otherwise we might land on the default token Ethereum selected while being on network ICP.
-			await back({ networkId: backToNetworkId });
+			await back({ networkId: $networkId });
 
 			await updateUi({
 				identity: $authStore.identity

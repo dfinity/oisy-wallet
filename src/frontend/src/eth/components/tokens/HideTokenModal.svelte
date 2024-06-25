@@ -8,7 +8,6 @@
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
-	import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
 	import { onMount } from 'svelte';
 	import { assertNonNullish } from '@dfinity/utils';
 	import { token } from '$lib/stores/token.store';
@@ -52,4 +51,4 @@
 	};
 </script>
 
-<HideTokenModal backToNetworkId={ETHEREUM_NETWORK_ID} {assertHide} {hideToken} {updateUi} />
+<HideTokenModal {assertHide} {hideToken} {updateUi} />
