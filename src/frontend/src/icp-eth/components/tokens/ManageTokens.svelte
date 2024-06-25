@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconClose, Input } from '@dfinity/gix-components';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Card from '$lib/components/ui/Card.svelte';
@@ -15,12 +15,16 @@
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { ICP_TOKEN } from '$env/tokens.env';
-	import { icTokenContainsEnabled, sortIcTokens } from '$icp/utils/icrc.utils';
+	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Token } from '$lib/types/token';
 	import { networkTokens } from '$lib/derived/network-tokens.derived';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
-	import { networkICP, selectedNetwork } from '$lib/derived/network.derived';
+	import {
+		networkICP,
+		pseudoNetworkChainFusion,
+		selectedNetwork
+	} from '$lib/derived/network.derived';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 
 	const dispatch = createEventDispatcher();
@@ -62,7 +66,7 @@
 					(icrcToken) => token.id === icrcToken.id && token.network.id === icrcToken.network.id
 				) ?? { ...token, show: true }
 		),
-		...(isNullish($selectedNetwork) || $networkICP
+		...($pseudoNetworkChainFusion || $networkICP
 			? allIcrcTokens.filter(
 					(icrcToken) =>
 						!$networkTokens.some(
@@ -86,7 +90,7 @@
 				(token) =>
 					token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
 					token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					(icTokenContainsEnabled(token) &&
+					(icTokenIcrcCustomToken(token) &&
 						(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()))
 			);
 
@@ -96,7 +100,7 @@
 
 		return {
 			...token,
-			...(icTokenContainsEnabled(token)
+			...(icTokenIcrcCustomToken(token)
 				? {
 						enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
 					}
@@ -182,7 +186,7 @@
 				</span>
 
 				<svelte:fragment slot="action">
-					{#if icTokenContainsEnabled(token)}
+					{#if icTokenIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
 					{:else}
 						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
