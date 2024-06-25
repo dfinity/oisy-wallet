@@ -1,5 +1,5 @@
 import { SEPOLIA_TOKEN } from '$env/tokens.env';
-import { erc20DefaultTokens } from '$eth/derived/erc20.derived';
+import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
 import { decodeQrCode } from '$eth/utils/qr-code.utils';
@@ -20,7 +20,7 @@ describe('decodeQrCode', () => {
 	const otherProps = {
 		expectedToken: token,
 		ethereumTokens: get(enabledEthereumTokens),
-		erc20Tokens: get(erc20DefaultTokens)
+		erc20Tokens: get(erc20Tokens)
 	};
 
 	const mockDecodeQrCodeUrn = decodeQrCodeUrn as MockedFunction<typeof decodeQrCodeUrn>;
