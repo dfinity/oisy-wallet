@@ -25,7 +25,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"test": "vitest",
 		"cargo:test": "./scripts/test.backend.sh",
-		"clippy": "cargo clippy --target=wasm32-unknown-unknown -- -A deprecated",
+		"clippy": "./scripts/lint.rust.sh",
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
 		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}'",
 		"generate": "scripts/did.sh && dfx generate && node scripts/did.update.types.mjs && node scripts/did.delete.types.mjs && npm run format",
