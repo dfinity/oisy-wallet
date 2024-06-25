@@ -32,10 +32,13 @@ pub mod transaction {
 pub type Version = u64;
 
 pub trait TokenVersion: Debug {
+    #[must_use]
     fn get_version(&self) -> Option<Version>;
+    #[must_use]
     fn clone_with_incremented_version(&self) -> Self
     where
         Self: Sized + Clone;
+    #[must_use]
     fn clone_with_initial_version(&self) -> Self
     where
         Self: Sized + Clone;
