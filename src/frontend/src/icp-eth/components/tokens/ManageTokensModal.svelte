@@ -22,7 +22,10 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { get } from 'svelte/store';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-	import { saveIcrcCustomTokens } from '$icp-eth/services/manage-tokens.services';
+	import {
+		saveErc20UserTokens,
+		saveIcrcCustomTokens
+	} from '$icp-eth/services/manage-tokens.services';
 	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 
 	const steps: WizardSteps = [
@@ -64,8 +67,7 @@
 
 		await Promise.allSettled([
 			...(icrc.length > 0 ? [saveIcrc(icrc)] : []),
-			// TODO: erc20 save
-			...(erc20.length > 0 ? [] : [])
+			...(erc20.length > 0 ? [saveErc20(erc20)] : [])
 		]);
 	};
 
@@ -94,6 +96,7 @@
 	};
 
 	const saveErc20Token = async () => {
+		// TODO: deprecated
 		await saveErc20Contract({
 			contractAddress: erc20ContractAddress,
 			metadata: erc20Metadata,
@@ -110,6 +113,16 @@
 
 	const saveIcrc = (tokens: SaveCustomToken[]): Promise<void> =>
 		saveIcrcCustomTokens({
+			tokens,
+			progress,
+			modalNext: () => modal.set(3),
+			onSuccess: close,
+			onError: () => modal.set(0),
+			identity: $authStore.identity
+		});
+
+	const saveErc20 = (tokens: Erc20UserToken[]): Promise<void> =>
+		saveErc20UserTokens({
 			tokens,
 			progress,
 			modalNext: () => modal.set(3),
