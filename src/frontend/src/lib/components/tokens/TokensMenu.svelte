@@ -4,7 +4,7 @@
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import ManageTokensMenuButton from '$icp-eth/components/tokens/ManageTokensMenuButton.svelte';
 
 	let visible = false;
@@ -16,8 +16,8 @@
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.navigation.alt.menu}
-	disabled={$erc20TokensNotInitialized}
-	class:opacity-10={$erc20TokensNotInitialized}
+	disabled={$erc20UserTokensNotInitialized}
+	class:opacity-10={$erc20UserTokensNotInitialized}
 >
 	<IconMore />
 </button>
