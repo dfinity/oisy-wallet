@@ -45,7 +45,7 @@ const erc20UserTokensDisabledAddresses: Readable<string[]> = derived(
 /**
  * The list of default tokens that are enabled - i.e. the list of default ERC20 tokens minus those disabled by the user.
  */
-const erc20DefaultTokensEnabled: Readable<Erc20Token[]> = derived(
+const enabledErc20DefaultTokens: Readable<Erc20Token[]> = derived(
 	[erc20DefaultTokens, erc20UserTokensDisabledAddresses],
 	([$erc20DefaultTokens, $erc20UserTokensDisabledAddresses]) =>
 		$erc20DefaultTokens.filter(
@@ -57,7 +57,7 @@ const erc20DefaultTokensEnabled: Readable<Erc20Token[]> = derived(
  * The list of ERC20 tokens enabled by the user - i.e. saved in the backend canister as enabled - minus those that duplicate default tokens.
  * We do so because the default statically configured are those to be used for various feature. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each others ("Twin Token" links).
  */
-const erc20UserTokensEnabled: Readable<Erc20UserToken[]> = derived(
+const enabledErc20UserTokens: Readable<Erc20UserToken[]> = derived(
 	[erc20UserTokens],
 	([$erc20UserTokens]) =>
 		$erc20UserTokens.filter(
@@ -67,11 +67,11 @@ const erc20UserTokensEnabled: Readable<Erc20UserToken[]> = derived(
 		)
 );
 
-export const erc20Tokens: Readable<Erc20Token[]> = derived(
-	[erc20DefaultTokensEnabled, erc20UserTokensEnabled],
-	([$erc20DefaultTokensEnabled, $erc20UserTokensEnabled]) => [
-		...$erc20DefaultTokensEnabled,
-		...$erc20UserTokensEnabled
+export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
+	[enabledErc20DefaultTokens, enabledErc20UserTokens],
+	([$enabledErc20DefaultTokens, $enabledErc20UserTokens]) => [
+		...$enabledErc20DefaultTokens,
+		...$enabledErc20UserTokens
 	]
 );
 
@@ -87,6 +87,6 @@ export const erc20TokensNotInitialized: Readable<boolean> = derived(
 );
 
 export const erc20TokensAddresses: Readable<Erc20ContractAddress[]> = derived(
-	[erc20Tokens],
+	[enabledErc20Tokens],
 	([$erc20Tokens]) => $erc20Tokens.map(({ address }: Erc20Token) => ({ address }))
 );
