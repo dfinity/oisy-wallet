@@ -28,12 +28,18 @@ export const networkTokens: Readable<Token[]> = derived(
 		})
 );
 
+export const enabledNetworkTokens: Readable<Token[]> = derived(
+	[networkTokens],
+	([$networkTokens]) =>
+		$networkTokens.filter((token) => ('enabled' in token ? token.enabled : true))
+);
+
 export const filteredNetworkTokens: Readable<Token[]> = derived(
-	[networkTokens, notPseudoNetworkChainFusion],
-	([$networkTokens, $notPseudoNetworkChainFusion]) =>
+	[enabledNetworkTokens, notPseudoNetworkChainFusion],
+	([$enabledNetworkTokens, $notPseudoNetworkChainFusion]) =>
 		$notPseudoNetworkChainFusion
-			? $networkTokens
-			: $networkTokens.filter(
+			? $enabledNetworkTokens
+			: $enabledNetworkTokens.filter(
 					(token) =>
 						[ICP_TOKEN_ID, ETHEREUM_TOKEN_ID].includes(token.id) ||
 						('ledgerCanisterId' in token &&
