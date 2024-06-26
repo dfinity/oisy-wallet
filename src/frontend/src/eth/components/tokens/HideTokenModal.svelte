@@ -5,7 +5,6 @@
 	import { setUserToken } from '$lib/api/backend.api';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
-	import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
 	import { onMount } from 'svelte';
 	import { assertNonNullish, toNullable } from '@dfinity/utils';
 	import { token } from '$lib/stores/token.store';
@@ -53,4 +52,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadUserTokens(params);
 </script>
 
-<HideTokenModal backToNetworkId={ETHEREUM_NETWORK_ID} {assertHide} {hideToken} {updateUi} />
+<HideTokenModal {assertHide} {hideToken} {updateUi} />
