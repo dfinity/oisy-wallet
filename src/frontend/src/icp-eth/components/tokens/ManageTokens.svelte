@@ -18,7 +18,6 @@
 	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Token } from '$lib/types/token';
-	import { networkTokens } from '$lib/derived/network-tokens.derived';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import {
 		networkEthereum,
@@ -85,14 +84,7 @@
 						$selectedNetwork?.id === id || ($pseudoNetworkChainFusion && env === 'mainnet')
 				)
 			: []),
-		...(manageIcTokens
-			? allIcrcTokens.filter(
-					(icrcToken) =>
-						!$networkTokens.some(
-							(token) => icrcToken.id === token.id && icrcToken.network.id === token.network.id
-						)
-				)
-			: [])
+		...(manageIcTokens ? allIcrcTokens : [])
 	];
 
 	let filterTokens = '';
