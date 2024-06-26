@@ -141,7 +141,7 @@ export const saveErc20Contract = async ({
 				symbol: [],
 				decimals: [],
 				version: [],
-				// TODO: set_user_token
+				// TODO: implement set_user_token in frontend
 				enabled: [true]
 			}
 		});
