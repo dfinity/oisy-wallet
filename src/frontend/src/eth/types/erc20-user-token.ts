@@ -11,3 +11,5 @@ export type Erc20UserTokenState = Omit<
 };
 
 export type Erc20UserToken = Erc20Token & Erc20UserTokenState;
+
+export type OptionErc20UserToken = Erc20UserToken | undefined | null;

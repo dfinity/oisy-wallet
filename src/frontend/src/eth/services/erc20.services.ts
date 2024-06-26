@@ -69,7 +69,7 @@ const loadDefaultErc20Contracts = async (): Promise<{ success: boolean }> => {
 	return { success: true };
 };
 
-const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
 	queryAndUpdate<Erc20UserToken[]>({
 		request: (params) => loadErc20UserTokens(params),
 		onLoad: loadErc20UserTokenData,
