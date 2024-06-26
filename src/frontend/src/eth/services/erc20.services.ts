@@ -13,14 +13,11 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
-import { addUserToken, listUserTokens } from '$lib/api/backend.api';
-import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-import { nullishSignOut } from '$lib/services/auth.services';
+import { listUserTokens } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { fromNullable, isNullish } from '@dfinity/utils';
+import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadErc20Contracts = async ({
@@ -137,89 +134,6 @@ const loadErc20UserTokens = async (params: {
 
 	const contracts = await Promise.all(userContracts);
 	return contracts.map(mapErc20UserToken);
-};
-
-export const saveErc20Contract = async ({
-	contractAddress,
-	metadata,
-	network,
-	updateSaveProgressStep,
-	modalNext,
-	onSuccess,
-	onError,
-	identity
-}: {
-	contractAddress: string | undefined;
-	metadata: Erc20Metadata | undefined;
-	network: EthereumNetwork;
-	updateSaveProgressStep: (step: ProgressStepsAddToken) => void;
-	modalNext: () => void;
-	onSuccess: () => void;
-	onError: () => void;
-	identity: OptionIdentity;
-}): Promise<void> => {
-	const $i18n = get(i18n);
-
-	if (isNullishOrEmpty(contractAddress)) {
-		toastsError({
-			msg: { text: $i18n.tokens.error.invalid_contract_address }
-		});
-		return;
-	}
-
-	if (isNullish(metadata)) {
-		toastsError({
-			msg: { text: $i18n.tokens.error.no_metadata }
-		});
-		return;
-	}
-
-	if (isNullish(identity)) {
-		await nullishSignOut();
-		return;
-	}
-
-	modalNext();
-
-	try {
-		updateSaveProgressStep(ProgressStepsAddToken.SAVE);
-
-		await addUserToken({
-			identity,
-			token: {
-				chain_id: network.chainId,
-				contract_address: contractAddress,
-				symbol: [],
-				decimals: [],
-				version: [],
-				// TODO: this should be a parameter
-				enabled: [true]
-			}
-		});
-
-		updateSaveProgressStep(ProgressStepsAddToken.UPDATE_UI);
-
-		erc20TokensStore.add(
-			mapErc20Token({
-				address: contractAddress,
-				exchange: 'ethereum',
-				category: 'custom',
-				network: network,
-				...metadata
-			})
-		);
-
-		updateSaveProgressStep(ProgressStepsAddToken.DONE);
-
-		setTimeout(() => onSuccess(), 750);
-	} catch (err: unknown) {
-		toastsError({
-			msg: { text: $i18n.tokens.error.unexpected },
-			err
-		});
-
-		onError();
-	}
 };
 
 const loadErc20UserTokenData = ({

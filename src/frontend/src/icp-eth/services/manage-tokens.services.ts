@@ -1,5 +1,4 @@
-import { saveUserTokens } from '$eth/services/erc20-user-tokens-services';
-import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import { saveUserTokens, type SaveUserToken } from '$eth/services/erc20-user-tokens-services';
 import { saveCustomTokens, type SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { nullishSignOut } from '$lib/services/auth.services';
@@ -22,12 +21,12 @@ export const saveErc20UserTokens = async ({
 	tokens,
 	...rest
 }: {
-	tokens: Erc20UserToken[];
+	tokens: SaveUserToken[];
 } & ManageTokensSaveParams) => {
 	const save = (params: {
 		progress: (step: ProgressStepsAddToken) => void;
 		identity: Identity;
-		tokens: [Erc20UserToken, ...Erc20UserToken[]];
+		tokens: [SaveUserToken, ...SaveUserToken[]];
 	}): Promise<void> => saveUserTokens(params);
 
 	await saveTokens({
