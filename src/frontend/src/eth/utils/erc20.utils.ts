@@ -4,17 +4,29 @@ import icpDark from '$eth/assets/icp_dark.svg';
 import uniswap from '$eth/assets/uniswap.svg';
 import usdt from '$eth/assets/usdt.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
+import type { Erc20UserToken, Erc20UserTokenState } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Token } from '$lib/types/token';
 
-export const mapErc20Token = ({
+type MapErc20TokenParams = Erc20Contract &
+	Erc20Metadata & { network: EthereumNetwork } & Pick<Token, 'category'> &
+	Partial<Pick<Token, 'id'>>;
+
+export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams): Erc20Token => ({
+	id: id ?? Symbol(symbol),
+	standard: 'erc20',
+	name,
+	symbol,
+	icon: mapErc20Icon(symbol),
+	...rest
+});
+
+export const mapErc20UserToken = ({
 	id,
 	symbol,
 	name,
 	...rest
-}: Erc20Contract &
-	Erc20Metadata & { network: EthereumNetwork } & Pick<Token, 'category'> &
-	Partial<Pick<Token, 'id'>>): Erc20Token => ({
+}: MapErc20TokenParams & Erc20UserTokenState): Erc20UserToken => ({
 	id: id ?? Symbol(symbol),
 	standard: 'erc20',
 	name,
