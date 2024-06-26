@@ -282,6 +282,27 @@ fn test_set_user_token_enabled_none() {
 }
 
 #[test]
+fn test_set_many_user_tokens_enabled_none() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let token: UserToken = UserToken {
+        enabled: None,
+        ..MOCK_TOKEN.clone()
+    };
+
+    let tokens: Vec<UserToken> = vec![token.clone(), MOCK_TOKEN.clone()];
+
+    let result = update_call::<()>(&pic_setup, caller, "set_many_user_tokens", tokens);
+
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .contains("Token should either be enabled or disabled"));
+}
+
+#[test]
 fn test_set_user_token_symbol_max_length() {
     let pic_setup = setup();
 
@@ -297,6 +318,31 @@ fn test_set_user_token_symbol_max_length() {
     };
 
     let result = update_call::<()>(&pic_setup, caller, "set_user_token", token);
+
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .contains("Token symbol should not exceed 20 bytes"));
+}
+
+#[test]
+fn test_set_user_many_tokens_symbol_max_length() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let token: UserToken = UserToken {
+        chain_id: SEPOLIA_CHAIN_ID,
+        contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
+        decimals: Some(WEENUS_DECIMALS),
+        symbol: Some("01234567890123456789_".to_string()),
+        version: None,
+        enabled: Some(true),
+    };
+
+    let tokens: Vec<UserToken> = vec![token.clone(), MOCK_TOKEN.clone()];
+
+    let result = update_call::<()>(&pic_setup, caller, "set_many_user_tokens", tokens);
 
     assert!(result.is_err());
     assert!(result
