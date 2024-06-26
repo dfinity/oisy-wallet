@@ -20,15 +20,15 @@ import type { OptionIdentity } from '$lib/types/identity';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadErc20Contracts = async ({
+export const loadErc20Tokens = async ({
 	identity
 }: {
 	identity: OptionIdentity;
 }): Promise<void> => {
-	await Promise.all([loadDefaultErc20Contracts(), loadUserTokens({ identity })]);
+	await Promise.all([loadDefaultErc20Tokens(), loadUserTokens({ identity })]);
 };
 
-const loadDefaultErc20Contracts = async (): Promise<{ success: boolean }> => {
+const loadDefaultErc20Tokens = async (): Promise<{ success: boolean }> => {
 	try {
 		type ContractData = Erc20Contract &
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
