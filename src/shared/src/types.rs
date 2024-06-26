@@ -48,16 +48,18 @@ pub trait TokenVersion: Debug {
 pub mod token {
     use crate::types::Version;
     use candid::{CandidType, Deserialize};
+    use serde::Serialize;
 
     pub type ChainId = u64;
 
-    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserToken {
         pub contract_address: String,
         pub chain_id: ChainId,
         pub symbol: Option<String>,
         pub decimals: Option<u8>,
         pub version: Option<Version>,
+        pub enabled: Option<bool>,
     }
 
     #[derive(CandidType, Deserialize, Clone)]
