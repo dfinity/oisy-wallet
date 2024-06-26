@@ -5,13 +5,12 @@ import {
 } from '$env/networks.env';
 import { ERC20_CONTRACTS, ERC20_TWIN_TOKENS } from '$env/tokens.erc20.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
-import { erc20TokensStore } from '$eth/stores/erc20.store';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken, Erc20UserTokenState } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
-import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { queryAndUpdate } from '$lib/actors/query.ic';
 import { listUserTokens } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
@@ -20,15 +19,15 @@ import type { OptionIdentity } from '$lib/types/identity';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadErc20Contracts = async ({
+export const loadErc20Tokens = async ({
 	identity
 }: {
 	identity: OptionIdentity;
 }): Promise<void> => {
-	await Promise.all([loadDefaultErc20Contracts(), loadUserTokens({ identity })]);
+	await Promise.all([loadDefaultErc20Tokens(), loadUserTokens({ identity })]);
 };
 
-const loadDefaultErc20Contracts = async (): Promise<{ success: boolean }> => {
+const loadDefaultErc20Tokens = async (): Promise<{ success: boolean }> => {
 	try {
 		type ContractData = Erc20Contract &
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
@@ -45,9 +44,9 @@ const loadDefaultErc20Contracts = async (): Promise<{ success: boolean }> => {
 			);
 
 		const contracts = await Promise.all(loadKnownContracts());
-		erc20TokensStore.set([...ERC20_TWIN_TOKENS, ...contracts.map(mapErc20Token)]);
+		erc20DefaultTokensStore.set([...ERC20_TWIN_TOKENS, ...contracts.map(mapErc20Token)]);
 	} catch (err: unknown) {
-		erc20TokensStore.reset();
+		erc20DefaultTokensStore.reset();
 
 		const {
 			init: {
@@ -91,19 +90,11 @@ const loadErc20UserTokens = async (params: {
 
 	type ContractDataWithCustomToken = ContractData & Erc20UserTokenState;
 
-	const erc20DefaultContractAddresses = ERC20_CONTRACTS.map(({ address }) =>
-		mapAddressStartsWith0x(address)
-	);
-
 	const loadUserContracts = async (): Promise<Promise<ContractDataWithCustomToken>[]> => {
 		const contracts = await listUserTokens(params);
 
 		return contracts
-			.filter(
-				({ chain_id, contract_address }) =>
-					SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id) &&
-					!erc20DefaultContractAddresses.includes(mapAddressStartsWith0x(contract_address))
-			)
+			.filter(({ chain_id }) => SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))
 			.map(
 				async ({
 					contract_address: address,
