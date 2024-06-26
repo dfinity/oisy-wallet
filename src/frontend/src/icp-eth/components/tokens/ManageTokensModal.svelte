@@ -96,8 +96,6 @@
 		]);
 	};
 
-	// TMP
-
 	const saveErc20Token = async () => {
 		if (isNullishOrEmpty(erc20ContractAddress)) {
 			toastsError({
