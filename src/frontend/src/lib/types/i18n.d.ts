@@ -321,7 +321,7 @@ interface I18nTokens {
 		unexpected_hiding: string;
 		already_available: string;
 		loading_metadata: string;
-		not_custom: string;
+		not_toggleable: string;
 		incomplete_metadata: string;
 		duplicate_metadata: string;
 		unexpected_undefined: string;

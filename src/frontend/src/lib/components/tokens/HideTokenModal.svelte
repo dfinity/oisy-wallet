@@ -16,8 +16,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { back } from '$lib/utils/nav.utils';
 	import type { Identity } from '@dfinity/agent';
-	import { token } from '$lib/stores/token.store';
 	import { networkId } from '$lib/derived/network.derived';
+	import { tokenToggleable } from '$lib/derived/token.derived';
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
@@ -30,9 +30,9 @@
 			return;
 		}
 
-		if ($token?.category !== 'custom') {
+		if (!$tokenToggleable) {
 			toastsError({
-				msg: { text: $i18n.tokens.error.not_custom }
+				msg: { text: $i18n.tokens.error.not_toggleable }
 			});
 			return;
 		}

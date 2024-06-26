@@ -5,7 +5,7 @@
 	import { networkICP } from '$lib/derived/network.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { tokenCategory } from '$lib/derived/token.derived';
+	import { tokenToggleable } from '$lib/derived/token.derived';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import { token } from '$lib/stores/token.store';
@@ -48,7 +48,7 @@
 	<div class="flex flex-col gap-3">
 		<slot />
 
-		{#if $tokenCategory === 'custom'}
+		{#if $tokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} on:click={hideToken}>
 				{hideTokenLabel}
 			</ButtonMenu>

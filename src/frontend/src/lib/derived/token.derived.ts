@@ -1,6 +1,8 @@
+import { icTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { token } from '$lib/stores/token.store';
 import type { OptionTokenId, OptionTokenStandard, Token, TokenCategory } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -31,4 +33,12 @@ export const tokenDecimals: Readable<number | undefined> = derived(
 export const tokenCategory: Readable<TokenCategory | undefined> = derived(
 	[token],
 	([$token]) => $token?.category
+);
+
+// TODO: $tokenCategory is used here for backwards compatibility with ICRC.
+// Once ICRC default tokens can also be enabled or disabled, this should be reviewed.
+export const tokenToggleable: Readable<boolean> = derived(
+	[token, tokenCategory],
+	([$token, $tokenCategory]) =>
+		nonNullish($token) && (icTokenErc20UserToken($token) || $tokenCategory === 'custom')
 );
