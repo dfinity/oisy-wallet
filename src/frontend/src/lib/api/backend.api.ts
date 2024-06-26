@@ -48,6 +48,9 @@ export const signPrehash = async ({
 	return sign_prehash(hash);
 };
 
+/**
+ * @deprecated
+ */
 export const addUserToken = async ({
 	token,
 	identity
@@ -59,6 +62,9 @@ export const addUserToken = async ({
 	return add_user_token(token);
 };
 
+/**
+ * @deprecated
+ */
 export const removeUserToken = async ({
 	tokenId,
 	identity
@@ -71,11 +77,10 @@ export const removeUserToken = async ({
 };
 
 export const listUserTokens = async ({
-	identity
-}: {
-	identity: Identity;
-}): Promise<UserToken[]> => {
-	const { list_user_tokens } = await getBackendActor({ identity });
+	identity,
+	certified = true
+}: { identity: OptionIdentity } & QueryParams): Promise<UserToken[]> => {
+	const { list_user_tokens } = await getBackendActor({ identity, certified });
 	return list_user_tokens();
 };
 
@@ -107,4 +112,26 @@ export const setCustomToken = async ({
 }): Promise<void> => {
 	const { set_custom_token } = await getBackendActor({ identity });
 	return set_custom_token(token);
+};
+
+export const setManyUserTokens = async ({
+	tokens,
+	identity
+}: {
+	tokens: UserToken[];
+	identity: Identity;
+}): Promise<void> => {
+	const { set_many_user_tokens } = await getBackendActor({ identity });
+	return set_many_user_tokens(tokens);
+};
+
+export const setUserToken = async ({
+	token,
+	identity
+}: {
+	token: UserToken;
+	identity: Identity;
+}): Promise<void> => {
+	const { set_user_token } = await getBackendActor({ identity });
+	return set_user_token(token);
 };
