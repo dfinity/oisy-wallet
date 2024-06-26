@@ -10,17 +10,17 @@
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
-	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
+	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	let convertEth = false;
-	$: convertEth = $ethToCkETHEnabled && $erc20TokensInitialized;
+	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
 
 	let convertErc20 = false;
-	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20TokensInitialized;
+	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = $tokenCkBtcLedger && $erc20TokensInitialized;
+	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
 </script>
 
 <div role="toolbar" class="grid grid-cols-2 gap-4 text-deep-violet font-bold pt-10 pb-3">

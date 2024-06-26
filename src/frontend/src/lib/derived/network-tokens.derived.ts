@@ -11,6 +11,9 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
+/**
+ * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not.
+ */
 export const networkTokens: Readable<Token[]> = derived(
 	[tokens, selectedNetwork, pseudoNetworkChainFusion],
 	([$tokens, $selectedNetwork, $pseudoNetworkChainFusion]) =>
@@ -28,12 +31,18 @@ export const networkTokens: Readable<Token[]> = derived(
 		})
 );
 
+export const enabledNetworkTokens: Readable<Token[]> = derived(
+	[networkTokens],
+	([$networkTokens]) =>
+		$networkTokens.filter((token) => ('enabled' in token ? token.enabled : true))
+);
+
 export const filteredNetworkTokens: Readable<Token[]> = derived(
-	[networkTokens, notPseudoNetworkChainFusion],
-	([$networkTokens, $notPseudoNetworkChainFusion]) =>
+	[enabledNetworkTokens, notPseudoNetworkChainFusion],
+	([$enabledNetworkTokens, $notPseudoNetworkChainFusion]) =>
 		$notPseudoNetworkChainFusion
-			? $networkTokens
-			: $networkTokens.filter(
+			? $enabledNetworkTokens
+			: $enabledNetworkTokens.filter(
 					(token) =>
 						[ICP_TOKEN_ID, ETHEREUM_TOKEN_ID].includes(token.id) ||
 						('ledgerCanisterId' in token &&
