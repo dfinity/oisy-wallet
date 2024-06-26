@@ -11,8 +11,7 @@ import { derived, type Readable } from 'svelte/store';
 /**
  * The list of ERC20 default tokens - i.e. the statically configured ERC20 tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
  */
-// TODO: check usage is still up-to-date
-export const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
+const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
 	[erc20DefaultTokensStore, enabledEthereumNetworksIds],
 	([$erc20TokensStore, $enabledEthereumNetworksIds]) =>
 		($erc20TokensStore ?? []).filter(({ network: { id: networkId } }) =>
@@ -23,8 +22,7 @@ export const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
 /**
  * The list of ERC20 tokens the user has added, enabled or enabled. Can contains default tokens if user disabled some.
  */
-// TODO: check usage is still up-to-date
-export const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
+const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
 	[erc20UserTokensStore],
 	([$erc20UserTokensStore]) => $erc20UserTokensStore?.map(({ data: token }) => token) ?? []
 );
@@ -42,31 +40,66 @@ const erc20UserTokensDisabledAddresses: Readable<string[]> = derived(
 		)
 );
 
+// TODO: extract type
+type Erc20TokenToggeable = Erc20Token & { enabled: boolean };
+
+export const erc20DefaultTokensToggleable: Readable<Erc20TokenToggeable[]> = derived(
+	[erc20DefaultTokens, erc20UserTokensDisabledAddresses],
+	([$erc20DefaultTokens, $erc20UserTokensDisabledAddresses]) =>
+		$erc20DefaultTokens.reduce(
+			(acc, { address, ...rest }) => [
+				...acc,
+				{
+					address,
+					...rest,
+					enabled: !$erc20UserTokensDisabledAddresses.includes(address)
+				}
+			],
+			[] as Erc20TokenToggeable[]
+		)
+);
+
 /**
  * The list of default tokens that are enabled - i.e. the list of default ERC20 tokens minus those disabled by the user.
  */
 const enabledErc20DefaultTokens: Readable<Erc20Token[]> = derived(
-	[erc20DefaultTokens, erc20UserTokensDisabledAddresses],
-	([$erc20DefaultTokens, $erc20UserTokensDisabledAddresses]) =>
-		$erc20DefaultTokens.filter(
-			({ address }) => !$erc20UserTokensDisabledAddresses.includes(address)
-		)
+	[erc20DefaultTokensToggleable],
+	([$erc20DefaultTokensToggleable]) =>
+		$erc20DefaultTokensToggleable.filter(({ enabled }) => enabled)
 );
 
 /**
  * The list of ERC20 tokens enabled by the user - i.e. saved in the backend canister as enabled - minus those that duplicate default tokens.
  * We do so because the default statically configured are those to be used for various feature. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each others ("Twin Token" links).
  */
-const enabledErc20UserTokens: Readable<Erc20UserToken[]> = derived(
+export const erc20UserTokensToggleable: Readable<Erc20UserToken[]> = derived(
 	[erc20UserTokens],
 	([$erc20UserTokens]) =>
 		$erc20UserTokens.filter(
-			({ enabled, address }) =>
-				enabled &&
+			({ address }) =>
 				!ERC20_CONTRACTS_ADDRESSES.includes(mapAddressStartsWith0x(address).toLowerCase())
 		)
 );
 
+const enabledErc20UserTokens: Readable<Erc20UserToken[]> = derived(
+	[erc20UserTokens],
+	([$erc20UserTokensToggleable]) => $erc20UserTokensToggleable.filter(({ enabled }) => enabled)
+);
+
+/**
+ * The list of all ERC20 tokens.
+ */
+export const erc20Tokens: Readable<Erc20TokenToggeable[]> = derived(
+	[erc20DefaultTokensToggleable, erc20UserTokensToggleable],
+	([$erc20DefaultTokensToggleable, $erc20UserTokensToggleable]) => [
+		...$erc20DefaultTokensToggleable,
+		...$erc20UserTokensToggleable
+	]
+);
+
+/**
+ * The list of ERC20 tokens that are either enabled by default (static config) or enabled by the users regardless if they are custom or default.
+ */
 export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	[enabledErc20DefaultTokens, enabledErc20UserTokens],
 	([$enabledErc20DefaultTokens, $enabledErc20UserTokens]) => [

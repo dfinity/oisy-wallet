@@ -28,7 +28,7 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { erc20DefaultTokens, erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import { networkTokens } from '$lib/derived/network-tokens.derived';
 
@@ -66,8 +66,7 @@
 	let allEthereumTokens: EthereumUserToken[] = [];
 	$: allEthereumTokens = [
 		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-		...$erc20DefaultTokens.map((token) => ({ ...token, enabled: true })),
-		...$erc20UserTokens
+		...$erc20Tokens
 	];
 
 	let manageIcTokens = false;

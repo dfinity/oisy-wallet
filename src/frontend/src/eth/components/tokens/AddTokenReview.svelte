@@ -11,7 +11,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import type { Network } from '$lib/types/network';
-	import { erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
@@ -37,7 +37,7 @@
 		}
 
 		if (
-			$erc20UserTokens?.find(
+			$erc20Tokens?.find(
 				({ address }) => address.toLowerCase() === contractAddress?.toLowerCase()
 			) !== undefined
 		) {
@@ -63,7 +63,7 @@
 			}
 
 			if (
-				$erc20UserTokens?.find(
+				$erc20Tokens?.find(
 					({ symbol, name }) =>
 						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
 						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
