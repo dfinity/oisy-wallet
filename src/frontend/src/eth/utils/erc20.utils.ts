@@ -4,11 +4,8 @@ import icpDark from '$eth/assets/icp_dark.svg';
 import uniswap from '$eth/assets/uniswap.svg';
 import usdt from '$eth/assets/usdt.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
-import type {
-	Erc20UserToken,
-	Erc20UserTokenState,
-	EthereumUserToken
-} from '$eth/types/erc20-user-token';
+import type { Erc20UserTokenState } from '$eth/types/erc20-token-toggleable';
+import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Token } from '$lib/types/token';
 
