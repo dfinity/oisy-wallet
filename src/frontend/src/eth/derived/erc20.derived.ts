@@ -6,7 +6,7 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
+export const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
 	[erc20TokensStore, enabledEthereumNetworksIds],
 	([$erc20TokensStore, $enabledEthereumNetworksIds]) =>
 		($erc20TokensStore ?? []).filter(({ network: { id: networkId } }) =>
