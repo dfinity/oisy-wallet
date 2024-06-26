@@ -160,6 +160,7 @@ fn test_update_user_token_after_upgrade() {
 
     let update_token: UserToken = UserToken {
         symbol: Some("Updated".to_string()),
+        enabled: Some(true),
         ..results.unwrap().swap_remove(0)
     };
 

@@ -15,6 +15,7 @@ lazy_static! {
         decimals: Some(WEENUS_DECIMALS),
         symbol: Some(WEENUS_SYMBOL.to_string()),
         version: None,
+        enabled: Some(true),
     };
     static ref MOCK_TOKEN_ID: UserTokenId = UserTokenId {
         chain_id: MOCK_TOKEN.chain_id.clone(),
@@ -103,6 +104,7 @@ fn test_list_user_tokens() {
         decimals: Some(18),
         symbol: Some("Uniswap".to_string()),
         version: None,
+        enabled: Some(false),
     };
 
     let _ = update_call::<()>(&pic_setup, caller, "add_user_token", another_token.clone());
@@ -183,6 +185,7 @@ fn test_add_user_token_symbol_max_length() {
         decimals: Some(WEENUS_DECIMALS),
         symbol: Some("01234567890123456789_".to_string()),
         version: None,
+        enabled: Some(true),
     };
 
     let result = update_call::<()>(&pic_setup, caller, "add_user_token", token);
