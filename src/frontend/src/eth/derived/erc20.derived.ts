@@ -6,7 +6,7 @@ import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -28,33 +28,24 @@ const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
 	([$erc20UserTokensStore]) => $erc20UserTokensStore?.map(({ data: token }) => token) ?? []
 );
 
-/**
- * The list of ERC20 tokens the user has disabled.
- * Note: Instead of deriving an array of Erc20Token we derive addresses, that way we can check if a default token is enabled more efficiently.
- */
-const erc20UserTokensDisabledAddresses: Readable<string[]> = derived(
-	[erc20UserTokens],
-	([$erc20UserTokens]) =>
-		$erc20UserTokens?.reduce(
-			(acc, { address, enabled }) => [...acc, ...(!enabled ? [address] : [])],
-			[] as string[]
-		)
-);
-
 export const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
-	[erc20DefaultTokens, erc20UserTokensDisabledAddresses],
-	([$erc20DefaultTokens, $erc20UserTokensDisabledAddresses]) =>
-		$erc20DefaultTokens.reduce(
-			(acc, { address, ...rest }) => [
+	[erc20DefaultTokens, erc20UserTokens],
+	([$erc20DefaultTokens, $erc20UserTokens]) =>
+		$erc20DefaultTokens.reduce((acc, { address, ...rest }) => {
+			const userToken = $erc20UserTokens.find(
+				({ address: contractAddress }) => contractAddress === address
+			);
+
+			return [
 				...acc,
 				{
 					address,
 					...rest,
-					enabled: !$erc20UserTokensDisabledAddresses.includes(address)
+					enabled: isNullish(userToken) || userToken.enabled,
+					version: userToken?.version
 				}
-			],
-			[] as Erc20TokenToggleable[]
-		)
+			];
+		}, [] as Erc20TokenToggleable[])
 );
 
 /**
