@@ -16,3 +16,5 @@ export type EthereumUserToken = Omit<Erc20UserToken, 'address' | 'exchange'> &
 	Partial<Pick<Erc20Token, 'address' | 'exchange'>>;
 
 export type OptionErc20UserToken = Erc20UserToken | undefined | null;
+
+// TMP for merge conflicts
