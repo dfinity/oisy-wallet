@@ -121,8 +121,6 @@
 			identity: $authStore.identity
 		});
 
-	// TMP for merge
-
 	const saveErc20 = (tokens: Erc20UserToken[]): Promise<void> =>
 		saveErc20UserTokens({
 			tokens,
