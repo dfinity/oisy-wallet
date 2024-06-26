@@ -5,6 +5,7 @@ import { SEPOLIA_PEPE_TOKEN } from '$env/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens.usdc.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
+import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { TokenId } from '$lib/types/token';
 
 const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
@@ -70,6 +71,10 @@ export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] =
 		: []),
 	...ERC20_CONTRACTS_SEPOLIA.map((contract) => ({ ...contract, network: SEPOLIA_NETWORK }))
 ];
+
+export const ERC20_CONTRACTS_ADDRESSES = ERC20_CONTRACTS.map(({ address }) =>
+	mapAddressStartsWith0x(address).toLowerCase()
+);
 
 /**
  * ERC20 which have twin tokens counterparts.
