@@ -3,6 +3,7 @@ import { enabledEthereumNetworksIds } from '$eth/derived/networks.derived';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
+import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -40,10 +41,7 @@ const erc20UserTokensDisabledAddresses: Readable<string[]> = derived(
 		)
 );
 
-// TODO: extract type
-type Erc20TokenToggeable = Erc20Token & { enabled: boolean };
-
-export const erc20DefaultTokensToggleable: Readable<Erc20TokenToggeable[]> = derived(
+export const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 	[erc20DefaultTokens, erc20UserTokensDisabledAddresses],
 	([$erc20DefaultTokens, $erc20UserTokensDisabledAddresses]) =>
 		$erc20DefaultTokens.reduce(
@@ -55,7 +53,7 @@ export const erc20DefaultTokensToggleable: Readable<Erc20TokenToggeable[]> = der
 					enabled: !$erc20UserTokensDisabledAddresses.includes(address)
 				}
 			],
-			[] as Erc20TokenToggeable[]
+			[] as Erc20TokenToggleable[]
 		)
 );
 
@@ -89,7 +87,7 @@ const enabledErc20UserTokens: Readable<Erc20UserToken[]> = derived(
 /**
  * The list of all ERC20 tokens.
  */
-export const erc20Tokens: Readable<Erc20TokenToggeable[]> = derived(
+export const erc20Tokens: Readable<Erc20TokenToggleable[]> = derived(
 	[erc20DefaultTokensToggleable, erc20UserTokensToggleable],
 	([$erc20DefaultTokensToggleable, $erc20UserTokensToggleable]) => [
 		...$erc20DefaultTokensToggleable,
