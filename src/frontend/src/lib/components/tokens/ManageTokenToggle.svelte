@@ -7,7 +7,7 @@
 	export let token: EthereumUserToken;
 
 	let disabled = false;
-	$: disabled = token.category === 'default';
+	$: disabled = token.category === 'default' && token.standard === 'ethereum';
 
 	let checked: boolean;
 	$: checked = token.enabled ?? false;
