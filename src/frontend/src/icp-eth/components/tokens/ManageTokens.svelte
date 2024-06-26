@@ -30,6 +30,7 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { erc20DefaultTokens, erc20UserTokens } from '$eth/derived/erc20.derived';
 	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+	import { networkTokens } from '$lib/derived/network-tokens.derived';
 
 	const dispatch = createEventDispatcher();
 
@@ -78,14 +79,11 @@
 	// TODO: Bitcoin tokens ($enabledBitcoinTokens) are not included yet.
 	let allTokens: Token[] = [];
 	$: allTokens = [
-		...(manageEthereumTokens
-			? allEthereumTokens.filter(
-					({ network: { id, env } }) =>
-						$selectedNetwork?.id === id || ($pseudoNetworkChainFusion && env === 'mainnet')
-				)
-			: []),
+		...(manageEthereumTokens ? allEthereumTokens : []),
 		...(manageIcTokens ? allIcrcTokens : [])
-	];
+	].filter(({ id: tokenId }) =>
+		$networkTokens.some(({ id: networkTokenId }) => tokenId === networkTokenId)
+	);
 
 	let filterTokens = '';
 	const updateFilter = () => (filterTokens = filter);
