@@ -1,4 +1,3 @@
-import { ERC20_CONTRACTS_ADDRESSES } from '$env/tokens.erc20.env';
 import { enabledEthereumNetworksIds } from '$eth/derived/networks.derived';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
@@ -6,7 +5,7 @@ import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -21,6 +20,15 @@ const erc20DefaultTokens: Readable<Erc20Token[]> = derived(
 );
 
 /**
+ * A flatten list of the default ERC20 contract addresses.
+ */
+export const erc20DefaultTokensAddresses: Readable<string[]> = derived(
+	[erc20DefaultTokens],
+	([$erc20DefaultTokens]) =>
+		$erc20DefaultTokens.map(({ address }) => mapAddressStartsWith0x(address).toLowerCase())
+);
+
+/**
  * The list of ERC20 tokens the user has added, enabled or enabled. Can contains default tokens if user disabled some.
  */
 const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
@@ -28,33 +36,21 @@ const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
 	([$erc20UserTokensStore]) => $erc20UserTokensStore?.map(({ data: token }) => token) ?? []
 );
 
-/**
- * The list of ERC20 tokens the user has disabled.
- * Note: Instead of deriving an array of Erc20Token we derive addresses, that way we can check if a default token is enabled more efficiently.
- */
-const erc20UserTokensDisabledAddresses: Readable<string[]> = derived(
-	[erc20UserTokens],
-	([$erc20UserTokens]) =>
-		$erc20UserTokens?.reduce(
-			(acc, { address, enabled }) => [...acc, ...(!enabled ? [address] : [])],
-			[] as string[]
-		)
-);
-
 export const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
-	[erc20DefaultTokens, erc20UserTokensDisabledAddresses],
-	([$erc20DefaultTokens, $erc20UserTokensDisabledAddresses]) =>
-		$erc20DefaultTokens.reduce(
-			(acc, { address, ...rest }) => [
-				...acc,
-				{
-					address,
-					...rest,
-					enabled: !$erc20UserTokensDisabledAddresses.includes(address)
-				}
-			],
-			[] as Erc20TokenToggleable[]
-		)
+	[erc20DefaultTokens, erc20UserTokens],
+	([$erc20DefaultTokens, $erc20UserTokens]) =>
+		$erc20DefaultTokens.map(({ address, ...rest }) => {
+			const userToken = $erc20UserTokens.find(
+				({ address: contractAddress }) => contractAddress === address
+			);
+
+			return {
+				address,
+				...rest,
+				enabled: isNullish(userToken) || userToken.enabled,
+				version: userToken?.version
+			};
+		})
 );
 
 /**
@@ -71,11 +67,11 @@ const enabledErc20DefaultTokens: Readable<Erc20Token[]> = derived(
  * We do so because the default statically configured are those to be used for various feature. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each others ("Twin Token" links).
  */
 export const erc20UserTokensToggleable: Readable<Erc20UserToken[]> = derived(
-	[erc20UserTokens],
-	([$erc20UserTokens]) =>
+	[erc20UserTokens, erc20DefaultTokensAddresses],
+	([$erc20UserTokens, $erc20DefaultTokensAddresses]) =>
 		$erc20UserTokens.filter(
 			({ address }) =>
-				!ERC20_CONTRACTS_ADDRESSES.includes(mapAddressStartsWith0x(address).toLowerCase())
+				!$erc20DefaultTokensAddresses.includes(mapAddressStartsWith0x(address).toLowerCase())
 		)
 );
 
