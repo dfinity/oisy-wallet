@@ -40,6 +40,7 @@ const erc20UserTokensDisabledAddresses: Readable<string[]> = derived(
 		)
 );
 
+// TODO: extract type
 type Erc20TokenToggeable = Erc20Token & { enabled: boolean };
 
 export const erc20DefaultTokensToggleable: Readable<Erc20TokenToggeable[]> = derived(

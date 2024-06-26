@@ -11,6 +11,9 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
+/**
+ * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not.
+ */
 export const networkTokens: Readable<Token[]> = derived(
 	[tokens, selectedNetwork, pseudoNetworkChainFusion],
 	([$tokens, $selectedNetwork, $pseudoNetworkChainFusion]) =>
