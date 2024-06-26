@@ -282,6 +282,27 @@ fn test_set_user_token_enabled_none() {
 }
 
 #[test]
+fn test_set_many_user_tokens_enabled_none() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+
+    let token: UserToken = UserToken {
+        enabled: None,
+        ..MOCK_TOKEN.clone()
+    };
+
+    let tokens: Vec<UserToken> = vec![token.clone()];
+
+    let result = update_call::<()>(&pic_setup, caller, "set_many_user_tokens", tokens);
+
+    assert!(result.is_err());
+    assert!(result
+        .unwrap_err()
+        .contains("Token should either be enabled or disabled"));
+}
+
+#[test]
 fn test_set_user_token_symbol_max_length() {
     let pic_setup = setup();
 

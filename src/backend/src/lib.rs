@@ -413,6 +413,7 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
     mutate_state(|s| {
         for token in tokens {
             assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
+            assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
 
             let addr = parse_eth_address(&token.contract_address);
 
