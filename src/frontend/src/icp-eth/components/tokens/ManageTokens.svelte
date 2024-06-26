@@ -18,14 +18,18 @@
 	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Token } from '$lib/types/token';
-	import { networkTokens } from '$lib/derived/network-tokens.derived';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import {
+		networkEthereum,
 		networkICP,
 		pseudoNetworkChainFusion,
 		selectedNetwork
 	} from '$lib/derived/network.derived';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { erc20DefaultTokens, erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -58,22 +62,29 @@
 		)
 	].sort(sortIcTokens);
 
+	let allEthereumTokens: EthereumUserToken[] = [];
+	$: allEthereumTokens = [
+		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
+		...$erc20DefaultTokens.map((token) => ({ ...token, enabled: true })),
+		...$erc20UserTokens
+	];
+
+	let manageIcTokens = false;
+	$: manageIcTokens = $pseudoNetworkChainFusion || $networkICP;
+
+	let manageEthereumTokens = false;
+	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
+
+	// TODO: Bitcoin tokens ($enabledBitcoinTokens) are not included yet.
 	let allTokens: Token[] = [];
 	$: allTokens = [
-		...$networkTokens.map(
-			(token) =>
-				allIcrcTokens.find(
-					(icrcToken) => token.id === icrcToken.id && token.network.id === icrcToken.network.id
-				) ?? { ...token, show: true }
-		),
-		...($pseudoNetworkChainFusion || $networkICP
-			? allIcrcTokens.filter(
-					(icrcToken) =>
-						!$networkTokens.some(
-							(token) => icrcToken.id === token.id && icrcToken.network.id === token.network.id
-						)
+		...(manageEthereumTokens
+			? allEthereumTokens.filter(
+					({ network: { id, env } }) =>
+						$selectedNetwork?.id === id || ($pseudoNetworkChainFusion && env === 'mainnet')
 				)
-			: [])
+			: []),
+		...(manageIcTokens ? allIcrcTokens : [])
 	];
 
 	let filterTokens = '';
@@ -188,7 +199,7 @@
 				<svelte:fragment slot="action">
 					{#if icTokenIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else}
+					{:else if icTokenEthereumUserToken(token)}
 						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
 					{/if}
 				</svelte:fragment>
