@@ -17,7 +17,7 @@
 	import { back } from '$lib/utils/nav.utils';
 	import type { Identity } from '@dfinity/agent';
 	import { token } from '$lib/stores/token.store';
-	import {networkId} from "$lib/derived/network.derived";
+	import { networkId } from '$lib/derived/network.derived';
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
