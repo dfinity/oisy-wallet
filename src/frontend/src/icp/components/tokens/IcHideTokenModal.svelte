@@ -8,7 +8,6 @@
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { assertNonNullish, toNullable } from '@dfinity/utils';
 	import { Principal } from '@dfinity/principal';
-	import { ICP_NETWORK_ID } from '$env/networks.env';
 	import { onMount } from 'svelte';
 	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
@@ -68,4 +67,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
-<HideTokenModal backToNetworkId={ICP_NETWORK_ID} {assertHide} {hideToken} {updateUi} />
+<HideTokenModal {assertHide} {hideToken} {updateUi} />
