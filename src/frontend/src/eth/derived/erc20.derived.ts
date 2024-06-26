@@ -62,7 +62,7 @@ export const erc20DefaultTokensToggleable: Readable<Erc20TokenToggeable[]> = der
 /**
  * The list of default tokens that are enabled - i.e. the list of default ERC20 tokens minus those disabled by the user.
  */
-const erc20DefaultTokensEnabled: Readable<Erc20Token[]> = derived(
+const enabledErc20DefaultTokens: Readable<Erc20Token[]> = derived(
 	[erc20DefaultTokensToggleable],
 	([$erc20DefaultTokensToggeable]) => $erc20DefaultTokensToggeable.filter(({ enabled }) => enabled)
 );
@@ -71,8 +71,7 @@ const erc20DefaultTokensEnabled: Readable<Erc20Token[]> = derived(
  * The list of ERC20 tokens enabled by the user - i.e. saved in the backend canister as enabled - minus those that duplicate default tokens.
  * We do so because the default statically configured are those to be used for various feature. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each others ("Twin Token" links).
  */
-// TODO: rename to erc20UserTokensToggeable
-const erc20UserTokensEnabled: Readable<Erc20UserToken[]> = derived(
+const enabledErc20UserTokens: Readable<Erc20UserToken[]> = derived(
 	[erc20UserTokens],
 	([$erc20UserTokens]) =>
 		$erc20UserTokens.filter(
@@ -84,34 +83,32 @@ const erc20UserTokensEnabled: Readable<Erc20UserToken[]> = derived(
 
 // TODO: rename to erc20Tokens
 export const erc20TokensAll: Readable<Erc20Token[]> = derived(
-	[erc20DefaultTokensToggleable, erc20UserTokensEnabled],
-	([$erc20DefaultTokensToggeable, $erc20UserTokensEnabled]) => [
+	[erc20DefaultTokensToggleable, enabledErc20UserTokens],
+	([$erc20DefaultTokensToggeable, $enabledErc20UserTokens]) => [
 		...$erc20DefaultTokensToggeable,
-		...$erc20UserTokensEnabled
+		...$enabledErc20UserTokens
 	]
 );
 
-// TODO: rename to erc20TokensEnabled
-export const erc20Tokens: Readable<Erc20Token[]> = derived(
-	[erc20DefaultTokensEnabled, erc20UserTokensEnabled],
-	([$erc20DefaultTokensEnabled, $erc20UserTokensEnabled]) => [
-		...$erc20DefaultTokensEnabled,
-		...$erc20UserTokensEnabled
+export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
+	[enabledErc20DefaultTokens, enabledErc20UserTokens],
+	([$enabledErc20DefaultTokens, $enabledErc20UserTokens]) => [
+		...$enabledErc20DefaultTokens,
+		...$enabledErc20UserTokens
 	]
 );
 
-// TODO: rename to erc20UserTokensInitialized
-export const erc20TokensInitialized: Readable<boolean> = derived(
+export const erc20UserTokensInitialized: Readable<boolean> = derived(
 	[erc20UserTokensStore],
 	([$erc20UserTokensStore]) => nonNullish($erc20UserTokensStore)
 );
 
-export const erc20TokensNotInitialized: Readable<boolean> = derived(
-	[erc20TokensInitialized],
+export const erc20UserTokensNotInitialized: Readable<boolean> = derived(
+	[erc20UserTokensInitialized],
 	([$erc20TokensInitialized]) => !$erc20TokensInitialized
 );
 
 export const erc20TokensAddresses: Readable<Erc20ContractAddress[]> = derived(
-	[erc20Tokens],
+	[enabledErc20Tokens],
 	([$erc20Tokens]) => $erc20Tokens.map(({ address }: Erc20Token) => ({ address }))
 );
