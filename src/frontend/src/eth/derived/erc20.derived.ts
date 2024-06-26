@@ -81,8 +81,10 @@ const enabledErc20UserTokens: Readable<Erc20UserToken[]> = derived(
 		)
 );
 
-// TODO: rename to erc20Tokens
-export const erc20TokensAll: Readable<Erc20Token[]> = derived(
+/**
+ * The list of all ERC20 tokens.
+ */
+export const erc20Tokens: Readable<Erc20Token[]> = derived(
 	[erc20DefaultTokensToggleable, enabledErc20UserTokens],
 	([$erc20DefaultTokensToggeable, $enabledErc20UserTokens]) => [
 		...$erc20DefaultTokensToggeable,
