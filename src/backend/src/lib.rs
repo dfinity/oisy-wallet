@@ -395,9 +395,9 @@ fn set_user_token(token: UserToken) {
     assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
     assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
 
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
-
     let addr = parse_eth_address(&token.contract_address);
+
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &UserToken| {
         t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
