@@ -160,7 +160,7 @@ export const findSnses = async () => {
 				rootCanisterId: root_canister_id,
 				metadata: {
 					...mapOptionalToken(icrc1_metadata),
-					alternativeName,
+					alternativeName: alternativeName.trim(),
 					url
 				}
 			})
