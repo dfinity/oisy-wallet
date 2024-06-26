@@ -7,9 +7,9 @@ import { enabledBitcoinNetworks } from '../../btc/derived/networks.derived';
 export const networks: Readable<Network[]> = derived(
 	[enabledBitcoinNetworks, enabledEthereumNetworks],
 	([$enabledBitcoinNetworks, $enabledEthereumNetworks]) => [
-		...$enabledBitcoinNetworks,
+		ICP_NETWORK,
 		...$enabledEthereumNetworks,
-		ICP_NETWORK
+		...$enabledBitcoinNetworks
 	]
 );
 
