@@ -26,7 +26,7 @@ export const initCertifiedErc20UserTokensStore = (): CertifiedErc20UserTokensSto
 						// However, this approach presents a challenge with ERC20 tokens, which need to be loaded twice - once with a query and once with an update. When they are loaded the second time, the existing Symbol should be reused to ensure they are identified as the same token.
 						id:
 							(state ?? []).find(({ data: { address } }) => address === data.address)?.data.id ??
-							Symbol(data.symbol),
+							Symbol(data.symbol)
 					}
 				}
 			]),
