@@ -43,7 +43,7 @@ const erc20UserTokensDisabledAddresses: Readable<string[]> = derived(
 
 type Erc20TokenToggeable = Erc20Token & { enabled: boolean };
 
-export const erc20DefaultTokensToggeable: Readable<Erc20TokenToggeable[]> = derived(
+export const erc20DefaultTokensToggleable: Readable<Erc20TokenToggeable[]> = derived(
 	[erc20DefaultTokens, erc20UserTokensDisabledAddresses],
 	([$erc20DefaultTokens, $erc20UserTokensDisabledAddresses]) =>
 		$erc20DefaultTokens.reduce(
@@ -63,7 +63,7 @@ export const erc20DefaultTokensToggeable: Readable<Erc20TokenToggeable[]> = deri
  * The list of default tokens that are enabled - i.e. the list of default ERC20 tokens minus those disabled by the user.
  */
 const erc20DefaultTokensEnabled: Readable<Erc20Token[]> = derived(
-	[erc20DefaultTokensToggeable],
+	[erc20DefaultTokensToggleable],
 	([$erc20DefaultTokensToggeable]) => $erc20DefaultTokensToggeable.filter(({ enabled }) => enabled)
 );
 
@@ -84,7 +84,7 @@ const erc20UserTokensEnabled: Readable<Erc20UserToken[]> = derived(
 
 // TODO: rename to erc20Tokens
 export const erc20TokensAll: Readable<Erc20Token[]> = derived(
-	[erc20DefaultTokensToggeable, erc20UserTokensEnabled],
+	[erc20DefaultTokensToggleable, erc20UserTokensEnabled],
 	([$erc20DefaultTokensToggeable, $erc20UserTokensEnabled]) => [
 		...$erc20DefaultTokensToggeable,
 		...$erc20UserTokensEnabled
