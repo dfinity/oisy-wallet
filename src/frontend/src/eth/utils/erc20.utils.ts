@@ -28,7 +28,7 @@ export const mapErc20UserToken = ({
 	name,
 	...rest
 }: MapErc20TokenParams & Erc20UserTokenState): Erc20UserToken => ({
-	id: id ?? Symbol(symbol),
+	id: id ?? Symbol(`user-token#${symbol}`),
 	standard: 'erc20',
 	name,
 	symbol,
