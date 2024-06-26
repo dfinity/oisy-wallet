@@ -6,7 +6,7 @@ import { writable, type Readable } from 'svelte/store';
 export type CertifiedErc20UserTokensData = CertifiedData<Erc20UserToken>[] | undefined | null;
 
 export interface CertifiedErc20UserTokensStore extends Readable<CertifiedErc20UserTokensData> {
-	set: (token: CertifiedData<Omit<Erc20UserToken, 'id'>>) => void;
+	set: (token: CertifiedData<Erc20UserToken>) => void;
 	reset: (tokenId: TokenId) => void;
 	clear: () => void;
 }
@@ -15,7 +15,7 @@ export const initCertifiedErc20UserTokensStore = (): CertifiedErc20UserTokensSto
 	const { subscribe, update, set } = writable<CertifiedErc20UserTokensData>(undefined);
 
 	return {
-		set: ({ data, certified }: CertifiedData<Omit<Erc20UserToken, 'id'>>) =>
+		set: ({ data, certified }: CertifiedData<Erc20UserToken>) =>
 			update((state) => [
 				...(state ?? []).filter(({ data: { address } }) => address !== data.address),
 				{
@@ -26,7 +26,7 @@ export const initCertifiedErc20UserTokensStore = (): CertifiedErc20UserTokensSto
 						// However, this approach presents a challenge with ERC20 tokens, which need to be loaded twice - once with a query and once with an update. When they are loaded the second time, the existing Symbol should be reused to ensure they are identified as the same token.
 						id:
 							(state ?? []).find(({ data: { address } }) => address === data.address)?.data.id ??
-							Symbol(data.symbol)
+							data.id
 					}
 				}
 			]),
