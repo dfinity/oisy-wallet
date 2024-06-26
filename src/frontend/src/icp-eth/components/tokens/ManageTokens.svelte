@@ -52,10 +52,6 @@
 	// The entire list of tokens to display to the user.
 	let allIcrcTokens: IcrcCustomToken[] = [];
 	$: allIcrcTokens = [
-		{
-			...ICP_TOKEN,
-			enabled: true
-		},
 		...$icrcDefaultTokens.map((token) => ({ ...token, enabled: true })),
 		...$icrcCustomTokens,
 		...icrcEnvTokens.filter(
@@ -63,11 +59,8 @@
 		)
 	].sort(sortIcTokens);
 
-	let allEthereumTokens: EthereumUserToken[] = [];
-	$: allEthereumTokens = [
-		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-		...$erc20Tokens
-	];
+	let allErc20Tokens: EthereumUserToken[] = [];
+	$: allErc20Tokens = $erc20Tokens;
 
 	let manageIcTokens = false;
 	$: manageIcTokens = $pseudoNetworkChainFusion || $networkICP;
@@ -78,7 +71,12 @@
 	// TODO: Bitcoin tokens ($enabledBitcoinTokens) are not included yet.
 	let allTokens: Token[] = [];
 	$: allTokens = [
-		...(manageEthereumTokens ? allEthereumTokens : []),
+		{
+			...ICP_TOKEN,
+			enabled: true
+		},
+		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
+		...(manageEthereumTokens ? allErc20Tokens : []),
 		...(manageIcTokens ? allIcrcTokens : [])
 	].filter(({ id: tokenId }) =>
 		$networkTokens.some(({ id: networkTokenId }) => tokenId === networkTokenId)
