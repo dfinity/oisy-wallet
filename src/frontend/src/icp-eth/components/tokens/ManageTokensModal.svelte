@@ -8,7 +8,6 @@
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { authStore } from '$lib/stores/auth.store';
-	import { saveIcrcCustomToken } from '$icp/services/ic-custom-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import AddTokenByNetwork from '$icp-eth/components/tokens/AddTokenByNetwork.svelte';
@@ -23,6 +22,8 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { get } from 'svelte/store';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+	import { saveIcrcCustomTokens } from '$icp-eth/services/manage-tokens.services';
+	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 
 	const steps: WizardSteps = [
 		{
@@ -62,7 +63,7 @@
 		}
 
 		await Promise.allSettled([
-			...(icrc.length > 0 ? [save(icrc)] : []),
+			...(icrc.length > 0 ? [saveIcrc(icrc)] : []),
 			// TODO: erc20 save
 			...(erc20.length > 0 ? [] : [])
 		]);
@@ -83,7 +84,7 @@
 			return;
 		}
 
-		await save([
+		await saveIcrc([
 			{
 				enabled: true,
 				ledgerCanisterId,
@@ -107,10 +108,8 @@
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
-	const save = async (
-		tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[]
-	) => {
-		await saveIcrcCustomToken({
+	const saveIcrc = (tokens: SaveCustomToken[]): Promise<void> =>
+		saveIcrcCustomTokens({
 			tokens,
 			progress,
 			modalNext: () => modal.set(3),
@@ -118,7 +117,6 @@
 			onError: () => modal.set(0),
 			identity: $authStore.identity
 		});
-	};
 
 	const close = () => {
 		modalStore.close();
