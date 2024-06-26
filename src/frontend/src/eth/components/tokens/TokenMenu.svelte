@@ -7,7 +7,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
+	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { fade } from 'svelte/transition';
 	import { token } from '$lib/stores/token.store';
 
@@ -21,7 +21,7 @@
 </script>
 
 <TokenMenu>
-	{#if nonNullish(explorerUrl) && $erc20TokensInitialized}
+	{#if nonNullish(explorerUrl) && $erc20UserTokensInitialized}
 		<div in:fade>
 			<ExternalLink
 				href={explorerUrl}

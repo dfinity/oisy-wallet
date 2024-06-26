@@ -6,7 +6,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { tokenCategory } from '$lib/derived/token.derived';
-	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import { token } from '$lib/stores/token.store';
 
@@ -38,8 +38,8 @@
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.tokens.alt.context_menu}
-	disabled={$erc20TokensNotInitialized}
-	class:opacity-10={$erc20TokensNotInitialized}
+	disabled={$erc20UserTokensNotInitialized}
+	class:opacity-10={$erc20UserTokensNotInitialized}
 >
 	<IconMore />
 </button>
