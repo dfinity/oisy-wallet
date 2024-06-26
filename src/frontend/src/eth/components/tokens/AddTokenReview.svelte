@@ -5,13 +5,13 @@
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import { isNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { erc20TokensStore } from '$eth/stores/erc20.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import type { Network } from '$lib/types/network';
+	import { erc20UserTokens } from '$eth/derived/erc20.derived';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
@@ -37,7 +37,7 @@
 		}
 
 		if (
-			$erc20TokensStore?.find(
+			$erc20UserTokens?.find(
 				({ address }) => address.toLowerCase() === contractAddress?.toLowerCase()
 			) !== undefined
 		) {
@@ -63,7 +63,7 @@
 			}
 
 			if (
-				$erc20TokensStore?.find(
+				$erc20UserTokens?.find(
 					({ symbol, name }) =>
 						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
 						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
