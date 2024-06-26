@@ -75,14 +75,13 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	]
 );
 
-// TODO: rename to erc20UserTokensInitialized
-export const erc20TokensInitialized: Readable<boolean> = derived(
+export const erc20UserTokensInitialized: Readable<boolean> = derived(
 	[erc20UserTokensStore],
 	([$erc20UserTokensStore]) => nonNullish($erc20UserTokensStore)
 );
 
-export const erc20TokensNotInitialized: Readable<boolean> = derived(
-	[erc20TokensInitialized],
+export const erc20UserTokensNotInitialized: Readable<boolean> = derived(
+	[erc20UserTokensInitialized],
 	([$erc20TokensInitialized]) => !$erc20TokensInitialized
 );
 
