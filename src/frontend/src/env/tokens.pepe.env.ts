@@ -4,7 +4,7 @@ import pepe from '$icp-eth/assets/pepe.svg';
 
 export const PEPE_DECIMALS = 18;
 
-export const PEPE_SYMBOL = 'LINK';
+export const PEPE_SYMBOL = 'PEPE';
 
 export const PEPE_TOKEN_ID: unique symbol = Symbol(PEPE_SYMBOL);
 
@@ -14,7 +14,7 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: 'Pepe',
-	symbol: 'PEPE',
+	symbol: PEPE_SYMBOL,
 	decimals: PEPE_DECIMALS,
 	icon: pepe,
 	address: '0x6982508145454Ce325dDbE47a25d4ec3d2311933',
@@ -32,7 +32,7 @@ export const SEPOLIA_PEPE_TOKEN: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: 'Pepe',
-	symbol: 'PEPE',
+	symbol: PEPE_SYMBOL,
 	decimals: PEPE_DECIMALS,
 	icon: pepe,
 	address: '0x560eF9F39E4B08f9693987cad307f6FBfd97B2F6',
