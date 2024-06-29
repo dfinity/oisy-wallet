@@ -97,14 +97,18 @@ export const icrcTokens: Readable<IcToken[]> = derived(
 	]
 );
 
+/**
+ * The list of Icrc tokens that are either enabled by default (static config) or enabled by the users regardless if they are custom or default.
+ */
 export const enabledIcrcTokens: Readable<IcToken[]> = derived(
-	[icrcDefaultTokens, enabledIcrcCustomTokens],
-	([$icrcDefaultTokens, $icrcCustomTokensEnabled]) => [
-		...$icrcDefaultTokens,
-		...$icrcCustomTokensEnabled
+	[enabledIcrcDefaultTokens, enabledIcrcCustomTokens],
+	([$enabledIcrcDefaultTokens, $enabledIcrcCustomTokens]) => [
+		...$enabledIcrcDefaultTokens,
+		...$enabledIcrcCustomTokens
 	]
 );
 
-export const sortedIcrcTokens: Readable<IcToken[]> = derived([icrcTokens], ([$icrcTokens]) =>
-	$icrcTokens.sort(sortIcTokens)
+export const sortedIcrcTokens: Readable<IcToken[]> = derived(
+	[enabledIcrcTokens],
+	([$enabledIcrcTokens]) => $enabledIcrcTokens.sort(sortIcTokens)
 );
