@@ -1,5 +1,5 @@
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import { icrcTokensStore } from '$icp/stores/icrc.store';
+import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
@@ -8,7 +8,7 @@ import { testnets } from '$lib/derived/testnets.derived';
 import { derived, type Readable } from 'svelte/store';
 
 export const icrcDefaultTokens: Readable<IcToken[]> = derived(
-	[icrcTokensStore, testnets],
+	[icrcDefaultTokensStore, testnets],
 	([$icrcTokensStore, $testnets]) =>
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
 			(token) => $testnets || !isTokenIcrcTestnet(token)
