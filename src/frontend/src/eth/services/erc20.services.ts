@@ -8,7 +8,6 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
-import type { Erc20UserTokenState } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
@@ -17,6 +16,7 @@ import { listUserTokens } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { UserTokenState } from '$lib/types/token-toggleable';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -89,7 +89,7 @@ const loadErc20UserTokens = async (params: {
 		Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
 		Partial<Pick<Erc20Token, 'id'>>;
 
-	type ContractDataWithCustomToken = ContractData & Erc20UserTokenState;
+	type ContractDataWithCustomToken = ContractData & UserTokenState;
 
 	const loadUserContracts = async (): Promise<Promise<ContractDataWithCustomToken>[]> => {
 		const contracts = await listUserTokens(params);
