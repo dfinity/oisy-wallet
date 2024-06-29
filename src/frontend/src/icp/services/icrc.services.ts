@@ -3,7 +3,7 @@ import { ICRC_TOKENS } from '$env/networks.icrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import { icrcTokensStore } from '$icp/stores/icrc.store';
+import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcInterface } from '$icp/types/ic';
 import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
 import {
@@ -49,7 +49,7 @@ const loadDefaultIcrc = (data: IcInterface): Promise<void> =>
 		request: (params) => requestIcrcMetadata({ ...params, ...data, category: 'default' }),
 		onLoad: loadIcrcData,
 		onCertifiedError: ({ error: err }) => {
-			icrcTokensStore.reset(data.ledgerCanisterId);
+			icrcDefaultTokensStore.reset(data.ledgerCanisterId);
 
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
@@ -80,7 +80,7 @@ const loadIcrcData = ({
 }) => {
 	const data = mapIcrcToken(token);
 	// In the unlikely event of a token not being mapped, we choose to skip it instead of throwing an error. This prevents the token from being displayed and, consequently, from being noticed as missing by the user.
-	nonNullish(data) && icrcTokensStore.set({ data, certified });
+	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
 const loadIcrcCustomTokens = async (params: {
