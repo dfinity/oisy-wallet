@@ -41,6 +41,7 @@ export const saveCustomTokens = async ({
 
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
+	// TODO: this is renamed in this PR but, it's actually a bug. That should be icrcCustomTokensStore
 	disabledTokens.forEach(({ ledgerCanisterId }) => icrcDefaultTokensStore.reset(ledgerCanisterId));
 
 	// Reload all custom tokens for simplicity reason.
