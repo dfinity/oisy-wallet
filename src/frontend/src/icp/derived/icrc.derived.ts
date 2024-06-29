@@ -81,16 +81,19 @@ const icrcCustomTokensToggleable: Readable<IcrcCustomToken[]> = derived(
 		)
 );
 
-const icrcCustomTokensEnabled: Readable<IcrcCustomToken[]> = derived(
+const enabledIcrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokens],
 	([$icrcCustomTokens]) => $icrcCustomTokens.filter(({ enabled }) => enabled)
 );
 
+/**
+ * The list of all Icrc tokens.
+ */
 export const icrcTokens: Readable<IcToken[]> = derived(
-	[icrcDefaultTokens, icrcCustomTokensEnabled],
-	([$icrcDefaultTokens, $icrcCustomTokensEnabled]) => [
-		...$icrcDefaultTokens,
-		...$icrcCustomTokensEnabled
+	[icrcDefaultTokensToggleable, icrcCustomTokensToggleable],
+	([$icrcDefaultTokensToggleable, $icrcCustomTokensToggleable]) => [
+		...$icrcDefaultTokensToggleable,
+		...$icrcCustomTokensToggleable
 	]
 );
 
