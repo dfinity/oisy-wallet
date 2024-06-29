@@ -5,7 +5,7 @@
 	import type { IcToken } from '$icp/types/ic';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { CKERC20_TO_ERC20_MAX_TRANSACTION_FEE } from '$icp/constants/cketh.constants';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
@@ -33,7 +33,7 @@
 		: undefined;
 
 	let tokenCkEth: IcToken | undefined;
-	$: tokenCkEth = $icrcTokens.find(isTokenCkEthLedger);
+	$: tokenCkEth = $enabledIcrcTokens.find(isTokenCkEthLedger);
 
 	let maxTransactionFeePlusEthLedgerApprove: bigint | undefined = undefined;
 	$: maxTransactionFeePlusEthLedgerApprove = nonNullish(maxTransactionFeeEth)
