@@ -23,7 +23,7 @@ export const buildIndexedIcrcCustomTokens = (): Record<
 		{}
 	);
 
-export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
+const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 	try {
 		const tokens = icrcEnvTokens
 			.parse(

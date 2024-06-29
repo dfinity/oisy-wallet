@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { IconClose, Input } from '@dfinity/gix-components';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,12 +10,10 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { fade } from 'svelte/transition';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
-	import { icrcCustomTokens, icrcDefaultTokens } from '$icp/derived/icrc.derived';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
-	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { ICP_TOKEN } from '$env/tokens.env';
-	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
+	import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Token } from '$lib/types/token';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
@@ -34,30 +32,9 @@
 
 	const dispatch = createEventDispatcher();
 
-	// The list of Icrc tokens initialized as environments variables
-	let icrcEnvTokens: IcrcCustomToken[] = [];
-	onMount(() => {
-		const tokens = buildIcrcCustomTokens();
-		icrcEnvTokens =
-			tokens?.map((token) => ({ ...token, id: Symbol(token.symbol), enabled: false })) ?? [];
-	});
-
-	// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
-	let knownLedgerCanisterIds: LedgerCanisterIdText[] = [];
-	$: knownLedgerCanisterIds = [
-		...$icrcDefaultTokens.map(({ ledgerCanisterId }) => ledgerCanisterId),
-		...$icrcCustomTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
-	];
-
 	// The entire list of tokens to display to the user.
 	let allIcrcTokens: IcrcCustomToken[] = [];
-	$: allIcrcTokens = [
-		...$icrcDefaultTokens.map((token) => ({ ...token, enabled: true })),
-		...$icrcCustomTokens,
-		...icrcEnvTokens.filter(
-			({ ledgerCanisterId }) => !knownLedgerCanisterIds.includes(ledgerCanisterId)
-		)
-	].sort(sortIcTokens);
+	$: allIcrcTokens = $icrcTokens;
 
 	let allErc20Tokens: EthereumUserToken[] = [];
 	$: allErc20Tokens = $erc20Tokens;
