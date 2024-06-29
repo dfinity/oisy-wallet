@@ -1,4 +1,6 @@
-import type { TokenStandard } from '$lib/types/token';
+import type { Token, TokenStandard } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
+import { isNullish } from '@dfinity/utils';
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -25,3 +27,15 @@ export const getMaxTransactionAmount = ({
 		Math.max(Number(balance - (tokenStandard !== 'erc20' ? fee : 0n)), 0) / 10 ** tokenDecimals
 	);
 };
+
+export const mapDefaultTokenToToggleable = <T extends Token>({
+	defaultToken,
+	userToken
+}: {
+	defaultToken: T;
+	userToken: TokenToggleable<T> | undefined;
+}): TokenToggleable<T> => ({
+	...defaultToken,
+	enabled: isNullish(userToken) || userToken.enabled,
+	version: userToken?.version
+});
