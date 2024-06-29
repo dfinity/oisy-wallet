@@ -1,10 +1,12 @@
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnets } from '$lib/derived/testnets.derived';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -25,6 +27,25 @@ export const icrcDefaultTokens: Readable<IcToken[]> = derived(
 export const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokensStore],
 	([$icrcCustomTokensStore]) => $icrcCustomTokensStore?.map(({ data: token }) => token) ?? []
+);
+
+const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
+	[icrcDefaultTokens, icrcCustomTokens],
+	([$icrcDefaultTokens, $icrcUserTokens]) =>
+		$icrcDefaultTokens.map(({ ledgerCanisterId, indexCanisterId, ...rest }) => {
+			const userToken = $icrcUserTokens.find(
+				({ ledgerCanisterId: userLedgerCanisterId, indexCanisterId: userIndexCanisterId }) =>
+					userLedgerCanisterId === ledgerCanisterId && userIndexCanisterId === indexCanisterId
+			);
+
+			return {
+				ledgerCanisterId,
+				indexCanisterId,
+				...rest,
+				enabled: isNullish(userToken) || userToken.enabled,
+				version: userToken?.version
+			};
+		})
 );
 
 const icrcCustomTokensEnabled: Readable<IcrcCustomToken[]> = derived(
