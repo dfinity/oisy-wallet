@@ -15,6 +15,7 @@
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
 	import { token } from '$lib/stores/token.store';
+	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -33,7 +34,11 @@
 		: undefined;
 
 	let tokenCkEth: IcToken | undefined;
-	$: tokenCkEth = $enabledIcrcTokens.find(isTokenCkEthLedger);
+	$: tokenCkEth = $enabledIcrcTokens
+		.filter(isTokenCkEthLedger)
+		.find(
+			(tokenCkEth) => isTokenIcrcTestnet(tokenCkEth ?? {}) === isTokenIcrcTestnet($token ?? {})
+		);
 
 	let maxTransactionFeePlusEthLedgerApprove: bigint | undefined = undefined;
 	$: maxTransactionFeePlusEthLedgerApprove = nonNullish(maxTransactionFeeEth)
