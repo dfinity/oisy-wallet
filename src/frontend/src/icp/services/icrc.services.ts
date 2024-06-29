@@ -89,14 +89,8 @@ const loadIcrcCustomTokens = async (params: {
 }): Promise<IcrcCustomTokenWithoutId[]> => {
 	const tokens = await listCustomTokens(params);
 
-	const icrcDefaultLedgerIds = ICRC_TOKENS.map(({ ledgerCanisterId }) => ledgerCanisterId);
-
-	// We filter the custom tokens that are enabled and Icrc, but also not part of the default tokens of Oisy.
-	// For example, and for some reason, a user might manually add the ckBTC ledger and index canister again to their list of tokens.
-	// Not an issue per se, but given that the list of tokens is sorted, one token might move, which equals a visual glitch.
-	const icrcTokens = tokens.filter(
-		({ token }) => 'Icrc' in token && !icrcDefaultLedgerIds.includes(token.Icrc.ledger_id.toText())
-	);
+	// We filter the custom tokens that are Icrc (the backend "Custom Token" potentially supports other types).
+	const icrcTokens = tokens.filter(({ token }) => 'Icrc' in token);
 
 	return await loadCustomIcrcTokensData({
 		tokens: icrcTokens,

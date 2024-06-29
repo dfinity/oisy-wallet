@@ -7,6 +7,9 @@ import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnets } from '$lib/derived/testnets.derived';
 import { derived, type Readable } from 'svelte/store';
 
+/**
+ * The list of Icrc default tokens - i.e. the statically configured Icrc tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
+ */
 export const icrcDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcDefaultTokensStore, testnets],
 	([$icrcTokensStore, $testnets]) =>
@@ -15,6 +18,10 @@ export const icrcDefaultTokens: Readable<IcToken[]> = derived(
 		)
 );
 
+/**
+ * The list of Icrc tokens the user has added, enabled or disabled. Can contains default tokens for example if user has disabled a default tokens.
+ * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "custom token" in the backend.
+ */
 export const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
 	[icrcCustomTokensStore],
 	([$icrcCustomTokensStore]) => $icrcCustomTokensStore?.map(({ data: token }) => token) ?? []
