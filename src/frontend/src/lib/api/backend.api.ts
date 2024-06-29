@@ -1,9 +1,4 @@
-import type {
-	CustomToken,
-	SignRequest,
-	UserToken,
-	UserTokenId
-} from '$declarations/backend/backend.did';
+import type { CustomToken, SignRequest, UserToken } from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -48,34 +43,11 @@ export const signPrehash = async ({
 	return sign_prehash(hash);
 };
 
-export const addUserToken = async ({
-	token,
-	identity
-}: {
-	token: UserToken;
-	identity: Identity;
-}): Promise<void> => {
-	const { add_user_token } = await getBackendActor({ identity });
-	return add_user_token(token);
-};
-
-export const removeUserToken = async ({
-	tokenId,
-	identity
-}: {
-	tokenId: UserTokenId;
-	identity: Identity;
-}): Promise<void> => {
-	const { remove_user_token } = await getBackendActor({ identity });
-	return remove_user_token(tokenId);
-};
-
 export const listUserTokens = async ({
-	identity
-}: {
-	identity: Identity;
-}): Promise<UserToken[]> => {
-	const { list_user_tokens } = await getBackendActor({ identity });
+	identity,
+	certified = true
+}: { identity: OptionIdentity } & QueryParams): Promise<UserToken[]> => {
+	const { list_user_tokens } = await getBackendActor({ identity, certified });
 	return list_user_tokens();
 };
 
@@ -107,4 +79,26 @@ export const setCustomToken = async ({
 }): Promise<void> => {
 	const { set_custom_token } = await getBackendActor({ identity });
 	return set_custom_token(token);
+};
+
+export const setManyUserTokens = async ({
+	tokens,
+	identity
+}: {
+	tokens: UserToken[];
+	identity: Identity;
+}): Promise<void> => {
+	const { set_many_user_tokens } = await getBackendActor({ identity });
+	return set_many_user_tokens(tokens);
+};
+
+export const setUserToken = async ({
+	token,
+	identity
+}: {
+	token: UserToken;
+	identity: Identity;
+}): Promise<void> => {
+	const { set_user_token } = await getBackendActor({ identity });
+	return set_user_token(token);
 };

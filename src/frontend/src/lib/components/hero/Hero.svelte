@@ -2,7 +2,7 @@
 	import Actions from '$lib/components/hero/Actions.svelte';
 	import HeaderHero from '$lib/components/layout/HeaderHero.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
-	import { erc20TokensInitialized } from '$eth/derived/erc20.derived';
+	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { fade, slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -25,7 +25,7 @@
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
 
 	let displayTokenSymbol = false;
-	$: displayTokenSymbol = summary && $erc20TokensInitialized;
+	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
 </script>
 
 <div class={`hero ${background}`}>
