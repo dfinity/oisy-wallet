@@ -1,8 +1,10 @@
+use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
+use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
 use ic_cdk::api::management_canister::ecdsa::{
@@ -28,6 +30,7 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
 
+mod assertions;
 mod guards;
 mod token;
 
@@ -64,6 +67,10 @@ pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
     STATE.with(|cell| f(&mut cell.borrow_mut()))
 }
 
+/// Reads the internal canister configuration, normally set at canister install or upgrade.
+///
+/// # Panics
+/// - If the config is not initialized.
 pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     read_state(|state| {
         f(state
@@ -170,14 +177,20 @@ fn post_upgrade(_: Option<Arg>) {
             .get()
             .as_ref()
             .expect("config is not initialized: reinstall the canister instead of upgrading");
-    })
+    });
 }
 
 /// Processes external HTTP requests.
 #[query]
+#[allow(clippy::needless_pass_by_value)]
+#[must_use]
 pub fn http_request(request: HttpRequest) -> HttpResponse {
-    let parts: Vec<&str> = request.url.split('?').collect();
-    match parts[0] {
+    let path = request
+        .url
+        .split('?')
+        .next()
+        .unwrap_or_else(|| unreachable!("Even splitting an empty string yields one entry"));
+    match path {
         "/metrics" => get_metrics(),
         _ => HttpResponse {
             status_code: 404,
@@ -303,7 +316,7 @@ async fn sign_transaction(req: SignRequest) -> String {
         value: Some(nat_to_u256(&req.value)),
         nonce: Some(nat_to_u256(&req.nonce)),
         data,
-        access_list: Default::default(),
+        access_list: AccessList::default(),
         max_priority_fee_per_gas: Some(nat_to_u256(&req.max_priority_fee_per_gas)),
         max_fee_per_gas: Some(nat_to_u256(&req.max_fee_per_gas)),
     };
@@ -346,7 +359,9 @@ async fn personal_sign(plaintext: String) -> String {
     let (pubkey, mut signature) = pubkey_and_signature(&caller, msg_hash.to_vec()).await;
 
     let v = y_parity(&msg_hash, &signature, &pubkey);
-    signature.push(v as u8);
+    signature.push(u8::try_from(v).unwrap_or_else(|_| {
+        unreachable!("The value should be one bit, so should easily fit into a byte")
+    }));
     format!("0x{}", hex::encode(&signature))
 }
 
@@ -360,22 +375,28 @@ async fn sign_prehash(prehash: String) -> String {
     let (pubkey, mut signature) = pubkey_and_signature(&caller, hash_bytes.to_vec()).await;
 
     let v = y_parity(&hash_bytes, &signature, &pubkey);
-    signature.push(v as u8);
+    signature.push(u8::try_from(v).unwrap_or_else(|_| {
+        unreachable!("The value should be just one bit, so should fit easily into a byte")
+    }));
     format!("0x{}", hex::encode(&signature))
 }
 
 /// Adds a new token to the user.
+#[deprecated(since = "0.0.4", note = "Use set_user_token")]
 #[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
 fn add_user_token(token: UserToken) {
+    set_user_token(token);
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
+fn set_user_token(token: UserToken) {
+    assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
+    assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
+
     let addr = parse_eth_address(&token.contract_address);
 
-    if let Some(symbol) = token.symbol.as_ref() {
-        if symbol.len() > MAX_SYMBOL_LENGTH {
-            ic_cdk::trap(&format!(
-                "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
-            ));
-        }
-    }
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     let find = |t: &UserToken| {
@@ -386,6 +407,31 @@ fn add_user_token(token: UserToken) {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
+fn set_many_user_tokens(tokens: Vec<UserToken>) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        for token in tokens {
+            assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
+            assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
+
+            let addr = parse_eth_address(&token.contract_address);
+
+            let find = |t: &UserToken| {
+                t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
+            };
+
+            add_to_user_token(stored_principal, &mut s.user_token, &token, &find);
+        }
+    });
+}
+
+#[deprecated(
+    since = "0.0.4",
+    note = "Tokens are deleted anymore. Use set_user_token to disable token."
+)]
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
 fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -405,6 +451,7 @@ fn list_user_tokens() -> Vec<UserToken> {
 
 /// Add, remove or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
 fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -425,7 +472,7 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
                 CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
             };
 
-            add_to_user_token(stored_principal, &mut s.custom_token, &token, &find)
+            add_to_user_token(stored_principal, &mut s.custom_token, &token, &find);
         }
     });
 }
@@ -453,7 +500,7 @@ fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
         let recovered_key = VerifyingKey::recover_from_prehash(prehash, &signature, recid)
             .expect("failed to recover key");
         if recovered_key == orig_key {
-            return parity as u64;
+            return u64::from(parity);
         }
     }
 

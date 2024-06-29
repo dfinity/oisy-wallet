@@ -86,6 +86,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		erc20_user_tokens: string;
 		loading_wallet_timeout: string;
 	};
 }
@@ -299,7 +300,7 @@ interface I18nTokens {
 			network: string;
 		};
 		placeholder: { select_network: string };
-		info: { outdated_index_canister: string };
+		info: { outdated_index_canister: string; no_changes: string };
 		error: { unexpected_build: string; empty: string };
 	};
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
@@ -320,7 +321,7 @@ interface I18nTokens {
 		unexpected_hiding: string;
 		already_available: string;
 		loading_metadata: string;
-		not_custom: string;
+		not_toggleable: string;
 		incomplete_metadata: string;
 		duplicate_metadata: string;
 		unexpected_undefined: string;
