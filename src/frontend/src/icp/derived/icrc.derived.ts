@@ -6,7 +6,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnets } from '$lib/derived/testnets.derived';
-import { isNullish } from '@dfinity/utils';
+import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -38,13 +38,14 @@ const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
 					userLedgerCanisterId === ledgerCanisterId && userIndexCanisterId === indexCanisterId
 			);
 
-			return {
-				ledgerCanisterId,
-				indexCanisterId,
-				...rest,
-				enabled: isNullish(userToken) || userToken.enabled,
-				version: userToken?.version
-			};
+			return mapDefaultTokenToToggleable({
+				defaultToken: {
+					ledgerCanisterId,
+					indexCanisterId,
+					...rest
+				},
+				userToken
+			});
 		})
 );
 
