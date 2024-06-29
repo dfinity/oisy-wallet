@@ -1,5 +1,5 @@
 import { loadCustomTokens } from '$icp/services/icrc.services';
-import { icrcTokensStore } from '$icp/stores/icrc.store';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -41,7 +41,7 @@ export const saveCustomTokens = async ({
 
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
-	disabledTokens.forEach(({ ledgerCanisterId }) => icrcTokensStore.reset(ledgerCanisterId));
+	disabledTokens.forEach(({ ledgerCanisterId }) => icrcCustomTokensStore.reset(ledgerCanisterId));
 
 	// Reload all custom tokens for simplicity reason.
 	await loadCustomTokens({ identity });

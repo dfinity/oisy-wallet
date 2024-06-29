@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { loadCkEthMinterInfo } from '$icp-eth/services/cketh.services';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
-	import { icrcTokensStore } from '$icp/stores/icrc.store';
+	import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 	import {
 		IC_CKETH_MINTER_CANISTER_ID,
 		LOCAL_CKETH_MINTER_CANISTER_ID,
@@ -51,7 +51,7 @@
 
 	$: $ethToCkETHEnabled,
 		$erc20ToCkErc20Enabled,
-		$icrcTokensStore,
+		$icrcDefaultTokensStore,
 		nativeTokenId,
 		(async () => await load())();
 </script>
