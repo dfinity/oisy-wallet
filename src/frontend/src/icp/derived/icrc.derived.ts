@@ -33,6 +33,7 @@ export const enabledIcrcTokens: Readable<IcToken[]> = derived(
 	]
 );
 
-export const sortedEnabledIcrcTokens: Readable<IcToken[]> = derived([enabledIcrcTokens], ([$enabledIcrcTokens]) =>
-	$enabledIcrcTokens.sort(sortIcTokens)
+export const sortedEnabledIcrcTokens: Readable<IcToken[]> = derived(
+	[enabledIcrcTokens],
+	([$enabledIcrcTokens]) => $enabledIcrcTokens.sort(sortIcTokens)
 );
