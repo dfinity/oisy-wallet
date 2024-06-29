@@ -13,7 +13,7 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -33,7 +33,7 @@
 			ledgerCanisterId,
 			indexCanisterId,
 			identity: $authStore.identity,
-			icrcTokens: $icrcTokens
+			icrcTokens: $enabledIcrcTokens
 		});
 
 		if (result === 'error' || isNullish(data)) {

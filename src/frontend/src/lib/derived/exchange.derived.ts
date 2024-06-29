@@ -1,7 +1,7 @@
 import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
-import { icrcTokens } from '$icp/derived/icrc.derived';
+import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcCkToken } from '$icp/types/ic';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -13,7 +13,7 @@ export const exchangeInitialized: Readable<boolean> = derived([exchangeStore], (
 );
 
 export const exchanges: Readable<ExchangesData> = derived(
-	[exchangeStore, enabledErc20Tokens, icrcTokens],
+	[exchangeStore, enabledErc20Tokens, enabledIcrcTokens],
 	([$exchangeStore, $erc20Tokens, $icrcTokens]) => {
 		const ethPrice = $exchangeStore?.ethereum;
 		const btcPrice = $exchangeStore?.bitcoin;
