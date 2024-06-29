@@ -1,5 +1,5 @@
 import { loadCustomTokens } from '$icp/services/icrc.services';
-import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setManyCustomTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -41,8 +41,7 @@ export const saveCustomTokens = async ({
 
 	// Hide tokens that have been disabled
 	const disabledTokens = tokens.filter(({ enabled }) => !enabled);
-	// TODO: this is renamed in this PR but, it's actually a bug. That should be icrcCustomTokensStore
-	disabledTokens.forEach(({ ledgerCanisterId }) => icrcDefaultTokensStore.reset(ledgerCanisterId));
+	disabledTokens.forEach(({ ledgerCanisterId }) => icrcCustomTokensStore.reset(ledgerCanisterId));
 
 	// Reload all custom tokens for simplicity reason.
 	await loadCustomTokens({ identity });
