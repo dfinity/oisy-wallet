@@ -5,7 +5,8 @@ import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -45,12 +46,13 @@ const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 				({ address: contractAddress }) => contractAddress === address
 			);
 
-			return {
-				address,
-				...rest,
-				enabled: isNullish(userToken) || userToken.enabled,
-				version: userToken?.version
-			};
+			return mapDefaultTokenToToggleable({
+				defaultToken: {
+					address,
+					...rest
+				},
+				userToken
+			});
 		})
 );
 
