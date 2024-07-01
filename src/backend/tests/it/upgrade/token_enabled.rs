@@ -70,7 +70,7 @@ fn test_update_user_token_after_upgrade() {
     let result = update_call::<()>(
         &pic_setup,
         caller,
-        "set_user_token",
+        "add_user_token",
         PRE_UPGRADE_TOKEN.clone(),
     );
 
