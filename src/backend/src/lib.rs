@@ -406,11 +406,10 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
         for token in tokens {
             assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
             assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
-
-            let addr = parse_eth_address(&token.contract_address);
+            parse_eth_address(&token.contract_address);
 
             let find = |t: &UserToken| {
-                t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
+                t.chain_id == token.chain_id && (t.contract_address == token.contract_address)
             };
 
             add_to_user_token(stored_principal, &mut s.user_token, &token, &find);
