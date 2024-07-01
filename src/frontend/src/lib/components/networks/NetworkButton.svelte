@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import { IconCheck } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -7,8 +6,7 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { back, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { i18n } from '$lib/stores/i18n.store';
+	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
@@ -29,15 +27,7 @@
 </script>
 
 <button class="w-full flex justify-between items-center" on:click={onClick}>
-	<div class="flex gap-2 items-center">
-		<Logo
-			src={icon}
-			alt={replacePlaceholders($i18n.core.alt.logo, {
-				$name: name
-			})}
-		/>
-		<span>{name}</span>
-	</div>
+	<TextWithLogo {name} {icon} logo="start" />
 
 	{#if id === $networkId}
 		<span in:fade><IconCheck size="20px" /></span>
