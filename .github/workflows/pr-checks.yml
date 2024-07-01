@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TITLE: ${{ github.event.pull_request.title }}
+    steps:
       - name: 'Check PR Title'
         run: |
           if [[ "$TITLE" =~ ^(feat|fix|chore|build|ci|docs|style|refactor|perf|test)(\([-a-zA-Z0-9,]+\))\!?\: ]]; then
