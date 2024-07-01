@@ -3,6 +3,7 @@
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import type { ComponentType } from 'svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ReceiveQRCode } from '$lib/types/receive';
 
 	export let infoCmp: ComponentType;
 
@@ -21,15 +22,18 @@
 	let modal: WizardModal;
 
 	let qrCodeAddress: undefined | string;
+	let qrCodeAddressLabel: undefined | string;
 
-	const displayQRCode = ({ detail: address }: CustomEvent<string>) => {
+	const displayQRCode = ({ detail: { address, addressLabel } }: CustomEvent<ReceiveQRCode>) => {
 		qrCodeAddress = address;
+		qrCodeAddressLabel = addressLabel;
 		modal.next();
 	};
 
 	const displayAddresses = () => {
 		modal.back();
 		qrCodeAddress = undefined;
+		qrCodeAddressLabel = undefined;
 	};
 </script>
 
@@ -37,7 +41,11 @@
 	<svelte:fragment slot="title">{$i18n.receive.text.receive}</svelte:fragment>
 
 	{#if currentStep?.name === steps[1].name}
-		<ReceiveAddressQRCode on:icBack={displayAddresses} address={qrCodeAddress} />
+		<ReceiveAddressQRCode
+			on:icBack={displayAddresses}
+			address={qrCodeAddress}
+			addressLabel={qrCodeAddressLabel}
+		/>
 	{:else}
 		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />
 	{/if}
