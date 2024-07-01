@@ -29,7 +29,7 @@ fn test_add_user_token() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+    let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
     assert!(result.is_ok());
 }
@@ -40,7 +40,7 @@ fn test_update_user_token() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+    let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
     assert!(result.is_ok());
 
@@ -55,7 +55,7 @@ fn test_update_user_token() {
     };
 
     let update_result =
-        update_call::<()>(&pic_setup, caller, "add_user_token", update_token.clone());
+        update_call::<()>(&pic_setup, caller, "set_user_token", update_token.clone());
 
     assert!(update_result.is_ok());
 
@@ -76,7 +76,7 @@ fn test_remove_user_token() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let add_result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+    let add_result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
     assert!(add_result.is_ok());
 
@@ -96,7 +96,7 @@ fn test_list_user_tokens() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let _ = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+    let _ = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
     let another_token: UserToken = UserToken {
         chain_id: SEPOLIA_CHAIN_ID,
@@ -107,7 +107,7 @@ fn test_list_user_tokens() {
         enabled: Some(false),
     };
 
-    let _ = update_call::<()>(&pic_setup, caller, "add_user_token", another_token.clone());
+    let _ = update_call::<()>(&pic_setup, caller, "set_user_token", another_token.clone());
 
     let results = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
 
@@ -129,7 +129,7 @@ fn test_cannot_update_user_token_without_version() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+    let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
     assert!(result.is_ok());
 
@@ -140,7 +140,7 @@ fn test_cannot_update_user_token_without_version() {
     };
 
     let update_result =
-        update_call::<()>(&pic_setup, caller, "add_user_token", update_token.clone());
+        update_call::<()>(&pic_setup, caller, "set_user_token", update_token.clone());
 
     assert!(update_result.is_err());
     assert!(update_result
@@ -154,7 +154,7 @@ fn test_cannot_update_user_token_with_invalid_version() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+    let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
     assert!(result.is_ok());
 
@@ -165,7 +165,7 @@ fn test_cannot_update_user_token_with_invalid_version() {
     };
 
     let update_result =
-        update_call::<()>(&pic_setup, caller, "add_user_token", update_token.clone());
+        update_call::<()>(&pic_setup, caller, "set_user_token", update_token.clone());
 
     assert!(update_result.is_err());
     assert!(update_result
@@ -188,7 +188,7 @@ fn test_add_user_token_symbol_max_length() {
         enabled: Some(true),
     };
 
-    let result = update_call::<()>(&pic_setup, caller, "add_user_token", token);
+    let result = update_call::<()>(&pic_setup, caller, "set_user_token", token);
 
     assert!(result.is_err());
     assert!(result
@@ -203,7 +203,7 @@ fn test_anonymous_cannot_add_user_token() {
     let result = update_call::<()>(
         &pic_setup,
         Principal::anonymous(),
-        "add_user_token",
+        "set_user_token",
         MOCK_TOKEN.clone(),
     );
 
@@ -256,7 +256,7 @@ fn test_user_cannot_list_another_user_tokens() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let _ = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
+    let _ = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
     let another_caller =
         Principal::from_text("yaa3n-twfur-6xz6e-3z7ep-xln56-222kz-w2b2m-y5wqz-vu6kk-s3fdg-lqe")
