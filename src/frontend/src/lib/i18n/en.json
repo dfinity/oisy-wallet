@@ -142,7 +142,10 @@
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users or other apps that support this address format.",
 				"use_for_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
-				"account_id_copied": "ICP Account ID copied to clipboard."
+				"account_id_copied": "ICP Account ID copied to clipboard.",
+				"icp_principal": "ICP Principal",
+				"icp_principal_copied": "ICP Principal copied to clipboard.",
+				"display_icp_principal_qr": "Display ICP Principal as a QR code"
 			}
 		},
 		"ethereum": {

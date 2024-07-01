@@ -8,6 +8,7 @@
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -15,24 +16,14 @@
 </script>
 
 <div class="stretch">
-	<div class="flex gap-8 mb-6 justify-between">
-		<Card>
-			ICP Principal
-
-			<TokenLogo slot="icon" color="white" token={ICP_TOKEN} />
-
-			<span class="break-all" slot="description">
-				{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}
-			</span>
-		</Card>
-
-		<ReceiveActions
-			on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
-			address={$icrcAccountIdentifierText ?? ''}
-			qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
-			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
-		/>
-	</div>
+	<ReceiveAddressWithLogo
+		on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
+		address={$icrcAccountIdentifierText ?? ''}
+		addressLabel={$i18n.receive.icp.text.icp_principal}
+		token={ICP_TOKEN}
+		qrCodeAriaLabel={$i18n.receive.icp.text.display_icp_principal_qr}
+		copyAriaLabel={$i18n.receive.icp.text.icp_principal_copied}
+	/>
 </div>
 
 <button class="primary full center text-center" on:click={modalStore.close}

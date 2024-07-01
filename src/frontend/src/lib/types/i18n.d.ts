@@ -126,6 +126,9 @@ interface I18nReceive {
 			use_for_deposit: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
+			icp_principal: string;
+			icp_principal_copied: string;
+			display_icp_principal_qr: string;
 		};
 	};
 	ethereum: {
