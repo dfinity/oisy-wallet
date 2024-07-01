@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import {deployIndex, deployLedger} from "./deploy.utils.mjs";
+import { deployIndex, deployLedger } from './deploy.utils.mjs';
 
 const WORDS = [
 	'Whimsical',
@@ -46,9 +46,17 @@ const randomMemecoin = {
 		decimals: 8,
 		name,
 		symbol,
-		fee: { __bigint__: '100000' }
+		fee: 100000n
 	}
 };
 
-await deployLedger(randomMemecoin);
-await deployIndex(randomMemecoin);
+const ledgerCanisterId = await deployLedger(randomMemecoin);
+
+await deployIndex({
+	...randomMemecoin,
+	ledgerCanisterId
+});
+
+console.log(
+	`✅ Memecoin ${randomMemecoin.metadata.name} (${randomMemecoin.metadata.symbol}) deployed.`
+);

@@ -121,7 +121,11 @@ const installLedger = async ({
 
 const installIndex = async ({ agent, ledgerCanisterId, indexCanisterId }) => {
 	const initArgs = {
-		ledger_id: Principal.fromText(ledgerCanisterId)
+		ledger_id:
+			ledgerCanisterId instanceof Principal
+				? ledgerCanisterId
+				: Principal.fromText(ledgerCanisterId),
+		retrieve_blocks_from_ledger_interval_seconds: []
 	};
 
 	const arg = IDL.encode(initIndex({ IDL }), [[{ Init: initArgs }]]);
@@ -139,9 +143,6 @@ const identity = await loadLocalIdentity(PEM_FILE);
 const agent = await localAgent({ identity });
 
 export const deployLedger = async ({ ledgerCanisterId: canisterId, metadata }) => {
-
-	console.log(metadata)
-
 	const ledgerCanisterId = await createCanister({ identity, canisterId, agent });
 
 	console.log(`Ledger canister ${ledgerCanisterId.toText()} created.`);
@@ -149,6 +150,8 @@ export const deployLedger = async ({ ledgerCanisterId: canisterId, metadata }) =
 	await installLedger({ agent, identity, ledgerCanisterId, metadata });
 
 	console.log(`Ledger canister ${ledgerCanisterId.toText()} installed.`);
+
+	return ledgerCanisterId;
 };
 
 export const deployIndex = async ({ ledgerCanisterId, indexCanisterId: canisterId }) => {
@@ -159,4 +162,6 @@ export const deployIndex = async ({ ledgerCanisterId, indexCanisterId: canisterI
 	await installIndex({ agent, indexCanisterId, ledgerCanisterId });
 
 	console.log(`Index canister ${indexCanisterId.toText()} installed.`);
+
+	return indexCanisterId;
 };
