@@ -1,8 +1,7 @@
 <script lang="ts">
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import { IconQRCodeScanner } from '@dfinity/gix-components';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
 
 	export let labelRef: string;
 	export let address: string;
@@ -26,15 +25,7 @@
 		<div class="flex justify-between gap-4 items-start">
 			<output id="ic-wallet-address" class="break-all">{address}</output>
 
-			<div class="flex gap-2">
-				<button
-					aria-label={qrCodeAriaLabel}
-					class="text-blue hover:text-dark-blue active:text-dark-blue"
-					on:click><IconQRCodeScanner /></button
-				>
-
-				<Copy inline value={address} text={copyAriaLabel} />
-			</div>
+			<ReceiveActions on:click {qrCodeAriaLabel} {address} {copyAriaLabel} />
 		</div>
 
 		<slot />
