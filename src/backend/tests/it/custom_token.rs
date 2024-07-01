@@ -146,7 +146,10 @@ fn test_add_many_custom_tokens(user_token: &CustomToken) {
 
     let after_set = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
 
-    let expected_tokens: Vec<CustomToken> = vec![user_token.clone_with_incremented_version(), ANOTHER_USER_TOKEN.clone_with_incremented_version()];
+    let expected_tokens: Vec<CustomToken> = vec![
+        user_token.clone_with_incremented_version(),
+        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+    ];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
