@@ -126,7 +126,8 @@ interface I18nReceive {
 			use_for_deposit: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
-			internet_computer_principal: string;
+			internet_computer: string;
+			principal: string;
 			internet_computer_principal_copied: string;
 			display_internet_computer_principal_qr: string;
 			icp_account: string;
@@ -142,6 +143,7 @@ interface I18nReceive {
 			eth_to_cketh_description: string;
 			learn_how_to_convert: string;
 			metamask: string;
+			ethereum: string;
 			ethereum_address: string;
 			ethereum_address_copied: string;
 			display_ethereum_address_qr: string;

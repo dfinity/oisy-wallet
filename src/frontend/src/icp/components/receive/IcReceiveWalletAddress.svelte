@@ -13,7 +13,11 @@
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (addressType: string) => dispatch('icQRCode', addressType);
+	const displayQRCode = (address: string) =>
+		dispatch('icQRCode', {
+			address,
+			addressLabel: $i18n.wallet.text.wallet_address
+		});
 </script>
 
 <ReceiveAddress
