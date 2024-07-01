@@ -4,9 +4,9 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type {
 	Eip1559TransactionPrice,
 	Eip1559TransactionPriceParams,
+	RetrieveErc20Request,
 	RetrieveEthRequest
 } from '@dfinity/cketh';
-import type { RetrieveErc20Request } from '@dfinity/cketh/dist/candid/minter';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
 
