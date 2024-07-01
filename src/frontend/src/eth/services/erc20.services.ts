@@ -135,5 +135,5 @@ const loadErc20UserTokenData = ({
 	certified: boolean;
 	response: Erc20UserToken[];
 }) => {
-	erc20UserTokensStore.set(tokens.map((token) => ({ data: token, certified })));
+	erc20UserTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };

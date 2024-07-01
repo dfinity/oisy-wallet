@@ -6,7 +6,7 @@ import { writable, type Readable } from 'svelte/store';
 export type CertifiedErc20UserTokensData = CertifiedData<Erc20UserToken>[] | undefined | null;
 
 export interface CertifiedErc20UserTokensStore extends Readable<CertifiedErc20UserTokensData> {
-	set: (tokens: CertifiedData<Erc20UserToken>[]) => void;
+	setAll: (tokens: CertifiedData<Erc20UserToken>[]) => void;
 	reset: (tokenId: TokenId) => void;
 	resetAll: () => void;
 }
@@ -15,7 +15,7 @@ export const initCertifiedErc20UserTokensStore = (): CertifiedErc20UserTokensSto
 	const { subscribe, update, set } = writable<CertifiedErc20UserTokensData>(undefined);
 
 	return {
-		set: (tokens: CertifiedData<Erc20UserToken>[]) =>
+		setAll: (tokens: CertifiedData<Erc20UserToken>[]) =>
 			update((state) => [
 				...(state ?? []).filter(
 					({ data: { address } }) =>
