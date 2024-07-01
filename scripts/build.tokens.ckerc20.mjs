@@ -88,7 +88,7 @@ const findCkErc20 = async () => {
 		staging
 	};
 
-	writeFileSync(join(DATA_FOLDER, 'tokens.ckerc20.json'), JSON.stringify(tokens, jsonReplacer));
+	writeFileSync(join(DATA_FOLDER, 'tokens.ckerc20.json'), JSON.stringify(tokens, jsonReplacer, 8));
 };
 
 try {
