@@ -3,8 +3,9 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Eip1559TransactionPrice, RetrieveEthRequest } from '@dfinity/cketh';
 import type { RetrieveErc20Request } from '@dfinity/cketh/dist/candid/minter';
+import type { Eip1559TransactionPriceParams } from '@dfinity/cketh/dist/types/types/minter.params';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish } from '@dfinity/utils';
 
 export const withdrawEth = async ({
 	identity,
@@ -52,7 +53,7 @@ export const eip1559TransactionPrice = async ({
 }: {
 	identity: OptionIdentity;
 	minterCanisterId: CanisterIdText;
-} & QueryParams): Promise<Eip1559TransactionPrice> => {
+} & Eip1559TransactionPriceParams): Promise<Eip1559TransactionPrice> => {
 	assertNonNullish(identity);
 
 	const { eip1559TransactionPrice } = await ckEthMinterCanister({ identity, minterCanisterId });
