@@ -1,13 +1,9 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store.js';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { createEventDispatcher } from 'svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import Card from '$lib/components/ui/Card.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import { ICP_TOKEN } from '$env/tokens.env';
-	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
 
 	const dispatch = createEventDispatcher();

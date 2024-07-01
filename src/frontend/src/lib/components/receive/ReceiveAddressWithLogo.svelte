@@ -1,8 +1,5 @@
 <script lang="ts">
-	import { ICP_TOKEN } from '$env/tokens.env.js';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils.js';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived.js';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import Card from '$lib/components/ui/Card.svelte';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
