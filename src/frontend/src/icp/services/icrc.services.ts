@@ -34,7 +34,7 @@ export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Pr
 		request: (params) => loadIcrcCustomTokens(params),
 		onLoad: loadIcrcCustomData,
 		onCertifiedError: ({ error: err }) => {
-			icrcCustomTokensStore.clear();
+			icrcCustomTokensStore.resetAll();
 
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
@@ -170,10 +170,5 @@ const loadIcrcCustomData = ({
 	certified: boolean;
 	response: IcrcCustomTokenWithoutId[];
 }) => {
-	tokens.forEach((token) =>
-		icrcCustomTokensStore.set({
-			data: token,
-			certified
-		})
-	);
+	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
