@@ -30,7 +30,7 @@
 	on:click={() => (visible = true)}
 	aria-label={$i18n.networks.title}
 >
-	<div class="w-full h-full md:w-[28px] md:h-[28px]">
+	<span class="block w-[22px] h-[22px]">
 		<Img
 			src={$selectedNetwork?.icon ?? chainFusion}
 			alt={replacePlaceholders($i18n.core.alt.logo, {
@@ -40,7 +40,7 @@
 			height="100%"
 			rounded
 		/>
-	</div>
+	</span>
 	<span class="text-black font-bold"
 		>{$selectedNetwork?.name ?? $i18n.networks.chain_fusion} <IconChevronDown /></span
 	>

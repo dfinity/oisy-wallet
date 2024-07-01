@@ -120,7 +120,7 @@ button {
 			justify-content: center;
 			align-items: center;
 
-			span {
+			span:not(.block) {
 				display: none;
 			}
 
@@ -149,7 +149,7 @@ button {
 
 	&.token {
 		border-width: 0;
-		background: transparent;
+		background: var(--color-white);
 
 		&.icon {
 			@include media.min-width(medium) {
