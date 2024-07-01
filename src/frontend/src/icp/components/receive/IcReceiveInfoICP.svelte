@@ -2,7 +2,7 @@
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
