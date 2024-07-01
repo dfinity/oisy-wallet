@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatToken } from '$lib/utils/format.utils';

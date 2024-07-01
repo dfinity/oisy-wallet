@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import IcReceiveModal from '$icp/components/receive/IcReceiveModal.svelte';
+	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
@@ -31,5 +31,5 @@
 <ReceiveButton {compact} on:click={async () => await open(openReceive)} />
 
 {#if $modalIcpReceive && $modalStore?.data === modalId}
-	<IcReceiveModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} />
+	<ReceiveAddressModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} />
 {/if}

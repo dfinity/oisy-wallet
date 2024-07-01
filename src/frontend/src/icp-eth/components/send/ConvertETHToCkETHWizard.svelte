@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { address } from '$lib/derived/address.derived';
 	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
-	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
+	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import type { Network } from '$lib/types/network';
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';

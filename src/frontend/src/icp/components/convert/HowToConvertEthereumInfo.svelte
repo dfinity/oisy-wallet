@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import { address } from '$lib/derived/address.derived';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import Value from '$lib/components/ui/Value.svelte';
