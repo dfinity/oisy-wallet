@@ -5,14 +5,6 @@ export const idlFactory = ({ IDL }) => {
 		allowed_callers: IDL.Vec(IDL.Principal)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
-	const UserToken = IDL.Record({
-		decimals: IDL.Opt(IDL.Nat8),
-		version: IDL.Opt(IDL.Nat64),
-		enabled: IDL.Opt(IDL.Bool),
-		chain_id: IDL.Nat64,
-		contract_address: IDL.Text,
-		symbol: IDL.Opt(IDL.Text)
-	});
 	const CanisterStatusType = IDL.Variant({
 		stopped: IDL.Null,
 		stopping: IDL.Null,
@@ -57,6 +49,14 @@ export const idlFactory = ({ IDL }) => {
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});
+	const UserToken = IDL.Record({
+		decimals: IDL.Opt(IDL.Nat8),
+		version: IDL.Opt(IDL.Nat64),
+		enabled: IDL.Opt(IDL.Bool),
+		chain_id: IDL.Nat64,
+		contract_address: IDL.Text,
+		symbol: IDL.Opt(IDL.Text)
+	});
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -72,7 +72,6 @@ export const idlFactory = ({ IDL }) => {
 		nonce: IDL.Nat
 	});
 	return IDL.Service({
-		add_user_token: IDL.Func([UserToken], [], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
