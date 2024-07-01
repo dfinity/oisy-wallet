@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
 	import { addressNotCertified } from '$lib/derived/address.derived';
-	import ReceiveModal from '$eth/components/receive/ReceiveModal.svelte';
+	import EthReceiveModal from '$eth/components/receive/EthReceiveModal.svelte';
 	import { metamaskNotInitialized } from '$eth/derived/metamask.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import { modalReceive } from '$lib/derived/modal.derived';
+	import { modalEthReceive } from '$lib/derived/modal.derived';
 	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 
 	export let compact = false;
@@ -22,12 +22,12 @@
 			}
 		}
 
-		modalStore.openReceive(modalId);
+		modalStore.openEthReceive(modalId);
 	};
 </script>
 
 <ReceiveButton {compact} on:click={async () => await openReceive()} />
 
-{#if $modalReceive && $modalStore?.data === modalId}
-	<ReceiveModal />
+{#if $modalEthReceive && $modalStore?.data === modalId}
+	<EthReceiveModal />
 {/if}

@@ -381,14 +381,6 @@ async fn sign_prehash(prehash: String) -> String {
     format!("0x{}", hex::encode(&signature))
 }
 
-/// Adds a new token to the user.
-#[deprecated(since = "0.0.4", note = "Use set_user_token")]
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-fn add_user_token(token: UserToken) {
-    set_user_token(token);
-}
-
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 fn set_user_token(token: UserToken) {
@@ -414,11 +406,10 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
         for token in tokens {
             assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
             assert_token_enabled_is_some(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
-
-            let addr = parse_eth_address(&token.contract_address);
+            parse_eth_address(&token.contract_address);
 
             let find = |t: &UserToken| {
-                t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
+                t.chain_id == token.chain_id && (t.contract_address == token.contract_address)
             };
 
             add_to_user_token(stored_principal, &mut s.user_token, &token, &find);
@@ -426,10 +417,6 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
     });
 }
 
-#[deprecated(
-    since = "0.0.4",
-    note = "Tokens are deleted anymore. Use set_user_token to disable token."
-)]
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 fn remove_user_token(token_id: UserTokenId) {

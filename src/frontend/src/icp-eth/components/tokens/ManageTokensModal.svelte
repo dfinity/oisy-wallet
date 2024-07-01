@@ -16,7 +16,7 @@
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { get } from 'svelte/store';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -179,7 +179,7 @@
 				{ledgerCanisterId}
 				{indexCanisterId}
 			/>
-		{:else if isNetworkIdEthereum(network?.id)}
+		{:else if nonNullish(network) && isNetworkIdEthereum(network?.id)}
 			<AddTokenReview
 				on:icBack={modal.back}
 				on:icSave={saveErc20Token}
