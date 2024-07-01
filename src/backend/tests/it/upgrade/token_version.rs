@@ -34,7 +34,7 @@ fn test_upgrade_user_token() {
     let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_13_WASM_PATH);
 
     // Add a user token
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(
         &pic_setup,
@@ -67,7 +67,7 @@ fn test_upgrade_allowed_caller_eth_address_of() {
     let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_13_WASM_PATH);
 
     // Caller is allowed to call eth_address_of
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<String>(&pic_setup, caller, "eth_address_of", caller);
     assert!(result.is_ok());
@@ -106,7 +106,7 @@ fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgr
         .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Add a user token
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let mut token = POST_UPGRADE_TOKEN.clone();
     // The version number should be ignored but we can check that.
@@ -138,7 +138,7 @@ fn test_update_user_token_after_upgrade() {
     let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_13_WASM_PATH);
 
     // Add a user token
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(
         &pic_setup,
