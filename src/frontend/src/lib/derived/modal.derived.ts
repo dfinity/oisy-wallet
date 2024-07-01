@@ -3,7 +3,7 @@ import { derived, type Readable } from 'svelte/store';
 
 export const modalReceive: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'receive'
+	($modalStore) => $modalStore?.type === 'eth-receive'
 );
 export const modalIcpReceive: Readable<boolean> = derived(
 	modalStore,
