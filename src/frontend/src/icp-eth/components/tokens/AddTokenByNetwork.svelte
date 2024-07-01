@@ -6,7 +6,7 @@
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
 	import { fade } from 'svelte/transition';
 	import type { Network } from '$lib/types/network';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { isNetworkIdICP, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { createEventDispatcher } from 'svelte';
 	import AddTokenByNetworkToolbar from '$icp-eth/components/tokens/AddTokenByNetworkToolbar.svelte';
@@ -52,21 +52,19 @@
 	let invalid = true;
 	$: invalid = isNetworkIdEthereum(network?.id) ? invalidErc20 : invalidIc;
 
-	let disabledNetworkSelector = false;
-	$: disabledNetworkSelector = nonNullish($selectedNetwork);
+	let enabledNetworkSelector = true;
+	$: enabledNetworkSelector = isNullish($selectedNetwork);
 
 	let availableNetworks: Network[] = [];
 	$: availableNetworks = $selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets;
 </script>
 
-<Value ref="network" element={disabledNetworkSelector ? 'p' : 'div'}>
-	<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
+{#if enabledNetworkSelector}
+	<Value ref="network" element="div">
+		<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
 
-	{#if disabledNetworkSelector}
-		<TextWithLogo name={network?.name ?? ''} icon={network?.icon} />
-	{:else}
-		<div id="network" class="mt-1 pt-0.5 network" class:opacity-50={disabledNetworkSelector}>
-			<Dropdown name="network" bind:selectedValue={networkName} disabled={disabledNetworkSelector}>
+		<div id="network" class="mt-1 pt-0.5 network">
+			<Dropdown name="network" bind:selectedValue={networkName}>
 				<option disabled selected value={undefined} class="hidden"
 					><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
 				>
@@ -75,8 +73,8 @@
 				{/each}
 			</Dropdown>
 		</div>
-	{/if}
-</Value>
+	</Value>
+{/if}
 
 <form on:submit={() => dispatch('icNext')} method="POST" in:fade>
 	{#if isNetworkIdICP(network?.id)}
