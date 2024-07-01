@@ -60,7 +60,6 @@ type UserToken = record {
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
-  add_user_token : (UserToken) -> ();
   caller_eth_address : () -> (text);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);

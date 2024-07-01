@@ -381,14 +381,6 @@ async fn sign_prehash(prehash: String) -> String {
     format!("0x{}", hex::encode(&signature))
 }
 
-/// Adds a new token to the user.
-#[deprecated(since = "0.0.4", note = "Use set_user_token")]
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)]
-fn add_user_token(token: UserToken) {
-    set_user_token(token);
-}
-
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 fn set_user_token(token: UserToken) {
