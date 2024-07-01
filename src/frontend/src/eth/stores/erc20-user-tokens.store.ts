@@ -6,19 +6,22 @@ import { writable, type Readable } from 'svelte/store';
 export type CertifiedErc20UserTokensData = CertifiedData<Erc20UserToken>[] | undefined | null;
 
 export interface CertifiedErc20UserTokensStore extends Readable<CertifiedErc20UserTokensData> {
-	set: (token: CertifiedData<Erc20UserToken>) => void;
+	set: (tokens: CertifiedData<Erc20UserToken>[]) => void;
 	reset: (tokenId: TokenId) => void;
-	clear: () => void;
+	resetAll: () => void;
 }
 
 export const initCertifiedErc20UserTokensStore = (): CertifiedErc20UserTokensStore => {
 	const { subscribe, update, set } = writable<CertifiedErc20UserTokensData>(undefined);
 
 	return {
-		set: ({ data, certified }: CertifiedData<Erc20UserToken>) =>
+		set: (tokens: CertifiedData<Erc20UserToken>[]) =>
 			update((state) => [
-				...(state ?? []).filter(({ data: { address } }) => address !== data.address),
-				{
+				...(state ?? []).filter(
+					({ data: { address } }) =>
+						!tokens.map(({ data: { address } }) => address).includes(address)
+				),
+				...tokens.map(({ data, certified }) => ({
 					certified,
 					data: {
 						...data,
@@ -28,11 +31,11 @@ export const initCertifiedErc20UserTokensStore = (): CertifiedErc20UserTokensSto
 							(state ?? []).find(({ data: { address } }) => address === data.address)?.data.id ??
 							data.id
 					}
-				}
+				}))
 			]),
 		reset: (tokenId: TokenId) =>
 			update((state) => [...(state ?? []).filter(({ data: { id } }) => id !== tokenId)]),
-		clear: () => set(null),
+		resetAll: () => set(null),
 		subscribe
 	};
 };
