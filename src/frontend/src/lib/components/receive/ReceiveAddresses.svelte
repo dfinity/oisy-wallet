@@ -8,17 +8,17 @@
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (addressType: string) => dispatch('icQRCode', addressType);
+	const displayQRCode = (address: string) => dispatch('icQRCode', address);
 </script>
 
 <div class="stretch">
 	<ReceiveAddressWithLogo
 		on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 		address={$icrcAccountIdentifierText ?? ''}
-		addressLabel={$i18n.receive.icp.text.icp_principal}
+		addressLabel={$i18n.receive.icp.text.internet_computer_principal}
 		token={ICP_TOKEN}
-		qrCodeAriaLabel={$i18n.receive.icp.text.display_icp_principal_qr}
-		copyAriaLabel={$i18n.receive.icp.text.icp_principal_copied}
+		qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
+		copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 	/>
 </div>
 

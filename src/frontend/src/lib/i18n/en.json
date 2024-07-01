@@ -143,9 +143,9 @@
 				"use_for_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
-				"icp_principal": "ICP Principal",
-				"icp_principal_copied": "ICP Principal copied to clipboard.",
-				"display_icp_principal_qr": "Display ICP Principal as a QR code"
+				"internet_computer_principal": "Internet Computer",
+				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
+				"display_internet_computer_principal_qr": "Display Internet Principal Computer as a QR code"
 			}
 		},
 		"ethereum": {
