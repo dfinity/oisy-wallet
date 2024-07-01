@@ -101,5 +101,5 @@
 {/await}
 
 <Banner />
-<Toasts />
+<Toasts maxVisible={3} />
 <Busy />
