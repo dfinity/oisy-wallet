@@ -3,7 +3,7 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Eip1559TransactionPrice, RetrieveEthRequest } from '@dfinity/cketh';
 import type { RetrieveErc20Request } from '@dfinity/cketh/dist/candid/minter';
-import type { Eip1559TransactionPriceParams } from '@dfinity/cketh/dist/types/types/minter.params';
+import type { Eip1559TransactionPriceParams } from '@dfinity/cketh';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
 
