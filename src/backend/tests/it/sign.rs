@@ -18,7 +18,7 @@ fn test_sign_transaction() {
         data: None,
     };
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let transaction = update_call::<String>(&pic_setup, caller, "sign_transaction", sign_request);
 
@@ -32,7 +32,7 @@ fn test_sign_transaction() {
 fn test_personal_sign() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let transaction = update_call::<String>(
         &pic_setup,
@@ -51,7 +51,7 @@ fn test_personal_sign() {
 fn test_cannot_personal_sign_if_message_is_not_hex_string() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<String>(
         &pic_setup,
@@ -79,7 +79,7 @@ fn test_cannot_sign_transaction_with_invalid_to_address() {
         data: None,
     };
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<String>(&pic_setup, caller, "sign_transaction", sign_request);
 

@@ -27,7 +27,7 @@ lazy_static! {
 fn test_add_user_token() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
 
@@ -38,7 +38,7 @@ fn test_add_user_token() {
 fn test_update_user_token() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
 
@@ -74,7 +74,7 @@ fn test_update_user_token() {
 fn test_remove_user_token() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let add_result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
 
@@ -94,7 +94,7 @@ fn test_remove_user_token() {
 fn test_list_user_tokens() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let _ = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
 
@@ -127,7 +127,7 @@ fn test_list_user_tokens() {
 fn test_cannot_update_user_token_without_version() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
 
@@ -152,7 +152,7 @@ fn test_cannot_update_user_token_without_version() {
 fn test_cannot_update_user_token_with_invalid_version() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
 
@@ -177,7 +177,7 @@ fn test_cannot_update_user_token_with_invalid_version() {
 fn test_add_user_token_symbol_max_length() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let token: UserToken = UserToken {
         chain_id: SEPOLIA_CHAIN_ID,
@@ -254,7 +254,7 @@ fn test_anonymous_cannot_list_user_tokens() {
 fn test_user_cannot_list_another_user_tokens() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let _ = update_call::<()>(&pic_setup, caller, "add_user_token", MOCK_TOKEN.clone());
 

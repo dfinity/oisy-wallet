@@ -6,7 +6,7 @@ use candid::Principal;
 fn test_caller_eth_address() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let address = update_call::<String>(&pic_setup, caller, "caller_eth_address", ())
         .expect("Failed to call eth address.");
@@ -18,7 +18,7 @@ fn test_caller_eth_address() {
 fn test_eth_address_of() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let address = update_call::<String>(&pic_setup, caller, "eth_address_of", caller)
         .expect("Failed to call eth address of.");
@@ -44,7 +44,7 @@ fn test_anonymous_cannot_call_eth_address() {
 fn test_non_allowed_caller_cannot_call_eth_address_of() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let address =
         update_call::<String>(&pic_setup, Principal::anonymous(), "eth_address_of", caller);
@@ -57,7 +57,7 @@ fn test_non_allowed_caller_cannot_call_eth_address_of() {
 fn test_cannot_call_eth_address_of_for_anonymous() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let address =
         update_call::<String>(&pic_setup, caller, "eth_address_of", Principal::anonymous());
