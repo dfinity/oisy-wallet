@@ -22,7 +22,7 @@
 			}
 		}
 
-		modalStore.openReceive(modalId);
+		modalStore.openEthReceive(modalId);
 	};
 </script>
 
