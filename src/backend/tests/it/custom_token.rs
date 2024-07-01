@@ -50,7 +50,7 @@ fn test_add_custom_token_without_index() {
 fn test_add_custom_token(user_token: &CustomToken) {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
 
@@ -70,7 +70,7 @@ fn test_update_custom_token_without_index() {
 fn test_update_custom_token(user_token: &CustomToken) {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
 
@@ -121,7 +121,7 @@ fn test_add_many_custom_tokens_without_index() {
 fn test_add_many_custom_tokens(user_token: &CustomToken) {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let tokens: Vec<CustomToken> = vec![user_token.clone(), ANOTHER_USER_TOKEN.clone()];
 
@@ -143,7 +143,7 @@ fn test_update_many_custom_tokens_without_index() {
 fn test_update_many_custom_tokens(user_token: &CustomToken) {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let tokens: Vec<CustomToken> = vec![user_token.clone(), ANOTHER_USER_TOKEN.clone()];
 
@@ -204,7 +204,7 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
 fn test_list_custom_tokens() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let _ = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
 
@@ -242,7 +242,7 @@ fn test_cannot_update_custom_token_without_version_without_index() {
 fn test_cannot_update_custom_token_without_version(user_token: &CustomToken) {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
 
@@ -276,7 +276,7 @@ fn test_cannot_update_custom_token_with_invalid_version_without_index() {
 fn test_cannot_update_custom_token_with_invalid_version(user_token: &CustomToken) {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
 
@@ -337,7 +337,7 @@ fn test_anonymous_cannot_list_custom_tokens() {
 fn test_user_cannot_list_another_custom_tokens() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let _ = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
 
