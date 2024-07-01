@@ -1,4 +1,4 @@
-use crate::utils::assertion::assert_custom_tokens_eq;
+use crate::utils::assertion::{assert_custom_tokens_eq, assert_tokens_data_eq};
 use crate::utils::mock::CALLER;
 use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
@@ -52,9 +52,19 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
+    let before_set = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+
+    assert!(before_set.is_ok());
+    assert_eq!(before_set.unwrap().len(), 0);
+
     let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
 
     assert!(result.is_ok());
+
+    let after_set = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+
+    let expected_tokens: Vec<CustomToken> = vec![user_token.clone_with_incremented_version()];
+    assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
 #[test]
@@ -123,11 +133,24 @@ fn test_add_many_custom_tokens(user_token: &CustomToken) {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
+    let before_set = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+
+    assert!(before_set.is_ok());
+    assert_eq!(before_set.unwrap().len(), 0);
+
     let tokens: Vec<CustomToken> = vec![user_token.clone(), ANOTHER_USER_TOKEN.clone()];
 
     let result = update_call::<()>(&pic_setup, caller, "set_many_custom_tokens", tokens);
 
     assert!(result.is_ok());
+
+    let after_set = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+
+    let expected_tokens: Vec<CustomToken> = vec![
+        user_token.clone_with_incremented_version(),
+        ANOTHER_USER_TOKEN.clone_with_incremented_version(),
+    ];
+    assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
 #[test]
