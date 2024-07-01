@@ -32,13 +32,11 @@
 
 <div
 	class="flex items-center justify-center rounded-full overflow-hidden"
-	class:bg-dust={color === 'dust'}
-	class:bg-off-white={color === 'off-white'}
-	class:bg-white={color === 'white'}
+	class:bg-dust={color === 'dust' && !loaded}
+	class:bg-off-white={color === 'off-white' && !loaded}
+	class:bg-white={color === 'white' && !loaded}
 	class:opacity-10={!loaded}
-	style={`border: 1px solid var(--color-${
-		color === 'off-white' ? 'off-white' : 'dust'
-	}); width: calc(${sizePx} + 2px); height: calc(${sizePx} + 2px); transition: opacity 0.15s ease-in;`}
+	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 >
 	{#if nonNullish(src) && !loadingError}
 		<Img
