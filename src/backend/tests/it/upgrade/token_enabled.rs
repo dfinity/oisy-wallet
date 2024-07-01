@@ -32,7 +32,7 @@ fn test_upgrade_user_token() {
     let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_19_WASM_PATH);
 
     // Add a user token
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(
         &pic_setup,
@@ -65,7 +65,7 @@ fn test_update_user_token_after_upgrade() {
     let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_19_WASM_PATH);
 
     // Add a user token
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(
         &pic_setup,

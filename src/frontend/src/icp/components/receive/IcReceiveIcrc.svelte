@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import IcReceiveModal from '$icp/components/receive/IcReceiveModal.svelte';
+	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import IcReceiveInfoIcrc from '$icp/components/receive/IcReceiveInfoIcrc.svelte';
 	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { modalIcrcReceive } from '$lib/derived/modal.derived';
@@ -24,5 +24,5 @@
 <ReceiveButton {compact} on:click={async () => await open(openReceive)} />
 
 {#if $modalIcrcReceive && $modalStore?.data === modalId}
-	<IcReceiveModal infoCmp={IcReceiveInfoIcrc} on:nnsClose={close} />
+	<ReceiveAddressModal infoCmp={IcReceiveInfoIcrc} on:nnsClose={close} />
 {/if}

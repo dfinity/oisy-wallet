@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import ReceiveAddress from '$icp-eth/components/receive/ReceiveAddress.svelte';
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { nonNullish } from '@dfinity/utils';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -21,7 +21,11 @@
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (addressType: string) => dispatch('icQRCode', addressType);
+	const displayQRCode = (address: string) =>
+		dispatch('icQRCode', {
+			address,
+			addressLabel: $i18n.receive.bitcoin.text.bitcoin_address
+		});
 
 	let btcAddress: string | undefined = undefined;
 	$: btcAddress = $btcAddressStore?.[$tokenId]?.data;

@@ -12,10 +12,11 @@
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import type { Network } from '$lib/types/network';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;
-	export let network: Network | undefined;
+	export let network: Network;
 
 	onMount(async () => {
 		if (isNullish(contractAddress)) {
@@ -105,6 +106,11 @@
 		{:else}
 			<span in:fade>{metadata.name}</span>
 		{/if}
+	</Value>
+
+	<Value ref="network" element="div">
+		<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
+		<TextWithLogo name={network.name} icon={network.icon} />
 	</Value>
 
 	<Value ref="contractSymbol" element="div">
