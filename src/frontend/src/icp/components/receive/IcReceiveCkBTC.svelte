@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
 	import { modalCkBTCReceive } from '$lib/derived/modal.derived';
-	import IcReceiveModal from '$icp/components/receive/IcReceiveModal.svelte';
+	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
 	import { authStore } from '$lib/stores/auth.store';
 	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
@@ -56,5 +56,5 @@
 {/if}
 
 {#if $modalCkBTCReceive && $modalStore?.data === modalId}
-	<IcReceiveModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} />
+	<ReceiveAddressModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} />
 {/if}
