@@ -417,7 +417,7 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
             parse_eth_address(&token.contract_address);
 
             let find = |t: &UserToken| {
-                t.chain_id == token.chain_id && (&t.contract_address == &token.contract_address)
+                t.chain_id == token.chain_id && (t.contract_address == token.contract_address)
             };
 
             add_to_user_token(stored_principal, &mut s.user_token, &token, &find);
