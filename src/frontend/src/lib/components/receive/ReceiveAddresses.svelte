@@ -9,22 +9,31 @@
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (address: string) => dispatch('icQRCode', address);
+	const displayQRCode = (details: { address: string; addressLabel: string }) =>
+		dispatch('icQRCode', details);
 </script>
 
 <div class="stretch">
 	<ReceiveAddressWithLogo
-		on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
+		on:click={() =>
+			displayQRCode({
+				address: $icrcAccountIdentifierText ?? '',
+				addressLabel: $i18n.receive.icp.text.principal
+			})}
 		address={$icrcAccountIdentifierText ?? ''}
 		token={ICP_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
 		copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 	>
-		{$i18n.receive.icp.text.internet_computer_principal}
+		{$i18n.receive.icp.text.internet_computer}
 	</ReceiveAddressWithLogo>
 
 	<ReceiveAddressWithLogo
-		on:click={() => displayQRCode($icpAccountIdentifierText ?? '')}
+		on:click={() =>
+			displayQRCode({
+				address: $icpAccountIdentifierText ?? '',
+				addressLabel: $i18n.receive.icp.text.icp_account
+			})}
 		address={$icpAccountIdentifierText ?? ''}
 		token={ICP_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_icp_account_qr}
@@ -36,13 +45,17 @@
 	</ReceiveAddressWithLogo>
 
 	<ReceiveAddressWithLogo
-		on:click={() => displayQRCode($address ?? '')}
+		on:click={() =>
+			displayQRCode({
+				address: $address ?? '',
+				addressLabel: $i18n.receive.ethereum.text.ethereum_address
+			})}
 		address={$address ?? ''}
 		token={ETHEREUM_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.ethereum.text.display_ethereum_address_qr}
 		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
 	>
-		{$i18n.receive.ethereum.text.ethereum_address}
+		{$i18n.receive.ethereum.text.ethereum}
 	</ReceiveAddressWithLogo>
 </div>
 
