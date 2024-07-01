@@ -14,7 +14,6 @@
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import Value from '$lib/components/ui/Value.svelte';
-	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 
 	export let network: Network | undefined;
 	export let tokenData: Partial<AddTokenData>;
