@@ -1,7 +1,7 @@
 import { modalStore } from '$lib/stores/modal.store';
 import { derived, type Readable } from 'svelte/store';
 
-export const modalReceive: Readable<boolean> = derived(
+export const modalEthReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-receive'
 );

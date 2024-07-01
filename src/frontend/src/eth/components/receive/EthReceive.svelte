@@ -4,7 +4,7 @@
 	import EthReceiveModal from '$eth/components/receive/EthReceiveModal.svelte';
 	import { metamaskNotInitialized } from '$eth/derived/metamask.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import { modalReceive } from '$lib/derived/modal.derived';
+	import { modalEthReceive } from '$lib/derived/modal.derived';
 	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 
 	export let compact = false;
@@ -28,6 +28,6 @@
 
 <ReceiveButton {compact} on:click={async () => await openReceive()} />
 
-{#if $modalReceive && $modalStore?.data === modalId}
+{#if $modalEthReceive && $modalStore?.data === modalId}
 	<EthReceiveModal />
 {/if}
