@@ -9,7 +9,7 @@
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
 
 	const sizes = {
-		small: '20px',
+		small: '22px',
 		medium: '52px',
 		big: '64px'
 	};
