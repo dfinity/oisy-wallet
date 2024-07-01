@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import { IconCheck } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';

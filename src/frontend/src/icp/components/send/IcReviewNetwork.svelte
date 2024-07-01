@@ -10,7 +10,6 @@
 	import bitcoin from '$icp/assets/bitcoin.svg';
 	import eth from '$icp-eth/assets/eth.svg';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 
 	export let networkId: NetworkId | undefined = undefined;
