@@ -3,7 +3,11 @@
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
-	import {networkEthereum, networkICP} from '$lib/derived/network.derived';
+	import {
+		networkEthereum,
+		networkICP,
+		pseudoNetworkChainFusion
+	} from '$lib/derived/network.derived';
 	import IcSend from '$icp/components/send/IcSend.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
@@ -12,6 +16,7 @@
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import Receive from '$lib/components/receive/Receive.svelte';
 
 	export let send = false;
 
@@ -25,11 +30,17 @@
 	$: convertBtc = send && $tokenCkBtcLedger && $erc20UserTokensInitialized;
 </script>
 
-<div role="toolbar" class="grid gap-4 text-deep-violet font-bold pt-10 pb-3" class:grid-cols-2={send}>
+<div
+	role="toolbar"
+	class="grid gap-4 text-deep-violet font-bold pt-10 pb-3"
+	class:grid-cols-2={send}
+>
 	{#if $networkICP}
 		<IcReceive token={$tokenWithFallback} />
 	{:else if $networkEthereum}
 		<EthReceive />
+	{:else if $pseudoNetworkChainFusion}
+		<Receive />
 	{/if}
 
 	{#if send}
