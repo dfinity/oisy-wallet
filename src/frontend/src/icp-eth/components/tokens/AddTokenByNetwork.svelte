@@ -13,6 +13,8 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import Value from '$lib/components/ui/Value.svelte';
+	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 
 	export let network: Network | undefined;
 	export let tokenData: Partial<AddTokenData>;
@@ -57,18 +59,24 @@
 	$: availableNetworks = $selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets;
 </script>
 
-<label for="network" class="font-bold px-4.5">{$i18n.tokens.manage.text.network}:</label>
+<Value ref="network" element={disabledNetworkSelector ? 'p' : 'div'}>
+	<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
 
-<div id="network" class="mb-6 mt-1 pt-0.5 network" class:opacity-50={disabledNetworkSelector}>
-	<Dropdown name="network" bind:selectedValue={networkName} disabled={disabledNetworkSelector}>
-		<option disabled selected value={undefined} class="hidden"
-			><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
-		>
-		{#each availableNetworks as network}
-			<DropdownItem value={network.name}>{network.name}</DropdownItem>
-		{/each}
-	</Dropdown>
-</div>
+	{#if disabledNetworkSelector}
+		<TextWithLogo name={network?.name ?? ''} icon={network?.icon} />
+	{:else}
+		<div id="network" class="mt-1 pt-0.5 network" class:opacity-50={disabledNetworkSelector}>
+			<Dropdown name="network" bind:selectedValue={networkName} disabled={disabledNetworkSelector}>
+				<option disabled selected value={undefined} class="hidden"
+					><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
+				>
+				{#each availableNetworks as network}
+					<DropdownItem value={network.name}>{network.name}</DropdownItem>
+				{/each}
+			</Dropdown>
+		</div>
+	{/if}
+</Value>
 
 <form on:submit={() => dispatch('icNext')} method="POST" in:fade>
 	{#if isNetworkIdICP(network?.id)}
