@@ -7,7 +7,7 @@
 	export let indexCanisterId = '';
 </script>
 
-<p class="text-misty-rose mb-2">{$i18n.tokens.import.text.info}</p>
+<p class="text-dark-blue mt-1 mb-2">{$i18n.tokens.import.text.info}</p>
 
 <p class="text-blue font-bold mb-4">
 	<ExternalLink

@@ -70,7 +70,6 @@ export interface UserTokenId {
 	contract_address: string;
 }
 export interface _SERVICE {
-	add_user_token: ActorMethod<[UserToken], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;

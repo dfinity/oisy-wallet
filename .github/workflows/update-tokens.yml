@@ -3,6 +3,7 @@ name: Update Tokens
 on:
   schedule:
     - cron: '30 3 * * MON'
+    - cron: '30 3 * * THU'
   workflow_dispatch:
 
 jobs:

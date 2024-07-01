@@ -35,31 +35,54 @@ lazy_static! {
 fn test_add_user_token() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let before_set = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    assert!(before_set.is_ok());
+    assert_eq!(before_set.unwrap().len(), 0);
 
     let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
     assert!(result.is_ok());
+
+    let after_set = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    let expected_tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone_with_incremented_version()];
+    assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
 #[test]
-fn test_add_many_custom_tokens() {
+fn test_add_many_user_tokens() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone(), ANOTHER_TOKEN.clone()];
+
+    let before_set = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    assert!(before_set.is_ok());
+    assert_eq!(before_set.unwrap().len(), 0);
 
     let result = update_call::<()>(&pic_setup, caller, "set_many_user_tokens", tokens);
 
     assert!(result.is_ok());
+
+    let after_set = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    let expected_tokens: Vec<UserToken> = vec![
+        MOCK_TOKEN.clone_with_incremented_version(),
+        ANOTHER_TOKEN.clone_with_incremented_version(),
+    ];
+    assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
 #[test]
 fn test_update_user_token() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
@@ -95,7 +118,7 @@ fn test_update_user_token() {
 fn test_update_many_user_tokens() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone(), ANOTHER_TOKEN.clone()];
 
@@ -156,7 +179,7 @@ fn test_update_many_user_tokens() {
 fn test_disable_user_token() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
@@ -192,7 +215,7 @@ fn test_disable_user_token() {
 fn test_list_user_tokens() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let _ = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
@@ -216,7 +239,7 @@ fn test_list_user_tokens() {
 fn test_cannot_update_user_token_without_version() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
@@ -241,7 +264,7 @@ fn test_cannot_update_user_token_without_version() {
 fn test_cannot_update_user_token_with_invalid_version() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
@@ -266,7 +289,7 @@ fn test_cannot_update_user_token_with_invalid_version() {
 fn test_set_user_token_enabled_none() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let token: UserToken = UserToken {
         enabled: None,
@@ -285,7 +308,7 @@ fn test_set_user_token_enabled_none() {
 fn test_set_many_user_tokens_enabled_none() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let token: UserToken = UserToken {
         enabled: None,
@@ -306,7 +329,7 @@ fn test_set_many_user_tokens_enabled_none() {
 fn test_set_user_token_symbol_max_length() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let token: UserToken = UserToken {
         chain_id: SEPOLIA_CHAIN_ID,
@@ -329,7 +352,7 @@ fn test_set_user_token_symbol_max_length() {
 fn test_set_user_many_tokens_symbol_max_length() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let token: UserToken = UserToken {
         chain_id: SEPOLIA_CHAIN_ID,
@@ -390,7 +413,7 @@ fn test_anonymous_cannot_list_user_tokens() {
 fn test_user_cannot_list_another_user_tokens() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
 
     let _ = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 

@@ -13,6 +13,7 @@
 	import { ICP_NETWORK } from '$env/networks.env';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { ERC20_CONTRACT_ICP, ERC20_CONTRACT_ICP_GOERLI } from '$env/tokens.erc20.env';
+	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
@@ -32,13 +33,7 @@
 		>{#if nonNullish(targetNetwork)}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 				.network}{/if}</svelte:fragment
 	>
-	<span class="flex gap-1">
-		{sourceNetwork.name}
-		<Logo
-			src={sourceNetwork.icon ?? eth}
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: sourceNetwork.name })}
-		/>
-	</span>
+	<TextWithLogo name={sourceNetwork.name} icon={sourceNetwork.icon ?? eth} />
 </Value>
 
 {#if nonNullish(targetNetwork)}

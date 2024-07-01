@@ -5,12 +5,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let address: undefined | string;
+	export let addressLabel: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 </script>
 
 <div class="stretch min-h-[50vh]">
-	<p class="font-bold text-center">{$i18n.wallet.text.address}:</p>
+	<p class="font-bold text-center">{addressLabel ?? $i18n.wallet.text.address}:</p>
 	<p class="mb-4 font-normal text-center px-2">
 		<output class="break-all">{address}</output><Copy
 			inline
