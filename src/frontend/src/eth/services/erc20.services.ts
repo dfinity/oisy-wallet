@@ -71,7 +71,7 @@ export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Prom
 		request: (params) => loadErc20UserTokens(params),
 		onLoad: loadErc20UserTokenData,
 		onCertifiedError: ({ error: err }) => {
-			erc20UserTokensStore.clear();
+			erc20UserTokensStore.resetAll();
 
 			toastsError({
 				msg: { text: get(i18n).init.error.erc20_user_tokens },
@@ -135,10 +135,5 @@ const loadErc20UserTokenData = ({
 	certified: boolean;
 	response: Erc20UserToken[];
 }) => {
-	tokens.forEach((token) =>
-		erc20UserTokensStore.set({
-			data: token,
-			certified
-		})
-	);
+	erc20UserTokensStore.set(tokens.map((token) => ({ data: token, certified })));
 };
