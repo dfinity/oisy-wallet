@@ -10,7 +10,7 @@
 	import bitcoin from '$icp/assets/bitcoin.svg';
 	import eth from '$icp-eth/assets/eth.svg';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -24,26 +24,22 @@
 		>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 				.network}{/if}</svelte:fragment
 	>
-	<span class="flex gap-1">
-		Internet Computer <Logo src={icpLight} alt={`Internet Computer logo`} />
-	</span>
+	<TextWithLogo name="Internet Computer" icon={icpLight} />
 </Value>
 
 {#if showDestinationNetwork}
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
-		<span class="flex gap-1">
-			{#if nonNullish(networkId) && isNetworkIdBitcoin(networkId)}
-				<IcSendBtcNetwork {networkId} /> <Logo src={bitcoin} alt={`Bitcoin logo`} />
-			{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
-				{$ckEthereumTwinToken.network.name}
-				<Logo
-					src={$ckEthereumTwinToken.network.icon ?? eth}
-					alt={replacePlaceholders($i18n.core.alt.logo, {
-						$name: $ckEthereumTwinToken.network.name
-					})}
-				/>
-			{/if}
-		</span>
+		{#if nonNullish(networkId) && isNetworkIdBitcoin(networkId)}
+			<span class="flex gap-1">
+				<IcSendBtcNetwork {networkId} />
+				<Logo src={bitcoin} alt={`Bitcoin logo`} />
+			</span>
+		{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
+			<TextWithLogo
+				name={$ckEthereumTwinToken.network.name}
+				icon={$ckEthereumTwinToken.network.icon ?? eth}
+			/>
+		{/if}
 	</Value>
 {/if}
