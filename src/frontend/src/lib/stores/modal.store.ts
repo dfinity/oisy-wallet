@@ -3,7 +3,7 @@ import { writable } from 'svelte/store';
 
 export interface Modal<T> {
 	type:
-		| 'receive'
+		| 'eth-receive'
 		| 'icp-receive'
 		| 'icrc-receive'
 		| 'ckbtc-receive'
@@ -60,7 +60,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
 	return {
-		openReceive: <D extends T>(data: D) => set({ type: 'receive', data }),
+		openReceive: <D extends T>(data: D) => set({ type: 'eth-receive', data }),
 		openIcpReceive: <D extends T>(data: D) => set({ type: 'icp-receive', data }),
 		openIcrcReceive: <D extends T>(data: D) => set({ type: 'icrc-receive', data }),
 		openCkBTCReceive: <D extends T>(data: D) => set({ type: 'ckbtc-receive', data }),
