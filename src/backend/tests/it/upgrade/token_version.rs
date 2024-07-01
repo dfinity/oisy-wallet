@@ -165,7 +165,7 @@ fn test_update_user_token_after_upgrade() {
     };
 
     let update_result =
-        update_call::<()>(&pic_setup, caller, "add_user_token", update_token.clone());
+        update_call::<()>(&pic_setup, caller, "set_user_token", update_token.clone());
 
     assert!(update_result.is_ok());
 
