@@ -126,6 +126,13 @@ interface I18nReceive {
 			use_for_deposit: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
+			internet_computer_principal: string;
+			internet_computer_principal_copied: string;
+			display_internet_computer_principal_qr: string;
+			icp_account: string;
+			icp_account_copied: string;
+			display_icp_account_qr: string;
+			icp_account_notes: string;
 		};
 	};
 	ethereum: {
@@ -135,6 +142,9 @@ interface I18nReceive {
 			eth_to_cketh_description: string;
 			learn_how_to_convert: string;
 			metamask: string;
+			ethereum_address: string;
+			ethereum_address_copied: string;
+			display_ethereum_address_qr: string;
 		};
 		error: { no_metamask: string };
 	};

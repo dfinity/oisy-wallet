@@ -3,7 +3,11 @@
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
-	import { networkICP } from '$lib/derived/network.derived';
+	import {
+		networkEthereum,
+		networkICP,
+		pseudoNetworkChainFusion
+	} from '$lib/derived/network.derived';
 	import IcSend from '$icp/components/send/IcSend.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
@@ -12,24 +16,39 @@
 	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import Receive from '$lib/components/receive/Receive.svelte';
+
+	export let send = false;
 
 	let convertEth = false;
-	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
+	$: convertEth = send && $ethToCkETHEnabled && $erc20UserTokensInitialized;
 
 	let convertErc20 = false;
-	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
+	$: convertErc20 = send && $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	$: convertBtc = send && $tokenCkBtcLedger && $erc20UserTokensInitialized;
 </script>
 
-<div role="toolbar" class="grid grid-cols-2 gap-4 text-deep-violet font-bold pt-10 pb-3">
+<div
+	role="toolbar"
+	class="grid gap-4 text-deep-violet font-bold pt-10 pb-3"
+	class:grid-cols-2={send}
+>
 	{#if $networkICP}
 		<IcReceive token={$tokenWithFallback} />
-		<IcSend token={$tokenWithFallback} />
-	{:else}
+	{:else if $networkEthereum}
 		<EthReceive />
-		<Send token={$tokenWithFallback} />
+	{:else if $pseudoNetworkChainFusion}
+		<Receive />
+	{/if}
+
+	{#if send}
+		{#if $networkICP}
+			<IcSend token={$tokenWithFallback} />
+		{:else}
+			<Send token={$tokenWithFallback} />
+		{/if}
 	{/if}
 
 	{#if convertEth}

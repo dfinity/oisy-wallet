@@ -20,6 +20,7 @@
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
+	export let send = false;
 
 	let background: string;
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
@@ -69,7 +70,7 @@
 
 		{#if actions}
 			<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-				<Actions />
+				<Actions {send} />
 			</div>
 		{/if}
 

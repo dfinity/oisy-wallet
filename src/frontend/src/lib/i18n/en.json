@@ -142,7 +142,14 @@
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users or other apps that support this address format.",
 				"use_for_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
-				"account_id_copied": "ICP Account ID copied to clipboard."
+				"account_id_copied": "ICP Account ID copied to clipboard.",
+				"internet_computer_principal": "Internet Computer",
+				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
+				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code",
+				"icp_account": "ICP Account",
+				"icp_account_copied": "ICP Account copied to clipboard.",
+				"display_icp_account_qr": "Display ICP Account as a QR code",
+				"icp_account_notes": "Use for ICP deposits from exchanges or other wallets that only support Account IDs"
 			}
 		},
 		"ethereum": {
@@ -151,7 +158,10 @@
 				"from_network": "Receive from $network Network",
 				"eth_to_cketh_description": "Converting $token into $ckToken requires a call to a smart contract on $network and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
 				"learn_how_to_convert": "Learn how to convert $token to $ckToken",
-				"metamask": "Receive from Metamask"
+				"metamask": "Receive from Metamask",
+				"ethereum_address": "Ethereum",
+				"ethereum_address_copied": "Ethereum address copied to clipboard.",
+				"display_ethereum_address_qr": "Display Ethereum address as a QR code"
 			},
 			"error": {
 				"no_metamask": "Metamask is not available."
