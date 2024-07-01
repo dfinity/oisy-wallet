@@ -13,7 +13,8 @@
 
 	const dispatch = createEventDispatcher();
 
-	const displayQRCode = (addressType: string) => dispatch('icQRCode', addressType);
+	const displayQRCode = (details: { address: string; addressLabel: string }) =>
+		dispatch('icQRCode', details);
 </script>
 
 <div class="stretch">
@@ -22,7 +23,11 @@
 		address={$icrcAccountIdentifierText ?? ''}
 		qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
 		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
-		on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
+		on:click={() =>
+			displayQRCode({
+				address: $icrcAccountIdentifierText ?? '',
+				addressLabel: $i18n.wallet.text.wallet_address
+			})}
 	>
 		<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_all_tokens}</svelte:fragment>
@@ -37,7 +42,11 @@
 		address={$icpAccountIdentifierText ?? ''}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_account_id_qr}
 		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
-		on:click={() => displayQRCode($icpAccountIdentifierText ?? '')}
+		on:click={() =>
+			displayQRCode({
+				address: $icpAccountIdentifierText ?? '',
+				addressLabel: $i18n.receive.icp.text.account_id
+			})}
 	>
 		<svelte:fragment slot="title">{$i18n.receive.icp.text.account_id}</svelte:fragment>
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_deposit}</svelte:fragment>
