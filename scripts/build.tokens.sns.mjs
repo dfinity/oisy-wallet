@@ -207,7 +207,7 @@ export const findSnses = async () => {
 
 	writeFileSync(
 		join(DATA_FOLDER, 'tokens.sns.json'),
-		JSON.stringify(enhancedTokens, jsonReplacer, 2)
+		JSON.stringify(enhancedTokens, jsonReplacer, 8)
 	);
 
 	await saveLogos(icons);
