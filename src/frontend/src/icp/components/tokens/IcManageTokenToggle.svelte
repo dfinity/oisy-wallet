@@ -12,7 +12,7 @@
 	$: outdated = token.indexCanisterVersion === 'outdated';
 
 	let disabled = false;
-	$: disabled = token.category === 'default' || outdated;
+	$: disabled = (token.category === 'default' && token.standard === 'icp') || outdated;
 
 	let checked: boolean;
 	$: checked = token.enabled;
