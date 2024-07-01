@@ -37,22 +37,45 @@ fn test_add_user_token() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
+    let before_set = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    assert!(before_set.is_ok());
+    assert_eq!(before_set.unwrap().len(), 0);
+
     let result = update_call::<()>(&pic_setup, caller, "set_user_token", MOCK_TOKEN.clone());
 
     assert!(result.is_ok());
+
+    let after_set = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    let expected_tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone_with_incremented_version()];
+    assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
 #[test]
-fn test_add_many_custom_tokens() {
+fn test_add_many_user_tokens() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
 
     let tokens: Vec<UserToken> = vec![MOCK_TOKEN.clone(), ANOTHER_TOKEN.clone()];
 
+    let before_set = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    assert!(before_set.is_ok());
+    assert_eq!(before_set.unwrap().len(), 0);
+
     let result = update_call::<()>(&pic_setup, caller, "set_many_user_tokens", tokens);
 
     assert!(result.is_ok());
+
+    let after_set = query_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+
+    let expected_tokens: Vec<UserToken> = vec![
+        MOCK_TOKEN.clone_with_incremented_version(),
+        ANOTHER_TOKEN.clone_with_incremented_version(),
+    ];
+    assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
 }
 
 #[test]
