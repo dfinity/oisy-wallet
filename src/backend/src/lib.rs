@@ -426,10 +426,6 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
     });
 }
 
-#[deprecated(
-    since = "0.0.4",
-    note = "Tokens are deleted anymore. Use set_user_token to disable token."
-)]
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 fn remove_user_token(token_id: UserTokenId) {
