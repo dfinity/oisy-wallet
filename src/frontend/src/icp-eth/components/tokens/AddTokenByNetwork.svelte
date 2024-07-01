@@ -6,13 +6,14 @@
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
 	import { fade } from 'svelte/transition';
 	import type { Network } from '$lib/types/network';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { isNetworkIdICP, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { createEventDispatcher } from 'svelte';
 	import AddTokenByNetworkToolbar from '$icp-eth/components/tokens/AddTokenByNetworkToolbar.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	export let network: Network | undefined;
 	export let tokenData: Partial<AddTokenData>;
@@ -50,25 +51,29 @@
 	let invalid = true;
 	$: invalid = isNetworkIdEthereum(network?.id) ? invalidErc20 : invalidIc;
 
-	let disabledNetworkSelector = false;
-	$: disabledNetworkSelector = nonNullish($selectedNetwork);
+	let enabledNetworkSelector = true;
+	$: enabledNetworkSelector = isNullish($selectedNetwork);
 
 	let availableNetworks: Network[] = [];
 	$: availableNetworks = $selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets;
 </script>
 
-<label for="network" class="font-bold px-4.5">{$i18n.tokens.manage.text.network}:</label>
+{#if enabledNetworkSelector}
+	<Value ref="network" element="div">
+		<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
 
-<div id="network" class="mb-6 mt-1 pt-0.5 network" class:opacity-50={disabledNetworkSelector}>
-	<Dropdown name="network" bind:selectedValue={networkName} disabled={disabledNetworkSelector}>
-		<option disabled selected value={undefined} class="hidden"
-			><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
-		>
-		{#each availableNetworks as network}
-			<DropdownItem value={network.name}>{network.name}</DropdownItem>
-		{/each}
-	</Dropdown>
-</div>
+		<div id="network" class="mt-1 pt-0.5 network">
+			<Dropdown name="network" bind:selectedValue={networkName}>
+				<option disabled selected value={undefined} class="hidden"
+					><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
+				>
+				{#each availableNetworks as network}
+					<DropdownItem value={network.name}>{network.name}</DropdownItem>
+				{/each}
+			</Dropdown>
+		</div>
+	</Value>
+{/if}
 
 <form on:submit={() => dispatch('icNext')} method="POST" in:fade>
 	{#if isNetworkIdICP(network?.id)}

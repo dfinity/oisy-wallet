@@ -16,6 +16,7 @@
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 
 	export let ledgerCanisterId: string | undefined;
 	export let indexCanisterId: string | undefined;
@@ -72,6 +73,11 @@
 
 	{#if nonNullish(token)}
 		<div in:fade>
+			<Value ref="network" element="div">
+				<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
+				<TextWithLogo name={token.token.network.name} icon={token.token.network.icon} />
+			</Value>
+
 			<Value ref="ledgerId" element="div">
 				<svelte:fragment slot="label">{$i18n.tokens.import.text.ledger_canister_id}</svelte:fragment
 				>
