@@ -36,8 +36,11 @@ const icrcDefaultTokensCanisterIds: Readable<string[]> = derived(
  * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "custom token" in the backend.
  */
 const icrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
-	[icrcCustomTokensStore],
-	([$icrcCustomTokensStore]) => $icrcCustomTokensStore?.map(({ data: token }) => token) ?? []
+	[icrcCustomTokensStore, testnets],
+	([$icrcCustomTokensStore, $testnets]) =>
+		($icrcCustomTokensStore?.map(({ data: token }) => token) ?? []).filter(
+			(token) => $testnets || !isTokenIcrcTestnet(token)
+		)
 );
 
 const icrcDefaultTokensToggleable: Readable<IcTokenToggleable[]> = derived(
