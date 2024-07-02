@@ -1,6 +1,6 @@
 name: Build Docker Image for E2E tests
 
-description: An image that runs a local replica, installed all required canisters and environment
+description: An image that runs a local replica, install all required canisters and environment
 
 outputs: {}
 
@@ -24,7 +24,7 @@ runs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: Dockerfile
+        file: Dockerfile.e2e
         cache-from: type=gha,scope=cached-stage
         cache-to: type=gha,scope=cached-stage,mode=max
         outputs: type=cacheonly

@@ -1,6 +1,6 @@
 name: Build Base Docker Image
 
-description: An image that sets up a local replica, installs all necessary canisters, and configures the environment.
+description: The image shared by all builds, containing pre-built rust deps
 
 outputs: {}
 
