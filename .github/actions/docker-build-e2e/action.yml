@@ -25,7 +25,7 @@ runs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Build base Docker image
+    - name: Build E2E Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -35,7 +35,7 @@ runs:
         outputs: type=docker
         tags: ${{ inputs.name }}:latest
 
-    - name: Save Docker image
+    - name: Save E2E Docker image
       run: |
         docker save ${{ inputs.name }}:latest | gzip > ./${{ inputs.name }}.tar.gz
       shell: bash
