@@ -27,5 +27,13 @@ runs:
         file: Dockerfile.e2e
         cache-from: type=gha,scope=cached-stage
         cache-to: type=gha,scope=cached-stage,mode=max
-        outputs: type=cacheonly
-        target: deps
+        outputs: type=docker
+        tags: oisy-e2e-image:latest
+
+    - name: Save Docker image as artifact
+      run: |
+        docker save oisy-e2e-image:latest | gzip > oisy-e2e-image.tar.gz
+      uses: actions/upload-artifact@v3
+      with:
+        name: oisy-e2e-image
+        path: oisy-e2e-image.tar.gz

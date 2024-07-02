@@ -26,10 +26,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: oisy-e2e-image
+          path: .
+
+      - name: Load Docker image
+        run: |
+          gzip -d oisy-e2e-image.tar.gz
+          docker load -i oisy-e2e-image.tar
+
+      - name: Run Docker container
+        run: |
+          docker run -d --name oisy-e2e-container oisy-e2e-image:latest
+
       - name: Prepare
         uses: ./.github/actions/prepare
+
       - name: Test
         run: npm run test
+
+      - name: Cleanup Docker container
+        run: |
+          docker stop oisy-e2e-container
+          docker rm oisy-e2e-container
 
   may-merge:
     needs: ['e2e']
