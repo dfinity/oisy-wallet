@@ -2,6 +2,11 @@ name: Build Docker Image for E2E tests
 
 description: An image that runs a local replica, install all required canisters and environment
 
+inputs:
+  name:
+    description: Name of the image and artifact
+    required: true
+
 outputs: {}
 
 runs:
@@ -28,12 +33,12 @@ runs:
         cache-from: type=gha,scope=cached-stage
         cache-to: type=gha,scope=cached-stage,mode=max
         outputs: type=docker
-        tags: oisy-e2e-image:latest
+        tags: ${{ inputs.name }}:latest
 
-    - name: Save Docker image as artifact
+    - name: 'Upload ${{ inputs.name }}'
       run: |
-        docker save oisy-e2e-image:latest | gzip > oisy-e2e-image.tar.gz
-      uses: actions/upload-artifact@v3
+        docker save ${{ inputs.name }}:latest | gzip > ${{ inputs.name }}.tar.gz
+      uses: actions/upload-artifact@v4
       with:
-        name: oisy-e2e-image
-        path: oisy-e2e-image.tar.gz
+        name: ${{ inputs.name }}
+        path: ${{ inputs.name }}.tar.gz
