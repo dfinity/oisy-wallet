@@ -35,10 +35,13 @@ runs:
         outputs: type=docker
         tags: ${{ inputs.name }}:latest
 
-    - name: 'Upload ${{ inputs.name }}'
+    - name: Save Docker image
       run: |
-        docker save ${{ inputs.name }}:latest | gzip > ${{ inputs.name }}.tar.gz
+        docker save ${{ inputs.name }}:latest | gzip > ./${{ inputs.name }}.tar.gz
+      shell: bash
+
+    - name: 'Upload ${{ inputs.name }}'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ inputs.name }}
-        path: ${{ inputs.name }}.tar.gz
+        path: ./${{ inputs.name }}.tar.gz
