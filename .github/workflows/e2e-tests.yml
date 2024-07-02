@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build Base Docker Image
+      - name: Build E2E Docker Image
         uses: ./.github/actions/docker-build-e2e
         with:
           name: oisy-e2e-image
@@ -26,7 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download Docker image artifact
+      - name: Download E2E Docker image artifact
         uses: actions/download-artifact@v4
         with:
           name: oisy-e2e-image
@@ -37,7 +37,7 @@ jobs:
           gzip -d oisy-e2e-image.gz
           docker load -i oisy-e2e-image.tar
 
-      - name: Run Docker container
+      - name: Run E2E Docker container
         run: |
           docker run -d --name oisy-e2e-container oisy-e2e-image:latest
 
