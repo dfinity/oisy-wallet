@@ -93,6 +93,11 @@ export const erc20Tokens: Readable<Erc20TokenToggleable[]> = derived(
 	]
 );
 
+export const erc20TokensAddresses: Readable<Erc20ContractAddress[]> = derived(
+	[erc20Tokens],
+	([$erc20Tokens]) => $erc20Tokens.map(({ address }: Erc20Token) => ({ address }))
+);
+
 /**
  * The list of ERC20 tokens that are either enabled by default (static config) or enabled by the users regardless if they are custom or default.
  */
@@ -112,9 +117,4 @@ export const erc20UserTokensInitialized: Readable<boolean> = derived(
 export const erc20UserTokensNotInitialized: Readable<boolean> = derived(
 	[erc20UserTokensInitialized],
 	([$erc20TokensInitialized]) => !$erc20TokensInitialized
-);
-
-export const erc20TokensAddresses: Readable<Erc20ContractAddress[]> = derived(
-	[enabledErc20Tokens],
-	([$erc20Tokens]) => $erc20Tokens.map(({ address }: Erc20Token) => ({ address }))
 );
