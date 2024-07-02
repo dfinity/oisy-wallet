@@ -1,6 +1,7 @@
+import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
+import type { CanisterIdText } from '$lib/types/canister';
 import type { Token, TokenStandard } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
-import { isNullish } from '@dfinity/utils';
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -28,6 +29,18 @@ export const getMaxTransactionAmount = ({
 	);
 };
 
+/**
+ * /**
+ *  * We always display following tokens on the "Tokens" view:
+ *  * - ICP token
+ *  * - Ethereum token
+ *  * - A subset of cK tokens
+ *
+ * In addition to those, we display also:
+ * - The tokens that have been enabled by the user
+ *
+ * That is why the `enabled` flag is either enabled for a subset of ledgerCanisterIds or if user has set an enabled custom token in the backend.
+ */
 export const mapDefaultTokenToToggleable = <T extends Token>({
 	defaultToken,
 	userToken
@@ -36,6 +49,11 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 	userToken: TokenToggleable<T> | undefined;
 }): TokenToggleable<T> => ({
 	...defaultToken,
-	enabled: isNullish(userToken) || userToken.enabled,
+	enabled:
+		('ledgerCanisterId' in defaultToken &&
+			ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(
+				(defaultToken as { ledgerCanisterId: CanisterIdText }).ledgerCanisterId
+			)) ||
+		userToken?.enabled === true,
 	version: userToken?.version
 });

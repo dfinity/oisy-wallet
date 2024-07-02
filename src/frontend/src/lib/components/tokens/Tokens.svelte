@@ -7,7 +7,7 @@
 	import Listener from '$lib/components/core/Listener.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import { filteredNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
@@ -24,7 +24,7 @@
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
 
 	let tokens: Token[];
-	$: tokens = $filteredNetworkTokens.filter(
+	$: tokens = $enabledNetworkTokens.filter(
 		({ id: tokenId }) =>
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
