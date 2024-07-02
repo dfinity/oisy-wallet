@@ -1,0 +1,31 @@
+name: 'PR checks'
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - labeled
+
+jobs:
+  check-pr-title:
+    name: 'check-pr-title:required'
+    runs-on: ubuntu-latest
+    env:
+      TITLE: ${{ github.event.pull_request.title }}
+    steps:
+      - name: 'Check PR Title'
+        run: |
+          if [[ "$TITLE" =~ ^(feat|fix|chore|build|ci|docs|style|refactor|perf|test)(\([-a-zA-Z0-9,]+\))\!?\: ]]; then
+              echo "PR Title passes"
+          else
+              echo "PR Title does not match conventions:"
+              echo "   verb(scope): description"
+              echo "or for a breaking change:"
+              echo "   verb(scope)!: description"
+              echo "For scope, please use the affected canister name(s) or 'ci' for infrastructure changes."
+              exit 1
+          fi
+
