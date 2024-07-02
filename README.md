@@ -7,8 +7,8 @@
 <br/>
 
 [![Internet Computer portal](https://img.shields.io/badge/Internet-Computer-grey?logo=internet%20computer)](https://internetcomputer.org)
-[![GitHub Frontend Checks Workflow Status](https://img.shields.io/github/actions/workflow/status/dfinity/oisy-wallet/checks.yml?logo=github&label=Frontend%20checks)](https://github.com/dfinity/oisy-wallet/actions/workflows/checks.yml)
-[![Chat on Discord](https://img.shields.io/badge/chat-Discord-lightgrey?logo=Discord&style=flat-square)](https://discord.gg/E9FxceAg2j)
+[![GitHub Backend Tests Workflow Status](https://img.shields.io/github/actions/workflow/status/dfinity/oisy-wallet/backend-tests.yml?logo=github&label=Backend%20Tests)](https://github.com/dfinity/oisy-wallet/actions/workflows/backend-tests.yml)
+[![GitHub Frontend Tests Workflow Status](https://img.shields.io/github/actions/workflow/status/dfinity/oisy-wallet/frontend-tests.yml?logo=github&label=Frontend%20Tests)](https://github.com/dfinity/oisy-wallet/actions/workflows/frontend-tests.yml)
 
 </div>
 
