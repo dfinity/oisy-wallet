@@ -50,6 +50,7 @@
 		"text": {
 			"address": "Address",
 			"wallet_address": "Wallet address",
+			"your_addresses": "Your addresses",
 			"address_copied": "Address copied to clipboard.",
 			"wallet_address_copied": "Wallet address copied to clipboard.",
 			"display_wallet_address_qr": "Display wallet address as a QR code",
