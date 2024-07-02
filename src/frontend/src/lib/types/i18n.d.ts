@@ -41,6 +41,7 @@ interface I18nWallet {
 	text: {
 		address: string;
 		wallet_address: string;
+		your_addresses: string;
 		address_copied: string;
 		wallet_address_copied: string;
 		display_wallet_address_qr: string;

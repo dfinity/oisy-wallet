@@ -12,6 +12,8 @@
 	};
 </script>
 
+<svelte:window on:oisyReceive={openReceive} />
+
 <ReceiveButton on:click={openReceive} />
 
 {#if $modalReceive && $modalStore?.data === modalId}
