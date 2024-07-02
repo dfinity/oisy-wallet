@@ -6,7 +6,6 @@
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
-	import type { CanisterIdText } from '$lib/types/canister';
 
 	export let token: IcrcCustomToken;
 
