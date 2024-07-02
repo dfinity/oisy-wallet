@@ -47,7 +47,8 @@
 	let knownLedgerCanisterIds: LedgerCanisterIdText[] = [];
 	$: knownLedgerCanisterIds = $icrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId);
 
-	// The entire list of tokens to display to the user.
+	// The entire list of ICRC tokens to display to the user:
+	// This includes the default tokens (disabled or enabled), the custom tokens (disabled or enabled), and the environment tokens that have never been used.
 	let allIcrcTokens: IcrcCustomToken[] = [];
 	$: allIcrcTokens = [
 		...$icrcTokens,
@@ -56,6 +57,7 @@
 		)
 	].sort(sortIcTokens);
 
+	// The entire list of Erc20 tokens to display to the user.
 	let allErc20Tokens: EthereumUserToken[] = [];
 	$: allErc20Tokens = $erc20Tokens;
 
