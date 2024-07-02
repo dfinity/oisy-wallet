@@ -34,7 +34,7 @@ jobs:
 
       - name: Load Docker image
         run: |
-          gzip -d oisy-e2e-image.gz
+          gzip -d oisy-e2e-image.tar.gz
           docker load -i oisy-e2e-image.tar
 
       - name: Run E2E Docker container
