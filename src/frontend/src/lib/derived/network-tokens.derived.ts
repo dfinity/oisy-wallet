@@ -1,6 +1,5 @@
 import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
 import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID } from '$env/tokens.env';
-import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import {
 	notPseudoNetworkChainFusion,
 	pseudoNetworkChainFusion,
@@ -9,6 +8,7 @@ import {
 import { tokens } from '$lib/derived/tokens.derived';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { Token } from '$lib/types/token';
+import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -16,19 +16,7 @@ import { derived, type Readable } from 'svelte/store';
  */
 export const networkTokens: Readable<Token[]> = derived(
 	[tokens, selectedNetwork, pseudoNetworkChainFusion],
-	([$tokens, $selectedNetwork, $pseudoNetworkChainFusion]) =>
-		$tokens.filter((token) => {
-			const {
-				network: { id: networkId }
-			} = token;
-
-			return (
-				($pseudoNetworkChainFusion &&
-					!isTokenIcrcTestnet(token) &&
-					token.network.env !== 'testnet') ||
-				$selectedNetwork?.id === networkId
-			);
-		})
+	filterTokensForSelectedNetwork
 );
 
 export const enabledNetworkTokens: Readable<Token[]> = derived(
