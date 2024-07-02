@@ -6,15 +6,10 @@ on:
       - 'e2e/**'
   workflow_dispatch:
 
-env:
-  RUNNER_OS: ubuntu-20.04
-  IMAGE_NAME: oisy-e2e-image
-  CONTAINER_NAME: oisy-e2e-container
-
 jobs:
 
   docker-build-e2e:
-    runs-on: ${{ env.RUNNER_OS }}
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,7 +17,7 @@ jobs:
       - name: Build Base Docker Image
         uses: ./.github/actions/docker-build-e2e
         with:
-          name: ${{ env.IMAGE_NAME }}
+          name: oisy-e2e-image
 
   e2e:
     runs-on: ubuntu-latest
@@ -34,17 +29,17 @@ jobs:
       - name: Download Docker image artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.IMAGE_NAME }}
+          name: oisy-e2e-image
           path: .
 
       - name: Load Docker image
         run: |
-          gzip -d ${{ env.IMAGE_NAME }}.gz
-          docker load -i ${{ env.IMAGE_NAME }}.tar
+          gzip -d oisy-e2e-image.gz
+          docker load -i oisy-e2e-image.tar
 
       - name: Run Docker container
         run: |
-          docker run -d --name ${{ env.CONTAINER_NAME }} ${{ env.IMAGE_NAME }}:latest
+          docker run -d --name oisy-e2e-container oisy-e2e-image:latest
 
       - name: Prepare
         uses: ./.github/actions/prepare
@@ -54,8 +49,8 @@ jobs:
 
       - name: Cleanup Docker container
         run: |
-          docker stop ${{ env.CONTAINER_NAME }}
-          docker rm ${{ env.CONTAINER_NAME }}
+          docker stop oisy-e2e-container
+          docker rm oisy-e2e-container
 
   may-merge:
     needs: ['e2e']
