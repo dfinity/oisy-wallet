@@ -45,7 +45,14 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Test
-        run: npm run test
+        run: npm run e2e:ci
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
 
       - name: Cleanup Docker container
         run: |
