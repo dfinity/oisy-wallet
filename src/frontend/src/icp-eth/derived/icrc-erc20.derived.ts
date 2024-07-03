@@ -10,7 +10,9 @@ export const enabledIcrcTwinTokensAddresses: Readable<ContractAddressText[]> = d
 	[enabledIcrcTokens],
 	([$enabledIcrcTokens]) =>
 		$enabledIcrcTokens
-			.filter((token: IcToken) => nonNullish((token as IcCkToken).twinToken) && 'address' in token)
+			.filter((token: IcToken) =>
+				nonNullish(((token as Partial<IcCkToken>).twinToken as Erc20Token | undefined)?.address)
+			)
 			.map((token) => ((token as IcCkToken).twinToken as Erc20Token).address)
 );
 
