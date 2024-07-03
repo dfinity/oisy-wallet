@@ -17,28 +17,8 @@ export default defineConfig({
 	},
 	projects: [
 		{
-			name: 'chromium',
-			use: { ...devices['Desktop Chrome'] }
-		},
-		...(!DEV
-			? [
-					{
-						name: 'firefox',
-						use: { ...devices['Desktop Firefox'] }
-					},
-					{
-						name: 'webkit',
-						use: { ...devices['Desktop Safari'] }
-					},
-					{
-						name: 'iphone',
-						use: { ...devices['iPhone 14'] }
-					},
-					{
-						name: 'android',
-						use: { ...devices['Galaxy S9+'] }
-					}
-				]
-			: [])
+			name: 'Google Chrome',
+			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
+		}
 	]
 });
