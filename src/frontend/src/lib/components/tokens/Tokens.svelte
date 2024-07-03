@@ -41,7 +41,7 @@
 		{@const url = transactionsUrl({ token })}
 
 		<Listener {token}>
-			<div class="flex gap-8 mb-6">
+			<div class="flex gap-3 sm:gap-8 mb-6">
 				<a
 					class="no-underline flex-1"
 					href={url}
