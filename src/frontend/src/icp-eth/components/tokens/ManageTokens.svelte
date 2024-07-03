@@ -31,7 +31,7 @@
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-	import type { IcCkToken, IcToken } from '$icp/types/ic';
+	import type { IcCkToken } from '$icp/types/ic';
 
 	const dispatch = createEventDispatcher();
 
