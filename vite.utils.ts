@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -48,8 +48,12 @@ const readIds = ({
  * @param prefix
  */
 const readLocalCanisterIds = ({ prefix }: { prefix?: string }): Record<string, string> => {
-	const canisterIdsJsonFile = join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
-	return readIds({ filePath: canisterIdsJsonFile, prefix });
+	const dfxCanisterIdsJsonFile = join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
+	const e2eCanisterIdsJsonFile = join(process.cwd(), 'canister_e2e_ids.json');
+	return readIds({
+		filePath: existsSync(dfxCanisterIdsJsonFile) ? dfxCanisterIdsJsonFile : e2eCanisterIdsJsonFile,
+		prefix
+	});
 };
 
 /**
