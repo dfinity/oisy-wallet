@@ -30,7 +30,7 @@ jobs:
         with:
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
           branch: bot-tokens-sns-update
-          title: 'build: Update Sns Tokens'
+          title: 'feat(frontend): Update Sns Tokens'
           body: |
             Modifications have been made to the icons and metadata of the Icrc tokens known to the Sns-Aggregator.
 
@@ -57,6 +57,6 @@ jobs:
         with:
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
           branch: bot-tokens-ckerc20-update
-          title: 'build: Update ckErc20 Tokens'
+          title: 'feat(frontend): Update ckErc20 Tokens'
           body: |
             Modifications have been made to the list of ckErc20 tokens deployed by the Orchestrator.
