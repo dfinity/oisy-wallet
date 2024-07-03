@@ -31,6 +31,7 @@
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
+	import type { IcCkToken } from '$icp/types/ic';
 
 	const dispatch = createEventDispatcher();
 
@@ -90,16 +91,19 @@
 	let filter = '';
 	$: filter, debounceUpdateFilter();
 
+	const matchingToken = (token: Token): boolean =>
+		token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
+		token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
+		(icTokenIcrcCustomToken(token) &&
+			(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()));
+
 	let filteredTokens: Token[] = [];
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
 		? allTokens
-		: allTokens.filter(
-				(token) =>
-					token.name.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					token.symbol.toLowerCase().includes(filterTokens.toLowerCase()) ||
-					(icTokenIcrcCustomToken(token) &&
-						(token.alternativeName ?? '').toLowerCase().includes(filterTokens.toLowerCase()))
-			);
+		: allTokens.filter((token) => {
+				const twinToken = (token as IcCkToken).twinToken;
+				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
+			});
 
 	let tokens: Token[] = [];
 	$: tokens = filteredTokens.map((token) => {
