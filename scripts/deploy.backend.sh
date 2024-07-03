@@ -27,5 +27,5 @@ else
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = vec {};
      }
-  })"
+  })" --specified-id tdxud-2yaaa-aaaad-aadiq-cai
 fi
