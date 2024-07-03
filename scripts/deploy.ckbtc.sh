@@ -6,9 +6,9 @@
 DFX_NETWORK=local
 
 echo "Step 1: create canisters..."
-dfx canister create ckbtc_ledger --network "$DFX_NETWORK"
-dfx canister create ckbtc_minter --network "$DFX_NETWORK"
-dfx canister create ckbtc_kyt --network "$DFX_NETWORK"
+dfx canister create ckbtc_ledger --specified-id mc6ru-gyaaa-aaaar-qaaaq-cai --network "$DFX_NETWORK"
+dfx canister create ckbtc_minter --specified-id ml52i-qqaaa-aaaar-qaaba-cai --network "$DFX_NETWORK"
+dfx canister create ckbtc_kyt --specified-id pvm5g-xaaaa-aaaar-qaaia-cai --network "$DFX_NETWORK"
 
 MINTERID="$(dfx canister id ckbtc_minter --network "$DFX_NETWORK")"
 echo "$MINTERID"
