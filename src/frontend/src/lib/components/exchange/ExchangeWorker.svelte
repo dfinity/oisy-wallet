@@ -2,7 +2,6 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { initExchangeWorker } from '$lib/services/worker.exchange.services';
-	import { enabledErc20TokensAddresses } from '$eth/derived/erc20.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
 
 	let worker: ExchangeWorker | undefined;
