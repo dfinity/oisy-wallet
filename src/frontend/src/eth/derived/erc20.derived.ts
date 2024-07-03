@@ -1,9 +1,11 @@
 import { enabledEthereumNetworksIds } from '$eth/derived/networks.derived';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
-import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
+import type { ContractAddressText } from '$eth/types/address';
+import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
 import { derived, type Readable } from 'svelte/store';
@@ -40,14 +42,17 @@ const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
 const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 	[erc20DefaultTokens, erc20UserTokens],
 	([$erc20DefaultTokens, $erc20UserTokens]) =>
-		$erc20DefaultTokens.map(({ address, ...rest }) => {
+		$erc20DefaultTokens.map(({ address, network, ...rest }) => {
 			const userToken = $erc20UserTokens.find(
-				({ address: contractAddress }) => contractAddress === address
+				({ address: contractAddress, network: contractNetwork }) =>
+					contractAddress === address &&
+					(network as EthereumNetwork).chainId === (contractNetwork as EthereumNetwork).chainId
 			);
 
 			return mapDefaultTokenToToggleable({
 				defaultToken: {
 					address,
+					network,
 					...rest
 				},
 				userToken
@@ -93,11 +98,6 @@ export const erc20Tokens: Readable<Erc20TokenToggleable[]> = derived(
 	]
 );
 
-export const erc20TokensAddresses: Readable<Erc20ContractAddress[]> = derived(
-	[erc20Tokens],
-	([$erc20Tokens]) => $erc20Tokens.map(({ address }: Erc20Token) => ({ address }))
-);
-
 /**
  * The list of ERC20 tokens that are either enabled by default (static config) or enabled by the users regardless if they are custom or default.
  */
@@ -107,6 +107,11 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 		...$enabledErc20DefaultTokens,
 		...$enabledErc20UserTokens
 	]
+);
+
+export const enabledErc20TokensAddresses: Readable<ContractAddressText[]> = derived(
+	[enabledErc20Tokens],
+	([$enabledErc20Tokens]) => $enabledErc20Tokens.map(({ address }: Erc20Token) => address)
 );
 
 export const erc20UserTokensInitialized: Readable<boolean> = derived(
