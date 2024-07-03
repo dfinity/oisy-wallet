@@ -39,3 +39,5 @@ backend-v*.wasm.gz
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+e2e/*-snapshots/*Chrome-darwin.png
