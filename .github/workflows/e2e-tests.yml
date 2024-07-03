@@ -39,7 +39,7 @@ jobs:
 
       - name: Run E2E Docker container
         run: |
-          docker run -d --name oisy-e2e-container oisy-e2e-image:latest
+          docker run -d -p 4943:4943 --name oisy-e2e-container oisy-e2e-image:latest
 
       - name: Prepare
         uses: ./.github/actions/prepare
