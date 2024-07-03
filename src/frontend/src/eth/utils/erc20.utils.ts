@@ -26,13 +26,15 @@ export const mapErc20UserToken = ({
 	id,
 	symbol,
 	name,
+	network,
 	...rest
 }: MapErc20TokenParams & UserTokenState): Erc20UserToken => ({
-	id: id ?? Symbol(`user-token#${symbol}`),
+	id: id ?? Symbol(`user-token#${symbol}#${network.chainId}`),
 	standard: 'erc20',
 	name,
 	symbol,
 	icon: mapErc20Icon(symbol),
+	network,
 	...rest
 });
 
