@@ -4,8 +4,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  update_snapshots:
-    runs-on: ubuntu-latest
+
+  docker-build-e2e:
+    runs-on: ubuntu-20.04
     steps:
       - name: Fail if branch is main
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -15,10 +16,46 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Build E2E Docker Image
+        uses: ./.github/actions/docker-build-e2e
+        with:
+          name: oisy-e2e-image
+
+  update_snapshots:
+    runs-on: ubuntu-latest
+    needs: docker-build-e2e
+    steps:
+      - name: Fail if branch is main
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          echo "This workflow should not be triggered with workflow_dispatch on main"
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download E2E Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: oisy-e2e-image
+          path: .
+
+      - name: Load Docker image
+        run: |
+          gzip -d oisy-e2e-image.tar.gz
+          docker load -i oisy-e2e-image.tar
+
+      - name: Run E2E Docker container
+        run: |
+          docker run -d -p 4943:4943 --name oisy-e2e-container oisy-e2e-image:latest
+
       - name: Prepare
         uses: ./.github/actions/prepare
+
       - name: Run Playwright tests
         run: npm run e2e:snapshots
+
       - name: Commit Playwright updated snapshots
         uses: EndBug/add-and-commit@v9
         if: ${{ github.ref != 'refs/heads/main' }}
