@@ -1,6 +1,7 @@
 import { enabledEthereumNetworksIds } from '$eth/derived/networks.derived';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
+import type { ContractAddressText } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -104,7 +105,7 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 	]
 );
 
-export const enabledErc20TokensAddresses: Readable<string[]> = derived(
+export const enabledErc20TokensAddresses: Readable<ContractAddressText[]> = derived(
 	[enabledErc20Tokens],
 	([$enabledErc20Tokens]) => $enabledErc20Tokens.map(({ address }: Erc20Token) => address)
 );

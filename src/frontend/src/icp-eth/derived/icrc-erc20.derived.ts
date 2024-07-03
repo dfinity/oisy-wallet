@@ -1,11 +1,12 @@
 import { enabledErc20TokensAddresses } from '$eth/derived/erc20.derived';
+import type { ContractAddressText } from '$eth/types/address';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcCkToken, IcToken } from '$icp/types/ic';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const enabledIcrcTwinTokensAddresses: Readable<string[]> = derived(
+export const enabledIcrcTwinTokensAddresses: Readable<ContractAddressText[]> = derived(
 	[enabledIcrcTokens],
 	([$enabledIcrcTokens]) =>
 		$enabledIcrcTokens
