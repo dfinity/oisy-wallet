@@ -49,7 +49,7 @@ const readIds = ({
  */
 const readLocalCanisterIds = ({ prefix }: { prefix?: string }): Record<string, string> => {
 	const dfxCanisterIdsJsonFile = join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
-	const e2eCanisterIdsJsonFile = join(process.cwd(), 'canister_e2e_ids');
+	const e2eCanisterIdsJsonFile = join(process.cwd(), 'canister_e2e_ids.json');
 	return readIds({
 		filePath: existsSync(dfxCanisterIdsJsonFile) ? dfxCanisterIdsJsonFile : e2eCanisterIdsJsonFile,
 		prefix
