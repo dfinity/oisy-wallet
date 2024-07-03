@@ -3,6 +3,7 @@
 	import type { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { initExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
+	import { debounce } from '@dfinity/utils';
 
 	let worker: ExchangeWorker | undefined;
 
@@ -24,7 +25,9 @@
 		worker?.startExchangeTimer({ erc20Addresses: $enabledMergedErc20TokensAddresses });
 	};
 
-	$: worker, $enabledMergedErc20TokensAddresses, syncTimer();
+	const debounceSyncTimer = debounce(syncTimer);
+
+	$: worker, $enabledMergedErc20TokensAddresses, debounceSyncTimer();
 </script>
 
 <slot />
