@@ -5,6 +5,7 @@ import type { ContractAddressText } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
 import { derived, type Readable } from 'svelte/store';
@@ -41,14 +42,17 @@ const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
 const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 	[erc20DefaultTokens, erc20UserTokens],
 	([$erc20DefaultTokens, $erc20UserTokens]) =>
-		$erc20DefaultTokens.map(({ address, ...rest }) => {
+		$erc20DefaultTokens.map(({ address, network, ...rest }) => {
 			const userToken = $erc20UserTokens.find(
-				({ address: contractAddress }) => contractAddress === address
+				({ address: contractAddress, network: contractNetwork }) =>
+					contractAddress === address &&
+					(network as EthereumNetwork).chainId === (contractNetwork as EthereumNetwork).chainId
 			);
 
 			return mapDefaultTokenToToggleable({
 				defaultToken: {
 					address,
+					network,
 					...rest
 				},
 				userToken
