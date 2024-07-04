@@ -90,8 +90,8 @@
 			"fee": {
 				"__bigint__": "10000"
 			},
-			"alternativeName": "Modclub",
-			"url": "https://modclub.app"
+			"alternativeName": "DecideAI DAO",
+			"url": "https://decideai.xyz"
 		},
 		"indexCanisterVersion": "up-to-date"
 	},
@@ -396,6 +396,22 @@
 			},
 			"alternativeName": "ORIGYN",
 			"url": "https://www.origyn.com/"
+		},
+		"indexCanisterVersion": "up-to-date"
+	},
+	{
+		"ledgerCanisterId": "jcmow-hyaaa-aaaaq-aadlq-cai",
+		"rootCanisterId": "jmod6-4iaaa-aaaaq-aadkq-cai",
+		"indexCanisterId": "iidmm-fiaaa-aaaaq-aadmq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "WaterNeuron",
+			"symbol": "WTN",
+			"fee": {
+				"__bigint__": "1000000"
+			},
+			"alternativeName": "WaterNeuron",
+			"url": "https://forum.dfinity.org/t/introducing-waterneuron/30897"
 		},
 		"indexCanisterVersion": "up-to-date"
 	}
