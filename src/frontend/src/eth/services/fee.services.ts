@@ -49,8 +49,9 @@ export const getErc20FeeData = async ({
 		const fee = await fn(rest);
 
 		// The cross-chain team recommended adding 10% to the fee to provide some buffer for when the transaction is effectively executed.
-		// However, according to our observations, we noticed that ERC20 transactions require even more fees. That is why we actually add 25%.
-		const additionalAmount = BigNumber.from(fee.toBigInt() / 4n);
+		// However, according to our observations, we noticed that ERC20 transactions require even more fees. That is why we actually add 50%.
+		// Note that originally we added 25% but, after facing some issues with transferring Pepe on busy network, we decided to enhance the allowance further.
+		const additionalAmount = BigNumber.from(fee.toBigInt() / 2n);
 
 		return fee.add(additionalAmount);
 	} catch (err: unknown) {
