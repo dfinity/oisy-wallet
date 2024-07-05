@@ -2,6 +2,7 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens.env';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { address as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -125,12 +126,12 @@ export const loadErc20Balances = async ({
 	networkId
 }: {
 	address: OptionAddress;
-	erc20Tokens: Erc20Token[];
+	erc20Tokens: Erc20TokenToggleable[];
 	networkId: NetworkId;
 }): Promise<{ success: boolean }> => {
 	const results = await Promise.all([
 		...erc20Tokens
-			.filter(({ network: { id } }) => id === networkId)
+			.filter(({ network: { id }, enabled }) => id === networkId && enabled)
 			.map((token) => loadErc20Balance({ token, address }))
 	]);
 

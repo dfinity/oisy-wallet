@@ -63,7 +63,7 @@ const erc20DefaultTokensToggleable: Readable<Erc20TokenToggleable[]> = derived(
 /**
  * The list of default tokens that are enabled - i.e. the list of default ERC20 tokens minus those disabled by the user.
  */
-const enabledErc20DefaultTokens: Readable<Erc20Token[]> = derived(
+const enabledErc20DefaultTokens: Readable<Erc20TokenToggleable[]> = derived(
 	[erc20DefaultTokensToggleable],
 	([$erc20DefaultTokensToggleable]) =>
 		$erc20DefaultTokensToggleable.filter(({ enabled }) => enabled)
@@ -84,7 +84,7 @@ const erc20UserTokensToggleable: Readable<Erc20UserToken[]> = derived(
 
 const enabledErc20UserTokens: Readable<Erc20UserToken[]> = derived(
 	[erc20UserTokens],
-	([$erc20UserTokensToggleable]) => $erc20UserTokensToggleable.filter(({ enabled }) => enabled)
+	([$erc20UserTokens]) => $erc20UserTokens.filter(({ enabled }) => enabled)
 );
 
 /**
@@ -101,7 +101,7 @@ export const erc20Tokens: Readable<Erc20TokenToggleable[]> = derived(
 /**
  * The list of ERC20 tokens that are either enabled by default (static config) or enabled by the users regardless if they are custom or default.
  */
-export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
+export const enabledErc20Tokens: Readable<Erc20TokenToggleable[]> = derived(
 	[enabledErc20DefaultTokens, enabledErc20UserTokens],
 	([$enabledErc20DefaultTokens, $enabledErc20UserTokens]) => [
 		...$enabledErc20DefaultTokens,
