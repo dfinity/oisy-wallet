@@ -121,17 +121,13 @@ export const loadBalances = async (): Promise<{ success: boolean }> => {
 
 export const loadErc20Balances = async ({
 	address,
-	erc20Tokens,
-	networkId
+	erc20Tokens
 }: {
 	address: OptionAddress;
 	erc20Tokens: Erc20Token[];
-	networkId: NetworkId;
 }): Promise<{ success: boolean }> => {
 	const results = await Promise.all([
-		...erc20Tokens
-			.filter(({ network: { id } }) => id === networkId)
-			.map((token) => loadErc20Balance({ token, address }))
+		...erc20Tokens.map((token) => loadErc20Balance({ token, address }))
 	]);
 
 	return { success: results.every(({ success }) => success === true) };
