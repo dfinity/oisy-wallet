@@ -24,8 +24,6 @@
 	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
 </script>
 
-<Alpha />
-
 {#if summary}
 	<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
 		<div class="icon flex justify-between items-start mt-6 md:mt-12 mb-0.5 pt-2">
