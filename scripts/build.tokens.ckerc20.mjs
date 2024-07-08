@@ -77,9 +77,9 @@ const buildOrchestratorInfo = async (orchestratorId) => {
 const ORCHESTRATOR_STAGING_ID = Principal.fromText('2s5qh-7aaaa-aaaar-qadya-cai');
 const ORCHESTRATOR_PRODUCTION_ID = Principal.fromText('vxkom-oyaaa-aaaar-qafda-cai');
 
-const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'env');
+const DATA_FOLDER = join(process.cwd(), '../src', 'frontend', 'src', 'env');
 
-const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
+const LOGO_FOLDER = join(process.cwd(), '../src', 'frontend', 'src', 'icp-eth', 'assets');
 
 const saveTokenLogo = async (canisterId, name) => {
 	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
@@ -96,7 +96,15 @@ const saveTokenLogo = async (canisterId, name) => {
 
 	const data = await metadata({ certified: true });
 
-	const logoData = data.find((item) => item[0] === 'icrc1:logo')[1].Text;
+	const logoItem = data.find((item) => item[0] === 'icrc1:logo');
+
+	if (isNullish(logoItem)) {
+		const error = new Error(`No 'icrc1:logo' data found for ${name}`);
+		console.warn(error.stack);
+		return;
+	}
+
+	const logoData = logoItem[1].Text;
 
 	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
 
