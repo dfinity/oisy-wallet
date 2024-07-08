@@ -27,19 +27,11 @@
 
 			<TokenLogo {token} slot="icon" color="white" />
 
-			<output class="break-all" slot="description">
-				{formatToken({
-					value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
-					unitName: token.decimals
-				})}
-				{token.symbol}
-			</output>
+			<slot name="description" slot="description" />
 
-			<CardAmount slot="action">
-				<ExchangeTokenValue {token} />
-			</CardAmount>
+			<slot name="exchange" slot="action" />
 		</Card>
 	</a>
 
-	<TokenReceiveSend {token} />
+	<slot name="actions" />
 </div>

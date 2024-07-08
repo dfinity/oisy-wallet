@@ -4,5 +4,11 @@
 </script>
 
 {#each $enabledNetworkTokens as token (token.id)}
-	<TokenCard {token} />
+	<TokenCard {token}>
+		<span class="break-all" slot="description">
+			-/- {token.symbol}
+		</span>
+
+		<span slot="actions" class="mr-[3px] font-bold">-/-</span>
+	</TokenCard>
 {/each}
