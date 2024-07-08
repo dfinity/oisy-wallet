@@ -62,8 +62,12 @@ pub fn public_key_to_p2pkh_address(public_key: &[u8], network: BitcoinNetwork) -
         BitcoinNetwork::Testnet | BitcoinNetwork::Regtest => 0x6f,
         BitcoinNetwork::Mainnet => 0x00,
     };
-    let mut data_with_prefix = vec![prefix];
-    data_with_prefix.extend(result);
+    let checksum = {
+          let mut hasher = sha2::Sha256::new();
+          hasher.update(&[prefix]);
+          hasher.update(&result);
+          sha256(hasher.finalize().to_vec()).truncate(4)
+    };
 
     let checksum = &sha256(&sha256(&data_with_prefix.clone()))[..4];
 
