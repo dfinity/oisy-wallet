@@ -14,6 +14,7 @@
 	let background: string;
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
 
+	// We only want to display the "Sign-in" call to action on pages that actually are displaying any content in the Hero pane.
 	let heroContent = true;
 	$: heroContent = usdTotal || summary;
 </script>
