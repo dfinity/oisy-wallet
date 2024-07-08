@@ -21,3 +21,7 @@ export interface TokenMetadata {
 }
 
 export type RequiredToken = Required<Token>;
+
+export type OptionToken = Token | undefined | null;
+export type OptionTokenId = TokenId | undefined | null;
+export type OptionTokenStandard = TokenStandard | undefined | null;

@@ -3,7 +3,7 @@ import {
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks.ircrc.env';
+import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
 import {

@@ -6,7 +6,12 @@
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
-	import { networkICP, networkId } from '$lib/derived/network.derived';
+	import {
+		networkEthereum,
+		networkICP,
+		networkId,
+		pseudoNetworkChainFusion
+	} from '$lib/derived/network.derived';
 	import { networkParam } from '$lib/utils/nav.utils';
 	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
 	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
@@ -14,6 +19,8 @@
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
+	import WalletAddresses from '$lib/components/core/WalletAddresses.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -37,8 +44,10 @@
 	<div class="flex flex-col gap-4">
 		{#if $networkICP}
 			<IcWalletAddress />
-		{:else}
+		{:else if $networkEthereum}
 			<EthWalletAddress />
+		{:else if $pseudoNetworkChainFusion}
+			<WalletAddresses on:icReceiveTriggered={() => (visible = false)} />
 		{/if}
 
 		<Hr />
@@ -63,14 +72,10 @@
 			{$i18n.navigation.text.manage_internet_identity}
 		</ExternalLink>
 
-		<button
-			class="flex gap-2 items-center no-underline hover:text-blue active:text-blue"
-			aria-label={$i18n.navigation.alt.more_settings}
-			on:click={gotoSettings}
-		>
+		<ButtonMenu ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
 			<IconSettings />
 			{$i18n.settings.text.title}
-		</button>
+		</ButtonMenu>
 
 		<SignOut on:icLogoutTriggered={() => (visible = false)} />
 	</div>

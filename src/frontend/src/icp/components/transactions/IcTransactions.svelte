@@ -9,9 +9,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcpTransactionModal from './IcTransactionModal.svelte';
 	import type { IcToken, IcTransactionUi } from '$icp/types/ic';
-	import { token } from '$lib/derived/token.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
-	import IcReceiveBitcoin from '$icp/components/receive/IcReceiveBitcoin.svelte';
+	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
 	import Info from '$icp/components/info/Info.svelte';
 	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 	import type { ComponentType } from 'svelte';
@@ -26,10 +25,11 @@
 	import { slide } from 'svelte/transition';
 	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import IcReceiveEthereum from '$icp/components/receive/IcReceiveEthereum.svelte';
+	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import { token } from '$lib/stores/token.store';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
@@ -62,6 +62,11 @@
 			return;
 		}
 
+		if (isNullish($token)) {
+			// Prevent unlikely events. UI wise if we are about to load the next transactions, it's probably because transactions for a loaded token have been fetched.
+			return;
+		}
+
 		await loadNextTransactions({
 			owner: $authStore.identity.getPrincipal(),
 			identity: $authStore.identity,
@@ -85,9 +90,9 @@
 
 	<svelte:fragment slot="end">
 		{#if $tokenCkBtcLedger}
-			<IcReceiveBitcoin />
+			<IcTransactionsBitcoinStatus />
 		{:else if ckEthereum}
-			<IcReceiveEthereum />
+			<IcTransactionsEthereumStatus />
 		{/if}
 	</svelte:fragment>
 </Header>

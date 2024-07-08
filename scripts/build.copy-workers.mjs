@@ -6,7 +6,7 @@ await cp(
 	'./build/workers',
 	{
 		recursive: true,
-		filter: (source, destination) => extname(source) !== '.map'
+		filter: (source) => extname(source) !== '.map'
 	},
 	(err) => {
 		if (err === null) {

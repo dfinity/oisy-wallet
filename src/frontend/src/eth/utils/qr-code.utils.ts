@@ -1,7 +1,7 @@
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { type QrResponse, type QrStatus } from '$lib/types/qr-code';
-import type { Token } from '$lib/types/token';
+import type { OptionToken, Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { hexStringToUint8Array, isNullish, nonNullish } from '@dfinity/utils';
@@ -16,7 +16,7 @@ export const decodeQrCode = ({
 }: {
 	status: QrStatus;
 	code?: string | undefined;
-	expectedToken: Token;
+	expectedToken: OptionToken;
 	ethereumTokens: Token[];
 	erc20Tokens: Erc20Token[];
 }): QrResponse => {
@@ -96,6 +96,10 @@ export const decodeQrCode = ({
 			) ?? undefined
 		);
 	};
+
+	if (isNullish(expectedToken)) {
+		return { status: 'token_incompatible' };
+	}
 
 	const token =
 		prefix === 'ethereum'

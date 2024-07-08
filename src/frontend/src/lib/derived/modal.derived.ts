@@ -1,9 +1,9 @@
 import { modalStore } from '$lib/stores/modal.store';
 import { derived, type Readable } from 'svelte/store';
 
-export const modalReceive: Readable<boolean> = derived(
+export const modalEthReceive: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'receive'
+	($modalStore) => $modalStore?.type === 'eth-receive'
 );
 export const modalIcpReceive: Readable<boolean> = derived(
 	modalStore,
@@ -20,6 +20,10 @@ export const modalCkBTCReceive: Readable<boolean> = derived(
 export const modalCkETHReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'cketh-receive'
+);
+export const modalReceive: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'receive'
 );
 export const modalSend: Readable<boolean> = derived(
 	modalStore,
@@ -65,13 +69,9 @@ export const modalIcTransaction: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-transaction'
 );
-export const modalAddToken: Readable<boolean> = derived(
+export const modalManageTokens: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'add-token'
-);
-export const modalIcManageTokens: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'ic-manage-tokens'
+	($modalStore) => $modalStore?.type === 'manage-tokens'
 );
 export const modalHideToken: Readable<boolean> = derived(
 	modalStore,

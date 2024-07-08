@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { loadCkEthMinterInfo } from '$icp-eth/services/cketh.services';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
-	import { icrcTokensStore } from '$icp/stores/icrc.store';
+	import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 	import {
 		IC_CKETH_MINTER_CANISTER_ID,
 		LOCAL_CKETH_MINTER_CANISTER_ID,
 		STAGING_CKETH_MINTER_CANISTER_ID
-	} from '$env/networks.ircrc.env';
+	} from '$env/networks.icrc.env';
 	import { SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { isNullish } from '@dfinity/utils';
@@ -51,7 +51,7 @@
 
 	$: $ethToCkETHEnabled,
 		$erc20ToCkErc20Enabled,
-		$icrcTokensStore,
+		$icrcDefaultTokensStore,
 		nativeTokenId,
 		(async () => await load())();
 </script>

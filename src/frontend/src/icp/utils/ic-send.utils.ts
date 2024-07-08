@@ -3,7 +3,7 @@ import {
 	CKBTC_LEDGER_CANISTER_IDS,
 	CKERC20_LEDGER_CANISTER_IDS,
 	CKETH_LEDGER_CANISTER_IDS
-} from '$env/networks.ircrc.env';
+} from '$env/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';

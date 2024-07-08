@@ -3,10 +3,10 @@
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import { tokenId } from '$lib/derived/token.derived';
+	import { token } from '$lib/stores/token.store';
 
 	let transactionsInitialized: boolean;
-	$: transactionsInitialized = nonNullish($icTransactionsStore?.[$tokenId]);
+	$: transactionsInitialized = nonNullish($token) && nonNullish($icTransactionsStore?.[$token.id]);
 </script>
 
 {#if !transactionsInitialized}

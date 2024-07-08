@@ -5,6 +5,7 @@
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
 
 	export let token: IcrcCustomToken;
 
@@ -12,7 +13,10 @@
 	$: outdated = token.indexCanisterVersion === 'outdated';
 
 	let disabled = false;
-	$: disabled = token.category === 'default' || outdated;
+	$: disabled =
+		(token.category === 'default' && token.standard === 'icp') ||
+		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.includes(token.ledgerCanisterId) ||
+		outdated;
 
 	let checked: boolean;
 	$: checked = token.enabled;
@@ -51,7 +55,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class:outdated role="button" on:click={onClick}>
 	<Toggle
-		ariaLabel={$i18n.tokens.text.hide_zero_balances}
+		ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
 		{disabled}
 		bind:checked
 		on:nnsToggle={toggle}

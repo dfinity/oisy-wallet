@@ -6,7 +6,7 @@
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
-	import ReceiveAddressQRCode from '$icp-eth/components/receive/ReceiveAddressQRCode.svelte';
+	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
@@ -23,6 +23,7 @@
 	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { createEventDispatcher } from 'svelte';
 
 	/**
 	 * Props
@@ -65,6 +66,8 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
+	const dispatch = createEventDispatcher();
+
 	const close = () =>
 		closeModal(() => {
 			destination = '';
@@ -74,6 +77,8 @@
 			sendProgressStep = ProgressStepsSend.INITIALIZATION;
 
 			currentStep = undefined;
+
+			dispatch('nnsClose');
 		});
 </script>
 

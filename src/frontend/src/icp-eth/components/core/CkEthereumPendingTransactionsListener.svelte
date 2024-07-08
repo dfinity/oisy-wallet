@@ -5,7 +5,7 @@
 	import type { OptionAddress } from '$lib/types/address';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { token, tokenId } from '$lib/derived/token.derived';
+	import { tokenId } from '$lib/derived/token.derived';
 	import { address } from '$lib/derived/address.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { balance } from '$lib/derived/balances.derived';
@@ -28,6 +28,7 @@
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
 	import type { TransactionResponse } from '@ethersproject/abstract-provider';
+	import { token } from '$lib/stores/token.store';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -36,6 +37,10 @@
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
 	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
+		if (isNullish($tokenId) || isNullish($token)) {
+			return;
+		}
+
 		if (isNullish(toAddress)) {
 			icPendingTransactionsStore.reset($tokenId);
 			return;

@@ -15,6 +15,3 @@ yarn.lock
 /target
 
 .dfx
-
-src/frontend/src/env/tokens.sns.json
-src/frontend/src/env/tokens.ckerc20.json

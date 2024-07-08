@@ -1,0 +1,41 @@
+{
+	"backend": {
+		"local": "tdxud-2yaaa-aaaad-aadiq-cai"
+	},
+	"ckbtc_index": {
+		"local": "mm444-5iaaa-aaaar-qaabq-cai"
+	},
+	"ckbtc_kyt": {
+		"local": "pvm5g-xaaaa-aaaar-qaaia-cai"
+	},
+	"ckbtc_ledger": {
+		"local": "mc6ru-gyaaa-aaaar-qaaaq-cai"
+	},
+	"ckbtc_minter": {
+		"local": "ml52i-qqaaa-aaaar-qaaba-cai"
+	},
+	"cketh_index": {
+		"local": "sh5u2-cqaaa-aaaar-qacna-cai"
+	},
+	"cketh_ledger": {
+		"local": "apia6-jaaaa-aaaar-qabma-cai"
+	},
+	"cketh_minter": {
+		"local": "jzenf-aiaaa-aaaar-qaa7q-cai"
+	},
+	"ckusdc_index": {
+		"local": "ycvkf-paaaa-aaaar-qaelq-cai"
+	},
+	"ckusdc_ledger": {
+		"local": "yfumr-cyaaa-aaaar-qaela-cai"
+	},
+	"icp_index": {
+		"local": "qhbym-qaaaa-aaaaa-aaafq-cai"
+	},
+	"icp_ledger": {
+		"local": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+	},
+	"internet_identity": {
+		"local": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+	}
+}

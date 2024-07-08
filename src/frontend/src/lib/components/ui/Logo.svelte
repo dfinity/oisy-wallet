@@ -5,8 +5,15 @@
 
 	export let src: string | undefined;
 	export let alt = '';
-	export let size: string;
+	export let size: 'small' | 'medium' | 'big' = 'small';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
+
+	const sizes = {
+		small: '22px',
+		medium: '52px',
+		big: '64px'
+	};
+	let sizePx = sizes[size];
 
 	let loaded = false;
 
@@ -25,25 +32,23 @@
 
 <div
 	class="flex items-center justify-center rounded-full overflow-hidden"
-	class:bg-dust={color === 'dust'}
-	class:bg-off-white={color === 'off-white'}
-	class:bg-white={color === 'white'}
+	class:bg-dust={color === 'dust' && !loaded}
+	class:bg-off-white={color === 'off-white' && !loaded}
+	class:bg-white={color === 'white' && !loaded}
 	class:opacity-10={!loaded}
-	style={`border: 1px solid var(--color-${
-		color === 'off-white' ? 'off-white' : 'dust'
-	}); width: calc(${size} + 2px); height: calc(${size} + 2px); transition: opacity 0.15s ease-in;`}
+	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 >
 	{#if nonNullish(src) && !loadingError}
 		<Img
 			{src}
 			{alt}
-			width={size}
-			height={size}
+			width={sizePx}
+			height={sizePx}
 			on:load={() => (loaded = true)}
 			on:error={onError}
 			rounded
 		/>
 	{:else}
-		<IconRandom {size} text={alt} />
+		<IconRandom size={sizePx} text={alt} />
 	{/if}
 </div>

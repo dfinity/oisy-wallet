@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
-	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalSend } from '$lib/derived/modal.derived';
 	import SendModal from '$eth/components/send/SendModal.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import { i18n } from '$lib/stores/i18n.store';
+	import SendButton from '$lib/components/send/SendButton.svelte';
+	import { loadTokenAndRun } from '$icp/services/token.services';
+	import type { Token } from '$lib/types/token';
+
+	export let token: Token;
+	export let compact = false;
+
+	const modalId = Symbol();
 
 	const isDisabled = (): boolean => $addressNotLoaded;
 
@@ -19,20 +24,13 @@
 			}
 		}
 
-		modalStore.openSend();
+		const callback = async () => modalStore.openSend(modalId);
+		await loadTokenAndRun({ token, callback });
 	};
 </script>
 
-<button
-	class="hero"
-	on:click={async () => await openSend()}
-	disabled={$isBusy}
-	class:opacity-50={$isBusy}
->
-	<IconSend size="28" />
-	<span>{$i18n.send.text.send}</span></button
->
+<SendButton on:click={async () => await openSend()} {compact} />
 
-{#if $modalSend}
-	<SendModal />
+{#if $modalSend && $modalStore?.data === modalId}
+	<SendModal on:nnsClose />
 {/if}

@@ -2,7 +2,7 @@ import {
 	IC_CKETH_LEDGER_CANISTER_ID,
 	LOCAL_CKETH_LEDGER_CANISTER_ID,
 	STAGING_CKETH_LEDGER_CANISTER_ID
-} from '$env/networks.ircrc.env';
+} from '$env/networks.icrc.env';
 import { retrieveBtc } from '$icp/api/ckbtc-minter.api';
 import { withdrawErc20, withdrawEth } from '$icp/api/cketh-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';

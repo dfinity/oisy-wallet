@@ -6,10 +6,7 @@
 	import { fade } from 'svelte/transition';
 	import { Spinner, Toasts } from '@dfinity/gix-components';
 	import Busy from '$lib/components/ui/Busy.svelte';
-
 	import '$lib/styles/global.scss';
-	import { authSignedIn } from '$lib/derived/auth.derived';
-	import SignIn from '$lib/components/pages/SignIn.svelte';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -93,13 +90,9 @@
 		<Spinner />
 	</div>
 {:then _}
-	{#if $authSignedIn}
-		<slot />
-	{:else}
-		<SignIn />
-	{/if}
+	<slot />
 {/await}
 
 <Banner />
-<Toasts />
+<Toasts maxVisible={3} />
 <Busy />
