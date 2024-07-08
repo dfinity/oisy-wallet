@@ -33,7 +33,14 @@ interface I18nNavigation {
 }
 
 interface I18nAuth {
-	text: { title: string; description: string; connect_with: string; logout: string };
+	text: {
+		title: string;
+		description: string;
+		connect_with: string;
+		connect: string;
+		logout: string;
+	};
+	alt: { sign_in: string };
 	error: { no_internet_identity: string };
 }
 
