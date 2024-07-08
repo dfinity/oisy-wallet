@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -14,6 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -24,27 +24,15 @@
 	$: testnets = $testnetsStore?.enabled ?? false;
 </script>
 
-<button
-	class="token icon desktop-wide"
-	bind:this={button}
+<ButtonHero
+	bind:button
 	on:click={() => (visible = true)}
-	aria-label={$i18n.networks.title}
+	ariaLabel={$i18n.networks.title}
+	imgSrc={$selectedNetwork?.icon ?? chainFusion}
+	imgAlt={replacePlaceholders($i18n.core.alt.logo, {
+		$name: $selectedNetwork?.name ?? $i18n.networks.chain_fusion
+	})}>{$selectedNetwork?.name ?? $i18n.networks.chain_fusion} <IconChevronDown /></ButtonHero
 >
-	<span class="block w-[22px] h-[22px]">
-		<Img
-			src={$selectedNetwork?.icon ?? chainFusion}
-			alt={replacePlaceholders($i18n.core.alt.logo, {
-				$name: $selectedNetwork?.name ?? $i18n.networks.chain_fusion
-			})}
-			width="100%"
-			height="100%"
-			rounded
-		/>
-	</span>
-	<span class="text-black font-bold"
-		>{$selectedNetwork?.name ?? $i18n.networks.chain_fusion} <IconChevronDown /></span
-	>
-</button>
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<ul class="flex flex-col gap-4 list-none">
