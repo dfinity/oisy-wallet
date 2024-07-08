@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Alpha from '$lib/components/core/Alpha.svelte';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { fade, slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
