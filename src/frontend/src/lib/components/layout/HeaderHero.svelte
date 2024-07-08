@@ -6,7 +6,7 @@
 	import Back from '$lib/components/core/Back.svelte';
 	import { isSubRoute } from '$lib/utils/nav.utils';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 	import SignIn from '$lib/components/hero/SignIn.svelte';
 
 	let back = false;
