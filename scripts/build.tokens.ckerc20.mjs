@@ -94,7 +94,7 @@ const saveTokenLogo = async (canisterId, name) => {
 		canisterId
 	});
 
-	const data = await metadata({});
+	const data = await metadata({ certified: true });
 
 	const logoData = data.find((item) => item[0] === 'icrc1:logo')[1].Text;
 
