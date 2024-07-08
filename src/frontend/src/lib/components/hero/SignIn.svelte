@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { signIn } from '$lib/services/auth.services';
 	import icpLight from '$icp/assets/icp_light.svg';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';

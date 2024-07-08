@@ -115,6 +115,7 @@ interface I18nSettings {
 		testnets: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
+		sign_in: string;
 	};
 	alt: { testnets_toggle: string };
 }

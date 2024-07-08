@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { token } from '$lib/stores/token.store';

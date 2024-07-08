@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { authSignedIn } from '$lib/derived/auth.derived.js';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
