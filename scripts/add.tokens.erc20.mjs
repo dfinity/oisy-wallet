@@ -26,6 +26,9 @@ if (isNullish(ETHERSCAN_API_KEY)) {
 const DATA_DIR = 'src/frontend/src/env';
 const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
 
+const SVG_DIR = 'src/frontend/src/icp-eth/assets';
+const SVG_DIR_PATH = resolve(process.cwd(), SVG_DIR);
+
 const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const unescapeRegExp = (string) => string.replace(/\\([.*+?^${}()|/[\]\\])/g, '$1');
@@ -336,6 +339,8 @@ const main = async () => {
 		`Found ${tokensToProcess.length} tokens to check: ${tokensToProcess.map(({ mainSymbol }) => mainSymbol).join(', ')}`
 	);
 
+	let newTokens = [];
+
 	for (const token of tokensToProcess) {
 		const { mainSymbol } = token;
 
@@ -345,20 +350,26 @@ const main = async () => {
 		const { fileName, mainnetToken, testnetToken } = await manageEnvFile(token);
 
 		updateTokensErc20Env({ fileName, mainnetToken, testnetToken });
+
+		if (nonNullish(mainnetToken) || nonNullish(testnetToken)) {
+			newTokens.push(token);
+		}
 	}
 
 	if (filesCreatedOrModified) {
 		console.log('--------------------------------');
 		console.log('Running npm run format && npm run lint');
 		execSync('npm run format && npm run lint', { stdio: 'inherit' });
+	}
 
+	if (newTokens.length > 0) {
 		console.log('--------------------------------');
 		console.log(
 			'Final Step: To complete the integration of the new tokens, you need to create SVG icon files for each token and place them in the correct directory.'
 		);
-		console.log(`Navigate to the following directory: ${path.join(DATA_DIR)}`);
+		console.log(`Navigate to the following directory: ${path.join(SVG_DIR_PATH)}`);
 
-		tokensToProcess.forEach(({ mainSymbol }) => {
+		newTokens.forEach(({ mainSymbol }) => {
 			console.log(
 				`- For token ${mainSymbol}, create an SVG file named '${mainSymbol.toLowerCase()}.svg'`
 			);
@@ -368,9 +379,9 @@ const main = async () => {
 			'Ensure that the SVG files are valid SVG format and represent the tokens, typically the logo or symbol of each token.'
 		);
 
-		tokensToProcess.forEach(({ mainSymbol }) => {
+		newTokens.forEach(({ mainSymbol }) => {
 			console.log(
-				`Example: For token ${mainSymbol}, the SVG file should be: ${DATA_DIR}/${mainSymbol.toLowerCase()}.svg`
+				`Example: For token ${mainSymbol}, the SVG file should be: ${SVG_DIR_PATH}/${mainSymbol.toLowerCase()}.svg`
 			);
 		});
 	}
