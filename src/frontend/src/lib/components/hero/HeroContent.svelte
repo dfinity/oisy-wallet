@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Alpha from '$lib/components/core/Alpha.svelte';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { fade, slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
@@ -23,8 +22,6 @@
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
 </script>
-
-<Alpha />
 
 {#if summary}
 	<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
