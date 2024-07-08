@@ -1,5 +1,5 @@
 <script lang="ts">
-	import HeaderHero from '$lib/components/layout/HeaderHero.svelte';
+	import Header from '$lib/components/hero/Header.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
@@ -16,7 +16,7 @@
 </script>
 
 <div class={`hero ${background}`}>
-	<HeaderHero />
+	<Header />
 
 	<article
 		class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main"
