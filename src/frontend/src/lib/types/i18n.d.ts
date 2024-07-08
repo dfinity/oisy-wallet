@@ -38,6 +38,7 @@ interface I18nAuth {
 		description: string;
 		connect_with: string;
 		connect: string;
+		connect_to_oisy: string;
 		logout: string;
 	};
 	alt: { sign_in: string };

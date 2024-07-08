@@ -52,7 +52,8 @@ button {
 	}
 
 	&.ic {
-		padding: var(--padding) var(--padding-4x) var(--padding) var(--padding-2x);
+		width: fit-content;
+		padding: var(--padding) var(--padding-8x) var(--padding) var(--padding-2x);
 
 		span {
 			display: block;
