@@ -8,12 +8,12 @@ import { createAgent, fromNullable, isNullish, jsonReplacer } from '@dfinity/uti
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
-	const agent = await createAgent({
-		identity: new AnonymousIdentity(),
-		host: 'https://icp-api.io'
-	});
+const agent = await createAgent({
+	identity: new AnonymousIdentity(),
+	host: 'https://icp-api.io'
+});
 
+const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
 	const { getOrchestratorInfo } = CkETHOrchestratorCanister.create({
 		agent,
 		canisterId
@@ -88,11 +88,6 @@ const saveTokenLogo = async (canisterId, name) => {
 	if (existsSync(file)) {
 		return;
 	}
-
-	const agent = await createAgent({
-		identity: new AnonymousIdentity(),
-		host: 'https://icp-api.io'
-	});
 
 	const { metadata } = IcrcLedgerCanister.create({
 		agent,
