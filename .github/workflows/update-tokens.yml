@@ -44,9 +44,12 @@ jobs:
       - name: Update
         run: npm run build:tokens-ckerc20
 
+      - name: Stage Changes
+        run: git add .
+
       - name: Check for Changes
         run: |
-          if ! git diff --quiet; then
+          if ! git diff --cached --quiet; then
             echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
           fi
 
@@ -59,4 +62,4 @@ jobs:
           branch: bot-tokens-ckerc20-update
           title: 'feat(frontend): Update ckErc20 Tokens'
           body: |
-            Modifications have been made to the list of ckErc20 tokens deployed by the Orchestrator.
+            Modifications have been made to the list of ckErc20 tokens deployed by the Orchestrator and/or to their icons.
