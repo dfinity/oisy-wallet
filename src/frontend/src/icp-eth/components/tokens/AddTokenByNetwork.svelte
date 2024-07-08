@@ -64,7 +64,7 @@
 
 		<div id="network" class="mt-1 pt-0.5 network">
 			<Dropdown name="network" bind:selectedValue={networkName}>
-				<option disabled selected value={undefined} class="hidden"
+				<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
 					><span class="description">{$i18n.tokens.manage.placeholder.select_network}</span></option
 				>
 				{#each availableNetworks as network}
