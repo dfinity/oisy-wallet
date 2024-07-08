@@ -13,9 +13,13 @@
 
 	let background: string;
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
+
+	// We only want to display the "Sign-in" call to action on pages that actually are displaying any content in the Hero pane.
+	let heroContent = true;
+	$: heroContent = usdTotal || summary;
 </script>
 
-<div class={`hero ${background}`}>
+<div class={`hero pb-4 md:pb-6 ${background}`}>
 	<Header />
 
 	<article
@@ -27,7 +31,7 @@
 
 		{#if $authSignedIn}
 			<HeroContent {usdTotal} {summary} {actions} {send} />
-		{:else}
+		{:else if heroContent}
 			<HeroSignIn />
 		{/if}
 	</article>
