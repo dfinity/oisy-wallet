@@ -1,15 +1,14 @@
 <script lang="ts">
-	import Loader from '$lib/components/core/Loader.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
-	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
-	import LoaderBalances from '$icp-eth/components/core/LoaderBalances.svelte';
-	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
-	import LoaderMetamask from '$lib/components/core/LoaderMetamask.svelte';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
+	import type { ComponentType } from 'svelte';
+	import { authSignedIn } from '$lib/derived/auth.derived';
+	import Loaders from '$lib/components/core/Loaders.svelte';
+	import NoLoaders from '$lib/components/core/NoLoaders.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -19,6 +18,9 @@
 			: 'tokens';
 
 	$: token.set($pageToken);
+
+	let cmpLoaders: ComponentType;
+	$: cmpLoaders = $authSignedIn ? Loaders : NoLoaders;
 </script>
 
 <Hero
@@ -29,17 +31,9 @@
 />
 
 <main class="pt-12">
-	<AddressGuard>
-		<Loader>
-			<LoaderBalances>
-				<ExchangeWorker>
-					<LoaderMetamask>
-						<slot />
-					</LoaderMetamask>
-				</ExchangeWorker>
-			</LoaderBalances>
-		</Loader>
-	</AddressGuard>
+	<svelte:component this={cmpLoaders}>
+		<slot />
+	</svelte:component>
 </main>
 
 <Modals />
