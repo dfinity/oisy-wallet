@@ -6,6 +6,8 @@
 	import Back from '$lib/components/core/Back.svelte';
 	import { isSubRoute } from '$lib/utils/nav.utils';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import SignIn from '$lib/components/hero/SignIn.svelte';
 
 	let back = false;
 	$: back = isSubRoute($page);
@@ -24,8 +26,16 @@
 	{/if}
 
 	<div class="flex m-4 gap-4 pointer-events-auto ml-auto">
-		<WalletConnect />
-		<NetworksSwitcher />
-		<Menu />
+		{#if $authSignedIn}
+			<WalletConnect />
+		{/if}
+
+		<NetworksSwitcher disabled={$authNotSignedIn} />
+
+		{#if $authSignedIn}
+			<Menu />
+		{:else}
+			<SignIn />
+		{/if}
 	</div>
 </header>
