@@ -2,7 +2,8 @@
 	import { onDestroy, onMount } from 'svelte';
 	import type { ExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { initExchangeWorker } from '$lib/services/worker.exchange.services';
-	import { erc20TokensAddresses } from '$eth/derived/erc20.derived';
+	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
+	import { debounce } from '@dfinity/utils';
 
 	let worker: ExchangeWorker | undefined;
 
@@ -21,10 +22,12 @@
 
 	const syncTimer = () => {
 		worker?.stopExchangeTimer();
-		worker?.startExchangeTimer({ erc20Addresses: $erc20TokensAddresses });
+		worker?.startExchangeTimer({ erc20Addresses: $enabledMergedErc20TokensAddresses });
 	};
 
-	$: worker, $erc20TokensAddresses, syncTimer();
+	const debounceSyncTimer = debounce(syncTimer);
+
+	$: worker, $enabledMergedErc20TokensAddresses, debounceSyncTimer();
 </script>
 
 <slot />

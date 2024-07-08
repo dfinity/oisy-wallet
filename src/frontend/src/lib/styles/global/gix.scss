@@ -27,10 +27,9 @@
 	--overlay-background: var(--color-white);
 	--overlay-background-contrast: var(--color-dark);
 
-	--tooltip-background: var(--overlay-background);
-	--tooltip-background-contrast: var(--overlay-background-contrast);
-	--tooltip-border-size: 1.5px;
-	--tooltip-border-color: #ebedf9;
+	--dropdown-background: var(--overlay-background);
+	--dropdown-border-size: 1.5px;
+	--dropdown-border-color: #ebedf9;
 
 	--overlay-z-index: calc(var(--z-index) + 1);
 	--modal-z-index: calc(var(--overlay-z-index) + 3);
@@ -154,7 +153,6 @@ div.modal {
 }
 
 div.popover {
-	--background: var(--overlay-background);
 	--background-contrast: var(--overlay-background-contrast);
 
 	.wrapper {

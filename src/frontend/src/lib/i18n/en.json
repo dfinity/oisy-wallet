@@ -37,10 +37,15 @@
 	},
 	"auth": {
 		"text": {
-			"title": "A multi-chain wallet powered by chainfusion",
+			"title": "A multi-chain wallet powered by Chain Fusion",
 			"description": "$oisy_name provides a seamless on-chain experience to manage your Ethereum and ICP assets. By leveraging native web technologies and advanced cryptography, it eliminates the need for browser extensions or mobile apps. And accessing the wallet is easy using passkeys on a computer or mobile device.",
 			"connect_with": "Connect with",
+			"connect": "Connect",
+			"connect_to_oisy": "Connect to Oisy",
 			"logout": "Logout"
+		},
+		"alt": {
+			"sign_in": "Sign in with Internet Identity to start using Oisy Wallet."
 		},
 		"error": {
 			"no_internet_identity": "No internet identity."
@@ -50,6 +55,7 @@
 		"text": {
 			"address": "Address",
 			"wallet_address": "Wallet address",
+			"your_addresses": "Your addresses",
 			"address_copied": "Address copied to clipboard.",
 			"wallet_address_copied": "Wallet address copied to clipboard.",
 			"display_wallet_address_qr": "Display wallet address as a QR code",
@@ -99,6 +105,7 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"erc20_user_tokens": "Error while loading the Erc20 user tokens.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again."
 		}
 	},
@@ -141,7 +148,15 @@
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users or other apps that support this address format.",
 				"use_for_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
-				"account_id_copied": "ICP Account ID copied to clipboard."
+				"account_id_copied": "ICP Account ID copied to clipboard.",
+				"internet_computer": "Internet Computer",
+				"principal": "Principal",
+				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
+				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code",
+				"icp_account": "ICP Account",
+				"icp_account_copied": "ICP Account copied to clipboard.",
+				"display_icp_account_qr": "Display ICP Account as a QR code",
+				"icp_account_notes": "Use for ICP deposits from exchanges or other wallets that only support Account IDs"
 			}
 		},
 		"ethereum": {
@@ -150,7 +165,11 @@
 				"from_network": "Receive from $network Network",
 				"eth_to_cketh_description": "Converting $token into $ckToken requires a call to a smart contract on $network and passing your IC principal as argument – $oisy_name simplifies this procedure by enabling you to perform the conversion directly within the wallet.",
 				"learn_how_to_convert": "Learn how to convert $token to $ckToken",
-				"metamask": "Receive from Metamask"
+				"metamask": "Receive from Metamask",
+				"ethereum": "Ethereum",
+				"ethereum_address": "Address",
+				"ethereum_address_copied": "Ethereum address copied to clipboard.",
+				"display_ethereum_address_qr": "Display Ethereum address as a QR code"
 			},
 			"error": {
 				"no_metamask": "Metamask is not available."
@@ -309,22 +328,27 @@
 				"no_metadata": "No metadata for the token are provided. This is unexpected.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
-				"invalid_ledger_id": "The Ledger ID is not related the Index canister."
+				"invalid_ledger_id": "The Ledger ID is not related the Index canister.",
+				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
+				"missing_index_id": "The Index ID is missing. Did you provide a value?",
+				"missing_contract_address": "The contract address is missing. Did you provide a value?",
+				"no_network": "No network is selected. This is unexpected."
 			}
 		},
 		"manage": {
 			"text": {
-				"title": "Add and hide tokens",
+				"title": "Manage tokens",
 				"do_not_see_import": "Don’t see your token? Import",
 				"clear_filter": "Clear filter",
 				"manage_for_network": "Managing tokens for $network",
 				"network": "Network"
 			},
 			"placeholder": {
-				"select_network": "Select network"
+				"select_network": "Select the network"
 			},
 			"info": {
-				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade."
+				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade.",
+				"no_changes": "No changes need to be saved."
 			},
 			"error": {
 				"unexpected_build": "An unexpected error happened while building the list of known tokens.",
@@ -334,7 +358,7 @@
 		"hide": {
 			"title": "Hide token?",
 			"token": "Hide $token",
-			"info": "You can add this token back in the future by going into <strong>“$where”</strong> in your wallet view.",
+			"info": "You can add this token back in the future by going into <strong>“Manage tokens”</strong> in your wallet view.",
 			"confirm": "Hide",
 			"hiding": "Hiding..."
 		},
@@ -360,7 +384,7 @@
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
 			"loading_metadata": "Error while loading the ERC20 contract metadata.",
-			"not_custom": "Only custom token can be hidden.",
+			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol are provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
 			"unexpected_undefined": "Token is undefined. This is unexpected."
@@ -496,7 +520,8 @@
 	"transactions": {
 		"text": {
 			"title": "Transactions",
-			"no_transactions": "You have no transactions."
+			"no_transactions": "You have no transactions.",
+			"sign_in": "Sign in to access your $token ($symbol) transactions."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",

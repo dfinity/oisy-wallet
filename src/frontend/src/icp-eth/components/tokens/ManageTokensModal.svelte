@@ -8,15 +8,25 @@
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { authStore } from '$lib/stores/auth.store';
-	import { saveIcrcCustomToken } from '$icp/services/ic-custom-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import AddTokenByNetwork from '$icp-eth/components/tokens/AddTokenByNetwork.svelte';
 	import type { Network } from '$lib/types/network';
 	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
-	import { saveErc20Contract } from '$eth/services/erc20.services';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { get } from 'svelte/store';
+	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+	import {
+		saveErc20UserTokens,
+		saveIcrcCustomTokens
+	} from '$icp-eth/services/manage-tokens.services';
+	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
 	import type { EthereumNetwork } from '$eth/types/network';
 
 	const steps: WizardSteps = [
@@ -43,12 +53,41 @@
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
 
-	const saveTokens = async ({ detail: tokens }: CustomEvent<IcrcCustomToken[]>) => {
-		await save(tokens);
+	const saveTokens = async ({
+		detail: { icrc, erc20 }
+	}: CustomEvent<{ icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] }>) => {
+		if (icrc.length === 0 && erc20.length === 0) {
+			toastsShow({
+				text: $i18n.tokens.manage.info.no_changes,
+				level: 'info',
+				duration: 5000
+			});
+
+			return;
+		}
+
+		await Promise.allSettled([
+			...(icrc.length > 0 ? [saveIcrc(icrc)] : []),
+			...(erc20.length > 0 ? [saveErc20(erc20)] : [])
+		]);
 	};
 
-	const addToken = async () => {
-		await save([
+	const addIcrcToken = async () => {
+		if (isNullish(ledgerCanisterId)) {
+			toastsError({
+				msg: { text: get(i18n).tokens.import.error.missing_ledger_id }
+			});
+			return;
+		}
+
+		if (isNullish(indexCanisterId)) {
+			toastsError({
+				msg: { text: get(i18n).tokens.import.error.missing_index_id }
+			});
+			return;
+		}
+
+		await saveIcrc([
 			{
 				enabled: true,
 				ledgerCanisterId,
@@ -58,24 +97,34 @@
 	};
 
 	const saveErc20Token = async () => {
-		await saveErc20Contract({
-			contractAddress: erc20ContractAddress,
-			metadata: erc20Metadata,
-			network: network as EthereumNetwork,
-			updateSaveProgressStep: progress,
-			modalNext: modal.next,
-			onSuccess: close,
-			onError: modal.back,
-			identity: $authStore.identity
-		});
+		if (isNullishOrEmpty(erc20ContractAddress)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.invalid_contract_address }
+			});
+			return;
+		}
+
+		if (isNullish(erc20Metadata)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.no_metadata }
+			});
+			return;
+		}
+
+		await saveErc20([
+			{
+				address: erc20ContractAddress,
+				...erc20Metadata,
+				network: network as EthereumNetwork,
+				enabled: true
+			}
+		]);
 	};
 
 	const progress = (step: ProgressStepsAddToken) => (saveProgressStep = step);
 
-	const save = async (
-		tokens: Pick<IcrcCustomToken, 'enabled' | 'version' | 'ledgerCanisterId' | 'indexCanisterId'>[]
-	) => {
-		await saveIcrcCustomToken({
+	const saveIcrc = (tokens: SaveCustomToken[]): Promise<void> =>
+		saveIcrcCustomTokens({
 			tokens,
 			progress,
 			modalNext: () => modal.set(3),
@@ -83,7 +132,16 @@
 			onError: () => modal.set(0),
 			identity: $authStore.identity
 		});
-	};
+
+	const saveErc20 = (tokens: SaveUserToken[]): Promise<void> =>
+		saveErc20UserTokens({
+			tokens,
+			progress,
+			modalNext: () => modal.set(3),
+			onSuccess: close,
+			onError: () => modal.set(0),
+			identity: $authStore.identity
+		});
 
 	const close = () => {
 		modalStore.close();
@@ -91,16 +149,17 @@
 		saveProgressStep = ProgressStepsAddToken.INITIALIZATION;
 	};
 
-	let ledgerCanisterId = '';
-	let indexCanisterId = '';
+	let ledgerCanisterId: string | undefined;
+	let indexCanisterId: string | undefined;
 
-	let erc20ContractAddress = '';
+	let erc20ContractAddress: string | undefined;
 	let erc20Metadata: Erc20Metadata | undefined;
 
 	let network: Network | undefined = $selectedNetwork;
-	let tokenData: Record<string, string> = {};
+	let tokenData: Partial<AddTokenData> = {};
 
-	$: tokenData, ({ ledgerCanisterId, indexCanisterId, erc20ContractAddress } = tokenData);
+	$: tokenData,
+		({ ledgerCanisterId, indexCanisterId, contractAddress: erc20ContractAddress } = tokenData);
 </script>
 
 <WizardModal
@@ -116,15 +175,16 @@
 		{#if isNetworkIdICP(network?.id)}
 			<IcAddTokenReview
 				on:icBack={modal.back}
-				on:icSave={addToken}
+				on:icSave={addIcrcToken}
 				{ledgerCanisterId}
 				{indexCanisterId}
 			/>
-		{:else if isNetworkIdEthereum(network?.id)}
+		{:else if nonNullish(network) && isNetworkIdEthereum(network?.id)}
 			<AddTokenReview
 				on:icBack={modal.back}
 				on:icSave={saveErc20Token}
 				contractAddress={erc20ContractAddress}
+				{network}
 				bind:metadata={erc20Metadata}
 			/>
 		{/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 	import Value from '$lib/components/ui/Value.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import type { Token } from '$lib/types/token';
@@ -37,7 +37,7 @@
 {#if ['icrc', 'erc20'].includes(token.standard)}
 	<Value ref="symbol">
 		<svelte:fragment slot="label">{$i18n.tokens.details.standard}</svelte:fragment>
-		<output class="capitalize">{token.standard}</output>
+		<output class="first-letter:capitalize inline-block">{token.standard}</output>
 	</Value>
 {/if}
 
