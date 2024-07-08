@@ -4,7 +4,7 @@
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokensSignedIn from '$lib/components/tokens/TokensSignedIn.svelte';
-	import TokensNotSignedIn from '$lib/components/tokens/TokensNotSignedIn.svelte';
+	import TokensSignedOut from '$lib/components/tokens/TokensSignedOut.svelte';
 </script>
 
 <Header>
@@ -16,5 +16,5 @@
 {#if $authSignedIn}
 	<TokensSignedIn />
 {:else}
-	<TokensNotSignedIn />
+	<TokensSignedOut />
 {/if}
