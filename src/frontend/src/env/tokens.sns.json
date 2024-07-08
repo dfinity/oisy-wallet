@@ -85,8 +85,8 @@
 		"indexCanisterId": "xaonm-oiaaa-aaaaq-aabgq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Modclub",
-			"symbol": "MOD",
+			"name": "DecideAI",
+			"symbol": "DCD",
 			"fee": {
 				"__bigint__": "10000"
 			},
