@@ -15,7 +15,7 @@
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
 </script>
 
-<div class={`hero ${background}`}>
+<div class={`hero pb-4 md:pb-6 ${background}`}>
 	<Header />
 
 	<article
