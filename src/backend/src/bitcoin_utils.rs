@@ -10,12 +10,12 @@ fn parse_derivation_path(path: &str) -> Vec<Vec<u8>> {
     path.split('/')
         .skip(1) // Skip the leading 'm'
         .map(|s| {
-            if s.ends_with('\'') {
+            if let Some(stripped) = s.strip_suffix('\'') {
                 // Handle hardened derivation (apostrophe indicates hardened)
                 // Value 0x80000000 is added to represent a hardened key.
                 // It is the hexadecimal of the smallest 32-bit value with the high-order bit set
                 // More details: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#Extended_keys
-                let index = u32::from_str(&s[..s.len() - 1]).unwrap() + 0x80000000;
+                let index = u32::from_str(stripped).unwrap() + 0x8000_0000;
                 index.to_be_bytes().to_vec()
             } else {
                 let index = u32::from_str(s).unwrap();
@@ -33,10 +33,9 @@ pub fn network_to_derivation_path(network: BitcoinNetwork) -> Vec<Vec<u8>> {
     // However, we do that because we would like to have the same behavior of the Testnet network.
     let coin_type = match network {
         BitcoinNetwork::Mainnet => "0",
-        BitcoinNetwork::Testnet => "1",
-        BitcoinNetwork::Regtest => "1",
+        BitcoinNetwork::Testnet | BitcoinNetwork::Regtest => "1",
     };
-    let path = format!("m/44'/{}'/0'/0/0", coin_type);
+    let path = format!("m/44'/{coin_type}'/0'/0/0");
     parse_derivation_path(&path)
 }
 

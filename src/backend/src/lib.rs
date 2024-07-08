@@ -477,7 +477,7 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 #[update(guard = "caller_is_not_anonymous")]
 async fn caller_btc_address(network: BitcoinNetwork)  -> String {
     let name = read_config(|s| s.ecdsa_key_name.clone());
-    let derivation_path = network_to_derivation_path(network)?;
+    let derivation_path = network_to_derivation_path(network);
     let (key, ) = ecdsa_public_key(EcdsaPublicKeyArgument {
         canister_id: None,
         derivation_path,
