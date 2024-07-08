@@ -1,9 +1,9 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
-import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens.link.env';
-import { OCT_TOKEN } from '$env/tokens.oct.env';
-import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens.pepe.env';
-import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens.usdc.env';
+import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
+import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
+import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
+import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
