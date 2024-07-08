@@ -13,6 +13,9 @@
 
 	let background: string;
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
+
+	let heroContent = true;
+	$: heroContent = usdTotal || summary;
 </script>
 
 <div class={`hero ${background}`}>
@@ -27,7 +30,7 @@
 
 		{#if $authSignedIn}
 			<HeroContent {usdTotal} {summary} {actions} {send} />
-		{:else}
+		{:else if heroContent}
 			<HeroSignIn />
 		{/if}
 	</article>

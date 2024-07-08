@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { signIn } from '$lib/services/auth.services';
 	import ButtonIC from '$lib/components/ui/ButtonIC.svelte';
 </script>
