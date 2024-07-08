@@ -1,24 +1,16 @@
 <script lang="ts">
-	import Card from '$lib/components/ui/Card.svelte';
-	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import Header from '$lib/components/ui/Header.svelte';
-	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import type { Token } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
-	import CardAmount from '$lib/components/ui/CardAmount.svelte';
+	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -30,44 +22,11 @@
 	);
 </script>
 
-<Header>
-	{$i18n.tokens.text.title}
-
-	<TokensMenu slot="end" />
-</Header>
-
 <TokensSkeletons>
 	{#each tokens as token (token.id)}
-		{@const url = transactionsUrl({ token })}
-
 		<Listener {token}>
-			<div class="flex gap-3 sm:gap-8 mb-6">
-				<a
-					class="no-underline flex-1"
-					href={url}
-					aria-label={`Open the list of ${token.symbol} transactions`}
-					in:fade
-				>
-					<Card noMargin>
-						{token.name}
-
-						<TokenLogo {token} slot="icon" color="white" />
-
-						<output class="break-all" slot="description">
-							{formatToken({
-								value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
-								unitName: token.decimals
-							})}
-							{token.symbol}
-						</output>
-
-						<CardAmount slot="action">
-							<ExchangeTokenValue {token} />
-						</CardAmount>
-					</Card>
-				</a>
-
-				<TokenReceiveSend {token} />
+			<div in:fade>
+				<TokenCard {token} />
 			</div>
 		</Listener>
 	{/each}
