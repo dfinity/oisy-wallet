@@ -77,9 +77,9 @@ const buildOrchestratorInfo = async (orchestratorId) => {
 const ORCHESTRATOR_STAGING_ID = Principal.fromText('2s5qh-7aaaa-aaaar-qadya-cai');
 const ORCHESTRATOR_PRODUCTION_ID = Principal.fromText('vxkom-oyaaa-aaaar-qafda-cai');
 
-const DATA_FOLDER = join(process.cwd(), '../src', 'frontend', 'src', 'env');
+const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'env');
 
-const LOGO_FOLDER = join(process.cwd(), '../src', 'frontend', 'src', 'icp-eth', 'assets');
+const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
 
 const saveTokenLogo = async (canisterId, name) => {
 	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
@@ -125,12 +125,12 @@ const findCkErc20 = async () => {
 
 	writeFileSync(join(DATA_FOLDER, 'tokens.ckerc20.json'), JSON.stringify(tokens, jsonReplacer, 8));
 
-	for (const [name, { ledgerCanisterId }] of Object.entries({
-		...tokens.production,
-		...tokens.staging
-	})) {
-		await saveTokenLogo(ledgerCanisterId, name);
-	}
+	await Promise.allSettled(
+		Object.entries({
+			...tokens.production,
+			...tokens.staging
+		}).map(([name, { ledgerCanisterId }]) => saveTokenLogo(ledgerCanisterId, name))
+	);
 };
 
 try {
