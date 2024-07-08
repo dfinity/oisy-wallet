@@ -35,6 +35,7 @@ interface I18nNavigation {
 interface I18nAuth {
 	text: {
 		title: string;
+		description: string;
 		connect_with: string;
 		connect: string;
 		connect_to_oisy: string;
@@ -464,7 +465,7 @@ interface I18nTransaction {
 }
 
 interface I18nTransactions {
-	text: { title: string; no_transactions: string };
+	text: { title: string; no_transactions: string; sign_in: string };
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;

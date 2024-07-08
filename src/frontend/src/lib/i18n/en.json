@@ -520,7 +520,8 @@
 	"transactions": {
 		"text": {
 			"title": "Transactions",
-			"no_transactions": "You have no transactions."
+			"no_transactions": "You have no transactions.",
+			"sign_in": "Sign in to access your $token ($symbol) transactions."
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",

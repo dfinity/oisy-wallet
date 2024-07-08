@@ -1,12 +1,10 @@
 <script lang="ts">
-	import Transactions from '$eth/components/transactions/Transactions.svelte';
-	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { routeNetwork } from '$lib/derived/nav.derived';
+	import { isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { networkICP } from '$lib/derived/network.derived';
 	import { goto } from '$app/navigation';
 	import { networks } from '$lib/derived/networks.derived';
+	import Transactions from '$lib/components/transactions/Transactions.svelte';
 
 	onMount(async () => {
 		// We need to know the network on which the transactions should be loaded.
@@ -26,10 +24,4 @@
 	});
 </script>
 
-{#if nonNullish($routeNetwork)}
-	{#if $networkICP}
-		<IcTransactions />
-	{:else if nonNullish($routeToken)}
-		<Transactions />
-	{/if}
-{/if}
+<Transactions />
