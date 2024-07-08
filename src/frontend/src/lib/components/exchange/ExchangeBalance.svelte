@@ -20,8 +20,7 @@
 
 <span class="text-off-white block">
 	<output
-		class={`break-all font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} inline-block mt-8`}
-		style="font-size: calc(2 * var(--font-size-h1)); line-height: 0.95;"
+		class={`break-all text-6xl font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} inline-block mt-8`}
 	>
 		{#if $exchangeInitialized}
 			{formatUSD(totalUsd, { notation: 'compact' })}

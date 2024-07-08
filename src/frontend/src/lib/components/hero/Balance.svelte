@@ -11,9 +11,9 @@
 		class={`break-all ${($balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'} flex flex-col sm:block`}
 	>
 		{#if nonNullish($balance) && !$balanceZero}
-			<span class="amount font-bold"><Amount amount={$balance} /></span>
+			<span class="text-6xl font-bold"><Amount amount={$balance} /></span>
 		{:else}
-			<span class="amount font-bold" class:animate-pulse={isNullish($balance)}>0.00</span>
+			<span class="text-6xl font-bold" class:animate-pulse={isNullish($balance)}>0.00</span>
 		{/if}
 
 		{#if $erc20UserTokensInitialized}
@@ -21,10 +21,3 @@
 		{/if}
 	</output>
 </span>
-
-<style lang="scss">
-	.amount {
-		font-size: calc(2 * var(--font-size-h1));
-		line-height: 0.95;
-	}
-</style>
