@@ -188,7 +188,7 @@ export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
 
 const ckErc20 = envTokensCkErc20.safeParse(ckErc20Tokens);
 
-const { production: ckErc20Production, staging: ckErc20Staging } = ckErc20.success
+export const { production: ckErc20Production, staging: ckErc20Staging } = ckErc20.success
 	? ckErc20.data
 	: { production: {}, staging: {} };
 
