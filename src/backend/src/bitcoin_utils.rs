@@ -50,6 +50,13 @@ fn parse_segment(segment: &str) -> Result<u32, String> {
     }
 }
 
+/// Gets the derivation path for a given Bitcoin network
+///
+/// This is a simplified version of the complete flow to create a derivation path.
+/// The documentation on the complete flow can be found at https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
+/// For the current implementation and to spare computation workload, we are using the default account 0, change 0, and address index 0.
+/// For the Regtest network, we are using the Testnet derivation path, even if it is not necessary to conform to BIP-44, since it is a local node.
+/// However, we do that because we would like to have the same behavior of the Testnet network.
 pub fn network_to_derivation_path(network: BitcoinNetwork) -> Vec<Vec<u8>> {
     let coin_type = match network {
         BitcoinNetwork::Mainnet => "0",
