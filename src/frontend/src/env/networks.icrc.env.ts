@@ -1,11 +1,11 @@
 import { CKBTC_EXPLORER_URL, CKETH_EXPLORER_URL } from '$env/explorers.env';
+import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
+import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
+import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
+import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import ckErc20Tokens from '$env/tokens.ckerc20.json';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens.link.env';
-import { OCT_TOKEN } from '$env/tokens.oct.env';
-import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens.pepe.env';
-import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens.usdc.env';
 import {
 	envTokensCkErc20,
 	type EnvTokenSymbol,
