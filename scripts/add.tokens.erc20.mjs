@@ -26,6 +26,9 @@ if (isNullish(ETHERSCAN_API_KEY)) {
 const DATA_DIR = 'src/frontend/src/env';
 const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
 
+const ERC20_DATA_DIR = DATA_DIR + '/tokens-erc20';
+const ERC20_DATA_DIR_PATH = resolve(process.cwd(), ERC20_DATA_DIR);
+
 const SVG_DIR = 'src/frontend/src/icp-eth/assets';
 const SVG_DIR_PATH = resolve(process.cwd(), SVG_DIR);
 
@@ -111,7 +114,7 @@ const loadFileContentOrEmpty = (filePath) => {
 let filesCreatedOrModified = false;
 const manageEnvFile = async ({ mainSymbol: symbol, contractAddress, testnetContractAddress }) => {
 	const fileName = `tokens.${symbol.toLowerCase()}.env.ts`;
-	const filePath = path.join(DATA_DIR_PATH, fileName);
+	const filePath = path.join(ERC20_DATA_DIR_PATH, fileName);
 
 	const existingFileContent = loadFileContentOrEmpty(filePath);
 
@@ -267,7 +270,7 @@ const updateTokensErc20Env = ({ fileName, mainnetToken, testnetToken }) => {
 		const { content: newContent, hasChanged } = updateImportsInContent({
 			content,
 			imports,
-			module: `$env/${fileName.replace('.ts', '')}`
+			module: `$env/tokens-erc20/${fileName.replace('.ts', '')}`
 		});
 		if (hasChanged) {
 			content = newContent;
