@@ -23,9 +23,7 @@
 	<Header />
 
 	<article
-		class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main"
-		class:2xl:mt-[-70px]={$authSignedIn}
-		class:xl:mt-[-70px]={!$authSignedIn}
+		class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main 2xl:mt-[-70px]"
 	>
 		<Alpha />
 
