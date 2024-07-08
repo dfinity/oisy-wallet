@@ -28,9 +28,8 @@
 	<div class="flex m-4 gap-4 pointer-events-auto ml-auto">
 		{#if $authSignedIn}
 			<WalletConnect />
+			<NetworksSwitcher />
 		{/if}
-
-		<NetworksSwitcher disabled={$authNotSignedIn} />
 
 		{#if $authSignedIn}
 			<Menu />
