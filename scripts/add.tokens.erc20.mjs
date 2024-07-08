@@ -299,25 +299,27 @@ const readSupportedTokens = () => {
 
 const parseTokens = (tokens) => {
 	const { production: prodTokens, staging: testnetTokens } = flattenEnvironmentData(tokens);
-	const tokensAsList = [...prodTokens, ...testnetTokens];
 
-	return Object.values(
-		tokensAsList.reduce((acc, { symbol, erc20ContractAddress }) => {
-			const mainSymbol = symbol.replace('Sepolia', '').slice(2);
-			const contractAddress = !symbol.includes('ckSepolia') ? erc20ContractAddress : undefined;
-			const testnetContractAddress = symbol.includes('ckSepolia')
-				? erc20ContractAddress
-				: undefined;
+	const acc = {};
 
-			acc[mainSymbol] = {
-				mainSymbol,
-				contractAddress: acc[mainSymbol]?.contractAddress || contractAddress,
-				testnetContractAddress: acc[mainSymbol]?.testnetContractAddress || testnetContractAddress
-			};
+	prodTokens.forEach(({ symbol, erc20ContractAddress }) => {
+		const mainSymbol = symbol.slice(2);
+		acc[mainSymbol] = {
+			mainSymbol,
+			contractAddress: erc20ContractAddress,
+			testnetContractAddress: acc[mainSymbol]?.testnetContractAddress
+		};
+	});
 
-			return acc;
-		}, {})
-	);
+	testnetTokens.forEach(({ symbol, erc20ContractAddress }) => {
+		const mainSymbol = symbol.replace('Sepolia', '').slice(2);
+		if (!acc[mainSymbol]) {
+			acc[mainSymbol] = { mainSymbol };
+		}
+		acc[mainSymbol].testnetContractAddress = erc20ContractAddress;
+	});
+
+	return Object.values(acc);
 };
 
 const main = async () => {
