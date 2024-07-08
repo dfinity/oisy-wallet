@@ -12,7 +12,7 @@ import { derived, type Readable } from 'svelte/store';
 /**
  * The list of Icrc default tokens - i.e. the statically configured Icrc tokens of Oisy + their metadata, unique ids etc. fetched at runtime.
  */
-export const icrcDefaultTokens: Readable<IcToken[]> = derived(
+const icrcDefaultTokens: Readable<IcToken[]> = derived(
 	[icrcDefaultTokensStore, testnets],
 	([$icrcTokensStore, $testnets]) =>
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
