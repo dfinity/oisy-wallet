@@ -5,6 +5,7 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokensSignedIn from '$lib/components/tokens/TokensSignedIn.svelte';
 	import TokensSignedOut from '$lib/components/tokens/TokensSignedOut.svelte';
+	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 </script>
 
 <Header>
@@ -18,3 +19,5 @@
 {:else}
 	<TokensSignedOut />
 {/if}
+
+<ManageTokensButton />
