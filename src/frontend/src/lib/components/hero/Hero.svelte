@@ -19,7 +19,7 @@
 	$: heroContent = usdTotal || summary;
 </script>
 
-<div class={`hero ${background}`}>
+<div class={`hero pb-4 md:pb-6 ${background}`}>
 	<Header />
 
 	<article
