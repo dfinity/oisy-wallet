@@ -1,12 +1,6 @@
 <script lang="ts">
-	import { formatToken } from '$lib/utils/format.utils.js';
-	import { balancesStore } from '$lib/stores/balances.store.js';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
-	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import type { Token } from '$lib/types/token';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 
