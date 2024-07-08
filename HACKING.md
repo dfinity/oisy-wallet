@@ -106,3 +106,7 @@ The steps are as follows:
 6. **Create the mapping for the new token** in [src/frontend/src/env/networks.icrc.env.ts]. This step sets up the token as a ck token, statically establishes the link between the token on the Ethereum network and its twin token on the IC network, and lists the token in the ICRC tokens and ledgers.
 
 Note that setting up the twin token counterpart or collecting their logo is unnecessary. This information is automatically fetched at runtime from the ckETH orchestrator and the related ledger.
+
+To help with steps 3 to 5, one can use the script [./scripts/add.tokens.erc20.mjs] (or [./scripts/add.tokens.erc20.sh]) to generate the environment files for the new tokens. It requires the EtherScan API key to fetch the token information from the Ethereum network, to be set in the `.env` file as `VITE_ETHERSCAN_API_KEY`.
+The script will run through the supported ckERC20 tokens in the production dashboard and will automatically generate the necessary environment files for the new tokens that have a respective testnet token, and that do not yet exist in the repository.
+Please be aware of the instructions provided by the script and follow them accordingly, if there are any, and possibly double-check the generated files.
