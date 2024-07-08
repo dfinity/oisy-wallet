@@ -106,7 +106,6 @@ const loadFileContentOrEmpty = (filePath) => {
 };
 
 let filesCreatedOrModified = false;
-
 const manageEnvFile = async ({ mainSymbol: symbol, contractAddress, testnetContractAddress }) => {
 	const fileName = `tokens.${symbol.toLowerCase()}.env.ts`;
 	const filePath = path.join(DATA_DIR_PATH, fileName);
@@ -124,10 +123,15 @@ const manageEnvFile = async ({ mainSymbol: symbol, contractAddress, testnetContr
 		return { fileName, mainnetToken: undefined, testnetToken: undefined };
 	}
 
-	const { name, decimals } = await fetchTokenDetails({
-		contractAddress: nonNullish(contractAddress) ? contractAddress : testnetContractAddress,
-		isTestnet: isNullish(contractAddress)
-	});
+	const { name: mainnetName, decimals: mainnetDecimals } = nonNullish(contractAddress)
+		? await fetchTokenDetails({ contractAddress, isTestnet: false })
+		: {};
+	const { name: testnetName, decimals: testnetDecimals } = nonNullish(testnetContractAddress)
+		? await fetchTokenDetails({
+				contractAddress: testnetContractAddress,
+				isTestnet: true
+			})
+		: {};
 
 	const icon = symbol.toLowerCase();
 
@@ -147,7 +151,7 @@ import ${icon} from '$icp-eth/assets/${icon}.svg';
 		module: '$env/networks.env'
 	});
 
-	const decimalsConst = `export const ${symbol}_DECIMALS = ${decimals};`;
+	const decimalsConst = `export const ${symbol}_DECIMALS = ${mainnetDecimals ?? testnetDecimals};`;
 	const fileContentDecimalsConst = !existingFileContent.includes(decimalsConst)
 		? `\n${decimalsConst}\n`
 		: '';
@@ -164,7 +168,7 @@ export const ${mainnetToken}: RequiredErc20Token = {
 	network: ETHEREUM_NETWORK,
 	standard: 'erc20',
 	category: 'default',
-	name: '${name}',
+	name: '${mainnetName}',
 	symbol: '${symbol}',
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
@@ -187,7 +191,7 @@ export const ${testnetToken}: RequiredErc20Token = {
 	network: SEPOLIA_NETWORK,
 	standard: 'erc20',
 	category: 'default',
-	name: '${name}',
+	name: '${testnetName}',
 	symbol: '${symbol}',
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
@@ -289,16 +293,16 @@ const flattenEnvironmentData = (data) => {
 };
 
 const readSupportedTokens = () => {
-	const jsonPath = path.resolve(DATA_DIR_PATH, 'tokens.ckerc20.json');
-	const { production: prodTokens, staging: testnetTokens } = flattenEnvironmentData(
-		JSON.parse(readFileSync(jsonPath, 'utf-8'))
-	);
-	return [...prodTokens, ...testnetTokens];
+	const jsonPath = resolve(DATA_DIR_PATH, 'tokens.ckerc20.json');
+	return JSON.parse(readFileSync(jsonPath, 'utf-8'));
 };
 
-const parseTokens = (tokens) =>
-	Object.values(
-		tokens.reduce((acc, { symbol, erc20ContractAddress }) => {
+const parseTokens = (tokens) => {
+	const { production: prodTokens, staging: testnetTokens } = flattenEnvironmentData(tokens);
+	const tokensAsList = [...prodTokens, ...testnetTokens];
+
+	return Object.values(
+		tokensAsList.reduce((acc, { symbol, erc20ContractAddress }) => {
 			const mainSymbol = symbol.replace('Sepolia', '').slice(2);
 			const contractAddress = !symbol.includes('ckSepolia') ? erc20ContractAddress : undefined;
 			const testnetContractAddress = symbol.includes('ckSepolia')
@@ -314,6 +318,7 @@ const parseTokens = (tokens) =>
 			return acc;
 		}, {})
 	);
+};
 
 const main = async () => {
 	const tokens = readSupportedTokens();
