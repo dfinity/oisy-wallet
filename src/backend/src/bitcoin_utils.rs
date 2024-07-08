@@ -53,7 +53,7 @@ fn ripemd160(data: &[u8]) -> Vec<u8> {
     hasher.finalize().to_vec()
 }
 
-// Converts a public key to a P2PKH address.
+/// Converts a public key to a P2PKH address.
 pub fn public_key_to_p2pkh_address(public_key: &[u8], network: BitcoinNetwork) -> String {
     // SHA-256 & RIPEMD-160
     let result = ripemd160(&sha256(public_key));
