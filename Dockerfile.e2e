@@ -9,6 +9,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     netcat \
     ca-certificates \
     build-essential \
+    openssl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install NodeJS
