@@ -9,4 +9,9 @@ body {
 
 	overflow-y: auto;
 	overflow-x: hidden;
+
+	&:has([role='menu']),
+	&:has([role='dialog']) {
+		overflow: hidden;
+	}
 }
