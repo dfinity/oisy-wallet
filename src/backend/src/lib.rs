@@ -1,7 +1,7 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
+use crate::bitcoin_utils::{network_to_derivation_path, public_key_to_p2pkh_address};
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
-use crate::bitcoin_utils::{network_to_derivation_path, public_key_to_p2pkh_address};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
@@ -33,9 +33,9 @@ use std::cell::RefCell;
 use std::str::FromStr;
 
 mod assertions;
+mod bitcoin_utils;
 mod guards;
 mod token;
-mod bitcoin_utils;
 
 type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
@@ -86,12 +86,12 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
 
 #[derive(Default)]
 struct Candid<T>(T)
-    where
-        T: CandidType + for<'de> Deserialize<'de>;
+where
+    T: CandidType + for<'de> Deserialize<'de>;
 
 impl<T> Storable for Candid<T>
-    where
-        T: CandidType + for<'de> Deserialize<'de>,
+where
+    T: CandidType + for<'de> Deserialize<'de>,
 {
     const BOUND: Bound = Bound::Unbounded;
 
@@ -105,8 +105,8 @@ impl<T> Storable for Candid<T>
 }
 
 impl<T> Deref for Candid<T>
-    where
-        T: CandidType + for<'de> Deserialize<'de>,
+where
+    T: CandidType + for<'de> Deserialize<'de>,
 {
     type Target = T;
 
@@ -157,9 +157,9 @@ pub struct Config {
 fn init(arg: Arg) {
     match arg {
         Arg::Init(InitArg {
-                      ecdsa_key_name,
-                      allowed_callers,
-                  }) => mutate_state(|state| {
+            ecdsa_key_name,
+            allowed_callers,
+        }) => mutate_state(|state| {
             state
                 .config
                 .set(Some(Candid(Config {
@@ -228,7 +228,7 @@ fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
 /// Computes the public key of the specified principal.
 async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
     let name = read_config(|s| s.ecdsa_key_name.clone());
-    let (key, ) = ecdsa_public_key(EcdsaPublicKeyArgument {
+    let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
         canister_id: None,
         derivation_path: principal_to_derivation_path(principal),
         key_id: EcdsaKeyId {
@@ -236,8 +236,8 @@ async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
             name,
         },
     })
-        .await
-        .expect("failed to get Ethereum public key");
+    .await
+    .expect("failed to get Ethereum public key");
     key.public_key
 }
 
@@ -355,7 +355,7 @@ async fn personal_sign(plaintext: String) -> String {
         bytes.len().to_string().as_bytes(),
         bytes.as_ref(),
     ]
-        .concat();
+    .concat();
 
     let msg_hash = keccak256(&message);
 
@@ -475,10 +475,10 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 
 /// Returns the Bitcoin address of the caller.
 #[update(guard = "caller_is_not_anonymous")]
-async fn caller_btc_address(network: BitcoinNetwork)  -> String {
+async fn caller_btc_address(network: BitcoinNetwork) -> String {
     let name = read_config(|s| s.ecdsa_key_name.clone());
     let derivation_path = network_to_derivation_path(network);
-    let (key, ) = ecdsa_public_key(EcdsaPublicKeyArgument {
+    let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
         canister_id: None,
         derivation_path,
         key_id: EcdsaKeyId {
@@ -486,8 +486,8 @@ async fn caller_btc_address(network: BitcoinNetwork)  -> String {
             name,
         },
     })
-        .await
-        .expect("failed to get Bitcoin public key");
+    .await
+    .expect("failed to get Bitcoin public key");
     public_key_to_p2pkh_address(&key.public_key, network)
 }
 

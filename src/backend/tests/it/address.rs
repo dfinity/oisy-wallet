@@ -87,8 +87,12 @@ fn test_anonymous_cannot_call_btc_address() {
     let pic_setup = setup();
     let network = BitcoinNetwork::Testnet;
 
-    let address =
-        update_call::<String>(&pic_setup, Principal::anonymous(), "caller_btc_address", network);
+    let address = update_call::<String>(
+        &pic_setup,
+        Principal::anonymous(),
+        "caller_btc_address",
+        network,
+    );
 
     assert!(address.is_err());
     assert_eq!(

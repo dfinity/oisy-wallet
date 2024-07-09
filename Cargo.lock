@@ -78,6 +78,7 @@ version = "0.0.3"
 dependencies = [
  "bs58",
  "candid",
+ "derivation-path",
  "ethers-core",
  "futures",
  "getrandom",
@@ -88,7 +89,6 @@ dependencies = [
  "k256",
  "lazy_static",
  "pocket-ic",
- "regex",
  "ripemd",
  "serde",
  "serde_bytes",
@@ -402,6 +402,12 @@ checksum = "b42b6fa04a440b495c8b04d0e71b707c585f83cb9cb28cf8cd0d976c315e31b4"
 dependencies = [
  "powerfmt",
 ]
+
+[[package]]
+name = "derivation-path"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e5c37193a1db1d8ed868c03ec7b152175f26160a5b740e5e484143877e0adf0"
 
 [[package]]
 name = "derive_more"
