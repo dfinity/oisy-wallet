@@ -2,17 +2,18 @@
 
 import { AnonymousIdentity } from '@dfinity/agent';
 import { CkETHOrchestratorCanister } from '@dfinity/cketh';
+import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { createAgent, fromNullable, isNullish, jsonReplacer } from '@dfinity/utils';
-import { writeFileSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
-	const agent = await createAgent({
-		identity: new AnonymousIdentity(),
-		host: 'https://icp-api.io'
-	});
+const agent = await createAgent({
+	identity: new AnonymousIdentity(),
+	host: 'https://icp-api.io'
+});
 
+const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
 	const { getOrchestratorInfo } = CkETHOrchestratorCanister.create({
 		agent,
 		canisterId
@@ -78,6 +79,40 @@ const ORCHESTRATOR_PRODUCTION_ID = Principal.fromText('vxkom-oyaaa-aaaar-qafda-c
 
 const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'env');
 
+const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
+
+const saveTokenLogo = async (canisterId, name) => {
+	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
+	const file = join(LOGO_FOLDER, `${logoName}.svg`);
+
+	if (existsSync(file)) {
+		return;
+	}
+
+	const { metadata } = IcrcLedgerCanister.create({
+		agent,
+		canisterId
+	});
+
+	const data = await metadata({ certified: true });
+
+	const logoItem = data.find((item) => item[0] === 'icrc1:logo');
+
+	if (isNullish(logoItem)) {
+		const error = new Error(`No 'icrc1:logo' data found for ${name}`);
+		console.warn(error.stack);
+		return;
+	}
+
+	const logoData = logoItem[1].Text;
+
+	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
+
+	const svgContent = Buffer.from(encodedStr, encoding).toString('utf-8');
+
+	writeFileSync(file, svgContent, 'utf-8');
+};
+
 const findCkErc20 = async () => {
 	const [staging, production] = await Promise.all(
 		[ORCHESTRATOR_STAGING_ID, ORCHESTRATOR_PRODUCTION_ID].map(buildOrchestratorInfo)
@@ -89,6 +124,13 @@ const findCkErc20 = async () => {
 	};
 
 	writeFileSync(join(DATA_FOLDER, 'tokens.ckerc20.json'), JSON.stringify(tokens, jsonReplacer, 8));
+
+	await Promise.allSettled(
+		Object.entries({
+			...tokens.production,
+			...tokens.staging
+		}).map(([name, { ledgerCanisterId }]) => saveTokenLogo(ledgerCanisterId, name))
+	);
 };
 
 try {

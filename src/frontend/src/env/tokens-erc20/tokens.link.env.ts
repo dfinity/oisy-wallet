@@ -1,7 +1,7 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import { ckErc20Production, ckErc20Staging } from '$env/networks.icrc.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
-import chainlink from '$icp-eth/assets/chainlink.svg';
+import link from '$icp-eth/assets/link.svg';
 
 export const LINK_DECIMALS = 18;
 
@@ -19,7 +19,7 @@ export const LINK_TOKEN: RequiredErc20Token = {
 	name: 'ChainLink Token',
 	symbol: LINK_SYMBOL,
 	decimals: LINK_DECIMALS,
-	icon: chainlink,
+	icon: link,
 	address: ckErc20Production[LINK_TWIN_TOKEN_SYMBOL].erc20ContractAddress,
 	exchange: 'erc20',
 	twinTokenSymbol: LINK_TWIN_TOKEN_SYMBOL
@@ -39,7 +39,7 @@ export const SEPOLIA_LINK_TOKEN: RequiredErc20Token = {
 	name: 'ChainLink Token',
 	symbol: LINK_SYMBOL,
 	decimals: LINK_DECIMALS,
-	icon: chainlink,
+	icon: link,
 	address: ckErc20Staging[SEPOLIA_LINK_TWIN_TOKEN_SYMBOL].erc20ContractAddress,
 	exchange: 'erc20',
 	twinTokenSymbol: SEPOLIA_LINK_TWIN_TOKEN_SYMBOL

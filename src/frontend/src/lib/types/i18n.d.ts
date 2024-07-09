@@ -38,6 +38,7 @@ interface I18nAuth {
 		description: string;
 		connect_with: string;
 		connect: string;
+		connect_to_oisy: string;
 		logout: string;
 	};
 	alt: { sign_in: string };
@@ -114,6 +115,7 @@ interface I18nSettings {
 		testnets: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
+		sign_in: string;
 	};
 	alt: { testnets_toggle: string };
 }
@@ -314,6 +316,7 @@ interface I18nTokens {
 	manage: {
 		text: {
 			title: string;
+			your_tokens: string;
 			do_not_see_import: string;
 			clear_filter: string;
 			manage_for_network: string;
@@ -464,7 +467,7 @@ interface I18nTransaction {
 }
 
 interface I18nTransactions {
-	text: { title: string; no_transactions: string };
+	text: { title: string; no_transactions: string; sign_in: string };
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;
@@ -473,6 +476,21 @@ interface I18nTransactions {
 		loading_pending_ck_ethereum_transactions: string;
 		get_transaction_for_hash: string;
 		unexpected_transaction_for_hash: string;
+	};
+}
+
+interface I18nAbout {
+	text: {
+		title: string;
+		sub_title: string;
+		description: string;
+		features: string;
+		browser_based: string;
+		cross_device: string;
+		network_custody: string;
+		fully_on_chain: string;
+		interoperable: string;
+		free: string;
 	};
 }
 
@@ -495,4 +513,5 @@ interface I18n {
 	wallet_connect: I18nWallet_connect;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
+	about: I18nAbout;
 }

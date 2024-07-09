@@ -15,6 +15,8 @@
 	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 
+	export let disabled = false;
+
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
@@ -28,6 +30,7 @@
 	bind:button
 	on:click={() => (visible = true)}
 	ariaLabel={$i18n.networks.title}
+	{disabled}
 	imgSrc={$selectedNetwork?.icon ?? chainFusion}
 	imgAlt={replacePlaceholders($i18n.core.alt.logo, {
 		$name: $selectedNetwork?.name ?? $i18n.networks.chain_fusion
