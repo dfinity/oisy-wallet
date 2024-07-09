@@ -13,7 +13,7 @@ const envTokenSymbol = z.string();
 
 export type EnvTokenSymbol = z.infer<typeof envTokenSymbol>;
 
-const envTokens = z.record(envTokenSymbol, z.union([z.undefined(), envTokenData]));
+const envTokens = z.record(envTokenSymbol, envTokenData);
 
 export type EnvTokens = z.infer<typeof envTokens>;
 

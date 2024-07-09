@@ -4,7 +4,7 @@ import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.en
 import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
-import type { Erc20Contract, RequiredErc20TwinToken } from '$eth/types/erc20';
+import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { TokenId } from '$lib/types/token';
@@ -83,20 +83,20 @@ export const ERC20_CONTRACTS_ADDRESSES = ERC20_CONTRACTS.map(({ address }) =>
  * Unlike other Erc20 tokens, for which we load the details at runtime based one their contract address.
  */
 
-const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20TwinToken[] = [
+const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [
 	SEPOLIA_USDC_TOKEN,
 	SEPOLIA_LINK_TOKEN,
 	SEPOLIA_PEPE_TOKEN
 ];
 
-const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20TwinToken[] = [
+const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	USDC_TOKEN,
 	LINK_TOKEN,
 	PEPE_TOKEN,
 	OCT_TOKEN
 ];
 
-export const ERC20_TWIN_TOKENS: RequiredErc20TwinToken[] = [
+export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
 	...(ETH_MAINNET_ENABLED ? ERC20_TWIN_TOKENS_MAINNET : []),
 	...ERC20_TWIN_TOKENS_SEPOLIA
 ];

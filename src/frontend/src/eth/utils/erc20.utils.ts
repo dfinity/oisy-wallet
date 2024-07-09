@@ -1,21 +1,13 @@
-import { ckErc20Production, ckErc20Staging } from '$env/networks.icrc.env';
 import oneInch from '$eth/assets/1inch.svg';
 import dai from '$eth/assets/dai.svg';
 import icpDark from '$eth/assets/icp_dark.svg';
 import uniswap from '$eth/assets/uniswap.svg';
 import usdt from '$eth/assets/usdt.svg';
-import type {
-	Erc20Contract,
-	Erc20Metadata,
-	Erc20Token,
-	RequiredErc20Token,
-	RequiredErc20TwinToken
-} from '$eth/types/erc20';
+import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Token } from '$lib/types/token';
 import type { UserTokenState } from '$lib/types/token-toggleable';
-import { nonNullish } from '@dfinity/utils';
 
 type MapErc20TokenParams = Erc20Contract &
 	Erc20Metadata & { network: EthereumNetwork } & Pick<Token, 'category'> &
@@ -70,16 +62,3 @@ export const icTokenEthereumUserToken = (token: Token): token is EthereumUserTok
 
 export const icTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
 	token.standard === 'erc20' && 'enabled' in token && 'address' in token && 'exchange' in token;
-
-export const mapTwinTokenAddressOrUndefined = (
-	token: RequiredErc20TwinToken
-): RequiredErc20Token | undefined => {
-	const {
-		network: { env },
-		twinTokenSymbol
-	} = token;
-	const ckErc20EnvTokens = env === 'mainnet' ? ckErc20Production : ckErc20Staging;
-	const address = ckErc20EnvTokens[twinTokenSymbol]?.erc20ContractAddress;
-
-	return nonNullish(address) ? { ...token, address } : undefined;
-};

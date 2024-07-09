@@ -6,8 +6,6 @@ export type Erc20Token = Erc20Contract & Token;
 
 export type RequiredErc20Token = Required<Erc20Token>;
 
-export type RequiredErc20TwinToken = Omit<RequiredErc20Token, 'address'>;
-
 export type Erc20ContractAddress = ContractAddress;
 export type Erc20Contract = Erc20ContractAddress & { exchange: Exchange; twinTokenSymbol?: string };
 
