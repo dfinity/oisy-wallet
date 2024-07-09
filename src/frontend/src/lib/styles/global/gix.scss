@@ -135,6 +135,8 @@ div.modal {
 
 		div.content {
 			border-radius: var(--padding-0_75x);
+
+			overscroll-behavior: contain;
 		}
 	}
 
