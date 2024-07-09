@@ -1,5 +1,5 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ICRC_TOKENS } from '$env/networks.icrc.env';
+import { ICRC_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/networks.icrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -11,7 +11,11 @@ import {
 	mapIcrcToken,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
+import {
+	queryAndUpdate,
+	type QueryAndUpdateRequestParams,
+	type QueryAndUpdateStrategy
+} from '$lib/actors/query.ic';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -25,8 +29,14 @@ export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity })
 	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity })]);
 };
 
+export const unsafeLoadDefaultPublicIcrcTokens = async () => {
+	await Promise.all(
+		PUBLIC_ICRC_TOKENS.map((token) => loadDefaultIcrc({ data: token, strategy: 'query' }))
+	);
+};
+
 const loadDefaultIcrcTokens = async () => {
-	await Promise.all(ICRC_TOKENS.map(loadDefaultIcrc));
+	await Promise.all(ICRC_TOKENS.map((token) => loadDefaultIcrc({ data: token })));
 };
 
 export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
@@ -44,7 +54,13 @@ export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Pr
 		identity
 	});
 
-const loadDefaultIcrc = (data: IcInterface): Promise<void> =>
+export const loadDefaultIcrc = ({
+	data,
+	strategy
+}: {
+	data: IcInterface;
+	strategy?: QueryAndUpdateStrategy;
+}): Promise<void> =>
 	queryAndUpdate<IcrcLoadData>({
 		request: (params) => requestIcrcMetadata({ ...params, ...data, category: 'default' }),
 		onLoad: loadIcrcData,
@@ -56,6 +72,7 @@ const loadDefaultIcrc = (data: IcInterface): Promise<void> =>
 				err
 			});
 		},
+		strategy,
 		identity: new AnonymousIdentity()
 	});
 
