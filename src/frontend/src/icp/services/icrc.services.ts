@@ -1,9 +1,9 @@
 import type { CustomToken } from '$declarations/backend/backend.did';
-import { ICRC_TOKENS } from '$env/networks.icrc.env';
+import { ICRC_TOKENS, PUBLIC_ICRC_TOKENS } from '$env/networks.icrc.env';
 import { metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
-import { icrcTokensStore } from '$icp/stores/icrc.store';
+import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcInterface } from '$icp/types/ic';
 import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
 import {
@@ -11,7 +11,11 @@ import {
 	mapIcrcToken,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
+import {
+	queryAndUpdate,
+	type QueryAndUpdateRequestParams,
+	type QueryAndUpdateStrategy
+} from '$lib/actors/query.ic';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -22,19 +26,25 @@ import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {
-	await Promise.all([loadDefaultIcrcTokens(), loadUserTokens({ identity })]);
+	await Promise.all([loadDefaultIcrcTokens(), loadCustomTokens({ identity })]);
+};
+
+export const unsafeLoadDefaultPublicIcrcTokens = async () => {
+	await Promise.all(
+		PUBLIC_ICRC_TOKENS.map((token) => loadDefaultIcrc({ data: token, strategy: 'query' }))
+	);
 };
 
 const loadDefaultIcrcTokens = async () => {
-	await Promise.all(ICRC_TOKENS.map(loadDefaultIcrc));
+	await Promise.all(ICRC_TOKENS.map((token) => loadDefaultIcrc({ data: token })));
 };
 
-export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
+export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>
 	queryAndUpdate<IcrcCustomTokenWithoutId[]>({
 		request: (params) => loadIcrcCustomTokens(params),
 		onLoad: loadIcrcCustomData,
 		onCertifiedError: ({ error: err }) => {
-			icrcCustomTokensStore.clear();
+			icrcCustomTokensStore.resetAll();
 
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
@@ -44,18 +54,25 @@ export const loadUserTokens = ({ identity }: { identity: OptionIdentity }): Prom
 		identity
 	});
 
-const loadDefaultIcrc = (data: IcInterface): Promise<void> =>
+export const loadDefaultIcrc = ({
+	data,
+	strategy
+}: {
+	data: IcInterface;
+	strategy?: QueryAndUpdateStrategy;
+}): Promise<void> =>
 	queryAndUpdate<IcrcLoadData>({
 		request: (params) => requestIcrcMetadata({ ...params, ...data, category: 'default' }),
 		onLoad: loadIcrcData,
 		onCertifiedError: ({ error: err }) => {
-			icrcTokensStore.reset(data.ledgerCanisterId);
+			icrcDefaultTokensStore.reset(data.ledgerCanisterId);
 
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
 				err
 			});
 		},
+		strategy,
 		identity: new AnonymousIdentity()
 	});
 
@@ -80,7 +97,7 @@ const loadIcrcData = ({
 }) => {
 	const data = mapIcrcToken(token);
 	// In the unlikely event of a token not being mapped, we choose to skip it instead of throwing an error. This prevents the token from being displayed and, consequently, from being noticed as missing by the user.
-	nonNullish(data) && icrcTokensStore.set({ data, certified });
+	nonNullish(data) && icrcDefaultTokensStore.set({ data, certified });
 };
 
 const loadIcrcCustomTokens = async (params: {
@@ -89,14 +106,8 @@ const loadIcrcCustomTokens = async (params: {
 }): Promise<IcrcCustomTokenWithoutId[]> => {
 	const tokens = await listCustomTokens(params);
 
-	const icrcDefaultLedgerIds = ICRC_TOKENS.map(({ ledgerCanisterId }) => ledgerCanisterId);
-
-	// We filter the custom tokens that are enabled and Icrc, but also not part of the default tokens of Oisy.
-	// For example, and for some reason, a user might manually add the ckBTC ledger and index canister again to their list of tokens.
-	// Not an issue per se, but given that the list of tokens is sorted, one token might move, which equals a visual glitch.
-	const icrcTokens = tokens.filter(
-		({ token }) => 'Icrc' in token && !icrcDefaultLedgerIds.includes(token.Icrc.ledger_id.toText())
-	);
+	// We filter the custom tokens that are Icrc (the backend "Custom Token" potentially supports other types).
+	const icrcTokens = tokens.filter(({ token }) => 'Icrc' in token);
 
 	return await loadCustomIcrcTokensData({
 		tokens: icrcTokens,
@@ -176,10 +187,5 @@ const loadIcrcCustomData = ({
 	certified: boolean;
 	response: IcrcCustomTokenWithoutId[];
 }) => {
-	tokens.forEach((token) =>
-		icrcCustomTokensStore.set({
-			data: token,
-			certified
-		})
-	);
+	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };

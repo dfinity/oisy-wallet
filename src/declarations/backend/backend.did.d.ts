@@ -60,6 +60,7 @@ export type Token = { Icrc: IcrcToken };
 export interface UserToken {
 	decimals: [] | [number];
 	version: [] | [bigint];
+	enabled: [] | [boolean];
 	chain_id: bigint;
 	contract_address: string;
 	symbol: [] | [string];
@@ -69,7 +70,6 @@ export interface UserTokenId {
 	contract_address: string;
 }
 export interface _SERVICE {
-	add_user_token: ActorMethod<[UserToken], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
@@ -80,6 +80,8 @@ export interface _SERVICE {
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
+	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
+	set_user_token: ActorMethod<[UserToken], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 }

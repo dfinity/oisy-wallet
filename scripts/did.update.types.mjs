@@ -5,21 +5,17 @@ import { readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const deleteIndexes = async ({ dest = `./src/declarations` }) => {
-	const promises = readdirSync(dest).map(
-		(dir) =>
-			new Promise(async (resolve) => {
-				const indexPath = join(dest, dir, 'index.js');
+	const rmIndex = async (dir) => {
+		const indexPath = join(dest, dir, 'index.js');
 
-				if (!existsSync(indexPath)) {
-					resolve();
-					return;
-				}
+		if (!existsSync(indexPath)) {
+			return;
+		}
 
-				await rm(indexPath, { force: true });
+		await rm(indexPath, { force: true });
+	};
 
-				resolve();
-			})
-	);
+	const promises = readdirSync(dest).map(rmIndex);
 
 	await Promise.all(promises);
 };
@@ -31,9 +27,9 @@ const deleteIndexes = async ({ dest = `./src/declarations` }) => {
  *
  */
 const cleanFactory = async ({ dest = `./src/declarations` }) => {
-	const promises = readdirSync(dest).map(
-		(dir) =>
-			new Promise(async (resolve) => {
+	const promises = readdirSync(dest).map((dir) => {
+		return new Promise((resolve) => {
+			const cleanFile = async () => {
 				const factoryPath = join(dest, dir, `${dir}.did.js`);
 
 				if (!existsSync(factoryPath)) {
@@ -56,16 +52,19 @@ export const init = ({ IDL }) => {`
 				await writeFile(factoryPath, cleanInit, 'utf8');
 
 				resolve();
-			})
-	);
+			};
+
+			cleanFile();
+		});
+	});
 
 	await Promise.all(promises);
 };
 
 const renameFactory = async ({ dest = `./src/declarations` }) => {
-	const promises = readdirSync(dest).map(
-		(dir) =>
-			new Promise(async (resolve) => {
+	const promises = readdirSync(dest).map((dir) => {
+		return new Promise((resolve) => {
+			const renameFile = async () => {
 				const factoryPath = join(dest, dir, `${dir}.did.js`);
 				const formattedPath = join(dest, dir, `${dir}.factory.did.js`);
 
@@ -77,8 +76,11 @@ const renameFactory = async ({ dest = `./src/declarations` }) => {
 				await rename(factoryPath, formattedPath);
 
 				resolve();
-			})
-	);
+			};
+
+			renameFile();
+		});
+	});
 
 	await Promise.all(promises);
 };
@@ -86,9 +88,9 @@ const renameFactory = async ({ dest = `./src/declarations` }) => {
 const copyCertifiedFactory = async ({ dest = `./src/declarations` }) => {
 	const promises = readdirSync(dest)
 		.filter((dir) => !['frontend'].includes(dir))
-		.map(
-			(dir) =>
-				new Promise(async (resolve) => {
+		.map((dir) => {
+			return new Promise((resolve) => {
+				const copyFile = async () => {
 					const uncertifiedFactoryPath = join(dest, dir, `${dir}.factory.did.js`);
 
 					if (!existsSync(uncertifiedFactoryPath)) {
@@ -103,8 +105,11 @@ const copyCertifiedFactory = async ({ dest = `./src/declarations` }) => {
 					await writeFile(certifiedFactoryPath, content.toString().replace(/\['query']/g, ''));
 
 					resolve();
-				})
-		);
+				};
+
+				copyFile();
+			});
+		});
 
 	await Promise.all(promises);
 };

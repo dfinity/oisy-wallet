@@ -10,11 +10,6 @@ export const selectedEthereumNetwork: Readable<EthereumNetwork> = derived(
 		$enabledEthereumNetworks.find(({ id }) => id === $networkId) ?? DEFAULT_ETHEREUM_NETWORK
 );
 
-export const selectedChainId: Readable<bigint> = derived(
-	[selectedEthereumNetwork],
-	([{ chainId }]) => chainId
-);
-
 export const explorerUrl: Readable<string> = derived(
 	[selectedEthereumNetwork],
 	([{ explorerUrl }]) => explorerUrl

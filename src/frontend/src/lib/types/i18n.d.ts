@@ -33,7 +33,15 @@ interface I18nNavigation {
 }
 
 interface I18nAuth {
-	text: { title: string; description: string; connect_with: string; logout: string };
+	text: {
+		title: string;
+		description: string;
+		connect_with: string;
+		connect: string;
+		connect_to_oisy: string;
+		logout: string;
+	};
+	alt: { sign_in: string };
 	error: { no_internet_identity: string };
 }
 
@@ -41,6 +49,7 @@ interface I18nWallet {
 	text: {
 		address: string;
 		wallet_address: string;
+		your_addresses: string;
 		address_copied: string;
 		wallet_address_copied: string;
 		display_wallet_address_qr: string;
@@ -86,6 +95,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		erc20_user_tokens: string;
 		loading_wallet_timeout: string;
 	};
 }
@@ -105,6 +115,7 @@ interface I18nSettings {
 		testnets: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
+		sign_in: string;
 	};
 	alt: { testnets_toggle: string };
 }
@@ -125,6 +136,14 @@ interface I18nReceive {
 			use_for_deposit: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
+			internet_computer: string;
+			principal: string;
+			internet_computer_principal_copied: string;
+			display_internet_computer_principal_qr: string;
+			icp_account: string;
+			icp_account_copied: string;
+			display_icp_account_qr: string;
+			icp_account_notes: string;
 		};
 	};
 	ethereum: {
@@ -134,6 +153,10 @@ interface I18nReceive {
 			eth_to_cketh_description: string;
 			learn_how_to_convert: string;
 			metamask: string;
+			ethereum: string;
+			ethereum_address: string;
+			ethereum_address_copied: string;
+			display_ethereum_address_qr: string;
 		};
 		error: { no_metamask: string };
 	};
@@ -250,6 +273,8 @@ interface I18nTokens {
 		all_tokens_with_zero_hidden: string;
 		initializing: string;
 		updating_ui: string;
+		show_token: string;
+		hide_token: string;
 	};
 	details: {
 		title: string;
@@ -282,11 +307,23 @@ interface I18nTokens {
 			unexpected_index: string;
 			unexpected_index_ledger: string;
 			invalid_ledger_id: string;
+			missing_ledger_id: string;
+			missing_index_id: string;
+			missing_contract_address: string;
+			no_network: string;
 		};
 	};
 	manage: {
-		text: { title: string; do_not_see_import: string; clear_filter: string };
-		info: { outdated_index_canister: string };
+		text: {
+			title: string;
+			your_tokens: string;
+			do_not_see_import: string;
+			clear_filter: string;
+			manage_for_network: string;
+			network: string;
+		};
+		placeholder: { select_network: string };
+		info: { outdated_index_canister: string; no_changes: string };
 		error: { unexpected_build: string; empty: string };
 	};
 	hide: { title: string; token: string; info: string; confirm: string; hiding: string };
@@ -307,7 +344,7 @@ interface I18nTokens {
 		unexpected_hiding: string;
 		already_available: string;
 		loading_metadata: string;
-		not_custom: string;
+		not_toggleable: string;
 		incomplete_metadata: string;
 		duplicate_metadata: string;
 		unexpected_undefined: string;
@@ -430,7 +467,7 @@ interface I18nTransaction {
 }
 
 interface I18nTransactions {
-	text: { title: string; no_transactions: string };
+	text: { title: string; no_transactions: string; sign_in: string };
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;
@@ -439,6 +476,21 @@ interface I18nTransactions {
 		loading_pending_ck_ethereum_transactions: string;
 		get_transaction_for_hash: string;
 		unexpected_transaction_for_hash: string;
+	};
+}
+
+interface I18nAbout {
+	text: {
+		title: string;
+		sub_title: string;
+		description: string;
+		features: string;
+		browser_based: string;
+		cross_device: string;
+		network_custody: string;
+		fully_on_chain: string;
+		interoperable: string;
+		free: string;
 	};
 }
 
@@ -461,4 +513,5 @@ interface I18n {
 	wallet_connect: I18nWallet_connect;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
+	about: I18nAbout;
 }

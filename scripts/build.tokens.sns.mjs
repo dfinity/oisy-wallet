@@ -160,7 +160,7 @@ export const findSnses = async () => {
 				rootCanisterId: root_canister_id,
 				metadata: {
 					...mapOptionalToken(icrc1_metadata),
-					alternativeName,
+					alternativeName: alternativeName.trim(),
 					url
 				}
 			})
@@ -205,7 +205,10 @@ export const findSnses = async () => {
 
 	const enhancedTokens = await Promise.all(tokens.map(indexCanisterVersion));
 
-	writeFileSync(join(DATA_FOLDER, 'tokens.sns.json'), JSON.stringify(enhancedTokens, jsonReplacer));
+	writeFileSync(
+		join(DATA_FOLDER, 'tokens.sns.json'),
+		JSON.stringify(enhancedTokens, jsonReplacer, 8)
+	);
 
 	await saveLogos(icons);
 };

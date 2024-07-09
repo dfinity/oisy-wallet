@@ -16,7 +16,8 @@
 		"./postcss.config.js",
 		"./playwright.config.ts",
 		"./e2e/**/*.js",
-		"./e2e/**/*.ts"
+		"./e2e/**/*.ts",
+		"./scripts/*.mjs"
 	],
 	"exclude": [
 		"./node_modules/**",

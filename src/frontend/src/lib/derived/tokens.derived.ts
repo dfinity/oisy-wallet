@@ -9,8 +9,8 @@ import { enabledBitcoinTokens } from '../../btc/derived/tokens.derived';
 export const tokens: Readable<Token[]> = derived(
 	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens, enabledBitcoinTokens],
 	([$erc20Tokens, $icrcTokens, $enabledEthereumTokens, $enabledBitcoinTokens]) => [
-		...$enabledEthereumTokens,
 		ICP_TOKEN,
+		...$enabledEthereumTokens,
 		...$enabledBitcoinTokens,
 		...$erc20Tokens,
 		...$icrcTokens

@@ -4,22 +4,20 @@
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { networkEthereum, networkICP } from '$lib/derived/network.derived';
-	import { erc20TokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IcManageTokensMenuButton from '$icp/components/tokens/IcManageTokensMenuButton.svelte';
-	import ManageTokensMenuButton from '$eth/components/tokens/ManageTokensMenuButton.svelte';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import ManageTokensMenuButton from '$icp-eth/components/tokens/ManageTokensMenuButton.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 </script>
 
 <button
-	class="icon bg-white border border-dust rounded-md"
+	class="icon bg-white border-2 border-dark-blue rounded-md"
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.navigation.alt.menu}
-	disabled={$erc20TokensNotInitialized}
-	class:opacity-10={$erc20TokensNotInitialized}
+	disabled={$erc20UserTokensNotInitialized}
+	class:opacity-10={$erc20UserTokensNotInitialized}
 >
 	<IconMore />
 </button>
@@ -28,16 +26,10 @@
 	<div class="flex flex-col gap-3">
 		<TokensZeroBalance />
 
-		{#if $networkICP || $networkEthereum}
-			<div class="my">
-				<Hr />
-			</div>
+		<div class="my">
+			<Hr />
+		</div>
 
-			{#if $networkICP}
-				<IcManageTokensMenuButton />
-			{:else if $networkEthereum}
-				<ManageTokensMenuButton />
-			{/if}
-		{/if}
+		<ManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
 	</div>
 </Popover>

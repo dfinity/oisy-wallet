@@ -7,17 +7,17 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-ic-cdk.workspace = true
-ic-cdk-macros.workspace = true
-candid.workspace = true
-serde.workspace = true
-serde_bytes.workspace = true
-ic-stable-structures = "0.6.4"
+candid = { workspace = true }
 ethers-core = "= 2.0.11"
 futures = "0.3"
-k256 = "0.13"
-hex = "0.4"
 getrandom = { version = "0.2", features = ["custom"] }
+hex = "0.4"
+ic-cdk = { workspace = true }
+ic-cdk-macros = { workspace = true }
+ic-stable-structures = "0.6.4"
+k256 = "0.13"
+serde = { workspace = true }
+serde_bytes = { workspace = true }
 shared = { path = "../shared" }
 
 [dev-dependencies]

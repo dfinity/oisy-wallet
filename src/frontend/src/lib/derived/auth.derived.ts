@@ -5,3 +5,8 @@ export const authSignedIn: Readable<boolean> = derived(
 	authStore,
 	({ identity }) => identity !== null && identity !== undefined
 );
+
+export const authNotSignedIn: Readable<boolean> = derived(
+	authSignedIn,
+	($authSignedIn) => !$authSignedIn
+);
