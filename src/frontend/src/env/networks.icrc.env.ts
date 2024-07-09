@@ -5,13 +5,9 @@ import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.en
 import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
-import ckErc20Tokens from '$env/tokens.ckerc20.json';
+import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import {
-	envTokensCkErc20,
-	type EnvTokenSymbol,
-	type EnvTokens
-} from '$icp/types/env-token-ckerc20';
+import { type EnvTokenSymbol, type EnvTokens } from '$icp/types/env-token-ckerc20';
 import type { IcCkInterface } from '$icp/types/ic';
 import { LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -186,12 +182,6 @@ export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
 /**
  * ckERC20
  */
-
-const ckErc20 = envTokensCkErc20.safeParse(ckErc20Tokens);
-
-const { production: ckErc20Production, staging: ckErc20Staging } = ckErc20.success
-	? ckErc20.data
-	: { production: {}, staging: {} };
 
 export const LOCAL_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKUSDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
