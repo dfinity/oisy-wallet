@@ -10,7 +10,7 @@
 	target="_blank"
 	class="inline-flex items-center gap-2 no-underline px-6 py-2 font-bold text-xs md:text-base mx-auto max-w-72 md:max-w-[100%]"
 >
-	<span class="align-middle inline-block"><IconWarning inline /></span>
+	<IconWarning inline />
 	<span>{$i18n.hero.text.use_with_caution}</span>
 </a>
 
