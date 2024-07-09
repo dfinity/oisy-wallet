@@ -357,16 +357,21 @@ export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
  * All ICRC tokens data
  */
 
+// The subset of the ICRC tokens that are also displayed if the user is not signed-in.
+export const PUBLIC_ICRC_TOKENS: IcCkInterface[] = [
+	...(nonNullish(CKBTC_IC_DATA) ? [CKBTC_IC_DATA] : []),
+	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : []),
+	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : [])
+];
+
 export const ICRC_TOKENS: IcCkInterface[] = [
+	...PUBLIC_ICRC_TOKENS,
 	...(nonNullish(CKBTC_LOCAL_DATA) ? [CKBTC_LOCAL_DATA] : []),
 	...(nonNullish(CKBTC_STAGING_DATA) ? [CKBTC_STAGING_DATA] : []),
-	...(nonNullish(CKBTC_IC_DATA) ? [CKBTC_IC_DATA] : []),
 	...(nonNullish(CKETH_LOCAL_DATA) ? [CKETH_LOCAL_DATA] : []),
 	...(nonNullish(CKETH_STAGING_DATA) ? [CKETH_STAGING_DATA] : []),
-	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : []),
 	...(nonNullish(CKUSDC_LOCAL_DATA) ? [CKUSDC_LOCAL_DATA] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA) ? [CKUSDC_STAGING_DATA] : []),
-	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : []),
 	...(nonNullish(CKLINK_STAGING_DATA) ? [CKLINK_STAGING_DATA] : []),
 	...(nonNullish(CKLINK_IC_DATA) ? [CKLINK_IC_DATA] : []),
 	...(nonNullish(CKPEPE_IC_DATA) ? [CKPEPE_IC_DATA] : []),
