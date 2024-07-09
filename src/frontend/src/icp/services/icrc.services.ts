@@ -30,7 +30,9 @@ export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity })
 };
 
 export const unsafeLoadDefaultPublicIcrcTokens = async () => {
-	await Promise.all(PUBLIC_ICRC_TOKENS.map((token) => loadDefaultIcrc({ data: token })));
+	await Promise.all(
+		PUBLIC_ICRC_TOKENS.map((token) => loadDefaultIcrc({ data: token, strategy: 'query' }))
+	);
 };
 
 const loadDefaultIcrcTokens = async () => {
