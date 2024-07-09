@@ -2,6 +2,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { signIn } from '$lib/services/auth.services';
 	import ButtonIC from '$lib/components/ui/ButtonIC.svelte';
+	import { IconInfo } from '@dfinity/gix-components';
 </script>
 
 <div class="mt-6 xl:mt-12 mb-0.5 pt-2">
@@ -9,7 +10,10 @@
 		{$i18n.auth.text.connect_to_oisy}
 	</h1>
 
-	<span class="text-off-white block my-4">{$i18n.auth.text.title}</span>
+	<button class="block text-left text-off-white my-4 max-w-72 sm:max-w-[100%]">
+		<span>{$i18n.auth.text.title}</span>
+		<span class="align-middle inline-block"><IconInfo /></span></button
+	>
 </div>
 
 <ButtonIC on:click={async () => await signIn({})} testId="login-button">
