@@ -42,7 +42,7 @@
 		<Img
 			{src}
 			{alt}
-			width={sizePx}
+			fitHeight
 			height={sizePx}
 			on:load={() => (loaded = true)}
 			on:error={onError}
