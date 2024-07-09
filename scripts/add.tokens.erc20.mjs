@@ -141,15 +141,24 @@ const manageEnvFile = async ({ mainSymbol: symbol, contractAddress, testnetContr
 
 	const icon = symbol.toLowerCase();
 
-	const fileContentFirstPart =
+	const initialFileContent =
 		existingFileContent !== ''
 			? existingFileContent
 			: `import type { RequiredErc20Token } from '$eth/types/erc20';
 import ${icon} from '$icp-eth/assets/${icon}.svg';
 `;
 
-	const { content: fileContentFirstPartWithImports } = updateImportsInContent({
-		content: fileContentFirstPart,
+	const { content: fileContentWithTokenModules } = updateImportsInContent({
+		content: initialFileContent,
+		imports: [
+			...(!mainnetTokenCreated ? ['ckErc20Production'] : []),
+			...(!testnetTokenCreated ? ['ckErc20Staging'] : [])
+		],
+		module: '$env/tokens.ckerc20.env'
+	});
+
+	const { content: finalFileContentWithImports } = updateImportsInContent({
+		content: fileContentWithTokenModules,
 		imports: [
 			...(!mainnetTokenCreated ? ['ETHEREUM_NETWORK'] : []),
 			...(!testnetTokenCreated ? ['SEPOLIA_NETWORK'] : [])
@@ -169,6 +178,8 @@ export const ${symbol}_SYMBOL = '${symbol}';
 
 export const ${symbol}_TOKEN_ID: unique symbol = Symbol(${symbol}_SYMBOL);
 
+export const ${symbol}_TWIN_TOKEN_SYMBOL = 'ck${symbol}';
+
 export const ${mainnetToken}: RequiredErc20Token = {
 	id: ${symbol}_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
@@ -178,9 +189,9 @@ export const ${mainnetToken}: RequiredErc20Token = {
 	symbol: '${symbol}',
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
-	address: '${contractAddress}',
+	address: ckErc20Production[${symbol}_TWIN_TOKEN_SYMBOL].erc20ContractAddress,
 	exchange: 'erc20',
-	twinTokenSymbol: 'ck${symbol}'
+	twinTokenSymbol: ${symbol}_TWIN_TOKEN_SYMBOL
 };
 `
 			: '';
@@ -192,6 +203,8 @@ export const SEPOLIA_${symbol}_SYMBOL = 'Sepolia${symbol}';
 
 export const SEPOLIA_${symbol}_TOKEN_ID: unique symbol = Symbol(SEPOLIA_${symbol}_SYMBOL);
 
+export const SEPOLIA_${symbol}_TWIN_TOKEN_SYMBOL = 'ckSepolia${symbol}';
+
 export const ${testnetToken}: RequiredErc20Token = {
 	id: SEPOLIA_${symbol}_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
@@ -201,9 +214,9 @@ export const ${testnetToken}: RequiredErc20Token = {
 	symbol: '${symbol}',
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
-	address: '${testnetContractAddress}',
+	address: ckErc20Staging[SEPOLIA_${symbol}_TWIN_TOKEN_SYMBOL].erc20ContractAddress,
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckSepolia${symbol}'
+	twinTokenSymbol: SEPOLIA_${symbol}_TWIN_TOKEN_SYMBOL
 };
 `
 			: '';
@@ -214,7 +227,7 @@ export const ${testnetToken}: RequiredErc20Token = {
 	}
 
 	const newFileContent =
-		fileContentFirstPartWithImports +
+		finalFileContentWithImports +
 		fileContentDecimalsConst +
 		newFileContentMainnet +
 		newFileContentTestnet;
