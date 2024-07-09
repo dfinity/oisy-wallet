@@ -28,6 +28,7 @@
 		"clippy": "./scripts/lint.rust.sh",
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && eslint .",
 		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}'",
+		"format:backend": "./scripts/format.sh",
 		"generate": "scripts/did.sh && dfx generate && node scripts/did.update.types.mjs && node scripts/did.delete.types.mjs && npm run format",
 		"deploy": "scripts/deploy.sh",
 		"i18n": "node scripts/i18n.mjs && prettier --write ./src/frontend/src/lib/types/i18n.d.ts",
