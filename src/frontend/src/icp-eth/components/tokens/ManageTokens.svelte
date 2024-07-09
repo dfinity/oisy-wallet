@@ -202,7 +202,7 @@
 		>
 	</button>
 {:else}
-	<div class="container md:max-h-[26rem] pr-2 pt-1 overflow-y-auto">
+	<div class="container md:max-h-[26rem] pr-2 pt-1 overflow-y-auto overscroll-contain">
 		{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 			<Card>
 				{token.name}
