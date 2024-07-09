@@ -1,5 +1,5 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
-import { ckErc20Production, ckErc20Staging } from '$env/networks.icrc.env';
+import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import link from '$icp-eth/assets/link.svg';
 

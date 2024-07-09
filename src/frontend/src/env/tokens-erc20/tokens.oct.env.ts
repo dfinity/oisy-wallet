@@ -1,5 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks.env';
-import { ckErc20Production } from '$env/networks.icrc.env';
+import { ckErc20Production } from '$env/tokens.ckerc20.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import oct from '$icp-eth/assets/oct.svg';
 
