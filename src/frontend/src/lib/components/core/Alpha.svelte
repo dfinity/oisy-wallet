@@ -8,20 +8,14 @@
 	href={OISY_ALPHA_WARNING_URL}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="no-underline inline-flex items-center gap-2 text-center px-6 py-2 font-bold text-xs md:text-base"
+	class="inline-flex items-center gap-2 no-underline px-6 py-2 font-bold text-xs md:text-base mx-auto max-w-72 md:max-w-[100%]"
 >
 	<IconWarning inline />
-	<span class="pl-1">{$i18n.hero.text.use_with_caution}</span>
+	<span>{$i18n.hero.text.use_with_caution}</span>
 </a>
 
 <style lang="scss">
 	a {
 		color: var(--alpha-color, var(--color-misty-rose));
-		max-width: 300px;
-		margin: 0 auto;
-
-		@include media.min-width(medium) {
-			max-width: 100%;
-		}
 	}
 </style>
