@@ -61,15 +61,10 @@ a {
 a:active,
 a:hover {
 	color: var(--color-blue);
-	outline-width: 0;
 }
 a:hover,
 a:focus {
 	text-decoration: underline;
-}
-a:focus,
-a:focus-visible {
-	outline: none;
 }
 b,
 strong {
