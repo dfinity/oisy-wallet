@@ -16,11 +16,11 @@ const API_KEY = import.meta.env.VITE_COINGECKO_API_KEY;
  * - https://www.coingecko.com/api/documentation
  *
  */
-export const simplePrice = async ({
+export const simplePrice = async <T extends CoingeckoSimplePriceParams>({
 	ids,
 	...rest
-}: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse | null> =>
-	fetchCoingecko({
+}: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse<T> | null> =>
+	fetchCoingecko<CoingeckoSimplePriceResponse<T>>({
 		endpointPath: 'simple/price',
 		queryParams: joinParams([
 			`ids=${Array.isArray(ids) ? ids.join(',') : ids}`,
@@ -35,12 +35,12 @@ export const simplePrice = async ({
  * - https://www.coingecko.com/api/documentation
  *
  */
-export const simpleTokenPrice = async ({
+export const simpleTokenPrice = async <T extends CoingeckoSimpleTokenPriceParams>({
 	id,
 	contract_addresses,
 	...rest
-}: CoingeckoSimpleTokenPriceParams): Promise<CoingeckoSimplePriceResponse | null> =>
-	fetchCoingecko({
+}: CoingeckoSimpleTokenPriceParams): Promise<CoingeckoSimplePriceResponse<T> | null> =>
+	fetchCoingecko<CoingeckoSimplePriceResponse<T>>({
 		endpointPath: `simple/token_price/${id}`,
 		queryParams: joinParams([
 			`contract_addresses=${
@@ -50,13 +50,13 @@ export const simpleTokenPrice = async ({
 		])
 	});
 
-const fetchCoingecko = async ({
+const fetchCoingecko = async <T>({
 	endpointPath,
 	queryParams
 }: {
 	endpointPath: string;
 	queryParams: string;
-}): Promise<CoingeckoSimplePriceResponse | null> => {
+}): Promise<T | null> => {
 	const response = await fetch(`${API_URL}/${endpointPath}?${queryParams}`, {
 		headers: {
 			...(nonNullish(API_KEY) && { ['x-cg-pro-api-key']: API_KEY })
