@@ -2,37 +2,33 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
-	CoingeckoSimplePriceParams,
 	CoingeckoSimplePriceResponse,
-	CoingeckoSimpleTokenPriceParams
+	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import { nonNullish } from '@dfinity/utils';
 
-export const exchangeRateETHToUsd =
-	async (): Promise<CoingeckoSimplePriceResponse<CoingeckoSimplePriceParams> | null> =>
-		simplePrice({
-			ids: 'ethereum',
-			vs_currencies: 'usd'
-		});
+export const exchangeRateETHToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'ethereum',
+		vs_currencies: 'usd'
+	});
 
-export const exchangeRateBTCToUsd =
-	async (): Promise<CoingeckoSimplePriceResponse<CoingeckoSimplePriceParams> | null> =>
-		simplePrice({
-			ids: 'bitcoin',
-			vs_currencies: 'usd'
-		});
+export const exchangeRateBTCToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'bitcoin',
+		vs_currencies: 'usd'
+	});
 
-export const exchangeRateICPToUsd =
-	async (): Promise<CoingeckoSimplePriceResponse<CoingeckoSimplePriceParams> | null> =>
-		simplePrice({
-			ids: 'internet-computer',
-			vs_currencies: 'usd'
-		});
+export const exchangeRateICPToUsd = async (): Promise<CoingeckoSimplePriceResponse | null> =>
+	simplePrice({
+		ids: 'internet-computer',
+		vs_currencies: 'usd'
+	});
 
 export const exchangeRateERC20ToUsd = async (
 	contractAddresses: Erc20ContractAddress[]
-): Promise<CoingeckoSimplePriceResponse<CoingeckoSimpleTokenPriceParams> | null> =>
+): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({
 		id: 'ethereum',
 		vs_currencies: 'usd',

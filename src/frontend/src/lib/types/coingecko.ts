@@ -42,39 +42,23 @@ export interface CoingeckoSimpleTokenPriceParams extends CoingeckoSimpleParams {
 	id: CoingeckoPlatformId;
 	// The contract address of tokens, comma separated
 	contract_addresses: string | string[];
-	//
-	include_market_cap: true;
 }
 
-interface CoingeckoSimplePriceBase {
+export interface CoingeckoSimplePrice {
 	usd: number;
+	usd_market_cap?: number;
+	usd_24h_vol?: number;
+	usd_24h_change?: number;
+	last_updated_at?: number;
 }
 
-interface CoingeckoSimplePriceEmpty {}
+export type CoingeckoSimplePriceResponse = Record<CoingeckoCoinsId | string, CoingeckoSimplePrice>;
 
-export type CoingeckoSimplePrice<T extends CoingeckoSimpleParams> = CoingeckoSimplePriceBase &
-	(T['include_market_cap'] extends true
-		? {
-				usd_market_cap: number;
-			}
-		: CoingeckoSimplePriceEmpty) &
-	(T['include_24hr_vol'] extends true
-		? {
-				usd_24h_vol: number;
-			}
-		: CoingeckoSimplePriceEmpty) &
-	(T['include_24hr_change'] extends true
-		? {
-				usd_24h_change: number;
-			}
-		: CoingeckoSimplePriceEmpty) &
-	(T['include_last_updated_at'] extends true
-		? {
-				last_updated_at: number;
-			}
-		: CoingeckoSimplePriceEmpty);
+export interface CoingeckoSimpleTokenPrice extends CoingeckoSimplePrice {
+	usd_market_cap: number;
+}
 
-export type CoingeckoSimplePriceResponse<T extends CoingeckoSimpleParams> = Record<
+export type CoingeckoSimpleTokenPriceResponse = Record<
 	CoingeckoCoinsId | string,
-	CoingeckoSimplePrice<T>
+	CoingeckoSimpleTokenPrice
 >;
