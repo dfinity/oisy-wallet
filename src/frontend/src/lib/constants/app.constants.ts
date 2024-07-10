@@ -9,6 +9,14 @@ export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_INTERNET_IDENTITY_CANISTER_ID
 	: undefined;
 
+export const POH_ISSUER_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_POH_ISSUER_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_POH_ISSUER_CANISTER_ID
+		: PROD
+			? import.meta.env.VITE_IC_POH_ISSUER_CANISTER_ID
+			: undefined;
+
 export const BACKEND_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_BACKEND_CANISTER_ID
 	: STAGING
