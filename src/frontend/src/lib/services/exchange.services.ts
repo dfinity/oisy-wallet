@@ -29,7 +29,8 @@ export const exchangeRateERC20ToUsd = async (
 	simpleTokenPrice({
 		id: 'ethereum',
 		vs_currencies: 'usd',
-		contract_addresses: contractAddresses.map(({ address }) => address.toLowerCase())
+		contract_addresses: contractAddresses.map(({ address }) => address.toLowerCase()),
+		include_market_cap: true
 	});
 
 export const syncExchange = (data: PostMessageDataResponseExchange | undefined) =>
