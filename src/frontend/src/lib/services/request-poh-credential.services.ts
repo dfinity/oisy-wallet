@@ -14,9 +14,10 @@ import {
 } from '@dfinity/verifiable-credentials/request-verifiable-presentation';
 import { get } from 'svelte/store';
 
+// This credential type is defined by the issuer Decide AI
 const POH_CREDENTIAL_TYPE = 'ProofOfUniqueness';
 
-export const requestPouhCredential = async ({
+export const requestPohCredential = async ({
 	credentialSubject
 }: {
 	credentialSubject: Principal;
