@@ -1,7 +1,10 @@
 import type {
+	CoingeckoResponse,
 	CoingeckoSimpleParams,
+	CoingeckoSimplePrice,
 	CoingeckoSimplePriceParams,
 	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPrice,
 	CoingeckoSimpleTokenPriceParams,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
@@ -21,7 +24,7 @@ export const simplePrice = async ({
 	ids,
 	...rest
 }: CoingeckoSimplePriceParams): Promise<CoingeckoSimplePriceResponse | null> =>
-	fetchCoingecko<CoingeckoSimplePriceResponse>({
+	fetchCoingecko<CoingeckoSimplePrice>({
 		endpointPath: 'simple/price',
 		queryParams: joinParams([
 			`ids=${Array.isArray(ids) ? ids.join(',') : ids}`,
@@ -41,7 +44,7 @@ export const simpleTokenPrice = async ({
 	contract_addresses,
 	...rest
 }: CoingeckoSimpleTokenPriceParams): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
-	fetchCoingecko<CoingeckoSimpleTokenPriceResponse>({
+	fetchCoingecko<CoingeckoSimpleTokenPrice>({
 		endpointPath: `simple/token_price/${id}`,
 		queryParams: joinParams([
 			`contract_addresses=${
@@ -51,13 +54,13 @@ export const simpleTokenPrice = async ({
 		])
 	});
 
-const fetchCoingecko = async <T>({
+const fetchCoingecko = async <T extends CoingeckoSimplePrice | CoingeckoSimpleTokenPrice>({
 	endpointPath,
 	queryParams
 }: {
 	endpointPath: string;
 	queryParams: string;
-}): Promise<T | null> => {
+}): Promise<CoingeckoResponse<T> | null> => {
 	const response = await fetch(`${API_URL}/${endpointPath}?${queryParams}`, {
 		headers: {
 			...(nonNullish(API_KEY) && { ['x-cg-pro-api-key']: API_KEY })
