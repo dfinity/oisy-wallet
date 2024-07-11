@@ -60,3 +60,7 @@ export type CoingeckoResponse<T> = Record<CoingeckoCoinsId | string, T>;
 export type CoingeckoSimplePriceResponse = CoingeckoResponse<CoingeckoSimplePrice>;
 
 export type CoingeckoSimpleTokenPriceResponse = CoingeckoResponse<CoingeckoSimpleTokenPrice>;
+
+export type CoingeckoPriceResponse =
+	| CoingeckoSimplePriceResponse
+	| CoingeckoSimpleTokenPriceResponse;
