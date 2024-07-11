@@ -48,7 +48,9 @@
 			"sign_in": "Sign in with Internet Identity to start using Oisy Wallet."
 		},
 		"error": {
-			"no_internet_identity": "No internet identity."
+			"no_internet_identity": "No internet identity.",
+			"error_requesting_poh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
+			"no_poh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?"
 		}
 	},
 	"wallet": {
