@@ -23,6 +23,19 @@ const icrcDefaultTokens: Readable<IcToken[]> = derived(
 );
 
 /**
+ * The list of Icrc tokens that are default for Chain Fusion, in the order provided by the static list.
+ */
+export const icrcChainFusionDefaultTokens: Readable<IcToken[]> = derived(
+	[icrcDefaultTokens],
+	([$icrcDefaultTokens]) =>
+		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.map((canisterId) =>
+			$icrcDefaultTokens.find(
+				({ ledgerCanisterId: tokenCanisterId }) => tokenCanisterId === canisterId
+			)
+		).filter(nonNullish)
+);
+
+/**
  * A flatten list of the default Icrc Ledger and Index canister Ids.
  */
 const icrcDefaultTokensCanisterIds: Readable<string[]> = derived(
@@ -105,17 +118,6 @@ export const icrcTokens: Readable<IcrcCustomToken[]> = derived(
 export const sortedIcrcTokens: Readable<IcrcCustomToken[]> = derived(
 	[icrcTokens],
 	([$icrcTokens]) => $icrcTokens.sort(sortIcTokens)
-);
-
-/**
- * The list of Icrc tokens that are default for Chain Fusion, in the order provided by the static list.
- */
-export const icrcChainFusionDefaultTokens: Readable<IcrcCustomToken[]> = derived(
-	[icrcTokens],
-	([$icrcTokens]) =>
-		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.map((canisterId) =>
-			$icrcTokens.find(({ ledgerCanisterId: tokenCanisterId }) => tokenCanisterId === canisterId)
-		).filter(nonNullish)
 );
 
 /**
