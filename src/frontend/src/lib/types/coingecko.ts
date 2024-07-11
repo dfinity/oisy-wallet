@@ -52,4 +52,11 @@ export interface CoingeckoSimplePrice {
 	last_updated_at?: number;
 }
 
-export type CoingeckoSimplePriceResponse = Record<CoingeckoCoinsId | string, CoingeckoSimplePrice>;
+export type CoingeckoSimpleTokenPrice = Omit<CoingeckoSimplePrice, 'usd_market_cap'> &
+	Required<Pick<CoingeckoSimplePrice, 'usd_market_cap'>>;
+
+export type CoingeckoResponse<T> = Record<CoingeckoCoinsId | string, T>;
+
+export type CoingeckoSimplePriceResponse = CoingeckoResponse<CoingeckoSimplePrice>;
+
+export type CoingeckoSimpleTokenPriceResponse = CoingeckoResponse<CoingeckoSimpleTokenPrice>;
