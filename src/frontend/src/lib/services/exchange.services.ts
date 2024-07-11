@@ -1,7 +1,10 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
-import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import { nonNullish } from '@dfinity/utils';
 
@@ -25,7 +28,7 @@ export const exchangeRateICPToUsd = async (): Promise<CoingeckoSimplePriceRespon
 
 export const exchangeRateERC20ToUsd = async (
 	contractAddresses: Erc20ContractAddress[]
-): Promise<CoingeckoSimplePriceResponse | null> =>
+): Promise<CoingeckoSimpleTokenPriceResponse | null> =>
 	simpleTokenPrice({
 		id: 'ethereum',
 		vs_currencies: 'usd',
