@@ -1,4 +1,5 @@
 type Arg = variant { Upgrade; Init : InitArg };
+type BitcoinNetwork = variant { mainnet; testnet; regtest };
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -60,6 +61,7 @@ type UserToken = record {
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
+  caller_btc_address : (BitcoinNetwork) -> (text);
   caller_eth_address : () -> (text);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
