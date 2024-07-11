@@ -1,20 +1,18 @@
 import {
-	INTERNET_IDENTITY_CANISTER_ID,
-	POH_ISSUER_CANISTER_ID
+	INTERNET_IDENTITY_ORIGIN,
+	POH_ISSUER_CANISTER_ID,
+	POH_ISSUER_ORIGIN
 } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore, type UserProfile } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { Principal } from '@dfinity/principal';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	requestVerifiablePresentation,
 	type VerifiablePresentationResponse
 } from '@dfinity/verifiable-credentials/request-verifiable-presentation';
 import { get } from 'svelte/store';
-
-// TODO: Move to env vars
-const ISSUER_ORIGIN = `http://${POH_ISSUER_CANISTER_ID}.localhost:4943`;
-const IDENTITY_PROVIDER_ORIGIN = `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`;
 
 const POH_CREDENTIAL_TYPE = 'ProofOfUniqueness';
 
@@ -25,12 +23,22 @@ export const requestPouhCredential = async ({
 }): Promise<boolean> => {
 	const i18Copy = get(i18n);
 	return new Promise((resolve, reject) => {
+		const issuerCanisterId = nonNullish(POH_ISSUER_CANISTER_ID)
+			? Principal.fromText(POH_ISSUER_CANISTER_ID)
+			: undefined;
+		if (isNullish(POH_ISSUER_ORIGIN) || isNullish(issuerCanisterId)) {
+			toastsError({
+				msg: { text: i18Copy.auth.error.missing_poh_issuer_origin }
+			});
+			resolve(false);
+			return;
+		}
 		requestVerifiablePresentation({
 			issuerData: {
-				origin: ISSUER_ORIGIN,
-				canisterId: Principal.fromText(POH_ISSUER_CANISTER_ID)
+				origin: POH_ISSUER_ORIGIN,
+				canisterId: issuerCanisterId
 			},
-			identityProvider: new URL(IDENTITY_PROVIDER_ORIGIN),
+			identityProvider: new URL(INTERNET_IDENTITY_ORIGIN),
 			credentialData: {
 				credentialSpec: {
 					credentialType: POH_CREDENTIAL_TYPE,

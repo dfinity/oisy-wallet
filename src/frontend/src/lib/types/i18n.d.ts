@@ -45,6 +45,7 @@ interface I18nAuth {
 	error: {
 		no_internet_identity: string;
 		error_requesting_poh_credential: string;
+		missing_poh_issuer_origin: string;
 		no_poh_credential: string;
 	};
 }
