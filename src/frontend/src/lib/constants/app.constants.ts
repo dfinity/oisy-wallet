@@ -18,11 +18,11 @@ export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	: 'https://identity.ic0.app';
 
 export const POUH_ISSUER_CANISTER_ID = LOCAL
-	? import.meta.env.VITE_LOCAL_POH_ISSUER_CANISTER_ID
+	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
 	: STAGING
-		? import.meta.env.VITE_STAGING_POH_ISSUER_CANISTER_ID
+		? import.meta.env.VITE_STAGING_POUH_ISSUER_CANISTER_ID
 		: PROD
-			? import.meta.env.VITE_IC_POH_ISSUER_CANISTER_ID
+			? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
 			: undefined;
 
 export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)

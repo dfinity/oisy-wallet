@@ -15,7 +15,7 @@ import {
 import { get } from 'svelte/store';
 
 // This credential type is defined by the issuer Decide AI
-const POH_CREDENTIAL_TYPE = 'ProofOfUniqueness';
+const POUH_CREDENTIAL_TYPE = 'ProofOfUniqueness';
 
 const handleSuccess = async (
 	response: VerifiablePresentationResponse
@@ -24,13 +24,13 @@ const handleSuccess = async (
 	if ('Ok' in response) {
 		// TODO: GIX-2646 Add credential to backend and load user profile
 		const fakeTemporaryCredentialSummary = {
-			credential_type: POH_CREDENTIAL_TYPE,
+			credential_type: POUH_CREDENTIAL_TYPE,
 			verified_date_timestamp: BigInt(Date.now()),
 			expire_date_timestamp: BigInt(Date.now() + 1000 * 60 * 60 * 24 * 365)
 		};
 		const fakeUserProfile: UserProfile = {
 			credentials: {
-				[POH_CREDENTIAL_TYPE]: fakeTemporaryCredentialSummary
+				[POUH_CREDENTIAL_TYPE]: fakeTemporaryCredentialSummary
 			},
 			created_timestamp: BigInt(Date.now()),
 			updated_timestamp: BigInt(Date.now())
@@ -39,7 +39,7 @@ const handleSuccess = async (
 		return { success: true };
 	}
 	toastsError({
-		msg: { text: authI18n.error.no_poh_credential }
+		msg: { text: authI18n.error.no_pouh_credential }
 	});
 	return { success: false };
 };
@@ -56,7 +56,7 @@ export const requestPouhCredential = async ({
 			: undefined;
 		if (isNullish(POUH_ISSUER_ORIGIN) || isNullish(issuerCanisterId)) {
 			toastsError({
-				msg: { text: authI18n.error.missing_poh_issuer_origin }
+				msg: { text: authI18n.error.missing_pouh_issuer_origin }
 			});
 			resolve({ success: false });
 			return;
@@ -69,14 +69,14 @@ export const requestPouhCredential = async ({
 			identityProvider: new URL(INTERNET_IDENTITY_ORIGIN),
 			credentialData: {
 				credentialSpec: {
-					credentialType: POH_CREDENTIAL_TYPE,
+					credentialType: POUH_CREDENTIAL_TYPE,
 					arguments: {}
 				},
 				credentialSubject
 			},
 			onError() {
 				toastsError({
-					msg: { text: authI18n.error.error_requesting_poh_credential }
+					msg: { text: authI18n.error.error_requesting_pouh_credential }
 				});
 				reject();
 			},
