@@ -1,5 +1,5 @@
 import type { EthereumNetwork } from '$eth/types/network';
-import { tokens } from '$lib/derived/tokens.derived';
+import { sortedTokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import { decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -7,7 +7,7 @@ import { get } from 'svelte/store';
 import { generateUrn } from '../../mocks/qr-generator.mock';
 
 describe('decodeUrn', () => {
-	const tokenList = get(tokens);
+	const tokenList = get(sortedTokens);
 	const destination = 'some-destination';
 	const amount = 1.23;
 
