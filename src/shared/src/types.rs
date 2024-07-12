@@ -100,3 +100,60 @@ pub mod custom_token {
         Icrc(LedgerId),
     }
 }
+
+/// Types specifics to the user profile.
+pub mod user_profile {
+    use std::collections::BTreeMap;
+    use candid::{CandidType, Deserialize, Principal};
+
+    pub type CredentialType = String;
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct UserCredential {
+        pub credential_type: CredentialType,
+        pub verified_date_timestamp: Option<u64>,
+        pub expire_date_timestamp: Option<u64>,
+    }
+
+    // Used in the endpoint
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct UserProfile {
+        pub credentials: Vec<UserCredential>,
+        pub created_timestamp: u64,
+        pub updated_timestamp: u64,
+    }
+
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct UserProfileStorage {
+        pub credentials: BTreeMap<CredentialType, UserCredential>,
+        pub created_timestamp: u64,
+        pub updated_timestamp: u64,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct AddCredentialRequest {
+        pub credential_jwt: String,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct GetUsersRequest {
+        pub updated_after_timestamp: u64,
+        pub limit_response: Option<u64>,
+    }
+      
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct OisyUser {
+        pub principal: Principal,
+        pub pouh_verified: bool,
+    }
+      
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct GetUsersResponse {
+        pub data: Vec<OisyUser>,
+        pub total_users: u64,
+        pub limit_response: Option<u64>,
+    }
+}
+
+  
