@@ -45,6 +45,7 @@ const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 
+const DEFAULT_LIMIT_GET_USERS_RESPONSE: u64 = 10_000;
 const MAX_SYMBOL_LENGTH: usize = 20;
 
 thread_local! {
@@ -473,7 +474,9 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-fn add_credential(_request: AddCredentialRequest) {
+#[allow(clippy::needless_pass_by_value)]
+#[allow(unused_variables)]
+fn add_credential(request: AddCredentialRequest) {
     // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2649
 }
 
@@ -489,12 +492,13 @@ fn get_or_create_user_profile() -> UserProfile {
 }
 
 #[query]
-fn get_users(_request: GetUsersRequest) -> GetUsersResponse {
+#[allow(clippy::needless_pass_by_value)]
+fn get_users(request: GetUsersRequest) -> GetUsersResponse {
     // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2650
     let data: Vec<OisyUser> = Vec::new();
     GetUsersResponse {
         data,
-        limit_response: None,
+        limit_response: request.limit_response.unwrap_or(DEFAULT_LIMIT_GET_USERS_RESPONSE),
         total_users: 0,
     }
 }

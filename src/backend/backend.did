@@ -79,7 +79,7 @@ type AddCredentialRequest {
 }
 
 type GetUsersRequest {
-  updated_after_timestamp: u64,
+  updated_after_timestamp: opt u64,
   limit_response: opt u64,
 }
 
@@ -91,7 +91,7 @@ type OisyUser {
 type GetUsersResponse {
   data: Vec<OisyUser>,
   total_users: u64,
-  limit_response: opt u64,
+  limit_response: u64,
 }
 
 service : (Arg) -> {
