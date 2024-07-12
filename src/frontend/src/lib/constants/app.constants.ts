@@ -17,18 +17,18 @@ export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
 	: 'https://identity.ic0.app';
 
-export const POH_ISSUER_CANISTER_ID = LOCAL
-	? import.meta.env.VITE_LOCAL_POH_ISSUER_CANISTER_ID
+export const POUH_ISSUER_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
 	: STAGING
-		? import.meta.env.VITE_STAGING_POH_ISSUER_CANISTER_ID
+		? import.meta.env.VITE_STAGING_POUH_ISSUER_CANISTER_ID
 		: PROD
-			? import.meta.env.VITE_IC_POH_ISSUER_CANISTER_ID
+			? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
 			: undefined;
 
-export const POH_ISSUER_ORIGIN = nonNullish(POH_ISSUER_CANISTER_ID)
+export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 	? LOCAL
-		? `http://${POH_ISSUER_CANISTER_ID}.localhost:4943`
-		: `https://${POH_ISSUER_CANISTER_ID}.${MAINNET_DOMAIN}`
+		? `http://${POUH_ISSUER_CANISTER_ID}.localhost:4943`
+		: `https://${POUH_ISSUER_CANISTER_ID}.${MAINNET_DOMAIN}`
 	: undefined;
 
 export const BACKEND_CANISTER_ID = LOCAL

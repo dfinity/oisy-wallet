@@ -26,7 +26,7 @@
 				}
 			}
 		},
-		"poh_issuer": {
+		"pouh_issuer": {
 			"type": "custom",
 			"candid": "https://github.com/dfinity/verifiable-credentials-sdk/releases/download/release-2024-07-01/dummy_issuer.did",
 			"wasm": "https://github.com/dfinity/verifiable-credentials-sdk/releases/download/release-2024-07-01/dummy_issuer.wasm.gz",
