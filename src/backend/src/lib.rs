@@ -2,7 +2,6 @@ use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
-use ic_cdk::api::time;
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
@@ -12,6 +11,7 @@ use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
+use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
@@ -24,9 +24,11 @@ use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
 use shared::types::custom_token::{CustomToken, CustomTokenId};
-use shared::types::user_profile::{AddCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential, UserProfile};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
+use shared::types::user_profile::{
+    AddCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential, UserProfile,
+};
 use shared::types::{Arg, InitArg};
 use std::borrow::Cow;
 use std::cell::RefCell;
@@ -498,7 +500,9 @@ fn get_users(request: GetUsersRequest) -> GetUsersResponse {
     let data: Vec<OisyUser> = Vec::new();
     GetUsersResponse {
         data,
-        limit_response: request.limit_response.unwrap_or(DEFAULT_LIMIT_GET_USERS_RESPONSE),
+        limit_response: request
+            .limit_response
+            .unwrap_or(DEFAULT_LIMIT_GET_USERS_RESPONSE),
         total_users: 0,
     }
 }
