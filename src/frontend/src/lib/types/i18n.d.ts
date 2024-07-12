@@ -42,7 +42,12 @@ interface I18nAuth {
 		logout: string;
 	};
 	alt: { sign_in: string };
-	error: { no_internet_identity: string };
+	error: {
+		no_internet_identity: string;
+		error_requesting_poh_credential: string;
+		missing_poh_issuer_origin: string;
+		no_poh_credential: string;
+	};
 }
 
 interface I18nWallet {
