@@ -10,9 +10,77 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { TokenId } from '$lib/types/token';
 
+// TODO: remember to remove the ERC20 from here once the ckERC20 is implemented. Following the normal flow, the ERC20 variables should be created on a separate file.
+
+const ERC20_CONTRACT_ADDRESS_WBTC: Erc20Contract = {
+	// Wrapped Bitcoin
+	address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_WSTETH: Erc20Contract = {
+	// Lido Finance (wstETH)
+	address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_USDT: Erc20Contract = {
+	// Tether
+	address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_DMAIL: Erc20Contract = {
+	// Dmail Network
+	address: '0xcC6f1e1B87cfCbe9221808d2d85C501aab0B5192',
+	exchange: 'ethereum'
+};
+
 const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
 	// Uniswap
 	address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_MATIC: Erc20Contract = {
+	// Polygon
+	address: '0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_JASMY: Erc20Contract = {
+	// Jasmy
+	address: '0x7420B4b9a0110cdC71fB720908340C03F9Bc03EC',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_DAI: Erc20Contract = {
+	// Multi-Collateral DAI
+	address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_FLOKI: Erc20Contract = {
+	// Floki Inu
+	address: '0xcf0c122c6b73ff809c693db761e7baebe62b6a2e',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_RNDR: Erc20Contract = {
+	// Render
+	address: '0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_FET: Erc20Contract = {
+	// Fetch
+	address: '0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85',
+	exchange: 'ethereum'
+};
+
+const ERC20_CONTRACT_ADDRESS_WEEETH: Erc20Contract = {
+	// Wrapped Ether (weETH)
+	address: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee',
 	exchange: 'ethereum'
 };
 
@@ -50,21 +118,22 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	{
-		// USDT
-		address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
-		exchange: 'ethereum'
-	},
-	{
-		// DAI
-		address: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
-		exchange: 'ethereum'
-	},
-	{
 		// 1INCH
 		address: '0x111111111117dc0aa78b770fa6a738034120c302',
 		exchange: 'ethereum'
 	},
-	ERC20_CONTRACT_ADDRESS_UNISWAP
+	ERC20_CONTRACT_ADDRESS_WBTC,
+	ERC20_CONTRACT_ADDRESS_WSTETH,
+	ERC20_CONTRACT_ADDRESS_USDT,
+	ERC20_CONTRACT_ADDRESS_DMAIL,
+	ERC20_CONTRACT_ADDRESS_UNISWAP,
+	ERC20_CONTRACT_ADDRESS_MATIC,
+	ERC20_CONTRACT_ADDRESS_JASMY,
+	ERC20_CONTRACT_ADDRESS_DAI,
+	ERC20_CONTRACT_ADDRESS_FLOKI,
+	ERC20_CONTRACT_ADDRESS_RNDR,
+	ERC20_CONTRACT_ADDRESS_FET,
+	ERC20_CONTRACT_ADDRESS_WEEETH
 ];
 
 export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = [
