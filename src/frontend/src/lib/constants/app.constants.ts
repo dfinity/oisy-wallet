@@ -1,3 +1,5 @@
+import { nonNullish } from '@dfinity/utils';
+
 export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
@@ -5,8 +7,28 @@ export const LOCAL = MODE === 'local';
 export const STAGING = MODE === 'staging';
 export const PROD = MODE === 'ic';
 
+const MAINNET_DOMAIN = 'ic0.app';
+
 export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_INTERNET_IDENTITY_CANISTER_ID
+	: undefined;
+
+export const INTERNET_IDENTITY_ORIGIN = LOCAL
+	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
+	: 'https://identity.ic0.app';
+
+export const POUH_ISSUER_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_POUH_ISSUER_CANISTER_ID
+		: PROD
+			? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
+			: undefined;
+
+export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
+	? LOCAL
+		? `http://${POUH_ISSUER_CANISTER_ID}.localhost:4943`
+		: `https://${POUH_ISSUER_CANISTER_ID}.${MAINNET_DOMAIN}`
 	: undefined;
 
 export const BACKEND_CANISTER_ID = LOCAL

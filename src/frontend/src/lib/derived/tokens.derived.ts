@@ -12,8 +12,8 @@ const tokens: Readable<Token[]> = derived(
 	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens, enabledBitcoinTokens],
 	([$erc20Tokens, $icrcTokens, $enabledEthereumTokens, $enabledBitcoinTokens]) => [
 		ICP_TOKEN,
-		...$enabledEthereumTokens,
 		...$enabledBitcoinTokens,
+		...$enabledEthereumTokens,
 		...$erc20Tokens,
 		...$icrcTokens
 	]

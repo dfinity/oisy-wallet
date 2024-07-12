@@ -1,6 +1,9 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessageWalletData } from '$icp/types/ic.post-message';
-import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
 
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
@@ -79,7 +82,7 @@ export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 export interface PostMessageDataResponseExchange extends PostMessageDataResponse {
 	currentEthPrice: CoingeckoSimplePriceResponse;
 	currentBtcPrice: CoingeckoSimplePriceResponse;
-	currentErc20Prices: CoingeckoSimplePriceResponse;
+	currentErc20Prices: CoingeckoSimpleTokenPriceResponse;
 	currentIcpPrice: CoingeckoSimplePriceResponse;
 }
 
