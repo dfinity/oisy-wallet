@@ -1,4 +1,4 @@
-import type { Token } from '$lib/types/token';
+import type { Token, TokenToPin } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
 export const pinTokensAtTop = ({
@@ -6,7 +6,7 @@ export const pinTokensAtTop = ({
 	$tokensToPin
 }: {
 	$tokens: Token[];
-	$tokensToPin: Token[];
+	$tokensToPin: TokenToPin[];
 }): Token[] => {
 	const pinnedTokens = $tokensToPin
 		.map(({ id: pinnedId, network: { id: pinnedNetworkId } }) =>
