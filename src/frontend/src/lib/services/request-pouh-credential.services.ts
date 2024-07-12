@@ -1,7 +1,7 @@
 import {
 	INTERNET_IDENTITY_ORIGIN,
-	POH_ISSUER_CANISTER_ID,
-	POH_ISSUER_ORIGIN
+	POUH_ISSUER_CANISTER_ID,
+	POUH_ISSUER_ORIGIN
 } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore, type UserProfile } from '$lib/stores/settings.store';
@@ -44,17 +44,17 @@ const handleSuccess = async (
 	return { success: false };
 };
 
-export const requestPohCredential = async ({
+export const requestPouhCredential = async ({
 	credentialSubject
 }: {
 	credentialSubject: Principal;
 }): Promise<{ success: boolean }> => {
 	const { auth: authI18n } = get(i18n);
 	return new Promise((resolve, reject) => {
-		const issuerCanisterId = nonNullish(POH_ISSUER_CANISTER_ID)
-			? Principal.fromText(POH_ISSUER_CANISTER_ID)
+		const issuerCanisterId = nonNullish(POUH_ISSUER_CANISTER_ID)
+			? Principal.fromText(POUH_ISSUER_CANISTER_ID)
 			: undefined;
-		if (isNullish(POH_ISSUER_ORIGIN) || isNullish(issuerCanisterId)) {
+		if (isNullish(POUH_ISSUER_ORIGIN) || isNullish(issuerCanisterId)) {
 			toastsError({
 				msg: { text: authI18n.error.missing_poh_issuer_origin }
 			});
@@ -63,7 +63,7 @@ export const requestPohCredential = async ({
 		}
 		requestVerifiablePresentation({
 			issuerData: {
-				origin: POH_ISSUER_ORIGIN,
+				origin: POUH_ISSUER_ORIGIN,
 				canisterId: issuerCanisterId
 			},
 			identityProvider: new URL(INTERNET_IDENTITY_ORIGIN),
