@@ -159,7 +159,8 @@ const CKETH_STAGING_DATA: IcCkInterface | undefined =
 				minterCanisterId: STAGING_CKETH_MINTER_CANISTER_ID,
 				exchangeCoinId: 'ethereum',
 				position: 2,
-				twinToken: SEPOLIA_TOKEN
+				twinToken: SEPOLIA_TOKEN,
+				explorerUrl: CKETH_SEPOLIA_EXPLORER_URL
 			}
 		: undefined;
 
