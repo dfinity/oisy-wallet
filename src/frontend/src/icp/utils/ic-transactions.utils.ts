@@ -40,6 +40,7 @@ export const mapIcTransaction = ({
 		return mapCkBTCTransaction({
 			transaction: transaction as IcrcTransaction,
 			ledgerCanisterId: (token as IcCkToken).ledgerCanisterId,
+			env: token.network.env,
 			...rest
 		});
 	}

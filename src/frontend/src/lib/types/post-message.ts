@@ -8,6 +8,7 @@ import type {
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
+import type { Network } from '$lib/types/network';
 import type { SyncState } from '$lib/types/sync';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 
@@ -40,7 +41,7 @@ export interface PostMessageDataRequestExchangeTimer {
 	erc20Addresses: Erc20ContractAddress[];
 }
 
-export type PostMessageDataRequestIcrc = IcCanisters;
+export type PostMessageDataRequestIcrc = IcCanisters & Pick<Network, 'env'>;
 
 export type PostMessageDataRequestIcCk = Partial<Pick<IcCkMetadata, 'minterCanisterId'>>;
 
