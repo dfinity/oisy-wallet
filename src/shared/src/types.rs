@@ -2,10 +2,23 @@ use candid::{CandidType, Deserialize, Principal};
 use std::fmt::Debug;
 
 #[derive(CandidType, Deserialize)]
+pub struct SupportedCredential {
+    pub credential_type: String,
+    pub ii_origin: String,
+    pub ii_canister_id: String,
+    pub issuer_origin: String,
+    pub issuer_canister_id: String,
+}
+
+#[derive(CandidType, Deserialize)]
 pub struct InitArg {
     pub ecdsa_key_name: String,
     pub allowed_callers: Vec<Principal>,
+    pub supported_credentials: Option<Vec<SupportedCredential>>,
+    /// Root of trust for checking canister signatures.
+    pub ic_root_key_der: Option<Vec<u8>>,
 }
+
 
 #[derive(CandidType, Deserialize)]
 pub enum Arg {

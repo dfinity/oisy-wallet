@@ -44,9 +44,18 @@ type HttpResponse = record {
   status_code : nat16;
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
+type SupportedCredential = record {
+  credential_type : text;
+  ii_origin : text;
+  ii_canister_id : text;
+  issuer_origin : text;
+  issuer_canister_id : text;
+};
 type InitArg = record {
   ecdsa_key_name : text;
   allowed_callers : vec principal;
+  supported_credentials : opt vec SupportedCredential;
+  ic_root_key_der : opt vec nat8;
 };
 type OisyUser = record {
   "principal" : principal;
