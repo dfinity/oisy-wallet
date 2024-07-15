@@ -389,7 +389,8 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKPEPE_IC_DATA) ? [CKPEPE_IC_DATA] : []),
 	...(nonNullish(CKPEPE_STAGING_DATA) ? [CKPEPE_STAGING_DATA] : []),
 	...(nonNullish(CKOCT_IC_DATA) ? [CKOCT_IC_DATA] : []),
-	...(nonNullish(CKSHIB_IC_DATA) ? [CKSHIB_IC_DATA] : [])
+	...(nonNullish(CKSHIB_IC_DATA) ? [CKSHIB_IC_DATA] : []),
+	...(nonNullish(CKWBTC_IC_DATA) ? [CKWBTC_IC_DATA] : [])
 ];
 
 export const ICRC_LEDGER_CANISTER_TESTNET_IDS = [
