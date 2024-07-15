@@ -97,5 +97,8 @@
 	"type": "module",
 	"overrides": {
 		"ws": "^7.5.10"
+	},
+	"engines": {
+		"node": ">=20"
 	}
 }
