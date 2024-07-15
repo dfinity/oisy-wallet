@@ -1,9 +1,13 @@
 import {
 	CKETH_EXPLORER_URL,
+	CKETH_SEPOLIA_EXPLORER_URL,
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
+import {
+	IC_CKETH_LEDGER_CANISTER_ID,
+	STAGING_CKETH_LEDGER_CANISTER_ID
+} from '$env/networks.icrc.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { IcToken, IcTransactionUi, IcrcTransaction } from '$icp/types/ic';
 import {
@@ -14,6 +18,7 @@ import {
 } from '$icp/utils/cketh-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { Network } from '$lib/types/network';
 import {
 	fromNullable,
 	isNullish,
@@ -25,15 +30,23 @@ import {
 export const mapCkEthereumTransaction = ({
 	transaction,
 	identity,
-	ledgerCanisterId
+	ledgerCanisterId,
+	env
 }: {
 	transaction: IcrcTransaction;
 	identity: OptionIdentity;
-} & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
+} & Pick<IcToken, 'ledgerCanisterId'> &
+	Partial<Pick<Network, 'env'>>): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
 	const ckETHExplorerUrl =
-		IC_CKETH_LEDGER_CANISTER_ID === ledgerCanisterId ? CKETH_EXPLORER_URL : undefined;
+		IC_CKETH_LEDGER_CANISTER_ID === ledgerCanisterId && nonNullish(env)
+			? env === 'testnet' && nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID)
+				? ledgerCanisterId !== STAGING_CKETH_LEDGER_CANISTER_ID
+					? `${CKETH_SEPOLIA_EXPLORER_URL}/${ledgerCanisterId}`
+					: CKETH_SEPOLIA_EXPLORER_URL
+				: CKETH_EXPLORER_URL
+			: undefined;
 
 	const tx: IcTransactionUi = {
 		id,
