@@ -12,11 +12,10 @@ import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.en
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import { type EnvTokenSymbol, type EnvTokens } from '$env/types/env-token-ckerc20';
+import { mapCkErc20Data } from '$env/utils/networks.icrc.env.utils';
 import type { IcCkInterface } from '$icp/types/ic';
 import { LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
-import type { NetworkEnvironment } from '$lib/types/network';
 import { nonNullish } from '@dfinity/utils';
 
 export const IC_CKBTC_LEDGER_CANISTER_ID =
@@ -213,37 +212,6 @@ const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 				})
 			}
 		: undefined;
-
-const mapCkErc20Data = ({
-	ckErc20Tokens,
-	minterCanisterId,
-	ledgerCanisterId,
-	env
-}: {
-	ckErc20Tokens: EnvTokens;
-	minterCanisterId: string | null | undefined;
-	ledgerCanisterId: string | null | undefined;
-	env: NetworkEnvironment;
-}): Record<EnvTokenSymbol, Omit<IcCkInterface, 'twinToken' | 'position'>> =>
-	Object.entries(ckErc20Tokens).reduce(
-		(acc, [key, value]) => ({
-			...acc,
-			...((STAGING || PROD) &&
-				nonNullish(value) &&
-				nonNullish(minterCanisterId) && {
-					[key]: {
-						...value,
-						minterCanisterId,
-						exchangeCoinId: 'ethereum',
-						explorerUrl: `${env === 'testnet' ? CKETH_SEPOLIA_EXPLORER_URL : CKETH_EXPLORER_URL}/${value.ledgerCanisterId}`,
-						...(nonNullish(ledgerCanisterId) && {
-							feeLedgerCanisterId: ledgerCanisterId
-						})
-					}
-				})
-		}),
-		{}
-	);
 
 const CKERC20_STAGING_DATA = mapCkErc20Data({
 	ckErc20Tokens: ckErc20Staging,
