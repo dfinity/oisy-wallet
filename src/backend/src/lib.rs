@@ -499,15 +499,13 @@ fn get_or_create_user_profile() -> UserProfile {
 #[allow(clippy::needless_pass_by_value)]
 fn get_users(request: GetUsersRequest) -> GetUsersResponse {
     // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2650
-    // WARNING: Do not read all the BTreeMap directly, but put a limit on how much one reads
-    // due to concerns on running out of cycles.
-    let data: Vec<OisyUser> = Vec::new();
+    // WARNING: The value `DEFAULT_LIMIT_GET_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
+    let users: Vec<OisyUser> = Vec::new();
     GetUsersResponse {
-        data,
-        limit_response: request
-            .limit_response
+        users,
+        matches_max_length: request
+            .matches_max_length
             .unwrap_or(DEFAULT_LIMIT_GET_USERS_RESPONSE),
-        total_users: 0,
     }
 }
 

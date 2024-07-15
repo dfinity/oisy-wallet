@@ -140,7 +140,7 @@ pub mod user_profile {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct GetUsersRequest {
         pub updated_after_timestamp: Option<u64>,
-        pub limit_response: Option<u64>,
+        pub matches_max_length: Option<u64>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -151,8 +151,7 @@ pub mod user_profile {
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct GetUsersResponse {
-        pub data: Vec<OisyUser>,
-        pub total_users: u64,
-        pub limit_response: u64,
+        pub users: Vec<OisyUser>,
+        pub matches_max_length: u64,
     }
 }
