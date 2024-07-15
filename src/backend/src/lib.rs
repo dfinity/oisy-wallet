@@ -27,7 +27,8 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
-    AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential, UserProfile,
+    AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential,
+    UserProfile,
 };
 use shared::types::{Arg, InitArg};
 use std::borrow::Cow;
