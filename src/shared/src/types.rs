@@ -131,7 +131,7 @@ pub mod user_profile {
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct AddCredentialRequest {
+    pub struct AddUserCredentialRequest {
         pub credential_jwt: String,
     }
 

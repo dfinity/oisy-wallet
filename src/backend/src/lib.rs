@@ -27,7 +27,7 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
-    AddCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential, UserProfile,
+    AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential, UserProfile,
 };
 use shared::types::{Arg, InitArg};
 use std::borrow::Cow;
@@ -478,7 +478,7 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 #[allow(unused_variables)]
-fn add_credential(request: AddCredentialRequest) {
+fn add_user_credential(request: AddUserCredentialRequest) {
     // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2649
 }
 

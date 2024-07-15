@@ -74,7 +74,7 @@ type UserProfile {
   updated_timestamp: u64,
 }
 
-type AddCredentialRequest {
+type AddUserCredentialRequest {
   credential_jwt: String,
 }
 
@@ -109,7 +109,7 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
-  add_credential : (AddCredentialRequest) -> ();
+  add_user_credential : (AddUserCredentialRequest) -> ();
   get_or_create_user_profile : () -> (UserProfile);
   get_users : (GetUsersRequest) -> (GetUsersResponse) query;
 }

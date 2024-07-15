@@ -1,17 +1,17 @@
 use crate::utils::pocketic::{query_call, setup, update_call};
 use candid::Principal;
-use shared::types::user_profile::{AddCredentialRequest, GetUsersRequest, GetUsersResponse, UserProfile};
+use shared::types::user_profile::{AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, UserProfile};
 
 #[test]
-fn test_add_credential() {
+fn test_add_user_credential() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let request = AddCredentialRequest {
+    let request = AddUserCredentialRequest {
         credential_jwt: "test".to_string(),
     };
-    let before_set = update_call::<()>(&pic_setup, caller, "add_credential", (request));
+    let before_set = update_call::<()>(&pic_setup, caller, "add_user_credential", (request));
 
     assert!(before_set.is_ok());
     assert_eq!(before_set.unwrap().len(), 0);
