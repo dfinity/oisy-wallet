@@ -1,6 +1,11 @@
-use crate::utils::{mock::CALLER, pocketic::{query_call, setup, update_call}};
+use crate::utils::{
+    mock::CALLER,
+    pocketic::{query_call, setup, update_call},
+};
 use candid::Principal;
-use shared::types::user_profile::{AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, UserProfile};
+use shared::types::user_profile::{
+    AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, UserProfile,
+};
 
 #[test]
 fn test_add_user_credential() {
@@ -22,7 +27,8 @@ fn test_get_or_create_user_profile() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let before_set = update_call::<UserProfile>(&pic_setup, caller, "get_or_create_user_profile", ());
+    let before_set =
+        update_call::<UserProfile>(&pic_setup, caller, "get_or_create_user_profile", ());
 
     assert!(before_set.is_ok());
 }
