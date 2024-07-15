@@ -1,3 +1,4 @@
+type AddUserCredentialRequest = record { credential_jwt : text };
 type Arg = variant { Upgrade; Init : InitArg };
 type CanisterStatusResultV2 = record {
   controller : principal;
@@ -23,6 +24,14 @@ type DefiniteCanisterSettingsArgs = record {
   memory_allocation : nat;
   compute_allocation : nat;
 };
+type GetUsersRequest = record {
+  updated_after_timestamp : opt nat64;
+  matches_max_length : opt nat64;
+};
+type GetUsersResponse = record {
+  users : vec OisyUser;
+  matches_max_length : nat64;
+};
 type HttpRequest = record {
   url : text;
   method : text;
@@ -39,6 +48,7 @@ type InitArg = record {
   ecdsa_key_name : text;
   allowed_callers : vec principal;
 };
+type OisyUser = record { "principal" : principal; pouh_verified : bool };
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -50,6 +60,17 @@ type SignRequest = record {
   nonce : nat;
 };
 type Token = variant { Icrc : IcrcToken };
+type UserCredential = record {
+  verified_date_timestamp : opt nat64;
+  expire_date_timestamp : opt nat64;
+  credential_type : text;
+};
+type UserProfile = record {
+  credentials : vec UserCredential;
+  version : opt nat64;
+  created_timestamp : nat64;
+  updated_timestamp : nat64;
+};
 type UserToken = record {
   decimals : opt nat8;
   version : opt nat64;
@@ -59,45 +80,13 @@ type UserToken = record {
   symbol : opt text;
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
-
-type CredentialType = string;
-
-type UserCredentialSummary {
-  credential_type: CredentialType,
-  verified_date_timestamp: opt u64,
-  expire_date_timestamp: opt u64,
-}
-
-type UserProfile {
-  credentials: vec UserCredentialSummary,
-  created_timestamp: u64,
-  updated_timestamp: u64,
-}
-
-type AddUserCredentialRequest {
-  credential_jwt: String,
-}
-
-type GetUsersRequest {
-  updated_after_timestamp: opt u64,
-  limit_response: opt u64,
-}
-
-type OisyUser {
-  principal: Principal,
-  pouh_verified: bool,
-}
-
-type GetUsersResponse {
-  data: Vec<OisyUser>,
-  total_users: u64,
-  limit_response: u64,
-}
-
 service : (Arg) -> {
+  add_user_credential : (AddUserCredentialRequest) -> ();
   caller_eth_address : () -> (text);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
+  get_or_create_user_profile : () -> (UserProfile) query;
+  get_users : (GetUsersRequest) -> (GetUsersResponse) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
@@ -109,7 +98,4 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
-  add_user_credential : (AddUserCredentialRequest) -> ();
-  get_or_create_user_profile : () -> (UserProfile);
-  get_users : (GetUsersRequest) -> (GetUsersResponse) query;
 }
