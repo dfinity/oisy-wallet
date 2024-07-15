@@ -11,6 +11,7 @@ use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
+use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
@@ -25,6 +26,10 @@ use shared::std_canister_status;
 use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
+use shared::types::user_profile::{
+    AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential,
+    UserProfile,
+};
 use shared::types::{Arg, InitArg};
 use std::borrow::Cow;
 use std::cell::RefCell;
@@ -43,6 +48,7 @@ const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 
+const DEFAULT_LIMIT_GET_USERS_RESPONSE: u64 = 10_000;
 const MAX_SYMBOL_LENGTH: usize = 20;
 
 thread_local! {
@@ -468,6 +474,39 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
+}
+
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
+#[allow(unused_variables)]
+fn add_user_credential(request: AddUserCredentialRequest) {
+    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2649
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+fn get_or_create_user_profile() -> UserProfile {
+    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2648
+    let credentials: Vec<UserCredential> = Vec::new();
+    UserProfile {
+        credentials,
+        created_timestamp: time(),
+        updated_timestamp: time(),
+        version: None,
+    }
+}
+
+#[query(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
+fn get_users(request: GetUsersRequest) -> GetUsersResponse {
+    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2650
+    // WARNING: The value `DEFAULT_LIMIT_GET_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
+    let users: Vec<OisyUser> = Vec::new();
+    GetUsersResponse {
+        users,
+        matches_max_length: request
+            .matches_max_length
+            .unwrap_or(DEFAULT_LIMIT_GET_USERS_RESPONSE),
+    }
 }
 
 /// API method to get cycle balance and burn rate.
