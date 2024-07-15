@@ -46,13 +46,13 @@
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
 	<div class="flex flex-col gap-3">
-		<slot />
-
 		{#if $tokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} on:click={hideToken}>
 				{hideTokenLabel}
 			</ButtonMenu>
 		{/if}
+
+		<slot />
 
 		<ButtonMenu ariaLabel={$i18n.tokens.details.title} on:click={openToken}>
 			{$i18n.tokens.details.title}
