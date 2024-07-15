@@ -6,6 +6,8 @@ import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.en
 import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
+import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
+import { mapOptionalErc20TwinToken } from '$env/utils/tokens.erc20.env.utils';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
@@ -150,18 +152,18 @@ export const ERC20_CONTRACTS_ADDRESSES = ERC20_CONTRACTS.map(({ address }) =>
  */
 
 const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [
-	SEPOLIA_USDC_TOKEN,
-	SEPOLIA_LINK_TOKEN,
-	SEPOLIA_PEPE_TOKEN
+	...mapOptionalErc20TwinToken({ token: SEPOLIA_USDC_TOKEN, ckErc20Tokens: ckErc20Production }),
+	...mapOptionalErc20TwinToken({ token: SEPOLIA_LINK_TOKEN, ckErc20Tokens: ckErc20Production }),
+	...mapOptionalErc20TwinToken({ token: SEPOLIA_PEPE_TOKEN, ckErc20Tokens: ckErc20Production })
 ];
 
 const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
-	USDC_TOKEN,
-	LINK_TOKEN,
-	PEPE_TOKEN,
-	OCT_TOKEN,
-	SHIB_TOKEN,
-	WBTC_TOKEN
+	...mapOptionalErc20TwinToken({ token: USDC_TOKEN, ckErc20Tokens: ckErc20Staging }),
+	...mapOptionalErc20TwinToken({ token: LINK_TOKEN, ckErc20Tokens: ckErc20Staging }),
+	...mapOptionalErc20TwinToken({ token: PEPE_TOKEN, ckErc20Tokens: ckErc20Staging }),
+	...mapOptionalErc20TwinToken({ token: OCT_TOKEN, ckErc20Tokens: ckErc20Staging }),
+	...mapOptionalErc20TwinToken({ token: SHIB_TOKEN, ckErc20Tokens: ckErc20Staging }),
+	...mapOptionalErc20TwinToken({ token: WBTC_TOKEN, ckErc20Tokens: ckErc20Staging })
 ];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
