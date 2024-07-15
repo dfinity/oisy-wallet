@@ -1,7 +1,8 @@
 import {
 	BTC_MAINNET_EXPLORER_URL,
 	BTC_TESTNET_EXPLORER_URL,
-	CKBTC_EXPLORER_URL
+	CKBTC_EXPLORER_URL,
+	CKBTC_TESTNET_EXPLORER_URL
 } from '$env/explorers.env';
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks.icrc.env';
 import type { BtcStatusesData } from '$icp/stores/btc.store';
@@ -11,21 +12,28 @@ import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/ckbtc-memo.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { Network } from '$lib/types/network';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({
 	transaction,
 	identity,
-	ledgerCanisterId
+	ledgerCanisterId,
+	env
 }: {
 	transaction: IcrcTransaction;
 	identity: OptionIdentity;
-} & Pick<IcToken, 'ledgerCanisterId'>): IcTransactionUi => {
+} & Pick<IcToken, 'ledgerCanisterId'> &
+	Partial<Pick<Network, 'env'>>): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
 	const ckBTCExplorerUrl =
-		IC_CKBTC_LEDGER_CANISTER_ID === ledgerCanisterId ? CKBTC_EXPLORER_URL : undefined;
+		IC_CKBTC_LEDGER_CANISTER_ID === ledgerCanisterId && nonNullish(env)
+			? env === 'testnet'
+				? CKBTC_TESTNET_EXPLORER_URL
+				: CKBTC_EXPLORER_URL
+			: undefined;
 
 	const tx: IcTransactionUi = {
 		id,

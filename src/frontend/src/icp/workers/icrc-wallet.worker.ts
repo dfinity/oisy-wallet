@@ -43,9 +43,10 @@ const mapTransaction = ({
 	jobData: SchedulerJobData<PostMessageDataRequestIcrc>;
 }): IcTransactionUi => {
 	const ledgerId = nonNullish(data) ? { ledgerCanisterId: data.ledgerCanisterId } : undefined;
+	const env = { env: data?.env };
 
 	if (nonNullish(ledgerId) && isTokenCkBtcLedger(ledgerId)) {
-		return mapCkBTCTransaction({ transaction, identity, ...ledgerId });
+		return mapCkBTCTransaction({ transaction, identity, ...env, ...ledgerId });
 	}
 
 	if (nonNullish(ledgerId) && (isTokenCkEthLedger(ledgerId) || isTokenCkErc20Ledger(ledgerId))) {
