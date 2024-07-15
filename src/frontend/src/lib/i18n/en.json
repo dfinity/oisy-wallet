@@ -39,8 +39,8 @@
 		"text": {
 			"title": "A multi-chain wallet powered by Chain Fusion",
 			"description": "$oisy_name provides a seamless on-chain experience to manage your Ethereum and ICP assets. By leveraging native web technologies and advanced cryptography, it eliminates the need for browser extensions or mobile apps. And accessing the wallet is easy using passkeys on a computer or mobile device.",
-			"connect_with": "Connect with",
-			"connect": "Connect",
+			"authenticate_with": "Authenticate with",
+			"authenticate": "Authenticate",
 			"connect_to_oisy": "Connect to Oisy",
 			"logout": "Logout"
 		},
