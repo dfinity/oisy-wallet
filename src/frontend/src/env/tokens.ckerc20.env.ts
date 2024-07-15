@@ -1,5 +1,5 @@
 import ckErc20Tokens from '$env/tokens.ckerc20.json';
-import { envTokensCkErc20 } from '$icp/types/env-token-ckerc20';
+import { envTokensCkErc20 } from '$env/types/env-token-ckerc20';
 
 const ckErc20 = envTokensCkErc20.safeParse(ckErc20Tokens);
 
