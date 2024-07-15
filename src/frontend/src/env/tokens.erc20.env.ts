@@ -5,18 +5,13 @@ import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
 import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
+import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import type { TokenId } from '$lib/types/token';
 
 // TODO: remember to remove the ERC20 from here once the ckERC20 is implemented. Following the normal flow, the ERC20 variables should be created on a separate file.
-
-const ERC20_CONTRACT_ADDRESS_WBTC: Erc20Contract = {
-	// Wrapped Bitcoin
-	address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
-	exchange: 'ethereum'
-};
 
 const ERC20_CONTRACT_ADDRESS_WSTETH: Erc20Contract = {
 	// Lido Finance (wstETH)
@@ -122,7 +117,6 @@ const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 		address: '0x111111111117dc0aa78b770fa6a738034120c302',
 		exchange: 'ethereum'
 	},
-	ERC20_CONTRACT_ADDRESS_WBTC,
 	ERC20_CONTRACT_ADDRESS_WSTETH,
 	ERC20_CONTRACT_ADDRESS_USDT,
 	ERC20_CONTRACT_ADDRESS_DMAIL,
@@ -164,7 +158,8 @@ const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	LINK_TOKEN,
 	PEPE_TOKEN,
 	OCT_TOKEN,
-	SHIB_TOKEN
+	SHIB_TOKEN,
+	WBTC_TOKEN
 ];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
