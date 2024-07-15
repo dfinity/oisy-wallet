@@ -9,5 +9,5 @@
 	on:click={async () => await signIn({})}
 	ariaLabel={$i18n.auth.alt.sign_in}
 	imgSrc={icpLight}
-	imgAlt={$i18n.networks.chain_fusion}>{$i18n.auth.text.connect}</ButtonHero
+	imgAlt={$i18n.networks.chain_fusion}>{$i18n.auth.text.authenticate}</ButtonHero
 >

@@ -36,8 +36,8 @@ interface I18nAuth {
 	text: {
 		title: string;
 		description: string;
-		connect_with: string;
-		connect: string;
+		authenticate_with: string;
+		authenticate: string;
 		connect_to_oisy: string;
 		logout: string;
 	};
