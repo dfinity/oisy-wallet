@@ -100,3 +100,58 @@ pub mod custom_token {
         Icrc(LedgerId),
     }
 }
+
+/// Types specifics to the user profile.
+pub mod user_profile {
+    use crate::types::Version;
+    use candid::{CandidType, Deserialize, Principal};
+    use std::collections::BTreeMap;
+
+    pub type CredentialType = String;
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct UserCredential {
+        pub credential_type: CredentialType,
+        pub verified_date_timestamp: Option<u64>,
+        pub expire_date_timestamp: Option<u64>,
+    }
+
+    // Used in the endpoint
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct UserProfile {
+        pub credentials: Vec<UserCredential>,
+        pub created_timestamp: u64,
+        pub updated_timestamp: u64,
+        pub version: Option<Version>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct UserProfileStorage {
+        pub credentials: BTreeMap<CredentialType, UserCredential>,
+        pub created_timestamp: u64,
+        pub updated_timestamp: u64,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct AddUserCredentialRequest {
+        pub credential_jwt: String,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct GetUsersRequest {
+        pub updated_after_timestamp: Option<u64>,
+        pub matches_max_length: Option<u64>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct OisyUser {
+        pub principal: Principal,
+        pub pouh_verified: bool,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct GetUsersResponse {
+        pub users: Vec<OisyUser>,
+        pub matches_max_length: u64,
+    }
+}

@@ -59,6 +59,41 @@ type UserToken = record {
   symbol : opt text;
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
+
+type CredentialType = string;
+
+type UserCredentialSummary {
+  credential_type: CredentialType,
+  verified_date_timestamp: opt u64,
+  expire_date_timestamp: opt u64,
+}
+
+type UserProfile {
+  credentials: vec UserCredentialSummary,
+  created_timestamp: u64,
+  updated_timestamp: u64,
+}
+
+type AddUserCredentialRequest {
+  credential_jwt: String,
+}
+
+type GetUsersRequest {
+  updated_after_timestamp: opt u64,
+  limit_response: opt u64,
+}
+
+type OisyUser {
+  principal: Principal,
+  pouh_verified: bool,
+}
+
+type GetUsersResponse {
+  data: Vec<OisyUser>,
+  total_users: u64,
+  limit_response: u64,
+}
+
 service : (Arg) -> {
   caller_eth_address : () -> (text);
   eth_address_of : (principal) -> (text);
@@ -74,4 +109,7 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
+  add_user_credential : (AddUserCredentialRequest) -> ();
+  get_or_create_user_profile : () -> (UserProfile);
+  get_users : (GetUsersRequest) -> (GetUsersResponse) query;
 }
