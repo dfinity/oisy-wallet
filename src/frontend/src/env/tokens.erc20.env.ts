@@ -84,6 +84,12 @@ const ERC20_CONTRACT_ADDRESS_WEEETH: Erc20Contract = {
 	exchange: 'ethereum'
 };
 
+const ERC20_CONTRACT_ADDRESS_1INCH: Erc20Contract = {
+	// 1INCH
+	address: '0x111111111117dc0aa78b770fa6a738034120c302',
+	exchange: 'ethereum'
+};
+
 const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	{
 		// Weenus
@@ -117,11 +123,7 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 
 const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
-	{
-		// 1INCH
-		address: '0x111111111117dc0aa78b770fa6a738034120c302',
-		exchange: 'ethereum'
-	},
+	ERC20_CONTRACT_ADDRESS_1INCH,
 	ERC20_CONTRACT_ADDRESS_WBTC,
 	ERC20_CONTRACT_ADDRESS_WSTETH,
 	ERC20_CONTRACT_ADDRESS_USDT,
