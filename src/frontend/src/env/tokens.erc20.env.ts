@@ -12,6 +12,12 @@ import type { TokenId } from '$lib/types/token';
 
 // TODO: remember to remove the ERC20 from here once the ckERC20 is implemented. Following the normal flow, the ERC20 variables should be created on a separate file.
 
+const ERC20_CONTRACT_ADDRESS_1INCH: Erc20Contract = {
+	// 1INCH
+	address: '0x111111111117dc0aa78b770fa6a738034120c302',
+	exchange: 'ethereum'
+};
+
 const ERC20_CONTRACT_ADDRESS_WBTC: Erc20Contract = {
 	// Wrapped Bitcoin
 	address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
@@ -81,12 +87,6 @@ const ERC20_CONTRACT_ADDRESS_FET: Erc20Contract = {
 const ERC20_CONTRACT_ADDRESS_WEEETH: Erc20Contract = {
 	// Wrapped Ether (weETH)
 	address: '0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee',
-	exchange: 'ethereum'
-};
-
-const ERC20_CONTRACT_ADDRESS_1INCH: Erc20Contract = {
-	// 1INCH
-	address: '0x111111111117dc0aa78b770fa6a738034120c302',
 	exchange: 'ethereum'
 };
 
