@@ -16,7 +16,7 @@
 			<span class="text-5xl font-bold" class:animate-pulse={isNullish($balance)}>0.00</span>
 		{/if}
 
-		{#if $erc20UserTokensInitialized}
+		{#if $erc20UserTokensInitialized && nonNullish(tokenSymbol)}
 			<span class="opacity-100">{$tokenSymbol}</span>
 		{/if}
 	</output>
