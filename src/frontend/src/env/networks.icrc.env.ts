@@ -9,6 +9,7 @@ import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
 import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
+import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
@@ -329,6 +330,14 @@ const CKSHIB_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 		}
 	: undefined;
 
+const CKWBTC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckWBTC)
+	? {
+			...CKERC20_PRODUCTION_DATA.ckWBTC,
+			position: 6,
+			twinToken: WBTC_TOKEN
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -347,7 +356,8 @@ export const CKERC20_LEDGER_CANISTER_IC_IDS: CanisterIdText[] = [
 	...(nonNullish(CKLINK_IC_DATA?.ledgerCanisterId) ? [CKLINK_IC_DATA.ledgerCanisterId] : []),
 	...(nonNullish(CKPEPE_IC_DATA?.ledgerCanisterId) ? [CKPEPE_IC_DATA.ledgerCanisterId] : []),
 	...(nonNullish(CKOCT_IC_DATA?.ledgerCanisterId) ? [CKOCT_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKSHIB_IC_DATA?.ledgerCanisterId) ? [CKSHIB_IC_DATA.ledgerCanisterId] : [])
+	...(nonNullish(CKSHIB_IC_DATA?.ledgerCanisterId) ? [CKSHIB_IC_DATA.ledgerCanisterId] : []),
+	...(nonNullish(CKWBTC_IC_DATA?.ledgerCanisterId) ? [CKWBTC_IC_DATA.ledgerCanisterId] : [])
 ];
 
 export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
