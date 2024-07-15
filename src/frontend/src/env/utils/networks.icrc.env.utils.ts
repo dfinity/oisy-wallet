@@ -1,5 +1,5 @@
 import { CKETH_EXPLORER_URL, CKETH_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
-import type { EnvTokens, EnvTokenSymbol } from '$env/types/env-token-ckerc20';
+import type { EnvTokenSymbol, EnvTokens } from '$env/types/env-token-ckerc20';
 import type { IcCkInterface } from '$icp/types/ic';
 import { PROD, STAGING } from '$lib/constants/app.constants';
 import type { NetworkEnvironment } from '$lib/types/network';
