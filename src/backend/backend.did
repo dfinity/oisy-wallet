@@ -62,36 +62,36 @@ type UserTokenId = record { chain_id : nat64; contract_address : text };
 
 type CredentialType = string;
 
-type UserCredentialSummary {
-  credential_type: CredentialType,
-  verified_date_timestamp: opt u64,
-  expire_date_timestamp: opt u64,
+type UserCredentialSummary = record {
+  credential_type : CredentialType,
+  verified_date_timestamp : opt u64,
+  expire_date_timestamp : opt u64,
 }
 
-type UserProfile {
-  credentials: vec UserCredentialSummary,
-  created_timestamp: u64,
-  updated_timestamp: u64,
+type UserProfile = record {
+  credentials : vec UserCredentialSummary,
+  created_timestamp : u64,
+  updated_timestamp : u64,
 }
 
-type AddUserCredentialRequest {
-  credential_jwt: String,
+type AddUserCredentialRequest = record {
+  credential_jwt : String,
 }
 
-type GetUsersRequest {
-  updated_after_timestamp: opt u64,
-  limit_response: opt u64,
+type GetUsersRequest = record {
+  updated_after_timestamp : opt u64,
+  limit_response : opt u64,
 }
 
-type OisyUser {
-  principal: Principal,
-  pouh_verified: bool,
+type OisyUser = record {
+  principal : Principal,
+  pouh_verified : bool,
 }
 
-type GetUsersResponse {
-  data: Vec<OisyUser>,
-  total_users: u64,
-  limit_response: u64,
+type GetUsersResponse = record {
+  data : Vec<OisyUser>,
+  total_users : u64,
+  limit_response : u64,
 }
 
 service : (Arg) -> {
