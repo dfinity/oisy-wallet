@@ -19,12 +19,6 @@ const ERC20_CONTRACT_ADDRESS_1INCH: Erc20Contract = {
 	exchange: 'erc20'
 };
 
-const ERC20_CONTRACT_ADDRESS_WBTC: Erc20Contract = {
-	// Wrapped Bitcoin
-	address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
-	exchange: 'erc20'
-};
-
 const ERC20_CONTRACT_ADDRESS_WSTETH: Erc20Contract = {
 	// Lido Finance (wstETH)
 	address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
@@ -125,7 +119,6 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	ERC20_CONTRACT_ADDRESS_1INCH,
-	ERC20_CONTRACT_ADDRESS_WBTC,
 	ERC20_CONTRACT_ADDRESS_WSTETH,
 	ERC20_CONTRACT_ADDRESS_USDT,
 	ERC20_CONTRACT_ADDRESS_DMAIL,
