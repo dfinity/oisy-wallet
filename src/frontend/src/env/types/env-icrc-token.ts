@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const icrcEnvTokenMetadata = z.object({
+export const envIcrcTokenMetadata = z.object({
 	decimals: z.number(),
 	name: z.string(),
 	symbol: z.string(),
@@ -11,18 +11,18 @@ export const icrcEnvTokenMetadata = z.object({
 
 const indexCanisterVersion = z.union([z.literal('up-to-date'), z.literal('outdated')]);
 
-export const icrcEnvToken = z.object({
+export const envIcrcToken = z.object({
 	ledgerCanisterId: z.string(),
 	rootCanisterId: z.string(),
 	indexCanisterId: z.string(),
-	metadata: icrcEnvTokenMetadata,
+	metadata: envIcrcTokenMetadata,
 	indexCanisterVersion
 });
 
-export const icrcEnvTokens = z.array(icrcEnvToken);
+export const envIcrcTokens = z.array(envIcrcToken);
 
-export type IcrcEnvTokenMetadata = z.infer<typeof icrcEnvTokenMetadata>;
+export type EnvIcrcTokenMetadata = z.infer<typeof envIcrcTokenMetadata>;
 
-export type IcrcEnvToken = z.infer<typeof icrcEnvToken>;
+export type EnvIcrcToken = z.infer<typeof envIcrcToken>;
 
-export type IcrcEnvTokens = z.infer<typeof icrcEnvTokens>;
+export type EnvIcrcTokens = z.infer<typeof envIcrcTokens>;

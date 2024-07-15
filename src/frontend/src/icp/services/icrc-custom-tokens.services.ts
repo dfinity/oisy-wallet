@@ -1,9 +1,9 @@
 import { SNS_EXPLORER_URL } from '$env/explorers.env';
 import { ICP_NETWORK } from '$env/networks.env';
 import snsTokens from '$env/tokens.sns.json';
+import { envIcrcToken, envIcrcTokens, type EnvIcrcToken } from '$env/types/env-icrc-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcTokenWithoutIdExtended } from '$icp/types/icrc-custom-token';
-import { icrcEnvToken, icrcEnvTokens, type IcrcEnvToken } from '$icp/types/icrc-env-token';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { get } from 'svelte/store';
@@ -25,7 +25,7 @@ export const buildIndexedIcrcCustomTokens = (): Record<
 
 export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 	try {
-		const tokens = icrcEnvTokens
+		const tokens = envIcrcTokens
 			.parse(
 				snsTokens.map(
 					({
@@ -35,7 +35,7 @@ export const buildIcrcCustomTokens = (): IcTokenWithoutIdExtended[] => {
 						},
 						...ids
 					}) =>
-						icrcEnvToken.parse({
+						envIcrcToken.parse({
 							...ids,
 							metadata: {
 								...rest,
@@ -64,7 +64,7 @@ const mapIcrcCustomToken = ({
 	indexCanisterVersion,
 	rootCanisterId,
 	metadata: { name, decimals, symbol, fee, alternativeName }
-}: IcrcEnvToken): IcTokenWithoutIdExtended => ({
+}: EnvIcrcToken): IcTokenWithoutIdExtended => ({
 	ledgerCanisterId,
 	indexCanisterId,
 	network: ICP_NETWORK,
