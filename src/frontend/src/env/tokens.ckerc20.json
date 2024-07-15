@@ -1,5 +1,10 @@
 {
 	"production": {
+		"ckWBTC": {
+			"ledgerCanisterId": "bptq2-faaaa-aaaar-qagxq-cai",
+			"indexCanisterId": "dso6s-wiaaa-aaaar-qagya-cai",
+			"erc20ContractAddress": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+		},
 		"ckLINK": {
 			"ledgerCanisterId": "g4tto-rqaaa-aaaar-qageq-cai",
 			"indexCanisterId": "gvqys-hyaaa-aaaar-qagfa-cai",
