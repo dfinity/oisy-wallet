@@ -126,7 +126,7 @@ pub mod user_profile {
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct UserProfileStorage {
+    pub struct StoredUserProfile {
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: u64,
         pub updated_timestamp: u64,
