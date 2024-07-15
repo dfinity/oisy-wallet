@@ -103,6 +103,7 @@ pub mod custom_token {
 
 /// Types specifics to the user profile.
 pub mod user_profile {
+    use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use std::collections::BTreeMap;
 
@@ -121,6 +122,7 @@ pub mod user_profile {
         pub credentials: Vec<UserCredential>,
         pub created_timestamp: u64,
         pub updated_timestamp: u64,
+        pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

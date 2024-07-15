@@ -491,10 +491,11 @@ fn get_or_create_user_profile() -> UserProfile {
         credentials,
         created_timestamp: time(),
         updated_timestamp: time(),
+        version: None,
     }
 }
 
-#[query]
+#[query(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
 fn get_users(request: GetUsersRequest) -> GetUsersResponse {
     // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2650
