@@ -7,6 +7,7 @@
 	import SendButton from '$lib/components/send/SendButton.svelte';
 	import { loadTokenAndRun } from '$icp/services/token.services';
 	import type { Token } from '$lib/types/token';
+	import TokenContext from '$lib/components/tokens/TokenContext.svelte';
 
 	export let token: Token;
 	export let compact = false;
@@ -32,5 +33,7 @@
 <SendButton on:click={async () => await openSend()} {compact} />
 
 {#if $modalSend && $modalStore?.data === modalId}
-	<SendModal on:nnsClose />
+	<TokenContext>
+		<SendModal on:nnsClose />
+	</TokenContext>
 {/if}

@@ -6,6 +6,7 @@
 	import SendButton from '$lib/components/send/SendButton.svelte';
 	import type { Token } from '$lib/types/token';
 	import { loadTokenAndRun } from '$icp/services/token.services';
+	import TokenContext from '$lib/components/tokens/TokenContext.svelte';
 
 	export let token: Token;
 	export let compact = false;
@@ -21,5 +22,7 @@
 <SendButton on:click={openSend} {compact} />
 
 {#if $modalIcSend && $modalStore?.data === modalId}
-	<IcSendModal networkId={ICP_NETWORK_ID} on:nnsClose />
+	<TokenContext>
+		<IcSendModal networkId={ICP_NETWORK_ID} on:nnsClose />
+	</TokenContext>
 {/if}

@@ -1,4 +1,5 @@
 import type { OptionToken } from '$lib/types/token';
+import { getContext } from 'svelte';
 import { writable, type Readable } from 'svelte/store';
 
 export type TokenData = OptionToken;
@@ -8,7 +9,7 @@ export interface TokenStore extends Readable<TokenData> {
 	reset: () => void;
 }
 
-const initTokenStore = (): TokenStore => {
+export const initTokenStore = (): TokenStore => {
 	const INITIAL: TokenData = undefined;
 
 	const { subscribe, set } = writable<TokenData>(INITIAL);
@@ -31,3 +32,8 @@ const initTokenStore = (): TokenStore => {
  * @deprecated This approach works for now but does not align with the new architectural requirements.
  */
 export const token = initTokenStore();
+
+export const TOKEN_CONTEXT_KEY = Symbol('token');
+
+export const getTokenStoreFromContext = (): TokenStore =>
+	getContext<{ store: TokenStore }>(TOKEN_CONTEXT_KEY).store;

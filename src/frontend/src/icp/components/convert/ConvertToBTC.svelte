@@ -13,6 +13,7 @@
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import TokenContext from '$lib/components/tokens/TokenContext.svelte';
 
 	const isDisabled = (): boolean =>
 		isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);
@@ -42,5 +43,7 @@
 </button>
 
 {#if $modalConvertCkBTCToBTC}
-	<IcSendModal {networkId} />
+	<TokenContext>
+		<IcSendModal {networkId} />
+	</TokenContext>
 {/if}
