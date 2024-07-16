@@ -160,25 +160,29 @@ pub struct Config {
     pub ic_root_key_raw: Option<Vec<u8>>,
 }
 
-fn update_config(arg: InitArg) {
+fn set_config(arg: InitArg) {
+    let InitArg {
+        ecdsa_key_name,
+        allowed_callers,
+        supported_credentials,
+        ic_root_key_der,
+    } = arg;
     mutate_state(|state| {
-        let ic_root_key_raw = match arg
-            .ic_root_key_der
-            .map(|der_key| extract_raw_root_pk_from_der(&der_key))
-        {
-            Some(Ok(root_key)) => Some(root_key),
-            Some(Err(_)) => None,
-            None => match extract_raw_root_pk_from_der(IC_ROOT_PK_DER) {
-                Ok(root_key) => Some(root_key),
-                Err(_) => None,
-            },
-        };
+        let ic_root_key_raw =
+            match ic_root_key_der.map(|der_key| extract_raw_root_pk_from_der(&der_key)) {
+                Some(Ok(root_key)) => Some(root_key),
+                Some(Err(_)) => panic!("There was an error parsing the root key"),
+                None => match extract_raw_root_pk_from_der(IC_ROOT_PK_DER) {
+                    Ok(root_key) => Some(root_key),
+                    Err(_) => panic!("There was an error parsing the root key"),
+                },
+            };
         state
             .config
             .set(Some(Candid(Config {
-                ecdsa_key_name: arg.ecdsa_key_name,
-                allowed_callers: arg.allowed_callers,
-                supported_credentials: arg.supported_credentials,
+                ecdsa_key_name,
+                allowed_callers,
+                supported_credentials,
                 ic_root_key_raw,
             })))
             .expect("setting config should succeed");
@@ -188,7 +192,7 @@ fn update_config(arg: InitArg) {
 #[init]
 fn init(arg: Arg) {
     match arg {
-        Arg::Init(arg) => update_config(arg),
+        Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
 }
@@ -196,15 +200,8 @@ fn init(arg: Arg) {
 #[post_upgrade]
 fn post_upgrade(arg: Option<Arg>) {
     match arg {
-        Some(Arg::Init(arg)) => update_config(arg),
-        Some(Arg::Upgrade) => {
-            read_state(|s| {
-                let _ = s.config.get().as_ref().expect(
-                    "config is not initialized: reinstall the canister instead of upgrading",
-                );
-            });
-        }
-        None => {
+        Some(Arg::Init(arg)) => set_config(arg),
+        _ => {
             read_state(|s| {
                 let _ = s.config.get().as_ref().expect(
                     "config is not initialized: reinstall the canister instead of upgrading",
