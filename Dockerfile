@@ -39,10 +39,7 @@ COPY Cargo.toml .
 COPY src/backend/Cargo.toml src/backend/Cargo.toml
 COPY src/shared/Cargo.toml src/shared/Cargo.toml
 ENV CARGO_TARGET_DIR=/cargo_target
-RUN mkdir -p src/backend/src \
-    && touch src/backend/src/lib.rs \
-    && mkdir -p src/shared/src \
-    && touch src/shared/src/lib.rs \
+RUN yq -oy .workspace.members[] Cargo.toml | xargs -I{} cargo new --lib {} \
     && ./docker/build --only-dependencies \
     && rm -rf src
 
