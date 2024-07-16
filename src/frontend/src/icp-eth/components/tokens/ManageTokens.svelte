@@ -42,10 +42,18 @@
 	// The list of ICRC tokens (SNSes) is defined as environment variables.
 	// These tokens are not necessarily loaded at boot time if the user has not added them to their list of custom tokens.
 	let icrcEnvTokens: IcrcCustomToken[] = [];
+
+	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
+	// since some of them are sorted by market cap), we store the exchange data in a variable during
+	// the life of the component.
+	let exchangesStaticData: ExchangesData | undefined;
+
 	onMount(() => {
 		const tokens = buildIcrcCustomTokens();
 		icrcEnvTokens =
 			tokens?.map((token) => ({ ...token, id: Symbol(token.symbol), enabled: false })) ?? [];
+
+		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
 	// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
@@ -88,22 +96,13 @@
 		$pseudoNetworkChainFusion
 	]);
 
-	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
-	// since some of them are sorted by market cap), we store the exchange data in a variable during
-	// the life of the component.
-	let exchangesStaticData: ExchangesData | undefined;
-	onMount(() => {
-		exchangesStaticData = $exchanges;
-	});
-
 	let allTokensSorted: Token[] = [];
-	$: exchangesStaticData,
-		(allTokensSorted = nonNullish(exchangesStaticData)
-			? pinTokensAtTop({
-					$tokens: sortTokens({ $tokens: allTokens, $exchanges: exchangesStaticData }),
-					$tokensToPin: $tokensToPin
-				})
-			: []);
+	$: allTokensSorted = nonNullish(exchangesStaticData)
+		? pinTokensAtTop({
+				$tokens: sortTokens({ $tokens: allTokens, $exchanges: exchangesStaticData }),
+				$tokensToPin: $tokensToPin
+			})
+		: [];
 
 	let filterTokens = '';
 	const updateFilter = () => (filterTokens = filter);
