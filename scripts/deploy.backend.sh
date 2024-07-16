@@ -15,16 +15,12 @@ case $ENV in
     ;;
   *)
     ECDSA_KEY_NAME="dfx_test_key"
-    # At the time of writing dfx outputs incorrect JSON with dfx ping (commas between object
-    # entries are missing).
     # In order to read the root key we grab the array from the '"root_key": [...]' bit, the brackets
     # to match what candid expects ({}), replace the commas between array entries to match
     # what candid expects (semicolon) and annotate the numbers with their type (otherwise dfx assumes 'nat'
     # instead of 'nat8').
     rootkey_did=$(dfx ping "${ENV:-local}" \
-        | sed -n 's/.*"root_key": \[\(.*\)\].*/{\1}/p' \
-        | sed 's/\([0-9][0-9]*\)/\1:nat8/g' \
-        | sed 's/,/;/g')
+        | jq -r '.root_key | reduce .[] as $item ("{ "; "\(.) \($item):nat8;") + " }"')
     echo "Parsed rootkey: ${rootkey_did:0:20}..." >&2
     ic_root_key_der="opt vec $rootkey_did"
     ;;
