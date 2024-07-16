@@ -2,12 +2,12 @@ use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
-use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
+use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
@@ -162,14 +162,15 @@ pub struct Config {
 
 fn update_config(arg: InitArg) {
     mutate_state(|state| {
-        let ic_root_key_raw = match arg.ic_root_key_der.map(|der_key| extract_raw_root_pk_from_der(&der_key)) {
+        let ic_root_key_raw = match arg
+            .ic_root_key_der
+            .map(|der_key| extract_raw_root_pk_from_der(&der_key))
+        {
             Some(Ok(root_key)) => Some(root_key),
             Some(Err(_)) => None,
-            None => {
-                match extract_raw_root_pk_from_der(IC_ROOT_PK_DER) {
-                    Ok(root_key) => Some(root_key),
-                    Err(_) => None,
-                }
+            None => match extract_raw_root_pk_from_der(IC_ROOT_PK_DER) {
+                Ok(root_key) => Some(root_key),
+                Err(_) => None,
             },
         };
         state
@@ -198,22 +199,18 @@ fn post_upgrade(arg: Option<Arg>) {
         Some(Arg::Init(arg)) => update_config(arg),
         Some(Arg::Upgrade) => {
             read_state(|s| {
-                let _ = s
-                    .config
-                    .get()
-                    .as_ref()
-                    .expect("config is not initialized: reinstall the canister instead of upgrading");
+                let _ = s.config.get().as_ref().expect(
+                    "config is not initialized: reinstall the canister instead of upgrading",
+                );
             });
-        },
+        }
         None => {
             read_state(|s| {
-                let _ = s
-                    .config
-                    .get()
-                    .as_ref()
-                    .expect("config is not initialized: reinstall the canister instead of upgrading");
+                let _ = s.config.get().as_ref().expect(
+                    "config is not initialized: reinstall the canister instead of upgrading",
+                );
             });
-        },
+        }
     }
 }
 

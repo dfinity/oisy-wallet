@@ -19,7 +19,6 @@ pub struct InitArg {
     pub ic_root_key_der: Option<Vec<u8>>,
 }
 
-
 #[derive(CandidType, Deserialize)]
 pub enum Arg {
     Init(InitArg),
