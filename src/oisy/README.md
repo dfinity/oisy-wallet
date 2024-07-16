@@ -1,4 +1,4 @@
-# `migrate-oisy`
+# `oisy` CLI
 
 This is a tool used to move state from one Oisy instance to another.
 
