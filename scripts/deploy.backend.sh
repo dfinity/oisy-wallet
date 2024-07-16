@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-ENV=${ENV:-local}
-
 case $ENV in
   "staging")
     ECDSA_KEY_NAME="test_key_1"
@@ -26,17 +24,24 @@ II_VC_URL="https://identity.ic0.app"
 # TODO: To be confirmed by DECIDE AI team
 POUH_ISSUER_VC_URL="https://www.elna.ai"
 
-# At the time of writing dfx outputs incorrect JSON with dfx ping (commas between object
-# entries are missing).
-# In order to read the root key we grab the array from the '"root_key": [...]' bit, the brackets
-# to match what candid expects ({}), replace the commas between array entries to match
-# what candid expects (semicolon) and annotate the numbers with their type (otherwise dfx assumes 'nat'
-# instead of 'nat8').
-rootkey_did=$(dfx ping "$ENV" \
-    | sed -n 's/.*"root_key": \[\(.*\)\].*/{\1}/p' \
-    | sed 's/\([0-9][0-9]*\)/\1:nat8/g' \
-    | sed 's/,/;/g')
-echo "Parsed rootkey: ${rootkey_did:0:20}..." >&2
+
+if [[ "$ENV" = "local" || -z "${ENV}" ]]; then
+  # At the time of writing dfx outputs incorrect JSON with dfx ping (commas between object
+  # entries are missing).
+  # In order to read the root key we grab the array from the '"root_key": [...]' bit, the brackets
+  # to match what candid expects ({}), replace the commas between array entries to match
+  # what candid expects (semicolon) and annotate the numbers with their type (otherwise dfx assumes 'nat'
+  # instead of 'nat8').
+  rootkey_did=$(dfx ping "${ENV:-local}" \
+      | sed -n 's/.*"root_key": \[\(.*\)\].*/{\1}/p' \
+      | sed 's/\([0-9][0-9]*\)/\1:nat8/g' \
+      | sed 's/,/;/g')
+  echo "Parsed rootkey: ${rootkey_did:0:20}..." >&2
+  ic_root_key_der="opt vec $rootkey_did"
+  else
+  # For security reasons, mainnet root key will be hardcoded in the backend canister.
+  ic_root_key_der="null"
+fi
 
 if [ -n "${ENV+1}" ]; then
   dfx deploy backend --argument "(variant {
@@ -52,7 +57,7 @@ if [ -n "${ENV+1}" ]; then
               issuer_canister_id = \"$POUH_ISSUER_CANISTER_ID\";
             }
          };
-         ic_root_key_der = opt vec $rootkey_did;
+         ic_root_key_der = $ic_root_key_der;
      }
   })" --network "$ENV" --wallet "$WALLET"
 else
@@ -69,7 +74,7 @@ else
               issuer_canister_id = \"$POUH_ISSUER_CANISTER_ID\";
             }
          };
-         ic_root_key_der = opt vec $rootkey_did;
+         ic_root_key_der = $ic_root_key_der;
      }
   })" --specified-id tdxud-2yaaa-aaaad-aadiq-cai
 fi

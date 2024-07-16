@@ -2,6 +2,7 @@ use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
+use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
@@ -159,33 +160,17 @@ pub struct Config {
     pub ic_root_key_raw: Option<Vec<u8>>,
 }
 
-pub const IC_ROOT_PK_DER_PREFIX: &[u8; 37] = b"\x30\x81\x82\x30\x1d\x06\x0d\x2b\x06\x01\x04\x01\x82\xdc\x7c\x05\x03\x01\x02\x01\x06\x0c\x2b\x06\x01\x04\x01\x82\xdc\x7c\x05\x03\x02\x01\x03\x61\x00";
-pub const IC_ROOT_PK_DER: &[u8; 133] = b"\x30\x81\x82\x30\x1d\x06\x0d\x2b\x06\x01\x04\x01\x82\xdc\x7c\x05\x03\x01\x02\x01\x06\x0c\x2b\x06\x01\x04\x01\x82\xdc\x7c\x05\x03\x02\x01\x03\x61\x00\x81\x4c\x0e\x6e\xc7\x1f\xab\x58\x3b\x08\xbd\x81\x37\x3c\x25\x5c\x3c\x37\x1b\x2e\x84\x86\x3c\x98\xa4\xf1\xe0\x8b\x74\x23\x5d\x14\xfb\x5d\x9c\x0c\xd5\x46\xd9\x68\x5f\x91\x3a\x0c\x0b\x2c\xc5\x34\x15\x83\xbf\x4b\x43\x92\xe4\x67\xdb\x96\xd6\x5b\x9b\xb4\xcb\x71\x71\x12\xf8\x47\x2e\x0d\x5a\x4d\x14\x50\x5f\xfd\x74\x84\xb0\x12\x91\x09\x1c\x5f\x87\xb9\x88\x83\x46\x3f\x98\x09\x1a\x0b\xaa\xae";
-pub const IC_ROOT_PK_LENGTH: usize = 96;
-
-/// Verifies the structure given public key in DER-format, and returns raw bytes of the key.
-pub fn extract_raw_root_pk_from_der(pk_der: &[u8]) -> Result<Vec<u8>, String> {
-    let expected_length = IC_ROOT_PK_DER_PREFIX.len() + IC_ROOT_PK_LENGTH;
-    if pk_der.len() != expected_length {
-        return Err(String::from("invalid root pk length"));
-    }
-
-    let prefix = &pk_der[0..IC_ROOT_PK_DER_PREFIX.len()];
-    if prefix[..] != IC_ROOT_PK_DER_PREFIX[..] {
-        return Err(String::from("invalid OID"));
-    }
-
-    let key = &pk_der[IC_ROOT_PK_DER_PREFIX.len()..];
-    Ok(key.to_vec())
-}
-
 fn update_config(arg: InitArg) {
     mutate_state(|state| {
         let ic_root_key_raw = match arg.ic_root_key_der.map(|der_key| extract_raw_root_pk_from_der(&der_key)) {
             Some(Ok(root_key)) => Some(root_key),
             Some(Err(_)) => None,
-            // TODO: Hardcode mainnet root key when none is passed
-            None => None,
+            None => {
+                match extract_raw_root_pk_from_der(IC_ROOT_PK_DER) {
+                    Ok(root_key) => Some(root_key),
+                    Err(_) => None,
+                }
+            },
         };
         state
             .config
