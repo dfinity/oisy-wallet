@@ -169,8 +169,10 @@ fn set_config(arg: InitArg) {
     } = arg;
     mutate_state(|state| {
         let ic_root_key_raw = extract_raw_root_pk_from_der(
-            &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec())
-        ).map(Some).unwrap_or_else(|_| panic!("There was an error parsing the root key"));
+            &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
+        )
+        .map(Some)
+        .unwrap_or_else(|_| panic!("There was an error parsing the root key"));
         state
             .config
             .set(Some(Candid(Config {
