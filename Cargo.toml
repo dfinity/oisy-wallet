@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "src/migrate-oisy",
     "src/backend",
+    "src/migrate-oisy",
     "src/shared"
 ]
 resolver = "2"
