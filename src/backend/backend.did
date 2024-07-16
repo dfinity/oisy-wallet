@@ -12,6 +12,7 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
+type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
   token : Token;
   version : opt nat64;
@@ -47,6 +48,8 @@ type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type InitArg = record {
   ecdsa_key_name : text;
   allowed_callers : vec principal;
+  supported_credentials : opt vec SupportedCredential;
+  ic_root_key_der : opt blob;
 };
 type OisyUser = record {
   "principal" : principal;
@@ -63,11 +66,18 @@ type SignRequest = record {
   chain_id : nat;
   nonce : nat;
 };
+type SupportedCredential = record {
+  ii_canister_id : text;
+  issuer_origin : text;
+  issuer_canister_id : text;
+  ii_origin : text;
+  credential_type : CredentialType;
+};
 type Token = variant { Icrc : IcrcToken };
 type UserCredential = record {
   verified_date_timestamp : opt nat64;
   expire_date_timestamp : opt nat64;
-  credential_type : text;
+  credential_type : CredentialType;
 };
 type UserProfile = record {
   credentials : vec UserCredential;

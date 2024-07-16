@@ -12,6 +12,7 @@ ethers-core = { workspace = true }
 futures = { workspace = true }
 getrandom = { workspace = true }
 hex = { workspace = true }
+ic-canister-sig-creation = { workspace = true }
 ic-cdk = { workspace = true }
 ic-cdk-macros = { workspace = true }
 ic-stable-structures = { workspace = true }

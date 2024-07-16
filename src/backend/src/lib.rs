@@ -7,6 +7,7 @@ use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
+use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
@@ -30,7 +31,7 @@ use shared::types::user_profile::{
     AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential,
     UserProfile,
 };
-use shared::types::{Arg, InitArg};
+use shared::types::{Arg, InitArg, SupportedCredential};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -154,36 +155,57 @@ pub struct Config {
     pub ecdsa_key_name: String,
     // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
     pub allowed_callers: Vec<Principal>,
+    pub supported_credentials: Option<Vec<SupportedCredential>>,
+    /// Root of trust for checking canister signatures.
+    pub ic_root_key_raw: Option<Vec<u8>>,
+}
+
+fn set_config(arg: InitArg) {
+    let InitArg {
+        ecdsa_key_name,
+        allowed_callers,
+        supported_credentials,
+        ic_root_key_der,
+    } = arg;
+    mutate_state(|state| {
+        let ic_root_key_raw = match extract_raw_root_pk_from_der(
+            &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
+        ) {
+            Ok(root_key) => root_key,
+            Err(msg) => panic!("{}", format!("Error parsing root key: {msg}")),
+        };
+        state
+            .config
+            .set(Some(Candid(Config {
+                ecdsa_key_name,
+                allowed_callers,
+                supported_credentials,
+                ic_root_key_raw: Some(ic_root_key_raw),
+            })))
+            .expect("setting config should succeed");
+    });
 }
 
 #[init]
 fn init(arg: Arg) {
     match arg {
-        Arg::Init(InitArg {
-            ecdsa_key_name,
-            allowed_callers,
-        }) => mutate_state(|state| {
-            state
-                .config
-                .set(Some(Candid(Config {
-                    ecdsa_key_name,
-                    allowed_callers,
-                })))
-                .expect("setting config should succeed");
-        }),
+        Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
 }
 
 #[post_upgrade]
-fn post_upgrade(_: Option<Arg>) {
-    read_state(|s| {
-        let _ = s
-            .config
-            .get()
-            .as_ref()
-            .expect("config is not initialized: reinstall the canister instead of upgrading");
-    });
+fn post_upgrade(arg: Option<Arg>) {
+    match arg {
+        Some(Arg::Init(arg)) => set_config(arg),
+        _ => {
+            read_state(|s| {
+                let _ = s.config.get().as_ref().expect(
+                    "config is not initialized: reinstall the canister instead of upgrading",
+                );
+            });
+        }
+    }
 }
 
 /// Processes external HTTP requests.

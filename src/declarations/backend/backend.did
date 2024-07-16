@@ -1,3 +1,4 @@
+type AddUserCredentialRequest = record { credential_jwt : text };
 type Arg = variant { Upgrade; Init : InitArg };
 type CanisterStatusResultV2 = record {
   controller : principal;
@@ -11,6 +12,7 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
+type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
   token : Token;
   version : opt nat64;
@@ -22,6 +24,14 @@ type DefiniteCanisterSettingsArgs = record {
   controllers : vec principal;
   memory_allocation : nat;
   compute_allocation : nat;
+};
+type GetUsersRequest = record {
+  updated_after_timestamp : opt nat64;
+  matches_max_length : opt nat64;
+};
+type GetUsersResponse = record {
+  users : vec OisyUser;
+  matches_max_length : nat64;
 };
 type HttpRequest = record {
   url : text;
@@ -38,7 +48,10 @@ type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type InitArg = record {
   ecdsa_key_name : text;
   allowed_callers : vec principal;
+  supported_credentials : opt vec SupportedCredential;
+  ic_root_key_der : opt blob;
 };
+type OisyUser = record { "principal" : principal; pouh_verified : bool };
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -49,7 +62,25 @@ type SignRequest = record {
   chain_id : nat;
   nonce : nat;
 };
+type SupportedCredential = record {
+  ii_canister_id : text;
+  issuer_origin : text;
+  issuer_canister_id : text;
+  ii_origin : text;
+  credential_type : text;
+};
 type Token = variant { Icrc : IcrcToken };
+type UserCredential = record {
+  verified_date_timestamp : opt nat64;
+  expire_date_timestamp : opt nat64;
+  credential_type : CredentialType;
+};
+type UserProfile = record {
+  credentials : vec UserCredential;
+  version : opt nat64;
+  created_timestamp : nat64;
+  updated_timestamp : nat64;
+};
 type UserToken = record {
   decimals : opt nat8;
   version : opt nat64;
@@ -60,9 +91,12 @@ type UserToken = record {
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
+  add_user_credential : (AddUserCredentialRequest) -> ();
   caller_eth_address : () -> (text);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
+  get_or_create_user_profile : () -> (UserProfile) query;
+  get_users : (GetUsersRequest) -> (GetUsersResponse) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
