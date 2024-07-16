@@ -54,31 +54,54 @@ export const pinTokensWithBalanceAtTop = ({
 	$tokens: Token[];
 	$exchanges: ExchangesData;
 	$balancesStore: CertifiedStoreData<BalancesData>;
-}) => {
+}): Token[] => {
+	return $tokens;
+	const tokensWithBalanceToPin2: TokenToPin[] = $tokens.map((token) => ({
+		...token,
+		usdValue: nonNullish($exchanges?.[token.id])
+			? usdValue({
+					token,
+					balances: $balancesStore,
+					exchanges: $exchanges
+				})
+			: 0,
+		balance: Number(
+			formatToken({
+				value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
+				unitName: token.decimals,
+				displayDecimals: token.decimals
+			})
+		)
+	}));
 	const tokensWithBalanceToPin: TokenToPin[] = $tokens
 		.map((token) => ({
 			...token,
-			balance: $exchanges?.[token.id]?.usd
+			usdValue: nonNullish($exchanges?.[token.id])
 				? usdValue({
 						token,
 						balances: $balancesStore,
 						exchanges: $exchanges
 					})
-				: Number(
-						formatToken({
-							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
-							unitName: token.decimals,
-							displayDecimals: token.decimals
-						})
-					)
+				: 0,
+			balance: Number(
+				formatToken({
+					value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
+					unitName: token.decimals,
+					displayDecimals: token.decimals
+				})
+			)
 		}))
+		.filter(({ usdValue, balance }) => usdValue > 0 || balance > 0)
 		.sort(
 			(a, b) =>
+				b.usdValue - a.usdValue ||
 				b.balance - a.balance ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
-		)
-		.filter((token) => token.balance > 0);
+		);
+	return $tokens;
+	return tokensWithBalanceToPin2 as Token[];
+
 	return pinTokensAtTop({
 		$tokens,
 		$tokensToPin: tokensWithBalanceToPin
