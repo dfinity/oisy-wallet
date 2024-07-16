@@ -168,18 +168,19 @@ fn set_config(arg: InitArg) {
         ic_root_key_der,
     } = arg;
     mutate_state(|state| {
-        let ic_root_key_raw = extract_raw_root_pk_from_der(
+        let ic_root_key_raw = match extract_raw_root_pk_from_der(
             &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
-        )
-        .map(Some)
-        .unwrap_or_else(|_| panic!("There was an error parsing the root key"));
+        ) {
+            Ok(root_key) => root_key,
+            Err(msg) => panic!("{}", format!("Error parsing root key: {msg}"))
+        };
         state
             .config
             .set(Some(Candid(Config {
                 ecdsa_key_name,
                 allowed_callers,
                 supported_credentials,
-                ic_root_key_raw,
+                ic_root_key_raw: Some(ic_root_key_raw),
             })))
             .expect("setting config should succeed");
     });
