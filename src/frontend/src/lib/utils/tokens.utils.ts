@@ -55,24 +55,6 @@ export const pinTokensWithBalanceAtTop = ({
 	$exchanges: ExchangesData;
 	$balancesStore: CertifiedStoreData<BalancesData>;
 }): Token[] => {
-	return $tokens;
-	const tokensWithBalanceToPin2: TokenToPin[] = $tokens.map((token) => ({
-		...token,
-		usdValue: nonNullish($exchanges?.[token.id])
-			? usdValue({
-					token,
-					balances: $balancesStore,
-					exchanges: $exchanges
-				})
-			: 0,
-		balance: Number(
-			formatToken({
-				value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
-				unitName: token.decimals,
-				displayDecimals: token.decimals
-			})
-		)
-	}));
 	const tokensWithBalanceToPin: TokenToPin[] = $tokens
 		.map((token) => ({
 			...token,
@@ -99,9 +81,6 @@ export const pinTokensWithBalanceAtTop = ({
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
 		);
-	return $tokens;
-	return tokensWithBalanceToPin2 as Token[];
-
 	return pinTokensAtTop({
 		$tokens,
 		$tokensToPin: tokensWithBalanceToPin
