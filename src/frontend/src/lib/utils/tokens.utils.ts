@@ -1,6 +1,11 @@
+import { type BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin } from '$lib/types/token';
+import { usdValue } from '$lib/utils/exchange.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export const pinTokensAtTop = ({
 	$tokens,
@@ -40,3 +45,42 @@ export const sortTokens = ({
 			a.name.localeCompare(b.name) ||
 			a.network.name.localeCompare(b.network.name)
 	);
+
+export const pinTokensWithBalanceAtTop = ({
+	$tokens,
+	$exchanges,
+	$balancesStore
+}: {
+	$tokens: Token[];
+	$exchanges: ExchangesData;
+	$balancesStore: CertifiedStoreData<BalancesData>;
+}) => {
+	const tokensWithBalanceToPin: TokenToPin[] = $tokens
+		.map((token) => ({
+			...token,
+			balance: $exchanges?.[token.id]?.usd
+				? usdValue({
+						token,
+						balances: $balancesStore,
+						exchanges: $exchanges
+					})
+				: Number(
+						formatToken({
+							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})
+					)
+		}))
+		.sort(
+			(a, b) =>
+				b.balance - a.balance ||
+				a.name.localeCompare(b.name) ||
+				a.network.name.localeCompare(b.network.name)
+		)
+		.filter((token) => token.balance > 0);
+	return pinTokensAtTop({
+		$tokens,
+		$tokensToPin: tokensWithBalanceToPin
+	});
+};
