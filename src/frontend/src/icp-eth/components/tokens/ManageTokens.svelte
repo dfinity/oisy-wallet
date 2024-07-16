@@ -32,6 +32,10 @@
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import type { IcCkToken } from '$icp/types/ic';
+	import { pinTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import type { ExchangesData } from '$lib/types/exchange';
 
 	const dispatch = createEventDispatcher();
 
@@ -84,6 +88,23 @@
 		$pseudoNetworkChainFusion
 	]);
 
+	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
+	// since some of them are sorted by market cap), we store the exchange data in a variable during
+	// the life of the component.
+	let exchangesStaticData: ExchangesData | undefined;
+	onMount(() => {
+		exchangesStaticData = $exchanges;
+	});
+
+	let allTokensSorted: Token[] = [];
+	$: exchangesStaticData,
+		(allTokensSorted = nonNullish(exchangesStaticData)
+			? pinTokensAtTop({
+					$tokens: sortTokens({ $tokens: allTokens, $exchanges: exchangesStaticData }),
+					$tokensToPin: $tokensToPin
+				})
+			: []);
+
 	let filterTokens = '';
 	const updateFilter = () => (filterTokens = filter);
 	const debounceUpdateFilter = debounce(updateFilter);
@@ -99,8 +120,8 @@
 
 	let filteredTokens: Token[] = [];
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
-		? allTokens
-		: allTokens.filter((token) => {
+		? allTokensSorted
+		: allTokensSorted.filter((token) => {
 				const twinToken = (token as IcCkToken).twinToken;
 				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
 			});
