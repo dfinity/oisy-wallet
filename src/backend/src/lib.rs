@@ -172,7 +172,7 @@ fn set_config(arg: InitArg) {
             &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
         ) {
             Ok(root_key) => root_key,
-            Err(msg) => panic!("{}", format!("Error parsing root key: {msg}"))
+            Err(msg) => panic!("{}", format!("Error parsing root key: {msg}")),
         };
         state
             .config
