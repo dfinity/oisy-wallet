@@ -6,8 +6,17 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
+ethers-core = "= 2.0.11"
 candid = "0.10.0"
+futures = "0.3"
 ic-cdk = "0.12.0"
 ic-cdk-macros = "0.8.1"
 serde = "1"
 serde_bytes = "0.11"
+getrandom = { version = "0.2", features = ["custom"] }
+hex = "0.4"
+k256 = "0.13"
+ic-stable-structures = "0.6.4"
+ic-metrics-encoder = "1.1.1"
+lazy_static = "1.4.0"
+pocket-ic = "2.2.0"

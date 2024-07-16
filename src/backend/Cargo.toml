@@ -8,18 +8,18 @@ crate-type = ["cdylib"]
 
 [dependencies]
 candid = { workspace = true }
-ethers-core = "= 2.0.11"
-futures = "0.3"
-getrandom = { version = "0.2", features = ["custom"] }
-hex = "0.4"
+ethers-core = { workspace = true }
+futures = { workspace = true }
+getrandom = { workspace = true }
+hex = { workspace = true }
 ic-cdk = { workspace = true }
 ic-cdk-macros = { workspace = true }
-ic-stable-structures = "0.6.4"
-k256 = "0.13"
+ic-stable-structures = { workspace = true }
+k256 = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
 shared = { path = "../shared" }
 
 [dev-dependencies]
-lazy_static = "1.4.0"
-pocket-ic = "2.2.0"
+lazy_static = { workspace = true }
+pocket-ic = { workspace = true }
