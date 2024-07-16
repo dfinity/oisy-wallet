@@ -20,7 +20,7 @@ const tokens: Readable<Token[]> = derived(
 	]
 );
 
-const tokensToPin: Readable<TokenToPin[]> = derived(
+export const tokensToPin: Readable<TokenToPin[]> = derived(
 	[icrcChainFusionDefaultTokens],
 	([$icrcChainFusionDefaultTokens]) => [
 		ICP_TOKEN,
