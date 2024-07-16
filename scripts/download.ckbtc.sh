@@ -14,10 +14,10 @@ curl -sSL https://download.dfinity.systems/ic/$IC_COMMIT/canisters/ic-ckbtc-mint
 gunzip "$DIR"/ckbtc_minter.wasm.gz
 
 curl -sSL https://download.dfinity.systems/ic/$IC_COMMIT/canisters/ic-icrc1-ledger.wasm.gz -o "$DIR"/ckbtc_ledger.wasm.gz
-gunzip "$DIR"/ckbtc_ledger.wasm.gz
+gunzip -k "$DIR"/ckbtc_ledger.wasm.gz
 
 curl -sSL https://download.dfinity.systems/ic/$IC_COMMIT/canisters/ic-icrc1-index-ng.wasm.gz -o "$DIR"/ckbtc_index.wasm.gz
-gunzip "$DIR"/ckbtc_index.wasm.gz
+gunzip -k "$DIR"/ckbtc_index.wasm.gz
 
 curl -sSL https://download.dfinity.systems/ic/$IC_COMMIT/canisters/ic-ckbtc-kyt.wasm.gz -o "$DIR"/ckbtc_kyt.wasm.gz
 gunzip "$DIR"/ckbtc_kyt.wasm.gz
