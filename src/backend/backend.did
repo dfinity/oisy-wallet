@@ -44,18 +44,11 @@ type HttpResponse = record {
   status_code : nat16;
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
-type SupportedCredential = record {
-  credential_type : text;
-  ii_origin : text;
-  ii_canister_id : text;
-  issuer_origin : text;
-  issuer_canister_id : text;
-};
 type InitArg = record {
   ecdsa_key_name : text;
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
-  ic_root_key_der : opt vec nat8;
+  ic_root_key_der : opt blob;
 };
 type OisyUser = record {
   "principal" : principal;
@@ -71,6 +64,13 @@ type SignRequest = record {
   max_fee_per_gas : nat;
   chain_id : nat;
   nonce : nat;
+};
+type SupportedCredential = record {
+  ii_canister_id : text;
+  issuer_origin : text;
+  issuer_canister_id : text;
+  ii_origin : text;
+  credential_type : text;
 };
 type Token = variant { Icrc : IcrcToken };
 type UserCredential = record {
