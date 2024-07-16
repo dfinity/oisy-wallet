@@ -147,6 +147,7 @@ pub mod user_profile {
     pub struct OisyUser {
         pub principal: Principal,
         pub pouh_verified: bool,
+        pub updated_timestamp: u64,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
