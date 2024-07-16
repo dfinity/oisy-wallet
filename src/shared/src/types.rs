@@ -117,9 +117,13 @@ pub mod custom_token {
 pub mod user_profile {
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
+    use serde::Serialize;
     use std::collections::BTreeMap;
 
-    pub type CredentialType = String;
+    #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
+    pub enum CredentialType {
+        ProofOfUniqueness,
+    }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserCredential {

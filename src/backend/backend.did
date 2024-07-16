@@ -12,6 +12,7 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
+type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
   token : Token;
   version : opt nat64;
@@ -76,7 +77,7 @@ type Token = variant { Icrc : IcrcToken };
 type UserCredential = record {
   verified_date_timestamp : opt nat64;
   expire_date_timestamp : opt nat64;
-  credential_type : text;
+  credential_type : CredentialType;
 };
 type UserProfile = record {
   credentials : vec UserCredential;

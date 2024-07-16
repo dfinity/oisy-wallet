@@ -47,7 +47,7 @@ if [ -n "${ENV+1}" ]; then
          allowed_callers = vec {};
          supported_credentials = opt vec {
             record {
-              credential_type = \"ProofOfUniqueness\";
+              credential_type = variant { ProofOfUniqueness };
               ii_origin = \"$II_VC_URL\";
               ii_canister_id = \"$II_CANISTER_ID\";
               issuer_origin = \"$POUH_ISSUER_VC_URL\";
@@ -64,7 +64,7 @@ else
          allowed_callers = vec {};
          supported_credentials = opt vec {
             record {
-              credential_type = \"ProofOfUniqueness\";
+              credential_type = variant { ProofOfUniqueness };
               ii_origin = \"$II_VC_URL\";
               ii_canister_id = \"$II_CANISTER_ID\";
               issuer_origin = \"$POUH_ISSUER_VC_URL\";
