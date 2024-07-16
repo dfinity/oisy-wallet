@@ -22,6 +22,7 @@
 			"remote": {
 				"candid": "internet_identity.did",
 				"id": {
+					"staging": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
 				}
 			}

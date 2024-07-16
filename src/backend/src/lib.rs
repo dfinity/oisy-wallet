@@ -168,15 +168,9 @@ fn set_config(arg: InitArg) {
         ic_root_key_der,
     } = arg;
     mutate_state(|state| {
-        let ic_root_key_raw =
-            match ic_root_key_der.map(|der_key| extract_raw_root_pk_from_der(&der_key)) {
-                Some(Ok(root_key)) => Some(root_key),
-                Some(Err(msg)) => panic!("{}", format!("There was an error parsing the root key: {msg}")),
-                None => match extract_raw_root_pk_from_der(IC_ROOT_PK_DER) {
-                    Ok(root_key) => Some(root_key),
-                    Err(msg) => panic!("{}", format!("There was an error parsing the main root key: {msg}")),
-                },
-            };
+        let ic_root_key_raw = extract_raw_root_pk_from_der(
+            &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec())
+        ).map(Some).unwrap_or_else(|_| panic!("There was an error parsing the root key"));
         state
             .config
             .set(Some(Candid(Config {
