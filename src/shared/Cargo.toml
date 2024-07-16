@@ -7,6 +7,6 @@ edition = "2021"
 candid = { workspace = true }
 ic-cdk = { workspace = true }
 ic-cdk-macros = { workspace = true }
-ic-metrics-encoder = "1.1.1"
+ic-metrics-encoder = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }

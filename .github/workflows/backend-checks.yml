@@ -55,8 +55,16 @@ jobs:
       - name: Lint
         run: ./scripts/lint.rust.sh
 
+  workspace-dependencies:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo snap install yq
+      - name: Dependencies are defined in the workspace
+        run: ./scripts/lint.cargo-workspace-dependencies.sh
+
   may-merge:
-    needs: [ 'format', 'lint' ]
+    needs: [ 'format', 'lint', 'workspace-dependencies' ]
     runs-on: ubuntu-20.04
     steps:
       - name: Cleared for merging
