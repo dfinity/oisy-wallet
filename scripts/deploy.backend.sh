@@ -54,7 +54,7 @@ if [ -n "${ENV+1}" ]; then
          };
          ic_root_key_der = opt vec $rootkey_did;
      }
-  })" --network "$ENV" # add --wallet $WALLET when I figure out the problem
+  })" --network "$ENV" --wallet "$WALLET"
 else
   dfx deploy backend --argument "(variant {
     Init = record {
