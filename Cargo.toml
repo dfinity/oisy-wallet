@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "src/migrate-oisy",
     "src/backend",
     "src/shared"
 ]
