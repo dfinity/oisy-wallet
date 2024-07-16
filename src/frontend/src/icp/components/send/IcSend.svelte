@@ -22,7 +22,7 @@
 <SendButton on:click={openSend} {compact} />
 
 {#if $modalIcSend && $modalStore?.data === modalId}
-	<TokenContext>
+	<TokenContext {token}>
 		<IcSendModal networkId={ICP_NETWORK_ID} on:nnsClose />
 	</TokenContext>
 {/if}

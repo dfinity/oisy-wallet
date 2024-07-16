@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
-	import { initTokenStore } from '$lib/stores/token.store';
+	import { initTokenStore, TOKEN_CONTEXT_KEY, type TokenData } from '$lib/stores/token.store';
 
-	const tokenContextKey = {};
+	export let token: TokenData;
 
-	const tokenStore = initTokenStore();
-	setContext(tokenContextKey, tokenStore);
+	const tokenStore = initTokenStore(token);
+	setContext(TOKEN_CONTEXT_KEY, tokenStore);
 </script>
 
 <slot />

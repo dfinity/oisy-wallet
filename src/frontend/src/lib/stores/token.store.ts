@@ -9,12 +9,8 @@ export interface TokenStore extends Readable<TokenData> {
 	reset: () => void;
 }
 
-export interface TokenContext {
-	store: TokenStore;
-}
-
-export const initTokenStore = (): TokenStore => {
-	const INITIAL: TokenData = undefined;
+export const initTokenStore = (token?: TokenData): TokenStore => {
+	const INITIAL: TokenData = token;
 
 	const { subscribe, set } = writable<TokenData>(INITIAL);
 
@@ -36,6 +32,10 @@ export const initTokenStore = (): TokenStore => {
  * @deprecated This approach works for now but does not align with the new architectural requirements.
  */
 export const token = initTokenStore();
+
+export interface TokenContext {
+	store: TokenStore;
+}
 
 export const TOKEN_CONTEXT_KEY = Symbol('token');
 

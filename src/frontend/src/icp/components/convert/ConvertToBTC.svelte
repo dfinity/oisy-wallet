@@ -43,7 +43,7 @@
 </button>
 
 {#if $modalConvertCkBTCToBTC}
-	<TokenContext>
+	<TokenContext token={$token}>
 		<IcSendModal {networkId} />
 	</TokenContext>
 {/if}

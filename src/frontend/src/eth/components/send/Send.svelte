@@ -33,7 +33,7 @@
 <SendButton on:click={async () => await openSend()} {compact} />
 
 {#if $modalSend && $modalStore?.data === modalId}
-	<TokenContext>
+	<TokenContext {token}>
 		<SendModal on:nnsClose />
 	</TokenContext>
 {/if}

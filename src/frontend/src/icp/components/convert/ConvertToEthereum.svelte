@@ -13,6 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import TokenContext from '$lib/components/tokens/TokenContext.svelte';
+	import { token } from '$lib/stores/token.store';
 </script>
 
 <ConvertETH
@@ -28,7 +29,7 @@
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenEth}
-	<TokenContext>
+	<TokenContext token={$token}>
 		<IcSendModal networkId={$ckEthereumTwinTokenNetworkId} destination={$address ?? ''} />
 	</TokenContext>
 {/if}
