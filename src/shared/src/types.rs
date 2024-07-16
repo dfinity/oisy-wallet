@@ -1,9 +1,14 @@
 use candid::{CandidType, Deserialize, Principal};
 use std::fmt::Debug;
 
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
+pub enum CredentialType {
+    ProofOfUniqueness,
+}
+
 #[derive(CandidType, Deserialize)]
 pub struct SupportedCredential {
-    pub credential_type: String,
+    pub credential_type: CredentialType,
     pub ii_origin: String,
     pub ii_canister_id: String,
     pub issuer_origin: String,
@@ -115,15 +120,10 @@ pub mod custom_token {
 
 /// Types specifics to the user profile.
 pub mod user_profile {
+    use super::CredentialType;
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
-    use serde::Serialize;
     use std::collections::BTreeMap;
-
-    #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
-    pub enum CredentialType {
-        ProofOfUniqueness,
-    }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserCredential {
