@@ -9,6 +9,10 @@ export interface TokenStore extends Readable<TokenData> {
 	reset: () => void;
 }
 
+export interface TokenContext {
+	store: TokenStore;
+}
+
 export const initTokenStore = (): TokenStore => {
 	const INITIAL: TokenData = undefined;
 
@@ -35,5 +39,4 @@ export const token = initTokenStore();
 
 export const TOKEN_CONTEXT_KEY = Symbol('token');
 
-export const getTokenStoreFromContext = (): TokenStore =>
-	getContext<{ store: TokenStore }>(TOKEN_CONTEXT_KEY).store;
+export const getContextToken = (): TokenContext => getContext<TokenContext>(TOKEN_CONTEXT_KEY);
