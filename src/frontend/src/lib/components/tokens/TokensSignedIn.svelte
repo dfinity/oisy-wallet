@@ -15,6 +15,7 @@
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
+	import { flip } from 'svelte/animate';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -24,12 +25,25 @@
 		({ id: tokenId }) =>
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
+
+	let animating = false;
+
+	const handleAnimationStart = () => (animating = true);
+
+	const handleAnimationEnd = () => (animating = false);
 </script>
 
 <TokensSkeletons>
 	{#each tokens as token (token.id)}
-		<Listener {token}>
-			<div in:fade>
+		<div
+			in:fade|local
+			out:fade|local
+			animate:flip={{ duration: 1000 }}
+			on:animationstart={handleAnimationStart}
+			on:animationend={handleAnimationEnd}
+			class:disable-pointer-events={animating}
+		>
+			<Listener {token}>
 				<TokenCard {token}>
 					<output class="break-all" slot="description">
 						{formatToken({
@@ -45,8 +59,8 @@
 
 					<TokenReceiveSend {token} slot="actions" />
 				</TokenCard>
-			</div>
-		</Listener>
+			</Listener>
+		</div>
 	{/each}
 
 	{#if tokens.length === 0}
@@ -57,3 +71,9 @@
 		<ManageTokensModal />
 	{/if}
 </TokensSkeletons>
+
+<style lang="scss">
+	.disable-pointer-events {
+		pointer-events: none;
+	}
+</style>
