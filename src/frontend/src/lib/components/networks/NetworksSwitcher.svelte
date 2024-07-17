@@ -33,7 +33,7 @@
 	>{$selectedNetwork?.name ?? $i18n.networks.chain_fusion} <IconChevronDown /></ButtonSwitcher
 >
 
-<Popover bind:visible anchor={button} direction="ltr">
+<Popover bind:visible anchor={button}>
 	<ul class="flex flex-col gap-4 list-none">
 		<li>
 			<NetworkButton
