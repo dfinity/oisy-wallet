@@ -427,6 +427,7 @@
 			"reject": "Reject",
 			"connect": "Connect",
 			"connecting": "Connecting...",
+			"disconnect": "Disconnect",
 			"scan_qr": "Scan QR code",
 			"or_use_uri": "or use WalletConnect uri",
 			"proposer": "Proposer",
