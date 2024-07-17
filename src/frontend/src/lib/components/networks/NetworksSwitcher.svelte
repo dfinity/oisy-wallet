@@ -34,7 +34,7 @@
 >
 
 <Popover bind:visible anchor={button}>
-	<ul class="flex flex-col gap-4 list-none">
+	<ul class="flex flex-col gap-4 list-none font-normal">
 		<li>
 			<NetworkButton
 				id={undefined}
@@ -58,7 +58,7 @@
 
 	{#if testnets}
 		<ul
-			class="flex flex-col gap-4 list-none mb-2"
+			class="flex flex-col gap-4 list-none mb-2 font-normal"
 			transition:slide={{ easing: quintOut, axis: 'y' }}
 		>
 			{#each $networksTestnets as network}
@@ -71,7 +71,7 @@
 
 	<hr class="bg-dark-blue opacity-10 my-4 w-10/12" style="border: 0.05rem solid" />
 
-	<ul class="flex flex-col gap-4 list-none">
+	<ul class="flex flex-col gap-4 list-none font-normal">
 		<li class="flex justify-between items-center">
 			<div class="flex gap-2 items-center">
 				<IconMorePlain />
