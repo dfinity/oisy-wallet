@@ -36,12 +36,12 @@
 <TokensSkeletons>
 	{#each tokens as token (token.id)}
 		<div
-			in:fade|local
-			out:fade|local
-			animate:flip={{ duration: 1000 }}
+			in:fade
+			out:fade
+			animate:flip={{ duration: 500 }}
 			on:animationstart={handleAnimationStart}
 			on:animationend={handleAnimationEnd}
-			class:disable-pointer-events={animating}
+			class:pointer-events-none={animating}
 		>
 			<Listener {token}>
 				<TokenCard {token}>
@@ -71,9 +71,3 @@
 		<ManageTokensModal />
 	{/if}
 </TokensSkeletons>
-
-<style lang="scss">
-	.disable-pointer-events {
-		pointer-events: none;
-	}
-</style>
