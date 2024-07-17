@@ -45,9 +45,9 @@ type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
 type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
 type CustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<CustomToken>>, VMem>;
-/// Map of (updated_timestamp, user_principal) to UserProfile
+/// Map of (`updated_timestamp`, `user_principal`) to `UserProfile`
 type UserProfileMap = StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>;
-/// Map of user_principal to updated_timestamp (in UserProfile)
+/// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
 type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, u64, VMem>;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);

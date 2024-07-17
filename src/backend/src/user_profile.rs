@@ -17,6 +17,6 @@ pub fn get_or_create(
         let default_profile = StoredUserProfile::default(now);
         user_profile_updated_map.insert(principal, now);
         user_profile_map.insert((now, principal), Candid(default_profile.clone()));
-        return Candid(default_profile);
+        Candid(default_profile)
     }
 }

@@ -50,6 +50,7 @@ impl TokenVersion for CustomToken {
 }
 
 impl StoredUserProfile {
+    #[must_use]
     pub fn default(now: u64) -> StoredUserProfile {
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
@@ -62,6 +63,7 @@ impl StoredUserProfile {
 }
 
 impl UserProfile {
+    #[must_use]
     pub fn from_stored(user: StoredUserProfile) -> UserProfile {
         let StoredUserProfile {
             created_timestamp,

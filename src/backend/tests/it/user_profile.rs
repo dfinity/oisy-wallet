@@ -29,8 +29,7 @@ fn test_get_or_create_user_profile_creates_default_profile() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let response =
-        update_call::<UserProfile>(&pic_setup, caller, "get_or_create_user_profile", ());
+    let response = update_call::<UserProfile>(&pic_setup, caller, "get_or_create_user_profile", ());
 
     assert!(response.is_ok());
 
