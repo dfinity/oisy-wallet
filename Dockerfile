@@ -16,7 +16,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     jq \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_amd64 | install -m 755 /dev/stdin /bin/yq && yq --version
+RUN curl --proto '=https' --tlsv1.2 -L https://github.com/mikefarah/yq/releases/download/v4.33.3/yq_linux_amd64 | install -m 755 /dev/stdin /bin/yq && yq --version | grep yq
 
 # Install Rust and Cargo in /opt
 ENV RUSTUP_HOME=/opt/rustup \
