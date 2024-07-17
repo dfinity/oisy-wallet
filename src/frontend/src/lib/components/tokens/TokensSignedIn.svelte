@@ -24,32 +24,66 @@
 		({ id: tokenId }) =>
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
+
+	let stopRefreshing = false;
+
+	const stopRefreshingTokens = () => {
+		stopRefreshing = true;
+	};
+
+	const startRefreshingTokens = () => {
+		stopRefreshing = false;
+	};
+
+	let tokensStatic: Token[] = [];
+	$: tokensStatic = stopRefreshing ? updateTokensStatic(tokensStatic, tokens) : tokens;
+
+	const updateTokensStatic = (staticTokens: Token[], dynamicTokens: Token[]): Token[] => {
+		const tokenMap = new Map(
+			dynamicTokens.map((token) => [
+				`${token.id.description}-${token.network.id.description}`,
+				token
+			])
+		);
+		return staticTokens.map(
+			(token) => tokenMap.get(`${token.id.description}-${token.network.id.description}`) ?? token
+		);
+	};
 </script>
 
 <TokensSkeletons>
-	{#each tokens as token (token.id)}
-		<Listener {token}>
-			<div in:fade>
-				<TokenCard {token}>
-					<output class="break-all" slot="description">
-						{formatToken({
-							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
-							unitName: token.decimals
-						})}
-						{token.symbol}
-					</output>
+	<div
+		on:pointerenter={stopRefreshingTokens}
+		on:pointerover={stopRefreshingTokens}
+		on:pointerleave={startRefreshingTokens}
+		on:focus={stopRefreshingTokens}
+		on:focusin={stopRefreshingTokens}
+		on:focusout={startRefreshingTokens}
+	>
+		{#each tokensStatic as token (token.id)}
+			<Listener {token}>
+				<div in:fade>
+					<TokenCard {token}>
+						<output class="break-all" slot="description">
+							{formatToken({
+								value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
+								unitName: token.decimals
+							})}
+							{token.symbol}
+						</output>
 
-					<CardAmount slot="exchange">
-						<ExchangeTokenValue {token} />
-					</CardAmount>
+						<CardAmount slot="exchange">
+							<ExchangeTokenValue {token} />
+						</CardAmount>
 
-					<TokenReceiveSend {token} slot="actions" />
-				</TokenCard>
-			</div>
-		</Listener>
-	{/each}
+						<TokenReceiveSend {token} slot="actions" />
+					</TokenCard>
+				</div>
+			</Listener>
+		{/each}
+	</div>
 
-	{#if tokens.length === 0}
+	{#if tokensStatic.length === 0}
 		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
 	{/if}
 
