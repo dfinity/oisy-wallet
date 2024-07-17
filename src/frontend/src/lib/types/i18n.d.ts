@@ -271,7 +271,6 @@ interface I18nConvert {
 
 interface I18nTokens {
 	text: {
-		title: string;
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;

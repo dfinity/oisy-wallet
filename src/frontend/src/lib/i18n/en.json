@@ -292,7 +292,6 @@
 	},
 	"tokens": {
 		"text": {
-			"title": "Tokens",
 			"contract_address": "Contract address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
