@@ -2,9 +2,9 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import { enabledNetworkTokensWithFinancials } from '$lib/derived/network-tokens.derived';
+	import { enabledNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { TokenWithFinancials } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
@@ -19,8 +19,8 @@
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
 
-	let tokens: TokenWithFinancials[];
-	$: tokens = $enabledNetworkTokensWithFinancials.filter(
+	let tokens: TokenUi[];
+	$: tokens = $enabledNetworkTokensUi.filter(
 		({ id: tokenId }) =>
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
