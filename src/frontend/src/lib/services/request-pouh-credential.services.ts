@@ -1,10 +1,11 @@
+import type { UserCredential, UserProfile } from '$declarations/backend/backend.did';
 import {
 	INTERNET_IDENTITY_ORIGIN,
 	POUH_ISSUER_CANISTER_ID,
 	POUH_ISSUER_ORIGIN
 } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import { userProfileStore, type UserProfile } from '$lib/stores/settings.store';
+import { userProfileStore } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -23,17 +24,16 @@ const handleSuccess = async (
 	const { auth: authI18n } = get(i18n);
 	if ('Ok' in response) {
 		// TODO: GIX-2646 Add credential to backend and load user profile
-		const fakeTemporaryCredentialSummary = {
-			credential_type: POUH_CREDENTIAL_TYPE,
-			verified_date_timestamp: BigInt(Date.now()),
-			expire_date_timestamp: BigInt(Date.now() + 1000 * 60 * 60 * 24 * 365)
+		const fakeTemporaryCredentialSummary: UserCredential = {
+			credential_type: { [POUH_CREDENTIAL_TYPE]: null },
+			verified_date_timestamp: [BigInt(Date.now())],
+			expire_date_timestamp: [BigInt(Date.now() + 1000 * 60 * 60 * 24 * 365)]
 		};
 		const fakeUserProfile: UserProfile = {
-			credentials: {
-				[POUH_CREDENTIAL_TYPE]: fakeTemporaryCredentialSummary
-			},
+			credentials: [fakeTemporaryCredentialSummary],
 			created_timestamp: BigInt(Date.now()),
-			updated_timestamp: BigInt(Date.now())
+			updated_timestamp: BigInt(Date.now()),
+			version: [0n]
 		};
 		userProfileStore.set({ key: 'user-profile', value: fakeUserProfile });
 		return { success: true };
