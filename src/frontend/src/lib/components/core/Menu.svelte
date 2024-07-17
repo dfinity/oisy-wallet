@@ -37,7 +37,7 @@
 	on:click={() => (visible = true)}
 	aria-label={$i18n.navigation.alt.menu}
 >
-	<IconWallet /><span><IconChevronDown /></span>
+	<IconWallet /><span class="text-black"><IconChevronDown /></span>
 </button>
 
 <Popover bind:visible anchor={button} direction="rtl">
