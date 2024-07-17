@@ -91,6 +91,8 @@ fn init_arg() -> Arg {
     Arg::Init(InitArg {
         ecdsa_key_name: format!("master_ecdsa_public_key_{}", SUBNET_ID).to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
+        ic_root_key_der: None,
+        supported_credentials: None,
     })
 }
 
