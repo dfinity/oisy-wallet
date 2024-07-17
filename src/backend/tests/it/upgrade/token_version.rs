@@ -46,7 +46,7 @@ fn test_upgrade_user_token() {
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade_with_wasm(&pic_setup, &BACKEND_V0_0_19_WASM_PATH.to_string())
+    upgrade_with_wasm(&pic_setup, &BACKEND_V0_0_19_WASM_PATH.to_string(), None)
         .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Get the list of token and check that it still contains the one we added before upgrade
@@ -73,7 +73,7 @@ fn test_upgrade_allowed_caller_eth_address_of() {
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade_latest_wasm(&pic_setup)
+    upgrade_latest_wasm(&pic_setup, None)
         .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Caller is still allowed to call eth_address_of
@@ -102,7 +102,7 @@ fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgr
     pic_setup.0.tick();
 
     // Upgrade canister with new wasm
-    upgrade_with_wasm(&pic_setup, &BACKEND_V0_0_19_WASM_PATH.to_string())
+    upgrade_with_wasm(&pic_setup, &BACKEND_V0_0_19_WASM_PATH.to_string(), None)
         .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Add a user token
@@ -150,7 +150,7 @@ fn test_update_user_token_after_upgrade() {
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade_latest_wasm(&pic_setup)
+    upgrade_latest_wasm(&pic_setup, None)
         .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Get the list of token and check that it still contains the one we added before upgrade

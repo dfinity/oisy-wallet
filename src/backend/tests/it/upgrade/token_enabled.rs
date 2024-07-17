@@ -44,7 +44,7 @@ fn test_upgrade_user_token() {
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade_latest_wasm(&pic_setup)
+    upgrade_latest_wasm(&pic_setup, None)
         .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Get the list of token and check that it still contains the one we added before upgrade
@@ -77,7 +77,7 @@ fn test_update_user_token_after_upgrade() {
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade_latest_wasm(&pic_setup)
+    upgrade_latest_wasm(&pic_setup, None)
         .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Get the list of token and check that it still contains the one we added before upgrade
