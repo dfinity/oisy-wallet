@@ -4,7 +4,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { goto } from '$app/navigation';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
-	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 	import {
 		networkEthereum,
@@ -37,7 +37,7 @@
 	on:click={() => (visible = true)}
 	aria-label={$i18n.navigation.alt.menu}
 >
-	<IconWallet /><span class="text-black"><IconChevronDown /></span>
+	<IconUser /><span class="text-black"><IconChevronDown /></span>
 </button>
 
 <Popover bind:visible anchor={button} direction="rtl">
