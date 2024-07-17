@@ -52,6 +52,18 @@
 
 		<Hr />
 
+		<ButtonMenu ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
+			<IconSettings />
+			{$i18n.settings.text.title}
+		</ButtonMenu>
+
+		<ExternalLink
+			href="https://identity.ic0.app"
+			ariaLabel={$i18n.navigation.alt.manage_internet_identity}
+		>
+			{$i18n.navigation.text.manage_internet_identity}
+		</ExternalLink>
+
 		<a
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
@@ -64,18 +76,6 @@
 		</a>
 
 		<Hr />
-
-		<ExternalLink
-			href="https://identity.ic0.app"
-			ariaLabel={$i18n.navigation.alt.manage_internet_identity}
-		>
-			{$i18n.navigation.text.manage_internet_identity}
-		</ExternalLink>
-
-		<ButtonMenu ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
-			<IconSettings />
-			{$i18n.settings.text.title}
-		</ButtonMenu>
 
 		<SignOut on:icLogoutTriggered={() => (visible = false)} />
 	</div>
