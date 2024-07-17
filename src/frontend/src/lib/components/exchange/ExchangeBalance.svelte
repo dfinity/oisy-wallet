@@ -1,19 +1,11 @@
 <script lang="ts">
 	import { formatUSD } from '$lib/utils/format.utils';
-	import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
-	import { balancesStore } from '$lib/stores/balances.store';
-	import { usdValue } from '$lib/utils/exchange.utils';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { exchangeInitialized } from '$lib/derived/exchange.derived';
+	import { enabledNetworkTokensWithFinancials } from '$lib/derived/network-tokens.derived';
 
 	let totalUsd: number;
-	$: totalUsd = $enabledNetworkTokens.reduce(
-		(acc, token) =>
-			acc +
-			usdValue({
-				token,
-				balances: $balancesStore,
-				exchanges: $exchanges
-			}),
+	$: totalUsd = $enabledNetworkTokensWithFinancials.reduce(
+		(acc, token) => acc + (token.usdValue ?? 0),
 		0
 	);
 </script>
