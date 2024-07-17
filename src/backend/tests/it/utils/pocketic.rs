@@ -46,7 +46,10 @@ pub fn setup_with_custom_wasm(
     (pic, canister_id)
 }
 
-pub fn upgrade_latest_wasm(pocket_ic: &(PocketIc, Principal), encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
+pub fn upgrade_latest_wasm(
+    pocket_ic: &(PocketIc, Principal),
+    encoded_arg: Option<Vec<u8>>,
+) -> Result<(), String> {
     let backend_wasm_path =
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
