@@ -53,7 +53,7 @@
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
-	import { token } from '$lib/stores/token.store';
+	import { getContextToken } from '$lib/stores/token.store';
 
 	/**
 	 * Props
@@ -66,6 +66,8 @@
 	/**
 	 * Send
 	 */
+
+	const { store: token } = getContextToken();
 
 	let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;
 
