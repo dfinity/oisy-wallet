@@ -12,7 +12,7 @@
 </script>
 
 <button
-	class="icon bg-white border-2 border-dark-blue rounded-md"
+	class="icon"
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.navigation.alt.menu}
