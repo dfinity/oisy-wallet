@@ -64,10 +64,6 @@
 			{$i18n.navigation.text.manage_internet_identity}
 		</ExternalLink>
 
-		<SignOut on:icLogoutTriggered={() => (visible = false)} />
-
-		<Hr />
-
 		<a
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
@@ -78,5 +74,9 @@
 			<IconGitHub />
 			{$i18n.navigation.text.source_code}
 		</a>
+
+		<Hr />
+
+		<SignOut on:icLogoutTriggered={() => (visible = false)} />
 	</div>
 </Popover>
