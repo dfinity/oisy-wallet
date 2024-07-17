@@ -146,6 +146,7 @@ pub mod user_profile {
         pub credentials: BTreeMap<CredentialType, UserCredential>,
         pub created_timestamp: u64,
         pub updated_timestamp: u64,
+        pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

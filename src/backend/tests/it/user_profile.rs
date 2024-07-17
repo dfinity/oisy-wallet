@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use crate::utils::{
     mock::CALLER,
     pocketic::{query_call, setup, update_call},
@@ -22,15 +24,38 @@ fn test_add_user_credential() {
 }
 
 #[test]
-fn test_get_or_create_user_profile() {
+fn test_get_or_create_user_profile_creates_default_profile() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let before_set =
+    let response =
         update_call::<UserProfile>(&pic_setup, caller, "get_or_create_user_profile", ());
 
-    assert!(before_set.is_ok());
+    assert!(response.is_ok());
+
+    let user_profile = response.unwrap();
+
+    assert_eq!(user_profile.credentials.len(), 0);
+    assert!(user_profile.version.is_none());
+}
+
+#[test]
+fn test_get_or_create_user_profile_returns_created_profile() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let first_response =
+        update_call::<UserProfile>(&pic_setup, caller, "get_or_create_user_profile", ());
+
+    let (pic, principal) = pic_setup;
+    pic.advance_time(Duration::new(1, 0));
+
+    let second_response =
+        update_call::<UserProfile>(&(pic, principal), caller, "get_or_create_user_profile", ());
+
+    assert_eq!(first_response.unwrap(), second_response.unwrap());
 }
 
 #[test]
