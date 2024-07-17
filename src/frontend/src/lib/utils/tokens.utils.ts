@@ -46,6 +46,21 @@ export const sortTokens = ({
 			a.network.name.localeCompare(b.network.name)
 	);
 
+/**
+ * Pins tokens by USD value, balance and name.
+ *
+ * The function pins on top of the list the tokens that have a balance and/or an exchange rate.
+ * It sorts first the ones that have an exchange rate and balance non-zero, according to their usd value (descending).
+ * Then, it sorts the ones that have only a balance non-zero and no exchange rate, according to their balance (descending).
+ * Finally, it leaves the rest of the tokens untouched.
+ * In case of a tie, it sorts by token name and network name.
+ *
+ * @param $tokens - The list of tokens to sort.
+ * @param $exchanges - The exchange rates for the tokens.
+ * @param $balancesStore - The balances for the tokens.
+ * @returns The sorted list of tokens.
+ *
+ */
 export const pinTokensWithBalanceAtTop = ({
 	$tokens,
 	$exchanges,
@@ -58,6 +73,7 @@ export const pinTokensWithBalanceAtTop = ({
 	const tokensWithBalanceToPin: TokenToPin[] = $tokens
 		.map((token) => ({
 			...token,
+			// If the token has no exchange rate, we do not sort it by usd value.
 			usdValue: nonNullish($exchanges?.[token.id])
 				? usdValue({
 						token,
