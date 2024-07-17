@@ -2,6 +2,9 @@ import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
+export interface AddUserCredentialRequest {
+	credential_jwt: string;
+}
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export interface CanisterStatusResultV2 {
 	controller: Principal;
@@ -15,6 +18,7 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
+export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
 	version: [] | [bigint];
@@ -26,6 +30,14 @@ export interface DefiniteCanisterSettingsArgs {
 	controllers: Array<Principal>;
 	memory_allocation: bigint;
 	compute_allocation: bigint;
+}
+export interface GetUsersRequest {
+	updated_after_timestamp: [] | [bigint];
+	matches_max_length: [] | [bigint];
+}
+export interface GetUsersResponse {
+	users: Array<OisyUser>;
+	matches_max_length: bigint;
 }
 export interface HttpRequest {
 	url: string;
@@ -45,6 +57,13 @@ export interface IcrcToken {
 export interface InitArg {
 	ecdsa_key_name: string;
 	allowed_callers: Array<Principal>;
+	supported_credentials: [] | [Array<SupportedCredential>];
+	ic_root_key_der: [] | [Uint8Array | number[]];
+}
+export interface OisyUser {
+	principal: Principal;
+	pouh_verified: boolean;
+	updated_timestamp: bigint;
 }
 export interface SignRequest {
 	to: string;
@@ -56,7 +75,25 @@ export interface SignRequest {
 	chain_id: bigint;
 	nonce: bigint;
 }
+export interface SupportedCredential {
+	ii_canister_id: string;
+	issuer_origin: string;
+	issuer_canister_id: string;
+	ii_origin: string;
+	credential_type: CredentialType;
+}
 export type Token = { Icrc: IcrcToken };
+export interface UserCredential {
+	verified_date_timestamp: [] | [bigint];
+	expire_date_timestamp: [] | [bigint];
+	credential_type: CredentialType;
+}
+export interface UserProfile {
+	credentials: Array<UserCredential>;
+	version: [] | [bigint];
+	created_timestamp: bigint;
+	updated_timestamp: bigint;
+}
 export interface UserToken {
 	decimals: [] | [number];
 	version: [] | [bigint];
@@ -70,9 +107,12 @@ export interface UserTokenId {
 	contract_address: string;
 }
 export interface _SERVICE {
+	add_user_credential: ActorMethod<[AddUserCredentialRequest], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
+	get_or_create_user_profile: ActorMethod<[], UserProfile>;
+	get_users: ActorMethod<[GetUsersRequest], GetUsersResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
