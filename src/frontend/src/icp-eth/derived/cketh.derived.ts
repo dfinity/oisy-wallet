@@ -13,7 +13,7 @@ import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 import type { IcCkToken } from '$icp/types/ic';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
+import { tokenStandard } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -48,8 +48,9 @@ export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
  * On ckETH, we need to know if the target for conversion is Ethereum mainnet or Sepolia.
  */
 export const ckEthereumTwinToken: Readable<Token> = derived(
-	[tokenWithFallback],
-	([$tokenWithFallback]) => ($tokenWithFallback as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
+	[tokenWithFallbackAsIcToken],
+	([$tokenWithFallbackAsIcToken]) =>
+		($tokenWithFallbackAsIcToken as IcCkToken)?.twinToken ?? ETHEREUM_TOKEN
 );
 
 export const ckEthereumTwinTokenId: Readable<TokenId> = derived(

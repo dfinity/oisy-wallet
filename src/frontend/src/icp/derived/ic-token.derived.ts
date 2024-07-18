@@ -6,13 +6,17 @@ import {
 } from '$icp/utils/ic-send.utils';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { token } from '$lib/stores/token.store';
+import type { Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
-export const tokenAsIcToken: Readable<IcToken> = derived([token], ([$token]) => $token as IcToken);
+export const tokenAsIcToken: Readable<IcToken> = derived(
+	[token],
+	([$token]) => $token as Token as IcToken
+);
 
 export const tokenWithFallbackAsIcToken: Readable<IcToken> = derived(
 	[tokenWithFallback],
-	([$token]) => $token as IcToken
+	([$token]) => $token as Token as IcToken
 );
 
 export const tokenCkBtcLedger: Readable<boolean> = derived(

@@ -31,7 +31,6 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
 	import { token } from '$lib/stores/token.store';
-	import type { Token } from '$lib/types/token';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;

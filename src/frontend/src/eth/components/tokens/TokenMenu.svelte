@@ -10,11 +10,12 @@
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { fade } from 'svelte/transition';
 	import { token } from '$lib/stores/token.store';
+	import type { Token } from '$lib/types/token';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl =
 		$tokenStandard === 'erc20' && nonNullish($token)
-			? `${$explorerUrlStore}/token/${($token as Erc20Token).address}`
+			? `${$explorerUrlStore}/token/${($token as Token as Erc20Token).address}`
 			: notEmptyString($address)
 				? `${$explorerUrlStore}/address/${$address}`
 				: undefined;
