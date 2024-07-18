@@ -53,6 +53,7 @@ type InitArg = record {
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
   lock_signing : opt bool;
+  hide_user_data : opt bool;
 };
 type OisyUser = record {
   "principal" : principal;
