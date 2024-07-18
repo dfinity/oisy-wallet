@@ -1,10 +1,21 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
+	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
+	const SupportedCredential = IDL.Record({
+		ii_canister_id: IDL.Text,
+		issuer_origin: IDL.Text,
+		issuer_canister_id: IDL.Text,
+		ii_origin: IDL.Text,
+		credential_type: CredentialType
+	});
 	const InitArg = IDL.Record({
 		ecdsa_key_name: IDL.Text,
-		allowed_callers: IDL.Vec(IDL.Principal)
+		allowed_callers: IDL.Vec(IDL.Principal),
+		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
+	const AddUserCredentialRequest = IDL.Record({ credential_jwt: IDL.Text });
 	const CanisterStatusType = IDL.Variant({
 		stopped: IDL.Null,
 		stopping: IDL.Null,
@@ -27,6 +38,30 @@ export const idlFactory = ({ IDL }) => {
 		settings: DefiniteCanisterSettingsArgs,
 		idle_cycles_burned_per_day: IDL.Nat,
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
+	const UserCredential = IDL.Record({
+		verified_date_timestamp: IDL.Opt(IDL.Nat64),
+		expire_date_timestamp: IDL.Opt(IDL.Nat64),
+		credential_type: CredentialType
+	});
+	const UserProfile = IDL.Record({
+		credentials: IDL.Vec(UserCredential),
+		version: IDL.Opt(IDL.Nat64),
+		created_timestamp: IDL.Nat64,
+		updated_timestamp: IDL.Nat64
+	});
+	const GetUsersRequest = IDL.Record({
+		updated_after_timestamp: IDL.Opt(IDL.Nat64),
+		matches_max_length: IDL.Opt(IDL.Nat64)
+	});
+	const OisyUser = IDL.Record({
+		principal: IDL.Principal,
+		pouh_verified: IDL.Bool,
+		updated_timestamp: IDL.Nat64
+	});
+	const GetUsersResponse = IDL.Record({
+		users: IDL.Vec(OisyUser),
+		matches_max_length: IDL.Nat64
 	});
 	const HttpRequest = IDL.Record({
 		url: IDL.Text,
@@ -72,9 +107,12 @@ export const idlFactory = ({ IDL }) => {
 		nonce: IDL.Nat
 	});
 	return IDL.Service({
+		add_user_credential: IDL.Func([AddUserCredentialRequest], [], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
+		get_or_create_user_profile: IDL.Func([], [UserProfile], ['query']),
+		get_users: IDL.Func([GetUsersRequest], [GetUsersResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
@@ -90,9 +128,19 @@ export const idlFactory = ({ IDL }) => {
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
+	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
+	const SupportedCredential = IDL.Record({
+		ii_canister_id: IDL.Text,
+		issuer_origin: IDL.Text,
+		issuer_canister_id: IDL.Text,
+		ii_origin: IDL.Text,
+		credential_type: CredentialType
+	});
 	const InitArg = IDL.Record({
 		ecdsa_key_name: IDL.Text,
-		allowed_callers: IDL.Vec(IDL.Principal)
+		allowed_callers: IDL.Vec(IDL.Principal),
+		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	return [Arg];

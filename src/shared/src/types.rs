@@ -1,10 +1,27 @@
 use candid::{CandidType, Deserialize, Principal};
 use std::fmt::Debug;
 
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
+pub enum CredentialType {
+    ProofOfUniqueness,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct SupportedCredential {
+    pub credential_type: CredentialType,
+    pub ii_origin: String,
+    pub ii_canister_id: String,
+    pub issuer_origin: String,
+    pub issuer_canister_id: String,
+}
+
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
     pub ecdsa_key_name: String,
     pub allowed_callers: Vec<Principal>,
+    pub supported_credentials: Option<Vec<SupportedCredential>>,
+    /// Root of trust for checking canister signatures.
+    pub ic_root_key_der: Option<Vec<u8>>,
 }
 
 #[derive(CandidType, Deserialize)]
@@ -103,11 +120,10 @@ pub mod custom_token {
 
 /// Types specifics to the user profile.
 pub mod user_profile {
+    use super::CredentialType;
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use std::collections::BTreeMap;
-
-    pub type CredentialType = String;
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserCredential {

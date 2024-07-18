@@ -271,7 +271,6 @@ interface I18nConvert {
 
 interface I18nTokens {
 	text: {
-		title: string;
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
@@ -379,6 +378,7 @@ interface I18nWallet_connect {
 		reject: string;
 		connect: string;
 		connecting: string;
+		disconnect: string;
 		scan_qr: string;
 		or_use_uri: string;
 		proposer: string;
