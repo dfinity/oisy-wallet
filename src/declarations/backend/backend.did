@@ -51,7 +51,11 @@ type InitArg = record {
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
 };
-type OisyUser = record { "principal" : principal; pouh_verified : bool };
+type OisyUser = record {
+  "principal" : principal;
+  pouh_verified : bool;
+  updated_timestamp : nat64;
+};
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -67,7 +71,7 @@ type SupportedCredential = record {
   issuer_origin : text;
   issuer_canister_id : text;
   ii_origin : text;
-  credential_type : text;
+  credential_type : CredentialType;
 };
 type Token = variant { Icrc : IcrcToken };
 type UserCredential = record {

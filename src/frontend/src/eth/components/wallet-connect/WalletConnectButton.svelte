@@ -1,14 +1,14 @@
 <script lang="ts">
-	import IconWalletConnectWhite from '$lib/components/icons/IconWalletConnectWhite.svelte';
+	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 </script>
 
 <button
 	on:click
-	class="wallet-connect icon desktop-wide"
+	class="wallet-connect icon desktop-wide text-white"
 	disabled={$addressNotLoaded}
 	class:opacity-0={$addressNotLoaded}
 >
-	<IconWalletConnectWhite />
-	<span class="text-white font-bold"><slot /></span>
+	<IconWalletConnect />
+	<span class="font-bold"><slot /></span>
 </button>
