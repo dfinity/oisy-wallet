@@ -22,9 +22,9 @@ pub fn caller_is_allowed() -> Result<(), String> {
 pub fn may_write_user_data() -> Result<(), String> {
     caller_is_not_anonymous()?;
     if read_config(|s| s.api.unwrap_or_default().user_data.writable()) {
-        Err("User data is in read only mode due to a migration.".to_string())
-    } else {
         Ok(())
+    } else {
+        Err("User data is in read only mode due to a migration.".to_string())
     }
 }
 
@@ -32,9 +32,9 @@ pub fn may_write_user_data() -> Result<(), String> {
 pub fn may_read_user_data() -> Result<(), String> {
     caller_is_not_anonymous()?;
     if read_config(|s| s.api.unwrap_or_default().user_data.readable()) {
-        Err("User data cannot be read at this time due to a migration.".to_string())
-    } else {
         Ok(())
+    } else {
+        Err("User data cannot be read at this time due to a migration.".to_string())
     }
 }
 
@@ -42,9 +42,9 @@ pub fn may_read_user_data() -> Result<(), String> {
 pub fn may_read_threshold_keys() -> Result<(), String> {
     caller_is_not_anonymous()?;
     if read_config(|s| s.api.unwrap_or_default().threshold_key.readable()) {
-        Err("Reading threshold keys is disabled.".to_string())
-    } else {
         Ok(())
+    } else {
+        Err("Reading threshold keys is disabled.".to_string())
     }
 }
 
@@ -52,8 +52,8 @@ pub fn may_read_threshold_keys() -> Result<(), String> {
 pub fn may_threshold_sign() -> Result<(), String> {
     caller_is_not_anonymous()?;
     if read_config(|s| s.api.unwrap_or_default().threshold_key.writable()) {
-        Err("Threshold signing is disabled.".to_string())
-    } else {
         Ok(())
+    } else {
+        Err("Threshold signing is disabled.".to_string())
     }
 }
