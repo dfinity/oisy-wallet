@@ -14,6 +14,20 @@
 			"source": ["build/"],
 			"type": "assets"
 		},
+		"new_backend": {
+			"candid": "src/backend/backend.did",
+			"package": "backend",
+			"type": "rust",
+			"optimize": "cycles"
+		},
+		"orbit": {
+			"remote": {
+				"id": {
+					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
+					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai"
+				}
+			}
+		},
 		"internet_identity": {
 			"type": "custom",
 			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2024-04-05/internet_identity.did",
