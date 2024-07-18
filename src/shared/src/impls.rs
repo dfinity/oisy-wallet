@@ -71,9 +71,9 @@ impl From<&StoredUserProfile> for UserProfile {
             credentials,
         } = user;
         UserProfile {
-            created_timestamp: created_timestamp.clone(),
-            updated_timestamp: updated_timestamp.clone(),
-            version: version.clone(),
+            created_timestamp: *created_timestamp,
+            updated_timestamp: *updated_timestamp,
+            version: *version,
             credentials: credentials.clone().into_values().collect(),
         }
     }
