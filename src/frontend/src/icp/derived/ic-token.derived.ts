@@ -5,16 +5,27 @@ import {
 	isTokenCkEthLedger
 } from '$icp/utils/ic-send.utils';
 import { tokenWithFallback } from '$lib/derived/token.derived';
+import { token } from '$lib/stores/token.store';
 import { derived, type Readable } from 'svelte/store';
 
-export const tokenCkBtcLedger: Readable<boolean> = derived([tokenWithFallback], ([$token]) =>
-	isTokenCkBtcLedger($token as IcToken)
+export const tokenAsIcToken: Readable<IcToken> = derived([token], ([$token]) => $token as IcToken);
+
+export const tokenWithFallbackAsIcToken: Readable<IcToken> = derived(
+	[tokenWithFallback],
+	([$token]) => $token as IcToken
 );
 
-export const tokenCkEthLedger: Readable<boolean> = derived([tokenWithFallback], ([$token]) =>
-	isTokenCkEthLedger($token as IcToken)
+export const tokenCkBtcLedger: Readable<boolean> = derived(
+	[tokenWithFallbackAsIcToken],
+	([$token]) => isTokenCkBtcLedger($token)
 );
 
-export const tokenCkErc20Ledger: Readable<boolean> = derived([tokenWithFallback], ([$token]) =>
-	isTokenCkErc20Ledger($token as IcToken)
+export const tokenCkEthLedger: Readable<boolean> = derived(
+	[tokenWithFallbackAsIcToken],
+	([$token]) => isTokenCkEthLedger($token)
+);
+
+export const tokenCkErc20Ledger: Readable<boolean> = derived(
+	[tokenWithFallbackAsIcToken],
+	([$token]) => isTokenCkErc20Ledger($token)
 );
