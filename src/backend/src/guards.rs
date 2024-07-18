@@ -38,6 +38,16 @@ pub fn may_read_user_data() -> Result<(), String> {
     }
 }
 
+/// Getting threshold public keys is disabled.
+pub fn may_read_threshold_keys() -> Result<(), String> {
+    caller_is_not_anonymous()?;
+    if read_config(|s| s.lock_user_data.unwrap_or_default()) {
+        Err("Reading threshold keys is disabled.".to_string())
+    } else {
+        Ok(())
+    }
+}
+
 /// Threshold signatures are disabled in the new backend canister.
 pub fn may_threshold_sign() -> Result<(), String> {
     caller_is_not_anonymous()?;

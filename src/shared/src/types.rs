@@ -25,15 +25,15 @@ pub struct InitArg {
     /// Root of trust for checking canister signatures.
     pub ic_root_key_der: Option<Vec<u8>>,
     /// Disable signing.
-    /// 
+    ///
     /// Applies to the new backend canister.
     pub lock_signing: Option<bool>,
     /// Disable writing user data.
-    /// 
+    ///
     /// Applies while migrating user data to another canister.
     pub lock_user_data: Option<bool>,
     /// Disable reading user data.
-    /// 
+    ///
     /// Applies after migrating user data to another canister and updating the frontend to get user data from the new caister.
     pub hide_user_data: Option<bool>,
 }

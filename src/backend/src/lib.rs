@@ -1,6 +1,7 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{
-    caller_is_allowed, may_read_user_data, may_threshold_sign, may_write_user_data,
+    caller_is_allowed, may_read_threshold_keys, may_read_user_data, may_threshold_sign,
+    may_write_user_data,
 };
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
@@ -301,13 +302,13 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
 }
 
 /// Returns the Ethereum address of the caller.
-#[update(guard = "may_threshold_sign")]
+#[update(guard = "may_read_threshold_keys")]
 async fn caller_eth_address() -> String {
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
-/// Returns the Ethereum address of the specified .
-#[update(guard = "may_threshold_sign")]
+/// Returns the Ethereum address of the specified user.
+#[update(guard = "may_read_threshold_keys")]
 async fn eth_address_of(p: Principal) -> String {
     if p == Principal::anonymous() {
         ic_cdk::trap("Anonymous principal is not authorized");
