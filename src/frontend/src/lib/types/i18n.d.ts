@@ -34,8 +34,6 @@ interface I18nNavigation {
 
 interface I18nAuth {
 	text: {
-		title: string;
-		description: string;
 		authenticate_with: string;
 		authenticate: string;
 		connect_to_oisy: string;
