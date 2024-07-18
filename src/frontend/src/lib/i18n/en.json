@@ -139,7 +139,7 @@
 		"title": "Current network. Access to selection.",
 		"show_testnets": "Show test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion"
+		"chain_fusion": "Chain Fusion (all networks)"
 	},
 	"receive": {
 		"text": {
