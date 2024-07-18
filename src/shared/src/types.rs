@@ -40,6 +40,14 @@ impl Default for ApiEnabled {
         Self::Enabled
     }
 }
+impl ApiEnabled {
+    pub fn readable(&self) -> bool {
+        matches!(self, Self::Enabled | Self::ReadOnly)
+    }
+    pub fn writable(&self) -> bool {
+        matches!(self, Self::Enabled)
+    }
+}
 
 #[derive(CandidType, Deserialize, Default, Copy, Clone)]
 pub struct Guards {
