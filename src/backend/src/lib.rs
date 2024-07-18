@@ -33,7 +33,7 @@ use shared::types::user_profile::{
     AddUserCredentialRequest, GetUserProfileError, GetUsersRequest, GetUsersResponse, OisyUser,
     StoredUserProfile, UserProfile,
 };
-use shared::types::{Arg, InitArg, SupportedCredential, Timestamp};
+use shared::types::{Arg, Guards, InitArg, SupportedCredential, Timestamp};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -172,12 +172,8 @@ pub struct Config {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_raw: Option<Vec<u8>>,
-    /// Disable signing APIs
-    pub lock_signing: Option<bool>,
-    /// Disable saving user data
-    pub lock_user_data: Option<bool>,
-    /// Disable reading user data
-    pub hide_user_data: Option<bool>,
+    /// Enables or disables APIs
+    pub api: Option<Guards>,
 }
 
 fn set_config(arg: InitArg) {
@@ -186,9 +182,7 @@ fn set_config(arg: InitArg) {
         allowed_callers,
         supported_credentials,
         ic_root_key_der,
-        lock_signing,
-        lock_user_data,
-        hide_user_data,
+        api,
     } = arg;
     mutate_state(|state| {
         let ic_root_key_raw = match extract_raw_root_pk_from_der(
@@ -204,9 +198,7 @@ fn set_config(arg: InitArg) {
                 allowed_callers,
                 supported_credentials,
                 ic_root_key_raw: Some(ic_root_key_raw),
-                lock_signing,
-                lock_user_data,
-                hide_user_data,
+                api,
             })))
             .expect("setting config should succeed");
     });
@@ -581,6 +573,12 @@ fn get_users(request: GetUsersRequest) -> GetUsersResponse {
 #[update]
 async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
+}
+
+/// Computes a signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
+#[update(guard = "may_threshold_sign")]
+fn guard() {
+    // This method is used to test the guards.
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.

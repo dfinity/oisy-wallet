@@ -24,18 +24,27 @@ pub struct InitArg {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_der: Option<Vec<u8>>,
-    /// Disable signing.
-    ///
-    /// Applies to the new backend canister.
-    pub lock_signing: Option<bool>,
-    /// Disable writing user data.
-    ///
-    /// Applies while migrating user data to another canister.
-    pub lock_user_data: Option<bool>,
-    /// Disable reading user data.
-    ///
-    /// Applies after migrating user data to another canister and updating the frontend to get user data from the new caister.
-    pub hide_user_data: Option<bool>,
+    /// Enables or disables APIs
+    pub api: Option<Guards>,
+}
+
+#[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
+#[repr(u8)]
+pub enum ApiEnabled {
+    Enabled,
+    ReadOnly,
+    Disabled,
+}
+impl Default for ApiEnabled {
+    fn default() -> Self {
+        Self::Enabled
+    }
+}
+
+#[derive(CandidType, Deserialize, Default, Copy, Clone)]
+pub struct Guards {
+    pub threshold_key: ApiEnabled,
+    pub user_data: ApiEnabled,
 }
 
 #[derive(CandidType, Deserialize)]
