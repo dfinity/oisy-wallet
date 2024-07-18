@@ -26,6 +26,9 @@ fn test_upgrade_credential_init_args() {
         allowed_callers: allowed_callers.clone(),
         ic_root_key_der: None,
         supported_credentials: None,
+        lock_signing: None,
+        lock_user_data: Some(true),
+        hide_user_data: None,
     });
     let encoded_updated_arg = encode_one(updated_arg).unwrap();
 

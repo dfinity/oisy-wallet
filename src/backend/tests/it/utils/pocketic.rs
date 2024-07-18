@@ -100,6 +100,9 @@ fn init_arg() -> Arg {
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
         supported_credentials: None,
+        lock_signing: None,
+        lock_user_data: None,
+        hide_user_data: None,
     })
 }
 

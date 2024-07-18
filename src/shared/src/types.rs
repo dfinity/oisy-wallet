@@ -26,8 +26,10 @@ pub struct InitArg {
     pub ic_root_key_der: Option<Vec<u8>>,
     /// Disable signing.
     pub lock_signing: Option<bool>,
-    /// Disable saving user data.
+    /// Disable writing user data.
     pub lock_user_data: Option<bool>,
+    /// Disable reading user data.
+    pub hide_user_data: Option<bool>,
 }
 
 #[derive(CandidType, Deserialize)]

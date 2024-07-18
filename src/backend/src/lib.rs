@@ -1,5 +1,7 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
-use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
+use crate::guards::{
+    caller_is_allowed, may_read_user_data, may_threshold_sign, may_write_user_data,
+};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use core::ops::Deref;
@@ -173,6 +175,8 @@ pub struct Config {
     pub lock_signing: Option<bool>,
     /// Disable saving user data
     pub lock_user_data: Option<bool>,
+    /// Disable reading user data
+    pub hide_user_data: Option<bool>,
 }
 
 fn set_config(arg: InitArg) {
@@ -183,6 +187,7 @@ fn set_config(arg: InitArg) {
         ic_root_key_der,
         lock_signing,
         lock_user_data,
+        hide_user_data,
     } = arg;
     mutate_state(|state| {
         let ic_root_key_raw = match extract_raw_root_pk_from_der(
@@ -200,6 +205,7 @@ fn set_config(arg: InitArg) {
                 ic_root_key_raw: Some(ic_root_key_raw),
                 lock_signing,
                 lock_user_data,
+                hide_user_data,
             })))
             .expect("setting config should succeed");
     });
@@ -295,13 +301,13 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
 }
 
 /// Returns the Ethereum address of the caller.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn caller_eth_address() -> String {
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
 /// Returns the Ethereum address of the specified .
-#[update(guard = "caller_is_allowed")]
+#[update(guard = "may_threshold_sign")]
 async fn eth_address_of(p: Principal) -> String {
     if p == Principal::anonymous() {
         ic_cdk::trap("Anonymous principal is not authorized");
@@ -340,7 +346,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
 }
 
 /// Computes a signature for an [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) transaction.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn sign_transaction(req: SignRequest) -> String {
     use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
     use ethers_core::types::Signature;
@@ -388,7 +394,7 @@ async fn sign_transaction(req: SignRequest) -> String {
 }
 
 /// Computes a signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn personal_sign(plaintext: String) -> String {
     let caller = ic_cdk::caller();
 
@@ -413,7 +419,7 @@ async fn personal_sign(plaintext: String) -> String {
 }
 
 /// Computes a signature for a precomputed hash.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn sign_prehash(prehash: String) -> String {
     let caller = ic_cdk::caller();
 
@@ -428,7 +434,7 @@ async fn sign_prehash(prehash: String) -> String {
     format!("0x{}", hex::encode(&signature))
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn set_user_token(token: UserToken) {
     assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
@@ -445,7 +451,7 @@ fn set_user_token(token: UserToken) {
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_token, &token, &find));
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 fn set_many_user_tokens(tokens: Vec<UserToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -464,7 +470,7 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
     });
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
@@ -477,14 +483,14 @@ fn remove_user_token(token_id: UserTokenId) {
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_token, &find));
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[query(guard = "may_read_user_data")]
 fn list_user_tokens() -> Vec<UserToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
 /// Add, remove or update custom token for the user.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -496,7 +502,7 @@ fn set_custom_token(token: CustomToken) {
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -511,13 +517,13 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     });
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[query(guard = "may_read_user_data")]
 fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 #[allow(unused_variables)]
 fn add_user_credential(request: AddUserCredentialRequest) {
@@ -526,7 +532,7 @@ fn add_user_credential(request: AddUserCredentialRequest) {
 
 /// It create a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -540,7 +546,7 @@ fn create_user_profile() -> UserProfile {
     })
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[query(guard = "may_read_user_data")]
 fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
