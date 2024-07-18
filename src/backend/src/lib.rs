@@ -516,6 +516,8 @@ fn add_user_credential(request: AddUserCredentialRequest) {
     // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2649
 }
 
+/// It create a new user profile for the caller.
+/// If the user has already a profile, it will return that profile.
 #[update(guard = "caller_is_not_anonymous")]
 fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -526,7 +528,7 @@ fn create_user_profile() -> UserProfile {
             &mut s.user_profile,
             &mut s.user_profile_updated,
         );
-        UserProfile::from(&stored_user.clone())
+        UserProfile::from(&stored_user)
     })
 }
 
@@ -540,7 +542,7 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
             &mut s.user_profile,
             &mut s.user_profile_updated,
         ) {
-            Ok(stored_user) => Ok(UserProfile::from(&stored_user.clone())),
+            Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
             Err(err) => Err(err),
         }
     })
