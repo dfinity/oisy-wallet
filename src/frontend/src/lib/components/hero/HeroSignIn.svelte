@@ -5,8 +5,8 @@
 </script>
 
 <div class="mt-6 xl:mt-12 mb-10 pt-2">
-	<h1 class="text-off-white text-5xl max-w-[15rem]">
-		{$i18n.auth.text.connect_to_oisy}
+	<h1 class="text-off-white text-4xl max-w-[22rem] text-center">
+		{$i18n.auth.text.title}
 	</h1>
 </div>
 
