@@ -31,6 +31,7 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+export type GetUserProfileError = { NotFound: null };
 export interface GetUsersRequest {
 	updated_after_timestamp: [] | [bigint];
 	matches_max_length: [] | [bigint];
@@ -65,6 +66,7 @@ export interface OisyUser {
 	pouh_verified: boolean;
 	updated_timestamp: bigint;
 }
+export type Result = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface SignRequest {
 	to: string;
 	gas: bigint;
@@ -109,9 +111,10 @@ export interface UserTokenId {
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], undefined>;
 	caller_eth_address: ActorMethod<[], string>;
+	create_user_profile: ActorMethod<[], UserProfile>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-	get_or_create_user_profile: ActorMethod<[], UserProfile>;
+	get_user_profile: ActorMethod<[], Result>;
 	get_users: ActorMethod<[GetUsersRequest], GetUsersResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;

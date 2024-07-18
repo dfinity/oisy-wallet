@@ -16,6 +16,17 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const AddUserCredentialRequest = IDL.Record({ credential_jwt: IDL.Text });
+	const UserCredential = IDL.Record({
+		verified_date_timestamp: IDL.Opt(IDL.Nat64),
+		expire_date_timestamp: IDL.Opt(IDL.Nat64),
+		credential_type: CredentialType
+	});
+	const UserProfile = IDL.Record({
+		credentials: IDL.Vec(UserCredential),
+		version: IDL.Opt(IDL.Nat64),
+		created_timestamp: IDL.Nat64,
+		updated_timestamp: IDL.Nat64
+	});
 	const CanisterStatusType = IDL.Variant({
 		stopped: IDL.Null,
 		stopping: IDL.Null,
@@ -39,16 +50,10 @@ export const idlFactory = ({ IDL }) => {
 		idle_cycles_burned_per_day: IDL.Nat,
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
-	const UserCredential = IDL.Record({
-		verified_date_timestamp: IDL.Opt(IDL.Nat64),
-		expire_date_timestamp: IDL.Opt(IDL.Nat64),
-		credential_type: CredentialType
-	});
-	const UserProfile = IDL.Record({
-		credentials: IDL.Vec(UserCredential),
-		version: IDL.Opt(IDL.Nat64),
-		created_timestamp: IDL.Nat64,
-		updated_timestamp: IDL.Nat64
+	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
+	const Result = IDL.Variant({
+		Ok: UserProfile,
+		Err: GetUserProfileError
 	});
 	const GetUsersRequest = IDL.Record({
 		updated_after_timestamp: IDL.Opt(IDL.Nat64),
@@ -109,9 +114,10 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
+		create_user_profile: IDL.Func([], [UserProfile], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		get_or_create_user_profile: IDL.Func([], [UserProfile], ['query']),
+		get_user_profile: IDL.Func([], [Result], ['query']),
 		get_users: IDL.Func([GetUsersRequest], [GetUsersResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),

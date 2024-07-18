@@ -12,7 +12,6 @@ use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
-use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
@@ -28,26 +27,34 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
-    AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential,
-    UserProfile,
+    AddUserCredentialRequest, GetUserProfileError, GetUsersRequest, GetUsersResponse, OisyUser,
+    StoredUserProfile, UserProfile,
 };
-use shared::types::{Arg, InitArg, SupportedCredential};
+use shared::types::{Arg, InitArg, SupportedCredential, Timestamp};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
+use user_profile::{create_profile, get_profile};
 
 mod assertions;
 mod guards;
 mod token;
+mod user_profile;
 
 type VMem = VirtualMemory<DefaultMemoryImpl>;
 type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
 type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
 type CustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<CustomToken>>, VMem>;
+/// Map of (`updated_timestamp`, `user_principal`) to `UserProfile`
+type UserProfileMap = StableBTreeMap<(Timestamp, StoredPrincipal), Candid<StoredUserProfile>, VMem>;
+/// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
+type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
+const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
+const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 
 const DEFAULT_LIMIT_GET_USERS_RESPONSE: u64 = 10_000;
 const MAX_SYMBOL_LENGTH: usize = 20;
@@ -62,6 +69,8 @@ thread_local! {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
+            user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
+            user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
         })
     );
 }
@@ -126,6 +135,8 @@ pub struct State {
     /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
     /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
     custom_token: CustomTokenMap,
+    user_profile: UserProfileMap,
+    user_profile_updated: UserProfileUpdatedMap,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -505,16 +516,36 @@ fn add_user_credential(request: AddUserCredentialRequest) {
     // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2649
 }
 
+/// It create a new user profile for the caller.
+/// If the user has already a profile, it will return that profile.
+#[update(guard = "caller_is_not_anonymous")]
+fn create_user_profile() -> UserProfile {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        let stored_user = create_profile(
+            stored_principal,
+            &mut s.user_profile,
+            &mut s.user_profile_updated,
+        );
+        UserProfile::from(&stored_user)
+    })
+}
+
 #[query(guard = "caller_is_not_anonymous")]
-fn get_or_create_user_profile() -> UserProfile {
-    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2648
-    let credentials: Vec<UserCredential> = Vec::new();
-    UserProfile {
-        credentials,
-        created_timestamp: time(),
-        updated_timestamp: time(),
-        version: None,
-    }
+fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        match get_profile(
+            stored_principal,
+            &mut s.user_profile,
+            &mut s.user_profile_updated,
+        ) {
+            Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
+            Err(err) => Err(err),
+        }
+    })
 }
 
 #[query(guard = "caller_is_allowed")]
