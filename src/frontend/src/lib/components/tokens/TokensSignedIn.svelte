@@ -49,16 +49,32 @@
 			(token) => tokenMap.get(`${token.id.description}-${token.network.id.description}`) ?? token
 		);
 	};
+
+	const passiveEvent = (
+		node: HTMLElement,
+		{ event, handler }: { event: string; handler: EventListener }
+	) => {
+		node.addEventListener(event, handler, { passive: true });
+
+		return {
+			destroy() {
+				node.removeEventListener(event, handler);
+			}
+		};
+	};
 </script>
 
 <TokensSkeletons>
 	<div
-		on:pointerenter={stopRefreshingTokens}
-		on:pointerover={stopRefreshingTokens}
-		on:pointerleave={startRefreshingTokens}
-		on:focus={stopRefreshingTokens}
-		on:focusin={stopRefreshingTokens}
-		on:focusout={startRefreshingTokens}
+		use:passiveEvent={{ event: 'pointerenter', handler: stopRefreshingTokens }}
+		use:passiveEvent={{ event: 'pointerover', handler: stopRefreshingTokens }}
+		use:passiveEvent={{ event: 'pointerleave', handler: startRefreshingTokens }}
+		use:passiveEvent={{ event: 'focus', handler: stopRefreshingTokens }}
+		use:passiveEvent={{ event: 'focusin', handler: stopRefreshingTokens }}
+		use:passiveEvent={{ event: 'focusout', handler: startRefreshingTokens }}
+		use:passiveEvent={{ event: 'touchstart', handler: stopRefreshingTokens }}
+		use:passiveEvent={{ event: 'touchmove', handler: stopRefreshingTokens }}
+		use:passiveEvent={{ event: 'touchend', handler: startRefreshingTokens }}
 	>
 		{#each tokensToDisplay as token (token.id)}
 			<Listener {token}>
