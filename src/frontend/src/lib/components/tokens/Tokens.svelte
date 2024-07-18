@@ -8,16 +8,18 @@
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 </script>
 
-<Header>
-	<NetworksSwitcher disabled={$authNotSignedIn} />
+<div class:pointer-events-none={$authNotSignedIn} class:blur-[1.5px]={$authNotSignedIn}>
+	<Header>
+		<NetworksSwitcher disabled={$authNotSignedIn} />
 
-	<TokensMenu slot="end" />
-</Header>
+		<TokensMenu slot="end" />
+	</Header>
 
-{#if $authSignedIn}
-	<TokensSignedIn />
-{:else}
-	<TokensSignedOut />
-{/if}
+	{#if $authSignedIn}
+		<TokensSignedIn />
+	{:else}
+		<TokensSignedOut />
+	{/if}
 
-<ManageTokensButton />
+	<ManageTokensButton />
+</div>
