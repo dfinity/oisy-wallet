@@ -21,6 +21,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import WalletAddresses from '$lib/components/core/WalletAddresses.svelte';
+	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -28,6 +31,11 @@
 	const gotoSettings = async () => {
 		visible = false;
 		await goto(`/settings?${networkParam($networkId)}`);
+	};
+
+	const openWalletConnectAuth = () => {
+		visible = false;
+		modalStore.openWalletConnectAuth();
 	};
 </script>
 
@@ -49,6 +57,17 @@
 		{:else if $pseudoNetworkChainFusion}
 			<WalletAddresses on:icReceiveTriggered={() => (visible = false)} />
 		{/if}
+
+		<Hr />
+
+		<ButtonMenu
+			ariaLabel={$i18n.wallet_connect.text.name}
+			on:click={openWalletConnectAuth}
+			disabled={$walletConnectPaired}
+		>
+			<IconWalletConnect />
+			{$i18n.wallet_connect.text.name}
+		</ButtonMenu>
 
 		<Hr />
 
