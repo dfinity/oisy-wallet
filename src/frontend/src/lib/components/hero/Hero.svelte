@@ -51,12 +51,23 @@
 		}
 
 		&.chainfusion {
-			background: radial-gradient(
-				90.18% 135.69% at 50% 135.69%,
-				#3653cb 0%,
-				#5331a6 40.06%,
-				#191e86 100%
-			);
+			background: #03020b;
+
+			position: relative;
+			overflow: hidden;
+
+			&::before {
+				content: '';
+				position: absolute;
+				top: calc(50% - 727px);
+				left: 50%;
+				transform: translate(-50%, -50%);
+				width: max(100%, 1160px);
+				height: 1160px;
+				border-radius: 1160px;
+				background: #3d45ff 50%;
+				filter: blur(294px);
+			}
 		}
 	}
 </style>
