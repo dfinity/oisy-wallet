@@ -25,12 +25,10 @@
 	export let compact = false;
 
 	let ckEthereum = false;
-	$: ckEthereum =
-		isTokenCkEthLedger(token as Token as IcToken) ||
-		isTokenCkErc20Ledger(token as Token as IcToken);
+	$: ckEthereum = isTokenCkEthLedger(token) || isTokenCkErc20Ledger(token);
 
 	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger(token as Token as IcToken);
+	$: ckBTC = isTokenCkBtcLedger(token);
 
 	let icrc = false;
 	$: icrc = token.standard === 'icrc';

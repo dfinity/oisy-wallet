@@ -73,7 +73,7 @@
 			identity: $authStore.identity,
 			maxResults: WALLET_PAGINATION,
 			start: lastId,
-			token: $token as Token as IcToken,
+			token: $token as IcToken,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
 	};
