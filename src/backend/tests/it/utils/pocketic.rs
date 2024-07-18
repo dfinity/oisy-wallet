@@ -31,35 +31,42 @@ pub fn setup() -> (PocketIc, Principal) {
     (pic, canister_id)
 }
 
-pub fn setup_with_custom_wasm(wasm_path: &str) -> (PocketIc, Principal) {
+pub fn setup_with_custom_wasm(
+    wasm_path: &str,
+    encoded_arg: Option<Vec<u8>>,
+) -> (PocketIc, Principal) {
     let (pic, canister_id) = init();
 
     let wasm_bytes = read(wasm_path).expect(&format!("Could not find the wasm: {}", wasm_path));
 
-    let arg = init_arg();
+    let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
 
-    pic.install_canister(canister_id, wasm_bytes, encode_one(&arg).unwrap(), None);
+    pic.install_canister(canister_id, wasm_bytes, arg, None);
 
     (pic, canister_id)
 }
 
-pub fn upgrade_latest_wasm(pocket_ic: &(PocketIc, Principal)) -> Result<(), String> {
+pub fn upgrade_latest_wasm(
+    pocket_ic: &(PocketIc, Principal),
+    encoded_arg: Option<Vec<u8>>,
+) -> Result<(), String> {
     let backend_wasm_path =
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
-    upgrade_with_wasm(pocket_ic, &backend_wasm_path)
+    upgrade_with_wasm(pocket_ic, &backend_wasm_path, encoded_arg)
 }
 
 pub fn upgrade_with_wasm(
     (pic, canister_id): &(PocketIc, Principal),
     backend_wasm_path: &String,
+    encoded_arg: Option<Vec<u8>>,
 ) -> Result<(), String> {
     let wasm_bytes = read(backend_wasm_path.clone()).expect(&format!(
         "Could not find the backend wasm: {}",
         backend_wasm_path
     ));
 
-    let arg = init_arg();
+    let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
 
     pic.upgrade_canister(
         canister_id.clone(),
