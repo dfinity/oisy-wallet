@@ -17,7 +17,7 @@ fn test_upgrade_credential_init_args() {
     let encoded_initial_arg = encode_one(initial_arg).unwrap();
     let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_25_WASM_PATH, Some(encoded_initial_arg));
 
-    // Test a call
+    // Get ETH address before upgrade for post-upgrade test
     let caller = Principal::from_text(CALLER).unwrap();
     let initial_result = update_call::<String>(&pic_setup, caller, "caller_eth_address", ());
 
@@ -35,5 +35,5 @@ fn test_upgrade_credential_init_args() {
 
     let after_upgrade_result = update_call::<String>(&pic_setup, caller, "caller_eth_address", ());
 
-    assert_eq!(initial_result.unwrap(), after_upgrade_result.unwrap());
+    assert_eq!(initial_result.expect("Initial ETH address err"), after_upgrade_result.expect("Post-upgrade ETH address err"));
 }
