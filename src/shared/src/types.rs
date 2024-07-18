@@ -24,6 +24,10 @@ pub struct InitArg {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_der: Option<Vec<u8>>,
+    /// Disable signing.
+    pub lock_signing: Option<bool>,
+    /// Disable saving user data.
+    pub lock_user_data: Option<bool>,
 }
 
 #[derive(CandidType, Deserialize)]
