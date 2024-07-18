@@ -14,7 +14,7 @@
 			"source": ["build/"],
 			"type": "assets"
 		},
-		"chain_fusion_signer": {
+		"new_backend": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
