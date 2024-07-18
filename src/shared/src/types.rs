@@ -174,4 +174,9 @@ pub mod user_profile {
         pub users: Vec<OisyUser>,
         pub matches_max_length: u64,
     }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum GetUserProfileError {
+        NotFound,
+    }
 }

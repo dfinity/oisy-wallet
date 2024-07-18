@@ -1,9 +1,22 @@
 use crate::{Candid, StoredPrincipal, VMem};
 use ic_cdk::api::time;
 use ic_stable_structures::StableBTreeMap;
-use shared::types::user_profile::StoredUserProfile;
+use shared::types::user_profile::{GetUserProfileError, StoredUserProfile};
 
-pub fn get_or_create(
+pub fn get_profile(
+    principal: StoredPrincipal,
+    user_profile_map: &mut StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
+    user_profile_updated_map: &mut StableBTreeMap<StoredPrincipal, u64, VMem>,
+) -> Result<Candid<StoredUserProfile>, GetUserProfileError> {
+    if let Some(updated) = user_profile_updated_map.get(&principal) {
+        return Ok(user_profile_map
+            .get(&(updated, principal))
+            .expect("Failed to fetch user from user profile map but it's present in updated map"));
+    }
+    Err(GetUserProfileError::NotFound)
+}
+
+pub fn create_profile(
     principal: StoredPrincipal,
     user_profile_map: &mut StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
     user_profile_updated_map: &mut StableBTreeMap<StoredPrincipal, u64, VMem>,

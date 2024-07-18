@@ -27,14 +27,14 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
-    AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, StoredUserProfile,
-    UserProfile,
+    AddUserCredentialRequest, GetUserProfileError, GetUsersRequest, GetUsersResponse, OisyUser,
+    StoredUserProfile, UserProfile,
 };
 use shared::types::{Arg, InitArg, SupportedCredential, Timestamp};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
-use user_profile::get_or_create;
+use user_profile::{create_profile, get_profile};
 
 mod assertions;
 mod guards;
@@ -517,16 +517,32 @@ fn add_user_credential(request: AddUserCredentialRequest) {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
-fn get_or_create_user_profile() -> UserProfile {
+fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        let stored_user = get_or_create(
+        let stored_user = create_profile(
             stored_principal,
             &mut s.user_profile,
             &mut s.user_profile_updated,
         );
         UserProfile::from(&stored_user.clone())
+    })
+}
+
+#[query(guard = "caller_is_not_anonymous")]
+fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        match get_profile(
+            stored_principal,
+            &mut s.user_profile,
+            &mut s.user_profile_updated,
+        ) {
+            Ok(stored_user) => Ok(UserProfile::from(&stored_user.clone())),
+            Err(err) => Err(err),
+        }
     })
 }
 
