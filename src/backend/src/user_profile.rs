@@ -14,7 +14,7 @@ pub fn get_or_create(
             .expect("Failed to fetch user from user profile map but it's present in updated map")
     } else {
         let now = time();
-        let default_profile = StoredUserProfile::default(now);
+        let default_profile = StoredUserProfile::from_timestamp(now);
         user_profile_updated_map.insert(principal, now);
         user_profile_map.insert((now, principal), Candid(default_profile.clone()));
         Candid(default_profile)
