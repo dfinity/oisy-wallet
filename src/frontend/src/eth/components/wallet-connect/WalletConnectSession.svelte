@@ -333,6 +333,8 @@
 	};
 
 	$: walletConnectPaired.set(nonNullish(listener));
+
+	onDestroy(() => walletConnectPaired.set(false));
 </script>
 
 {#if nonNullish(listener)}
