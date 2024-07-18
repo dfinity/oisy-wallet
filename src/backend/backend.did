@@ -47,10 +47,12 @@ type HttpResponse = record {
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type InitArg = record {
+  lock_user_data : opt bool;
   ecdsa_key_name : text;
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
+  lock_signing : opt bool;
 };
 type OisyUser = record {
   "principal" : principal;

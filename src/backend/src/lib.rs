@@ -169,6 +169,10 @@ pub struct Config {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_raw: Option<Vec<u8>>,
+    /// Disable signing APIs
+    pub lock_signing: Option<bool>,
+    /// Disable saving user data
+    pub lock_user_data: Option<bool>,
 }
 
 fn set_config(arg: InitArg) {
@@ -177,6 +181,8 @@ fn set_config(arg: InitArg) {
         allowed_callers,
         supported_credentials,
         ic_root_key_der,
+        lock_signing,
+        lock_user_data,
     } = arg;
     mutate_state(|state| {
         let ic_root_key_raw = match extract_raw_root_pk_from_der(
@@ -192,6 +198,8 @@ fn set_config(arg: InitArg) {
                 allowed_callers,
                 supported_credentials,
                 ic_root_key_raw: Some(ic_root_key_raw),
+                lock_signing,
+                lock_user_data,
             })))
             .expect("setting config should succeed");
     });
