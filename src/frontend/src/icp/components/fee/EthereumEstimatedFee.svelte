@@ -13,12 +13,11 @@
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
 	import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
-	import type { IcToken } from '$icp/types/ic';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 
 	let ckEr20 = false;
-	$: ckEr20 = isTokenCkErc20Ledger($tokenWithFallback as IcToken);
+	$: ckEr20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
