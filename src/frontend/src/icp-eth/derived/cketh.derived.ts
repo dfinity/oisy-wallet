@@ -9,7 +9,8 @@ import {
 	toCkErc20HelperContractAddress,
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
-import type { IcCkToken, IcToken } from '$icp/types/ic';
+import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+import type { IcCkToken } from '$icp/types/ic';
 import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
@@ -26,9 +27,9 @@ import { derived, type Readable } from 'svelte/store';
  * - on network ICP if the token is ckETH
  */
 export const ethToCkETHEnabled: Readable<boolean> = derived(
-	[tokenStandard, tokenWithFallback],
-	([$tokenStandard, $tokenWithFallback]) =>
-		$tokenStandard === 'ethereum' || isTokenCkEthLedger($tokenWithFallback as IcToken)
+	[tokenStandard, tokenWithFallbackAsIcToken],
+	([$tokenStandard, $tokenWithFallbackAsIcToken]) =>
+		$tokenStandard === 'ethereum' || isTokenCkEthLedger($tokenWithFallbackAsIcToken)
 );
 
 /**
@@ -37,10 +38,10 @@ export const ethToCkETHEnabled: Readable<boolean> = derived(
  * - on network ICP if the token is ckErc20
  */
 export const erc20ToCkErc20Enabled: Readable<boolean> = derived(
-	[tokenWithFallback],
-	([$tokenWithFallback]) =>
-		ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallback.id) ||
-		isTokenCkErc20Ledger($tokenWithFallback as IcToken)
+	[tokenWithFallbackAsIcToken],
+	([$tokenWithFallbackAsIcToken]) =>
+		ERC20_TWIN_TOKENS_IDS.includes($tokenWithFallbackAsIcToken.id) ||
+		isTokenCkErc20Ledger($tokenWithFallbackAsIcToken)
 );
 
 /**

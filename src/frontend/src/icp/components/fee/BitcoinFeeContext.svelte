@@ -4,18 +4,18 @@
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
-	import { tokenDecimals, tokenWithFallback } from '$lib/derived/token.derived';
-	import type { IcToken } from '$icp/types/ic';
+	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { authStore } from '$lib/stores/auth.store';
 	import { queryEstimateFee } from '$icp/services/ckbtc.services';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 
 	export let amount: string | number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
 	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger($tokenWithFallback as IcToken);
+	$: ckBTC = isTokenCkBtcLedger($tokenWithFallbackAsIcToken);
 
 	const { store } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 
@@ -40,7 +40,7 @@
 				value: `${amount}`,
 				unitName: $tokenDecimals
 			}).toBigInt(),
-			...($tokenWithFallback as IcToken)
+			...$tokenWithFallbackAsIcToken
 		});
 
 		if (isNullish(fee) || result === 'error') {

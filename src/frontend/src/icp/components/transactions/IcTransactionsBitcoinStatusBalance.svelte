@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { IcToken } from '$icp/types/ic';
 	import IconSync from '$lib/components/icons/IconSync.svelte';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { updateBalance } from '$icp/services/ckbtc.services';
@@ -15,6 +14,7 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 
 	let receiveProgressStep: string | undefined = undefined;
 
@@ -32,7 +32,7 @@
 
 		try {
 			await updateBalance({
-				token: $token as IcToken,
+				token: $tokenAsIcToken,
 				identity: $authStore.identity,
 				progress: (step: ProgressStepsUpdateBalanceCkBtc) => (receiveProgressStep = step)
 			});

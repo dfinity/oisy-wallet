@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { NetworkId } from '$lib/types/network';
 	import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
-	import { tokenId, tokenWithFallback } from '$lib/derived/token.derived';
+	import { tokenId } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
@@ -16,14 +16,15 @@
 	} from '$icp/stores/ethereum-fee.store';
 	import { token } from '$lib/stores/token.store';
 	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
+	import { tokenAsIcToken, tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 
 	export let networkId: NetworkId | undefined = undefined;
 
 	let ckETH = false;
-	$: ckETH = isTokenCkEthLedger($tokenWithFallback as IcToken);
+	$: ckETH = isTokenCkEthLedger($tokenWithFallbackAsIcToken);
 
 	let ckEr20 = false;
-	$: ckEr20 = isTokenCkErc20Ledger($tokenWithFallback as IcToken);
+	$: ckEr20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
 
 	let ethNetwork = false;
 	$: ethNetwork = isNetworkIdEthereum(networkId);
@@ -78,7 +79,7 @@
 			return;
 		}
 
-		const load = async () => await loadEip1559TransactionPrice($token as IcToken);
+		const load = async () => await loadEip1559TransactionPrice($tokenAsIcToken);
 
 		await load();
 
