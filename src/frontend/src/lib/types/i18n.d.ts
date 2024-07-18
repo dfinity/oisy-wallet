@@ -35,10 +35,8 @@ interface I18nNavigation {
 interface I18nAuth {
 	text: {
 		title: string;
-		description: string;
 		authenticate_with: string;
 		authenticate: string;
-		connect_to_oisy: string;
 		logout: string;
 	};
 	alt: { sign_in: string };
@@ -483,21 +481,6 @@ interface I18nTransactions {
 	};
 }
 
-interface I18nAbout {
-	text: {
-		title: string;
-		sub_title: string;
-		description: string;
-		features: string;
-		browser_based: string;
-		cross_device: string;
-		network_custody: string;
-		fully_on_chain: string;
-		interoperable: string;
-		free: string;
-	};
-}
-
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -517,5 +500,4 @@ interface I18n {
 	wallet_connect: I18nWallet_connect;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
-	about: I18nAbout;
 }
