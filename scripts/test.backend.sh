@@ -1,7 +1,7 @@
 #!/bin/bash
 
 POCKET_IC_SERVER_VERSION=3.0.1
-OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
+OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19,v0.0.25"
 
 # If a backend wasm file exists at the root, it will be used for the tests.
 
