@@ -4,10 +4,10 @@
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ICP_NETWORK_ID } from '$env/networks.env';
 	import SendButton from '$lib/components/send/SendButton.svelte';
-	import type { Token } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token';
 	import { loadTokenAndRun } from '$icp/services/token.services';
 
-	export let token: Token;
+	export let token: TokenUi;
 	export let compact = false;
 
 	const modalId = Symbol();

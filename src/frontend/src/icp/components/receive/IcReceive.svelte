@@ -3,7 +3,7 @@
 	import IcReceiveIcp from '$icp/components/receive/IcReceiveICP.svelte';
 	import IcReceiveCkBTC from '$icp/components/receive/IcReceiveCkBTC.svelte';
 	import IcReceiveIcrc from '$icp/components/receive/IcReceiveIcrc.svelte';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenUi } from '$lib/types/token';
 	import {
 		isTokenCkBtcLedger,
 		isTokenCkErc20Ledger,
@@ -21,14 +21,16 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { loadTokenAndRun } from '$icp/services/token.services';
 
-	export let token: Token;
+	export let token: TokenUi;
 	export let compact = false;
 
 	let ckEthereum = false;
-	$: ckEthereum = isTokenCkEthLedger(token as IcToken) || isTokenCkErc20Ledger(token as IcToken);
+	$: ckEthereum =
+		isTokenCkEthLedger(token as Token as IcToken) ||
+		isTokenCkErc20Ledger(token as Token as IcToken);
 
 	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger(token as IcToken);
+	$: ckBTC = isTokenCkBtcLedger(token as Token as IcToken);
 
 	let icrc = false;
 	$: icrc = token.standard === 'icrc';
@@ -52,7 +54,7 @@
 	setContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY, context);
 
 	// At boot time, if the context is derived globally, the token might be updated a few times. That's why we also update it with an auto-subscriber.
-	$: token, (() => context.token.set(token as IcToken))();
+	$: token, (() => context.token.set(token as Token as IcToken))();
 </script>
 
 {#if ckEthereum}

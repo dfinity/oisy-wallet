@@ -6,9 +6,9 @@
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import SendButton from '$lib/components/send/SendButton.svelte';
 	import { loadTokenAndRun } from '$icp/services/token.services';
-	import type { Token } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token';
 
-	export let token: Token;
+	export let token: TokenUi;
 	export let compact = false;
 
 	const modalId = Symbol();

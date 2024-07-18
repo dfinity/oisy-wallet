@@ -41,6 +41,7 @@ export const enabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 		$enabledNetworkTokens.map((token) => {
 			return {
 				...token,
+				balance: $balancesStore?.[token.id]?.data,
 				usdBalance: nonNullish($exchanges?.[token.id]?.usd)
 					? usdValue({
 							token,

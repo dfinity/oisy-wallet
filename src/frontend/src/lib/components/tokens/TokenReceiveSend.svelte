@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Token } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
@@ -8,7 +8,7 @@
 	import { runAndResetToken } from '$icp/services/token.services';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let token: Token;
+	export let token: TokenUi;
 
 	let networkIcp = false;
 	$: networkIcp = isNetworkIdICP(token?.network.id);

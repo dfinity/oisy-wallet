@@ -14,15 +14,13 @@
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
-	import { balancesStore } from '$lib/stores/balances.store';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
 
 	let tokens: TokenUi[];
 	$: tokens = $enabledNetworkTokensUi.filter(
-		({ id: tokenId }) =>
-			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
+		({ balance }) => (balance ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
 </script>
 
@@ -33,7 +31,7 @@
 				<TokenCard {token}>
 					<output class="break-all" slot="description">
 						{formatToken({
-							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
+							value: token.balance ?? BigNumber.from(0n),
 							unitName: token.decimals
 						})}
 						{token.symbol}

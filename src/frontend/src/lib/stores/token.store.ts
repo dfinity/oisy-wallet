@@ -1,7 +1,7 @@
-import type { OptionToken } from '$lib/types/token';
+import type { OptionTokenUi } from '$lib/types/token';
 import { writable, type Readable } from 'svelte/store';
 
-export type TokenData = OptionToken;
+export type TokenData = OptionTokenUi;
 
 export interface TokenStore extends Readable<TokenData> {
 	set: (token: TokenData) => void;
