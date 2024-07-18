@@ -35,5 +35,8 @@ fn test_upgrade_credential_init_args() {
 
     let after_upgrade_result = update_call::<String>(&pic_setup, caller, "caller_eth_address", ());
 
-    assert_eq!(initial_result.expect("Initial ETH address err"), after_upgrade_result.expect("Post-upgrade ETH address err"));
+    assert_eq!(
+        initial_result.expect("Initial ETH address err"),
+        after_upgrade_result.expect("Post-upgrade ETH address err")
+    );
 }
