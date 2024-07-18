@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { enabledNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
@@ -15,12 +14,13 @@
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
+	import { balancesStore } from '$lib/stores/balances.store';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
 
-	let tokens: Token[];
-	$: tokens = $enabledNetworkTokens.filter(
+	let tokens: TokenUi[];
+	$: tokens = $enabledNetworkTokensUi.filter(
 		({ id: tokenId }) =>
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
