@@ -332,11 +332,7 @@
 	};
 </script>
 
-{#if isNullish(listener)}
-	<WalletConnectButton on:click={modalStore.openWalletConnectAuth}
-		>{$i18n.wallet_connect.text.connect}</WalletConnectButton
-	>
-{:else}
+{#if nonNullish(listener)}
 	<WalletConnectButton on:click={disconnect}
 		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
 	>
