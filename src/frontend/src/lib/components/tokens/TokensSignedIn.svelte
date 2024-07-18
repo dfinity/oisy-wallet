@@ -35,8 +35,8 @@
 		stopRefreshing = false;
 	};
 
-	let tokensStatic: Token[] = [];
-	$: tokensStatic = stopRefreshing ? updateTokensStatic(tokensStatic, tokens) : tokens;
+	let tokensToDisplay: Token[] = [];
+	$: tokensToDisplay = stopRefreshing ? updateTokensStatic(tokensToDisplay, tokens) : tokens;
 
 	const updateTokensStatic = (staticTokens: Token[], dynamicTokens: Token[]): Token[] => {
 		const tokenMap = new Map(
@@ -60,7 +60,7 @@
 		on:focusin={stopRefreshingTokens}
 		on:focusout={startRefreshingTokens}
 	>
-		{#each tokensStatic as token (token.id)}
+		{#each tokensToDisplay as token (token.id)}
 			<Listener {token}>
 				<div in:fade>
 					<TokenCard {token}>
@@ -83,7 +83,7 @@
 		{/each}
 	</div>
 
-	{#if tokensStatic.length === 0}
+	{#if tokensToDisplay.length === 0}
 		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
 	{/if}
 
