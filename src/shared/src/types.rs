@@ -41,9 +41,11 @@ impl Default for ApiEnabled {
     }
 }
 impl ApiEnabled {
+    #[must_use]
     pub fn readable(&self) -> bool {
         matches!(self, Self::Enabled | Self::ReadOnly)
     }
+    #[must_use]
     pub fn writable(&self) -> bool {
         matches!(self, Self::Enabled)
     }
