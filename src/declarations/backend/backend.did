@@ -25,6 +25,7 @@ type DefiniteCanisterSettingsArgs = record {
   memory_allocation : nat;
   compute_allocation : nat;
 };
+type GetUserProfileError = variant { NotFound };
 type GetUsersRequest = record {
   updated_after_timestamp : opt nat64;
   matches_max_length : opt nat64;
@@ -56,6 +57,7 @@ type OisyUser = record {
   pouh_verified : bool;
   updated_timestamp : nat64;
 };
+type Result = variant { Ok : UserProfile; Err : GetUserProfileError };
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -97,9 +99,10 @@ type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> ();
   caller_eth_address : () -> (text);
+  create_user_profile : () -> (UserProfile);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
-  get_or_create_user_profile : () -> (UserProfile) query;
+  get_user_profile : () -> (Result) query;
   get_users : (GetUsersRequest) -> (GetUsersResponse) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;

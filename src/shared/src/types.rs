@@ -1,6 +1,8 @@
 use candid::{CandidType, Deserialize, Principal};
 use std::fmt::Debug;
 
+pub type Timestamp = u64;
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
     ProofOfUniqueness,
@@ -120,7 +122,7 @@ pub mod custom_token {
 
 /// Types specifics to the user profile.
 pub mod user_profile {
-    use super::CredentialType;
+    use super::{CredentialType, Timestamp};
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use std::collections::BTreeMap;
@@ -128,24 +130,25 @@ pub mod user_profile {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserCredential {
         pub credential_type: CredentialType,
-        pub verified_date_timestamp: Option<u64>,
-        pub expire_date_timestamp: Option<u64>,
+        pub verified_date_timestamp: Option<Timestamp>,
+        pub expire_date_timestamp: Option<Timestamp>,
     }
 
     // Used in the endpoint
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserProfile {
         pub credentials: Vec<UserCredential>,
-        pub created_timestamp: u64,
-        pub updated_timestamp: u64,
+        pub created_timestamp: Timestamp,
+        pub updated_timestamp: Timestamp,
         pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredUserProfile {
         pub credentials: BTreeMap<CredentialType, UserCredential>,
-        pub created_timestamp: u64,
-        pub updated_timestamp: u64,
+        pub created_timestamp: Timestamp,
+        pub updated_timestamp: Timestamp,
+        pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -155,7 +158,7 @@ pub mod user_profile {
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct GetUsersRequest {
-        pub updated_after_timestamp: Option<u64>,
+        pub updated_after_timestamp: Option<Timestamp>,
         pub matches_max_length: Option<u64>,
     }
 
@@ -163,12 +166,17 @@ pub mod user_profile {
     pub struct OisyUser {
         pub principal: Principal,
         pub pouh_verified: bool,
-        pub updated_timestamp: u64,
+        pub updated_timestamp: Timestamp,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct GetUsersResponse {
         pub users: Vec<OisyUser>,
         pub matches_max_length: u64,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum GetUserProfileError {
+        NotFound,
     }
 }
