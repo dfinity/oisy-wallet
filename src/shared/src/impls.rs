@@ -62,9 +62,8 @@ impl StoredUserProfile {
     }
 }
 
-impl UserProfile {
-    #[must_use]
-    pub fn from_stored(user: StoredUserProfile) -> UserProfile {
+impl From<&StoredUserProfile> for UserProfile {
+    fn from(user: &StoredUserProfile) -> UserProfile {
         let StoredUserProfile {
             created_timestamp,
             updated_timestamp,
@@ -72,10 +71,10 @@ impl UserProfile {
             credentials,
         } = user;
         UserProfile {
-            created_timestamp,
-            updated_timestamp,
-            version,
-            credentials: credentials.into_values().collect(),
+            created_timestamp: created_timestamp.clone(),
+            updated_timestamp: updated_timestamp.clone(),
+            version: version.clone(),
+            credentials: credentials.clone().into_values().collect(),
         }
     }
 }

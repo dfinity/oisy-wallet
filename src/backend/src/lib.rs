@@ -30,7 +30,7 @@ use shared::types::user_profile::{
     AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, StoredUserProfile,
     UserProfile,
 };
-use shared::types::{Arg, InitArg, SupportedCredential};
+use shared::types::{Arg, InitArg, SupportedCredential, Timestamp};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -46,9 +46,9 @@ type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
 type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
 type CustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<CustomToken>>, VMem>;
 /// Map of (`updated_timestamp`, `user_principal`) to `UserProfile`
-type UserProfileMap = StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>;
+type UserProfileMap = StableBTreeMap<(Timestamp, StoredPrincipal), Candid<StoredUserProfile>, VMem>;
 /// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
-type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, u64, VMem>;
+type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -518,7 +518,6 @@ fn add_user_credential(request: AddUserCredentialRequest) {
 
 #[update(guard = "caller_is_not_anonymous")]
 fn get_or_create_user_profile() -> UserProfile {
-    ic_cdk::println!("in da get_or_create_user_profile");
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
@@ -527,7 +526,7 @@ fn get_or_create_user_profile() -> UserProfile {
             &mut s.user_profile,
             &mut s.user_profile_updated,
         );
-        UserProfile::from_stored(stored_user.clone())
+        UserProfile::from(&stored_user.clone())
     })
 }
 
