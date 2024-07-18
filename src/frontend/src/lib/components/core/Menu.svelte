@@ -23,7 +23,7 @@
 	import WalletAddresses from '$lib/components/core/WalletAddresses.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { walletConnectStore } from '$eth/stores/wallet-connect.store';
+	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -63,7 +63,7 @@
 		<ButtonMenu
 			ariaLabel={$i18n.wallet_connect.text.name}
 			on:click={openWalletConnectAuth}
-			disabled={$walletConnectStore}
+			disabled={$walletConnectPaired}
 		>
 			<IconWalletConnect />
 			{$i18n.wallet_connect.text.name}

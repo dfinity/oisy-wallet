@@ -1,3 +1,3 @@
 import { writable } from 'svelte/store';
 
-export const walletConnectStore = writable(false);
+export const walletConnectPaired = writable(false);

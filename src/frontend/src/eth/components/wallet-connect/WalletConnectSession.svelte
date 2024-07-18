@@ -25,7 +25,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { walletConnectStore } from '$eth/stores/wallet-connect.store';
+	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -332,7 +332,7 @@
 		close();
 	};
 
-	$: listener, walletConnectStore.set(nonNullish(listener));
+	$: walletConnectPaired.set(nonNullish(listener));
 </script>
 
 {#if nonNullish(listener)}
