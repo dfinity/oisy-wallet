@@ -20,7 +20,7 @@
 
 <div class="flex md:hidden">
 	<button
-		class="user icon desktop-wide !bg-black !bg-opacity-30 !border !border-white !border-opacity-30"
+		class="about icon desktop-wide"
 		bind:this={button}
 		on:click={() => (visible = !visible)}
 		aria-label={replaceOisyPlaceholders($i18n.about.text.title)}><IconMenu /></button
