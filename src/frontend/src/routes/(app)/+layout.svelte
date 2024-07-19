@@ -3,7 +3,7 @@
 	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import Modals from '$lib/components/core/Modals.svelte';
-	import { pageToken } from '$lib/derived/page-token.derived';
+	import { pageTokenUi } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { ComponentType } from 'svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
@@ -17,7 +17,7 @@
 			? 'transactions'
 			: 'tokens';
 
-	$: token.set($pageToken);
+	$: token.set($pageTokenUi);
 
 	let cmpLoaders: ComponentType;
 	$: cmpLoaders = $authSignedIn ? Loaders : NoLoaders;
