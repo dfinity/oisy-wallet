@@ -6,10 +6,12 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{replaceOisyPlaceholders($i18n.how.text.title)}</svelte:fragment>
+	<svelte:fragment slot="title"
+		><p class="text-xl">{replaceOisyPlaceholders($i18n.how.text.title)}</p>
+	</svelte:fragment>
 
 	<div class="stretch">
-		<h2>{replaceOisyPlaceholders($i18n.how.text.sub_title)}</h2>
+		<h2 class="mt-4">{replaceOisyPlaceholders($i18n.how.text.sub_title)}</h2>
 
 		<p class="mt-4">
 			<Html text={replaceOisyPlaceholders($i18n.how.text.cross_device)} />

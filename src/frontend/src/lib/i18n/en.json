@@ -547,7 +547,7 @@
 	},
 	"how": {
 		"text": {
-			"title": "How does $$oisy_name_name work",
+			"title": "How does $oisy_name work",
 			"sub_title": "How does $oisy_name work?",
 			"cross_device": "<strong>Cross-device:</strong> Using Internet Identity means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
 			"self_custody": "<strong>Self-custody:</strong> The key controlling your multichain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/smart-contracts/signatures/t-ecdsa\">threshold ECDSA</a>.",
