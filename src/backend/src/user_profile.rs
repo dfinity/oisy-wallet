@@ -43,7 +43,7 @@ pub fn create_profile(
 
 pub fn add_credential(
     principal: StoredPrincipal,
-    credential_type: CredentialType,
+    credential_type: &CredentialType,
     user_profile_map: &mut StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
     user_profile_updated_map: &mut StableBTreeMap<StoredPrincipal, u64, VMem>,
 ) -> Result<(), AddUserCredentialError> {
@@ -58,7 +58,7 @@ pub fn add_credential(
         let updated_profile = StoredUserProfile {
             created_timestamp: user_profile.created_timestamp,
             updated_timestamp: now,
-            version: Some(user_profile.version.map(|v| v + 1).unwrap_or(1)),
+            version: Some(user_profile.version.map_or(1, |v| v + 1)),
             credentials,
         };
         user_profile_updated_map.insert(principal, now);

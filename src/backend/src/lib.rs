@@ -514,13 +514,14 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 }
 
 #[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
 fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = time() as u128;
 
     let (vc_flow_signers, root_pk_raw, credential_type) =
-        read_config(|config| get_credential_config(&request, &config))
+        read_config(|config| get_credential_config(&request, config))
             .ok_or(AddUserCredentialError::ConfigurationError)?;
 
     match validate_ii_presentation_and_claims(
@@ -534,7 +535,7 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
         Ok(()) => mutate_state(|s| {
             add_credential(
                 stored_principal,
-                credential_type,
+                &credential_type,
                 &mut s.user_profile,
                 &mut s.user_profile_updated,
             )
