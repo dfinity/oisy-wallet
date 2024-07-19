@@ -6,7 +6,8 @@
 	import Back from '$lib/components/core/Back.svelte';
 	import { isSubRoute } from '$lib/utils/nav.utils';
 	import { authSignedIn } from '$lib/derived/auth.derived';
-	import SignIn from '$lib/components/hero/SignIn.svelte';
+	import AboutWhat from '$lib/components/hero/AboutWhat.svelte';
+	import AboutHow from '$lib/components/hero/AboutHow.svelte';
 
 	let back = false;
 	$: back = isSubRoute($page);
@@ -32,7 +33,8 @@
 		{#if $authSignedIn}
 			<Menu />
 		{:else}
-			<SignIn />
+			<AboutWhat />
+			<AboutHow />
 		{/if}
 	</div>
 </header>
