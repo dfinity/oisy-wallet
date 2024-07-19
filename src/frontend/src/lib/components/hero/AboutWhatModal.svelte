@@ -1,0 +1,34 @@
+<script lang="ts">
+	import { modalStore } from '$lib/stores/modal.store.js';
+	import { Html, Modal } from '@dfinity/gix-components';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+</script>
+
+<Modal on:nnsClose={modalStore.close}>
+	<svelte:fragment slot="title">{replaceOisyPlaceholders($i18n.what.text.title)}</svelte:fragment>
+
+	<div class="stretch">
+		<h2>{replaceOisyPlaceholders($i18n.what.text.sub_title)}</h2>
+
+		<p class="mt-4">
+			<Html text={replaceOisyPlaceholders($i18n.what.text.hold_crypto)} />
+		</p>
+
+		<p class="mt-4">
+			<Html text={replaceOisyPlaceholders($i18n.what.text.go_incognito)} />
+		</p>
+
+		<p class="mt-4">
+			<Html text={replaceOisyPlaceholders($i18n.what.text.use_eth_dapps)} />
+		</p>
+
+		<p class="my-4">
+			<Html text={replaceOisyPlaceholders($i18n.what.text.use_ic_dapps)} />
+		</p>
+	</div>
+
+	<button class="primary full center text-center" on:click={modalStore.close}
+		>{$i18n.core.text.close}</button
+	>
+</Modal>
