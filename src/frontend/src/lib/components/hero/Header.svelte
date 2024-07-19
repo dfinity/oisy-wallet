@@ -24,7 +24,7 @@
 			<OisyWalletLogo />
 			{#if authNotSignedIn}
 				<div
-					class="absolute max-w-[3rem] leading-none text-[8px] uppercase font-semibold translate-x-[112%] translate-y-[130%]"
+					class="absolute max-w-[3rem] leading-none text-[8px] uppercase font-semibold translate-x-[112%] translate-y-[130%] hidden md:flex"
 				>
 					{$i18n.hero.text.never_download}
 				</div>
