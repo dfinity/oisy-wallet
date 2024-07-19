@@ -5,8 +5,9 @@
 	import { page } from '$app/stores';
 	import Back from '$lib/components/core/Back.svelte';
 	import { isSubRoute } from '$lib/utils/nav.utils';
-	import { authSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import SignIn from '$lib/components/hero/SignIn.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let back = false;
 	$: back = isSubRoute($page);
@@ -21,6 +22,13 @@
 	{:else}
 		<div class="flex p-4 items-center text-off-white">
 			<OisyWalletLogo />
+			{#if authNotSignedIn}
+				<div
+					class="absolute max-w-[3rem] leading-none text-[8px] uppercase font-semibold translate-x-[112%] translate-y-[130%]"
+				>
+					{$i18n.hero.text.never_download}
+				</div>
+			{/if}
 		</div>
 	{/if}
 
