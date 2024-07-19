@@ -476,24 +476,26 @@ interface I18nTransactions {
 	};
 }
 
-interface I18nWhat {
-	text: {
-		title: string;
-		sub_title: string;
-		hold_crypto: string;
-		go_incognito: string;
-		use_eth_dapps: string;
-		use_ic_dapps: string;
+interface I18nAbout {
+	text: { title: string };
+	what: {
+		text: {
+			title: string;
+			sub_title: string;
+			hold_crypto: string;
+			go_incognito: string;
+			use_eth_dapps: string;
+			use_ic_dapps: string;
+		};
 	};
-}
-
-interface I18nHow {
-	text: {
-		title: string;
-		sub_title: string;
-		cross_device: string;
-		self_custody: string;
-		fully_on_chain: string;
+	how: {
+		text: {
+			title: string;
+			sub_title: string;
+			cross_device: string;
+			self_custody: string;
+			fully_on_chain: string;
+		};
 	};
 }
 
@@ -516,6 +518,5 @@ interface I18n {
 	wallet_connect: I18nWallet_connect;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
-	what: I18nWhat;
-	how: I18nHow;
+	about: I18nAbout;
 }

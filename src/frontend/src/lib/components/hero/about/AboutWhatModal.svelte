@@ -7,22 +7,26 @@
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title"
-		><p class="text-xl">{replaceOisyPlaceholders($i18n.how.text.title)}</p>
-	</svelte:fragment>
+		><p class="text-xl">{replaceOisyPlaceholders($i18n.about.what.text.title)}</p></svelte:fragment
+	>
 
 	<div class="stretch">
-		<h2 class="mt-4">{replaceOisyPlaceholders($i18n.how.text.sub_title)}</h2>
+		<h2 class="mt-4">{replaceOisyPlaceholders($i18n.about.what.text.sub_title)}</h2>
 
 		<p class="mt-4">
-			<Html text={replaceOisyPlaceholders($i18n.how.text.cross_device)} />
+			<Html text={replaceOisyPlaceholders($i18n.about.what.text.hold_crypto)} />
 		</p>
 
 		<p class="mt-4">
-			<Html text={replaceOisyPlaceholders($i18n.how.text.self_custody)} />
+			<Html text={replaceOisyPlaceholders($i18n.about.what.text.go_incognito)} />
+		</p>
+
+		<p class="mt-4">
+			<Html text={replaceOisyPlaceholders($i18n.about.what.text.use_eth_dapps)} />
 		</p>
 
 		<p class="my-4">
-			<Html text={replaceOisyPlaceholders($i18n.how.text.fully_on_chain)} />
+			<Html text={replaceOisyPlaceholders($i18n.about.what.text.use_ic_dapps)} />
 		</p>
 	</div>
 

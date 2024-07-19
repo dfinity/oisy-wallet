@@ -535,23 +535,28 @@
 			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
 		}
 	},
-	"what": {
+	"about": {
 		"text": {
-			"title": "What can I do with my wallet",
-			"sub_title": "What can I do with my wallet?",
-			"hold_crypto": "<strong>Hold crypto across networks:</strong> Manage and transact with native Ethereum, Bitcoin <i>(coming soon)</i>, and Internet Computer assets.\nPowered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/chainfusion\">Chain Fusion</a>.",
-			"go_incognito": "<strong>Go incognito:</strong> When you close the $oisy_name window in your browser in incognito mode, no one can detect your wallet on your phone. This way, no one can steal your funds by accessing your phone.",
-			"use_eth_dapps": "<strong>Use with Ethereum dapps:</strong> $oisy_name integrates with the WalletConnect protocol allowing you to use $oisy_name as a wallet for many established web3 services, such as Uniswap. Moreover, a Metamask integration demonstrates how other wallets can transfer assets to the $oisy_name wallet.",
-			"use_ic_dapps": "<strong>Use with Internet Computer dapps:</strong> Use your $oisy_name wallet in any dapp on the Internet Computer that supports the signer standards, including the NNS dapp. <i>(coming soon)</i>"
-		}
-	},
-	"how": {
-		"text": {
-			"title": "How does $oisy_name work",
-			"sub_title": "How does $oisy_name work?",
-			"cross_device": "<strong>Cross-device:</strong> Using Internet Identity means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
-			"self_custody": "<strong>Self-custody:</strong> The key controlling your multichain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/smart-contracts/signatures/t-ecdsa\">threshold ECDSA</a>.",
-			"fully_on_chain": "<strong>Fully on-chain:</strong> Not only the keys but the entire wallet application is stored on chain and served directly into users’ browsers from ICP. Therefore the entire wallet is secured by a decentralized trust model making it tamper-proof."
+			"title": "About $oisy_name"
+		},
+		"what": {
+			"text": {
+				"title": "What can I do with my wallet",
+				"sub_title": "What can I do with my wallet?",
+				"hold_crypto": "<strong>Hold crypto across networks:</strong> Manage and transact with native Ethereum, Bitcoin <i>(coming soon)</i>, and Internet Computer assets.\nPowered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/chainfusion\">Chain Fusion</a>.",
+				"go_incognito": "<strong>Go incognito:</strong> When you close the $oisy_name window in your browser in incognito mode, no one can detect your wallet on your phone. This way, no one can steal your funds by accessing your phone.",
+				"use_eth_dapps": "<strong>Use with Ethereum dapps:</strong> $oisy_name integrates with the WalletConnect protocol allowing you to use $oisy_name as a wallet for many established web3 services, such as Uniswap. Moreover, a Metamask integration demonstrates how other wallets can transfer assets to the $oisy_name wallet.",
+				"use_ic_dapps": "<strong>Use with Internet Computer dapps:</strong> Use your $oisy_name wallet in any dapp on the Internet Computer that supports the signer standards, including the NNS dapp. <i>(coming soon)</i>"
+			}
+		},
+		"how": {
+			"text": {
+				"title": "How does $oisy_name work",
+				"sub_title": "How does $oisy_name work?",
+				"cross_device": "<strong>Cross-device:</strong> Using Internet Identity means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
+				"self_custody": "<strong>Self-custody:</strong> The key controlling your multichain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/smart-contracts/signatures/t-ecdsa\">threshold ECDSA</a>.",
+				"fully_on_chain": "<strong>Fully on-chain:</strong> Not only the keys but the entire wallet application is stored on chain and served directly into users’ browsers from ICP. Therefore the entire wallet is secured by a decentralized trust model making it tamper-proof."
+			}
 		}
 	}
 }
