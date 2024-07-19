@@ -36,8 +36,6 @@
 
 {#if $modalAboutWhat}
 	<AboutWhatModal />
-{/if}
-
-{#if $modalAboutHow}
+{:else if $modalAboutHow}
 	<AboutHowModal />
 {/if}
