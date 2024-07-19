@@ -12,7 +12,7 @@ if [ -f "./backend.wasm.gz" ]; then
 else
     # If none exist we build the project. The test will resolve the target/wasm32-unknown-unknown/release/backend.wasm automatically as fallback if no exported BACKEND_WASM_PATH variable is set.
     echo "Building backend canister."
-    cargo build --locked --target wasm32-unknown-unknown --release -p backend
+    cargo build --target wasm32-unknown-unknown --release -p backend
 fi
 
 # We use a previous version of the release to ensure upgradability
@@ -62,4 +62,4 @@ export POCKET_IC_MUTE_SERVER=""
 # Run tests
 
 echo "Running backend integration tests."
-cargo test -p backend
+RUST_BACKTRACE=1 cargo test -p backend test_add_user_credential_adds_credential

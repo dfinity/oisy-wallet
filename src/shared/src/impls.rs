@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::fmt;
 
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
 use crate::types::token::UserToken;
@@ -46,6 +47,32 @@ impl TokenVersion for CustomToken {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
+    }
+}
+
+impl TokenVersion for StoredUserProfile {
+    fn get_version(&self) -> Option<Version> {
+        self.version
+    }
+
+    fn clone_with_incremented_version(&self) -> Self {
+        let mut cloned = self.clone();
+        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned
+    }
+
+    fn clone_with_initial_version(&self) -> Self {
+        let mut cloned = self.clone();
+        cloned.version = Some(1);
+        cloned
+    }
+}
+
+impl fmt::Display for CredentialType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            CredentialType::ProofOfUniqueness => write!(f, "ProofOfUniqueness"),
+        }
     }
 }
 
