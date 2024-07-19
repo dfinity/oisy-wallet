@@ -28,8 +28,8 @@
 
 	<Popover bind:visible anchor={button} direction="rtl">
 		<ul class="flex flex-col gap-4 list-none">
-			<li><AboutWhat asMenuItem onClick={() => (visible = false)} /></li>
-			<li><AboutHow asMenuItem onClick={() => (visible = false)} /></li>
+			<li><AboutWhat asMenuItem on:click={() => (visible = false)} /></li>
+			<li><AboutHow asMenuItem on:click={() => (visible = false)} /></li>
 		</ul>
 	</Popover>
 </div>

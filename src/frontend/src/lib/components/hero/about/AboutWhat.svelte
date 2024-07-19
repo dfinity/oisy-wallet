@@ -5,10 +5,9 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let asMenuItem = false;
-	export let onClick: (() => void) | undefined = undefined;
 </script>
 
-<AboutItem openModal={modalStore.openAboutWhat} {asMenuItem} {onClick}>
+<AboutItem openModal={modalStore.openAboutWhat} {asMenuItem} on:click>
 	<span slot="label"
 		>{replaceOisyPlaceholders(
 			asMenuItem ? $i18n.about.what.text.sub_title : $i18n.about.what.text.title
