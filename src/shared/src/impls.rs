@@ -50,24 +50,6 @@ impl TokenVersion for CustomToken {
     }
 }
 
-impl TokenVersion for StoredUserProfile {
-    fn get_version(&self) -> Option<Version> {
-        self.version
-    }
-
-    fn clone_with_incremented_version(&self) -> Self {
-        let mut cloned = self.clone();
-        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
-        cloned
-    }
-
-    fn clone_with_initial_version(&self) -> Self {
-        let mut cloned = self.clone();
-        cloned.version = Some(1);
-        cloned
-    }
-}
-
 impl fmt::Display for CredentialType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
