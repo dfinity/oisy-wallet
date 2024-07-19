@@ -33,12 +33,7 @@ interface I18nNavigation {
 }
 
 interface I18nAuth {
-	text: {
-		title: string;
-		authenticate_with: string;
-		authenticate: string;
-		logout: string;
-	};
+	text: { title: string; authenticate_with: string; authenticate: string; logout: string };
 	alt: { sign_in: string };
 	error: {
 		no_internet_identity: string;
@@ -481,6 +476,27 @@ interface I18nTransactions {
 	};
 }
 
+interface I18nWhat {
+	text: {
+		title: string;
+		sub_title: string;
+		hold_crypto: string;
+		go_incognito: string;
+		use_eth_dapps: string;
+		use_ic_dapps: string;
+	};
+}
+
+interface I18nHow {
+	text: {
+		title: string;
+		sub_title: string;
+		cross_device: string;
+		self_custody: string;
+		fully_on_chain: string;
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -500,4 +516,6 @@ interface I18n {
 	wallet_connect: I18nWallet_connect;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
+	what: I18nWhat;
+	how: I18nHow;
 }
