@@ -11,6 +11,7 @@
 	export let address: string;
 	export let qrCodeAriaLabel: string;
 	export let copyAriaLabel: string;
+	export let invisibleLogo = false;
 </script>
 
 <div class="flex gap-8 justify-between">
@@ -23,6 +24,7 @@
 			src={token.network.icon}
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.network.name })}
 			size="medium"
+			invisible={invisibleLogo}
 		/>
 
 		<span class="break-all" slot="description">

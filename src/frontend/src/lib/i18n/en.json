@@ -149,17 +149,16 @@
 			"text": {
 				"account_id": "ICP Account ID",
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users or other apps that support this address format.",
-				"use_for_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
+				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
+				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
-				"internet_computer": "Internet Computer",
-				"principal": "Principal",
+				"principal": "ICP Principal",
 				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
 				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code",
-				"icp_account": "ICP Account",
+				"icp_account": "ICP Account (for exchanges)",
 				"icp_account_copied": "ICP Account copied to clipboard.",
-				"display_icp_account_qr": "Display ICP Account as a QR code",
-				"icp_account_notes": "Use for ICP deposits from exchanges or other wallets that only support Account IDs"
+				"display_icp_account_qr": "Display ICP Account as a QR code"
 			}
 		},
 		"ethereum": {
