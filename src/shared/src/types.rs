@@ -156,6 +156,7 @@ pub mod user_profile {
         pub credential_jwt: String,
         pub credential_spec: CredentialSpec,
         pub issuer_canister_id: Principal,
+        pub current_user_version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -163,6 +164,7 @@ pub mod user_profile {
         InvalidCredential,
         ConfigurationError,
         UserNotFound,
+        VersionMismatch,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

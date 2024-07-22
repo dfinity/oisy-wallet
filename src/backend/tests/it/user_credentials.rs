@@ -19,13 +19,8 @@ fn test_add_user_credential_adds_credential() {
     let create_profile_response =
         update_call::<UserProfile>(&pic_setup, vc_holder, "create_user_profile", ());
 
-    assert_eq!(
-        create_profile_response
-            .expect("Create failed")
-            .credentials
-            .len(),
-        0
-    );
+    let profile = create_profile_response.expect("Create failed");
+    assert_eq!(profile.credentials.len(), 0);
 
     let add_user_cred_arg = AddUserCredentialRequest {
         credential_jwt: VP_JWT.to_string(),
@@ -33,6 +28,7 @@ fn test_add_user_credential_adds_credential() {
             credential_type: "ProofOfUniqueness".to_string(),
             arguments: None,
         },
+        current_user_version: profile.version,
         issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
             .expect("VC Holder principal is invalid"),
     };
@@ -64,6 +60,46 @@ fn test_add_user_credential_adds_credential() {
 }
 
 #[test]
+fn test_add_user_credential_cannot_updated_wrong_version() {
+    let pic_setup = setup();
+
+    let vc_holder = Principal::from_text(VC_HOLDER).expect("VC Holder principal is invalid");
+
+    let create_profile_response =
+        update_call::<UserProfile>(&pic_setup, vc_holder, "create_user_profile", ());
+
+    let profile = create_profile_response.expect("Create failed");
+    assert_eq!(profile.credentials.len(), 0);
+
+    let add_user_cred_arg = AddUserCredentialRequest {
+        credential_jwt: VP_JWT.to_string(),
+        credential_spec: CredentialSpec {
+            credential_type: "ProofOfUniqueness".to_string(),
+            arguments: None,
+        },
+        // Set an incremented version to make the endpoint fail.
+        current_user_version: Some(profile.version.map_or(1, |v| v + 1)),
+        issuer_canister_id: Principal::from_text(ISSUER_CANISTER_ID)
+            .expect("VC Holder principal is invalid"),
+    };
+
+    let add_user_credential_response = update_call::<Result<(), AddUserCredentialError>>(
+        &pic_setup,
+        vc_holder,
+        "add_user_credential",
+        add_user_cred_arg,
+    );
+
+    assert!(add_user_credential_response.is_ok());
+    let response = add_user_credential_response.expect("Call to add credential failed");
+    assert!(response.is_err());
+    assert_eq!(
+        response.unwrap_err(),
+        AddUserCredentialError::VersionMismatch
+    );
+}
+
+#[test]
 fn test_add_user_credential_replaces_credential_same_type() {
     let pic_setup = setup();
 
@@ -72,16 +108,12 @@ fn test_add_user_credential_replaces_credential_same_type() {
     let create_profile_response =
         update_call::<UserProfile>(&pic_setup, vc_holder, "create_user_profile", ());
 
-    assert_eq!(
-        create_profile_response
-            .expect("Create failed")
-            .credentials
-            .len(),
-        0
-    );
+    let initia_profile = create_profile_response.expect("Create failed");
+    assert_eq!(initia_profile.credentials.len(), 0);
 
     let add_user_cred_arg = AddUserCredentialRequest {
         credential_jwt: VP_JWT.to_string(),
+        current_user_version: initia_profile.version,
         credential_spec: CredentialSpec {
             credential_type: "ProofOfUniqueness".to_string(),
             arguments: None,
@@ -118,11 +150,14 @@ fn test_add_user_credential_replaces_credential_same_type() {
 
     let new_pic_setup = (pic, principal);
 
+    let mut add_user_cred_arg_2 = add_user_cred_arg.clone();
+    add_user_cred_arg_2.current_user_version = first_profile.version;
+
     let add_user_credential_response = update_call::<Result<(), AddUserCredentialError>>(
         &new_pic_setup,
         vc_holder,
         "add_user_credential",
-        add_user_cred_arg.clone(),
+        add_user_cred_arg_2.clone(),
     );
 
     assert!(add_user_credential_response.is_ok());
@@ -144,4 +179,8 @@ fn test_add_user_credential_replaces_credential_same_type() {
     assert!(first_credential.verified_date_timestamp < second_credential.verified_date_timestamp);
 
     assert_eq!(second_profile.credentials.len(), 1);
+    assert_eq!(
+        second_profile.version,
+        Some(first_profile.version.map_or(1, |v| v + 1))
+    )
 }

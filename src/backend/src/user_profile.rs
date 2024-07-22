@@ -2,10 +2,8 @@ use crate::{Candid, StoredPrincipal, VMem};
 use ic_cdk::api::time;
 use ic_stable_structures::StableBTreeMap;
 use shared::types::{
-    user_profile::{
-        AddUserCredentialError, GetUserProfileError, StoredUserProfile, UserCredential,
-    },
-    CredentialType,
+    user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
+    CredentialType, Version,
 };
 
 pub fn get_profile(
@@ -43,27 +41,21 @@ pub fn create_profile(
 
 pub fn add_credential(
     principal: StoredPrincipal,
+    profile_version: Option<Version>,
     credential_type: &CredentialType,
     user_profile_map: &mut StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
     user_profile_updated_map: &mut StableBTreeMap<StoredPrincipal, u64, VMem>,
 ) -> Result<(), AddUserCredentialError> {
     if let Ok(user_profile) = get_profile(principal, user_profile_map, user_profile_updated_map) {
         let now = time();
-        let user_credential = UserCredential {
-            credential_type: credential_type.clone(),
-            verified_date_timestamp: Some(now),
-        };
-        let mut credentials = user_profile.credentials.clone();
-        credentials.insert(credential_type.clone(), user_credential);
-        let updated_profile = StoredUserProfile {
-            created_timestamp: user_profile.created_timestamp,
-            updated_timestamp: now,
-            version: Some(user_profile.version.map_or(1, |v| v + 1)),
-            credentials,
-        };
-        user_profile_updated_map.insert(principal, now);
-        user_profile_map.insert((now, principal), Candid(updated_profile));
-        Ok(())
+        if let Ok(new_profile) = user_profile.add_credential(profile_version, now, credential_type)
+        {
+            user_profile_updated_map.insert(principal, now);
+            user_profile_map.insert((now, principal), Candid(new_profile));
+            Ok(())
+        } else {
+            Err(AddUserCredentialError::VersionMismatch)
+        }
     } else {
         Err(AddUserCredentialError::UserNotFound)
     }

@@ -58,6 +58,24 @@ impl fmt::Display for CredentialType {
     }
 }
 
+impl TokenVersion for StoredUserProfile {
+    fn get_version(&self) -> Option<Version> {
+        self.version
+    }
+
+    fn clone_with_incremented_version(&self) -> Self {
+        let mut cloned = self.clone();
+        cloned.version = Some(cloned.version.unwrap_or_default() + 1);
+        cloned
+    }
+
+    fn clone_with_initial_version(&self) -> Self {
+        let mut cloned = self.clone();
+        cloned.version = Some(1);
+        cloned
+    }
+}
+
 impl StoredUserProfile {
     #[must_use]
     pub fn from_timestamp(now: Timestamp) -> StoredUserProfile {
@@ -68,6 +86,28 @@ impl StoredUserProfile {
             updated_timestamp: now,
             version: None,
         }
+    }
+
+    #[must_use]
+    pub fn add_credential(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        credential_type: &CredentialType,
+    ) -> Result<StoredUserProfile, String> {
+        if profile_version != self.version {
+            return Err("User version is not matching".to_string());
+        }
+        let mut new_profile = self.clone_with_incremented_version();
+        let user_credential = UserCredential {
+            credential_type: credential_type.clone(),
+            verified_date_timestamp: Some(now),
+        };
+        let mut new_credentials = new_profile.credentials.clone();
+        new_credentials.insert(credential_type.clone(), user_credential);
+        new_profile.credentials = new_credentials;
+        new_profile.updated_timestamp = now;
+        Ok(new_profile)
     }
 }
 

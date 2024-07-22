@@ -530,11 +530,12 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
         &vc_flow_signers,
         &request.credential_spec,
         &root_pk_raw,
-        current_time_ns,
+        current_time_ns as u128,
     ) {
         Ok(()) => mutate_state(|s| {
             add_credential(
                 stored_principal,
+                request.current_user_version,
                 &credential_type,
                 &mut s.user_profile,
                 &mut s.user_profile_updated,
