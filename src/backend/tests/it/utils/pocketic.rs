@@ -2,9 +2,11 @@ use crate::utils::mock::CALLER;
 use candid::{decode_one, encode_one, CandidType, Principal};
 use pocket_ic::{CallError, PocketIc, WasmResult};
 use serde::Deserialize;
-use shared::types::{Arg, InitArg};
+use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::env;
 use std::fs::read;
+
+use super::mock::{II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
 
@@ -99,7 +101,13 @@ fn init_arg() -> Arg {
         ecdsa_key_name: format!("master_ecdsa_public_key_{}", SUBNET_ID).to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
-        supported_credentials: None,
+        supported_credentials: Some(vec![SupportedCredential {
+            ii_canister_id: II_CANISTER_ID.to_string(),
+            ii_origin: II_ORIGIN.to_string(),
+            issuer_canister_id: ISSUER_CANISTER_ID.to_string(),
+            issuer_origin: ISSUER_ORIGIN.to_string(),
+            credential_type: CredentialType::ProofOfUniqueness,
+        }]),
     })
 }
 

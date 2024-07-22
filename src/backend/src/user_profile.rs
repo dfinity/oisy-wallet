@@ -1,7 +1,10 @@
 use crate::{Candid, StoredPrincipal, VMem};
 use ic_cdk::api::time;
 use ic_stable_structures::StableBTreeMap;
-use shared::types::user_profile::{GetUserProfileError, StoredUserProfile};
+use shared::types::{
+    user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
+    CredentialType, Version,
+};
 
 pub fn get_profile(
     principal: StoredPrincipal,
@@ -33,5 +36,27 @@ pub fn create_profile(
         user_profile_updated_map.insert(principal, now);
         user_profile_map.insert((now, principal), Candid(default_profile.clone()));
         default_profile
+    }
+}
+
+pub fn add_credential(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    credential_type: &CredentialType,
+    user_profile_map: &mut StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
+    user_profile_updated_map: &mut StableBTreeMap<StoredPrincipal, u64, VMem>,
+) -> Result<(), AddUserCredentialError> {
+    if let Ok(user_profile) = get_profile(principal, user_profile_map, user_profile_updated_map) {
+        let now = time();
+        if let Ok(new_profile) = user_profile.add_credential(profile_version, now, credential_type)
+        {
+            user_profile_updated_map.insert(principal, now);
+            user_profile_map.insert((now, principal), Candid(new_profile));
+            Ok(())
+        } else {
+            Err(AddUserCredentialError::VersionMismatch)
+        }
+    } else {
+        Err(AddUserCredentialError::UserNotFound)
     }
 }

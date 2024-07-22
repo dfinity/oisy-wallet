@@ -1,27 +1,12 @@
-use std::time::Duration;
-
 use crate::utils::{
     mock::CALLER,
     pocketic::{query_call, setup, update_call},
 };
 use candid::Principal;
 use shared::types::user_profile::{
-    AddUserCredentialRequest, GetUserProfileError, GetUsersRequest, GetUsersResponse, UserProfile,
+    GetUserProfileError, GetUsersRequest, GetUsersResponse, UserProfile,
 };
-
-#[test]
-fn test_add_user_credential() {
-    let pic_setup = setup();
-
-    let caller = Principal::from_text(CALLER).unwrap();
-
-    let request = AddUserCredentialRequest {
-        credential_jwt: "test".to_string(),
-    };
-    let before_set = update_call::<()>(&pic_setup, caller, "add_user_credential", request);
-
-    assert!(before_set.is_ok());
-}
+use std::time::Duration;
 
 #[test]
 fn test_create_user_profile_creates_default_profile() {

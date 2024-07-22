@@ -15,10 +15,29 @@ export const idlFactory = ({ IDL }) => {
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
-	const AddUserCredentialRequest = IDL.Record({ credential_jwt: IDL.Text });
+	const ArgumentValue = IDL.Variant({ Int: IDL.Int32, String: IDL.Text });
+	const CredentialSpec = IDL.Record({
+		arguments: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, ArgumentValue))),
+		credential_type: IDL.Text
+	});
+	const AddUserCredentialRequest = IDL.Record({
+		credential_jwt: IDL.Text,
+		issuer_canister_id: IDL.Principal,
+		current_user_version: IDL.Opt(IDL.Nat64),
+		credential_spec: CredentialSpec
+	});
+	const AddUserCredentialError = IDL.Variant({
+		InvalidCredential: IDL.Null,
+		VersionMismatch: IDL.Null,
+		ConfigurationError: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const Result = IDL.Variant({
+		Ok: IDL.Null,
+		Err: AddUserCredentialError
+	});
 	const UserCredential = IDL.Record({
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
-		expire_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
 	const UserProfile = IDL.Record({
@@ -51,7 +70,7 @@ export const idlFactory = ({ IDL }) => {
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
-	const Result = IDL.Variant({
+	const Result_1 = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
@@ -112,12 +131,12 @@ export const idlFactory = ({ IDL }) => {
 		nonce: IDL.Nat
 	});
 	return IDL.Service({
-		add_user_credential: IDL.Func([AddUserCredentialRequest], [], []),
+		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		get_user_profile: IDL.Func([], [Result], ['query']),
+		get_user_profile: IDL.Func([], [Result_1], ['query']),
 		get_users: IDL.Func([GetUsersRequest], [GetUsersResponse], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),

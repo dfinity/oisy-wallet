@@ -16,6 +16,7 @@ ic-canister-sig-creation = { workspace = true }
 ic-cdk = { workspace = true }
 ic-cdk-macros = { workspace = true }
 ic-stable-structures = { workspace = true }
+ic-verifiable-credentials = { workspace = true }
 k256 = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
