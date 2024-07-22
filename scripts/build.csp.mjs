@@ -150,7 +150,7 @@ const updateCSP = (indexHtml) => {
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc};
         manifest-src 'self';
-        script-src 'unsafe-eval' 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
+        script-src 'strict-dynamic' ${indexHashes.join(' ')};
         base-uri 'self';
         form-action 'none';
         style-src 'self' 'unsafe-inline';
