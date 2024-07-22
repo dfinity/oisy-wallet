@@ -26,8 +26,8 @@ case $ENV in
     ;;
 esac
 
-II_CANISTER_ID="$(dfx canister id internet_identity --network "$ENV")"
-POUH_ISSUER_CANISTER_ID="$(dfx canister id pouh_issuer --network "$ENV")"
+II_CANISTER_ID="$(dfx canister id internet_identity --network "${ENV:-local}")"
+POUH_ISSUER_CANISTER_ID="$(dfx canister id pouh_issuer --network "${ENV:-local}")"
 # URL used by II-issuer in the id_alias-verifiable credentials (hard-coded in II)
 # Represents more an ID than a URL
 II_VC_URL="https://identity.ic0.app"
