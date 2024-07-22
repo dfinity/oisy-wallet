@@ -137,7 +137,7 @@
 		"title": "Current network. Access to selection.",
 		"show_testnets": "Show test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion"
+		"chain_fusion": "Chain Fusion (all networks)"
 	},
 	"receive": {
 		"text": {
@@ -425,6 +425,7 @@
 			"reject": "Reject",
 			"connect": "Connect",
 			"connecting": "Connecting...",
+			"disconnect": "Disconnect",
 			"scan_qr": "Scan QR code",
 			"or_use_uri": "or use WalletConnect uri",
 			"proposer": "Proposer",

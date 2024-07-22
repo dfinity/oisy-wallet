@@ -376,6 +376,7 @@ interface I18nWallet_connect {
 		reject: string;
 		connect: string;
 		connecting: string;
+		disconnect: string;
 		scan_qr: string;
 		or_use_uri: string;
 		proposer: string;
