@@ -33,12 +33,7 @@ interface I18nNavigation {
 }
 
 interface I18nAuth {
-	text: {
-		title: string;
-		authenticate_with: string;
-		authenticate: string;
-		logout: string;
-	};
+	text: { title: string; authenticate_with: string; authenticate: string; logout: string };
 	alt: { sign_in: string };
 	error: {
 		no_internet_identity: string;
@@ -104,7 +99,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { use_with_caution: string; learn_more_about_erc20_icp: string };
+	text: { use_with_caution: string; learn_more_about_erc20_icp: string; never_download: string };
 }
 
 interface I18nSettings {
