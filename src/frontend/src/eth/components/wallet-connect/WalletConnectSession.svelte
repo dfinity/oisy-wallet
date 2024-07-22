@@ -25,6 +25,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -330,12 +331,16 @@
 
 		close();
 	};
+
+	$: walletConnectPaired.set(nonNullish(listener));
+
+	onDestroy(() => walletConnectPaired.set(false));
 </script>
 
-{#if isNullish(listener)}
-	<WalletConnectButton on:click={modalStore.openWalletConnectAuth}>Connect</WalletConnectButton>
-{:else}
-	<WalletConnectButton on:click={disconnect}>Disconnect</WalletConnectButton>
+{#if nonNullish(listener)}
+	<WalletConnectButton on:click={disconnect}
+		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
+	>
 {/if}
 
 {#if $modalWalletConnectAuth}
