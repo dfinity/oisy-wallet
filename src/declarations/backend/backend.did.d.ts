@@ -4,11 +4,13 @@ import type { Principal } from '@dfinity/principal';
 
 export type AddUserCredentialError =
 	| { InvalidCredential: null }
+	| { VersionMismatch: null }
 	| { ConfigurationError: null }
 	| { UserNotFound: null };
 export interface AddUserCredentialRequest {
 	credential_jwt: string;
 	issuer_canister_id: Principal;
+	current_user_version: [] | [bigint];
 	credential_spec: CredentialSpec;
 }
 export type Arg = { Upgrade: null } | { Init: InitArg };

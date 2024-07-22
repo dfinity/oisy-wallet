@@ -1,11 +1,13 @@
 type AddUserCredentialError = variant {
   InvalidCredential;
+  VersionMismatch;
   ConfigurationError;
   UserNotFound;
 };
 type AddUserCredentialRequest = record {
   credential_jwt : text;
   issuer_canister_id : principal;
+  current_user_version : opt nat64;
   credential_spec : CredentialSpec;
 };
 type Arg = variant { Upgrade; Init : InitArg };

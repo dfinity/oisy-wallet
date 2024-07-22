@@ -23,10 +23,12 @@ export const idlFactory = ({ IDL }) => {
 	const AddUserCredentialRequest = IDL.Record({
 		credential_jwt: IDL.Text,
 		issuer_canister_id: IDL.Principal,
+		current_user_version: IDL.Opt(IDL.Nat64),
 		credential_spec: CredentialSpec
 	});
 	const AddUserCredentialError = IDL.Variant({
 		InvalidCredential: IDL.Null,
+		VersionMismatch: IDL.Null,
 		ConfigurationError: IDL.Null,
 		UserNotFound: IDL.Null
 	});
