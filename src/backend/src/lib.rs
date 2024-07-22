@@ -22,6 +22,7 @@ use ic_stable_structures::{
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
+use oisy_user::get_oisy_users;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
@@ -42,6 +43,7 @@ use user_profile::{add_credential, create_profile, get_profile};
 mod assertions;
 mod config;
 mod guards;
+mod oisy_user;
 mod token;
 mod user_profile;
 
@@ -60,7 +62,6 @@ const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
 const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
 const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 
-const DEFAULT_LIMIT_GET_USERS_RESPONSE: u64 = 10_000;
 const MAX_SYMBOL_LENGTH: usize = 20;
 
 thread_local! {
@@ -162,6 +163,12 @@ impl Storable for StoredPrincipal {
         Self(Principal::from_slice(
             Blob::<29>::from_bytes(bytes).as_slice(),
         ))
+    }
+}
+
+impl StoredPrincipal {
+    fn clone_principal(self) -> Principal {
+        self.0.clone()
     }
 }
 
@@ -580,14 +587,14 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 #[query(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
 fn get_users(request: GetUsersRequest) -> GetUsersResponse {
-    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2650
     // WARNING: The value `DEFAULT_LIMIT_GET_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
-    let users: Vec<OisyUser> = Vec::new();
+
+    let (users, limit_users_size): (Vec<OisyUser>, u64) =
+        read_state(|s| get_oisy_users(request, &s.user_profile));
+
     GetUsersResponse {
         users,
-        matches_max_length: request
-            .matches_max_length
-            .unwrap_or(DEFAULT_LIMIT_GET_USERS_RESPONSE),
+        matches_max_length: limit_users_size,
     }
 }
 
