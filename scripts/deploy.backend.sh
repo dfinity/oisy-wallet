@@ -45,9 +45,9 @@ if [ -n "${ENV+1}" ]; then
             record {
               credential_type = variant { ProofOfUniqueness };
               ii_origin = \"$II_VC_URL\";
-              ii_canister_id = \"$II_CANISTER_ID\";
+              ii_canister_id = principal \"$II_CANISTER_ID\";
               issuer_origin = \"$POUH_ISSUER_VC_URL\";
-              issuer_canister_id = \"$POUH_ISSUER_CANISTER_ID\";
+              issuer_canister_id = principal \"$POUH_ISSUER_CANISTER_ID\";
             }
          };
          ic_root_key_der = $ic_root_key_der;
@@ -62,9 +62,9 @@ else
             record {
               credential_type = variant { ProofOfUniqueness };
               ii_origin = \"$II_VC_URL\";
-              ii_canister_id = \"$II_CANISTER_ID\";
+              ii_canister_id = principal \"$II_CANISTER_ID\";
               issuer_origin = \"$POUH_ISSUER_VC_URL\";
-              issuer_canister_id = \"$POUH_ISSUER_CANISTER_ID\";
+              issuer_canister_id = principal \"$POUH_ISSUER_CANISTER_ID\";
             }
          };
          ic_root_key_der = $ic_root_key_der;
