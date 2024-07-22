@@ -10,8 +10,8 @@
 	const dispatch = createEventDispatcher();
 
 	const openModal = () => {
+		dispatch('icOpenAboutModal');
 		modalStore.openAboutHow();
-		dispatch('click');
 	};
 </script>
 

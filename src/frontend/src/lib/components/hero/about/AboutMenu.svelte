@@ -30,8 +30,8 @@
 
 	<Popover bind:visible anchor={button} direction="rtl">
 		<ul class="flex flex-col gap-4 list-none">
-			<li><AboutWhat asMenuItem on:click={hidePopover} /></li>
-			<li><AboutHow asMenuItem on:click={hidePopover} /></li>
+			<li><AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} /></li>
+			<li><AboutHow asMenuItem on:icOpenAboutModal={hidePopover} /></li>
 		</ul>
 	</Popover>
 </div>
