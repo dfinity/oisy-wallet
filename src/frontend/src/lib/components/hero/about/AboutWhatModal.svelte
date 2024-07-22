@@ -6,6 +6,7 @@
 	import IconIncognito from '$lib/components/icons/IconIncognito.svelte';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import CoverWhat from '$lib/assets/cover-features.png';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -14,6 +15,7 @@
 	>
 
 	<div class="stretch">
+		<img src={CoverWhat} alt={$i18n.about.what.text.title} class="mt-4" />
 
 		<p class="mt-6">
 			<IconCrypto />
