@@ -3,6 +3,9 @@
 	import { Html, Modal } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import IconIncognito from '$lib/components/icons/IconIncognito.svelte';
+	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
+	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -11,21 +14,24 @@
 	>
 
 	<div class="stretch">
-		<h2 class="mt-4">{replaceOisyPlaceholders($i18n.about.what.text.label)}</h2>
 
-		<p class="mt-4">
+		<p class="mt-6">
+			<IconCrypto />
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.hold_crypto)} />
 		</p>
 
-		<p class="mt-4">
+		<p class="mt-6">
+			<IconIncognito />
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.go_incognito)} />
 		</p>
 
-		<p class="mt-4">
+		<p class="mt-6">
+			<IconWalletConnect />
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.use_eth_dapps)} />
 		</p>
 
-		<p class="my-4 opacity-50">
+		<!-- TODO: Remove the opacity when it will be possible to use IC dapps with Oisy-->
+		<p class="my-6 opacity-50">
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.use_ic_dapps)} />
 		</p>
 	</div>
