@@ -9,6 +9,6 @@
 	disabled={$addressNotLoaded}
 	class:opacity-0={$addressNotLoaded}
 >
-	<IconWalletConnect />
+	<IconWalletConnect size="24" />
 	<span class="font-bold"><slot /></span>
 </button>
