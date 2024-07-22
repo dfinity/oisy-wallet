@@ -22,6 +22,5 @@
 </div>
 
 <ButtonIC on:click={async () => await signIn({})} testId="login-button">
-	<svelte:fragment slot="action">{$i18n.auth.text.authenticate_with}</svelte:fragment>
-	Internet Identity
+	{$i18n.auth.text.authenticate}
 </ButtonIC>
