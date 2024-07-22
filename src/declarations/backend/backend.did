@@ -1,5 +1,17 @@
-type AddUserCredentialRequest = record { credential_jwt : text };
+type AddUserCredentialError = variant {
+  InvalidCredential;
+  VersionMismatch;
+  ConfigurationError;
+  UserNotFound;
+};
+type AddUserCredentialRequest = record {
+  credential_jwt : text;
+  issuer_canister_id : principal;
+  current_user_version : opt nat64;
+  credential_spec : CredentialSpec;
+};
 type Arg = variant { Upgrade; Init : InitArg };
+type ArgumentValue = variant { Int : int32; String : text };
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -12,6 +24,10 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
+type CredentialSpec = record {
+  arguments : opt vec record { text; ArgumentValue };
+  credential_type : text;
+};
 type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
   token : Token;
@@ -57,7 +73,8 @@ type OisyUser = record {
   pouh_verified : bool;
   updated_timestamp : nat64;
 };
-type Result = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result = variant { Ok; Err : AddUserCredentialError };
+type Result_1 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -78,7 +95,6 @@ type SupportedCredential = record {
 type Token = variant { Icrc : IcrcToken };
 type UserCredential = record {
   verified_date_timestamp : opt nat64;
-  expire_date_timestamp : opt nat64;
   credential_type : CredentialType;
 };
 type UserProfile = record {
@@ -97,12 +113,12 @@ type UserToken = record {
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
-  add_user_credential : (AddUserCredentialRequest) -> ();
+  add_user_credential : (AddUserCredentialRequest) -> (Result);
   caller_eth_address : () -> (text);
   create_user_profile : () -> (UserProfile);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
-  get_user_profile : () -> (Result) query;
+  get_user_profile : () -> (Result_1) query;
   get_users : (GetUsersRequest) -> (GetUsersResponse) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;

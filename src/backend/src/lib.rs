@@ -2,6 +2,7 @@ use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
+use config::get_credential_config;
 use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
@@ -12,12 +13,14 @@ use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
+use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
     storable::{Blob, Bound, Storable},
     DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
+use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
@@ -27,16 +30,17 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
-    AddUserCredentialRequest, GetUserProfileError, GetUsersRequest, GetUsersResponse, OisyUser,
-    StoredUserProfile, UserProfile,
+    AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, GetUsersRequest,
+    GetUsersResponse, OisyUser, StoredUserProfile, UserProfile,
 };
 use shared::types::{Arg, InitArg, SupportedCredential, Timestamp};
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
-use user_profile::{create_profile, get_profile};
+use user_profile::{add_credential, create_profile, get_profile};
 
 mod assertions;
+mod config;
 mod guards;
 mod token;
 mod user_profile;
@@ -511,9 +515,34 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
-#[allow(unused_variables)]
-fn add_user_credential(request: AddUserCredentialRequest) {
-    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2649
+fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+    let current_time_ns = time() as u128;
+
+    let (vc_flow_signers, root_pk_raw, credential_type) =
+        read_config(|config| get_credential_config(&request, config))
+            .ok_or(AddUserCredentialError::ConfigurationError)?;
+
+    match validate_ii_presentation_and_claims(
+        &request.credential_jwt,
+        user_principal,
+        &vc_flow_signers,
+        &request.credential_spec,
+        &root_pk_raw,
+        current_time_ns as u128,
+    ) {
+        Ok(()) => mutate_state(|s| {
+            add_credential(
+                stored_principal,
+                request.current_user_version,
+                &credential_type,
+                &mut s.user_profile,
+                &mut s.user_profile_updated,
+            )
+        }),
+        Err(_) => Err(AddUserCredentialError::InvalidCredential),
+    }
 }
 
 /// It create a new user profile for the caller.

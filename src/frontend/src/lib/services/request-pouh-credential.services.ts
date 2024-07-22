@@ -26,8 +26,7 @@ const handleSuccess = async (
 		// TODO: GIX-2646 Add credential to backend and load user profile
 		const fakeTemporaryCredentialSummary: UserCredential = {
 			credential_type: { [POUH_CREDENTIAL_TYPE]: null },
-			verified_date_timestamp: [BigInt(Date.now())],
-			expire_date_timestamp: [BigInt(Date.now() + 1000 * 60 * 60 * 24 * 365)]
+			verified_date_timestamp: [BigInt(Date.now())]
 		};
 		const fakeUserProfile: UserProfile = {
 			credentials: [fakeTemporaryCredentialSummary],

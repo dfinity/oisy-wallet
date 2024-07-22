@@ -125,13 +125,13 @@ pub mod user_profile {
     use super::{CredentialType, Timestamp};
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
+    use ic_verifiable_credentials::issuer_api::CredentialSpec;
     use std::collections::BTreeMap;
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserCredential {
         pub credential_type: CredentialType,
         pub verified_date_timestamp: Option<Timestamp>,
-        pub expire_date_timestamp: Option<Timestamp>,
     }
 
     // Used in the endpoint
@@ -154,6 +154,17 @@ pub mod user_profile {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct AddUserCredentialRequest {
         pub credential_jwt: String,
+        pub credential_spec: CredentialSpec,
+        pub issuer_canister_id: Principal,
+        pub current_user_version: Option<Version>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum AddUserCredentialError {
+        InvalidCredential,
+        ConfigurationError,
+        UserNotFound,
+        VersionMismatch,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
