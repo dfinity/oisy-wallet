@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+npm rm @dfinity/agent @dfinity/auth-client @dfinity/candid @dfinity/principal @dfinity/ckbtc @dfinity/cketh @dfinity/ic-management @dfinity/ledger-icp @dfinity/ledger-icrc @dfinity/utils
+
+npm rm @dfinity/identity-secp256k1 -D
+
+npm i @dfinity/agent@1.4.0 @dfinity/auth-client@1.4.0 @dfinity/candid@1.4.0 @dfinity/principal@1.4.0 @dfinity/ckbtc@next @dfinity/cketh@next @dfinity/ic-management@next @dfinity/ledger-icp@next @dfinity/ledger-icrc@next @dfinity/utils@next
+
+npm i @dfinity/identity-secp256k1@1.4.0 -D
