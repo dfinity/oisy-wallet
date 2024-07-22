@@ -3,7 +3,9 @@ use std::fmt;
 
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
 use crate::types::token::UserToken;
-use crate::types::user_profile::{StoredUserProfile, UserCredential, UserProfile};
+use crate::types::user_profile::{
+    AddUserCredentialError, StoredUserProfile, UserCredential, UserProfile,
+};
 use crate::types::{CredentialType, Timestamp, TokenVersion, Version};
 
 impl From<&Token> for CustomTokenId {
@@ -88,15 +90,17 @@ impl StoredUserProfile {
         }
     }
 
-    #[must_use]
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
     pub fn add_credential(
         &self,
         profile_version: Option<Version>,
         now: Timestamp,
         credential_type: &CredentialType,
-    ) -> Result<StoredUserProfile, String> {
+    ) -> Result<StoredUserProfile, AddUserCredentialError> {
         if profile_version != self.version {
-            return Err("User version is not matching".to_string());
+            return Err(AddUserCredentialError::VersionMismatch);
         }
         let mut new_profile = self.clone_with_incremented_version();
         let user_credential = UserCredential {
