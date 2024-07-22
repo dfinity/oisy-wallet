@@ -22,7 +22,7 @@
 	{:else}
 		<div class="flex p-4 items-center text-off-white">
 			<OisyWalletLogo />
-			{#if authNotSignedIn}
+			{#if $authNotSignedIn}
 				<div
 					class="absolute max-w-[3rem] leading-none text-[8px] uppercase font-semibold translate-x-[112%] translate-y-[130%] hidden md:flex"
 				>
