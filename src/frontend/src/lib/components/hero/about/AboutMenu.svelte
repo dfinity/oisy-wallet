@@ -11,6 +11,8 @@
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
+
+	const hidePopover = () => (visible = false);
 </script>
 
 <div class="hidden md:flex gap-4">
@@ -28,8 +30,8 @@
 
 	<Popover bind:visible anchor={button} direction="rtl">
 		<ul class="flex flex-col gap-4 list-none">
-			<li><AboutWhat asMenuItem on:click={() => (visible = false)} /></li>
-			<li><AboutHow asMenuItem on:click={() => (visible = false)} /></li>
+			<li><AboutWhat asMenuItem on:click={hidePopover} /></li>
+			<li><AboutHow asMenuItem on:click={hidePopover} /></li>
 		</ul>
 	</Popover>
 </div>

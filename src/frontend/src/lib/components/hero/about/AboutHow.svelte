@@ -3,11 +3,19 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { createEventDispatcher } from 'svelte';
 
 	export let asMenuItem = false;
+
+	const dispatch = createEventDispatcher();
+
+	const openModal = () => {
+		modalStore.openAboutHow();
+		dispatch('click');
+	};
 </script>
 
-<AboutItem openModal={modalStore.openAboutHow} {asMenuItem} on:click>
+<AboutItem {asMenuItem} on:click={openModal}>
 	<span slot="label"
 		>{replaceOisyPlaceholders(
 			asMenuItem ? $i18n.about.how.text.sub_title : $i18n.about.how.text.title
