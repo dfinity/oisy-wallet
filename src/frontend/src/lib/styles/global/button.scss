@@ -10,7 +10,7 @@ button {
 		cursor: pointer;
 	}
 
-	--button-border-radius: var(--border-radius-sm);
+	--button-border-radius: var(--border-radius-xs);
 	border-radius: var(--button-border-radius);
 
 	transition:
@@ -40,7 +40,7 @@ button {
 	}
 
 	&.primary {
-		background: var(--color-blue);
+		background: var(--color-dodger-blue);
 		color: var(--color-white);
 	}
 
