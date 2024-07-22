@@ -480,8 +480,8 @@ interface I18nAbout {
 	text: { title: string };
 	what: {
 		text: {
+			label: string;
 			title: string;
-			sub_title: string;
 			hold_crypto: string;
 			go_incognito: string;
 			use_eth_dapps: string;
@@ -490,8 +490,8 @@ interface I18nAbout {
 	};
 	how: {
 		text: {
+			label: string;
 			title: string;
-			sub_title: string;
 			cross_device: string;
 			self_custody: string;
 			fully_on_chain: string;
