@@ -11,18 +11,26 @@
 	</svelte:fragment>
 
 	<div class="stretch">
-		<h2 class="mt-4">{replaceOisyPlaceholders($i18n.about.how.text.sub_title)}</h2>
+		<h2 class="mt-4">{replaceOisyPlaceholders($i18n.about.how.text.label)}</h2>
+
+		<p class="mt-4">
+			<Html text={replaceOisyPlaceholders($i18n.about.how.text.self_custody)} />
+		</p>
+
+		<p class="mt-4">
+			<Html text={replaceOisyPlaceholders($i18n.about.how.text.fully_on_chain)} />
+		</p>
 
 		<p class="mt-4">
 			<Html text={replaceOisyPlaceholders($i18n.about.how.text.cross_device)} />
 		</p>
 
 		<p class="mt-4">
-			<Html text={replaceOisyPlaceholders($i18n.about.how.text.self_custody)} />
+			<Html text={replaceOisyPlaceholders($i18n.about.how.text.verifiable_credentials)} />
 		</p>
 
 		<p class="my-4">
-			<Html text={replaceOisyPlaceholders($i18n.about.how.text.fully_on_chain)} />
+			<Html text={replaceOisyPlaceholders($i18n.about.how.text.open_source)} />
 		</p>
 	</div>
 

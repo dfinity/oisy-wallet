@@ -492,9 +492,11 @@ interface I18nAbout {
 		text: {
 			label: string;
 			title: string;
-			cross_device: string;
 			self_custody: string;
 			fully_on_chain: string;
+			cross_device: string;
+			verifiable_credentials: string;
+			open_source: string;
 		};
 	};
 }

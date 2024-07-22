@@ -11,7 +11,7 @@
 	>
 
 	<div class="stretch">
-		<h2 class="mt-4">{replaceOisyPlaceholders($i18n.about.what.text.sub_title)}</h2>
+		<h2 class="mt-4">{replaceOisyPlaceholders($i18n.about.what.text.label)}</h2>
 
 		<p class="mt-4">
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.hold_crypto)} />
@@ -25,7 +25,7 @@
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.use_eth_dapps)} />
 		</p>
 
-		<p class="my-4">
+		<p class="my-4 opacity-50">
 			<Html text={replaceOisyPlaceholders($i18n.about.what.text.use_ic_dapps)} />
 		</p>
 	</div>
