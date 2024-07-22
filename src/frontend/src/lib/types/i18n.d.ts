@@ -477,6 +477,31 @@ interface I18nTransactions {
 	};
 }
 
+interface I18nAbout {
+	text: { title: string };
+	what: {
+		text: {
+			label: string;
+			title: string;
+			hold_crypto: string;
+			go_incognito: string;
+			use_eth_dapps: string;
+			use_ic_dapps: string;
+		};
+	};
+	how: {
+		text: {
+			label: string;
+			title: string;
+			self_custody: string;
+			fully_on_chain: string;
+			cross_device: string;
+			verifiable_credentials: string;
+			open_source: string;
+		};
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -496,4 +521,5 @@ interface I18n {
 	wallet_connect: I18nWallet_connect;
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
+	about: I18nAbout;
 }

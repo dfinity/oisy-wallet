@@ -110,7 +110,8 @@ button {
 
 	&.user,
 	&.token,
-	&.wallet-connect {
+	&.wallet-connect,
+	&.about {
 		&.icon {
 			padding: 0;
 			border-radius: 50%;
@@ -166,5 +167,10 @@ button {
 				}
 			}
 		}
+	}
+
+	&.about {
+		background: rgba(0, 0, 0, 0.3);
+		border: 1px solid rgba(255, 255, 255, 0.3);
 	}
 }

@@ -536,5 +536,31 @@
 			"get_transaction_for_hash": "Failed to get the transaction from the provided (hash: $hash).",
 			"unexpected_transaction_for_hash": "Something went wrong while loading the pending for hash: $hash."
 		}
+	},
+	"about": {
+		"text": {
+			"title": "About $oisy_name"
+		},
+		"what": {
+			"text": {
+				"label": "What can I do with my wallet?",
+				"title": "Features",
+				"hold_crypto": "<strong>Hold crypto across networks</strong><br>Manage and transact with native Ethereum, Bitcoin <i>(coming soon)</i>, and Internet Computer assets. Powered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/chainfusion\">Chain Fusion</a>.",
+				"go_incognito": "<strong>Go incognito</strong><br>When you close the $oisy_name window in your browser in incognito mode, no one can detect your wallet on your phone. This way, no one can steal your funds by accessing your phone.",
+				"use_eth_dapps": "<strong>Use with Ethereum dapps</strong><br>$oisy_name is fully compatible with Ethereum Defi like <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://uniswap.org/\">Uniswap</a> thanks to the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://walletconnect.com/\">WalletConnect</a> framework.",
+				"use_ic_dapps": "<strong>Use with Internet Computer dapps (coming soon)</strong><br>Use your $oisy_name wallet in any <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/ecosystem\">dapp on the Internet Computer</a> that supports the signer standards, including <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://oc.app/\">OpenChat</a>, <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://www.icpswap.com/\">ICPSwap</a>, and the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://nns.ic0.app/\">NNS dapp</a>."
+			}
+		},
+		"how": {
+			"text": {
+				"label": "How does $oisy_name work?",
+				"title": "How does $oisy_name work?",
+				"self_custody": "<strong>Self-custody</strong><br>The key controlling your multi-chain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/smart-contracts/signatures/t-ecdsa\">threshold ECDSA</a>.",
+				"fully_on_chain": "<strong>Fully on-chain</strong><br>Not only the keys but the entire wallet application is <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">stored on chain</a> and served directly into users’ browsers from ICP. Therefore the entire wallet is secured by a decentralized trust model making it tamper-proof.",
+				"cross_device": "<strong>Cross-device</strong><br>Using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a> means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
+				"verifiable_credentials": "<strong>Compatible with verifiable credentials</strong><br>$oisy_name is designed to integrate with Internet Computer’s <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials platform</a>. Users can access additional functionality, like airdrops, if they acquire credentials of a certain type.",
+				"open_source": "<strong>Open source</strong><br>Oisy is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organisation’s 200 world-leading cryptographers and engineers."
+			}
+		}
 	}
 }
