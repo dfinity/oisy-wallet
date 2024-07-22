@@ -25,7 +25,8 @@ export default {
 			cyclamen: '#ea6c99',
 			'medium-purple': '#8969d5',
 			platinum: '#e4e4e4',
-			'mountain-meadow': '#30af91'
+			'mountain-meadow': '#30af91',
+			'dodger-blue': '#1e90ff'
 		}
 	},
 	plugins: []
