@@ -9,10 +9,10 @@
 </script>
 
 <div class="flex -space-x-2.5 mt-6 xl:mt-12">
-	<div class="z-0"><IconHeaderICP /></div>
-	<div class="z-10"><IconHeaderBTC /></div>
-	<div class="z-20"><IconHeaderETH /></div>
-	<div class="z-30"><IconHeaderUSDC /></div>
+	<div><IconHeaderICP /></div>
+	<div><IconHeaderBTC /></div>
+	<div><IconHeaderETH /></div>
+	<div><IconHeaderUSDC /></div>
 </div>
 
 <div class="mt-5 mb-10 pt-2">
