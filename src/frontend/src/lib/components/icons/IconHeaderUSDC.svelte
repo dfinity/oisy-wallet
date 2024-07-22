@@ -1,3 +1,4 @@
+<!-- source: DFINITY foundation -->
 <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
 	<path
 		d="M18 36C27.9751 36 36 27.9751 36 18C36 8.02494 27.9751 0 18 0C8.02494 0 0 8.02494 0 18C0 27.9751 8.02494 36 18 36Z"
