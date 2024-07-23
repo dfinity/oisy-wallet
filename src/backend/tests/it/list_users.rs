@@ -8,8 +8,8 @@ use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
 use pocket_ic::PocketIc;
 use shared::types::user_profile::{
-    AddUserCredentialError, AddUserCredentialRequest, ListUsersRequest, ListUsersResponse, OisyUser,
-    UserProfile,
+    AddUserCredentialError, AddUserCredentialRequest, ListUsersRequest, ListUsersResponse,
+    OisyUser, UserProfile,
 };
 
 fn create_users(pic_setup: &(PocketIc, Principal), start: u8, end: u8) {
@@ -30,7 +30,8 @@ fn test_list_users_cannot_be_called_if_not_allowed() {
         matches_max_length: None,
         updated_after_timestamp: None,
     };
-    let list_users_response = query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
+    let list_users_response =
+        query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
 
     assert!(list_users_response.is_err(),);
 }
@@ -64,7 +65,8 @@ fn test_list_users_returns_users() {
         matches_max_length: None,
         updated_after_timestamp: None,
     };
-    let list_users_response = query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
+    let list_users_response =
+        query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
 
     let results_users = list_users_response.expect("Call failed").users;
     assert_eq!(results_users.len(), expected_users.len(),);
@@ -183,10 +185,10 @@ fn test_list_users_returns_requested_users_count() {
     let list_users_response =
         query_call::<ListUsersResponse>(&new_pic_setup, caller, "list_users", arg);
 
-    assert_eq!(
-        list_users_response.expect("Call failed").users.len(),
-        requested_count as usize,
-    );
+    let users_response_count = list_users_response.expect("Call failed").users.len();
+
+    assert!(users_response_count < requested_count as usize,);
+    assert_eq!(users_response_count, users_count_after_timestamp as usize,);
 }
 
 #[test]
@@ -203,7 +205,8 @@ fn test_list_users_returns_less_than_requested_users_count() {
         matches_max_length: Some(requested_count),
         updated_after_timestamp: None,
     };
-    let list_users_response = query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
+    let list_users_response =
+        query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
 
     assert_eq!(
         list_users_response.expect("Call failed").users.len(),
@@ -251,7 +254,8 @@ fn test_list_users_returns_pouh_credential() {
         matches_max_length: None,
         updated_after_timestamp: None,
     };
-    let list_users_response = query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
+    let list_users_response =
+        query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
     let users = list_users_response.expect("Call list_users failed").users;
 
     assert_eq!(users.len(), 11);
