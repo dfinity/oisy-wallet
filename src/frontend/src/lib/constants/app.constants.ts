@@ -43,9 +43,6 @@ export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
 export const AUTH_POPUP_WIDTH = 576;
 export const AUTH_POPUP_HEIGHT = 625;
-export const VC_POPUP_WIDTH = AUTH_POPUP_WIDTH;
-// The screen to present the credential is higher than the screen to authenticate the user.
-export const VC_POPUP_HEIGHT = 900;
 
 // Workers
 export const AUTH_TIMER_INTERVAL = 1000;
