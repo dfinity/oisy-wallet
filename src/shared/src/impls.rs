@@ -136,7 +136,7 @@ impl From<&StoredUserProfile> for UserProfile {
 
 impl OisyUser {
     #[must_use]
-    pub fn from_profile(user: StoredUserProfile, principal: Principal) -> OisyUser {
+    pub fn from_profile(user: &StoredUserProfile, principal: Principal) -> OisyUser {
         OisyUser {
             principal,
             pouh_verified: user

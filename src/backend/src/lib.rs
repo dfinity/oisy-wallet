@@ -166,12 +166,6 @@ impl Storable for StoredPrincipal {
     }
 }
 
-impl StoredPrincipal {
-    fn clone_principal(self) -> Principal {
-        self.0.clone()
-    }
-}
-
 #[derive(CandidType, Deserialize)]
 pub struct Config {
     pub ecdsa_key_name: String,
@@ -590,7 +584,7 @@ fn get_users(request: GetUsersRequest) -> GetUsersResponse {
     // WARNING: The value `DEFAULT_LIMIT_GET_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
 
     let (users, limit_users_size): (Vec<OisyUser>, u64) =
-        read_state(|s| get_oisy_users(request, &s.user_profile));
+        read_state(|s| get_oisy_users(&request, &s.user_profile));
 
     GetUsersResponse {
         users,
