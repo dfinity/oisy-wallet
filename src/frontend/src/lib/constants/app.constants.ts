@@ -7,7 +7,7 @@ export const LOCAL = MODE === 'local';
 export const STAGING = MODE === 'staging';
 export const PROD = MODE === 'ic';
 
-const MAINNET_DOMAIN = 'ic0.app';
+const MAINNET_DOMAIN = 'icp0.io';
 
 export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_INTERNET_IDENTITY_CANISTER_ID
