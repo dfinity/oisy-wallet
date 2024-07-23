@@ -2,11 +2,15 @@ import type { UserCredential, UserProfile } from '$declarations/backend/backend.
 import {
 	INTERNET_IDENTITY_ORIGIN,
 	POUH_ISSUER_CANISTER_ID,
-	POUH_ISSUER_ORIGIN
+	POUH_ISSUER_ORIGIN,
+	VC_POPUP_HEIGHT,
+	VC_POPUP_WIDTH
 } from '$lib/constants/app.constants';
+import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { popupCenter } from '$lib/utils/window.utils';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
@@ -14,9 +18,6 @@ import {
 	type VerifiablePresentationResponse
 } from '@dfinity/verifiable-credentials/request-verifiable-presentation';
 import { get } from 'svelte/store';
-
-// This credential type is defined by the issuer Decide AI
-const POUH_CREDENTIAL_TYPE = 'ProofOfUniqueness';
 
 const handleSuccess = async (
 	response: VerifiablePresentationResponse
@@ -26,8 +27,7 @@ const handleSuccess = async (
 		// TODO: GIX-2646 Add credential to backend and load user profile
 		const fakeTemporaryCredentialSummary: UserCredential = {
 			credential_type: { [POUH_CREDENTIAL_TYPE]: null },
-			verified_date_timestamp: [BigInt(Date.now())],
-			expire_date_timestamp: [BigInt(Date.now() + 1000 * 60 * 60 * 24 * 365)]
+			verified_date_timestamp: [BigInt(Date.now())]
 		};
 		const fakeUserProfile: UserProfile = {
 			credentials: [fakeTemporaryCredentialSummary],
@@ -82,7 +82,8 @@ export const requestPouhCredential = async ({
 			},
 			onSuccess: async (response: VerifiablePresentationResponse) => {
 				resolve(await handleSuccess(response));
-			}
+			},
+			windowOpenerFeatures: popupCenter({ width: VC_POPUP_WIDTH, height: VC_POPUP_HEIGHT })
 		});
 	});
 };
