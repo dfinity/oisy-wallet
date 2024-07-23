@@ -12,6 +12,20 @@ const replaceEnv = ({ html, pattern, value }) => {
 	return html.replace(regex, value);
 };
 
+const parseDomain = (targetFile) => {
+	let content = readFileSync(targetFile, 'utf8');
+
+	// For information such as custom domains, only the domain without protocol is required
+	const { host: value } = new URL(process.env['VITE_OISY_URL'] ?? 'https://oisy.com');
+	content = replaceEnv({
+		html: content,
+		pattern: `{{VITE_OISY_DOMAIN}}`,
+		value
+	});
+
+	writeFileSync(targetFile, content);
+};
+
 const parseMetadata = (targetFile) => {
 	let content = readFileSync(targetFile, 'utf8');
 
@@ -80,6 +94,7 @@ htmlFiles.forEach((htmlFile) => parseMetadata(htmlFile));
 
 parseUrl(join(process.cwd(), 'build', 'sitemap.xml'));
 parseMetadata(join(process.cwd(), 'build', 'manifest.webmanifest'));
+parseDomain(join(process.cwd(), 'build', '.well-known', 'ic-domains'));
 
 // SEO
 htmlFiles.forEach((htmlFile) => removeMetaRobots(htmlFile));
