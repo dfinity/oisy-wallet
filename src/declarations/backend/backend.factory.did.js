@@ -2,9 +2,9 @@
 export const idlFactory = ({ IDL }) => {
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Text,
+		ii_canister_id: IDL.Principal,
 		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Text,
+		issuer_canister_id: IDL.Principal,
 		ii_origin: IDL.Text,
 		credential_type: CredentialType
 	});
@@ -155,9 +155,9 @@ export const idlFactory = ({ IDL }) => {
 export const init = ({ IDL }) => {
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Text,
+		ii_canister_id: IDL.Principal,
 		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Text,
+		issuer_canister_id: IDL.Principal,
 		ii_origin: IDL.Text,
 		credential_type: CredentialType
 	});

@@ -92,9 +92,9 @@ export interface SignRequest {
 	nonce: bigint;
 }
 export interface SupportedCredential {
-	ii_canister_id: string;
+	ii_canister_id: Principal;
 	issuer_origin: string;
-	issuer_canister_id: string;
+	issuer_canister_id: Principal;
 	ii_origin: string;
 	credential_type: CredentialType;
 }
