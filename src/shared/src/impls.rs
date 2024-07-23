@@ -1,10 +1,12 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
+use candid::Principal;
+
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
-    AddUserCredentialError, StoredUserProfile, UserCredential, UserProfile,
+    AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
 };
 use crate::types::{CredentialType, Timestamp, TokenVersion, Version};
 
@@ -128,6 +130,19 @@ impl From<&StoredUserProfile> for UserProfile {
             updated_timestamp: *updated_timestamp,
             version: *version,
             credentials: credentials.clone().into_values().collect(),
+        }
+    }
+}
+
+impl OisyUser {
+    #[must_use]
+    pub fn from_profile(user: &StoredUserProfile, principal: Principal) -> OisyUser {
+        OisyUser {
+            principal,
+            pouh_verified: user
+                .credentials
+                .contains_key(&CredentialType::ProofOfUniqueness),
+            updated_timestamp: user.updated_timestamp,
         }
     }
 }

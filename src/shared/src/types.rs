@@ -168,7 +168,7 @@ pub mod user_profile {
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct GetUsersRequest {
+    pub struct ListUsersRequest {
         pub updated_after_timestamp: Option<Timestamp>,
         pub matches_max_length: Option<u64>,
     }
@@ -181,7 +181,7 @@ pub mod user_profile {
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct GetUsersResponse {
+    pub struct ListUsersResponse {
         pub users: Vec<OisyUser>,
         pub matches_max_length: u64,
     }

@@ -45,14 +45,6 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type GetUserProfileError = { NotFound: null };
-export interface GetUsersRequest {
-	updated_after_timestamp: [] | [bigint];
-	matches_max_length: [] | [bigint];
-}
-export interface GetUsersResponse {
-	users: Array<OisyUser>;
-	matches_max_length: bigint;
-}
 export interface HttpRequest {
 	url: string;
 	method: string;
@@ -73,6 +65,14 @@ export interface InitArg {
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
+}
+export interface ListUsersRequest {
+	updated_after_timestamp: [] | [bigint];
+	matches_max_length: [] | [bigint];
+}
+export interface ListUsersResponse {
+	users: Array<OisyUser>;
+	matches_max_length: bigint;
 }
 export interface OisyUser {
 	principal: Principal;
@@ -128,10 +128,10 @@ export interface _SERVICE {
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_user_profile: ActorMethod<[], Result_1>;
-	get_users: ActorMethod<[GetUsersRequest], GetUsersResponse>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
+	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;

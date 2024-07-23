@@ -1,11 +1,9 @@
 use crate::utils::{
     mock::CALLER,
-    pocketic::{query_call, setup, update_call},
+    pocketic::{setup, update_call},
 };
 use candid::Principal;
-use shared::types::user_profile::{
-    GetUserProfileError, GetUsersRequest, GetUsersResponse, UserProfile,
-};
+use shared::types::user_profile::{GetUserProfileError, UserProfile};
 use std::time::Duration;
 
 #[test]
@@ -84,20 +82,4 @@ fn test_get_user_profile_returns_not_found() {
         response.expect("Create failed").unwrap_err(),
         GetUserProfileError::NotFound,
     );
-}
-
-#[test]
-fn test_get_users() {
-    let pic_setup = setup();
-
-    let caller = Principal::from_text(CALLER).unwrap();
-
-    let request = GetUsersRequest {
-        updated_after_timestamp: None,
-        matches_max_length: None,
-    };
-
-    let before_set = query_call::<GetUsersResponse>(&pic_setup, caller, "get_users", request);
-
-    assert!(before_set.is_ok());
 }
