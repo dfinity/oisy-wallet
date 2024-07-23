@@ -37,8 +37,11 @@ export const networkParam = (networkId: NetworkId | undefined): string =>
 
 export const back = async (params: { networkId: NetworkId | undefined; fromUrl?: URL }) => {
 	const { networkId, fromUrl } = params;
+	const fromUrlExceptSettings = fromUrl?.pathname.includes('settings')
+		? undefined
+		: fromUrl?.toString();
 	const rootUrl =
-		fromUrl?.toString() ?? `/${nonNullish(networkId) ? `?${networkParam(networkId)}` : ''}`;
+		fromUrlExceptSettings ?? `/${nonNullish(networkId) ? `?${networkParam(networkId)}` : ''}`;
 	await goto(rootUrl, { replaceState: 'fromUrl' in params ? nonNullish(fromUrl) : true });
 };
 
