@@ -16,6 +16,7 @@ interface I18nCore {
 		decimals: string;
 		amount: string;
 		max: string;
+		more: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string };
@@ -33,7 +34,7 @@ interface I18nNavigation {
 }
 
 interface I18nAuth {
-	text: { title: string; authenticate_with: string; authenticate: string; logout: string };
+	text: { title: string; authenticate: string; logout: string };
 	alt: { sign_in: string };
 	error: {
 		no_internet_identity: string;
@@ -113,6 +114,11 @@ interface I18nSettings {
 		testnets: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
+		credentials_title: string;
+		pouh_credential: string;
+		pouh_credential_description: string;
+		present_pouh_credential: string;
+		pouh_credential_verified: string;
 		sign_in: string;
 	};
 	alt: { testnets_toggle: string };

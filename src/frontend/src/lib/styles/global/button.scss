@@ -10,7 +10,7 @@ button {
 		cursor: pointer;
 	}
 
-	--button-border-radius: var(--border-radius-sm);
+	--button-border-radius: var(--border-radius-xs);
 	border-radius: var(--button-border-radius);
 
 	transition:
@@ -40,36 +40,14 @@ button {
 	}
 
 	&.primary {
-		background: var(--color-blue);
+		background: var(--color-dodger-blue);
 		color: var(--color-white);
 	}
 
 	&.secondary,
-	&.ic,
 	&.user {
 		background: var(--color-white);
 		color: var(--color-blue);
-	}
-
-	&.ic {
-		width: fit-content;
-		padding: var(--padding-1_5x) var(--padding-8x) var(--padding-1_5x) var(--padding-2x);
-		margin: 0 0 var(--padding-2x);
-
-		span {
-			display: block;
-			line-height: var(--line-height-small);
-
-			span:first-child {
-				font-size: var(--font-size-small);
-				color: var(--color-blue);
-			}
-
-			span:last-child {
-				font-size: var(--font-size-h5);
-				color: var(--color-dark-blue);
-			}
-		}
 	}
 
 	&.hero {

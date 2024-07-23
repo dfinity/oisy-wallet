@@ -12,7 +12,8 @@
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
-			"max": "Max"
+			"max": "Max",
+			"more": "More"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -38,7 +39,6 @@
 	"auth": {
 		"text": {
 			"title": "Securely control your crypto across networks",
-			"authenticate_with": "Authenticate with",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
@@ -128,6 +128,11 @@
 			"testnets": "Show test networks",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
 			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
+			"credentials_title": "Credentials",
+			"pouh_credential": "Humanity Credential",
+			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
+			"present_pouh_credential": "Present",
+			"pouh_credential_verified": "Verified ✅",
 			"sign_in": "Sign in to start using Oisy Wallet."
 		},
 		"alt": {
