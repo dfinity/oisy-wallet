@@ -516,34 +516,9 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
-    // TODO: enable after reinstalling ic-verifiable-credentials when size has been fixed
-    // let current_time_ns = time() as u128;
 
-    // let (vc_flow_signers, root_pk_raw, credential_type) =
-    //     read_config(|config| get_credential_config(&request, config))
-    //         .ok_or(AddUserCredentialError::ConfigurationError)?;
-
-    // match validate_ii_presentation_and_claims(
-    //     &request.credential_jwt,
-    //     user_principal,
-    //     &vc_flow_signers,
-    //     &request.credential_spec,
-    //     &root_pk_raw,
-    //     current_time_ns as u128,
-    // ) {
-    //     Ok(()) => mutate_state(|s| {
-    //         add_credential(
-    //             stored_principal,
-    //             request.current_user_version,
-    //             &credential_type,
-    //             &mut s.user_profile,
-    //             &mut s.user_profile_updated,
-    //         )
-    //     }),
-    //     Err(_) => Err(AddUserCredentialError::InvalidCredential),
-    // }
-
-    // TODO: Remove when previous code is enabled
+    // TODO: Enable verification with ic-verifiable-credentials when size issue has been fixed.
+    // Implementation reference: https://github.com/dfinity/oisy-wallet/pull/1811
     mutate_state(|s| {
         add_credential(
             stored_principal,
