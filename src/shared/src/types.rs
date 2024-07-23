@@ -135,7 +135,7 @@ pub mod custom_token {
 
 /// Types specifics to the user profile.
 pub mod user_profile {
-    use super::{CredentialType, Timestamp};
+    use super::{CredentialSpec, CredentialType, Timestamp};
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
     use std::collections::BTreeMap;
