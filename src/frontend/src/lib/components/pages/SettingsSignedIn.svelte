@@ -1,21 +1,29 @@
 <script lang="ts">
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { KeyValuePairInfo } from '@dfinity/gix-components';
+	import { KeyValuePair, KeyValuePairInfo } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
+	import { userProfileStore } from '$lib/stores/settings.store';
+	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
 
 	let principal: Principal | undefined | null;
 	$: principal = $authStore?.identity?.getPrincipal();
+
+	const getCredential = () => {
+		if (nonNullish(principal)) {
+			requestPouhCredential({ credentialSubject: principal });
+		}
+	};
 </script>
 
 <KeyValuePairInfo>
@@ -79,4 +87,17 @@
 			{$i18n.settings.text.hide_zero_balances_description}
 		</svelte:fragment>
 	</KeyValuePairInfo>
+</div>
+
+<div class="mt-8">
+	<h2 class="text-base mb-6 pb-1">Credentials</h2>
+
+	{#if isNullish($userProfileStore)}
+		<button class="secondary" on:click={getCredential}>Get Credential</button>
+	{:else}
+		<KeyValuePair>
+			<span class="font-bold" slot="key">Proof Of Humanity:</span>
+			<output slot="value" class="mr-1.5"> Verified ✅ </output>
+		</KeyValuePair>
+	{/if}
 </div>
