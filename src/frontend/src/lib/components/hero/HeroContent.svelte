@@ -8,7 +8,6 @@
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
-	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
@@ -18,6 +17,7 @@
 	export let summary = false;
 	export let actions = true;
 	export let send = false;
+	export let more = false;
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
@@ -25,7 +25,7 @@
 
 {#if summary}
 	<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-		<div class="icon flex justify-between items-start mt-6 md:mt-12 mb-0.5 pt-2">
+		<div class="icon flex justify-between items-center mt-6 md:mt-12 mb-0.5 pt-2">
 			<div>
 				{#if displayTokenSymbol}
 					<div in:fade>
@@ -40,8 +40,6 @@
 					<SkeletonLogo size="big" />
 				{/if}
 			</div>
-
-			<ContextMenu />
 		</div>
 
 		<Balance />
@@ -56,7 +54,7 @@
 
 {#if actions}
 	<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-		<Actions {send} />
+		<Actions {send} {more} />
 	</div>
 {/if}
 

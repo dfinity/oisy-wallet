@@ -17,8 +17,10 @@
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import Receive from '$lib/components/receive/Receive.svelte';
+	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 
 	export let send = false;
+	export let more = false;
 
 	let convertEth = false;
 	$: convertEth = send && $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -65,5 +67,9 @@
 
 	{#if convertBtc}
 		<ConvertToBTC />
+	{/if}
+
+	{#if more}
+		<ContextMenu />
 	{/if}
 </div>

@@ -27,6 +27,7 @@
 	usdTotal={route === 'tokens'}
 	summary={route === 'transactions'}
 	send={route === 'transactions'}
+	more={route === 'transactions'}
 	actions={route !== 'settings'}
 />
 

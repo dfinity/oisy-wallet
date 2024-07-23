@@ -12,7 +12,8 @@
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
-			"max": "Max"
+			"max": "Max",
+			"more": "More"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
