@@ -6,7 +6,7 @@ use shared::types::{
     CredentialType, Timestamp, Version,
 };
 
-fn store_user(
+fn store_user_profile(
     principal: StoredPrincipal,
     timestamp: Timestamp,
     user: &StoredUserProfile,
@@ -48,7 +48,7 @@ pub fn create_profile(
     } else {
         let now = time();
         let default_profile = StoredUserProfile::from_timestamp(now);
-        store_user(
+        store_user_profile(
             principal,
             now,
             &default_profile,
@@ -70,7 +70,7 @@ pub fn add_credential(
         let now = time();
         if let Ok(new_profile) = user_profile.add_credential(profile_version, now, credential_type)
         {
-            store_user(
+            store_user_profile(
                 principal,
                 now,
                 &new_profile,

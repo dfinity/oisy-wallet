@@ -8,7 +8,7 @@ use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
 use pocket_ic::PocketIc;
 use shared::types::user_profile::{
-    AddUserCredentialError, AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser,
+    AddUserCredentialError, AddUserCredentialRequest, ListUsersRequest, ListUsersResponse, OisyUser,
     UserProfile,
 };
 
@@ -21,28 +21,65 @@ fn create_users(pic_setup: &(PocketIc, Principal), start: u8, end: u8) {
 }
 
 #[test]
-fn test_get_users_returns_users() {
+fn test_list_users_cannot_be_called_if_not_allowed() {
     let pic_setup = setup();
 
-    let users_count = 5;
-    create_users(&pic_setup, 1, users_count);
+    let caller = Principal::from_text(VC_HOLDER).unwrap();
 
-    let caller = Principal::from_text(CALLER).unwrap();
-
-    let arg = GetUsersRequest {
+    let arg = ListUsersRequest {
         matches_max_length: None,
         updated_after_timestamp: None,
     };
-    let get_users_response = query_call::<GetUsersResponse>(&pic_setup, caller, "get_users", arg);
+    let list_users_response = query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
 
-    assert_eq!(
-        get_users_response.expect("Call failed").users.len(),
-        users_count as usize
-    );
+    assert!(list_users_response.is_err(),);
 }
 
 #[test]
-fn test_get_users_returns_filtered_users_by_updated() {
+fn test_list_users_returns_users() {
+    let pic_setup = setup();
+
+    let mut expected_users: Vec<OisyUser> = Vec::new();
+    for i in 1..=5 {
+        pic_setup.0.advance_time(Duration::new(10, 0));
+        let caller = Principal::self_authenticating(i.to_string());
+        let response = update_call::<UserProfile>(&pic_setup, caller, "create_user_profile", ());
+        let timestamp = pic_setup.0.get_time();
+        let timestamp_nanos = timestamp
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_nanos();
+        let expected_user = OisyUser {
+            updated_timestamp: timestamp_nanos as u64,
+            pouh_verified: false,
+            principal: caller,
+        };
+        expected_users.push(expected_user);
+        assert!(response.is_ok());
+    }
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let arg = ListUsersRequest {
+        matches_max_length: None,
+        updated_after_timestamp: None,
+    };
+    let list_users_response = query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
+
+    let results_users = list_users_response.expect("Call failed").users;
+    assert_eq!(results_users.len(), expected_users.len(),);
+
+    for (user, expected) in results_users.iter().zip(expected_users.iter()) {
+        assert_eq!(
+            user, expected,
+            "Result users differs from expected user: {:?} vs {:?}",
+            user, expected
+        );
+    }
+}
+
+#[test]
+fn test_list_users_returns_filtered_users_by_updated() {
     let pic_setup = setup();
 
     // Add 10 users
@@ -95,16 +132,16 @@ fn test_get_users_returns_filtered_users_by_updated() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let arg = GetUsersRequest {
+    let arg = ListUsersRequest {
         matches_max_length: None,
         updated_after_timestamp: Some(timestamp_nanos as u64),
     };
-    let get_users_response =
-        query_call::<GetUsersResponse>(&new_pic_setup, caller, "get_users", arg);
+    let list_users_response =
+        query_call::<ListUsersResponse>(&new_pic_setup, caller, "list_users", arg);
 
     assert_eq!(
-        get_users_response
-            .expect("Call get_users failed")
+        list_users_response
+            .expect("Call list_users failed")
             .users
             .len(),
         users_count_after_timestamp as usize + 1
@@ -112,7 +149,48 @@ fn test_get_users_returns_filtered_users_by_updated() {
 }
 
 #[test]
-fn test_get_users_returns_requested_users_count() {
+fn test_list_users_returns_requested_users_count() {
+    let pic_setup = setup();
+
+    let users_count_initial = 20;
+    create_users(&pic_setup, 1, users_count_initial);
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    // Advance time before creating more users
+    let (pic, principal) = pic_setup;
+    pic.advance_time(Duration::new(10, 0));
+    let timestamp = pic.get_time();
+    let new_pic_setup = (pic, principal);
+    let timestamp_nanos = timestamp
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_nanos();
+
+    // Add 5 more users
+    let users_count_after_timestamp = 5;
+    create_users(
+        &new_pic_setup,
+        users_count_initial + 1,
+        users_count_initial + users_count_after_timestamp,
+    );
+
+    let requested_count = 10;
+    let arg = ListUsersRequest {
+        matches_max_length: Some(requested_count),
+        updated_after_timestamp: Some(timestamp_nanos as u64),
+    };
+    let list_users_response =
+        query_call::<ListUsersResponse>(&new_pic_setup, caller, "list_users", arg);
+
+    assert_eq!(
+        list_users_response.expect("Call failed").users.len(),
+        requested_count as usize,
+    );
+}
+
+#[test]
+fn test_list_users_returns_less_than_requested_users_count() {
     let pic_setup = setup();
 
     let users_count = 20;
@@ -121,20 +199,20 @@ fn test_get_users_returns_requested_users_count() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     let requested_count = 5;
-    let arg = GetUsersRequest {
+    let arg = ListUsersRequest {
         matches_max_length: Some(requested_count),
         updated_after_timestamp: None,
     };
-    let get_users_response = query_call::<GetUsersResponse>(&pic_setup, caller, "get_users", arg);
+    let list_users_response = query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
 
     assert_eq!(
-        get_users_response.expect("Call failed").users.len(),
+        list_users_response.expect("Call failed").users.len(),
         requested_count as usize,
     );
 }
 
 #[test]
-fn test_get_users_returns_pouh_credential() {
+fn test_list_users_returns_pouh_credential() {
     let pic_setup = setup();
 
     // Add one user that will be updated after the desired timestamp
@@ -169,12 +247,12 @@ fn test_get_users_returns_pouh_credential() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let arg = GetUsersRequest {
+    let arg = ListUsersRequest {
         matches_max_length: None,
         updated_after_timestamp: None,
     };
-    let get_users_response = query_call::<GetUsersResponse>(&pic_setup, caller, "get_users", arg);
-    let users = get_users_response.expect("Call get_users failed").users;
+    let list_users_response = query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
+    let users = list_users_response.expect("Call list_users failed").users;
 
     assert_eq!(users.len(), 11);
 

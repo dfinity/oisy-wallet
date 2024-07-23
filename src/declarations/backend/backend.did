@@ -42,14 +42,6 @@ type DefiniteCanisterSettingsArgs = record {
   compute_allocation : nat;
 };
 type GetUserProfileError = variant { NotFound };
-type GetUsersRequest = record {
-  updated_after_timestamp : opt nat64;
-  matches_max_length : opt nat64;
-};
-type GetUsersResponse = record {
-  users : vec OisyUser;
-  matches_max_length : nat64;
-};
 type HttpRequest = record {
   url : text;
   method : text;
@@ -67,6 +59,14 @@ type InitArg = record {
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
+};
+type ListUsersRequest = record {
+  updated_after_timestamp : opt nat64;
+  matches_max_length : opt nat64;
+};
+type ListUsersResponse = record {
+  users : vec OisyUser;
+  matches_max_length : nat64;
 };
 type OisyUser = record {
   "principal" : principal;
@@ -119,10 +119,10 @@ service : (Arg) -> {
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
   get_user_profile : () -> (Result_1) query;
-  get_users : (GetUsersRequest) -> (GetUsersResponse) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
+  list_users : (ListUsersRequest) -> (ListUsersResponse) query;
   personal_sign : (text) -> (text);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();

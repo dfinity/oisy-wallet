@@ -31,8 +31,8 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
-    AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, GetUsersRequest,
-    GetUsersResponse, OisyUser, StoredUserProfile, UserProfile,
+    AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
+    ListUsersResponse, OisyUser, StoredUserProfile, UserProfile,
 };
 use shared::types::{Arg, InitArg, SupportedCredential, Timestamp};
 use std::borrow::Cow;
@@ -580,15 +580,15 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 
 #[query(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
-fn get_users(request: GetUsersRequest) -> GetUsersResponse {
-    // WARNING: The value `DEFAULT_LIMIT_GET_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
+fn list_users(request: ListUsersRequest) -> ListUsersResponse {
+    // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
 
-    let (users, limit_users_size): (Vec<OisyUser>, u64) =
+    let (users, matches_max_length): (Vec<OisyUser>, u64) =
         read_state(|s| get_oisy_users(&request, &s.user_profile));
 
-    GetUsersResponse {
+    ListUsersResponse {
         users,
-        matches_max_length: limit_users_size,
+        matches_max_length,
     }
 }
 
