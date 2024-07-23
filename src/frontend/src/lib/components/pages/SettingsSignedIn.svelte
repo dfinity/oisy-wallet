@@ -102,11 +102,8 @@
 			<KeyValuePairInfo>
 				<span slot="key" class="font-bold">{$i18n.settings.text.pouh_credential}:</span>
 				<svelte:fragment slot="value">
-					{#if isNullish($userHasPouhCredential)}
-						<div class="mr-1.5">
-							<Spinner size="small" inline />
-						</div>
-					{:else if $userHasPouhCredential}
+					<!-- TODO: Render spinner if no user profile -->
+					{#if $userHasPouhCredential}
 						<output in:fade class="mr-1.5">
 							{$i18n.settings.text.pouh_credential_verified}
 						</output>
