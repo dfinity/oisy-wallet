@@ -34,7 +34,7 @@ const checkFileUsage = ({ filename, dir }) =>
 const logResult = (isUsed) => process.stdout.write(isUsed ? `${GREEN}.${NC}` : `${RED}x${NC}`);
 
 const main = async () => {
-	console.log(`${NC}Scanning src folder to find all .svelte files`);
+	console.log(`${NC}Scanning ${DATA_DIR} folder to find all .svelte files`);
 	console.log(`  ${GREEN}.${NC} means the .svelte is imported in another file`);
 	console.log(`  ${RED}x${NC} means the .svelte is not imported and should likely be removed`);
 
