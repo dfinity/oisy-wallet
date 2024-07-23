@@ -87,11 +87,10 @@ fn test_list_users_returns_filtered_users_by_updated() {
     let initial_profile = create_profile_response.expect("Create failed");
 
     // Advance time before creating more users
-    let (pic, principal) = pic_setup;
-    pic.advance_time(Duration::new(10, 0));
-    let timestamp = pic.get_time();
-    let new_pic_setup = (pic, principal);
-    let timestamp_nanos = timestamp
+    pic_setup.0.advance_time(Duration::new(10, 0));
+    let timestamp_nanos_1 = pic_setup
+        .0
+        .get_time()
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards")
         .as_nanos();
@@ -99,10 +98,19 @@ fn test_list_users_returns_filtered_users_by_updated() {
     // Add 10 more users
     let users_count_after_timestamp = 10;
     let mut expected_users: Vec<OisyUser> = create_users(
-        &new_pic_setup,
+        &pic_setup,
         users_count_initial + 1,
         users_count_initial + users_count_after_timestamp,
     );
+
+    // Advance time before updating one of the users
+    pic_setup.0.advance_time(Duration::new(10, 0));
+    let timestamp_nanos_2 = pic_setup
+        .0
+        .get_time()
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_nanos();
 
     // Update one of the users created before timestamp
     let add_user_cred_arg = AddUserCredentialRequest {
@@ -117,7 +125,7 @@ fn test_list_users_returns_filtered_users_by_updated() {
     };
 
     let _ = update_call::<Result<(), AddUserCredentialError>>(
-        &new_pic_setup,
+        &pic_setup,
         vc_holder,
         "add_user_credential",
         add_user_cred_arg.clone(),
@@ -127,16 +135,16 @@ fn test_list_users_returns_filtered_users_by_updated() {
 
     let arg = ListUsersRequest {
         matches_max_length: None,
-        updated_after_timestamp: Some(timestamp_nanos as u64),
+        updated_after_timestamp: Some(timestamp_nanos_1 as u64),
     };
     let list_users_response =
-        query_call::<ListUsersResponse>(&new_pic_setup, caller, "list_users", arg);
+        query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
 
     let results_users = list_users_response.expect("Call failed").users;
 
     let vc_holder_expected_user = OisyUser {
         principal: vc_holder,
-        updated_timestamp: timestamp_nanos as u64,
+        updated_timestamp: timestamp_nanos_2 as u64,
         pouh_verified: true,
     };
     expected_users.push(vc_holder_expected_user);
