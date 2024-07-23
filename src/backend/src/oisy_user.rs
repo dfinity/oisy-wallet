@@ -24,7 +24,7 @@ pub fn get_oisy_users(
     request: &ListUsersRequest,
     user_profile_map: &StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
 ) -> (Vec<OisyUser>, u64) {
-    let limit_users_size: usize = get_limit_users_size(&request);
+    let limit_users_size: usize = get_limit_users_size(request);
 
     let start_bound: Bound<(Timestamp, StoredPrincipal)> = match request.updated_after_timestamp {
         Some(updated) => Bound::Included((updated, StoredPrincipal(PRINCIPAL_MIN))),
