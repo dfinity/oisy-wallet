@@ -38,7 +38,6 @@ use std::str::FromStr;
 use user_profile::{add_credential, create_profile, get_profile};
 
 mod assertions;
-mod config;
 mod guards;
 mod oisy_user;
 mod token;
