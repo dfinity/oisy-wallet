@@ -37,7 +37,7 @@
 	on:click={async () => await openSend()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
-	<IconBurn size="28" />
+	<IconBurn size="28" slot="icon" />
 	{$i18n.convert.text.convert_to_btc}
 </ButtonHero>
 
