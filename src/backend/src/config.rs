@@ -1,4 +1,3 @@
-use candid::Principal;
 use ic_verifiable_credentials::VcFlowSigners;
 use shared::types::{user_profile::AddUserCredentialRequest, CredentialType};
 
@@ -15,23 +14,15 @@ pub fn get_credential_config(
             supported_credentials
                 .iter()
                 .find_map(|supported_credential| {
-                    let supported_issuer_canister_id =
-                        Principal::from_text(&supported_credential.issuer_canister_id).ok()?;
                     if supported_credential.credential_type.to_string()
                         == request.credential_spec.credential_type
-                        && supported_issuer_canister_id == request.issuer_canister_id
+                        && supported_credential.issuer_canister_id == request.issuer_canister_id
                     {
                         Some((
                             VcFlowSigners {
-                                ii_canister_id: Principal::from_text(
-                                    &supported_credential.ii_canister_id,
-                                )
-                                .ok()?,
+                                ii_canister_id: supported_credential.ii_canister_id,
                                 ii_origin: supported_credential.ii_origin.clone(),
-                                issuer_canister_id: Principal::from_text(
-                                    &supported_credential.issuer_canister_id,
-                                )
-                                .ok()?,
+                                issuer_canister_id: supported_credential.issuer_canister_id,
                                 issuer_origin: supported_credential.issuer_origin.clone(),
                             },
                             config
