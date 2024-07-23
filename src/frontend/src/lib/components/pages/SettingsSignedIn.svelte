@@ -89,15 +89,17 @@
 	</KeyValuePairInfo>
 </div>
 
-<div class="mt-8">
-	<h2 class="text-base mb-6 pb-1">Credentials</h2>
+{#if JSON.parse(import.meta.env.VITE_POUH_ENABLED ?? false)}
+	<div class="mt-8">
+		<h2 class="text-base mb-6 pb-1">Credentials</h2>
 
-	{#if isNullish($userProfileStore)}
-		<button class="secondary" on:click={getCredential}>Get Credential</button>
-	{:else}
-		<KeyValuePair>
-			<span class="font-bold" slot="key">Proof Of Humanity:</span>
-			<output slot="value" class="mr-1.5"> Verified ✅ </output>
-		</KeyValuePair>
-	{/if}
-</div>
+		{#if isNullish($userProfileStore)}
+			<button class="secondary" on:click={getCredential}>Get Credential</button>
+		{:else}
+			<KeyValuePair>
+				<span class="font-bold" slot="key">Proof Of Humanity:</span>
+				<output slot="value" class="mr-1.5"> Verified ✅ </output>
+			</KeyValuePair>
+		{/if}
+	</div>
+{/if}
