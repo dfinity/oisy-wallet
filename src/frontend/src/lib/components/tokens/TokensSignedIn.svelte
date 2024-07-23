@@ -13,7 +13,6 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
 	import { balancesStore } from '$lib/stores/balances.store';
 
 	let displayZeroBalance: boolean;
@@ -42,8 +41,6 @@
 					<CardAmount slot="exchange">
 						<ExchangeTokenValue {token} />
 					</CardAmount>
-
-					<TokenReceiveSend {token} slot="actions" />
 				</TokenCard>
 			</div>
 		</Listener>
