@@ -17,8 +17,10 @@
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import Receive from '$lib/components/receive/Receive.svelte';
+	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 
 	export let send = false;
+	export let more = false;
 
 	let convertEth = false;
 	$: convertEth = send && $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -30,7 +32,7 @@
 	$: convertBtc = send && $tokenCkBtcLedger && $erc20UserTokensInitialized;
 </script>
 
-<div role="toolbar" class="flex gap-4 text-deep-violet font-bold pt-10 pb-3">
+<div role="toolbar" class="flex w-full gap-4 justify-between pt-10 pb-3 px-10 max-w-96">
 	{#if $networkICP}
 		<IcReceive token={$tokenWithFallback} />
 	{:else if $networkEthereum}
@@ -65,5 +67,9 @@
 
 	{#if convertBtc}
 		<ConvertToBTC />
+	{/if}
+
+	{#if more}
+		<ContextMenu />
 	{/if}
 </div>

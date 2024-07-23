@@ -10,6 +10,7 @@
 	export let summary = false;
 	export let actions = true;
 	export let send = false;
+	export let more = false;
 
 	let background: string;
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
@@ -28,7 +29,7 @@
 		<Alpha />
 
 		{#if $authSignedIn}
-			<HeroContent {usdTotal} {summary} {actions} {send} />
+			<HeroContent {usdTotal} {summary} {actions} {send} {more} />
 		{:else if heroContent}
 			<HeroSignIn />
 		{/if}
