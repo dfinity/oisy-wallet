@@ -162,34 +162,34 @@ fn test_list_users_returns_requested_users_count() {
     let caller = Principal::from_text(CALLER).unwrap();
 
     // Advance time before creating more users
-    let (pic, principal) = pic_setup;
-    pic.advance_time(Duration::new(10, 0));
-    let timestamp = pic.get_time();
-    let new_pic_setup = (pic, principal);
-    let timestamp_nanos = timestamp
+    pic_setup.0.advance_time(Duration::new(10, 0));
+    let timestamp_nanos = pic_setup
+        .0
+        .get_time()
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards")
         .as_nanos();
 
     // Add 15 more users
     let users_count_after_timestamp = 15;
-    create_users(
-        &new_pic_setup,
+    let users_after_expected_timestamp = create_users(
+        &pic_setup,
         users_count_initial + 1,
         users_count_initial + users_count_after_timestamp,
     );
 
-    let requested_count = 10;
+    let requested_count: usize = 10;
     let arg = ListUsersRequest {
-        matches_max_length: Some(requested_count),
+        matches_max_length: Some(requested_count as u64),
         updated_after_timestamp: Some(timestamp_nanos as u64),
     };
+    let expected_users = &users_after_expected_timestamp[0..requested_count];
     let list_users_response =
-        query_call::<ListUsersResponse>(&new_pic_setup, caller, "list_users", arg);
+        query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
 
-    let users_response_count = list_users_response.expect("Call failed").users.len();
+    let results_users = list_users_response.expect("Call failed").users;
 
-    assert_eq!(users_response_count, requested_count as usize);
+    assert_user_profiles_eq(results_users, expected_users.to_vec());
 }
 
 #[test]
@@ -197,22 +197,22 @@ fn test_list_users_returns_less_than_requested_users_count() {
     let pic_setup = setup();
 
     let users_count = 20;
-    create_users(&pic_setup, 1, users_count);
+    let created_users = create_users(&pic_setup, 1, users_count);
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let requested_count = 5;
+    let requested_count: usize = 5;
     let arg = ListUsersRequest {
-        matches_max_length: Some(requested_count),
+        matches_max_length: Some(requested_count as u64),
         updated_after_timestamp: None,
     };
     let list_users_response =
         query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
 
-    assert_eq!(
-        list_users_response.expect("Call failed").users.len(),
-        requested_count as usize,
-    );
+    let results_users = list_users_response.expect("Call failed").users;
+    let expected_users = &created_users[0..requested_count];
+
+    assert_user_profiles_eq(results_users, expected_users.to_vec());
 }
 
 #[test]
@@ -228,9 +228,18 @@ fn test_list_users_returns_pouh_credential() {
 
     // Add 10 more users
     let users_count = 10;
-    create_users(&pic_setup, 1, users_count);
+    let mut expected_users = create_users(&pic_setup, 1, users_count);
 
-    // Update one of the users created before timestamp
+    // Advance time before adding credentials
+    pic_setup.0.advance_time(Duration::new(10, 0));
+    let timestamp_nanos = pic_setup
+        .0
+        .get_time()
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_nanos();
+
+    // Update the first user
     let add_user_cred_arg = AddUserCredentialRequest {
         credential_jwt: VP_JWT.to_string(),
         current_user_version: initial_profile.version,
@@ -257,13 +266,15 @@ fn test_list_users_returns_pouh_credential() {
     };
     let list_users_response =
         query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
-    let users = list_users_response.expect("Call list_users failed").users;
 
-    assert_eq!(users.len(), 11);
+    let results_users = list_users_response.expect("Call failed").users;
 
-    let pouh_holders: Vec<&OisyUser> = users.iter().filter(|user| user.pouh_verified).collect();
-    assert_eq!(pouh_holders.len(), 1);
+    let expected_vc_holder_user = OisyUser {
+        principal: vc_holder,
+        updated_timestamp: timestamp_nanos as u64,
+        pouh_verified: true,
+    };
+    expected_users.push(expected_vc_holder_user);
 
-    let pouh_holder_principal = pouh_holders.first().unwrap().principal;
-    assert_eq!(pouh_holder_principal.to_text(), VC_HOLDER);
+    assert_user_profiles_eq(results_users, expected_users.to_vec());
 }

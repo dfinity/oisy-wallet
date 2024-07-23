@@ -8,7 +8,7 @@ use shared::types::{
 use std::ops::Bound;
 
 const DEFAULT_LIMIT_LIST_USERS_RESPONSE: usize = 10_000;
-pub const PRINCIPAL_MIN: Principal = Principal::from_slice(&[]);
+const PRINCIPAL_MIN: Principal = Principal::from_slice(&[]);
 
 fn get_limit_users_size(request: &ListUsersRequest) -> usize {
     match request.matches_max_length {
