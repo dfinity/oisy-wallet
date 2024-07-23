@@ -10,8 +10,6 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 
-	export let compact = false;
-
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -35,7 +33,7 @@
 	const openReceive = async () => modalStore.openCkETHReceive(modalId);
 </script>
 
-<ReceiveButton {compact} on:click={async () => await open(openReceive)} />
+<ReceiveButton on:click={async () => await open(openReceive)} />
 
 {#if $modalCkETHReceive && $modalStore?.data === modalId}
 	<IcReceiveCkEthereumModal on:nnsClose={close} />
