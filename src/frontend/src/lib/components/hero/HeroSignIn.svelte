@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { i18n } from '$lib/stores/i18n.store';
 	import { signIn } from '$lib/services/auth.services';
-	import ButtonIC from '$lib/components/ui/ButtonIC.svelte';
 	import IconHeaderICP from '$lib/components/icons/IconHeaderICP.svelte';
 	import IconHeaderBTC from '$lib/components/icons/IconHeaderBTC.svelte';
 	import IconHeaderETH from '$lib/components/icons/IconHeaderETH.svelte';
@@ -21,7 +20,10 @@
 	</h1>
 </div>
 
-<ButtonIC on:click={async () => await signIn({})} testId="login-button">
-	<svelte:fragment slot="action">{$i18n.auth.text.authenticate_with}</svelte:fragment>
-	Internet Identity
-</ButtonIC>
+<button
+	on:click={async () => await signIn({})}
+	class="primary full center max-w-72"
+	data-tid="login-button"
+>
+	{$i18n.auth.text.authenticate}
+</button>

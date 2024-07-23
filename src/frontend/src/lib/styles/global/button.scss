@@ -45,31 +45,9 @@ button {
 	}
 
 	&.secondary,
-	&.ic,
 	&.user {
 		background: var(--color-white);
 		color: var(--color-blue);
-	}
-
-	&.ic {
-		width: fit-content;
-		padding: var(--padding-1_5x) var(--padding-8x) var(--padding-1_5x) var(--padding-2x);
-		margin: 0 0 var(--padding-2x);
-
-		span {
-			display: block;
-			line-height: var(--line-height-small);
-
-			span:first-child {
-				font-size: var(--font-size-small);
-				color: var(--color-blue);
-			}
-
-			span:last-child {
-				font-size: var(--font-size-h5);
-				color: var(--color-dark-blue);
-			}
-		}
 	}
 
 	&.hero {
