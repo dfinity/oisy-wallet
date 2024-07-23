@@ -32,7 +32,7 @@
 	$: convertBtc = send && $tokenCkBtcLedger && $erc20UserTokensInitialized;
 </script>
 
-<div role="toolbar" class="flex gap-4 text-deep-violet font-bold pt-10 pb-3">
+<div role="toolbar" class="flex w-full gap-4 justify-between pt-10 pb-3 px-10 max-w-96">
 	{#if $networkICP}
 		<IcReceive token={$tokenWithFallback} />
 	{:else if $networkEthereum}

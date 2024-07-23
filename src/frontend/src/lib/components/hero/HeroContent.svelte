@@ -53,7 +53,10 @@
 {/if}
 
 {#if actions}
-	<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
+	<div
+		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
+		class="flex w-full justify-center"
+	>
 		<Actions {send} {more} />
 	</div>
 {/if}
