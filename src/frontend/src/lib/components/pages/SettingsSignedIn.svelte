@@ -13,6 +13,8 @@
 	import { POUH_ENABLED } from '$lib/constants/app.constants';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
 	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
+	import { fade } from 'svelte/transition';
+	import { busy } from '$lib/stores/busy.store';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -20,9 +22,11 @@
 	let principal: Principal | undefined | null;
 	$: principal = $authStore?.identity?.getPrincipal();
 
-	const getPouhCredential = () => {
+	const getPouhCredential = async () => {
 		if (nonNullish(principal)) {
-			requestPouhCredential({ credentialSubject: principal });
+			busy.show();
+			await requestPouhCredential({ credentialSubject: principal });
+			busy.stop();
 		}
 	};
 </script>
@@ -97,17 +101,21 @@
 		<div class="mt-4">
 			<KeyValuePairInfo>
 				<span slot="key" class="font-bold">{$i18n.settings.text.pouh_credential}:</span>
-				<output slot="value" class="mr-1.5">
+				<svelte:fragment slot="value">
 					{#if isNullish($userHasPouhCredential)}
-						<Spinner size="small" inline />
+						<div class="mr-1.5">
+							<Spinner size="small" inline />
+						</div>
 					{:else if $userHasPouhCredential}
-						{$i18n.settings.text.pouh_credential_verified}
+						<output in:fade class="mr-1.5">
+							{$i18n.settings.text.pouh_credential_verified}
+						</output>
 					{:else}
-						<button type="button" class="secondary" on:click={getPouhCredential}
+						<button in:fade type="button" class="secondary" on:click={getPouhCredential}
 							>{$i18n.settings.text.present_pouh_credential}</button
 						>
 					{/if}
-				</output>
+				</svelte:fragment>
 
 				<svelte:fragment slot="info">
 					{$i18n.settings.text.pouh_credential_description}

@@ -5,7 +5,6 @@ import {
 	POUH_ISSUER_ORIGIN
 } from '$lib/constants/app.constants';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
-import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -73,7 +72,6 @@ export const requestPouhCredential = async ({
 				credentialSubject
 			},
 			onError() {
-				busy.stop();
 				toastsError({
 					msg: { text: authI18n.error.error_requesting_pouh_credential }
 				});
