@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { KeyValuePairInfo, Spinner } from '@dfinity/gix-components';
+	import { KeyValuePairInfo } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
