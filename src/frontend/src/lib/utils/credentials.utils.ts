@@ -1,5 +1,10 @@
-import type { UserProfile } from '$declarations/backend/backend.did';
+import type { UserCredential, UserProfile } from '$declarations/backend/backend.did';
+import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import { isNullish } from '@dfinity/utils';
+
+const isValidPouhCredential = (credential: UserCredential): boolean =>
+	POUH_CREDENTIAL_TYPE in credential.credential_type &&
+	credential.verified_date_timestamp.length > 0;
 
 /**
  * Returns true if the user has a verified proof of uniqueness credential
@@ -13,7 +18,5 @@ export const hasPouhCredential = (profile: UserProfile | null | undefined): bool
 	if (isNullish(profile)) {
 		return undefined;
 	}
-	return profile.credentials.some(
-		(cred) => 'ProofOfUniqueness' in cred.credential_type && cred.verified_date_timestamp.length > 0
-	);
+	return profile.credentials.some(isValidPouhCredential);
 };
