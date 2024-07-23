@@ -29,9 +29,14 @@ button {
 	&.ic {
 		justify-content: flex-start;
 
-		border: 1px solid var(--color-blue);
-
 		padding: var(--button-padding);
+	}
+
+	&.secondary,
+	&.user,
+	&.token,
+	&.ic {
+		border: 1px solid var(--color-blue);
 	}
 
 	&.primary,
