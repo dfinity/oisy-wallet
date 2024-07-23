@@ -24,9 +24,12 @@
 
 	const getPouhCredential = async () => {
 		if (nonNullish(principal)) {
-			busy.show();
-			await requestPouhCredential({ credentialSubject: principal });
-			busy.stop();
+			try {
+				busy.show();
+				await requestPouhCredential({ credentialSubject: principal });
+			} finally {
+				busy.stop();
+			}
 		}
 	};
 </script>
