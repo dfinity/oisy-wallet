@@ -122,6 +122,11 @@ const extractStartScript = (htmlFile) => {
 
 /**
  * Inject "Content Security Policy" (CSP) into index.html for production build
+ *
+ * Note about script-src and 'strict-dynamic':
+ * Chrome 40+ / Firefox 31+ / Safari 15.4+ / Edge 15+ supports 'strict-dynamic'.
+ * Safari 15.4 has been released recently - March 15, 2022 - that's why we add 'unsafe-inline' to the rules for backwards compatibility.
+ * Browsers that supports the 'strict-dynamic' rule will ignore these backwards directives (CSP 3).
  */
 const updateCSP = (indexHtml) => {
 	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script>/gm;
@@ -150,7 +155,7 @@ const updateCSP = (indexHtml) => {
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc};
         manifest-src 'self';
-        script-src 'strict-dynamic' ${indexHashes.join(' ')};
+        script-src 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
         base-uri 'self';
         form-action 'none';
         style-src 'self' 'unsafe-inline';
