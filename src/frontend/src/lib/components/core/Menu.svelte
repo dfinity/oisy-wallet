@@ -5,7 +5,6 @@
 	import { goto } from '$app/navigation';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
-	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 	import {
 		networkEthereum,
 		networkICP,
@@ -24,6 +23,7 @@
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -39,15 +39,9 @@
 	};
 </script>
 
-<button
-	class="user icon desktop-wide"
-	bind:this={button}
-	on:click={() => (visible = true)}
-	aria-label={$i18n.navigation.alt.menu}
->
-	<div class="text-black"><IconUser /></div>
-	<span class="text-black"><IconChevronDown /></span>
-</button>
+<ButtonHero bind:button on:click={() => (visible = true)} ariaLabel={$i18n.navigation.alt.menu}>
+	<IconUser slot="icon" />
+</ButtonHero>
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div class="flex flex-col gap-4">
