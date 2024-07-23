@@ -24,7 +24,10 @@
 </script>
 
 {#if summary}
-	<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
+	<div
+		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
+		class="flex flex-col items-center"
+	>
 		<div class="icon flex justify-between items-center mt-6 md:mt-12 mb-0.5 pt-2">
 			<div>
 				{#if displayTokenSymbol}
