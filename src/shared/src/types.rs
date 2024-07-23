@@ -12,9 +12,9 @@ pub enum CredentialType {
 pub struct SupportedCredential {
     pub credential_type: CredentialType,
     pub ii_origin: String,
-    pub ii_canister_id: String,
+    pub ii_canister_id: Principal,
     pub issuer_origin: String,
-    pub issuer_canister_id: String,
+    pub issuer_canister_id: Principal,
 }
 
 #[derive(CandidType, Deserialize)]
