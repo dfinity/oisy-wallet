@@ -1,21 +1,30 @@
 <script lang="ts">
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { KeyValuePairInfo } from '@dfinity/gix-components';
+	import { KeyValuePairInfo, Spinner } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
+	import { POUH_ENABLED } from '$lib/constants/app.constants';
+	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
 
 	let principal: Principal | undefined | null;
 	$: principal = $authStore?.identity?.getPrincipal();
+
+	const getPouhCredential = () => {
+		if (nonNullish(principal)) {
+			requestPouhCredential({ credentialSubject: principal });
+		}
+	};
 </script>
 
 <KeyValuePairInfo>
@@ -80,3 +89,30 @@
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
+
+{#if POUH_ENABLED}
+	<div class="mt-8">
+		<h2 class="text-base mb-6 pb-1">{$i18n.settings.text.credentials_title}</h2>
+
+		<div class="mt-4">
+			<KeyValuePairInfo>
+				<span slot="key" class="font-bold">{$i18n.settings.text.pouh_credential}:</span>
+				<output slot="value" class="mr-1.5">
+					{#if isNullish($userHasPouhCredential)}
+						<Spinner size="small" inline />
+					{:else if $userHasPouhCredential}
+						{$i18n.settings.text.pouh_credential_verified}
+					{:else}
+						<button type="button" class="secondary" on:click={getPouhCredential}
+							>{$i18n.settings.text.present_pouh_credential}</button
+						>
+					{/if}
+				</output>
+
+				<svelte:fragment slot="info">
+					{$i18n.settings.text.pouh_credential_description}
+				</svelte:fragment>
+			</KeyValuePairInfo>
+		</div>
+	</div>
+{/if}

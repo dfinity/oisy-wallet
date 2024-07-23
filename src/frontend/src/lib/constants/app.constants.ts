@@ -43,6 +43,9 @@ export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
 export const AUTH_POPUP_WIDTH = 576;
 export const AUTH_POPUP_HEIGHT = 625;
+export const VC_POPUP_WIDTH = AUTH_POPUP_WIDTH;
+// The screen to present the credential is higher than the screen to authenticate the user.
+export const VC_POPUP_HEIGHT = 900;
 
 // Workers
 export const AUTH_TIMER_INTERVAL = 1000;
@@ -59,3 +62,5 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_MILLISECOND * 1_000n * 60n
 // For some use case we want to display some amount to a maximal number of decimals which is not related to the number of decimals of the selected token.
 // Just a value that looks good visually.
 export const EIGHT_DECIMALS = 8;
+
+export const POUH_ENABLED = JSON.parse(import.meta.env.VITE_POUH_ENABLED ?? false) === true;
