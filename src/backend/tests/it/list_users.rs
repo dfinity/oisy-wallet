@@ -84,8 +84,8 @@ fn test_list_users_returns_users() {
 fn test_list_users_returns_filtered_users_by_updated() {
     let pic_setup = setup();
 
-    // Add 10 users
-    let users_count_initial = 10;
+    // Add 15 users
+    let users_count_initial = 15;
     create_users(&pic_setup, 1, users_count_initial);
 
     // Add one user that will be updated after the desired timestamp
@@ -169,8 +169,8 @@ fn test_list_users_returns_requested_users_count() {
         .expect("Time went backwards")
         .as_nanos();
 
-    // Add 5 more users
-    let users_count_after_timestamp = 5;
+    // Add 15 more users
+    let users_count_after_timestamp = 15;
     create_users(
         &new_pic_setup,
         users_count_initial + 1,
@@ -187,8 +187,7 @@ fn test_list_users_returns_requested_users_count() {
 
     let users_response_count = list_users_response.expect("Call failed").users.len();
 
-    assert!(users_response_count < requested_count as usize,);
-    assert_eq!(users_response_count, users_count_after_timestamp as usize,);
+    assert_eq!(users_response_count, requested_count as usize);
 }
 
 #[test]
