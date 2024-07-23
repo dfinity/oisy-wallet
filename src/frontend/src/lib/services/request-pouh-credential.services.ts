@@ -1,12 +1,15 @@
 import type { UserCredential, UserProfile } from '$declarations/backend/backend.did';
 import {
+	AUTH_POPUP_WIDTH,
 	INTERNET_IDENTITY_ORIGIN,
 	POUH_ISSUER_CANISTER_ID,
 	POUH_ISSUER_ORIGIN
 } from '$lib/constants/app.constants';
+import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { popupCenter } from '$lib/utils/window.utils';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
@@ -49,6 +52,7 @@ export const requestPouhCredential = async ({
 	credentialSubject: Principal;
 }): Promise<{ success: boolean }> => {
 	const { auth: authI18n } = get(i18n);
+	busy.show();
 	return new Promise((resolve, reject) => {
 		const issuerCanisterId = nonNullish(POUH_ISSUER_CANISTER_ID)
 			? Principal.fromText(POUH_ISSUER_CANISTER_ID)
@@ -74,14 +78,17 @@ export const requestPouhCredential = async ({
 				credentialSubject
 			},
 			onError() {
+				busy.stop();
 				toastsError({
 					msg: { text: authI18n.error.error_requesting_pouh_credential }
 				});
 				reject();
 			},
 			onSuccess: async (response: VerifiablePresentationResponse) => {
+				busy.stop();
 				resolve(await handleSuccess(response));
-			}
+			},
+			windowOpenerFeatures: popupCenter({ width: AUTH_POPUP_WIDTH, height: 900 })
 		});
 	});
 };
