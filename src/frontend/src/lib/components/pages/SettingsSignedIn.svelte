@@ -10,11 +10,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
-	import { POUH_ENABLED } from '$lib/constants/app.constants';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
 	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 	import { fade } from 'svelte/transition';
 	import { busy } from '$lib/stores/busy.store';
+	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
