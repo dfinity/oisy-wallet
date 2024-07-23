@@ -1,7 +1,20 @@
 use candid::{CandidType, Deserialize, Principal};
-use std::fmt::Debug;
+use std::{collections::HashMap, fmt::Debug};
 
 pub type Timestamp = u64;
+
+// TODO: Import `CredentialSpec` from ic-verifiable-credentials
+#[derive(Eq, PartialEq, Clone, Debug, CandidType, Deserialize)]
+pub enum ArgumentValue {
+    String(String),
+    Int(i32),
+}
+
+#[derive(Clone, Debug, CandidType, Deserialize, Eq, PartialEq)]
+pub struct CredentialSpec {
+    pub credential_type: String,
+    pub arguments: Option<HashMap<String, ArgumentValue>>,
+}
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
@@ -125,7 +138,6 @@ pub mod user_profile {
     use super::{CredentialType, Timestamp};
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
-    use ic_verifiable_credentials::issuer_api::CredentialSpec;
     use std::collections::BTreeMap;
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

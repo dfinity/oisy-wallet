@@ -5,9 +5,11 @@ use crate::utils::{
     pocketic::{setup, update_call},
 };
 use candid::Principal;
-use ic_verifiable_credentials::issuer_api::CredentialSpec;
-use shared::types::user_profile::{
-    AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, UserProfile,
+use shared::types::{
+    user_profile::{
+        AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, UserProfile,
+    },
+    CredentialSpec,
 };
 
 #[test]

@@ -20,7 +20,6 @@ use ic_stable_structures::{
     storable::{Blob, Bound, Storable},
     DefaultMemoryImpl, StableBTreeMap, StableCell,
 };
-use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
 use oisy_user::get_oisy_users;
 use serde_bytes::ByteBuf;
@@ -519,31 +518,42 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
     let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
-    let current_time_ns = time() as u128;
+    // TODO: reinstall ic-verifiable-credentials after size has been fixed
+    // let current_time_ns = time() as u128;
 
-    let (vc_flow_signers, root_pk_raw, credential_type) =
-        read_config(|config| get_credential_config(&request, config))
-            .ok_or(AddUserCredentialError::ConfigurationError)?;
+    // let (vc_flow_signers, root_pk_raw, credential_type) =
+    //     read_config(|config| get_credential_config(&request, config))
+    //         .ok_or(AddUserCredentialError::ConfigurationError)?;
 
-    match validate_ii_presentation_and_claims(
-        &request.credential_jwt,
-        user_principal,
-        &vc_flow_signers,
-        &request.credential_spec,
-        &root_pk_raw,
-        current_time_ns as u128,
-    ) {
-        Ok(()) => mutate_state(|s| {
-            add_credential(
-                stored_principal,
-                request.current_user_version,
-                &credential_type,
-                &mut s.user_profile,
-                &mut s.user_profile_updated,
-            )
-        }),
-        Err(_) => Err(AddUserCredentialError::InvalidCredential),
-    }
+    // match validate_ii_presentation_and_claims(
+    //     &request.credential_jwt,
+    //     user_principal,
+    //     &vc_flow_signers,
+    //     &request.credential_spec,
+    //     &root_pk_raw,
+    //     current_time_ns as u128,
+    // ) {
+    //     Ok(()) => mutate_state(|s| {
+    //         add_credential(
+    //             stored_principal,
+    //             request.current_user_version,
+    //             &credential_type,
+    //             &mut s.user_profile,
+    //             &mut s.user_profile_updated,
+    //         )
+    //     }),
+    //     Err(_) => Err(AddUserCredentialError::InvalidCredential),
+    // }
+
+    mutate_state(|s| {
+        add_credential(
+            stored_principal,
+            request.current_user_version,
+            &credential_type,
+            &mut s.user_profile,
+            &mut s.user_profile_updated,
+        )
+    })
 }
 
 /// It create a new user profile for the caller.

@@ -6,11 +6,13 @@ use crate::utils::{
     pocketic::{query_call, setup, update_call},
 };
 use candid::Principal;
-use ic_verifiable_credentials::issuer_api::CredentialSpec;
 use pocket_ic::PocketIc;
-use shared::types::user_profile::{
-    AddUserCredentialError, AddUserCredentialRequest, ListUsersRequest, ListUsersResponse,
-    OisyUser, UserProfile,
+use shared::types::{
+    user_profile::{
+        AddUserCredentialError, AddUserCredentialRequest, ListUsersRequest, ListUsersResponse,
+        OisyUser, UserProfile,
+    },
+    CredentialSpec,
 };
 
 fn create_users(pic_setup: &(PocketIc, Principal), start: u8, end: u8) -> Vec<OisyUser> {
