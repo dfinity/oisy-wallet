@@ -1,6 +1,7 @@
 use std::time::{Duration, UNIX_EPOCH};
 
 use crate::utils::{
+    assertion::assert_user_profiles_eq,
     mock::{CALLER, ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
     pocketic::{query_call, setup, update_call},
 };
@@ -12,12 +13,26 @@ use shared::types::user_profile::{
     OisyUser, UserProfile,
 };
 
-fn create_users(pic_setup: &(PocketIc, Principal), start: u8, end: u8) {
+fn create_users(pic_setup: &(PocketIc, Principal), start: u8, end: u8) -> Vec<OisyUser> {
+    let mut expected_users: Vec<OisyUser> = Vec::new();
     for i in start..=end {
+        pic_setup.0.advance_time(Duration::new(10, 0));
         let caller = Principal::self_authenticating(i.to_string());
-        let response = update_call::<UserProfile>(pic_setup, caller, "create_user_profile", ());
+        let response = update_call::<UserProfile>(&pic_setup, caller, "create_user_profile", ());
+        let timestamp = pic_setup.0.get_time();
+        let timestamp_nanos = timestamp
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_nanos();
+        let expected_user = OisyUser {
+            updated_timestamp: timestamp_nanos as u64,
+            pouh_verified: false,
+            principal: caller,
+        };
+        expected_users.push(expected_user);
         assert!(response.is_ok());
     }
+    expected_users
 }
 
 #[test]
@@ -40,24 +55,7 @@ fn test_list_users_cannot_be_called_if_not_allowed() {
 fn test_list_users_returns_users() {
     let pic_setup = setup();
 
-    let mut expected_users: Vec<OisyUser> = Vec::new();
-    for i in 1..=5 {
-        pic_setup.0.advance_time(Duration::new(10, 0));
-        let caller = Principal::self_authenticating(i.to_string());
-        let response = update_call::<UserProfile>(&pic_setup, caller, "create_user_profile", ());
-        let timestamp = pic_setup.0.get_time();
-        let timestamp_nanos = timestamp
-            .duration_since(UNIX_EPOCH)
-            .expect("Time went backwards")
-            .as_nanos();
-        let expected_user = OisyUser {
-            updated_timestamp: timestamp_nanos as u64,
-            pouh_verified: false,
-            principal: caller,
-        };
-        expected_users.push(expected_user);
-        assert!(response.is_ok());
-    }
+    let expected_users: Vec<OisyUser> = create_users(&pic_setup, 1, 5);
 
     let caller = Principal::from_text(CALLER).unwrap();
 
@@ -69,15 +67,8 @@ fn test_list_users_returns_users() {
         query_call::<ListUsersResponse>(&pic_setup, caller, "list_users", arg);
 
     let results_users = list_users_response.expect("Call failed").users;
-    assert_eq!(results_users.len(), expected_users.len(),);
 
-    for (user, expected) in results_users.iter().zip(expected_users.iter()) {
-        assert_eq!(
-            user, expected,
-            "Result users differs from expected user: {:?} vs {:?}",
-            user, expected
-        );
-    }
+    assert_user_profiles_eq(results_users, expected_users);
 }
 
 #[test]
@@ -107,7 +98,7 @@ fn test_list_users_returns_filtered_users_by_updated() {
 
     // Add 10 more users
     let users_count_after_timestamp = 10;
-    create_users(
+    let mut expected_users: Vec<OisyUser> = create_users(
         &new_pic_setup,
         users_count_initial + 1,
         users_count_initial + users_count_after_timestamp,
@@ -141,13 +132,16 @@ fn test_list_users_returns_filtered_users_by_updated() {
     let list_users_response =
         query_call::<ListUsersResponse>(&new_pic_setup, caller, "list_users", arg);
 
-    assert_eq!(
-        list_users_response
-            .expect("Call list_users failed")
-            .users
-            .len(),
-        users_count_after_timestamp as usize + 1
-    );
+    let results_users = list_users_response.expect("Call failed").users;
+
+    let vc_holder_expected_user = OisyUser {
+        principal: vc_holder,
+        updated_timestamp: timestamp_nanos as u64,
+        pouh_verified: true,
+    };
+    expected_users.push(vc_holder_expected_user);
+
+    assert_user_profiles_eq(results_users, expected_users);
 }
 
 #[test]
