@@ -1,5 +1,6 @@
 mod address;
 mod custom_token;
+mod list_users;
 mod sign;
 mod token;
 mod upgrade;
