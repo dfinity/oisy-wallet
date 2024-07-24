@@ -7,9 +7,23 @@ import { ENV, findHtmlFiles } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
 
-const replaceEnv = ({ html, pattern, value }) => {
+const replaceEnv = ({ content, pattern, value }) => {
 	const regex = new RegExp(pattern, 'g');
-	return html.replace(regex, value);
+	return content.replace(regex, value);
+};
+
+const parseDomain = (targetFile) => {
+	let content = readFileSync(targetFile, 'utf8');
+
+	// For information such as custom domains, only the domain without protocol is required
+	const { host: value } = new URL(process.env['VITE_OISY_URL'] ?? 'https://oisy.com');
+	content = replaceEnv({
+		content,
+		pattern: `{{VITE_OISY_DOMAIN}}`,
+		value
+	});
+
+	writeFileSync(targetFile, content);
 };
 
 const parseMetadata = (targetFile) => {
@@ -24,13 +38,12 @@ const parseMetadata = (targetFile) => {
 	];
 
 	METADATA_KEYS.forEach(
-		(key) =>
-			(content = replaceEnv({ html: content, pattern: `{{${key}}}`, value: process.env[key] }))
+		(key) => (content = replaceEnv({ content, pattern: `{{${key}}}`, value: process.env[key] }))
 	);
 
 	// Special use case. We need to build the dapp with a real URL within app.html other build fails.
 	content = replaceEnv({
-		html: content,
+		content,
 		pattern: `https://oisy.com`,
 		value: process.env.VITE_OISY_URL
 	});
@@ -42,7 +55,7 @@ const parseUrl = (filePath) => {
 	let content = readFileSync(filePath, 'utf8');
 
 	content = replaceEnv({
-		html: content,
+		content,
 		pattern: `https://oisy.com`,
 		value: process.env.VITE_OISY_URL
 	});
@@ -80,6 +93,7 @@ htmlFiles.forEach((htmlFile) => parseMetadata(htmlFile));
 
 parseUrl(join(process.cwd(), 'build', 'sitemap.xml'));
 parseMetadata(join(process.cwd(), 'build', 'manifest.webmanifest'));
+parseDomain(join(process.cwd(), 'build', '.well-known', 'ic-domains'));
 
 // SEO
 htmlFiles.forEach((htmlFile) => removeMetaRobots(htmlFile));
