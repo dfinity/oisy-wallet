@@ -41,6 +41,9 @@ export const BACKEND_CANISTER_ID = LOCAL
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
+export const AUTH_ALTERNATIVE_ORIGINS = import.meta.env.VITE_AUTH_ALTERNATIVE_ORIGINS;
+export const AUTH_DERIVATION_ORIGIN = import.meta.env.VITE_AUTH_DERIVATION_ORIGIN;
+
 export const AUTH_POPUP_WIDTH = 576;
 export const AUTH_POPUP_HEIGHT = 625;
 export const VC_POPUP_WIDTH = AUTH_POPUP_WIDTH;

@@ -1,5 +1,7 @@
+import { AUTH_ALTERNATIVE_ORIGINS, AUTH_DERIVATION_ORIGIN } from '$lib/constants/app.constants';
 import type { Identity } from '@dfinity/agent';
 import { AuthClient } from '@dfinity/auth-client';
+import { notEmptyString } from '@dfinity/utils';
 
 export const createAuthClient = (): Promise<AuthClient> =>
 	AuthClient.create({
@@ -24,3 +26,16 @@ export const loadIdentity = async (): Promise<Identity | undefined> => {
 
 	return authClient.getIdentity();
 };
+
+export const isAlternativeOrigin = (): boolean => {
+	const {
+		location: { origin }
+	} = window;
+
+	const knownAlternativeOrigins = (AUTH_ALTERNATIVE_ORIGINS ?? '')
+		.split(',')
+		.filter(notEmptyString);
+	return knownAlternativeOrigins.includes(origin);
+};
+
+export const hasDerivationOrigin = (): boolean => notEmptyString(AUTH_DERIVATION_ORIGIN);
