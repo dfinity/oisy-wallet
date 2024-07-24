@@ -24,7 +24,7 @@ export const waitReady = async ({
 		return 'timeout';
 	}
 
-	await new Promise((resolve) => setTimeout(resolve, intervalInMs));
+	await waitForMilliseconds(intervalInMs);
 
 	return waitReady({ retries: remainingRetries, isDisabled });
 };
