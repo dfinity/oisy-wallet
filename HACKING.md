@@ -31,6 +31,15 @@ ENV=staging dfx deploy frontend --network staging --wallet cvthj-wyaaa-aaaad-aaa
 ENV=staging ./scripts/deploy.backend.sh
 ```
 
+### Beta
+
+> To perform staging development, you'll need a `.env.beta` file.
+> Note that beta frontend points to production (IC) backend.
+
+```bash
+ENV=beta dfx deploy frontend --network beta --wallet yit3i-lyaaa-aaaan-qeavq-cai
+```
+
 ### IC
 
 > To perform production development, you'll need a `.env.production` file.

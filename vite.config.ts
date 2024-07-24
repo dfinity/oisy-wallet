@@ -9,6 +9,7 @@ import { defineViteReplacements, readCanisterIds } from './vite.utils';
 // npm run build = local
 // dfx deploy = local
 // dfx deploy --network ic = ic
+// dfx deploy --network beta = beta
 // dfx deploy --network staging = staging
 const network = process.env.DFX_NETWORK ?? 'local';
 
@@ -96,7 +97,11 @@ export default defineConfig((): UserConfig => {
 	process.env = {
 		...process.env,
 		...loadEnv(
-			network === 'ic' ? 'production' : network === 'staging' ? 'staging' : 'development',
+			network === 'ic'
+				? 'production'
+				: ['beta', 'staging'].includes(network)
+					? network
+					: 'development',
 			process.cwd()
 		),
 		...readCanisterIds({ prefix: 'VITE_' })
