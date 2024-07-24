@@ -1,8 +1,7 @@
 <script lang="ts">
-	import Card from '$lib/components/ui/Card.svelte';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { Token } from '$lib/types/token';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
+	import TokenDisplayCard from '$lib/components/tokens/TokenDisplayCard.svelte';
 
 	export let token: Token;
 
@@ -16,15 +15,10 @@
 		href={url}
 		aria-label={`Open the list of ${token.symbol} transactions`}
 	>
-		<Card noMargin>
-			{token.name}
-
-			<TokenLogo {token} slot="icon" color="white" />
-
+		<TokenDisplayCard {token}>
 			<slot name="description" slot="description" />
-
-			<slot name="exchange" slot="action" />
-		</Card>
+			<slot name="exchange" slot="exchange" />
+		</TokenDisplayCard>
 	</a>
 
 	<slot name="actions" />
