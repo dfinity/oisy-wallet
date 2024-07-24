@@ -128,6 +128,7 @@ interface I18nSettings {
 		sign_in: string;
 	};
 	alt: { testnets_toggle: string };
+	error: { loading_profile: string };
 }
 
 interface I18nNetworks {
