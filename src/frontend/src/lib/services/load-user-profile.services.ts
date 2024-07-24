@@ -26,7 +26,7 @@ const queryProfile = async ({
 	throw new Error('Unknown error');
 };
 
-const queryUnsaveProfile = async ({
+const queryUnsafeProfile = async ({
 	identity
 }: {
 	identity: Identity;
@@ -53,7 +53,7 @@ const loadCertifiedUserProfile = async ({ identity }: { identity: Identity }): P
 
 export const loadUserProfile = async ({ identity }: { identity: Identity }): Promise<void> => {
 	try {
-		let profile = await queryUnsaveProfile({ identity });
+		let profile = await queryUnsafeProfile({ identity });
 		if (isNullish(profile)) {
 			profile = await createUserProfile({ identity });
 			userProfileStore.set({ key: 'user-profile', value: profile });
