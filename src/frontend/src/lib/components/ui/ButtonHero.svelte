@@ -5,7 +5,7 @@
 </script>
 
 <button
-	class="w-12 flex flex-col text-white text-xs font-normal text-center"
+	class="w-16 flex flex-col text-white text-xs font-normal text-center"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}
