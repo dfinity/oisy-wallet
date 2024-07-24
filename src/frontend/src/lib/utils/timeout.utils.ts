@@ -4,11 +4,13 @@ export const waitForMilliseconds = (milliseconds: number): Promise<void> =>
 	});
 
 export const waitReady = async ({
-	count,
-	isDisabled
+	retries,
+	isDisabled,
+	intervalInMs = 500
 }: {
-	count: number;
+	retries: number;
 	isDisabled: () => boolean;
+	intervalInMs?: number;
 }): Promise<'ready' | 'timeout'> => {
 	const disabled = isDisabled();
 
@@ -16,13 +18,13 @@ export const waitReady = async ({
 		return 'ready';
 	}
 
-	const nextCount = count - 1;
+	const remainingRetries = retries - 1;
 
-	if (nextCount === 0) {
+	if (remainingRetries === 0) {
 		return 'timeout';
 	}
 
-	await new Promise((resolve) => setTimeout(resolve, 500));
+	await waitForMilliseconds(intervalInMs);
 
-	return waitReady({ count: nextCount, isDisabled });
+	return waitReady({ retries: remainingRetries, isDisabled });
 };
