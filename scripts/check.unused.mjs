@@ -29,10 +29,11 @@ const main = async () => {
 
 	if (unusedFiles.length === 0) {
 		console.log(`${GREEN}No unused components found.${NC}`);
-		process.exit(1);
+		process.exit(0);
 	} else {
 		console.log(`${RED}Found ${unusedFiles.length} unused component(s).${NC}`);
 		unusedFiles.forEach((file) => console.log(`${RED}Unused Svelte file: ${file}${NC}`));
+		process.exit(1);
 	}
 };
 
