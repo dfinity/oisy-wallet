@@ -24,7 +24,6 @@ button {
 
 	&.primary,
 	&.secondary,
-	&.user,
 	&.token,
 	&.ic {
 		justify-content: flex-start;
@@ -49,8 +48,7 @@ button {
 		color: var(--color-white);
 	}
 
-	&.secondary,
-	&.user {
+	&.secondary {
 		background: var(--color-white);
 		color: var(--color-blue);
 	}
@@ -91,7 +89,6 @@ button {
 		padding: var(--button-padding);
 	}
 
-	&.user,
 	&.token,
 	&.wallet-connect,
 	&.about {
@@ -123,13 +120,6 @@ button {
 					}
 				}
 			}
-		}
-	}
-
-	&.user {
-		&.icon {
-			gap: var(--padding-0_5x);
-			--button-padding: var(--padding);
 		}
 	}
 
