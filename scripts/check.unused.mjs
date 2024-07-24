@@ -2,6 +2,7 @@
 
 import { readFileSync, readdirSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
+import { findFiles } from './utils.mjs';
 
 const RED = '\x1b[31m';
 const GREEN = '\x1b[32m';
@@ -11,14 +12,7 @@ const DATA_DIR = 'src/frontend/src';
 const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
 
 const findSvelteFiles = (dir) =>
-	readdirSync(dir, { withFileTypes: true }).flatMap((file) => {
-		const res = resolve(dir, file.name);
-		return file.isDirectory()
-			? findSvelteFiles(res)
-			: file.isFile() && res.endsWith('.svelte')
-				? [res]
-				: [];
-	});
+	findFiles({ dir, extensions: ['.svelte'], ignoreDirs: ['routes'] });
 
 const searchForFileName = ({ filename, dir }) =>
 	readdirSync(dir, { withFileTypes: true }).some((file) => {
@@ -28,8 +22,7 @@ const searchForFileName = ({ filename, dir }) =>
 			: file.isFile() && readFileSync(res, 'utf-8').includes(filename);
 	});
 
-const checkFileUsage = ({ filename, dir }) =>
-	filename.startsWith('+') || searchForFileName({ filename, dir });
+const checkFileUsage = ({ filename, dir }) => searchForFileName({ filename, dir });
 
 const logResult = (isUsed) => process.stdout.write(isUsed ? `${GREEN}.${NC}` : `${RED}x${NC}`);
 
@@ -50,6 +43,7 @@ const main = async () => {
 
 	if (unusedFiles.length === 0) {
 		console.log(`${GREEN}No unused components found.${NC}`);
+		process.exit(1);
 	} else {
 		unusedFiles.forEach((file) => console.log(`${RED}Unused Svelte file: ${file}${NC}`));
 	}
