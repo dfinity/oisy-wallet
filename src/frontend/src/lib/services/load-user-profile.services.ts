@@ -8,13 +8,31 @@ import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const getUncertifiedProfile = async ({
+const queryProfile = async ({
+	identity,
+	certified
+}: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<UserProfile> => {
+	const response = await getUserProfile({ identity, certified });
+	if ('Ok' in response) {
+		return response.Ok;
+	}
+	const err = response.Err;
+	if ('NotFound' in err) {
+		throw new UserProfileNotFoundError();
+	}
+	throw new Error('Unknown error');
+};
+
+const queryUnsaveProfile = async ({
 	identity
 }: {
 	identity: Identity;
 }): Promise<UserProfile | undefined> => {
 	try {
-		return await getUserProfile({ identity, certified: false });
+		return await queryProfile({ identity, certified: false });
 	} catch (err) {
 		if (err instanceof UserProfileNotFoundError) {
 			return undefined;
@@ -25,7 +43,7 @@ const getUncertifiedProfile = async ({
 
 const loadCertifiedUserProfile = async ({ identity }: { identity: Identity }): Promise<void> => {
 	try {
-		const profile = await getUserProfile({ identity, certified: true });
+		const profile = await queryProfile({ identity, certified: true });
 		userProfileStore.set({ key: 'user-profile', value: profile });
 	} catch (err) {
 		// We ignore the error because this is a background task.
@@ -35,7 +53,7 @@ const loadCertifiedUserProfile = async ({ identity }: { identity: Identity }): P
 
 export const loadUserProfile = async ({ identity }: { identity: Identity }): Promise<void> => {
 	try {
-		let profile = await getUncertifiedProfile({ identity });
+		let profile = await queryUnsaveProfile({ identity });
 		if (isNullish(profile)) {
 			profile = await createUserProfile({ identity });
 		} else {
@@ -44,11 +62,11 @@ export const loadUserProfile = async ({ identity }: { identity: Identity }): Pro
 			loadCertifiedUserProfile({ identity });
 		}
 		userProfileStore.set({ key: 'user-profile', value: profile });
-	} catch (err) {
+	} catch (err: unknown) {
 		const { settings } = get(i18n);
 		toastsError({
-			msg: { text: settings.error.loading_profile }
+			msg: { text: settings.error.loading_profile },
+			err
 		});
-		console.error('Failed to load user profile.', err);
 	}
 };

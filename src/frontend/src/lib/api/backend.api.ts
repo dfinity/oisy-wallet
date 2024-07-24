@@ -1,12 +1,12 @@
 import type {
 	CustomToken,
+	GetUserProfileError,
 	SignRequest,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
-import { UserProfileNotFoundError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import type { QueryParams } from '@dfinity/utils';
@@ -121,15 +121,9 @@ export const createUserProfile = async ({
 export const getUserProfile = async ({
 	identity,
 	certified = true
-}: { identity: Identity } & QueryParams): Promise<UserProfile> => {
+}: { identity: Identity } & QueryParams): Promise<
+	{ Ok: UserProfile } | { Err: GetUserProfileError }
+> => {
 	const { get_user_profile } = await getBackendActor({ identity, certified });
-	const response = await get_user_profile();
-	if ('Ok' in response) {
-		return response.Ok;
-	}
-	const err = response.Err;
-	if ('NotFound' in err) {
-		throw new UserProfileNotFoundError();
-	}
-	throw new Error('Unknown error');
+	return get_user_profile();
 };
