@@ -3,7 +3,6 @@ use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
 use config::get_credential_config;
-use core::ops::Deref;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
@@ -16,9 +15,8 @@ use ic_cdk::api::management_canister::ecdsa::{
 use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_stable_structures::{
-    memory_manager::{MemoryId, MemoryManager, VirtualMemory},
-    storable::{Blob, Bound, Storable},
-    DefaultMemoryImpl, StableBTreeMap, StableCell,
+    memory_manager::{MemoryId, MemoryManager},
+    DefaultMemoryImpl,
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
@@ -32,29 +30,25 @@ use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
-    ListUsersResponse, OisyUser, StoredUserProfile, UserProfile,
+    ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, InitArg, SupportedCredential, Timestamp};
-use std::borrow::Cow;
+use shared::types::{Arg, InitArg, SupportedCredential};
 use std::cell::RefCell;
 use std::str::FromStr;
+use types::{
+    Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
+    UserTokenMap,
+};
 use user_profile::{add_credential, create_profile, get_profile};
 
 mod assertions;
 mod config;
 mod guards;
+mod impls;
 mod oisy_user;
 mod token;
+mod types;
 mod user_profile;
-
-type VMem = VirtualMemory<DefaultMemoryImpl>;
-type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
-type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
-type CustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<CustomToken>>, VMem>;
-/// Map of (`updated_timestamp`, `user_principal`) to `UserProfile`
-type UserProfileMap = StableBTreeMap<(Timestamp, StoredPrincipal), Candid<StoredUserProfile>, VMem>;
-/// Map of `user_principal` to `updated_timestamp` (in `UserProfile`)
-type UserProfileUpdatedMap = StableBTreeMap<StoredPrincipal, Timestamp, VMem>;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -102,37 +96,6 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
-#[derive(Default)]
-struct Candid<T>(T)
-where
-    T: CandidType + for<'de> Deserialize<'de>;
-
-impl<T> Storable for Candid<T>
-where
-    T: CandidType + for<'de> Deserialize<'de>,
-{
-    const BOUND: Bound = Bound::Unbounded;
-
-    fn to_bytes(&self) -> Cow<'_, [u8]> {
-        Cow::Owned(candid::encode_one(&self.0).expect("encoding should always succeed"))
-    }
-
-    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
-        Self(candid::decode_one(bytes.as_ref()).expect("decoding should succeed"))
-    }
-}
-
-impl<T> Deref for Candid<T>
-where
-    T: CandidType + for<'de> Deserialize<'de>,
-{
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        &self.0
-    }
-}
-
 pub struct State {
     config: ConfigCell,
     /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the users.
@@ -142,28 +105,6 @@ pub struct State {
     custom_token: CustomTokenMap,
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-struct StoredPrincipal(Principal);
-
-impl Storable for StoredPrincipal {
-    const BOUND: Bound = Blob::<29>::BOUND;
-
-    fn to_bytes(&self) -> Cow<'_, [u8]> {
-        Cow::Owned(
-            Blob::<29>::try_from(self.0.as_slice())
-                .expect("principal length should not exceed 29 bytes")
-                .to_bytes()
-                .into_owned(),
-        )
-    }
-
-    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
-        Self(Principal::from_slice(
-            Blob::<29>::from_bytes(bytes).as_slice(),
-        ))
-    }
 }
 
 #[derive(CandidType, Deserialize)]
