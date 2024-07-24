@@ -14,25 +14,30 @@ const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
 const findSvelteFiles = (dir) => findFiles({ dir, extensions: ['.svelte'] });
 
 const main = async () => {
-	console.log(`${NC}Scanning ${DATA_DIR} folder to find all .svelte files`);
+	console.log(`${NC}Scanning ${DATA_DIR} folder to find all .svelte files\n`);
 
 	const allSvelteFiles = findSvelteFiles(DATA_DIR_PATH);
 
-	const potentialUnusedFiles = allSvelteFiles.filter((file) => !dirname(file).includes('routes'));
+	let potentialUnusedFiles = allSvelteFiles.filter((file) => !dirname(file).includes('routes'));
 
-	const unusedFiles = allSvelteFiles.reduce((acc, file) => {
+	allSvelteFiles.forEach((file) => {
 		const content = readFileSync(file, 'utf-8');
-		return acc.filter((f) => !content.includes(basename(f)));
-	}, potentialUnusedFiles);
+		potentialUnusedFiles = potentialUnusedFiles.filter(
+			(potentialUnusedFile) => !content.includes(basename(potentialUnusedFile))
+		);
 
-	console.log('\n');
+		if (potentialUnusedFiles.length === 0) {
+			console.log(`${GREEN}No unused components found.${NC}`);
+			process.exit(0);
+		}
+	});
 
-	if (unusedFiles.length === 0) {
+	if (potentialUnusedFiles.length === 0) {
 		console.log(`${GREEN}No unused components found.${NC}`);
 		process.exit(0);
 	} else {
-		console.log(`${RED}Found ${unusedFiles.length} unused component(s).${NC}`);
-		unusedFiles.forEach((file) => console.log(`${RED}Unused Svelte file: ${file}${NC}`));
+		console.log(`${RED}Found ${potentialUnusedFiles.length} unused component(s).${NC}`);
+		potentialUnusedFiles.forEach((file) => console.log(`${RED}Unused Svelte file: ${file}${NC}`));
 		process.exit(1);
 	}
 };
