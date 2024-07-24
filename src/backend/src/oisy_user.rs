@@ -1,8 +1,7 @@
-use crate::{Candid, StoredPrincipal, VMem};
+use crate::{types::UserProfileMap, StoredPrincipal};
 use candid::Principal;
-use ic_stable_structures::StableBTreeMap;
 use shared::types::{
-    user_profile::{ListUsersRequest, OisyUser, StoredUserProfile},
+    user_profile::{ListUsersRequest, OisyUser},
     Timestamp,
 };
 use std::ops::Bound;
@@ -22,7 +21,7 @@ fn get_limit_users_size(request: &ListUsersRequest) -> usize {
 
 pub fn get_oisy_users(
     request: &ListUsersRequest,
-    user_profile_map: &StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
+    user_profile_map: &UserProfileMap,
 ) -> (Vec<OisyUser>, u64) {
     let limit_users_size: usize = get_limit_users_size(request);
 
