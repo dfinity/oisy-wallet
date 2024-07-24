@@ -137,17 +137,16 @@ interface I18nReceive {
 		text: {
 			account_id: string;
 			use_for_all_tokens: string;
-			use_for_deposit: string;
+			use_for_icrc_deposit: string;
+			use_for_icp_deposit: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
-			internet_computer: string;
 			principal: string;
 			internet_computer_principal_copied: string;
 			display_internet_computer_principal_qr: string;
 			icp_account: string;
 			icp_account_copied: string;
 			display_icp_account_qr: string;
-			icp_account_notes: string;
 		};
 	};
 	ethereum: {

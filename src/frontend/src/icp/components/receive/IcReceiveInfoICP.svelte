@@ -49,7 +49,7 @@
 			})}
 	>
 		<svelte:fragment slot="title">{$i18n.receive.icp.text.account_id}</svelte:fragment>
-		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_deposit}</svelte:fragment>
+		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_icp_deposit}</svelte:fragment>
 	</ReceiveAddress>
 </div>
 
