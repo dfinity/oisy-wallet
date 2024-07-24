@@ -7,7 +7,7 @@ export const LOCAL = MODE === 'local';
 export const STAGING = MODE === 'staging';
 export const PROD = MODE === 'ic';
 
-const MAINNET_DOMAIN = 'ic0.app';
+const MAINNET_DOMAIN = 'icp0.io';
 
 export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_INTERNET_IDENTITY_CANISTER_ID
@@ -43,6 +43,9 @@ export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
 
 export const AUTH_POPUP_WIDTH = 576;
 export const AUTH_POPUP_HEIGHT = 625;
+export const VC_POPUP_WIDTH = AUTH_POPUP_WIDTH;
+// Screen to allow credential presentation is longer than the authentication screen.
+export const VC_POPUP_HEIGHT = 900;
 
 // Workers
 export const AUTH_TIMER_INTERVAL = 1000;
