@@ -48,7 +48,7 @@
 		<p slot="notes" class="text-sm text-dark">{$i18n.receive.icp.text.use_for_icp_deposit}</p>
 	</ReceiveAddressWithLogo>
 
-	<div class="mb-8">
+	<div class="mb-6">
 		<Hr />
 	</div>
 
