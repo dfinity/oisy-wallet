@@ -56,12 +56,14 @@ export const loadUserProfile = async ({ identity }: { identity: Identity }): Pro
 		let profile = await queryUnsaveProfile({ identity });
 		if (isNullish(profile)) {
 			profile = await createUserProfile({ identity });
+			userProfileStore.set({ key: 'user-profile', value: profile });
 		} else {
+			// We set the store before the call to load the certified profile.
+			userProfileStore.set({ key: 'user-profile', value: profile });
 			// We don't wait for this to complete because we want a smooth UX
 			// the uncertified data is enough for the user to start using the app.
 			loadCertifiedUserProfile({ identity });
 		}
-		userProfileStore.set({ key: 'user-profile', value: profile });
 	} catch (err: unknown) {
 		const { settings } = get(i18n);
 		toastsError({
