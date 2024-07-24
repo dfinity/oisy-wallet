@@ -29,7 +29,7 @@
 	$: converToSymbol = ($token as OptionErc20Token)?.twinTokenSymbol ?? 'ckETH';
 </script>
 
-<ConvertETH nativeTokenId={$ethereumTokenId} nativeNetworkId={$selectedEthereumNetwork.id}>
+<ConvertETH nativeTokenId={$ethereumTokenId} nativeNetworkId={$selectedEthereumNetwork.id} sendToken={$tokenWithFallback}>
 	<IconBurn size="28" />
 	<span>
 		{replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
