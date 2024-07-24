@@ -24,25 +24,20 @@
 </script>
 
 {#if summary}
-	<div
-		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
-		class="flex flex-col items-center"
-	>
-		<div class="icon flex justify-between items-center mt-6 md:mt-12 mb-0.5 pt-2">
-			<div>
-				{#if displayTokenSymbol}
-					<div in:fade>
-						<Logo
-							src={$token?.icon}
-							size="big"
-							alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
-							color="off-white"
-						/>
-					</div>
-				{:else}
-					<SkeletonLogo size="big" />
-				{/if}
-			</div>
+	<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
+		<div class="icon flex justify-center items-center mt-6 md:mt-12 mb-0.5 pt-2">
+			{#if displayTokenSymbol}
+				<div in:fade>
+					<Logo
+						src={$token?.icon}
+						size="big"
+						alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
+						color="off-white"
+					/>
+				</div>
+			{:else}
+				<SkeletonLogo size="big" />
+			{/if}
 		</div>
 
 		<Balance />
