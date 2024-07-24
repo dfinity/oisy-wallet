@@ -1,6 +1,12 @@
-import type { CustomToken, SignRequest, UserToken } from '$declarations/backend/backend.did';
+import type {
+	CustomToken,
+	SignRequest,
+	UserProfile,
+	UserToken
+} from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import { UserProfileNotFoundError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import type { QueryParams } from '@dfinity/utils';
@@ -101,4 +107,29 @@ export const setUserToken = async ({
 }): Promise<void> => {
 	const { set_user_token } = await getBackendActor({ identity });
 	return set_user_token(token);
+};
+
+export const createUserProfile = async ({
+	identity
+}: {
+	identity: Identity;
+}): Promise<UserProfile> => {
+	const { create_user_profile } = await getBackendActor({ identity });
+	return create_user_profile();
+};
+
+export const getUserProfile = async ({
+	identity,
+	certified = true
+}: { identity: Identity } & QueryParams): Promise<UserProfile> => {
+	const { get_user_profile } = await getBackendActor({ identity, certified });
+	const response = await get_user_profile();
+	if ('Ok' in response) {
+		return response.Ok;
+	}
+	const err = response.Err;
+	if ('NotFound' in err) {
+		throw new UserProfileNotFoundError();
+	}
+	throw new Error('Unknown error');
 };
