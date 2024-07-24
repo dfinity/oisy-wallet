@@ -2,7 +2,6 @@ import type { UserProfile } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/settings.store';
-import { UserProfileNotFoundError } from '$lib/types/errors';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { beforeEach } from 'node:test';
@@ -32,7 +31,9 @@ describe('loadUserProfile', () => {
 	});
 
 	it("doesn't create a user profile if uncertified profile is found", async () => {
-		const getUserProfileSpy = vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue(mockProfile);
+		const getUserProfileSpy = vi
+			.spyOn(backendApi, 'getUserProfile')
+			.mockResolvedValue({ Ok: mockProfile });
 		const createUserProfileSpy = vi.spyOn(backendApi, 'createUserProfile');
 
 		await loadUserProfile({ identity: mockIdentity });
@@ -48,7 +49,7 @@ describe('loadUserProfile', () => {
 	it('creates a user profile if uncertified profile is not found', async () => {
 		const getUserProfileSpy = vi
 			.spyOn(backendApi, 'getUserProfile')
-			.mockRejectedValue(new UserProfileNotFoundError());
+			.mockResolvedValue({ Err: { NotFound: null } });
 		const createUserProfileSpy = vi
 			.spyOn(backendApi, 'createUserProfile')
 			.mockResolvedValue(mockProfile);
@@ -66,7 +67,9 @@ describe('loadUserProfile', () => {
 	});
 
 	it('loads the store with certified data when uncertified profile is found', async () => {
-		const getUserProfileSpy = vi.spyOn(backendApi, 'getUserProfile').mockResolvedValue(mockProfile);
+		const getUserProfileSpy = vi
+			.spyOn(backendApi, 'getUserProfile')
+			.mockResolvedValue({ Ok: mockProfile });
 
 		await loadUserProfile({ identity: mockIdentity });
 
