@@ -25,3 +25,8 @@ export const ENV =
 		: ['staging', 'beta'].includes(process.env.ENV)
 			? process.env.ENV
 			: 'development';
+
+export const replaceEnv = ({ content, pattern, value }) => {
+	const regex = new RegExp(pattern, 'g');
+	return content.replace(regex, value);
+};
