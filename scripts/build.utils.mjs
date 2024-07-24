@@ -22,8 +22,8 @@ export const findHtmlFiles = (dir = join(process.cwd(), 'build')) => {
 export const ENV =
 	process.env.ENV === 'ic'
 		? 'production'
-		: process.env.ENV === 'staging'
-			? 'staging'
+		: ['staging', 'beta'].includes(process.env.ENV)
+			? process.env.ENV
 			: 'development';
 
 export const replaceEnv = ({ content, pattern, value }) => {
