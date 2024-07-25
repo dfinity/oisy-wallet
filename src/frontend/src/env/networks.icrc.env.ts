@@ -342,7 +342,7 @@ const CKWBTC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 const CKUSDT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUSDT)
 	? {
 			...CKERC20_PRODUCTION_DATA.ckUSDT,
-			position: 6,
+			position: 7,
 			twinToken: USDT_TOKEN
 		}
 	: undefined;
