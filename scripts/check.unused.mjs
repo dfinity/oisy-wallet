@@ -43,7 +43,9 @@ const main = async () => {
 		);
 		potentialUnusedFiles.forEach((file) => {
 			console.log(`${RED}Unused Svelte file: ${file}${NC}`);
-			if (REMOVE_FILES) unlinkSync(file);
+			if (REMOVE_FILES) {
+				unlinkSync(file);
+			}
 		});
 		process.exit(1);
 	}
