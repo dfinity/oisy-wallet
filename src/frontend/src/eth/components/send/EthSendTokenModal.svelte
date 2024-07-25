@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
+	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { sendWizardStepsWithQrCodeScan } from '$eth/config/send.config';
 	import { closeModal } from '$lib/utils/modal.utils';
@@ -83,7 +83,7 @@
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<SendTokenWizard
+	<EthSendTokenWizard
 		{currentStep}
 		sourceNetwork={$selectedEthereumNetwork}
 		nativeEthereumToken={$ethereumToken}

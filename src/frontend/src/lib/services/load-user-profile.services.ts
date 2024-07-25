@@ -41,7 +41,11 @@ const queryUnsafeProfile = async ({
 	}
 };
 
-const loadCertifiedUserProfile = async ({ identity }: { identity: Identity }): Promise<void> => {
+export const loadCertifiedUserProfile = async ({
+	identity
+}: {
+	identity: Identity;
+}): Promise<void> => {
 	try {
 		const profile = await queryProfile({ identity, certified: true });
 		userProfileStore.set({ key: 'user-profile', value: profile });
