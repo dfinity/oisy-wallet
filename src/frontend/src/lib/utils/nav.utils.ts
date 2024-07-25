@@ -35,11 +35,17 @@ const tokenUrl = ({
 export const networkParam = (networkId: NetworkId | undefined): string =>
 	isNullish(networkId) ? '' : `network=${networkId.description ?? ''}`;
 
-export const back = async (params: { networkId: NetworkId | undefined; fromUrl?: URL }) => {
-	const { networkId, fromUrl } = params;
-	const rootUrl =
-		fromUrl?.toString() ?? `/${nonNullish(networkId) ? `?${networkParam(networkId)}` : ''}`;
-	await goto(rootUrl, { replaceState: 'fromUrl' in params ? nonNullish(fromUrl) : true });
+export const back = async ({ pop }: { pop: boolean }) => {
+	if (pop) {
+		history.back();
+		return;
+	}
+
+	await goto('/');
+};
+
+export const gotoReplaceRoot = async () => {
+	await goto('/', { replaceState: true });
 };
 
 export type RouteParams = {

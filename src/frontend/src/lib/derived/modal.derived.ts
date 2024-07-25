@@ -25,9 +25,9 @@ export const modalReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive'
 );
-export const modalSend: Readable<boolean> = derived(
+export const modalEthSend: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'send'
+	($modalStore) => $modalStore?.type === 'eth-send'
 );
 export const modalConvertCkBTCToBTC: Readable<boolean> = derived(
 	modalStore,
