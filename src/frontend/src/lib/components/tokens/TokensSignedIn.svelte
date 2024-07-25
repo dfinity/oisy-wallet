@@ -9,7 +9,7 @@
 	import { fade } from 'svelte/transition';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
-	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
+	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
 	import { formatToken } from '$lib/utils/format.utils';
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
@@ -29,7 +29,7 @@
 	{#each tokens as token (token.id)}
 		<Listener {token}>
 			<div in:fade>
-				<TokenCard {token}>
+				<TokenCardWithUrl {token}>
 					<output class="break-all" slot="description">
 						{formatToken({
 							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
@@ -41,7 +41,7 @@
 					<CardAmount slot="exchange">
 						<ExchangeTokenValue {token} />
 					</CardAmount>
-				</TokenCard>
+				</TokenCardWithUrl>
 			</div>
 		</Listener>
 	{/each}
