@@ -470,7 +470,7 @@ interface I18nTransaction {
 }
 
 interface I18nTransactions {
-	text: { title: string; no_transactions: string; sign_in: string };
+	text: { title: string; no_transactions: string; sign_in: string; open_transactions: string };
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;

@@ -2,6 +2,8 @@
 	import type { Token } from '$lib/types/token';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let token: Token;
 
@@ -13,7 +15,9 @@
 	<a
 		class="no-underline flex-1"
 		href={url}
-		aria-label={`Open the list of ${token.symbol} transactions`}
+		aria-label={replacePlaceholders($i18n.transactions.text.open_transactions, {
+			token: token.symbol
+		})}
 	>
 		<TokenCard {token}>
 			<slot name="description" slot="description" />
