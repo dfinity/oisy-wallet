@@ -1,23 +1,8 @@
-import { lstatSync, readdirSync } from 'node:fs';
-import { extname, join } from 'node:path';
+import { join } from 'node:path';
+import { findFiles } from './utils.mjs';
 
-const findFiles = ({ dir, files }) => {
-	readdirSync(dir).forEach((file) => {
-		const fullPath = join(dir, file);
-		if (lstatSync(fullPath).isDirectory()) {
-			findFiles({ dir: fullPath, files });
-		} else {
-			files.push(fullPath);
-		}
-	});
-};
-
-export const findHtmlFiles = (dir = join(process.cwd(), 'build')) => {
-	const files = [];
-	findFiles({ dir, files });
-
-	return files.filter((entry) => ['.html'].includes(extname(entry)));
-};
+export const findHtmlFiles = (dir = join(process.cwd(), 'build')) =>
+	findFiles({ dir, extensions: ['.html'] });
 
 export const ENV =
 	process.env.ENV === 'ic'
