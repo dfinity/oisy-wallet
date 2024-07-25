@@ -25,6 +25,10 @@ export const modalReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive'
 );
+export const modalSend: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'send'
+);
 export const modalEthSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-send'
