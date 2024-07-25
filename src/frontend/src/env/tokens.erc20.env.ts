@@ -5,6 +5,7 @@ import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
 import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
@@ -22,12 +23,6 @@ const ERC20_CONTRACT_ADDRESS_1INCH: Erc20Contract = {
 const ERC20_CONTRACT_ADDRESS_WSTETH: Erc20Contract = {
 	// Lido Finance (wstETH)
 	address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_USDT: Erc20Contract = {
-	// Tether
-	address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
 	exchange: 'erc20'
 };
 
@@ -120,7 +115,6 @@ const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	ERC20_CONTRACT_ADDRESS_1INCH,
 	ERC20_CONTRACT_ADDRESS_WSTETH,
-	ERC20_CONTRACT_ADDRESS_USDT,
 	ERC20_CONTRACT_ADDRESS_DMAIL,
 	ERC20_CONTRACT_ADDRESS_UNISWAP,
 	ERC20_CONTRACT_ADDRESS_MATIC,
@@ -161,7 +155,8 @@ const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	PEPE_TOKEN,
 	OCT_TOKEN,
 	SHIB_TOKEN,
-	WBTC_TOKEN
+	WBTC_TOKEN,
+	USDT_TOKEN
 ];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [

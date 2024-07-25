@@ -8,7 +8,6 @@ import jasmy from '$eth/assets/jasmy.svg';
 import matic from '$eth/assets/matic.svg';
 import rndr from '$eth/assets/rndr.svg';
 import uniswap from '$eth/assets/uniswap.svg';
-import usdt from '$eth/assets/usdt.svg';
 import weeth from '$eth/assets/weeth.svg';
 import wsteth from '$eth/assets/wsteth.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
@@ -64,8 +63,6 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return rndr;
 		case 'uni':
 			return uniswap;
-		case 'usdt':
-			return usdt;
 		case 'weeth':
 			return weeth;
 		case 'wsteth':
