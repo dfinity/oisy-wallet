@@ -1,6 +1,8 @@
-use crate::{Candid, StoredPrincipal, VMem};
+use crate::{
+    types::{UserProfileMap, UserProfileUpdatedMap},
+    Candid, StoredPrincipal,
+};
 use ic_cdk::api::time;
-use ic_stable_structures::StableBTreeMap;
 use shared::types::{
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     CredentialType, Timestamp, Version,
@@ -10,8 +12,8 @@ fn store_user_profile(
     principal: StoredPrincipal,
     timestamp: Timestamp,
     user: &StoredUserProfile,
-    user_profile_map: &mut StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
-    user_profile_updated_map: &mut StableBTreeMap<StoredPrincipal, u64, VMem>,
+    user_profile_map: &mut UserProfileMap,
+    user_profile_updated_map: &mut UserProfileUpdatedMap,
 ) {
     if let Some(old_updated) = user_profile_updated_map.get(&principal) {
         // Clean up old entries
@@ -23,8 +25,8 @@ fn store_user_profile(
 
 pub fn get_profile(
     principal: StoredPrincipal,
-    user_profile_map: &mut StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
-    user_profile_updated_map: &mut StableBTreeMap<StoredPrincipal, u64, VMem>,
+    user_profile_map: &mut UserProfileMap,
+    user_profile_updated_map: &mut UserProfileUpdatedMap,
 ) -> Result<StoredUserProfile, GetUserProfileError> {
     if let Some(updated) = user_profile_updated_map.get(&principal) {
         return Ok(user_profile_map
@@ -37,8 +39,8 @@ pub fn get_profile(
 
 pub fn create_profile(
     principal: StoredPrincipal,
-    user_profile_map: &mut StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
-    user_profile_updated_map: &mut StableBTreeMap<StoredPrincipal, u64, VMem>,
+    user_profile_map: &mut UserProfileMap,
+    user_profile_updated_map: &mut UserProfileUpdatedMap,
 ) -> StoredUserProfile {
     if let Some(updated) = user_profile_updated_map.get(&principal) {
         user_profile_map
@@ -63,8 +65,8 @@ pub fn add_credential(
     principal: StoredPrincipal,
     profile_version: Option<Version>,
     credential_type: &CredentialType,
-    user_profile_map: &mut StableBTreeMap<(u64, StoredPrincipal), Candid<StoredUserProfile>, VMem>,
-    user_profile_updated_map: &mut StableBTreeMap<StoredPrincipal, u64, VMem>,
+    user_profile_map: &mut UserProfileMap,
+    user_profile_updated_map: &mut UserProfileUpdatedMap,
 ) -> Result<(), AddUserCredentialError> {
     if let Ok(user_profile) = get_profile(principal, user_profile_map, user_profile_updated_map) {
         let now = time();

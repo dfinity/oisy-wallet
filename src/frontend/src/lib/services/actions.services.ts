@@ -15,7 +15,7 @@ export const waitWalletReady = async (isDisabled: () => boolean): Promise<'ready
 	busy.start({ msg: hold_loading_wallet });
 
 	// 20 tries with a delay of 500ms each = max 10 seconds
-	const result = await waitReady({ count: 20, isDisabled });
+	const result = await waitReady({ retries: 20, isDisabled });
 
 	busy.stop();
 

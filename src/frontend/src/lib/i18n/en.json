@@ -138,6 +138,9 @@
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets"
+		},
+		"error": {
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
 	},
 	"networks": {
