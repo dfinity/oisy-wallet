@@ -3,14 +3,9 @@
 import { config } from 'dotenv';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ENV, findHtmlFiles } from './build.utils.mjs';
+import { ENV, findHtmlFiles, replaceEnv } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
-
-const replaceEnv = ({ html, pattern, value }) => {
-	const regex = new RegExp(pattern, 'g');
-	return html.replace(regex, value);
-};
 
 const parseMetadata = (targetFile) => {
 	let content = readFileSync(targetFile, 'utf8');
@@ -24,13 +19,12 @@ const parseMetadata = (targetFile) => {
 	];
 
 	METADATA_KEYS.forEach(
-		(key) =>
-			(content = replaceEnv({ html: content, pattern: `{{${key}}}`, value: process.env[key] }))
+		(key) => (content = replaceEnv({ content, pattern: `{{${key}}}`, value: process.env[key] }))
 	);
 
 	// Special use case. We need to build the dapp with a real URL within app.html other build fails.
 	content = replaceEnv({
-		html: content,
+		content,
 		pattern: `https://oisy.com`,
 		value: process.env.VITE_OISY_URL
 	});
@@ -42,7 +36,7 @@ const parseUrl = (filePath) => {
 	let content = readFileSync(filePath, 'utf8');
 
 	content = replaceEnv({
-		html: content,
+		content,
 		pattern: `https://oisy.com`,
 		value: process.env.VITE_OISY_URL
 	});
