@@ -27,7 +27,6 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		manage_internet_identity: string;
-		back_to_wallet: string;
 	};
 	alt: { manage_internet_identity: string; more_settings: string; menu: string };
 }

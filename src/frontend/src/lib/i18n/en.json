@@ -26,8 +26,7 @@
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
-			"manage_internet_identity": "Manage Internet Identity",
-			"back_to_wallet": "Back to Wallet"
+			"manage_internet_identity": "Manage Internet Identity"
 		},
 		"alt": {
 			"manage_internet_identity": "Administrate your Internet Identity",
