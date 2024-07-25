@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks.env';
+import usdt from '$eth/assets/usdt.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
-import usdt from '$icp-eth/assets/usdt.svg';
 
 export const USDT_DECIMALS = 6;
 
