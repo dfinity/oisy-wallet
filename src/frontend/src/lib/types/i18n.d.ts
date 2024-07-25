@@ -28,7 +28,6 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		manage_internet_identity: string;
-		back_to_wallet: string;
 	};
 	alt: { manage_internet_identity: string; more_settings: string; menu: string };
 }
@@ -122,6 +121,7 @@ interface I18nSettings {
 		sign_in: string;
 	};
 	alt: { testnets_toggle: string };
+	error: { loading_profile: string };
 }
 
 interface I18nNetworks {
