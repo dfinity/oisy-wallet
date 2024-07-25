@@ -25,6 +25,11 @@
 			"indexCanisterId": "xrs4b-hiaaa-aaaar-qafoa-cai",
 			"erc20ContractAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
 		},
+		"ckUSDT": {
+			"ledgerCanisterId": "cngnf-vqaaa-aaaar-qag4q-cai",
+			"indexCanisterId": "cefgz-dyaaa-aaaar-qag5a-cai",
+			"erc20ContractAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+		},
 		"ckOCT": {
 			"ledgerCanisterId": "ebo5g-cyaaa-aaaar-qagla-cai",
 			"indexCanisterId": "egp3s-paaaa-aaaar-qaglq-cai",
