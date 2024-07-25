@@ -132,6 +132,7 @@ pub mod user_profile {
     pub struct UserCredential {
         pub credential_type: CredentialType,
         pub verified_date_timestamp: Option<Timestamp>,
+        pub issuer: String,
     }
 
     // Used in the endpoint

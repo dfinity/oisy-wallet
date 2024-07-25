@@ -100,6 +100,7 @@ impl StoredUserProfile {
         profile_version: Option<Version>,
         now: Timestamp,
         credential_type: &CredentialType,
+        issuer: String,
     ) -> Result<StoredUserProfile, AddUserCredentialError> {
         if profile_version != self.version {
             return Err(AddUserCredentialError::VersionMismatch);
@@ -108,6 +109,7 @@ impl StoredUserProfile {
         let user_credential = UserCredential {
             credential_type: credential_type.clone(),
             verified_date_timestamp: Some(now),
+            issuer,
         };
         let mut new_credentials = new_profile.credentials.clone();
         new_credentials.insert(credential_type.clone(), user_credential);

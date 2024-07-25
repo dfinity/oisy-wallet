@@ -65,12 +65,14 @@ pub fn add_credential(
     principal: StoredPrincipal,
     profile_version: Option<Version>,
     credential_type: &CredentialType,
+    issuer: String,
     user_profile_map: &mut UserProfileMap,
     user_profile_updated_map: &mut UserProfileUpdatedMap,
 ) -> Result<(), AddUserCredentialError> {
     if let Ok(user_profile) = get_profile(principal, user_profile_map, user_profile_updated_map) {
         let now = time();
-        if let Ok(new_profile) = user_profile.add_credential(profile_version, now, credential_type)
+        if let Ok(new_profile) =
+            user_profile.add_credential(profile_version, now, credential_type, issuer)
         {
             store_user_profile(
                 principal,
