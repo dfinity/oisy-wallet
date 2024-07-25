@@ -7,6 +7,7 @@
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import CoverWhat from '$lib/assets/cover-features.png';
+	import Img from '$lib/components/ui/Img.svelte';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -14,8 +15,8 @@
 		><p class="text-xl">{replaceOisyPlaceholders($i18n.about.what.text.title)}</p></svelte:fragment
 	>
 
-	<div class="stretch">
-		<img src={CoverWhat} alt={$i18n.about.what.text.title} class="mt-4" />
+	<div class="stretch pt-4">
+		<Img src={CoverWhat} alt={$i18n.about.what.text.title} />
 
 		<p class="mt-6">
 			<IconCrypto />

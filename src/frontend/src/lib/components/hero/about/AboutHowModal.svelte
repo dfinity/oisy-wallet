@@ -9,6 +9,7 @@
 	import IconWorld from '$lib/components/icons/IconWorld.svelte';
 	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
 	import CoverHow from '$lib/assets/cover-how-it-works.png';
+	import Img from '$lib/components/ui/Img.svelte';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -16,8 +17,8 @@
 		><p class="text-xl">{replaceOisyPlaceholders($i18n.about.how.text.title)}</p>
 	</svelte:fragment>
 
-	<div class="stretch">
-		<img src={CoverHow} alt={$i18n.about.how.text.title} class="mt-4" />
+	<div class="stretch pt-4">
+		<Img src={CoverHow} alt={$i18n.about.how.text.title} />
 
 		<p class="mt-6">
 			<IconKey />
