@@ -15,23 +15,35 @@
 	import { fade } from 'svelte/transition';
 	import { busy } from '$lib/stores/busy.store';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
+	import type { OptionIdentity } from '$lib/types/identity';
+	import { loadUserProfile } from '$lib/services/load-user-profile.services';
+	import { userProfileStore } from '$lib/stores/settings.store';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
 
+	let identity: OptionIdentity;
+	$: identity = $authStore?.identity;
+
 	let principal: Principal | undefined | null;
-	$: principal = $authStore?.identity?.getPrincipal();
+	$: principal = identity?.getPrincipal();
 
 	const getPouhCredential = async () => {
-		if (nonNullish(principal)) {
+		if (nonNullish(identity)) {
 			try {
 				busy.show();
-				await requestPouhCredential({ credentialSubject: principal });
+				await requestPouhCredential({ identity });
 			} finally {
 				busy.stop();
 			}
 		}
 	};
+
+	$: {
+		if (nonNullish(identity) && POUH_ENABLED) {
+			loadUserProfile({ identity });
+		}
+	}
 </script>
 
 <KeyValuePairInfo>
@@ -97,21 +109,20 @@
 	</KeyValuePairInfo>
 </div>
 
-{#if POUH_ENABLED}
-	<div class="mt-8">
+{#if POUH_ENABLED && nonNullish($userProfileStore)}
+	<div class="mt-8" in:fade>
 		<h2 class="text-base mb-6 pb-1">{$i18n.settings.text.credentials_title}</h2>
 
 		<div class="mt-4">
 			<KeyValuePairInfo>
 				<span slot="key" class="font-bold">{$i18n.settings.text.pouh_credential}:</span>
 				<svelte:fragment slot="value">
-					<!-- TODO: Render spinner if no user profile -->
 					{#if $userHasPouhCredential}
-						<output in:fade class="mr-1.5">
+						<output class="mr-1.5">
 							{$i18n.settings.text.pouh_credential_verified}
 						</output>
 					{:else}
-						<button in:fade type="button" class="secondary" on:click={getPouhCredential}
+						<button type="button" class="secondary" on:click={getPouhCredential}
 							>{$i18n.settings.text.present_pouh_credential}</button
 						>
 					{/if}
