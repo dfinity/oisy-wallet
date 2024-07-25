@@ -39,5 +39,8 @@
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenCkEth}
-	<EthSendTokenModal destination={$ckErc20HelperContractAddress ?? ''} targetNetwork={ICP_NETWORK} />
+	<EthSendTokenModal
+		destination={$ckErc20HelperContractAddress ?? ''}
+		targetNetwork={ICP_NETWORK}
+	/>
 {/if}
