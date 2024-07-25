@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
+import usdc from '$eth/assets/usdc.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
-import usdc from '$icp-eth/assets/usdc.svg';
 
 export const USDC_DECIMALS = 6;
 
