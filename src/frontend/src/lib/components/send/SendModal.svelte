@@ -1,0 +1,142 @@
+<script lang="ts">
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { sendWizardSteps } from '$lib/components/config/send.config';
+	import { createEventDispatcher } from 'svelte';
+	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
+	import type { Token } from '$lib/types/token';
+	import { waitWalletReady } from '$lib/services/actions.services';
+	import { loadTokenAndRun } from '$icp/services/token.services';
+	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { ethereumToken } from '$eth/derived/token.derived';
+	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
+	import { closeModal } from '$lib/utils/modal.utils';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import type { Network, NetworkId } from '$lib/types/network';
+	import { token } from '$lib/stores/token.store';
+	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
+	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
+	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+
+	export let destination = '';
+	export let targetNetwork: Network | undefined = undefined;
+
+	let networkId: NetworkId | undefined = undefined;
+	$: networkId = targetNetwork?.id;
+
+	let amount: number | undefined = undefined;
+	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
+
+	let steps: WizardSteps;
+	$: steps = sendWizardSteps($i18n);
+
+	let currentStep: WizardStep | undefined;
+	let modal: WizardModal;
+
+	const dispatch = createEventDispatcher();
+
+	const close = () =>
+		closeModal(() => {
+			destination = '';
+			amount = undefined;
+			targetNetwork = undefined;
+
+			sendProgressStep = ProgressStepsSend.INITIALIZATION;
+
+			currentStep = undefined;
+
+			dispatch('nnsClose');
+		});
+
+	const isDisabled = (): boolean => $addressNotLoaded;
+
+	const nextStep = async ({ detail: token }: CustomEvent<Token>) => {
+		if (isDisabled()) {
+			const status = await waitWalletReady(isDisabled);
+
+			if (status === 'timeout') {
+				return;
+			}
+		}
+
+		const callback = async () => {
+			modal.next();
+		};
+		await loadTokenAndRun({ token, callback });
+	};
+</script>
+
+<WizardModal
+	{steps}
+	bind:currentStep
+	bind:this={modal}
+	on:nnsClose={close}
+	disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING}
+>
+	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+
+	{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
+		<SendTokensList on:icSendToken={nextStep} />
+
+		<button class="secondary full center text-center" on:click={modalStore.close}
+			>{$i18n.core.text.close}</button
+		>
+	{:else if isNetworkIdEthereum($token?.network.id)}
+		<SendTokenContext token={$token}>
+			<EthSendTokenWizard
+				{currentStep}
+				formCancelAction="back"
+				sourceNetwork={$selectedEthereumNetwork}
+				nativeEthereumToken={$ethereumToken}
+				bind:destination
+				bind:targetNetwork
+				bind:amount
+				bind:sendProgressStep
+				on:icBack={modal.back}
+				on:icNext={modal.next}
+				on:icClose={close}
+				on:icQRCodeScan={() =>
+					goToWizardSendStep({
+						modal,
+						steps,
+						stepName: WizardStepsSend.QR_CODE_SCAN
+					})}
+				on:icQRCodeBack={() =>
+					goToWizardSendStep({
+						modal,
+						steps,
+						stepName: WizardStepsSend.SEND
+					})}
+			/>
+		</SendTokenContext>
+	{:else if isNetworkIdICP($token?.network.id)}
+		<IcSendTokenWizard
+			{currentStep}
+			bind:destination
+			bind:networkId
+			bind:amount
+			bind:sendProgressStep
+			on:icBack={modal.back}
+			on:icNext={modal.next}
+			on:icClose={close}
+			on:icQRCodeScan={() =>
+				goToWizardSendStep({
+					modal,
+					steps,
+					stepName: WizardStepsSend.QR_CODE_SCAN
+				})}
+			on:icQRCodeBack={() =>
+				goToWizardSendStep({
+					modal,
+					steps,
+					stepName: WizardStepsSend.SEND
+				})}
+		/>
+	{:else}
+		<slot />
+	{/if}
+</WizardModal>
