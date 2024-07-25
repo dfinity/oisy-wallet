@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { readFileSync, readdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { findFiles } from './utils.mjs';
 
 const PATH_FROM_ROOT = join(process.cwd(), 'src', 'frontend', 'src');
 const PATH_TO_EN_JSON = join(PATH_FROM_ROOT, 'lib', 'i18n', 'en.json');
@@ -14,16 +15,6 @@ const extractKeys = (obj, prefix = '') =>
 		}
 		return [...res, `${prefix}${el}`];
 	}, []);
-
-const getAllFiles = (dir) =>
-	readdirSync(dir, { withFileTypes: true }).flatMap((file) => {
-		const res = resolve(dir, file.name);
-		return file.isDirectory()
-			? getAllFiles(res)
-			: file.isFile() && (res.endsWith('.svelte') || res.endsWith('.ts'))
-				? [res]
-				: [];
-	});
 
 // It checks if the key is used in the content or if the key is used in a dynamic way
 const checkKeyUsage = ({ key, files }) =>
@@ -39,7 +30,7 @@ const main = async () => {
 	const en = JSON.parse(readFileSync(PATH_TO_EN_JSON, 'utf8'));
 	const enKeys = extractKeys(en);
 
-	const files = getAllFiles(PATH_TO_CODEBASE);
+	const files = findFiles({ dir: PATH_TO_CODEBASE, extensions: ['.svelte', '.ts'] });
 	const unusedKeys = enKeys.filter((key) => !checkKeyUsage({ key, files }));
 
 	if (unusedKeys.length) {
@@ -47,7 +38,11 @@ const main = async () => {
 		process.exit(1);
 	} else {
 		console.log('All keys are used.');
+		process.exit(0);
 	}
 };
 
-main().catch(console.error);
+main().catch((err) => {
+	console.error(err);
+	process.exit(1);
+});
