@@ -1,4 +1,10 @@
-import type { CustomToken, SignRequest, UserToken } from '$declarations/backend/backend.did';
+import type {
+	CustomToken,
+	GetUserProfileError,
+	SignRequest,
+	UserProfile,
+	UserToken
+} from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
 import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -101,4 +107,23 @@ export const setUserToken = async ({
 }): Promise<void> => {
 	const { set_user_token } = await getBackendActor({ identity });
 	return set_user_token(token);
+};
+
+export const createUserProfile = async ({
+	identity
+}: {
+	identity: Identity;
+}): Promise<UserProfile> => {
+	const { create_user_profile } = await getBackendActor({ identity });
+	return create_user_profile();
+};
+
+export const getUserProfile = async ({
+	identity,
+	certified = true
+}: { identity: Identity } & QueryParams): Promise<
+	{ Ok: UserProfile } | { Err: GetUserProfileError }
+> => {
+	const { get_user_profile } = await getBackendActor({ identity, certified });
+	return get_user_profile();
 };

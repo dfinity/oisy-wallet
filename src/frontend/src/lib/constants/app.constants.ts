@@ -5,6 +5,7 @@ export const APP_VERSION = VITE_APP_VERSION;
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
 export const STAGING = MODE === 'staging';
+export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
 const MAINNET_DOMAIN = 'icp0.io';
@@ -21,9 +22,11 @@ export const POUH_ISSUER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
 	: STAGING
 		? import.meta.env.VITE_STAGING_POUH_ISSUER_CANISTER_ID
-		: PROD
-			? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
-			: undefined;
+		: BETA
+			? import.meta.env.VITE_BETA_POUH_ISSUER_CANISTER_ID
+			: PROD
+				? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
+				: undefined;
 
 export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 	? LOCAL
