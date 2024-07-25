@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync } from 'node:fs';
+import { readFileSync, unlinkSync } from 'node:fs';
 import { basename, dirname, resolve } from 'node:path';
 import { findFiles } from './utils.mjs';
 
@@ -10,6 +10,8 @@ const NC = '\x1b[0m'; // No Colour
 
 const DATA_DIR = 'src/frontend/src';
 const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
+
+const REMOVE_FILES = process.argv.includes('--remove-files');
 
 const findSvelteFiles = (dir) => findFiles({ dir, extensions: ['.svelte'] });
 
@@ -36,8 +38,13 @@ const main = async () => {
 		console.log(`${GREEN}No unused components found.${NC}`);
 		process.exit(0);
 	} else {
-		console.log(`${RED}Found ${potentialUnusedFiles.length} unused component(s).${NC}`);
-		potentialUnusedFiles.forEach((file) => console.log(`${RED}Unused Svelte file: ${file}${NC}`));
+		console.log(
+			`${RED}Found ${potentialUnusedFiles.length} unused component(s)${REMOVE_FILES ? ' that will be deleted' : ''}.${NC}`
+		);
+		potentialUnusedFiles.forEach((file) => {
+			console.log(`${RED}Unused Svelte file: ${file}${NC}`);
+			if (REMOVE_FILES) unlinkSync(file);
+		});
 		process.exit(1);
 	}
 };
