@@ -21,3 +21,4 @@ ic-metrics-encoder = "1.1.1"
 lazy_static = "1.4.0"
 pocket-ic = "2.2.0"
 ic-canister-sig-creation = "1.0.1"
+ic-verifiable-credentials = { git = "https://github.com/dfinity/verifiable-credentials-sdk", rev = "a116a2e53a13e4a1f6f7e8429960a7d0d6142e70" }

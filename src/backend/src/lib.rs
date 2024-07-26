@@ -2,7 +2,7 @@ use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{CandidType, Deserialize, Nat, Principal};
-use core::ops::Deref;
+use config::get_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
@@ -15,11 +15,12 @@ use ic_cdk::api::management_canister::ecdsa::{
 use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_stable_structures::{
-    memory_manager::{MemoryId, MemoryManager, VirtualMemory},
-    storable::{Blob, Bound, Storable},
-    DefaultMemoryImpl, StableBTreeMap, StableCell,
+    memory_manager::{MemoryId, MemoryManager},
+    DefaultMemoryImpl,
 };
+use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
+use oisy_user::get_oisy_users;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
@@ -28,28 +29,33 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
-    AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential,
-    UserProfile,
+    AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
+    ListUsersResponse, OisyUser, UserProfile,
 };
 use shared::types::{Arg, InitArg, SupportedCredential};
-use std::borrow::Cow;
 use std::cell::RefCell;
 use std::str::FromStr;
+use types::{
+    Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
+    UserTokenMap,
+};
+use user_profile::{add_credential, create_profile, get_profile};
 
 mod assertions;
+mod config;
 mod guards;
+mod impls;
+mod oisy_user;
 mod token;
-
-type VMem = VirtualMemory<DefaultMemoryImpl>;
-type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
-type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
-type CustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<CustomToken>>, VMem>;
+mod types;
+mod user_profile;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
+const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
+const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 
-const DEFAULT_LIMIT_GET_USERS_RESPONSE: u64 = 10_000;
 const MAX_SYMBOL_LENGTH: usize = 20;
 
 thread_local! {
@@ -62,6 +68,8 @@ thread_local! {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
+            user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
+            user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
         })
     );
 }
@@ -88,37 +96,6 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
-#[derive(Default)]
-struct Candid<T>(T)
-where
-    T: CandidType + for<'de> Deserialize<'de>;
-
-impl<T> Storable for Candid<T>
-where
-    T: CandidType + for<'de> Deserialize<'de>,
-{
-    const BOUND: Bound = Bound::Unbounded;
-
-    fn to_bytes(&self) -> Cow<'_, [u8]> {
-        Cow::Owned(candid::encode_one(&self.0).expect("encoding should always succeed"))
-    }
-
-    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
-        Self(candid::decode_one(bytes.as_ref()).expect("decoding should succeed"))
-    }
-}
-
-impl<T> Deref for Candid<T>
-where
-    T: CandidType + for<'de> Deserialize<'de>,
-{
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        &self.0
-    }
-}
-
 pub struct State {
     config: ConfigCell,
     /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the users.
@@ -126,28 +103,8 @@ pub struct State {
     /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
     /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
     custom_token: CustomTokenMap,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-struct StoredPrincipal(Principal);
-
-impl Storable for StoredPrincipal {
-    const BOUND: Bound = Blob::<29>::BOUND;
-
-    fn to_bytes(&self) -> Cow<'_, [u8]> {
-        Cow::Owned(
-            Blob::<29>::try_from(self.0.as_slice())
-                .expect("principal length should not exceed 29 bytes")
-                .to_bytes()
-                .into_owned(),
-        )
-    }
-
-    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
-        Self(Principal::from_slice(
-            Blob::<29>::from_bytes(bytes).as_slice(),
-        ))
-    }
+    user_profile: UserProfileMap,
+    user_profile_updated: UserProfileUpdatedMap,
 }
 
 #[derive(CandidType, Deserialize)]
@@ -500,34 +457,80 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
-#[allow(unused_variables)]
-fn add_user_credential(request: AddUserCredentialRequest) {
-    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2649
+fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+    let current_time_ns = time() as u128;
+
+    let (vc_flow_signers, root_pk_raw, credential_type) =
+        read_config(|config| get_credential_config(&request, config))
+            .ok_or(AddUserCredentialError::ConfigurationError)?;
+
+    match validate_ii_presentation_and_claims(
+        &request.credential_jwt,
+        user_principal,
+        &vc_flow_signers,
+        &request.credential_spec,
+        &root_pk_raw,
+        current_time_ns as u128,
+    ) {
+        Ok(()) => mutate_state(|s| {
+            add_credential(
+                stored_principal,
+                request.current_user_version,
+                &credential_type,
+                vc_flow_signers.issuer_origin,
+                &mut s.user_profile,
+                &mut s.user_profile_updated,
+            )
+        }),
+        Err(_) => Err(AddUserCredentialError::InvalidCredential),
+    }
+}
+
+/// It create a new user profile for the caller.
+/// If the user has already a profile, it will return that profile.
+#[update(guard = "caller_is_not_anonymous")]
+fn create_user_profile() -> UserProfile {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        let stored_user = create_profile(
+            stored_principal,
+            &mut s.user_profile,
+            &mut s.user_profile_updated,
+        );
+        UserProfile::from(&stored_user)
+    })
 }
 
 #[query(guard = "caller_is_not_anonymous")]
-fn get_or_create_user_profile() -> UserProfile {
-    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2648
-    let credentials: Vec<UserCredential> = Vec::new();
-    UserProfile {
-        credentials,
-        created_timestamp: time(),
-        updated_timestamp: time(),
-        version: None,
-    }
+fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        match get_profile(
+            stored_principal,
+            &mut s.user_profile,
+            &mut s.user_profile_updated,
+        ) {
+            Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
+            Err(err) => Err(err),
+        }
+    })
 }
 
 #[query(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
-fn get_users(request: GetUsersRequest) -> GetUsersResponse {
-    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2650
-    // WARNING: The value `DEFAULT_LIMIT_GET_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
-    let users: Vec<OisyUser> = Vec::new();
-    GetUsersResponse {
+fn list_users(request: ListUsersRequest) -> ListUsersResponse {
+    // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
+
+    let (users, matches_max_length): (Vec<OisyUser>, u64) =
+        read_state(|s| get_oisy_users(&request, &s.user_profile));
+
+    ListUsersResponse {
         users,
-        matches_max_length: request
-            .matches_max_length
-            .unwrap_or(DEFAULT_LIMIT_GET_USERS_RESPONSE),
+        matches_max_length,
     }
 }
 

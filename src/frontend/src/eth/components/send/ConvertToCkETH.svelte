@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
-	import SendTokenModal from '$eth/components/send/SendTokenModal.svelte';
+	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
@@ -28,5 +28,5 @@
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenCkEth}
-	<SendTokenModal destination={$ckEthHelperContractAddress ?? ''} targetNetwork={ICP_NETWORK} />
+	<EthSendTokenModal destination={$ckEthHelperContractAddress ?? ''} targetNetwork={ICP_NETWORK} />
 {/if}

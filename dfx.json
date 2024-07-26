@@ -5,14 +5,31 @@
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
-			"optimize": "cycles"
+			"optimize": "cycles",
+			"gzip": true
 		},
 		"frontend": {
 			"frontend": {
 				"entrypoint": "build/index.html"
 			},
 			"source": ["build/"],
-			"type": "assets"
+			"type": "assets",
+			"gzip": true
+		},
+		"new_backend": {
+			"candid": "src/backend/backend.did",
+			"package": "backend",
+			"type": "rust",
+			"optimize": "cycles",
+			"gzip": true
+		},
+		"orbit": {
+			"remote": {
+				"id": {
+					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
+					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai"
+				}
+			}
 		},
 		"internet_identity": {
 			"type": "custom",
@@ -159,6 +176,10 @@
 			"type": "persistent"
 		},
 		"staging": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"beta": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},

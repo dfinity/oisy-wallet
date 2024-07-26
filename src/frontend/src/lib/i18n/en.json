@@ -26,8 +26,7 @@
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
-			"manage_internet_identity": "Manage Internet Identity",
-			"back_to_wallet": "Back to Wallet"
+			"manage_internet_identity": "Manage Internet Identity"
 		},
 		"alt": {
 			"manage_internet_identity": "Administrate your Internet Identity",
@@ -49,6 +48,8 @@
 		},
 		"error": {
 			"no_internet_identity": "No internet identity.",
+			"invalid_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential. Please contact the issuer and request the credential again.",
+			"error_validating_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential.",
 			"error_requesting_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
 			"missing_pouh_issuer_origin": "Sorry, but there was an error while requesting the Humanity Credential. The issuer origin is missing.",
 			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?"
@@ -129,17 +130,25 @@
 			"testnets": "Show test networks",
 			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
 			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
+			"credentials_title": "Credentials",
+			"pouh_credential": "Humanity Credential",
+			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
+			"present_pouh_credential": "Present",
+			"pouh_credential_verified": "Verified ✅",
 			"sign_in": "Sign in to start using Oisy Wallet."
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets"
+		},
+		"error": {
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
 	},
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"show_testnets": "Show test networks",
 		"more": "More networks coming soon...",
-		"chain_fusion": "Chain Fusion"
+		"chain_fusion": "Chain Fusion (all networks)"
 	},
 	"receive": {
 		"text": {

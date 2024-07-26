@@ -10,12 +10,40 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
+	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
+	import { fade } from 'svelte/transition';
+	import { busy } from '$lib/stores/busy.store';
+	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
+	import type { OptionIdentity } from '$lib/types/identity';
+	import { loadUserProfile } from '$lib/services/load-user-profile.services';
+	import { userProfileStore } from '$lib/stores/settings.store';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
 
+	let identity: OptionIdentity;
+	$: identity = $authStore?.identity;
+
 	let principal: Principal | undefined | null;
-	$: principal = $authStore?.identity?.getPrincipal();
+	$: principal = identity?.getPrincipal();
+
+	const getPouhCredential = async () => {
+		if (nonNullish(identity)) {
+			try {
+				busy.show();
+				await requestPouhCredential({ identity });
+			} finally {
+				busy.stop();
+			}
+		}
+	};
+
+	$: {
+		if (nonNullish(identity) && POUH_ENABLED) {
+			loadUserProfile({ identity });
+		}
+	}
 </script>
 
 <KeyValuePairInfo>
@@ -80,3 +108,30 @@
 		</svelte:fragment>
 	</KeyValuePairInfo>
 </div>
+
+{#if POUH_ENABLED && nonNullish($userProfileStore)}
+	<div class="mt-8" in:fade>
+		<h2 class="text-base mb-6 pb-1">{$i18n.settings.text.credentials_title}</h2>
+
+		<div class="mt-4">
+			<KeyValuePairInfo>
+				<span slot="key" class="font-bold">{$i18n.settings.text.pouh_credential}:</span>
+				<svelte:fragment slot="value">
+					{#if $userHasPouhCredential}
+						<output class="mr-1.5">
+							{$i18n.settings.text.pouh_credential_verified}
+						</output>
+					{:else}
+						<button type="button" class="secondary" on:click={getPouhCredential}
+							>{$i18n.settings.text.present_pouh_credential}</button
+						>
+					{/if}
+				</svelte:fragment>
+
+				<svelte:fragment slot="info">
+					{$i18n.settings.text.pouh_credential_description}
+				</svelte:fragment>
+			</KeyValuePairInfo>
+		</div>
+	</div>
+{/if}
