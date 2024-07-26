@@ -1,6 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import * as THREE from 'three';
+	import {
+		Color,
+		Mesh,
+		PerspectiveCamera,
+		PlaneGeometry,
+		Scene,
+		ShaderMaterial,
+		WebGLRenderer
+	} from 'three';
 	import { isNullish } from '@dfinity/utils';
 
 	let container: HTMLDivElement;
@@ -78,11 +86,11 @@ void main(){
   }
 `;
 
-	let renderer: THREE.WebGLRenderer;
-	let scene: THREE.Scene;
-	let camera: THREE.PerspectiveCamera;
-	let material: THREE.ShaderMaterial;
-	let mesh: THREE.Mesh;
+	let renderer: WebGLRenderer;
+	let scene: Scene;
+	let camera: PerspectiveCamera;
+	let material: ShaderMaterial;
+	let mesh: Mesh;
 
 	onMount(() => {
 		init();
@@ -96,23 +104,18 @@ void main(){
 	});
 
 	const init = () => {
-		scene = new THREE.Scene();
-		camera = new THREE.PerspectiveCamera(
-			75,
-			container.clientWidth / container.clientHeight,
-			0.1,
-			1000
-		);
-		renderer = new THREE.WebGLRenderer();
+		scene = new Scene();
+		camera = new PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+		renderer = new WebGLRenderer();
 		renderer.setSize(container.clientWidth, container.clientHeight);
 		container.appendChild(renderer.domElement);
 
-		material = new THREE.ShaderMaterial({
+		material = new ShaderMaterial({
 			uniforms: {
 				time: { value: 0.0 },
 				frequency: { value: window.innerWidth < 768 ? 0.5 : 1.0 },
-				background: { value: new THREE.Color(colors[2]) },
-				colors: { value: colors.map((c) => new THREE.Color(c)) },
+				background: { value: new Color(colors[2]) },
+				colors: { value: colors.map((c) => new Color(c)) },
 				initialNoisePositions: { value: colors.map(() => Math.random() * 1000) },
 				speeds: { value: colors.map(() => -1 + Math.random() * 2) },
 				waveHeight: { value: 0.5 }
@@ -121,8 +124,8 @@ void main(){
 			fragmentShader
 		});
 
-		const geometry = new THREE.PlaneGeometry(2, 2);
-		mesh = new THREE.Mesh(geometry, material);
+		const geometry = new PlaneGeometry(2, 2);
+		mesh = new Mesh(geometry, material);
 		scene.add(mesh);
 
 		camera.position.z = 5;
