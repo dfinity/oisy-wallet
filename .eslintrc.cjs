@@ -4,10 +4,11 @@ module.exports = {
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
 		'plugin:svelte/recommended',
+		'plugin:import/recommended',
 		'prettier'
 	],
 	parser: '@typescript-eslint/parser',
-	plugins: ['@typescript-eslint', 'eslint-plugin-local-rules'],
+	plugins: ['@typescript-eslint', 'eslint-plugin-local-rules', 'import'],
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2020,
@@ -52,6 +53,8 @@ module.exports = {
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'no-delete-var': 'error',
 		'curly': 'error',
+		'import/no-unresolved': 'off',
+		'import/order': ['warn', { 'alphabetize': { 'order': 'asc' } }]
 	},
 	globals: {
 		NodeJS: true
