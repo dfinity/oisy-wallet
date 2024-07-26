@@ -3,7 +3,7 @@
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
-	import Send from '$eth/components/send/Send.svelte';
+	import EthSend from '$eth/components/send/EthSend.svelte';
 	import IcSend from '$icp/components/send/IcSend.svelte';
 	import { runAndResetToken } from '$icp/services/token.services';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -22,6 +22,6 @@
 		<IcSend compact {token} on:nnsClose={close} />
 	{:else}
 		<EthReceive compact />
-		<Send compact {token} on:nnsClose={close} />
+		<EthSend compact {token} on:nnsClose={close} />
 	{/if}
 </div>
