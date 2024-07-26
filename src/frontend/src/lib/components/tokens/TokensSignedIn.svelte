@@ -35,20 +35,28 @@
 		stopRefreshing = false;
 	};
 
-	let tokensToDisplay: Token[] = [];
-	$: tokensToDisplay = stopRefreshing ? updateTokensStatic(tokensToDisplay, tokens) : tokens;
-
-	const updateTokensStatic = (staticTokens: Token[], dynamicTokens: Token[]): Token[] => {
+	const updateTokensToDisplay = ({
+		tokensToDisplay,
+		newTokensList
+	}: {
+		tokensToDisplay: Token[];
+		newTokensList: Token[];
+	}): Token[] => {
 		const tokenMap = new Map(
-			dynamicTokens.map((token) => [
+			newTokensList.map((token) => [
 				`${token.id.description}-${token.network.id.description}`,
 				token
 			])
 		);
-		return staticTokens.map(
+		return tokensToDisplay.map(
 			(token) => tokenMap.get(`${token.id.description}-${token.network.id.description}`) ?? token
 		);
 	};
+
+	let tokensToDisplay: Token[] = [];
+	$: tokensToDisplay = stopRefreshing
+		? updateTokensToDisplay({ tokensToDisplay, newTokensList: tokens })
+		: tokens;
 
 	const passiveEvent = (
 		node: HTMLElement,
