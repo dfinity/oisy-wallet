@@ -113,8 +113,8 @@ void main(){
 				frequency: { value: window.innerWidth < 768 ? 0.5 : 1.0 },
 				background: { value: new THREE.Color(colors[2]) },
 				colors: { value: colors.map((c) => new THREE.Color(c)) },
-				initialNoisePositions: { value: colors.map((c) => Math.random() * 1000) },
-				speeds: { value: colors.map((c) => -1 + Math.random() * 2) },
+				initialNoisePositions: { value: colors.map(() => Math.random() * 1000) },
+				speeds: { value: colors.map(() => -1 + Math.random() * 2) },
 				waveHeight: { value: 0.5 }
 			},
 			vertexShader,
