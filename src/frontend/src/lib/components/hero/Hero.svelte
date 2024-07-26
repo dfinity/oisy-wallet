@@ -5,6 +5,7 @@
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
+	import ThreeBackground from '$lib/components/ui/ThreeBackground.svelte';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -20,7 +21,8 @@
 	$: heroContent = usdTotal || summary;
 </script>
 
-<div class={`hero pb-4 md:pb-6 ${background}`}>
+<div class={`hero pb-4 md:pb-6 ${background} relative`}>
+	<ThreeBackground />
 	<Header />
 
 	<article
@@ -38,12 +40,14 @@
 
 <style lang="scss">
 	.hero {
-		background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
-
 		--alpha-color: var(--color-grey);
 
 		&.icp {
 			background: radial-gradient(66.11% 97.11% at 50% 115.28%, #300097 0%, #1f005e 100%);
+		}
+
+		&.eth {
+			background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
 		}
 
 		&.sepoliaeth {
@@ -52,23 +56,10 @@
 		}
 
 		&.chainfusion {
-			background: #03020b;
+			background: transparent;
 
 			position: relative;
 			overflow: hidden;
-
-			&::before {
-				content: '';
-				position: absolute;
-				top: calc(50% - 727px);
-				left: 50%;
-				transform: translate(-50%, -50%);
-				width: max(100%, 1160px);
-				height: 1160px;
-				border-radius: 1160px;
-				background: #3d45ff 50%;
-				filter: blur(294px);
-			}
 		}
 	}
 </style>
