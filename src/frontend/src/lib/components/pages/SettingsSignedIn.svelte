@@ -18,6 +18,7 @@
 	import type { OptionIdentity } from '$lib/types/identity';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { userProfileStore } from '$lib/stores/settings.store';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
@@ -40,7 +41,7 @@
 	};
 
 	$: {
-		if (nonNullish(identity) && POUH_ENABLED) {
+		if ($authSignedIn && POUH_ENABLED) {
 			loadUserProfile({ identity });
 		}
 	}
@@ -118,7 +119,7 @@
 				<span slot="key" class="font-bold">{$i18n.settings.text.pouh_credential}:</span>
 				<svelte:fragment slot="value">
 					{#if $userHasPouhCredential}
-						<output class="mr-1.5">
+						<output in:fade class="mr-1.5">
 							{$i18n.settings.text.pouh_credential_verified}
 						</output>
 					{:else}
