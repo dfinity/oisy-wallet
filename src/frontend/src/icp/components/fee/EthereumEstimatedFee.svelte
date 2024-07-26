@@ -17,6 +17,7 @@
 	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let ckEr20 = false;
 	$: ckEr20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
@@ -54,7 +55,13 @@
 						{feeSymbol}
 						{#if insufficientFeeFunds}
 							<p transition:slide={{ duration: 250 }} class="text-cyclamen text-xs">
-								{$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees}
+								{replacePlaceholders($i18n.send.assertion.not_enough_eth_for_gas, {
+									$balance: formatToken({
+										value: balance,
+										displayDecimals: EIGHT_DECIMALS
+									}),
+									$symbol: feeSymbol
+								})}
 							</p>
 						{/if}
 					</span>

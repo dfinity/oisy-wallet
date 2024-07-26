@@ -10,6 +10,7 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { slide } from 'svelte/transition';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const { maxGasFee, feeSymbolStore, feeIdStore }: FeeContext =
 		getContext<FeeContext>(FEE_CONTEXT_KEY);
@@ -67,7 +68,13 @@
 			{$feeSymbolStore ?? ''}
 			{#if insufficientFeeFunds}
 				<p transition:slide={{ duration: 250 }} class="text-cyclamen text-xs">
-					{$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees}
+					{replacePlaceholders($i18n.send.assertion.not_enough_eth_for_gas, {
+						$balance: formatToken({
+							value: balance,
+							displayDecimals: EIGHT_DECIMALS
+						}),
+						$symbol: $feeSymbolStore ?? ''
+					})}
 				</p>
 			{/if}
 		</div>
