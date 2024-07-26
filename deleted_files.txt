@@ -1,0 +1,1 @@
+src/frontend/src/lib/components/icons/IconPlus.svelte
