@@ -25,14 +25,14 @@
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
 
-	let stopRefreshing = false;
+	let sortingEnabled = true;
 
-	const stopRefreshingTokens = () => {
-		stopRefreshing = true;
+	const enableSortingTokens = () => {
+		sortingEnabled = true;
 	};
 
-	const startRefreshingTokens = () => {
-		stopRefreshing = false;
+	const disableSortingTokens = () => {
+		sortingEnabled = false;
 	};
 
 	const updateTokensToDisplay = ({
@@ -42,6 +42,10 @@
 		tokensToDisplay: Token[];
 		newTokensList: Token[];
 	}): Token[] => {
+		if (sortingEnabled) {
+			return newTokensList;
+		}
+
 		const tokenMap = new Map(
 			newTokensList.map((token) => [
 				`${token.id.description}-${token.network.id.description}`,
@@ -54,9 +58,7 @@
 	};
 
 	let tokensToDisplay: Token[] = [];
-	$: tokensToDisplay = stopRefreshing
-		? updateTokensToDisplay({ tokensToDisplay, newTokensList: tokens })
-		: tokens;
+	$: tokensToDisplay = updateTokensToDisplay({ tokensToDisplay, newTokensList: tokens });
 
 	const passiveEvent = (
 		node: HTMLElement,
@@ -74,15 +76,15 @@
 
 <TokensSkeletons>
 	<div
-		use:passiveEvent={{ event: 'pointerenter', handler: stopRefreshingTokens }}
-		use:passiveEvent={{ event: 'pointerover', handler: stopRefreshingTokens }}
-		use:passiveEvent={{ event: 'pointerleave', handler: startRefreshingTokens }}
-		use:passiveEvent={{ event: 'focus', handler: stopRefreshingTokens }}
-		use:passiveEvent={{ event: 'focusin', handler: stopRefreshingTokens }}
-		use:passiveEvent={{ event: 'focusout', handler: startRefreshingTokens }}
-		use:passiveEvent={{ event: 'touchstart', handler: stopRefreshingTokens }}
-		use:passiveEvent={{ event: 'touchmove', handler: stopRefreshingTokens }}
-		use:passiveEvent={{ event: 'touchend', handler: startRefreshingTokens }}
+		use:passiveEvent={{ event: 'pointerenter', handler: disableSortingTokens }}
+		use:passiveEvent={{ event: 'pointerover', handler: disableSortingTokens }}
+		use:passiveEvent={{ event: 'pointerleave', handler: enableSortingTokens }}
+		use:passiveEvent={{ event: 'focus', handler: disableSortingTokens }}
+		use:passiveEvent={{ event: 'focusin', handler: disableSortingTokens }}
+		use:passiveEvent={{ event: 'focusout', handler: enableSortingTokens }}
+		use:passiveEvent={{ event: 'touchstart', handler: disableSortingTokens }}
+		use:passiveEvent={{ event: 'touchmove', handler: disableSortingTokens }}
+		use:passiveEvent={{ event: 'touchend', handler: enableSortingTokens }}
 	>
 		{#each tokensToDisplay as token (token.id)}
 			<Listener {token}>
