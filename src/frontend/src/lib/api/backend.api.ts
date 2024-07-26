@@ -115,7 +115,7 @@ export const setUserToken = async ({
 export const createUserProfile = async ({
 	identity
 }: {
-	identity: Identity;
+	identity: OptionIdentity;
 }): Promise<UserProfile> => {
 	const { create_user_profile } = await getBackendActor({ identity });
 	return create_user_profile();
@@ -124,7 +124,7 @@ export const createUserProfile = async ({
 export const getUserProfile = async ({
 	identity,
 	certified = true
-}: { identity: Identity } & QueryParams): Promise<
+}: { identity: OptionIdentity } & QueryParams): Promise<
 	{ Ok: UserProfile } | { Err: GetUserProfileError }
 > => {
 	const { get_user_profile } = await getBackendActor({ identity, certified });

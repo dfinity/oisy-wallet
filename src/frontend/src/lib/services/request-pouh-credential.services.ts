@@ -10,6 +10,7 @@ import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -53,8 +54,14 @@ const addPouhCredential = async ({
 				});
 				return { success: false };
 			}
-			// Throw so that it gets handled by the catch block.
-			throw new Error();
+			const errorKey = Object.keys(response.Err)[0];
+			toastsError({
+				msg: {
+					text: replacePlaceholders(authI18n.error.error_validating_pouh_credential_oisy, {
+						$error: errorKey
+					})
+				}
+			});
 		}
 	} catch (err: unknown) {
 		toastsError({

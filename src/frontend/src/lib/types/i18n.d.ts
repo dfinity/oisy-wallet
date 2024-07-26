@@ -44,6 +44,7 @@ interface I18nAuth {
 	error: {
 		no_internet_identity: string;
 		invalid_pouh_credential: string;
+		error_validating_pouh_credential_oisy: string;
 		error_validating_pouh_credential: string;
 		error_requesting_pouh_credential: string;
 		missing_pouh_issuer_origin: string;
