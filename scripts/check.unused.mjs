@@ -15,6 +15,11 @@ const REMOVE_FILES = process.argv.includes('--remove-files');
 
 const findSvelteFiles = (dir) => findFiles({ dir, extensions: ['.svelte'] });
 
+const noUnusedFiles = () => {
+	console.log(`${GREEN}No unused components found.${NC}`);
+	process.exit(0);
+};
+
 const main = async () => {
 	console.log(`${NC}Scanning ${DATA_DIR} folder to find all .svelte files\n`);
 
@@ -29,24 +34,29 @@ const main = async () => {
 		);
 
 		if (potentialUnusedFiles.length === 0) {
-			console.log(`${GREEN}No unused components found.${NC}`);
-			process.exit(0);
+			noUnusedFiles();
 		}
 	});
 
 	if (potentialUnusedFiles.length === 0) {
-		console.log(`${GREEN}No unused components found.${NC}`);
-		process.exit(0);
+		noUnusedFiles();
 	} else {
-		console.log(
-			`${RED}Found ${potentialUnusedFiles.length} unused component(s)${REMOVE_FILES ? ' that will be deleted' : ''}.${NC}`
-		);
+		console.log(`${RED}Found ${potentialUnusedFiles.length} unused component(s).${NC}`);
 		potentialUnusedFiles.forEach((file) => {
 			console.log(`${RED}Unused Svelte file: ${file}${NC}`);
 			if (REMOVE_FILES) {
 				unlinkSync(file);
+				console.log(`${GREEN}Removed: ${file}${NC}`);
 			}
 		});
+
+		if (REMOVE_FILES) {
+			console.log(
+				'Run the script again to check for more unused files after removing the ones above.'
+			);
+			await main();
+		}
+
 		process.exit(1);
 	}
 };
