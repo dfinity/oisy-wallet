@@ -38,7 +38,7 @@
 			return;
 		}
 
-		if (confirm) {
+		if (isNullish(oisy_introduction)) {
 			return;
 		}
 
@@ -49,10 +49,6 @@
 	const { oisy_introduction }: Storage = browser
 		? localStorage
 		: ({ oisy_introduction: null } as unknown as Storage);
-	const confirm = isNullish(oisy_introduction);
-
-	let disabledConfirm = true;
-	$: disabledConfirm = progressStep !== ProgressStepsLoader.DONE;
 
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
@@ -98,6 +94,9 @@
 		}
 
 		await progressAndLoad();
+
+		// Automatically confirm introduction after a delay for visual feedback.
+		setTimeout(confirmIntroduction, 500);
 	});
 
 	const confirmIntroduction = () => {
@@ -121,15 +120,6 @@
 
 					<InProgress {progressStep} {steps} />
 				</div>
-
-				{#if confirm}
-					<button
-						on:click={confirmIntroduction}
-						class="primary full center"
-						disabled={disabledConfirm}
-						class:opacity-0={disabledConfirm}>{$i18n.init.text.lets_go}</button
-					>
-				{/if}
 			</Modal>
 		</div>
 	{/if}
