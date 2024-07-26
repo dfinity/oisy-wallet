@@ -51,6 +51,7 @@ module.exports = {
 		'no-continue': 'warn',
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'no-delete-var': 'error',
+		'curly': 'error',
 	},
 	globals: {
 		NodeJS: true
