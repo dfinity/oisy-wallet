@@ -11,16 +11,10 @@
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { loadTokenAndRun } from '$icp/services/token.services';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
-	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { ethereumToken } from '$eth/derived/token.derived';
-	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import type { Network, NetworkId } from '$lib/types/network';
-	import { token } from '$lib/stores/token.store';
-	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
-	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
-	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import SendWizard from '$lib/components/send/SendWizard.svelte';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
@@ -85,39 +79,12 @@
 		<button class="secondary full center text-center" on:click={modalStore.close}
 			>{$i18n.core.text.close}</button
 		>
-	{:else if isNetworkIdEthereum($token?.network.id)}
-		<SendTokenContext token={$token}>
-			<EthSendTokenWizard
-				{currentStep}
-				formCancelAction="back"
-				sourceNetwork={$selectedEthereumNetwork}
-				nativeEthereumToken={$ethereumToken}
-				bind:destination
-				bind:targetNetwork
-				bind:amount
-				bind:sendProgressStep
-				on:icBack={modal.back}
-				on:icNext={modal.next}
-				on:icClose={close}
-				on:icQRCodeScan={() =>
-					goToWizardSendStep({
-						modal,
-						steps,
-						stepName: WizardStepsSend.QR_CODE_SCAN
-					})}
-				on:icQRCodeBack={() =>
-					goToWizardSendStep({
-						modal,
-						steps,
-						stepName: WizardStepsSend.SEND
-					})}
-			/>
-		</SendTokenContext>
-	{:else if isNetworkIdICP($token?.network.id)}
-		<IcSendTokenWizard
+	{:else}
+		<SendWizard
 			{currentStep}
 			bind:destination
 			bind:networkId
+			bind:targetNetwork
 			bind:amount
 			bind:sendProgressStep
 			on:icBack={modal.back}
@@ -136,7 +103,5 @@
 					stepName: WizardStepsSend.SEND
 				})}
 		/>
-	{:else}
-		<slot />
 	{/if}
 </WizardModal>
