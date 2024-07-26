@@ -1,0 +1,44 @@
+name: Remove Unused Svelte Files
+
+on:
+  schedule:
+    - cron: '30 3 * * MON'
+  workflow_dispatch:
+
+jobs:
+  check-unused-files:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Remove unused files
+        run: ./scripts/check.unused.sh --remove-files
+        continue-on-error: true
+
+      - name: Stage Changes
+        run: git add .
+
+      - name: Check for Changes
+        run: |
+          if ! git diff --cached --quiet; then
+            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
+            git diff --cached --name-only > deleted_files.txt
+          fi
+
+      # This action creates a PR only if there are changes.
+      - name: Create Pull Request
+        if: env.CHANGES_DETECTED == 'true'
+        uses: ./.github/actions/create-pr
+        with:
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+          branch: bot-frontend-remove-unused-svelte-files
+          title: 'chore(frontend): Remove Unused Svelte Files'
+          body: |
+            The following files were removed because they were not used in the project anymore:
+            ```
+            $(cat deleted_files.txt)
+            ```
