@@ -7,9 +7,9 @@
 </script>
 
 <div class="flex -space-x-2.5 mt-6 xl:mt-12">
-	<div><IconHeaderICP /></div>
-	<div><IconHeaderBTC /></div>
-	<div><IconHeaderETH /></div>
+	<IconHeaderICP />
+	<IconHeaderBTC />
+	<IconHeaderETH />
 </div>
 
 <div class="mt-5 mb-10 pt-2">
