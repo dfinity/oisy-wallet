@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { BigNumber } from '@ethersproject/bignumber';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import { enabledNetworkTokensUiNonZeroBalance } from '$lib/derived/network-tokens.derived';
+	import { sortedNetworkTokensUiNonZeroBalance } from '$lib/derived/network-tokens.derived';
 	import type { TokenUi } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
@@ -13,7 +13,7 @@
 	const dispatch = createEventDispatcher();
 
 	let tokens: TokenUi[];
-	$: tokens = $enabledNetworkTokensUiNonZeroBalance;
+	$: tokens = $sortedNetworkTokensUiNonZeroBalance;
 </script>
 
 <TokensSkeletons>
