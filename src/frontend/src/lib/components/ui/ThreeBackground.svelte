@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import {
 		Color,
 		Mesh,
@@ -94,13 +94,15 @@ void main(){
 
 	onMount(() => {
 		init();
-		return () => {
-			// Cleanup
-			renderer.dispose();
-			scene.remove(mesh);
-			material.dispose();
-			mesh.geometry.dispose();
-		};
+		window.addEventListener('resize', handleResize);
+	});
+
+	onDestroy(() => {
+		window.removeEventListener('resize', handleResize);
+		renderer.dispose();
+		scene.remove(mesh);
+		material.dispose();
+		mesh.geometry.dispose();
 	});
 
 	const init = () => {
@@ -147,18 +149,11 @@ void main(){
 		camera.aspect = container.clientWidth / container.clientHeight;
 		camera.updateProjectionMatrix();
 	};
-
-	onMount(() => {
-		window.addEventListener('resize', handleResize);
-		return () => {
-			window.removeEventListener('resize', handleResize);
-		};
-	});
 </script>
 
 <div bind:this={container} class="three-background"></div>
 
-<style>
+<style lang="scss">
 	.three-background {
 		position: absolute;
 		top: 0;
