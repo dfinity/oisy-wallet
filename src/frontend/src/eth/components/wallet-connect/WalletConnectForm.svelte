@@ -4,6 +4,11 @@
 	import { createEventDispatcher } from 'svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		TRACK_COUNT_WALLET_CONNECT,
+		TRACK_COUNT_WALLET_CONNECT_QR_CODE
+	} from '$lib/constants/analytics.contants';
 
 	let renderQRCodeReader = false;
 
@@ -22,21 +27,39 @@
 
 	const dispatch = createEventDispatcher();
 
-	const connect = () => {
+	const connect = (): 'success' | 'error' => {
 		if (!uri) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.missing_uri }
 			});
-			return;
+			return 'error';
 		}
 
 		dispatch('icConnect', uri);
+
+		return 'success';
 	};
 
-	const onQRCodeSuccess = ({ detail }: CustomEvent<string>) => {
+	const onClick = async () => {
+		const result = connect();
+
+		if (result === 'error') {
+			return;
+		}
+
+		await trackEvent({
+			name: TRACK_COUNT_WALLET_CONNECT
+		});
+	};
+
+	const onQRCodeSuccess = async ({ detail }: CustomEvent<string>) => {
 		uri = detail;
 
 		connect();
+
+		await trackEvent({
+			name: TRACK_COUNT_WALLET_CONNECT_QR_CODE
+		});
 	};
 </script>
 
@@ -72,7 +95,7 @@
 		class="primary block flex-1"
 		disabled={invalid}
 		class:opacity-10={invalid}
-		on:click={connect}
+		on:click={onClick}
 	>
 		{$i18n.wallet_connect.text.connect}
 	</button>
