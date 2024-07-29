@@ -20,6 +20,7 @@ export default {
 			blue: '#3b00b9',
 			dark: '#0e002d',
 			'dark-blue': '#321469',
+			'navy-blue': '#01016d',
 			'misty-rose': '#937993',
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',

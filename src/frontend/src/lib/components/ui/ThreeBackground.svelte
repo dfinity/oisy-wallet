@@ -151,15 +151,4 @@ void main(){
 	};
 </script>
 
-<div bind:this={container} class="three-background"></div>
-
-<style lang="scss">
-	.three-background {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background-color: #01016d;
-	}
-</style>
+<div bind:this={container} class="absolute inset-0 bg-navy-blue"></div>
