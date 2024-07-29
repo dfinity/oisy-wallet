@@ -95,11 +95,9 @@ void main(){
 
 	onMount(() => {
 		init();
-		window.addEventListener('resize', handleResize);
 	});
 
 	onDestroy(() => {
-		window.removeEventListener('resize', handleResize);
 		cancelAnimationFrame(animationRequestId);
 		renderer.dispose();
 		scene.remove(mesh);
@@ -152,5 +150,7 @@ void main(){
 		camera.updateProjectionMatrix();
 	};
 </script>
+
+<svelte:window on:resize={handleResize} />
 
 <div bind:this={container} class="absolute inset-0 bg-navy-blue"></div>
