@@ -6,7 +6,7 @@ import {
 	ERC20_TWIN_TOKENS_SEPOLIA
 } from '../src/frontend/src/env/tokens.erc20.env';
 
-const getAddresses = (contracts: Erc20Contract[]) =>
+const getAddresses = (contracts: Erc20Contract[]): string[] =>
 	contracts.map((contract) => contract.address.toLowerCase());
 
 const productionAddresses = getAddresses(ERC20_CONTRACTS_PRODUCTION);
@@ -15,11 +15,11 @@ const twinTokensMainnetAddresses = getAddresses(ERC20_TWIN_TOKENS_MAINNET);
 const sepoliaAddresses = getAddresses(ERC20_CONTRACTS_SEPOLIA);
 const twinTokensSepoliaAddresses = getAddresses(ERC20_TWIN_TOKENS_SEPOLIA);
 
-const checkDuplicates = (addresses1: string[], addresses2: string[]) =>
+const filterDuplicates = (addresses1: string[], addresses2: string[]): string[] =>
 	addresses1.filter((address) => addresses2.includes(address));
 
-const mainnetDuplicates = checkDuplicates(productionAddresses, twinTokensMainnetAddresses);
-const sepoliaDuplicates = checkDuplicates(sepoliaAddresses, twinTokensSepoliaAddresses);
+const mainnetDuplicates = filterDuplicates(productionAddresses, twinTokensMainnetAddresses);
+const sepoliaDuplicates = filterDuplicates(sepoliaAddresses, twinTokensSepoliaAddresses);
 
 if (mainnetDuplicates.length > 0 || sepoliaDuplicates.length > 0) {
 	if (mainnetDuplicates.length > 0) {
