@@ -1,3 +1,4 @@
+<!-- source: DFINITY foundation -->
 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="button__icon">
 	<defs>
 		<symbol viewBox="0 0 13 10" fill="none" id="svg-arrow" class="svg-arrow-go">
