@@ -5,14 +5,28 @@ import type { EthereumNetwork } from '$eth/types/network';
 import type { OptionIcCkToken } from '$icp/types/ic';
 import { setUserToken as setUserTokenApi } from '$lib/api/backend.api';
 import { busy } from '$lib/stores/busy.store';
+import { i18n } from '$lib/stores/i18n.store';
+import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, isNullish, toNullable } from '@dfinity/utils';
-import {toastsError} from "$lib/stores/toasts.store";
-import {get} from "svelte/store";
-import {i18n} from "$lib/stores/i18n.store";
+import { get } from 'svelte/store';
 
+/**
+ * When a user converts an ERC20 token to a ckERC20 twin token, the UI needs information about the counterpart token (ERC20).
+ * For example, the user might have a CK token (e.g., ckUSDC) enabled, but its token counterpart (e.g., USDC) disabled.
+ * As a result, the UI might lack necessary information.
+ * This is typically the case for the balance. For instance, when the user opens the modal to convert USDC to ckUSDC, Oisy informs them that they should first transfer USDC.
+ * On that screen, the balance of USDC is displayed, so the user knows when the funds were transferred and when they can proceed with the conversion.
+ * Therefore, this function aims to enable the counterpart token if the user has only enabled the CK token.
+ *
+ * @param {Object} params - The parameters for the function.
+ * @param {Erc20UserToken[]} params.erc20UserTokens - The list of user's ERC20 tokens.
+ * @param {Token} params.sendToken - The token to be sent.
+ * @param {OptionIdentity} params.identity - The user's identity.
+ * @returns {Promise<{ result: 'loaded' | 'skipped' | 'error' }>} The result of the operation.
+ */
 export const autoLoadUserToken = async ({
 	erc20UserTokens,
 	sendToken,
@@ -21,14 +35,14 @@ export const autoLoadUserToken = async ({
 	erc20UserTokens: Erc20UserToken[];
 	sendToken: Token;
 	identity: OptionIdentity;
-}): Promise<{ result: 'loaded' | 'skipped' | 'error'}> => {
+}): Promise<{ result: 'loaded' | 'skipped' | 'error' }> => {
 	if (sendToken.standard !== 'icrc') {
-		return {result: 'skipped'};
+		return { result: 'skipped' };
 	}
 
 	const twinToken = (sendToken as OptionIcCkToken)?.twinToken;
 	if (isNullish(twinToken)) {
-		return {result: 'skipped'};
+		return { result: 'skipped' };
 	}
 
 	const erc20UserToken = erc20UserTokens.find(
@@ -36,7 +50,7 @@ export const autoLoadUserToken = async ({
 	);
 
 	if (erc20UserToken?.enabled === true) {
-		return {result: 'skipped'};
+		return { result: 'skipped' };
 	}
 
 	busy.start();
@@ -67,7 +81,7 @@ export const autoLoadUserToken = async ({
 		busy.stop();
 	}
 
-	return {result: "loaded"};
+	return { result: 'loaded' };
 };
 
 export const setUserToken = async ({
