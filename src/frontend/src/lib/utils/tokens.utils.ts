@@ -78,10 +78,11 @@ export const pinTokensWithBalanceAtTop = ({
 				})
 			)
 		}))
-		.filter(({ usdBalance, balance }) => (nonNullish(usdBalance) && usdBalance > 0) || balance > 0)
+		// If the token has no exchange rate (undefined balance), we do not sort it by usd value, but by balance.
+		.filter(({ usdBalance, balance }) => (usdBalance ?? 0) > 0 || balance > 0)
 		.sort(
 			(a, b) =>
-				b.usdBalance! - a.usdBalance! ||
+				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
 				b.balance - a.balance ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)

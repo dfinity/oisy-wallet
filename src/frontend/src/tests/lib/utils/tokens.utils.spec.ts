@@ -3,11 +3,10 @@ import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Token } from '$lib/types/token';
-import { usdValue } from '$lib/utils/exchange.utils';
+import type { Token, TokenUi } from '$lib/types/token';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import { describe, expect, it, type MockedFunction } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 const usd = 1;
 
@@ -95,10 +94,6 @@ describe('sortTokens', () => {
 });
 
 describe('pinTokensWithBalanceAtTop', () => {
-	const tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
-
-	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
-
 	beforeEach(() => {
 		vi.resetAllMocks();
 	});
@@ -110,24 +105,21 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: bn200, certified: true }
 		};
 
-		mockUsdValue.mockImplementation(({ token }) => {
-			switch (token.id) {
-				case ICP_TOKEN.id:
-					return 100;
-				case BTC_MAINNET_TOKEN.id:
-					return 50;
-				case ETHEREUM_TOKEN.id:
-					return 200;
-				default:
-					return 0;
-			}
-		});
+		const tokens: TokenUi[] = [
+			{ ...ICP_TOKEN, usdBalance: 100 },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
+			{ ...ETHEREUM_TOKEN, usdBalance: 200 }
+		];
 
 		const result = pinTokensWithBalanceAtTop({
 			$tokens: tokens,
 			$balancesStore: balancesStore
 		});
-		expect(result).toEqual([ETHEREUM_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN]);
+		expect(result).toEqual([
+			{ ...ETHEREUM_TOKEN, usdBalance: 200 },
+			{ ...ICP_TOKEN, usdBalance: 100 },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 }
+		]);
 	});
 
 	it('should return the same array if no tokens have balance', () => {
@@ -137,7 +129,10 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: bn0, certified: true }
 		};
 
-		mockUsdValue.mockImplementation(() => 0);
+		const tokens: TokenUi[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN].map((token) => ({
+			...token,
+			usdBalance: 0
+		}));
 
 		const result = pinTokensWithBalanceAtTop({
 			$tokens: tokens,
@@ -153,46 +148,44 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: bn0, certified: true }
 		};
 
-		mockUsdValue.mockImplementation(({ token }) => {
-			switch (token.id) {
-				case BTC_MAINNET_TOKEN.id:
-					return 50;
-				default:
-					return 0;
-			}
-		});
+		const tokens: TokenUi[] = [
+			{ ...ICP_TOKEN, usdBalance: 0 },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
+			{ ...ETHEREUM_TOKEN, usdBalance: 0 }
+		];
 
 		const result = pinTokensWithBalanceAtTop({
 			$tokens: tokens,
 			$balancesStore: balancesStore
 		});
-		expect(result).toEqual([BTC_MAINNET_TOKEN, ICP_TOKEN, ETHEREUM_TOKEN]);
+		expect(result).toEqual([
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
+			{ ...ICP_TOKEN, usdBalance: 0 },
+			{ ...ETHEREUM_TOKEN, usdBalance: 0 }
+		]);
 	});
 
-	it('should put tokens with no exchange price after tokens with balance', () => {
+	it('should put tokens with no exchange price (undefined balance) after tokens with balance', () => {
 		const balancesStore: CertifiedStoreData<BalancesData> = {
 			[ICP_TOKEN.id]: { data: bn200, certified: true },
 			[BTC_MAINNET_TOKEN.id]: { data: bn100, certified: true },
 			[ETHEREUM_TOKEN.id]: { data: bn100, certified: true }
 		};
 
-		mockUsdValue.mockImplementation(({ token }) => {
-			switch (token.id) {
-				case ICP_TOKEN.id:
-					return 100;
-				case BTC_MAINNET_TOKEN.id:
-					return 50;
-				case ETHEREUM_TOKEN.id:
-					return 200;
-				default:
-					return 0;
-			}
-		});
+		const tokens: TokenUi[] = [
+			{ ...ICP_TOKEN },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
+			{ ...ETHEREUM_TOKEN, usdBalance: 200 }
+		];
 
 		const result = pinTokensWithBalanceAtTop({
 			$tokens: tokens,
 			$balancesStore: balancesStore
 		});
-		expect(result).toEqual([ETHEREUM_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN]);
+		expect(result).toEqual([
+			{ ...ETHEREUM_TOKEN, usdBalance: 200 },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
+			ICP_TOKEN
+		]);
 	});
 });
