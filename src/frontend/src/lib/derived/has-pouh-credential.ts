@@ -4,5 +4,5 @@ import { derived, type Readable } from 'svelte/store';
 
 export const userHasPouhCredential: Readable<boolean | undefined> = derived(
 	[userProfileStore],
-	([$profile]) => hasPouhCredential($profile)
+	([$profile]) => hasPouhCredential($profile?.profile)
 );
