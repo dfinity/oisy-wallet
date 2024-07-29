@@ -1,6 +1,6 @@
-<div align="center" style="display:flex;flex-direction:column;">
+<div style="display:flex;flex-direction:column;">
   <a href="https://oisy.com/">
-    <img src="./src/frontend/static/images/meta-share.jpg" alt="Oisy Wallet logo" role="presentation"/>
+    <img src="./oisy-github-image.jpg" alt="Oisy Wallet logo" role="presentation"/>
   </a>
 
 <br/>
