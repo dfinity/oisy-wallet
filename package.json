@@ -39,7 +39,7 @@
 		"e2e:ci": "playwright test --reporter=html",
 		"e2e:snapshots": "npx playwright test --update-snapshots --reporter=list",
 		"e2e:report": "npx playwright show-report",
-		"erc20:check": "npx vite-node scripts/check.tokens.erc20.ts"
+		"erc20:check": "vite-node scripts/check.tokens.erc20.ts"
 	},
 	"dependencies": {
 		"@dfinity/agent": "^1.4.0",

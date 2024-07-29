@@ -39,5 +39,4 @@ if (mainnetDuplicates.length > 0 || sepoliaDuplicates.length > 0) {
 	process.exit(1);
 } else {
 	console.log('No ERC20 token duplicates found. All addresses are unique.');
-	process.exit(0);
 }
