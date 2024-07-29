@@ -4,14 +4,13 @@
 	import IconHeaderICP from '$lib/components/icons/IconHeaderICP.svelte';
 	import IconHeaderBTC from '$lib/components/icons/IconHeaderBTC.svelte';
 	import IconHeaderETH from '$lib/components/icons/IconHeaderETH.svelte';
-	import IconHeaderUSDC from '$lib/components/icons/IconHeaderUSDC.svelte';
+	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 </script>
 
 <div class="flex -space-x-2.5 mt-6 xl:mt-12">
-	<div><IconHeaderICP /></div>
-	<div><IconHeaderBTC /></div>
-	<div><IconHeaderETH /></div>
-	<div><IconHeaderUSDC /></div>
+	<IconHeaderICP />
+	<IconHeaderBTC />
+	<IconHeaderETH />
 </div>
 
 <div class="mt-5 mb-10 pt-2">
@@ -20,10 +19,6 @@
 	</h1>
 </div>
 
-<button
-	on:click={async () => await signIn({})}
-	class="primary full center max-w-72"
-	data-tid="login-button"
->
+<ButtonAuthenticate on:click={async () => await signIn({})}>
 	{$i18n.auth.text.authenticate}
-</button>
+</ButtonAuthenticate>

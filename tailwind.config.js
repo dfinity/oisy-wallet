@@ -21,6 +21,8 @@ export default {
 			dark: '#0e002d',
 			'dark-blue': '#321469',
 			'navy-blue': '#01016d',
+			'brandeis-blue': '#016dfc',
+			'spiro-disco-ball': '#1bb5ff',
 			'misty-rose': '#937993',
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',
