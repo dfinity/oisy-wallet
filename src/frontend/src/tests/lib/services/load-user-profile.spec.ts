@@ -43,7 +43,7 @@ describe('loadUserProfile', () => {
 			certified: false
 		});
 		expect(createUserProfileSpy).not.toHaveBeenCalled();
-		expect(get(userProfileStore)).toEqual(mockProfile);
+		expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
 	});
 
 	it('creates a user profile if uncertified profile is not found', async () => {
@@ -63,7 +63,7 @@ describe('loadUserProfile', () => {
 		expect(createUserProfileSpy).toHaveBeenCalledWith({
 			identity: mockIdentity
 		});
-		expect(get(userProfileStore)).toEqual(mockProfile);
+		expect(get(userProfileStore)).toEqual({ certified: true, profile: mockProfile });
 	});
 
 	it('loads the store with certified data when uncertified profile is found', async () => {
