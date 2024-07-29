@@ -32,12 +32,18 @@
 
 		dispatch('icConnect', uri);
 	};
+
+	const onQRCodeSuccess = ({ detail }: CustomEvent<string>) => {
+		uri = detail;
+
+		connect();
+	};
 </script>
 
 <div class="stretch">
 	<div class="rounded-lg qr-code">
 		{#if renderQRCodeReader}
-			<QRCodeReader on:nnsQRCode={async ({ detail }) => (uri = detail)} on:nnsQRCodeError={error} />
+			<QRCodeReader on:nnsQRCode={onQRCodeSuccess} on:nnsQRCodeError={error} />
 		{/if}
 
 		{#if !renderQRCodeReader}
