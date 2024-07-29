@@ -7,6 +7,7 @@ import type { Token, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -50,4 +51,12 @@ export const enabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 					: undefined
 			};
 		})
+);
+
+export const enabledNetworkTokensUiNonZeroBalance: Readable<TokenUi[]> = derived(
+	[enabledNetworkTokensUi, balancesStore],
+	([$enabledNetworkTokensUi, $balancesStore]) =>
+		$enabledNetworkTokensUi.filter(({ id: tokenId }) =>
+			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n)
+		)
 );
