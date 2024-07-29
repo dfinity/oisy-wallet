@@ -9,6 +9,7 @@
 		ShaderMaterial,
 		WebGLRenderer
 	} from 'three';
+	import { isNullish } from '@dfinity/utils';
 
 	let container: HTMLDivElement | undefined | null;
 
@@ -105,6 +106,9 @@ void main(){
 	});
 
 	const init = () => {
+		if (isNullish(container)) {
+			return;
+		}
 		scene = new Scene();
 		camera = new PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
 		renderer = new WebGLRenderer();
@@ -141,6 +145,9 @@ void main(){
 	};
 
 	const handleResize = () => {
+		if (isNullish(container)) {
+			return;
+		}
 		renderer.setSize(container.clientWidth, container.clientHeight);
 		camera.aspect = container.clientWidth / container.clientHeight;
 		camera.updateProjectionMatrix();
