@@ -34,7 +34,7 @@ const erc20DefaultTokensAddresses: Readable<string[]> = derived(
  * The list of ERC20 tokens the user has added, enabled or disabled. Can contains default tokens for example if user has disabled a default tokens.
  * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "user token" in the backend.
  */
-const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
+export const erc20UserTokens: Readable<Erc20UserToken[]> = derived(
 	[erc20UserTokensStore],
 	([$erc20UserTokensStore]) => $erc20UserTokensStore?.map(({ data: token }) => token) ?? []
 );

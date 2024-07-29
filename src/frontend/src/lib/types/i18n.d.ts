@@ -98,6 +98,7 @@ interface I18nInit {
 		transaction_price: string;
 		icrc_canisters: string;
 		erc20_user_tokens: string;
+		erc20_user_token: string;
 		loading_wallet_timeout: string;
 	};
 }

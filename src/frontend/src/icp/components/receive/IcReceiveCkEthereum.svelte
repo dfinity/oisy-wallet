@@ -9,6 +9,10 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
+	import { erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { authStore } from '$lib/stores/auth.store';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 
 	export let compact = false;
 
@@ -32,7 +36,19 @@
 
 	$: sendToken.set($ckEthereumTwinToken);
 
-	const openReceive = async () => modalStore.openCkETHReceive(modalId);
+	const openReceive = async () => {
+		const { result } = await autoLoadUserToken({
+			erc20UserTokens: $erc20UserTokens,
+			sendToken: $tokenWithFallback,
+			identity: $authStore.identity
+		});
+
+		if (result === 'error') {
+			return;
+		}
+
+		modalStore.openCkETHReceive(modalId);
+	};
 </script>
 
 <ReceiveButton {compact} on:click={async () => await open(openReceive)} />
