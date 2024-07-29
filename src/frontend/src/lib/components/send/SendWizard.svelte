@@ -18,6 +18,7 @@
 </script>
 
 {#if isNetworkIdEthereum($token?.network.id)}
+	<!-- TODO: Move the context one level down -->
 	<SendTokenContext token={$token}>
 		<EthSendTokenWizard
 			{currentStep}
