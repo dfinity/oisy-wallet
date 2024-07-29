@@ -21,3 +21,8 @@ export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS = 'ic_ckerc20_to_erc20
 export const TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR = 'ic_ckerc20_to_erc20_error_count';
 export const TRACK_COUNT_IC_SEND_SUCCESS = 'ic_send_success_count';
 export const TRACK_COUNT_IC_SEND_ERROR = 'ic_send_error_count';
+
+// WalletConnect
+export const TRACK_COUNT_WALLET_CONNECT_MENU_OPEN = 'wallet_connect_menu_open_count';
+export const TRACK_COUNT_WALLET_CONNECT_QR_CODE = 'wallet_connect_qr_code_count';
+export const TRACK_COUNT_WALLET_CONNECT = 'wallet_connect_count';
