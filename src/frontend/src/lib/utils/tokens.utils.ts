@@ -81,7 +81,7 @@ export const pinTokensWithBalanceAtTop = ({
 				const usdBalance = token.usdBalance ?? 0;
 
 				if (usdBalance > 0 || balance > 0) {
-					acc.push({ ...token, balance });
+					return [...acc, { ...token, balance }];
 				}
 
 				return acc;
