@@ -5,17 +5,6 @@
 	import { goto } from '$app/navigation';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
-	import {
-		networkEthereum,
-		networkICP,
-		networkId,
-		pseudoNetworkChainFusion
-	} from '$lib/derived/network.derived';
-	import { networkParam } from '$lib/utils/nav.utils';
-	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
-	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
-	import IconWallet from '$lib/components/icons/IconWallet.svelte';
-	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { isRouteSettings, networkParam } from '$lib/utils/nav.utils';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -23,10 +12,6 @@
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
-	import WalletAddresses from '$lib/components/core/WalletAddresses.svelte';
-	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import MenuWallet from '$lib/components/core/MenuWallet.svelte';
 	import { page } from '$app/stores';
