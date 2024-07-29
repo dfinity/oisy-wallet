@@ -9,8 +9,6 @@
 	import banner from '$lib/assets/banner.svg';
 	import { Modal } from '@dfinity/gix-components';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { browser } from '$app/environment';
-	import { isNullish } from '@dfinity/utils';
 	import { loading } from '$lib/stores/loader.store';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
@@ -38,17 +36,9 @@
 			return;
 		}
 
-		if (isNullish(oisy_introduction)) {
-			return;
-		}
-
 		// A small delay for display animation purpose.
 		setTimeout(() => loading.set(false), 1000);
 	})();
-
-	const { oisy_introduction }: Storage = browser
-		? localStorage
-		: ({ oisy_introduction: null } as unknown as Storage);
 
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
@@ -94,15 +84,7 @@
 		}
 
 		await progressAndLoad();
-
-		// Automatically confirm introduction after a delay for visual feedback.
-		setTimeout(confirmIntroduction, 500);
 	});
-
-	const confirmIntroduction = () => {
-		localStorage.setItem('oisy_introduction', 'done');
-		loading.set(false);
-	};
 </script>
 
 {#if $loading}
