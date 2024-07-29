@@ -4,7 +4,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { UserProfileNotFoundError } from '$lib/types/errors';
-import type { Identity } from '@dfinity/agent';
+import type { OptionIdentity } from '$lib/types/identity';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -12,7 +12,7 @@ const queryProfile = async ({
 	identity,
 	certified
 }: {
-	identity: Identity;
+	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<UserProfile> => {
 	const response = await getUserProfile({ identity, certified });
@@ -29,7 +29,7 @@ const queryProfile = async ({
 const queryUnsafeProfile = async ({
 	identity
 }: {
-	identity: Identity;
+	identity: OptionIdentity;
 }): Promise<UserProfile | undefined> => {
 	try {
 		return await queryProfile({ identity, certified: false });
@@ -44,7 +44,7 @@ const queryUnsafeProfile = async ({
 export const loadCertifiedUserProfile = async ({
 	identity
 }: {
-	identity: Identity;
+	identity: OptionIdentity;
 }): Promise<void> => {
 	try {
 		const profile = await queryProfile({ identity, certified: true });
@@ -55,7 +55,11 @@ export const loadCertifiedUserProfile = async ({
 	}
 };
 
-export const loadUserProfile = async ({ identity }: { identity: Identity }): Promise<void> => {
+export const loadUserProfile = async ({
+	identity
+}: {
+	identity: OptionIdentity;
+}): Promise<void> => {
 	try {
 		let profile = await queryUnsafeProfile({ identity });
 		if (isNullish(profile)) {
