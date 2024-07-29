@@ -18,7 +18,6 @@
 
 Oisy is a new browser-based, self-custodial and multi-chain wallet powered by Internet Computer's [chain fusion](https://internetcomputer.org/chainfusion) technology.
 
-
 ## Features
 
 The Oisy wallet provides a convenient user experience known from custodial wallets but without their strong trust assumptions. In contrast, Oisy provides trust assumptions comparable to self-custody solutions. Different from self-custody wallets though, Oisy requires no browser extensions or additional mobile app, a standard off-the-shelf web browser is sufficient. In conclusion, Oisy provides an attractive user experience with a low entry barrier, yet requires no strong trust assumptions.
