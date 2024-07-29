@@ -14,9 +14,8 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { back } from '$lib/utils/nav.utils';
+	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 	import type { Identity } from '@dfinity/agent';
-	import { networkId } from '$lib/derived/network.derived';
 	import { tokenToggleable } from '$lib/derived/token.derived';
 
 	export let assertHide: () => { valid: boolean };
@@ -54,7 +53,7 @@
 			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
 
 			// We must navigate first otherwise we might land on the default token Ethereum selected while being on network ICP.
-			await back({ networkId: $networkId });
+			await gotoReplaceRoot();
 
 			await updateUi({
 				identity: $authStore.identity

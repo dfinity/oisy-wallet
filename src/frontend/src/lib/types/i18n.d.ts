@@ -27,7 +27,6 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		manage_internet_identity: string;
-		back_to_wallet: string;
 	};
 	alt: { manage_internet_identity: string; more_settings: string; menu: string };
 }
@@ -44,6 +43,9 @@ interface I18nAuth {
 	alt: { sign_in: string };
 	error: {
 		no_internet_identity: string;
+		invalid_pouh_credential: string;
+		error_validating_pouh_credential_oisy: string;
+		error_validating_pouh_credential: string;
 		error_requesting_pouh_credential: string;
 		missing_pouh_issuer_origin: string;
 		no_pouh_credential: string;
@@ -128,6 +130,7 @@ interface I18nSettings {
 		sign_in: string;
 	};
 	alt: { testnets_toggle: string };
+	error: { loading_profile: string };
 }
 
 interface I18nNetworks {

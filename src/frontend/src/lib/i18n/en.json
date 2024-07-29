@@ -26,8 +26,7 @@
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
-			"manage_internet_identity": "Manage Internet Identity",
-			"back_to_wallet": "Back to Wallet"
+			"manage_internet_identity": "Manage Internet Identity"
 		},
 		"alt": {
 			"manage_internet_identity": "Administrate your Internet Identity",
@@ -49,6 +48,9 @@
 		},
 		"error": {
 			"no_internet_identity": "No internet identity.",
+			"invalid_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential. Please contact the issuer and request the credential again.",
+			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in Oisy: $error",
+			"error_validating_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential.",
 			"error_requesting_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
 			"missing_pouh_issuer_origin": "Sorry, but there was an error while requesting the Humanity Credential. The issuer origin is missing.",
 			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?"
@@ -138,6 +140,9 @@
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets"
+		},
+		"error": {
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
 	},
 	"networks": {
