@@ -166,7 +166,7 @@ fn post_upgrade(arg: Option<Arg>) {
 }
 
 /// Show the canister configuration.
-#[query]
+#[query(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
 #[must_use]
 fn config() -> Config {
