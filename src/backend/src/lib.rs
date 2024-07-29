@@ -170,7 +170,7 @@ fn post_upgrade(arg: Option<Arg>) {
 #[allow(clippy::needless_pass_by_value)]
 #[must_use]
 fn config() -> Config {
-    read_config(|c| c.clone())
+    read_config(std::clone::Clone::clone)
 }
 
 /// Processes external HTTP requests.
