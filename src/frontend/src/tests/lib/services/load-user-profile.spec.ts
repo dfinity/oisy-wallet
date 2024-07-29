@@ -1,9 +1,10 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
-import { userProfileStore } from '$lib/stores/settings.store';
+import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
+import { waitFor } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
 import { get } from 'svelte/store';
 
@@ -26,7 +27,7 @@ const mockIdentity = {
 
 describe('loadUserProfile', () => {
 	beforeEach(() => {
-		userProfileStore.reset({ key: 'user-profile' });
+		userProfileStore.reset();
 		vi.clearAllMocks();
 	});
 
@@ -43,7 +44,7 @@ describe('loadUserProfile', () => {
 			certified: false
 		});
 		expect(createUserProfileSpy).not.toHaveBeenCalled();
-		expect(get(userProfileStore)).toEqual(mockProfile);
+		expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
 	});
 
 	it('creates a user profile if uncertified profile is not found', async () => {
@@ -63,7 +64,7 @@ describe('loadUserProfile', () => {
 		expect(createUserProfileSpy).toHaveBeenCalledWith({
 			identity: mockIdentity
 		});
-		expect(get(userProfileStore)).toEqual(mockProfile);
+		expect(get(userProfileStore)).toEqual({ certified: true, profile: mockProfile });
 	});
 
 	it('loads the store with certified data when uncertified profile is found', async () => {
@@ -81,5 +82,8 @@ describe('loadUserProfile', () => {
 			identity: mockIdentity,
 			certified: true
 		});
+		await waitFor(() =>
+			expect(get(userProfileStore)).toEqual({ certified: true, profile: mockProfile })
+		);
 	});
 });
