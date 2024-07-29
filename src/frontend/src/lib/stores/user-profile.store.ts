@@ -21,7 +21,7 @@ const initUserProfileStore = (): UserProfileStore => {
 
 	return {
 		set: (data: CertifiedUserProfileData | null) => set(data),
-		reset: () => set(undefined),
+		reset: () => set(null),
 		subscribe
 	};
 };
