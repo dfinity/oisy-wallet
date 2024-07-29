@@ -14,14 +14,20 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import { createEventDispatcher } from 'svelte';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 
 	const dispatch = createEventDispatcher();
 
 	const click = () => dispatch('icMenuClick');
 
-	const openWalletConnectAuth = () => {
+	const openWalletConnectAuth = async () => {
 		click();
 		modalStore.openWalletConnectAuth();
+
+		await trackEvent({
+			name: TRACK_COUNT_WALLET_CONNECT_MENU_OPEN
+		});
 	};
 </script>
 
