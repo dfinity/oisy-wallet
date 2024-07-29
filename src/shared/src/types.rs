@@ -8,7 +8,7 @@ pub enum CredentialType {
     ProofOfUniqueness,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone)]
 pub struct SupportedCredential {
     pub credential_type: CredentialType,
     pub ii_origin: String,

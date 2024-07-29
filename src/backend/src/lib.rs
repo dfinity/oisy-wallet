@@ -107,7 +107,7 @@ pub struct State {
     user_profile_updated: UserProfileUpdatedMap,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone)]
 pub struct Config {
     pub ecdsa_key_name: String,
     // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
@@ -163,6 +163,14 @@ fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+}
+
+/// Show the canister configuration.
+#[query]
+#[allow(clippy::needless_pass_by_value)]
+#[must_use]
+fn config() -> Config {
+    read_config(|c| c.clone())
 }
 
 /// Processes external HTTP requests.
