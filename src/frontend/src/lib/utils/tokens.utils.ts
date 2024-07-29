@@ -68,18 +68,26 @@ export const pinTokensWithBalanceAtTop = ({
 	$balancesStore: CertifiedStoreData<BalancesData>;
 }): TokenUi[] => {
 	const tokensWithBalanceToPin: TokenToPin[] = $tokens
-		.map((token) => ({
-			...token,
-			balance: Number(
-				formatToken({
-					value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
-					unitName: token.decimals,
-					displayDecimals: token.decimals
-				})
-			)
-		}))
-		// If the token has no exchange rate (undefined balance), we do not sort it by usd value, but by balance.
-		.filter(({ usdBalance, balance }) => (usdBalance ?? 0) > 0 || balance > 0)
+		.reduce(
+			(acc, token) => {
+				const balance = Number(
+					formatToken({
+						value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
+						unitName: token.decimals,
+						displayDecimals: token.decimals
+					})
+				);
+
+				const usdBalance = token.usdBalance ?? 0;
+
+				if (usdBalance > 0 || balance > 0) {
+					acc.push({ ...token, balance });
+				}
+
+				return acc;
+			},
+			[] as (TokenUi & { balance: number })[]
+		)
 		.sort(
 			(a, b) =>
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
@@ -87,6 +95,7 @@ export const pinTokensWithBalanceAtTop = ({
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
 		);
+
 	return pinTokensAtTop({
 		$tokens,
 		$tokensToPin: tokensWithBalanceToPin
