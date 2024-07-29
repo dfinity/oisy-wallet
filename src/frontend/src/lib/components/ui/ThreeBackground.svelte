@@ -10,7 +10,7 @@
 		WebGLRenderer
 	} from 'three';
 
-	let container: HTMLDivElement;
+	let container: HTMLDivElement | undefined | null;
 
 	const colors = ['#89cee0', '#5dcabf', '#041093', '#010155'];
 
