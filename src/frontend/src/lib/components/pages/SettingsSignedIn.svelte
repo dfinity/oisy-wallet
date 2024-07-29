@@ -17,7 +17,7 @@
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
 	import type { OptionIdentity } from '$lib/types/identity';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
-	import { userProfileStore } from '$lib/stores/settings.store';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 
 	let remainingTimeMilliseconds: number | undefined;

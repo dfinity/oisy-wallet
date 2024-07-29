@@ -14,6 +14,10 @@
 	import { networkParam } from '$lib/utils/nav.utils';
 	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
 	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
+	import IconWallet from '$lib/components/icons/IconWallet.svelte';
+	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
+	import { networkId } from '$lib/derived/network.derived';
+	import { isRouteSettings, networkParam } from '$lib/utils/nav.utils';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
@@ -24,6 +28,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import MenuWallet from '$lib/components/core/MenuWallet.svelte';
+	import { page } from '$app/stores';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -33,10 +39,11 @@
 		await goto(`/settings?${networkParam($networkId)}`);
 	};
 
-	const openWalletConnectAuth = () => {
-		visible = false;
-		modalStore.openWalletConnectAuth();
-	};
+	let settingsRoute = false;
+	$: settingsRoute = isRouteSettings($page);
+
+	let walletOptions = true;
+	$: walletOptions = !settingsRoute;
 </script>
 
 <ButtonHero bind:button on:click={() => (visible = true)} ariaLabel={$i18n.navigation.alt.menu}>
@@ -45,31 +52,16 @@
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div class="flex flex-col gap-4">
-		{#if $networkICP}
-			<IcWalletAddress />
-		{:else if $networkEthereum}
-			<EthWalletAddress />
-		{:else if $pseudoNetworkChainFusion}
-			<WalletAddresses on:icReceiveTriggered={() => (visible = false)} />
+		{#if walletOptions}
+			<MenuWallet on:icMenuClick={() => (visible = false)} />
 		{/if}
 
-		<Hr />
-
-		<ButtonMenu
-			ariaLabel={$i18n.wallet_connect.text.name}
-			on:click={openWalletConnectAuth}
-			disabled={$walletConnectPaired}
-		>
-			<IconWalletConnect />
-			{$i18n.wallet_connect.text.name}
-		</ButtonMenu>
-
-		<Hr />
-
-		<ButtonMenu ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
-			<IconSettings />
-			{$i18n.settings.text.title}
-		</ButtonMenu>
+		{#if !settingsRoute}
+			<ButtonMenu ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
+				<IconSettings />
+				{$i18n.settings.text.title}
+			</ButtonMenu>
+		{/if}
 
 		<ExternalLink
 			href="https://identity.ic0.app"

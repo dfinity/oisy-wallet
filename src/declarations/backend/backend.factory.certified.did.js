@@ -37,6 +37,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: AddUserCredentialError
 	});
 	const UserCredential = IDL.Record({
+		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
