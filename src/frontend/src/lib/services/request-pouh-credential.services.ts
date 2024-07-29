@@ -42,7 +42,7 @@ const addPouhCredential = async ({
 				arguments: []
 			},
 			issuerCanisterId,
-			currentUserVersion: fromNullable(userProfile?.version ?? [])
+			currentUserVersion: fromNullable(userProfile?.profile.version ?? [])
 		});
 		if ('Ok' in response) {
 			return { success: true };
