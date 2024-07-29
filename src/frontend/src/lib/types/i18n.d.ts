@@ -489,7 +489,6 @@ interface I18nAbout {
 			label: string;
 			title: string;
 			hold_crypto: string;
-			go_incognito: string;
 			use_eth_dapps: string;
 			use_ic_dapps: string;
 		};
