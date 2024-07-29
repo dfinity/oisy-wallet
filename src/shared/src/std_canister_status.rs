@@ -79,6 +79,8 @@ impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
             compute_allocation,
             memory_allocation,
             freezing_threshold,
+            // TODO: should API method get_canister_status be extended with additional information such as reserved_cycles_limit, log_visibility, or wasm_memory_limit?
+            ..
         } = value;
         Ok(Self {
             controller: *controllers
