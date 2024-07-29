@@ -55,7 +55,7 @@
 						{feeSymbol}
 						{#if insufficientFeeFunds}
 							<p transition:slide={{ duration: 250 }} class="text-cyclamen text-xs">
-								{replacePlaceholders($i18n.send.assertion.not_enough_eth_for_gas, {
+								{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 									$balance: formatToken({
 										value: balance,
 										displayDecimals: EIGHT_DECIMALS

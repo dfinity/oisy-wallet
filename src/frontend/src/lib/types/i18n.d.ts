@@ -238,7 +238,7 @@ interface I18nSend {
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
-		not_enough_eth_for_gas: string;
+		not_enough_tokens_for_gas: string;
 		gas_fees_not_defined: string;
 		max_gas_gee_per_gas_undefined: string;
 		address_unknown: string;

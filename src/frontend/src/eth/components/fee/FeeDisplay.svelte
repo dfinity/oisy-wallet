@@ -47,12 +47,13 @@
 		clearTimeout(timer);
 	});
 
-	const balance = nonNullish($feeTokenIdStore)
-		? $balancesStore?.[$feeTokenIdStore]?.data ?? BigNumber.from(0n)
-		: BigNumber.from(0n);
+	const balance =
+		nonNullish($feeTokenIdStore) && nonNullish($balancesStore)
+			? $balancesStore[$feeTokenIdStore]?.data ?? BigNumber.from(0n)
+			: undefined;
 
 	let insufficientFeeFunds = false;
-	$: insufficientFeeFunds = nonNullish(fee) && balance.lt(fee);
+	$: insufficientFeeFunds = nonNullish(fee) && nonNullish(balance) && balance.lt(fee);
 </script>
 
 <label for="balance" class="font-bold px-4.5"
@@ -66,9 +67,9 @@
 				displayDecimals: EIGHT_DECIMALS
 			})}
 			{$feeSymbolStore ?? ''}
-			{#if insufficientFeeFunds}
+			{#if insufficientFeeFunds && nonNullish(balance)}
 				<p transition:slide={{ duration: 250 }} class="text-cyclamen text-xs">
-					{replacePlaceholders($i18n.send.assertion.not_enough_eth_for_gas, {
+					{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 						$balance: formatToken({
 							value: balance,
 							displayDecimals: EIGHT_DECIMALS
