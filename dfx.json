@@ -51,7 +51,9 @@
 			"shrink": false,
 			"remote": {
 				"id": {
-					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai"
+					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai",
+					"beta": "qgxyr-pyaaa-aaaah-qdcwq-cai",
+					"ic": "qgxyr-pyaaa-aaaah-qdcwq-cai"
 				}
 			}
 		},
