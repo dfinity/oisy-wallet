@@ -43,9 +43,7 @@
 	</div>
 
 	<ButtonGroup>
-		<button type="button" class="secondary block flex-1" on:click={() => dispatch('icClose')}
-			>{$i18n.core.text.cancel}</button
-		>
+		<slot name="cancel" />
 		<button
 			class="primary block flex-1"
 			type="submit"
