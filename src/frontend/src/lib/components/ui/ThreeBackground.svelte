@@ -142,9 +142,6 @@ void main(){
 	};
 
 	const handleResize = () => {
-		if (isNullish(container)) {
-			return;
-		}
 		renderer.setSize(container.clientWidth, container.clientHeight);
 		camera.aspect = container.clientWidth / container.clientHeight;
 		camera.updateProjectionMatrix();
