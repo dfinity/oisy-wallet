@@ -68,19 +68,17 @@ export const formatUSD = (
 		maxFraction?: number;
 		maximumSignificantDigits?: number;
 		symbol?: boolean;
-	} & Pick<Intl.NumberFormatOptions, 'notation'>
+	}
 ): string => {
 	const {
 		minFraction = 2,
 		maxFraction = 2,
 		maximumSignificantDigits,
-		symbol = true,
-		notation
+		symbol = true
 	} = options ?? {};
 
 	return new Intl.NumberFormat('en-US', {
 		...(symbol && { style: 'currency', currency: 'USD' }),
-		notation,
 		minimumFractionDigits: minFraction,
 		maximumFractionDigits: maxFraction,
 		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })

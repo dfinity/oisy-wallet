@@ -10,7 +10,7 @@
 <output class="break-all">
 	{#if $exchangeInitialized}
 		{#if nonNullish(token.usdBalance)}
-			{formatUSD(token.usdBalance, { notation: 'compact' })}
+			{formatUSD(token.usdBalance)}
 		{:else}
 			{formatUSD(0, { minFraction: 0, maxFraction: 0 }).replace('0', '-')}
 		{/if}
