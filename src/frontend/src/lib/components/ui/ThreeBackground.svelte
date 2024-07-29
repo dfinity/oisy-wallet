@@ -9,7 +9,6 @@
 		ShaderMaterial,
 		WebGLRenderer
 	} from 'three';
-	import { isNullish } from '@dfinity/utils';
 
 	let container: HTMLDivElement;
 
