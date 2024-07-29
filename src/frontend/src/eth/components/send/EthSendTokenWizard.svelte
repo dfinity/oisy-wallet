@@ -143,7 +143,7 @@
 		// exceeds block gas limit
 		if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
 			toastsError({
-				msg: { text: $i18n.send.assertion.max_gas_gee_per_gas_undefined }
+				msg: { text: $i18n.send.assertion.max_gas_fee_per_gas_undefined }
 			});
 			return;
 		}

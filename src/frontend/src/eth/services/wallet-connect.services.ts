@@ -149,7 +149,7 @@ export const send = ({
 
 			const {
 				send: {
-					assertion: { gas_fees_not_defined, max_gas_gee_per_gas_undefined }
+					assertion: { gas_fees_not_defined, max_gas_fee_per_gas_undefined }
 				}
 			} = get(i18n);
 
@@ -164,7 +164,7 @@ export const send = ({
 
 			if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
 				toastsError({
-					msg: { text: max_gas_gee_per_gas_undefined }
+					msg: { text: max_gas_fee_per_gas_undefined }
 				});
 				return { success: false };
 			}
