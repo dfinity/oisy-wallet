@@ -31,7 +31,10 @@ export const POUH_ISSUER_CANISTER_ID = LOCAL
 export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 	? LOCAL
 		? `http://${POUH_ISSUER_CANISTER_ID}.localhost:4943`
-		: `https://${POUH_ISSUER_CANISTER_ID}.${MAINNET_DOMAIN}`
+		: STAGING
+			? `https://${POUH_ISSUER_CANISTER_ID}.${MAINNET_DOMAIN}`
+			: // BETA and PROD
+				'https://id.decideai.xyz'
 	: undefined;
 
 export const BACKEND_CANISTER_ID = LOCAL
