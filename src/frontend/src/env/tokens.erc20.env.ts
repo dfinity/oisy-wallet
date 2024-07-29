@@ -80,7 +80,7 @@ const ERC20_CONTRACT_ADDRESS_WEEETH: Erc20Contract = {
 	exchange: 'erc20'
 };
 
-const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
+export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	{
 		// Weenus
 		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
@@ -111,7 +111,7 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 	exchange: 'icp'
 };
 
-const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
+export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	ERC20_CONTRACT_ADDRESS_1INCH,
 	ERC20_CONTRACT_ADDRESS_WSTETH,
@@ -143,13 +143,13 @@ export const ERC20_CONTRACTS_ADDRESSES = ERC20_CONTRACTS.map(({ address }) =>
  * Unlike other Erc20 tokens, for which we load the details at runtime based one their contract address.
  */
 
-const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [
+export const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [
 	SEPOLIA_USDC_TOKEN,
 	SEPOLIA_LINK_TOKEN,
 	SEPOLIA_PEPE_TOKEN
 ];
 
-const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
+export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	USDC_TOKEN,
 	LINK_TOKEN,
 	PEPE_TOKEN,

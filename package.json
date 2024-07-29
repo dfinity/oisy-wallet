@@ -38,7 +38,8 @@
 		"e2e:dev": "NODE_ENV=development playwright test",
 		"e2e:ci": "playwright test --reporter=html",
 		"e2e:snapshots": "npx playwright test --update-snapshots --reporter=list",
-		"e2e:report": "npx playwright show-report"
+		"e2e:report": "npx playwright show-report",
+		"erc20:check": "vite-node scripts/check.tokens.erc20.ts"
 	},
 	"dependencies": {
 		"@dfinity/agent": "^1.4.0",
@@ -94,6 +95,7 @@
 		"tslib": "^2.6.3",
 		"typescript": "^5.4.5",
 		"vite": "^5.3.2",
+		"vite-node": "^2.0.4",
 		"vitest": "^1.6.0"
 	},
 	"type": "module",
