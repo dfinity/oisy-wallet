@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Header from '$lib/components/hero/Header.svelte';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
@@ -22,7 +22,10 @@
 </script>
 
 <div class={`hero pb-4 md:pb-6 ${background} relative`}>
-	<ThreeBackground />
+	{#if $pseudoNetworkChainFusion}
+		<ThreeBackground />
+	{/if}
+
 	<Header />
 
 	<article
