@@ -24,6 +24,12 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
+type Config = record {
+  ecdsa_key_name : text;
+  allowed_callers : vec principal;
+  supported_credentials : opt vec SupportedCredential;
+  ic_root_key_raw : opt blob;
+};
 type CredentialSpec = record {
   arguments : opt vec record { text; ArgumentValue };
   credential_type : text;
@@ -116,6 +122,7 @@ type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
   caller_eth_address : () -> (text);
+  config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
