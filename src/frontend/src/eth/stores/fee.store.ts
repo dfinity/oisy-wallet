@@ -26,7 +26,7 @@ export const initFeeStore = (): FeeStore => {
 export interface FeeContext {
 	feeStore: FeeStore;
 	feeSymbolStore: Writable<string | undefined>;
-	feeIdStore: Writable<TokenId | undefined>;
+	feeTokenIdStore: Writable<TokenId | undefined>;
 	maxGasFee: Readable<BigNumber | undefined>;
 	minGasFee: Readable<BigNumber | undefined>;
 	evaluateFee?: () => void;

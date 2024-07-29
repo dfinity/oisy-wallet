@@ -64,15 +64,15 @@
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set($sendToken.symbol);
 
-	let feeIdStore = writable<TokenId | undefined>(undefined);
-	$: feeIdStore.set($sendToken.id);
+	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	$: feeTokenIdStore.set($sendToken.id);
 
 	setContext<FeeContextType>(
 		FEE_CONTEXT_KEY,
 		initFeeContext({
 			feeStore,
 			feeSymbolStore,
-			feeIdStore
+			feeTokenIdStore
 		})
 	);
 

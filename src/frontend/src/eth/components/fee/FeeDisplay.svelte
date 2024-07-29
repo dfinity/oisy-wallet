@@ -12,7 +12,7 @@
 	import { slide } from 'svelte/transition';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	const { maxGasFee, feeSymbolStore, feeIdStore }: FeeContext =
+	const { maxGasFee, feeSymbolStore, feeTokenIdStore }: FeeContext =
 		getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let fee: BigNumber | undefined | null = undefined;
@@ -47,8 +47,8 @@
 		clearTimeout(timer);
 	});
 
-	const balance = nonNullish($feeIdStore)
-		? $balancesStore?.[$feeIdStore]?.data ?? BigNumber.from(0n)
+	const balance = nonNullish($feeTokenIdStore)
+		? $balancesStore?.[$feeTokenIdStore]?.data ?? BigNumber.from(0n)
 		: BigNumber.from(0n);
 
 	let insufficientFeeFunds = false;

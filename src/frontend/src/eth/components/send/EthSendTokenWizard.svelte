@@ -87,8 +87,8 @@
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(nativeEthereumToken.symbol);
 
-	let feeIdStore = writable<TokenId | undefined>(undefined);
-	$: feeIdStore.set(nativeEthereumToken.id);
+	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	$: feeTokenIdStore.set(nativeEthereumToken.id);
 
 	let feeContext: FeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
@@ -98,7 +98,7 @@
 		initFeeContext({
 			feeStore,
 			feeSymbolStore,
-			feeIdStore,
+			feeTokenIdStore,
 			evaluateFee
 		})
 	);
