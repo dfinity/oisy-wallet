@@ -46,19 +46,13 @@ jobs:
 
           cat ./rust-toolchain.toml
 
-        # If the rust-toolchain was updated, create a PR.
+      # This action creates a PR only if there are changes.
       - name: Create Pull Request
         if: ${{ steps.update.outputs.updated == '1' }}
-        uses: peter-evans/create-pull-request@v6
+        uses: ./.github/actions/create-pr
         with:
           token: ${{ secrets.GIX_CREATE_PR_PAT }}
-          base: main
-          commit-message: 'build: Update Rust version'
-          committer: GitHub <noreply@github.com>
-          author: gix-bot <gix-bot@users.noreply.github.com>
           branch: bot-rust-update
-          delete-branch: true
-          add-paths: ./rust-toolchain.toml
-          title: 'build: Update Rust version'
+          title: 'build(backend): Update Rust version'
           body: |
             A new Rust version available.
