@@ -94,6 +94,7 @@ type SupportedCredential = record {
 };
 type Token = variant { Icrc : IcrcToken };
 type UserCredential = record {
+  issuer : text;
   verified_date_timestamp : opt nat64;
   credential_type : CredentialType;
 };

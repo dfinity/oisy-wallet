@@ -72,7 +72,6 @@
 	"init": {
 		"text": {
 			"initializing_wallet": "Initializing your wallet",
-			"lets_go": "Let's go!",
 			"securing_session": "Securing session with Internet Identity",
 			"retrieving_eth_key": "Retrieving your Ethereum public key"
 		},
@@ -109,6 +108,7 @@
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
 			"erc20_user_tokens": "Error while loading the Erc20 user tokens.",
+			"erc20_user_token": "Error while enabling the Erc20 twin token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again."
 		}
 	},
@@ -260,8 +260,9 @@
 			"insufficient_funds_for_gas": "Insufficient funds for gas",
 			"insufficient_funds_for_amount": "Insufficient funds for amount",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Insufficient Ethereum funds to cover the fees",
+			"not_enough_tokens_for_gas": "Not enough $symbol for gas. Balance: $balance $symbol",
 			"gas_fees_not_defined": "Gas fees are not defined.",
-			"max_gas_gee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
+			"max_gas_fee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
 			"address_unknown": "Address is unknown.",
 			"minter_info_not_loaded": "Try again in few seconds, a ckETH configuration parameter is not yet loaded.",
 			"minter_info_not_certified": "Try again in few seconds, a ckETH configuration parameter has not yet certified."

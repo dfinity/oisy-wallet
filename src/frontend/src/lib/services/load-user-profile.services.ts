@@ -1,8 +1,8 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import { createUserProfile, getUserProfile } from '$lib/api/backend.api';
 import { i18n } from '$lib/stores/i18n.store';
-import { userProfileStore } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { userProfileStore } from '$lib/stores/user-profile.store';
 import { UserProfileNotFoundError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import { isNullish } from '@dfinity/utils';
@@ -48,7 +48,7 @@ export const loadCertifiedUserProfile = async ({
 }): Promise<void> => {
 	try {
 		const profile = await queryProfile({ identity, certified: true });
-		userProfileStore.set({ key: 'user-profile', value: profile });
+		userProfileStore.set({ certified: true, profile });
 	} catch (err) {
 		// We ignore the error because this is a background task.
 		console.error('Failed to load certified user profile.', err);
@@ -64,10 +64,10 @@ export const loadUserProfile = async ({
 		let profile = await queryUnsafeProfile({ identity });
 		if (isNullish(profile)) {
 			profile = await createUserProfile({ identity });
-			userProfileStore.set({ key: 'user-profile', value: profile });
+			userProfileStore.set({ certified: true, profile });
 		} else {
 			// We set the store before the call to load the certified profile.
-			userProfileStore.set({ key: 'user-profile', value: profile });
+			userProfileStore.set({ certified: false, profile });
 			// We don't wait for this to complete because we want a smooth UX
 			// the uncertified data is enough for the user to start using the app.
 			loadCertifiedUserProfile({ identity });

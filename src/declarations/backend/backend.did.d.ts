@@ -100,6 +100,7 @@ export interface SupportedCredential {
 }
 export type Token = { Icrc: IcrcToken };
 export interface UserCredential {
+	issuer: string;
 	verified_date_timestamp: [] | [bigint];
 	credential_type: CredentialType;
 }
