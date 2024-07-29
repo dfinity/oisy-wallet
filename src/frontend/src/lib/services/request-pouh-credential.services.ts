@@ -1,41 +1,96 @@
-import type { UserCredential, UserProfile } from '$declarations/backend/backend.did';
+import { addUserCredential } from '$lib/api/backend.api';
 import {
 	INTERNET_IDENTITY_ORIGIN,
 	POUH_ISSUER_CANISTER_ID,
-	POUH_ISSUER_ORIGIN
+	POUH_ISSUER_ORIGIN,
+	VC_POPUP_HEIGHT,
+	VC_POPUP_WIDTH
 } from '$lib/constants/app.constants';
+import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import { userProfileStore } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { userProfileStore } from '$lib/stores/user-profile.store';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { popupCenter } from '$lib/utils/window.utils';
+import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	requestVerifiablePresentation,
 	type VerifiablePresentationResponse
 } from '@dfinity/verifiable-credentials/request-verifiable-presentation';
 import { get } from 'svelte/store';
+import { loadCertifiedUserProfile } from './load-user-profile.services';
 
-// This credential type is defined by the issuer Decide AI
-const POUH_CREDENTIAL_TYPE = 'ProofOfUniqueness';
+const addPouhCredential = async ({
+	identity,
+	credentialJwt,
+	issuerCanisterId
+}: {
+	identity: Identity;
+	credentialJwt: string;
+	issuerCanisterId: Principal;
+}): Promise<{ success: boolean }> => {
+	const { auth: authI18n } = get(i18n);
+	try {
+		const userProfile = get(userProfileStore);
+		const response = await addUserCredential({
+			identity,
+			credentialJwt,
+			credentialSpec: {
+				credential_type: POUH_CREDENTIAL_TYPE,
+				arguments: []
+			},
+			issuerCanisterId,
+			currentUserVersion: fromNullable(userProfile?.profile.version ?? [])
+		});
+		if ('Ok' in response) {
+			return { success: true };
+		}
+		if ('Err' in response) {
+			if ('InvalidCredential' in response.Err) {
+				toastsError({
+					msg: { text: authI18n.error.invalid_pouh_credential }
+				});
+				return { success: false };
+			}
+			const errorKey = Object.keys(response.Err)[0];
+			toastsError({
+				msg: {
+					text: replacePlaceholders(authI18n.error.error_validating_pouh_credential_oisy, {
+						$error: errorKey
+					})
+				}
+			});
+		}
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: authI18n.error.error_validating_pouh_credential },
+			err
+		});
+	}
+	return { success: false };
+};
 
-const handleSuccess = async (
-	response: VerifiablePresentationResponse
-): Promise<{ success: boolean }> => {
+const handleSuccess = async ({
+	response,
+	identity,
+	issuerCanisterId
+}: {
+	response: VerifiablePresentationResponse;
+	identity: Identity;
+	issuerCanisterId: Principal;
+}): Promise<{ success: boolean }> => {
 	const { auth: authI18n } = get(i18n);
 	if ('Ok' in response) {
-		// TODO: GIX-2646 Add credential to backend and load user profile
-		const fakeTemporaryCredentialSummary: UserCredential = {
-			credential_type: { [POUH_CREDENTIAL_TYPE]: null },
-			verified_date_timestamp: [BigInt(Date.now())],
-			expire_date_timestamp: [BigInt(Date.now() + 1000 * 60 * 60 * 24 * 365)]
-		};
-		const fakeUserProfile: UserProfile = {
-			credentials: [fakeTemporaryCredentialSummary],
-			created_timestamp: BigInt(Date.now()),
-			updated_timestamp: BigInt(Date.now()),
-			version: [0n]
-		};
-		userProfileStore.set({ key: 'user-profile', value: fakeUserProfile });
+		const { success } = await addPouhCredential({
+			credentialJwt: response.Ok,
+			identity,
+			issuerCanisterId
+		});
+		if (success) {
+			await loadCertifiedUserProfile({ identity });
+		}
 		return { success: true };
 	}
 	toastsError({
@@ -45,10 +100,11 @@ const handleSuccess = async (
 };
 
 export const requestPouhCredential = async ({
-	credentialSubject
+	identity
 }: {
-	credentialSubject: Principal;
+	identity: Identity;
 }): Promise<{ success: boolean }> => {
+	const credentialSubject = identity.getPrincipal();
 	const { auth: authI18n } = get(i18n);
 	return new Promise((resolve, reject) => {
 		const issuerCanisterId = nonNullish(POUH_ISSUER_CANISTER_ID)
@@ -81,8 +137,9 @@ export const requestPouhCredential = async ({
 				reject();
 			},
 			onSuccess: async (response: VerifiablePresentationResponse) => {
-				resolve(await handleSuccess(response));
-			}
+				resolve(await handleSuccess({ response, identity, issuerCanisterId }));
+			},
+			windowOpenerFeatures: popupCenter({ width: VC_POPUP_WIDTH, height: VC_POPUP_HEIGHT })
 		});
 	});
 };

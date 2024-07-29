@@ -5,22 +5,28 @@
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
-			"optimize": "cycles"
+			"optimize": "cycles",
+			"gzip": true
 		},
 		"frontend": {
 			"frontend": {
 				"entrypoint": "build/index.html"
 			},
 			"source": ["build/"],
-			"type": "assets"
+			"type": "assets",
+			"gzip": true
 		},
 		"new_backend": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
-			"optimize": "cycles"
+			"optimize": "cycles",
+			"gzip": true
 		},
 		"orbit": {
+			"type": "custom",
+			"candid": "https://raw.githubusercontent.com/dfinity/orbit/%40orbit/station-v0.0.2-alpha.5/apps/wallet/src/generated/station/station.did",
+			"wasm": "https://github.com/dfinity/orbit/releases/download/%40orbit%2Fstation-v0.0.2-alpha.5/station.wasm.gz",
 			"remote": {
 				"id": {
 					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
@@ -48,7 +54,9 @@
 			"shrink": false,
 			"remote": {
 				"id": {
-					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai"
+					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai",
+					"beta": "qgxyr-pyaaa-aaaah-qdcwq-cai",
+					"ic": "qgxyr-pyaaa-aaaah-qdcwq-cai"
 				}
 			}
 		},
@@ -173,6 +181,10 @@
 			"type": "persistent"
 		},
 		"staging": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"beta": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},

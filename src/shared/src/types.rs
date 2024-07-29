@@ -1,6 +1,8 @@
 use candid::{CandidType, Deserialize, Principal};
 use std::fmt::Debug;
 
+pub type Timestamp = u64;
+
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
 pub enum CredentialType {
     ProofOfUniqueness,
@@ -10,9 +12,9 @@ pub enum CredentialType {
 pub struct SupportedCredential {
     pub credential_type: CredentialType,
     pub ii_origin: String,
-    pub ii_canister_id: String,
+    pub ii_canister_id: Principal,
     pub issuer_origin: String,
-    pub issuer_canister_id: String,
+    pub issuer_canister_id: Principal,
 }
 
 #[derive(CandidType, Deserialize)]
@@ -120,42 +122,55 @@ pub mod custom_token {
 
 /// Types specifics to the user profile.
 pub mod user_profile {
-    use super::CredentialType;
+    use super::{CredentialType, Timestamp};
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
+    use ic_verifiable_credentials::issuer_api::CredentialSpec;
     use std::collections::BTreeMap;
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserCredential {
         pub credential_type: CredentialType,
-        pub verified_date_timestamp: Option<u64>,
-        pub expire_date_timestamp: Option<u64>,
+        pub verified_date_timestamp: Option<Timestamp>,
+        pub issuer: String,
     }
 
     // Used in the endpoint
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserProfile {
         pub credentials: Vec<UserCredential>,
-        pub created_timestamp: u64,
-        pub updated_timestamp: u64,
+        pub created_timestamp: Timestamp,
+        pub updated_timestamp: Timestamp,
         pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredUserProfile {
         pub credentials: BTreeMap<CredentialType, UserCredential>,
-        pub created_timestamp: u64,
-        pub updated_timestamp: u64,
+        pub created_timestamp: Timestamp,
+        pub updated_timestamp: Timestamp,
+        pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct AddUserCredentialRequest {
         pub credential_jwt: String,
+        pub credential_spec: CredentialSpec,
+        pub issuer_canister_id: Principal,
+        pub current_user_version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct GetUsersRequest {
-        pub updated_after_timestamp: Option<u64>,
+    pub enum AddUserCredentialError {
+        InvalidCredential,
+        ConfigurationError,
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct ListUsersRequest {
+        pub updated_after_timestamp: Option<Timestamp>,
         pub matches_max_length: Option<u64>,
     }
 
@@ -163,12 +178,17 @@ pub mod user_profile {
     pub struct OisyUser {
         pub principal: Principal,
         pub pouh_verified: bool,
-        pub updated_timestamp: u64,
+        pub updated_timestamp: Timestamp,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct GetUsersResponse {
+    pub struct ListUsersResponse {
         pub users: Vec<OisyUser>,
         pub matches_max_length: u64,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum GetUserProfileError {
+        NotFound,
     }
 }

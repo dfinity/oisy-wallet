@@ -2,10 +2,19 @@ import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
 
+export type AddUserCredentialError =
+	| { InvalidCredential: null }
+	| { VersionMismatch: null }
+	| { ConfigurationError: null }
+	| { UserNotFound: null };
 export interface AddUserCredentialRequest {
 	credential_jwt: string;
+	issuer_canister_id: Principal;
+	current_user_version: [] | [bigint];
+	credential_spec: CredentialSpec;
 }
 export type Arg = { Upgrade: null } | { Init: InitArg };
+export type ArgumentValue = { Int: number } | { String: string };
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -18,6 +27,10 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
+export interface CredentialSpec {
+	arguments: [] | [Array<[string, ArgumentValue]>];
+	credential_type: string;
+}
 export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
@@ -31,14 +44,7 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
-export interface GetUsersRequest {
-	updated_after_timestamp: [] | [bigint];
-	matches_max_length: [] | [bigint];
-}
-export interface GetUsersResponse {
-	users: Array<OisyUser>;
-	matches_max_length: bigint;
-}
+export type GetUserProfileError = { NotFound: null };
 export interface HttpRequest {
 	url: string;
 	method: string;
@@ -60,11 +66,21 @@ export interface InitArg {
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
 }
+export interface ListUsersRequest {
+	updated_after_timestamp: [] | [bigint];
+	matches_max_length: [] | [bigint];
+}
+export interface ListUsersResponse {
+	users: Array<OisyUser>;
+	matches_max_length: bigint;
+}
 export interface OisyUser {
 	principal: Principal;
 	pouh_verified: boolean;
 	updated_timestamp: bigint;
 }
+export type Result = { Ok: null } | { Err: AddUserCredentialError };
+export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export interface SignRequest {
 	to: string;
 	gas: bigint;
@@ -76,16 +92,16 @@ export interface SignRequest {
 	nonce: bigint;
 }
 export interface SupportedCredential {
-	ii_canister_id: string;
+	ii_canister_id: Principal;
 	issuer_origin: string;
-	issuer_canister_id: string;
+	issuer_canister_id: Principal;
 	ii_origin: string;
 	credential_type: CredentialType;
 }
 export type Token = { Icrc: IcrcToken };
 export interface UserCredential {
+	issuer: string;
 	verified_date_timestamp: [] | [bigint];
-	expire_date_timestamp: [] | [bigint];
 	credential_type: CredentialType;
 }
 export interface UserProfile {
@@ -107,15 +123,16 @@ export interface UserTokenId {
 	contract_address: string;
 }
 export interface _SERVICE {
-	add_user_credential: ActorMethod<[AddUserCredentialRequest], undefined>;
+	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	caller_eth_address: ActorMethod<[], string>;
+	create_user_profile: ActorMethod<[], UserProfile>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-	get_or_create_user_profile: ActorMethod<[], UserProfile>;
-	get_users: ActorMethod<[GetUsersRequest], GetUsersResponse>;
+	get_user_profile: ActorMethod<[], Result_1>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
+	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
