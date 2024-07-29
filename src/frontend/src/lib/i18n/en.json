@@ -74,7 +74,6 @@
 	"init": {
 		"text": {
 			"initializing_wallet": "Initializing your wallet",
-			"lets_go": "Let's go!",
 			"securing_session": "Securing session with Internet Identity",
 			"retrieving_eth_key": "Retrieving your Ethereum public key"
 		},
