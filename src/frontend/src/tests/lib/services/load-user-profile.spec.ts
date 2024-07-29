@@ -1,7 +1,7 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
-import { userProfileStore } from '$lib/stores/settings.store';
+import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { beforeEach } from 'node:test';
@@ -26,7 +26,7 @@ const mockIdentity = {
 
 describe('loadUserProfile', () => {
 	beforeEach(() => {
-		userProfileStore.reset({ key: 'user-profile' });
+		userProfileStore.reset();
 		vi.clearAllMocks();
 	});
 
