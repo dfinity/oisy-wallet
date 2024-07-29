@@ -91,6 +91,7 @@ void main(){
 	let camera: PerspectiveCamera;
 	let material: ShaderMaterial;
 	let mesh: Mesh;
+	let animationRequestId: number;
 
 	onMount(() => {
 		init();
@@ -99,6 +100,7 @@ void main(){
 
 	onDestroy(() => {
 		window.removeEventListener('resize', handleResize);
+		cancelAnimationFrame(animationRequestId);
 		renderer.dispose();
 		scene.remove(mesh);
 		material.dispose();
@@ -136,7 +138,7 @@ void main(){
 	};
 
 	const animate = () => {
-		requestAnimationFrame(animate);
+		animationRequestId = requestAnimationFrame(animate);
 		material.uniforms.time.value += 0.001;
 		renderer.render(scene, camera);
 	};
