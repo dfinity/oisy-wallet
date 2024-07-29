@@ -40,6 +40,7 @@
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import type { TokenId } from '$lib/types/token';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -63,11 +64,15 @@
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set($sendToken.symbol);
 
+	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	$: feeTokenIdStore.set($sendToken.id);
+
 	setContext<FeeContextType>(
 		FEE_CONTEXT_KEY,
 		initFeeContext({
 			feeStore,
-			feeSymbolStore
+			feeSymbolStore,
+			feeTokenIdStore
 		})
 	);
 
