@@ -4,6 +4,7 @@ import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
+import { waitFor } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
 import { get } from 'svelte/store';
 
@@ -81,5 +82,8 @@ describe('loadUserProfile', () => {
 			identity: mockIdentity,
 			certified: true
 		});
+		await waitFor(() =>
+			expect(get(userProfileStore)).toEqual({ certified: true, profile: mockProfile })
+		);
 	});
 });
