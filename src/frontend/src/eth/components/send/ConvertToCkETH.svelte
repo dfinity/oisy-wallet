@@ -22,7 +22,7 @@
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 </script>
 
-<ConvertETH nativeTokenId={$ethereumTokenId} nativeNetworkId={$selectedEthereumNetwork.id} sendToken={$ethereumToken}>
+<ConvertETH nativeTokenId={$ethereumTokenId} nativeNetworkId={$selectedEthereumNetwork.id}>
 	<IconBurn size="28" />
 	<span> {$i18n.convert.text.convert_to_cketh} </span>
 </ConvertETH>

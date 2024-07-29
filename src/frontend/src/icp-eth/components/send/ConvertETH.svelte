@@ -11,11 +11,8 @@
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import type { NetworkId } from '$lib/types/network';
-	import {loadUserTokens} from "$eth/services/erc20.services";
-	import {loadCkErc20UserToken} from "$icp-eth/services/user-token.services";
 
 	export let nativeTokenId: TokenId;
-	export let sendToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let nativeNetworkId: NetworkId;
 
@@ -38,9 +35,6 @@
 		}
 
 		if ($networkICP) {
-			// TODO: wip
-			await loadCkErc20UserToken()
-
 			modalStore.openConvertToTwinTokenEth();
 			return;
 		}

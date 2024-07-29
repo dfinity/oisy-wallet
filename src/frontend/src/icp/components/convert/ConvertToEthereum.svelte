@@ -12,13 +12,11 @@
 	} from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import {tokenWithFallback} from "$lib/derived/token.derived";
 </script>
 
 <ConvertETH
 	nativeTokenId={$ckEthereumNativeTokenId}
 	nativeNetworkId={$ckEthereumNativeToken.network.id}
-	sendToken={$tokenWithFallback}
 >
 	<IconBurn size="28" />
 	<span
