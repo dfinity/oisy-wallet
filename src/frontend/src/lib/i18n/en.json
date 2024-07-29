@@ -49,6 +49,7 @@
 		"error": {
 			"no_internet_identity": "No internet identity.",
 			"invalid_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential. Please contact the issuer and request the credential again.",
+			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in Oisy: $error",
 			"error_validating_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential.",
 			"error_requesting_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
 			"missing_pouh_issuer_origin": "Sorry, but there was an error while requesting the Humanity Credential. The issuer origin is missing.",
