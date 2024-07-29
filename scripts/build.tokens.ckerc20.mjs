@@ -13,6 +13,16 @@ const agent = await createAgent({
 	host: 'https://icp-api.io'
 });
 
+// Tokens for which the ERC20 and ckERC20 logos are different—i.e., tokens that are presented with their original ERC20 logos but have a custom logo for ckERC20.
+const SKIP_CANISTER_IDS_LOGOS = [
+	// ckUSDC
+	'xevnm-gaaaa-aaaar-qafnq-cai',
+	// ckUSDT
+	'cngnf-vqaaa-aaaar-qag4q-cai',
+	// ckSepoliaUSDC
+	'yfumr-cyaaa-aaaar-qaela-cai'
+];
+
 const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
 	const { getOrchestratorInfo } = CkETHOrchestratorCanister.create({
 		agent,
@@ -129,7 +139,9 @@ const findCkErc20 = async () => {
 		Object.entries({
 			...tokens.production,
 			...tokens.staging
-		}).map(([name, { ledgerCanisterId }]) => saveTokenLogo(ledgerCanisterId, name))
+		})
+			.filter(([_, { ledgerCanisterId }]) => !SKIP_CANISTER_IDS_LOGOS.includes(ledgerCanisterId))
+			.map(([name, { ledgerCanisterId }]) => saveTokenLogo(ledgerCanisterId, name))
 	);
 };
 
