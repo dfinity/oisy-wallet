@@ -97,12 +97,6 @@ describe('sortTokens', () => {
 describe('pinTokensWithBalanceAtTop', () => {
 	const tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 
-	const exchanges: ExchangesData = {
-		[ICP_TOKEN.id]: { usd },
-		[BTC_MAINNET_TOKEN.id]: { usd },
-		[ETHEREUM_TOKEN.id]: { usd }
-	};
-
 	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
 
 	beforeEach(() => {
@@ -131,7 +125,6 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 		const result = pinTokensWithBalanceAtTop({
 			$tokens: tokens,
-			$exchanges: exchanges,
 			$balancesStore: balancesStore
 		});
 		expect(result).toEqual([ETHEREUM_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN]);
@@ -148,7 +141,6 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 		const result = pinTokensWithBalanceAtTop({
 			$tokens: tokens,
-			$exchanges: exchanges,
 			$balancesStore: balancesStore
 		});
 		expect(result).toEqual(tokens);
@@ -172,17 +164,12 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 		const result = pinTokensWithBalanceAtTop({
 			$tokens: tokens,
-			$exchanges: exchanges,
 			$balancesStore: balancesStore
 		});
 		expect(result).toEqual([BTC_MAINNET_TOKEN, ICP_TOKEN, ETHEREUM_TOKEN]);
 	});
 
 	it('should put tokens with no exchange price after tokens with balance', () => {
-		const modifiedExchanges = {
-			[ETHEREUM_TOKEN.id]: { usd }
-		};
-
 		const balancesStore: CertifiedStoreData<BalancesData> = {
 			[ICP_TOKEN.id]: { data: bn200, certified: true },
 			[BTC_MAINNET_TOKEN.id]: { data: bn100, certified: true },
@@ -204,7 +191,6 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 		const result = pinTokensWithBalanceAtTop({
 			$tokens: tokens,
-			$exchanges: modifiedExchanges,
 			$balancesStore: balancesStore
 		});
 		expect(result).toEqual([ETHEREUM_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN]);

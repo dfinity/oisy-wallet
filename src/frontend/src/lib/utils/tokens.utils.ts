@@ -1,8 +1,7 @@
 import { type BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Token, TokenToPin } from '$lib/types/token';
-import { usdValue } from '$lib/utils/exchange.utils';
+import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -63,24 +62,14 @@ export const sortTokens = ({
  */
 export const pinTokensWithBalanceAtTop = ({
 	$tokens,
-	$exchanges,
 	$balancesStore
 }: {
-	$tokens: Token[];
-	$exchanges: ExchangesData;
+	$tokens: TokenUi[];
 	$balancesStore: CertifiedStoreData<BalancesData>;
-}): Token[] => {
+}): TokenUi[] => {
 	const tokensWithBalanceToPin: TokenToPin[] = $tokens
 		.map((token) => ({
 			...token,
-			// If the token has no exchange rate, we do not sort it by usd value.
-			usdValue: nonNullish($exchanges?.[token.id])
-				? usdValue({
-						token,
-						balances: $balancesStore,
-						exchanges: $exchanges
-					})
-				: 0,
 			balance: Number(
 				formatToken({
 					value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
@@ -89,10 +78,10 @@ export const pinTokensWithBalanceAtTop = ({
 				})
 			)
 		}))
-		.filter(({ usdValue, balance }) => usdValue > 0 || balance > 0)
+		.filter(({ usdBalance, balance }) => (nonNullish(usdBalance) && usdBalance > 0) || balance > 0)
 		.sort(
 			(a, b) =>
-				b.usdValue - a.usdValue ||
+				b.usdBalance! - a.usdBalance! ||
 				b.balance - a.balance ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)

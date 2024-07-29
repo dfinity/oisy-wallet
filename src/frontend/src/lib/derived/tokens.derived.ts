@@ -36,7 +36,6 @@ export const sortedTokens: Readable<Token[]> = derived(
 	([$tokens, $tokensToPin, $exchanges, $balancesStore]) =>
 		pinTokensWithBalanceAtTop({
 			$tokens: pinTokensAtTop({ $tokens: sortTokens({ $tokens, $exchanges }), $tokensToPin }),
-			$exchanges: $exchanges,
 			$balancesStore: $balancesStore
 		})
 );
