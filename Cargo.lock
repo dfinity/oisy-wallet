@@ -129,8 +129,8 @@ dependencies = [
  "getrandom 0.2.13",
  "hex",
  "ic-canister-sig-creation",
- "ic-cdk 0.12.0",
- "ic-cdk-macros 0.8.4",
+ "ic-cdk 0.15.0",
+ "ic-cdk-macros 0.15.0",
  "ic-stable-structures 0.6.4",
  "ic-verifiable-credentials",
  "k256",
@@ -345,9 +345,9 @@ dependencies = [
 
 [[package]]
 name = "candid"
-version = "0.10.6"
+version = "0.10.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "965e86b1bd1c0c26df70cf0c92ae16c56204ab402eb915c26a541cf949d841cf"
+checksum = "7df77a80c72fcd356cf37ff59c812f37ff06dc9a81232b3aff0a308cb5996904"
 dependencies = [
  "anyhow",
  "binread",
@@ -1561,6 +1561,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-cdk"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c44983d6e97135d86132111bae5b86c34c498d96b4f182638bebcc7ac07e03c"
+dependencies = [
+ "candid",
+ "ic-cdk-macros 0.15.0",
+ "ic0 0.23.0",
+ "serde",
+ "serde_bytes",
+]
+
+[[package]]
 name = "ic-cdk-macros"
 version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1593,6 +1606,20 @@ name = "ic-cdk-macros"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "01dc6bc425ec048d6ac4137c7c0f2cfbd6f8b0be8efc568feae2b265f566117c"
+dependencies = [
+ "candid",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_tokenstream 0.2.1",
+ "syn 2.0.58",
+]
+
+[[package]]
+name = "ic-cdk-macros"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3af44fb4ec3a4b18831c9d3303ca8fa2ace846c4022d50cb8df4122635d3782e"
 dependencies = [
  "candid",
  "proc-macro2",
@@ -3681,8 +3708,8 @@ name = "shared"
 version = "0.0.2"
 dependencies = [
  "candid",
- "ic-cdk 0.12.0",
- "ic-cdk-macros 0.8.4",
+ "ic-cdk 0.15.0",
+ "ic-cdk-macros 0.15.0",
  "ic-metrics-encoder",
  "ic-verifiable-credentials",
  "serde",
