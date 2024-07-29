@@ -21,9 +21,15 @@
 		| 'undefined';
 
 	const getValueType = (value: unknown): ValueType => {
-		if (value === null) return 'null';
-		if (isPrincipal(value)) return 'principal';
-		if (Array.isArray(json) && isHash(json)) return 'hash';
+		if (value === null) {
+			return 'null';
+		}
+		if (isPrincipal(value)) {
+			return 'principal';
+		}
+		if (Array.isArray(json) && isHash(json)) {
+			return 'hash';
+		}
 		return typeof value;
 	};
 

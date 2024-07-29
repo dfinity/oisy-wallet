@@ -479,6 +479,7 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
                 stored_principal,
                 request.current_user_version,
                 &credential_type,
+                vc_flow_signers.issuer_origin,
                 &mut s.user_profile,
                 &mut s.user_profile_updated,
             )

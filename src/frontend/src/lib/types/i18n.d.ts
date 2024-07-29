@@ -27,7 +27,6 @@ interface I18nNavigation {
 		view_on_explorer: string;
 		source_code: string;
 		manage_internet_identity: string;
-		back_to_wallet: string;
 	};
 	alt: { manage_internet_identity: string; more_settings: string; menu: string };
 }
@@ -44,6 +43,9 @@ interface I18nAuth {
 	alt: { sign_in: string };
 	error: {
 		no_internet_identity: string;
+		invalid_pouh_credential: string;
+		error_validating_pouh_credential_oisy: string;
+		error_validating_pouh_credential: string;
 		error_requesting_pouh_credential: string;
 		missing_pouh_issuer_origin: string;
 		no_pouh_credential: string;
@@ -65,12 +67,7 @@ interface I18nWallet {
 }
 
 interface I18nInit {
-	text: {
-		initializing_wallet: string;
-		lets_go: string;
-		securing_session: string;
-		retrieving_eth_key: string;
-	};
+	text: { initializing_wallet: string; securing_session: string; retrieving_eth_key: string };
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
@@ -238,7 +235,7 @@ interface I18nSend {
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
 		gas_fees_not_defined: string;
-		max_gas_gee_per_gas_undefined: string;
+		max_gas_fee_per_gas_undefined: string;
 		address_unknown: string;
 		minter_info_not_loaded: string;
 		minter_info_not_certified: string;
