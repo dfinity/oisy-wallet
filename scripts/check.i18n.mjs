@@ -17,28 +17,33 @@ const extractKeys = (obj, prefix = '') =>
 	}, []);
 
 // It checks if the key is used in the content or if the key is used in a dynamic way
-const checkKeyUsage = ({ key, files }) =>
-	files.some((file) => {
-		const content = readFileSync(file, 'utf8');
-		return (
-			content.includes(key) ||
-			(content.includes(`get(i18n)`) && key.split('.').every((k) => content.includes(k)))
-		);
-	});
+const checkKeyUsage = ({ key, content }) =>
+	content.includes(key) ||
+	(content.includes(`get(i18n)`) && key.split('.').every((k) => content.includes(k)));
 
 const main = async () => {
 	const en = JSON.parse(readFileSync(PATH_TO_EN_JSON, 'utf8'));
-	const enKeys = extractKeys(en);
+
+	let potentialUnusedKeys = extractKeys(en);
 
 	const files = findFiles({ dir: PATH_TO_CODEBASE, extensions: ['.svelte', '.ts'] });
-	const unusedKeys = enKeys.filter((key) => !checkKeyUsage({ key, files }));
 
-	if (unusedKeys.length) {
-		console.error('Unused keys:', unusedKeys);
-		process.exit(1);
-	} else {
+	files.forEach((file) => {
+		const content = readFileSync(file, 'utf8');
+		potentialUnusedKeys = potentialUnusedKeys.filter((key) => !checkKeyUsage({ key, content }));
+
+		if (potentialUnusedKeys.length === 0) {
+			console.log('All keys are used.');
+			process.exit(0);
+		}
+	});
+
+	if (potentialUnusedKeys.length === 0) {
 		console.log('All keys are used.');
 		process.exit(0);
+	} else {
+		console.error('Unused keys:', potentialUnusedKeys);
+		process.exit(1);
 	}
 };
 
