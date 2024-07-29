@@ -37,7 +37,7 @@
 	},
 	"auth": {
 		"text": {
-			"title": "Securely control your crypto across networks",
+			"title": "A wallet without keys for frictionless crypto",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
