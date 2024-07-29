@@ -58,6 +58,7 @@
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
+	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const dispatch = createEventDispatcher();
 
@@ -161,6 +162,7 @@
 		store: initEthereumFeeStore()
 	});
 
+	const back = () => dispatch('icBack');
 	const close = () => dispatch('icClose');
 </script>
 
@@ -171,14 +173,19 @@
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<IcSendForm
-				on:icNext
-				on:icClose={close}
-				bind:destination
-				bind:amount
-				bind:networkId
-				on:icQRCodeScan
-			/>
+			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan>
+				<svelte:fragment slot="cancel">
+					{#if formCancelAction === 'back'}
+						<button type="button" class="secondary block flex-1" on:click={back}
+							>{$i18n.core.text.back}</button
+						>
+					{:else}
+						<button type="button" class="secondary block flex-1" on:click={close}
+							>{$i18n.core.text.cancel}</button
+						>
+					{/if}
+				</svelte:fragment>
+			</IcSendForm>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQRCodeScan
 				expectedToken={$token}

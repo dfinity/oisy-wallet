@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Send from '$eth/components/send/Send.svelte';
+	import EthSend from '$eth/components/send/EthSend.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
@@ -47,7 +47,7 @@
 		{#if $networkICP}
 			<IcSend token={$tokenWithFallback} />
 		{:else}
-			<Send token={$tokenWithFallback} />
+			<EthSend token={$tokenWithFallback} />
 		{/if}
 	{/if}
 
