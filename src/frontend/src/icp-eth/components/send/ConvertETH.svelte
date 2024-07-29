@@ -7,7 +7,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { networkICP } from '$lib/derived/network.derived';
-	import type { Token, TokenId } from '$lib/types/token';
+	import type { TokenId } from '$lib/types/token';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import type { NetworkId } from '$lib/types/network';
