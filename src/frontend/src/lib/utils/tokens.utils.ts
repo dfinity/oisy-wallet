@@ -31,6 +31,12 @@ export const pinTokensAtTop = ({
 	return [...pinnedTokens, ...otherTokens];
 };
 
+/**
+ * Sorts tokens by market cap, name and network name.
+ *
+ * @param $tokens - The list of tokens to sort.
+ * @param $exchanges - The exchange rates for the tokens.
+ */
 export const sortTokens = ({
 	$tokens,
 	$exchanges
