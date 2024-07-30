@@ -4,7 +4,7 @@
 
 <button
 	on:click
-	class="h-16 px-8 py-2 rounded-full gap-4 font-bold text-lg"
+	class="h-16 px-10 py-2 rounded-full gap-4 font-bold text-lg bg-brandeis-blue"
 	data-tid="login-button"
 >
 	<slot />
@@ -13,8 +13,6 @@
 
 <style lang="scss">
 	button {
-		padding: 1.5em 2em;
-		background: var(--color-brandeis-blue);
 		background: linear-gradient(
 			90deg,
 			#0975ff 0%,
@@ -26,7 +24,6 @@
 			#0874ff 100%
 		);
 		background-size: 600% 100%;
-		background-position: 0 0;
 		transition:
 			background-position 0.7s ease-in-out,
 			box-shadow 0.5s ease-in-out;
@@ -35,5 +32,7 @@
 	button:hover {
 		background-position: 100% 0;
 		box-shadow: 0 0 50px var(--color-spiro-disco-ball);
+		border-width: 1px;
+		border-color: rgba(255, 255, 255, 0.2);
 	}
 </style>
