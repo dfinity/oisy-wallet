@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade, slide } from 'svelte/transition';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
@@ -8,7 +8,6 @@
 	import { balancesStore } from '$lib/stores/balances.store.js';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { TokenId } from '$lib/types/token';
-	import { onDestroy } from 'svelte';
 
 	export let fee: BigNumber;
 	export let feeSymbol: string;
@@ -19,15 +18,10 @@
 		: undefined;
 
 	let insufficientFeeFunds = false;
-	let timer: NodeJS.Timeout | undefined;
 
 	$: {
-		timer = setTimeout(() => {
-			insufficientFeeFunds = nonNullish(balance) && balance.lt(fee);
-		}, 250);
+		debounce(() => (insufficientFeeFunds = nonNullish(balance) && balance.lt(fee)), 250)();
 	}
-
-	onDestroy(() => clearTimeout(timer));
 </script>
 
 <div transition:fade>
