@@ -83,6 +83,7 @@
 			bind:amount
 			bind:sendProgressStep
 			on:icBack={modal.back}
+			on:icSendBack={modal.back}
 			on:icNext={modal.next}
 			on:icClose={close}
 			on:icQRCodeScan={() =>

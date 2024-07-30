@@ -30,6 +30,7 @@
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
+			on:icSendBack
 			on:icNext
 			on:icClose
 			on:icQRCodeScan
