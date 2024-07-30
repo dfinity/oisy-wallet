@@ -9,6 +9,8 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { createEventDispatcher } from 'svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	const dispatch = createEventDispatcher();
 
@@ -33,3 +35,7 @@
 		</TokenCardWithOnClick>
 	{/each}
 </TokensSkeletons>
+
+<button class="secondary full center text-center" on:click={modalStore.close}>
+	{$i18n.core.text.close}
+</button>

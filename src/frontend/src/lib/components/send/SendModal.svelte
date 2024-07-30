@@ -75,10 +75,6 @@
 
 	{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 		<SendTokensList on:icSendToken={nextStep} />
-
-		<button class="secondary full center text-center" on:click={modalStore.close}
-			>{$i18n.core.text.close}</button
-		>
 	{:else}
 		<SendWizard
 			{currentStep}
