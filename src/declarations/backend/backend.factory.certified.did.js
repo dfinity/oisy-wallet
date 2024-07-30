@@ -36,6 +36,12 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
+	const Config = IDL.Record({
+		ecdsa_key_name: IDL.Text,
+		allowed_callers: IDL.Vec(IDL.Principal),
+		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
+		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -134,6 +140,7 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
+		config: IDL.Func([], [Config]),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),

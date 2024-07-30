@@ -1,14 +1,13 @@
-use std::collections::BTreeMap;
-use std::fmt;
-
-use candid::Principal;
-
 use crate::types::custom_token::{CustomToken, CustomTokenId, Token};
 use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
 };
-use crate::types::{CredentialType, Timestamp, TokenVersion, Version};
+use crate::types::{Config, CredentialType, InitArg, Timestamp, TokenVersion, Version};
+use candid::Principal;
+use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
+use std::collections::BTreeMap;
+use std::fmt;
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -33,6 +32,33 @@ impl TokenVersion for UserToken {
         let mut cloned = self.clone();
         cloned.version = Some(1);
         cloned
+    }
+}
+
+impl From<InitArg> for Config {
+    /// Creates a new `Config` from the provided `InitArg`.
+    ///
+    /// # Panics
+    /// - If the root key cannot be parsed.
+    fn from(arg: InitArg) -> Self {
+        let InitArg {
+            ecdsa_key_name,
+            allowed_callers,
+            supported_credentials,
+            ic_root_key_der,
+        } = arg;
+        let ic_root_key_raw = match extract_raw_root_pk_from_der(
+            &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
+        ) {
+            Ok(root_key) => root_key,
+            Err(msg) => panic!("{}", format!("Error parsing root key: {msg}")),
+        };
+        Config {
+            ecdsa_key_name,
+            allowed_callers,
+            supported_credentials,
+            ic_root_key_raw: Some(ic_root_key_raw),
+        }
     }
 }
 
