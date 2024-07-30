@@ -3,16 +3,13 @@
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
 	import { onMount } from 'svelte';
 	import { unsafeLoadDefaultPublicIcrcTokens } from '$icp/services/icrc.services';
+	import TokenCardSignedOut from '$lib/components/tokens/TokenCardSignedOut.svelte';
 
 	onMount(unsafeLoadDefaultPublicIcrcTokens);
 </script>
 
 {#each $enabledNetworkTokens as token (token.id)}
 	<TokenCardWithUrl {token}>
-		<span class="break-all" slot="description">
-			-/- {token.symbol}
-		</span>
-
-		<span slot="actions" class="mr-[3px] font-bold">-/-</span>
+		<TokenCardSignedOut {token} />
 	</TokenCardWithUrl>
 {/each}
