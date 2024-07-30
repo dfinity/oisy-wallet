@@ -5,7 +5,7 @@ use shared::types::{
     CredentialType, Version,
 };
 
-pub fn get_profile(
+pub fn find_profile(
     principal: StoredPrincipal,
     user_profile_model: &mut UserProfileModel,
 ) -> Result<StoredUserProfile, GetUserProfileError> {
@@ -37,7 +37,7 @@ pub fn add_credential(
     issuer: String,
     user_profile_model: &mut UserProfileModel,
 ) -> Result<(), AddUserCredentialError> {
-    if let Ok(user_profile) = get_profile(principal, user_profile_model) {
+    if let Ok(user_profile) = find_profile(principal, user_profile_model) {
         let now = time();
         if let Ok(new_profile) =
             user_profile.add_credential(profile_version, now, credential_type, issuer)

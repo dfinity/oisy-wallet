@@ -38,7 +38,7 @@ use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
 };
-use user_profile::{add_credential, create_profile, get_profile};
+use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
@@ -493,7 +493,7 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     mutate_state(|s| {
         let mut user_profile_model =
             UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
-        match get_profile(stored_principal, &mut user_profile_model) {
+        match find_profile(stored_principal, &mut user_profile_model) {
             Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
             Err(err) => Err(err),
         }
