@@ -7,6 +7,7 @@ import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
+import { WSTETH_TOKEN } from '$env/tokens-erc20/tokens.wsteth.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
@@ -156,7 +157,8 @@ export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	OCT_TOKEN,
 	SHIB_TOKEN,
 	WBTC_TOKEN,
-	USDT_TOKEN
+	USDT_TOKEN,
+	WSTETH_TOKEN
 ];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
