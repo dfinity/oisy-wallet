@@ -15,7 +15,7 @@
 	const hidePopover = () => (visible = false);
 </script>
 
-<div class="hidden md:flex gap-4">
+<div class="hidden md:flex gap-5">
 	<AboutWhat />
 	<AboutHow />
 </div>
