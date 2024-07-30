@@ -1,8 +1,10 @@
 import { afterAll, describe } from 'vitest';
 
 describe('auth utils', () => {
-	describe('isAlternativeOrigin', () => {
+	describe('getOptionalDerivationOrigin', () => {
 		let originalWindowLocation: Location;
+		const derivationOrigin = 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io';
+		const alternativeOrigins = ['https://staging.oisy.com', 'https://hello.com'];
 
 		beforeAll(() => {
 			originalWindowLocation = window.location;
@@ -12,85 +14,62 @@ describe('auth utils', () => {
 			vi.stubGlobal('location', originalWindowLocation);
 		});
 
-		describe('env configured', () => {
+		describe('with alternative origins and derivation origin configured', () => {
 			beforeEach(() => {
-				vi.stubEnv('VITE_AUTH_ALTERNATIVE_ORIGINS', 'https://staging.oisy.com,https://hello.com');
+				vi.resetModules();
+				vi.stubEnv('VITE_AUTH_ALTERNATIVE_ORIGINS', alternativeOrigins.join(','));
+				vi.stubEnv('VITE_AUTH_DERIVATION_ORIGIN', derivationOrigin);
 			});
 
 			afterEach(() => {
 				vi.unstubAllEnvs();
 			});
 
-			const urls = [
-				{
-					name: 'staging',
-					url: 'https://staging.oisy.com'
-				},
-				{
-					name: 'test',
-					url: 'https://hello.com'
-				}
-			];
-
-			describe.each(urls)('$name', ({ url }) => {
-				it('should return true if the origin is in the known alternative origins', async () => {
-					const { isAlternativeOrigin } = await import('$lib/utils/auth.utils');
+			describe.each(alternativeOrigins)('$name', (url) => {
+				it('should return derivation if the origin is in the known alternative origins', async () => {
+					const { getOptionalDerivationOrigin } = await import('$lib/utils/auth.utils');
 
 					vi.stubGlobal('location', { origin: url });
-					expect(isAlternativeOrigin()).toBe(true);
+
+					expect(getOptionalDerivationOrigin()).toEqual({
+						derivationOrigin
+					});
 				});
 			});
 
-			it('should return false if the origin is not in the known alternative origins', async () => {
+			it('should return empty object if the origin is not in the known alternative origins', async () => {
+				const { getOptionalDerivationOrigin } = await import('$lib/utils/auth.utils');
+
 				vi.stubGlobal('location', { origin: 'https://empty.com' });
-				const { isAlternativeOrigin } = await import('$lib/utils/auth.utils');
-				expect(isAlternativeOrigin()).toBe(false);
+
+				expect(getOptionalDerivationOrigin()).toEqual({});
 			});
 		});
 
-		describe('env configured with empty', () => {
+		describe('with empty alternative origins', () => {
 			beforeEach(() => {
+				vi.resetModules();
 				vi.stubEnv('VITE_AUTH_ALTERNATIVE_ORIGINS', '');
+				vi.stubEnv('VITE_AUTH_DERIVATION_ORIGIN', derivationOrigin);
 			});
 
 			afterEach(() => {
 				vi.unstubAllEnvs();
 			});
 
-			it('should return false if there are no alternative origins', async () => {
-				const { isAlternativeOrigin } = await import('$lib/utils/auth.utils');
-				expect(isAlternativeOrigin()).toBe(false);
+			it('should return empty object', async () => {
+				const { getOptionalDerivationOrigin } = await import('$lib/utils/auth.utils');
+
+				vi.stubGlobal('location', { origin: derivationOrigin });
+
+				expect(getOptionalDerivationOrigin()).toEqual({});
 			});
 		});
 
-		describe('env not configured', () => {
-			it('should return false if there are no alternative origins', async () => {
-				const { isAlternativeOrigin } = await import('$lib/utils/auth.utils');
-				expect(isAlternativeOrigin()).toBe(false);
-			});
-		});
-	});
-
-	describe('hasDerivationOrigin', () => {
-		describe('env configured', () => {
+		describe('with no derivation origin', () => {
 			beforeEach(() => {
 				vi.resetModules();
-				vi.stubEnv('VITE_AUTH_DERIVATION_ORIGIN', 'https://tewsx-xaaaa-aaaad-aadia-cai.icp0.io');
-			});
-
-			afterEach(() => {
-				vi.unstubAllEnvs();
-			});
-
-			it('should return true if the derivation origin is not empty', async () => {
-				const { hasDerivationOrigin } = await import('$lib/utils/auth.utils');
-				expect(hasDerivationOrigin()).toBe(true);
-			});
-		});
-
-		describe('env configured with empty', () => {
-			beforeEach(() => {
-				vi.resetModules();
+				vi.stubEnv('VITE_AUTH_ALTERNATIVE_ORIGINS', alternativeOrigins.join(','));
 				vi.stubEnv('VITE_AUTH_DERIVATION_ORIGIN', '');
 			});
 
@@ -98,16 +77,22 @@ describe('auth utils', () => {
 				vi.unstubAllEnvs();
 			});
 
-			it('should return false if the derivation origin is empty', async () => {
-				const { hasDerivationOrigin } = await import('$lib/utils/auth.utils');
-				expect(hasDerivationOrigin()).toBe(false);
+			it('should return empty object', async () => {
+				const { getOptionalDerivationOrigin } = await import('$lib/utils/auth.utils');
+
+				vi.stubGlobal('location', { origin: alternativeOrigins[0] });
+
+				expect(getOptionalDerivationOrigin()).toEqual({});
 			});
 		});
 
-		describe('env not configured', () => {
-			it('should return false if the derivation origin is not set', async () => {
-				const { hasDerivationOrigin } = await import('$lib/utils/auth.utils');
-				expect(hasDerivationOrigin()).toBe(false);
+		describe('no environment set', () => {
+			it('should return empty object', async () => {
+				const { getOptionalDerivationOrigin } = await import('$lib/utils/auth.utils');
+
+				vi.stubGlobal('location', { origin: derivationOrigin });
+
+				expect(getOptionalDerivationOrigin()).toEqual({});
 			});
 		});
 	});

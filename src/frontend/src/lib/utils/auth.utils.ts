@@ -27,7 +27,7 @@ export const loadIdentity = async (): Promise<Identity | undefined> => {
 	return authClient.getIdentity();
 };
 
-export const isAlternativeOrigin = (): boolean => {
+const isAlternativeOrigin = (): boolean => {
 	const {
 		location: { origin }
 	} = window;
@@ -38,4 +38,14 @@ export const isAlternativeOrigin = (): boolean => {
 	return knownAlternativeOrigins.includes(origin);
 };
 
-export const hasDerivationOrigin = (): boolean => notEmptyString(AUTH_DERIVATION_ORIGIN);
+const hasDerivationOrigin = (): boolean => notEmptyString(AUTH_DERIVATION_ORIGIN);
+
+export const getOptionalDerivationOrigin = ():
+	| { derivationOrigin: string }
+	| Record<string, never> => {
+	return isAlternativeOrigin() && hasDerivationOrigin()
+		? {
+				derivationOrigin: AUTH_DERIVATION_ORIGIN
+			}
+		: {};
+};
