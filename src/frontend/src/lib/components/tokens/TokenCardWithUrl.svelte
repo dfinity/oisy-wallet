@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Token } from '$lib/types/token';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -19,10 +18,7 @@
 			token: token.symbol
 		})}
 	>
-		<TokenCard {token}>
-			<slot name="description" slot="description" />
-			<slot name="exchange" slot="exchange" />
-		</TokenCard>
+		<slot />
 	</a>
 
 	<slot name="actions" />
