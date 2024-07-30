@@ -88,18 +88,24 @@ const fetchTokenDetails = async ({ contractAddress, isTestnet }) => {
 	);
 	const contract = new ethers.Contract(
 		contractAddress,
-		['function name() view returns (string)', 'function decimals() view returns (uint8)'],
+		[
+			'function name() view returns (string)',
+			'function decimals() view returns (uint8)',
+			'function symbol() public view returns (string)'
+		],
 		provider
 	);
 
-	const [name, decimals] = await Promise.all([contract.name(), contract.decimals()]).catch(
-		(err) => {
-			console.error(`Error fetching token details:\n${err}`);
-			process.exit(1);
-		}
-	);
+	const [name, decimals, symbol] = await Promise.all([
+		contract.name(),
+		contract.decimals(),
+		contract.symbol()
+	]).catch((err) => {
+		console.error(`Error fetching token details:\n${err}`);
+		process.exit(1);
+	});
 
-	return { name, decimals };
+	return { name, decimals, symbol };
 };
 
 const loadFileContentOrEmpty = (filePath) => {
@@ -129,10 +135,18 @@ const manageEnvFile = async ({ mainSymbol: symbol, contractAddress, testnetContr
 		return { fileName, mainnetToken: undefined, testnetToken: undefined };
 	}
 
-	const { name: mainnetName, decimals: mainnetDecimals } = nonNullish(contractAddress)
+	const {
+		name: mainnetName,
+		decimals: mainnetDecimals,
+		symbol: mainnetSymbol
+	} = nonNullish(contractAddress)
 		? await fetchTokenDetails({ contractAddress, isTestnet: false })
 		: {};
-	const { name: testnetName, decimals: testnetDecimals } = nonNullish(testnetContractAddress)
+	const {
+		name: testnetName,
+		decimals: testnetDecimals,
+		symbol: testnetSymbol
+	} = nonNullish(testnetContractAddress)
 		? await fetchTokenDetails({
 				contractAddress: testnetContractAddress,
 				isTestnet: true
@@ -165,7 +179,7 @@ import ${icon} from '$icp-eth/assets/${icon}.svg';
 	const newFileContentMainnet =
 		nonNullish(mainnetToken) && !mainnetTokenCreated
 			? `
-export const ${symbol}_SYMBOL = '${symbol}';
+export const ${symbol}_SYMBOL = '${mainnetSymbol}';
 
 export const ${symbol}_TOKEN_ID: unique symbol = Symbol(${symbol}_SYMBOL);
 
@@ -175,7 +189,7 @@ export const ${mainnetToken}: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: '${mainnetName}',
-	symbol: '${symbol}',
+	symbol: '${mainnetSymbol}',
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
 	address: '${contractAddress}',
@@ -188,7 +202,7 @@ export const ${mainnetToken}: RequiredErc20Token = {
 	const newFileContentTestnet =
 		nonNullish(testnetToken) && !testnetTokenCreated
 			? `
-export const SEPOLIA_${symbol}_SYMBOL = 'Sepolia${symbol}';
+export const SEPOLIA_${symbol}_SYMBOL = 'Sepolia${testnetSymbol}';
 
 export const SEPOLIA_${symbol}_TOKEN_ID: unique symbol = Symbol(SEPOLIA_${symbol}_SYMBOL);
 
@@ -198,7 +212,7 @@ export const ${testnetToken}: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: '${testnetName}',
-	symbol: '${symbol}',
+	symbol: '${testnetSymbol}',
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
 	address: '${testnetContractAddress}',
