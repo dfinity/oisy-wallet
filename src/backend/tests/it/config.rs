@@ -20,7 +20,7 @@ fn config_is_available_to_allowed_users_only() {
     // Try a random user
     let nns_root = Principal::from_text("r7inp-6aaaa-aaaaa-aaabq-cai")
         .unwrap_or_else(|_| unreachable!("NNS root principal is definitely a valid principal."));
-    assert!(!expected_config.allowed_callers.contains(&nns_root), "Test setup erorr: NNS root should not be in the allowed callers list, or a different principal should be used to test here.");
+    assert!(!expected_config.allowed_callers.contains(&nns_root), "Test setup error: NNS root should not be in the allowed callers list, or a different principal should be used to test here.");
     assert!(
         update_call::<UserProfile>(&pic_setup, nns_root, "config", ()).is_err(),
         "NNS root should not be able to call config"
