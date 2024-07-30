@@ -1,7 +1,5 @@
 use ic_verifiable_credentials::VcFlowSigners;
-use shared::types::{user_profile::AddUserCredentialRequest, CredentialType};
-
-use crate::Config;
+use shared::types::{user_profile::AddUserCredentialRequest, Config, CredentialType};
 
 pub fn get_credential_config(
     request: &AddUserCredentialRequest,

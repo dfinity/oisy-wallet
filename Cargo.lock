@@ -128,7 +128,6 @@ dependencies = [
  "futures",
  "getrandom 0.2.13",
  "hex",
- "ic-canister-sig-creation",
  "ic-cdk 0.15.0",
  "ic-cdk-macros 0.15.0",
  "ic-stable-structures 0.6.4",
@@ -3708,6 +3707,7 @@ name = "shared"
 version = "0.0.2"
 dependencies = [
  "candid",
+ "ic-canister-sig-creation",
  "ic-cdk 0.15.0",
  "ic-cdk-macros 0.15.0",
  "ic-metrics-encoder",

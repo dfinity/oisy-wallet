@@ -8,7 +8,7 @@ pub enum CredentialType {
     ProofOfUniqueness,
 }
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct SupportedCredential {
     pub credential_type: CredentialType,
     pub ii_origin: String,
@@ -30,6 +30,16 @@ pub struct InitArg {
 pub enum Arg {
     Init(InitArg),
     Upgrade,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct Config {
+    pub ecdsa_key_name: String,
+    // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
+    pub allowed_callers: Vec<Principal>,
+    pub supported_credentials: Option<Vec<SupportedCredential>>,
+    /// Root of trust for checking canister signatures.
+    pub ic_root_key_raw: Option<Vec<u8>>,
 }
 
 pub mod transaction {
