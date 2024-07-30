@@ -61,12 +61,7 @@ interface I18nWallet {
 }
 
 interface I18nInit {
-	text: {
-		initializing_wallet: string;
-		lets_go: string;
-		securing_session: string;
-		retrieving_eth_key: string;
-	};
+	text: { initializing_wallet: string; securing_session: string; retrieving_eth_key: string };
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
@@ -97,6 +92,7 @@ interface I18nInit {
 		transaction_price: string;
 		icrc_canisters: string;
 		erc20_user_tokens: string;
+		erc20_user_token: string;
 		loading_wallet_timeout: string;
 	};
 }
@@ -232,8 +228,9 @@ interface I18nSend {
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
+		not_enough_tokens_for_gas: string;
 		gas_fees_not_defined: string;
-		max_gas_gee_per_gas_undefined: string;
+		max_gas_fee_per_gas_undefined: string;
 		address_unknown: string;
 		minter_info_not_loaded: string;
 		minter_info_not_certified: string;
@@ -492,7 +489,6 @@ interface I18nAbout {
 			label: string;
 			title: string;
 			hold_crypto: string;
-			go_incognito: string;
 			use_eth_dapps: string;
 			use_ic_dapps: string;
 		};

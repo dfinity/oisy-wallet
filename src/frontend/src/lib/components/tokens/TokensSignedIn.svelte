@@ -3,8 +3,8 @@
 	import Listener from '$lib/components/core/Listener.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import {
-		enabledNetworkTokensUi,
-		enabledNetworkTokensUiNonZeroBalance
+		sortedNetworkTokensUi,
+		sortedNetworkTokensUiNonZeroBalance
 	} from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
@@ -22,7 +22,7 @@
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
 
 	let tokens: TokenUi[];
-	$: tokens = displayZeroBalance ? $enabledNetworkTokensUi : $enabledNetworkTokensUiNonZeroBalance;
+	$: tokens = displayZeroBalance ? $sortedNetworkTokensUi : $sortedNetworkTokensUiNonZeroBalance;
 </script>
 
 <TokensSkeletons>

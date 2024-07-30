@@ -6,6 +6,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
+import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
@@ -34,7 +35,7 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 );
 
 /**
- * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not, with their financial data.
+ * All tokens matching the selected network or Chain Fusion, with their financial data.
  */
 export const enabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[enabledNetworkTokens, balancesStore, exchanges],
@@ -53,10 +54,22 @@ export const enabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 		})
 );
 
-export const enabledNetworkTokensUiNonZeroBalance: Readable<TokenUi[]> = derived(
+/**
+ * All tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
+ */
+export const sortedNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[enabledNetworkTokensUi, balancesStore],
 	([$enabledNetworkTokensUi, $balancesStore]) =>
-		$enabledNetworkTokensUi.filter(({ id: tokenId }) =>
+		pinTokensWithBalanceAtTop({
+			$tokens: $enabledNetworkTokensUi,
+			$balancesStore: $balancesStore
+		})
+);
+
+export const sortedNetworkTokensUiNonZeroBalance: Readable<TokenUi[]> = derived(
+	[sortedNetworkTokensUi, balancesStore],
+	([$sortedNetworkTokensUi, $balancesStore]) =>
+		$sortedNetworkTokensUi.filter(({ id: tokenId }) =>
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n)
 		)
 );
