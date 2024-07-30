@@ -9,6 +9,6 @@
 
 <SendButton on:click={() => modalStore.openSend(modalId)} />
 
-{#if $modalSend}
+{#if $modalSend && $modalStore?.data === modalId}
 	<SendModal on:nnsClose />
 {/if}
