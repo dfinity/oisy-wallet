@@ -23,25 +23,17 @@ export class InfuraProvider {
 		this.provider = new InfuraProviderLib(this.network, API_KEY);
 	}
 
-	balance = (address: ETH_ADDRESS): Promise<BigNumber> => {
-		return this.provider.getBalance(address);
-	};
+	balance = (address: ETH_ADDRESS): Promise<BigNumber> => this.provider.getBalance(address);
 
-	getFeeData = (): Promise<FeeData> => {
-		return this.provider.getFeeData();
-	};
+	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
 
-	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> => {
-		return this.provider.sendTransaction(signedTransaction);
-	};
+	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
+		this.provider.sendTransaction(signedTransaction);
 
-	getTransactionCount = (address: ETH_ADDRESS): Promise<number> => {
-		return this.provider.getTransactionCount(address, 'pending');
-	};
+	getTransactionCount = (address: ETH_ADDRESS): Promise<number> =>
+		this.provider.getTransactionCount(address, 'pending');
 
-	getBlockNumber = (): Promise<number> => {
-		return this.provider.getBlockNumber();
-	};
+	getBlockNumber = (): Promise<number> => this.provider.getBlockNumber();
 }
 
 const providers: Record<NetworkId, InfuraProvider> = {

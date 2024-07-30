@@ -27,8 +27,7 @@ const deleteIndexes = async ({ dest = `./src/declarations` }) => {
  *
  */
 const cleanFactory = async ({ dest = `./src/declarations` }) => {
-	const promises = readdirSync(dest).map((dir) => {
-		return new Promise((resolve) => {
+	const promises = readdirSync(dest).map((dir) => new Promise((resolve) => {
 			const cleanFile = async () => {
 				const factoryPath = join(dest, dir, `${dir}.did.js`);
 
@@ -55,15 +54,13 @@ export const init = ({ IDL }) => {`
 			};
 
 			cleanFile();
-		});
-	});
+		}));
 
 	await Promise.all(promises);
 };
 
 const renameFactory = async ({ dest = `./src/declarations` }) => {
-	const promises = readdirSync(dest).map((dir) => {
-		return new Promise((resolve) => {
+	const promises = readdirSync(dest).map((dir) => new Promise((resolve) => {
 			const renameFile = async () => {
 				const factoryPath = join(dest, dir, `${dir}.did.js`);
 				const formattedPath = join(dest, dir, `${dir}.factory.did.js`);
@@ -79,8 +76,7 @@ const renameFactory = async ({ dest = `./src/declarations` }) => {
 			};
 
 			renameFile();
-		});
-	});
+		}));
 
 	await Promise.all(promises);
 };
@@ -88,8 +84,7 @@ const renameFactory = async ({ dest = `./src/declarations` }) => {
 const copyCertifiedFactory = async ({ dest = `./src/declarations` }) => {
 	const promises = readdirSync(dest)
 		.filter((dir) => !['frontend'].includes(dir))
-		.map((dir) => {
-			return new Promise((resolve) => {
+		.map((dir) => new Promise((resolve) => {
 				const copyFile = async () => {
 					const uncertifiedFactoryPath = join(dest, dir, `${dir}.factory.did.js`);
 
@@ -108,8 +103,7 @@ const copyCertifiedFactory = async ({ dest = `./src/declarations` }) => {
 				};
 
 				copyFile();
-			});
-		});
+			}));
 
 	await Promise.all(promises);
 };

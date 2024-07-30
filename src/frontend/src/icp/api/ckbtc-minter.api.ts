@@ -132,10 +132,9 @@ const minterCanister = async ({
 	});
 };
 
-const minterAccountParams = ({ identity }: { identity: Identity }): { owner: Principal } => {
+const minterAccountParams = ({ identity }: { identity: Identity }): { owner: Principal } =>
 	// We use the identity to follow NNS-dapp's scheme but, if it would not be provided, it would be the same result.
 	// If "owner" is not provided, the minter canister uses the "caller" as a fallback.
-	return {
+	({
 		owner: identity.getPrincipal()
-	};
-};
+	});
