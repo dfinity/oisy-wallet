@@ -202,7 +202,7 @@ export const ${mainnetToken}: RequiredErc20Token = {
 	const newFileContentTestnet =
 		nonNullish(testnetToken) && !testnetTokenCreated
 			? `
-export const SEPOLIA_${symbol}_SYMBOL = 'Sepolia${symbol}';
+export const SEPOLIA_${symbol}_SYMBOL = 'Sepolia${testnetSymbol}';
 
 export const SEPOLIA_${symbol}_TOKEN_ID: unique symbol = Symbol(SEPOLIA_${symbol}_SYMBOL);
 
@@ -212,7 +212,7 @@ export const ${testnetToken}: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: '${testnetName}',
-	symbol: '${symbol}',
+	symbol: '${testnetSymbol}',
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
 	address: '${testnetContractAddress}',
