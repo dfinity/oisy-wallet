@@ -23,12 +23,14 @@ const buildCsp = (htmlFile) => {
 	writeFileSync(htmlFile, indexHTMLWithCSP);
 };
 
-const removeDefaultCspTag = (indexHtml) => indexHtml.replace('<meta http-equiv="content-security-policy" content="">', '');
+const removeDefaultCspTag = (indexHtml) =>
+	indexHtml.replace('<meta http-equiv="content-security-policy" content="">', '');
 
 /**
  * We need a script loader to implement a proper Content Security Policy. See `updateCSP` doc for more information.
  */
-const injectScriptLoader = (indexHtml) => indexHtml.replace(
+const injectScriptLoader = (indexHtml) =>
+	indexHtml.replace(
 		'<!-- SCRIPT_LOADER -->',
 		`<script sveltekit-loader>
       const loader = document.createElement("script");
