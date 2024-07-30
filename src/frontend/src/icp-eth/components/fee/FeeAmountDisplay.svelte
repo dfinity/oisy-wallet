@@ -21,8 +21,6 @@
 	let insufficientFeeFunds = false;
 	let timer: NodeJS.Timeout | undefined;
 
-	// $: insufficientFeeFunds = nonNullish(balance) && balance.lt(fee);
-
 	$: {
 		timer = setTimeout(() => {
 			insufficientFeeFunds = nonNullish(balance) && balance.lt(fee);
