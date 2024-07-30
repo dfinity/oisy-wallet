@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { sendWizardSteps } from '$lib/config/send.config';
 	import { createEventDispatcher } from 'svelte';
