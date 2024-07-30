@@ -1,13 +1,12 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
-use candid::{CandidType, Deserialize, Nat, Principal};
+use candid::{Nat, Principal};
 use config::get_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
-use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
@@ -32,7 +31,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, InitArg, SupportedCredential};
+use shared::types::{Arg, Config, InitArg};
 use std::cell::RefCell;
 use std::str::FromStr;
 use types::{
@@ -107,38 +106,12 @@ pub struct State {
     user_profile_updated: UserProfileUpdatedMap,
 }
 
-#[derive(CandidType, Deserialize)]
-pub struct Config {
-    pub ecdsa_key_name: String,
-    // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
-    pub allowed_callers: Vec<Principal>,
-    pub supported_credentials: Option<Vec<SupportedCredential>>,
-    /// Root of trust for checking canister signatures.
-    pub ic_root_key_raw: Option<Vec<u8>>,
-}
-
 fn set_config(arg: InitArg) {
-    let InitArg {
-        ecdsa_key_name,
-        allowed_callers,
-        supported_credentials,
-        ic_root_key_der,
-    } = arg;
+    let config = Config::from(arg);
     mutate_state(|state| {
-        let ic_root_key_raw = match extract_raw_root_pk_from_der(
-            &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
-        ) {
-            Ok(root_key) => root_key,
-            Err(msg) => panic!("{}", format!("Error parsing root key: {msg}")),
-        };
         state
             .config
-            .set(Some(Candid(Config {
-                ecdsa_key_name,
-                allowed_callers,
-                supported_credentials,
-                ic_root_key_raw: Some(ic_root_key_raw),
-            })))
+            .set(Some(Candid(config)))
             .expect("setting config should succeed");
     });
 }
@@ -163,6 +136,13 @@ fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+}
+
+/// Show the canister configuration.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+fn config() -> Config {
+    read_config(std::clone::Clone::clone)
 }
 
 /// Processes external HTTP requests.

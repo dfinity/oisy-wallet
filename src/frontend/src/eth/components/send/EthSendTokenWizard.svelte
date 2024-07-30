@@ -36,7 +36,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import { decodeQrCode } from '$eth/utils/qr-code.utils';
@@ -87,6 +87,9 @@
 	let feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set(nativeEthereumToken.symbol);
 
+	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	$: feeTokenIdStore.set(nativeEthereumToken.id);
+
 	let feeContext: FeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
@@ -95,6 +98,7 @@
 		initFeeContext({
 			feeStore,
 			feeSymbolStore,
+			feeTokenIdStore,
 			evaluateFee
 		})
 	);
@@ -143,7 +147,7 @@
 		// exceeds block gas limit
 		if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
 			toastsError({
-				msg: { text: $i18n.send.assertion.max_gas_gee_per_gas_undefined }
+				msg: { text: $i18n.send.assertion.max_gas_fee_per_gas_undefined }
 			});
 			return;
 		}

@@ -1,12 +1,11 @@
 import {
-	AUTH_DERIVATION_ORIGIN,
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
 	AUTH_POPUP_WIDTH,
 	INTERNET_IDENTITY_CANISTER_ID
 } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
-import { createAuthClient, hasDerivationOrigin, isAlternativeOrigin } from '$lib/utils/auth.utils';
+import { createAuthClient, getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { AuthClient } from '@dfinity/auth-client';
 import { nonNullish } from '@dfinity/utils';
@@ -69,10 +68,7 @@ const initAuthStore = (): AuthStore => {
 					onError: reject,
 					identityProvider,
 					windowOpenerFeatures: popupCenter({ width: AUTH_POPUP_WIDTH, height: AUTH_POPUP_HEIGHT }),
-					...(isAlternativeOrigin() &&
-						hasDerivationOrigin() && {
-							derivationOrigin: AUTH_DERIVATION_ORIGIN
-						})
+					...getOptionalDerivationOrigin()
 				});
 			}),
 
