@@ -1,4 +1,5 @@
 use candid::{CandidType, Deserialize, Principal};
+use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use std::fmt::Debug;
 
 pub type Timestamp = u64;
@@ -8,7 +9,7 @@ pub enum CredentialType {
     ProofOfUniqueness,
 }
 
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct SupportedCredential {
     pub credential_type: CredentialType,
     pub ii_origin: String,
@@ -30,6 +31,43 @@ pub struct InitArg {
 pub enum Arg {
     Init(InitArg),
     Upgrade,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct Config {
+    pub ecdsa_key_name: String,
+    // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
+    pub allowed_callers: Vec<Principal>,
+    pub supported_credentials: Option<Vec<SupportedCredential>>,
+    /// Root of trust for checking canister signatures.
+    pub ic_root_key_raw: Option<Vec<u8>>,
+}
+
+impl From<InitArg> for Config {
+    /// Creates a new `Config` from the provided `InitArg`.
+    ///
+    /// # Panics
+    /// - If the root key cannot be parsed.
+    fn from(arg: InitArg) -> Self {
+        let InitArg {
+            ecdsa_key_name,
+            allowed_callers,
+            supported_credentials,
+            ic_root_key_der,
+        } = arg;
+        let ic_root_key_raw = match extract_raw_root_pk_from_der(
+            &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
+        ) {
+            Ok(root_key) => root_key,
+            Err(msg) => panic!("{}", format!("Error parsing root key: {msg}")),
+        };
+        Config {
+            ecdsa_key_name,
+            allowed_callers,
+            supported_credentials,
+            ic_root_key_raw: Some(ic_root_key_raw),
+        }
+    }
 }
 
 pub mod transaction {
