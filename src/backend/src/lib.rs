@@ -38,7 +38,8 @@ use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
 };
-use user_profile::{add_credential, create_profile, get_profile};
+use user_profile::{add_credential, create_profile, find_profile};
+use user_profile_model::UserProfileModel;
 
 mod assertions;
 mod config;
@@ -48,6 +49,7 @@ mod oisy_user;
 mod token;
 mod types;
 mod user_profile;
+mod user_profile_model;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -67,6 +69,7 @@ thread_local! {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
+            // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
         })
@@ -455,13 +458,14 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
         current_time_ns as u128,
     ) {
         Ok(()) => mutate_state(|s| {
+            let mut user_profile_model =
+                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             add_credential(
                 stored_principal,
                 request.current_user_version,
                 &credential_type,
                 vc_flow_signers.issuer_origin,
-                &mut s.user_profile,
-                &mut s.user_profile_updated,
+                &mut user_profile_model,
             )
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
@@ -475,11 +479,9 @@ fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        let stored_user = create_profile(
-            stored_principal,
-            &mut s.user_profile,
-            &mut s.user_profile_updated,
-        );
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        let stored_user = create_profile(stored_principal, &mut user_profile_model);
         UserProfile::from(&stored_user)
     })
 }
@@ -489,11 +491,9 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        match get_profile(
-            stored_principal,
-            &mut s.user_profile,
-            &mut s.user_profile_updated,
-        ) {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        match find_profile(stored_principal, &mut user_profile_model) {
             Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
             Err(err) => Err(err),
         }
