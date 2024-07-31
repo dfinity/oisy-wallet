@@ -159,6 +159,7 @@ void main(){
 		return {
 			destroy() {
 				resizeObserver.unobserve(node);
+				resizeObserver.disconnect();
 			}
 		};
 	};
