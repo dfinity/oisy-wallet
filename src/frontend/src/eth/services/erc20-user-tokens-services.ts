@@ -44,6 +44,7 @@ export const saveUserTokens = async ({
 	const disabledTokens = tokens.filter(({ enabled, id }) => !enabled && nonNullish(id));
 	disabledTokens.forEach(({ id }) => erc20UserTokensStore.reset(id as symbol));
 
+	// TODO(GIX-2740): reload only what's needed to spare Infura calls
 	// Reload all user tokens for simplicity reason.
 	await loadUserTokens({ identity });
 };
