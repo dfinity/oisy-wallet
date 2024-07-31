@@ -7,7 +7,7 @@ import { ENV, findHtmlFiles, replaceEnv } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
 
-const METADATA_PATH = join(process.cwd(), 'src', 'frontend', 'static', 'metadata.json');
+const METADATA_PATH = join(process.cwd(), 'src', 'frontend', 'src', 'env', 'oisy.metadata.json');
 
 const getMetadata = () => JSON.parse(readFileSync(resolve(METADATA_PATH), 'utf-8'));
 
