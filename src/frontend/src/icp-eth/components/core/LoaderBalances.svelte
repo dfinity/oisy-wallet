@@ -15,7 +15,7 @@
 		]);
 	};
 
-	const debounceLoad = debounce(load);
+	const debounceLoad = debounce(load, 500);
 
 	$: $address, $enabledErc20NetworkTokens, debounceLoad();
 </script>
