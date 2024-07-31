@@ -29,6 +29,8 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+      - name: Install shfmt
+        run: sudo snap install --classic shfmt
       - name: Install cargo dependency sorter
         run: cargo install cargo-sort@1.0.9
       - name: Format
