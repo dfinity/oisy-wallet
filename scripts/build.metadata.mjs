@@ -2,24 +2,25 @@
 
 import { config } from 'dotenv';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { ENV, findHtmlFiles, replaceEnv } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
 
+const METADATA_PATH = join(process.cwd(), 'src', 'frontend', 'src', 'env', 'oisy.metadata.json');
+
+const getMetadata = () => JSON.parse(readFileSync(resolve(METADATA_PATH), 'utf-8'));
+
 const parseMetadata = (targetFile) => {
 	let content = readFileSync(targetFile, 'utf8');
 
-	const METADATA_KEYS = [
-		'VITE_OISY_NAME',
-		'VITE_OISY_ONELINER',
-		'VITE_OISY_DESCRIPTION',
-		'VITE_OISY_URL',
-		'VITE_OISY_ICON'
-	];
+	const METADATA = {
+		...getMetadata(),
+		VITE_OISY_URL: process.env.VITE_OISY_URL
+	};
 
-	METADATA_KEYS.forEach(
-		(key) => (content = replaceEnv({ content, pattern: `{{${key}}}`, value: process.env[key] }))
+	Object.entries(METADATA).forEach(
+		([key, value]) => (content = replaceEnv({ content, pattern: `{{${key}}}`, value }))
 	);
 
 	// Special use case. We need to build the dapp with a real URL within app.html other build fails.
