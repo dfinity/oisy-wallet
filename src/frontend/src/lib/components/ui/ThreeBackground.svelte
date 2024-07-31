@@ -152,8 +152,18 @@ void main(){
 		camera.aspect = container.clientWidth / container.clientHeight;
 		camera.updateProjectionMatrix();
 	};
+
+	const resizeAction = (node: HTMLElement) => {
+		const resizeObserver = new ResizeObserver(handleResize);
+		resizeObserver.observe(node);
+		return {
+			destroy() {
+				resizeObserver.unobserve(node);
+			}
+		};
+	};
 </script>
 
 <svelte:window on:resize={handleResize} />
 
-<div bind:this={container} class="absolute inset-0 bg-navy-blue"></div>
+<div use:resizeAction bind:this={container} class="absolute inset-0 bg-navy-blue"></div>
