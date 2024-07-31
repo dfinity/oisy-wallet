@@ -20,10 +20,9 @@ impl<'a> UserProfileModel<'a> {
 
     pub fn find_by_principal(&self, user_principal: StoredPrincipal) -> Option<StoredUserProfile> {
         if let Some(updated) = self.user_profile_updated_map.get(&user_principal) {
-            return self
-                .user_profile_map
+            self.user_profile_map
                 .get(&(updated, user_principal))
-                .map(|p| p.0);
+                .map(|p| p.0)
         } else {
             None
         }
