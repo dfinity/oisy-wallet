@@ -24,7 +24,7 @@
 		() => (insufficientFeeFunds = nonNullish(balance) && balance.lt(fee))
 	);
 
-	$: balance, debounceCheckFeeFunds();
+	$: balance, fee, debounceCheckFeeFunds();
 </script>
 
 <div transition:fade>
