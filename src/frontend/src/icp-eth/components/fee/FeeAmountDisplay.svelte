@@ -13,7 +13,8 @@
 	export let feeSymbol: string;
 	export let feeTokenId: TokenId;
 
-	const balance = nonNullish($balancesStore)
+	let balance: BigNumber | undefined;
+	$: balance = nonNullish($balancesStore)
 		? $balancesStore[feeTokenId]?.data ?? BigNumber.from(0n)
 		: undefined;
 
