@@ -1,4 +1,4 @@
-name: Backend Checks
+name: Binding Checks
 
 on:
   pull_request:
@@ -34,7 +34,7 @@ jobs:
         run: npm ci
       - name: Generate bindings
         run: npm run generate
-        # TODO: Cache teh build.
+        # TODO: Cache the build.
       - name: Check bindings
         run: |
           test -z "$(git status --porcelain)" || {
@@ -42,8 +42,8 @@ jobs:
                   git diff
                   exit 1
           }
-  may-merge:
-    needs: [ 'format', 'lint', 'workspace-dependencies' ]
+  binding-checks-pass:
+    needs: [ 'generate' ]
     runs-on: ubuntu-20.04
     steps:
       - name: Cleared for merging
