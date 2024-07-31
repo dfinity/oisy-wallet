@@ -62,4 +62,4 @@ export POCKET_IC_MUTE_SERVER=""
 # Run tests
 
 echo "Running backend integration tests."
-cargo test -p backend
+cargo test -p backend "${@}"
