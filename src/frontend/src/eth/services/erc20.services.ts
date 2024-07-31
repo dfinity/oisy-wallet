@@ -117,9 +117,9 @@ const loadErc20UserTokens = async (params: {
 							version: fromNullable(version),
 							enabled: fromNullable(enabled) ?? true
 						},
-						// TODO(GIX-2740): check if metadata for address already loaded and reuse - using Infura is not a certified call anyway
+						// 1. TODO(GIX-2740): check uf user token is actually a match in the environment static metadata
 						// +
-						// TODO(GIX-2740): check uf user token is actually a match in the environment static metadata
+						// 2. TODO(GIX-2740): check if metadata for address already loaded and reuse - using Infura is not a certified call anyway
 						...(await infuraErc20Providers(network.id).metadata({ address }))
 					};
 				}
