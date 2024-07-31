@@ -1,10 +1,14 @@
 <script lang="ts">
+	import IconInfo from '$lib/components/icons/IconInfo.svelte';
+
 	export let asMenuItem = false;
 </script>
 
-<button
-	class={asMenuItem ? '' : 'text-center text-white text-lg font-bold px-4 whitespace-nowrap'}
-	on:click
->
-	<slot name="label"></slot>
+<button class={asMenuItem ? '' : 'text-center text-white font-bold whitespace-nowrap'} on:click>
+	<div class="flex gap-2 items-center">
+		{#if asMenuItem}
+			<IconInfo />
+		{/if}
+		<slot name="label"></slot>
+	</div>
 </button>

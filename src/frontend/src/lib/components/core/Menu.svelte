@@ -15,12 +15,16 @@
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import MenuWallet from '$lib/components/core/MenuWallet.svelte';
 	import { page } from '$app/stores';
+	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
+	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
 
+	const hidePopover = () => (visible = false);
+
 	const gotoSettings = async () => {
-		visible = false;
+		hidePopover();
 		await goto(`/settings?${networkParam($networkId)}`);
 	};
 
@@ -38,7 +42,7 @@
 <Popover bind:visible anchor={button} direction="rtl">
 	<div class="flex flex-col gap-4">
 		{#if walletOptions}
-			<MenuWallet on:icMenuClick={() => (visible = false)} />
+			<MenuWallet on:icMenuClick={hidePopover} />
 		{/if}
 
 		{#if !settingsRoute}
@@ -68,6 +72,11 @@
 
 		<Hr />
 
-		<SignOut on:icLogoutTriggered={() => (visible = false)} />
+		<AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} />
+		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
+
+		<Hr />
+
+		<SignOut on:icLogoutTriggered={hidePopover} />
 	</div>
 </Popover>
