@@ -1,10 +1,7 @@
 <script lang="ts">
 	import Listener from '$lib/components/core/Listener.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import {
-		sortedNetworkTokensUi,
-		sortedNetworkTokensUiNonZeroBalance
-	} from '$lib/derived/network-tokens.derived';
+	import { sortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
@@ -18,7 +15,10 @@
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
 
 	let tokens: TokenUi[];
-	$: tokens = displayZeroBalance ? $sortedNetworkTokensUi : $sortedNetworkTokensUiNonZeroBalance;
+	$: tokens = $sortedNetworkTokensUi.filter(
+		({ id: tokenId }) =>
+			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
+	);
 </script>
 
 <TokensSkeletons>
