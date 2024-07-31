@@ -2,7 +2,7 @@ use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{Nat, Principal};
-use config::get_credential_config;
+use config::find_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
@@ -19,7 +19,7 @@ use ic_stable_structures::{
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
-use oisy_user::get_oisy_users;
+use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
@@ -38,7 +38,8 @@ use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
 };
-use user_profile::{add_credential, create_profile, get_profile};
+use user_profile::{add_credential, create_profile, find_profile};
+use user_profile_model::UserProfileModel;
 
 mod assertions;
 mod config;
@@ -48,6 +49,7 @@ mod oisy_user;
 mod token;
 mod types;
 mod user_profile;
+mod user_profile_model;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -67,6 +69,7 @@ thread_local! {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
+            // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
         })
@@ -443,7 +446,7 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
     let current_time_ns = time() as u128;
 
     let (vc_flow_signers, root_pk_raw, credential_type) =
-        read_config(|config| get_credential_config(&request, config))
+        read_config(|config| find_credential_config(&request, config))
             .ok_or(AddUserCredentialError::ConfigurationError)?;
 
     match validate_ii_presentation_and_claims(
@@ -455,13 +458,14 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
         current_time_ns as u128,
     ) {
         Ok(()) => mutate_state(|s| {
+            let mut user_profile_model =
+                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             add_credential(
                 stored_principal,
                 request.current_user_version,
                 &credential_type,
                 vc_flow_signers.issuer_origin,
-                &mut s.user_profile,
-                &mut s.user_profile_updated,
+                &mut user_profile_model,
             )
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
@@ -475,11 +479,9 @@ fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        let stored_user = create_profile(
-            stored_principal,
-            &mut s.user_profile,
-            &mut s.user_profile_updated,
-        );
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        let stored_user = create_profile(stored_principal, &mut user_profile_model);
         UserProfile::from(&stored_user)
     })
 }
@@ -489,11 +491,9 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        match get_profile(
-            stored_principal,
-            &mut s.user_profile,
-            &mut s.user_profile_updated,
-        ) {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        match find_profile(stored_principal, &mut user_profile_model) {
             Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
             Err(err) => Err(err),
         }
@@ -506,7 +506,7 @@ fn list_users(request: ListUsersRequest) -> ListUsersResponse {
     // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
 
     let (users, matches_max_length): (Vec<OisyUser>, u64) =
-        read_state(|s| get_oisy_users(&request, &s.user_profile));
+        read_state(|s| oisy_users(&request, &s.user_profile));
 
     ListUsersResponse {
         users,
