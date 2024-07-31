@@ -1,0 +1,50 @@
+name: Backend Checks
+
+on:
+  pull_request:
+    paths:
+      - # Any new or changed canisters
+        'dfx.json'
+      - # Any new or changed .did files
+        '**/*.did'
+      - # Scripts, GitHub actions that contain 'backend' in their path.
+        '**/*backend*'
+      - # The backend source code
+        'src/backend/**'
+      - 'src/shared/**'
+      - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
+        '**/Cargo*'
+      - '**/*rust*'
+  workflow_dispatch:
+
+jobs:
+
+  generate:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+      - name: Install node tools
+        run: npm ci
+      - name: Generate bindings
+        run: npm run generate
+        # TODO: Cache teh build.
+      - name: Check bindings
+        run: |
+          test -z "$(git status --porcelain)" || {
+                  echo "FIX: Please run npm run generate"
+                  git diff
+                  exit 1
+          }
+  may-merge:
+    needs: [ 'format', 'lint', 'workspace-dependencies' ]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Cleared for merging
+        run: echo OK
