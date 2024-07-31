@@ -28,9 +28,7 @@ export class EtherscanProvider {
 	}: {
 		address: ETH_ADDRESS;
 		startBlock?: BlockTag;
-	}): Promise<TransactionResponse[]> => {
-		return this.provider.getHistory(address, startBlock);
-	};
+	}): Promise<TransactionResponse[]> => this.provider.getHistory(address, startBlock);
 }
 
 const providers: Record<NetworkId, EtherscanProvider> = {

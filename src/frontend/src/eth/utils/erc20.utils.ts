@@ -1,7 +1,6 @@
 import oneInch from '$eth/assets/1inch.svg';
 import dai from '$eth/assets/dai.svg';
 import dmail from '$eth/assets/dmail.svg';
-import fet from '$eth/assets/fet.svg';
 import floki from '$eth/assets/floki.svg';
 import icpDark from '$eth/assets/icp_dark.svg';
 import jasmy from '$eth/assets/jasmy.svg';
@@ -51,8 +50,6 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return dai;
 		case 'dmail':
 			return dmail;
-		case 'fet':
-			return fet;
 		case 'floki':
 			return floki;
 		case 'jasmy':

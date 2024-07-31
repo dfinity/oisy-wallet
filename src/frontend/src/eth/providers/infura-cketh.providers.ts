@@ -60,14 +60,13 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		contract: ContractAddress;
 		startBlock?: BlockTag;
 		topics: (string | null)[];
-	}): Promise<Log[]> => {
-		return this.provider.getLogs({
+	}): Promise<Log[]> =>
+		this.provider.getLogs({
 			fromBlock,
 			toBlock: 'latest',
 			address: contractAddress,
 			topics
 		});
-	};
 }
 
 const providers: Record<NetworkId, InfuraCkETHProvider> = {
