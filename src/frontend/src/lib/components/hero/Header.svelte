@@ -8,6 +8,9 @@
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
+	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
+	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
+	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
 
 	let back = false;
 	$: back = isSubRoute($page);
@@ -44,3 +47,9 @@
 		{/if}
 	</div>
 </header>
+
+{#if $modalAboutWhat}
+	<AboutWhatModal />
+{:else if $modalAboutHow}
+	<AboutHowModal />
+{/if}
