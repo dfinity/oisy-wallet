@@ -20,6 +20,7 @@
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 
+	// TODO: remove deprecated send params
 	export let send = false;
 	export let more = false;
 
