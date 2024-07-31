@@ -20,18 +20,16 @@
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 
-	// TODO: remove deprecated send params
-	export let send = false;
 	export let more = false;
 
 	let convertEth = false;
-	$: convertEth = send && $ethToCkETHEnabled && $erc20UserTokensInitialized;
+	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
 
 	let convertErc20 = false;
-	$: convertErc20 = send && $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
+	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = send && $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
 </script>
 
 <div role="toolbar" class="flex w-full gap-6 justify-center pt-10 pb-3 px-1 max-w-96">
