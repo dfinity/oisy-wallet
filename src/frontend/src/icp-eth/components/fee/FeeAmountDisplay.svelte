@@ -33,7 +33,7 @@
 	{feeSymbol}
 </div>
 {#if insufficientFeeFunds && nonNullish(balance)}
-	<p transition:slide={{ duration: 250 }} class="text-cyclamen">
+	<p in:slide={{ duration: 250 }} class="text-cyclamen">
 		{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 			$balance: formatToken({
 				value: balance,
