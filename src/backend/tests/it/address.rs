@@ -50,7 +50,7 @@ fn test_non_allowed_caller_cannot_call_eth_address_of() {
         update_call::<String>(&pic_setup, Principal::anonymous(), "eth_address_of", caller);
 
     assert!(address.is_err());
-    assert_eq!(address.unwrap_err(), "Caller is not allowed.".to_string());
+    assert_eq!(address.unwrap_err(), "Anonymous caller not authorized.".to_string());
 }
 
 #[test]
