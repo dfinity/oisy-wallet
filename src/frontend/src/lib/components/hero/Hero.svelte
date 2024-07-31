@@ -20,7 +20,7 @@
 	$: heroContent = usdTotal || summary;
 </script>
 
-<div class={`hero pb-4 md:pb-6 ${background} relative`}>
+<div class={`hero pb-4 md:pb-6 ${background}`}>
 	{#if $pseudoNetworkChainFusion}
 		<ThreeBackground />
 	{/if}
@@ -61,7 +61,6 @@
 			background: transparent;
 
 			position: relative;
-			overflow: hidden;
 		}
 	}
 </style>
