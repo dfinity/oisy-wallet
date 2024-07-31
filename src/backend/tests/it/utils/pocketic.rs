@@ -16,21 +16,10 @@ const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.
 const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 
 pub fn setup() -> (PocketIc, Principal) {
-    let (pic, canister_id) = init();
-
     let backend_wasm_path =
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
-    let wasm_bytes = read(backend_wasm_path.clone()).expect(&format!(
-        "Could not find the backend wasm: {}",
-        backend_wasm_path
-    ));
-
-    let arg = init_arg();
-
-    pic.install_canister(canister_id, wasm_bytes, encode_one(&arg).unwrap(), None);
-
-    (pic, canister_id)
+    setup_with_custom_wasm(&backend_wasm_path, None)
 }
 
 pub fn setup_with_custom_wasm(
@@ -96,7 +85,7 @@ fn init() -> (PocketIc, Principal) {
     (pic, canister_id)
 }
 
-fn init_arg() -> Arg {
+pub(crate) fn init_arg() -> Arg {
     Arg::Init(InitArg {
         ecdsa_key_name: format!("master_ecdsa_public_key_{}", SUBNET_ID).to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],

@@ -35,6 +35,7 @@
 		await setUserToken({ ...params, token: selectedToken, enabled: false });
 	};
 
+	// TODO(GIX-2740): no call to Infura - remove only the selected token from stores
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadUserTokens(params);
 </script>
 

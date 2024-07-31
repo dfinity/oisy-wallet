@@ -1,13 +1,12 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
-use candid::{CandidType, Deserialize, Nat, Principal};
-use config::get_credential_config;
+use candid::{Nat, Principal};
+use config::find_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
-use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
@@ -20,7 +19,7 @@ use ic_stable_structures::{
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
-use oisy_user::get_oisy_users;
+use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
@@ -32,14 +31,15 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, InitArg, SupportedCredential};
+use shared::types::{Arg, Config, InitArg};
 use std::cell::RefCell;
 use std::str::FromStr;
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
 };
-use user_profile::{add_credential, create_profile, get_profile};
+use user_profile::{add_credential, create_profile, find_profile};
+use user_profile_model::UserProfileModel;
 
 mod assertions;
 mod config;
@@ -49,6 +49,7 @@ mod oisy_user;
 mod token;
 mod types;
 mod user_profile;
+mod user_profile_model;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
@@ -68,6 +69,7 @@ thread_local! {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
+            // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
         })
@@ -107,38 +109,12 @@ pub struct State {
     user_profile_updated: UserProfileUpdatedMap,
 }
 
-#[derive(CandidType, Deserialize)]
-pub struct Config {
-    pub ecdsa_key_name: String,
-    // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
-    pub allowed_callers: Vec<Principal>,
-    pub supported_credentials: Option<Vec<SupportedCredential>>,
-    /// Root of trust for checking canister signatures.
-    pub ic_root_key_raw: Option<Vec<u8>>,
-}
-
 fn set_config(arg: InitArg) {
-    let InitArg {
-        ecdsa_key_name,
-        allowed_callers,
-        supported_credentials,
-        ic_root_key_der,
-    } = arg;
+    let config = Config::from(arg);
     mutate_state(|state| {
-        let ic_root_key_raw = match extract_raw_root_pk_from_der(
-            &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
-        ) {
-            Ok(root_key) => root_key,
-            Err(msg) => panic!("{}", format!("Error parsing root key: {msg}")),
-        };
         state
             .config
-            .set(Some(Candid(Config {
-                ecdsa_key_name,
-                allowed_callers,
-                supported_credentials,
-                ic_root_key_raw: Some(ic_root_key_raw),
-            })))
+            .set(Some(Candid(config)))
             .expect("setting config should succeed");
     });
 }
@@ -163,6 +139,13 @@ fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+}
+
+/// Show the canister configuration.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+fn config() -> Config {
+    read_config(std::clone::Clone::clone)
 }
 
 /// Processes external HTTP requests.
@@ -463,7 +446,7 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
     let current_time_ns = time() as u128;
 
     let (vc_flow_signers, root_pk_raw, credential_type) =
-        read_config(|config| get_credential_config(&request, config))
+        read_config(|config| find_credential_config(&request, config))
             .ok_or(AddUserCredentialError::ConfigurationError)?;
 
     match validate_ii_presentation_and_claims(
@@ -475,13 +458,14 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
         current_time_ns as u128,
     ) {
         Ok(()) => mutate_state(|s| {
+            let mut user_profile_model =
+                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
             add_credential(
                 stored_principal,
                 request.current_user_version,
                 &credential_type,
                 vc_flow_signers.issuer_origin,
-                &mut s.user_profile,
-                &mut s.user_profile_updated,
+                &mut user_profile_model,
             )
         }),
         Err(_) => Err(AddUserCredentialError::InvalidCredential),
@@ -495,11 +479,9 @@ fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        let stored_user = create_profile(
-            stored_principal,
-            &mut s.user_profile,
-            &mut s.user_profile_updated,
-        );
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        let stored_user = create_profile(stored_principal, &mut user_profile_model);
         UserProfile::from(&stored_user)
     })
 }
@@ -509,11 +491,9 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
     mutate_state(|s| {
-        match get_profile(
-            stored_principal,
-            &mut s.user_profile,
-            &mut s.user_profile_updated,
-        ) {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        match find_profile(stored_principal, &mut user_profile_model) {
             Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
             Err(err) => Err(err),
         }
@@ -526,7 +506,7 @@ fn list_users(request: ListUsersRequest) -> ListUsersResponse {
     // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
 
     let (users, matches_max_length): (Vec<OisyUser>, u64) =
-        read_state(|s| get_oisy_users(&request, &s.user_profile));
+        read_state(|s| oisy_users(&request, &s.user_profile));
 
     ListUsersResponse {
         users,
