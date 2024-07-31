@@ -1,12 +1,7 @@
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import type { WizardSteps } from '@dfinity/gix-components';
 
-// TODO: Merge with the sendWizardSteps used for IC and ETH
 export const sendWizardSteps = (i18n: I18n): WizardSteps => [
-	{
-		name: WizardStepsSend.TOKENS_LIST,
-		title: i18n.send.text.send
-	},
 	{
 		name: WizardStepsSend.SEND,
 		title: i18n.send.text.send
@@ -18,9 +13,21 @@ export const sendWizardSteps = (i18n: I18n): WizardSteps => [
 	{
 		name: WizardStepsSend.SENDING,
 		title: i18n.send.text.sending
-	},
+	}
+];
+
+export const sendWizardStepsWithQrCodeScan = (i18n: I18n): WizardSteps => [
+	...sendWizardSteps(i18n),
 	{
 		name: WizardStepsSend.QR_CODE_SCAN,
 		title: i18n.send.text.scan_qr
 	}
+];
+
+export const sendWizardStepsComplete = (i18n: I18n): WizardSteps => [
+	{
+		name: WizardStepsSend.TOKENS_LIST,
+		title: i18n.send.text.send
+	},
+	...sendWizardStepsWithQrCodeScan(i18n)
 ];
