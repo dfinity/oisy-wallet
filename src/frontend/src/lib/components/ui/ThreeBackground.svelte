@@ -112,7 +112,8 @@ void main(){
 		scene = new Scene();
 		camera = new PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
 		renderer = new WebGLRenderer();
-		renderer.setSize(container.clientWidth, container.clientHeight);
+		renderer.domElement.style.width = '100%';
+		renderer.domElement.style.height = '100%';
 		container.appendChild(renderer.domElement);
 
 		material = new ShaderMaterial({
@@ -148,23 +149,11 @@ void main(){
 		if (isNullish(container)) {
 			return;
 		}
-		renderer.setSize(container.clientWidth, container.clientHeight);
 		camera.aspect = container.clientWidth / container.clientHeight;
 		camera.updateProjectionMatrix();
-	};
-
-	const resizeAction = (node: HTMLElement) => {
-		const resizeObserver = new ResizeObserver(handleResize);
-		resizeObserver.observe(node);
-		return {
-			destroy() {
-				resizeObserver.unobserve(node);
-				resizeObserver.disconnect();
-			}
-		};
 	};
 </script>
 
 <svelte:window on:resize={handleResize} />
 
-<div use:resizeAction bind:this={container} class="absolute inset-0 bg-navy-blue"></div>
+<div bind:this={container} class="absolute inset-0 bg-navy-blue"></div>
