@@ -13,15 +13,14 @@ import type {
 const getTransactions = ({
 	identity,
 	certified
-}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetAccountIdentifierTransactionsResponse> => {
-	return getTransactionsApi({
+}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetAccountIdentifierTransactionsResponse> =>
+	getTransactionsApi({
 		identity,
 		certified,
 		owner: identity.getPrincipal(),
 		// We query tip to discover the new transactions
 		start: undefined
 	});
-};
 
 const mapTransaction = ({
 	transaction,
