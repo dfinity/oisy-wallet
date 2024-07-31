@@ -11,7 +11,8 @@ pub fn caller_is_not_anonymous() -> Result<(), String> {
 }
 
 pub fn caller_is_allowed() -> Result<(), String> {
-    if read_config(|s| s.allowed_callers.contains(&caller())) {
+    let caller = caller();
+    if read_config(|s| s.allowed_callers.contains(&caller)) || ic_cdk::api::is_controller(&caller) {
         Ok(())
     } else {
         Err("Caller is not allowed.".to_string())

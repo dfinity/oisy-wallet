@@ -1,3 +1,4 @@
+use crate::utils::mock::CONTROLLER;
 use crate::utils::pocketic::{init_arg, setup, update_call};
 use candid::Principal;
 use shared::types::user_profile::UserProfile;
@@ -6,6 +7,12 @@ use shared::types::{Arg, Config};
 #[test]
 fn config_is_available_to_allowed_users_only() {
     let pic_setup = setup();
+    let (pic, canister_id) = &pic_setup;
+    let controllers = vec![Principal::from_text(CONTROLLER)
+        .expect("Test setup error: Failed to parse controller principal")];
+    pic.set_controllers(canister_id.clone(), None, controllers)
+        .expect("Test setup error: Failed to set controllers");
+
     let init_arg = if let Arg::Init(arg) = init_arg() {
         arg
     } else {
@@ -33,7 +40,19 @@ fn config_is_available_to_allowed_users_only() {
         .expect("Test setup error: No allowed users found in the config.");
     assert_eq!(
         update_call::<Config>(&pic_setup, allowed_user.clone(), "config", ()),
-        Ok(expected_config),
+        Ok(expected_config.clone()),
         "Allowed user should be able to call config and get the right answer."
+    );
+    // Try a controller
+    assert_eq!(
+        update_call::<Config>(
+            &pic_setup,
+            Principal::from_text(CONTROLLER)
+                .expect("Test setup error: Failed to parse controller principal"),
+            "config",
+            ()
+        ),
+        Ok(expected_config),
+        "Controller should be able to call config and get the right answer."
     );
 }

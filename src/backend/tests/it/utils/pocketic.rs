@@ -30,6 +30,9 @@ pub fn setup() -> (PocketIc, Principal) {
 
     pic.install_canister(canister_id, wasm_bytes, encode_one(&arg).unwrap(), None);
 
+    pic.set_controllers(canister_id, None, vec![Principal::anonymous()])
+        .expect("Failed to set controllers");
+
     (pic, canister_id)
 }
 
