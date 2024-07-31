@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { sendWizardSteps } from '$lib/config/send.config';
+	import { sendWizardStepsComplete } from '$lib/config/send.config';
 	import { createEventDispatcher } from 'svelte';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 	import type { Token } from '$lib/types/token';
@@ -25,7 +25,7 @@
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let steps: WizardSteps;
-	$: steps = sendWizardSteps($i18n);
+	$: steps = sendWizardStepsComplete($i18n);
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
