@@ -17,6 +17,9 @@
 	import { page } from '$app/stores';
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
+	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
+	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
+	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -80,3 +83,9 @@
 		<SignOut on:icLogoutTriggered={hidePopover} />
 	</div>
 </Popover>
+
+{#if $modalAboutWhat}
+	<AboutWhatModal />
+{:else if $modalAboutHow}
+	<AboutHowModal />
+{/if}
