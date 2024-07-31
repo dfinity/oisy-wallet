@@ -9,21 +9,20 @@ use std::ops::Bound;
 const DEFAULT_LIMIT_LIST_USERS_RESPONSE: usize = 10_000;
 const PRINCIPAL_MIN: Principal = Principal::from_slice(&[]);
 
-fn get_limit_users_size(request: &ListUsersRequest) -> usize {
-    match request.matches_max_length {
-        Some(num) => match usize::try_from(num) {
-            Ok(val) if val <= DEFAULT_LIMIT_LIST_USERS_RESPONSE => val,
-            _ => DEFAULT_LIMIT_LIST_USERS_RESPONSE,
-        },
-        None => DEFAULT_LIMIT_LIST_USERS_RESPONSE,
-    }
+/// The maximum number of users to list in one response.  Returns the default limit if the requested limit is invalid or too large.
+fn limit_users_size(request: &ListUsersRequest) -> usize {
+    request
+        .matches_max_length
+        .and_then(|val| usize::try_from(val).ok())
+        .filter(|val| *val <= DEFAULT_LIMIT_LIST_USERS_RESPONSE)
+        .unwrap_or(DEFAULT_LIMIT_LIST_USERS_RESPONSE)
 }
 
-pub fn get_oisy_users(
+pub fn oisy_users(
     request: &ListUsersRequest,
     user_profile_map: &UserProfileMap,
 ) -> (Vec<OisyUser>, u64) {
-    let limit_users_size: usize = get_limit_users_size(request);
+    let limit_users_size: usize = limit_users_size(request);
 
     let start_bound: Bound<(Timestamp, StoredPrincipal)> = match request.updated_after_timestamp {
         Some(updated) => Bound::Included((updated, StoredPrincipal(PRINCIPAL_MIN))),
