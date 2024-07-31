@@ -68,7 +68,7 @@ export const autoLoadUserToken = async ({
 			enabled: true
 		});
 
-		// TODO: For simplicity, we reload all the user's tokens. However, for performance reasons, here and in other areas of the codebase, we might only reload the tokens we need.
+		// TODO(GIX-2740): Only reload the tokens we need.
 		await loadUserTokens({ identity });
 	} catch (err: unknown) {
 		toastsError({
