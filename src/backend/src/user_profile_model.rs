@@ -43,6 +43,23 @@ impl<'a> UserProfileModel<'a> {
         self.user_profile_map
             .insert((timestamp, user_principal), Candid(new_user.clone()));
     }
+
+    #[cfg(test)]
+    fn assert_consistent(&self) {
+        assert_eq!(
+            self.user_profile_map.len(),
+            self.user_profile_updated_map.len(),
+            "The number of entries should be the same"
+        );
+        for (user_principal, timestamp) in self.user_profile_updated_map.iter() {
+            assert!(
+                self.user_profile_map
+                    .contains_key(&(timestamp, user_principal)),
+                "Profile map is missing user {}",
+                user_principal.0.to_text()
+            );
+        }
+    }
 }
 
 #[cfg(test)]
@@ -107,6 +124,7 @@ mod tests {
                 .unwrap(),
             user_profile_2
         );
+        user_profile_model.assert_consistent();
     }
 
     #[test]
@@ -159,5 +177,6 @@ mod tests {
                 .unwrap(),
             user_profile
         );
+        user_profile_model.assert_consistent();
     }
 }
