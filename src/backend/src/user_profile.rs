@@ -25,7 +25,7 @@ pub fn create_profile(
     } else {
         let now = time();
         let default_profile = StoredUserProfile::from_timestamp(now);
-        user_profile_model.stor_new(principal, now, &default_profile);
+        user_profile_model.store_new(principal, now, &default_profile);
         default_profile
     }
 }
@@ -42,7 +42,7 @@ pub fn add_credential(
         if let Ok(new_profile) =
             user_profile.add_credential(profile_version, now, credential_type, issuer)
         {
-            user_profile_model.stor_new(principal, now, &new_profile);
+            user_profile_model.store_new(principal, now, &new_profile);
             Ok(())
         } else {
             Err(AddUserCredentialError::VersionMismatch)
