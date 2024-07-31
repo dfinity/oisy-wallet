@@ -16,7 +16,6 @@
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
-	export let send = false;
 	export let more = false;
 
 	let displayTokenSymbol = false;
@@ -55,7 +54,7 @@
 		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
 		class="flex w-full justify-center"
 	>
-		<Actions {send} {more} />
+		<Actions {more} />
 	</div>
 {/if}
 

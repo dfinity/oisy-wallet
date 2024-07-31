@@ -10,7 +10,6 @@
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
-	export let send = false;
 	export let more = false;
 
 	let background: string;
@@ -34,7 +33,7 @@
 		<Alpha />
 
 		{#if $authSignedIn}
-			<HeroContent {usdTotal} {summary} {actions} {send} {more} />
+			<HeroContent {usdTotal} {summary} {actions} {more} />
 		{:else if heroContent}
 			<HeroSignIn />
 		{/if}
