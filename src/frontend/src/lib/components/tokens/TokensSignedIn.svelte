@@ -10,6 +10,8 @@
 	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { BigNumber } from '@ethersproject/bignumber';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
