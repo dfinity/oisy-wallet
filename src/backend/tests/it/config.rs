@@ -7,7 +7,6 @@ use shared::types::{Arg, Config};
 #[test]
 fn config_is_available_to_allowed_users_only() {
     let pic_setup = setup();
-
     let init_arg = if let Arg::Init(arg) = init_arg() {
         arg
     } else {
@@ -27,17 +26,6 @@ fn config_is_available_to_allowed_users_only() {
         update_call::<UserProfile>(&pic_setup, nns_root, "config", ()).is_err(),
         "NNS root should not be able to call config"
     );
-    // Try an allowed user.
-    let allowed_user = expected_config
-        .allowed_callers
-        .iter()
-        .next()
-        .expect("Test setup error: No allowed users found in the config.");
-    assert_eq!(
-        update_call::<Config>(&pic_setup, allowed_user.clone(), "config", ()),
-        Ok(expected_config.clone()),
-        "Allowed user should be able to call config and get the right answer."
-    );
     // Try a controller
     assert_eq!(
         update_call::<Config>(
@@ -47,7 +35,18 @@ fn config_is_available_to_allowed_users_only() {
             "config",
             ()
         ),
-        Ok(expected_config),
+        Ok(expected_config.clone()),
         "Controller should be able to call config and get the right answer."
+    );
+    // Try an allowed user.
+    let allowed_user = expected_config
+        .allowed_callers
+        .iter()
+        .next()
+        .expect("Test setup error: No allowed users found in the config.");
+    assert_eq!(
+        update_call::<Config>(&pic_setup, allowed_user.clone(), "config", ()),
+        Ok(expected_config),
+        "Allowed user should be able to call config and get the right answer."
     );
 }
