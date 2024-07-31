@@ -2,7 +2,7 @@ use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length
 use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{Nat, Principal};
-use config::get_credential_config;
+use config::find_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
@@ -19,7 +19,7 @@ use ic_stable_structures::{
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
-use oisy_user::get_oisy_users;
+use oisy_user::oisy_users;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
@@ -443,7 +443,7 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
     let current_time_ns = time() as u128;
 
     let (vc_flow_signers, root_pk_raw, credential_type) =
-        read_config(|config| get_credential_config(&request, config))
+        read_config(|config| find_credential_config(&request, config))
             .ok_or(AddUserCredentialError::ConfigurationError)?;
 
     match validate_ii_presentation_and_claims(
@@ -506,7 +506,7 @@ fn list_users(request: ListUsersRequest) -> ListUsersResponse {
     // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
 
     let (users, matches_max_length): (Vec<OisyUser>, u64) =
-        read_state(|s| get_oisy_users(&request, &s.user_profile));
+        read_state(|s| oisy_users(&request, &s.user_profile));
 
     ListUsersResponse {
         users,
