@@ -1,4 +1,4 @@
-use crate::utils::mock::{CALLER, CALLER_ETH_ADDRESS, CONTROLLER};
+use crate::utils::mock::{CALLER, CALLER_ETH_ADDRESS};
 use crate::utils::pocketic::{setup, update_call};
 use candid::Principal;
 
@@ -43,11 +43,6 @@ fn test_anonymous_cannot_call_eth_address() {
 #[test]
 fn test_non_allowed_caller_cannot_call_eth_address_of() {
     let pic_setup = setup();
-    let (pic, canister_id) = &pic_setup;
-    let controllers = vec![Principal::from_text(CONTROLLER)
-        .expect("Test setup error: Failed to parse controller principal")];
-    pic.set_controllers(canister_id.clone(), None, controllers)
-        .expect("Test setup error: Failed to set controllers");
 
     let caller = Principal::from_text(CALLER).unwrap();
 

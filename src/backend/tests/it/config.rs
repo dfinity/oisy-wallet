@@ -7,11 +7,6 @@ use shared::types::{Arg, Config};
 #[test]
 fn config_is_available_to_allowed_users_only() {
     let pic_setup = setup();
-    let (pic, canister_id) = &pic_setup;
-    let controllers = vec![Principal::from_text(CONTROLLER)
-        .expect("Test setup error: Failed to parse controller principal")];
-    pic.set_controllers(canister_id.clone(), None, controllers)
-        .expect("Test setup error: Failed to set controllers");
 
     let init_arg = if let Arg::Init(arg) = init_arg() {
         arg
