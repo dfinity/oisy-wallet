@@ -28,6 +28,7 @@ export const loadErc20Tokens = async ({
 	await Promise.all([loadDefaultErc20Tokens(), loadUserTokens({ identity })]);
 };
 
+// TODO: use environment static metadata
 const loadDefaultErc20Tokens = async (): Promise<{ success: boolean }> => {
 	try {
 		type ContractData = Erc20Contract &
@@ -116,6 +117,9 @@ const loadErc20UserTokens = async (params: {
 							version: fromNullable(version),
 							enabled: fromNullable(enabled) ?? true
 						},
+						// TODO: check if metadata for address already loaded and reuse - using Infura is not a certified call anyway
+						// +
+						// TODO: check uf user token is actually a match in the environment static metadata
 						...(await infuraErc20Providers(network.id).metadata({ address }))
 					};
 				}

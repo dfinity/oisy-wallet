@@ -94,6 +94,8 @@ const loadErc20Balance = async ({
 	} catch (err: unknown) {
 		balancesStore.reset(contract.id);
 
+		console.log('errorrrr')
+
 		toastsError({
 			msg: {
 				text: replacePlaceholders(loading_balance_symbol, {
