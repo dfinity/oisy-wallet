@@ -1,17 +1,21 @@
 <script lang="ts">
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import { sortedNetworkTokensUiNonZeroBalance } from '$lib/derived/network-tokens.derived';
+	import { sortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import type { TokenUi } from '$lib/types/token';
 	import { createEventDispatcher } from 'svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { BigNumber } from '@ethersproject/bignumber';
 
 	const dispatch = createEventDispatcher();
 
 	let tokens: TokenUi[];
-	$: tokens = $sortedNetworkTokensUiNonZeroBalance;
+	$: tokens = $sortedNetworkTokensUi.filter(({ id: tokenId }) =>
+		($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n)
+	);
 </script>
 
 <TokensSkeletons>
