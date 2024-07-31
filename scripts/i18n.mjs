@@ -22,13 +22,11 @@ const generateTypes = async () => {
 			[]
 		);
 
-	const data = Object.entries(en).map(([key, values]) => {
-		return {
-			key,
-			name: `I18n${key.charAt(0).toUpperCase()}${key.slice(1)}`,
-			values: mapValues(values)
-		};
-	});
+	const data = Object.entries(en).map(([key, values]) => ({
+		key,
+		name: `I18n${key.charAt(0).toUpperCase()}${key.slice(1)}`,
+		values: mapValues(values)
+	}));
 
 	const lang = `lang: Languages;`;
 

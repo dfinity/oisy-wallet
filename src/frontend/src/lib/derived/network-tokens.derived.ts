@@ -38,16 +38,14 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 export const enabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[enabledNetworkTokens, balancesStore, exchanges],
 	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
-		$enabledNetworkTokens.map((token) => {
-			return {
-				...token,
-				usdBalance: nonNullish($exchanges?.[token.id]?.usd)
-					? usdValue({
-							token,
-							balances: $balancesStore,
-							exchanges: $exchanges
-						})
-					: undefined
-			};
-		})
+		$enabledNetworkTokens.map((token) => ({
+			...token,
+			usdBalance: nonNullish($exchanges?.[token.id]?.usd)
+				? usdValue({
+						token,
+						balances: $balancesStore,
+						exchanges: $exchanges
+					})
+				: undefined
+		}))
 );

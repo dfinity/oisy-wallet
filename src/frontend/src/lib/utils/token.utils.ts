@@ -23,11 +23,8 @@ export const getMaxTransactionAmount = ({
 	fee?: bigint;
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
-}): number => {
-	return (
-		Math.max(Number(balance - (tokenStandard !== 'erc20' ? fee : 0n)), 0) / 10 ** tokenDecimals
-	);
-};
+}): number =>
+	Math.max(Number(balance - (tokenStandard !== 'erc20' ? fee : 0n)), 0) / 10 ** tokenDecimals;
 
 /**
  * /**

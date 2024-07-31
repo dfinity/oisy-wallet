@@ -114,8 +114,8 @@ export const loadAllCkBtcInfo = async ({
 	};
 
 	// ckBTC minter info are loaded when accessing the ckBTC transactions page with a worker
-	const waitCkBtcMinterInfoLoaded = (): Promise<void> => {
-		return new Promise<void>((resolve, reject) => {
+	const waitCkBtcMinterInfoLoaded = (): Promise<void> =>
+		new Promise<void>((resolve, reject) => {
 			const isDisabled = (): boolean => {
 				const $ckBtcMinterInfoStore = get(ckBtcMinterInfoStore);
 				return isNullish($ckBtcMinterInfoStore?.[tokenId]);
@@ -123,7 +123,6 @@ export const loadAllCkBtcInfo = async ({
 
 			waitWalletReady(isDisabled).then((status) => (status === 'timeout' ? reject() : resolve()));
 		});
-	};
 
 	await Promise.all([
 		addressLoaded ? Promise.resolve() : loadBtcAddress(params),

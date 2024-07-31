@@ -52,6 +52,7 @@ module.exports = {
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'no-delete-var': 'error',
 		'curly': 'error',
+		'arrow-body-style': ['warn', 'as-needed'],
 	},
 	globals: {
 		NodeJS: true

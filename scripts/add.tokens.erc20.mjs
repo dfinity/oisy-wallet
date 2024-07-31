@@ -295,22 +295,20 @@ const updateTokensErc20Env = ({ fileName, mainnetToken, testnetToken }) => {
 	writeFileSync(filePath, content);
 };
 
-const flattenData = (data) => {
-	return Object.keys(data).map((symbol) => ({
+const flattenData = (data) =>
+	Object.keys(data).map((symbol) => ({
 		symbol,
 		...data[symbol]
 	}));
-};
 
-const flattenEnvironmentData = (data) => {
-	return Object.entries(data).reduce(
+const flattenEnvironmentData = (data) =>
+	Object.entries(data).reduce(
 		(acc, [environment, values]) => ({
 			...acc,
 			[environment]: flattenData(values)
 		}),
 		{}
 	);
-};
 
 const readSupportedTokens = () => {
 	const jsonPath = resolve(DATA_DIR_PATH, 'tokens.ckerc20.json');
