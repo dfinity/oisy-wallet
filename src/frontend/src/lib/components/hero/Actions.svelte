@@ -18,7 +18,9 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
+	import Send from '$lib/components/send/Send.svelte';
 
+	// TODO: remove deprecated send params
 	export let send = false;
 	export let more = false;
 
@@ -41,12 +43,12 @@
 		<Receive />
 	{/if}
 
-	{#if send}
-		{#if $networkICP}
-			<IcSend token={$tokenWithFallback} />
-		{:else}
-			<EthSend token={$tokenWithFallback} />
-		{/if}
+	{#if $networkICP}
+		<IcSend token={$tokenWithFallback} />
+	{:else if $networkEthereum}
+		<EthSend token={$tokenWithFallback} />
+	{:else if $pseudoNetworkChainFusion}
+		<Send />
 	{/if}
 
 	{#if convertEth}
