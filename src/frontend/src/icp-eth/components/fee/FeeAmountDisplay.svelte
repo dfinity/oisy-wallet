@@ -20,9 +20,11 @@
 
 	let insufficientFeeFunds = false;
 
-	$: {
-		debounce(() => (insufficientFeeFunds = nonNullish(balance) && balance.lt(fee)), 250)();
-	}
+	const debounceCheckFeeFunds = debounce(
+		() => (insufficientFeeFunds = nonNullish(balance) && balance.lt(fee))
+	);
+
+	$: balance, debounceCheckFeeFunds();
 </script>
 
 <div transition:fade>
