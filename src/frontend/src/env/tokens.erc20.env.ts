@@ -5,7 +5,9 @@ import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
 import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
+import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
+import { WSTETH_TOKEN } from '$env/tokens-erc20/tokens.wsteth.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
@@ -16,18 +18,6 @@ import type { TokenId } from '$lib/types/token';
 const ERC20_CONTRACT_ADDRESS_1INCH: Erc20Contract = {
 	// 1INCH
 	address: '0x111111111117dc0aa78b770fa6a738034120c302',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_WSTETH: Erc20Contract = {
-	// Lido Finance (wstETH)
-	address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_USDT: Erc20Contract = {
-	// Tether
-	address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
 	exchange: 'erc20'
 };
 
@@ -85,7 +75,7 @@ const ERC20_CONTRACT_ADDRESS_WEEETH: Erc20Contract = {
 	exchange: 'erc20'
 };
 
-const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
+export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	{
 		// Weenus
 		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
@@ -116,11 +106,9 @@ export const ERC20_CONTRACT_ICP: Erc20Contract = {
 	exchange: 'icp'
 };
 
-const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
+export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	ERC20_CONTRACT_ADDRESS_1INCH,
-	ERC20_CONTRACT_ADDRESS_WSTETH,
-	ERC20_CONTRACT_ADDRESS_USDT,
 	ERC20_CONTRACT_ADDRESS_DMAIL,
 	ERC20_CONTRACT_ADDRESS_UNISWAP,
 	ERC20_CONTRACT_ADDRESS_MATIC,
@@ -149,19 +137,21 @@ export const ERC20_CONTRACTS_ADDRESSES = ERC20_CONTRACTS.map(({ address }) =>
  * Unlike other Erc20 tokens, for which we load the details at runtime based one their contract address.
  */
 
-const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [
+export const ERC20_TWIN_TOKENS_SEPOLIA: RequiredErc20Token[] = [
 	SEPOLIA_USDC_TOKEN,
 	SEPOLIA_LINK_TOKEN,
 	SEPOLIA_PEPE_TOKEN
 ];
 
-const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
+export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	USDC_TOKEN,
 	LINK_TOKEN,
 	PEPE_TOKEN,
 	OCT_TOKEN,
 	SHIB_TOKEN,
-	WBTC_TOKEN
+	WBTC_TOKEN,
+	USDT_TOKEN,
+	WSTETH_TOKEN
 ];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [

@@ -1,5 +1,17 @@
-type AddUserCredentialRequest = record { credential_jwt : text };
+type AddUserCredentialError = variant {
+  InvalidCredential;
+  VersionMismatch;
+  ConfigurationError;
+  UserNotFound;
+};
+type AddUserCredentialRequest = record {
+  credential_jwt : text;
+  issuer_canister_id : principal;
+  current_user_version : opt nat64;
+  credential_spec : CredentialSpec;
+};
 type Arg = variant { Upgrade; Init : InitArg };
+type ArgumentValue = variant { Int : int32; String : text };
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -12,6 +24,16 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
+type Config = record {
+  ecdsa_key_name : text;
+  allowed_callers : vec principal;
+  supported_credentials : opt vec SupportedCredential;
+  ic_root_key_raw : opt blob;
+};
+type CredentialSpec = record {
+  arguments : opt vec record { text; ArgumentValue };
+  credential_type : text;
+};
 type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
   token : Token;
@@ -26,14 +48,6 @@ type DefiniteCanisterSettingsArgs = record {
   compute_allocation : nat;
 };
 type GetUserProfileError = variant { NotFound };
-type GetUsersRequest = record {
-  updated_after_timestamp : opt nat64;
-  matches_max_length : opt nat64;
-};
-type GetUsersResponse = record {
-  users : vec OisyUser;
-  matches_max_length : nat64;
-};
 type HttpRequest = record {
   url : text;
   method : text;
@@ -55,12 +69,21 @@ type InitArg = record {
   lock_signing : opt bool;
   hide_user_data : opt bool;
 };
+type ListUsersRequest = record {
+  updated_after_timestamp : opt nat64;
+  matches_max_length : opt nat64;
+};
+type ListUsersResponse = record {
+  users : vec OisyUser;
+  matches_max_length : nat64;
+};
 type OisyUser = record {
   "principal" : principal;
   pouh_verified : bool;
   updated_timestamp : nat64;
 };
-type Result = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result = variant { Ok; Err : AddUserCredentialError };
+type Result_1 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -72,16 +95,16 @@ type SignRequest = record {
   nonce : nat;
 };
 type SupportedCredential = record {
-  ii_canister_id : text;
+  ii_canister_id : principal;
   issuer_origin : text;
-  issuer_canister_id : text;
+  issuer_canister_id : principal;
   ii_origin : text;
   credential_type : CredentialType;
 };
 type Token = variant { Icrc : IcrcToken };
 type UserCredential = record {
+  issuer : text;
   verified_date_timestamp : opt nat64;
-  expire_date_timestamp : opt nat64;
   credential_type : CredentialType;
 };
 type UserProfile = record {
@@ -100,16 +123,17 @@ type UserToken = record {
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
-  add_user_credential : (AddUserCredentialRequest) -> ();
+  add_user_credential : (AddUserCredentialRequest) -> (Result);
   caller_eth_address : () -> (text);
+  config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
-  get_user_profile : () -> (Result) query;
-  get_users : (GetUsersRequest) -> (GetUsersResponse) query;
+  get_user_profile : () -> (Result_1) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
+  list_users : (ListUsersRequest) -> (ListUsersResponse) query;
   personal_sign : (text) -> (text);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();

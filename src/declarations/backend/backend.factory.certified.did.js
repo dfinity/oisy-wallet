@@ -2,9 +2,9 @@
 export const idlFactory = ({ IDL }) => {
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Text,
+		ii_canister_id: IDL.Principal,
 		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Text,
+		issuer_canister_id: IDL.Principal,
 		ii_origin: IDL.Text,
 		credential_type: CredentialType
 	});
@@ -15,10 +15,36 @@ export const idlFactory = ({ IDL }) => {
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
-	const AddUserCredentialRequest = IDL.Record({ credential_jwt: IDL.Text });
+	const ArgumentValue = IDL.Variant({ Int: IDL.Int32, String: IDL.Text });
+	const CredentialSpec = IDL.Record({
+		arguments: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, ArgumentValue))),
+		credential_type: IDL.Text
+	});
+	const AddUserCredentialRequest = IDL.Record({
+		credential_jwt: IDL.Text,
+		issuer_canister_id: IDL.Principal,
+		current_user_version: IDL.Opt(IDL.Nat64),
+		credential_spec: CredentialSpec
+	});
+	const AddUserCredentialError = IDL.Variant({
+		InvalidCredential: IDL.Null,
+		VersionMismatch: IDL.Null,
+		ConfigurationError: IDL.Null,
+		UserNotFound: IDL.Null
+	});
+	const Result = IDL.Variant({
+		Ok: IDL.Null,
+		Err: AddUserCredentialError
+	});
+	const Config = IDL.Record({
+		ecdsa_key_name: IDL.Text,
+		allowed_callers: IDL.Vec(IDL.Principal),
+		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
+		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
 	const UserCredential = IDL.Record({
+		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
-		expire_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
 	const UserProfile = IDL.Record({
@@ -51,22 +77,9 @@ export const idlFactory = ({ IDL }) => {
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
-	const Result = IDL.Variant({
+	const Result_1 = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
-	});
-	const GetUsersRequest = IDL.Record({
-		updated_after_timestamp: IDL.Opt(IDL.Nat64),
-		matches_max_length: IDL.Opt(IDL.Nat64)
-	});
-	const OisyUser = IDL.Record({
-		principal: IDL.Principal,
-		pouh_verified: IDL.Bool,
-		updated_timestamp: IDL.Nat64
-	});
-	const GetUsersResponse = IDL.Record({
-		users: IDL.Vec(OisyUser),
-		matches_max_length: IDL.Nat64
 	});
 	const HttpRequest = IDL.Record({
 		url: IDL.Text,
@@ -97,6 +110,19 @@ export const idlFactory = ({ IDL }) => {
 		contract_address: IDL.Text,
 		symbol: IDL.Opt(IDL.Text)
 	});
+	const ListUsersRequest = IDL.Record({
+		updated_after_timestamp: IDL.Opt(IDL.Nat64),
+		matches_max_length: IDL.Opt(IDL.Nat64)
+	});
+	const OisyUser = IDL.Record({
+		principal: IDL.Principal,
+		pouh_verified: IDL.Bool,
+		updated_timestamp: IDL.Nat64
+	});
+	const ListUsersResponse = IDL.Record({
+		users: IDL.Vec(OisyUser),
+		matches_max_length: IDL.Nat64
+	});
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -112,16 +138,17 @@ export const idlFactory = ({ IDL }) => {
 		nonce: IDL.Nat
 	});
 	return IDL.Service({
-		add_user_credential: IDL.Func([AddUserCredentialRequest], [], []),
+		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
+		config: IDL.Func([], [Config]),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		get_user_profile: IDL.Func([], [Result]),
-		get_users: IDL.Func([GetUsersRequest], [GetUsersResponse]),
+		get_user_profile: IDL.Func([], [Result_1]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
+		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse]),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
@@ -136,9 +163,9 @@ export const idlFactory = ({ IDL }) => {
 export const init = ({ IDL }) => {
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
-		ii_canister_id: IDL.Text,
+		ii_canister_id: IDL.Principal,
 		issuer_origin: IDL.Text,
-		issuer_canister_id: IDL.Text,
+		issuer_canister_id: IDL.Principal,
 		ii_origin: IDL.Text,
 		credential_type: CredentialType
 	});
