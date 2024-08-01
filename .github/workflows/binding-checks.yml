@@ -32,8 +32,8 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
-      - name: Install node tools
-        run: npm ci
+      - name: Prepare
+        uses: ./.github/actions/prepare
       - name: Generate bindings
         run: npm run generate
         # TODO: Cache the build.
