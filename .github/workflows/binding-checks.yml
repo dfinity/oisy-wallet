@@ -34,6 +34,14 @@ jobs:
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
       - name: Prepare
         uses: ./.github/actions/prepare
+      - name: Install binstall
+        run: |
+          BINSTALL_VERSION="1.8.0"
+          curl -L --proto '=https' --tlsv1.2 -sSf "https://github.com/cargo-bins/cargo-binstall/releases/download/v${BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.tgz" | tar -xvzf - cargo-binstall
+          ./cargo-binstall -y --force "cargo-binstall@$BINSTALL_VERSION"
+          rm cargo-binstall
+      - name: Install candid-extractor
+        run: cargo binstall --no-confirm candid-extractor@0.1.4
       - name: Generate bindings
         run: npm run generate
         # TODO: Cache the build.
