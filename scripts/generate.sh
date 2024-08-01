@@ -40,3 +40,5 @@ dfx generate
 node scripts/did.update.types.mjs
 node scripts/did.delete.types.mjs
 npm run format
+# We do not need frontend bindings
+rm -fr src/declarations/frontend
