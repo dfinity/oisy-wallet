@@ -2,17 +2,17 @@
 set -euo pipefail
 
 [[ "${1:-}" != "--help" ]] || {
-	cat <<-EOF
+  cat <<-EOF
 	Gets .did files and generates canister bindings from them.
 	EOF
-	exit 0
+  exit 0
 }
 
 # Gets all .did files listed in dfx.json.
 #
 # .did files are placed in the local .dfx directory, where the .did files are expected by `dfx generate` and other commands.
 function install_did_files() {
-	jq -r '.canisters | to_entries | .[] | select(.value.candid != null) | "\(.key) \(.value.candid)"' dfx.json |
+  jq -r '.canisters | to_entries | .[] | select(.value.candid != null) | "\(.key) \(.value.candid)"' dfx.json |
     while read -r line; do
       IFS=', ' read -r -a array <<<"$line"
       canister_name="${array[0]}"
@@ -20,8 +20,8 @@ function install_did_files() {
       destination=".dfx/local/canisters/${array[0]}/${array[0]}.did"
       mkdir -p "$(dirname "$destination")"
       case "$source" in
-	      http*) curl -sSL "$source" >"$destination" ;;
-	      *) if test -e "$source" ; then cp "$source" "$destination" ; else echo "WARNING: $canister_name did file not found at $source" ; fi ;;
+      http*) curl -sSL "$source" >"$destination" ;;
+      *) if test -e "$source"; then cp "$source" "$destination"; else echo "WARNING: $canister_name did file not found at $source"; fi ;;
       esac
     done
 }
