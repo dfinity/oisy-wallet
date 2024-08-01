@@ -12,6 +12,8 @@ on:
         '**/*.sh'
       - 'docker/*'
       - 'scripts/*'
+      - # This workflow
+        '.github/workflows/formatting-checks.yml'
   workflow_dispatch:
 
 jobs:
