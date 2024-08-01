@@ -52,7 +52,6 @@ jobs:
         run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
       - name: Generate bindings
         run: npm run generate
-        # TODO: Cache the build.
       - name: Check bindings
         run: |
           test -z "$(git status --porcelain)" || {
