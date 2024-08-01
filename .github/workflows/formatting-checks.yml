@@ -2,6 +2,16 @@ name: Formatting Checks
 
 on:
   pull_request:
+    paths:
+      - # Files formatted by ./scripts/format.cargo.sh
+        '**/Cargo.toml'
+      - # Files formatted by ./scripts/format.rust.sh
+        '**/*.rs'
+      - # Files formatted by ./scripts/format.sh.sh
+        # Note: shell scripts not ending in .sh are found with: scripts/format.sh.sh --list | grep -vE 'sh$'
+        '**/*.sh'
+      - 'docker/*'
+      - 'scripts/*'
   workflow_dispatch:
 
 jobs:
