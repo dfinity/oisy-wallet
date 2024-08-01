@@ -4,11 +4,17 @@
 #
 # .did files are placed in the local .dfx directory, where the .did files are expected by `dfx generate` and other commands.
 function get_remote_did_files() {
-  jq -r '.canisters | to_entries | .[] | select("\(.value.candid)" | startswith("http")) | "\(.key) \(.value.candid)"' dfx.json |
+	jq -r '.canisters | to_entries | .[] | select(.value.candid != null) | "\(.key) \(.value.candid)"' dfx.json |
     while read -r line; do
       IFS=', ' read -r -a array <<<"$line"
-      mkdir -p ".dfx/local/canisters/${array[0]}"
-      curl -sSL "${array[1]}" >".dfx/local/canisters/${array[0]}/${array[0]}.did"
+      canister_name="${array[0]}"
+      source="${array[1]}"
+      destination=".dfx/local/canisters/${array[0]}/${array[0]}.did"
+      mkdir -p "$(dirname "$destination")"
+      case "$source" in
+	      http*) curl -sSL "$source" >"$destination" ;;
+	      *) if test -e "$source" ; then cp "$source" "$destination" ; else echo "WARNING: $canister_name did file not found at $source" ; fi ;;
+      esac
     done
 }
 
