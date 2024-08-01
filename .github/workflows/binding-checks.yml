@@ -32,8 +32,16 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+      - uses: actions/cache@v4
+        id: backend-wasm-cache
+        with:
+          path: |
+            target/wasm32-unknown-unknown/release/backend.wasm
+          key: ${{ runner.os }}-backend-wasm-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
       - name: Prepare
         uses: ./.github/actions/prepare
+      - name: Install dfx
+        uses: dfinity/setup-dfx@main
       - name: Install binstall
         run: |
           BINSTALL_VERSION="1.8.0"
