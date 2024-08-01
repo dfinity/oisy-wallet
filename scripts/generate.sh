@@ -32,10 +32,10 @@ function install_did_files() {
 ./scripts/download.icp.sh
 ./scripts/download.ckbtc.sh
 ./scripts/download.cketh.sh
-# Asset storage canister .did file
-mv .dfx/local/canisters/frontend/frontend.did .dfx/local/canisters/frontend/assetstorage.did
 # Generate bindings
 install_did_files
+# Asset storage canister .did file
+mv .dfx/local/canisters/frontend/frontend.did .dfx/local/canisters/frontend/assetstorage.did
 dfx generate
 node scripts/did.update.types.mjs
 node scripts/did.delete.types.mjs
