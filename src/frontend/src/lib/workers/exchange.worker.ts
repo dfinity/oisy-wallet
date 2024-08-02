@@ -36,7 +36,7 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 	const sync = async () =>
 		await syncExchange({
 			erc20ContractAddresses: data?.erc20Addresses ?? [],
-			icrcCanisterIds: data?.icrcCanisterIds ?? []
+			icrcLedgerCanisterIds: data?.icrcCanisterIds ?? []
 		});
 
 	// We sync now but also schedule the update afterwards
@@ -58,10 +58,10 @@ let syncInProgress = false;
 
 const syncExchange = async ({
 	erc20ContractAddresses,
-	icrcCanisterIds
+	icrcLedgerCanisterIds
 }: {
 	erc20ContractAddresses: Erc20ContractAddress[];
-	icrcCanisterIds: LedgerCanisterIdText[];
+	icrcLedgerCanisterIds: LedgerCanisterIdText[];
 }) => {
 	// Avoid to duplicate the sync if already in progress and not yet finished
 	if (syncInProgress) {
@@ -82,7 +82,7 @@ const syncExchange = async ({
 			exchangeRateBTCToUsd(),
 			exchangeRateERC20ToUsd(erc20ContractAddresses),
 			exchangeRateICPToUsd(),
-			exchangeRateICRCToUsd(icrcCanisterIds)
+			exchangeRateICRCToUsd(icrcLedgerCanisterIds)
 		]);
 
 		postMessage({
