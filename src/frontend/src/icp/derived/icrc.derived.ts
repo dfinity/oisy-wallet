@@ -132,7 +132,7 @@ export const enabledIcrcTokens: Readable<IcToken[]> = derived(
 	]
 );
 
-export const enabledIcrcTokensCanisterIds: Readable<LedgerCanisterIdText[]> = derived(
+export const enabledIcrcTokensLedgerCanisterIds: Readable<LedgerCanisterIdText[]> = derived(
 	[enabledIcrcTokens],
 	([$enabledIcrcTokens]) => $enabledIcrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
 );
