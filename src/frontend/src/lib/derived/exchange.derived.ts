@@ -23,8 +23,36 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[ETHEREUM_TOKEN_ID]: ethPrice,
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
+			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
+				const token = $erc20Tokens.find(
+					({ address }) => address.toLowerCase() === key.toLowerCase()
+				);
+
+				return {
+					...acc,
+					...(nonNullish(token) && { [token.id]: currentPrice })
+				};
+			}, {}),
+			...$erc20Tokens
+				.filter(({ exchange }) => exchange === 'icp')
+				.reduce(
+					(acc, { id }) => ({
+						...acc,
+						[id]: icpPrice
+					}),
+					{}
+				),
 			...$icrcTokens.reduce((acc, token) => {
-				const { id, exchangeCoinId } = token;
+				const { id, ledgerCanisterId, exchangeCoinId } = token;
+
+				const icrcPrice = $exchangeStore?.[ledgerCanisterId];
+
+				if (nonNullish(icrcPrice)) {
+					return {
+						...acc,
+						[id]: icrcPrice
+					};
+				}
 
 				const { twinToken } = token as Partial<IcCkToken>;
 				const { address } = (twinToken as Partial<Erc20Token>) ?? { address: undefined };
@@ -43,26 +71,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 									? icpPrice
 									: undefined
 				};
-			}, {}),
-			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
-				const token =
-					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
-					$icrcTokens.find(({ ledgerCanisterId }) => ledgerCanisterId === key);
-
-				return {
-					...acc,
-					...(nonNullish(token) && { [token.id]: currentPrice })
-				};
-			}, {}),
-			...$erc20Tokens
-				.filter(({ exchange }) => exchange === 'icp')
-				.reduce(
-					(acc, { id }) => ({
-						...acc,
-						[id]: icpPrice
-					}),
-					{}
-				)
+			}, {})
 		};
 	}
 );
