@@ -4,7 +4,7 @@
 	import { initExchangeWorker } from '$lib/services/worker.exchange.services';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
 	import { debounce } from '@dfinity/utils';
-	import { enabledIcrcTokensLedgerCanisterIds } from '$icp/derived/icrc.derived';
+	import { enabledIcrcLedgerCanisterIds } from '$icp/derived/icrc.derived';
 
 	let worker: ExchangeWorker | undefined;
 
@@ -25,16 +25,13 @@
 		worker?.stopExchangeTimer();
 		worker?.startExchangeTimer({
 			erc20Addresses: $enabledMergedErc20TokensAddresses,
-			icrcCanisterIds: $enabledIcrcTokensLedgerCanisterIds
+			icrcCanisterIds: $enabledIcrcLedgerCanisterIds
 		});
 	};
 
 	const debounceSyncTimer = debounce(syncTimer);
 
-	$: worker,
-		$enabledMergedErc20TokensAddresses,
-		$enabledIcrcTokensLedgerCanisterIds,
-		debounceSyncTimer();
+	$: worker, $enabledMergedErc20TokensAddresses, $enabledIcrcLedgerCanisterIds, debounceSyncTimer();
 </script>
 
 <slot />
