@@ -4,7 +4,7 @@
 // *refers to curl -l https://api.coingecko.com/api/v3/coins/list
 export type CoingeckoCoinsId = 'ethereum' | 'bitcoin' | 'internet-computer';
 
-// We are interested in the ERC20 <> USD on Ethereum only, therefore not an exhaustive list.
+// We are interested only in the ERC20 <> USD on Ethereum and in the ICRC <> USD on Internet Computer, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/asset_platforms
 export type CoingeckoPlatformId = 'ethereum' | 'internet-computer';
 
