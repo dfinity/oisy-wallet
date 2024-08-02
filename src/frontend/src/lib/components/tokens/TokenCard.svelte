@@ -3,6 +3,8 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { Token } from '$lib/types/token';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
+	import Tag from '$lib/components/ui/Tag.svelte';
+	import { isCkErc20Token } from '$icp/utils/ck.utils';
 
 	export let token: Token;
 
@@ -17,7 +19,12 @@
 		aria-label={`Open the list of ${token.symbol} transactions`}
 	>
 		<Card noMargin>
-			{token.name}
+			{#if isCkErc20Token(token)}
+				<Tag>ck</Tag>
+				{token.name.replace(/^ck/, '')}
+			{:else}
+				{token.name}
+			{/if}
 
 			<TokenLogo {token} slot="icon" color="white" />
 
