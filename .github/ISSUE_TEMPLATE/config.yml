@@ -1,0 +1,7 @@
+blank_issues_enabled: true  # Allows users to open a blank issue.
+
+# You can also add external links or contact information here
+contact_links:
+  - name: Support
+    url: TBD
+    about: Please contact our support team for help.
