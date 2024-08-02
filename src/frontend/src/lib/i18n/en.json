@@ -37,7 +37,7 @@
 	},
 	"auth": {
 		"text": {
-			"title": "A wallet without keys for frictionless crypto",
+			"title": "A wallet that lives on-chain for 100% decentralisation",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
