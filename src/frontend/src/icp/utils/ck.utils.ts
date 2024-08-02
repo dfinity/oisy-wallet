@@ -1,6 +1,4 @@
 import { browser } from '$app/environment';
-import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
-import type { Token } from '$lib/types/token';
 
 export type HideInfoKey =
 	| 'oisy_ic_hide_bitcoin_info'
@@ -26,10 +24,3 @@ export const shouldHideInfo = (key: HideInfoKey): boolean => {
 		return false;
 	}
 };
-
-export const isCkErc20Token = ({ symbol }: Token): boolean =>
-	[
-		...Object.keys({ ...(ckErc20Production ?? {}), ...(ckErc20Staging ?? {}) }),
-		'ckBTC',
-		'ckETH'
-	].includes(symbol);
