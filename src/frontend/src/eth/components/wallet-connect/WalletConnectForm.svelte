@@ -79,7 +79,7 @@
 		{/if}
 	</div>
 
-	<p class="text-center pt-4 pb-2">{$i18n.wallet_connect.text.or_use_uri}</p>
+	<p class="text-center pt-4 pb-2">{$i18n.wallet_connect.text.or_use_link}</p>
 
 	<Input
 		name="uri"
