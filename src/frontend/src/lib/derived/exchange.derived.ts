@@ -24,9 +24,9 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
 			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
-				const token = $erc20Tokens.find(
-					({ address }) => address.toLowerCase() === key.toLowerCase()
-				);
+				const token =
+					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
+					$icrcTokens.find(({ ledgerCanisterId }) => ledgerCanisterId === key);
 
 				return {
 					...acc,

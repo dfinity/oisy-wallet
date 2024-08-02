@@ -1,6 +1,7 @@
 import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -129,4 +130,9 @@ export const enabledIcrcTokens: Readable<IcToken[]> = derived(
 		...$enabledIcrcDefaultTokens,
 		...$enabledIcrcCustomTokens
 	]
+);
+
+export const enabledIcrcTokensCanisterIds: Readable<LedgerCanisterIdText[]> = derived(
+	[enabledIcrcTokens],
+	([$enabledIcrcTokens]) => $enabledIcrcTokens.map(({ ledgerCanisterId }) => ledgerCanisterId)
 );

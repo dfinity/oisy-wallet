@@ -1,10 +1,12 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { SYNC_EXCHANGE_TIMER_INTERVAL } from '$lib/constants/exchange.constants';
 import {
 	exchangeRateBTCToUsd,
 	exchangeRateERC20ToUsd,
 	exchangeRateETHToUsd,
-	exchangeRateICPToUsd
+	exchangeRateICPToUsd,
+	exchangeRateICRCToUsd
 } from '$lib/services/exchange.services';
 import type { PostMessage, PostMessageDataRequestExchangeTimer } from '$lib/types/post-message';
 import { errorDetailToString } from '$lib/utils/error.utils';
@@ -31,7 +33,11 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 		return;
 	}
 
-	const sync = async () => await syncExchange(data?.erc20Addresses ?? []);
+	const sync = async () =>
+		await syncExchange({
+			erc20ContractAddresses: data?.erc20Addresses ?? [],
+			icrcCanisterIds: data?.icrcCanisterIds ?? []
+		});
 
 	// We sync now but also schedule the update afterwards
 	await sync();
@@ -50,7 +56,15 @@ const stopTimer = () => {
 
 let syncInProgress = false;
 
-const syncExchange = async (contractAddresses: Erc20ContractAddress[]) => {
+const syncExchange = async ({
+	erc20ContractAddresses,
+	icrcCanisterIds
+}: {
+	erc20ContractAddresses: Erc20ContractAddress[];
+	icrcCanisterIds: LedgerCanisterIdText[];
+}) => {
+	console.warn('icrcCanisterIds', icrcCanisterIds);
+
 	// Avoid to duplicate the sync if already in progress and not yet finished
 	if (syncInProgress) {
 		return;
@@ -59,13 +73,21 @@ const syncExchange = async (contractAddresses: Erc20ContractAddress[]) => {
 	syncInProgress = true;
 
 	try {
-		const [currentEthPrice, currentBtcPrice, currentErc20Prices, currentIcpPrice] =
-			await Promise.all([
-				exchangeRateETHToUsd(),
-				exchangeRateBTCToUsd(),
-				exchangeRateERC20ToUsd(contractAddresses),
-				exchangeRateICPToUsd()
-			]);
+		const [
+			currentEthPrice,
+			currentBtcPrice,
+			currentErc20Prices,
+			currentIcpPrice,
+			currentIcrcPrices
+		] = await Promise.all([
+			exchangeRateETHToUsd(),
+			exchangeRateBTCToUsd(),
+			exchangeRateERC20ToUsd(erc20ContractAddresses),
+			exchangeRateICPToUsd(),
+			exchangeRateICRCToUsd(icrcCanisterIds)
+		]);
+
+		console.warn('currentEthPrice', currentIcrcPrices);
 
 		postMessage({
 			msg: 'syncExchange',
@@ -73,7 +95,8 @@ const syncExchange = async (contractAddresses: Erc20ContractAddress[]) => {
 				currentEthPrice,
 				currentBtcPrice,
 				currentErc20Prices,
-				currentIcpPrice
+				currentIcpPrice,
+				currentIcrcPrices
 			}
 		});
 	} catch (err: unknown) {
