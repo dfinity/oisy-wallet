@@ -63,8 +63,6 @@ const syncExchange = async ({
 	erc20ContractAddresses: Erc20ContractAddress[];
 	icrcCanisterIds: LedgerCanisterIdText[];
 }) => {
-	console.warn('icrcCanisterIds', icrcCanisterIds);
-
 	// Avoid to duplicate the sync if already in progress and not yet finished
 	if (syncInProgress) {
 		return;
@@ -86,8 +84,6 @@ const syncExchange = async ({
 			exchangeRateICPToUsd(),
 			exchangeRateICRCToUsd(icrcCanisterIds)
 		]);
-
-		console.warn('currentEthPrice', currentIcrcPrices);
 
 		postMessage({
 			msg: 'syncExchange',
