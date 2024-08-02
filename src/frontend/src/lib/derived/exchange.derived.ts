@@ -23,25 +23,6 @@ export const exchanges: Readable<ExchangesData> = derived(
 			[ETHEREUM_TOKEN_ID]: ethPrice,
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
-			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
-				const token =
-					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
-					$icrcTokens.find(({ ledgerCanisterId }) => ledgerCanisterId === key);
-
-				return {
-					...acc,
-					...(nonNullish(token) && { [token.id]: currentPrice })
-				};
-			}, {}),
-			...$erc20Tokens
-				.filter(({ exchange }) => exchange === 'icp')
-				.reduce(
-					(acc, { id }) => ({
-						...acc,
-						[id]: icpPrice
-					}),
-					{}
-				),
 			...$icrcTokens.reduce((acc, token) => {
 				const { id, exchangeCoinId } = token;
 
@@ -62,7 +43,26 @@ export const exchanges: Readable<ExchangesData> = derived(
 									? icpPrice
 									: undefined
 				};
-			}, {})
+			}, {}),
+			...Object.entries($exchangeStore ?? {}).reduce((acc, [key, currentPrice]) => {
+				const token =
+					$erc20Tokens.find(({ address }) => address.toLowerCase() === key.toLowerCase()) ??
+					$icrcTokens.find(({ ledgerCanisterId }) => ledgerCanisterId === key);
+
+				return {
+					...acc,
+					...(nonNullish(token) && { [token.id]: currentPrice })
+				};
+			}, {}),
+			...$erc20Tokens
+				.filter(({ exchange }) => exchange === 'icp')
+				.reduce(
+					(acc, { id }) => ({
+						...acc,
+						[id]: icpPrice
+					}),
+					{}
+				)
 		};
 	}
 );
