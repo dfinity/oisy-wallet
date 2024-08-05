@@ -43,7 +43,16 @@ export const exchanges: Readable<ExchangesData> = derived(
 					{}
 				),
 			...$icrcTokens.reduce((acc, token) => {
-				const { id, exchangeCoinId } = token;
+				const { id, ledgerCanisterId, exchangeCoinId } = token;
+
+				const icrcPrice = $exchangeStore?.[ledgerCanisterId];
+
+				if (nonNullish(icrcPrice)) {
+					return {
+						...acc,
+						[id]: icrcPrice
+					};
+				}
 
 				const { twinToken } = token as Partial<IcCkToken>;
 				const { address } = (twinToken as Partial<Erc20Token>) ?? { address: undefined };

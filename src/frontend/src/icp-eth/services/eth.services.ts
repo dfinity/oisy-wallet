@@ -16,7 +16,7 @@ import type { IcCkLinkedAssets, IcToken, IcTransactionUi } from '$icp/types/ic';
 import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { emit } from '$lib/utils/events.utils';
@@ -31,7 +31,7 @@ export const loadCkEthereumPendingTransactions = async ({
 	twinToken,
 	...rest
 }: {
-	toAddress: ETH_ADDRESS;
+	toAddress: EthAddress;
 	token: IcToken;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
@@ -57,12 +57,12 @@ const loadCkETHPendingTransactions = async ({
 	twinToken,
 	...rest
 }: {
-	toAddress: ETH_ADDRESS;
+	toAddress: EthAddress;
 	token: IcToken;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 } & IcCkLinkedAssets) => {
-	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
+	const logsTopics = (to: EthAddress): (string | null)[] => [
 		CKETH_HELPER_CONTRACT_SIGNATURE,
 		null,
 		to
@@ -82,12 +82,12 @@ const loadCkErc20PendingTransactions = async ({
 	twinToken,
 	...rest
 }: {
-	toAddress: ETH_ADDRESS;
+	toAddress: EthAddress;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
 	token: IcToken;
 } & IcCkLinkedAssets) => {
-	const logsTopics = (to: ETH_ADDRESS): (string | null)[] => [
+	const logsTopics = (to: EthAddress): (string | null)[] => [
 		CKERC20_HELPER_CONTRACT_SIGNATURE,
 		null,
 		null,
@@ -112,10 +112,10 @@ const loadPendingTransactions = async ({
 	token,
 	mapPendingTransaction
 }: {
-	toAddress: ETH_ADDRESS;
+	toAddress: EthAddress;
 	lastObservedBlockNumber: bigint;
 	identity: OptionIdentity;
-	logsTopics: (to: ETH_ADDRESS) => (string | null)[];
+	logsTopics: (to: EthAddress) => (string | null)[];
 	token: IcToken;
 	mapPendingTransaction: (params: MapCkEthereumPendingTransactionParams) => IcTransactionUi;
 } & IcCkLinkedAssets) => {
