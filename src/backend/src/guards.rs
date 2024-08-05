@@ -1,5 +1,6 @@
 use crate::read_config;
 use candid::Principal;
+use ic_cdk::api::is_controller;
 use ic_cdk::caller;
 
 pub fn caller_is_not_anonymous() -> Result<(), String> {
@@ -12,7 +13,7 @@ pub fn caller_is_not_anonymous() -> Result<(), String> {
 
 pub fn caller_is_allowed() -> Result<(), String> {
     let caller = caller();
-    if read_config(|s| s.allowed_callers.contains(&caller)) || ic_cdk::api::is_controller(&caller) {
+    if read_config(|s| s.allowed_callers.contains(&caller)) || is_controller(&caller) {
         Ok(())
     } else {
         Err("Caller is not allowed.".to_string())
