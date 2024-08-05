@@ -528,6 +528,23 @@ fn migration() -> Option<Migration> {
     read_state(|s| s.migration.clone())
 }
 
+/// Starts user data migration to a given canister.
+///
+/// # Errors
+/// - There is acurrent migration in progress to a different canister.
+#[query(guard = "caller_is_allowed")]
+fn migrate_user_data_to(target: Principal) -> Result<(), String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            if migration.to != target {
+                return Err("migration in progress to a different canister".to_string());
+            }
+        }
+        s.migration = Some(Migration::new(target));
+        Ok(())
+    })
+}
+
 /// Computes the parity bit allowing to recover the public key from the signature.
 fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
     use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};

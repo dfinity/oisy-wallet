@@ -204,10 +204,11 @@ pub mod user_profile {
 }
 
 /// The current state of progress of a user data migration.
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
 pub enum MigrationProgress {
     // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
     /// Migration has been requested.
+    #[default]
     Pending,
     /// APIs have been locked on the current canister.
     Locked,
@@ -228,7 +229,17 @@ pub enum MigrationProgress {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct Migration {
     /// The canister that data is being migrated to.
-    to: Principal,
+    pub to: Principal,
     /// The current state of progress of a user data migration.
-    progress: MigrationProgress,
+    pub progress: MigrationProgress,
+}
+
+impl Migration {
+    #[must_use]
+    pub fn new(to: Principal) -> Self {
+        Self {
+            to,
+            progress: MigrationProgress::default(),
+        }
+    }
 }
