@@ -8,7 +8,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { WebSocketListener } from '$eth/types/listener';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -19,7 +19,7 @@ export const initTransactionsListener = ({
 	address
 }: {
 	token: Token;
-	address: ETH_ADDRESS;
+	address: EthAddress;
 }): WebSocketListener => {
 	if (isSupportedEthTokenId(token.id)) {
 		return initEthPendingTransactionsListenerProvider({
@@ -55,5 +55,5 @@ export const initMinedTransactionsListener = ({
 
 export const initWalletConnectListener = async (params: {
 	uri: string;
-	address: ETH_ADDRESS;
+	address: EthAddress;
 }): Promise<WalletConnectListener> => initWalletConnect(params);

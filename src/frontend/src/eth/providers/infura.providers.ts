@@ -1,7 +1,7 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks.env';
 import { INFURA_NETWORK_HOMESTEAD, INFURA_NETWORK_SEPOLIA } from '$env/networks.eth.env';
 import { i18n } from '$lib/stores/i18n.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -23,14 +23,14 @@ export class InfuraProvider {
 		this.provider = new InfuraProviderLib(this.network, API_KEY);
 	}
 
-	balance = (address: ETH_ADDRESS): Promise<BigNumber> => this.provider.getBalance(address);
+	balance = (address: EthAddress): Promise<BigNumber> => this.provider.getBalance(address);
 
 	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
 
 	sendTransaction = (signedTransaction: string): Promise<TransactionResponse> =>
 		this.provider.sendTransaction(signedTransaction);
 
-	getTransactionCount = (address: ETH_ADDRESS): Promise<number> =>
+	getTransactionCount = (address: EthAddress): Promise<number> =>
 		this.provider.getTransactionCount(address, 'pending');
 
 	getBlockNumber = (): Promise<number> => this.provider.getBlockNumber();
