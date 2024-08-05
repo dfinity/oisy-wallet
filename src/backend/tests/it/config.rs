@@ -1,4 +1,4 @@
-use crate::utils::pocketic::{init_arg, setup, update_call};
+use crate::utils::pocketic::{controller, init_arg, setup, update_call};
 use candid::Principal;
 use shared::types::user_profile::UserProfile;
 use shared::types::{Arg, Config};
@@ -24,6 +24,12 @@ fn config_is_available_to_allowed_users_only() {
     assert!(
         update_call::<UserProfile>(&pic_setup, nns_root, "config", ()).is_err(),
         "NNS root should not be able to call config"
+    );
+    // Try a controller
+    assert_eq!(
+        update_call::<Config>(&pic_setup, controller(), "config", ()),
+        Ok(expected_config.clone()),
+        "Controller should be able to call config and get the right answer."
     );
     // Try an allowed user.
     let allowed_user = expected_config
