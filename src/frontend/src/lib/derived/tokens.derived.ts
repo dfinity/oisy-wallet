@@ -30,6 +30,9 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 	]
 );
 
+/**
+ * All tokens sorted by market cap, with the ones to pin at the top of the list.
+ */
 export const sortedTokens: Readable<Token[]> = derived(
 	[tokens, tokensToPin, exchanges],
 	([$tokens, $tokensToPin, $exchanges]) =>

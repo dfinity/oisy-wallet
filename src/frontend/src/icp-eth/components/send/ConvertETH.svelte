@@ -11,8 +11,10 @@
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import type { NetworkId } from '$lib/types/network';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 
 	export let nativeTokenId: TokenId;
+	export let ariaLabel: string;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let nativeNetworkId: NetworkId;
 
@@ -44,12 +46,8 @@
 </script>
 
 <CkEthLoader {nativeTokenId}>
-	<button
-		class="hero col-span-2"
-		on:click={async () => await openSend()}
-		disabled={$isBusy}
-		class:opacity-50={$isBusy}
-	>
+	<ButtonHero on:click={async () => await openSend()} disabled={$isBusy} {ariaLabel}>
+		<slot name="icon" slot="icon" />
 		<slot />
-	</button>
+	</ButtonHero>
 </CkEthLoader>

@@ -9,7 +9,6 @@
 	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
-	export let compact = false;
 
 	const modalId = Symbol();
 
@@ -29,7 +28,7 @@
 	};
 </script>
 
-<SendButton on:click={async () => await openSend()} {compact} />
+<SendButton on:click={async () => await openSend()} />
 
 {#if $modalEthSend && $modalStore?.data === modalId}
 	<EthSendModal on:nnsClose />

@@ -11,26 +11,35 @@
 	export let address: string;
 	export let qrCodeAriaLabel: string;
 	export let copyAriaLabel: string;
+	export let invisibleLogo = false;
 </script>
 
-<div class="flex gap-8 justify-between">
-	<Card>
-		<slot />
+<div class="flex gap-8 justify-between mb-6">
+	<div class="grid grid-cols-[minmax(52px,auto),1fr] gap-4 content-center w-full">
+		<div class="col-start-1">
+			{#if !invisibleLogo}
+				<Logo
+					color="white"
+					src={token.network.icon}
+					alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.network.name })}
+					size="medium"
+				/>
+			{/if}
+		</div>
 
-		<Logo
-			slot="icon"
-			color="white"
-			src={token.network.icon}
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.network.name })}
-			size="medium"
-		/>
+		<div class="col-start-2 content-center">
+			<div class="flex flex-row justify-between">
+				<Card noMargin>
+					<slot />
 
-		<span class="break-all" slot="description">
-			{shortenWithMiddleEllipsis(address)}
+					<span class="break-all" slot="description">
+						{shortenWithMiddleEllipsis(address)}
+					</span>
+				</Card>
 
+				<ReceiveActions on:click {address} {qrCodeAriaLabel} {copyAriaLabel} />
+			</div>
 			<slot name="notes" />
-		</span>
-	</Card>
-
-	<ReceiveActions on:click {address} {qrCodeAriaLabel} {copyAriaLabel} />
+		</div>
+	</div>
 </div>

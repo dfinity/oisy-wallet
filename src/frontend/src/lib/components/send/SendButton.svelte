@@ -1,14 +1,11 @@
 <script lang="ts">
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonDualMode from '$lib/components/ui/ButtonDualMode.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-
-	export let compact = false;
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 </script>
 
-<ButtonDualMode on:click disabled={$isBusy} alt={$i18n.send.text.send} {compact}>
-	<IconSend size="24" slot="icon-only" />
-	<IconSend size="28" slot="text-icon" />
+<ButtonHero on:click disabled={$isBusy} ariaLabel={$i18n.send.text.send}>
+	<IconSend size="28" slot="icon" />
 	{$i18n.send.text.send}
-</ButtonDualMode>
+</ButtonHero>

@@ -14,8 +14,6 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 
-	export let compact = false;
-
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -51,7 +49,7 @@
 	};
 </script>
 
-<ReceiveButton {compact} on:click={async () => await open(openReceive)} />
+<ReceiveButton on:click={async () => await open(openReceive)} />
 
 {#if $modalCkETHReceive && $modalStore?.data === modalId}
 	<IcReceiveCkEthereumModal on:nnsClose={close} />

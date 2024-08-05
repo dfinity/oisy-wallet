@@ -17,24 +17,22 @@
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import Receive from '$lib/components/receive/Receive.svelte';
+	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
+	import Send from '$lib/components/send/Send.svelte';
 
-	export let send = false;
+	export let more = false;
 
 	let convertEth = false;
-	$: convertEth = send && $ethToCkETHEnabled && $erc20UserTokensInitialized;
+	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
 
 	let convertErc20 = false;
-	$: convertErc20 = send && $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
+	$: convertErc20 = $erc20ToCkErc20Enabled && $erc20UserTokensInitialized;
 
 	let convertBtc = false;
-	$: convertBtc = send && $tokenCkBtcLedger && $erc20UserTokensInitialized;
+	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
 </script>
 
-<div
-	role="toolbar"
-	class="grid gap-4 text-deep-violet font-bold pt-10 pb-3"
-	class:grid-cols-2={send}
->
+<div role="toolbar" class="flex w-full gap-6 justify-center pt-10 pb-3 px-1 max-w-96">
 	{#if $networkICP}
 		<IcReceive token={$tokenWithFallback} />
 	{:else if $networkEthereum}
@@ -43,12 +41,12 @@
 		<Receive />
 	{/if}
 
-	{#if send}
-		{#if $networkICP}
-			<IcSend token={$tokenWithFallback} />
-		{:else}
-			<EthSend token={$tokenWithFallback} />
-		{/if}
+	{#if $networkICP}
+		<IcSend token={$tokenWithFallback} />
+	{:else if $networkEthereum}
+		<EthSend token={$tokenWithFallback} />
+	{:else if $pseudoNetworkChainFusion}
+		<Send />
 	{/if}
 
 	{#if convertEth}
@@ -69,5 +67,9 @@
 
 	{#if convertBtc}
 		<ConvertToBTC />
+	{/if}
+
+	{#if more}
+		<ContextMenu />
 	{/if}
 </div>

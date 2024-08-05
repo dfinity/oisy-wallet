@@ -18,10 +18,10 @@
 
 <div class="flex justify-center gap-1 mr-[-0.45rem]">
 	{#if networkIcp}
-		<IcReceive compact {token} on:nnsClose={close} />
-		<IcSend compact {token} on:nnsClose={close} />
+		<IcReceive {token} on:nnsClose={close} />
+		<IcSend {token} on:nnsClose={close} />
 	{:else}
-		<EthReceive compact />
-		<EthSend compact {token} on:nnsClose={close} />
+		<EthReceive />
+		<EthSend {token} on:nnsClose={close} />
 	{/if}
 </div>

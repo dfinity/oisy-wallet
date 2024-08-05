@@ -22,7 +22,6 @@
 	import { loadTokenAndRun } from '$icp/services/token.services';
 
 	export let token: Token;
-	export let compact = false;
 
 	let ckEthereum = false;
 	$: ckEthereum = isTokenCkEthLedger(token) || isTokenCkErc20Ledger(token);
@@ -56,11 +55,11 @@
 </script>
 
 {#if ckEthereum}
-	<IcReceiveCkEthereum {compact} />
+	<IcReceiveCkEthereum />
 {:else if ckBTC}
-	<IcReceiveCkBTC {compact} />
+	<IcReceiveCkBTC />
 {:else if icrc}
-	<IcReceiveIcrc {compact} />
+	<IcReceiveIcrc />
 {:else}
-	<IcReceiveIcp {compact} />
+	<IcReceiveIcp />
 {/if}

@@ -16,8 +16,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 
-	export let compact = false;
-
 	const { token, tokenId, ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -45,7 +43,7 @@
 
 <svelte:window on:oisyReceiveCkBTC={async () => await open(openReceive)} />
 
-<ReceiveButton {compact} on:click={async () => await open(openReceive)} />
+<ReceiveButton on:click={async () => await open(openReceive)} />
 
 {#if !minterInfoLoaded}
 	<IcCkListener

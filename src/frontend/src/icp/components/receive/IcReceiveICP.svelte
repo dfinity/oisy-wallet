@@ -12,8 +12,6 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 
-	export let compact = false;
-
 	const modalId = Symbol();
 
 	const { tokenStandard, open, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
@@ -28,7 +26,7 @@
 	};
 </script>
 
-<ReceiveButton {compact} on:click={async () => await open(openReceive)} />
+<ReceiveButton on:click={async () => await open(openReceive)} />
 
 {#if $modalIcpReceive && $modalStore?.data === modalId}
 	<ReceiveAddressModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} />

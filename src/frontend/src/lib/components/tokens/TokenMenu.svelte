@@ -9,6 +9,7 @@
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import { token } from '$lib/stores/token.store';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -33,16 +34,15 @@
 	});
 </script>
 
-<button
-	class="icon text-white bg-white/[.15] border border-white/[.05] rounded-md"
-	bind:this={button}
+<ButtonHero
+	bind:button
 	on:click={() => (visible = true)}
-	aria-label={$i18n.tokens.alt.context_menu}
+	ariaLabel={$i18n.tokens.alt.context_menu}
 	disabled={$erc20UserTokensNotInitialized}
-	class:opacity-10={$erc20UserTokensNotInitialized}
 >
-	<IconMore />
-</button>
+	<IconMore size="28" slot="icon" />
+	{$i18n.core.text.more}
+</ButtonHero>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
 	<div class="flex flex-col gap-3">

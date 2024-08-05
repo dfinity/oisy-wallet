@@ -17,8 +17,11 @@
 <ConvertETH
 	nativeTokenId={$ckEthereumNativeTokenId}
 	nativeNetworkId={$ckEthereumNativeToken.network.id}
+	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {
+		$token: $ckEthereumTwinToken.symbol
+	})}
 >
-	<IconBurn size="28" />
+	<IconBurn size="28" slot="icon" />
 	<span
 		>{replacePlaceholders($i18n.convert.text.convert_to_token, {
 			$token: $ckEthereumTwinToken.symbol

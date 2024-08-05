@@ -12,7 +12,8 @@
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
-			"max": "Max"
+			"max": "Max",
+			"more": "More"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -26,21 +27,20 @@
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
-			"manage_internet_identity": "Manage Internet Identity"
+			"oisy_roadmap": "$oisy_name Roadmap",
+			"submit_ticket": "Submit a ticket"
 		},
 		"alt": {
-			"manage_internet_identity": "Administrate your Internet Identity",
 			"more_settings": "More settings",
-			"menu": "Your wallet address, settings, sign-out and external links"
+			"menu": "Your wallet address, settings, sign-out and external links",
+			"oisy_roadmap": "Open the $oisy_name roadmap",
+			"submit_ticket": "Open the ticket submission form"
 		}
 	},
 	"auth": {
 		"text": {
-			"title": "A multi-chain wallet powered by Chain Fusion",
-			"description": "$oisy_name provides a seamless on-chain experience to manage your Ethereum and ICP assets. By leveraging native web technologies and advanced cryptography, it eliminates the need for browser extensions or mobile apps. And accessing the wallet is easy using passkeys on a computer or mobile device.",
-			"authenticate_with": "Authenticate with",
+			"title": "A wallet that lives on-chain for 100% decentralisation",
 			"authenticate": "Authenticate",
-			"connect_to_oisy": "Connect to Oisy",
 			"logout": "Logout"
 		},
 		"alt": {
@@ -117,7 +117,8 @@
 	"hero": {
 		"text": {
 			"use_with_caution": "Learn more about this alpha version. Use with caution.",
-			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
+			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
+			"never_download": "Never download an app"
 		}
 	},
 	"settings": {
@@ -160,17 +161,16 @@
 			"text": {
 				"account_id": "ICP Account ID",
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users or other apps that support this address format.",
-				"use_for_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
+				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
+				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
 				"account_id_copied": "ICP Account ID copied to clipboard.",
-				"internet_computer": "Internet Computer",
-				"principal": "Principal",
+				"principal": "ICP Principal",
 				"internet_computer_principal_copied": "Internet Computer Principal copied to clipboard.",
 				"display_internet_computer_principal_qr": "Display Internet Computer Principal as a QR code",
-				"icp_account": "ICP Account",
+				"icp_account": "ICP Account (for exchanges)",
 				"icp_account_copied": "ICP Account copied to clipboard.",
-				"display_icp_account_qr": "Display ICP Account as a QR code",
-				"icp_account_notes": "Use for ICP deposits from exchanges or other wallets that only support Account IDs"
+				"display_icp_account_qr": "Display ICP Account as a QR code"
 			}
 		},
 		"ethereum": {
@@ -537,7 +537,8 @@
 		"text": {
 			"title": "Transactions",
 			"no_transactions": "You have no transactions.",
-			"sign_in": "Sign in to access your $token ($symbol) transactions."
+			"sign_in": "Sign in to access your $token ($symbol) transactions.",
+			"open_transactions": "Open the list of $token transactions"
 		},
 		"error": {
 			"loading_transactions": "Error while loading the transactions.",
@@ -551,16 +552,27 @@
 	},
 	"about": {
 		"text": {
-			"title": "About $oisy_name",
-			"sub_title": "What makes $oisy_name unique?",
-			"description": "The  $oisy_name is a technology demonstrator that shows how one can build a multichain wallet using Internet Computer Protocol (ICP) technology. For now, it demonstrates how to manage Ethereum and ERC20 assets, but its architecture and the underlying ICP technology is extendable to to many other tokens, including <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/bitcoin-integration\">Bitcoin</a> and <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/defi/tokens/create\">IC-native tokens</a>. The name $oisy_name derives from Open Internet Service Wallet.",
-			"features": "Building on ICP, $oisy_name achieves a very unique set of features:",
-			"browser_based": "<strong>Browser-based</strong>: no matter your browser and operating system preferences, Oisy allows you to receive, hold, and send native ETH and ERC-20 tokens on Ethereum. Currently, the list of ERC-20 tokens is hardcoded but it can easily be extended.",
-			"cross_device": "<strong>Cross-device</strong>: due to the use of Internet Identity, Oisy can easily be used across all devices you have linked to your Internet Identity.",
-			"network_custody": "<strong>Networked-custody</strong>: the key controlling your multichain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/smart-contracts/encryption/t-ecdsa\">threshold ECDSA</a>.",
-			"fully_on_chain": "<strong>Fully on-chain</strong>: not only the keys but the entire wallet application is stored on chain and served directly into users’ browsers from the chain. Therefore the entire wallet is secured by a decentralized trust model and it is guaranteed that the entire wallet has not been tampered with.",
-			"interoperable": "<strong>Interoperable</strong>: Oisy integrates with the WalletConnect protocol allowing you to use Oisy as a wallet for many established web3 services, such as Uniswap. Moreover, a Metamask integration demonstrates how other wallets can transfer assets to the Oisy wallet.",
-			"free": "Free to use and develop: Oisy is open-source software and licensed under <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet/blob/main/LICENSE\">Apache 2.0</a>. Feel free to fork it or propose improvements."
+			"title": "About $oisy_name"
+		},
+		"what": {
+			"text": {
+				"label": "What I can do with my tokens",
+				"title": "Utility",
+				"hold_crypto": "<strong>Hold crypto across networks</strong><br>Manage and transact with native Ethereum, Bitcoin <i>(coming soon)</i>, and Internet Computer assets. Powered by <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/chainfusion\">Chain Fusion</a>.",
+				"use_eth_dapps": "<strong>Use with Ethereum dapps</strong><br>$oisy_name is fully compatible with Ethereum Defi like <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://uniswap.org/\">Uniswap</a> thanks to the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://walletconnect.com/\">WalletConnect</a> framework.",
+				"use_ic_dapps": "<strong>Use with Internet Computer dapps (Coming soon)</strong><br>Use your $oisy_name wallet in any <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/ecosystem\">dapp on the Internet Computer</a> that supports the signer standards, including <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://oc.app/\">OpenChat</a>, <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://www.icpswap.com/\">ICPSwap</a>, and the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://nns.ic0.app/\">NNS dapp</a>."
+			}
+		},
+		"how": {
+			"text": {
+				"label": "How $oisy_name works",
+				"title": "Magic",
+				"self_custody": "<strong>Self-custody</strong><br>The key controlling your multi-chain assets is not controlled by a single entity nor has it ever existed as such. The key was generated using advanced cryptography that distributed key-shares among dedicated ICP replica nodes and signatures are created using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/smart-contracts/signatures/t-ecdsa\">threshold ECDSA</a>.",
+				"fully_on_chain": "<strong>Fully on-chain</strong><br>Not only the keys but the entire wallet application is <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">stored on chain</a> and served directly into users’ browsers from ICP. Therefore the entire wallet is secured by a decentralized trust model making it tamper-proof.",
+				"cross_device": "<strong>Cross-device</strong><br>Using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a> means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
+				"verifiable_credentials": "<strong>Compatible with verifiable credentials</strong><br>$oisy_name is designed to integrate with Internet Computer’s <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials platform</a>. Users can access additional functionality, like airdrops, if they acquire credentials of a certain type.",
+				"open_source": "<strong>Open source</strong><br>Oisy is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organisation’s 200 world-leading cryptographers and engineers."
+			}
 		}
 	}
 }

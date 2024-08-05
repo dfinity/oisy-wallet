@@ -2,14 +2,10 @@
 	import { isBusy } from '$lib/derived/busy.derived';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { IconQRCodeScanner } from '@dfinity/gix-components';
-	import ButtonDualMode from '$lib/components/ui/ButtonDualMode.svelte';
-
-	export let compact = false;
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 </script>
 
-<ButtonDualMode on:click disabled={$isBusy} alt={$i18n.receive.text.receive} {compact}>
-	<IconQRCodeScanner size="24" slot="icon-only" />
-	<IconReceive size="28" slot="text-icon" />
+<ButtonHero on:click disabled={$isBusy} ariaLabel={$i18n.receive.text.receive}>
+	<IconReceive size="28" slot="icon" />
 	{$i18n.receive.text.receive}
-</ButtonDualMode>
+</ButtonHero>

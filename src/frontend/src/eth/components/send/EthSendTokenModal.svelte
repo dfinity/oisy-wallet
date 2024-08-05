@@ -4,7 +4,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import { sendWizardStepsWithQrCodeScan } from '$eth/config/send.config';
+	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import type { Network } from '$lib/types/network';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
