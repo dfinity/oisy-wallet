@@ -15,6 +15,7 @@ const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.
 // Instead, we can use the master_ecdsa_public_key suffixed with the subnet ID. PocketID adds the suffix because it can have multiple subnets.
 const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 
+#[inline]
 pub fn controller() -> Principal {
     Principal::from_text(CONTROLLER)
         .expect("Test setup error: Failed to parse controller principal")
