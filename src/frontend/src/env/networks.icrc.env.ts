@@ -16,6 +16,7 @@ import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import { type EnvTokenSymbol, type EnvTokens } from '$env/types/env-token-ckerc20';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface } from '$icp/types/ic';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -389,7 +390,7 @@ export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
  * All ICRC tokens data
  */
 
-// The subset of the ICRC tokens that are also displayed if the user is not signed-in.
+// The subset of the ICRC tokens that are also displayed if the user is not signed in.
 export const PUBLIC_ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKBTC_IC_DATA) ? [CKBTC_IC_DATA] : []),
 	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : []),
@@ -414,6 +415,10 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKUSDT_IC_DATA) ? [CKUSDT_IC_DATA] : []),
 	...(nonNullish(CKWSTETH_IC_DATA) ? [CKWSTETH_IC_DATA] : [])
 ];
+
+export const ICRC_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_TOKENS.map(
+	({ ledgerCanisterId }) => ledgerCanisterId
+);
 
 export const ICRC_LEDGER_CANISTER_TESTNET_IDS = [
 	...CKBTC_LEDGER_CANISTER_TESTNET_IDS,

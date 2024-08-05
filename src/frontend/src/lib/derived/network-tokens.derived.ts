@@ -6,6 +6,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
+import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -33,21 +34,31 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 );
 
 /**
- * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not, with their financial data.
+ * All tokens matching the selected network or Chain Fusion, with their financial data.
  */
 export const enabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[enabledNetworkTokens, balancesStore, exchanges],
 	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
-		$enabledNetworkTokens.map((token) => {
-			return {
-				...token,
-				usdBalance: nonNullish($exchanges?.[token.id]?.usd)
-					? usdValue({
-							token,
-							balances: $balancesStore,
-							exchanges: $exchanges
-						})
-					: undefined
-			};
+		$enabledNetworkTokens.map((token) => ({
+			...token,
+			usdBalance: nonNullish($exchanges?.[token.id]?.usd)
+				? usdValue({
+						token,
+						balances: $balancesStore,
+						exchanges: $exchanges
+					})
+				: undefined
+		}))
+);
+
+/**
+ * All tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
+ */
+export const sortedNetworkTokensUi: Readable<TokenUi[]> = derived(
+	[enabledNetworkTokensUi, balancesStore],
+	([$enabledNetworkTokensUi, $balancesStore]) =>
+		pinTokensWithBalanceAtTop({
+			$tokens: $enabledNetworkTokensUi,
+			$balancesStore: $balancesStore
 		})
 );
