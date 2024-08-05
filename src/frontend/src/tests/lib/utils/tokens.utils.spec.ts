@@ -5,7 +5,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenUi } from '$lib/types/token';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from 'ethers';
 import { describe, expect, it } from 'vitest';
 
 const usd = 1;
@@ -17,13 +17,8 @@ const bn200 = BigNumber.from(200);
 
 const tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 
-vi.mock('$lib/utils/exchange.utils', () => ({
-	usdValue: vi.fn()
-}));
-
 describe('sortTokens', () => {
 	it('should sort tokens by market cap, then by name, and finally by network name', () => {
-		const tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 		const exchanges: ExchangesData = {
 			[ICP_TOKEN.id]: { usd_market_cap: 200, usd },
 			[BTC_MAINNET_TOKEN.id]: { usd },
@@ -34,7 +29,6 @@ describe('sortTokens', () => {
 	});
 
 	it('should sort tokens with same market cap by name', () => {
-		const tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 		const exchanges: ExchangesData = {
 			[ICP_TOKEN.id]: { usd_market_cap: 200, usd },
 			[BTC_MAINNET_TOKEN.id]: { usd_market_cap: 200, usd },
@@ -55,16 +49,13 @@ describe('sortTokens', () => {
 	});
 
 	it('should sort tokens with same market cap and name by network name', () => {
-		const tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN].map((token) => ({
-			...token,
-			name: 'Test Token'
-		}));
+		const newTokens: Token[] = tokens.map((token) => ({ ...token, name: 'Test Token' }));
 		const exchanges: ExchangesData = {
 			[ICP_TOKEN.id]: { usd_market_cap: 200, usd },
 			[BTC_MAINNET_TOKEN.id]: { usd_market_cap: 200, usd },
 			[ETHEREUM_TOKEN.id]: { usd_market_cap: 200, usd }
 		};
-		const sortedTokens = sortTokens({ $tokens: tokens, $exchanges: exchanges });
+		const sortedTokens = sortTokens({ $tokens: newTokens, $exchanges: exchanges });
 		expect(sortedTokens).toEqual(
 			[BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN].map((token) => ({
 				...token,
@@ -74,16 +65,13 @@ describe('sortTokens', () => {
 	});
 
 	it('should sort tokens with same name by network name if market cap is not provided', () => {
-		const tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN].map((token) => ({
-			...token,
-			name: 'Test Token'
-		}));
+		const newTokens: Token[] = tokens.map((token) => ({ ...token, name: 'Test Token' }));
 		const exchanges: ExchangesData = {
 			[ICP_TOKEN.id]: { usd },
 			[BTC_MAINNET_TOKEN.id]: { usd },
 			[ETHEREUM_TOKEN.id]: { usd }
 		};
-		const sortedTokens = sortTokens({ $tokens: tokens, $exchanges: exchanges });
+		const sortedTokens = sortTokens({ $tokens: newTokens, $exchanges: exchanges });
 		expect(sortedTokens).toEqual(
 			[BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN].map((token) => ({
 				...token,

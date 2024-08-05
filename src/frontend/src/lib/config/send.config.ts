@@ -23,3 +23,11 @@ export const sendWizardStepsWithQrCodeScan = (i18n: I18n): WizardSteps => [
 		title: i18n.send.text.scan_qr
 	}
 ];
+
+export const sendWizardStepsComplete = (i18n: I18n): WizardSteps => [
+	{
+		name: WizardStepsSend.TOKENS_LIST,
+		title: i18n.send.text.send
+	},
+	...sendWizardStepsWithQrCodeScan(i18n)
+];

@@ -1,0 +1,43 @@
+name: Formatting Backend and Scripts
+
+on:
+  pull_request:
+    paths:
+      - # Files formatted by ./scripts/format.cargo.sh
+        '**/Cargo.toml'
+      - # Files formatted by ./scripts/format.rust.sh
+        '**/*.rs'
+      - # Files formatted by ./scripts/format.sh.sh
+        # Note: shell scripts not ending in .sh are found with: scripts/format.sh.sh --list | grep -vE 'sh$'
+        '**/*.sh'
+      - 'docker/*'
+      - 'scripts/*'
+      - # This workflow
+        '.github/workflows/formatting-checks.yml'
+  workflow_dispatch:
+
+jobs:
+
+  format:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shfmt
+        run: sudo snap install --classic shfmt
+      - name: Install binstall
+        run: |
+          BINSTALL_VERSION="1.8.0"
+          curl -L --proto '=https' --tlsv1.2 -sSf "https://github.com/cargo-bins/cargo-binstall/releases/download/v${BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.tgz" | tar -xvzf - cargo-binstall
+          ./cargo-binstall -y --force "cargo-binstall@$BINSTALL_VERSION"
+          rm cargo-binstall
+      - name: Install cargo dependency sorter
+        run: cargo binstall --no-confirm cargo-sort@1.0.9
+      - name: Format
+        run: ./scripts/format.sh
+      - name: Check formatted
+        run: |
+          test -z "$(git status --porcelain)" || {
+                  echo "FIX: Please run ./scripts/format.sh"
+                  git diff
+                  exit 1
+          }
