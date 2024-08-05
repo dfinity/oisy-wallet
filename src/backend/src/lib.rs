@@ -31,7 +31,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, InitArg, Migration};
+use shared::types::{Arg, Config, InitArg, Migration, MigrationProgress};
 use std::cell::RefCell;
 use std::str::FromStr;
 use types::{
@@ -532,7 +532,7 @@ fn migration() -> Option<Migration> {
 ///
 /// # Errors
 /// - There is a current migration in progress to a different canister.
-#[query(guard = "caller_is_allowed")]
+#[update(guard = "caller_is_allowed")]
 fn migrate_user_data_to(target: Principal) -> Result<(), String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
@@ -542,6 +542,56 @@ fn migrate_user_data_to(target: Principal) -> Result<(), String> {
         }
         s.migration = Some(Migration::new(target));
         Ok(())
+    })
+}
+
+/// Steps the migration
+#[update(guard = "caller_is_allowed")]
+fn step_migration() {
+    mutate_state(|state| {
+        match &mut state.migration {
+            Some(migration) => {
+                match migration.progress {
+                    MigrationProgress::Pending => {
+                        // TODO: Lock the local canister APIs.
+                        migration.progress = MigrationProgress::Locked;
+                    }
+                    MigrationProgress::Locked => {
+                        // TODO: Lock the target canister APIs.
+                        migration.progress = MigrationProgress::TargetLocked;
+                    }
+                    MigrationProgress::TargetLocked => {
+                        // TODO: Check that the target canister is empty.
+                        migration.progress = MigrationProgress::TargetPreCheckOk;
+                    }
+                    MigrationProgress::TargetPreCheckOk => {
+                        // TODO: Start migrating user tokens.
+                        migration.progress =
+                            MigrationProgress::MigratedUserTokensUpTo(Principal::anonymous());
+                    }
+                    MigrationProgress::MigratedUserTokensUpTo(_) => {
+                        // TODO: Migrate user tokens
+                        migration.progress =
+                            MigrationProgress::MigratedCustomTokensUpTo(Principal::anonymous());
+                    }
+                    MigrationProgress::MigratedCustomTokensUpTo(_) => {
+                        // TODO: Migrate custom tokens
+                        migration.progress = MigrationProgress::CheckingTargetCanister;
+                    }
+                    MigrationProgress::CheckingTargetCanister => {
+                        // TODO: Check that the target canister has all the data.
+                        migration.progress = MigrationProgress::Completed;
+                    }
+                    MigrationProgress::Completed => {
+                        // Migration is already completed.
+                        migration.progress = MigrationProgress::Completed;
+                    }
+                }
+            }
+            None => {
+                ic_cdk::trap("migration is not in progress");
+            }
+        }
     })
 }
 
