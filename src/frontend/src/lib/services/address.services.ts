@@ -3,7 +3,7 @@ import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -35,7 +35,7 @@ const saveEthAddressForFutureSignIn = async ({
 	address
 }: {
 	identity: OptionIdentity;
-	address: ETH_ADDRESS;
+	address: EthAddress;
 }) => {
 	// Should not happen given the current layout and guards. Moreover, the backend throws an error if the caller is anonymous.
 	assertNonNullish(identity, 'Cannot continue without an identity.');

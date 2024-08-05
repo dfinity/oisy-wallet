@@ -3,7 +3,7 @@ import { INFURA_NETWORK_HOMESTEAD, INFURA_NETWORK_SEPOLIA } from '$env/networks.
 import { CKERC20_ABI } from '$eth/constants/ckerc20.constants';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { i18n } from '$lib/stores/i18n.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -31,7 +31,7 @@ export class InfuraCkErc20Provider {
 	}: {
 		contract: Erc20ContractAddress;
 		erc20Contract: Erc20ContractAddress;
-		to: ETH_ADDRESS;
+		to: EthAddress;
 		amount: BigNumber;
 	}): Promise<BigNumber> => {
 		const ckEthContract = new ethers.Contract(contractAddress, CKERC20_ABI, this.provider);
@@ -46,7 +46,7 @@ export class InfuraCkErc20Provider {
 	}: {
 		contract: Erc20ContractAddress;
 		erc20Contract: Erc20ContractAddress;
-		to: ETH_ADDRESS;
+		to: EthAddress;
 		amount: BigNumber;
 	}): Promise<PopulatedTransaction> => {
 		const erc20Contract = new ethers.Contract(contractAddress, CKERC20_ABI, this.provider);

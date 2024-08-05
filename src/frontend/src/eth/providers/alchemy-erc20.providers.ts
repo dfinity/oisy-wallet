@@ -5,7 +5,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20Transaction } from '$eth/types/erc20-transaction';
 import type { WebSocketListener } from '$eth/types/listener';
 import { i18n } from '$lib/stores/i18n.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -30,7 +30,7 @@ export class AlchemyErc20Provider {
 		listener
 	}: {
 		contract: Erc20Token;
-		address: ETH_ADDRESS;
+		address: EthAddress;
 		listener: (params: { hash: string; value: BigNumber }) => Promise<void>;
 	}): WebSocketListener => {
 		const erc20Contract = new ethers.Contract(contract.address, ERC20_ABI, this.provider);

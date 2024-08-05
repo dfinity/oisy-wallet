@@ -1,8 +1,8 @@
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import { writable, type Readable } from 'svelte/store';
 
 export interface CertifiedAddressData {
-	address: ECDSA_PUBLIC_KEY;
+	address: EthAddress;
 	certified: boolean;
 }
 

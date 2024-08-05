@@ -8,13 +8,13 @@ import type {
 	UserToken
 } from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
 import { toNullable, type QueryParams } from '@dfinity/utils';
 
-export const getEthAddress = async (identity: OptionIdentity): Promise<ECDSA_PUBLIC_KEY> => {
+export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
 	const { caller_eth_address } = await getBackendActor({ identity });
 	return caller_eth_address();
 };

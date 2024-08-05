@@ -4,7 +4,7 @@ import { ERC20_ICP_ABI } from '$eth/constants/erc20-icp.constants';
 import type { Erc20Provider, PopulateTransactionParams } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { i18n } from '$lib/stores/i18n.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -31,8 +31,8 @@ export class InfuraErc20IcpProvider implements Erc20Provider {
 		amount
 	}: {
 		contract: Erc20ContractAddress;
-		to: ETH_ADDRESS;
-		from: ETH_ADDRESS;
+		to: EthAddress;
+		from: EthAddress;
 		amount: BigNumber;
 	}): Promise<BigNumber> => {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, this.provider);

@@ -5,7 +5,7 @@ import type { ContractAddress } from '$eth/types/address';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { i18n } from '$lib/stores/i18n.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
@@ -33,8 +33,8 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		to
 	}: {
 		contract: Erc20ContractAddress;
-		from: ETH_ADDRESS;
-		to: ETH_ADDRESS;
+		from: EthAddress;
+		to: EthAddress;
 		amount: BigNumber;
 	}): Promise<BigNumber> => {
 		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
@@ -46,7 +46,7 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		to
 	}: {
 		contract: ContractAddress;
-		to: ETH_ADDRESS;
+		to: EthAddress;
 	}): Promise<PopulatedTransaction> => {
 		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
 		return ckEthContract.populateTransaction.deposit(to);

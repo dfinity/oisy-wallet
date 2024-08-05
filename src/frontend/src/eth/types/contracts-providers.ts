@@ -1,11 +1,11 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { PopulatedTransaction } from '@ethersproject/contracts';
 
 export interface PopulateTransactionParams {
 	contract: Erc20ContractAddress;
-	to: ETH_ADDRESS;
+	to: EthAddress;
 }
 
 export type CkEthPopulateTransaction = (
@@ -23,8 +23,8 @@ export interface Erc20Provider {
 
 	getFeeData(params: {
 		contract: Erc20ContractAddress;
-		from: ETH_ADDRESS;
-		to: ETH_ADDRESS;
+		from: EthAddress;
+		to: EthAddress;
 		amount: BigNumber;
 	}): Promise<BigNumber>;
 }
