@@ -47,6 +47,11 @@ pub fn may_read_threshold_keys() -> Result<(), String> {
         Err("Reading threshold keys is disabled.".to_string())
     }
 }
+/// Caller is allowed AND reading threshold keys is enabled.
+pub fn caller_is_allowed_and_may_read_threshold_keys() -> Result<(), String> {
+    caller_is_allowed()?;
+    may_read_threshold_keys()
+}
 
 /// Is signing with threshold keys is enabled?
 pub fn may_threshold_sign() -> Result<(), String> {
