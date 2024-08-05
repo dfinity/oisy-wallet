@@ -7,6 +7,7 @@ import type {
 
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
 import type { Network } from '$lib/types/network';
 import type { SyncState } from '$lib/types/sync';
@@ -39,6 +40,7 @@ export type PostMessageDataResponse = object;
 
 export interface PostMessageDataRequestExchangeTimer {
 	erc20Addresses: Erc20ContractAddress[];
+	icrcCanisterIds: LedgerCanisterIdText[];
 }
 
 export type PostMessageDataRequestIcrc = IcCanisters & Pick<Network, 'env'>;
@@ -85,6 +87,7 @@ export interface PostMessageDataResponseExchange extends PostMessageDataResponse
 	currentBtcPrice: CoingeckoSimplePriceResponse;
 	currentErc20Prices: CoingeckoSimpleTokenPriceResponse;
 	currentIcpPrice: CoingeckoSimplePriceResponse;
+	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
 }
 
 export interface PostMessageDataResponseExchangeError extends PostMessageDataResponse {
