@@ -40,7 +40,7 @@ const config: UserConfig = {
 					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
 
 					if (
-						['@sveltejs', 'svelte', '@dfinity/gix-components', ...lazy].find((lib) =>
+						['@sveltejs', 'svelte', '@dfinity/gix-components', 'three', ...lazy].find((lib) =>
 							folder.includes(lib)
 						) === undefined &&
 						folder.includes('node_modules')
@@ -73,6 +73,7 @@ const config: UserConfig = {
 		}
 	},
 	optimizeDeps: {
+		include: ['three'],
 		esbuildOptions: {
 			define: {
 				global: 'globalThis'

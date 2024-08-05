@@ -61,6 +61,7 @@
 		"buffer": "^6.0.3",
 		"ethers": "^5.7.0",
 		"idb-keyval": "^6.2.1",
+		"three": "^0.167.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
@@ -74,6 +75,7 @@
 		"@testing-library/jest-dom": "^6.4.6",
 		"@testing-library/svelte": "^5.2.0",
 		"@types/node": "^20.14.9",
+		"@types/three": "^0.167.0",
 		"@typescript-eslint/eslint-plugin": "^7.2.0",
 		"@typescript-eslint/parser": "^7.2.0",
 		"autoprefixer": "^10.4.19",
