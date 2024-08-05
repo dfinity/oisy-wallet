@@ -7,15 +7,15 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
-import type { ETH_ADDRESS, OptionAddress } from '$lib/types/address';
+import type { EthAddress, OptionAddress } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export interface GetFeeData {
-	from: ETH_ADDRESS;
-	to: ETH_ADDRESS;
+	from: EthAddress;
+	to: EthAddress;
 }
 
 export const getEthFeeData = async ({
