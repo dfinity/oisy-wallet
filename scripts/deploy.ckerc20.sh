@@ -6,21 +6,21 @@ MINTERID="$(dfx canister id cketh_minter --network "$DFX_NETWORK")"
 echo "$MINTERID"
 
 function deploy_ckerc20 {
-    local LEDGER_CANISTER=$1
-    local LEDGER_CANISTER_ID=$2
-    local INDEX_CANISTER=$3
-    local INDEX_CANISTER_ID=$4
-    local TOKEN_SYMBOL=$5
-    local TOKEN_NAME=$6
-    local DECIMALS=$7
+  local LEDGER_CANISTER=$1
+  local LEDGER_CANISTER_ID=$2
+  local INDEX_CANISTER=$3
+  local INDEX_CANISTER_ID=$4
+  local TOKEN_SYMBOL=$5
+  local TOKEN_NAME=$6
+  local DECIMALS=$7
 
-    echo "Step A: create ledger canisters..."
-    dfx canister create "$LEDGER_CANISTER" --specified-id "$LEDGER_CANISTER_ID" --network "$DFX_NETWORK"
+  echo "Step A: create ledger canisters..."
+  dfx canister create "$LEDGER_CANISTER" --specified-id "$LEDGER_CANISTER_ID" --network "$DFX_NETWORK"
 
-    echo "Step B: deploy ledger canister..."
-    PRINCIPAL="$(dfx identity get-principal)"
+  echo "Step B: deploy ledger canister..."
+  PRINCIPAL="$(dfx identity get-principal)"
 
-    dfx deploy "$LEDGER_CANISTER" --specified-id "$LEDGER_CANISTER_ID" --network "$DFX_NETWORK" --argument "(variant {
+  dfx deploy "$LEDGER_CANISTER" --specified-id "$LEDGER_CANISTER_ID" --network "$DFX_NETWORK" --argument "(variant {
       Init = record {
          token_symbol = \"$TOKEN_SYMBOL\";
          token_name = \"$TOKEN_NAME\";
@@ -42,15 +42,15 @@ function deploy_ckerc20 {
      }
     })"
 
-    echo "Step C: deploy index canister..."
-    dfx deploy "$INDEX_CANISTER" --specified-id "$INDEX_CANISTER_ID" --network "$DFX_NETWORK" --argument "(opt variant {
+  echo "Step C: deploy index canister..."
+  dfx deploy "$INDEX_CANISTER" --specified-id "$INDEX_CANISTER_ID" --network "$DFX_NETWORK" --argument "(opt variant {
       Init = record {
         ledger_id = principal \"$LEDGER_CANISTER_ID\";
        }
     })"
 
-    echo "Step D: transfer ckETH to principal..."
-    dfx canister call "$LEDGER_CANISTER" --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"x4w27-so7wg-cudsa-yy7fh-wcpy5-njul4-q54tv-euzzi-tdnzz-ill46-zqe\";}; amount=500_000_000_000_000_000; fee=null; memo=null; created_at_time=null;})"
+  echo "Step D: transfer ckETH to principal..."
+  dfx canister call "$LEDGER_CANISTER" --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"x4w27-so7wg-cudsa-yy7fh-wcpy5-njul4-q54tv-euzzi-tdnzz-ill46-zqe\";}; amount=500_000_000_000_000_000; fee=null; memo=null; created_at_time=null;})"
 }
 
 deploy_ckerc20 ckusdc_ledger "yfumr-cyaaa-aaaar-qaela-cai" ckusdc_index "ycvkf-paaaa-aaaar-qaelq-cai" "ckSepoliaUSDC" "Chain key Sepolia USDC" 6
