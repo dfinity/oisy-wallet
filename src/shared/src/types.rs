@@ -205,10 +205,21 @@ pub mod user_profile {
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum MigrationProgress {
+    /// Migration has been requested.
     Pending,
-    WritesLocked,
+    /// APIs have been locked on the current canister.
+    Locked,
+    /// APIs have been locked on the target canister.
+    TargetLocked,
+    /// Target canister was empty.
+    TargetPreCheckOk,
+    /// Tokens have been migrated up to but excluding the given principal.
     MigratedUserTokensUpTo(Principal),
+    /// Custom tokens have been migrated up to but excluding the given principal.
     MigratedCustomTokensUpTo(Principal),
+    /// Checking that the target canister has all the data.
+    CheckingTargetCanister,
+    /// Migration has been completed.
     Completed,
 }
 
