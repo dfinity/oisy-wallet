@@ -17,6 +17,7 @@
 	import { page } from '$app/stores';
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -50,14 +51,28 @@
 				<IconSettings />
 				{$i18n.settings.text.title}
 			</ButtonMenu>
+
+			<Hr />
 		{/if}
 
+		<AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} />
+		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
+
 		<ExternalLink
-			href="https://identity.ic0.app"
-			ariaLabel={$i18n.navigation.alt.manage_internet_identity}
+			href="https://github.com/orgs/dfinity/projects/33"
+			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.oisy_roadmap)}
 		>
-			{$i18n.navigation.text.manage_internet_identity}
+			{replaceOisyPlaceholders($i18n.navigation.text.oisy_roadmap)}
 		</ExternalLink>
+
+		<ExternalLink
+			href="https://github.com/dfinity/oisy-wallet/issues"
+			ariaLabel={$i18n.navigation.alt.submit_ticket}
+		>
+			{$i18n.navigation.text.submit_ticket}
+		</ExternalLink>
+
+		<Hr />
 
 		<a
 			href={OISY_REPO_URL}
@@ -69,11 +84,6 @@
 			<IconGitHub />
 			{$i18n.navigation.text.source_code}
 		</a>
-
-		<Hr />
-
-		<AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} />
-		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
 
 		<Hr />
 

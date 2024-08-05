@@ -27,9 +27,10 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		manage_internet_identity: string;
+		oisy_roadmap: string;
+		submit_ticket: string;
 	};
-	alt: { manage_internet_identity: string; more_settings: string; menu: string };
+	alt: { more_settings: string; menu: string; oisy_roadmap: string; submit_ticket: string };
 }
 
 interface I18nAuth {
