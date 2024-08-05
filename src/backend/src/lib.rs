@@ -523,12 +523,6 @@ async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
 }
 
-/// Computes a signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
-#[update(guard = "may_threshold_sign")]
-fn guard() {
-    // This method is used to test the guards.
-}
-
 /// Computes the parity bit allowing to recover the public key from the signature.
 fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
     use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
