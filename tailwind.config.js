@@ -20,12 +20,16 @@ export default {
 			blue: '#3b00b9',
 			dark: '#0e002d',
 			'dark-blue': '#321469',
+			'navy-blue': '#01016d',
+			'brandeis-blue': '#016dfc',
+			'spiro-disco-ball': '#1bb5ff',
 			'misty-rose': '#937993',
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',
 			'medium-purple': '#8969d5',
 			platinum: '#e4e4e4',
-			'mountain-meadow': '#30af91'
+			'mountain-meadow': '#30af91',
+			'dodger-blue': '#1e90ff'
 		}
 	},
 	plugins: []

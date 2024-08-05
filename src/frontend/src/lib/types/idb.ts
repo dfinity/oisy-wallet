@@ -1,7 +1,7 @@
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 
 export interface IdbEthAddress {
-	address: ETH_ADDRESS;
+	address: EthAddress;
 	createdAtTimestamp: number;
 	lastUsedTimestamp: number;
 }
