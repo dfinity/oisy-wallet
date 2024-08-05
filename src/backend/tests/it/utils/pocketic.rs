@@ -6,7 +6,7 @@ use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::env;
 use std::fs::read;
 
-use super::mock::{II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
+use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
 
@@ -14,6 +14,12 @@ const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.
 // PocketIC does not get mounted with "key_1" or "test_key_1" available in the management canister. If the canister request those ecdsa_public_key, it throws an error.
 // Instead, we can use the master_ecdsa_public_key suffixed with the subnet ID. PocketID adds the suffix because it can have multiple subnets.
 const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
+
+#[inline]
+pub fn controller() -> Principal {
+    Principal::from_text(CONTROLLER)
+        .expect("Test setup error: Failed to parse controller principal")
+}
 
 pub fn setup() -> (PocketIc, Principal) {
     let backend_wasm_path =
@@ -33,6 +39,9 @@ pub fn setup_with_custom_wasm(
     let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
 
     pic.install_canister(canister_id, wasm_bytes, arg, None);
+
+    pic.set_controllers(canister_id.clone(), None, vec![controller()])
+        .expect("Test setup error: Failed to set controllers");
 
     (pic, canister_id)
 }
@@ -63,7 +72,7 @@ pub fn upgrade_with_wasm(
         canister_id.clone(),
         wasm_bytes,
         encode_one(&arg).unwrap(),
-        None,
+        Some(controller()),
     )
     .map_err(|e| match e {
         CallError::Reject(e) => e,
