@@ -1,5 +1,4 @@
-use crate::utils::mock::CONTROLLER;
-use crate::utils::pocketic::{init_arg, setup, update_call};
+use crate::utils::pocketic::{controller, init_arg, setup, update_call};
 use candid::Principal;
 use shared::types::user_profile::UserProfile;
 use shared::types::{Arg, Config};
@@ -28,13 +27,7 @@ fn config_is_available_to_allowed_users_only() {
     );
     // Try a controller
     assert_eq!(
-        update_call::<Config>(
-            &pic_setup,
-            Principal::from_text(CONTROLLER)
-                .expect("Test setup error: Failed to parse controller principal"),
-            "config",
-            ()
-        ),
+        update_call::<Config>(&pic_setup, controller(), "config", ()),
         Ok(expected_config.clone()),
         "Controller should be able to call config and get the right answer."
     );
