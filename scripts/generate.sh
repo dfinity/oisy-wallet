@@ -7,7 +7,7 @@ set -euo pipefail
 
 	Note: This does so WITHOUT deploying any canisters.  Typically "dfx generate"
 	requires all the canisters to be deployed locally, which seems absurdly heavyweight.
-	This code just downlaods the candid files and puts them where they would normally
+	This code just downloads the candid files and puts them where they would normally
 	be found for a local deployment.  Much faster!
 	EOF
   exit 0
