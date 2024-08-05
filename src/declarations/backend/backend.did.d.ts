@@ -143,7 +143,6 @@ export interface _SERVICE {
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_user_profile: ActorMethod<[], Result_1>;
-	guard: ActorMethod<[], undefined>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;

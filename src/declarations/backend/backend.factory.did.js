@@ -156,7 +156,6 @@ export const idlFactory = ({ IDL }) => {
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_user_profile: IDL.Func([], [Result_1], ['query']),
-		guard: IDL.Func([], [], []),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
