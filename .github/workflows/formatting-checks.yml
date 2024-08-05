@@ -1,4 +1,4 @@
-name: Formatting Checks
+name: Formatting Backend and Scripts
 
 on:
   pull_request:
