@@ -531,7 +531,7 @@ fn migration() -> Option<Migration> {
 /// Starts user data migration to a given canister.
 ///
 /// # Errors
-/// - There is acurrent migration in progress to a different canister.
+/// - There is a current migration in progress to a different canister.
 #[query(guard = "caller_is_allowed")]
 fn migrate_user_data_to(target: Principal) -> Result<(), String> {
     mutate_state(|s| {
