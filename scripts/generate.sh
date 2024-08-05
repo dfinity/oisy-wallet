@@ -4,6 +4,11 @@ set -euo pipefail
 [[ "${1:-}" != "--help" ]] || {
   cat <<-EOF
 	Gets .did files and generates canister bindings from them.
+
+	Note: This does so WITHOUT deploying any canisters.  Typically "dfx generate"
+	requires all the canisters to be deployed locally, which seems absurdly heavyweight.
+	This code just downlaods the candid files and puts them where they would normally
+	be found for a local deployment.  Much faster!
 	EOF
   exit 0
 }
