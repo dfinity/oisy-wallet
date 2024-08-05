@@ -31,7 +31,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, InitArg};
+use shared::types::{Arg, Config, InitArg, Migration};
 use std::cell::RefCell;
 use std::str::FromStr;
 use types::{
@@ -72,6 +72,7 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
+            migration: None,
         })
     );
 }
@@ -107,6 +108,7 @@ pub struct State {
     custom_token: CustomTokenMap,
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
+    migration: Option<Migration>,
 }
 
 fn set_config(arg: InitArg) {

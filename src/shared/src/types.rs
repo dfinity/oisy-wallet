@@ -202,3 +202,18 @@ pub mod user_profile {
         NotFound,
     }
 }
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum MigrationProgress {
+    Pending,
+    WritesLocked,
+    MigratedUserTokensUpTo(Principal),
+    MigratedCustomTokensUpTo(Principal),
+    Completed,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct Migration {
+    to: Principal,
+    progress: MigrationProgress,
+}
