@@ -356,7 +356,8 @@
 				"do_not_see_import": "Don’t see your token? Import",
 				"clear_filter": "Clear filter",
 				"manage_for_network": "Managing tokens for $network",
-				"network": "Network"
+				"network": "Network",
+				"all_tokens_zero_balance": "All tokens have zero balance."
 			},
 			"placeholder": {
 				"select_network": "Select the network"
