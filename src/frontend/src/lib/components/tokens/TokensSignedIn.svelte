@@ -84,13 +84,13 @@
 		use:passiveEvent={{ event: 'touchend', handler: enableSortingTokens }}
 	>
 		{#each tokensToDisplay as token (token.id)}
-      <Listener {token}>
-        <div in:fade>
-          <TokenCardWithUrl {token}>
-            <TokenCardContent {token} />
-          </TokenCardWithUrl>
-        </div>
-      </Listener>
+			<Listener {token}>
+				<div in:fade>
+					<TokenCardWithUrl {token}>
+						<TokenCardContent {token} />
+					</TokenCardWithUrl>
+				</div>
+			</Listener>
 		{/each}
 	</div>
 
