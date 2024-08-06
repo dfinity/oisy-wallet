@@ -121,13 +121,9 @@ impl BackendInstaller {
     /// Setup the backend canister.
     fn setup(&mut self, pic: &mut PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
-        pic.advance_time(Duration::from_secs(100_000));
         self.add_cycles(pic);
-        pic.advance_time(Duration::from_secs(100_000));
         self.install(pic);
-        pic.advance_time(Duration::from_secs(100_000));
         self.set_controllers(pic);
-        pic.advance_time(Duration::from_secs(100_000));
         canister_id
     }
 }
