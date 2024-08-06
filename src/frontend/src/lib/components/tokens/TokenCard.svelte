@@ -6,13 +6,19 @@
 	import { nonNullish } from '@dfinity/utils';
 
 	export let token: Token;
+
+	const ariaLabel = nonNullish(token.displayName)
+		? `${token.displayName.prefix ?? ''}${token.displayName.name}`
+		: token.name;
 </script>
 
 <Card noMargin>
-	{#if nonNullish(token.displayName?.prefix)}
-		<Tag>ck</Tag>
-	{/if}
-	{token.displayName?.name ?? token.name}
+	<span aria-label={ariaLabel}>
+		{#if nonNullish(token.displayName?.prefix)}
+			<Tag ariaHidden>ck</Tag>
+		{/if}
+		<span aria-hidden="true">{token.displayName?.name ?? token.name}</span>
+	</span>
 
 	<TokenLogo {token} slot="icon" color="white" />
 
