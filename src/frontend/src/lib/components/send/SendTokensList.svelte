@@ -24,11 +24,11 @@
 			<TokenCardContent {token} />
 		</TokenCardWithOnClick>
 	{/each}
-</TokensSkeletons>
 
-{#if tokens.length === 0}
-	<p class="mt-4 mb-6 text-dark opacity-50">{$i18n.tokens.manage.text.all_tokens_zero_balance}</p>
-{/if}
+	{#if tokens.length === 0}
+		<p class="mt-4 mb-6 text-dark opacity-50">{$i18n.tokens.manage.text.all_tokens_zero_balance}</p>
+	{/if}
+</TokensSkeletons>
 
 <button class="secondary full center text-center" on:click={modalStore.close}>
 	{$i18n.core.text.close}
