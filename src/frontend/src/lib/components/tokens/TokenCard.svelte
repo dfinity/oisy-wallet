@@ -15,7 +15,7 @@
 <Card noMargin>
 	<span aria-label={ariaLabel}>
 		{#if nonNullish(token.displayName?.prefix)}
-			<Tag ariaHidden>ck</Tag>
+			<Tag ariaHidden>{token.displayName.prefix}</Tag>
 		{/if}
 		<span aria-hidden="true">{token.displayName?.name ?? token.name}</span>
 	</span>
