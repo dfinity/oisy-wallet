@@ -11,7 +11,8 @@ export type Token = {
 	network: Network;
 	standard: TokenStandard;
 	category: TokenCategory;
-} & TokenMetadata;
+} & TokenMetadata &
+	TokenAppearance;
 
 export interface TokenMetadata {
 	name: string;
@@ -19,6 +20,15 @@ export interface TokenMetadata {
 	decimals: number;
 	icon?: string;
 }
+
+interface TokenAppearance {
+	displayName?: TokenDisplayName;
+}
+
+export type TokenDisplayName = {
+	prefix: string | undefined;
+	name: string;
+};
 
 export type RequiredToken = Required<Token>;
 

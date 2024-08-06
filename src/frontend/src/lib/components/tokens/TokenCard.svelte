@@ -3,18 +3,16 @@
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { Token } from '$lib/types/token';
 	import Tag from '$lib/components/ui/Tag.svelte';
-	import { isTokenCkLedger } from '$icp/utils/ic-send.utils';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let token: Token;
 </script>
 
 <Card noMargin>
-	{#if isTokenCkLedger(token)}
+	{#if nonNullish(token.displayName?.prefix)}
 		<Tag>ck</Tag>
-		{token.twinToken?.name ?? token.name.replace(/^ck/, '')}
-	{:else}
-		{token.name}
 	{/if}
+	{token.displayName?.name ?? token.name}
 
 	<TokenLogo {token} slot="icon" color="white" />
 

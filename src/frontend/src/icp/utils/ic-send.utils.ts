@@ -4,7 +4,7 @@ import {
 	CKERC20_LEDGER_CANISTER_IDS,
 	CKETH_LEDGER_CANISTER_IDS
 } from '$env/networks.icrc.env';
-import type { IcCkToken } from '$icp/types/ic';
+import type { IcToken } from '$icp/types/ic';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type { NetworkId } from '$lib/types/network';
@@ -31,17 +31,14 @@ export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
 export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
 	!isBtcAddress(address);
 
-export const isTokenCkBtcLedger = ({ ledgerCanisterId }: Partial<IcCkToken>): boolean =>
+export const isTokenCkBtcLedger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
 	nonNullish(ledgerCanisterId) && CKBTC_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
-export const isTokenCkEthLedger = ({ ledgerCanisterId }: Partial<IcCkToken>): boolean =>
+export const isTokenCkEthLedger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
 	nonNullish(ledgerCanisterId) && CKETH_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
 
-export const isTokenCkErc20Ledger = ({ ledgerCanisterId }: Partial<IcCkToken>): boolean =>
+export const isTokenCkErc20Ledger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
 	nonNullish(ledgerCanisterId) && CKERC20_LEDGER_CANISTER_IDS.includes(ledgerCanisterId);
-
-export const isTokenCkLedger = (token: Partial<IcCkToken>): token is IcCkToken =>
-	isTokenCkBtcLedger(token) || isTokenCkEthLedger(token) || isTokenCkErc20Ledger(token);
 
 export const isNetworkIdETHMainnet = (networkId: NetworkId | undefined): boolean =>
 	ETHEREUM_NETWORK_ID === networkId;
