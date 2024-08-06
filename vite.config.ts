@@ -1,3 +1,4 @@
+import { isNullish, nonNullish } from '@dfinity/utils';
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { dirname, resolve } from 'node:path';
@@ -40,16 +41,18 @@ const config: UserConfig = {
 					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
 
 					if (
-						['@sveltejs', 'svelte', '@dfinity/gix-components', 'three', ...lazy].find((lib) =>
-							folder.includes(lib)
-						) === undefined &&
+						isNullish(
+							['@sveltejs', 'svelte', '@dfinity/gix-components', 'three', ...lazy].find((lib) =>
+								folder.includes(lib)
+							)
+						) &&
 						folder.includes('node_modules')
 					) {
 						return 'vendor';
 					}
 
 					if (
-						lazy.find((lib) => folder.includes(lib)) !== undefined &&
+						nonNullish(lazy.find((lib) => folder.includes(lib))) &&
 						folder.includes('node_modules')
 					) {
 						return 'lazy';

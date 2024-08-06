@@ -3,6 +3,7 @@ import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-messag
 import { createAuthClient } from '$lib/utils/auth.utils';
 import { IdbStorage, KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
 import { DelegationChain, isDelegationValid } from '@dfinity/identity';
+import { isNullish } from '@dfinity/utils';
 
 onmessage = ({ data }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg } = data;
@@ -88,7 +89,7 @@ const emitExpirationTime = (delegation: DelegationChain) => {
 	const expirationTime: bigint | undefined = delegation.delegations[0]?.delegation.expiration;
 
 	// That would be unexpected here because the delegation has just been tested and is valid
-	if (expirationTime === undefined) {
+	if (isNullish(expirationTime)) {
 		return;
 	}
 

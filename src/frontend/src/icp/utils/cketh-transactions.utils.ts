@@ -75,10 +75,9 @@ export const mapCkEthereumTransaction = ({
 
 		const memoInfo = nonNullish(memo) ? mintMemoInfo(memo) : undefined;
 
-		const from =
-			memoInfo?.fromAddress !== undefined
-				? mapAddressStartsWith0x(memoInfo.fromAddress)
-				: undefined;
+		const from = nonNullish(memoInfo?.fromAddress)
+			? mapAddressStartsWith0x(memoInfo.fromAddress)
+			: undefined;
 
 		return {
 			...tx,
@@ -100,8 +99,9 @@ export const mapCkEthereumTransaction = ({
 
 		const burnMemo = burnMemoInfo(memo);
 
-		const to =
-			burnMemo?.toAddress !== undefined ? mapAddressStartsWith0x(burnMemo.toAddress) : undefined;
+		const to = nonNullish(burnMemo?.toAddress)
+			? mapAddressStartsWith0x(burnMemo.toAddress)
+			: undefined;
 
 		return {
 			...tx,

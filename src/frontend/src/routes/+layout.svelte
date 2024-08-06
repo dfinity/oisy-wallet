@@ -17,7 +17,7 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	/**
 	 * Init dApp
@@ -74,7 +74,7 @@
 		}
 
 		// We want to display a spinner until the authentication is loaded. This to avoid a glitch when either the landing page or effective content (sign-in / sign-out) is presented.
-		if ($authStore === undefined) {
+		if (isNullish($authStore)) {
 			return;
 		}
 

@@ -36,7 +36,7 @@ export const generateUrn = (
 
 	const queryString = new URLSearchParams();
 	for (const [key, value] of Object.entries(params)) {
-		if (value !== undefined) {
+		if (nonNullish(value)) {
 			queryString.append(key, value.toString());
 		}
 	}

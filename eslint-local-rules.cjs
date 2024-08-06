@@ -74,7 +74,7 @@ module.exports = {
 					node,
 					message: nonNullishMessage,
 					fix(fixer) {
-						return fixer.replaceText(node, `nonNullish(${context.getSourceCode().getText(node)})`);
+						return fixer.replaceText(node, `nonNullish(${context.getSourceCode().getText(node.left)})`);
 					}
 				});
 			};
