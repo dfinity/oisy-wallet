@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isHash, stringifyJson, isPrincipal } from '$lib/utils/json.utils';
+	import { isNullish } from '@dfinity/utils';
 
 	export let json: unknown | undefined = undefined;
 	export let defaultExpandedLevel = Infinity;
@@ -21,7 +22,7 @@
 		| 'undefined';
 
 	const getValueType = (value: unknown): ValueType => {
-		if (value === null) {
+		if (isNullish(value)) {
 			return 'null';
 		}
 		if (isPrincipal(value)) {

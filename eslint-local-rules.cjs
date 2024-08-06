@@ -44,17 +44,21 @@ module.exports = {
 			const nonNullishMessage = 'Use nonNullish() instead of direct variable check for nullish checks.';
 
 			const isNullishCheck = (node) => {
-				return (
-					node.operator === '===' &&
-					((node.right.type === 'Identifier' && node.right.name === 'undefined') || (node.right.type === 'Literal' && node.right.value === null))
-				);
+				if (node.type === 'BinaryExpression') {
+					return (
+						node.operator === '===' &&
+						((node.right.type === 'Identifier' && node.right.name === 'undefined') || (node.right.type === 'Literal' && node.right.value === null))
+					);
+				}
 			};
 
 			const isNonNullishCheck = (node) => {
-				return (
-					node.operator === '!==' &&
-					((node.right.type === 'Identifier' && node.right.name === 'undefined') || (node.right.type === 'Literal' && node.right.value === null))
-				);
+				if (node.type === 'BinaryExpression') {
+					return (
+						node.operator === '!==' &&
+						((node.right.type === 'Identifier' && node.right.name === 'undefined') || (node.right.type === 'Literal' && node.right.value === null))
+					);
+				}
 			};
 
 			const reportNullishCheck = (node) => {

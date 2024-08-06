@@ -1,3 +1,4 @@
+import { isNullish } from '@dfinity/utils';
 import { cp } from 'node:fs';
 import { extname } from 'node:path';
 
@@ -9,7 +10,7 @@ await cp(
 		filter: (source) => extname(source) !== '.map'
 	},
 	(err) => {
-		if (err === null) {
+		if (isNullish(err)) {
 			return;
 		}
 

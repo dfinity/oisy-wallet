@@ -3,7 +3,7 @@ import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-messag
 import { createAuthClient } from '$lib/utils/auth.utils';
 import { IdbStorage, KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
 import { DelegationChain, isDelegationValid } from '@dfinity/identity';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 onmessage = ({ data }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg } = data;
@@ -39,7 +39,7 @@ const onIdleSignOut = async () => {
 	const [auth, chain] = await Promise.all([checkAuthentication(), checkDelegationChain()]);
 
 	// Both identity and delegation are alright, so all good
-	if (auth && chain.valid && chain.delegation !== null) {
+	if (auth && chain.valid && nonNullish(chain.delegation)) {
 		emitExpirationTime(chain.delegation);
 		return;
 	}
@@ -69,10 +69,10 @@ const checkDelegationChain = async (): Promise<{
 	const idbStorage: IdbStorage = new IdbStorage();
 	const delegationChain: string | null = await idbStorage.get(KEY_STORAGE_DELEGATION);
 
-	const delegation = delegationChain !== null ? DelegationChain.fromJSON(delegationChain) : null;
+	const delegation = nonNullish(delegationChain) ? DelegationChain.fromJSON(delegationChain) : null;
 
 	return {
-		valid: delegation !== null && isDelegationValid(delegation),
+		valid: nonNullish(delegation) && isDelegationValid(delegation),
 		delegation
 	};
 };
