@@ -7,17 +7,17 @@
 
 	export let token: Token;
 
-	const ariaLabel = nonNullish(token.displayName)
-		? `${token.displayName.prefix ?? ''}${token.displayName.name}`
+	const ariaLabel = nonNullish(token.oisyName)
+		? `${token.oisyName.prefix ?? ''}${token.oisyName.oisyName}`
 		: token.name;
 </script>
 
 <Card noMargin>
 	<span aria-label={ariaLabel}>
-		{#if nonNullish(token.displayName?.prefix)}
-			<Tag ariaHidden>{token.displayName.prefix}</Tag>
+		{#if nonNullish(token.oisyName?.prefix)}
+			<Tag ariaHidden>{token.oisyName.prefix}</Tag>
 		{/if}
-		<span aria-hidden="true">{token.displayName?.name ?? token.name}</span>
+		<span aria-hidden="true">{token.oisyName?.oisyName ?? token.name}</span>
 	</span>
 
 	<TokenLogo {token} slot="icon" color="white" />

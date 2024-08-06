@@ -22,12 +22,12 @@ export interface TokenMetadata {
 }
 
 export interface TokenAppearance {
-	displayName?: TokenDisplayName;
+	oisyName?: TokenOisyName;
 }
 
-export type TokenDisplayName = {
+export type TokenOisyName = {
 	prefix: string | undefined;
-	name: string;
+	oisyName: string;
 };
 
 export type RequiredToken = Required<Omit<Token, keyof TokenAppearance>> & TokenAppearance;
