@@ -40,8 +40,10 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-            !target/wasm32-unknown-unknown/release/backend.wasm
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
+      - name: Remove the old Wasm to force a rebuild
+        if: steps.backend-wasm-cache.outputs.cache-hit != 'true'
+        run: rm -f target/wasm32-unknown-unknown/release/backend.wasm
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Install dfx
