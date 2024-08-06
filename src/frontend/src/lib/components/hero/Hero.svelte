@@ -6,7 +6,7 @@
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import ThreeBackground from '$lib/components/ui/ThreeBackground.svelte';
-	import { slide } from 'svelte/transition';
+	import { slide, fade } from 'svelte/transition';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -33,9 +33,13 @@
 
 <svelte:window on:scroll={handleScroll} on:wheel={handleScroll} on:touchmove={handleScroll} />
 
-<div class={`hero pb-4 md:pb-6 ${background} sticky top-0 z-[var(--overlay-z-index)]`}>
-	{#if $pseudoNetworkChainFusion}
-		<ThreeBackground />
+<div
+	class={`hero ${isCollapsed ? '' : 'pb-4 md:pb-6'} ${background} sticky top-0 z-[var(--overlay-z-index)]`}
+>
+	{#if $pseudoNetworkChainFusion && !isCollapsed}
+		<div in:fade={{ duration: 250 }} out:fade={{ duration: 250 }}>
+			<ThreeBackground />
+		</div>
 	{/if}
 
 	<Header />
@@ -78,7 +82,7 @@
 		}
 
 		&.chainfusion {
-			background: transparent;
+			background: #010155;
 		}
 	}
 </style>
