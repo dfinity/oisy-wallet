@@ -1,4 +1,5 @@
 import type { Network } from '$lib/types/network';
+import type { RequiredExcept } from '$lib/types/utils';
 
 export type TokenId = symbol;
 
@@ -21,7 +22,7 @@ export interface TokenMetadata {
 	icon?: string;
 }
 
-interface TokenAppearance {
+export interface TokenAppearance {
 	displayName?: TokenDisplayName;
 }
 
@@ -30,7 +31,7 @@ export type TokenDisplayName = {
 	name: string;
 };
 
-export type RequiredToken = Required<Token>;
+export type RequiredToken = RequiredExcept<Token, keyof TokenAppearance>;
 
 export type OptionToken = Token | undefined | null;
 export type OptionTokenId = TokenId | undefined | null;
