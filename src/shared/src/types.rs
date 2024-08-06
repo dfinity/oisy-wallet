@@ -288,3 +288,19 @@ pub struct Migration {
     /// The timer id for the migration.
     pub timer_id: TimerId,
 }
+
+/// A serializable report of a migration.
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+pub struct MigrationReport {
+    pub to: Principal,
+    pub progress: MigrationProgress,
+}
+
+impl From<&Migration> for MigrationReport {
+    fn from(migration: &Migration) -> Self {
+        MigrationReport {
+            to: migration.to,
+            progress: migration.progress,
+        }
+    }
+}

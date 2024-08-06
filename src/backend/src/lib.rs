@@ -35,7 +35,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, InitArg, Migration, MigrationProgress};
+use shared::types::{Arg, Config, InitArg, Migration, MigrationProgress, MigrationReport};
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Duration;
@@ -529,12 +529,8 @@ async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
 
 /// Gets the state of any migration currently in progress.
 #[query(guard = "caller_is_allowed")]
-fn migration() -> Option<(Principal, MigrationProgress)> {
-    read_state(|s| {
-        s.migration
-            .as_ref()
-            .map(|migration| (migration.to, migration.progress))
-    })
+fn migration() -> Option<MigrationReport> {
+    read_state(|s| s.migration.as_ref().map(MigrationReport::from))
 }
 
 /// Starts user data migration to a given canister.
