@@ -595,7 +595,7 @@ fn step_migration() {
                 ic_cdk::trap("migration is not in progress");
             }
         }
-    })
+    });
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
