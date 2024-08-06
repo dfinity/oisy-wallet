@@ -17,7 +17,7 @@ const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 
 /// Backend canister installer
 #[derive(Debug)]
-pub struct BackendInstaller {
+pub struct BackendBuilder {
     /// Canister ID of the backend canister.  If not set, a new canister will be created.
     canister_id: Option<Principal>,
     /// Cycles to add to the backend canister.
@@ -30,7 +30,7 @@ pub struct BackendInstaller {
     controllers: Vec<Principal>,
 }
 // Defaults
-impl BackendInstaller {
+impl BackendBuilder {
     pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
     fn default_wasm_path() -> String {
         BACKEND_WASM.to_string()
@@ -43,7 +43,7 @@ impl BackendInstaller {
             .expect("Test setup error: Failed to parse controller principal")]
     }
 }
-impl Default for BackendInstaller {
+impl Default for BackendBuilder {
     fn default() -> Self {
         Self {
             canister_id: None,
@@ -55,7 +55,7 @@ impl Default for BackendInstaller {
     }
 }
 // Customisation
-impl BackendInstaller {
+impl BackendBuilder {
     pub fn with_canister_id(mut self, canister_id: Principal) -> Self {
         self.canister_id = Some(canister_id);
         self
@@ -70,7 +70,7 @@ impl BackendInstaller {
     }
 }
 // Get parameters
-impl BackendInstaller {
+impl BackendBuilder {
     fn wasm_bytes(&self) -> Vec<u8> {
         read(self.wasm_path.clone()).expect(&format!(
             "Could not find the backend wasm: {}",
@@ -79,7 +79,7 @@ impl BackendInstaller {
     }
 }
 // Builder
-impl BackendInstaller {
+impl BackendBuilder {
     /// Get or create canister ID.
     fn canister_id(&mut self, pic: &mut PocketIc) -> Principal {
         if let Some(canister_id) = self.canister_id {
@@ -117,6 +117,12 @@ impl BackendInstaller {
         self.set_controllers(pic);
         canister_id
     }
+    /// Deploy to a new pic.
+    pub fn deploy(&mut self) -> (PocketIc, Principal) {
+        let mut pic = PocketIc::new();
+        let canister_id = self.deploy_to(&mut pic);
+        (pic, canister_id)
+    }
 }
 
 #[inline]
@@ -127,7 +133,7 @@ pub fn controller() -> Principal {
 
 pub fn setup() -> (PocketIc, Principal) {
     let mut pic = PocketIc::new();
-    let canister_id = BackendInstaller::default().deploy_to(&mut pic);
+    let canister_id = BackendBuilder::default().deploy_to(&mut pic);
     (pic, canister_id)
 }
 
@@ -136,7 +142,7 @@ pub fn setup_with_custom_wasm(
     encoded_arg: Option<Vec<u8>>,
 ) -> (PocketIc, Principal) {
     let mut pic = PocketIc::new();
-    let mut builder = BackendInstaller::default().with_wasm_path(wasm_path);
+    let mut builder = BackendBuilder::default().with_wasm_path(wasm_path);
     if let Some(encoded_arg) = encoded_arg {
         builder = builder.with_arg_bytes(encoded_arg);
     }
