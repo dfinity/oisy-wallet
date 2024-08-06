@@ -110,7 +110,7 @@ impl BackendInstaller {
             .expect("Test setup error: Failed to set controllers");
     }
     /// Setup the backend canister.
-    fn setup(&mut self, pic: &mut PocketIc) -> Principal {
+    fn deploy_to(&mut self, pic: &mut PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
         self.add_cycles(pic);
         self.install(pic);
@@ -127,7 +127,7 @@ pub fn controller() -> Principal {
 
 pub fn setup() -> (PocketIc, Principal) {
     let mut pic = PocketIc::new();
-    let canister_id = BackendInstaller::default().setup(&mut pic);
+    let canister_id = BackendInstaller::default().deploy_to(&mut pic);
     (pic, canister_id)
 }
 
@@ -140,7 +140,7 @@ pub fn setup_with_custom_wasm(
     if let Some(encoded_arg) = encoded_arg {
         builder = builder.with_arg_bytes(encoded_arg);
     }
-    let canister_id = builder.setup(&mut pic);
+    let canister_id = builder.deploy_to(&mut pic);
     (pic, canister_id)
 }
 
