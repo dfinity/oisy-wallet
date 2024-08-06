@@ -47,7 +47,7 @@
 		"@dfinity/candid": "^1.4.0",
 		"@dfinity/ckbtc": "^2.5.0",
 		"@dfinity/cketh": "^3.2.0",
-		"@dfinity/gix-components": "^4.5.0",
+		"@dfinity/gix-components": "^4.6.0",
 		"@dfinity/ic-management": "^5.1.0",
 		"@dfinity/ledger-icp": "^2.4.0",
 		"@dfinity/ledger-icrc": "^2.4.0",
