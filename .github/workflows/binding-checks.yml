@@ -40,6 +40,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
+            !target/wasm32-unknown-unknown/release/backend.wasm
           key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
       - name: Prepare
         uses: ./.github/actions/prepare
