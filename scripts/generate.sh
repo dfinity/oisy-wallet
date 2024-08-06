@@ -33,15 +33,14 @@ function install_did_files() {
 
 # Create local .did files
 ./scripts/did.sh
-# Download .did files without an explicit url in dfx.json
-./scripts/download.icp.sh
-./scripts/download.ckbtc.sh
-./scripts/download.cketh.sh
-# Generate bindings
+# Download .did files listed in dfx.json
 install_did_files
-# Asset storage canister .did file
-mv .dfx/local/canisters/frontend/frontend.did .dfx/local/canisters/frontend/assetstorage.did
-dfx generate
+# Generate bindings for canisters with directories in `declarations`:
+for canister in $(ls src/declarations/) ; do
+	echo "Generating bindings for $canister"
+	dfx generate "$canister"
+done
+# Clean up..
 node scripts/did.update.types.mjs
 node scripts/did.delete.types.mjs
 npm run format
