@@ -16,7 +16,7 @@ use ic_cdk::api::management_canister::ecdsa::{
 };
 use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
-use ic_cdk_timers::set_timer_interval;
+use ic_cdk_timers::{clear_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -597,8 +597,7 @@ fn step_migration() {
                         migration.progress = MigrationProgress::Completed;
                     }
                     MigrationProgress::Completed => {
-                        // Migration is already completed.
-                        migration.progress = MigrationProgress::Completed;
+                        clear_timer(migration.timer_id);
                     }
                 }
             }
