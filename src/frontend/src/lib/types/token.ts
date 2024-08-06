@@ -25,3 +25,13 @@ export type RequiredToken = Required<Token>;
 export type OptionToken = Token | undefined | null;
 export type OptionTokenId = TokenId | undefined | null;
 export type OptionTokenStandard = TokenStandard | undefined | null;
+
+export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
+
+interface TokenFinancialData {
+	usdBalance?: number;
+}
+
+export type TokenUi = Token & TokenFinancialData;
+
+export type TokenWithBalance = TokenUi & { balance: number };

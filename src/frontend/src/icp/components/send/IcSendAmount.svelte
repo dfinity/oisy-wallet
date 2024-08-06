@@ -115,8 +115,8 @@
 		return assertBalance();
 	};
 
-	$: calculateMax = (): number | undefined => {
-		return isNullish($token)
+	$: calculateMax = (): number | undefined =>
+		isNullish($token)
 			? undefined
 			: getMaxTransactionAmount({
 					balance: $balance?.toBigInt(),
@@ -124,7 +124,6 @@
 					tokenDecimals: $token.decimals,
 					tokenStandard: $token.standard
 				});
-	};
 
 	let sendInputAmount: SendInputAmount | undefined;
 	$: $ethereumFeeStore, (() => sendInputAmount?.triggerValidate())();

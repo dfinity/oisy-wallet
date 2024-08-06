@@ -1,15 +1,20 @@
 import type { Erc20Token } from '$eth/types/erc20';
+import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
-import { tokens } from '$lib/derived/tokens.derived';
-import type { Token } from '$lib/types/token';
+import { sortedTokens } from '$lib/derived/tokens.derived';
+import { balancesStore } from '$lib/stores/balances.store';
+import type { Token, TokenUi } from '$lib/types/token';
+import { usdValue } from '$lib/utils/exchange.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
+import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
  * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not.
  */
 const networkTokens: Readable<Token[]> = derived(
-	[tokens, selectedNetwork, pseudoNetworkChainFusion],
+	[sortedTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );
 
@@ -26,4 +31,34 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 	[enabledNetworkTokens],
 	([$enabledNetworkTokens]) =>
 		$enabledNetworkTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
+);
+
+/**
+ * All tokens matching the selected network or Chain Fusion, with their financial data.
+ */
+export const enabledNetworkTokensUi: Readable<TokenUi[]> = derived(
+	[enabledNetworkTokens, balancesStore, exchanges],
+	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
+		$enabledNetworkTokens.map((token) => ({
+			...token,
+			usdBalance: nonNullish($exchanges?.[token.id]?.usd)
+				? usdValue({
+						token,
+						balances: $balancesStore,
+						exchanges: $exchanges
+					})
+				: undefined
+		}))
+);
+
+/**
+ * All tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
+ */
+export const sortedNetworkTokensUi: Readable<TokenUi[]> = derived(
+	[enabledNetworkTokensUi, balancesStore],
+	([$enabledNetworkTokensUi, $balancesStore]) =>
+		pinTokensWithBalanceAtTop({
+			$tokens: $enabledNetworkTokensUi,
+			$balancesStore: $balancesStore
+		})
 );

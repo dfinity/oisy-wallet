@@ -8,7 +8,6 @@
 	import { loadTokenAndRun } from '$icp/services/token.services';
 
 	export let token: Token;
-	export let compact = false;
 
 	const modalId = Symbol();
 
@@ -18,7 +17,7 @@
 	};
 </script>
 
-<SendButton on:click={openSend} {compact} />
+<SendButton on:click={openSend} />
 
 {#if $modalIcSend && $modalStore?.data === modalId}
 	<IcSendModal networkId={ICP_NETWORK_ID} on:nnsClose />

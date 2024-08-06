@@ -1,4 +1,5 @@
 import { maxGasFee as maxGasFeeUtils, minGasFee as minGasFeeUtils } from '$eth/utils/fee.utils';
+import type { TokenId } from '$lib/types/token';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -25,6 +26,7 @@ export const initFeeStore = (): FeeStore => {
 export interface FeeContext {
 	feeStore: FeeStore;
 	feeSymbolStore: Writable<string | undefined>;
+	feeTokenIdStore: Writable<TokenId | undefined>;
 	maxGasFee: Readable<BigNumber | undefined>;
 	minGasFee: Readable<BigNumber | undefined>;
 	evaluateFee?: () => void;

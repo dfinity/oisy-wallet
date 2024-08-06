@@ -16,6 +16,7 @@ interface I18nCore {
 		decimals: string;
 		amount: string;
 		max: string;
+		more: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string };
@@ -26,23 +27,24 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		manage_internet_identity: string;
-		back_to_wallet: string;
+		oisy_roadmap: string;
+		submit_ticket: string;
 	};
-	alt: { manage_internet_identity: string; more_settings: string; menu: string };
+	alt: { more_settings: string; menu: string; oisy_roadmap: string; submit_ticket: string };
 }
 
 interface I18nAuth {
-	text: {
-		title: string;
-		description: string;
-		connect_with: string;
-		connect: string;
-		connect_to_oisy: string;
-		logout: string;
-	};
+	text: { title: string; authenticate: string; logout: string };
 	alt: { sign_in: string };
-	error: { no_internet_identity: string };
+	error: {
+		no_internet_identity: string;
+		invalid_pouh_credential: string;
+		error_validating_pouh_credential_oisy: string;
+		error_validating_pouh_credential: string;
+		error_requesting_pouh_credential: string;
+		missing_pouh_issuer_origin: string;
+		no_pouh_credential: string;
+	};
 }
 
 interface I18nWallet {
@@ -60,12 +62,7 @@ interface I18nWallet {
 }
 
 interface I18nInit {
-	text: {
-		initializing_wallet: string;
-		lets_go: string;
-		securing_session: string;
-		retrieving_eth_key: string;
-	};
+	text: { initializing_wallet: string; securing_session: string; retrieving_eth_key: string };
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
@@ -96,12 +93,13 @@ interface I18nInit {
 		transaction_price: string;
 		icrc_canisters: string;
 		erc20_user_tokens: string;
+		erc20_user_token: string;
 		loading_wallet_timeout: string;
 	};
 }
 
 interface I18nHero {
-	text: { use_with_caution: string; learn_more_about_erc20_icp: string };
+	text: { use_with_caution: string; learn_more_about_erc20_icp: string; never_download: string };
 }
 
 interface I18nSettings {
@@ -115,9 +113,15 @@ interface I18nSettings {
 		testnets: string;
 		testnets_description: string;
 		hide_zero_balances_description: string;
+		credentials_title: string;
+		pouh_credential: string;
+		pouh_credential_description: string;
+		present_pouh_credential: string;
+		pouh_credential_verified: string;
 		sign_in: string;
 	};
 	alt: { testnets_toggle: string };
+	error: { loading_profile: string };
 }
 
 interface I18nNetworks {
@@ -133,17 +137,16 @@ interface I18nReceive {
 		text: {
 			account_id: string;
 			use_for_all_tokens: string;
-			use_for_deposit: string;
+			use_for_icrc_deposit: string;
+			use_for_icp_deposit: string;
 			display_account_id_qr: string;
 			account_id_copied: string;
-			internet_computer: string;
 			principal: string;
 			internet_computer_principal_copied: string;
 			display_internet_computer_principal_qr: string;
 			icp_account: string;
 			icp_account_copied: string;
 			display_icp_account_qr: string;
-			icp_account_notes: string;
 		};
 	};
 	ethereum: {
@@ -226,8 +229,9 @@ interface I18nSend {
 		insufficient_funds_for_gas: string;
 		insufficient_funds_for_amount: string;
 		insufficient_ethereum_funds_to_cover_the_fees: string;
+		not_enough_tokens_for_gas: string;
 		gas_fees_not_defined: string;
-		max_gas_gee_per_gas_undefined: string;
+		max_gas_fee_per_gas_undefined: string;
 		address_unknown: string;
 		minter_info_not_loaded: string;
 		minter_info_not_certified: string;
@@ -266,7 +270,6 @@ interface I18nConvert {
 
 interface I18nTokens {
 	text: {
-		title: string;
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
@@ -374,8 +377,9 @@ interface I18nWallet_connect {
 		reject: string;
 		connect: string;
 		connecting: string;
+		disconnect: string;
 		scan_qr: string;
-		or_use_uri: string;
+		or_use_link: string;
 		proposer: string;
 		review: string;
 		method: string;
@@ -467,7 +471,7 @@ interface I18nTransaction {
 }
 
 interface I18nTransactions {
-	text: { title: string; no_transactions: string; sign_in: string };
+	text: { title: string; no_transactions: string; sign_in: string; open_transactions: string };
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;
@@ -480,17 +484,26 @@ interface I18nTransactions {
 }
 
 interface I18nAbout {
-	text: {
-		title: string;
-		sub_title: string;
-		description: string;
-		features: string;
-		browser_based: string;
-		cross_device: string;
-		network_custody: string;
-		fully_on_chain: string;
-		interoperable: string;
-		free: string;
+	text: { title: string };
+	what: {
+		text: {
+			label: string;
+			title: string;
+			hold_crypto: string;
+			use_eth_dapps: string;
+			use_ic_dapps: string;
+		};
+	};
+	how: {
+		text: {
+			label: string;
+			title: string;
+			self_custody: string;
+			fully_on_chain: string;
+			cross_device: string;
+			verifiable_credentials: string;
+			open_source: string;
+		};
 	};
 }
 

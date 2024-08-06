@@ -1,10 +1,15 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { PostMessageWalletData } from '$icp/types/ic.post-message';
-import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
 
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
+import type { Network } from '$lib/types/network';
 import type { SyncState } from '$lib/types/sync';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 
@@ -35,9 +40,10 @@ export type PostMessageDataResponse = object;
 
 export interface PostMessageDataRequestExchangeTimer {
 	erc20Addresses: Erc20ContractAddress[];
+	icrcCanisterIds: LedgerCanisterIdText[];
 }
 
-export type PostMessageDataRequestIcrc = IcCanisters;
+export type PostMessageDataRequestIcrc = IcCanisters & Pick<Network, 'env'>;
 
 export type PostMessageDataRequestIcCk = Partial<Pick<IcCkMetadata, 'minterCanisterId'>>;
 
@@ -79,8 +85,9 @@ export interface PostMessageDataResponseAuth extends PostMessageDataResponse {
 export interface PostMessageDataResponseExchange extends PostMessageDataResponse {
 	currentEthPrice: CoingeckoSimplePriceResponse;
 	currentBtcPrice: CoingeckoSimplePriceResponse;
-	currentErc20Prices: CoingeckoSimplePriceResponse;
+	currentErc20Prices: CoingeckoSimpleTokenPriceResponse;
 	currentIcpPrice: CoingeckoSimplePriceResponse;
+	currentIcrcPrices: CoingeckoSimpleTokenPriceResponse;
 }
 
 export interface PostMessageDataResponseExchangeError extends PostMessageDataResponse {

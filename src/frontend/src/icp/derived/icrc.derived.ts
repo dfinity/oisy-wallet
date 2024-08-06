@@ -1,5 +1,10 @@
+import {
+	ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS,
+	ICRC_TOKENS_LEDGER_CANISTER_IDS
+} from '$env/networks.icrc.env';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -7,6 +12,7 @@ import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { testnets } from '$lib/derived/testnets.derived';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -18,6 +24,19 @@ const icrcDefaultTokens: Readable<IcToken[]> = derived(
 		($icrcTokensStore?.map(({ data: token }) => token) ?? []).filter(
 			(token) => $testnets || !isTokenIcrcTestnet(token)
 		)
+);
+
+/**
+ * The list of Icrc tokens that are default for Chain Fusion, in the order provided by the static list.
+ */
+export const icrcChainFusionDefaultTokens: Readable<IcToken[]> = derived(
+	[icrcDefaultTokens],
+	([$icrcDefaultTokens]) =>
+		ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS.map((canisterId) =>
+			$icrcDefaultTokens.find(
+				({ ledgerCanisterId: tokenCanisterId }) => tokenCanisterId === canisterId
+			)
+		).filter(nonNullish)
 );
 
 /**
@@ -114,4 +133,18 @@ export const enabledIcrcTokens: Readable<IcToken[]> = derived(
 		...$enabledIcrcDefaultTokens,
 		...$enabledIcrcCustomTokens
 	]
+);
+
+const enabledIcrcTokensNoCk: Readable<IcToken[]> = derived(
+	[enabledIcrcTokens],
+	([$enabledIcrcTokens]) =>
+		$enabledIcrcTokens.filter(
+			({ ledgerCanisterId }) => !ICRC_TOKENS_LEDGER_CANISTER_IDS.includes(ledgerCanisterId)
+		)
+);
+
+export const enabledIcrcLedgerCanisterIdsNoCk: Readable<LedgerCanisterIdText[]> = derived(
+	[enabledIcrcTokensNoCk],
+	([$enabledIcrcTokensNoCk]) =>
+		$enabledIcrcTokensNoCk.map(({ ledgerCanisterId }) => ledgerCanisterId)
 );

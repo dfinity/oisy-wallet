@@ -1,16 +1,45 @@
 use candid::{CandidType, Deserialize, Principal};
 use std::fmt::Debug;
 
+pub type Timestamp = u64;
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
+pub enum CredentialType {
+    ProofOfUniqueness,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct SupportedCredential {
+    pub credential_type: CredentialType,
+    pub ii_origin: String,
+    pub ii_canister_id: Principal,
+    pub issuer_origin: String,
+    pub issuer_canister_id: Principal,
+}
+
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
     pub ecdsa_key_name: String,
     pub allowed_callers: Vec<Principal>,
+    pub supported_credentials: Option<Vec<SupportedCredential>>,
+    /// Root of trust for checking canister signatures.
+    pub ic_root_key_der: Option<Vec<u8>>,
 }
 
 #[derive(CandidType, Deserialize)]
 pub enum Arg {
     Init(InitArg),
     Upgrade,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct Config {
+    pub ecdsa_key_name: String,
+    // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
+    pub allowed_callers: Vec<Principal>,
+    pub supported_credentials: Option<Vec<SupportedCredential>>,
+    /// Root of trust for checking canister signatures.
+    pub ic_root_key_raw: Option<Vec<u8>>,
 }
 
 pub mod transaction {
@@ -98,5 +127,78 @@ pub mod custom_token {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq)]
     pub enum CustomTokenId {
         Icrc(LedgerId),
+    }
+}
+
+/// Types specifics to the user profile.
+pub mod user_profile {
+    use super::{CredentialType, Timestamp};
+    use crate::types::Version;
+    use candid::{CandidType, Deserialize, Principal};
+    use ic_verifiable_credentials::issuer_api::CredentialSpec;
+    use std::collections::BTreeMap;
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct UserCredential {
+        pub credential_type: CredentialType,
+        pub verified_date_timestamp: Option<Timestamp>,
+        pub issuer: String,
+    }
+
+    // Used in the endpoint
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct UserProfile {
+        pub credentials: Vec<UserCredential>,
+        pub created_timestamp: Timestamp,
+        pub updated_timestamp: Timestamp,
+        pub version: Option<Version>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct StoredUserProfile {
+        pub credentials: BTreeMap<CredentialType, UserCredential>,
+        pub created_timestamp: Timestamp,
+        pub updated_timestamp: Timestamp,
+        pub version: Option<Version>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct AddUserCredentialRequest {
+        pub credential_jwt: String,
+        pub credential_spec: CredentialSpec,
+        pub issuer_canister_id: Principal,
+        pub current_user_version: Option<Version>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum AddUserCredentialError {
+        InvalidCredential,
+        ConfigurationError,
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct ListUsersRequest {
+        pub updated_after_timestamp: Option<Timestamp>,
+        pub matches_max_length: Option<u64>,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct OisyUser {
+        pub principal: Principal,
+        pub pouh_verified: bool,
+        pub updated_timestamp: Timestamp,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct ListUsersResponse {
+        pub users: Vec<OisyUser>,
+        pub matches_max_length: u64,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum GetUserProfileError {
+        NotFound,
     }
 }

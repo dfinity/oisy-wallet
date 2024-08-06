@@ -7,6 +7,7 @@
 	export let iconVisible = true;
 	export let inline = false;
 	export let color: 'blue' | 'inherit' = 'inherit';
+	export let fullWidth = false;
 </script>
 
 <a
@@ -21,6 +22,7 @@
 	class:active:text-dark-blue={color === 'blue'}
 	class:hover:text-blue={color === 'inherit'}
 	class:active:text-blue={color === 'inherit'}
+	class:w-full={fullWidth}
 >
 	{#if iconVisible}
 		<IconExternalLink size={iconSize} />

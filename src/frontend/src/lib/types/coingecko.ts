@@ -2,11 +2,14 @@
 
 // We are only interested in specific coin <> USD for now, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/coins/list
+import type { LedgerCanisterIdText } from '$icp/types/canister';
+import type { EthAddress } from '$lib/types/address';
+
 export type CoingeckoCoinsId = 'ethereum' | 'bitcoin' | 'internet-computer';
 
-// We are interested in the ERC20 <> USD on Ethereum only, therefore not an exhaustive list.
+// We are interested only in the ERC20 <> USD on Ethereum and in the ICRC <> USD on Internet Computer, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/asset_platforms
-export type CoingeckoPlatformId = 'ethereum';
+export type CoingeckoPlatformId = 'ethereum' | 'internet-computer';
 
 // We only support conversion in USD for now, therefore not an exhaustive list.
 // *refers to curl -l https://api.coingecko.com/api/v3/simple/supported_vs_currencies
@@ -52,4 +55,15 @@ export interface CoingeckoSimplePrice {
 	last_updated_at?: number;
 }
 
-export type CoingeckoSimplePriceResponse = Record<CoingeckoCoinsId | string, CoingeckoSimplePrice>;
+export type CoingeckoSimpleTokenPrice = Omit<CoingeckoSimplePrice, 'usd_market_cap'> &
+	Required<Pick<CoingeckoSimplePrice, 'usd_market_cap'>>;
+
+export type CoingeckoResponse<T> = Record<CoingeckoCoinsId | LedgerCanisterIdText | EthAddress, T>;
+
+export type CoingeckoSimplePriceResponse = CoingeckoResponse<CoingeckoSimplePrice>;
+
+export type CoingeckoSimpleTokenPriceResponse = CoingeckoResponse<CoingeckoSimpleTokenPrice>;
+
+export type CoingeckoPriceResponse =
+	| CoingeckoSimplePriceResponse
+	| CoingeckoSimpleTokenPriceResponse;

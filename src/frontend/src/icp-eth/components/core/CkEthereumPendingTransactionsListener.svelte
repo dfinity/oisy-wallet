@@ -22,13 +22,13 @@
 		ckEthereumTwinTokenStandard
 	} from '$icp-eth/derived/cketh.derived';
 	import type { NetworkId } from '$lib/types/network';
-	import type { IcToken } from '$icp/types/ic';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
 	import type { TransactionResponse } from '@ethersproject/abstract-provider';
 	import { token } from '$lib/stores/token.store';
+	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 
 	let listener: WebSocketListener | undefined = undefined;
 
@@ -68,7 +68,7 @@
 		loadBalance = $balance;
 
 		await loadCkEthereumPendingTransactions({
-			token: $token as IcToken,
+			token: $tokenAsIcToken,
 			lastObservedBlockNumber,
 			identity: $authStore.identity,
 			toAddress,
@@ -108,7 +108,7 @@
 
 				await loadPendingCkEthereumTransaction({
 					hash,
-					token: $token as IcToken,
+					token: $tokenAsIcToken,
 					twinToken: $ckEthereumTwinToken,
 					networkId
 				});

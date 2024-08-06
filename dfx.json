@@ -5,24 +5,58 @@
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
-			"optimize": "cycles"
+			"optimize": "cycles",
+			"gzip": true
 		},
 		"frontend": {
 			"frontend": {
 				"entrypoint": "build/index.html"
 			},
 			"source": ["build/"],
-			"type": "assets"
+			"type": "assets",
+			"gzip": true
+		},
+		"new_backend": {
+			"candid": "src/backend/backend.did",
+			"package": "backend",
+			"type": "rust",
+			"optimize": "cycles",
+			"gzip": true
+		},
+		"orbit": {
+			"type": "custom",
+			"candid": "https://raw.githubusercontent.com/dfinity/orbit/%40orbit/station-v0.0.2-alpha.5/apps/wallet/src/generated/station/station.did",
+			"wasm": "https://github.com/dfinity/orbit/releases/download/%40orbit%2Fstation-v0.0.2-alpha.5/station.wasm.gz",
+			"remote": {
+				"id": {
+					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
+					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai"
+				}
+			}
 		},
 		"internet_identity": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2023-11-17/internet_identity.did",
-			"wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2023-11-17/internet_identity_dev.wasm.gz",
+			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2024-04-05/internet_identity.did",
+			"wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2024-04-05/internet_identity_dev.wasm.gz",
 			"shrink": false,
 			"remote": {
 				"candid": "internet_identity.did",
 				"id": {
+					"staging": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+				}
+			}
+		},
+		"pouh_issuer": {
+			"type": "custom",
+			"candid": "https://github.com/dfinity/verifiable-credentials-sdk/releases/download/release-2024-07-01/dummy_issuer.did",
+			"wasm": "https://github.com/dfinity/verifiable-credentials-sdk/releases/download/release-2024-07-01/dummy_issuer.wasm.gz",
+			"shrink": false,
+			"remote": {
+				"id": {
+					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai",
+					"beta": "qgxyr-pyaaa-aaaah-qdcwq-cai",
+					"ic": "qgxyr-pyaaa-aaaah-qdcwq-cai"
 				}
 			}
 		},
@@ -147,6 +181,10 @@
 			"type": "persistent"
 		},
 		"staging": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"beta": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},

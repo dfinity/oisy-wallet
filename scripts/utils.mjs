@@ -2,8 +2,9 @@ import { HttpAgent } from '@dfinity/agent';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import { jsonReviver } from '@dfinity/utils';
+import { readdirSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import pemfile from 'pem-file';
 
 const SNS_JSON_FILE = join(process.cwd(), 'src', 'frontend', 'src', 'env', 'tokens.sns.json');
@@ -39,3 +40,23 @@ export const localAgent = async ({ identity }) => {
 
 	return agent;
 };
+
+/**
+ * Find all files in a directory. Optionally filter by extensions and ignore directories
+ *
+ * @param dir - directory to search
+ * @param extensions - file extensions to include in the search (empty array means all files)
+ * @param ignoreDirs - directories to ignore in the search (empty array means no directories are ignored)
+ * @returns {*} - array of file paths found in the directory and subdirectories
+ */
+export const findFiles = ({ dir, extensions = [], ignoreDirs = [] }) =>
+	readdirSync(dir, { withFileTypes: true }).flatMap((file) => {
+		const res = resolve(dir, file.name);
+		return file.isDirectory()
+			? ignoreDirs.includes(file.name)
+				? []
+				: findFiles({ dir: res, extensions, ignoreDirs })
+			: file.isFile() && (extensions.length === 0 || extensions.some((ext) => res.endsWith(ext)))
+				? [res]
+				: [];
+	});

@@ -28,7 +28,7 @@ module.exports = {
 			}
 		},
 		{
-			files: ['scripts/**/*.mjs'],
+			files: ['scripts/**/*.mjs', 'scripts/**/*.ts'],
 			rules: {
 				'no-console': 'off',
 			}
@@ -51,6 +51,8 @@ module.exports = {
 		'no-continue': 'warn',
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'no-delete-var': 'error',
+		'curly': 'error',
+		'arrow-body-style': ['warn', 'as-needed'],
 	},
 	globals: {
 		NodeJS: true
