@@ -324,6 +324,7 @@ interface I18nTokens {
 			clear_filter: string;
 			manage_for_network: string;
 			network: string;
+			all_tokens_zero_balance: string;
 		};
 		placeholder: { select_network: string };
 		info: { outdated_index_canister: string; no_changes: string };
