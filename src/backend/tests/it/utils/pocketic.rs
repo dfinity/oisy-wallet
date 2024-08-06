@@ -108,6 +108,7 @@ pub(crate) fn init_arg() -> Arg {
             issuer_origin: ISSUER_ORIGIN.to_string(),
             credential_type: CredentialType::ProofOfUniqueness,
         }]),
+        api: None,
     })
 }
 
