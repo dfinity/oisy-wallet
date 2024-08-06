@@ -22,8 +22,6 @@ pub struct BackendInstaller {
     canister_id: Option<Principal>,
     /// Cycles to add to the backend canister.
     cycles: u128,
-    /// Backend wasm bytes.  Overrides `wasm_path` if set.
-    wasm_bytes: Option<Vec<u8>>,
     /// Path to the backend wasm file.
     wasm_path: String,
     /// Argument to pass to the backend canister.
@@ -50,7 +48,6 @@ impl Default for BackendInstaller {
         Self {
             canister_id: None,
             cycles: Self::DEFAULT_CYCLES,
-            wasm_bytes: None,
             wasm_path: Self::default_wasm_path(),
             arg: Self::default_arg(),
             controllers: Self::default_controllers(),
@@ -67,10 +64,6 @@ impl BackendInstaller {
         self.wasm_path = wasm_path.to_string();
         self
     }
-    pub fn with_wasm_bytes(mut self, wasm_bytes: Vec<u8>) -> Self {
-        self.wasm_bytes = Some(wasm_bytes);
-        self
-    }
     pub fn with_arg_bytes(mut self, arg: Vec<u8>) -> Self {
         self.arg = arg;
         self
@@ -79,12 +72,10 @@ impl BackendInstaller {
 // Get parameters
 impl BackendInstaller {
     fn wasm_bytes(&self) -> Vec<u8> {
-        self.wasm_bytes.clone().unwrap_or_else(|| {
-            read(self.wasm_path.clone()).expect(&format!(
-                "Could not find the backend wasm: {}",
-                self.wasm_path
-            ))
-        })
+        read(self.wasm_path.clone()).expect(&format!(
+            "Could not find the backend wasm: {}",
+            self.wasm_path
+        ))
     }
 }
 // Builder
