@@ -80,7 +80,7 @@ impl BackendBuilder {
 }
 // Builder
 impl BackendBuilder {
-    /// Get or create canister ID.
+    /// Get or create canister.
     fn canister_id(&mut self, pic: &mut PocketIc) -> Principal {
         if let Some(canister_id) = self.canister_id {
             canister_id
@@ -132,22 +132,7 @@ pub fn controller() -> Principal {
 }
 
 pub fn setup() -> (PocketIc, Principal) {
-    let mut pic = PocketIc::new();
-    let canister_id = BackendBuilder::default().deploy_to(&mut pic);
-    (pic, canister_id)
-}
-
-pub fn setup_with_custom_wasm(
-    wasm_path: &str,
-    encoded_arg: Option<Vec<u8>>,
-) -> (PocketIc, Principal) {
-    let mut pic = PocketIc::new();
-    let mut builder = BackendBuilder::default().with_wasm_path(wasm_path);
-    if let Some(encoded_arg) = encoded_arg {
-        builder = builder.with_arg_bytes(encoded_arg);
-    }
-    let canister_id = builder.deploy_to(&mut pic);
-    (pic, canister_id)
+    BackendBuilder::default().deploy()
 }
 
 pub fn upgrade_latest_wasm(
