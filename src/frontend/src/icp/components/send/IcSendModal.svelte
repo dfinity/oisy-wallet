@@ -10,7 +10,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { icSendWizardStepsWithQrCodeScan } from '$icp/config/ic-send.config';
+	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 
@@ -30,7 +30,7 @@
 
 	let firstStep: WizardStep;
 	let otherSteps: WizardStep[];
-	$: [firstStep, ...otherSteps] = icSendWizardStepsWithQrCodeScan($i18n);
+	$: [firstStep, ...otherSteps] = sendWizardStepsWithQrCodeScan($i18n);
 
 	let steps: WizardSteps;
 	$: steps = [
