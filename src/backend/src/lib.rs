@@ -16,6 +16,7 @@ use ic_cdk::api::management_canister::ecdsa::{
 };
 use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
+use ic_cdk_timers::set_timer_interval;
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -37,6 +38,7 @@ use shared::types::user_profile::{
 use shared::types::{Arg, Config, InitArg, Migration, MigrationProgress};
 use std::cell::RefCell;
 use std::str::FromStr;
+use std::time::Duration;
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -527,8 +529,12 @@ async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
 
 /// Gets the state of any migration currently in progress.
 #[query(guard = "caller_is_allowed")]
-fn migration() -> Option<Migration> {
-    read_state(|s| s.migration.clone())
+fn migration() -> Option<(Principal, MigrationProgress)> {
+    read_state(|s| {
+        s.migration
+            .as_ref()
+            .map(|migration| (migration.to, migration.progress))
+    })
 }
 
 /// Starts user data migration to a given canister.
@@ -536,14 +542,19 @@ fn migration() -> Option<Migration> {
 /// # Errors
 /// - There is a current migration in progress to a different canister.
 #[update(guard = "caller_is_allowed")]
-fn migrate_user_data_to(target: Principal) -> Result<(), String> {
+fn migrate_user_data_to(to: Principal) -> Result<(), String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
-            if migration.to != target {
+            if migration.to != to {
                 return Err("migration in progress to a different canister".to_string());
             }
         }
-        s.migration = Some(Migration::new(target));
+        let timer_id = set_timer_interval(Duration::from_secs(0), step_migration);
+        s.migration = Some(Migration {
+            to,
+            progress: MigrationProgress::Pending,
+            timer_id,
+        });
         Ok(())
     })
 }

@@ -1,4 +1,5 @@
 use candid::{CandidType, Deserialize, Principal};
+use ic_cdk_timers::TimerId;
 use std::fmt::Debug;
 
 pub type Timestamp = u64;
@@ -256,7 +257,7 @@ pub mod user_profile {
 }
 
 /// The current state of progress of a user data migration.
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Default)]
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub enum MigrationProgress {
     // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
     /// Migration has been requested.
@@ -278,20 +279,12 @@ pub enum MigrationProgress {
     Completed,
 }
 
-#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub struct Migration {
     /// The canister that data is being migrated to.
     pub to: Principal,
     /// The current state of progress of a user data migration.
     pub progress: MigrationProgress,
-}
-
-impl Migration {
-    #[must_use]
-    pub fn new(to: Principal) -> Self {
-        Self {
-            to,
-            progress: MigrationProgress::default(),
-        }
-    }
+    /// The timer id for the migration.
+    pub timer_id: TimerId,
 }
