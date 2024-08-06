@@ -53,6 +53,7 @@ module.exports = {
 		'no-delete-var': 'error',
 		'curly': 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
+		'local-rules/use-nullish-checks': 'warn',
 	},
 	globals: {
 		NodeJS: true
