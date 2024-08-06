@@ -17,5 +17,3 @@ mkdir -p ./target/ic
 
 dfx deploy internet_identity --specified-id rdmx6-jaaaa-aaaaa-aaadq-cai
 dfx deploy pouh_issuer --specified-id qbw6f-caaaa-aaaah-qdcwa-cai
-
-
