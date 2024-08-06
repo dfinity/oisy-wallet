@@ -46,16 +46,14 @@ module.exports = {
 			const isNullishCheck = (node) => {
 				return (
 					node.operator === '===' &&
-					node.right.type === 'Identifier' &&
-					node.right.name === 'undefined'
+					((node.right.type === 'Identifier' && node.right.name === 'undefined') || (node.right.type === 'Literal' && node.right.value === null))
 				);
 			};
 
 			const isNonNullishCheck = (node) => {
 				return (
 					node.operator === '!==' &&
-					node.right.type === 'Identifier' &&
-					node.right.name === 'undefined'
+					((node.right.type === 'Identifier' && node.right.name === 'undefined') || (node.right.type === 'Literal' && node.right.value === null))
 				);
 			};
 
