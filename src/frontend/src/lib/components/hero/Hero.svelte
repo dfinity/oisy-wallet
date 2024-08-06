@@ -1,15 +1,16 @@
 <script lang="ts">
 	import Header from '$lib/components/hero/Header.svelte';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
+	import ThreeBackground from '$lib/components/ui/ThreeBackground.svelte';
 
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
-	export let send = false;
+	export let more = false;
 
 	let background: string;
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
@@ -20,15 +21,19 @@
 </script>
 
 <div class={`hero pb-4 md:pb-6 ${background}`}>
+	{#if $pseudoNetworkChainFusion}
+		<ThreeBackground />
+	{/if}
+
 	<Header />
 
 	<article
-		class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main 2xl:mt-[-70px]"
+		class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main 2xl:mt-[-70px] items-center"
 	>
 		<Alpha />
 
 		{#if $authSignedIn}
-			<HeroContent {usdTotal} {summary} {actions} {send} />
+			<HeroContent {usdTotal} {summary} {actions} {more} />
 		{:else if heroContent}
 			<HeroSignIn />
 		{/if}
@@ -37,12 +42,14 @@
 
 <style lang="scss">
 	.hero {
-		background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
-
 		--alpha-color: var(--color-grey);
 
 		&.icp {
 			background: radial-gradient(66.11% 97.11% at 50% 115.28%, #300097 0%, #1f005e 100%);
+		}
+
+		&.eth {
+			background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
 		}
 
 		&.sepoliaeth {
@@ -51,12 +58,9 @@
 		}
 
 		&.chainfusion {
-			background: radial-gradient(
-				90.18% 135.69% at 50% 135.69%,
-				#3653cb 0%,
-				#5331a6 40.06%,
-				#191e86 100%
-			);
+			background: transparent;
+
+			position: relative;
 		}
 	}
 </style>
