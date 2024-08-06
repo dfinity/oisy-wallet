@@ -16,8 +16,8 @@ fn test_upgrade_credential_init_args() {
     });
     let encoded_initial_arg = encode_one(initial_arg).unwrap();
     let pic_setup = BackendBuilder::default()
-        .with_wasm_path(BACKEND_V0_0_25_WASM_PATH)
-        .with_arg_bytes(encoded_initial_arg)
+        .with_wasm(BACKEND_V0_0_25_WASM_PATH)
+        .with_arg(encoded_initial_arg)
         .deploy();
 
     // Get ETH address before upgrade for post-upgrade test

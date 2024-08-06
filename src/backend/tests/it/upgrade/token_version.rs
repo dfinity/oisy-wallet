@@ -30,7 +30,7 @@ lazy_static! {
 fn test_upgrade_user_token() {
     // Deploy a released canister
     let pic_setup = BackendBuilder::default()
-        .with_wasm_path(BACKEND_V0_0_13_WASM_PATH)
+        .with_wasm(BACKEND_V0_0_13_WASM_PATH)
         .deploy();
 
     // Add a user token
@@ -65,7 +65,7 @@ fn test_upgrade_user_token() {
 fn test_upgrade_allowed_caller_eth_address_of() {
     // Deploy a released canister
     let pic_setup = BackendBuilder::default()
-        .with_wasm_path(BACKEND_V0_0_13_WASM_PATH)
+        .with_wasm(BACKEND_V0_0_13_WASM_PATH)
         .deploy();
 
     // Caller is allowed to call eth_address_of
@@ -100,7 +100,7 @@ fn test_add_user_token_after_upgrade_should_ignore_premature_increments() {
 fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgradeOptions) {
     // Deploy a released canister
     let pic_setup = BackendBuilder::default()
-        .with_wasm_path(BACKEND_V0_0_13_WASM_PATH)
+        .with_wasm(BACKEND_V0_0_13_WASM_PATH)
         .deploy();
 
     pic_setup.0.tick();
@@ -140,7 +140,7 @@ fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgr
 fn test_update_user_token_after_upgrade() {
     // Deploy a released canister
     let pic_setup = BackendBuilder::default()
-        .with_wasm_path(BACKEND_V0_0_13_WASM_PATH)
+        .with_wasm(BACKEND_V0_0_13_WASM_PATH)
         .deploy();
 
     // Add a user token

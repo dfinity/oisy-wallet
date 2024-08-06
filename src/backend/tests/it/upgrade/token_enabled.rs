@@ -30,7 +30,7 @@ lazy_static! {
 fn test_upgrade_user_token() {
     // Deploy a released canister
     let pic_setup = BackendBuilder::default()
-        .with_wasm_path(BACKEND_V0_0_19_WASM_PATH)
+        .with_wasm(BACKEND_V0_0_19_WASM_PATH)
         .deploy();
 
     // Add a user token
@@ -65,7 +65,7 @@ fn test_upgrade_user_token() {
 fn test_update_user_token_after_upgrade() {
     // Deploy a released canister
     let pic_setup = BackendBuilder::default()
-        .with_wasm_path(BACKEND_V0_0_19_WASM_PATH)
+        .with_wasm(BACKEND_V0_0_19_WASM_PATH)
         .deploy();
 
     // Add a user token

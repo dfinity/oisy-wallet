@@ -56,15 +56,15 @@ impl Default for BackendBuilder {
 }
 // Customisation
 impl BackendBuilder {
-    pub fn with_canister_id(mut self, canister_id: Principal) -> Self {
+    pub fn with_canister(mut self, canister_id: Principal) -> Self {
         self.canister_id = Some(canister_id);
         self
     }
-    pub fn with_wasm_path(mut self, wasm_path: &str) -> Self {
+    pub fn with_wasm(mut self, wasm_path: &str) -> Self {
         self.wasm_path = wasm_path.to_string();
         self
     }
-    pub fn with_arg_bytes(mut self, arg: Vec<u8>) -> Self {
+    pub fn with_arg(mut self, arg: Vec<u8>) -> Self {
         self.arg = arg;
         self
     }
