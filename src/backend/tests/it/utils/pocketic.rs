@@ -3,8 +3,8 @@ use candid::{decode_one, encode_one, CandidType, Principal};
 use pocket_ic::{CallError, PocketIc, WasmResult};
 use serde::Deserialize;
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
-use std::env;
 use std::fs::read;
+use std::{env, time::Duration};
 
 use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
 
@@ -15,6 +15,123 @@ const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.
 // Instead, we can use the master_ecdsa_public_key suffixed with the subnet ID. PocketID adds the suffix because it can have multiple subnets.
 const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 
+/// Backend canister installer
+#[derive(Debug)]
+pub struct BackendInstaller {
+    /// Canister ID of the backend canister.  If not set, a new canister will be created.
+    canister_id: Option<Principal>,
+    /// Cycles to add to the backend canister.
+    cycles: u128,
+    /// Backend wasm bytes.  Overrides `wasm_path` if set.
+    wasm_bytes: Option<Vec<u8>>,
+    /// Path to the backend wasm file.
+    wasm_path: String,
+    /// Argument to pass to the backend canister.
+    arg: Vec<u8>,
+    /// Controllers of the backend canister.
+    controllers: Vec<Principal>,
+}
+// Defaults
+impl BackendInstaller {
+    pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
+    fn default_wasm_path() -> String {
+        BACKEND_WASM.to_string()
+    }
+    fn default_arg() -> Vec<u8> {
+        encode_one(&init_arg()).unwrap()
+    }
+    fn default_controllers() -> Vec<Principal> {
+        vec![Principal::from_text(CONTROLLER)
+            .expect("Test setup error: Failed to parse controller principal")]
+    }
+}
+impl Default for BackendInstaller {
+    fn default() -> Self {
+        Self {
+            canister_id: None,
+            cycles: Self::DEFAULT_CYCLES,
+            wasm_bytes: None,
+            wasm_path: Self::default_wasm_path(),
+            arg: Self::default_arg(),
+            controllers: Self::default_controllers(),
+        }
+    }
+}
+// Customisation
+impl BackendInstaller {
+    pub fn with_canister_id(mut self, canister_id: Principal) -> Self {
+        self.canister_id = Some(canister_id);
+        self
+    }
+    pub fn with_wasm_path(mut self, wasm_path: &str) -> Self {
+        self.wasm_path = wasm_path.to_string();
+        self
+    }
+    pub fn with_wasm_bytes(mut self, wasm_bytes: Vec<u8>) -> Self {
+        self.wasm_bytes = Some(wasm_bytes);
+        self
+    }
+    pub fn with_arg_bytes(mut self, arg: Vec<u8>) -> Self {
+        self.arg = arg;
+        self
+    }
+}
+// Get parameters
+impl BackendInstaller {
+    fn wasm_bytes(&self) -> Vec<u8> {
+        self.wasm_bytes.clone().unwrap_or_else(|| {
+            read(self.wasm_path.clone()).expect(&format!(
+                "Could not find the backend wasm: {}",
+                self.wasm_path
+            ))
+        })
+    }
+}
+// Builder
+impl BackendInstaller {
+    /// Get or create canister ID.
+    fn canister_id(&mut self, pic: &mut PocketIc) -> Principal {
+        if let Some(canister_id) = self.canister_id {
+            canister_id
+        } else {
+            let canister_id =
+                pic.create_canister_on_subnet(None, None, Principal::from_text(SUBNET_ID).unwrap());
+            self.canister_id = Some(canister_id);
+            canister_id
+        }
+    }
+    /// Add cycles to the backend canister.
+    fn add_cycles(&mut self, pic: &mut PocketIc) {
+        let canister_id = self.canister_id(pic);
+        pic.add_cycles(canister_id, self.cycles);
+    }
+    /// Install the backend canister.
+    fn install(&mut self, pic: &mut PocketIc) {
+        let wasm_bytes = self.wasm_bytes();
+        let canister_id = self.canister_id(pic);
+        let arg = self.arg.clone();
+        pic.install_canister(canister_id, wasm_bytes, arg, None);
+    }
+    /// Set controllers of the backend canister.
+    fn set_controllers(&mut self, pic: &mut PocketIc) {
+        let canister_id = self.canister_id(pic);
+        pic.set_controllers(canister_id.clone(), None, self.controllers.clone())
+            .expect("Test setup error: Failed to set controllers");
+    }
+    /// Setup the backend canister.
+    fn setup(&mut self, pic: &mut PocketIc) -> Principal {
+        let canister_id = self.canister_id(pic);
+        pic.advance_time(Duration::from_secs(100_000));
+        self.add_cycles(pic);
+        pic.advance_time(Duration::from_secs(100_000));
+        self.install(pic);
+        pic.advance_time(Duration::from_secs(100_000));
+        self.set_controllers(pic);
+        pic.advance_time(Duration::from_secs(100_000));
+        canister_id
+    }
+}
+
 #[inline]
 pub fn controller() -> Principal {
     Principal::from_text(CONTROLLER)
@@ -22,27 +139,21 @@ pub fn controller() -> Principal {
 }
 
 pub fn setup() -> (PocketIc, Principal) {
-    let backend_wasm_path =
-        env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
-
-    setup_with_custom_wasm(&backend_wasm_path, None)
+    let mut pic = PocketIc::new();
+    let canister_id = BackendInstaller::default().setup(&mut pic);
+    (pic, canister_id)
 }
 
 pub fn setup_with_custom_wasm(
     wasm_path: &str,
     encoded_arg: Option<Vec<u8>>,
 ) -> (PocketIc, Principal) {
-    let (pic, canister_id) = init();
-
-    let wasm_bytes = read(wasm_path).expect(&format!("Could not find the wasm: {}", wasm_path));
-
-    let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
-
-    pic.install_canister(canister_id, wasm_bytes, arg, None);
-
-    pic.set_controllers(canister_id.clone(), None, vec![controller()])
-        .expect("Test setup error: Failed to set controllers");
-
+    let mut pic = PocketIc::new();
+    let mut builder = BackendInstaller::default().with_wasm_path(wasm_path);
+    if let Some(encoded_arg) = encoded_arg {
+        builder = builder.with_arg_bytes(encoded_arg);
+    }
+    let canister_id = builder.setup(&mut pic);
     (pic, canister_id)
 }
 
@@ -68,6 +179,8 @@ pub fn upgrade_with_wasm(
 
     let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
 
+    pic.advance_time(Duration::from_secs(100_000));
+
     pic.upgrade_canister(
         canister_id.clone(),
         wasm_bytes,
@@ -83,15 +196,6 @@ pub fn upgrade_with_wasm(
             )
         }
     })
-}
-
-fn init() -> (PocketIc, Principal) {
-    let pic = PocketIc::new();
-    let canister_id =
-        pic.create_canister_on_subnet(None, None, Principal::from_text(SUBNET_ID).unwrap());
-    pic.add_cycles(canister_id, 2_000_000_000_000);
-
-    (pic, canister_id)
 }
 
 pub(crate) fn init_arg() -> Arg {

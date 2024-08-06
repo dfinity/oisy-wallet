@@ -67,14 +67,13 @@ fn test_update_user_token_after_upgrade() {
     // Add a user token
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(
+    update_call::<()>(
         &pic_setup,
         caller,
         "add_user_token",
         PRE_UPGRADE_TOKEN.clone(),
-    );
-
-    assert!(result.is_ok());
+    )
+    .expect("Test fail: Update call add_user_token() should succeed");
 
     // Upgrade canister with new wasm
     upgrade_latest_wasm(&pic_setup, None)
