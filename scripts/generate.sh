@@ -9,9 +9,18 @@ set -euo pipefail
 	requires all the canisters to be deployed locally, which seems absurdly heavyweight.
 	This code just downloads the candid files and puts them where they would normally
 	be found for a local deployment.  Much faster!
+
+	Dependencies:
+	- Please install jq before running this script.
 	EOF
   exit 0
 }
+
+# Check that jq is installed.
+command -v jq &>/dev/null || {
+  echo "ERROR: Please install jq before running this command."
+  exit 1
+} >&2
 
 # Gets all .did files listed in dfx.json.
 #
@@ -22,7 +31,8 @@ function install_did_files() {
       IFS=', ' read -r -a array <<<"$line"
       canister_name="${array[0]}"
       source="${array[1]}"
-      destination=".dfx/local/canisters/${array[0]}/${array[0]}.did"
+      filename="${source##*/}"
+      destination=".dfx/local/canisters/${array[0]}/${filename}"
       mkdir -p "$(dirname "$destination")"
       case "$source" in
       http*) curl -sSL "$source" >"$destination" ;;
@@ -36,9 +46,9 @@ function install_did_files() {
 # Download .did files listed in dfx.json
 install_did_files
 # Generate bindings for canisters with directories in `declarations`:
-for canister in $(ls src/declarations/) ; do
-	echo "Generating bindings for $canister"
-	dfx generate "$canister"
+for canister in $(ls src/declarations/); do
+  echo "Generating bindings for $canister"
+  dfx generate "$canister"
 done
 # Clean up..
 node scripts/did.update.types.mjs
