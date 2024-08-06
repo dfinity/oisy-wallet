@@ -13,6 +13,7 @@ export interface AddUserCredentialRequest {
 	current_user_version: [] | [bigint];
 	credential_spec: CredentialSpec;
 }
+export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export interface CanisterStatusResultV2 {
@@ -28,6 +29,7 @@ export interface CanisterStatusResultV2 {
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export interface Config {
+	api: [] | [Guards];
 	ecdsa_key_name: string;
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
@@ -51,6 +53,10 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type GetUserProfileError = { NotFound: null };
+export interface Guards {
+	user_data: ApiEnabled;
+	threshold_key: ApiEnabled;
+}
 export interface HttpRequest {
 	url: string;
 	method: string;
@@ -67,6 +73,7 @@ export interface IcrcToken {
 	index_id: [] | [Principal];
 }
 export interface InitArg {
+	api: [] | [Guards];
 	ecdsa_key_name: string;
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
