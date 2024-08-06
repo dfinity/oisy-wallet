@@ -1,5 +1,14 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
+	const ApiEnabled = IDL.Variant({
+		ReadOnly: IDL.Null,
+		Enabled: IDL.Null,
+		Disabled: IDL.Null
+	});
+	const Guards = IDL.Record({
+		user_data: ApiEnabled,
+		threshold_key: ApiEnabled
+	});
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
 		ii_canister_id: IDL.Principal,
@@ -9,6 +18,7 @@ export const idlFactory = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const InitArg = IDL.Record({
+		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
@@ -37,6 +47,7 @@ export const idlFactory = ({ IDL }) => {
 		Err: AddUserCredentialError
 	});
 	const Config = IDL.Record({
+		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
@@ -161,6 +172,15 @@ export const idlFactory = ({ IDL }) => {
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
+	const ApiEnabled = IDL.Variant({
+		ReadOnly: IDL.Null,
+		Enabled: IDL.Null,
+		Disabled: IDL.Null
+	});
+	const Guards = IDL.Record({
+		user_data: ApiEnabled,
+		threshold_key: ApiEnabled
+	});
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
 		ii_canister_id: IDL.Principal,
@@ -170,6 +190,7 @@ export const init = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const InitArg = IDL.Record({
+		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),

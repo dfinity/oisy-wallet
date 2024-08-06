@@ -46,6 +46,7 @@ impl From<InitArg> for Config {
             allowed_callers,
             supported_credentials,
             ic_root_key_der,
+            api,
         } = arg;
         let ic_root_key_raw = match extract_raw_root_pk_from_der(
             &ic_root_key_der.unwrap_or_else(|| IC_ROOT_PK_DER.to_vec()),
@@ -58,6 +59,7 @@ impl From<InitArg> for Config {
             allowed_callers,
             supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),
+            api,
         }
     }
 }

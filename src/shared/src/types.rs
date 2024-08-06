@@ -24,6 +24,56 @@ pub struct InitArg {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_der: Option<Vec<u8>>,
+    /// Enables or disables APIs
+    pub api: Option<Guards>,
+}
+
+#[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
+#[repr(u8)]
+pub enum ApiEnabled {
+    Enabled,
+    ReadOnly,
+    Disabled,
+}
+impl Default for ApiEnabled {
+    fn default() -> Self {
+        Self::Enabled
+    }
+}
+impl ApiEnabled {
+    #[must_use]
+    pub fn readable(&self) -> bool {
+        matches!(self, Self::Enabled | Self::ReadOnly)
+    }
+    #[must_use]
+    pub fn writable(&self) -> bool {
+        matches!(self, Self::Enabled)
+    }
+}
+#[test]
+fn test_api_enabled() {
+    assert_eq!(ApiEnabled::Enabled.readable(), true);
+    assert_eq!(ApiEnabled::Enabled.writable(), true);
+    assert_eq!(ApiEnabled::ReadOnly.readable(), true);
+    assert_eq!(ApiEnabled::ReadOnly.writable(), false);
+    assert_eq!(ApiEnabled::Disabled.readable(), false);
+    assert_eq!(ApiEnabled::Disabled.writable(), false);
+}
+
+#[derive(CandidType, Deserialize, Default, Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Guards {
+    pub threshold_key: ApiEnabled,
+    pub user_data: ApiEnabled,
+}
+#[test]
+fn guards_default() {
+    assert_eq!(
+        Guards::default(),
+        Guards {
+            threshold_key: ApiEnabled::Enabled,
+            user_data: ApiEnabled::Enabled,
+        }
+    );
 }
 
 #[derive(CandidType, Deserialize)]
@@ -40,6 +90,8 @@ pub struct Config {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_raw: Option<Vec<u8>>,
+    /// Enables or disables APIs
+    pub api: Option<Guards>,
 }
 
 pub mod transaction {
