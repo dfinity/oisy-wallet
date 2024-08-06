@@ -31,7 +31,7 @@ jobs:
         with:
           path: |
             target/wasm32-unknown-unknown/release/backend.wasm
-          key: ${{ runner.os }}-backend-wasm-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
+          key: ${{ runner.os }}-backend-wasm-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
       - name: Cache cargo dependencies
         if: steps.backend-wasm-cache.outputs.cache-hit != 'true'
         uses: actions/cache@v4
