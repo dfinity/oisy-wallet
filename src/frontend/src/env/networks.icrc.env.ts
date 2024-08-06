@@ -414,15 +414,7 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKWBTC_IC_DATA) ? [CKWBTC_IC_DATA] : []),
 	...(nonNullish(CKUSDT_IC_DATA) ? [CKUSDT_IC_DATA] : []),
 	...(nonNullish(CKWSTETH_IC_DATA) ? [CKWSTETH_IC_DATA] : [])
-].map((token) => ({
-	...token,
-	...(nonNullish(token.twinToken) && {
-		displayName: {
-			prefix: 'ck',
-			name: token.twinToken.name
-		}
-	})
-}));
+];
 
 export const ICRC_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_TOKENS.map(
 	({ ledgerCanisterId }) => ledgerCanisterId
