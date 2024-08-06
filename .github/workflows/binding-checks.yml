@@ -58,7 +58,7 @@ jobs:
       - name: Check bindings
         run: |
           test -z "$(git status --porcelain)" || {
-                  echo "FIX: Please run npm run generate"
+                  echo "FIX: Please execute npm run generate"
                   git diff
                   exit 1
           }
