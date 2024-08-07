@@ -68,6 +68,10 @@ impl BackendBuilder {
         self.arg = arg;
         self
     }
+    pub fn with_controllers(mut self, controllers: Vec<Principal>) -> Self {
+        self.controllers = controllers;
+        self
+    }
 }
 // Get parameters
 impl BackendBuilder {
@@ -93,8 +97,10 @@ impl BackendBuilder {
     }
     /// Add cycles to the backend canister.
     fn add_cycles(&mut self, pic: &mut PocketIc) {
-        let canister_id = self.canister_id(pic);
-        pic.add_cycles(canister_id, self.cycles);
+        if self.cycles > 0 {
+            let canister_id = self.canister_id(pic);
+            pic.add_cycles(canister_id, self.cycles);
+        }
     }
     /// Install the backend canister.
     fn install(&mut self, pic: &mut PocketIc) {
@@ -110,7 +116,7 @@ impl BackendBuilder {
             .expect("Test setup error: Failed to set controllers");
     }
     /// Setup the backend canister.
-    fn deploy_to(&mut self, pic: &mut PocketIc) -> Principal {
+    pub fn deploy_to(&mut self, pic: &mut PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
         self.add_cycles(pic);
         self.install(pic);
