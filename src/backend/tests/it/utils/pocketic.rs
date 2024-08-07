@@ -68,6 +68,10 @@ impl BackendBuilder {
         self.arg = arg;
         self
     }
+    pub fn with_controllers(mut self, controllers: Vec<Principal>) -> Self {
+        self.controllers = controllers;
+        self
+    }
 }
 // Get parameters
 impl BackendBuilder {
