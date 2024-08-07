@@ -14,16 +14,7 @@
 
 	let back = false;
 	$: back = isSubRoute($page);
-
-	let hideName = false;
-	$: $authSignedIn, updateHideName();
-
-	const updateHideName = () => {
-		hideName = window.innerWidth < 768 && $authSignedIn;
-	};
 </script>
-
-<svelte:window on:resize={updateHideName} />
 
 <header
 	class="flex justify-between md:px-4 relative z-10 pointer-events-none"
@@ -33,7 +24,7 @@
 		<Back />
 	{:else}
 		<div class="flex p-4 items-center text-off-white">
-			<OisyWalletLogo {hideName} />
+			<OisyWalletLogo hideName={$authSignedIn} />
 
 			{#if $authNotSignedIn}
 				<div
