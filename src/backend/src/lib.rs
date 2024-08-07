@@ -566,6 +566,17 @@ fn stats() -> Stats {
     read_state(|s| Stats::from(s))
 }
 
+/// Sets the lock state of the canister APIs.
+#[update(guard = "caller_is_allowed")]
+fn set_guards(guards: Guards) {
+    mutate_state(|state| {
+        modify_state_config(state, |mut config| {
+            config.api = Some(guards);
+            config
+        })
+    });
+}
+
 /// Starts user data migration to a given canister.
 ///
 /// # Errors
@@ -601,7 +612,7 @@ fn step_migration() {
             Some(mut migration) => {
                 match migration.progress {
                     MigrationProgress::Pending => {
-                        // TODO: Lock the local canister APIs.
+                        // Lock the local canister APIs.
                         modify_state_config(state, |mut config: Config| {
                             config.api = Some(Guards {
                                 threshold_key: ApiEnabled::ReadOnly,
