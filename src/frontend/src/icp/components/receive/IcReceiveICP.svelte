@@ -14,7 +14,7 @@
 
 	const { tokenStandard, open, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	const openReceive = async (modalId: symbol) => {
+	const openReceive = (modalId: symbol) => {
 		if ($tokenStandard === 'icp' || isRouteTokens($page)) {
 			modalStore.openIcpReceive(modalId);
 			return;

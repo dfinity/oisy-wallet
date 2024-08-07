@@ -8,7 +8,7 @@
 	const modalId = Symbol();
 </script>
 
-<svelte:window on:oisyReceive={async () => modalStore.openReceive(modalId)} />
+<svelte:window on:oisyReceive={() => modalStore.openReceive(modalId)} />
 
 <ReceiveButtonWithModal
 	openModal={modalStore.openReceive}
