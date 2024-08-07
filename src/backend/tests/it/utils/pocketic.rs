@@ -116,7 +116,7 @@ impl BackendBuilder {
             .expect("Test setup error: Failed to set controllers");
     }
     /// Setup the backend canister.
-    fn deploy_to(&mut self, pic: &mut PocketIc) -> Principal {
+    pub fn deploy_to(&mut self, pic: &mut PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
         self.add_cycles(pic);
         self.install(pic);
