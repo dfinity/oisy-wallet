@@ -538,7 +538,7 @@ async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
 }
 
-/// Sets the lock state of the canister APIs.
+/// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to enable an API in read-only mode.
 #[update(guard = "caller_is_allowed")]
 fn set_guards(guards: Guards) {
     mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
