@@ -32,7 +32,7 @@ use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
-    ListUsersResponse, OisyUser, UserProfile,
+    ListUsersResponse, OisyUser, Stats, UserProfile,
 };
 use shared::types::{Arg, Config, InitArg};
 use std::cell::RefCell;
@@ -110,6 +110,16 @@ pub struct State {
     custom_token: CustomTokenMap,
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
+}
+
+impl From<&State> for Stats {
+    fn from(state: &State) -> Self {
+        Stats {
+            user_profile_count: state.user_profile.len(),
+            user_token_count: state.user_token.len(),
+            custom_token_count: state.custom_token.len(),
+        }
+    }
 }
 
 fn set_config(arg: InitArg) {
@@ -521,6 +531,12 @@ fn list_users(request: ListUsersRequest) -> ListUsersResponse {
 #[update]
 async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
+}
+
+/// Gets stats relevant to the user migration.
+#[query(guard = "caller_is_allowed")]
+fn stats() -> Stats {
+    read_state(|s| Stats::from(s))
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
