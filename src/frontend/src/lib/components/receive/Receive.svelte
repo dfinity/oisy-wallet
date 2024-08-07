@@ -1,21 +1,19 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
 	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
-	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
+	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 
 	const modalId = Symbol();
-
-	const openReceive = async () => {
-		modalStore.openReceive(modalId);
-	};
 </script>
 
-<svelte:window on:oisyReceive={openReceive} />
+<svelte:window on:oisyReceive={async () => modalStore.openReceive(modalId)} />
 
-<ReceiveButton on:click={openReceive} />
-
-{#if $modalReceive && $modalStore?.data === modalId}
-	<ReceiveAddressModal infoCmp={ReceiveAddresses} on:nnsClose={modalStore.close} />
-{/if}
+<ReceiveButtonWithModal
+	openModal={modalStore.openReceive}
+	isOpen={$modalReceive}
+	specificModalId={modalId}
+>
+	<ReceiveAddressModal infoCmp={ReceiveAddresses} on:nnsClose={modalStore.close} slot="modal" />
+</ReceiveButtonWithModal>
