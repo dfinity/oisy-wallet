@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 
-use crate::utils::pocketic::{controller, query_call, setup, BackendBuilder, PicCanister};
+use crate::utils::pocketic::{controller, query_call, setup, BackendBuilder, PicCanister, PicCanisterTrait};
 use candid::Principal;
 use pocket_ic::PocketIc;
 use shared::types::MigrationReport;
@@ -45,6 +45,7 @@ impl MigrationTestEnv {
             canister_id: self.new_backend,
         }
     }
+    
 }
 
 #[test]
@@ -80,4 +81,5 @@ fn test_empty_migration() {
         Ok(None),
         "Initially, no migration should be in progress"
     );
+
 }

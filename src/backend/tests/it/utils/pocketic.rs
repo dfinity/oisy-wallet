@@ -259,9 +259,19 @@ pub struct PicCanister {
     pub pic: Arc<PocketIc>,
     pub canister_id: Principal,
 }
+impl PicCanisterTrait for PicCanister {
+    fn pic(&self) -> Arc<PocketIc> {
+        self.pic.clone()
+    }
+    fn canister_id(&self) -> Principal {
+        self.canister_id.clone()
+    }
+}
 
-impl PicCanister {
-    pub fn update<T>(
+pub trait PicCanisterTrait {
+    fn pic(&self) -> Arc<PocketIc>;
+    fn canister_id(&self) -> Principal;
+    fn update<T>(
         &self,
         caller: Principal,
         method: &str,
@@ -270,9 +280,9 @@ impl PicCanister {
     where
         T: for<'a> Deserialize<'a> + CandidType,
     {
-        self.pic
+        self.pic()
             .update_call(
-                self.canister_id.clone(),
+                self.canister_id(),
                 caller,
                 method,
                 encode_one(arg).unwrap(),
@@ -291,7 +301,7 @@ impl PicCanister {
             })
     }
 
-    pub fn query<T>(
+    fn query<T>(
         &self,
         caller: Principal,
         method: &str,
@@ -300,9 +310,9 @@ impl PicCanister {
     where
         T: for<'a> Deserialize<'a> + CandidType,
     {
-        self.pic
+        self.pic()
             .query_call(
-                self.canister_id.clone(),
+                self.canister_id(),
                 caller,
                 method,
                 encode_one(arg).unwrap(),
