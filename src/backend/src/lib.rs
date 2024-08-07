@@ -554,20 +554,25 @@ fn stats() -> Stats {
 /// # Errors
 /// - There is a current migration in progress to a different canister.
 #[update(guard = "caller_is_allowed")]
-fn migrate_user_data_to(to: Principal) -> Result<(), String> {
+fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
             if migration.to != to {
-                return Err("migration in progress to a different canister".to_string());
+                Err("migration in progress to a different canister".to_string())
+            } else {
+                Ok(MigrationReport::from(migration))
             }
+        } else {
+            let timer_id = set_timer_interval(Duration::from_secs(0), step_migration);
+            let migration = Migration {
+                to,
+                progress: MigrationProgress::Pending,
+                timer_id,
+            };
+            let migration_report = MigrationReport::from(&migration);
+            s.migration = Some(migration);
+            Ok(migration_report)    
         }
-        let timer_id = set_timer_interval(Duration::from_secs(0), step_migration);
-        s.migration = Some(Migration {
-            to,
-            progress: MigrationProgress::Pending,
-            timer_id,
-        });
-        Ok(())
     })
 }
 

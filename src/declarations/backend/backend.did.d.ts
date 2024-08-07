@@ -87,10 +87,6 @@ export interface ListUsersResponse {
 	users: Array<OisyUser>;
 	matches_max_length: bigint;
 }
-export interface Migration {
-	to: Principal;
-	progress: MigrationProgress;
-}
 export type MigrationProgress =
 	| { MigratedUserTokensUpTo: Principal }
 	| { TargetPreCheckOk: null }
@@ -100,6 +96,10 @@ export type MigrationProgress =
 	| { TargetLocked: null }
 	| { Completed: null }
 	| { Pending: null };
+export interface MigrationReport {
+	to: Principal;
+	progress: MigrationProgress;
+}
 export interface OisyUser {
 	principal: Principal;
 	pouh_verified: boolean;
@@ -107,7 +107,7 @@ export interface OisyUser {
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_2 = { Ok: null } | { Err: string };
+export type Result_2 = { Ok: MigrationReport } | { Err: string };
 export interface SignRequest {
 	to: string;
 	gas: bigint;
@@ -117,6 +117,11 @@ export interface SignRequest {
 	max_fee_per_gas: bigint;
 	chain_id: bigint;
 	nonce: bigint;
+}
+export interface Stats {
+	user_profile_count: bigint;
+	custom_token_count: bigint;
+	user_token_count: bigint;
 }
 export interface SupportedCredential {
 	ii_canister_id: Principal;
@@ -162,7 +167,7 @@ export interface _SERVICE {
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
 	migrate_user_data_to: ActorMethod<[Principal], Result_2>;
-	migration: ActorMethod<[], [] | [Migration]>;
+	migration: ActorMethod<[], [] | [MigrationReport]>;
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
@@ -171,6 +176,7 @@ export interface _SERVICE {
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
+	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;

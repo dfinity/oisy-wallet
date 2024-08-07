@@ -25,3 +25,5 @@ shared = { path = "../shared" }
 [dev-dependencies]
 lazy_static = { workspace = true }
 pocket-ic = { workspace = true }
+idl2json = { workspace = true }
+candid_parser = { workspace = true }

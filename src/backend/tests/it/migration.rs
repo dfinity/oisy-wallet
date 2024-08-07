@@ -8,6 +8,7 @@ use crate::utils::pocketic::{
 use pocket_ic::PocketIc;
 use shared::types::{MigrationReport, Stats};
 
+
 struct MigrationTestEnv {
     /// Simulated Internet Computer
     pic: Arc<PocketIc>,
@@ -97,5 +98,23 @@ fn test_empty_migration() {
             user_token_count: 0,
         }),
         "Initially, there should be no users in the new backend"
+    );
+    // Start migration
+    assert_eq!(
+        pic_setup
+            .old_backend
+            .update::<MigrationReport>(controller(), "migrate_user_data_to", pic_setup.new_backend.canister_id()).expect("Failed to start migration"),
+        MigrationReport { to: pic_setup.new_backend.canister_id(), progress: shared::types::MigrationProgress::Pending },
+    );
+    // Migration should be in progress.
+    assert_eq!(
+        pic_setup
+            .old_backend
+            .query::<Option<MigrationReport>>(controller(), "migration", ()),
+        Ok(Some(MigrationReport {
+            to: pic_setup.new_backend.canister_id(),
+            progress: shared::types::MigrationProgress::Pending,
+        })),
+        "Migration should be in progress"
     );
 }

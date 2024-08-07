@@ -134,7 +134,6 @@ export const idlFactory = ({ IDL }) => {
 		users: IDL.Vec(OisyUser),
 		matches_max_length: IDL.Nat64
 	});
-	const Result_2 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
 	const MigrationProgress = IDL.Variant({
 		MigratedUserTokensUpTo: IDL.Principal,
 		TargetPreCheckOk: IDL.Null,
@@ -145,10 +144,11 @@ export const idlFactory = ({ IDL }) => {
 		Completed: IDL.Null,
 		Pending: IDL.Null
 	});
-	const Migration = IDL.Record({
+	const MigrationReport = IDL.Record({
 		to: IDL.Principal,
 		progress: MigrationProgress
 	});
+	const Result_2 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -163,6 +163,11 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat,
 		nonce: IDL.Nat
 	});
+	const Stats = IDL.Record({
+		user_profile_count: IDL.Nat64,
+		custom_token_count: IDL.Nat64,
+		user_token_count: IDL.Nat64
+	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
@@ -176,7 +181,7 @@ export const idlFactory = ({ IDL }) => {
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse]),
 		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_2], []),
-		migration: IDL.Func([], [IDL.Opt(Migration)]),
+		migration: IDL.Func([], [IDL.Opt(MigrationReport)]),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
@@ -185,6 +190,7 @@ export const idlFactory = ({ IDL }) => {
 		set_user_token: IDL.Func([UserToken], [], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], []),
+		stats: IDL.Func([], [Stats]),
 		step_migration: IDL.Func([], [], [])
 	});
 };
