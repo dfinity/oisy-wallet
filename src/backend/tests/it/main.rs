@@ -1,6 +1,7 @@
 mod address;
 mod config;
 mod custom_token;
+mod guard;
 mod list_users;
 mod sign;
 mod token;
@@ -9,4 +10,3 @@ mod user_credentials;
 mod user_profile;
 mod user_token;
 mod utils;
-mod guard;
