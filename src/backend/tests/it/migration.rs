@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use crate::utils::pocketic::{
-    controller, query_call, setup, BackendBuilder, PicCanister, PicCanisterTrait,
+    controller, query_call, setup, BackendBuilder, PicBackend, PicCanisterTrait,
 };
 use pocket_ic::PocketIc;
 use shared::types::{ApiEnabled, Guards, MigrationReport, Stats};
@@ -12,15 +12,15 @@ struct MigrationTestEnv {
     /// Simulated Internet Computer
     pic: Arc<PocketIc>,
     /// The old backend canister ID, from which data is being migrated.
-    old_backend: PicCanister,
+    old_backend: PicBackend,
     /// The new backend canister ID.
-    new_backend: PicCanister,
+    new_backend: PicBackend,
 }
 
 impl Default for MigrationTestEnv {
     fn default() -> Self {
         let mut pic = Arc::new(PocketIc::new());
-        let old_backend = PicCanister {
+        let old_backend = PicBackend {
             pic: pic.clone(),
             canister_id: BackendBuilder::default().deploy_to(&mut pic),
         };
@@ -29,7 +29,7 @@ impl Default for MigrationTestEnv {
             vec![old_backend.canister_id()],
         ]
         .concat();
-        let new_backend = PicCanister {
+        let new_backend = PicBackend {
             pic: pic.clone(),
             canister_id: BackendBuilder::default()
                 .with_controllers(new_controllers)

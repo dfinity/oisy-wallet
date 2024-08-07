@@ -314,11 +314,11 @@ where
     })
 }
 
-pub struct PicCanister {
+pub struct PicBackend {
     pub pic: Arc<PocketIc>,
     pub canister_id: Principal,
 }
-impl PicCanisterTrait for PicCanister {
+impl PicCanisterTrait for PicBackend {
     fn pic(&self) -> Arc<PocketIc> {
         self.pic.clone()
     }
@@ -326,7 +326,7 @@ impl PicCanisterTrait for PicCanister {
         self.canister_id.clone()
     }
 }
-impl PicCanister {
+impl PicBackend {
     /// Creates toy users with the given inclusive range of principals.
     pub fn create_users(&self, range: Range<u8>) -> Vec<OisyUser> {
         let mut expected_users: Vec<OisyUser> = Vec::new();
