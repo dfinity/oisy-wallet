@@ -4,7 +4,6 @@ module.exports = {
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
 		'plugin:svelte/recommended',
-		'plugin:import/recommended',
 		'prettier'
 	],
 	parser: '@typescript-eslint/parser',
@@ -54,8 +53,8 @@ module.exports = {
 		'no-delete-var': 'error',
 		'curly': 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
-		'import/no-unresolved': 'off',
-		'import/order': ['warn', { 'alphabetize': { 'order': 'asc' } }],
+		'import/order': ['error', { 'alphabetize': { 'order': 'asc' } }],
+		'import/no-duplicates': ['error', { 'prefer-inline': true }],
 	},
 	globals: {
 		NodeJS: true
