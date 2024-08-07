@@ -3,7 +3,6 @@
 use std::sync::Arc;
 
 use crate::utils::pocketic::{controller, query_call, setup, BackendBuilder, PicCanister, PicCanisterTrait};
-use candid::Principal;
 use pocket_ic::PocketIc;
 use shared::types::MigrationReport;
 
@@ -11,19 +10,21 @@ struct MigrationTestEnv {
     /// Simulated Internet Computer
     pic: Arc<PocketIc>,
     /// The old backend canister ID, from which data is being migrated.
-    old_backend: Principal,
+    old_backend: PicCanister,
     /// The new backend canister ID.
-    new_backend: Principal,
+    new_backend: PicCanister,
 }
 
 impl Default for MigrationTestEnv {
     fn default() -> Self {
         let mut pic = Arc::new(PocketIc::new());
-        let old_backend = BackendBuilder::default().deploy_to(&mut pic);
-        let new_controllers = [BackendBuilder::default_controllers(), vec![old_backend]].concat();
-        let new_backend = BackendBuilder::default()
+        let old_backend = PicCanister{pic: pic.clone(), canister_id: BackendBuilder::default().deploy_to(&mut pic)};
+        let new_controllers = [BackendBuilder::default_controllers(), vec![old_backend.canister_id()]].concat();
+        let new_backend = PicCanister{pic: pic.clone(), canister_id: BackendBuilder::default()
             .with_controllers(new_controllers)
-            .deploy_to(&mut pic);
+            .deploy_to(&mut pic)};
+
+        old_backend.create_users(1, 5);
 
         MigrationTestEnv {
             pic,
@@ -31,21 +32,6 @@ impl Default for MigrationTestEnv {
             new_backend,
         }
     }
-}
-impl MigrationTestEnv {
-    fn old_backend(&self) -> PicCanister {
-        PicCanister {
-            pic: self.pic.clone(),
-            canister_id: self.old_backend,
-        }
-    }
-    fn new_backend(&self) -> PicCanister {
-        PicCanister {
-            pic: self.pic.clone(),
-            canister_id: self.new_backend,
-        }
-    }
-    
 }
 
 #[test]
@@ -69,14 +55,14 @@ fn test_empty_migration() {
     // Initially no migrations should be in progress.
     assert_eq!(
         pic_setup
-            .old_backend()
+            .old_backend
             .query::<Option<MigrationReport>>(controller(), "migration", ()),
         Ok(None),
         "Initially, no migration should be in progress"
     );
     assert_eq!(
         pic_setup
-            .new_backend()
+            .new_backend
             .query::<Option<MigrationReport>>(controller(), "migration", ()),
         Ok(None),
         "Initially, no migration should be in progress"

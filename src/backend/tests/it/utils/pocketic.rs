@@ -2,9 +2,11 @@ use crate::utils::mock::CALLER;
 use candid::{decode_one, encode_one, CandidType, Principal};
 use pocket_ic::{CallError, PocketIc, WasmResult};
 use serde::Deserialize;
+use shared::types::user_profile::{OisyUser, UserProfile};
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::fs::read;
 use std::sync::Arc;
+use std::time::UNIX_EPOCH;
 use std::{env, time::Duration};
 
 use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
@@ -265,6 +267,30 @@ impl PicCanisterTrait for PicCanister {
     }
     fn canister_id(&self) -> Principal {
         self.canister_id.clone()
+    }
+}
+impl PicCanister {
+    /// Creates toy users with the given range of principals.
+    pub fn create_users(&self, start: u8, end: u8) -> Vec<OisyUser> {
+        let mut expected_users: Vec<OisyUser> = Vec::new();
+        for i in start..=end {
+            self.pic.advance_time(Duration::new(10, 0));
+            let caller = Principal::self_authenticating(i.to_string());
+            let response = self.update::<UserProfile>(caller, "create_user_profile", ());
+            let timestamp = self.pic.get_time();
+            let timestamp_nanos = timestamp
+                .duration_since(UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_nanos();
+            let expected_user = OisyUser {
+                updated_timestamp: timestamp_nanos as u64,
+                pouh_verified: false,
+                principal: caller,
+            };
+            expected_users.push(expected_user);
+            assert!(response.is_ok());
+        }
+        expected_users
     }
 }
 
