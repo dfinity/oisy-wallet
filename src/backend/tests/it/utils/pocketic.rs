@@ -18,7 +18,7 @@ const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 /// Backend canister installer, using the builder pattern, for use in test environmens using `PocketIC`.
 ///
 /// # Example
-/// For a defult test environment:
+/// For a default test environment:
 /// ```
 /// let (pic, canister_id) = BackendBuilder::default().deploy();
 /// ```
