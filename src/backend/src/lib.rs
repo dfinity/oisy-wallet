@@ -35,7 +35,9 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{ApiEnabled, Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats};
+use shared::types::{
+    ApiEnabled, Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
+};
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Duration;
@@ -106,13 +108,17 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
 
 /// Modifies config, given the state.
 fn modify_state_config(state: &mut State, f: impl FnOnce(Config) -> Config) {
-    let config: &Candid<Config> = state.config.get().as_ref().expect("config is not initialized");
+    let config: &Candid<Config> = state
+        .config
+        .get()
+        .as_ref()
+        .expect("config is not initialized");
     let config: Config = (*config).clone();
     let config = f(config);
     state
-    .config
-    .set(Some(Candid(config)))
-    .expect("setting config should succeed");
+        .config
+        .set(Some(Candid(config)))
+        .expect("setting config should succeed");
 }
 
 pub struct State {
@@ -596,8 +602,8 @@ fn step_migration() {
                 match migration.progress {
                     MigrationProgress::Pending => {
                         // TODO: Lock the local canister APIs.
-                        modify_state_config(state, |mut config: Config|{
-                            config.api = Some(Guards{
+                        modify_state_config(state, |mut config: Config| {
+                            config.api = Some(Guards {
                                 threshold_key: ApiEnabled::ReadOnly,
                                 user_data: ApiEnabled::ReadOnly,
                             });
@@ -609,28 +615,34 @@ fn step_migration() {
                     MigrationProgress::Locked => {
                         // TODO: Lock the target canister APIs.
                         migration.progress = MigrationProgress::TargetLocked;
+                        state.migration = Some(migration);
                     }
                     MigrationProgress::TargetLocked => {
                         // TODO: Check that the target canister is empty.
                         migration.progress = MigrationProgress::TargetPreCheckOk;
+                        state.migration = Some(migration);
                     }
                     MigrationProgress::TargetPreCheckOk => {
                         // TODO: Start migrating user tokens.
                         migration.progress =
                             MigrationProgress::MigratedUserTokensUpTo(Principal::anonymous());
+                        state.migration = Some(migration);
                     }
                     MigrationProgress::MigratedUserTokensUpTo(_) => {
                         // TODO: Migrate user tokens
                         migration.progress =
                             MigrationProgress::MigratedCustomTokensUpTo(Principal::anonymous());
+                        state.migration = Some(migration);
                     }
                     MigrationProgress::MigratedCustomTokensUpTo(_) => {
                         // TODO: Migrate custom tokens
                         migration.progress = MigrationProgress::CheckingTargetCanister;
+                        state.migration = Some(migration);
                     }
                     MigrationProgress::CheckingTargetCanister => {
                         // TODO: Check that the target canister has all the data.
                         migration.progress = MigrationProgress::Completed;
+                        state.migration = Some(migration);
                     }
                     MigrationProgress::Completed => {
                         clear_timer(migration.timer_id);
