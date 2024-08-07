@@ -5,6 +5,7 @@ use serde::Deserialize;
 use shared::types::user_profile::{OisyUser, UserProfile};
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::fs::read;
+use std::ops::Range;
 use std::sync::Arc;
 use std::time::UNIX_EPOCH;
 use std::{env, time::Duration};
@@ -270,10 +271,10 @@ impl PicCanisterTrait for PicCanister {
     }
 }
 impl PicCanister {
-    /// Creates toy users with the given range of principals.
-    pub fn create_users(&self, start: u8, end: u8) -> Vec<OisyUser> {
+    /// Creates toy users with the given inclusive range of principals.
+    pub fn create_users(&self, range: Range<u8>) -> Vec<OisyUser> {
         let mut expected_users: Vec<OisyUser> = Vec::new();
-        for i in start..=end {
+        for i in range {
             self.pic.advance_time(Duration::new(10, 0));
             let caller = Principal::self_authenticating(i.to_string());
             let response = self.update::<UserProfile>(caller, "create_user_profile", ());

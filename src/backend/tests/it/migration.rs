@@ -6,7 +6,7 @@ use crate::utils::pocketic::{
     controller, query_call, setup, BackendBuilder, PicCanister, PicCanisterTrait,
 };
 use pocket_ic::PocketIc;
-use shared::types::MigrationReport;
+use shared::types::{MigrationReport, Stats};
 
 struct MigrationTestEnv {
     /// Simulated Internet Computer
@@ -35,9 +35,6 @@ impl Default for MigrationTestEnv {
                 .with_controllers(new_controllers)
                 .deploy_to(&mut pic),
         };
-
-        old_backend.create_users(1, 5);
-
         MigrationTestEnv {
             pic,
             old_backend,
@@ -63,6 +60,8 @@ fn test_by_default_no_migration_is_in_progress() {
 #[test]
 fn test_empty_migration() {
     let pic_setup = MigrationTestEnv::default();
+    let user_range = 1..5;
+    pic_setup.old_backend.create_users(user_range.clone());
 
     // Initially no migrations should be in progress.
     assert_eq!(
@@ -79,6 +78,24 @@ fn test_empty_migration() {
         Ok(None),
         "Initially, no migration should be in progress"
     );
-    // But there should be users in the old backend.
-    // TODO: Confirm that there are no users in the new backend & users in the old backend.
+    // There should be users in the old backend.
+    assert_eq!(
+        pic_setup.old_backend.query::<Stats>(controller(), "stats", ()),
+        Ok(Stats {
+            user_profile_count: user_range.len() as u64,
+            custom_token_count: 0,
+            user_token_count: 0,
+        }),
+        "Initially, there should be users in the old backend"
+    );
+    // There should be no users in the new backend.
+    assert_eq!(
+        pic_setup.new_backend.query::<Stats>(controller(), "stats", ()),
+        Ok(Stats {
+            user_profile_count: 0,
+            custom_token_count: 0,
+            user_token_count: 0,
+        }),
+        "Initially, there should be no users in the new backend"
+    );
 }
