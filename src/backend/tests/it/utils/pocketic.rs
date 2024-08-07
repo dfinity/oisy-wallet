@@ -99,12 +99,12 @@ impl Default for BackendBuilder {
 }
 // Customisation
 impl BackendBuilder {
-    /// Set a custom argument for the backend canister.
+    /// Sets a custom argument for the backend canister.
     pub fn with_arg(mut self, arg: Vec<u8>) -> Self {
         self.arg = arg;
         self
     }
-    /// Deploy to an existing canister with the given ID.
+    /// Deploys to an existing canister with the given ID.
     pub fn with_canister(mut self, canister_id: Principal) -> Self {
         self.canister_id = Some(canister_id);
         self
