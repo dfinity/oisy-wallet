@@ -533,7 +533,9 @@ async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
 }
 
-/// Gets stats relevant to the user migration.
+/// Gets statistics about the canister.
+///
+/// Note: This is a private method, restricted to authorized users, as some stats may not be suitable for public consumption.
 #[query(guard = "caller_is_allowed")]
 fn stats() -> Stats {
     read_state(|s| Stats::from(s))
