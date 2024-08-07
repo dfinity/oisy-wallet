@@ -11,7 +11,8 @@ export type Token = {
 	network: Network;
 	standard: TokenStandard;
 	category: TokenCategory;
-} & TokenMetadata;
+} & TokenMetadata &
+	TokenAppearance;
 
 export interface TokenMetadata {
 	name: string;
@@ -20,7 +21,16 @@ export interface TokenMetadata {
 	icon?: string;
 }
 
-export type RequiredToken = Required<Token>;
+export interface TokenAppearance {
+	oisyName?: TokenOisyName;
+}
+
+export type TokenOisyName = {
+	prefix: string | undefined;
+	oisyName: string;
+};
+
+export type RequiredToken = Required<Omit<Token, keyof TokenAppearance>> & TokenAppearance;
 
 export type OptionToken = Token | undefined | null;
 export type OptionTokenId = TokenId | undefined | null;
