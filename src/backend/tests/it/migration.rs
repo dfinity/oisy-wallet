@@ -8,7 +8,6 @@ use crate::utils::pocketic::{
 use pocket_ic::PocketIc;
 use shared::types::{MigrationReport, Stats};
 
-
 struct MigrationTestEnv {
     /// Simulated Internet Computer
     pic: Arc<PocketIc>,
@@ -81,7 +80,9 @@ fn test_empty_migration() {
     );
     // There should be users in the old backend.
     assert_eq!(
-        pic_setup.old_backend.query::<Stats>(controller(), "stats", ()),
+        pic_setup
+            .old_backend
+            .query::<Stats>(controller(), "stats", ()),
         Ok(Stats {
             user_profile_count: user_range.len() as u64,
             custom_token_count: 0,
@@ -91,7 +92,9 @@ fn test_empty_migration() {
     );
     // There should be no users in the new backend.
     assert_eq!(
-        pic_setup.new_backend.query::<Stats>(controller(), "stats", ()),
+        pic_setup
+            .new_backend
+            .query::<Stats>(controller(), "stats", ()),
         Ok(Stats {
             user_profile_count: 0,
             custom_token_count: 0,
@@ -103,8 +106,16 @@ fn test_empty_migration() {
     assert_eq!(
         pic_setup
             .old_backend
-            .update::<MigrationReport>(controller(), "migrate_user_data_to", pic_setup.new_backend.canister_id()).expect("Failed to start migration"),
-        MigrationReport { to: pic_setup.new_backend.canister_id(), progress: shared::types::MigrationProgress::Pending },
+            .update::<Result<MigrationReport, String>>(
+                controller(),
+                "migrate_user_data_to",
+                pic_setup.new_backend.canister_id()
+            )
+            .expect("Failed to start migration"),
+        Ok(MigrationReport {
+            to: pic_setup.new_backend.canister_id(),
+            progress: shared::types::MigrationProgress::Pending
+        }),
     );
     // Migration should be in progress.
     assert_eq!(

@@ -1,6 +1,5 @@
 use crate::utils::mock::CALLER;
-use candid::{decode_one, encode_one, CandidType, IDLArgs, Principal};
-use candid_parser::parse_idl_args;
+use candid::{decode_one, encode_one, CandidType, Principal};
 use pocket_ic::{CallError, PocketIc, WasmResult};
 use serde::Deserialize;
 use shared::types::user_profile::{OisyUser, UserProfile};
@@ -10,8 +9,6 @@ use std::ops::Range;
 use std::sync::Arc;
 use std::time::UNIX_EPOCH;
 use std::{env, time::Duration};
-use idl2json::idl2json_with_weak_names;
-
 
 use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
 
@@ -368,7 +365,7 @@ pub trait PicCanisterTrait {
             })
             .and_then(|reply| match reply {
                 WasmResult::Reply(reply) => {
-                    decode_one(&reply).map_err(|e| format!("Decoding failed: {e}  Received: {:#?}", IDLArgs::from_bytes(&reply)))
+                    decode_one(&reply).map_err(|e| format!("Decoding failed: {e}"))
                 }
                 WasmResult::Reject(error) => Err(error),
             })

@@ -571,7 +571,7 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
             };
             let migration_report = MigrationReport::from(&migration);
             s.migration = Some(migration);
-            Ok(migration_report)    
+            Ok(migration_report)
         }
     })
 }
