@@ -7,7 +7,9 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
+bs58 = { workspace = true }
 candid = { workspace = true }
+derivation-path = { workspace = true }
 ethers-core = { workspace = true }
 futures = { workspace = true }
 getrandom = { workspace = true }
@@ -17,6 +19,7 @@ ic-cdk-macros = { workspace = true }
 ic-stable-structures = { workspace = true }
 ic-verifiable-credentials = { workspace = true }
 k256 = { workspace = true }
+ripemd = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
 shared = { path = "../shared" }
