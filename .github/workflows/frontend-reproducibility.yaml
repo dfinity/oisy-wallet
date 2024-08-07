@@ -17,7 +17,7 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Run reproducibility test
-        run: bash ./scripts/test.frontend.reproducibility
+        run: bash ./scripts/test.frontend.reproducibility.sh
         shell: bash
 
       - name: Check script exit status
