@@ -33,7 +33,7 @@ pub struct BackendBuilder {
 impl BackendBuilder {
     pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
     fn default_wasm_path() -> String {
-        BACKEND_WASM.to_string()
+        env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string())
     }
     fn default_arg() -> Vec<u8> {
         encode_one(&init_arg()).unwrap()
