@@ -5,6 +5,6 @@
 	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
 </script>
 
-<SendButtonWithModal openModal={modalStore.openSend} isOpen={$modalSend}>
+<SendButtonWithModal open={modalStore.openSend} isOpen={$modalSend}>
 	<SendModal on:nnsClose slot="modal" />
 </SendButtonWithModal>

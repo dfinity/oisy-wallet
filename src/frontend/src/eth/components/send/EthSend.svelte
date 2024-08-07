@@ -26,6 +26,6 @@
 	};
 </script>
 
-<SendButtonWithModal openModal={async (modalId) => await openSend(modalId)} isOpen={$modalEthSend}>
+<SendButtonWithModal open={async (modalId) => await openSend(modalId)} isOpen={$modalEthSend}>
 	<EthSendModal on:nnsClose slot="modal" />
 </SendButtonWithModal>
