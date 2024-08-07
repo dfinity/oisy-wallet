@@ -32,13 +32,13 @@ pub struct BackendBuilder {
 // Defaults
 impl BackendBuilder {
     pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
-    fn default_wasm_path() -> String {
+    pub fn default_wasm_path() -> String {
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string())
     }
-    fn default_arg() -> Vec<u8> {
+    pub fn default_arg() -> Vec<u8> {
         encode_one(&init_arg()).unwrap()
     }
-    fn default_controllers() -> Vec<Principal> {
+    pub fn default_controllers() -> Vec<Principal> {
         vec![Principal::from_text(CONTROLLER)
             .expect("Test setup error: Failed to parse controller principal")]
     }
