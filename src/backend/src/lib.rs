@@ -35,7 +35,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, InitArg, Migration, MigrationProgress, MigrationReport, Stats};
+use shared::types::{ApiEnabled, Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats};
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Duration;
@@ -102,6 +102,17 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
             .as_ref()
             .expect("config is not initialized"))
     })
+}
+
+/// Modifies config, given the state.
+fn modify_state_config(state: &mut State, f: impl FnOnce(Config) -> Config) {
+    let config: &Candid<Config> = state.config.get().as_ref().expect("config is not initialized");
+    let config: Config = (*config).clone();
+    let config = f(config);
+    state
+    .config
+    .set(Some(Candid(config)))
+    .expect("setting config should succeed");
 }
 
 pub struct State {
@@ -580,12 +591,20 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
 #[update(guard = "caller_is_allowed")]
 fn step_migration() {
     mutate_state(|state| {
-        match &mut state.migration {
-            Some(migration) => {
+        match state.migration.clone() {
+            Some(mut migration) => {
                 match migration.progress {
                     MigrationProgress::Pending => {
                         // TODO: Lock the local canister APIs.
+                        modify_state_config(state, |mut config: Config|{
+                            config.api = Some(Guards{
+                                threshold_key: ApiEnabled::ReadOnly,
+                                user_data: ApiEnabled::ReadOnly,
+                            });
+                            config
+                        });
                         migration.progress = MigrationProgress::Locked;
+                        state.migration = Some(migration);
                     }
                     MigrationProgress::Locked => {
                         // TODO: Lock the target canister APIs.

@@ -6,7 +6,7 @@ use crate::utils::pocketic::{
     controller, query_call, setup, BackendBuilder, PicCanister, PicCanisterTrait,
 };
 use pocket_ic::PocketIc;
-use shared::types::{MigrationReport, Stats};
+use shared::types::{ApiEnabled, Guards, MigrationReport, Stats};
 
 struct MigrationTestEnv {
     /// Simulated Internet Computer
@@ -103,28 +103,68 @@ fn test_empty_migration() {
         "Initially, there should be no users in the new backend"
     );
     // Start migration
-    assert_eq!(
-        pic_setup
+    {
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .update::<Result<MigrationReport, String>>(
+                    controller(),
+                    "migrate_user_data_to",
+                    pic_setup.new_backend.canister_id()
+                )
+                .expect("Failed to start migration"),
+            Ok(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::Pending
+            }),
+        );
+        // Migration should be in progress.
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ()),
+            Ok(Some(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::Pending,
+            })),
+            "Migration should be in progress"
+        );
+    }
+    // Step the timer: User data writing should be locked.
+    {
+        pic_setup.pic.tick();
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ()),
+            Ok(Some(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::Locked,
+            })),
+            "Migration should be in progress"
+        );
+        let old_config = pic_setup
             .old_backend
-            .update::<Result<MigrationReport, String>>(
-                controller(),
-                "migrate_user_data_to",
-                pic_setup.new_backend.canister_id()
-            )
-            .expect("Failed to start migration"),
-        Ok(MigrationReport {
-            to: pic_setup.new_backend.canister_id(),
-            progress: shared::types::MigrationProgress::Pending
-        }),
-    );
-    // Migration should be in progress.
+            .query::<shared::types::Config>(controller(), "config", ())
+            .expect("Failed to get config");
+        assert_eq!(
+            old_config.api,
+            Some(Guards {
+                threshold_key: ApiEnabled::ReadOnly,
+                user_data: ApiEnabled::ReadOnly
+            }),
+            "Local user data writes should be locked."
+        );
+    }
+    // Step the timer
+    pic_setup.pic.tick();
     assert_eq!(
         pic_setup
             .old_backend
             .query::<Option<MigrationReport>>(controller(), "migration", ()),
         Ok(Some(MigrationReport {
             to: pic_setup.new_backend.canister_id(),
-            progress: shared::types::MigrationProgress::Pending,
+            progress: shared::types::MigrationProgress::TargetLocked,
         })),
         "Migration should be in progress"
     );
