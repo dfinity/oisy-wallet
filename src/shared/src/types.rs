@@ -125,7 +125,7 @@ pub trait TokenVersion: Debug {
         Self: Sized + Clone;
 }
 
-/// Erc20 specific user defined tokens
+/// ERC20 specific user defined tokens
 pub mod token {
     use crate::types::Version;
     use candid::{CandidType, Deserialize};
