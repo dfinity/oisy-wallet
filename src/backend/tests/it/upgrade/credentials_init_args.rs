@@ -1,7 +1,7 @@
 use crate::upgrade::constants::BACKEND_V0_0_25_WASM_PATH;
 use crate::upgrade::types::{ArgV0_0_25, InitArgV0_0_25};
 use crate::utils::mock::CALLER;
-use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade_latest_wasm};
+use crate::utils::pocketic::{update_call, upgrade_latest_wasm, BackendBuilder};
 use candid::{encode_one, Principal};
 use shared::types::{Arg, InitArg};
 
@@ -15,7 +15,10 @@ fn test_upgrade_credential_init_args() {
         allowed_callers: allowed_callers.clone(),
     });
     let encoded_initial_arg = encode_one(initial_arg).unwrap();
-    let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_25_WASM_PATH, Some(encoded_initial_arg));
+    let pic_setup = BackendBuilder::default()
+        .with_wasm(BACKEND_V0_0_25_WASM_PATH)
+        .with_arg(encoded_initial_arg)
+        .deploy();
 
     // Get ETH address before upgrade for post-upgrade test
     let caller = Principal::from_text(CALLER).unwrap();
