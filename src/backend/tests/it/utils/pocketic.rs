@@ -4,6 +4,7 @@ use pocket_ic::{CallError, PocketIc, WasmResult};
 use serde::Deserialize;
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::fs::read;
+use std::sync::Arc;
 use std::{env, time::Duration};
 
 use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
@@ -252,4 +253,65 @@ where
         WasmResult::Reply(reply) => decode_one(&reply).map_err(|_| "Decoding failed".to_string()),
         WasmResult::Reject(error) => Err(error),
     })
+}
+
+pub struct PicCanister {
+    pub pic: Arc<PocketIc>,
+    pub canister_id: Principal,
+}
+
+impl PicCanister {
+    fn new(pic: Arc<PocketIc>, canister_id: Principal) -> Self {
+        Self { pic, canister_id }
+    }
+
+    pub fn update<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
+    where
+        T: for<'a> Deserialize<'a> + CandidType,
+    {
+        self.pic
+            .update_call(
+                self.canister_id.clone(),
+                caller,
+                method,
+                encode_one(arg).unwrap(),
+            )
+            .map_err(|e| {
+                format!(
+                    "Update call error. RejectionCode: {:?}, Error: {}",
+                    e.code, e.description
+                )
+            })
+            .and_then(|reply| match reply {
+                WasmResult::Reply(reply) => {
+                    decode_one(&reply).map_err(|_| "Decoding failed".to_string())
+                }
+                WasmResult::Reject(error) => Err(error),
+            })
+    }
+
+    pub fn query<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
+    where
+        T: for<'a> Deserialize<'a> + CandidType,
+    {
+        self.pic
+            .query_call(
+                self.canister_id.clone(),
+                caller,
+                method,
+                encode_one(arg).unwrap(),
+            )
+            .map_err(|e| {
+                format!(
+                    "Query call error. RejectionCode: {:?}, Error: {}",
+                    e.code, e.description
+                )
+            })
+            .and_then(|reply| match reply {
+                WasmResult::Reply(reply) => {
+                    decode_one(&reply).map_err(|_| "Decoding failed".to_string())
+                }
+                WasmResult::Reject(error) => Err(error),
+            })
+    }
 }
