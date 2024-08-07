@@ -4,13 +4,14 @@
 
 	export let openModal: (modalId: symbol) => void | Promise<void>;
 	export let isOpen: boolean;
-	export let specificModalId: symbol | undefined = undefined;
+	export let modalId: symbol | undefined = undefined;
 
-	const modalId = specificModalId ?? Symbol();
+	let definedModalId: symbol;
+	$: definedModalId = modalId ?? Symbol();
 </script>
 
-<ReceiveButton on:click={async () => await openModal(modalId)} />
+<ReceiveButton on:click={async () => await openModal(definedModalId)} />
 
-{#if isOpen && $modalStore?.data === modalId}
+{#if isOpen && $modalStore?.data === definedModalId}
 	<slot name="modal" />
 {/if}
