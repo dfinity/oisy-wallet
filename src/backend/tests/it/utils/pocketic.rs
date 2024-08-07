@@ -220,6 +220,9 @@ pub fn upgrade_with_wasm(
 
     let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
 
+    // Upgrades burn a lot of cycles.
+    // If too many cycles are burnt in a short time, the canister will be throttled, so we advance time.
+    // The delay here is extremely conservative and can be reduced if needed.
     pic.advance_time(Duration::from_secs(100_000));
 
     pic.upgrade_canister(
