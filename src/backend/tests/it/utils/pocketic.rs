@@ -85,7 +85,7 @@ impl BackendBuilder {
 // Builder
 impl BackendBuilder {
     /// Get or create canister.
-    fn canister_id(&mut self, pic: &mut PocketIc) -> Principal {
+    fn canister_id(&mut self, pic: &PocketIc) -> Principal {
         if let Some(canister_id) = self.canister_id {
             canister_id
         } else {
@@ -96,27 +96,27 @@ impl BackendBuilder {
         }
     }
     /// Add cycles to the backend canister.
-    fn add_cycles(&mut self, pic: &mut PocketIc) {
+    fn add_cycles(&mut self, pic: &PocketIc) {
         if self.cycles > 0 {
             let canister_id = self.canister_id(pic);
             pic.add_cycles(canister_id, self.cycles);
         }
     }
     /// Install the backend canister.
-    fn install(&mut self, pic: &mut PocketIc) {
+    fn install(&mut self, pic: &PocketIc) {
         let wasm_bytes = self.wasm_bytes();
         let canister_id = self.canister_id(pic);
         let arg = self.arg.clone();
         pic.install_canister(canister_id, wasm_bytes, arg, None);
     }
     /// Set controllers of the backend canister.
-    fn set_controllers(&mut self, pic: &mut PocketIc) {
+    fn set_controllers(&mut self, pic: &PocketIc) {
         let canister_id = self.canister_id(pic);
         pic.set_controllers(canister_id.clone(), None, self.controllers.clone())
             .expect("Test setup error: Failed to set controllers");
     }
     /// Setup the backend canister.
-    pub fn deploy_to(&mut self, pic: &mut PocketIc) -> Principal {
+    pub fn deploy_to(&mut self, pic: &PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
         self.add_cycles(pic);
         self.install(pic);
@@ -125,8 +125,8 @@ impl BackendBuilder {
     }
     /// Deploy to a new pic.
     pub fn deploy(&mut self) -> (PocketIc, Principal) {
-        let mut pic = PocketIc::new();
-        let canister_id = self.deploy_to(&mut pic);
+        let pic = PocketIc::new();
+        let canister_id = self.deploy_to(&pic);
         (pic, canister_id)
     }
 }
