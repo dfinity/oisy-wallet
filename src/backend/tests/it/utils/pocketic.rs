@@ -97,8 +97,10 @@ impl BackendBuilder {
     }
     /// Add cycles to the backend canister.
     fn add_cycles(&mut self, pic: &mut PocketIc) {
-        let canister_id = self.canister_id(pic);
-        pic.add_cycles(canister_id, self.cycles);
+        if self.cycles > 0 {
+            let canister_id = self.canister_id(pic);
+            pic.add_cycles(canister_id, self.cycles);
+        }
     }
     /// Install the backend canister.
     fn install(&mut self, pic: &mut PocketIc) {
