@@ -2,7 +2,9 @@
 
 use std::sync::Arc;
 
-use crate::utils::pocketic::{controller, query_call, setup, BackendBuilder, PicCanister, PicCanisterTrait};
+use crate::utils::pocketic::{
+    controller, query_call, setup, BackendBuilder, PicCanister, PicCanisterTrait,
+};
 use pocket_ic::PocketIc;
 use shared::types::MigrationReport;
 
@@ -18,11 +20,21 @@ struct MigrationTestEnv {
 impl Default for MigrationTestEnv {
     fn default() -> Self {
         let mut pic = Arc::new(PocketIc::new());
-        let old_backend = PicCanister{pic: pic.clone(), canister_id: BackendBuilder::default().deploy_to(&mut pic)};
-        let new_controllers = [BackendBuilder::default_controllers(), vec![old_backend.canister_id()]].concat();
-        let new_backend = PicCanister{pic: pic.clone(), canister_id: BackendBuilder::default()
-            .with_controllers(new_controllers)
-            .deploy_to(&mut pic)};
+        let old_backend = PicCanister {
+            pic: pic.clone(),
+            canister_id: BackendBuilder::default().deploy_to(&mut pic),
+        };
+        let new_controllers = [
+            BackendBuilder::default_controllers(),
+            vec![old_backend.canister_id()],
+        ]
+        .concat();
+        let new_backend = PicCanister {
+            pic: pic.clone(),
+            canister_id: BackendBuilder::default()
+                .with_controllers(new_controllers)
+                .deploy_to(&mut pic),
+        };
 
         old_backend.create_users(1, 5);
 
@@ -67,5 +79,6 @@ fn test_empty_migration() {
         Ok(None),
         "Initially, no migration should be in progress"
     );
-
+    // But there should be users in the old backend.
+    // TODO: Confirm that there are no users in the new backend & users in the old backend.
 }

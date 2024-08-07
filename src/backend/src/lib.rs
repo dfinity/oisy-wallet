@@ -35,7 +35,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, InitArg, Migration, MigrationProgress, MigrationReport};
+use shared::types::{Arg, Config, InitArg, Migration, MigrationProgress, MigrationReport, Stats};
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Duration;
@@ -114,6 +114,16 @@ pub struct State {
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
     migration: Option<Migration>,
+}
+
+impl From<&State> for Stats {
+    fn from(state: &State) -> Self {
+        Stats {
+            user_profile_count: state.user_profile.len(),
+            user_token_count: state.user_token.len(),
+            custom_token_count: state.custom_token.len(),
+        }
+    }
 }
 
 fn set_config(arg: InitArg) {
@@ -531,6 +541,12 @@ async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
 #[query(guard = "caller_is_allowed")]
 fn migration() -> Option<MigrationReport> {
     read_state(|s| s.migration.as_ref().map(MigrationReport::from))
+}
+
+/// Gets stats relevant to the user migration.
+#[query(guard = "caller_is_allowed")]
+fn stats() -> Stats {
+    read_state(|s| Stats::from(s))
 }
 
 /// Starts user data migration to a given canister.

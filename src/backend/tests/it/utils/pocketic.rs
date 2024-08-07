@@ -297,22 +297,12 @@ impl PicCanister {
 pub trait PicCanisterTrait {
     fn pic(&self) -> Arc<PocketIc>;
     fn canister_id(&self) -> Principal;
-    fn update<T>(
-        &self,
-        caller: Principal,
-        method: &str,
-        arg: impl CandidType,
-    ) -> Result<T, String>
+    fn update<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
     where
         T: for<'a> Deserialize<'a> + CandidType,
     {
         self.pic()
-            .update_call(
-                self.canister_id(),
-                caller,
-                method,
-                encode_one(arg).unwrap(),
-            )
+            .update_call(self.canister_id(), caller, method, encode_one(arg).unwrap())
             .map_err(|e| {
                 format!(
                     "Update call error. RejectionCode: {:?}, Error: {}",
@@ -327,22 +317,12 @@ pub trait PicCanisterTrait {
             })
     }
 
-    fn query<T>(
-        &self,
-        caller: Principal,
-        method: &str,
-        arg: impl CandidType,
-    ) -> Result<T, String>
+    fn query<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
     where
         T: for<'a> Deserialize<'a> + CandidType,
     {
         self.pic()
-            .query_call(
-                self.canister_id(),
-                caller,
-                method,
-                encode_one(arg).unwrap(),
-            )
+            .query_call(self.canister_id(), caller, method, encode_one(arg).unwrap())
             .map_err(|e| {
                 format!(
                     "Query call error. RejectionCode: {:?}, Error: {}",
