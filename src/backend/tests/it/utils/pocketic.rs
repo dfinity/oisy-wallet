@@ -19,7 +19,34 @@ const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.
 // Instead, we can use the master_ecdsa_public_key suffixed with the subnet ID. PocketID adds the suffix because it can have multiple subnets.
 const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 
-/// Backend canister installer
+/// Backend canister installer, using the builder pattern, for use in test environmens using `PocketIC`.
+///
+/// # Example
+/// For a default test environment:
+/// ```
+/// let (pic, canister_id) = BackendBuilder::default().deploy();
+/// ```
+/// To add a backend canister to an existing `PocketIC`:
+/// ```
+/// let pic = PocketIc::new();
+/// let canister_id = BackendBuilder::default().deploy_to(&pic);
+/// ```
+/// To redeploy an existing canister:
+/// ```
+/// // First deployment:
+/// let (pic, canister_id) = BackendBuilder::default().deploy();
+/// // Subsequent deployment:
+/// let canister_id = BackendBuilder::default().with_canister(canister_id).deploy_to(&pic);
+/// ```
+/// To customise the deployment, use the `.with_*` modifiers.  E.g.:
+/// ```
+/// let (pic, canister_id) = BackendBuilder::default()
+///    .with_wasm("path/to/backend.wasm")
+///    .with_arg(vec![1, 2, 3])
+///    .with_controllers(vec![Principal::from_text("controller").unwrap()])
+///    .with_cycles(1_000_000_000_000)
+///    .deploy();
+/// ```
 #[derive(Debug)]
 pub struct BackendBuilder {
     /// Canister ID of the backend canister.  If not set, a new canister will be created.
@@ -35,13 +62,29 @@ pub struct BackendBuilder {
 }
 // Defaults
 impl BackendBuilder {
+    /// The default number of cycles to add to the backend canister on deployment.
+    ///
+    /// To override, please use `with_cycles()`.
     pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
+    /// The default Wasm file to deploy:
+    /// - If the environment variable `BACKEND_WASM_PATH` is set, it will use that path.
+    /// - Otherwise, it will use the `BACKEND_WASM` constant.
+    ///
+    /// To override, please use `with_wasm()`.
     pub fn default_wasm_path() -> String {
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string())
     }
+    /// The default argument to pass to the backend canister.
+    ///
+    /// Please see `init_arg()` for details.
+    ///
+    /// To override, please use `with_arg()`.
     pub fn default_arg() -> Vec<u8> {
         encode_one(&init_arg()).unwrap()
     }
+    /// The default controllers of the backend canister.
+    ///
+    /// To override, please use `with_controllers()`.
     pub fn default_controllers() -> Vec<Principal> {
         vec![Principal::from_text(CONTROLLER)
             .expect("Test setup error: Failed to parse controller principal")]
@@ -60,25 +103,35 @@ impl Default for BackendBuilder {
 }
 // Customisation
 impl BackendBuilder {
-    pub fn with_canister(mut self, canister_id: Principal) -> Self {
-        self.canister_id = Some(canister_id);
-        self
-    }
-    pub fn with_wasm(mut self, wasm_path: &str) -> Self {
-        self.wasm_path = wasm_path.to_string();
-        self
-    }
+    /// Sets a custom argument for the backend canister.
     pub fn with_arg(mut self, arg: Vec<u8>) -> Self {
         self.arg = arg;
         self
     }
+    /// Deploys to an existing canister with the given ID.
+    pub fn with_canister(mut self, canister_id: Principal) -> Self {
+        self.canister_id = Some(canister_id);
+        self
+    }
+    /// Sets custom controllers for the backend canister.
     pub fn with_controllers(mut self, controllers: Vec<Principal>) -> Self {
         self.controllers = controllers;
+        self
+    }
+    /// Sets the cycles to add to the backend canister.
+    pub fn with_cycles(mut self, cycles: u128) -> Self {
+        self.cycles = cycles;
+        self
+    }
+    /// Configures the deployment to use a custom Wasm file.
+    pub fn with_wasm(mut self, wasm_path: &str) -> Self {
+        self.wasm_path = wasm_path.to_string();
         self
     }
 }
 // Get parameters
 impl BackendBuilder {
+    /// Reads the backend Wasm bytes from the configured path.
     fn wasm_bytes(&self) -> Vec<u8> {
         read(self.wasm_path.clone()).expect(&format!(
             "Could not find the backend wasm: {}",
