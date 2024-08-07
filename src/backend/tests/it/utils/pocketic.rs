@@ -15,7 +15,34 @@ const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.
 // Instead, we can use the master_ecdsa_public_key suffixed with the subnet ID. PocketID adds the suffix because it can have multiple subnets.
 const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 
-/// Backend canister installer
+/// Backend canister installer, using the builder pattern, for use in test environmens using `PocketIC`.
+///
+/// # Example
+/// For a defult test environment:
+/// ```
+/// let (pic, canister_id) = BackendBuilder::default().deploy();
+/// ```
+/// To add a backend canister to an existing `PocketIC`:
+/// ```
+/// let pic = PocketIc::new();
+/// let canister_id = BackendBuilder::default().deploy_to(&pic);
+/// ```
+/// To redeploy an existing canister:
+/// ```
+/// // First deployment:
+/// let (pic, canister_id) = BackendBuilder::default().deploy();
+/// // Subsequent deployment:
+/// let canister_id = BackendBuilder::default().with_canister(canister_id).deploy_to(&pic);
+/// ```
+/// To customise the deployment, use the `.with_*` modifiers.  E.g.:
+/// ```
+/// let (pic, canister_id) = BackendBuilder::default()
+///    .with_wasm("path/to/backend.wasm")
+///    .with_arg(vec![1, 2, 3])
+///    .with_controllers(vec![Principal::from_text("controller").unwrap()])
+///    .with_cycles(1_000_000_000_000)
+///    .deploy();
+/// ```
 #[derive(Debug)]
 pub struct BackendBuilder {
     /// Canister ID of the backend canister.  If not set, a new canister will be created.
@@ -56,20 +83,24 @@ impl Default for BackendBuilder {
 }
 // Customisation
 impl BackendBuilder {
-    pub fn with_canister(mut self, canister_id: Principal) -> Self {
-        self.canister_id = Some(canister_id);
-        self
-    }
-    pub fn with_wasm(mut self, wasm_path: &str) -> Self {
-        self.wasm_path = wasm_path.to_string();
-        self
-    }
     pub fn with_arg(mut self, arg: Vec<u8>) -> Self {
         self.arg = arg;
         self
     }
+    pub fn with_canister(mut self, canister_id: Principal) -> Self {
+        self.canister_id = Some(canister_id);
+        self
+    }
     pub fn with_controllers(mut self, controllers: Vec<Principal>) -> Self {
         self.controllers = controllers;
+        self
+    }
+    pub fn with_cycles(mut self, cycles: u128) -> Self {
+        self.cycles = cycles;
+        self
+    }
+    pub fn with_wasm(mut self, wasm_path: &str) -> Self {
+        self.wasm_path = wasm_path.to_string();
         self
     }
 }
