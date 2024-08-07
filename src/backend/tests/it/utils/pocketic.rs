@@ -314,6 +314,7 @@ where
     })
 }
 
+/// A test Oisy backend canister with a shared reference to the `PocketIc` instance it is installed on.
 pub struct PicBackend {
     pub pic: Arc<PocketIc>,
     pub canister_id: Principal,
@@ -351,6 +352,7 @@ impl PicBackend {
     }
 }
 
+/// Common methods for interacting with a canister using `PocketIc`.
 pub trait PicCanisterTrait {
     fn pic(&self) -> Arc<PocketIc>;
     fn canister_id(&self) -> Principal;
