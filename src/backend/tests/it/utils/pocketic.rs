@@ -261,11 +261,12 @@ pub struct PicCanister {
 }
 
 impl PicCanister {
-    fn new(pic: Arc<PocketIc>, canister_id: Principal) -> Self {
-        Self { pic, canister_id }
-    }
-
-    pub fn update<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
+    pub fn update<T>(
+        &self,
+        caller: Principal,
+        method: &str,
+        arg: impl CandidType,
+    ) -> Result<T, String>
     where
         T: for<'a> Deserialize<'a> + CandidType,
     {
@@ -290,7 +291,12 @@ impl PicCanister {
             })
     }
 
-    pub fn query<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
+    pub fn query<T>(
+        &self,
+        caller: Principal,
+        method: &str,
+        arg: impl CandidType,
+    ) -> Result<T, String>
     where
         T: for<'a> Deserialize<'a> + CandidType,
     {

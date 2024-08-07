@@ -20,9 +20,9 @@ impl Default for MigrationTestEnv {
     fn default() -> Self {
         let mut pic = Arc::new(PocketIc::new());
         let old_backend = BackendBuilder::default().deploy_to(&mut pic);
-        let new_controllers = BackendBuilder::default_controllers();
+        let new_controllers = [BackendBuilder::default_controllers(), vec![old_backend]].concat();
         let new_backend = BackendBuilder::default()
-            .with_controllers(vec![old_backend])
+            .with_controllers(new_controllers)
             .deploy_to(&mut pic);
 
         MigrationTestEnv {
@@ -32,15 +32,20 @@ impl Default for MigrationTestEnv {
         }
     }
 }
-impl MigrationTestEnv{
+impl MigrationTestEnv {
     fn old_backend(&self) -> PicCanister {
-        PicCanister{pic: self.pic.clone(), canister_id: self.old_backend}
+        PicCanister {
+            pic: self.pic.clone(),
+            canister_id: self.old_backend,
+        }
     }
     fn new_backend(&self) -> PicCanister {
-        PicCanister{pic: self.pic.clone(), canister_id: self.new_backend}
+        PicCanister {
+            pic: self.pic.clone(),
+            canister_id: self.new_backend,
+        }
     }
 }
-
 
 #[test]
 fn test_by_default_no_migration_is_in_progress() {
@@ -62,20 +67,16 @@ fn test_empty_migration() {
 
     // Initially no migrations should be in progress.
     assert_eq!(
-        pic_setup.old_backend().query::<Option<MigrationReport>>(
-            controller(),
-            "migration",
-            ()
-        ),
+        pic_setup
+            .old_backend()
+            .query::<Option<MigrationReport>>(controller(), "migration", ()),
         Ok(None),
         "Initially, no migration should be in progress"
     );
     assert_eq!(
-        pic_setup.new_backend().query::<Option<MigrationReport>>(
-            controller(),
-            "migration",
-            ()
-        ),
+        pic_setup
+            .new_backend()
+            .query::<Option<MigrationReport>>(controller(), "migration", ()),
         Ok(None),
         "Initially, no migration should be in progress"
     );
