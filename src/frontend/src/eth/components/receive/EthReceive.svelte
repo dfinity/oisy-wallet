@@ -22,6 +22,6 @@
 	};
 </script>
 
-<ReceiveButtonWithModal openModal={openReceive} isOpen={$modalEthReceive}>
+<ReceiveButtonWithModal open={openReceive} isOpen={$modalEthReceive}>
 	<EthReceiveModal slot="modal" />
 </ReceiveButtonWithModal>

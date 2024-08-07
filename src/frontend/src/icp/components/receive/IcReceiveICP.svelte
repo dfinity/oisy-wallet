@@ -26,6 +26,6 @@
 	const openModal = async (modalId: symbol) => await open(async () => openReceive(modalId));
 </script>
 
-<ReceiveButtonWithModal {openModal} isOpen={$modalIcpReceive}>
+<ReceiveButtonWithModal open={openModal} isOpen={$modalIcpReceive}>
 	<ReceiveAddressModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} slot="modal" />
 </ReceiveButtonWithModal>

@@ -49,6 +49,6 @@
 	const openModal = async (modalId: symbol) => await open(async () => openReceive(modalId));
 </script>
 
-<ReceiveButtonWithModal {openModal} isOpen={$modalCkETHReceive}>
+<ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>
 	<IcReceiveCkEthereumModal on:nnsClose={close} slot="modal" />
 </ReceiveButtonWithModal>
