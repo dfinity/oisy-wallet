@@ -5,15 +5,11 @@
 	import { metamaskNotInitialized } from '$eth/derived/metamask.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { modalEthReceive } from '$lib/derived/modal.derived';
-	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
-
-	export let compact = false;
-
-	const modalId = Symbol();
+	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 
 	const isDisabled = (): boolean => $addressNotCertified || $metamaskNotInitialized;
 
-	const openReceive = async () => {
+	const openReceive = async (modalId: symbol) => {
 		if (isDisabled()) {
 			const status = await waitWalletReady(isDisabled);
 
@@ -26,8 +22,6 @@
 	};
 </script>
 
-<ReceiveButton {compact} on:click={async () => await openReceive()} />
-
-{#if $modalEthReceive && $modalStore?.data === modalId}
-	<EthReceiveModal />
-{/if}
+<ReceiveButtonWithModal open={openReceive} isOpen={$modalEthReceive}>
+	<EthReceiveModal slot="modal" />
+</ReceiveButtonWithModal>

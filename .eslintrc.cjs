@@ -29,7 +29,7 @@ module.exports = {
 			}
 		},
 		{
-			files: ['scripts/**/*.mjs'],
+			files: ['scripts/**/*.mjs', 'scripts/**/*.ts'],
 			rules: {
 				'no-console': 'off',
 			}
@@ -53,8 +53,9 @@ module.exports = {
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'no-delete-var': 'error',
 		'curly': 'error',
+		'arrow-body-style': ['warn', 'as-needed'],
 		'import/no-unresolved': 'off',
-		'import/order': ['warn', { 'alphabetize': { 'order': 'asc' } }]
+		'import/order': ['warn', { 'alphabetize': { 'order': 'asc' } }],
 	},
 	globals: {
 		NodeJS: true

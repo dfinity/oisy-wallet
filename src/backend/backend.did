@@ -10,6 +10,7 @@ type AddUserCredentialRequest = record {
   current_user_version : opt nat64;
   credential_spec : CredentialSpec;
 };
+type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
 type CanisterStatusResultV2 = record {
@@ -24,6 +25,13 @@ type CanisterStatusResultV2 = record {
   module_hash : opt blob;
 };
 type CanisterStatusType = variant { stopped; stopping; running };
+type Config = record {
+  api : opt Guards;
+  ecdsa_key_name : text;
+  allowed_callers : vec principal;
+  supported_credentials : opt vec SupportedCredential;
+  ic_root_key_raw : opt blob;
+};
 type CredentialSpec = record {
   arguments : opt vec record { text; ArgumentValue };
   credential_type : text;
@@ -42,6 +50,7 @@ type DefiniteCanisterSettingsArgs = record {
   compute_allocation : nat;
 };
 type GetUserProfileError = variant { NotFound };
+type Guards = record { user_data : ApiEnabled; threshold_key : ApiEnabled };
 type HttpRequest = record {
   url : text;
   method : text;
@@ -55,6 +64,7 @@ type HttpResponse = record {
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type InitArg = record {
+  api : opt Guards;
   ecdsa_key_name : text;
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
@@ -94,6 +104,7 @@ type SupportedCredential = record {
 };
 type Token = variant { Icrc : IcrcToken };
 type UserCredential = record {
+  issuer : text;
   verified_date_timestamp : opt nat64;
   credential_type : CredentialType;
 };
@@ -115,6 +126,7 @@ type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
   caller_eth_address : () -> (text);
+  config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);

@@ -8,8 +8,9 @@ import {
 } from '$lib/constants/app.constants';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import { userProfileStore } from '$lib/stores/settings.store';
 import { toastsError } from '$lib/stores/toasts.store';
+import { userProfileStore } from '$lib/stores/user-profile.store';
+import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
@@ -42,7 +43,7 @@ const addPouhCredential = async ({
 				arguments: []
 			},
 			issuerCanisterId,
-			currentUserVersion: fromNullable(userProfile?.version ?? [])
+			currentUserVersion: fromNullable(userProfile?.profile.version ?? [])
 		});
 		if ('Ok' in response) {
 			return { success: true };
@@ -139,7 +140,8 @@ export const requestPouhCredential = async ({
 			onSuccess: async (response: VerifiablePresentationResponse) => {
 				resolve(await handleSuccess({ response, identity, issuerCanisterId }));
 			},
-			windowOpenerFeatures: popupCenter({ width: VC_POPUP_WIDTH, height: VC_POPUP_HEIGHT })
+			windowOpenerFeatures: popupCenter({ width: VC_POPUP_WIDTH, height: VC_POPUP_HEIGHT }),
+			...getOptionalDerivationOrigin()
 		});
 	});
 };

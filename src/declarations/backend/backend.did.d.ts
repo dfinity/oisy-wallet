@@ -13,6 +13,7 @@ export interface AddUserCredentialRequest {
 	current_user_version: [] | [bigint];
 	credential_spec: CredentialSpec;
 }
+export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export interface CanisterStatusResultV2 {
@@ -27,6 +28,13 @@ export interface CanisterStatusResultV2 {
 	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
+export interface Config {
+	api: [] | [Guards];
+	ecdsa_key_name: string;
+	allowed_callers: Array<Principal>;
+	supported_credentials: [] | [Array<SupportedCredential>];
+	ic_root_key_raw: [] | [Uint8Array | number[]];
+}
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
 	credential_type: string;
@@ -45,6 +53,10 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type GetUserProfileError = { NotFound: null };
+export interface Guards {
+	user_data: ApiEnabled;
+	threshold_key: ApiEnabled;
+}
 export interface HttpRequest {
 	url: string;
 	method: string;
@@ -61,6 +73,7 @@ export interface IcrcToken {
 	index_id: [] | [Principal];
 }
 export interface InitArg {
+	api: [] | [Guards];
 	ecdsa_key_name: string;
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
@@ -100,6 +113,7 @@ export interface SupportedCredential {
 }
 export type Token = { Icrc: IcrcToken };
 export interface UserCredential {
+	issuer: string;
 	verified_date_timestamp: [] | [bigint];
 	credential_type: CredentialType;
 }
@@ -124,6 +138,7 @@ export interface UserTokenId {
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	caller_eth_address: ActorMethod<[], string>;
+	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;

@@ -1,9 +1,7 @@
 use ic_verifiable_credentials::VcFlowSigners;
-use shared::types::{user_profile::AddUserCredentialRequest, CredentialType};
+use shared::types::{user_profile::AddUserCredentialRequest, Config, CredentialType};
 
-use crate::Config;
-
-pub fn get_credential_config(
+pub fn find_credential_config(
     request: &AddUserCredentialRequest,
     config: &Config,
 ) -> Option<(VcFlowSigners, Vec<u8>, CredentialType)> {

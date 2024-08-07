@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "0.0.28",
+	"version": "0.0.31",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -32,14 +32,15 @@
 		"fix-imports": "eslint --fix --rule 'import/order: [error, { alphabetize: { order: asc } }]' --rule 'import/no-duplicates: error' ./src/**/*.svelte",
 		"format": "prettier --write './**/*.{ts,js,mjs,json,scss,css,svelte,html,md}' && npm run fix-imports",
 		"format:backend": "./scripts/format.sh",
-		"generate": "scripts/did.sh && dfx generate && node scripts/did.update.types.mjs && node scripts/did.delete.types.mjs && npm run format",
+		"generate": "scripts/generate.sh",
 		"deploy": "scripts/deploy.sh",
 		"i18n": "node scripts/i18n.mjs && prettier --write ./src/frontend/src/lib/types/i18n.d.ts",
 		"e2e": "playwright test",
 		"e2e:dev": "NODE_ENV=development playwright test",
 		"e2e:ci": "playwright test --reporter=html",
 		"e2e:snapshots": "npx playwright test --update-snapshots --reporter=list",
-		"e2e:report": "npx playwright show-report"
+		"e2e:report": "npx playwright show-report",
+		"erc20:check": "vite-node scripts/check.tokens.erc20.ts"
 	},
 	"dependencies": {
 		"@dfinity/agent": "^1.4.0",
@@ -47,7 +48,7 @@
 		"@dfinity/candid": "^1.4.0",
 		"@dfinity/ckbtc": "^2.5.0",
 		"@dfinity/cketh": "^3.2.0",
-		"@dfinity/gix-components": "^4.5.0",
+		"@dfinity/gix-components": "^4.6.0",
 		"@dfinity/ic-management": "^5.1.0",
 		"@dfinity/ledger-icp": "^2.4.0",
 		"@dfinity/ledger-icrc": "^2.4.0",
@@ -61,6 +62,7 @@
 		"buffer": "^6.0.3",
 		"ethers": "^5.7.0",
 		"idb-keyval": "^6.2.1",
+		"three": "^0.167.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
@@ -74,6 +76,7 @@
 		"@testing-library/jest-dom": "^6.4.6",
 		"@testing-library/svelte": "^5.2.0",
 		"@types/node": "^20.14.9",
+		"@types/three": "^0.167.0",
 		"@typescript-eslint/eslint-plugin": "^7.2.0",
 		"@typescript-eslint/parser": "^7.2.0",
 		"autoprefixer": "^10.4.19",
@@ -95,6 +98,7 @@
 		"tslib": "^2.6.3",
 		"typescript": "^5.4.5",
 		"vite": "^5.3.2",
+		"vite-node": "^2.0.4",
 		"vitest": "^1.6.0"
 	},
 	"type": "module",

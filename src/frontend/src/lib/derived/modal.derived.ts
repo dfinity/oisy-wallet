@@ -25,6 +25,10 @@ export const modalReceive: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive'
 );
+export const modalSend: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'send'
+);
 export const modalEthSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-send'
@@ -94,9 +98,13 @@ export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'receive-bitcoin'
 );
-export const modalAbout: Readable<boolean> = derived(
+export const modalAboutWhat: Readable<boolean> = derived(
 	modalStore,
-	($modalStore) => $modalStore?.type === 'about'
+	($modalStore) => $modalStore?.type === 'about-what'
+);
+export const modalAboutHow: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'about-how'
 );
 
 export const modalWalletConnect: Readable<boolean> = derived(

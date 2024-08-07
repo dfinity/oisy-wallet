@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { slide, fade } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 	import { nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -15,16 +13,16 @@
 	import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import type { Token } from '$lib/types/token';
+	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 
 	let ckEr20 = false;
 	$: ckEr20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	let feeSymbol: string;
-	$: feeSymbol = ckEr20
-		? $ethereumFeeTokenCkEth?.symbol ?? $ckEthereumNativeToken.symbol
-		: $ckEthereumNativeToken.symbol;
+	let feeToken: Token;
+	$: feeToken = ckEr20 ? $ethereumFeeTokenCkEth ?? $ckEthereumNativeToken : $ckEthereumNativeToken;
 
 	let maxTransactionFee: bigint | undefined | null = undefined;
 	$: maxTransactionFee = $store?.maxTransactionFee;
@@ -38,13 +36,11 @@
 			<div>
 				&ZeroWidthSpace;
 				{#if nonNullish(maxTransactionFee)}
-					<span in:fade>
-						{formatToken({
-							value: BigNumber.from(maxTransactionFee),
-							displayDecimals: EIGHT_DECIMALS
-						})}
-						{feeSymbol}
-					</span>
+					<FeeAmountDisplay
+						fee={BigNumber.from(maxTransactionFee)}
+						feeSymbol={feeToken.symbol}
+						feeTokenId={feeToken.id}
+					/>
 				{/if}
 			</div>
 		</Value>

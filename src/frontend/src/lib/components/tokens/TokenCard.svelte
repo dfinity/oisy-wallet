@@ -2,30 +2,27 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import type { Token } from '$lib/types/token';
-	import { transactionsUrl } from '$lib/utils/nav.utils';
+	import Tag from '$lib/components/ui/Tag.svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let token: Token;
 
-	let url: string;
-	$: url = transactionsUrl({ token });
+	const ariaLabel = nonNullish(token.oisyName)
+		? `${token.oisyName.prefix ?? ''}${token.oisyName.oisyName}`
+		: token.name;
 </script>
 
-<div class="flex gap-3 sm:gap-8 mb-6">
-	<a
-		class="no-underline flex-1"
-		href={url}
-		aria-label={`Open the list of ${token.symbol} transactions`}
-	>
-		<Card noMargin>
-			{token.name}
+<Card noMargin>
+	<span aria-label={ariaLabel}>
+		{#if nonNullish(token.oisyName?.prefix)}
+			<Tag ariaHidden>{token.oisyName.prefix}</Tag>
+		{/if}
+		<span aria-hidden="true">{token.oisyName?.oisyName ?? token.name}</span>
+	</span>
 
-			<TokenLogo {token} slot="icon" color="white" />
+	<TokenLogo {token} slot="icon" color="white" />
 
-			<slot name="description" slot="description" />
+	<slot name="description" slot="description" />
 
-			<slot name="exchange" slot="action" />
-		</Card>
-	</a>
-
-	<slot name="actions" />
-</div>
+	<slot name="exchange" slot="action" />
+</Card>

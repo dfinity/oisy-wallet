@@ -6,7 +6,7 @@ use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::env;
 use std::fs::read;
 
-use super::mock::{II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
+use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
 
@@ -15,22 +15,17 @@ const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.
 // Instead, we can use the master_ecdsa_public_key suffixed with the subnet ID. PocketID adds the suffix because it can have multiple subnets.
 const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 
-pub fn setup() -> (PocketIc, Principal) {
-    let (pic, canister_id) = init();
+#[inline]
+pub fn controller() -> Principal {
+    Principal::from_text(CONTROLLER)
+        .expect("Test setup error: Failed to parse controller principal")
+}
 
+pub fn setup() -> (PocketIc, Principal) {
     let backend_wasm_path =
         env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
-    let wasm_bytes = read(backend_wasm_path.clone()).expect(&format!(
-        "Could not find the backend wasm: {}",
-        backend_wasm_path
-    ));
-
-    let arg = init_arg();
-
-    pic.install_canister(canister_id, wasm_bytes, encode_one(&arg).unwrap(), None);
-
-    (pic, canister_id)
+    setup_with_custom_wasm(&backend_wasm_path, None)
 }
 
 pub fn setup_with_custom_wasm(
@@ -44,6 +39,9 @@ pub fn setup_with_custom_wasm(
     let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
 
     pic.install_canister(canister_id, wasm_bytes, arg, None);
+
+    pic.set_controllers(canister_id.clone(), None, vec![controller()])
+        .expect("Test setup error: Failed to set controllers");
 
     (pic, canister_id)
 }
@@ -74,7 +72,7 @@ pub fn upgrade_with_wasm(
         canister_id.clone(),
         wasm_bytes,
         encode_one(&arg).unwrap(),
-        None,
+        Some(controller()),
     )
     .map_err(|e| match e {
         CallError::Reject(e) => e,
@@ -96,7 +94,7 @@ fn init() -> (PocketIc, Principal) {
     (pic, canister_id)
 }
 
-fn init_arg() -> Arg {
+pub(crate) fn init_arg() -> Arg {
     Arg::Init(InitArg {
         ecdsa_key_name: format!("master_ecdsa_public_key_{}", SUBNET_ID).to_string(),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
@@ -110,6 +108,7 @@ fn init_arg() -> Arg {
             issuer_origin: ISSUER_ORIGIN.to_string(),
             credential_type: CredentialType::ProofOfUniqueness,
         }]),
+        api: None,
     })
 }
 

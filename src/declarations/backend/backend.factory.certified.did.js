@@ -1,5 +1,14 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
+	const ApiEnabled = IDL.Variant({
+		ReadOnly: IDL.Null,
+		Enabled: IDL.Null,
+		Disabled: IDL.Null
+	});
+	const Guards = IDL.Record({
+		user_data: ApiEnabled,
+		threshold_key: ApiEnabled
+	});
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
 		ii_canister_id: IDL.Principal,
@@ -9,6 +18,7 @@ export const idlFactory = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const InitArg = IDL.Record({
+		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
@@ -36,7 +46,15 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
+	const Config = IDL.Record({
+		api: IDL.Opt(Guards),
+		ecdsa_key_name: IDL.Text,
+		allowed_callers: IDL.Vec(IDL.Principal),
+		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
+		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
+	});
 	const UserCredential = IDL.Record({
+		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
 		credential_type: CredentialType
 	});
@@ -133,6 +151,7 @@ export const idlFactory = ({ IDL }) => {
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
+		config: IDL.Func([], [Config]),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
@@ -153,6 +172,15 @@ export const idlFactory = ({ IDL }) => {
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
+	const ApiEnabled = IDL.Variant({
+		ReadOnly: IDL.Null,
+		Enabled: IDL.Null,
+		Disabled: IDL.Null
+	});
+	const Guards = IDL.Record({
+		user_data: ApiEnabled,
+		threshold_key: ApiEnabled
+	});
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
 		ii_canister_id: IDL.Principal,
@@ -162,6 +190,7 @@ export const init = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const InitArg = IDL.Record({
+		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
