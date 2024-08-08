@@ -36,30 +36,6 @@ pub enum ApiEnabled {
     ReadOnly,
     Disabled,
 }
-impl Default for ApiEnabled {
-    fn default() -> Self {
-        Self::Enabled
-    }
-}
-impl ApiEnabled {
-    #[must_use]
-    pub fn readable(&self) -> bool {
-        matches!(self, Self::Enabled | Self::ReadOnly)
-    }
-    #[must_use]
-    pub fn writable(&self) -> bool {
-        matches!(self, Self::Enabled)
-    }
-}
-#[test]
-fn test_api_enabled() {
-    assert_eq!(ApiEnabled::Enabled.readable(), true);
-    assert_eq!(ApiEnabled::Enabled.writable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.readable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.writable(), false);
-    assert_eq!(ApiEnabled::Disabled.readable(), false);
-    assert_eq!(ApiEnabled::Disabled.writable(), false);
-}
 
 #[derive(CandidType, Deserialize, Default, Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Guards {
@@ -267,6 +243,7 @@ pub mod user_profile {
 #[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub enum MigrationProgress {
     // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
+    // TODO: Remove warning once the migration has been implemented.
     /// Migration has been requested.
     #[default]
     Pending,
@@ -301,15 +278,6 @@ pub struct Migration {
 pub struct MigrationReport {
     pub to: Principal,
     pub progress: MigrationProgress,
-}
-
-impl From<&Migration> for MigrationReport {
-    fn from(migration: &Migration) -> Self {
-        MigrationReport {
-            to: migration.to,
-            progress: migration.progress,
-        }
-    }
 }
 
 #[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
