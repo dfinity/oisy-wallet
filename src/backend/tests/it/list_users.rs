@@ -14,7 +14,7 @@ use shared::types::user_profile::{
 
 #[test]
 fn test_list_users_cannot_be_called_if_not_allowed() {
-    let pic_setup = BackendBuilder::default().deploy_new();
+    let pic_setup = BackendBuilder::default().deploy();
 
     let caller = Principal::from_text(VC_HOLDER).unwrap();
 
@@ -29,7 +29,7 @@ fn test_list_users_cannot_be_called_if_not_allowed() {
 
 #[test]
 fn test_list_users_returns_users() {
-    let pic_setup = BackendBuilder::default().deploy_new();
+    let pic_setup = BackendBuilder::default().deploy();
 
     let expected_users: Vec<OisyUser> = pic_setup.create_users(1..=5);
 
@@ -48,7 +48,7 @@ fn test_list_users_returns_users() {
 
 #[test]
 fn test_list_users_returns_filtered_users_by_updated() {
-    let pic_setup = BackendBuilder::default().deploy_new();
+    let pic_setup = BackendBuilder::default().deploy();
 
     // Add 15 users
     let users_count_initial = 15;
@@ -124,7 +124,7 @@ fn test_list_users_returns_filtered_users_by_updated() {
 
 #[test]
 fn test_list_users_returns_requested_users_count() {
-    let pic_setup = BackendBuilder::default().deploy_new();
+    let pic_setup = BackendBuilder::default().deploy();
 
     let users_count_initial = 20;
     pic_setup.create_users(1..=users_count_initial);
@@ -160,7 +160,7 @@ fn test_list_users_returns_requested_users_count() {
 
 #[test]
 fn test_list_users_returns_less_than_requested_users_count() {
-    let pic_setup = BackendBuilder::default().deploy_new();
+    let pic_setup = BackendBuilder::default().deploy();
 
     let users_count = 20;
     let created_users = pic_setup.create_users(1..=users_count);
@@ -182,7 +182,7 @@ fn test_list_users_returns_less_than_requested_users_count() {
 
 #[test]
 fn test_list_users_returns_pouh_credential() {
-    let pic_setup = BackendBuilder::default().deploy_new();
+    let pic_setup = BackendBuilder::default().deploy();
 
     // Add one user that will be updated after the desired timestamp
     let vc_holder = Principal::from_text(VC_HOLDER).expect("VC Holder principal is invalid");

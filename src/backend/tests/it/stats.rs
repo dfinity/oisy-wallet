@@ -11,7 +11,7 @@ use shared::types::user_profile::{OisyUser, Stats};
 
 #[test]
 fn stats_returns_correct_number_of_users() {
-    let pic_setup = BackendBuilder::default().deploy_new();
+    let pic_setup = BackendBuilder::default().deploy();
 
     // Create five users.
     let expected_users: Vec<OisyUser> = pic_setup.create_users(1..=5);
@@ -41,7 +41,7 @@ fn stats_returns_correct_number_of_users() {
 
 #[test]
 fn stats_endpoint_is_accessible_to_allowed_callers_only() {
-    let pic_setup = BackendBuilder::default().deploy_new();
+    let pic_setup = BackendBuilder::default().deploy();
     assert!(
         pic_setup.query::<Stats>(controller(), "stats", ()).is_ok(),
         "Controller should be able to call stats"
