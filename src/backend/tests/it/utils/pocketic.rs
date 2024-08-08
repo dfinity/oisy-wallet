@@ -186,6 +186,16 @@ impl BackendBuilder {
         let canister_id = self.deploy_to(&pic);
         (pic, canister_id)
     }
+
+    /// Deploy to a new pic.
+    pub fn deploy_new(&mut self) -> PicBackend {
+        let pic = PocketIc::new();
+        let canister_id = self.deploy_to(&pic);
+        PicBackend {
+            pic: Arc::new(pic),
+            canister_id,
+        }
+    }
 }
 
 #[inline]
