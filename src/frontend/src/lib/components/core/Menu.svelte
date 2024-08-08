@@ -47,7 +47,7 @@
 		{/if}
 
 		{#if !settingsRoute}
-			<!-- If the url is passed as href instead of click event, the pages refreshes. -->
+			<!-- If the URL is passed as href instead of click event, the pages refreshes. -->
 			<!-- After a few tries, it seems it is a behavior that happens only inside the popover. -->
 			<Link href={null} ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
 				<IconSettings slot="icon" />
