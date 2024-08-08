@@ -7,7 +7,7 @@ module.exports = {
 		'prettier'
 	],
 	parser: '@typescript-eslint/parser',
-	plugins: ['@typescript-eslint', 'eslint-plugin-local-rules'],
+	plugins: ['@typescript-eslint', 'eslint-plugin-local-rules', 'import'],
 	parserOptions: {
 		sourceType: 'module',
 		ecmaVersion: 2020,
@@ -53,6 +53,7 @@ module.exports = {
 		'no-delete-var': 'error',
 		'curly': 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
+		'import/no-duplicates': ['error', { 'prefer-inline': true }],
 	},
 	globals: {
 		NodeJS: true

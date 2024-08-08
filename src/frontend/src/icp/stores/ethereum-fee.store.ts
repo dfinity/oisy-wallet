@@ -1,5 +1,4 @@
-import type { Readable } from 'svelte/store';
-import { writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export type EthereumFeeStoreData =
 	| {

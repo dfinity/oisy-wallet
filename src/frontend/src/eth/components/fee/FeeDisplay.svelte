@@ -2,8 +2,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy } from 'svelte';
-	import type { FeeContext } from '$eth/stores/fee.store';
-	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 
 	const { maxGasFee, feeSymbolStore, feeTokenIdStore }: FeeContext =

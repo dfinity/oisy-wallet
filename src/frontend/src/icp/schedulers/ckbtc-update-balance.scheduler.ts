@@ -14,8 +14,12 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { MinterNoNewUtxosError, type PendingUtxo, type UtxoStatus } from '@dfinity/ckbtc';
+import {
+	MinterNoNewUtxosError,
+	type BitcoinNetwork,
+	type PendingUtxo,
+	type UtxoStatus
+} from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
-	import type { WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import type { NetworkId } from '$lib/types/network';
 	import { createEventDispatcher } from 'svelte';

@@ -4,7 +4,7 @@
 	import { address } from '$lib/derived/address.derived';
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -15,7 +15,6 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { notEmptyString } from '@dfinity/utils';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';

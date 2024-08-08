@@ -2,8 +2,7 @@ import { transactionsStore } from '$eth/stores/transactions.store';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Readable } from 'svelte/store';
-import { derived } from 'svelte/store';
+import { derived, type Readable } from 'svelte/store';
 
 export const sortedTransactions: Readable<Transaction[]> = derived(
 	[transactionsStore, tokenWithFallback],

@@ -7,8 +7,7 @@ import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
 import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
-import type { AlchemySettings, Network } from 'alchemy-sdk';
-import { Alchemy, AlchemySubscription } from 'alchemy-sdk';
+import { Alchemy, AlchemySubscription, type AlchemySettings, type Network } from 'alchemy-sdk';
 import { get } from 'svelte/store';
 
 const API_KEY = import.meta.env.VITE_ALCHEMY_API_KEY;

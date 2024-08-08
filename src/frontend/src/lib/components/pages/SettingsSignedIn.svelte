@@ -3,8 +3,7 @@
 	import { KeyValuePairInfo } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
-	import { nonNullish } from '@dfinity/utils';
-	import { secondsToDuration } from '@dfinity/utils';
+	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import { i18n } from '$lib/stores/i18n.store';

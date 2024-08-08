@@ -3,8 +3,7 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { address } from '$lib/derived/address.derived';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import { notEmptyString } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
