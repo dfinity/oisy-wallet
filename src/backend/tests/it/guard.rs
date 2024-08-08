@@ -3,7 +3,10 @@
 use candid::Principal;
 use shared::types::{ApiEnabled, Config, Guards};
 
-use crate::utils::pocketic::{controller, setup};
+use crate::utils::{
+    mock::USER_1,
+    pocketic::{controller, setup},
+};
 
 #[test]
 fn set_guards_is_accessible_to_allowed_callers_only() {
@@ -27,8 +30,6 @@ fn set_guards_is_accessible_to_allowed_callers_only() {
         .is_err(),
         "Anonymous user should not be able to set guards"
     );
-    // A principal NOT listed in `BackendConfig::default_controllers()`.
-    const USER_1: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
     assert!(
         crate::utils::pocketic::update_call::<()>(
             &pic_setup,
