@@ -2,8 +2,12 @@ use crate::utils::mock::CALLER;
 use candid::{decode_one, encode_one, CandidType, Principal};
 use pocket_ic::{CallError, PocketIc, WasmResult};
 use serde::Deserialize;
+use shared::types::user_profile::{OisyUser, UserProfile};
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::fs::read;
+use std::ops::RangeBounds;
+use std::sync::Arc;
+use std::time::UNIX_EPOCH;
 use std::{env, time::Duration};
 
 use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
@@ -308,4 +312,98 @@ where
         WasmResult::Reply(reply) => decode_one(&reply).map_err(|_| "Decoding failed".to_string()),
         WasmResult::Reject(error) => Err(error),
     })
+}
+
+/// A test Oisy backend canister with a shared reference to the `PocketIc` instance it is installed on.
+pub struct PicBackend {
+    pub pic: Arc<PocketIc>,
+    pub canister_id: Principal,
+}
+impl PicCanisterTrait for PicBackend {
+    fn pic(&self) -> Arc<PocketIc> {
+        self.pic.clone()
+    }
+    fn canister_id(&self) -> Principal {
+        self.canister_id.clone()
+    }
+}
+impl PicBackend {
+    /// Creates toy users with the given range of principals.
+    pub fn create_users<R>(&self, range: R) -> Vec<OisyUser>
+    where
+        R: RangeBounds<u8> + Iterator<Item = u8>,
+    {
+        let mut expected_users: Vec<OisyUser> = Vec::new();
+        for i in range {
+            self.pic.advance_time(Duration::new(10, 0));
+            let caller = Principal::self_authenticating(i.to_string());
+            let response = self.update::<UserProfile>(caller, "create_user_profile", ());
+            let timestamp = self.pic.get_time();
+            let timestamp_nanos = timestamp
+                .duration_since(UNIX_EPOCH)
+                .expect("Time went backwards")
+                .as_nanos();
+            let expected_user = OisyUser {
+                updated_timestamp: timestamp_nanos as u64,
+                pouh_verified: false,
+                principal: caller,
+            };
+            expected_users.push(expected_user);
+            assert!(response.is_ok());
+        }
+        expected_users
+    }
+}
+
+/// Common methods for interacting with a canister using `PocketIc`.
+pub trait PicCanisterTrait {
+    /// A shared PocketIc instance.
+    ///
+    /// Note: `PocketIc` uses interior mutability for query and update calls.  No external mut annotation or locks appear to be necessary.
+    fn pic(&self) -> Arc<PocketIc>;
+
+    /// The ID of this canister.
+    fn canister_id(&self) -> Principal;
+
+    /// Makes an update call to the canister.
+    fn update<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
+    where
+        T: for<'a> Deserialize<'a> + CandidType,
+    {
+        self.pic()
+            .update_call(self.canister_id(), caller, method, encode_one(arg).unwrap())
+            .map_err(|e| {
+                format!(
+                    "Update call error. RejectionCode: {:?}, Error: {}",
+                    e.code, e.description
+                )
+            })
+            .and_then(|reply| match reply {
+                WasmResult::Reply(reply) => {
+                    decode_one(&reply).map_err(|e| format!("Decoding failed: {e}"))
+                }
+                WasmResult::Reject(error) => Err(error),
+            })
+    }
+
+    /// Makes a query call to the canister.
+    fn query<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
+    where
+        T: for<'a> Deserialize<'a> + CandidType,
+    {
+        self.pic()
+            .query_call(self.canister_id(), caller, method, encode_one(arg).unwrap())
+            .map_err(|e| {
+                format!(
+                    "Query call error. RejectionCode: {:?}, Error: {}",
+                    e.code, e.description
+                )
+            })
+            .and_then(|reply| match reply {
+                WasmResult::Reply(reply) => {
+                    decode_one(&reply).map_err(|_| "Decoding failed".to_string())
+                }
+                WasmResult::Reject(error) => Err(error),
+            })
+    }
 }
