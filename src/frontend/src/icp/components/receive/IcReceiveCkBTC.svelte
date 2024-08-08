@@ -5,7 +5,6 @@
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
 	import { authStore } from '$lib/stores/auth.store';
 	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
-	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { getContext } from 'svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -15,6 +14,7 @@
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 
 	const { token, tokenId, ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
@@ -23,7 +23,7 @@
 
 	let minterInfoLoaded = false;
 
-	const openReceive = async () => {
+	const openReceive = async (modalId: symbol) => {
 		// If the minter info has not been loaded yet, we attach the web worker to load that information.
 		// Imperatively loading that information has the downside that the user might have to wait a few seconds (busy screen) to access the information.
 		// There might also be a race condition when the minter information is called twice if the user clicks really, really quickly on the "Receive" button on a screen where the minter information is already loaded globally.
@@ -39,11 +39,15 @@
 		modalStore.openCkBTCReceive(modalId);
 		return;
 	};
+
+	const openModal = async (modalId: symbol) => await open(async () => openReceive(modalId));
 </script>
 
-<svelte:window on:oisyReceiveCkBTC={async () => await open(openReceive)} />
+<svelte:window on:oisyReceiveCkBTC={async () => await openModal(modalId)} />
 
-<ReceiveButton on:click={async () => await open(openReceive)} />
+<ReceiveButtonWithModal open={openModal} isOpen={$modalCkBTCReceive} {modalId}>
+	<ReceiveAddressModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} slot="modal" />
+</ReceiveButtonWithModal>
 
 {#if !minterInfoLoaded}
 	<IcCkListener
@@ -51,8 +55,4 @@
 		token={$token}
 		twinToken={$ckEthereumTwinToken}
 	/>
-{/if}
-
-{#if $modalCkBTCReceive && $modalStore?.data === modalId}
-	<ReceiveAddressModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} />
 {/if}
