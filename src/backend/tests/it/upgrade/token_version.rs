@@ -4,9 +4,7 @@ use crate::utils::assertion::assert_tokens_data_eq;
 use crate::utils::mock::{
     CALLER, CALLER_ETH_ADDRESS, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL,
 };
-use crate::utils::pocketic::{
-    setup_with_custom_wasm, update_call, upgrade_latest_wasm, upgrade_with_wasm,
-};
+use crate::utils::pocketic::{update_call, upgrade_latest_wasm, upgrade_with_wasm, BackendBuilder};
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::token::UserToken;
@@ -31,7 +29,9 @@ lazy_static! {
 #[test]
 fn test_upgrade_user_token() {
     // Deploy a released canister
-    let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_13_WASM_PATH, None);
+    let pic_setup = BackendBuilder::default()
+        .with_wasm(BACKEND_V0_0_13_WASM_PATH)
+        .deploy();
 
     // Add a user token
     let caller = Principal::from_text(CALLER).unwrap();
@@ -64,7 +64,9 @@ fn test_upgrade_user_token() {
 #[test]
 fn test_upgrade_allowed_caller_eth_address_of() {
     // Deploy a released canister
-    let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_13_WASM_PATH, None);
+    let pic_setup = BackendBuilder::default()
+        .with_wasm(BACKEND_V0_0_13_WASM_PATH)
+        .deploy();
 
     // Caller is allowed to call eth_address_of
     let caller = Principal::from_text(CALLER).unwrap();
@@ -97,7 +99,9 @@ fn test_add_user_token_after_upgrade_should_ignore_premature_increments() {
 
 fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgradeOptions) {
     // Deploy a released canister
-    let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_13_WASM_PATH, None);
+    let pic_setup = BackendBuilder::default()
+        .with_wasm(BACKEND_V0_0_13_WASM_PATH)
+        .deploy();
 
     pic_setup.0.tick();
 
@@ -135,7 +139,9 @@ fn test_add_user_token_after_upgrade_with_options(options: AddUserTokenAfterUpgr
 #[test]
 fn test_update_user_token_after_upgrade() {
     // Deploy a released canister
-    let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_13_WASM_PATH, None);
+    let pic_setup = BackendBuilder::default()
+        .with_wasm(BACKEND_V0_0_13_WASM_PATH)
+        .deploy();
 
     // Add a user token
     let caller = Principal::from_text(CALLER).unwrap();

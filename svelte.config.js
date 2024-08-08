@@ -30,15 +30,15 @@ const config = {
 			$icp: './src/frontend/src/icp',
 			'$icp-eth': './src/frontend/src/icp-eth',
 			$env: './src/frontend/src/env'
+		},
+
+		serviceWorker: {
+			register: false
+		},
+
+		version: {
+			name: version
 		}
-	},
-
-	serviceWorker: {
-		register: false
-	},
-
-	version: {
-		name: version
 	}
 };
 
