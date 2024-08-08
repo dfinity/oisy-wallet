@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ProgressStep, Modal } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep } from '@dfinity/gix-components';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
 	import { loadAddress, loadIdbAddress } from '$lib/services/address.services';
