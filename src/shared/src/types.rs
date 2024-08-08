@@ -243,6 +243,7 @@ pub mod user_profile {
 #[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub enum MigrationProgress {
     // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
+    // TODO: Remove warning once the migration has been implemented.
     /// Migration has been requested.
     #[default]
     Pending,
