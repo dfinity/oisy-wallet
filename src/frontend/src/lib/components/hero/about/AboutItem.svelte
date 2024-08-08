@@ -4,7 +4,7 @@
 	export let asMenuItem = false;
 </script>
 
-<button class={asMenuItem ? '' : 'text-center text-white font-bold whitespace-nowrap'} on:click>
+<button class={asMenuItem ? 'text' : 'text-center text-white font-bold whitespace-nowrap'} on:click>
 	<div class="flex gap-2 items-center">
 		{#if asMenuItem}
 			<IconInfo />
