@@ -148,6 +148,11 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat,
 		nonce: IDL.Nat
 	});
+	const Stats = IDL.Record({
+		user_profile_count: IDL.Nat64,
+		custom_token_count: IDL.Nat64,
+		user_token_count: IDL.Nat64
+	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
@@ -167,7 +172,8 @@ export const idlFactory = ({ IDL }) => {
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
-		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
+		sign_transaction: IDL.Func([SignRequest], [IDL.Text], []),
+		stats: IDL.Func([], [Stats], ['query'])
 	});
 };
 // @ts-ignore

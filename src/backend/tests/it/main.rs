@@ -3,6 +3,7 @@ mod config;
 mod custom_token;
 mod list_users;
 mod sign;
+mod stats;
 mod token;
 mod upgrade;
 mod user_credentials;

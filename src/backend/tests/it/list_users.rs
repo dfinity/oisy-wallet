@@ -13,7 +13,7 @@ use shared::types::user_profile::{
     OisyUser, UserProfile,
 };
 
-fn create_users(pic_setup: &(PocketIc, Principal), start: u8, end: u8) -> Vec<OisyUser> {
+pub fn create_users(pic_setup: &(PocketIc, Principal), start: u8, end: u8) -> Vec<OisyUser> {
     let mut expected_users: Vec<OisyUser> = Vec::new();
     for i in start..=end {
         pic_setup.0.advance_time(Duration::new(10, 0));

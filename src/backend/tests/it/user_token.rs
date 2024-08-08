@@ -9,7 +9,7 @@ use shared::types::token::{UserToken, UserTokenId};
 use shared::types::TokenVersion;
 
 lazy_static! {
-    static ref MOCK_TOKEN: UserToken = UserToken {
+    pub static ref MOCK_TOKEN: UserToken = UserToken {
         chain_id: SEPOLIA_CHAIN_ID,
         contract_address: WEENUS_CONTRACT_ADDRESS.to_string(),
         decimals: Some(WEENUS_DECIMALS),
@@ -17,11 +17,11 @@ lazy_static! {
         version: None,
         enabled: Some(true),
     };
-    static ref MOCK_TOKEN_ID: UserTokenId = UserTokenId {
+    pub static ref MOCK_TOKEN_ID: UserTokenId = UserTokenId {
         chain_id: MOCK_TOKEN.chain_id.clone(),
         contract_address: MOCK_TOKEN.contract_address.clone(),
     };
-    static ref ANOTHER_TOKEN: UserToken = UserToken {
+    pub static ref ANOTHER_TOKEN: UserToken = UserToken {
         chain_id: SEPOLIA_CHAIN_ID,
         contract_address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984".to_string(),
         decimals: Some(18),

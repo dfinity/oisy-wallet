@@ -104,6 +104,11 @@ export interface SignRequest {
 	chain_id: bigint;
 	nonce: bigint;
 }
+export interface Stats {
+	user_profile_count: bigint;
+	custom_token_count: bigint;
+	user_token_count: bigint;
+}
 export interface SupportedCredential {
 	ii_canister_id: Principal;
 	issuer_origin: string;
@@ -155,6 +160,7 @@ export interface _SERVICE {
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
+	stats: ActorMethod<[], Stats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
