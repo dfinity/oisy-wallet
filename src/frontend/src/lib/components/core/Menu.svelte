@@ -11,13 +11,13 @@
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import MenuWallet from '$lib/components/core/MenuWallet.svelte';
 	import { page } from '$app/stores';
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import Link from '$lib/components/ui/Link.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -47,10 +47,12 @@
 		{/if}
 
 		{#if !settingsRoute}
-			<ButtonMenu ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
-				<IconSettings />
+			<!-- If the url is passed as href instead of click event, the pages refreshes. -->
+			<!-- After a few tries, it seems it is a behavior that happens only inside the popover. -->
+			<Link href={null} ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
+				<IconSettings slot="icon" />
 				{$i18n.settings.text.title}
-			</ButtonMenu>
+			</Link>
 
 			<Hr />
 		{/if}
@@ -74,16 +76,10 @@
 
 		<Hr />
 
-		<a
-			href={OISY_REPO_URL}
-			rel="external noopener noreferrer"
-			target="_blank"
-			class="flex gap-2 items-center no-underline"
-			aria-label={$i18n.navigation.text.source_code_on_github}
-		>
-			<IconGitHub />
+		<Link href={OISY_REPO_URL} ariaLabel={$i18n.navigation.text.source_code_on_github} external>
+			<IconGitHub slot="icon" />
 			{$i18n.navigation.text.source_code}
-		</a>
+		</Link>
 
 		<Hr />
 
