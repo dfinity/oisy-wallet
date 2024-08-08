@@ -1,4 +1,5 @@
 import type { Network } from '$lib/types/network';
+import type { RequiredExcept } from '$lib/types/utils';
 
 export type TokenId = symbol;
 
@@ -30,7 +31,7 @@ export type TokenOisyName = {
 	oisyName: string;
 };
 
-export type RequiredToken = Required<Omit<Token, keyof TokenAppearance>> & TokenAppearance;
+export type RequiredToken = RequiredExcept<Token, keyof TokenAppearance>;
 
 export type OptionToken = Token | undefined | null;
 export type OptionTokenId = TokenId | undefined | null;
