@@ -239,7 +239,7 @@ async fn eth_address_of(p: Principal) -> String {
 /// Returns the Bitcoin address of the caller.
 #[update(guard = "may_read_threshold_keys")]
 async fn caller_btc_address(network: BitcoinNetwork) -> String {
-    public_key_to_p2pkh_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await, network)
+    public_key_to_p2pkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
