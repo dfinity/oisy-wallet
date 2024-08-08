@@ -8,6 +8,7 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 import { mapDefaultTokenToToggleable } from '$lib/utils/token.utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -116,7 +117,7 @@ export const enabledErc20TokensAddresses: Readable<ContractAddressText[]> = deri
 
 export const erc20UserTokensInitialized: Readable<boolean> = derived(
 	[erc20UserTokensStore],
-	([$erc20UserTokensStore]) => $erc20UserTokensStore !== undefined
+	([$erc20UserTokensStore]) => nonNullish($erc20UserTokensStore)
 );
 
 export const erc20UserTokensNotInitialized: Readable<boolean> = derived(

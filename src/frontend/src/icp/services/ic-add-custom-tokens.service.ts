@@ -6,7 +6,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export interface ValidateTokenData {
@@ -99,11 +99,13 @@ const assertExistingTokens = ({
 	token: IcTokenWithoutId;
 }): { valid: boolean } => {
 	if (
-		icrcTokens.find(
-			({ symbol, name }) =>
-				symbol.toLowerCase() === token.symbol.toLowerCase() ||
-				name.toLowerCase() === token.name.toLowerCase()
-		) !== undefined
+		nonNullish(
+			icrcTokens.find(
+				({ symbol, name }) =>
+					symbol.toLowerCase() === token.symbol.toLowerCase() ||
+					name.toLowerCase() === token.name.toLowerCase()
+			)
+		)
 	) {
 		toastsError({
 			msg: { text: get(i18n).tokens.error.duplicate_metadata }
@@ -121,7 +123,7 @@ const assertAlreadyAvailable = ({
 }: {
 	icrcTokens: IcToken[];
 } & IcCanisters): { alreadyAvailable: boolean } => {
-	if (icrcTokens?.find(({ ledgerCanisterId: id }) => id === ledgerCanisterId) !== undefined) {
+	if (nonNullish(icrcTokens?.find(({ ledgerCanisterId: id }) => id === ledgerCanisterId))) {
 		toastsError({
 			msg: { text: get(i18n).tokens.error.already_available }
 		});

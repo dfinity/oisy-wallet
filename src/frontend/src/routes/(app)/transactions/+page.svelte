@@ -15,8 +15,7 @@
 			await goto('/');
 		}
 
-		const unknownNetwork =
-			$networks.find(({ id }) => id.description === $routeNetwork) === undefined;
+		const unknownNetwork = isNullish($networks.find(({ id }) => id.description === $routeNetwork));
 
 		if (unknownNetwork) {
 			await goto('/');

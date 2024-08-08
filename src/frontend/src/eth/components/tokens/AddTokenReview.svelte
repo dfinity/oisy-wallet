@@ -3,7 +3,7 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Erc20Metadata } from '$eth/types/erc20';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
@@ -38,9 +38,11 @@
 		}
 
 		if (
-			$erc20Tokens?.find(
-				({ address }) => address.toLowerCase() === contractAddress?.toLowerCase()
-			) !== undefined
+			nonNullish(
+				$erc20Tokens?.find(
+					({ address }) => address.toLowerCase() === contractAddress?.toLowerCase()
+				)
+			)
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.already_available }
@@ -64,11 +66,13 @@
 			}
 
 			if (
-				$erc20Tokens?.find(
-					({ symbol, name }) =>
-						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
-						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
-				) !== undefined
+				nonNullish(
+					$erc20Tokens?.find(
+						({ symbol, name }) =>
+							symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
+							name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
+					)
+				)
 			) {
 				toastsError({
 					msg: { text: $i18n.tokens.error.duplicate_metadata }

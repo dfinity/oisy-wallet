@@ -1,9 +1,10 @@
 import type { Principal } from '@dfinity/principal';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 // e.g. payloads.did/state_hash
 export const isHash = (bytes: number[]): boolean =>
 	bytes.length === 32 &&
-	bytes.find((value) => !Number.isInteger(value) || value < 0 || value > 255) === undefined;
+	isNullish(bytes.find((value) => !Number.isInteger(value) || value < 0 || value > 255));
 
 // Convert a byte array to a hex string
 const bytesToHexString = (bytes: number[]): string =>
@@ -55,7 +56,7 @@ export const stringifyJson = (
 					break;
 				}
 				case 'bigint': {
-					if (options?.devMode !== undefined && options.devMode) {
+					if (nonNullish(options?.devMode) && options.devMode) {
 						return `BigInt('${value.toString()}')`;
 					}
 					return value.toString();

@@ -8,7 +8,7 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 );
 
 export const address: Readable<OptionAddress> = derived([addressStore], ([$addressStore]) =>
-	$addressStore === null ? null : $addressStore?.address
+	isNullish($addressStore) ? null : $addressStore?.address
 );
 
 export const addressCertified: Readable<boolean> = derived(

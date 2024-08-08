@@ -11,7 +11,7 @@ import type { TokenId } from '$lib/types/token';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
 import type { MinterInfo } from '@dfinity/cketh';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadCkEthMinterInfo = async ({
@@ -24,7 +24,7 @@ export const loadCkEthMinterInfo = async ({
 	const minterInfoInStore = get(ckEthMinterInfoStore);
 
 	// We try to load only once per session the helpers (ckETH and ckErc20) contract addresses
-	if (minterInfoInStore?.[tokenId] !== undefined) {
+	if (nonNullish(minterInfoInStore?.[tokenId])) {
 		return;
 	}
 

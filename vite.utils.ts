@@ -1,3 +1,4 @@
+import { nonNullish } from '@dfinity/utils';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -93,7 +94,7 @@ const readRemoteCanisterIds = ({ prefix }: { prefix?: string }): Record<string, 
 		return Object.entries(canisters).reduce((acc, current: [string, Details]) => {
 			const [canisterName, canisterDetails] = current;
 
-			if (canisterDetails.remote !== undefined) {
+			if (nonNullish(canisterDetails.remote)) {
 				const ids = Object.entries(canisterDetails.remote.id).reduce(
 					(acc, [network, id]) => ({
 						...acc,
