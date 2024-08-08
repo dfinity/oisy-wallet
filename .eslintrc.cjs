@@ -53,7 +53,6 @@ module.exports = {
 		'no-delete-var': 'error',
 		'curly': 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
-		'import/order': ['error', { 'alphabetize': { 'order': 'asc' } }],
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],
 	},
 	globals: {
