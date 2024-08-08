@@ -5,7 +5,7 @@ use serde::Deserialize;
 use shared::types::user_profile::{OisyUser, UserProfile};
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::fs::read;
-use std::ops::Range;
+use std::ops::RangeBounds;
 use std::sync::Arc;
 use std::time::UNIX_EPOCH;
 use std::{env, time::Duration};
@@ -314,6 +314,7 @@ where
     })
 }
 
+/// A test Oisy backend canister with a shared reference to the `PocketIc` instance it is installed on.
 pub struct PicBackend {
     pub pic: Arc<PocketIc>,
     pub canister_id: Principal,
@@ -327,8 +328,11 @@ impl PicCanisterTrait for PicBackend {
     }
 }
 impl PicBackend {
-    /// Creates toy users with the given inclusive range of principals.
-    pub fn create_users(&self, range: Range<u8>) -> Vec<OisyUser> {
+    /// Creates toy users with the given range of principals.
+    pub fn create_users<R>(&self, range: R) -> Vec<OisyUser>
+    where
+        R: RangeBounds<u8> + Iterator<Item = u8>,
+    {
         let mut expected_users: Vec<OisyUser> = Vec::new();
         for i in range {
             self.pic.advance_time(Duration::new(10, 0));
@@ -351,9 +355,17 @@ impl PicBackend {
     }
 }
 
+/// Common methods for interacting with a canister using `PocketIc`.
 pub trait PicCanisterTrait {
+    /// A shared PocketIc instance.
+    ///
+    /// Note: `PocketIc` uses interior mutability for query and update calls.  No external mut annotation or locks appear to be necessary.
     fn pic(&self) -> Arc<PocketIc>;
+
+    /// The ID of this canister.
     fn canister_id(&self) -> Principal;
+
+    /// Makes an update call to the canister.
     fn update<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
     where
         T: for<'a> Deserialize<'a> + CandidType,
@@ -374,6 +386,7 @@ pub trait PicCanisterTrait {
             })
     }
 
+    /// Makes a query call to the canister.
     fn query<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
     where
         T: for<'a> Deserialize<'a> + CandidType,

@@ -164,5 +164,8 @@ service : (Arg) -> {
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
   stats : () -> (Stats) query;
+<<<<<<< HEAD
   step_migration : () -> ();
+=======
+>>>>>>> origin/main
 }

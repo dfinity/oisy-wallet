@@ -178,7 +178,10 @@ export interface _SERVICE {
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
 	stats: ActorMethod<[], Stats>;
+<<<<<<< HEAD
 	step_migration: ActorMethod<[], undefined>;
+=======
+>>>>>>> origin/main
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

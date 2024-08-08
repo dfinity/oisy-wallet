@@ -33,10 +33,10 @@ use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
-    ListUsersResponse, OisyUser, UserProfile,
+    ListUsersResponse, OisyUser, Stats, UserProfile,
 };
 use shared::types::{
-    ApiEnabled, Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
+    ApiEnabled, Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport,
 };
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -107,14 +107,14 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
 }
 
 /// Modifies config, given the state.
-fn modify_state_config(state: &mut State, f: impl FnOnce(Config) -> Config) {
+fn modify_state_config(state: &mut State, f: impl FnOnce(&mut Config)) {
     let config: &Candid<Config> = state
         .config
         .get()
         .as_ref()
         .expect("config is not initialized");
-    let config: Config = (*config).clone();
-    let config = f(config);
+    let mut config: Config = (*config).clone();
+    f(&mut config);
     state
         .config
         .set(Some(Candid(config)))
@@ -131,16 +131,6 @@ pub struct State {
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
     migration: Option<Migration>,
-}
-
-impl From<&State> for Stats {
-    fn from(state: &State) -> Self {
-        Stats {
-            user_profile_count: state.user_profile.len(),
-            user_token_count: state.user_token.len(),
-            custom_token_count: state.custom_token.len(),
-        }
-    }
 }
 
 fn set_config(arg: InitArg) {
@@ -560,21 +550,18 @@ fn migration() -> Option<MigrationReport> {
     read_state(|s| s.migration.as_ref().map(MigrationReport::from))
 }
 
-/// Gets stats relevant to the user migration.
+/// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to enable an API in read-only mode.
+#[update(guard = "caller_is_allowed")]
+fn set_guards(guards: Guards) {
+    mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
+}
+
+/// Gets statistics about the canister.
+///
+/// Note: This is a private method, restricted to authorized users, as some stats may not be suitable for public consumption.
 #[query(guard = "caller_is_allowed")]
 fn stats() -> Stats {
     read_state(|s| Stats::from(s))
-}
-
-/// Sets the lock state of the canister APIs.
-#[update(guard = "caller_is_allowed")]
-fn set_guards(guards: Guards) {
-    mutate_state(|state| {
-        modify_state_config(state, |mut config| {
-            config.api = Some(guards);
-            config
-        })
-    });
 }
 
 /// Starts user data migration to a given canister.
@@ -613,12 +600,11 @@ fn step_migration() {
                 match migration.progress {
                     MigrationProgress::Pending => {
                         // Lock the local canister APIs.
-                        modify_state_config(state, |mut config: Config| {
+                        modify_state_config(state, |config| {
                             config.api = Some(Guards {
                                 threshold_key: ApiEnabled::ReadOnly,
                                 user_data: ApiEnabled::ReadOnly,
-                            });
-                            config
+                            })
                         });
                         migration.progress = MigrationProgress::Locked;
                         state.migration = Some(migration);

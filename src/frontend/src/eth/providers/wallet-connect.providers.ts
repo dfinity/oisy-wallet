@@ -9,8 +9,11 @@ import {
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
 import type { EthAddress } from '$lib/types/address';
 import { Core } from '@walletconnect/core';
-import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';
-import { formatJsonRpcResult, type ErrorResponse } from '@walletconnect/jsonrpc-utils';
+import {
+	formatJsonRpcResult,
+	type ErrorResponse,
+	type JsonRpcResponse
+} from '@walletconnect/jsonrpc-utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { Web3Wallet, type Web3WalletTypes } from '@walletconnect/web3wallet';
 
