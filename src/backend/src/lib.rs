@@ -34,7 +34,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, Stats, UserProfile,
 };
-use shared::types::{Arg, Config, Guards, InitArg};
+use shared::types::{Arg, Config, Guards, InitArg, Migration, MigrationReport};
 use std::cell::RefCell;
 use std::str::FromStr;
 use types::{
@@ -75,6 +75,7 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
+            migration: None,
         })
     );
 }
@@ -125,6 +126,7 @@ pub struct State {
     custom_token: CustomTokenMap,
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
+    migration: Option<Migration>,
 }
 
 fn set_config(arg: InitArg) {
@@ -536,6 +538,12 @@ fn list_users(request: ListUsersRequest) -> ListUsersResponse {
 #[update]
 async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
+}
+
+/// Gets the state of any migration currently in progress.
+#[query(guard = "caller_is_allowed")]
+fn migration() -> Option<MigrationReport> {
+    read_state(|s| s.migration.as_ref().map(MigrationReport::from))
 }
 
 /// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to enable an API in read-only mode.

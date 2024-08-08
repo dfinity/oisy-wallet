@@ -8,6 +8,7 @@ candid = { workspace = true }
 ic-canister-sig-creation = { workspace = true }
 ic-cdk = { workspace = true }
 ic-cdk-macros = { workspace = true }
+ic-cdk-timers = { workspace = true }
 ic-metrics-encoder = { workspace = true }
 ic-verifiable-credentials = { workspace = true }
 serde = { workspace = true }

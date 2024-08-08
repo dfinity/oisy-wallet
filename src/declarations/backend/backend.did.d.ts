@@ -87,6 +87,19 @@ export interface ListUsersResponse {
 	users: Array<OisyUser>;
 	matches_max_length: bigint;
 }
+export type MigrationProgress =
+	| { MigratedUserTokensUpTo: Principal }
+	| { TargetPreCheckOk: null }
+	| { MigratedCustomTokensUpTo: Principal }
+	| { Locked: null }
+	| { CheckingTargetCanister: null }
+	| { TargetLocked: null }
+	| { Completed: null }
+	| { Pending: null };
+export interface MigrationReport {
+	to: Principal;
+	progress: MigrationProgress;
+}
 export interface OisyUser {
 	principal: Principal;
 	pouh_verified: boolean;
@@ -152,6 +165,7 @@ export interface _SERVICE {
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
+	migration: ActorMethod<[], [] | [MigrationReport]>;
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
