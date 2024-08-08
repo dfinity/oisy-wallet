@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ProgressStep } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep } from '@dfinity/gix-components';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
 	import { loadAddress, loadIdbAddress } from '$lib/services/address.services';
@@ -7,7 +7,6 @@
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import banner from '$lib/assets/banner.svg';
-	import { Modal } from '@dfinity/gix-components';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { loading } from '$lib/stores/loader.store';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
