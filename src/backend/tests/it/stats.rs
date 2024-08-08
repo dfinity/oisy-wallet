@@ -2,7 +2,10 @@
 use crate::{
     list_users::create_users,
     user_token::{ANOTHER_TOKEN, MOCK_TOKEN},
-    utils::pocketic::{controller, query_call, setup, update_call},
+    utils::{
+        mock::USER_1,
+        pocketic::{controller, query_call, setup, update_call},
+    },
 };
 use candid::Principal;
 use shared::types::user_profile::{OisyUser, Stats};
@@ -52,8 +55,6 @@ fn stats_endpoint_is_accessible_to_allowed_callers_only() {
         query_call::<Stats>(&pic_setup, Principal::anonymous(), "stats", ()).is_err(),
         "Anonymous user should not be able to get stats"
     );
-    // A principal NOT listed in `BackendConfig::default_controllers()`.
-    const USER_1: &str = "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
     assert!(
         query_call::<Stats>(
             &pic_setup,

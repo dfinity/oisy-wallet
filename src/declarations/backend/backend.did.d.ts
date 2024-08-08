@@ -155,6 +155,7 @@ export interface _SERVICE {
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
+	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_user_token: ActorMethod<[UserToken], undefined>;

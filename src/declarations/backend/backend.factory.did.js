@@ -168,6 +168,7 @@ export const idlFactory = ({ IDL }) => {
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
+		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_user_token: IDL.Func([UserToken], [], []),
