@@ -32,7 +32,7 @@ use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
-    ListUsersResponse, OisyUser, UserProfile,
+    ListUsersResponse, OisyUser, Stats, UserProfile,
 };
 use shared::types::{Arg, Config, Guards, InitArg};
 use std::cell::RefCell;
@@ -542,6 +542,14 @@ async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
 #[update(guard = "caller_is_allowed")]
 fn set_guards(guards: Guards) {
     mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
+}
+
+/// Gets statistics about the canister.
+///
+/// Note: This is a private method, restricted to authorized users, as some stats may not be suitable for public consumption.
+#[query(guard = "caller_is_allowed")]
+fn stats() -> Stats {
+    read_state(|s| Stats::from(s))
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
