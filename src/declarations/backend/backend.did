@@ -95,6 +95,11 @@ type SignRequest = record {
   chain_id : nat;
   nonce : nat;
 };
+type Stats = record {
+  user_profile_count : nat64;
+  custom_token_count : nat64;
+  user_token_count : nat64;
+};
 type SupportedCredential = record {
   ii_canister_id : principal;
   issuer_origin : text;
@@ -143,4 +148,5 @@ service : (Arg) -> {
   set_user_token : (UserToken) -> ();
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
+  stats : () -> (Stats) query;
 }
