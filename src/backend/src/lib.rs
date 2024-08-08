@@ -112,16 +112,6 @@ pub struct State {
     user_profile_updated: UserProfileUpdatedMap,
 }
 
-impl From<&State> for Stats {
-    fn from(state: &State) -> Self {
-        Stats {
-            user_profile_count: state.user_profile.len(),
-            user_token_count: state.user_token.len(),
-            custom_token_count: state.custom_token.len(),
-        }
-    }
-}
-
 fn set_config(arg: InitArg) {
     let config = Config::from(arg);
     mutate_state(|state| {
