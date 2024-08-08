@@ -1,7 +1,7 @@
 import type { Erc20Token } from '$eth/types/erc20';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
-import { sortedTokens } from '$lib/derived/tokens.derived';
+import { combinedDerivedSortedTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
@@ -14,7 +14,7 @@ import { derived, type Readable } from 'svelte/store';
  * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not.
  */
 const networkTokens: Readable<Token[]> = derived(
-	[sortedTokens, selectedNetwork, pseudoNetworkChainFusion],
+	[combinedDerivedSortedTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );
 
@@ -36,7 +36,7 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 /**
  * All tokens matching the selected network or Chain Fusion, with their financial data.
  */
-export const enabledNetworkTokensUi: Readable<TokenUi[]> = derived(
+export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[enabledNetworkTokens, balancesStore, exchanges],
 	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
 		$enabledNetworkTokens.map((token) => ({
@@ -54,8 +54,8 @@ export const enabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 /**
  * All tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
  */
-export const sortedNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[enabledNetworkTokensUi, balancesStore],
+export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived(
+	[combinedDerivedEnabledNetworkTokensUi, balancesStore],
 	([$enabledNetworkTokensUi, $balancesStore]) =>
 		pinTokensWithBalanceAtTop({
 			$tokens: $enabledNetworkTokensUi,
