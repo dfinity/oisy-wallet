@@ -143,6 +143,7 @@ service : (Arg) -> {
   personal_sign : (text) -> (text);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
+  set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
   set_user_token : (UserToken) -> ();

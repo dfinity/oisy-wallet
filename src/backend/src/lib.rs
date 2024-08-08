@@ -34,7 +34,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, Stats, UserProfile,
 };
-use shared::types::{Arg, Config, InitArg};
+use shared::types::{Arg, Config, Guards, InitArg};
 use std::cell::RefCell;
 use std::str::FromStr;
 use types::{
@@ -99,6 +99,21 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
             .as_ref()
             .expect("config is not initialized"))
     })
+}
+
+/// Modifies config, given the state.
+fn modify_state_config(state: &mut State, f: impl FnOnce(&mut Config)) {
+    let config: &Candid<Config> = state
+        .config
+        .get()
+        .as_ref()
+        .expect("config is not initialized");
+    let mut config: Config = (*config).clone();
+    f(&mut config);
+    state
+        .config
+        .set(Some(Candid(config)))
+        .expect("setting config should succeed");
 }
 
 pub struct State {
@@ -521,6 +536,12 @@ fn list_users(request: ListUsersRequest) -> ListUsersResponse {
 #[update]
 async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
+}
+
+/// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to enable an API in read-only mode.
+#[update(guard = "caller_is_allowed")]
+fn set_guards(guards: Guards) {
+    mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
 }
 
 /// Gets statistics about the canister.
