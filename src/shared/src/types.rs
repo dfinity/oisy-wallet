@@ -125,7 +125,7 @@ pub trait TokenVersion: Debug {
         Self: Sized + Clone;
 }
 
-/// Erc20 specific user defined tokens
+/// ERC20 specific user defined tokens
 pub mod token {
     use crate::types::Version;
     use candid::{CandidType, Deserialize};
@@ -252,5 +252,12 @@ pub mod user_profile {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum GetUserProfileError {
         NotFound,
+    }
+
+    #[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+    pub struct Stats {
+        pub user_profile_count: u64,
+        pub user_token_count: u64,
+        pub custom_token_count: u64,
     }
 }
