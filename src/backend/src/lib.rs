@@ -23,6 +23,7 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
 use oisy_user::oisy_users;
+use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;

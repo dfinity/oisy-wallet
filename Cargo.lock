@@ -135,6 +135,7 @@ dependencies = [
  "k256",
  "lazy_static",
  "pocket-ic",
+ "pretty_assertions",
  "serde",
  "serde_bytes",
  "shared",
