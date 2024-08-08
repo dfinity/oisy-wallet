@@ -191,12 +191,8 @@ export const idlFactory = ({ IDL }) => {
 		set_user_token: IDL.Func([UserToken], [], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
 		sign_transaction: IDL.Func([SignRequest], [IDL.Text], []),
-<<<<<<< HEAD
 		stats: IDL.Func([], [Stats], ['query']),
 		step_migration: IDL.Func([], [], [])
-=======
-		stats: IDL.Func([], [Stats], ['query'])
->>>>>>> origin/main
 	});
 };
 // @ts-ignore
