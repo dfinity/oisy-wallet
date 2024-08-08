@@ -5,7 +5,7 @@ use serde::Deserialize;
 use shared::types::user_profile::{OisyUser, UserProfile};
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::fs::read;
-use std::ops::Range;
+use std::ops::RangeBounds;
 use std::sync::Arc;
 use std::time::UNIX_EPOCH;
 use std::{env, time::Duration};
@@ -329,7 +329,10 @@ impl PicCanisterTrait for PicBackend {
 }
 impl PicBackend {
     /// Creates toy users with the given range of principals.
-    pub fn create_users(&self, range: Range<u8>) -> Vec<OisyUser> {
+    pub fn create_users<R>(&self, range: R) -> Vec<OisyUser>
+    where
+        R: RangeBounds<u8> + Iterator<Item = u8>,
+    {
         let mut expected_users: Vec<OisyUser> = Vec::new();
         for i in range {
             self.pic.advance_time(Duration::new(10, 0));
