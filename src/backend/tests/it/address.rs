@@ -69,7 +69,6 @@ fn test_cannot_call_eth_address_of_for_anonymous() {
         .contains("Anonymous principal is not authorized"));
 }
 
-
 #[test]
 fn test_caller_btc_address() {
     let pic_setup = setup();
