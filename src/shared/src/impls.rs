@@ -3,7 +3,10 @@ use crate::types::token::UserToken;
 use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
 };
-use crate::types::{Config, CredentialType, InitArg, Timestamp, TokenVersion, Version};
+use crate::types::{
+    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationReport, Timestamp,
+    TokenVersion, Version,
+};
 use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use std::collections::BTreeMap;
@@ -175,4 +178,38 @@ impl OisyUser {
             updated_timestamp: user.updated_timestamp,
         }
     }
+}
+
+impl From<&Migration> for MigrationReport {
+    fn from(migration: &Migration) -> Self {
+        MigrationReport {
+            to: migration.to,
+            progress: migration.progress,
+        }
+    }
+}
+
+impl Default for ApiEnabled {
+    fn default() -> Self {
+        Self::Enabled
+    }
+}
+impl ApiEnabled {
+    #[must_use]
+    pub fn readable(&self) -> bool {
+        matches!(self, Self::Enabled | Self::ReadOnly)
+    }
+    #[must_use]
+    pub fn writable(&self) -> bool {
+        matches!(self, Self::Enabled)
+    }
+}
+#[test]
+fn test_api_enabled() {
+    assert_eq!(ApiEnabled::Enabled.readable(), true);
+    assert_eq!(ApiEnabled::Enabled.writable(), true);
+    assert_eq!(ApiEnabled::ReadOnly.readable(), true);
+    assert_eq!(ApiEnabled::ReadOnly.writable(), false);
+    assert_eq!(ApiEnabled::Disabled.readable(), false);
+    assert_eq!(ApiEnabled::Disabled.writable(), false);
 }
