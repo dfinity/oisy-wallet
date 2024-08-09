@@ -16,6 +16,7 @@ export interface AddUserCredentialRequest {
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
+export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -155,6 +156,7 @@ export interface UserTokenId {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
+	caller_btc_address: ActorMethod<[BitcoinNetwork], string>;
 	caller_eth_address: ActorMethod<[], string>;
 	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
