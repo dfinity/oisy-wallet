@@ -7,7 +7,7 @@ import { address as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionAddress } from '$lib/types/address';
+import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -69,7 +69,7 @@ const loadErc20Balance = async ({
 	address: optionAddress
 }: {
 	token: Erc20Token;
-	address?: OptionAddress;
+	address?: OptionEthAddress;
 }): Promise<{ success: boolean }> => {
 	const address = optionAddress ?? get(addressStore);
 
@@ -123,7 +123,7 @@ export const loadErc20Balances = async ({
 	address,
 	erc20Tokens
 }: {
-	address: OptionAddress;
+	address: OptionEthAddress;
 	erc20Tokens: Erc20Token[];
 }): Promise<{ success: boolean }> => {
 	const results = await Promise.all([
