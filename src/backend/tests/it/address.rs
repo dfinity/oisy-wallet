@@ -75,7 +75,8 @@ fn test_caller_btc_address() {
     let caller = Principal::from_text(CALLER).unwrap();
     let network = BitcoinNetwork::Testnet;
 
-    let address = update_call::<String>(&pic_setup, caller, "caller_btc_address", network)
+    let address = pic_setup
+        .update::<String>(caller, "caller_btc_address", network)
         .expect("Failed to call btc address.");
 
     assert_eq!(address, CALLER_BTC_ADDRESS.to_string());
@@ -86,12 +87,7 @@ fn test_anonymous_cannot_call_btc_address() {
     let pic_setup = setup();
     let network = BitcoinNetwork::Testnet;
 
-    let address = update_call::<String>(
-        &pic_setup,
-        Principal::anonymous(),
-        "caller_btc_address",
-        network,
-    );
+    let address = pic_setup.update::<String>(Principal::anonymous(), "caller_btc_address", network);
 
     assert!(address.is_err());
     assert_eq!(
