@@ -40,6 +40,9 @@ RUN DFXVM_INIT_YES=true DFX_VERSION=$DFX_VERSION sh -ci "$(curl -fsSL https://in
 # Set permission to .config folder so that dfx can write whatever files are needed
 RUN mkdir -p /home/apprunner/.config/dfx && chmod -R 700 /home/apprunner/.config
 
+# Likewise, /home/apprunner/.config/dfx/identity/___temp___minter/
+RUN mkdir -p /home/apprunner/.config/dfx/identity/
+
 # Add dfx to path
 ENV PATH="/home/apprunner/.local/share/dfx/bin:$PATH"
 
