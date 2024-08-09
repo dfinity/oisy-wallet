@@ -15,11 +15,12 @@
 	// Custom click handler to guarantee that it prevents default browser behaviour (full page reload)
 	// when the link is internal (not external). A practical example is when the <a> tag is used
 	// inside a Popover component.
-	const onClick = () => {
+	const onClick = (event: MouseEvent) => {
 		if (!external) {
+			event.preventDefault();
 			goto(href);
-			dispatch('click');
 		}
+		dispatch('click');
 	};
 </script>
 
@@ -36,7 +37,7 @@
 	class:hover:text-blue={color === 'inherit'}
 	class:active:text-blue={color === 'inherit'}
 	class:w-full={fullWidth}
-	on:click|preventDefault={onClick}
+	on:click={onClick}
 >
 	{#if iconVisible}
 		<slot name="icon" />
