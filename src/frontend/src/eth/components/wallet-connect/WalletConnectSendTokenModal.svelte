@@ -14,7 +14,7 @@
 		initFeeContext,
 		initFeeStore
 	} from '$eth/stores/fee.store';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -146,7 +146,7 @@
 		const { success } = await sendServices({
 			request,
 			listener,
-			address: $address,
+			address: $ethAddress,
 			amount,
 			fee: $feeStore,
 			modalNext: modal.next,

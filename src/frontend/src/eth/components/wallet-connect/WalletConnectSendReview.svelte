@@ -5,7 +5,7 @@
 	import WalletConnectActions from './WalletConnectActions.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import WalletConnectSendData from './WalletConnectSendData.svelte';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
@@ -34,7 +34,7 @@
 		{destination}
 		token={$sendToken}
 		balance={$balance}
-		source={$address ?? ''}
+		source={$ethAddress ?? ''}
 	>
 		<WalletConnectSendData {data} />
 

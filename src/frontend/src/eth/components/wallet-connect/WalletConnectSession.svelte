@@ -3,7 +3,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { onDestroy } from 'svelte';
 	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import WalletConnectForm from './WalletConnectForm.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
@@ -87,14 +87,14 @@
 
 		try {
 			// Connect and disconnect buttons are disabled until the address is loaded therefore this should never happens.
-			if (isNullish($address)) {
+			if (isNullish($ethAddress)) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
 				});
 				return;
 			}
 
-			listener = await initWalletConnectListener({ uri, address: $address });
+			listener = await initWalletConnectListener({ uri, address: $ethAddress });
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.connect },
@@ -132,7 +132,7 @@
 		}
 
 		// Address is not defined. We need it.
-		if (isNullish($address)) {
+		if (isNullish($ethAddress)) {
 			return;
 		}
 
@@ -156,7 +156,7 @@
 		await connect($walletConnectUri);
 	};
 
-	$: $address, $walletConnectUri, $loading, (async () => await uriConnect())();
+	$: $ethAddress, $walletConnectUri, $loading, (async () => await uriConnect())();
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);
