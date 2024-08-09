@@ -3,7 +3,7 @@
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		ckEthereumTwinTokenNetworkId,
 		ckEthereumTwinToken,
@@ -30,5 +30,5 @@
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenEth}
-	<IcSendModal networkId={$ckEthereumTwinTokenNetworkId} destination={$address ?? ''} />
+	<IcSendModal networkId={$ckEthereumTwinTokenNetworkId} destination={$ethAddress ?? ''} />
 {/if}
