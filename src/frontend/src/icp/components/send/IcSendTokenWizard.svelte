@@ -26,7 +26,12 @@
 		isTokenCkEthLedger
 	} from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { trackEvent } from '$lib/services/analytics.services';
+	import {
+		initTimedEvent,
+		trackTimedEventSuccess,
+		trackEvent,
+		trackTimedEventError
+	} from '$lib/services/analytics.services';
 	import {
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR,
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS,
@@ -35,7 +40,11 @@
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR,
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS,
 		TRACK_COUNT_IC_SEND_ERROR,
-		TRACK_COUNT_IC_SEND_SUCCESS
+		TRACK_COUNT_IC_SEND_SUCCESS,
+		TRACK_DURATION_CONVERT_CKBTC_TO_BTC,
+		TRACK_DURATION_CONVERT_CKERC20_TO_ERC20,
+		TRACK_DURATION_CONVERT_CKETH_TO_ETH,
+		TRACK_DURATION_IC_SEND
 	} from '$lib/constants/analytics.contants';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
 	import {
@@ -90,6 +99,19 @@
 
 		dispatch('icNext');
 
+		const timedEvent = initTimedEvent({
+			name: isNetworkIdBitcoin(networkId)
+				? TRACK_DURATION_CONVERT_CKBTC_TO_BTC
+				: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
+					? TRACK_DURATION_CONVERT_CKETH_TO_ETH
+					: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
+						? TRACK_DURATION_CONVERT_CKERC20_TO_ERC20
+						: TRACK_DURATION_IC_SEND,
+			metadata: {
+				token: $token.symbol
+			}
+		});
+
 		try {
 			const params: IcTransferParams = {
 				to: destination,
@@ -107,35 +129,41 @@
 				targetNetworkId: networkId
 			});
 
-			await trackEvent({
-				name: isNetworkIdBitcoin(networkId)
-					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
-					: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
-						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
-						: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
-							? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS
-							: TRACK_COUNT_IC_SEND_SUCCESS,
-				metadata: {
-					token: $token.symbol
-				}
-			});
+			await Promise.allSettled([
+				trackTimedEventSuccess(timedEvent),
+				trackEvent({
+					name: isNetworkIdBitcoin(networkId)
+						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
+						: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
+							? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
+							: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
+								? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS
+								: TRACK_COUNT_IC_SEND_SUCCESS,
+					metadata: {
+						token: $token.symbol
+					}
+				})
+			]);
 
 			sendProgressStep = ProgressStepsSendIc.DONE;
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
-				name: isNetworkIdBitcoin(networkId)
-					? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
-					: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
-						? TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR
-						: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
-							? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR
-							: TRACK_COUNT_IC_SEND_ERROR,
-				metadata: {
-					token: $token.symbol
-				}
-			});
+			await Promise.allSettled([
+				trackTimedEventError(timedEvent),
+				trackEvent({
+					name: isNetworkIdBitcoin(networkId)
+						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
+						: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
+							? TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR
+							: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
+								? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR
+								: TRACK_COUNT_IC_SEND_ERROR,
+					metadata: {
+						token: $token.symbol
+					}
+				})
+			]);
 
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
