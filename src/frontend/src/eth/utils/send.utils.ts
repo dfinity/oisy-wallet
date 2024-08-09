@@ -1,5 +1,5 @@
 import { isNotSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
-import type { OptionAddress } from '$lib/types/address';
+import type { OptionEthAddress } from '$lib/types/address';
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
@@ -7,8 +7,8 @@ export const isDestinationContractAddress = ({
 	contractAddress,
 	destination
 }: {
-	contractAddress: OptionAddress;
-	destination: OptionAddress;
+	contractAddress: OptionEthAddress;
+	destination: OptionEthAddress;
 }): boolean =>
 	nonNullish(contractAddress) && destination?.toLowerCase() === contractAddress.toLowerCase();
 
@@ -19,7 +19,7 @@ export const shouldSendWithApproval = ({
 }: {
 	to: string;
 	tokenId: TokenId;
-	erc20HelperContractAddress: OptionAddress;
+	erc20HelperContractAddress: OptionEthAddress;
 }): boolean => {
 	// Approve happens before send currently only for ckERC20 -> ERC20.
 	// See Deposit schema: https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc

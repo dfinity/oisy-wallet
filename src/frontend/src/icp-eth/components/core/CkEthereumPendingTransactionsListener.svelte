@@ -2,7 +2,7 @@
 	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$eth/types/listener';
-	import type { OptionAddress } from '$lib/types/address';
+	import type { OptionEthAddress } from '$lib/types/address';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { tokenId } from '$lib/derived/token.derived';
@@ -36,7 +36,7 @@
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
-	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
+	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
 		if (isNullish($tokenId) || isNullish($token)) {
 			return;
 		}
@@ -80,7 +80,7 @@
 		toAddress,
 		networkId
 	}: {
-		toAddress: OptionAddress;
+		toAddress: OptionEthAddress;
 		networkId: NetworkId | undefined;
 	}) => {
 		await listener?.disconnect();

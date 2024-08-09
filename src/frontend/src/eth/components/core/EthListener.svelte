@@ -5,13 +5,13 @@
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { Token } from '$lib/types/token';
 	import { address } from '$lib/derived/address.derived';
-	import type { OptionAddress } from '$lib/types/address';
+	import type { OptionEthAddress } from '$lib/types/address';
 
 	export let token: Token;
 
 	let listener: WebSocketListener | undefined = undefined;
 
-	const initListener = async ({ address }: { address: OptionAddress }) => {
+	const initListener = async ({ address }: { address: OptionEthAddress }) => {
 		await listener?.disconnect();
 
 		if (isNullish(address)) {

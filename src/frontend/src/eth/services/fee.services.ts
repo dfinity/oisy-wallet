@@ -7,7 +7,7 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
-import type { EthAddress, OptionAddress } from '$lib/types/address';
+import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -22,7 +22,7 @@ export const getEthFeeData = async ({
 	to,
 	helperContractAddress
 }: GetFeeData & {
-	helperContractAddress: OptionAddress;
+	helperContractAddress: OptionEthAddress;
 }): Promise<BigNumber> => {
 	if (isDestinationContractAddress({ destination: to, contractAddress: helperContractAddress })) {
 		return BigNumber.from(CKETH_FEE);
@@ -72,7 +72,7 @@ export const getCkErc20FeeData = async ({
 	contract: Erc20ContractAddress;
 	amount: BigNumber;
 	sourceNetwork: EthereumNetwork;
-	erc20HelperContractAddress: OptionAddress;
+	erc20HelperContractAddress: OptionEthAddress;
 }): Promise<BigNumber> => {
 	const estimateGasForApprove = await getErc20FeeData({
 		to,

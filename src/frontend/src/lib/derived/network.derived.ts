@@ -2,7 +2,7 @@ import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 import { address } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { networks } from '$lib/derived/networks.derived';
-import type { OptionAddress } from '$lib/types/address';
+import type { OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -39,7 +39,7 @@ export const notPseudoNetworkChainFusion: Readable<boolean> = derived(
 	([$pseudoNetworkChainFusion]) => !$pseudoNetworkChainFusion
 );
 
-export const networkAddress: Readable<OptionAddress | string> = derived(
+export const networkAddress: Readable<OptionEthAddress | string> = derived(
 	[address, icrcAccountIdentifierText, networkICP],
 	([$address, $icrcAccountIdentifierStore, $networkICP]) =>
 		$networkICP ? $icrcAccountIdentifierStore : $address
