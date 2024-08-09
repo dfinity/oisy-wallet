@@ -95,3 +95,21 @@ fn test_anonymous_cannot_call_btc_address() {
         "Anonymous caller not authorized.".to_string()
     );
 }
+
+#[test]
+fn test_testnet_btc_address_is_same_as_regtest() {
+    let pic_setup = setup();
+
+    let testnet = BitcoinNetwork::Testnet;
+    let regtest = BitcoinNetwork::Regtest;
+
+    let address_testnet = pic_setup
+        .update::<String>(caller, "caller_btc_address", testnet)
+        .expect("Failed to call testnet btc address.");
+
+    let address_regtest = pic_setup
+        .update::<String>(caller, "caller_btc_address", regtest)
+        .expect("Failed to call regtest btc address.");
+
+    assert_eq!(address_testnet, address_regtest);
+}
