@@ -18,7 +18,7 @@
 	);
 </script>
 
-<TokensSkeletons>
+<TokensSkeletons rows={3}>
 	{#each tokens as token (token.id)}
 		<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
 			<TokenCardContent {token} />

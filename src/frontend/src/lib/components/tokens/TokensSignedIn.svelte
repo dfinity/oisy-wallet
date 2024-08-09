@@ -12,6 +12,7 @@
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { ERC20_CONTRACTS } from '$env/tokens.erc20.env';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -23,7 +24,7 @@
 	);
 </script>
 
-<TokensSkeletons>
+<TokensSkeletons rows={ERC20_CONTRACTS.length + 1}>
 	{#each tokens as token (token.id)}
 		<Listener {token}>
 			<div in:fade>
