@@ -3,7 +3,7 @@ import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { EthAddress } from '$lib/types/address';
+import type { Address, EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -12,10 +12,11 @@ export const loadAddress = async (): Promise<{ success: boolean }> => {
 	try {
 		const { identity } = get(authStore);
 
-		const address = await getEthAddress(identity);
-		addressStore.set({ address, certified: true });
+		const ethAddress = await getEthAddress(identity);
 
-		await saveEthAddressForFutureSignIn({ address, identity });
+		addressStore.set({ address: { eth: ethAddress }, certified: true });
+
+		await saveEthAddressForFutureSignIn({ address: ethAddress, identity });
 	} catch (err: unknown) {
 		addressStore.reset();
 
@@ -69,8 +70,8 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 			return { success: false };
 		}
 
-		const { address } = idbEthAddress;
-		addressStore.set({ address, certified: false });
+		const { address: ethAddress } = idbEthAddress;
+		addressStore.set({ address: { eth: ethAddress }, certified: false });
 
 		await updateIdbEthAddressLastUsage(identity.getPrincipal());
 	} catch (err: unknown) {
@@ -86,7 +87,7 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 };
 
 export const certifyAddress = async (
-	address: string
+	address: Address
 ): Promise<{ success: boolean; err?: string }> => {
 	try {
 		const { identity } = get(authStore);
@@ -97,9 +98,9 @@ export const certifyAddress = async (
 			return { success: false, err: 'Using the dapp with an anonymous user if not supported.' };
 		}
 
-		const certifiedAddress = await getEthAddress(identity);
+		const certifiedEthAddress = await getEthAddress(identity);
 
-		if (address.toLowerCase() !== certifiedAddress.toLowerCase()) {
+		if (address.eth.toLowerCase() !== certifiedEthAddress.toLowerCase()) {
 			return {
 				success: false,
 				err: 'The address used to load the data did not match your actual wallet address, which is why your session was ended. Please sign in again to reload your own data.'
