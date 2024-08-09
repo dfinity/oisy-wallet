@@ -2,7 +2,6 @@
 	import { Popover } from '@dfinity/gix-components';
 	import SignOut from '$lib/components/core/SignOut.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { goto } from '$app/navigation';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import { networkId } from '$lib/derived/network.derived';
@@ -24,10 +23,8 @@
 
 	const hidePopover = () => (visible = false);
 
-	const gotoSettings = async () => {
-		hidePopover();
-		await goto(`/settings?${networkParam($networkId)}`);
-	};
+	let settingsUrl: string;
+	$: settingsUrl = `/settings?${networkParam($networkId)}`;
 
 	let settingsRoute = false;
 	$: settingsRoute = isRouteSettings($page);
@@ -47,9 +44,11 @@
 		{/if}
 
 		{#if !settingsRoute}
-			<!-- If the URL is passed as href instead of click event, the pages refreshes. -->
-			<!-- After a few tries, it seems it is a behavior that happens only inside the popover. -->
-			<Link href={null} ariaLabel={$i18n.navigation.alt.more_settings} on:click={gotoSettings}>
+			<Link
+				href={settingsUrl}
+				ariaLabel={$i18n.navigation.alt.more_settings}
+				on:click={hidePopover}
+			>
 				<IconSettings slot="icon" />
 				{$i18n.settings.text.title}
 			</Link>
