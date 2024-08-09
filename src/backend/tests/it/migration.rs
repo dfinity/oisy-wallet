@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use crate::utils::pocketic::{
-    controller, query_call, setup, BackendBuilder, PicBackend, PicCanisterTrait,
+    controller, setup, BackendBuilder, PicBackend, PicCanisterTrait,
 };
 use pocket_ic::PocketIc;
 use shared::types::{ApiEnabled, Guards, MigrationReport, Stats};
