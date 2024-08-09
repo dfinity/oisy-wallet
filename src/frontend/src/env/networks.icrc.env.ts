@@ -8,6 +8,7 @@ import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.en
 import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
 import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
+import { UNI_TOKEN } from '$env/tokens-erc20/tokens.uni.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
@@ -22,7 +23,6 @@ import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import { nonNullish } from '@dfinity/utils';
-import {UNI_TOKEN} from "$env/tokens-erc20/tokens.uni.env";
 
 export const IC_CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined) ??
@@ -360,10 +360,10 @@ const CKWSTETH_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTIO
 
 const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUNI)
 	? {
-		...CKERC20_PRODUCTION_DATA.ckUNI,
-		position: 9,
-		twinToken: UNI_TOKEN
-	}
+			...CKERC20_PRODUCTION_DATA.ckUNI,
+			position: 9,
+			twinToken: UNI_TOKEN
+		}
 	: undefined;
 
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
