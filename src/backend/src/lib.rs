@@ -16,6 +16,7 @@ use ic_cdk::api::management_canister::ecdsa::{
 };
 use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
+use ic_cdk_timers::{clear_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -35,9 +36,12 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, Stats, UserProfile,
 };
-use shared::types::{Arg, Config, Guards, InitArg, Migration, MigrationReport};
+use shared::types::{
+    ApiEnabled, Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport,
+};
 use std::cell::RefCell;
 use std::str::FromStr;
+use std::time::Duration;
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -559,6 +563,95 @@ fn set_guards(guards: Guards) {
 #[query(guard = "caller_is_allowed")]
 fn stats() -> Stats {
     read_state(|s| Stats::from(s))
+}
+
+/// Starts user data migration to a given canister.
+///
+/// # Errors
+/// - There is a current migration in progress to a different canister.
+#[update(guard = "caller_is_allowed")]
+fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            if migration.to != to {
+                Err("migration in progress to a different canister".to_string())
+            } else {
+                Ok(MigrationReport::from(migration))
+            }
+        } else {
+            let timer_id = set_timer_interval(Duration::from_secs(0), step_migration);
+            let migration = Migration {
+                to,
+                progress: MigrationProgress::Pending,
+                timer_id,
+            };
+            let migration_report = MigrationReport::from(&migration);
+            s.migration = Some(migration);
+            Ok(migration_report)
+        }
+    })
+}
+
+/// Steps the migration
+#[update(guard = "caller_is_allowed")]
+fn step_migration() {
+    mutate_state(|state| {
+        match state.migration.clone() {
+            Some(mut migration) => {
+                match migration.progress {
+                    MigrationProgress::Pending => {
+                        // Lock the local canister APIs.
+                        modify_state_config(state, |config| {
+                            config.api = Some(Guards {
+                                threshold_key: ApiEnabled::ReadOnly,
+                                user_data: ApiEnabled::ReadOnly,
+                            })
+                        });
+                        migration.progress = MigrationProgress::Locked;
+                        state.migration = Some(migration);
+                    }
+                    MigrationProgress::Locked => {
+                        // TODO: Lock the target canister APIs.
+                        migration.progress = MigrationProgress::TargetLocked;
+                        state.migration = Some(migration);
+                    }
+                    MigrationProgress::TargetLocked => {
+                        // TODO: Check that the target canister is empty.
+                        migration.progress = MigrationProgress::TargetPreCheckOk;
+                        state.migration = Some(migration);
+                    }
+                    MigrationProgress::TargetPreCheckOk => {
+                        // TODO: Start migrating user tokens.
+                        migration.progress =
+                            MigrationProgress::MigratedUserTokensUpTo(Principal::anonymous());
+                        state.migration = Some(migration);
+                    }
+                    MigrationProgress::MigratedUserTokensUpTo(_) => {
+                        // TODO: Migrate user tokens
+                        migration.progress =
+                            MigrationProgress::MigratedCustomTokensUpTo(Principal::anonymous());
+                        state.migration = Some(migration);
+                    }
+                    MigrationProgress::MigratedCustomTokensUpTo(_) => {
+                        // TODO: Migrate custom tokens
+                        migration.progress = MigrationProgress::CheckingTargetCanister;
+                        state.migration = Some(migration);
+                    }
+                    MigrationProgress::CheckingTargetCanister => {
+                        // TODO: Check that the target canister has all the data.
+                        migration.progress = MigrationProgress::Completed;
+                        state.migration = Some(migration);
+                    }
+                    MigrationProgress::Completed => {
+                        clear_timer(migration.timer_id);
+                    }
+                }
+            }
+            None => {
+                ic_cdk::trap("migration is not in progress");
+            }
+        }
+    });
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
