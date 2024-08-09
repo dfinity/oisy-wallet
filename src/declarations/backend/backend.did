@@ -78,6 +78,17 @@ type ListUsersResponse = record {
   users : vec OisyUser;
   matches_max_length : nat64;
 };
+type MigrationProgress = variant {
+  MigratedUserTokensUpTo : principal;
+  TargetPreCheckOk;
+  MigratedCustomTokensUpTo : principal;
+  Locked;
+  CheckingTargetCanister;
+  TargetLocked;
+  Completed;
+  Pending;
+};
+type MigrationReport = record { to : principal; progress : MigrationProgress };
 type OisyUser = record {
   "principal" : principal;
   pouh_verified : bool;
@@ -140,6 +151,7 @@ service : (Arg) -> {
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
+  migration : () -> (opt MigrationReport) query;
   personal_sign : (text) -> (text);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();

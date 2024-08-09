@@ -1,4 +1,5 @@
 use candid::{CandidType, Deserialize, Principal};
+use ic_cdk_timers::TimerId;
 use std::fmt::Debug;
 
 pub type Timestamp = u64;
@@ -34,30 +35,6 @@ pub enum ApiEnabled {
     Enabled,
     ReadOnly,
     Disabled,
-}
-impl Default for ApiEnabled {
-    fn default() -> Self {
-        Self::Enabled
-    }
-}
-impl ApiEnabled {
-    #[must_use]
-    pub fn readable(&self) -> bool {
-        matches!(self, Self::Enabled | Self::ReadOnly)
-    }
-    #[must_use]
-    pub fn writable(&self) -> bool {
-        matches!(self, Self::Enabled)
-    }
-}
-#[test]
-fn test_api_enabled() {
-    assert_eq!(ApiEnabled::Enabled.readable(), true);
-    assert_eq!(ApiEnabled::Enabled.writable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.readable(), true);
-    assert_eq!(ApiEnabled::ReadOnly.writable(), false);
-    assert_eq!(ApiEnabled::Disabled.readable(), false);
-    assert_eq!(ApiEnabled::Disabled.writable(), false);
 }
 
 #[derive(CandidType, Deserialize, Default, Copy, Clone, Debug, PartialEq, Eq)]
@@ -260,4 +237,52 @@ pub mod user_profile {
         pub user_token_count: u64,
         pub custom_token_count: u64,
     }
+}
+
+/// The current state of progress of a user data migration.
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default)]
+pub enum MigrationProgress {
+    // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
+    // TODO: Remove warning once the migration has been implemented.
+    /// Migration has been requested.
+    #[default]
+    Pending,
+    /// APIs have been locked on the current canister.
+    Locked,
+    /// APIs have been locked on the target canister.
+    TargetLocked,
+    /// Target canister was empty.
+    TargetPreCheckOk,
+    /// Tokens have been migrated up to but excluding the given principal.
+    MigratedUserTokensUpTo(Principal),
+    /// Custom tokens have been migrated up to but excluding the given principal.
+    MigratedCustomTokensUpTo(Principal),
+    /// Checking that the target canister has all the data.
+    CheckingTargetCanister,
+    /// Migration has been completed.
+    Completed,
+}
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct Migration {
+    /// The canister that data is being migrated to.
+    pub to: Principal,
+    /// The current state of progress of a user data migration.
+    pub progress: MigrationProgress,
+    /// The timer id for the migration.
+    pub timer_id: TimerId,
+}
+
+/// A serializable report of a migration.
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+pub struct MigrationReport {
+    pub to: Principal,
+    pub progress: MigrationProgress,
+}
+
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+pub struct Stats {
+    pub user_profile_count: u64,
+    pub user_token_count: u64,
+    pub custom_token_count: u64,
 }
