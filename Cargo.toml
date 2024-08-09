@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "src/backend",
+    "src/oisy",
     "src/shared"
 ]
 resolver = "2"
