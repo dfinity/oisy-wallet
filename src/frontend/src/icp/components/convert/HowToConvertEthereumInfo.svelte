@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -78,7 +78,7 @@
 
 		<ReceiveAddress
 			labelRef="eth-wallet-address"
-			address={$address ?? ''}
+			address={$ethAddress ?? ''}
 			qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
 			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 			on:click={() => dispatch('icQRCode')}

@@ -4,7 +4,7 @@
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendNetworkICP from './SendNetworkICP.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import type { Network } from '$lib/types/network';
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import { isNullish } from '@dfinity/utils';
@@ -45,7 +45,7 @@
 
 		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
+		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
 
 		<FeeDisplay />
 	</div>

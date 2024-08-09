@@ -5,7 +5,7 @@
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import Hr from '$lib/components/ui/Hr.svelte';
 
 	const dispatch = createEventDispatcher();
@@ -55,10 +55,10 @@
 	<ReceiveAddressWithLogo
 		on:click={() =>
 			displayQRCode({
-				address: $address ?? '',
+				address: $ethAddress ?? '',
 				addressLabel: $i18n.receive.ethereum.text.ethereum_address
 			})}
-		address={$address ?? ''}
+		address={$ethAddress ?? ''}
 		token={ETHEREUM_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.ethereum.text.display_ethereum_address_qr}
 		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}

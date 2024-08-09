@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import type { Network } from '$lib/types/network';
@@ -37,7 +37,7 @@
 	formCancelAction="back"
 >
 	{#if currentStep?.name === steps[1].name}
-		<ReceiveAddressQRCode address={$address ?? ''} on:icBack />
+		<ReceiveAddressQRCode address={$ethAddress ?? ''} on:icBack />
 	{:else}
 		<slot />
 	{/if}

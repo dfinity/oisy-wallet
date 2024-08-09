@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Transaction } from '$lib/types/transaction';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
@@ -31,7 +31,7 @@
 	$: ({ from, value, timestamp, hash, blockNumber, to } = transaction);
 
 	let type: 'send' | 'receive';
-	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
+	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined;

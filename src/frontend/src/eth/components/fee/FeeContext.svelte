@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
@@ -52,9 +52,9 @@
 		try {
 			const params: GetFeeData = {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				to: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
+				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress!),
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				from: mapAddressStartsWith0x($address!)
+				from: mapAddressStartsWith0x($ethAddress!)
 			};
 
 			const { getFeeData } = infuraProviders($sendToken.network.id);

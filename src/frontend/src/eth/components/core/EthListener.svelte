@@ -4,7 +4,7 @@
 	import { initTransactionsListener } from '$eth/services/eth-listener.services';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { Token } from '$lib/types/token';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import type { OptionEthAddress } from '$lib/types/address';
 
 	export let token: Token;
@@ -21,7 +21,7 @@
 		listener = initTransactionsListener({ address, token });
 	};
 
-	$: (async () => initListener({ address: $address }))();
+	$: (async () => initListener({ address: $ethAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>

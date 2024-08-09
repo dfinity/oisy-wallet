@@ -4,7 +4,7 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import type { Network } from '$lib/types/network';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
@@ -40,7 +40,7 @@
 		destination={destinationEditable ? destination : null}
 		token={$sendToken}
 		balance={$sendBalance}
-		source={$address ?? ''}
+		source={$ethAddress ?? ''}
 	>
 		<FeeDisplay slot="fee" />
 

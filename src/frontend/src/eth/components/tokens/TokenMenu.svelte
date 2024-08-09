@@ -4,7 +4,7 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
@@ -15,8 +15,8 @@
 	$: explorerUrl =
 		$tokenStandard === 'erc20' && nonNullish($token)
 			? `${$explorerUrlStore}/token/${($token as Erc20Token).address}`
-			: notEmptyString($address)
-				? `${$explorerUrlStore}/address/${$address}`
+			: notEmptyString($ethAddress)
+				? `${$explorerUrlStore}/address/${$ethAddress}`
 				: undefined;
 </script>
 

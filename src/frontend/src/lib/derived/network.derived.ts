@@ -1,5 +1,5 @@
 import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-import { address } from '$lib/derived/address.derived';
+import { ethAddress } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { networks } from '$lib/derived/networks.derived';
 import type { OptionEthAddress } from '$lib/types/address';
@@ -40,7 +40,7 @@ export const notPseudoNetworkChainFusion: Readable<boolean> = derived(
 );
 
 export const networkAddress: Readable<OptionEthAddress | string> = derived(
-	[address, icrcAccountIdentifierText, networkICP],
+	[ethAddress, icrcAccountIdentifierText, networkICP],
 	([$address, $icrcAccountIdentifierStore, $networkICP]) =>
 		$networkICP ? $icrcAccountIdentifierStore : $address
 );
