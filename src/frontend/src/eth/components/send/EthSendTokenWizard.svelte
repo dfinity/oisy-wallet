@@ -7,7 +7,7 @@
 	import SendReview from './SendReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		FEE_CONTEXT_KEY,
@@ -159,7 +159,7 @@
 		}
 
 		// Unexpected errors
-		if (isNullish($address)) {
+		if (isNullish($ethAddress)) {
 			toastsError({
 				msg: { text: $i18n.send.assertion.address_unknown }
 			});
@@ -177,7 +177,7 @@
 
 		try {
 			await executeSend({
-				from: $address,
+				from: $ethAddress,
 				to: mapAddressStartsWith0x(destination),
 				progress: (step: ProgressStepsSend) => (sendProgressStep = step),
 				token: $sendToken,
