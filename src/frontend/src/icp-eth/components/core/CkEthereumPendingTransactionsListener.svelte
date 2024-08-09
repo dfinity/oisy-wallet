@@ -2,11 +2,11 @@
 	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import type { WebSocketListener } from '$eth/types/listener';
-	import type { OptionAddress } from '$lib/types/address';
+	import type { OptionEthAddress } from '$lib/types/address';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { tokenId } from '$lib/derived/token.derived';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { BigNumber } from '@ethersproject/bignumber';
@@ -36,7 +36,7 @@
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
-	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionAddress }) => {
+	const loadPendingTransactions = async ({ toAddress }: { toAddress: OptionEthAddress }) => {
 		if (isNullish($tokenId) || isNullish($token)) {
 			return;
 		}
@@ -80,7 +80,7 @@
 		toAddress,
 		networkId
 	}: {
-		toAddress: OptionAddress;
+		toAddress: OptionEthAddress;
 		networkId: NetworkId | undefined;
 	}) => {
 		await listener?.disconnect();
@@ -93,7 +93,7 @@
 			return;
 		}
 
-		if (isNullish($address)) {
+		if (isNullish($ethAddress)) {
 			return;
 		}
 
@@ -102,7 +102,7 @@
 			listener: async ({ hash, from }: TransactionResponse) => {
 				// Filtering from and to with Alchemy (see initEthPendingTransactionsListenerProvider) at the same time does not work according our observations.
 				// Therefore, we are observing the `to` address and filtering the `from` on each event.
-				if ($address?.toLowerCase() !== from.toLowerCase()) {
+				if ($ethAddress?.toLowerCase() !== from.toLowerCase()) {
 					return;
 				}
 

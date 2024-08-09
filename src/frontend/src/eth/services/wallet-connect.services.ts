@@ -18,7 +18,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-import type { OptionAddress } from '$lib/types/address';
+import type { OptionEthAddress } from '$lib/types/address';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
@@ -37,7 +37,7 @@ export type WalletConnectExecuteParams = Pick<WalletConnectCallBackParams, 'requ
 
 export type WalletConnectSendParams = WalletConnectExecuteParams & {
 	listener: WalletConnectListener | null | undefined;
-	address: OptionAddress;
+	address: OptionEthAddress;
 	fee: FeeStoreData;
 	modalNext: () => void;
 	amount: BigNumber;
