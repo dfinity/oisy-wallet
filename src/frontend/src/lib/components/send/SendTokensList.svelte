@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import { sortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import type { TokenUi } from '$lib/types/token';
 	import { createEventDispatcher } from 'svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
@@ -13,7 +13,7 @@
 	const dispatch = createEventDispatcher();
 
 	let tokens: TokenUi[];
-	$: tokens = $sortedNetworkTokensUi.filter(({ id: tokenId }) =>
+	$: tokens = $combinedDerivedSortedNetworkTokensUi.filter(({ id: tokenId }) =>
 		($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n)
 	);
 </script>
