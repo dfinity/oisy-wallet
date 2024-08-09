@@ -1,5 +1,10 @@
 {
 	"production": {
+		"ckUNI": {
+			"ledgerCanisterId": "ilzky-ayaaa-aaaar-qahha-cai",
+			"indexCanisterId": "imymm-naaaa-aaaar-qahhq-cai",
+			"erc20ContractAddress": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"
+		},
 		"ckWBTC": {
 			"ledgerCanisterId": "bptq2-faaaa-aaaar-qagxq-cai",
 			"indexCanisterId": "dso6s-wiaaa-aaaar-qagya-cai",
