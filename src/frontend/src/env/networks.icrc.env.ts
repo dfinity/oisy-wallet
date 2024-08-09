@@ -22,6 +22,7 @@ import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import { nonNullish } from '@dfinity/utils';
+import {UNI_TOKEN} from "$env/tokens-erc20/tokens.uni.env";
 
 export const IC_CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined) ??
@@ -357,6 +358,14 @@ const CKWSTETH_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTIO
 		}
 	: undefined;
 
+const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckUNI)
+	? {
+		...CKERC20_PRODUCTION_DATA.ckUNI,
+		position: 9,
+		twinToken: UNI_TOKEN
+	}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -378,7 +387,8 @@ export const CKERC20_LEDGER_CANISTER_IC_IDS: CanisterIdText[] = [
 	...(nonNullish(CKSHIB_IC_DATA?.ledgerCanisterId) ? [CKSHIB_IC_DATA.ledgerCanisterId] : []),
 	...(nonNullish(CKWBTC_IC_DATA?.ledgerCanisterId) ? [CKWBTC_IC_DATA.ledgerCanisterId] : []),
 	...(nonNullish(CKUSDT_IC_DATA?.ledgerCanisterId) ? [CKUSDT_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKWSTETH_IC_DATA?.ledgerCanisterId) ? [CKWSTETH_IC_DATA.ledgerCanisterId] : [])
+	...(nonNullish(CKWSTETH_IC_DATA?.ledgerCanisterId) ? [CKWSTETH_IC_DATA.ledgerCanisterId] : []),
+	...(nonNullish(CKUNI_IC_DATA?.ledgerCanisterId) ? [CKUNI_IC_DATA.ledgerCanisterId] : [])
 ];
 
 export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
@@ -413,7 +423,8 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKSHIB_IC_DATA) ? [CKSHIB_IC_DATA] : []),
 	...(nonNullish(CKWBTC_IC_DATA) ? [CKWBTC_IC_DATA] : []),
 	...(nonNullish(CKUSDT_IC_DATA) ? [CKUSDT_IC_DATA] : []),
-	...(nonNullish(CKWSTETH_IC_DATA) ? [CKWSTETH_IC_DATA] : [])
+	...(nonNullish(CKWSTETH_IC_DATA) ? [CKWSTETH_IC_DATA] : []),
+	...(nonNullish(CKUNI_IC_DATA) ? [CKUNI_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_TOKENS.map(
