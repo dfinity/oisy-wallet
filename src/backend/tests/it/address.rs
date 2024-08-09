@@ -73,7 +73,7 @@ fn test_cannot_call_eth_address_of_for_anonymous() {
 fn test_caller_btc_address() {
     let pic_setup = setup();
 
-    let caller = Principal::from_text(CALLER.to_string()).unwrap();
+    let caller = Principal::from_text(CALLER).unwrap();
     let network = BitcoinNetwork::Testnet;
 
     let address = update_call::<String>(&pic_setup, caller, "caller_btc_address", network)
