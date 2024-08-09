@@ -15,7 +15,7 @@ import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.uti
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { OptionAddress } from '$lib/types/address';
+import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -101,7 +101,7 @@ export const ckEthereumNativeTokenBalance: Readable<BigNumber | undefined | null
 /**
  * The contract helper used to convert ETH -> ckETH.
  */
-export const ckEthHelperContractAddress: Readable<OptionAddress> = derived(
+export const ckEthHelperContractAddress: Readable<OptionEthAddress> = derived(
 	[ckEthMinterInfoStore, ethereumTokenId, ethereumToken],
 	([$ckEthMinterInfoStore, $ethereumTokenId, $ethereumToken]) =>
 		toCkEthHelperContractAddress(
@@ -113,7 +113,7 @@ export const ckEthHelperContractAddress: Readable<OptionAddress> = derived(
 /**
  * The contract helper used to convert Erc20 -> ckErc20.
  */
-export const ckErc20HelperContractAddress: Readable<OptionAddress> = derived(
+export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
 	[ckEthMinterInfoStore, ethereumTokenId],
 	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
 		toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
