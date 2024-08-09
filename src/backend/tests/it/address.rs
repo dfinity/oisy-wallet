@@ -1,4 +1,4 @@
-use crate::utils::mock::{CALLER, CALLER_BTC_ADDRESS, CALLER_ETH_ADDRESS};
+use crate::utils::mock::{CALLER, CALLER_BTC_ADDRESS_MAINNET, CALLER_BTC_ADDRESS_TESTNET, CALLER_ETH_ADDRESS};
 use crate::utils::pocketic::{setup, PicCanisterTrait};
 use candid::Principal;
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
@@ -69,7 +69,22 @@ fn test_cannot_call_eth_address_of_for_anonymous() {
 }
 
 #[test]
-fn test_caller_btc_address() {
+fn test_caller_btc_address_mainnet() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+    let network = BitcoinNetwork::Mainnet;
+
+    let address = pic_setup
+        .update::<String>(caller, "caller_btc_address", network)
+        .expect("Failed to call btc address.");
+
+    assert_eq!(address, CALLER_BTC_ADDRESS_MAINNET.to_string());
+}
+
+
+#[test]
+fn test_caller_btc_address_testnet() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();
@@ -79,7 +94,7 @@ fn test_caller_btc_address() {
         .update::<String>(caller, "caller_btc_address", network)
         .expect("Failed to call btc address.");
 
-    assert_eq!(address, CALLER_BTC_ADDRESS.to_string());
+    assert_eq!(address, CALLER_BTC_ADDRESS_TESTNET.to_string());
 }
 
 #[test]
