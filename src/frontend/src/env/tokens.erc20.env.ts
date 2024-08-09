@@ -4,6 +4,7 @@ import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.en
 import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
 import { SHIB_TOKEN } from '$env/tokens-erc20/tokens.shib.env';
+import { UNI_TOKEN } from '$env/tokens-erc20/tokens.uni.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.env';
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
@@ -24,12 +25,6 @@ const ERC20_CONTRACT_ADDRESS_1INCH: Erc20Contract = {
 const ERC20_CONTRACT_ADDRESS_DMAIL: Erc20Contract = {
 	// Dmail Network
 	address: '0xcC6f1e1B87cfCbe9221808d2d85C501aab0B5192',
-	exchange: 'erc20'
-};
-
-const ERC20_CONTRACT_ADDRESS_UNISWAP: Erc20Contract = {
-	// Uniswap
-	address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
 	exchange: 'erc20'
 };
 
@@ -74,8 +69,7 @@ export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 		// Weenus
 		address: '0x7439E9Bb6D8a84dd3A23fe621A30F95403F87fB9',
 		exchange: 'erc20'
-	},
-	ERC20_CONTRACT_ADDRESS_UNISWAP
+	}
 ];
 
 export const ERC20_CONTRACT_ICP_GOERLI: Erc20Contract = {
@@ -83,16 +77,6 @@ export const ERC20_CONTRACT_ICP_GOERLI: Erc20Contract = {
 	address: '0x8c283B98Edeb405816FD1D321005dF4d3AA956ba',
 	exchange: 'icp'
 };
-
-const _ERC20_CONTRACTS_GOERLI: Erc20Contract[] = [
-	ERC20_CONTRACT_ICP_GOERLI,
-	{
-		// Weenus
-		address: '0xaFF4481D10270F50f203E0763e2597776068CBc5',
-		exchange: 'erc20'
-	},
-	ERC20_CONTRACT_ADDRESS_UNISWAP
-];
 
 export const ERC20_CONTRACT_ICP: Erc20Contract = {
 	// ICP
@@ -104,7 +88,6 @@ export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ICP,
 	ERC20_CONTRACT_ADDRESS_1INCH,
 	ERC20_CONTRACT_ADDRESS_DMAIL,
-	ERC20_CONTRACT_ADDRESS_UNISWAP,
 	ERC20_CONTRACT_ADDRESS_MATIC,
 	ERC20_CONTRACT_ADDRESS_JASMY,
 	ERC20_CONTRACT_ADDRESS_DAI,
@@ -144,7 +127,8 @@ export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	SHIB_TOKEN,
 	WBTC_TOKEN,
 	USDT_TOKEN,
-	WSTETH_TOKEN
+	WSTETH_TOKEN,
+	UNI_TOKEN
 ];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
