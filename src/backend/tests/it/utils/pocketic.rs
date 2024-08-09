@@ -181,10 +181,13 @@ impl BackendBuilder {
         canister_id
     }
     /// Deploy to a new pic.
-    pub fn deploy(&mut self) -> (PocketIc, Principal) {
+    pub fn deploy(&mut self) -> PicBackend {
         let pic = PocketIc::new();
         let canister_id = self.deploy_to(&pic);
-        (pic, canister_id)
+        PicBackend {
+            pic: Arc::new(pic),
+            canister_id,
+        }
     }
 }
 
@@ -194,52 +197,52 @@ pub fn controller() -> Principal {
         .expect("Test setup error: Failed to parse controller principal")
 }
 
-pub fn setup() -> (PocketIc, Principal) {
+pub fn setup() -> PicBackend {
     BackendBuilder::default().deploy()
 }
 
-pub fn upgrade_latest_wasm(
-    pocket_ic: &(PocketIc, Principal),
-    encoded_arg: Option<Vec<u8>>,
-) -> Result<(), String> {
-    let backend_wasm_path =
-        env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
+impl PicBackend {
+    pub fn upgrade_latest_wasm(&self, encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
+        let backend_wasm_path =
+            env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
 
-    upgrade_with_wasm(pocket_ic, &backend_wasm_path, encoded_arg)
-}
+        self.upgrade_with_wasm(&backend_wasm_path, encoded_arg)
+    }
 
-pub fn upgrade_with_wasm(
-    (pic, canister_id): &(PocketIc, Principal),
-    backend_wasm_path: &String,
-    encoded_arg: Option<Vec<u8>>,
-) -> Result<(), String> {
-    let wasm_bytes = read(backend_wasm_path.clone()).expect(&format!(
-        "Could not find the backend wasm: {}",
-        backend_wasm_path
-    ));
+    pub fn upgrade_with_wasm(
+        &self,
+        backend_wasm_path: &String,
+        encoded_arg: Option<Vec<u8>>,
+    ) -> Result<(), String> {
+        let wasm_bytes = read(backend_wasm_path.clone()).expect(&format!(
+            "Could not find the backend wasm: {}",
+            backend_wasm_path
+        ));
 
-    let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
+        let arg = encoded_arg.unwrap_or(encode_one(&init_arg()).unwrap());
 
-    // Upgrades burn a lot of cycles.
-    // If too many cycles are burnt in a short time, the canister will be throttled, so we advance time.
-    // The delay here is extremely conservative and can be reduced if needed.
-    pic.advance_time(Duration::from_secs(100_000));
+        // Upgrades burn a lot of cycles.
+        // If too many cycles are burnt in a short time, the canister will be throttled, so we advance time.
+        // The delay here is extremely conservative and can be reduced if needed.
+        self.pic.advance_time(Duration::from_secs(100_000));
 
-    pic.upgrade_canister(
-        canister_id.clone(),
-        wasm_bytes,
-        encode_one(&arg).unwrap(),
-        Some(controller()),
-    )
-    .map_err(|e| match e {
-        CallError::Reject(e) => e,
-        CallError::UserError(e) => {
-            format!(
-                "Upgrade canister error. RejectionCode: {:?}, Error: {}",
-                e.code, e.description
+        self.pic
+            .upgrade_canister(
+                self.canister_id,
+                wasm_bytes,
+                encode_one(&arg).unwrap(),
+                Some(controller()),
             )
-        }
-    })
+            .map_err(|e| match e {
+                CallError::Reject(e) => e,
+                CallError::UserError(e) => {
+                    format!(
+                        "Upgrade canister error. RejectionCode: {:?}, Error: {}",
+                        e.code, e.description
+                    )
+                }
+            })
+    }
 }
 
 pub(crate) fn init_arg() -> Arg {
@@ -257,60 +260,6 @@ pub(crate) fn init_arg() -> Arg {
             credential_type: CredentialType::ProofOfUniqueness,
         }]),
         api: None,
-    })
-}
-
-pub fn update_call<T>(
-    (pic, canister_id): &(PocketIc, Principal),
-    caller: Principal,
-    method: &str,
-    arg: impl CandidType,
-) -> Result<T, String>
-where
-    T: for<'a> Deserialize<'a> + CandidType,
-{
-    pic.update_call(
-        canister_id.clone(),
-        caller,
-        method,
-        encode_one(arg).unwrap(),
-    )
-    .map_err(|e| {
-        format!(
-            "Update call error. RejectionCode: {:?}, Error: {}",
-            e.code, e.description
-        )
-    })
-    .and_then(|reply| match reply {
-        WasmResult::Reply(reply) => decode_one(&reply).map_err(|_| "Decoding failed".to_string()),
-        WasmResult::Reject(error) => Err(error),
-    })
-}
-
-pub fn query_call<T>(
-    (pic, canister_id): &(PocketIc, Principal),
-    caller: Principal,
-    method: &str,
-    arg: impl CandidType,
-) -> Result<T, String>
-where
-    T: for<'a> Deserialize<'a> + CandidType,
-{
-    pic.query_call(
-        canister_id.clone(),
-        caller,
-        method,
-        encode_one(arg).unwrap(),
-    )
-    .map_err(|e| {
-        format!(
-            "Query call error. RejectionCode: {:?}, Error: {}",
-            e.code, e.description
-        )
-    })
-    .and_then(|reply| match reply {
-        WasmResult::Reply(reply) => decode_one(&reply).map_err(|_| "Decoding failed".to_string()),
-        WasmResult::Reject(error) => Err(error),
     })
 }
 

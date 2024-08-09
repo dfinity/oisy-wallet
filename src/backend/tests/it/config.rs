@@ -1,4 +1,4 @@
-use crate::utils::pocketic::{controller, init_arg, setup, update_call};
+use crate::utils::pocketic::{controller, init_arg, setup, PicCanisterTrait};
 use candid::Principal;
 use shared::types::user_profile::UserProfile;
 use shared::types::{Arg, Config};
@@ -14,7 +14,9 @@ fn config_is_available_to_allowed_users_only() {
     let expected_config = Config::from(init_arg);
     // Try anonymous request
     assert!(
-        update_call::<UserProfile>(&pic_setup, Principal::anonymous(), "config", ()).is_err(),
+        pic_setup
+            .update::<UserProfile>(Principal::anonymous(), "config", ())
+            .is_err(),
         "Anonymous user should not be able to call config"
     );
     // Try a random user
@@ -22,12 +24,14 @@ fn config_is_available_to_allowed_users_only() {
         .unwrap_or_else(|_| unreachable!("NNS root principal is definitely a valid principal."));
     assert!(!expected_config.allowed_callers.contains(&nns_root), "Test setup error: NNS root should not be in the allowed callers list, or a different principal should be used to test here.");
     assert!(
-        update_call::<UserProfile>(&pic_setup, nns_root, "config", ()).is_err(),
+        pic_setup
+            .update::<UserProfile>(nns_root, "config", ())
+            .is_err(),
         "NNS root should not be able to call config"
     );
     // Try a controller
     assert_eq!(
-        update_call::<Config>(&pic_setup, controller(), "config", ()),
+        pic_setup.update::<Config>(controller(), "config", ()),
         Ok(expected_config.clone()),
         "Controller should be able to call config and get the right answer."
     );
@@ -38,7 +42,7 @@ fn config_is_available_to_allowed_users_only() {
         .next()
         .expect("Test setup error: No allowed users found in the config.");
     assert_eq!(
-        update_call::<Config>(&pic_setup, allowed_user.clone(), "config", ()),
+        pic_setup.update::<Config>(allowed_user.clone(), "config", ()),
         Ok(expected_config),
         "Allowed user should be able to call config and get the right answer."
     );

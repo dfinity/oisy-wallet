@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use crate::utils::{
     mock::{ISSUER_CANISTER_ID, VC_HOLDER, VP_JWT},
-    pocketic::{setup, update_call},
+    pocketic::{setup, PicCanisterTrait},
 };
 use candid::Principal;
 use ic_verifiable_credentials::issuer_api::CredentialSpec;
@@ -17,7 +17,7 @@ fn test_add_user_credential_adds_credential() {
     let vc_holder = Principal::from_text(VC_HOLDER).expect("VC Holder principal is invalid");
 
     let create_profile_response =
-        update_call::<UserProfile>(&pic_setup, vc_holder, "create_user_profile", ());
+        pic_setup.update::<UserProfile>(vc_holder, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
     assert_eq!(profile.credentials.len(), 0);
@@ -33,8 +33,7 @@ fn test_add_user_credential_adds_credential() {
             .expect("VC Holder principal is invalid"),
     };
 
-    let add_user_credential_response = update_call::<Result<(), AddUserCredentialError>>(
-        &pic_setup,
+    let add_user_credential_response = pic_setup.update::<Result<(), AddUserCredentialError>>(
         vc_holder,
         "add_user_credential",
         add_user_cred_arg,
@@ -42,8 +41,7 @@ fn test_add_user_credential_adds_credential() {
 
     assert!(add_user_credential_response.is_ok());
 
-    let get_profile_response = update_call::<Result<UserProfile, GetUserProfileError>>(
-        &pic_setup,
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         vc_holder,
         "get_user_profile",
         (),
@@ -66,7 +64,7 @@ fn test_add_user_credential_cannot_updated_wrong_version() {
     let vc_holder = Principal::from_text(VC_HOLDER).expect("VC Holder principal is invalid");
 
     let create_profile_response =
-        update_call::<UserProfile>(&pic_setup, vc_holder, "create_user_profile", ());
+        pic_setup.update::<UserProfile>(vc_holder, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
     assert_eq!(profile.credentials.len(), 0);
@@ -83,8 +81,7 @@ fn test_add_user_credential_cannot_updated_wrong_version() {
             .expect("VC Holder principal is invalid"),
     };
 
-    let add_user_credential_response = update_call::<Result<(), AddUserCredentialError>>(
-        &pic_setup,
+    let add_user_credential_response = pic_setup.update::<Result<(), AddUserCredentialError>>(
         vc_holder,
         "add_user_credential",
         add_user_cred_arg,
@@ -106,7 +103,7 @@ fn test_add_user_credential_replaces_credential_same_type() {
     let vc_holder = Principal::from_text(VC_HOLDER).expect("VC Holder principal is invalid");
 
     let create_profile_response =
-        update_call::<UserProfile>(&pic_setup, vc_holder, "create_user_profile", ());
+        pic_setup.update::<UserProfile>(vc_holder, "create_user_profile", ());
 
     let initia_profile = create_profile_response.expect("Create failed");
     assert_eq!(initia_profile.credentials.len(), 0);
@@ -122,8 +119,7 @@ fn test_add_user_credential_replaces_credential_same_type() {
             .expect("VC Holder principal is invalid"),
     };
 
-    let add_user_credential_response = update_call::<Result<(), AddUserCredentialError>>(
-        &pic_setup,
+    let add_user_credential_response = pic_setup.update::<Result<(), AddUserCredentialError>>(
         vc_holder,
         "add_user_credential",
         add_user_cred_arg.clone(),
@@ -131,8 +127,7 @@ fn test_add_user_credential_replaces_credential_same_type() {
 
     assert!(add_user_credential_response.is_ok());
 
-    let get_profile_response = update_call::<Result<UserProfile, GetUserProfileError>>(
-        &pic_setup,
+    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         vc_holder,
         "get_user_profile",
         (),
@@ -145,16 +140,12 @@ fn test_add_user_credential_replaces_credential_same_type() {
         .first()
         .expect("User should have one credential by now");
 
-    let (pic, principal) = pic_setup;
-    pic.advance_time(Duration::new(10, 0));
-
-    let new_pic_setup = (pic, principal);
+    pic_setup.pic().advance_time(Duration::new(10, 0));
 
     let mut add_user_cred_arg_2 = add_user_cred_arg.clone();
     add_user_cred_arg_2.current_user_version = first_profile.version;
 
-    let add_user_credential_response = update_call::<Result<(), AddUserCredentialError>>(
-        &new_pic_setup,
+    let add_user_credential_response = pic_setup.update::<Result<(), AddUserCredentialError>>(
         vc_holder,
         "add_user_credential",
         add_user_cred_arg_2.clone(),
@@ -162,8 +153,7 @@ fn test_add_user_credential_replaces_credential_same_type() {
 
     assert!(add_user_credential_response.is_ok());
 
-    let get_profile_response_2 = update_call::<Result<UserProfile, GetUserProfileError>>(
-        &new_pic_setup,
+    let get_profile_response_2 = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         vc_holder,
         "get_user_profile",
         (),
