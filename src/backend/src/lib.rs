@@ -633,6 +633,13 @@ pub enum MigrationChunk {
 /// Steps the migration
 #[update(guard = "caller_is_allowed")]
 async fn step_migration() {
+    fn proceed_to_next_stage() {
+        mutate_state(|state| {
+            state.migration.iter_mut().for_each(|migration| {
+                migration.progress.advance();
+            });
+        });
+    }
     let migration = read_state(|s| s.migration.clone());
     match migration {
         Some(mut migration) => {
@@ -646,9 +653,8 @@ async fn step_migration() {
                                 user_data: ApiEnabled::ReadOnly,
                             })
                         });
-                        migration.progress.advance();
-                        state.migration = Some(migration);
                     });
+                    proceed_to_next_stage();
                 }
                 MigrationProgress::Locked => {
                     // Lock the target canister APIs.
@@ -659,10 +665,7 @@ async fn step_migration() {
                         })
                         .await;
                     assert!(lock_target.is_ok()); // TODO: Handle errors
-                    mutate_state(|state| {
-                        migration.progress = migration.progress.next();
-                        state.migration = Some(migration);
-                    });
+                    proceed_to_next_stage();
                 }
                 MigrationProgress::TargetLocked => {
                     // Check that the target canister is empty.
@@ -671,17 +674,11 @@ async fn step_migration() {
                         .expect("failed to get stats from the target canister")
                         .0; // TODO: Handle errors
                     assert_eq!(stats.user_profile_count, 0); // TODO: Handle errors
-                    mutate_state(|state| {
-                        migration.progress = MigrationProgress::TargetPreCheckOk;
-                        state.migration = Some(migration);
-                    });
+                    proceed_to_next_stage();
                 }
                 MigrationProgress::TargetPreCheckOk => {
                     // Start migrating user tokens.
-                    mutate_state(|state| {
-                        migration.progress = MigrationProgress::MigratedUserTokensUpTo(None);
-                        state.migration = Some(migration);
-                    });
+                    proceed_to_next_stage();
                 }
                 MigrationProgress::MigratedUserTokensUpTo(token_maybe) => {
                     // Migrate user tokens
@@ -700,7 +697,7 @@ async fn step_migration() {
                     let last = tokens.last().map(|(k, _)| k);
                     let next_state = last
                         .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last.clone())))
-                        .unwrap_or_else(|| MigrationProgress::MigratedUserTimestampsUpTo(None));
+                        .unwrap_or_else(|| migration.progress.next());
                     let migration_data = MigrationChunk::UserToken(tokens);
                     let migration_bytes =
                         encode_one(migration_data).expect("failed to encode migration data");
@@ -731,7 +728,7 @@ async fn step_migration() {
                     let last = users.last().map(|(k, _)| k);
                     let next_state = last
                         .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last.clone())))
-                        .unwrap_or_else(|| MigrationProgress::MigratedCustomTokensUpTo(None));
+                        .unwrap_or_else(|| migration.progress.next());
                     let migration_data = MigrationChunk::UserProfileUpdated(users);
                     let migration_bytes =
                         encode_one(migration_data).expect("failed to encode migration data");
@@ -748,17 +745,11 @@ async fn step_migration() {
                 MigrationProgress::MigratedUserProfilesUpTo(_) => todo!(),
                 MigrationProgress::MigratedCustomTokensUpTo(_) => {
                     // TODO: Migrate custom tokens
-                    mutate_state(|state| {
-                        migration.progress = MigrationProgress::CheckingTargetCanister;
-                        state.migration = Some(migration);
-                    });
+                    proceed_to_next_stage();
                 }
                 MigrationProgress::CheckingTargetCanister => {
                     // TODO: Check that the target canister has all the data.
-                    mutate_state(|state| {
-                        migration.progress = MigrationProgress::Completed;
-                        state.migration = Some(migration);
-                    });
+                    proceed_to_next_stage();
                 }
                 MigrationProgress::Completed => {
                     clear_timer(migration.timer_id);
