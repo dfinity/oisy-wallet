@@ -154,7 +154,7 @@ fn test_empty_migration() {
             "Local user data writes should be locked."
         );
     }
-    // Step the timer
+    // Step the timer: Target canister should be locked.
     {
         pic_setup.pic.tick();
         assert_eq!(
@@ -167,6 +167,7 @@ fn test_empty_migration() {
             })),
             "Migration should be in progress"
         );
+        // Check that the target really is locked:
         let new_config = pic_setup
             .new_backend
             .query::<shared::types::Config>(controller(), "config", ())
@@ -180,7 +181,7 @@ fn test_empty_migration() {
             "Target canister user data writes should be locked."
         );
     }
-    // Step the timer
+    // Step the timer: Should have found the target canister to be empty.
     {
         pic_setup.pic.tick();
         assert_eq!(
@@ -194,7 +195,7 @@ fn test_empty_migration() {
             "Migration should be in progress"
         );
     }
-    // Step the timer
+    // Step the timer: Should have started the user token migration.
     {
         pic_setup.pic.tick();
         assert_eq!(
@@ -207,5 +208,18 @@ fn test_empty_migration() {
             })),
             "Migration should be in progress"
         );
+    }
+    // Keep stepping until the user tokens have been migrated.
+    {
+        while let Some(MigrationReport {
+            progress: shared::types::MigrationProgress::MigratedUserTokensUpTo(_),
+            ..
+        }) = pic_setup
+            .old_backend
+            .query::<Option<MigrationReport>>(controller(), "migration", ())
+            .expect("Failed to get migration report")
+        {
+            pic_setup.pic.tick();
+        }
     }
 }
