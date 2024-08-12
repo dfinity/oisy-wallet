@@ -135,9 +135,9 @@ export const idlFactory = ({ IDL }) => {
 		matches_max_length: IDL.Nat64
 	});
 	const MigrationProgress = IDL.Variant({
-		MigratedUserTokensUpTo: IDL.Principal,
+		MigratedUserTokensUpTo: IDL.Opt(IDL.Principal),
 		TargetPreCheckOk: IDL.Null,
-		MigratedCustomTokensUpTo: IDL.Principal,
+		MigratedCustomTokensUpTo: IDL.Opt(IDL.Principal),
 		Locked: IDL.Null,
 		CheckingTargetCanister: IDL.Null,
 		TargetLocked: IDL.Null,
@@ -170,6 +170,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
+		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		config: IDL.Func([], [Config]),
 		create_user_profile: IDL.Func([], [UserProfile], []),

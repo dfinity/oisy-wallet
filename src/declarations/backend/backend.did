@@ -79,9 +79,9 @@ type ListUsersResponse = record {
   matches_max_length : nat64;
 };
 type MigrationProgress = variant {
-  MigratedUserTokensUpTo : principal;
+  MigratedUserTokensUpTo : opt principal;
   TargetPreCheckOk;
-  MigratedCustomTokensUpTo : principal;
+  MigratedCustomTokensUpTo : opt principal;
   Locked;
   CheckingTargetCanister;
   TargetLocked;
@@ -142,6 +142,7 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
+  bulk_up : (blob) -> ();
   caller_eth_address : () -> (text);
   config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
