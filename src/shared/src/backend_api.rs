@@ -7,4 +7,7 @@ impl Service {
     pub async fn set_guards(&self, arg0: Guards) -> Result<()> {
         ic_cdk::call(self.0, "set_guards", (arg0,)).await
     }
+    pub async fn stats(&self) -> Result<(Stats,)> {
+      ic_cdk::call(self.0, "stats", ()).await
+    }
 }
