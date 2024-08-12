@@ -4,7 +4,7 @@ use crate::guards::{
     may_read_user_data, may_threshold_sign, may_write_user_data,
 };
 use crate::token::{add_to_user_token, remove_from_user_token};
-use candid::{Nat, Principal};
+use candid::{decode_one, encode_one, CandidType, Deserialize, Nat, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
@@ -39,6 +39,7 @@ use shared::types::user_profile::{
 };
 use shared::types::{
     ApiEnabled, Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport,
+    Timestamp,
 };
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -566,6 +567,24 @@ fn stats() -> Stats {
     read_state(|s| Stats::from(s))
 }
 
+/// Bulk uploads data to this canister.
+#[update(guard = "caller_is_allowed")]
+fn bulk_up(data: Vec<u8>) {
+    let parsed: MigrationChunk = decode_one(&data).expect("failed to parse the data");
+    match parsed {
+        MigrationChunk::UserProfileUpdated(users) => {
+            mutate_state(|state| {
+                for (principal, timestamp) in users {
+                    state
+                        .user_profile_updated
+                        .insert(StoredPrincipal(principal), timestamp)
+                        .expect("failed to insert user profile update");
+                }
+            });
+        }
+    }
+}
+
 /// Starts user data migration to a given canister.
 ///
 /// # Errors
@@ -592,6 +611,11 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
             Ok(migration_report)
         }
     })
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum MigrationChunk {
+    UserProfileUpdated(Vec<(Principal, Timestamp)>),
 }
 
 /// Steps the migration
@@ -656,6 +680,9 @@ async fn step_migration() {
                                 .user_profile_updated
                                 .range(StoredPrincipal(user)..)
                                 .take(chunk_size)
+                                .map(|(stored_principal, timestamp)| {
+                                    (stored_principal.0, timestamp)
+                                })
                                 .collect::<Vec<_>>()
                         })
                     } else {
@@ -664,13 +691,23 @@ async fn step_migration() {
                                 .user_profile_updated
                                 .iter()
                                 .take(chunk_size)
+                                .map(|(stored_principal, timestamp)| {
+                                    (stored_principal.0, timestamp)
+                                })
                                 .collect::<Vec<_>>()
                         })
                     };
-                    let last = users.last().map(|(k, _)| k.0);
+                    let last = users.last().map(|(k, _)| k);
                     let next_state = last
-                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last)))
+                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last.clone())))
                         .unwrap_or_else(|| MigrationProgress::MigratedCustomTokensUpTo(None));
+                    let migration_data = MigrationChunk::UserProfileUpdated(users);
+                    let migration_bytes =
+                        encode_one(migration_data).expect("failed to encode migration data");
+                    Service(migration.to)
+                        .bulk_up(migration_bytes)
+                        .await
+                        .expect("failed to bulk up"); // TODO: Handle errors
 
                     mutate_state(|state| {
                         migration.progress = next_state;
