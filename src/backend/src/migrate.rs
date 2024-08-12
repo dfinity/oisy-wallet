@@ -64,6 +64,21 @@ fn next_user_token_chunk(last_user_token: Option<Principal>) -> Vec<(Principal, 
             .collect::<Vec<_>>()
     })
 }
+/// The next chunk of user timestamps to be migrated.
+fn next_user_timestamp_chunk(user_maybe: Option<Principal>) -> Vec<(Principal, Timestamp)> {
+    let chunk_size = 5;
+    let range = user_maybe
+        .map(|user| (Bound::Excluded(StoredPrincipal(user)), Bound::Unbounded))
+        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+    read_state(|state| {
+        state
+            .user_profile_updated
+            .range(range)
+            .take(chunk_size)
+            .map(|(stored_principal, timestamp)| (stored_principal.0, timestamp))
+            .collect::<Vec<_>>()
+    })
+}
 
 pub async fn step_migration() {
     fn proceed_to_next_stage() {
@@ -134,18 +149,7 @@ pub async fn step_migration() {
                 }
                 MigrationProgress::MigratedUserTimestampsUpTo(user_maybe) => {
                     // Migrate user timestamps
-                    let chunk_size = 5;
-                    let range = user_maybe
-                        .map(|user| (Bound::Excluded(StoredPrincipal(user)), Bound::Unbounded))
-                        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
-                    let users = read_state(|state| {
-                        state
-                            .user_profile_updated
-                            .range(range)
-                            .take(chunk_size)
-                            .map(|(stored_principal, timestamp)| (stored_principal.0, timestamp))
-                            .collect::<Vec<_>>()
-                    });
+                    let users = next_user_timestamp_chunk(user_maybe);
                     let last = users.last().map(|(k, _)| k);
                     let next_state = last
                         .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(*last)))
