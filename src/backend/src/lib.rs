@@ -38,9 +38,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, Stats, UserProfile,
 };
-use shared::types::{
-    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport,
-};
+use shared::types::{Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport};
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Duration;
@@ -56,12 +54,12 @@ mod bitcoin_utils;
 mod config;
 mod guards;
 mod impls;
+mod migrate;
 mod oisy_user;
 mod token;
 mod types;
 mod user_profile;
 mod user_profile_model;
-mod migrate;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);

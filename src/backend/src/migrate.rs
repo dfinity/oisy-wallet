@@ -1,14 +1,19 @@
-use std::ops::Bound;
-
+use crate::{
+    modify_state_config, mutate_state, read_state,
+    types::{Candid, StoredPrincipal},
+};
 use candid::{decode_one, encode_one, CandidType, Principal};
 use ic_cdk_timers::clear_timer;
+use pretty_assertions::assert_eq;
 use serde::Deserialize;
-use shared::{backend_api::Service, types::{token::UserToken, ApiEnabled, Guards, MigrationProgress, Timestamp}};
-
-use crate::{modify_state_config, mutate_state, read_state, types::{Candid, StoredPrincipal}};
+use shared::{
+    backend_api::Service,
+    types::{token::UserToken, ApiEnabled, Guards, MigrationProgress, Timestamp},
+};
+use std::ops::Bound;
 
 /// A chunk of data to be migrated.
-/// 
+///
 /// Note: Given that the migration moves data types that may be private, data is transferred with candid type Vec<u8>
 /// rather than littering the .did file with private types.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -19,7 +24,7 @@ pub enum MigrationChunk {
 
 /// Bulk uploads data to this canister.
 pub fn bulk_up(data: &[u8]) {
-    let parsed: MigrationChunk = decode_one(&data).expect("failed to parse the data");
+    let parsed: MigrationChunk = decode_one(data).expect("failed to parse the data");
     match parsed {
         MigrationChunk::UserToken(tokens) => {
             mutate_state(|state| {
@@ -44,6 +49,21 @@ pub fn bulk_up(data: &[u8]) {
     }
 }
 
+/// The next chunk of user tokens to be migrated.
+fn next_user_token_chunk(last_user_token: Option<Principal>) -> Vec<(Principal, Vec<UserToken>)> {
+    let chunk_size = 5;
+    let range = last_user_token
+        .map(|token| (Bound::Excluded(StoredPrincipal(token)), Bound::Unbounded))
+        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+    read_state(|state| {
+        state
+            .user_token
+            .range(range)
+            .take(chunk_size)
+            .map(|(stored_principal, token)| (stored_principal.0, token.0))
+            .collect::<Vec<_>>()
+    })
+}
 
 pub async fn step_migration() {
     fn proceed_to_next_stage() {
@@ -93,32 +113,20 @@ pub async fn step_migration() {
                     // Start migrating user tokens.
                     proceed_to_next_stage();
                 }
-                MigrationProgress::MigratedUserTokensUpTo(token_maybe) => {
+                MigrationProgress::MigratedUserTokensUpTo(last_user_token) => {
                     // Migrate user tokens
-                    let chunk_size = 5;
-                    let range = token_maybe
-                        .map(|token| (Bound::Excluded(StoredPrincipal(token)), Bound::Unbounded))
-                        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
-                    let tokens = read_state(|state| {
-                        state
-                            .user_token
-                            .range(range)
-                            .take(chunk_size)
-                            .map(|(stored_principal, token)| (stored_principal.0, token.0))
-                            .collect::<Vec<_>>()
-                    });
-                    let last = tokens.last().map(|(k, _)| k);
+                    let chunk = next_user_token_chunk(last_user_token);
+                    let last = chunk.last().map(|(k, _)| k).cloned();
                     let next_state = last
-                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last.clone())))
+                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last)))
                         .unwrap_or_else(|| migration.progress.next());
-                    let migration_data = MigrationChunk::UserToken(tokens);
+                    let migration_data = MigrationChunk::UserToken(chunk);
                     let migration_bytes =
                         encode_one(migration_data).expect("failed to encode migration data");
                     Service(migration.to)
                         .bulk_up(migration_bytes)
                         .await
                         .expect("failed to bulk up"); // TODO: Handle errors
-
                     mutate_state(|state| {
                         migration.progress = next_state;
                         state.migration = Some(migration);
@@ -140,7 +148,7 @@ pub async fn step_migration() {
                     });
                     let last = users.last().map(|(k, _)| k);
                     let next_state = last
-                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last.clone())))
+                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(*last)))
                         .unwrap_or_else(|| migration.progress.next());
                     let migration_data = MigrationChunk::UserProfileUpdated(users);
                     let migration_bytes =
