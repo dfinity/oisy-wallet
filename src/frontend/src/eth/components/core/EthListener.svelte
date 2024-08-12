@@ -4,14 +4,14 @@
 	import { initTransactionsListener } from '$eth/services/eth-listener.services';
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { Token } from '$lib/types/token';
-	import { address } from '$lib/derived/address.derived';
-	import type { OptionAddress } from '$lib/types/address';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import type { OptionEthAddress } from '$lib/types/address';
 
 	export let token: Token;
 
 	let listener: WebSocketListener | undefined = undefined;
 
-	const initListener = async ({ address }: { address: OptionAddress }) => {
+	const initListener = async ({ address }: { address: OptionEthAddress }) => {
 		await listener?.disconnect();
 
 		if (isNullish(address)) {
@@ -21,7 +21,7 @@
 		listener = initTransactionsListener({ address, token });
 	};
 
-	$: (async () => initListener({ address: $address }))();
+	$: (async () => initListener({ address: $ethAddress }))();
 
 	onDestroy(async () => await listener?.disconnect());
 </script>
