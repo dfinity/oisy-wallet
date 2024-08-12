@@ -643,16 +643,37 @@ async fn step_migration() {
                 MigrationProgress::TargetPreCheckOk => {
                     // Start migrating user tokens.
                     mutate_state(|state| {
-                        migration.progress =
-                            MigrationProgress::MigratedUserTokensUpTo(None);
+                        migration.progress = MigrationProgress::MigratedUserTokensUpTo(None);
                         state.migration = Some(migration);
                     });
                 }
-                MigrationProgress::MigratedUserTokensUpTo(_) => {
-                    // TODO: Migrate user tokens
+                MigrationProgress::MigratedUserTokensUpTo(user_maybe) => {
+                    // Migrate user tokens
+                    let chunk_size = 5;
+                    let users = if let Some(user) = user_maybe {
+                        read_state(|state| {
+                            state
+                                .user_profile_updated
+                                .range(StoredPrincipal(user)..)
+                                .take(chunk_size)
+                                .collect::<Vec<_>>()
+                        })
+                    } else {
+                        read_state(|state| {
+                            state
+                                .user_profile_updated
+                                .iter()
+                                .take(chunk_size)
+                                .collect::<Vec<_>>()
+                        })
+                    };
+                    let last = users.last().map(|(k, _)| k.0);
+                    let next_state = last
+                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last)))
+                        .unwrap_or_else(|| MigrationProgress::MigratedCustomTokensUpTo(None));
+
                     mutate_state(|state| {
-                        migration.progress =
-                            MigrationProgress::MigratedCustomTokensUpTo(None);
+                        migration.progress = next_state;
                         state.migration = Some(migration);
                     });
                 }
