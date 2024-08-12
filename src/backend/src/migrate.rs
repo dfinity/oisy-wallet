@@ -81,16 +81,16 @@ fn next_user_timestamp_chunk(user_maybe: Option<Principal>) -> Vec<(Principal, T
 }
 
 pub async fn step_migration() {
-    fn proceed_to_next_stage() {
+    fn set_progress(progress: MigrationProgress) {
         mutate_state(|state| {
             state.migration.iter_mut().for_each(|migration| {
-                migration.progress.advance();
+                migration.progress = progress;
             });
         });
     }
     let migration = read_state(|s| s.migration.clone());
     match migration {
-        Some(mut migration) => {
+        Some(migration) => {
             match migration.progress {
                 MigrationProgress::Pending => {
                     // Lock the local canister APIs.
@@ -102,7 +102,7 @@ pub async fn step_migration() {
                             })
                         });
                     });
-                    proceed_to_next_stage();
+                    set_progress(migration.progress.next());
                 }
                 MigrationProgress::Locked => {
                     // Lock the target canister APIs.
@@ -113,7 +113,7 @@ pub async fn step_migration() {
                         })
                         .await;
                     assert!(lock_target.is_ok()); // TODO: Handle errors
-                    proceed_to_next_stage();
+                    set_progress(migration.progress.next());
                 }
                 MigrationProgress::TargetLocked => {
                     // Check that the target canister is empty.
@@ -122,11 +122,11 @@ pub async fn step_migration() {
                         .expect("failed to get stats from the target canister")
                         .0; // TODO: Handle errors
                     assert_eq!(stats.user_profile_count, 0); // TODO: Handle errors
-                    proceed_to_next_stage();
+                    set_progress(migration.progress.next());
                 }
                 MigrationProgress::TargetPreCheckOk => {
                     // Start migrating user tokens.
-                    proceed_to_next_stage();
+                    set_progress(migration.progress.next());
                 }
                 MigrationProgress::MigratedUserTokensUpTo(last_user_token) => {
                     // Migrate user tokens
@@ -142,10 +142,7 @@ pub async fn step_migration() {
                         .bulk_up(migration_bytes)
                         .await
                         .expect("failed to bulk up"); // TODO: Handle errors
-                    mutate_state(|state| {
-                        migration.progress = next_state;
-                        state.migration = Some(migration);
-                    });
+                    set_progress(next_state);
                 }
                 MigrationProgress::MigratedUserTimestampsUpTo(user_maybe) => {
                     // Migrate user timestamps
@@ -162,19 +159,16 @@ pub async fn step_migration() {
                         .await
                         .expect("failed to bulk up"); // TODO: Handle errors
 
-                    mutate_state(|state| {
-                        migration.progress = next_state;
-                        state.migration = Some(migration);
-                    });
+                    set_progress(next_state);
                 }
                 MigrationProgress::MigratedUserProfilesUpTo(_) => todo!(),
                 MigrationProgress::MigratedCustomTokensUpTo(_) => {
                     // TODO: Migrate custom tokens
-                    proceed_to_next_stage();
+                    set_progress(migration.progress.next());
                 }
                 MigrationProgress::CheckingTargetCanister => {
                     // TODO: Check that the target canister has all the data.
-                    proceed_to_next_stage();
+                    set_progress(migration.progress.next());
                 }
                 MigrationProgress::Completed => {
                     clear_timer(migration.timer_id);
