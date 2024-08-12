@@ -430,5 +430,21 @@
 			"url": "https://cycles-transfer-station.com"
 		},
 		"indexCanisterVersion": "up-to-date"
+	},
+	{
+		"ledgerCanisterId": "np5km-uyaaa-aaaaq-aadrq-cai",
+		"rootCanisterId": "nb7he-piaaa-aaaaq-aadqq-cai",
+		"indexCanisterId": "n535v-yiaaa-aaaaq-aadsq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "DOGMI",
+			"symbol": "DOGMI",
+			"fee": {
+				"__bigint__": "705032704"
+			},
+			"alternativeName": "DOGMI",
+			"url": "https://qu2gy-uqaaa-aaaal-qcv6a-cai.icp0.io"
+		},
+		"indexCanisterVersion": "up-to-date"
 	}
 ]
