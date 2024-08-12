@@ -253,10 +253,10 @@ pub enum MigrationProgress {
     TargetLocked,
     /// Target canister was empty.
     TargetPreCheckOk,
-    /// Tokens have been migrated up to but excluding the given principal.
-    MigratedUserTokensUpTo(Principal),
-    /// Custom tokens have been migrated up to but excluding the given principal.
-    MigratedCustomTokensUpTo(Principal),
+    /// Tokens have been migrated up to and including the given principal.
+    MigratedUserTokensUpTo(Option<Principal>),
+    /// Custom tokens have been migrated up to and including the given principal.
+    MigratedCustomTokensUpTo(Option<Principal>),
     /// Checking that the target canister has all the data.
     CheckingTargetCanister,
     /// Migration has been completed.

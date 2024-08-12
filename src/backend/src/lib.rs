@@ -629,7 +629,7 @@ async fn step_migration() {
                     });
                 }
                 MigrationProgress::TargetLocked => {
-                    // TODO: Check that the target canister is empty.
+                    // Check that the target canister is empty.
                     let stats = Service(migration.to).stats().await;
                     let stats = stats
                         .expect("failed to get stats from the target canister")
@@ -641,10 +641,10 @@ async fn step_migration() {
                     });
                 }
                 MigrationProgress::TargetPreCheckOk => {
-                    // TODO: Start migrating user tokens.
+                    // Start migrating user tokens.
                     mutate_state(|state| {
                         migration.progress =
-                            MigrationProgress::MigratedUserTokensUpTo(Principal::anonymous());
+                            MigrationProgress::MigratedUserTokensUpTo(None);
                         state.migration = Some(migration);
                     });
                 }
@@ -652,7 +652,7 @@ async fn step_migration() {
                     // TODO: Migrate user tokens
                     mutate_state(|state| {
                         migration.progress =
-                            MigrationProgress::MigratedCustomTokensUpTo(Principal::anonymous());
+                            MigrationProgress::MigratedCustomTokensUpTo(None);
                         state.migration = Some(migration);
                     });
                 }
