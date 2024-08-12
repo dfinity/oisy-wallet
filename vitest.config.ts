@@ -19,6 +19,10 @@ export default defineConfig(
 					replacement: resolve(__dirname, 'src/frontend/src/routes')
 				},
 				{
+					find: '$btc',
+					replacement: resolve(__dirname, 'src/frontend/src/btc')
+				},
+				{
 					find: '$eth',
 					replacement: resolve(__dirname, 'src/frontend/src/eth')
 				},

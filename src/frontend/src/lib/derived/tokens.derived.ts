@@ -1,3 +1,4 @@
+import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -7,7 +8,6 @@ import { exchanges } from '$lib/derived/exchange.derived';
 import type { Token, TokenToPin } from '$lib/types/token';
 import { pinTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
-import { enabledBitcoinTokens } from '../../btc/derived/tokens.derived';
 
 const tokens: Readable<Token[]> = derived(
 	[erc20Tokens, sortedIcrcTokens, enabledEthereumTokens, enabledBitcoinTokens],
