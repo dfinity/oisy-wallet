@@ -47,7 +47,7 @@
 			<Link
 				href={settingsUrl}
 				ariaLabel={$i18n.navigation.alt.more_settings}
-				on:click={hidePopover}
+				on:icBeforeNavigate={hidePopover}
 			>
 				<IconSettings slot="icon" />
 				{$i18n.settings.text.title}

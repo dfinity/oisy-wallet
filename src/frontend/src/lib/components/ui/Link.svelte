@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { beforeNavigate } from '$app/navigation';
 	import { createEventDispatcher } from 'svelte';
 
 	export let href: string;
@@ -12,16 +12,9 @@
 
 	const dispatch = createEventDispatcher();
 
-	// Custom click handler to guarantee that it prevents default browser behaviour (full page reload)
-	// when the link is internal (not external). A practical example is when the <a> tag is used
-	// inside a Popover component.
-	const onClick = (event: MouseEvent) => {
-		if (!external) {
-			event.preventDefault();
-			goto(href);
-		}
-		dispatch('click');
-	};
+	beforeNavigate(() => {
+		dispatch('icBeforeNavigate');
+	});
 </script>
 
 <a
@@ -37,7 +30,6 @@
 	class:hover:text-blue={color === 'inherit'}
 	class:active:text-blue={color === 'inherit'}
 	class:w-full={fullWidth}
-	on:click={onClick}
 >
 	{#if iconVisible}
 		<slot name="icon" />
