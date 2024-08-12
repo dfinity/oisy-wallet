@@ -148,6 +148,24 @@ fn next_user_timestamp_chunk(user_maybe: Option<Principal>) -> Vec<(Principal, T
     })
 }
 
+macro_rules! migrate {
+    ($migration:ident, $chunk:ident, $progress_variant:ident, $chunk_variant:ident) => {
+        let last = $chunk.last().map(|(k, _)| k).cloned();
+        let next_state = last
+            .map(|last| MigrationProgress::$progress_variant(Some(last)))
+            .unwrap_or_else(|| $migration.progress.next());
+        let migration_data = MigrationChunk::$chunk_variant($chunk);
+        let migration_bytes =
+            encode_one(migration_data).expect("failed to encode migration data");
+        Service($migration.to)
+            .bulk_up(migration_bytes)
+            .await
+            .expect("failed to bulk up"); // TODO: Handle errors
+        set_progress(next_state);
+    }
+}
+pub(crate) use migrate;
+
 pub async fn step_migration() {
     fn set_progress(progress: MigrationProgress) {
         mutate_state(|state| {
@@ -196,21 +214,9 @@ pub async fn step_migration() {
                     // Start migrating user tokens.
                     set_progress(migration.progress.next());
                 }
-                MigrationProgress::MigratedUserTokensUpTo(last_user_token) => {
-                    // Migrate user tokens
-                    let chunk = next_user_token_chunk(last_user_token);
-                    let last = chunk.last().map(|(k, _)| k).cloned();
-                    let next_state = last
-                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last)))
-                        .unwrap_or_else(|| migration.progress.next());
-                    let migration_data = MigrationChunk::UserToken(chunk);
-                    let migration_bytes =
-                        encode_one(migration_data).expect("failed to encode migration data");
-                    Service(migration.to)
-                        .bulk_up(migration_bytes)
-                        .await
-                        .expect("failed to bulk up"); // TODO: Handle errors
-                    set_progress(next_state);
+                MigrationProgress::MigratedUserTokensUpTo(last) => {
+                    let chunk = next_user_token_chunk(last);
+                    migrate!(migration, chunk, MigratedUserTokensUpTo, UserToken);
                 }
                 MigrationProgress::MigratedCustomTokensUpTo(last_custom_token) => {
                     // Migrate custom tokens
