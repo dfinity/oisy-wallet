@@ -180,4 +180,18 @@ fn test_empty_migration() {
             "Target canister user data writes should be locked."
         );
     }
+    // Step the timer
+    {
+        pic_setup.pic.tick();
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ()),
+            Ok(Some(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::TargetPreCheckOk,
+            })),
+            "Migration should be in progress"
+        );
+    }
 }
