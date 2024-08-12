@@ -597,7 +597,7 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
 /// Steps the migration
 #[update(guard = "caller_is_allowed")]
 async fn step_migration() {
-    let migration = read_state(|s| s.migration.as_ref().map(|m| m.clone()));
+    let migration = read_state(|s| s.migration.clone());
     match migration {
         Some(mut migration) => {
             match migration.progress {
