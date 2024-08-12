@@ -26,6 +26,7 @@ use k256::PublicKey;
 use oisy_user::oisy_users;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
+use shared::backend_api::Service;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
@@ -579,7 +580,8 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
                 Ok(MigrationReport::from(migration))
             }
         } else {
-            let timer_id = set_timer_interval(Duration::from_secs(0), || ic_cdk::spawn(step_migration()));
+            let timer_id =
+                set_timer_interval(Duration::from_secs(0), || ic_cdk::spawn(step_migration()));
             let migration = Migration {
                 to,
                 progress: MigrationProgress::Pending,
@@ -612,6 +614,13 @@ async fn step_migration() {
                     }
                     MigrationProgress::Locked => {
                         // TODO: Lock the target canister APIs.
+                        /*
+                        let lock_target = Service(migration.to).set_guards(Guards {
+                            threshold_key: ApiEnabled::ReadOnly,
+                            user_data: ApiEnabled::ReadOnly,
+                        }).await;
+                        assert!(lock_target.is_ok());
+                        */
                         migration.progress = MigrationProgress::TargetLocked;
                         state.migration = Some(migration);
                     }

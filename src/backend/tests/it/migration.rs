@@ -2,9 +2,7 @@
 
 use std::sync::Arc;
 
-use crate::utils::pocketic::{
-    controller, setup, BackendBuilder, PicBackend, PicCanisterTrait,
-};
+use crate::utils::pocketic::{controller, setup, BackendBuilder, PicBackend, PicCanisterTrait};
 use pocket_ic::PocketIc;
 use shared::types::{ApiEnabled, Guards, MigrationReport, Stats};
 
@@ -157,15 +155,29 @@ fn test_empty_migration() {
         );
     }
     // Step the timer
-    pic_setup.pic.tick();
-    assert_eq!(
-        pic_setup
-            .old_backend
-            .query::<Option<MigrationReport>>(controller(), "migration", ()),
-        Ok(Some(MigrationReport {
-            to: pic_setup.new_backend.canister_id(),
-            progress: shared::types::MigrationProgress::TargetLocked,
-        })),
-        "Migration should be in progress"
-    );
+    {
+        pic_setup.pic.tick();
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ()),
+            Ok(Some(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::TargetLocked,
+            })),
+            "Migration should be in progress"
+        );
+        let new_config = pic_setup
+            .new_backend
+            .query::<shared::types::Config>(controller(), "config", ())
+            .expect("Failed to get config");
+        assert_eq!(
+            new_config.api,
+            Some(Guards {
+                threshold_key: ApiEnabled::ReadOnly,
+                user_data: ApiEnabled::ReadOnly
+            }),
+            "Target canister user data writes should be locked."
+        );
+    }
 }
