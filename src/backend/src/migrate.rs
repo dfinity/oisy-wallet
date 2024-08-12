@@ -8,7 +8,10 @@ use pretty_assertions::assert_eq;
 use serde::Deserialize;
 use shared::{
     backend_api::Service,
-    types::{custom_token::CustomToken, token::UserToken, ApiEnabled, Guards, MigrationProgress, Timestamp},
+    types::{
+        custom_token::CustomToken, token::UserToken, user_profile::StoredUserProfile, ApiEnabled,
+        Guards, MigrationProgress, Timestamp,
+    },
 };
 use std::ops::Bound;
 
@@ -20,6 +23,7 @@ use std::ops::Bound;
 pub enum MigrationChunk {
     UserToken(Vec<(Principal, Vec<UserToken>)>),
     CustomToken(Vec<(Principal, Vec<CustomToken>)>),
+    UserProfile(Vec<((Timestamp, Principal), StoredUserProfile)>),
     UserProfileUpdated(Vec<(Principal, Timestamp)>),
 }
 
@@ -44,6 +48,16 @@ pub fn bulk_up(data: &[u8]) {
                         .custom_token
                         .insert(StoredPrincipal(principal), Candid(token))
                         .expect("failed to insert custom token");
+                }
+            });
+        }
+        MigrationChunk::UserProfile(profiles) => {
+            mutate_state(|state| {
+                for ((timestamp, principal), profile) in profiles {
+                    state
+                        .user_profile
+                        .insert((timestamp, StoredPrincipal(principal)), Candid(profile))
+                        .expect("failed to insert user profile");
                 }
             });
         }
@@ -77,7 +91,9 @@ fn next_user_token_chunk(last_user_token: Option<Principal>) -> Vec<(Principal, 
 }
 
 /// The next chunk of custom tokens to be migrated.
-fn next_custom_token_chunk(last_custom_token: Option<Principal>) -> Vec<(Principal, Vec<CustomToken>)> {
+fn next_custom_token_chunk(
+    last_custom_token: Option<Principal>,
+) -> Vec<(Principal, Vec<CustomToken>)> {
     let chunk_size = 5;
     let range = last_custom_token
         .map(|token| (Bound::Excluded(StoredPrincipal(token)), Bound::Unbounded))
@@ -88,6 +104,30 @@ fn next_custom_token_chunk(last_custom_token: Option<Principal>) -> Vec<(Princip
             .range(range)
             .take(chunk_size)
             .map(|(stored_principal, token)| (stored_principal.0, token.0))
+            .collect::<Vec<_>>()
+    })
+}
+
+fn next_user_profile_chunk(
+    last_user_profile: Option<(Timestamp, Principal)>,
+) -> Vec<((Timestamp, Principal), StoredUserProfile)> {
+    let chunk_size = 5;
+    let range = last_user_profile
+        .map(|(timestamp, principal)| {
+            (
+                Bound::Excluded((timestamp, StoredPrincipal(principal))),
+                Bound::Unbounded,
+            )
+        })
+        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+    read_state(|state| {
+        state
+            .user_profile
+            .range(range)
+            .take(chunk_size)
+            .map(|((timestamp, stored_principal), profile)| {
+                ((timestamp, stored_principal.0), profile.0)
+            })
             .collect::<Vec<_>>()
     })
 }
@@ -205,7 +245,22 @@ pub async fn step_migration() {
 
                     set_progress(next_state);
                 }
-                MigrationProgress::MigratedUserProfilesUpTo(_) => todo!(),
+                MigrationProgress::MigratedUserProfilesUpTo(last_user_profile) => {
+                    // Migrate user profiles
+                    let chunk = next_user_profile_chunk(last_user_profile);
+                    let last = chunk.last().map(|(k, _)| k).cloned();
+                    let next_state = last
+                        .map(|last| MigrationProgress::MigratedUserProfilesUpTo(Some(last)))
+                        .unwrap_or_else(|| migration.progress.next());
+                    let migration_data = MigrationChunk::UserProfile(chunk);
+                    let migration_bytes =
+                        encode_one(migration_data).expect("failed to encode migration data");
+                    Service(migration.to)
+                        .bulk_up(migration_bytes)
+                        .await
+                        .expect("failed to bulk up"); // TODO: Handle errors
+                    set_progress(next_state);
+                }
                 MigrationProgress::CheckingTargetCanister => {
                     // TODO: Check that the target canister has all the data.
                     set_progress(migration.progress.next());
