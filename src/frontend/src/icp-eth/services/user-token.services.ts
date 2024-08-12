@@ -10,7 +10,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import type { Identity } from '@dfinity/agent';
-import { assertNonNullish, isNullish, toNullable } from '@dfinity/utils';
+import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -41,7 +41,8 @@ export const autoLoadUserToken = async ({
 	}
 
 	const twinToken = (sendToken as OptionIcCkToken)?.twinToken;
-	if (isNullish(twinToken)) {
+
+	if (twinToken?.standard !== 'erc20') {
 		return { result: 'skipped' };
 	}
 
