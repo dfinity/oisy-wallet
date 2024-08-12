@@ -42,6 +42,7 @@ use shared::types::{
     Timestamp,
 };
 use std::cell::RefCell;
+use std::ops::Bound;
 use std::str::FromStr;
 use std::time::Duration;
 use types::{
@@ -674,29 +675,17 @@ async fn step_migration() {
                 MigrationProgress::MigratedUserTokensUpTo(user_maybe) => {
                     // Migrate user tokens
                     let chunk_size = 5;
-                    let users = if let Some(user) = user_maybe {
-                        read_state(|state| {
-                            state
-                                .user_profile_updated
-                                .range(StoredPrincipal(user)..)
-                                .take(chunk_size)
-                                .map(|(stored_principal, timestamp)| {
-                                    (stored_principal.0, timestamp)
-                                })
-                                .collect::<Vec<_>>()
-                        })
-                    } else {
-                        read_state(|state| {
-                            state
-                                .user_profile_updated
-                                .iter()
-                                .take(chunk_size)
-                                .map(|(stored_principal, timestamp)| {
-                                    (stored_principal.0, timestamp)
-                                })
-                                .collect::<Vec<_>>()
-                        })
-                    };
+                    let range = user_maybe
+                        .map(|user| (Bound::Excluded(StoredPrincipal(user)), Bound::Unbounded))
+                        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+                    let users = read_state(|state| {
+                        state
+                            .user_profile_updated
+                            .range(range)
+                            .take(chunk_size)
+                            .map(|(stored_principal, timestamp)| (stored_principal.0, timestamp))
+                            .collect::<Vec<_>>()
+                    });
                     let last = users.last().map(|(k, _)| k);
                     let next_state = last
                         .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last.clone())))
