@@ -579,7 +579,7 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
                 Ok(MigrationReport::from(migration))
             }
         } else {
-            let timer_id = set_timer_interval(Duration::from_secs(0), step_migration);
+            let timer_id = set_timer_interval(Duration::from_secs(0), || ic_cdk::spawn(step_migration()));
             let migration = Migration {
                 to,
                 progress: MigrationProgress::Pending,
@@ -594,7 +594,7 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
 
 /// Steps the migration
 #[update(guard = "caller_is_allowed")]
-fn step_migration() {
+async fn step_migration() {
     mutate_state(|state| {
         match state.migration.clone() {
             Some(mut migration) => {

@@ -48,7 +48,7 @@ fn test_by_default_no_migration_is_in_progress() {
     let pic_setup = setup();
 
     let get_migration_response =
-        query_call::<Option<MigrationReport>>(&pic_setup, controller(), "migration", ());
+        pic_setup.query::<Option<MigrationReport>>(controller(), "migration", ());
 
     assert_eq!(
         get_migration_response,
