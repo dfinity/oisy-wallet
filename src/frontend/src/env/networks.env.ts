@@ -7,6 +7,7 @@ import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import type { Network } from '$lib/types/network';
+import type { BitcoinNetwork } from '../btc/types/network';
 
 /**
  * Ethereum
@@ -79,22 +80,24 @@ export const BTC_MAINNET_NETWORK_SYMBOL = 'BTC';
 
 export const BTC_MAINNET_NETWORK_ID = Symbol(BTC_MAINNET_NETWORK_SYMBOL);
 
-export const BTC_MAINNET_NETWORK: Network = {
+export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 	id: BTC_MAINNET_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Bitcoin',
-	icon: bitcoin
+	icon: bitcoin,
+	backendEnv: { mainnet: null }
 };
 
 export const BTC_TESTNET_NETWORK_SYMBOL = 'BTC (Testnet)';
 
 export const BTC_TESTNET_NETWORK_ID = Symbol(BTC_TESTNET_NETWORK_SYMBOL);
 
-export const BTC_TESTNET_NETWORK: Network = {
+export const BTC_TESTNET_NETWORK: BitcoinNetwork = {
 	id: BTC_TESTNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Bitcoin',
-	icon: bitcoinTestnet
+	icon: bitcoinTestnet,
+	backendEnv: { testnet: null }
 };
 
 export const BITCOIN_NETWORKS: Network[] = [BTC_MAINNET_NETWORK, BTC_TESTNET_NETWORK];
