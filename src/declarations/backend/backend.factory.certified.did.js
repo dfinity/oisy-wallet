@@ -46,6 +46,11 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
+	const BitcoinNetwork = IDL.Variant({
+		mainnet: IDL.Null,
+		regtest: IDL.Null,
+		testnet: IDL.Null
+	});
 	const Config = IDL.Record({
 		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
@@ -169,6 +174,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
+		caller_btc_address: IDL.Func([BitcoinNetwork], [IDL.Text], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		config: IDL.Func([], [Config]),
 		create_user_profile: IDL.Func([], [UserProfile], []),
