@@ -32,7 +32,18 @@ module.exports = {
 			rules: {
 				'no-console': 'off',
 			}
-		}
+		},
+		{
+			files: ['src/frontend/src/eth/**/*.svelte'],
+			rules: {
+				'import/order': [
+					'error',
+					{
+						alphabetize: { order: 'asc' }
+					}
+				],
+			},
+		},
 	],
 	rules: {
 		'no-unused-vars': 'off',
