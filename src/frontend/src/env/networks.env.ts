@@ -1,3 +1,4 @@
+import type { BitcoinNetwork } from '$btc/types/network';
 import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import sepolia from '$eth/assets/sepolia.svg';
@@ -7,7 +8,6 @@ import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import type { Network } from '$lib/types/network';
-import type { BitcoinNetwork } from '../btc/types/network';
 
 /**
  * Ethereum
