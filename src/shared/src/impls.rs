@@ -215,6 +215,10 @@ fn test_api_enabled() {
 }
 
 impl MigrationProgress {
+    /// The next phase in the migration process.
+    ///
+    /// Note: A given phase, such as migrating a BTreeMap, may need multiple steps.
+    /// The code for that phase will have to keep track of those steps by means of the data in the variant.
     #[must_use]
     pub fn next(&self) -> Self {
         match self {
@@ -237,8 +241,5 @@ impl MigrationProgress {
             MigrationProgress::CheckingTargetCanister => MigrationProgress::Completed,
             MigrationProgress::Completed => MigrationProgress::Completed,
         }
-    }
-    pub fn advance(&mut self) {
-        *self = self.next();
     }
 }

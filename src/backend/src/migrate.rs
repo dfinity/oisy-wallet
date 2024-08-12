@@ -8,7 +8,7 @@ use pretty_assertions::assert_eq;
 use serde::Deserialize;
 use shared::{
     backend_api::Service,
-    types::{token::UserToken, ApiEnabled, Guards, MigrationProgress, Timestamp},
+    types::{custom_token::CustomToken, token::UserToken, ApiEnabled, Guards, MigrationProgress, Timestamp},
 };
 use std::ops::Bound;
 
@@ -19,6 +19,7 @@ use std::ops::Bound;
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum MigrationChunk {
     UserToken(Vec<(Principal, Vec<UserToken>)>),
+    CustomToken(Vec<(Principal, Vec<CustomToken>)>),
     UserProfileUpdated(Vec<(Principal, Timestamp)>),
 }
 
@@ -33,6 +34,16 @@ pub fn bulk_up(data: &[u8]) {
                         .user_token
                         .insert(StoredPrincipal(principal), Candid(token))
                         .expect("failed to insert user token");
+                }
+            });
+        }
+        MigrationChunk::CustomToken(tokens) => {
+            mutate_state(|state| {
+                for (principal, token) in tokens {
+                    state
+                        .custom_token
+                        .insert(StoredPrincipal(principal), Candid(token))
+                        .expect("failed to insert custom token");
                 }
             });
         }
@@ -64,6 +75,23 @@ fn next_user_token_chunk(last_user_token: Option<Principal>) -> Vec<(Principal, 
             .collect::<Vec<_>>()
     })
 }
+
+/// The next chunk of custom tokens to be migrated.
+fn next_custom_token_chunk(last_custom_token: Option<Principal>) -> Vec<(Principal, Vec<CustomToken>)> {
+    let chunk_size = 5;
+    let range = last_custom_token
+        .map(|token| (Bound::Excluded(StoredPrincipal(token)), Bound::Unbounded))
+        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+    read_state(|state| {
+        state
+            .custom_token
+            .range(range)
+            .take(chunk_size)
+            .map(|(stored_principal, token)| (stored_principal.0, token.0))
+            .collect::<Vec<_>>()
+    })
+}
+
 /// The next chunk of user timestamps to be migrated.
 fn next_user_timestamp_chunk(user_maybe: Option<Principal>) -> Vec<(Principal, Timestamp)> {
     let chunk_size = 5;
@@ -144,6 +172,22 @@ pub async fn step_migration() {
                         .expect("failed to bulk up"); // TODO: Handle errors
                     set_progress(next_state);
                 }
+                MigrationProgress::MigratedCustomTokensUpTo(last_custom_token) => {
+                    // Migrate custom tokens
+                    let chunk = next_custom_token_chunk(last_custom_token);
+                    let last = chunk.last().map(|(k, _)| k).cloned();
+                    let next_state = last
+                        .map(|last| MigrationProgress::MigratedCustomTokensUpTo(Some(last)))
+                        .unwrap_or_else(|| migration.progress.next());
+                    let migration_data = MigrationChunk::CustomToken(chunk);
+                    let migration_bytes =
+                        encode_one(migration_data).expect("failed to encode migration data");
+                    Service(migration.to)
+                        .bulk_up(migration_bytes)
+                        .await
+                        .expect("failed to bulk up"); // TODO: Handle errors
+                    set_progress(next_state);
+                }
                 MigrationProgress::MigratedUserTimestampsUpTo(user_maybe) => {
                     // Migrate user timestamps
                     let users = next_user_timestamp_chunk(user_maybe);
@@ -162,10 +206,6 @@ pub async fn step_migration() {
                     set_progress(next_state);
                 }
                 MigrationProgress::MigratedUserProfilesUpTo(_) => todo!(),
-                MigrationProgress::MigratedCustomTokensUpTo(_) => {
-                    // TODO: Migrate custom tokens
-                    set_progress(migration.progress.next());
-                }
                 MigrationProgress::CheckingTargetCanister => {
                     // TODO: Check that the target canister has all the data.
                     set_progress(migration.progress.next());
