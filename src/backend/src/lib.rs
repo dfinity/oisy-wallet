@@ -622,7 +622,7 @@ async fn step_migration() {
                             user_data: ApiEnabled::ReadOnly,
                         })
                         .await;
-                    assert!(lock_target.is_ok());
+                    assert!(lock_target.is_ok()); // TODO: Handle errors
                     mutate_state(|state| {
                         migration.progress = MigrationProgress::TargetLocked;
                         state.migration = Some(migration);
@@ -630,6 +630,11 @@ async fn step_migration() {
                 }
                 MigrationProgress::TargetLocked => {
                     // TODO: Check that the target canister is empty.
+                    let stats = Service(migration.to).stats().await;
+                    let stats = stats
+                        .expect("failed to get stats from the target canister")
+                        .0; // TODO: Handle errors
+                    assert_eq!(stats.user_profile_count, 0); // TODO: Handle errors
                     mutate_state(|state| {
                         migration.progress = MigrationProgress::TargetPreCheckOk;
                         state.migration = Some(migration);
