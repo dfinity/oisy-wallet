@@ -3,22 +3,18 @@
 	import { modalIcSend } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ICP_NETWORK_ID } from '$env/networks.env';
-	import SendButton from '$lib/components/send/SendButton.svelte';
 	import type { Token } from '$lib/types/token';
 	import { loadTokenAndRun } from '$icp/services/token.services';
+	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
 
 	export let token: Token;
 
-	const modalId = Symbol();
-
-	const openSend = async () => {
+	const openSend = async (modalId: symbol) => {
 		const callback = async () => modalStore.openIcSend(modalId);
 		await loadTokenAndRun({ token, callback });
 	};
 </script>
 
-<SendButton on:click={openSend} />
-
-{#if $modalIcSend && $modalStore?.data === modalId}
-	<IcSendModal networkId={ICP_NETWORK_ID} on:nnsClose />
-{/if}
+<SendButtonWithModal open={openSend} isOpen={$modalIcSend}>
+	<IcSendModal networkId={ICP_NETWORK_ID} on:nnsClose slot="modal" />
+</SendButtonWithModal>
