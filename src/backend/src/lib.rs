@@ -4,7 +4,7 @@ use crate::guards::{
     may_read_user_data, may_threshold_sign, may_write_user_data,
 };
 use crate::token::{add_to_user_token, remove_from_user_token};
-use candid::{decode_one, encode_one, CandidType, Deserialize, Nat, Principal};
+use candid::{Nat, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
@@ -16,7 +16,7 @@ use ic_cdk::api::management_canister::ecdsa::{
 };
 use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
-use ic_cdk_timers::{clear_timer, set_timer_interval};
+use ic_cdk_timers::set_timer_interval;
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -26,7 +26,6 @@ use k256::PublicKey;
 use oisy_user::oisy_users;
 use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
-use shared::backend_api::Service;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
@@ -38,11 +37,9 @@ use shared::types::user_profile::{
     ListUsersResponse, OisyUser, Stats, UserProfile,
 };
 use shared::types::{
-    ApiEnabled, Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport,
-    Timestamp,
+    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport,
 };
 use std::cell::RefCell;
-use std::ops::Bound;
 use std::str::FromStr;
 use std::time::Duration;
 use types::{
