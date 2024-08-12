@@ -238,4 +238,7 @@ impl MigrationProgress {
             MigrationProgress::Completed => MigrationProgress::Completed,
         }
     }
+    pub fn advance(&mut self) {
+        *self = self.next();
+    }
 }

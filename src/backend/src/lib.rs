@@ -646,7 +646,7 @@ async fn step_migration() {
                                 user_data: ApiEnabled::ReadOnly,
                             })
                         });
-                        migration.progress = MigrationProgress::Locked;
+                        migration.progress.advance();
                         state.migration = Some(migration);
                     });
                 }
@@ -660,7 +660,7 @@ async fn step_migration() {
                         .await;
                     assert!(lock_target.is_ok()); // TODO: Handle errors
                     mutate_state(|state| {
-                        migration.progress = MigrationProgress::TargetLocked;
+                        migration.progress = migration.progress.next();
                         state.migration = Some(migration);
                     });
                 }
