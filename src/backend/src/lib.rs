@@ -615,7 +615,7 @@ async fn step_migration() {
                     });
                 }
                 MigrationProgress::Locked => {
-                    // TODO: Lock the target canister APIs.
+                    // Lock the target canister APIs.
                     let lock_target = Service(migration.to)
                         .set_guards(Guards {
                             threshold_key: ApiEnabled::ReadOnly,
