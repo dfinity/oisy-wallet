@@ -6,6 +6,8 @@
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import ThreeBackground from '$lib/components/ui/ThreeBackground.svelte';
+	import { slide, fade } from 'svelte/transition';
+	import { isNullish } from '@dfinity/utils';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -18,26 +20,54 @@
 	// We only want to display the "Sign-in" call to action on pages that actually are displaying any content in the Hero pane.
 	let heroContent = true;
 	$: heroContent = usdTotal || summary;
+
+	let isCollapsed = false;
+	let preventScrollHandler = false;
+
+	const handleScroll = () => {
+		if (preventScrollHandler) {
+			return;
+		}
+		isCollapsed = isNullish(window.scrollY) || window.scrollY > 0;
+	};
+
+
 </script>
 
-<div class={`hero pb-4 md:pb-6 ${background}`}>
-	{#if $pseudoNetworkChainFusion}
-		<ThreeBackground />
+<svelte:window  on:wheel={handleScroll} on:touchmove={handleScroll}  />
+
+<div
+	class={`hero ${isCollapsed ? '' : 'pb-4 md:pb-6'} ${background} sticky top-0 z-[var(--overlay-z-index)]`}
+>
+	{#if $pseudoNetworkChainFusion && !isCollapsed}
+		<div in:fade={{ duration: 250 }} out:fade={{ duration: 250 }} 			on:introstart={() => (preventScrollHandler = true)}
+				 on:introend={() => (preventScrollHandler = false)}
+				 on:outrostart={() => (preventScrollHandler = true)}
+				 on:outroend={() => (preventScrollHandler = false)}>
+			<ThreeBackground />
+		</div>
 	{/if}
 
 	<Header />
 
-	<article
-		class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main 2xl:mt-[-70px] items-center"
-	>
-		<Alpha />
+	{#if !isCollapsed}
+		<article
+			class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main 2xl:mt-[-70px] items-center"
+			transition:slide={{ duration: 250 }}
+			on:introstart={() => (preventScrollHandler = true)}
+			on:introend={() => (preventScrollHandler = false)}
+			on:outrostart={() => (preventScrollHandler = true)}
+			on:outroend={() => (preventScrollHandler = false)}
+		>
+			<Alpha />
 
-		{#if $authSignedIn}
-			<HeroContent {usdTotal} {summary} {actions} {more} />
-		{:else if heroContent}
-			<HeroSignIn />
-		{/if}
-	</article>
+			{#if $authSignedIn}
+				<HeroContent {usdTotal} {summary} {actions} {more} />
+			{:else if heroContent}
+				<HeroSignIn />
+			{/if}
+		</article>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -58,9 +88,7 @@
 		}
 
 		&.chainfusion {
-			background: transparent;
-
-			position: relative;
+			background: #010155;
 		}
 	}
 </style>
