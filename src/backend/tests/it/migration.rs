@@ -194,4 +194,18 @@ fn test_empty_migration() {
             "Migration should be in progress"
         );
     }
+    // Step the timer
+    {
+        pic_setup.pic.tick();
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ()),
+            Ok(Some(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::MigratedUserTokensUpTo(None),
+            })),
+            "Migration should be in progress"
+        );
+    }
 }
