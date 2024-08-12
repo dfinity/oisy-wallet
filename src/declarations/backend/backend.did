@@ -13,6 +13,7 @@ type AddUserCredentialRequest = record {
 type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
+type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -141,6 +142,7 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
+  caller_btc_address : (BitcoinNetwork) -> (text);
   caller_eth_address : () -> (text);
   config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
