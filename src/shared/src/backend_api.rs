@@ -1,6 +1,7 @@
 use crate::types::*;
 use candid::{self, Principal};
 use ic_cdk::api::call::CallResult as Result;
+use user_profile::Stats;
 
 pub struct Service(pub Principal);
 impl Service {

@@ -234,6 +234,7 @@ pub mod user_profile {
     #[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
     pub struct Stats {
         pub user_profile_count: u64,
+        pub user_timestamps_count: u64,
         pub user_token_count: u64,
         pub custom_token_count: u64,
     }
@@ -282,11 +283,4 @@ pub struct Migration {
 pub struct MigrationReport {
     pub to: Principal,
     pub progress: MigrationProgress,
-}
-
-#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
-pub struct Stats {
-    pub user_profile_count: u64,
-    pub user_token_count: u64,
-    pub custom_token_count: u64,
 }

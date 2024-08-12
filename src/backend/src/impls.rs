@@ -38,6 +38,7 @@ impl From<&State> for Stats {
     fn from(state: &State) -> Self {
         Stats {
             user_profile_count: state.user_profile.len(),
+            user_timestamps_count: state.user_profile_updated.len(),
             user_token_count: state.user_token.len(),
             custom_token_count: state.custom_token.len(),
         }

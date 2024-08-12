@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use crate::utils::pocketic::{controller, setup, BackendBuilder, PicBackend, PicCanisterTrait};
 use pocket_ic::PocketIc;
-use shared::types::{ApiEnabled, Guards, MigrationReport, Stats};
+use shared::types::{user_profile::Stats, ApiEnabled, Guards, MigrationReport};
 
 struct MigrationTestEnv {
     /// Simulated Internet Computer
@@ -83,6 +83,7 @@ fn test_empty_migration() {
             .query::<Stats>(controller(), "stats", ()),
         Ok(Stats {
             user_profile_count: user_range.len() as u64,
+            user_timestamps_count: user_range.len() as u64,
             custom_token_count: 0,
             user_token_count: 0,
         }),
@@ -95,6 +96,7 @@ fn test_empty_migration() {
             .query::<Stats>(controller(), "stats", ()),
         Ok(Stats {
             user_profile_count: 0,
+            user_timestamps_count: 0,
             custom_token_count: 0,
             user_token_count: 0,
         }),
