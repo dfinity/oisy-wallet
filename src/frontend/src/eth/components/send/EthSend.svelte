@@ -4,17 +4,15 @@
 	import { modalEthSend } from '$lib/derived/modal.derived';
 	import EthSendModal from '$eth/components/send/EthSendModal.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import SendButton from '$lib/components/send/SendButton.svelte';
 	import { loadTokenAndRun } from '$icp/services/token.services';
 	import type { Token } from '$lib/types/token';
+	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
 
 	export let token: Token;
 
-	const modalId = Symbol();
-
 	const isDisabled = (): boolean => $addressNotLoaded;
 
-	const openSend = async () => {
+	const openSend = async (modalId: symbol) => {
 		if (isDisabled()) {
 			const status = await waitWalletReady(isDisabled);
 
@@ -28,8 +26,6 @@
 	};
 </script>
 
-<SendButton on:click={async () => await openSend()} />
-
-{#if $modalEthSend && $modalStore?.data === modalId}
-	<EthSendModal on:nnsClose />
-{/if}
+<SendButtonWithModal open={async (modalId) => await openSend(modalId)} isOpen={$modalEthSend}>
+	<EthSendModal on:nnsClose slot="modal" />
+</SendButtonWithModal>
