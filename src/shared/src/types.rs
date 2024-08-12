@@ -257,6 +257,10 @@ pub enum MigrationProgress {
     MigratedUserTokensUpTo(Option<Principal>),
     /// Custom tokens have been migrated up to (but excluding) the given principal.
     MigratedCustomTokensUpTo(Option<Principal>),
+    /// Migrated user profile timestamps up to the given principal.
+    MigratedUserTimestampsUpTo(Option<Principal>),
+    /// Migrated user profiles up to the given timestamp/user pair.
+    MigratedUserProfilesUpTo(Option<(Timestamp, Principal)>),
     /// Checking that the target canister has all the data.
     CheckingTargetCanister,
     /// Migration has been completed.

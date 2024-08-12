@@ -4,8 +4,8 @@ use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
 };
 use crate::types::{
-    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationReport, Timestamp,
-    TokenVersion, Version,
+    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
+    Timestamp, TokenVersion, Version,
 };
 use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
@@ -212,4 +212,30 @@ fn test_api_enabled() {
     assert_eq!(ApiEnabled::ReadOnly.writable(), false);
     assert_eq!(ApiEnabled::Disabled.readable(), false);
     assert_eq!(ApiEnabled::Disabled.writable(), false);
+}
+
+impl MigrationProgress {
+    #[must_use]
+    pub fn next(&self) -> Self {
+        match self {
+            MigrationProgress::Pending => MigrationProgress::Locked,
+            MigrationProgress::Locked => MigrationProgress::TargetLocked,
+            MigrationProgress::TargetLocked => MigrationProgress::TargetPreCheckOk,
+            MigrationProgress::TargetPreCheckOk => MigrationProgress::MigratedUserTokensUpTo(None),
+            MigrationProgress::MigratedUserTokensUpTo(_) => {
+                MigrationProgress::MigratedCustomTokensUpTo(None)
+            }
+            MigrationProgress::MigratedCustomTokensUpTo(_) => {
+                MigrationProgress::MigratedUserProfilesUpTo(None)
+            }
+            MigrationProgress::MigratedUserProfilesUpTo(_) => {
+                MigrationProgress::MigratedUserTimestampsUpTo(None)
+            }
+            MigrationProgress::MigratedUserTimestampsUpTo(_) => {
+                MigrationProgress::CheckingTargetCanister
+            }
+            MigrationProgress::CheckingTargetCanister => MigrationProgress::Completed,
+            MigrationProgress::Completed => MigrationProgress::Completed,
+        }
+    }
 }

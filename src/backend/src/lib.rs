@@ -573,6 +573,16 @@ fn stats() -> Stats {
 fn bulk_up(data: Vec<u8>) {
     let parsed: MigrationChunk = decode_one(&data).expect("failed to parse the data");
     match parsed {
+        MigrationChunk::UserToken(tokens) => {
+            mutate_state(|state| {
+                for (principal, token) in tokens {
+                    state
+                        .user_token
+                        .insert(StoredPrincipal(principal), Candid(token))
+                        .expect("failed to insert user token");
+                }
+            });
+        }
         MigrationChunk::UserProfileUpdated(users) => {
             mutate_state(|state| {
                 for (principal, timestamp) in users {
@@ -616,6 +626,7 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum MigrationChunk {
+    UserToken(Vec<(Principal, Vec<UserToken>)>),
     UserProfileUpdated(Vec<(Principal, Timestamp)>),
 }
 
@@ -672,8 +683,39 @@ async fn step_migration() {
                         state.migration = Some(migration);
                     });
                 }
-                MigrationProgress::MigratedUserTokensUpTo(user_maybe) => {
+                MigrationProgress::MigratedUserTokensUpTo(token_maybe) => {
                     // Migrate user tokens
+                    let chunk_size = 5;
+                    let range = token_maybe
+                        .map(|token| (Bound::Excluded(StoredPrincipal(token)), Bound::Unbounded))
+                        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+                    let tokens = read_state(|state| {
+                        state
+                            .user_token
+                            .range(range)
+                            .take(chunk_size)
+                            .map(|(stored_principal, token)| (stored_principal.0, token.0))
+                            .collect::<Vec<_>>()
+                    });
+                    let last = tokens.last().map(|(k, _)| k);
+                    let next_state = last
+                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(last.clone())))
+                        .unwrap_or_else(|| MigrationProgress::MigratedUserTimestampsUpTo(None));
+                    let migration_data = MigrationChunk::UserToken(tokens);
+                    let migration_bytes =
+                        encode_one(migration_data).expect("failed to encode migration data");
+                    Service(migration.to)
+                        .bulk_up(migration_bytes)
+                        .await
+                        .expect("failed to bulk up"); // TODO: Handle errors
+
+                    mutate_state(|state| {
+                        migration.progress = next_state;
+                        state.migration = Some(migration);
+                    });
+                }
+                MigrationProgress::MigratedUserTimestampsUpTo(user_maybe) => {
+                    // Migrate user timestamps
                     let chunk_size = 5;
                     let range = user_maybe
                         .map(|user| (Bound::Excluded(StoredPrincipal(user)), Bound::Unbounded))
@@ -703,6 +745,7 @@ async fn step_migration() {
                         state.migration = Some(migration);
                     });
                 }
+                MigrationProgress::MigratedUserProfilesUpTo(_) => todo!(),
                 MigrationProgress::MigratedCustomTokensUpTo(_) => {
                     // TODO: Migrate custom tokens
                     mutate_state(|state| {
