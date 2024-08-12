@@ -4,19 +4,17 @@
 	import { isRouteTokens } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
-	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import { modalIcpReceive } from '$lib/derived/modal.derived';
 	import { getContext } from 'svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-
-	const modalId = Symbol();
+	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 
 	const { tokenStandard, open, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	const openReceive = async () => {
+	const openReceive = (modalId: symbol) => {
 		if ($tokenStandard === 'icp' || isRouteTokens($page)) {
 			modalStore.openIcpReceive(modalId);
 			return;
@@ -24,10 +22,10 @@
 
 		modalStore.openEthReceive(modalId);
 	};
+
+	const openModal = async (modalId: symbol) => await open(async () => openReceive(modalId));
 </script>
 
-<ReceiveButton on:click={async () => await open(openReceive)} />
-
-{#if $modalIcpReceive && $modalStore?.data === modalId}
-	<ReceiveAddressModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} />
-{/if}
+<ReceiveButtonWithModal open={openModal} isOpen={$modalIcpReceive}>
+	<ReceiveAddressModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} slot="modal" />
+</ReceiveButtonWithModal>

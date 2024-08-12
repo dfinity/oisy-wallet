@@ -2,7 +2,7 @@ use crate::upgrade::constants::BACKEND_V0_0_19_WASM_PATH;
 use crate::upgrade::types::UserTokenV0_0_19;
 use crate::utils::assertion::assert_tokens_data_eq;
 use crate::utils::mock::{CALLER, WEENUS_CONTRACT_ADDRESS, WEENUS_DECIMALS, WEENUS_SYMBOL};
-use crate::utils::pocketic::{setup_with_custom_wasm, update_call, upgrade_latest_wasm};
+use crate::utils::pocketic::{BackendBuilder, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::token::UserToken;
@@ -29,26 +29,24 @@ lazy_static! {
 #[test]
 fn test_upgrade_user_token() {
     // Deploy a released canister
-    let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_19_WASM_PATH, None);
+    let pic_setup = BackendBuilder::default()
+        .with_wasm(BACKEND_V0_0_19_WASM_PATH)
+        .deploy();
 
     // Add a user token
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "add_user_token",
-        PRE_UPGRADE_TOKEN.clone(),
-    );
+    let result = pic_setup.update::<()>(caller, "add_user_token", PRE_UPGRADE_TOKEN.clone());
 
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade_latest_wasm(&pic_setup, None)
+    pic_setup
+        .upgrade_latest_wasm(None)
         .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Get the list of token and check that it still contains the one we added before upgrade
-    let results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+    let results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserToken> = vec![POST_UPGRADE_TOKEN.clone()];
 
@@ -62,26 +60,24 @@ fn test_upgrade_user_token() {
 #[test]
 fn test_update_user_token_after_upgrade() {
     // Deploy a released canister
-    let pic_setup = setup_with_custom_wasm(BACKEND_V0_0_19_WASM_PATH, None);
+    let pic_setup = BackendBuilder::default()
+        .with_wasm(BACKEND_V0_0_19_WASM_PATH)
+        .deploy();
 
     // Add a user token
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "add_user_token",
-        PRE_UPGRADE_TOKEN.clone(),
-    );
+    let result = pic_setup.update::<()>(caller, "add_user_token", PRE_UPGRADE_TOKEN.clone());
 
     assert!(result.is_ok());
 
     // Upgrade canister with new wasm
-    upgrade_latest_wasm(&pic_setup, None)
+    pic_setup
+        .upgrade_latest_wasm(None)
         .unwrap_or_else(|e| panic!("Upgrade canister failed with error: {}", e));
 
     // Get the list of token and check that it still contains the one we added before upgrade
-    let results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+    let results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
     assert!(results.is_ok());
 
@@ -91,12 +87,11 @@ fn test_update_user_token_after_upgrade() {
         ..results.unwrap().swap_remove(0)
     };
 
-    let update_result =
-        update_call::<()>(&pic_setup, caller, "set_user_token", update_token.clone());
+    let update_result = pic_setup.update::<()>(caller, "set_user_token", update_token.clone());
 
     assert!(update_result.is_ok());
 
-    let updated_results = update_call::<Vec<UserToken>>(&pic_setup, caller, "list_user_tokens", ());
+    let updated_results = pic_setup.update::<Vec<UserToken>>(caller, "list_user_tokens", ());
 
     let expected_tokens: Vec<UserToken> = vec![update_token.clone_with_incremented_version()];
 
