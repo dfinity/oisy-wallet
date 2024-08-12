@@ -155,14 +155,13 @@ macro_rules! migrate {
             .map(|last| MigrationProgress::$progress_variant(Some(last)))
             .unwrap_or_else(|| $migration.progress.next());
         let migration_data = MigrationChunk::$chunk_variant($chunk);
-        let migration_bytes =
-            encode_one(migration_data).expect("failed to encode migration data");
+        let migration_bytes = encode_one(migration_data).expect("failed to encode migration data");
         Service($migration.to)
             .bulk_up(migration_bytes)
             .await
             .expect("failed to bulk up"); // TODO: Handle errors
         set_progress(next_state);
-    }
+    };
 }
 pub(crate) use migrate;
 
@@ -219,53 +218,21 @@ pub async fn step_migration() {
                     migrate!(migration, chunk, MigratedUserTokensUpTo, UserToken);
                 }
                 MigrationProgress::MigratedCustomTokensUpTo(last_custom_token) => {
-                    // Migrate custom tokens
                     let chunk = next_custom_token_chunk(last_custom_token);
-                    let last = chunk.last().map(|(k, _)| k).cloned();
-                    let next_state = last
-                        .map(|last| MigrationProgress::MigratedCustomTokensUpTo(Some(last)))
-                        .unwrap_or_else(|| migration.progress.next());
-                    let migration_data = MigrationChunk::CustomToken(chunk);
-                    let migration_bytes =
-                        encode_one(migration_data).expect("failed to encode migration data");
-                    Service(migration.to)
-                        .bulk_up(migration_bytes)
-                        .await
-                        .expect("failed to bulk up"); // TODO: Handle errors
-                    set_progress(next_state);
+                    migrate!(migration, chunk, MigratedCustomTokensUpTo, CustomToken);
                 }
                 MigrationProgress::MigratedUserTimestampsUpTo(user_maybe) => {
-                    // Migrate user timestamps
-                    let users = next_user_timestamp_chunk(user_maybe);
-                    let last = users.last().map(|(k, _)| k);
-                    let next_state = last
-                        .map(|last| MigrationProgress::MigratedUserTokensUpTo(Some(*last)))
-                        .unwrap_or_else(|| migration.progress.next());
-                    let migration_data = MigrationChunk::UserProfileUpdated(users);
-                    let migration_bytes =
-                        encode_one(migration_data).expect("failed to encode migration data");
-                    Service(migration.to)
-                        .bulk_up(migration_bytes)
-                        .await
-                        .expect("failed to bulk up"); // TODO: Handle errors
-
-                    set_progress(next_state);
+                    let chunk = next_user_timestamp_chunk(user_maybe);
+                    migrate!(
+                        migration,
+                        chunk,
+                        MigratedUserTimestampsUpTo,
+                        UserProfileUpdated
+                    );
                 }
                 MigrationProgress::MigratedUserProfilesUpTo(last_user_profile) => {
-                    // Migrate user profiles
                     let chunk = next_user_profile_chunk(last_user_profile);
-                    let last = chunk.last().map(|(k, _)| k).cloned();
-                    let next_state = last
-                        .map(|last| MigrationProgress::MigratedUserProfilesUpTo(Some(last)))
-                        .unwrap_or_else(|| migration.progress.next());
-                    let migration_data = MigrationChunk::UserProfile(chunk);
-                    let migration_bytes =
-                        encode_one(migration_data).expect("failed to encode migration data");
-                    Service(migration.to)
-                        .bulk_up(migration_bytes)
-                        .await
-                        .expect("failed to bulk up"); // TODO: Handle errors
-                    set_progress(next_state);
+                    migrate!(migration, chunk, MigratedUserProfilesUpTo, UserProfile);
                 }
                 MigrationProgress::CheckingTargetCanister => {
                     // TODO: Check that the target canister has all the data.
