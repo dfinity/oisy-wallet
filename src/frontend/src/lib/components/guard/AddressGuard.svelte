@@ -17,7 +17,7 @@
 			return;
 		}
 
-		const { success, err } = await certifyAddress($addressStore[ETHEREUM_TOKEN_ID].data.address);
+		const { success, err } = await certifyAddress($addressStore[ETHEREUM_TOKEN_ID].data);
 
 		if (success) {
 			// The address is valid
