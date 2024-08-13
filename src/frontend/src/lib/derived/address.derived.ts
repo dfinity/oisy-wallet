@@ -9,7 +9,7 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 );
 
 export const ethAddress: Readable<OptionEthAddress> = derived([addressStore], ([$addressStore]) =>
-	$addressStore?.[ETHEREUM_TOKEN_ID] === null ? null : $addressStore?.[ETHEREUM_TOKEN_ID].data
+	$addressStore?.[ETHEREUM_TOKEN_ID] === null ? null : $addressStore?.[ETHEREUM_TOKEN_ID]?.data
 );
 
 export const addressCertified: Readable<boolean> = derived(
