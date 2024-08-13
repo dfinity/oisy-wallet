@@ -4,7 +4,14 @@ import { AnonymousIdentity } from '@dfinity/agent';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { IcrcIndexNgCanister, IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { createAgent, fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import {
+	candidNatArrayToBigInt,
+	createAgent,
+	fromNullable,
+	isNullish,
+	jsonReplacer,
+	nonNullish
+} from '@dfinity/utils';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -80,7 +87,7 @@ const mapOptionalToken = (response) => {
 				acc = {
 					...acc,
 					...('Nat' in value &&
-						nonNullish(fromNullable(value.Nat)) && { fee: BigInt(fromNullable(value.Nat)) })
+						nonNullish(fromNullable(value.Nat)) && { fee: candidNatArrayToBigInt(value.Nat) })
 				};
 				break;
 			case IcrcMetadataResponseEntries.DECIMALS:
