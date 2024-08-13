@@ -9,7 +9,7 @@ import { createStore, del, get, set, update, type UseStore } from 'idb-keyval';
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
 export const idbAddressesStore = (tokenId: TokenId) =>
 	browser
-		? createStore(`oisy_${tokenId.description}_address`, `${tokenId.description}_address`)
+		? createStore(`oisy-${tokenId.description}-address`, `${tokenId.description}-address`)
 		: ({} as unknown as UseStore);
 
 const idbEthAddressesStore = idbAddressesStore(ETHEREUM_TOKEN_ID);
