@@ -1,5 +1,3 @@
-export type Address = string;
-
-export type EthAddress = Address;
+export type EthAddress = string;
 
 export type OptionEthAddress = EthAddress | undefined | null;
