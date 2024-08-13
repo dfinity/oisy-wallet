@@ -1,6 +1,7 @@
-import { addressStore } from '$lib/stores/address.store';
+import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
+import { addressStore, type AddressData } from '$lib/stores/address.store';
 import type { OptionEthAddress } from '$lib/types/address';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$addressStore]) =>
@@ -8,12 +9,16 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 );
 
 export const ethAddress: Readable<OptionEthAddress> = derived([addressStore], ([$addressStore]) =>
-	$addressStore === null ? null : $addressStore?.address
+	$addressStore?.[ETHEREUM_TOKEN_ID] === null ? null : $addressStore?.[ETHEREUM_TOKEN_ID].data
 );
 
 export const addressCertified: Readable<boolean> = derived(
 	[addressStore],
-	([$addressStore]) => $addressStore?.certified === true
+	([$addressStore]) =>
+		nonNullish($addressStore) &&
+		Object.values($addressStore).every(
+			(value) => value !== null && (value as AddressData).certified
+		)
 );
 
 export const addressNotCertified: Readable<boolean> = derived(

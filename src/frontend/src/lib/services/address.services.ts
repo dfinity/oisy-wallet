@@ -1,4 +1,4 @@
-import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks.env';
+import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 import { getEthAddress } from '$lib/api/backend.api';
 import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from '$lib/api/idb.api';
 import { addressStore } from '$lib/stores/address.store';
@@ -12,20 +12,22 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadAddress = async (): Promise<{ success: boolean }> => {
+	const tokenId = ETHEREUM_TOKEN_ID;
+
 	try {
 		const { identity } = get(authStore);
 
 		const address = await getEthAddress(identity);
-		addressStore.set({ address, certified: true });
+		addressStore.set({ tokenId, data: { data: address, certified: true } });
 
 		await saveEthAddressForFutureSignIn({ address, identity });
 	} catch (err: unknown) {
-		addressStore.reset();
+		addressStore.reset(tokenId);
 
 		toastsError({
 			msg: {
 				text: replacePlaceholders(get(i18n).init.error.loading_address, {
-					$symbol: ETHEREUM_NETWORK_SYMBOL
+					$symbol: tokenId.description ?? ''
 				})
 			},
 			err
@@ -60,6 +62,8 @@ const saveEthAddressForFutureSignIn = async ({
 };
 
 export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
+	const tokenId = ETHEREUM_TOKEN_ID;
+
 	try {
 		const { identity } = get(authStore);
 
@@ -77,7 +81,7 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 		}
 
 		const { address } = idbEthAddress;
-		addressStore.set({ address, certified: false });
+		addressStore.set({ tokenId, data: { data: address, certified: false } });
 
 		await updateIdbEthAddressLastUsage(identity.getPrincipal());
 	} catch (err: unknown) {
@@ -95,6 +99,8 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 export const certifyAddress = async (
 	address: string
 ): Promise<{ success: boolean; err?: string }> => {
+	const tokenId = ETHEREUM_TOKEN_ID;
+
 	try {
 		const { identity } = get(authStore);
 
@@ -113,11 +119,11 @@ export const certifyAddress = async (
 			};
 		}
 
-		addressStore.set({ address, certified: true });
+		addressStore.set({ tokenId, data: { data: address, certified: true } });
 
 		await updateIdbEthAddressLastUsage(identity.getPrincipal());
 	} catch (err: unknown) {
-		addressStore.reset();
+		addressStore.reset(tokenId);
 
 		return { success: false, err: 'Error while loading the ETH address.' };
 	}
