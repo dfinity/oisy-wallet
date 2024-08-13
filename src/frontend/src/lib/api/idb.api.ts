@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { IDB_ADDRESS_STORE, IDB_ETH_ADDRESS_STORE } from '$lib/constants/idb.constants';
-import type { IdbAddress, IdbParams } from '$lib/types/idb';
+import type { IdbAddress } from '$lib/types/idb';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { createStore, del, get, set, update, type UseStore } from 'idb-keyval';
@@ -9,13 +9,27 @@ import { createStore, del, get, set, update, type UseStore } from 'idb-keyval';
 const oisyAddressesStore = (storeName: string) =>
 	browser ? createStore(IDB_ADDRESS_STORE, storeName) : ({} as unknown as UseStore);
 
+const oisyEthAddressesStore = oisyAddressesStore(IDB_ETH_ADDRESS_STORE);
+
 const setIdbAddress = ({
 	address,
 	principal,
 	store
-}: { address: IdbAddress } & IdbParams): Promise<void> => set(principal.toText(), address, store);
+}: {
+	address: IdbAddress;
+	principal: Principal;
+	store: UseStore;
+}): Promise<void> => set(principal.toText(), address, store);
 
-const updateIdbAddressLastUsage = ({ principal, store }: IdbParams): Promise<void> =>
+export const setIdbEthAddress = ({
+	address,
+	principal
+}: {
+	principal: Principal;
+	address: IdbAddress;
+}): Promise<void> => setIdbAddress({ address, principal, store: oisyEthAddressesStore });
+
+export const updateIdbEthAddressLastUsage = (principal: Principal): Promise<void> =>
 	update(
 		principal.toText(),
 		(address) => {
@@ -28,30 +42,11 @@ const updateIdbAddressLastUsage = ({ principal, store }: IdbParams): Promise<voi
 				lastUsedTimestamp: Date.now()
 			};
 		},
-		store
+		oisyEthAddressesStore
 	);
 
-const getIdbAddress = ({ principal, store }: IdbParams): Promise<IdbAddress | undefined> =>
-	get(principal.toText(), store);
-
-const deleteIdbAddress = ({ principal, store }: IdbParams): Promise<void> =>
-	del(principal.toText(), store);
-
-const oisyEthAddressesStore = oisyAddressesStore(IDB_ETH_ADDRESS_STORE);
-
-export const setIdbEthAddress = ({
-	address,
-	principal
-}: {
-	principal: Principal;
-	address: IdbAddress;
-}): Promise<void> => setIdbAddress({ address, principal, store: oisyEthAddressesStore });
-
-export const updateIdbEthAddressLastUsage = (principal: Principal): Promise<void> =>
-	updateIdbAddressLastUsage({ principal, store: oisyEthAddressesStore });
-
 export const getIdbEthAddress = (principal: Principal): Promise<IdbAddress | undefined> =>
-	getIdbAddress({ principal, store: oisyEthAddressesStore });
+	get(principal.toText(), oisyEthAddressesStore);
 
 export const deleteIdbEthAddress = (principal: Principal): Promise<void> =>
-	deleteIdbAddress({ principal, store: oisyEthAddressesStore });
+	del(principal.toText(), oisyEthAddressesStore);
