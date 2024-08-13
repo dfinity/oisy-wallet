@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { IDB_ADDRESS_STORE, IDB_ETH_ADDRESS_STORE } from '$lib/constants/idb.constants';
-import type { IdbAddress } from '$lib/types/idb';
+import type { IdbEthAddress } from '$lib/types/idb';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { createStore, del, get, set, update, type UseStore } from 'idb-keyval';
@@ -11,23 +11,13 @@ const oisyAddressesStore = (storeName: string) =>
 
 const oisyEthAddressesStore = oisyAddressesStore(IDB_ETH_ADDRESS_STORE);
 
-const setIdbAddress = ({
-	address,
-	principal,
-	store
-}: {
-	address: IdbAddress;
-	principal: Principal;
-	store: UseStore;
-}): Promise<void> => set(principal.toText(), address, store);
-
 export const setIdbEthAddress = ({
 	address,
 	principal
 }: {
 	principal: Principal;
-	address: IdbAddress;
-}): Promise<void> => setIdbAddress({ address, principal, store: oisyEthAddressesStore });
+	address: IdbEthAddress;
+}): Promise<void> => set(principal.toText(), address, oisyEthAddressesStore);
 
 export const updateIdbEthAddressLastUsage = (principal: Principal): Promise<void> =>
 	update(
@@ -45,7 +35,7 @@ export const updateIdbEthAddressLastUsage = (principal: Principal): Promise<void
 		oisyEthAddressesStore
 	);
 
-export const getIdbEthAddress = (principal: Principal): Promise<IdbAddress | undefined> =>
+export const getIdbEthAddress = (principal: Principal): Promise<IdbEthAddress | undefined> =>
 	get(principal.toText(), oisyEthAddressesStore);
 
 export const deleteIdbEthAddress = (principal: Principal): Promise<void> =>
