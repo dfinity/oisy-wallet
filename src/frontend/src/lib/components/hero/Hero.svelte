@@ -1,13 +1,12 @@
 <script lang="ts">
 	import Header from '$lib/components/hero/Header.svelte';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
-	import { authSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import ThreeBackground from '$lib/components/ui/ThreeBackground.svelte';
 	import { slide, fade } from 'svelte/transition';
-	import { isNullish } from '@dfinity/utils';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -22,17 +21,28 @@
 	$: heroContent = usdTotal || summary;
 
 	let isCollapsed = false;
-	let preventScrollHandler = false;
+	let scrollHandlerDisabled = false;
+	let y = 0;
+	let lastY = 0;
+
+	const enableScrollHandler = () => (scrollHandlerDisabled = false);
+	const disableScrollHandler = () => (scrollHandlerDisabled = true);
 
 	const handleScroll = () => {
-		if (preventScrollHandler) {
+		const dy = lastY - y;
+		lastY = y;
+
+		if (scrollHandlerDisabled) {
 			return;
 		}
-		isCollapsed = $authSignedIn && (isNullish(window.scrollY) || window.scrollY > 0);
+
+		isCollapsed = $authSignedIn && dy < 0;
 	};
+
+	$: y, $authSignedIn, handleScroll();
 </script>
 
-<svelte:window on:wheel={handleScroll} on:touchmove={handleScroll} />
+<svelte:window bind:scrollY={y} />
 
 <div
 	class={`hero ${isCollapsed ? '' : 'pb-4 md:pb-6'} ${background} sticky top-0 z-[var(--overlay-z-index)]`}
@@ -49,10 +59,10 @@
 		<article
 			class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main 2xl:mt-[-70px] items-center"
 			transition:slide={{ duration: 250 }}
-			on:introstart={() => (preventScrollHandler = true)}
-			on:introend={() => (preventScrollHandler = false)}
-			on:outrostart={() => (preventScrollHandler = true)}
-			on:outroend={() => (preventScrollHandler = false)}
+			on:introstart={disableScrollHandler}
+			on:introend={enableScrollHandler}
+			on:outrostart={disableScrollHandler}
+			on:outroend={enableScrollHandler}
 		>
 			<Alpha />
 
