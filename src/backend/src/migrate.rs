@@ -17,7 +17,7 @@ use std::ops::Bound;
 
 /// A chunk of data to be migrated.
 ///
-/// Note: Given that the migration moves data types that may be private, data is transferred with candid type Vec<u8>
+/// Note: Given that the migration moves data types that may be private, data is transferred with candid type `Vec<u8>`
 /// rather than littering the .did file with private types.
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum MigrationChunk {

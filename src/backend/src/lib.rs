@@ -98,7 +98,7 @@ pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
 /// Reads the internal canister configuration, normally set at canister install or upgrade.
 ///
 /// # Panics
-/// - If the config is not initialized.
+/// - If the `STATE.config` is not initialized.
 pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     read_state(|state| {
         f(state
@@ -109,7 +109,7 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
-/// Modifies config, given the state.
+/// Modifies `state.config` with the provided function.
 fn modify_state_config(state: &mut State, f: impl FnOnce(&mut Config)) {
     let config: &Candid<Config> = state
         .config
