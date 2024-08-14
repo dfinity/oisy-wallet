@@ -7,6 +7,7 @@ import {
 import { trackEvent } from '$lib/services/analytics.services';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
@@ -46,7 +47,7 @@ export const signIn = async (
 		});
 
 		toastsError({
-			msg: { text: `Something went wrong while sign-in.` },
+			msg: { text: get(i18n).auth.error.error_while_signing_in },
 			err
 		});
 
@@ -67,12 +68,12 @@ export const warnSignOut = (text: string): Promise<void> =>
 	});
 
 export const nullishSignOut = (): Promise<void> =>
-	warnSignOut('You are not signed in. Please sign in to continue.');
+	warnSignOut(get(i18n).auth.warning.not_signed_in);
 
 export const idleSignOut = (): Promise<void> =>
 	logout({
 		msg: {
-			text: 'You have been logged out because your session has expired.',
+			text: get(i18n).auth.warning.session_expired,
 			level: 'warn'
 		},
 		clearStorages: false
