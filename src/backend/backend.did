@@ -80,10 +80,12 @@ type ListUsersResponse = record {
   matches_max_length : nat64;
 };
 type MigrationProgress = variant {
-  MigratedUserTokensUpTo : principal;
+  MigratedUserTokensUpTo : opt principal;
+  MigratedUserTimestampsUpTo : opt principal;
   TargetPreCheckOk;
-  MigratedCustomTokensUpTo : principal;
+  MigratedCustomTokensUpTo : opt principal;
   Locked;
+  MigratedUserProfilesUpTo : opt record { nat64; principal };
   CheckingTargetCanister;
   TargetLocked;
   Completed;

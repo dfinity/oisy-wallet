@@ -140,10 +140,12 @@ export const idlFactory = ({ IDL }) => {
 		matches_max_length: IDL.Nat64
 	});
 	const MigrationProgress = IDL.Variant({
-		MigratedUserTokensUpTo: IDL.Principal,
+		MigratedUserTokensUpTo: IDL.Opt(IDL.Principal),
+		MigratedUserTimestampsUpTo: IDL.Opt(IDL.Principal),
 		TargetPreCheckOk: IDL.Null,
-		MigratedCustomTokensUpTo: IDL.Principal,
+		MigratedCustomTokensUpTo: IDL.Opt(IDL.Principal),
 		Locked: IDL.Null,
+		MigratedUserProfilesUpTo: IDL.Opt(IDL.Tuple(IDL.Nat64, IDL.Principal)),
 		CheckingTargetCanister: IDL.Null,
 		TargetLocked: IDL.Null,
 		Completed: IDL.Null,
