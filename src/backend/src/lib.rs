@@ -575,6 +575,7 @@ fn stats() -> Stats {
 ///
 /// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur only if a migration failed and had to be restarted.
 #[update(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
 fn bulk_up(data: Vec<u8>) {
     migrate::bulk_up(&data);
 }
