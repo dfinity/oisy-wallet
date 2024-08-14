@@ -28,7 +28,7 @@
 		if (preventScrollHandler) {
 			return;
 		}
-		isCollapsed = isNullish(window.scrollY) || window.scrollY > 0;
+		isCollapsed = $authSignedIn && (isNullish(window.scrollY) || window.scrollY > 0);
 	};
 </script>
 
@@ -38,14 +38,7 @@
 	class={`hero ${isCollapsed ? '' : 'pb-4 md:pb-6'} ${background} sticky top-0 z-[var(--overlay-z-index)]`}
 >
 	{#if $pseudoNetworkChainFusion && !isCollapsed}
-		<div
-			in:fade={{ duration: 250 }}
-			out:fade={{ duration: 250 }}
-			on:introstart={() => (preventScrollHandler = true)}
-			on:introend={() => (preventScrollHandler = false)}
-			on:outrostart={() => (preventScrollHandler = true)}
-			on:outroend={() => (preventScrollHandler = false)}
-		>
+		<div in:fade={{ duration: 250 }} out:fade={{ duration: 250 }}>
 			<ThreeBackground />
 		</div>
 	{/if}
