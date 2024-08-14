@@ -3,11 +3,10 @@
 	import { isNullish } from '@dfinity/utils';
 	import { certifyAddress } from '$lib/services/address.services';
 	import { warnSignOut } from '$lib/services/auth.services';
-	import { addressCertified } from '$lib/derived/address.derived';
-	import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
+	import { addressCertified, ethAddress } from '$lib/derived/address.derived';
 
 	const validateAddress = async () => {
-		if (isNullish($addressStore?.[ETHEREUM_TOKEN_ID])) {
+		if (isNullish($ethAddress)) {
 			// No address is loaded, we don't have to verify it
 			return;
 		}
@@ -17,7 +16,7 @@
 			return;
 		}
 
-		const { success, err } = await certifyAddress($addressStore[ETHEREUM_TOKEN_ID].data);
+		const { success, err } = await certifyAddress($ethAddress);
 
 		if (success) {
 			// The address is valid
