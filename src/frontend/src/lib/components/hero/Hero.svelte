@@ -21,28 +21,36 @@
 	$: heroContent = usdTotal || summary;
 
 	let isCollapsed = false;
-	let scrollHandlerDisabled = false;
+
+	const setCollapse = (collapse: boolean) => {
+		if (collapseDisabled) {
+			return;
+		}
+		isCollapsed = $authSignedIn && collapse;
+	};
+
+	let collapseDisabled = false;
+	const enableScrollHandler = () => (collapseDisabled = false);
+	const disableScrollHandler = () => (collapseDisabled = true);
+
 	let y = 0;
 	let lastY = 0;
 
-	const enableScrollHandler = () => (scrollHandlerDisabled = false);
-	const disableScrollHandler = () => (scrollHandlerDisabled = true);
-
-	const handleScroll = () => {
+	const handleChangeY = () => {
 		const dy = lastY - y;
 		lastY = y;
-
-		if (scrollHandlerDisabled) {
-			return;
-		}
-
-		isCollapsed = $authSignedIn && dy < 0;
+		setCollapse(dy < 0);
 	};
 
-	$: y, $authSignedIn, handleScroll();
+	$: y, handleChangeY();
+
+	// This part is necessary for non-touch devices when the scrolling is disabled once the header is
+	// collapsed (the content would fit the entire window without need of a scrollbar). In such cases,
+	// variable 'y' would not be refreshed since the user would try to scroll but can not.
+	const handleScroll = ({ deltaY }: WheelEvent) => setCollapse(deltaY > 0);
 </script>
 
-<svelte:window bind:scrollY={y} />
+<svelte:window bind:scrollY={y} on:wheel={handleScroll} />
 
 <div
 	class={`hero ${isCollapsed ? '' : 'pb-4 md:pb-6'} ${background} sticky top-0 z-[var(--overlay-z-index)]`}
