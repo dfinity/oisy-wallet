@@ -222,37 +222,37 @@ impl MigrationProgress {
     ///
     /// Prior art:
     /// - There is an `enum_iterator` crate, however it deals only with simple enums
-    /// without variant fields.  In this implementation, `next()` always uses the default value for
-    /// the new field, which is always None.  `next()` does NOT step through the values of the
-    /// variant field.
+    ///   without variant fields.  In this implementation, `next()` always uses the default value for
+    ///   the new field, which is always None.  `next()` does NOT step through the values of the
+    ///   variant field.
     /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not on the
     ///   enum itself, so stepping from one variant to the next is not straightforward.
     ///
     /// Note: The next state after Completed is Completed, so the the iterator will run
-    /// indefinitely.
+    /// indefinitely.  In our case returning an option and ending with None would be fine but needs
+    /// additional code that we don't need.
     #[must_use]
     pub fn next(&self) -> Self {
         match self {
             MigrationProgress::Pending => MigrationProgress::Locked,
             MigrationProgress::Locked => MigrationProgress::TargetLocked,
             MigrationProgress::TargetLocked => MigrationProgress::TargetPreCheckOk,
-            MigrationProgress::TargetPreCheckOk => {
-                MigrationProgress::MigratedUserTokensUpTo(Default::default())
-            }
+            MigrationProgress::TargetPreCheckOk => MigrationProgress::MigratedUserTokensUpTo(None),
             MigrationProgress::MigratedUserTokensUpTo(_) => {
-                MigrationProgress::MigratedCustomTokensUpTo(Default::default())
+                MigrationProgress::MigratedCustomTokensUpTo(None)
             }
             MigrationProgress::MigratedCustomTokensUpTo(_) => {
-                MigrationProgress::MigratedUserProfilesUpTo(Default::default())
+                MigrationProgress::MigratedUserProfilesUpTo(None)
             }
             MigrationProgress::MigratedUserProfilesUpTo(_) => {
-                MigrationProgress::MigratedUserTimestampsUpTo(Default::default())
+                MigrationProgress::MigratedUserTimestampsUpTo(None)
             }
             MigrationProgress::MigratedUserTimestampsUpTo(_) => {
                 MigrationProgress::CheckingTargetCanister
             }
-            MigrationProgress::CheckingTargetCanister => MigrationProgress::Completed,
-            MigrationProgress::Completed => MigrationProgress::Completed,
+            MigrationProgress::CheckingTargetCanister | MigrationProgress::Completed => {
+                MigrationProgress::Completed
+            }
         }
     }
 }
