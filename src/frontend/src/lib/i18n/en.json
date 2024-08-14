@@ -522,8 +522,8 @@
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
-			"twin_token_received": "$twinToken received",
 			"twin_token_sent": "$twinToken sent",
+			"twin_token_converted": "Converted from $twinToken",
 			"receiving_twin_token": "Receiving $twinToken",
 			"sending_twin_token": "Sending $twinToken",
 			"sending_twin_token_failed": "Sending $twinToken failed",

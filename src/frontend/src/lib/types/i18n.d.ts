@@ -455,8 +455,8 @@ interface I18nTransaction {
 	status: { included: string; safe: string; finalised: string };
 	label: {
 		reimbursement: string;
-		twin_token_received: string;
 		twin_token_sent: string;
+		twin_token_converted: string;
 		receiving_twin_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;
