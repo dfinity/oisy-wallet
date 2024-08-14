@@ -52,6 +52,7 @@ mod bitcoin_utils;
 mod config;
 mod guards;
 mod impls;
+mod migrate;
 mod oisy_user;
 mod token;
 mod types;
@@ -568,6 +569,12 @@ fn set_guards(guards: Guards) {
 #[query(guard = "caller_is_allowed")]
 fn stats() -> Stats {
     read_state(|s| Stats::from(s))
+}
+
+/// Bulk uploads data to this canister.
+#[update(guard = "caller_is_allowed")]
+fn bulk_up(data: Vec<u8>) {
+    migrate::bulk_up(&data);
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
