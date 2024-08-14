@@ -35,9 +35,9 @@ use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
-    ListUsersResponse, OisyUser, Stats, UserProfile,
+    ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, Guards, InitArg, Migration, MigrationReport};
+use shared::types::{Arg, Config, Guards, InitArg, Migration, MigrationReport, Stats};
 use std::cell::RefCell;
 use std::str::FromStr;
 use types::{
