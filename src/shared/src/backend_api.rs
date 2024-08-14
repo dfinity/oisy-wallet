@@ -1,9 +1,8 @@
 //! Selected backend canister API signatures.
 #![allow(clippy::missing_errors_doc)] // The code is auto-generated.  Baybe `didc bind` will preserve comments in future.
-use crate::types::{user_profile, Guards};
+use crate::types::{Guards, Stats};
 use candid::{self, Principal};
 use ic_cdk::api::call::CallResult as Result;
-use user_profile::Stats;
 
 /// Client for the backend canister, implementing a subset of the API.
 ///
