@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Header from '$lib/components/hero/Header.svelte';
 	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
