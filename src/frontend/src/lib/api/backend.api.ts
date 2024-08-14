@@ -9,13 +9,13 @@ import type {
 	UserToken
 } from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
-import type { BtcAddress, EthAddress } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
 import { toNullable, type QueryParams } from '@dfinity/utils';
 
-const getBtcAddress = async ({
+export const getBtcAddress = async ({
 	identity,
 	network
 }: {
@@ -25,12 +25,6 @@ const getBtcAddress = async ({
 	const { caller_btc_address } = await getBackendActor({ identity });
 	return caller_btc_address(network);
 };
-
-export const getBtcAddressMainnet = async (identity: OptionIdentity): Promise<BtcAddress> =>
-	getBtcAddress({ identity, network: { mainnet: null } });
-
-export const getBtcAddressTestnet = async (identity: OptionIdentity): Promise<BtcAddress> =>
-	getBtcAddress({ identity, network: { testnet: null } });
 
 export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
 	const { caller_eth_address } = await getBackendActor({ identity });
