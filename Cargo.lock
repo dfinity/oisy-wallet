@@ -3829,6 +3829,8 @@ dependencies = [
  "ic-verifiable-credentials",
  "serde",
  "serde_bytes",
+ "strum",
+ "strum_macros",
 ]
 
 [[package]]
