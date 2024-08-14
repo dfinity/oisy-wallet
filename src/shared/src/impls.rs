@@ -220,10 +220,13 @@ impl MigrationProgress {
     /// Note: A given phase, such as migrating a `BTreeMap`, may need multiple steps.
     /// The code for that phase will have to keep track of those steps by means of the data in the variant.
     ///
-    /// Prior art: There is an `enum_iterator` crate, however it deals only with simple enums
+    /// Prior art:
+    /// - There is an `enum_iterator` crate, however it deals only with simple enums
     /// without variant fields.  In this implementation, `next()` always uses the default value for
     /// the new field, which is always None.  `next()` does NOT step through the values of the
     /// variant field.
+    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not on the
+    ///   enum itself, so stepping from one variant to the next is not straightforward.
     ///
     /// Note: The next state after Completed is Completed, so the the iterator will run
     /// indefinitely.
