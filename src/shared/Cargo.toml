@@ -13,4 +13,6 @@ ic-metrics-encoder = { workspace = true }
 ic-verifiable-credentials = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
+strum = { workspace = true }
+strum_macros = { workspace = true }
 

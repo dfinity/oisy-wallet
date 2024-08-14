@@ -89,10 +89,14 @@ export interface ListUsersResponse {
 	matches_max_length: bigint;
 }
 export type MigrationProgress =
-	| { MigratedUserTokensUpTo: Principal }
+	| {
+			MigratedUserTokensUpTo: [] | [Principal];
+	  }
+	| { MigratedUserTimestampsUpTo: [] | [Principal] }
 	| { TargetPreCheckOk: null }
-	| { MigratedCustomTokensUpTo: Principal }
+	| { MigratedCustomTokensUpTo: [] | [Principal] }
 	| { Locked: null }
+	| { MigratedUserProfilesUpTo: [] | [[bigint, Principal]] }
 	| { CheckingTargetCanister: null }
 	| { TargetLocked: null }
 	| { Completed: null }

@@ -4,13 +4,15 @@ use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
 };
 use crate::types::{
-    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationReport, Timestamp,
-    TokenVersion, Version,
+    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
+    Timestamp, TokenVersion, Version,
 };
 use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use std::collections::BTreeMap;
 use std::fmt;
+#[cfg(test)]
+use strum::IntoEnumIterator;
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -212,4 +214,63 @@ fn test_api_enabled() {
     assert_eq!(ApiEnabled::ReadOnly.writable(), false);
     assert_eq!(ApiEnabled::Disabled.readable(), false);
     assert_eq!(ApiEnabled::Disabled.writable(), false);
+}
+
+impl MigrationProgress {
+    /// The next phase in the migration process.
+    ///
+    /// Note: A given phase, such as migrating a `BTreeMap`, may need multiple steps.
+    /// The code for that phase will have to keep track of those steps by means of the data in the variant.
+    ///
+    /// Prior art:
+    /// - There is an `enum_iterator` crate, however it deals only with simple enums
+    ///   without variant fields.  In this implementation, `next()` always uses the default value for
+    ///   the new field, which is always None.  `next()` does NOT step through the values of the
+    ///   variant field.
+    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not on the
+    ///   enum itself, so stepping from one variant to the next is not straightforward.
+    ///
+    /// Note: The next state after Completed is Completed, so the the iterator will run
+    /// indefinitely.  In our case returning an option and ending with None would be fine but needs
+    /// additional code that we don't need.
+    #[must_use]
+    pub fn next(&self) -> Self {
+        match self {
+            MigrationProgress::Pending => MigrationProgress::Locked,
+            MigrationProgress::Locked => MigrationProgress::TargetLocked,
+            MigrationProgress::TargetLocked => MigrationProgress::TargetPreCheckOk,
+            MigrationProgress::TargetPreCheckOk => MigrationProgress::MigratedUserTokensUpTo(None),
+            MigrationProgress::MigratedUserTokensUpTo(_) => {
+                MigrationProgress::MigratedCustomTokensUpTo(None)
+            }
+            MigrationProgress::MigratedCustomTokensUpTo(_) => {
+                MigrationProgress::MigratedUserTimestampsUpTo(None)
+            }
+            MigrationProgress::MigratedUserTimestampsUpTo(_) => {
+                MigrationProgress::MigratedUserProfilesUpTo(None)
+            }
+            MigrationProgress::MigratedUserProfilesUpTo(_) => {
+                MigrationProgress::CheckingTargetCanister
+            }
+            MigrationProgress::CheckingTargetCanister | MigrationProgress::Completed => {
+                MigrationProgress::Completed
+            }
+        }
+    }
+}
+
+// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at Completed.
+#[test]
+fn next_matches_strum_iter() {
+    let mut iter = MigrationProgress::iter();
+    let mut next = MigrationProgress::Pending;
+    while next != MigrationProgress::Completed {
+        assert_eq!(iter.next(), Some(next), "iter.next() != Some(next)");
+        next = next.next();
+    }
+    assert_eq!(
+        next,
+        next.next(),
+        "Once completed, it should stay completed"
+    );
 }
