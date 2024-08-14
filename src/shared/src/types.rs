@@ -1,7 +1,6 @@
 use candid::{CandidType, Deserialize, Principal};
 use ic_cdk_timers::TimerId;
 use std::fmt::Debug;
-use strum_macros::EnumIter;
 
 pub type Timestamp = u64;
 
@@ -241,7 +240,7 @@ pub mod user_profile {
 }
 
 /// The current state of progress of a user data migration.
-#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumIter)]
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub enum MigrationProgress {
     // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
     // TODO: Remove warning once the migration has been implemented.

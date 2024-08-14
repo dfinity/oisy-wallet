@@ -4,8 +4,8 @@ use crate::types::user_profile::{
     AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
 };
 use crate::types::{
-    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationReport, Timestamp,
-    TokenVersion, Version,
+    ApiEnabled, Config, CredentialType, InitArg, Migration, MigrationProgress, MigrationReport,
+    Timestamp, TokenVersion, Version,
 };
 use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
@@ -212,4 +212,44 @@ fn test_api_enabled() {
     assert_eq!(ApiEnabled::ReadOnly.writable(), false);
     assert_eq!(ApiEnabled::Disabled.readable(), false);
     assert_eq!(ApiEnabled::Disabled.writable(), false);
+}
+
+impl MigrationProgress {
+    /// The next phase in the migration process.
+    ///
+    /// Note: A given phase, such as migrating a `BTreeMap`, may need multiple steps.
+    /// The code for that phase will have to keep track of those steps by means of the data in the variant.
+    ///
+    /// Prior art: There is an `enum_iterator` crate, however it deals only with simple enums
+    /// without variant fields.  In this implementation, `next()` always uses the default value for
+    /// the new field, which is always None.  `next()` does NOT step through the values of the
+    /// variant field.
+    ///
+    /// Note: The next state after Completed is Completed, so the the iterator will run
+    /// indefinitely.
+    #[must_use]
+    pub fn next(&self) -> Self {
+        match self {
+            MigrationProgress::Pending => MigrationProgress::Locked,
+            MigrationProgress::Locked => MigrationProgress::TargetLocked,
+            MigrationProgress::TargetLocked => MigrationProgress::TargetPreCheckOk,
+            MigrationProgress::TargetPreCheckOk => {
+                MigrationProgress::MigratedUserTokensUpTo(Default::default())
+            }
+            MigrationProgress::MigratedUserTokensUpTo(_) => {
+                MigrationProgress::MigratedCustomTokensUpTo(Default::default())
+            }
+            MigrationProgress::MigratedCustomTokensUpTo(_) => {
+                MigrationProgress::MigratedUserProfilesUpTo(Default::default())
+            }
+            MigrationProgress::MigratedUserProfilesUpTo(_) => {
+                MigrationProgress::MigratedUserTimestampsUpTo(Default::default())
+            }
+            MigrationProgress::MigratedUserTimestampsUpTo(_) => {
+                MigrationProgress::CheckingTargetCanister
+            }
+            MigrationProgress::CheckingTargetCanister => MigrationProgress::Completed,
+            MigrationProgress::Completed => MigrationProgress::Completed,
+        }
+    }
 }
