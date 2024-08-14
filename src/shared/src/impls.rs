@@ -11,6 +11,8 @@ use candid::Principal;
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use std::collections::BTreeMap;
 use std::fmt;
+#[cfg(test)]
+use strum::IntoEnumIterator;
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -242,12 +244,12 @@ impl MigrationProgress {
                 MigrationProgress::MigratedCustomTokensUpTo(None)
             }
             MigrationProgress::MigratedCustomTokensUpTo(_) => {
-                MigrationProgress::MigratedUserProfilesUpTo(None)
-            }
-            MigrationProgress::MigratedUserProfilesUpTo(_) => {
                 MigrationProgress::MigratedUserTimestampsUpTo(None)
             }
             MigrationProgress::MigratedUserTimestampsUpTo(_) => {
+                MigrationProgress::MigratedUserProfilesUpTo(None)
+            }
+            MigrationProgress::MigratedUserProfilesUpTo(_) => {
                 MigrationProgress::CheckingTargetCanister
             }
             MigrationProgress::CheckingTargetCanister | MigrationProgress::Completed => {
@@ -255,4 +257,20 @@ impl MigrationProgress {
             }
         }
     }
+}
+
+// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at Completed.
+#[test]
+fn next_matches_strum_iter() {
+    let mut iter = MigrationProgress::iter();
+    let mut next = MigrationProgress::Pending;
+    while next != MigrationProgress::Completed {
+        assert_eq!(iter.next(), Some(next), "iter.next() != Some(next)");
+        next = next.next();
+    }
+    assert_eq!(
+        next,
+        next.next(),
+        "Once completed, it should stay completed"
+    );
 }
