@@ -231,13 +231,6 @@ pub mod user_profile {
     pub enum GetUserProfileError {
         NotFound,
     }
-
-    #[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
-    pub struct Stats {
-        pub user_profile_count: u64,
-        pub user_token_count: u64,
-        pub custom_token_count: u64,
-    }
 }
 
 /// The current state of progress of a user data migration.
