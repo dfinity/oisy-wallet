@@ -1,18 +1,17 @@
 import { browser } from '$app/environment';
-import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
+import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks.env';
 import type { IdbEthAddress } from '$lib/types/idb';
-import type { TokenId } from '$lib/types/token';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { createStore, del, get, set, update, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.
-export const idbAddressesStore = (tokenId: TokenId) =>
+export const idbAddressesStore = (identifier: string) =>
 	browser
-		? createStore(`oisy-${tokenId.description}-address`, `${tokenId.description}-address`)
+		? createStore(`oisy-${identifier}-address`, `${identifier}-address`)
 		: ({} as unknown as UseStore);
 
-const idbEthAddressesStore = idbAddressesStore(ETHEREUM_TOKEN_ID);
+const idbEthAddressesStore = idbAddressesStore(ETHEREUM_NETWORK_SYMBOL.toLowerCase());
 
 export const setIdbEthAddress = ({
 	address,
