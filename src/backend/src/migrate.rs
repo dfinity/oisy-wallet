@@ -1,19 +1,12 @@
 use crate::{
-    modify_state_config, mutate_state, read_state,
+    mutate_state,
     types::{Candid, StoredPrincipal},
 };
-use candid::{decode_one, encode_one, CandidType, Principal};
-use ic_cdk_timers::clear_timer;
-use pretty_assertions::assert_eq;
+use candid::{decode_one, CandidType, Principal};
 use serde::Deserialize;
-use shared::{
-    backend_api::Service,
-    types::{
-        custom_token::CustomToken, token::UserToken, user_profile::StoredUserProfile, ApiEnabled,
-        Guards, MigrationProgress, Timestamp,
-    },
+use shared::types::{
+    custom_token::CustomToken, token::UserToken, user_profile::StoredUserProfile, Timestamp,
 };
-use std::ops::Bound;
 
 /// A chunk of data to be migrated.
 ///
