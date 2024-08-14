@@ -219,21 +219,31 @@ impl MigrationProgress {
     ///
     /// Note: A given phase, such as migrating a `BTreeMap`, may need multiple steps.
     /// The code for that phase will have to keep track of those steps by means of the data in the variant.
+    ///
+    /// Prior art: There is an `enum_iterator` crate, however it deals only with simple enums
+    /// without variant fields.  In this implementation, `next()` always uses the default value for
+    /// the new field, which is always None.  `next()` does NOT step through the values of the
+    /// variant field.
+    ///
+    /// Note: The next state after Completed is Completed, so the the iterator will run
+    /// indefinitely.
     #[must_use]
     pub fn next(&self) -> Self {
         match self {
             MigrationProgress::Pending => MigrationProgress::Locked,
             MigrationProgress::Locked => MigrationProgress::TargetLocked,
             MigrationProgress::TargetLocked => MigrationProgress::TargetPreCheckOk,
-            MigrationProgress::TargetPreCheckOk => MigrationProgress::MigratedUserTokensUpTo(None),
+            MigrationProgress::TargetPreCheckOk => {
+                MigrationProgress::MigratedUserTokensUpTo(Default::default())
+            }
             MigrationProgress::MigratedUserTokensUpTo(_) => {
-                MigrationProgress::MigratedCustomTokensUpTo(None)
+                MigrationProgress::MigratedCustomTokensUpTo(Default::default())
             }
             MigrationProgress::MigratedCustomTokensUpTo(_) => {
-                MigrationProgress::MigratedUserProfilesUpTo(None)
+                MigrationProgress::MigratedUserProfilesUpTo(Default::default())
             }
             MigrationProgress::MigratedUserProfilesUpTo(_) => {
-                MigrationProgress::MigratedUserTimestampsUpTo(None)
+                MigrationProgress::MigratedUserTimestampsUpTo(Default::default())
             }
             MigrationProgress::MigratedUserTimestampsUpTo(_) => {
                 MigrationProgress::CheckingTargetCanister
