@@ -5,7 +5,7 @@ import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { IcrcIndexNgCanister, IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import {
-	candidNatArrayToBigInt,
+	candidNumberArrayToBigInt,
 	createAgent,
 	fromNullable,
 	isNullish,
@@ -87,7 +87,7 @@ const mapOptionalToken = (response) => {
 				acc = {
 					...acc,
 					...('Nat' in value &&
-						nonNullish(fromNullable(value.Nat)) && { fee: candidNatArrayToBigInt(value.Nat) })
+						nonNullish(fromNullable(value.Nat)) && { fee: candidNumberArrayToBigInt(value.Nat) })
 				};
 				break;
 			case IcrcMetadataResponseEntries.DECIMALS:
