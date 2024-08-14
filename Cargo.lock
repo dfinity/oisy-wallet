@@ -131,7 +131,6 @@ dependencies = [
  "hex",
  "ic-cdk 0.15.0",
  "ic-cdk-macros 0.15.0",
- "ic-cdk-timers",
  "ic-stable-structures 0.6.4",
  "ic-verifiable-credentials",
  "k256",
