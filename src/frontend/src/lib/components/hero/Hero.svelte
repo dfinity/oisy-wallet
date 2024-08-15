@@ -33,24 +33,38 @@
 	const enableScrollHandler = () => (collapseDisabled = false);
 	const disableScrollHandler = () => (collapseDisabled = true);
 
-	let y = 0;
-	let lastY = 0;
+	let observer: IntersectionObserver;
+	let lastEntryIsIntersecting = true;
 
-	const handleChangeY = () => {
-		const dy = lastY - y;
-		lastY = y;
-		setCollapse(dy < 0);
+	const heroRef = (node: HTMLElement) => {
+		if (observer) {
+			observer.disconnect();
+		}
+
+		observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (collapseDisabled) {
+						return;
+					}
+
+					if (!entry.isIntersecting && lastEntryIsIntersecting) {
+						setCollapse(true);
+					} else if (entry.isIntersecting && !lastEntryIsIntersecting) {
+						setCollapse(false);
+					}
+
+					lastEntryIsIntersecting = entry.isIntersecting;
+				});
+			},
+			{ threshold: 0 }
+		);
+
+		observer.observe(node);
 	};
-
-	$: y, handleChangeY();
-
-	// This part is necessary for non-touch devices when the scrolling is disabled once the header is
-	// collapsed (the content would fit the entire window without need of a scrollbar). In such cases,
-	// variable 'y' would not be refreshed since the user would try to scroll but can not.
-	const handleScroll = ({ deltaY }: WheelEvent) => setCollapse(deltaY > 0);
 </script>
 
-<svelte:window bind:scrollY={y} on:wheel={handleScroll} />
+<div class="sentinel" use:heroRef></div>
 
 <div
 	class={`hero ${isCollapsed ? '' : 'pb-4 md:pb-6'} ${background} sticky top-0 z-[var(--overlay-z-index)]`}
