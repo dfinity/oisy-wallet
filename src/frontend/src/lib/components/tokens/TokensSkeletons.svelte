@@ -7,7 +7,7 @@
 {#if $erc20UserTokensNotInitialized}
 	<SkeletonCards rows={5} />
 {:else}
-	<div in:fade>
+	<div in:fade data-tid="tokens-skeletons-initialized">
 		<slot />
 	</div>
 {/if}

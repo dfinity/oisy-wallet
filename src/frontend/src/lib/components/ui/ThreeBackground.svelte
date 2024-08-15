@@ -114,6 +114,7 @@ void main(){
 		renderer = new WebGLRenderer();
 		renderer.domElement.style.width = '100%';
 		renderer.domElement.style.height = '100%';
+		renderer.domElement.setAttribute('data-tid', 'three-background-canvas');
 		container.appendChild(renderer.domElement);
 
 		material = new ShaderMaterial({

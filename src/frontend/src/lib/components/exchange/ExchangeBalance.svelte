@@ -13,6 +13,7 @@
 <span class="text-off-white block">
 	<output
 		class={`break-all text-5xl font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} inline-block mt-8`}
+		data-tid="exchange-balance-output"
 	>
 		{#if $exchangeInitialized}
 			{formatUSD(totalUsd)}
