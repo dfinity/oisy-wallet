@@ -102,9 +102,7 @@ export const setCustomToken = async ({
 	return set_custom_token(token);
 };
 
-const test = async () => {
-	return 1;
-};
+const test = async () => 1;
 
 test();
 
