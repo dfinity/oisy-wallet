@@ -34,7 +34,6 @@
 	const disableScrollHandler = () => (collapseDisabled = true);
 
 	let observer: IntersectionObserver;
-	let lastEntryIsIntersecting = true;
 
 	const heroRef = (node: HTMLElement) => {
 		if (observer) {
@@ -43,19 +42,11 @@
 
 		observer = new IntersectionObserver(
 			(entries) => {
-				entries.forEach((entry) => {
-					if (collapseDisabled) {
-						return;
-					}
+				if (collapseDisabled) {
+					return;
+				}
 
-					if (!entry.isIntersecting && lastEntryIsIntersecting) {
-						setCollapse(true);
-					} else if (entry.isIntersecting && !lastEntryIsIntersecting) {
-						setCollapse(false);
-					}
-
-					lastEntryIsIntersecting = entry.isIntersecting;
-				});
+				entries.forEach((entry) => setCollapse(!entry.isIntersecting));
 			},
 			{ threshold: 0 }
 		);
@@ -64,7 +55,8 @@
 	};
 </script>
 
-<div class="sentinel" use:heroRef></div>
+<!-- This is a "sentinel" to observe the scrolling -->
+<div use:heroRef></div>
 
 <div
 	class={`hero ${isCollapsed ? '' : 'pb-4 md:pb-6'} ${background} sticky top-0 z-[var(--overlay-z-index)]`}
