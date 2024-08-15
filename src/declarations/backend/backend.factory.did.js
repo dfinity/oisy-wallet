@@ -176,6 +176,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
+		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
 		caller_btc_address: IDL.Func([BitcoinNetwork], [IDL.Text], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		config: IDL.Func([], [Config], ['query']),

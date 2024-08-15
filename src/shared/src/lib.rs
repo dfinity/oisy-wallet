@@ -1,3 +1,4 @@
+pub mod backend_api;
 pub mod http;
 mod impls;
 pub mod metrics;

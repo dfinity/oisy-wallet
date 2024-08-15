@@ -52,6 +52,7 @@ mod bitcoin_utils;
 mod config;
 mod guards;
 mod impls;
+mod migrate;
 mod oisy_user;
 mod token;
 mod types;
@@ -568,6 +569,15 @@ fn set_guards(guards: Guards) {
 #[query(guard = "caller_is_allowed")]
 fn stats() -> Stats {
     read_state(|s| Stats::from(s))
+}
+
+/// Bulk uploads data to this canister.
+///
+/// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur only if a migration failed and had to be restarted.
+#[update(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
+fn bulk_up(data: Vec<u8>) {
+    migrate::bulk_up(&data);
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
