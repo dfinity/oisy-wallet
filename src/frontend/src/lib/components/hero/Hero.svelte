@@ -12,6 +12,7 @@
 	export let summary = false;
 	export let actions = true;
 	export let more = false;
+	export let collapse: boolean;
 
 	let background: string;
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
@@ -20,43 +21,22 @@
 	let heroContent = true;
 	$: heroContent = usdTotal || summary;
 
-	let isCollapsed = false;
+	let isCollapsed: boolean;
 
 	const setCollapse = (collapse: boolean) => {
 		if (collapseDisabled) {
 			return;
 		}
-		isCollapsed = $authSignedIn && collapse;
+		isCollapsed = collapse;
 	};
 
+	// To avoid glitches in case of slow scrolling we disable changing the collapsed state while the animation is still running.
 	let collapseDisabled = false;
 	const enableScrollHandler = () => (collapseDisabled = false);
 	const disableScrollHandler = () => (collapseDisabled = true);
 
-	let observer: IntersectionObserver;
-
-	const heroRef = (node: HTMLElement) => {
-		if (observer) {
-			observer.disconnect();
-		}
-
-		observer = new IntersectionObserver(
-			(entries) => {
-				if (collapseDisabled) {
-					return;
-				}
-
-				entries.forEach((entry) => setCollapse(!entry.isIntersecting));
-			},
-			{ threshold: 0 }
-		);
-
-		observer.observe(node);
-	};
+	$: collapse, setCollapse(collapse);
 </script>
-
-<!-- This is a "sentinel" to observe the scrolling -->
-<div use:heroRef></div>
 
 <div
 	class={`hero ${isCollapsed ? '' : 'pb-4 md:pb-6'} ${background} sticky top-0 z-[var(--overlay-z-index)]`}
