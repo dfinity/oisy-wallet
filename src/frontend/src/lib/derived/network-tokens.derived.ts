@@ -1,11 +1,7 @@
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { exchanges } from '$lib/derived/exchange.derived';
-import {
-	networkEthereum,
-	pseudoNetworkChainFusion,
-	selectedNetwork
-} from '$lib/derived/network.derived';
+import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 import { combinedDerivedSortedTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
@@ -33,9 +29,13 @@ export const enabledNetworkTokens: Readable<Token[]> = derived(
  * This list is used only to refresh the balances of the enabled ERC20 tokens, so it should be agnostic from any combined derived.
  */
 export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
-	[networkEthereum, pseudoNetworkChainFusion, enabledErc20Tokens],
-	([$networkEthereum, $pseudoNetworkChainFusion, $enabledErc20Tokens]) =>
-		$networkEthereum || $pseudoNetworkChainFusion ? $enabledErc20Tokens : ([] as Erc20Token[])
+	[enabledErc20Tokens, selectedNetwork, pseudoNetworkChainFusion],
+	([$tokens, $selectedNetwork, $pseudoNetworkChainFusion]) =>
+		filterTokensForSelectedNetwork([
+			$tokens,
+			$selectedNetwork,
+			$pseudoNetworkChainFusion
+		]) as Erc20Token[]
 );
 
 /**
