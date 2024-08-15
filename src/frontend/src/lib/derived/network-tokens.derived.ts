@@ -30,7 +30,7 @@ export const enabledNetworkTokens: Readable<Token[]> = derived(
 );
 
 /**
- * It isn't performant to post filter again the Erc20 tokens that are enabled for the specific selected network or no network selected but, it's code wise convenient to avoid duplication of logic.
+ * This list is used only to refresh the balances of the enabled ERC20 tokens, so it should be agnostic from any combined derived.
  */
 export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 	[networkEthereum, pseudoNetworkChainFusion, enabledErc20Tokens],
