@@ -1,5 +1,5 @@
 //! Selected backend canister API signatures.
-#![allow(clippy::missing_errors_doc)] // The code is auto-generated.  Baybe `didc bind` will preserve comments in future.
+#![allow(clippy::missing_errors_doc)] // The code is auto-generated.  Maybe `didc bind` will preserve comments in future.
 use crate::types::{Guards, Stats};
 use candid::{self, Principal};
 use ic_cdk::api::call::CallResult as Result;
