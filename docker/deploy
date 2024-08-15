@@ -6,6 +6,9 @@ dfx start --background --quiet
 
 ./docker/wait-port "$DFX_PORT"
 
+dfx canister create internet_identity
+dfx canister create pouh_issuer
+
 npm run deploy
 
 dfx stop
