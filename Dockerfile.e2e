@@ -29,6 +29,9 @@ ENV RUSTUP_HOME=/home/apprunner/.rustup \
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 RUN /bin/bash -c "source /home/apprunner/.cargo/env && rustc --version && cargo --version"
 
+# Install jq
+RUN apt-get install jq
+
 # Add wasm32-unknown-unknown target
 RUN /bin/bash -c "source /home/apprunner/.cargo/env && rustup target add wasm32-unknown-unknown"
 
