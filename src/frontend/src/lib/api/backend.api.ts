@@ -106,6 +106,8 @@ const test = async () => {
 	return 1;
 };
 
+test();
+
 export const setManyUserTokens = async ({
 	tokens,
 	identity
