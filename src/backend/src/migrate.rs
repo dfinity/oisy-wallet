@@ -28,6 +28,8 @@ pub enum MigrationChunk {
 }
 
 /// Bulk uploads data to this canister.
+///
+/// Note: In case of conflict, existing data is overwritten.
 pub fn bulk_up(data: &[u8]) {
     let parsed: MigrationChunk = decode_one(data).expect("failed to parse the data");
     match parsed {

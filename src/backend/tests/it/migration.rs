@@ -10,8 +10,7 @@ use candid::Principal;
 use pocket_ic::PocketIc;
 use shared::types::{
     custom_token::{CustomToken, IcrcToken, Token},
-    user_profile::Stats,
-    ApiEnabled, Guards, MigrationReport,
+    ApiEnabled, Guards, MigrationReport, Stats,
 };
 
 struct MigrationTestEnv {

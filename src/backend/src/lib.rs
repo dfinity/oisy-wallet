@@ -36,9 +36,11 @@ use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
-    ListUsersResponse, OisyUser, Stats, UserProfile,
+    ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport};
+use shared::types::{
+    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
+};
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Duration;
@@ -574,7 +576,10 @@ fn stats() -> Stats {
 }
 
 /// Bulk uploads data to this canister.
+///
+/// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur only if a migration failed and had to be restarted.
 #[update(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
 fn bulk_up(data: Vec<u8>) {
     migrate::bulk_up(&data);
 }
