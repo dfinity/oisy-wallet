@@ -1,6 +1,11 @@
+import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { exchanges } from '$lib/derived/exchange.derived';
-import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+import {
+	networkEthereum,
+	pseudoNetworkChainFusion,
+	selectedNetwork
+} from '$lib/derived/network.derived';
 import { combinedDerivedSortedTokens } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
@@ -28,9 +33,9 @@ export const enabledNetworkTokens: Readable<Token[]> = derived(
  * It isn't performant to post filter again the Erc20 tokens that are enabled for the specific selected network or no network selected but, it's code wise convenient to avoid duplication of logic.
  */
 export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
-	[enabledNetworkTokens],
-	([$enabledNetworkTokens]) =>
-		$enabledNetworkTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
+	[networkEthereum, pseudoNetworkChainFusion, enabledErc20Tokens],
+	([$networkEthereum, $pseudoNetworkChainFusion, $enabledErc20Tokens]) =>
+		$networkEthereum || $pseudoNetworkChainFusion ? $enabledErc20Tokens : ([] as Erc20Token[])
 );
 
 /**
