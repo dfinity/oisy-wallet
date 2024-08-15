@@ -144,6 +144,7 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
+  bulk_up : (blob) -> ();
   caller_btc_address : (BitcoinNetwork) -> (text);
   caller_eth_address : () -> (text);
   config : () -> (Config) query;
