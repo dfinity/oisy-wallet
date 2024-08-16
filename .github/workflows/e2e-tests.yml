@@ -11,6 +11,9 @@ jobs:
   docker-build-e2e:
     runs-on: ubuntu-20.04
     steps:
+      - name: Delete unnecessary tools folder to prevent "out of space" error
+        run: rm -rf /opt/hostedtoolcache
+
       - name: Checkout
         uses: actions/checkout@v4
 
