@@ -40,5 +40,3 @@ backend-v*.wasm.gz
 /blob-report/
 /playwright/.cache/
 pocket-ic
-
-e2e/*-snapshots/*Chrome-darwin.png
