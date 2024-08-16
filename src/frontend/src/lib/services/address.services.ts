@@ -1,10 +1,13 @@
+import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks.env';
 import { getEthAddress } from '$lib/api/backend.api';
 import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from '$lib/api/idb.api';
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -20,7 +23,11 @@ export const loadAddress = async (): Promise<{ success: boolean }> => {
 		addressStore.reset();
 
 		toastsError({
-			msg: { text: 'Error while loading the ETH address.' },
+			msg: {
+				text: replacePlaceholders(get(i18n).init.error.loading_address, {
+					$symbol: ETHEREUM_NETWORK_SYMBOL
+				})
+			},
 			err
 		});
 

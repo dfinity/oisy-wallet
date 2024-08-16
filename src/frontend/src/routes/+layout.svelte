@@ -44,7 +44,7 @@
 			});
 
 			toastsError({
-				msg: { text: 'Unexpected issue while syncing the status of your authentication.' },
+				msg: { text: $i18n.auth.error.unexpected_issue_with_syncing },
 				err
 			});
 		}
