@@ -14,6 +14,9 @@ jobs:
           echo "This workflow should not be triggered with workflow_dispatch on main"
           exit 1
 
+      - name: Delete unnecessary tools folder to prevent "out of space" error
+        run: rm -rf /opt/hostedtoolcache
+
       - name: Checkout
         uses: actions/checkout@v4
 
