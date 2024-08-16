@@ -9,9 +9,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y \
     netcat \
     ca-certificates \
     build-essential \
-    llvm-dev \
-    clang \
-    jq \
     && rm -rf /var/lib/apt/lists/*
 
 # Install NodeJS
@@ -34,6 +31,7 @@ RUN /bin/bash -c "source /home/apprunner/.cargo/env && rustc --version && cargo 
 
 # Add wasm32-unknown-unknown target
 RUN /bin/bash -c "source /home/apprunner/.cargo/env && rustup target add wasm32-unknown-unknown"
+
 # Install dfx
 ENV DFX_PORT=4943
 ENV DFX_VERSION=0.20.0
