@@ -1,12 +1,12 @@
 import type { Erc20Token } from '$eth/types/erc20';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
-import { combinedDerivedSortedTokens } from '$lib/derived/tokens.derived';
+import { tokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
+import { pinTokensAtTop, pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -14,14 +14,12 @@ import { derived, type Readable } from 'svelte/store';
  * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not.
  */
 const networkTokens: Readable<Token[]> = derived(
-	[combinedDerivedSortedTokens, selectedNetwork, pseudoNetworkChainFusion],
+	[tokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );
 
-export const enabledNetworkTokens: Readable<Token[]> = derived(
-	[networkTokens],
-	([$networkTokens]) =>
-		$networkTokens.filter((token) => ('enabled' in token ? token.enabled : true))
+const enabledNetworkTokens: Readable<Token[]> = derived([networkTokens], ([$networkTokens]) =>
+	$networkTokens.filter((token) => ('enabled' in token ? token.enabled : true))
 );
 
 /**
@@ -34,10 +32,19 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 );
 
 /**
+ * Network tokens sorted by market cap, with the ones to pin at the top of the list.
+ */
+export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
+	[enabledNetworkTokens, tokensToPin, exchanges],
+	([$tokens, $tokensToPin, $exchanges]) =>
+		pinTokensAtTop({ $tokens: sortTokens({ $tokens, $exchanges }), $tokensToPin })
+);
+
+/**
  * All tokens matching the selected network or Chain Fusion, with their financial data.
  */
 export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[enabledNetworkTokens, balancesStore, exchanges],
+	[combinedDerivedSortedNetworkTokens, balancesStore, exchanges],
 	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
 		$enabledNetworkTokens.map((token) => ({
 			...token,
