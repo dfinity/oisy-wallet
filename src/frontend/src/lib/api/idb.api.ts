@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks.env';
-import type { IdbEthAddress } from '$lib/types/idb';
+import { BTC_MAINNET_SYMBOL } from '$env/tokens.btc.env';
+import type { IdbBtcAddress, IdbEthAddress } from '$lib/types/idb';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { createStore, del, get, set, update, type UseStore } from 'idb-keyval';
@@ -9,7 +10,17 @@ import { createStore, del, get, set, update, type UseStore } from 'idb-keyval';
 export const idbAddressesStore = (key: string): UseStore =>
 	browser ? createStore(`oisy-${key}-addresses`, `${key}-addresses`) : ({} as unknown as UseStore);
 
+const idbBtcAddressesStoreMainnet = idbAddressesStore(BTC_MAINNET_SYMBOL.toLowerCase());
+
 const idbEthAddressesStore = idbAddressesStore(ETHEREUM_NETWORK_SYMBOL.toLowerCase());
+
+export const setIdbBtcAddressMainnet = ({
+	address,
+	principal
+}: {
+	principal: Principal;
+	address: IdbBtcAddress;
+}): Promise<void> => set(principal.toText(), address, idbBtcAddressesStoreMainnet);
 
 export const setIdbEthAddress = ({
 	address,
@@ -19,7 +30,13 @@ export const setIdbEthAddress = ({
 	address: IdbEthAddress;
 }): Promise<void> => set(principal.toText(), address, idbEthAddressesStore);
 
-export const updateIdbEthAddressLastUsage = (principal: Principal): Promise<void> =>
+const updateIdbAddressLastUsage = ({
+	principal,
+	idbAddressesStore
+}: {
+	principal: Principal;
+	idbAddressesStore: UseStore;
+}): Promise<void> =>
 	update(
 		principal.toText(),
 		(address) => {
@@ -32,11 +49,23 @@ export const updateIdbEthAddressLastUsage = (principal: Principal): Promise<void
 				lastUsedTimestamp: Date.now()
 			};
 		},
-		idbEthAddressesStore
+		idbAddressesStore
 	);
+
+export const updateIdbBtcAddressMainnetLastUsage = (principal: Principal): Promise<void> =>
+	updateIdbAddressLastUsage({ principal, idbAddressesStore: idbBtcAddressesStoreMainnet });
+
+export const updateIdbEthAddressLastUsage = (principal: Principal): Promise<void> =>
+	updateIdbAddressLastUsage({ principal, idbAddressesStore: idbEthAddressesStore });
+
+export const getIdbBtcAddressMainnet = (principal: Principal): Promise<IdbBtcAddress | undefined> =>
+	get(principal.toText(), idbBtcAddressesStoreMainnet);
 
 export const getIdbEthAddress = (principal: Principal): Promise<IdbEthAddress | undefined> =>
 	get(principal.toText(), idbEthAddressesStore);
+
+export const deleteIdbBtcAddressMainnet = (principal: Principal): Promise<void> =>
+	del(principal.toText(), idbBtcAddressesStoreMainnet);
 
 export const deleteIdbEthAddress = (principal: Principal): Promise<void> =>
 	del(principal.toText(), idbEthAddressesStore);
