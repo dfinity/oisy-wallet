@@ -104,7 +104,8 @@
 	},
 	"type": "module",
 	"overrides": {
-		"ws": "^7.5.10"
+		"ws": "^7.5.10",
+		"elliptic": "^6.5.7"
 	},
 	"engines": {
 		"node": ">=20"
