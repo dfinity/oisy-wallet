@@ -57,8 +57,8 @@
 		"@dfinity/verifiable-credentials": "^0.0.2",
 		"@junobuild/analytics": "^0.0.24",
 		"@metamask/detect-provider": "^2.0.0",
-		"@walletconnect/web3wallet": "^1.12.3",
-		"alchemy-sdk": "^3.3.1",
+		"@walletconnect/web3wallet": "^1.14.0",
+		"alchemy-sdk": "^3.4.1",
 		"buffer": "^6.0.3",
 		"ethers": "^5.7.0",
 		"idb-keyval": "^6.2.1",
@@ -104,7 +104,8 @@
 	},
 	"type": "module",
 	"overrides": {
-		"ws": "^7.5.10"
+		"ws": "^7.5.10",
+		"elliptic": "^6.5.7"
 	},
 	"engines": {
 		"node": ">=20"
