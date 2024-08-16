@@ -12,7 +12,6 @@
 	export let summary = false;
 	export let actions = true;
 	export let more = false;
-	export let collapse: boolean;
 
 	let background: string;
 	$: background = ($selectedNetwork?.id.description ?? 'chainfusion').toLowerCase();
@@ -21,22 +20,28 @@
 	let heroContent = true;
 	$: heroContent = usdTotal || summary;
 
+	// To avoid glitches in case of slow scrolling we disable changing the collapsed state while the animation is still running.
+	let collapseDisabled = false;
+	const enableScrollHandler = () => (collapseDisabled = false);
+	const disableScrollHandler = () => (collapseDisabled = true);
+
 	let isCollapsed: boolean;
 
 	const setCollapse = (collapse: boolean) => {
 		if (collapseDisabled) {
 			return;
 		}
-		isCollapsed = collapse;
+		isCollapsed = !collapse;
 	};
 
-	// To avoid glitches in case of slow scrolling we disable changing the collapsed state while the animation is still running.
-	let collapseDisabled = false;
-	const enableScrollHandler = () => (collapseDisabled = false);
-	const disableScrollHandler = () => (collapseDisabled = true);
-
-	$: collapse, setCollapse(collapse);
+	const onTitleIntersecting = ({
+		detail: { intersecting }
+	}: CustomEvent<{ intersecting: boolean }>) => {
+		setCollapse(intersecting);
+	};
 </script>
+
+<svelte:window on:oisyTitleIntersecting={onTitleIntersecting} />
 
 <div
 	class={`hero ${isCollapsed ? '' : 'pb-4 md:pb-6'} ${background} sticky top-0 z-[var(--overlay-z-index)]`}
@@ -52,7 +57,7 @@
 	{#if !isCollapsed}
 		<article
 			class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main 2xl:mt-[-70px] items-center"
-			transition:slide={{ duration: 250 }}
+			transition:slide={{ duration: 400 }}
 			on:introstart={disableScrollHandler}
 			on:introend={enableScrollHandler}
 			on:outrostart={disableScrollHandler}

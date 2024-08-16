@@ -9,7 +9,6 @@
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import Loaders from '$lib/components/core/Loaders.svelte';
 	import NoLoaders from '$lib/components/core/NoLoaders.svelte';
-	import CollapseObserver from '$lib/components/hero/CollapseObserver.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -22,22 +21,13 @@
 
 	let cmpLoaders: ComponentType;
 	$: cmpLoaders = $authSignedIn ? Loaders : NoLoaders;
-
-	let collapse = false;
-
-	const toggleCollapse = async ({ detail: isIntersecting }: CustomEvent<boolean>) => {
-		collapse = $authSignedIn && !isIntersecting;
-	};
 </script>
-
-<CollapseObserver on:icIntersect={toggleCollapse} />
 
 <Hero
 	usdTotal={route === 'tokens'}
 	summary={route === 'transactions'}
 	more={route === 'transactions'}
 	actions={route !== 'settings'}
-	{collapse}
 />
 
 <main class="pt-12">
