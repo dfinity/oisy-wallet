@@ -2,6 +2,7 @@ import { testWithII } from '@dfinity/internet-identity-playwright';
 import { expect, test, type Page } from '@playwright/test';
 
 const testUrl = '/';
+const timeout = 120000;
 
 const hideHeroAnimation = async (page: Page): Promise<void> => {
 	await page
@@ -26,41 +27,19 @@ test.describe('logged out user', () => {
 });
 
 testWithII.describe('logged in user', () => {
-	testWithII.beforeEach(async ({ page, iiPage, context }) => {
+	testWithII.beforeEach(async ({ page, iiPage }) => {
 		const url = 'http://127.0.0.1:4943';
-		const canisterId = 'bkyz2-fmaaa-aaaaa-qaaaq-cai';
-		const timeout = 180000;
+		const canisterId = 'rdmx6-jaaaa-aaaaa-aaadq-cai';
 		await iiPage.waitReady({ url, canisterId, timeout });
 
 		await page.goto(testUrl);
 
-		// test if adding timeout solves the issue
-		const iiPageCustomPromise = context.waitForEvent('page', { timeout });
-		await page.getByTestId('login-button').click();
-
-		const iiPageCustom = await iiPageCustomPromise;
-		await expect(iiPageCustom).toHaveTitle('Internet Identity', { timeout });
-
-		await iiPageCustom.locator('#registerButton').click({ timeout });
-		await iiPageCustom.locator('[data-action=construct-identity]').click({ timeout });
-
-		await iiPageCustom.locator('input#captchaInput').fill('a');
-		await iiPageCustom.locator('#confirmRegisterButton').click({ timeout });
-
-		const identity = await iiPageCustom.locator('#userNumber').textContent({ timeout });
-		expect(identity).not.toBeNull();
-
-		await iiPageCustom.locator('#displayUserContinue').click();
-		await iiPageCustom.waitForEvent('close', { timeout });
-		expect(iiPageCustom.isClosed()).toBe(true);
-
-		// await iiPage.signInWithNewIdentity();
-
-		await page.getByTestId('exchange-balance-output').waitFor({ timeout });
-		await page.getByTestId('tokens-skeletons-initialized').waitFor({ timeout });
+		await iiPage.signInWithNewIdentity();
 	});
 
 	testWithII('should display logged in hero and tokens', async ({ page }) => {
+		await page.getByTestId('tokens-skeletons-initialized').waitFor({ timeout });
+
 		await hideHeroAnimation(page);
 
 		await expect(page).toHaveScreenshot({
