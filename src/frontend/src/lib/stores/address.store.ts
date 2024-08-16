@@ -1,26 +1,7 @@
-import type { EthAddress } from '$lib/types/address';
-import { writable, type Readable } from 'svelte/store';
+import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
+import type { Address } from '$lib/types/address';
+import type { CertifiedData } from '$lib/types/store';
 
-export interface CertifiedAddressData {
-	address: EthAddress;
-	certified: boolean;
-}
+export type AddressData = CertifiedData<Address>;
 
-export type AddressData = CertifiedAddressData | undefined | null;
-
-export interface AddressStore extends Readable<AddressData> {
-	set: (data: CertifiedAddressData) => void;
-	reset: () => void;
-}
-
-const initAddressStore = (): AddressStore => {
-	const { subscribe, set } = writable<AddressData>(undefined);
-
-	return {
-		set: (data: CertifiedAddressData) => set(data),
-		reset: () => set(null),
-		subscribe
-	};
-};
-
-export const addressStore = initAddressStore();
+export const addressStore = initCertifiedSetterStore<AddressData>();
