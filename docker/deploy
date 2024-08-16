@@ -6,6 +6,7 @@ dfx start --background --quiet
 
 ./docker/wait-port "$DFX_PORT"
 
+# TODO: Remove these lines after the dependency problem is solved by ic-terraform
 dfx canister create internet_identity --specified-id rdmx6-jaaaa-aaaaa-aaadq-cai
 dfx canister create pouh_issuer --specified-id qbw6f-caaaa-aaaah-qdcwa-cai
 
