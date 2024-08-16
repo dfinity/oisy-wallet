@@ -26,7 +26,7 @@
 	let collapse = false;
 
 	const toggleCollapse = async ({ detail: isIntersecting }: CustomEvent<boolean>) => {
-		collapse = !isIntersecting;
+		collapse = $authSignedIn && !isIntersecting;
 	};
 </script>
 
