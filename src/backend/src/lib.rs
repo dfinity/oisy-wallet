@@ -1,5 +1,9 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
-use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
+use crate::bitcoin_utils::public_key_to_p2pkh_address;
+use crate::guards::{
+    caller_is_allowed, caller_is_allowed_and_may_read_threshold_keys, may_read_threshold_keys,
+    may_read_user_data, may_threshold_sign, may_write_user_data,
+};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{Nat, Principal};
 use config::find_credential_config;
@@ -7,6 +11,7 @@ use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
+use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
@@ -20,6 +25,7 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
 use oisy_user::oisy_users;
+use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
@@ -31,7 +37,7 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, InitArg};
+use shared::types::{Arg, Config, Guards, InitArg, Migration, MigrationReport, Stats};
 use std::cell::RefCell;
 use std::str::FromStr;
 use types::{
@@ -42,9 +48,11 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bitcoin_utils;
 mod config;
 mod guards;
 mod impls;
+mod migrate;
 mod oisy_user;
 mod token;
 mod types;
@@ -72,6 +80,7 @@ thread_local! {
             // Use `UserProfileModel` to access and manage access to these states
             user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
             user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
+            migration: None,
         })
     );
 }
@@ -98,6 +107,21 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
+/// Modifies config, given the state.
+fn modify_state_config(state: &mut State, f: impl FnOnce(&mut Config)) {
+    let config: &Candid<Config> = state
+        .config
+        .get()
+        .as_ref()
+        .expect("config is not initialized");
+    let mut config: Config = (*config).clone();
+    f(&mut config);
+    state
+        .config
+        .set(Some(Candid(config)))
+        .expect("setting config should succeed");
+}
+
 pub struct State {
     config: ConfigCell,
     /// Initially intended for ERC20 tokens only, this field stores the list of tokens set by the users.
@@ -107,6 +131,7 @@ pub struct State {
     custom_token: CustomTokenMap,
     user_profile: UserProfileMap,
     user_profile_updated: UserProfileUpdatedMap,
+    migration: Option<Migration>,
 }
 
 fn set_config(arg: InitArg) {
@@ -216,18 +241,24 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
 }
 
 /// Returns the Ethereum address of the caller.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_read_threshold_keys")]
 async fn caller_eth_address() -> String {
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
-/// Returns the Ethereum address of the specified .
-#[update(guard = "caller_is_allowed")]
+/// Returns the Ethereum address of the specified user.
+#[update(guard = "caller_is_allowed_and_may_read_threshold_keys")]
 async fn eth_address_of(p: Principal) -> String {
     if p == Principal::anonymous() {
         ic_cdk::trap("Anonymous principal is not authorized");
     }
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&p).await)
+}
+
+/// Returns the Bitcoin address of the caller.
+#[update(guard = "may_read_threshold_keys")]
+async fn caller_btc_address(network: BitcoinNetwork) -> String {
+    public_key_to_p2pkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
@@ -261,7 +292,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
 }
 
 /// Computes a signature for an [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) transaction.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn sign_transaction(req: SignRequest) -> String {
     use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
     use ethers_core::types::Signature;
@@ -309,7 +340,7 @@ async fn sign_transaction(req: SignRequest) -> String {
 }
 
 /// Computes a signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn personal_sign(plaintext: String) -> String {
     let caller = ic_cdk::caller();
 
@@ -334,7 +365,7 @@ async fn personal_sign(plaintext: String) -> String {
 }
 
 /// Computes a signature for a precomputed hash.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn sign_prehash(prehash: String) -> String {
     let caller = ic_cdk::caller();
 
@@ -349,7 +380,7 @@ async fn sign_prehash(prehash: String) -> String {
     format!("0x{}", hex::encode(&signature))
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn set_user_token(token: UserToken) {
     assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
@@ -366,7 +397,7 @@ fn set_user_token(token: UserToken) {
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_token, &token, &find));
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 fn set_many_user_tokens(tokens: Vec<UserToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -385,7 +416,7 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
     });
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
@@ -398,14 +429,14 @@ fn remove_user_token(token_id: UserTokenId) {
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_token, &find));
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[query(guard = "may_read_user_data")]
 fn list_user_tokens() -> Vec<UserToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
 /// Add, remove or update custom token for the user.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -417,7 +448,7 @@ fn set_custom_token(token: CustomToken) {
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -432,13 +463,13 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     });
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[query(guard = "may_read_user_data")]
 fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
     let user_principal = ic_cdk::caller();
@@ -474,7 +505,7 @@ fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserC
 
 /// It create a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 fn create_user_profile() -> UserProfile {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -486,7 +517,7 @@ fn create_user_profile() -> UserProfile {
     })
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[query(guard = "may_read_user_data")]
 fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -518,6 +549,35 @@ fn list_users(request: ListUsersRequest) -> ListUsersResponse {
 #[update]
 async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
+}
+
+/// Gets the state of any migration currently in progress.
+#[query(guard = "caller_is_allowed")]
+fn migration() -> Option<MigrationReport> {
+    read_state(|s| s.migration.as_ref().map(MigrationReport::from))
+}
+
+/// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to enable an API in read-only mode.
+#[update(guard = "caller_is_allowed")]
+fn set_guards(guards: Guards) {
+    mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
+}
+
+/// Gets statistics about the canister.
+///
+/// Note: This is a private method, restricted to authorized users, as some stats may not be suitable for public consumption.
+#[query(guard = "caller_is_allowed")]
+fn stats() -> Stats {
+    read_state(|s| Stats::from(s))
+}
+
+/// Bulk uploads data to this canister.
+///
+/// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur only if a migration failed and had to be restarted.
+#[update(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
+fn bulk_up(data: Vec<u8>) {
+    migrate::bulk_up(&data);
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.

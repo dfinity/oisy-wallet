@@ -1,5 +1,14 @@
 // @ts-ignore
 export const idlFactory = ({ IDL }) => {
+	const ApiEnabled = IDL.Variant({
+		ReadOnly: IDL.Null,
+		Enabled: IDL.Null,
+		Disabled: IDL.Null
+	});
+	const Guards = IDL.Record({
+		user_data: ApiEnabled,
+		threshold_key: ApiEnabled
+	});
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
 		ii_canister_id: IDL.Principal,
@@ -9,6 +18,7 @@ export const idlFactory = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const InitArg = IDL.Record({
+		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
@@ -36,7 +46,13 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
+	const BitcoinNetwork = IDL.Variant({
+		mainnet: IDL.Null,
+		regtest: IDL.Null,
+		testnet: IDL.Null
+	});
 	const Config = IDL.Record({
+		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
@@ -123,6 +139,22 @@ export const idlFactory = ({ IDL }) => {
 		users: IDL.Vec(OisyUser),
 		matches_max_length: IDL.Nat64
 	});
+	const MigrationProgress = IDL.Variant({
+		MigratedUserTokensUpTo: IDL.Opt(IDL.Principal),
+		MigratedUserTimestampsUpTo: IDL.Opt(IDL.Principal),
+		TargetPreCheckOk: IDL.Null,
+		MigratedCustomTokensUpTo: IDL.Opt(IDL.Principal),
+		Locked: IDL.Null,
+		MigratedUserProfilesUpTo: IDL.Opt(IDL.Tuple(IDL.Nat64, IDL.Principal)),
+		CheckingTargetCanister: IDL.Null,
+		TargetLocked: IDL.Null,
+		Completed: IDL.Null,
+		Pending: IDL.Null
+	});
+	const MigrationReport = IDL.Record({
+		to: IDL.Principal,
+		progress: MigrationProgress
+	});
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -137,8 +169,15 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat,
 		nonce: IDL.Nat
 	});
+	const Stats = IDL.Record({
+		user_profile_count: IDL.Nat64,
+		custom_token_count: IDL.Nat64,
+		user_token_count: IDL.Nat64
+	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
+		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
+		caller_btc_address: IDL.Func([BitcoinNetwork], [IDL.Text], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		config: IDL.Func([], [Config], ['query']),
 		create_user_profile: IDL.Func([], [UserProfile], []),
@@ -149,18 +188,30 @@ export const idlFactory = ({ IDL }) => {
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse], ['query']),
+		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
+		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_user_token: IDL.Func([UserToken], [], []),
 		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
-		sign_transaction: IDL.Func([SignRequest], [IDL.Text], [])
+		sign_transaction: IDL.Func([SignRequest], [IDL.Text], []),
+		stats: IDL.Func([], [Stats], ['query'])
 	});
 };
 // @ts-ignore
 export const init = ({ IDL }) => {
+	const ApiEnabled = IDL.Variant({
+		ReadOnly: IDL.Null,
+		Enabled: IDL.Null,
+		Disabled: IDL.Null
+	});
+	const Guards = IDL.Record({
+		user_data: ApiEnabled,
+		threshold_key: ApiEnabled
+	});
 	const CredentialType = IDL.Variant({ ProofOfUniqueness: IDL.Null });
 	const SupportedCredential = IDL.Record({
 		ii_canister_id: IDL.Principal,
@@ -170,6 +221,7 @@ export const init = ({ IDL }) => {
 		credential_type: CredentialType
 	});
 	const InitArg = IDL.Record({
+		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),

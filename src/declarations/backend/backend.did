@@ -10,8 +10,10 @@ type AddUserCredentialRequest = record {
   current_user_version : opt nat64;
   credential_spec : CredentialSpec;
 };
+type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
+type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -25,6 +27,7 @@ type CanisterStatusResultV2 = record {
 };
 type CanisterStatusType = variant { stopped; stopping; running };
 type Config = record {
+  api : opt Guards;
   ecdsa_key_name : text;
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
@@ -48,6 +51,7 @@ type DefiniteCanisterSettingsArgs = record {
   compute_allocation : nat;
 };
 type GetUserProfileError = variant { NotFound };
+type Guards = record { user_data : ApiEnabled; threshold_key : ApiEnabled };
 type HttpRequest = record {
   url : text;
   method : text;
@@ -61,6 +65,7 @@ type HttpResponse = record {
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
 type InitArg = record {
+  api : opt Guards;
   ecdsa_key_name : text;
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
@@ -74,6 +79,19 @@ type ListUsersResponse = record {
   users : vec OisyUser;
   matches_max_length : nat64;
 };
+type MigrationProgress = variant {
+  MigratedUserTokensUpTo : opt principal;
+  MigratedUserTimestampsUpTo : opt principal;
+  TargetPreCheckOk;
+  MigratedCustomTokensUpTo : opt principal;
+  Locked;
+  MigratedUserProfilesUpTo : opt record { nat64; principal };
+  CheckingTargetCanister;
+  TargetLocked;
+  Completed;
+  Pending;
+};
+type MigrationReport = record { to : principal; progress : MigrationProgress };
 type OisyUser = record {
   "principal" : principal;
   pouh_verified : bool;
@@ -90,6 +108,11 @@ type SignRequest = record {
   max_fee_per_gas : nat;
   chain_id : nat;
   nonce : nat;
+};
+type Stats = record {
+  user_profile_count : nat64;
+  custom_token_count : nat64;
+  user_token_count : nat64;
 };
 type SupportedCredential = record {
   ii_canister_id : principal;
@@ -121,6 +144,8 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
+  bulk_up : (blob) -> ();
+  caller_btc_address : (BitcoinNetwork) -> (text);
   caller_eth_address : () -> (text);
   config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
@@ -131,12 +156,15 @@ service : (Arg) -> {
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
+  migration : () -> (opt MigrationReport) query;
   personal_sign : (text) -> (text);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
+  set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
   set_user_token : (UserToken) -> ();
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
+  stats : () -> (Stats) query;
 }

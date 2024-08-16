@@ -14,6 +14,8 @@ on:
       - # The dockerfile used in this CI run, and the scripts it COPY's.
         'Dockerfile'
       - 'docker/**'
+      - # There may be some files in frontend folder that contains 'backend' in their name.
+        '!src/frontend/**'
   workflow_dispatch:
 
 jobs:

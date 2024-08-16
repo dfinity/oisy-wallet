@@ -13,8 +13,10 @@ export interface AddUserCredentialRequest {
 	current_user_version: [] | [bigint];
 	credential_spec: CredentialSpec;
 }
+export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
+export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -28,6 +30,7 @@ export interface CanisterStatusResultV2 {
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export interface Config {
+	api: [] | [Guards];
 	ecdsa_key_name: string;
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
@@ -51,6 +54,10 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type GetUserProfileError = { NotFound: null };
+export interface Guards {
+	user_data: ApiEnabled;
+	threshold_key: ApiEnabled;
+}
 export interface HttpRequest {
 	url: string;
 	method: string;
@@ -67,6 +74,7 @@ export interface IcrcToken {
 	index_id: [] | [Principal];
 }
 export interface InitArg {
+	api: [] | [Guards];
 	ecdsa_key_name: string;
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
@@ -79,6 +87,23 @@ export interface ListUsersRequest {
 export interface ListUsersResponse {
 	users: Array<OisyUser>;
 	matches_max_length: bigint;
+}
+export type MigrationProgress =
+	| {
+			MigratedUserTokensUpTo: [] | [Principal];
+	  }
+	| { MigratedUserTimestampsUpTo: [] | [Principal] }
+	| { TargetPreCheckOk: null }
+	| { MigratedCustomTokensUpTo: [] | [Principal] }
+	| { Locked: null }
+	| { MigratedUserProfilesUpTo: [] | [[bigint, Principal]] }
+	| { CheckingTargetCanister: null }
+	| { TargetLocked: null }
+	| { Completed: null }
+	| { Pending: null };
+export interface MigrationReport {
+	to: Principal;
+	progress: MigrationProgress;
 }
 export interface OisyUser {
 	principal: Principal;
@@ -96,6 +121,11 @@ export interface SignRequest {
 	max_fee_per_gas: bigint;
 	chain_id: bigint;
 	nonce: bigint;
+}
+export interface Stats {
+	user_profile_count: bigint;
+	custom_token_count: bigint;
+	user_token_count: bigint;
 }
 export interface SupportedCredential {
 	ii_canister_id: Principal;
@@ -130,6 +160,8 @@ export interface UserTokenId {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
+	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
+	caller_btc_address: ActorMethod<[BitcoinNetwork], string>;
 	caller_eth_address: ActorMethod<[], string>;
 	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
@@ -140,14 +172,17 @@ export interface _SERVICE {
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
+	migration: ActorMethod<[], [] | [MigrationReport]>;
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
+	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
 	sign_prehash: ActorMethod<[string], string>;
 	sign_transaction: ActorMethod<[SignRequest], string>;
+	stats: ActorMethod<[], Stats>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

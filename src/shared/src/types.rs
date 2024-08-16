@@ -1,5 +1,7 @@
 use candid::{CandidType, Deserialize, Principal};
+use ic_cdk_timers::TimerId;
 use std::fmt::Debug;
+use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
 pub type Timestamp = u64;
 
@@ -24,6 +26,32 @@ pub struct InitArg {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_der: Option<Vec<u8>>,
+    /// Enables or disables APIs
+    pub api: Option<Guards>,
+}
+
+#[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
+#[repr(u8)]
+pub enum ApiEnabled {
+    Enabled,
+    ReadOnly,
+    Disabled,
+}
+
+#[derive(CandidType, Deserialize, Default, Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Guards {
+    pub threshold_key: ApiEnabled,
+    pub user_data: ApiEnabled,
+}
+#[test]
+fn guards_default() {
+    assert_eq!(
+        Guards::default(),
+        Guards {
+            threshold_key: ApiEnabled::Enabled,
+            user_data: ApiEnabled::Enabled,
+        }
+    );
 }
 
 #[derive(CandidType, Deserialize)]
@@ -40,6 +68,8 @@ pub struct Config {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_raw: Option<Vec<u8>>,
+    /// Enables or disables APIs
+    pub api: Option<Guards>,
 }
 
 pub mod transaction {
@@ -73,7 +103,7 @@ pub trait TokenVersion: Debug {
         Self: Sized + Clone;
 }
 
-/// Erc20 specific user defined tokens
+/// ERC20 specific user defined tokens
 pub mod token {
     use crate::types::Version;
     use candid::{CandidType, Deserialize};
@@ -201,4 +231,58 @@ pub mod user_profile {
     pub enum GetUserProfileError {
         NotFound,
     }
+}
+
+/// The current state of progress of a user data migration.
+#[derive(
+    CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
+)]
+pub enum MigrationProgress {
+    // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
+    // TODO: Remove warning once the migration has been implemented.
+    /// Migration has been requested.
+    #[default]
+    Pending,
+    /// APIs have been locked on the current canister.
+    Locked,
+    /// APIs have been locked on the target canister.
+    TargetLocked,
+    /// Target canister was empty.
+    TargetPreCheckOk,
+    /// Tokens have been migrated up to (but excluding) the given principal.
+    MigratedUserTokensUpTo(Option<Principal>),
+    /// Custom tokens have been migrated up to (but excluding) the given principal.
+    MigratedCustomTokensUpTo(Option<Principal>),
+    /// Migrated user profile timestamps up to the given principal.
+    MigratedUserTimestampsUpTo(Option<Principal>),
+    /// Migrated user profiles up to the given timestamp/user pair.
+    MigratedUserProfilesUpTo(Option<(Timestamp, Principal)>),
+    /// Checking that the target canister has all the data.
+    CheckingTargetCanister,
+    /// Migration has been completed.
+    Completed,
+}
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct Migration {
+    /// The canister that data is being migrated to.
+    pub to: Principal,
+    /// The current state of progress of a user data migration.
+    pub progress: MigrationProgress,
+    /// The timer id for the migration.
+    pub timer_id: TimerId,
+}
+
+/// A serializable report of a migration.
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+pub struct MigrationReport {
+    pub to: Principal,
+    pub progress: MigrationProgress,
+}
+
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+pub struct Stats {
+    pub user_profile_count: u64,
+    pub user_token_count: u64,
+    pub custom_token_count: u64,
 }

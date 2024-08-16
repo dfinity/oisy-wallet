@@ -36,6 +36,7 @@ interface I18nNavigation {
 interface I18nAuth {
 	text: { title: string; authenticate: string; logout: string };
 	alt: { sign_in: string };
+	warning: { not_signed_in: string; session_expired: string };
 	error: {
 		no_internet_identity: string;
 		invalid_pouh_credential: string;
@@ -44,6 +45,8 @@ interface I18nAuth {
 		error_requesting_pouh_credential: string;
 		missing_pouh_issuer_origin: string;
 		no_pouh_credential: string;
+		error_while_signing_in: string;
+		unexpected_issue_with_syncing: string;
 	};
 }
 
@@ -76,6 +79,7 @@ interface I18nInit {
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
 		eth_address_unknown: string;
+		loading_address: string;
 		loading_balance: string;
 		loading_balance_symbol: string;
 		erc20_contracts: string;
@@ -324,6 +328,7 @@ interface I18nTokens {
 			clear_filter: string;
 			manage_for_network: string;
 			network: string;
+			all_tokens_zero_balance: string;
 		};
 		placeholder: { select_network: string };
 		info: { outdated_index_canister: string; no_changes: string };
@@ -450,8 +455,8 @@ interface I18nTransaction {
 	status: { included: string; safe: string; finalised: string };
 	label: {
 		reimbursement: string;
-		twin_token_received: string;
 		twin_token_sent: string;
+		twin_token_converted: string;
 		receiving_twin_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;

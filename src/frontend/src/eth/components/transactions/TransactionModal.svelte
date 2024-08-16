@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Transaction } from '$lib/types/transaction';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { Modal } from '@dfinity/gix-components';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { nonNullish } from '@dfinity/utils';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -15,7 +15,6 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import Value from '$lib/components/ui/Value.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { notEmptyString } from '@dfinity/utils';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -32,7 +31,7 @@
 	$: ({ from, value, timestamp, hash, blockNumber, to } = transaction);
 
 	let type: 'send' | 'receive';
-	$: type = from?.toLowerCase() === $address?.toLowerCase() ? 'send' : 'receive';
+	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
 
 	let explorerUrl: string | undefined;
 	$: explorerUrl = notEmptyString(hash) ? `${$explorerUrlStore}/tx/${hash}` : undefined;
