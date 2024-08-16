@@ -24,13 +24,9 @@
 
 	let sortingEnabled = true;
 
-	const enableSortingTokens = () => {
-		sortingEnabled = true;
-	};
+	const enableSortingTokens = () => (sortingEnabled = true);
 
-	const disableSortingTokens = () => {
-		sortingEnabled = false;
-	};
+	const disableSortingTokens = () => (sortingEnabled = false);
 
 	const updateTokensToDisplay = ({
 		tokensToDisplay,
