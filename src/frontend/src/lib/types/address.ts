@@ -1,5 +1,7 @@
-export type BtcAddress = string;
+export type Address = string;
 
-export type EthAddress = string;
+export type BtcAddress = Address;
+
+export type EthAddress = Address;
 
 export type OptionEthAddress = EthAddress | undefined | null;
