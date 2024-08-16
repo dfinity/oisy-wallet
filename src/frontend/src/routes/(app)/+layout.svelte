@@ -24,9 +24,13 @@
 	$: cmpLoaders = $authSignedIn ? Loaders : NoLoaders;
 
 	let collapse = false;
+
+	const toggleCollapse = async ({ detail: isIntersecting }: CustomEvent<boolean>) => {
+		collapse = !isIntersecting;
+	};
 </script>
 
-<CollapseObserver bind:collapse />
+<CollapseObserver on:icIntersect={toggleCollapse} />
 
 <Hero
 	usdTotal={route === 'tokens'}

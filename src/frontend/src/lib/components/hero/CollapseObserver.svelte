@@ -1,29 +1,10 @@
 <script lang="ts">
-	import { authNotSignedIn } from '$lib/derived/auth.derived';
+	import { onIntersection } from '$lib/directives/intersection.directives';
+	import { createEventDispatcher } from 'svelte';
 
-	export let collapse: boolean;
+	const dispatch = createEventDispatcher();
 
-	let observer: IntersectionObserver;
-
-	const heroRef = (node: HTMLElement) => {
-		if (observer) {
-			observer.disconnect();
-		}
-
-		observer = new IntersectionObserver(
-			(entries) => {
-				if ($authNotSignedIn) {
-					collapse = false;
-					return;
-				}
-
-				entries.forEach((entry) => (collapse = !entry.isIntersecting));
-			},
-			{ threshold: 0 }
-		);
-
-		observer.observe(node);
-	};
+	const useIntersection = (node: HTMLElement) => onIntersection({ node, dispatch });
 </script>
 
-<div use:heroRef></div>
+<div use:useIntersection></div>
