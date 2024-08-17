@@ -2,7 +2,7 @@
 	import { Modal, type ProgressStep } from '@dfinity/gix-components';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
-	import { loadAddress, loadIdbAddress } from '$lib/services/address.services';
+	import { loadEthAddress, loadIdbAddress } from '$lib/services/address.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
@@ -75,7 +75,7 @@
 		// We are loading the ETH address from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 		progressModal = true;
 
-		const { success: addressSuccess } = await loadAddress();
+		const { success: addressSuccess } = await loadEthAddress();
 
 		if (!addressSuccess) {
 			await signOut();

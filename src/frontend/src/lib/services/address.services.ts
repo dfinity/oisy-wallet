@@ -22,17 +22,17 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const loadTokenAddress = async <T extends Address>({
-	identity,
 	tokenId,
 	getAddress,
 	setIdbAddress
 }: {
-	identity: OptionIdentity;
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
 	setIdbAddress: (params: { address: IdbAddress<T>; principal: Principal }) => Promise<void>;
 }): Promise<{ success: boolean }> => {
 	try {
+		const { identity } = get(authStore);
+
 		const address = await getAddress(identity);
 		addressStore.set({ tokenId, data: { data: address, certified: true } });
 
@@ -42,7 +42,7 @@ const loadTokenAddress = async <T extends Address>({
 
 		toastsError({
 			msg: {
-				text: replacePlaceholders(get(i18n).init.error.loading_address_symbol, {
+				text: replacePlaceholders(get(i18n).init.error.loading_address, {
 					$symbol: tokenId.description ?? ''
 				})
 			},
@@ -56,16 +56,13 @@ const loadTokenAddress = async <T extends Address>({
 };
 
 const loadBtcAddress = async ({
-	identity,
 	tokenId,
 	network
 }: {
-	identity: OptionIdentity;
 	tokenId: TokenId;
 	network: BitcoinNetwork;
 }): Promise<{ success: boolean }> =>
 	loadTokenAddress<BtcAddress>({
-		identity,
 		tokenId,
 		getAddress: (identity) =>
 			getBtcAddress({
@@ -75,39 +72,18 @@ const loadBtcAddress = async ({
 		setIdbAddress: setIdbBtcAddressMainnet
 	});
 
-export const loadBtcAddressMainnet = async (
-	identity: OptionIdentity
-): Promise<{ success: boolean }> =>
+export const loadBtcAddressMainnet = async (): Promise<{ success: boolean }> =>
 	loadBtcAddress({
-		identity,
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		network: 'mainnet'
 	});
 
-const loadEthAddress = async (identity: OptionIdentity): Promise<{ success: boolean }> =>
+export const loadEthAddress = async (): Promise<{ success: boolean }> =>
 	loadTokenAddress<EthAddress>({
-		identity,
 		tokenId: ETHEREUM_TOKEN_ID,
 		getAddress: getEthAddress,
 		setIdbAddress: setIdbEthAddress
 	});
-
-export const loadAddress = async (): Promise<{ success: boolean }> => {
-	try {
-		const { identity } = get(authStore);
-
-		return await loadEthAddress(identity);
-	} catch (err: unknown) {
-		toastsError({
-			msg: {
-				text: get(i18n).init.error.loading_address
-			},
-			err
-		});
-
-		return { success: false };
-	}
-};
 
 const saveTokenAddressForFutureSignIn = async <T extends Address>({
 	identity,
