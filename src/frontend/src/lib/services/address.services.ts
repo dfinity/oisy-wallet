@@ -1,15 +1,22 @@
+import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
-import { getEthAddress } from '$lib/api/backend.api';
-import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from '$lib/api/idb.api';
+import { getBtcAddress, getEthAddress } from '$lib/api/backend.api';
+import {
+	getIdbEthAddress,
+	setIdbBtcAddressMainnet,
+	setIdbEthAddress,
+	updateIdbEthAddressLastUsage
+} from '$lib/api/idb.api';
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { Address, EthAddress } from '$lib/types/address';
+import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
 import type { IdbAddress } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -47,6 +54,35 @@ const loadTokenAddress = async <T extends Address>({
 
 	return { success: true };
 };
+
+const loadBtcAddress = async ({
+	identity,
+	tokenId,
+	network
+}: {
+	identity: OptionIdentity;
+	tokenId: TokenId;
+	network: BitcoinNetwork;
+}): Promise<{ success: boolean }> =>
+	loadTokenAddress<BtcAddress>({
+		identity,
+		tokenId,
+		getAddress: (identity) =>
+			getBtcAddress({
+				identity,
+				network: network === 'mainnet' ? { mainnet: null } : { testnet: null }
+			}),
+		setIdbAddress: setIdbBtcAddressMainnet
+	});
+
+export const loadBtcAddressMainnet = async (
+	identity: OptionIdentity
+): Promise<{ success: boolean }> =>
+	loadBtcAddress({
+		identity,
+		tokenId: BTC_MAINNET_TOKEN_ID,
+		network: 'mainnet'
+	});
 
 const loadEthAddress = async (identity: OptionIdentity): Promise<{ success: boolean }> =>
 	loadTokenAddress<EthAddress>({
