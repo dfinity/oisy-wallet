@@ -12,7 +12,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
-import type { IdbAddress } from '$lib/types/idb';
+import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -28,7 +28,7 @@ const loadTokenAddress = async <T extends Address>({
 }: {
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
-	setIdbAddress: (params: { address: IdbAddress<T>; principal: Principal }) => Promise<void>;
+	setIdbAddress: (params: SetIdbAddressParams<T>) => Promise<void>;
 }): Promise<{ success: boolean }> => {
 	try {
 		const { identity } = get(authStore);
