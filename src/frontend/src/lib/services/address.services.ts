@@ -5,28 +5,37 @@ import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { EthAddress } from '$lib/types/address';
+import type { Address, EthAddress } from '$lib/types/address';
+import type { IdbAddress } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadAddress = async (): Promise<{ success: boolean }> => {
-	const tokenId = ETHEREUM_TOKEN_ID;
-
+const loadTokenAddress = async <T extends Address>({
+	identity,
+	tokenId,
+	getAddress,
+	setIdbAddress
+}: {
+	identity: OptionIdentity;
+	tokenId: TokenId;
+	getAddress: (identity: OptionIdentity) => Promise<T>;
+	setIdbAddress: (params: { address: IdbAddress<T>; principal: Principal }) => Promise<void>;
+}): Promise<{ success: boolean }> => {
 	try {
-		const { identity } = get(authStore);
-
-		const address = await getEthAddress(identity);
+		const address = await getAddress(identity);
 		addressStore.set({ tokenId, data: { data: address, certified: true } });
 
-		await saveEthAddressForFutureSignIn({ address, identity });
+		await saveTokenAddressForFutureSignIn({ address, identity, setIdbAddress });
 	} catch (err: unknown) {
 		addressStore.reset(tokenId);
 
 		toastsError({
 			msg: {
-				text: replacePlaceholders(get(i18n).init.error.loading_address, {
+				text: replacePlaceholders(get(i18n).init.error.loading_address_symbol, {
 					$symbol: tokenId.description ?? ''
 				})
 			},
@@ -39,19 +48,46 @@ export const loadAddress = async (): Promise<{ success: boolean }> => {
 	return { success: true };
 };
 
-const saveEthAddressForFutureSignIn = async ({
+const loadEthAddress = async (identity: OptionIdentity): Promise<{ success: boolean }> =>
+	loadTokenAddress<EthAddress>({
+		identity,
+		tokenId: ETHEREUM_TOKEN_ID,
+		getAddress: getEthAddress,
+		setIdbAddress: setIdbEthAddress
+	});
+
+export const loadAddress = async (): Promise<{ success: boolean }> => {
+	try {
+		const { identity } = get(authStore);
+
+		return await loadEthAddress(identity);
+	} catch (err: unknown) {
+		toastsError({
+			msg: {
+				text: get(i18n).init.error.loading_address
+			},
+			err
+		});
+
+		return { success: false };
+	}
+};
+
+const saveTokenAddressForFutureSignIn = async <T extends Address>({
 	identity,
-	address
+	address,
+	setIdbAddress
 }: {
 	identity: OptionIdentity;
-	address: EthAddress;
+	address: T;
+	setIdbAddress: (params: { address: IdbAddress<T>; principal: Principal }) => Promise<void>;
 }) => {
 	// Should not happen given the current layout and guards. Moreover, the backend throws an error if the caller is anonymous.
 	assertNonNullish(identity, 'Cannot continue without an identity.');
 
 	const now = Date.now();
 
-	await setIdbEthAddress({
+	await setIdbAddress({
 		address: {
 			address,
 			createdAtTimestamp: now,

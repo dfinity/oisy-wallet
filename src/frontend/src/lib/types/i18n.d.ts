@@ -80,6 +80,7 @@ interface I18nInit {
 		no_infura_erc20_icp_provider: string;
 		eth_address_unknown: string;
 		loading_address: string;
+		loading_address_symbol: string;
 		loading_balance: string;
 		loading_balance_symbol: string;
 		erc20_contracts: string;
