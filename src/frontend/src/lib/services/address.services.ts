@@ -1,13 +1,24 @@
+import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 import { getEthAddress } from '$lib/api/backend.api';
-import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from '$lib/api/idb.api';
+import {
+	getIdbBtcAddressMainnet,
+	getIdbEthAddress,
+	setIdbEthAddress,
+	updateIdbBtcAddressMainnetLastUsage,
+	updateIdbEthAddressLastUsage
+} from '$lib/api/idb.api';
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { EthAddress } from '$lib/types/address';
+import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
+import type { IdbAddress } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import type { Identity } from '@dfinity/agent';
+import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -61,9 +72,57 @@ const saveEthAddressForFutureSignIn = async ({
 	});
 };
 
-export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
-	const tokenId = ETHEREUM_TOKEN_ID;
+const loadIdbTokenAddress = async <T extends Address>({
+	identity,
+	tokenId,
+	getIdbAddress,
+	updateIdbAddressLastUsage
+}: {
+	identity: Identity;
+	tokenId: TokenId;
+	getIdbAddress: (principal: Principal) => Promise<IdbAddress<T> | undefined>;
+	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
+}): Promise<{ success: boolean }> => {
+	try {
+		const idbAddress = await getIdbAddress(identity.getPrincipal());
 
+		if (isNullish(idbAddress)) {
+			return { success: false };
+		}
+
+		const { address } = idbAddress;
+		addressStore.set({ tokenId, data: { data: address, certified: false } });
+
+		await updateIdbAddressLastUsage(identity.getPrincipal());
+	} catch (err: unknown) {
+		// We silence the error as the dapp will proceed with a standard lookup of the address.
+		console.error(
+			`Error encountered while searching for locally stored ${tokenId.description} public address in the browser.`
+		);
+
+		return { success: false };
+	}
+
+	return { success: true };
+};
+
+const loadIdbBtcAddressMainnet = async (identity: Identity): Promise<{ success: boolean }> =>
+	loadIdbTokenAddress<BtcAddress>({
+		identity,
+		tokenId: BTC_MAINNET_TOKEN_ID,
+		getIdbAddress: getIdbBtcAddressMainnet,
+		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage
+	});
+
+const loadIdbEthAddress = async (identity: Identity): Promise<{ success: boolean }> =>
+	loadIdbTokenAddress<EthAddress>({
+		identity,
+		tokenId: ETHEREUM_TOKEN_ID,
+		getIdbAddress: getIdbEthAddress,
+		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
+	});
+
+export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 	try {
 		const { identity } = get(authStore);
 
@@ -74,16 +133,7 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 			return { success: false };
 		}
 
-		const idbEthAddress = await getIdbEthAddress(identity.getPrincipal());
-
-		if (isNullish(idbEthAddress)) {
-			return { success: false };
-		}
-
-		const { address } = idbEthAddress;
-		addressStore.set({ tokenId, data: { data: address, certified: false } });
-
-		await updateIdbEthAddressLastUsage(identity.getPrincipal());
+		return await loadIdbEthAddress(identity);
 	} catch (err: unknown) {
 		// We silence the error as the dapp will proceed with a standard lookup of the address.
 		console.error(
@@ -92,8 +142,6 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 
 		return { success: false };
 	}
-
-	return { success: true };
 };
 
 export const certifyAddress = async (
