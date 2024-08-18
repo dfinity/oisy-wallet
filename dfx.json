@@ -1,7 +1,7 @@
 {
 	"dfx": "0.20.0",
 	"canisters": {
-		"backend": {
+		"chain_fusion_signer": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
@@ -17,7 +17,7 @@
 			"type": "assets",
 			"gzip": true
 		},
-		"new_backend": {
+		"backend": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
