@@ -45,8 +45,8 @@ function install_did_files() {
 ./scripts/did.sh
 # Download .did files listed in dfx.json
 install_did_files
-# Generate bindings for canisters with directories in `declarations`:
-for canister in $(ls src/declarations/); do
+# Generate bindings
+for canister in backend  frontend  signer; do
   echo "Generating bindings for $canister"
   dfx generate "$canister"
 done
