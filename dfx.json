@@ -8,6 +8,13 @@
 			"optimize": "cycles",
 			"gzip": true
 		},
+		"backend": {
+			"candid": "src/backend/backend.did",
+			"package": "backend",
+			"type": "rust",
+			"optimize": "cycles",
+			"gzip": true
+		},
 		"frontend": {
 			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.20.0/src/distributed/assetstorage.did",
 			"frontend": {
@@ -17,7 +24,7 @@
 			"type": "assets",
 			"gzip": true
 		},
-		"backend": {
+		"new_backend": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
