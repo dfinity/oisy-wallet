@@ -3,7 +3,7 @@
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		ckEthereumTwinTokenNetworkId,
 		ckEthereumTwinToken,
@@ -17,8 +17,11 @@
 <ConvertETH
 	nativeTokenId={$ckEthereumNativeTokenId}
 	nativeNetworkId={$ckEthereumNativeToken.network.id}
+	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {
+		$token: $ckEthereumTwinToken.symbol
+	})}
 >
-	<IconBurn size="28" />
+	<IconBurn size="28" slot="icon" />
 	<span
 		>{replacePlaceholders($i18n.convert.text.convert_to_token, {
 			$token: $ckEthereumTwinToken.symbol
@@ -27,5 +30,5 @@
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenEth}
-	<IcSendModal networkId={$ckEthereumTwinTokenNetworkId} destination={$address ?? ''} />
+	<IcSendModal networkId={$ckEthereumTwinTokenNetworkId} destination={$ethAddress ?? ''} />
 {/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ProgressStep } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep } from '@dfinity/gix-components';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
 	import { loadAddress, loadIdbAddress } from '$lib/services/address.services';
@@ -7,10 +7,7 @@
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import banner from '$lib/assets/banner.svg';
-	import { Modal } from '@dfinity/gix-components';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { browser } from '$app/environment';
-	import { isNullish } from '@dfinity/utils';
 	import { loading } from '$lib/stores/loader.store';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
@@ -38,21 +35,9 @@
 			return;
 		}
 
-		if (confirm) {
-			return;
-		}
-
 		// A small delay for display animation purpose.
 		setTimeout(() => loading.set(false), 1000);
 	})();
-
-	const { oisy_introduction }: Storage = browser
-		? localStorage
-		: ({ oisy_introduction: null } as unknown as Storage);
-	const confirm = isNullish(oisy_introduction);
-
-	let disabledConfirm = true;
-	$: disabledConfirm = progressStep !== ProgressStepsLoader.DONE;
 
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
@@ -99,11 +84,6 @@
 
 		await progressAndLoad();
 	});
-
-	const confirmIntroduction = () => {
-		localStorage.setItem('oisy_introduction', 'done');
-		loading.set(false);
-	};
 </script>
 
 {#if $loading}
@@ -121,15 +101,6 @@
 
 					<InProgress {progressStep} {steps} />
 				</div>
-
-				{#if confirm}
-					<button
-						on:click={confirmIntroduction}
-						class="primary full center"
-						disabled={disabledConfirm}
-						class:opacity-0={disabledConfirm}>{$i18n.init.text.lets_go}</button
-					>
-				{/if}
 			</Modal>
 		</div>
 	{/if}

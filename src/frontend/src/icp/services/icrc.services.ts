@@ -8,6 +8,7 @@ import type { IcInterface } from '$icp/types/ic';
 import type { IcrcCustomTokenWithoutId } from '$icp/types/icrc-custom-token';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
+	mapCkTokenOisyName,
 	mapIcrcToken,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
@@ -31,12 +32,16 @@ export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity })
 
 export const unsafeLoadDefaultPublicIcrcTokens = async () => {
 	await Promise.all(
-		PUBLIC_ICRC_TOKENS.map((token) => loadDefaultIcrc({ data: token, strategy: 'query' }))
+		PUBLIC_ICRC_TOKENS.map(mapCkTokenOisyName).map((token) =>
+			loadDefaultIcrc({ data: token, strategy: 'query' })
+		)
 	);
 };
 
 const loadDefaultIcrcTokens = async () => {
-	await Promise.all(ICRC_TOKENS.map((token) => loadDefaultIcrc({ data: token })));
+	await Promise.all(
+		ICRC_TOKENS.map(mapCkTokenOisyName).map((token) => loadDefaultIcrc({ data: token }))
+	);
 };
 
 export const loadCustomTokens = ({ identity }: { identity: OptionIdentity }): Promise<void> =>

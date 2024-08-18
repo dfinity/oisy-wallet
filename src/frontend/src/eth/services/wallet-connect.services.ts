@@ -10,15 +10,21 @@ import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
 import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
-	TRACK_COUNT_WC_ETH_SEND_SUCCESS
+	TRACK_COUNT_WC_ETH_SEND_SUCCESS,
+	TRACK_DURATION_WC_ETH_SEND
 } from '$lib/constants/analytics.contants';
 import { ProgressStepsSend, ProgressStepsSign } from '$lib/enums/progress-steps';
-import { trackEvent } from '$lib/services/analytics.services';
+import {
+	initTimedEvent,
+	trackEvent,
+	trackTimedEventError,
+	trackTimedEventSuccess
+} from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-import type { OptionAddress } from '$lib/types/address';
+import type { OptionEthAddress } from '$lib/types/address';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
@@ -37,7 +43,7 @@ export type WalletConnectExecuteParams = Pick<WalletConnectCallBackParams, 'requ
 
 export type WalletConnectSendParams = WalletConnectExecuteParams & {
 	listener: WalletConnectListener | null | undefined;
-	address: OptionAddress;
+	address: OptionEthAddress;
 	fee: FeeStoreData;
 	modalNext: () => void;
 	amount: BigNumber;
@@ -149,7 +155,7 @@ export const send = ({
 
 			const {
 				send: {
-					assertion: { gas_fees_not_defined, max_gas_gee_per_gas_undefined }
+					assertion: { gas_fees_not_defined, max_gas_fee_per_gas_undefined }
 				}
 			} = get(i18n);
 
@@ -164,7 +170,7 @@ export const send = ({
 
 			if (isNullish(maxFeePerGas) || isNullish(maxPriorityFeePerGas)) {
 				toastsError({
-					msg: { text: max_gas_gee_per_gas_undefined }
+					msg: { text: max_gas_fee_per_gas_undefined }
 				});
 				return { success: false };
 			}
@@ -172,6 +178,13 @@ export const send = ({
 			const { to, gas: gasWC, data } = firstParam;
 
 			modalNext();
+
+			const timedEvent = initTimedEvent({
+				name: TRACK_DURATION_WC_ETH_SEND,
+				metadata: {
+					token: token.symbol
+				}
+			});
 
 			try {
 				const { hash } = await executeSend({
@@ -195,21 +208,27 @@ export const send = ({
 
 				progress(lastProgressStep);
 
-				await trackEvent({
-					name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
-					metadata: {
-						token: token.symbol
-					}
-				});
+				await Promise.allSettled([
+					trackTimedEventSuccess(timedEvent),
+					trackEvent({
+						name: TRACK_COUNT_WC_ETH_SEND_SUCCESS,
+						metadata: {
+							token: token.symbol
+						}
+					})
+				]);
 
 				return { success: true };
 			} catch (err: unknown) {
-				await trackEvent({
-					name: TRACK_COUNT_WC_ETH_SEND_ERROR,
-					metadata: {
-						token: token.symbol
-					}
-				});
+				await Promise.allSettled([
+					trackTimedEventError(timedEvent),
+					trackEvent({
+						name: TRACK_COUNT_WC_ETH_SEND_ERROR,
+						metadata: {
+							token: token.symbol
+						}
+					})
+				]);
 
 				await listener.rejectRequest({ topic, id, error: UNEXPECTED_ERROR });
 

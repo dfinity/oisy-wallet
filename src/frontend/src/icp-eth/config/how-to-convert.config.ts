@@ -1,5 +1,5 @@
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
-import { sendWizardSteps } from '$eth/config/send.config';
+import { sendWizardSteps } from '$lib/config/send.config';
 import type { Token } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { WizardSteps } from '@dfinity/gix-components';

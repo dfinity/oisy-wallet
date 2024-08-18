@@ -1,0 +1,31 @@
+<script lang="ts">
+	import { modalStore } from '$lib/stores/modal.store';
+	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { modalEthSend } from '$lib/derived/modal.derived';
+	import EthSendModal from '$eth/components/send/EthSendModal.svelte';
+	import { waitWalletReady } from '$lib/services/actions.services';
+	import { loadTokenAndRun } from '$icp/services/token.services';
+	import type { Token } from '$lib/types/token';
+	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
+
+	export let token: Token;
+
+	const isDisabled = (): boolean => $addressNotLoaded;
+
+	const openSend = async (modalId: symbol) => {
+		if (isDisabled()) {
+			const status = await waitWalletReady(isDisabled);
+
+			if (status === 'timeout') {
+				return;
+			}
+		}
+
+		const callback = async () => modalStore.openEthSend(modalId);
+		await loadTokenAndRun({ token, callback });
+	};
+</script>
+
+<SendButtonWithModal open={async (modalId) => await openSend(modalId)} isOpen={$modalEthSend}>
+	<EthSendModal on:nnsClose slot="modal" />
+</SendButtonWithModal>

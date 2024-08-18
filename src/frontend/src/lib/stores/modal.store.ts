@@ -1,5 +1,4 @@
-import type { Readable } from 'svelte/store';
-import { writable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export interface Modal<T> {
 	type:
@@ -10,6 +9,7 @@ export interface Modal<T> {
 		| 'cketh-receive'
 		| 'receive'
 		| 'send'
+		| 'eth-send'
 		| 'convert-ckbtc-btc'
 		| 'convert-to-twin-token-cketh'
 		| 'convert-to-twin-token-eth'
@@ -26,7 +26,8 @@ export interface Modal<T> {
 		| 'token'
 		| 'ic-token'
 		| 'receive-bitcoin'
-		| 'about';
+		| 'about-what'
+		| 'about-how';
 	data?: T;
 }
 
@@ -40,6 +41,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openCkETHReceive: <D extends T>(data: D) => void;
 	openReceive: <D extends T>(data: D) => void;
 	openSend: <D extends T>(data: D) => void;
+	openEthSend: <D extends T>(data: D) => void;
 	openConvertCkBTCToBTC: () => void;
 	openConvertToTwinTokenCkEth: () => void;
 	openConvertToTwinTokenEth: () => void;
@@ -56,7 +58,8 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openToken: () => void;
 	openIcToken: () => void;
 	openReceiveBitcoin: () => void;
-	openAbout: () => void;
+	openAboutWhat: () => void;
+	openAboutHow: () => void;
 	close: () => void;
 }
 
@@ -71,6 +74,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openCkETHReceive: <D extends T>(data: D) => set({ type: 'cketh-receive', data }),
 		openReceive: <D extends T>(data: D) => set({ type: 'receive', data }),
 		openSend: <D extends T>(data: D) => set({ type: 'send', data }),
+		openEthSend: <D extends T>(data: D) => set({ type: 'eth-send', data }),
 		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
 		openConvertToTwinTokenCkEth: () => set({ type: 'convert-to-twin-token-cketh' }),
 		openConvertToTwinTokenEth: () => set({ type: 'convert-to-twin-token-eth' }),
@@ -87,7 +91,8 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openToken: () => set({ type: 'token' }),
 		openIcToken: () => set({ type: 'ic-token' }),
 		openReceiveBitcoin: () => set({ type: 'receive-bitcoin' }),
-		openAbout: () => set({ type: 'about' }),
+		openAboutWhat: () => set({ type: 'about-what' }),
+		openAboutHow: () => set({ type: 'about-how' }),
 		close: () => set(null),
 		subscribe
 	};

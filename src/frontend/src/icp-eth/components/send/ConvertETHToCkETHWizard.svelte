@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { address } from '$lib/derived/address.derived';
-	import SendTokenWizard from '$eth/components/send/SendTokenWizard.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import type { Network } from '$lib/types/network';
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
@@ -22,7 +22,7 @@
 	$: steps = howToConvertWizardSteps({ i18n: $i18n, twinToken: $ckEthereumTwinToken });
 </script>
 
-<SendTokenWizard
+<EthSendTokenWizard
 	{currentStep}
 	sourceNetwork={$ckEthereumTwinTokenNetwork}
 	nativeEthereumToken={$ckEthereumNativeToken}
@@ -37,8 +37,8 @@
 	formCancelAction="back"
 >
 	{#if currentStep?.name === steps[1].name}
-		<ReceiveAddressQRCode address={$address ?? ''} on:icBack />
+		<ReceiveAddressQRCode address={$ethAddress ?? ''} on:icBack />
 	{:else}
 		<slot />
 	{/if}
-</SendTokenWizard>
+</EthSendTokenWizard>

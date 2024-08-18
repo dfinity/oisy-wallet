@@ -1,16 +1,75 @@
 use candid::{CandidType, Deserialize, Principal};
+use ic_cdk_timers::TimerId;
 use std::fmt::Debug;
+use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
+
+pub type Timestamp = u64;
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug, Ord, PartialOrd)]
+pub enum CredentialType {
+    ProofOfUniqueness,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct SupportedCredential {
+    pub credential_type: CredentialType,
+    pub ii_origin: String,
+    pub ii_canister_id: Principal,
+    pub issuer_origin: String,
+    pub issuer_canister_id: Principal,
+}
 
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
     pub ecdsa_key_name: String,
     pub allowed_callers: Vec<Principal>,
+    pub supported_credentials: Option<Vec<SupportedCredential>>,
+    /// Root of trust for checking canister signatures.
+    pub ic_root_key_der: Option<Vec<u8>>,
+    /// Enables or disables APIs
+    pub api: Option<Guards>,
+}
+
+#[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
+#[repr(u8)]
+pub enum ApiEnabled {
+    Enabled,
+    ReadOnly,
+    Disabled,
+}
+
+#[derive(CandidType, Deserialize, Default, Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Guards {
+    pub threshold_key: ApiEnabled,
+    pub user_data: ApiEnabled,
+}
+#[test]
+fn guards_default() {
+    assert_eq!(
+        Guards::default(),
+        Guards {
+            threshold_key: ApiEnabled::Enabled,
+            user_data: ApiEnabled::Enabled,
+        }
+    );
 }
 
 #[derive(CandidType, Deserialize)]
 pub enum Arg {
     Init(InitArg),
     Upgrade,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub struct Config {
+    pub ecdsa_key_name: String,
+    // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
+    pub allowed_callers: Vec<Principal>,
+    pub supported_credentials: Option<Vec<SupportedCredential>>,
+    /// Root of trust for checking canister signatures.
+    pub ic_root_key_raw: Option<Vec<u8>>,
+    /// Enables or disables APIs
+    pub api: Option<Guards>,
 }
 
 pub mod transaction {
@@ -44,7 +103,7 @@ pub trait TokenVersion: Debug {
         Self: Sized + Clone;
 }
 
-/// Erc20 specific user defined tokens
+/// ERC20 specific user defined tokens
 pub mod token {
     use crate::types::Version;
     use candid::{CandidType, Deserialize};
@@ -103,43 +162,55 @@ pub mod custom_token {
 
 /// Types specifics to the user profile.
 pub mod user_profile {
+    use super::{CredentialType, Timestamp};
     use crate::types::Version;
     use candid::{CandidType, Deserialize, Principal};
+    use ic_verifiable_credentials::issuer_api::CredentialSpec;
     use std::collections::BTreeMap;
-
-    pub type CredentialType = String;
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserCredential {
         pub credential_type: CredentialType,
-        pub verified_date_timestamp: Option<u64>,
-        pub expire_date_timestamp: Option<u64>,
+        pub verified_date_timestamp: Option<Timestamp>,
+        pub issuer: String,
     }
 
     // Used in the endpoint
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct UserProfile {
         pub credentials: Vec<UserCredential>,
-        pub created_timestamp: u64,
-        pub updated_timestamp: u64,
+        pub created_timestamp: Timestamp,
+        pub updated_timestamp: Timestamp,
         pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct StoredUserProfile {
         pub credentials: BTreeMap<CredentialType, UserCredential>,
-        pub created_timestamp: u64,
-        pub updated_timestamp: u64,
+        pub created_timestamp: Timestamp,
+        pub updated_timestamp: Timestamp,
+        pub version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub struct AddUserCredentialRequest {
         pub credential_jwt: String,
+        pub credential_spec: CredentialSpec,
+        pub issuer_canister_id: Principal,
+        pub current_user_version: Option<Version>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct GetUsersRequest {
-        pub updated_after_timestamp: Option<u64>,
+    pub enum AddUserCredentialError {
+        InvalidCredential,
+        ConfigurationError,
+        UserNotFound,
+        VersionMismatch,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct ListUsersRequest {
+        pub updated_after_timestamp: Option<Timestamp>,
         pub matches_max_length: Option<u64>,
     }
 
@@ -147,11 +218,71 @@ pub mod user_profile {
     pub struct OisyUser {
         pub principal: Principal,
         pub pouh_verified: bool,
+        pub updated_timestamp: Timestamp,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-    pub struct GetUsersResponse {
+    pub struct ListUsersResponse {
         pub users: Vec<OisyUser>,
         pub matches_max_length: u64,
     }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum GetUserProfileError {
+        NotFound,
+    }
+}
+
+/// The current state of progress of a user data migration.
+#[derive(
+    CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
+)]
+pub enum MigrationProgress {
+    // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
+    // TODO: Remove warning once the migration has been implemented.
+    /// Migration has been requested.
+    #[default]
+    Pending,
+    /// APIs have been locked on the current canister.
+    Locked,
+    /// APIs have been locked on the target canister.
+    TargetLocked,
+    /// Target canister was empty.
+    TargetPreCheckOk,
+    /// Tokens have been migrated up to (but excluding) the given principal.
+    MigratedUserTokensUpTo(Option<Principal>),
+    /// Custom tokens have been migrated up to (but excluding) the given principal.
+    MigratedCustomTokensUpTo(Option<Principal>),
+    /// Migrated user profile timestamps up to the given principal.
+    MigratedUserTimestampsUpTo(Option<Principal>),
+    /// Migrated user profiles up to the given timestamp/user pair.
+    MigratedUserProfilesUpTo(Option<(Timestamp, Principal)>),
+    /// Checking that the target canister has all the data.
+    CheckingTargetCanister,
+    /// Migration has been completed.
+    Completed,
+}
+
+#[derive(Clone, Eq, PartialEq, Debug)]
+pub struct Migration {
+    /// The canister that data is being migrated to.
+    pub to: Principal,
+    /// The current state of progress of a user data migration.
+    pub progress: MigrationProgress,
+    /// The timer id for the migration.
+    pub timer_id: TimerId,
+}
+
+/// A serializable report of a migration.
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+pub struct MigrationReport {
+    pub to: Principal,
+    pub progress: MigrationProgress,
+}
+
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+pub struct Stats {
+    pub user_profile_count: u64,
+    pub user_token_count: u64,
+    pub custom_token_count: u64,
 }

@@ -7,10 +7,13 @@ import {
 	WALLET_CONNECT_METADATA
 } from '$eth/constants/wallet-connect.constants';
 import type { WalletConnectListener } from '$eth/types/wallet-connect';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import { Core } from '@walletconnect/core';
-import type { JsonRpcResponse } from '@walletconnect/jsonrpc-utils';
-import { formatJsonRpcResult, type ErrorResponse } from '@walletconnect/jsonrpc-utils';
+import {
+	formatJsonRpcResult,
+	type ErrorResponse,
+	type JsonRpcResponse
+} from '@walletconnect/jsonrpc-utils';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { Web3Wallet, type Web3WalletTypes } from '@walletconnect/web3wallet';
 
@@ -21,7 +24,7 @@ export const initWalletConnect = async ({
 	address
 }: {
 	uri: string;
-	address: ETH_ADDRESS;
+	address: EthAddress;
 }): Promise<WalletConnectListener> => {
 	const clearLocalStorage = () => {
 		const keys = Object.keys(localStorage).filter((key) => key.startsWith('wc@'));

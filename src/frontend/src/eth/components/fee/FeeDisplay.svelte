@@ -1,14 +1,12 @@
 <script lang="ts">
-	import type { BigNumber } from '@ethersproject/bignumber';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { fade } from 'svelte/transition';
 	import { getContext, onDestroy } from 'svelte';
-	import { formatToken } from '$lib/utils/format.utils';
-	import type { FeeContext } from '$eth/stores/fee.store';
-	import { FEE_CONTEXT_KEY } from '$eth/stores/fee.store';
-	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 
-	const { maxGasFee, feeSymbolStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { maxGasFee, feeSymbolStore, feeTokenIdStore }: FeeContext =
+		getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let fee: BigNumber | undefined | null = undefined;
 
@@ -46,14 +44,8 @@
 <label for="balance" class="font-bold px-4.5"
 	>Max fee <small>(likely in &lt; 30 seconds)</small>:</label
 >
-<div id="balance" class="font-normal px-4.5 mb-4 break-all" style="min-height: 24px">
-	{#if nonNullish(fee)}
-		<div transition:fade>
-			{formatToken({
-				value: fee,
-				displayDecimals: EIGHT_DECIMALS
-			})}
-			{$feeSymbolStore ?? ''}
-		</div>
+<div id="balance" class="font-normal px-4.5 mb-4 break-all min-h-6">
+	{#if nonNullish(fee) && nonNullish($feeSymbolStore) && nonNullish($feeTokenIdStore)}
+		<FeeAmountDisplay {fee} feeSymbol={$feeSymbolStore} feeTokenId={$feeTokenIdStore} />
 	{/if}
 </div>

@@ -69,7 +69,7 @@ export const mapCkBTCTransaction = ({
 			fromLabel: 'transaction.label.twin_network',
 			typeLabel: isReimbursement
 				? 'transaction.label.reimbursement'
-				: 'transaction.label.twin_token_received',
+				: 'transaction.label.twin_token_converted',
 			status: isReimbursement ? 'reimbursed' : 'executed'
 		};
 	}

@@ -8,13 +8,14 @@
 	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcpTransactionModal from './IcTransactionModal.svelte';
-	import type { IcToken, IcTransactionUi } from '$icp/types/ic';
+	import type { IcTransactionUi } from '$icp/types/ic';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
 	import Info from '$icp/components/info/Info.svelte';
 	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 	import type { ComponentType } from 'svelte';
 	import {
+		tokenAsIcToken,
 		tokenCkBtcLedger,
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
@@ -72,7 +73,7 @@
 			identity: $authStore.identity,
 			maxResults: WALLET_PAGINATION,
 			start: lastId,
-			token: $token as IcToken,
+			token: $tokenAsIcToken,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
 	};

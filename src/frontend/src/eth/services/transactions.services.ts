@@ -3,7 +3,7 @@ import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import { etherscanRests } from '$eth/rest/etherscan.rest';
 import { transactionsStore } from '$eth/stores/transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { address as addressStore } from '$lib/derived/address.derived';
+import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';

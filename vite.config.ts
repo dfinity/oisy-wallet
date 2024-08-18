@@ -1,14 +1,14 @@
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { dirname, resolve } from 'node:path';
-import type { UserConfig } from 'vite';
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { defineViteReplacements, readCanisterIds } from './vite.utils';
 
 // npm run dev = local
 // npm run build = local
 // dfx deploy = local
 // dfx deploy --network ic = ic
+// dfx deploy --network beta = beta
 // dfx deploy --network staging = staging
 const network = process.env.DFX_NETWORK ?? 'local';
 
@@ -39,7 +39,7 @@ const config: UserConfig = {
 					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
 
 					if (
-						['@sveltejs', 'svelte', '@dfinity/gix-components', ...lazy].find((lib) =>
+						['@sveltejs', 'svelte', '@dfinity/gix-components', 'three', ...lazy].find((lib) =>
 							folder.includes(lib)
 						) === undefined &&
 						folder.includes('node_modules')
@@ -72,6 +72,7 @@ const config: UserConfig = {
 		}
 	},
 	optimizeDeps: {
+		include: ['three'],
 		esbuildOptions: {
 			define: {
 				global: 'globalThis'
@@ -96,7 +97,11 @@ export default defineConfig((): UserConfig => {
 	process.env = {
 		...process.env,
 		...loadEnv(
-			network === 'ic' ? 'production' : network === 'staging' ? 'staging' : 'development',
+			network === 'ic'
+				? 'production'
+				: ['beta', 'staging'].includes(network)
+					? network
+					: 'development',
 			process.cwd()
 		),
 		...readCanisterIds({ prefix: 'VITE_' })

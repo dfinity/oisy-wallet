@@ -23,15 +23,14 @@ const buildCsp = (htmlFile) => {
 	writeFileSync(htmlFile, indexHTMLWithCSP);
 };
 
-const removeDefaultCspTag = (indexHtml) => {
-	return indexHtml.replace('<meta http-equiv="content-security-policy" content="">', '');
-};
+const removeDefaultCspTag = (indexHtml) =>
+	indexHtml.replace('<meta http-equiv="content-security-policy" content="">', '');
 
 /**
  * We need a script loader to implement a proper Content Security Policy. See `updateCSP` doc for more information.
  */
-const injectScriptLoader = (indexHtml) => {
-	return indexHtml.replace(
+const injectScriptLoader = (indexHtml) =>
+	indexHtml.replace(
 		'<!-- SCRIPT_LOADER -->',
 		`<script sveltekit-loader>
       const loader = document.createElement("script");
@@ -40,7 +39,6 @@ const injectScriptLoader = (indexHtml) => {
       document.head.appendChild(loader);
     </script>`
 	);
-};
 
 /**
  * Calculating the sh256 value for the preloaded link and whitelisting these seem not to be supported by the Content-Security-Policy.
@@ -122,6 +120,11 @@ const extractStartScript = (htmlFile) => {
 
 /**
  * Inject "Content Security Policy" (CSP) into index.html for production build
+ *
+ * Note about script-src and 'strict-dynamic':
+ * Chrome 40+ / Firefox 31+ / Safari 15.4+ / Edge 15+ supports 'strict-dynamic'.
+ * Safari 15.4 has been released recently - March 15, 2022 - that's why we add 'unsafe-inline' to the rules for backwards compatibility.
+ * Browsers that supports the 'strict-dynamic' rule will ignore these backwards directives (CSP 3).
  */
 const updateCSP = (indexHtml) => {
 	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script>/gm;
@@ -150,7 +153,7 @@ const updateCSP = (indexHtml) => {
         img-src 'self' data:;
         frame-src 'self' ${walletConnectFrameSrc};
         manifest-src 'self';
-        script-src 'unsafe-eval' 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
+        script-src 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};
         base-uri 'self';
         form-action 'none';
         style-src 'self' 'unsafe-inline';

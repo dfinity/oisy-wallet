@@ -3,7 +3,7 @@
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { onDestroy } from 'svelte';
 	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import WalletConnectForm from './WalletConnectForm.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
@@ -25,6 +25,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 
 	export let listener: WalletConnectListener | undefined | null;
 
@@ -86,14 +87,14 @@
 
 		try {
 			// Connect and disconnect buttons are disabled until the address is loaded therefore this should never happens.
-			if (isNullish($address)) {
+			if (isNullish($ethAddress)) {
 				toastsError({
 					msg: { text: $i18n.send.assertion.address_unknown }
 				});
 				return;
 			}
 
-			listener = await initWalletConnectListener({ uri, address: $address });
+			listener = await initWalletConnectListener({ uri, address: $ethAddress });
 		} catch (err: unknown) {
 			toastsError({
 				msg: { text: $i18n.wallet_connect.error.connect },
@@ -131,7 +132,7 @@
 		}
 
 		// Address is not defined. We need it.
-		if (isNullish($address)) {
+		if (isNullish($ethAddress)) {
 			return;
 		}
 
@@ -155,7 +156,7 @@
 		await connect($walletConnectUri);
 	};
 
-	$: $address, $walletConnectUri, $loading, (async () => await uriConnect())();
+	$: $ethAddress, $walletConnectUri, $loading, (async () => await uriConnect())();
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener(uri);
@@ -330,12 +331,16 @@
 
 		close();
 	};
+
+	$: walletConnectPaired.set(nonNullish(listener));
+
+	onDestroy(() => walletConnectPaired.set(false));
 </script>
 
-{#if isNullish(listener)}
-	<WalletConnectButton on:click={modalStore.openWalletConnectAuth}>Connect</WalletConnectButton>
-{:else}
-	<WalletConnectButton on:click={disconnect}>Disconnect</WalletConnectButton>
+{#if nonNullish(listener)}
+	<WalletConnectButton on:click={disconnect}
+		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
+	>
 {/if}
 
 {#if $modalWalletConnectAuth}
