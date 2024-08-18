@@ -1,3 +1,4 @@
+// @ts-ignore
 export const idlFactory = ({ IDL }) => {
   const ApiEnabled = IDL.Variant({
     'ReadOnly' : IDL.Null,
@@ -200,6 +201,7 @@ export const idlFactory = ({ IDL }) => {
     'stats' : IDL.Func([], [Stats], ['query']),
   });
 };
+// @ts-ignore
 export const init = ({ IDL }) => {
   const ApiEnabled = IDL.Variant({
     'ReadOnly' : IDL.Null,
