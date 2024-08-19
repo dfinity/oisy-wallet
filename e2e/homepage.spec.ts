@@ -1,5 +1,4 @@
 import {
-	EXCHANGE_BALANCE_OUTPUT,
 	LOGIN_BUTTON,
 	THREE_BACKGROUND_CANVAS,
 	TOKENS_SKELETONS_INITIALIZED
@@ -18,11 +17,11 @@ const hideHeroAnimation = async (page: Page): Promise<void> => {
 test.describe('logged out user', () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto(testUrl);
+
+		await page.getByTestId(LOGIN_BUTTON).waitFor();
 	});
 
 	test('should display homepage in logged out state', async ({ page }) => {
-		await page.getByTestId(LOGIN_BUTTON).waitFor();
-
 		await hideHeroAnimation(page);
 
 		await expect(page).toHaveScreenshot({
@@ -40,12 +39,11 @@ testWithII.describe('logged in user', () => {
 		await page.goto(testUrl);
 
 		await iiPage.signInWithNewIdentity();
+
+		await page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
 	});
 
 	testWithII('should display homepage in logged in state', async ({ page }) => {
-		await page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
-		await page.getByTestId(EXCHANGE_BALANCE_OUTPUT).waitFor();
-
 		await hideHeroAnimation(page);
 
 		await expect(page).toHaveScreenshot({
