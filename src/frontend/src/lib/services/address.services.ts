@@ -5,6 +5,7 @@ import {
 	getIdbEthAddress,
 	setIdbBtcAddressMainnet,
 	setIdbEthAddress,
+	updateIdbBtcAddressMainnetLastUsage,
 	updateIdbEthAddressLastUsage
 } from '$lib/api/idb.api';
 import { addressStore } from '$lib/stores/address.store';
@@ -17,6 +18,8 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { address } from '@dfinity/ckbtc/dist/candid/bitcoin';
+import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -143,11 +146,17 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 	return { success: true };
 };
 
-export const certifyAddress = async (
-	address: string
-): Promise<{ success: boolean; err?: string }> => {
-	const tokenId = ETHEREUM_TOKEN_ID;
-
+const certifyAddress = async <T extends address>({
+	tokenId,
+	address,
+	getAddress,
+	updateIdbAddressLastUsage
+}: {
+	tokenId: TokenId;
+	address: string;
+	getAddress: (identity: OptionIdentity) => Promise<T>;
+	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
+}): Promise<{ success: boolean; err?: string }> => {
 	try {
 		const { identity } = get(authStore);
 
@@ -157,23 +166,47 @@ export const certifyAddress = async (
 			return { success: false, err: 'Using the dapp with an anonymous user if not supported.' };
 		}
 
-		const certifiedAddress = await getEthAddress(identity);
+		const certifiedAddress = await getAddress(identity);
 
 		if (address.toLowerCase() !== certifiedAddress.toLowerCase()) {
 			return {
 				success: false,
-				err: 'The address used to load the data did not match your actual wallet address, which is why your session was ended. Please sign in again to reload your own data.'
+				err: `The address used to load the data did not match your actual ${tokenId.description} wallet address, which is why your session was ended. Please sign in again to reload your own data.`
 			};
 		}
 
 		addressStore.set({ tokenId, data: { data: address, certified: true } });
 
-		await updateIdbEthAddressLastUsage(identity.getPrincipal());
+		await updateIdbAddressLastUsage(identity.getPrincipal());
 	} catch (err: unknown) {
 		addressStore.reset(tokenId);
 
-		return { success: false, err: 'Error while loading the ETH address.' };
+		return { success: false, err: `Error while loading the ${tokenId.description} address.` };
 	}
 
 	return { success: true };
 };
+
+export const certifyBtcAddressMainnet = async (
+	address: string
+): Promise<{ success: boolean; err?: string }> =>
+	certifyAddress<BtcAddress>({
+		tokenId: BTC_MAINNET_TOKEN_ID,
+		address,
+		getAddress: (identity) =>
+			getBtcAddress({
+				identity,
+				network: { mainnet: null }
+			}),
+		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage
+	});
+
+export const certifyEthAddress = async (
+	address: EthAddress
+): Promise<{ success: boolean; err?: string }> =>
+	certifyAddress<EthAddress>({
+		tokenId: ETHEREUM_TOKEN_ID,
+		address,
+		getAddress: getEthAddress,
+		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
+	});
