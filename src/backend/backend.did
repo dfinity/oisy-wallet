@@ -113,7 +113,6 @@ type SignRequest = record {
 type Stats = record {
   user_profile_count : nat64;
   custom_token_count : nat64;
-  user_timestamps_count : nat64;
   user_token_count : nat64;
 };
 type SupportedCredential = record {
@@ -170,5 +169,4 @@ service : (Arg) -> {
   sign_prehash : (text) -> (text);
   sign_transaction : (SignRequest) -> (text);
   stats : () -> (Stats) query;
-  step_migration : () -> ();
 }

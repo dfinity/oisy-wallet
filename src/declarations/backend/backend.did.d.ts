@@ -112,6 +112,7 @@ export interface OisyUser {
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
+export type Result_2 = { Ok: MigrationReport } | { Err: string };
 export interface SignRequest {
 	to: string;
 	gas: bigint;
@@ -172,6 +173,7 @@ export interface _SERVICE {
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
+	migrate_user_data_to: ActorMethod<[Principal], Result_2>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;

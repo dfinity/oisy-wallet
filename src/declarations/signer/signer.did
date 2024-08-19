@@ -99,6 +99,7 @@ type OisyUser = record {
 };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_2 = variant { Ok : MigrationReport; Err : text };
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -156,6 +157,7 @@ service : (Arg) -> {
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
+  migrate_user_data_to : (principal) -> (Result_2);
   migration : () -> (opt MigrationReport) query;
   personal_sign : (text) -> (text);
   remove_user_token : (UserTokenId) -> ();
