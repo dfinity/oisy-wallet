@@ -47,6 +47,18 @@ impl Default for MigrationTestEnv {
         }
     }
 }
+impl MigrationTestEnv {
+    fn step_migration(&self) {
+            self
+                .old_backend
+                .update::<()>(
+                    controller(),
+                    "step_migration",
+                    ()
+                )
+                .expect("Failed to stop migration tmer")
+    }
+}
 
 #[test]
 fn test_by_default_no_migration_is_in_progress() {
@@ -155,6 +167,17 @@ fn test_migration() {
                 progress: shared::types::MigrationProgress::Pending
             }),
         );
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .update::<Result<(), String>>(
+                    controller(),
+                    "migration_stop_timer",
+                    ()
+                )
+                .expect("Failed to stop migration tmer"),
+            Ok(()),
+        );
         // Migration should be in progress.
         assert_eq!(
             pic_setup
@@ -169,7 +192,7 @@ fn test_migration() {
     }
     // Step the timer: User data writing should be locked.
     {
-        pic_setup.pic.tick();
+        pic_setup.step_migration();
         assert_eq!(
             pic_setup
                 .old_backend
@@ -184,7 +207,7 @@ fn test_migration() {
     }
     // Step the timer: Target canister should be locked.
     {
-        pic_setup.pic.tick();
+        pic_setup.step_migration();
         assert_eq!(
             pic_setup
                 .old_backend
@@ -199,7 +222,7 @@ fn test_migration() {
     }
     // Step the timer: Should have found the target canister to be empty.
     {
-        pic_setup.pic.tick();
+        pic_setup.step_migration();
         assert_eq!(
             pic_setup
                 .old_backend
@@ -213,7 +236,7 @@ fn test_migration() {
     }
     // Step the timer: Should have started the user token migration.
     {
-        pic_setup.pic.tick();
+        pic_setup.step_migration();
         assert_eq!(
             pic_setup
                 .old_backend
@@ -235,12 +258,11 @@ fn test_migration() {
             .query::<Option<MigrationReport>>(controller(), "migration", ())
             .expect("Failed to get migration report")
         {
-            pic_setup.pic.tick();
+            pic_setup.step_migration();
         }
     }
     // Step the timer: Should have started the custom token migration.
     {
-        pic_setup.pic.tick();
         assert_eq!(
             pic_setup
                 .old_backend
@@ -262,12 +284,11 @@ fn test_migration() {
             .query::<Option<MigrationReport>>(controller(), "migration", ())
             .expect("Failed to get migration report")
         {
-            pic_setup.pic.tick();
+            pic_setup.step_migration();
         }
     }
     // Step the timer: Should have started the user timestamp migration migration.
     {
-        pic_setup.pic.tick();
         assert_eq!(
             pic_setup
                 .old_backend
@@ -289,12 +310,11 @@ fn test_migration() {
             .query::<Option<MigrationReport>>(controller(), "migration", ())
             .expect("Failed to get migration report")
         {
-            pic_setup.pic.tick();
+            pic_setup.step_migration();
         }
     }
     // Step the timer: Should have started the user profile migration.
     {
-        pic_setup.pic.tick();
         assert_eq!(
             pic_setup
                 .old_backend
@@ -316,12 +336,11 @@ fn test_migration() {
             .query::<Option<MigrationReport>>(controller(), "migration", ())
             .expect("Failed to get migration report")
         {
-            pic_setup.pic.tick();
+            pic_setup.step_migration();
         }
     }
     // Step the timer: Should be checking the migration.
     {
-        pic_setup.pic.tick();
         assert_eq!(
             pic_setup
                 .old_backend
@@ -336,7 +355,7 @@ fn test_migration() {
     // Step the timer: Migration should be complete, and stay complete.
     {
         for stepnum in 0..5 {
-            pic_setup.pic.tick();
+            pic_setup.step_migration();
             assert_eq!(
                 pic_setup.old_backend.query::<Option<MigrationReport>>(
                     controller(),

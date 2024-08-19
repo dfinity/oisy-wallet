@@ -18,7 +18,7 @@ use ic_cdk::api::management_canister::ecdsa::{
 };
 use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
-use ic_cdk_timers::set_timer_interval;
+use ic_cdk_timers::{clear_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -598,9 +598,8 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
                 Ok(MigrationReport::from(migration))
             }
         } else {
-            let timer_id = set_timer_interval(Duration::from_secs(0), || {
-                ic_cdk::spawn(migrate::step_migration())
-            });
+            let timer_id =
+                set_timer_interval(Duration::from_secs(0), || ic_cdk::spawn(step_migration()));
             let migration = Migration {
                 to,
                 progress: MigrationProgress::Pending,
@@ -611,6 +610,25 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
             Ok(migration_report)
         }
     })
+}
+
+/// Switch off the migration timer; migrate with manual API calls instead.
+#[update(guard = "caller_is_allowed")]
+fn migration_stop_timer() -> Result<(), String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            clear_timer(migration.timer_id);
+            Ok(())
+        } else {
+            Err("no migration in progress".to_string())
+        }
+    })
+}
+
+/// Steps the migration
+#[update(guard = "caller_is_allowed")]
+async fn step_migration() {
+    migrate::step_migration().await;
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
