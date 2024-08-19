@@ -4,4 +4,8 @@ export type BtcAddress = Address;
 
 export type EthAddress = Address;
 
-export type OptionEthAddress = EthAddress | undefined | null;
+export type OptionAddress<T extends Address> = T | undefined | null;
+
+export type OptionBtcAddress = OptionAddress<BtcAddress>;
+
+export type OptionEthAddress = OptionAddress<EthAddress>;
