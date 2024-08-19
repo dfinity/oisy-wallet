@@ -9,7 +9,7 @@ case $ENV in
   WALLET="cvthj-wyaaa-aaaad-aaaaq-cai"
   # For security reasons, mainnet root key will be hardcoded in the signer canister.
   ic_root_key_der="null"
-  # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
+  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
   # Represents more an ID than a URL
   POUH_ISSUER_VC_URL="https://${POUH_ISSUER_CANISTER_ID}.icp0.io/"
   ;;
@@ -32,7 +32,7 @@ case $ENV in
     jq -r '.root_key | reduce .[] as $item ("{ "; "\(.) \($item):nat8;") + " }"')
   echo "Parsed rootkey: ${rootkey_did:0:20}..." >&2
   ic_root_key_der="opt vec $rootkey_did"
-  # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
+  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
   # We use the dummy issuer canister for local development
   POUH_ISSUER_VC_URL="https://dummy-issuer.vc/"
   ;;
