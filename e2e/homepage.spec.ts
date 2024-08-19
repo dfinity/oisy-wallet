@@ -24,9 +24,7 @@ test.describe('logged out user', () => {
 	test('should display homepage in logged out state', async ({ page }) => {
 		await hideHeroAnimation(page);
 
-		await expect(page).toHaveScreenshot({
-			fullPage: true
-		});
+		await expect(page).toHaveScreenshot({ fullPage: true });
 	});
 });
 
@@ -46,8 +44,6 @@ testWithII.describe('logged in user', () => {
 	testWithII('should display homepage in logged in state', async ({ page }) => {
 		await hideHeroAnimation(page);
 
-		await expect(page).toHaveScreenshot({
-			fullPage: true
-		});
+		await expect(page).toHaveScreenshot({ fullPage: true });
 	});
 });
