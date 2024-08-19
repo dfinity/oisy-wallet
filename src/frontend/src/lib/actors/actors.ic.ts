@@ -1,11 +1,8 @@
 import type { _SERVICE as BackendActor } from '$declarations/backend/backend.did';
-import type { _SERVICE as SignerActor } from '$declarations/signer/signer.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
-import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
-import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
-import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
-import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import type { _SERVICE as SignerActor } from '$declarations/signer/signer.did';
+import { BACKEND_CANISTER_ID, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { Actor, type ActorMethod, type ActorSubclass, type Identity } from '@dfinity/agent';
@@ -15,7 +12,7 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import { getAgent } from './agents.ic';
 
-let actors: { backend?: BackendActor, signer?: SignerActor } | undefined | null = undefined;
+let actors: { backend?: BackendActor; signer?: SignerActor } | undefined | null = undefined;
 
 export const getBackendActor = async ({
 	identity,
@@ -75,8 +72,6 @@ export const getSignerActor = async ({
 
 	return signer;
 };
-
-
 
 export const clearActors = () => (actors = null);
 
