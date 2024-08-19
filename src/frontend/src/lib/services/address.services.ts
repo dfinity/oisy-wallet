@@ -17,6 +17,7 @@ import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
 import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import type { Principal } from '@dfinity/principal';
@@ -31,7 +32,7 @@ const loadTokenAddress = async <T extends Address>({
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
 	setIdbAddress: (params: SetIdbAddressParams<T>) => Promise<void>;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
@@ -63,7 +64,7 @@ const loadBtcAddress = async ({
 }: {
 	tokenId: typeof BTC_MAINNET_TOKEN_ID;
 	network: BitcoinNetwork;
-}): Promise<{ success: boolean }> =>
+}): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,
 		getAddress: (identity) =>
@@ -74,13 +75,13 @@ const loadBtcAddress = async ({
 		setIdbAddress: setIdbBtcAddressMainnet
 	});
 
-export const loadBtcAddressMainnet = async (): Promise<{ success: boolean }> =>
+export const loadBtcAddressMainnet = async (): Promise<ResultSuccess> =>
 	loadBtcAddress({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		network: 'mainnet'
 	});
 
-export const loadEthAddress = async (): Promise<{ success: boolean }> =>
+export const loadEthAddress = async (): Promise<ResultSuccess> =>
 	loadTokenAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		getAddress: getEthAddress,
@@ -119,7 +120,7 @@ const loadIdbTokenAddress = async <T extends Address>({
 	tokenId: TokenId;
 	getIdbAddress: (principal: Principal) => Promise<IdbAddress<T> | undefined>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
@@ -152,23 +153,21 @@ const loadIdbTokenAddress = async <T extends Address>({
 	return { success: true };
 };
 
-export const loadIdbBtcAddressMainnet = async (): Promise<{ success: boolean }> =>
+export const loadIdbBtcAddressMainnet = async (): Promise<ResultSuccess> =>
 	loadIdbTokenAddress<BtcAddress>({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		getIdbAddress: getIdbBtcAddressMainnet,
 		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage
 	});
 
-export const loadIdbEthAddress = async (): Promise<{ success: boolean }> =>
+export const loadIdbEthAddress = async (): Promise<ResultSuccess> =>
 	loadIdbTokenAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		getIdbAddress: getIdbEthAddress,
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
 	});
 
-export const certifyAddress = async (
-	address: string
-): Promise<{ success: boolean; err?: string }> => {
+export const certifyAddress = async (address: string): Promise<ResultSuccess<string>> => {
 	const tokenId = ETHEREUM_TOKEN_ID;
 
 	try {

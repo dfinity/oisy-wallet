@@ -8,6 +8,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -18,7 +19,7 @@ export const loadTransactions = async ({
 }: {
 	tokenId: TokenId;
 	networkId: NetworkId;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(tokenId)) {
 		return loadEthTransactions({ networkId, tokenId });
 	}
@@ -32,7 +33,7 @@ const loadEthTransactions = async ({
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
@@ -78,7 +79,7 @@ export const loadErc20Transactions = async ({
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
