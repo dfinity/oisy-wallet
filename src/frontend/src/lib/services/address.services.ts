@@ -18,7 +18,6 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import type { address } from '@dfinity/ckbtc/dist/candid/bitcoin';
 import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -146,14 +145,14 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 	return { success: true };
 };
 
-const certifyAddress = async <T extends address>({
+const certifyAddress = async <T extends Address>({
 	tokenId,
 	address,
 	getAddress,
 	updateIdbAddressLastUsage
 }: {
 	tokenId: TokenId;
-	address: string;
+	address: T;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
 }): Promise<{ success: boolean; err?: string }> => {
