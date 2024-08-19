@@ -9,7 +9,7 @@ case $ENV in
   WALLET="cvthj-wyaaa-aaaad-aaaaq-cai"
   # For security reasons, mainnet root key will be hardcoded in the backend canister.
   ic_root_key_der="null"
-  # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
+  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
   # Represents more an ID than a URL
   POUH_ISSUER_VC_URL="https://${POUH_ISSUER_CANISTER_ID}.icp0.io/"
   ;;
@@ -62,6 +62,7 @@ if [ -n "${ENV+1}" ]; then
      }
   })" --network "$ENV" --wallet "$WALLET"
 else
+  DEFAULT_CANISTER_ID="$(dfx canister id --network staging backend)"
   dfx deploy backend --argument "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
@@ -77,5 +78,5 @@ else
          };
          ic_root_key_der = $ic_root_key_der;
      }
-  })" --specified-id tdxud-2yaaa-aaaad-aadiq-cai
+  })" --specified-id "$DEFAULT_CANISTER_ID"
 fi
