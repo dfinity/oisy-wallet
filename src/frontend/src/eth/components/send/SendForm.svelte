@@ -38,7 +38,13 @@
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<div class="stretch">
 		{#if destinationEditable}
-			<SendDestination bind:destination bind:invalidDestination on:icQRCodeScan />
+			<SendDestination
+				token={$sendToken}
+				{network}
+				bind:destination
+				bind:invalidDestination
+				on:icQRCodeScan
+			/>
 
 			<SendNetworkICP {destination} {sourceNetwork} bind:network />
 		{/if}
