@@ -1,26 +1,41 @@
+import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
-import { getEthAddress } from '$lib/api/backend.api';
-import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from '$lib/api/idb.api';
+import { getBtcAddress, getEthAddress } from '$lib/api/backend.api';
+import {
+	getIdbEthAddress,
+	setIdbBtcAddressMainnet,
+	setIdbEthAddress,
+	updateIdbEthAddressLastUsage
+} from '$lib/api/idb.api';
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { EthAddress } from '$lib/types/address';
+import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
+import type { SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const loadAddress = async (): Promise<{ success: boolean }> => {
-	const tokenId = ETHEREUM_TOKEN_ID;
-
+const loadTokenAddress = async <T extends Address>({
+	tokenId,
+	getAddress,
+	setIdbAddress
+}: {
+	tokenId: TokenId;
+	getAddress: (identity: OptionIdentity) => Promise<T>;
+	setIdbAddress: (params: SetIdbAddressParams<T>) => Promise<void>;
+}): Promise<{ success: boolean }> => {
 	try {
 		const { identity } = get(authStore);
 
-		const address = await getEthAddress(identity);
+		const address = await getAddress(identity);
 		addressStore.set({ tokenId, data: { data: address, certified: true } });
 
-		await saveEthAddressForFutureSignIn({ address, identity });
+		await saveTokenAddressForFutureSignIn({ address, identity, setIdbAddress });
 	} catch (err: unknown) {
 		addressStore.reset(tokenId);
 
@@ -39,19 +54,51 @@ export const loadAddress = async (): Promise<{ success: boolean }> => {
 	return { success: true };
 };
 
-const saveEthAddressForFutureSignIn = async ({
+const loadBtcAddress = async ({
+	tokenId,
+	network
+}: {
+	tokenId: typeof BTC_MAINNET_TOKEN_ID;
+	network: BitcoinNetwork;
+}): Promise<{ success: boolean }> =>
+	loadTokenAddress<BtcAddress>({
+		tokenId,
+		getAddress: (identity) =>
+			getBtcAddress({
+				identity,
+				network: network === 'testnet' ? { testnet: null } : { mainnet: null }
+			}),
+		setIdbAddress: setIdbBtcAddressMainnet
+	});
+
+export const loadBtcAddressMainnet = async (): Promise<{ success: boolean }> =>
+	loadBtcAddress({
+		tokenId: BTC_MAINNET_TOKEN_ID,
+		network: 'mainnet'
+	});
+
+export const loadEthAddress = async (): Promise<{ success: boolean }> =>
+	loadTokenAddress<EthAddress>({
+		tokenId: ETHEREUM_TOKEN_ID,
+		getAddress: getEthAddress,
+		setIdbAddress: setIdbEthAddress
+	});
+
+const saveTokenAddressForFutureSignIn = async <T extends Address>({
 	identity,
-	address
+	address,
+	setIdbAddress
 }: {
 	identity: OptionIdentity;
-	address: EthAddress;
+	address: T;
+	setIdbAddress: (params: SetIdbAddressParams<T>) => Promise<void>;
 }) => {
 	// Should not happen given the current layout and guards. Moreover, the backend throws an error if the caller is anonymous.
 	assertNonNullish(identity, 'Cannot continue without an identity.');
 
 	const now = Date.now();
 
-	await setIdbEthAddress({
+	await setIdbAddress({
 		address: {
 			address,
 			createdAtTimestamp: now,
