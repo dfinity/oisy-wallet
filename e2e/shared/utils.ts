@@ -7,7 +7,5 @@ export const hideHeroAnimation = async (page: Page): Promise<void> => {
 		.evaluate((element) => (element.style.display = 'none'));
 };
 
-export const getInternetIdentityCanisterId = (): string => {
-	// TODO readCanisterIds to get the II canister ID
-	return 'rdmx6-jaaaa-aaaaa-aaadq-cai';
-};
+// TODO: use readCanisterIds to get the II canister ID
+export const getInternetIdentityCanisterId = (): string => 'rdmx6-jaaaa-aaaaa-aaadq-cai';
