@@ -17,6 +17,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { UserTokenState } from '$lib/types/token-toggleable';
+import type { ResultSuccess } from '$lib/types/utils';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -29,7 +30,7 @@ export const loadErc20Tokens = async ({
 };
 
 // TODO(GIX-2740): use environment static metadata
-const loadDefaultErc20Tokens = async (): Promise<{ success: boolean }> => {
+const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	try {
 		type ContractData = Erc20Contract &
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
