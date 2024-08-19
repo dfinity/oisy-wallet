@@ -1,5 +1,6 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
+import { EURC_TOKEN } from '$env/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
@@ -128,7 +129,8 @@ export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	WBTC_TOKEN,
 	USDT_TOKEN,
 	WSTETH_TOKEN,
-	UNI_TOKEN
+	UNI_TOKEN,
+	EURC_TOKEN
 ];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
