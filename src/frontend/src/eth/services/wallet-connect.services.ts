@@ -25,6 +25,7 @@ import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionEthAddress } from '$lib/types/address';
+import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
@@ -55,15 +56,13 @@ export type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
 	progress: (step: ProgressStepsSign) => void;
 };
 
-export const reject = (
-	params: WalletConnectExecuteParams
-): Promise<{ success: boolean; err?: unknown }> =>
+export const reject = (params: WalletConnectExecuteParams): Promise<ResultSuccess> =>
 	execute({
 		params,
 		callback: async ({
 			request,
 			listener
-		}: WalletConnectCallBackParams): Promise<{ success: boolean; err?: unknown }> => {
+		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
 			busy.start();
 
 			const { id, topic } = request;
@@ -92,13 +91,13 @@ export const send = ({
 	sourceNetwork,
 	targetNetwork,
 	...params
-}: WalletConnectSendParams): Promise<{ success: boolean; err?: unknown }> =>
+}: WalletConnectSendParams): Promise<ResultSuccess> =>
 	execute({
 		params,
 		callback: async ({
 			request,
 			listener
-		}: WalletConnectCallBackParams): Promise<{ success: boolean; err?: unknown }> => {
+		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
 			const { id, topic } = request;
 
 			const firstParam = request?.params.request.params?.[0];
@@ -242,13 +241,13 @@ export const signMessage = ({
 	modalNext,
 	progress,
 	...params
-}: WalletConnectSignMessageParams): Promise<{ success: boolean; err?: unknown }> =>
+}: WalletConnectSignMessageParams): Promise<ResultSuccess> =>
 	execute({
 		params,
 		callback: async ({
 			request,
 			listener
-		}: WalletConnectCallBackParams): Promise<{ success: boolean; err?: unknown }> => {
+		}: WalletConnectCallBackParams): Promise<ResultSuccess> => {
 			const {
 				id,
 				topic,
@@ -301,9 +300,9 @@ const execute = async ({
 	toastMsg
 }: {
 	params: WalletConnectExecuteParams;
-	callback: (params: WalletConnectCallBackParams) => Promise<{ success: boolean; err?: unknown }>;
+	callback: (params: WalletConnectCallBackParams) => Promise<ResultSuccess>;
 	toastMsg: string;
-}): Promise<{ success: boolean; err?: unknown }> => {
+}): Promise<ResultSuccess> => {
 	const {
 		wallet_connect: {
 			error: { no_connection_opened, request_not_defined, unexpected_processing_request }
