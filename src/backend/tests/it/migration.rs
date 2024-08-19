@@ -237,7 +237,7 @@ fn test_migration() {
             pic_setup.step_migration();
         }
     }
-    // Should have started the user timestamp migration migration.
+    // Should have started the user timestamp migration.
     {
         pic_setup.assert_migration_progress_is(MigrationProgress::MigratedUserTimestampsUpTo(None));
     }
