@@ -18,7 +18,6 @@ import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -113,17 +112,24 @@ const saveTokenAddressForFutureSignIn = async <T extends Address>({
 };
 
 const loadIdbTokenAddress = async <T extends Address>({
-	identity,
 	tokenId,
 	getIdbAddress,
 	updateIdbAddressLastUsage
 }: {
-	identity: Identity;
 	tokenId: TokenId;
 	getIdbAddress: (principal: Principal) => Promise<IdbAddress<T> | undefined>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
 }): Promise<{ success: boolean }> => {
 	try {
+		const { identity } = get(authStore);
+
+		// Should not happen given the current layout and guards.
+		assertNonNullish(identity, 'Cannot continue without an identity.');
+
+		if (identity.getPrincipal().isAnonymous()) {
+			return { success: false };
+		}
+
 		const idbAddress = await getIdbAddress(identity.getPrincipal());
 
 		if (isNullish(idbAddress)) {
@@ -146,43 +152,19 @@ const loadIdbTokenAddress = async <T extends Address>({
 	return { success: true };
 };
 
-const loadIdbBtcAddressMainnet = async (identity: Identity): Promise<{ success: boolean }> =>
+export const loadIdbBtcAddressMainnet = async (): Promise<{ success: boolean }> =>
 	loadIdbTokenAddress<BtcAddress>({
-		identity,
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		getIdbAddress: getIdbBtcAddressMainnet,
 		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage
 	});
 
-const loadIdbEthAddress = async (identity: Identity): Promise<{ success: boolean }> =>
+export const loadIdbEthAddress = async (): Promise<{ success: boolean }> =>
 	loadIdbTokenAddress<EthAddress>({
-		identity,
 		tokenId: ETHEREUM_TOKEN_ID,
 		getIdbAddress: getIdbEthAddress,
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
 	});
-
-export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
-	try {
-		const { identity } = get(authStore);
-
-		// Should not happen given the current layout and guards.
-		assertNonNullish(identity, 'Cannot continue without an identity.');
-
-		if (identity.getPrincipal().isAnonymous()) {
-			return { success: false };
-		}
-
-		return await loadIdbEthAddress(identity);
-	} catch (err: unknown) {
-		// We silence the error as the dapp will proceed with a standard lookup of the address.
-		console.error(
-			'Error encountered while searching for a locally stored public address in the browser.'
-		);
-
-		return { success: false };
-	}
-};
 
 export const certifyAddress = async (
 	address: string
