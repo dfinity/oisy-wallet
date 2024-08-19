@@ -2,6 +2,7 @@ import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 import { getBtcAddress, getEthAddress } from '$lib/api/backend.api';
 import {
+	getIdbBtcAddressMainnet,
 	getIdbEthAddress,
 	setIdbBtcAddressMainnet,
 	setIdbEthAddress,
@@ -17,7 +18,9 @@ import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
