@@ -145,15 +145,15 @@ export const loadIdbAddress = async (): Promise<{ success: boolean }> => {
 	return { success: true };
 };
 
-const certifyAddress = async <T extends Address>({
+const certifyAddress = async ({
 	tokenId,
 	address,
 	getAddress,
 	updateIdbAddressLastUsage
 }: {
 	tokenId: TokenId;
-	address: T;
-	getAddress: (identity: OptionIdentity) => Promise<T>;
+	address: Address;
+	getAddress: (identity: OptionIdentity) => Promise<Address>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
 }): Promise<{ success: boolean; err?: string }> => {
 	try {
@@ -189,7 +189,7 @@ const certifyAddress = async <T extends Address>({
 export const certifyBtcAddressMainnet = async (
 	address: string
 ): Promise<{ success: boolean; err?: string }> =>
-	certifyAddress<BtcAddress>({
+	certifyAddress({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		address,
 		getAddress: (identity) =>
@@ -203,7 +203,7 @@ export const certifyBtcAddressMainnet = async (
 export const certifyEthAddress = async (
 	address: EthAddress
 ): Promise<{ success: boolean; err?: string }> =>
-	certifyAddress<EthAddress>({
+	certifyAddress({
 		tokenId: ETHEREUM_TOKEN_ID,
 		address,
 		getAddress: getEthAddress,
