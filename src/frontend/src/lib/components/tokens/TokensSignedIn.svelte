@@ -12,6 +12,7 @@
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { pointerEventStore } from '$lib/stores/events.store';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -23,10 +24,7 @@
 	);
 
 	let sortingEnabled = true;
-
-	const enableSortingTokens = () => (sortingEnabled = true);
-
-	const disableSortingTokens = () => (sortingEnabled = false);
+	$: $pointerEventStore, (sortingEnabled = !$pointerEventStore);
 
 	const updateTokensToDisplay = ({
 		tokensToDisplay,
@@ -52,43 +50,18 @@
 
 	let tokensToDisplay: Token[] = [];
 	$: tokensToDisplay = updateTokensToDisplay({ tokensToDisplay, newTokensList: tokens });
-
-	const passiveEvent = (
-		node: HTMLElement,
-		{ event, handler }: { event: string; handler: EventListener }
-	) => {
-		node.addEventListener(event, handler, { passive: true });
-
-		return {
-			destroy() {
-				node.removeEventListener(event, handler);
-			}
-		};
-	};
 </script>
 
 <TokensSkeletons>
-	<div
-		use:passiveEvent={{ event: 'pointerenter', handler: disableSortingTokens }}
-		use:passiveEvent={{ event: 'pointerover', handler: disableSortingTokens }}
-		use:passiveEvent={{ event: 'pointerleave', handler: enableSortingTokens }}
-		use:passiveEvent={{ event: 'focus', handler: disableSortingTokens }}
-		use:passiveEvent={{ event: 'focusin', handler: disableSortingTokens }}
-		use:passiveEvent={{ event: 'focusout', handler: enableSortingTokens }}
-		use:passiveEvent={{ event: 'touchstart', handler: disableSortingTokens }}
-		use:passiveEvent={{ event: 'touchmove', handler: disableSortingTokens }}
-		use:passiveEvent={{ event: 'touchend', handler: enableSortingTokens }}
-	>
-		{#each tokensToDisplay as token (token.id)}
-			<Listener {token}>
-				<div in:fade>
-					<TokenCardWithUrl {token}>
-						<TokenCardContent {token} />
-					</TokenCardWithUrl>
-				</div>
-			</Listener>
-		{/each}
-	</div>
+	{#each tokensToDisplay as token (token.id)}
+		<Listener {token}>
+			<div in:fade>
+				<TokenCardWithUrl {token}>
+					<TokenCardContent {token} />
+				</TokenCardWithUrl>
+			</div>
+		</Listener>
+	{/each}
 
 	{#if tokensToDisplay.length === 0}
 		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
