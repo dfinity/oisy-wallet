@@ -119,6 +119,7 @@ pub async fn step_migration() {
                     // TODO: Check that the target canister has all the data.
                     set_progress(migration.progress.next());
                 }
+                // TODO: Add steps to unlock APIs.
                 MigrationProgress::Completed => {
                     // Migration is complete.
                     clear_timer(migration.timer_id);

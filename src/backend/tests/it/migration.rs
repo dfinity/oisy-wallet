@@ -222,7 +222,7 @@ fn test_migration() {
                 to: pic_setup.new_backend.canister_id(),
                 progress: shared::types::MigrationProgress::MigratedUserTokensUpTo(None),
             })),
-            "Migration should be in progress"
+            "User token migration should be in progress"
         );
     }
     // Keep stepping until the user tokens have been migrated.
@@ -236,6 +236,120 @@ fn test_migration() {
             .expect("Failed to get migration report")
         {
             pic_setup.pic.tick();
+        }
+    }
+    // Step the timer: Should have started the custom token migration.
+    {
+        pic_setup.pic.tick();
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ()),
+            Ok(Some(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::MigratedCustomTokensUpTo(None),
+            })),
+            "Custom token migration should be in progress"
+        );
+    }
+    // Keep stepping until the custom tokens have been migrated.
+    {
+        while let Some(MigrationReport {
+            progress: shared::types::MigrationProgress::MigratedCustomTokensUpTo(_),
+            ..
+        }) = pic_setup
+            .old_backend
+            .query::<Option<MigrationReport>>(controller(), "migration", ())
+            .expect("Failed to get migration report")
+        {
+            pic_setup.pic.tick();
+        }
+    }
+    // Step the timer: Should have started the user timestamp migration migration.
+    {
+        pic_setup.pic.tick();
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ()),
+            Ok(Some(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::MigratedUserTimestampsUpTo(None),
+            })),
+            "User timestamp migration should be in progress"
+        );
+    }
+    // Keep stepping until the user timestamps have been migrated.
+    {
+        while let Some(MigrationReport {
+            progress: shared::types::MigrationProgress::MigratedUserTimestampsUpTo(_),
+            ..
+        }) = pic_setup
+            .old_backend
+            .query::<Option<MigrationReport>>(controller(), "migration", ())
+            .expect("Failed to get migration report")
+        {
+            pic_setup.pic.tick();
+        }
+    }
+    // Step the timer: Should have started the user profile migration.
+    {
+        pic_setup.pic.tick();
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ()),
+            Ok(Some(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::MigratedUserProfilesUpTo(None),
+            })),
+            "User timestamp migration should be in progress"
+        );
+    }
+    // Keep stepping until the user profiles have been migrated.
+    {
+        while let Some(MigrationReport {
+            progress: shared::types::MigrationProgress::MigratedUserProfilesUpTo(_),
+            ..
+        }) = pic_setup
+            .old_backend
+            .query::<Option<MigrationReport>>(controller(), "migration", ())
+            .expect("Failed to get migration report")
+        {
+            pic_setup.pic.tick();
+        }
+    }
+    // Step the timer: Should be checking the migration.
+    {
+        pic_setup.pic.tick();
+        assert_eq!(
+            pic_setup
+                .old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ()),
+            Ok(Some(MigrationReport {
+                to: pic_setup.new_backend.canister_id(),
+                progress: shared::types::MigrationProgress::CheckingTargetCanister,
+            })),
+            "Should be checking that all data bas been migrated to the target canister"
+        );
+    }
+    // Step the timer: Migration should be complete, and stay complete.
+    {
+        for stepnum in 0..5 {
+            pic_setup.pic.tick();
+            assert_eq!(
+                pic_setup.old_backend.query::<Option<MigrationReport>>(
+                    controller(),
+                    "migration",
+                    ()
+                ),
+                Ok(Some(MigrationReport {
+                    to: pic_setup.new_backend.canister_id(),
+                    progress: shared::types::MigrationProgress::Completed,
+                })),
+                "Should be completed {} steps after the migration finished.",
+                stepnum
+            );
         }
     }
 }
