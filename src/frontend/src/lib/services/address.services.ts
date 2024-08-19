@@ -15,7 +15,7 @@ import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
 import type { SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
-import type { SuccessOrNot } from '$lib/types/utils';
+import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
@@ -29,7 +29,7 @@ const loadTokenAddress = async <T extends Address>({
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
 	setIdbAddress: (params: SetIdbAddressParams<T>) => Promise<void>;
-}): Promise<SuccessOrNot> => {
+}): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
@@ -61,7 +61,7 @@ const loadBtcAddress = async ({
 }: {
 	tokenId: typeof BTC_MAINNET_TOKEN_ID;
 	network: BitcoinNetwork;
-}): Promise<SuccessOrNot> =>
+}): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,
 		getAddress: (identity) =>
@@ -72,13 +72,13 @@ const loadBtcAddress = async ({
 		setIdbAddress: setIdbBtcAddressMainnet
 	});
 
-export const loadBtcAddressMainnet = async (): Promise<SuccessOrNot> =>
+export const loadBtcAddressMainnet = async (): Promise<ResultSuccess> =>
 	loadBtcAddress({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		network: 'mainnet'
 	});
 
-export const loadEthAddress = async (): Promise<SuccessOrNot> =>
+export const loadEthAddress = async (): Promise<ResultSuccess> =>
 	loadTokenAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		getAddress: getEthAddress,
@@ -109,7 +109,7 @@ const saveTokenAddressForFutureSignIn = async <T extends Address>({
 	});
 };
 
-export const loadIdbAddress = async (): Promise<SuccessOrNot> => {
+export const loadIdbAddress = async (): Promise<ResultSuccess> => {
 	const tokenId = ETHEREUM_TOKEN_ID;
 
 	try {
@@ -144,7 +144,7 @@ export const loadIdbAddress = async (): Promise<SuccessOrNot> => {
 	return { success: true };
 };
 
-export const certifyAddress = async (address: string): Promise<SuccessOrNot<string>> => {
+export const certifyAddress = async (address: string): Promise<ResultSuccess<string>> => {
 	const tokenId = ETHEREUM_TOKEN_ID;
 
 	try {
