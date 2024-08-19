@@ -598,8 +598,9 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
                 Ok(MigrationReport::from(migration))
             }
         } else {
-            let timer_id =
-                set_timer_interval(Duration::from_secs(0), || ic_cdk::spawn(step_migration()));
+            let timer_id = set_timer_interval(Duration::from_secs(0), || {
+                ic_cdk::spawn(migrate::step_migration())
+            });
             let migration = Migration {
                 to,
                 progress: MigrationProgress::Pending,
@@ -610,12 +611,6 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
             Ok(migration_report)
         }
     })
-}
-
-/// Steps the migration
-#[update(guard = "caller_is_allowed")]
-async fn step_migration() {
-    migrate::step_migration().await;
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
