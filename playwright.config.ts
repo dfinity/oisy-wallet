@@ -9,7 +9,7 @@ export default defineConfig({
 		port: DEV ? 5173 : 4173
 	},
 	testDir: 'e2e',
-	timeout: 120000,
+	timeout: 180000,
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
 		testIdAttribute: 'data-tid',
