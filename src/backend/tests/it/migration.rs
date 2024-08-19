@@ -9,8 +9,7 @@ use crate::{
 use candid::Principal;
 use pocket_ic::PocketIc;
 use shared::types::{
-    custom_token::{CustomToken, IcrcToken, Token},
-    ApiEnabled, Guards, MigrationReport, Stats,
+    custom_token::{CustomToken, IcrcToken, Token}, MigrationReport, Stats,
 };
 
 struct MigrationTestEnv {
