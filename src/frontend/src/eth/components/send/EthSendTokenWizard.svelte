@@ -48,6 +48,7 @@
 	import { decodeQrCode } from '$eth/utils/qr-code.utils';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+	import { isErc20Icp } from '$eth/utils/token.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';
@@ -178,7 +179,7 @@
 		try {
 			await executeSend({
 				from: $ethAddress,
-				to: mapAddressStartsWith0x(destination),
+				to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),
 				progress: (step: ProgressStepsSend) => (sendProgressStep = step),
 				token: $sendToken,
 				amount: parseToken({

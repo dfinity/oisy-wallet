@@ -3,7 +3,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
@@ -28,6 +28,7 @@
 	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { Token } from '$lib/types/token';
+	import { isNetworkICP } from '$lib/utils/network.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -97,7 +98,13 @@
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
-					targetNetwork
+					targetNetwork,
+					to:
+						// When converting "ICP Erc20" to native ICP, the destination address is an "old" ICP hex account identifier.
+						// Therefore, it should not be prefixed with 0x.
+						nonNullish(targetNetwork) && isNetworkICP(targetNetwork)
+							? destination
+							: erc20GasFeeParams.to
 				})
 			});
 		} catch (err: unknown) {
