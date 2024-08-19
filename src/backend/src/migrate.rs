@@ -71,6 +71,7 @@ pub fn bulk_up(data: &[u8]) {
     }
 }
 
+#[allow(clippy::unused_async)] // TODO: remove this once we make real function calls
 pub async fn step_migration() {
     fn set_progress(progress: MigrationProgress) {
         mutate_state(|state| {

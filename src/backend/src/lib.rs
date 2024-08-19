@@ -592,10 +592,10 @@ fn bulk_up(data: Vec<u8>) {
 fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
-            if migration.to != to {
-                Err("migration in progress to a different canister".to_string())
-            } else {
+            if migration.to == to {
                 Ok(MigrationReport::from(migration))
+            } else {
+                Err("migration in progress to a different canister".to_string())
             }
         } else {
             let timer_id =
