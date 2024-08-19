@@ -2,7 +2,7 @@
 	import { Modal, type ProgressStep } from '@dfinity/gix-components';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
-	import { loadEthAddress, loadIdbAddress } from '$lib/services/address.services';
+	import { loadEthAddress, loadIdbEthAddress } from '$lib/services/address.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
@@ -62,7 +62,7 @@
 	let progressModal = false;
 
 	onMount(async () => {
-		const { success: addressIdbSuccess } = await loadIdbAddress();
+		const { success: addressIdbSuccess } = await loadIdbEthAddress();
 
 		if (addressIdbSuccess) {
 			loading.set(false);
