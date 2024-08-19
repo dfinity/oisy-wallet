@@ -58,7 +58,7 @@ const loadBtcAddress = async ({
 	tokenId,
 	network
 }: {
-	tokenId: TokenId;
+	tokenId: typeof BTC_MAINNET_TOKEN_ID;
 	network: BitcoinNetwork;
 }): Promise<{ success: boolean }> =>
 	loadTokenAddress<BtcAddress>({
@@ -66,7 +66,7 @@ const loadBtcAddress = async ({
 		getAddress: (identity) =>
 			getBtcAddress({
 				identity,
-				network: network === 'mainnet' ? { mainnet: null } : { testnet: null }
+				network: network === 'testnet' ? { testnet: null } : { mainnet: null }
 			}),
 		setIdbAddress: setIdbBtcAddressMainnet
 	});
