@@ -1,49 +1,26 @@
-import {
-	LOGIN_BUTTON,
-	THREE_BACKGROUND_CANVAS,
-	TOKENS_SKELETONS_INITIALIZED
-} from '$lib/constants/test-ids.constant';
+import { LOGIN_BUTTON, TOKENS_SKELETONS_INITIALIZED } from '$lib/constants/test-ids.constant';
 import { testWithII } from '@dfinity/internet-identity-playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { DEFAULT_ROOT_URL, HOMEPAGE_URL } from './shared/constants';
+import { getInternetIdentityCanisterId, hideHeroAnimation } from './shared/utils';
 
-const testUrl = '/';
+test('should display homepage in logged out state', async ({ page }) => {
+	await page.goto(HOMEPAGE_URL);
+	await page.getByTestId(LOGIN_BUTTON).waitFor();
 
-const hideHeroAnimation = async (page: Page): Promise<void> => {
-	await page
-		.getByTestId(THREE_BACKGROUND_CANVAS)
-		.evaluate((element) => (element.style.display = 'none'));
-};
+	await hideHeroAnimation(page);
 
-test.describe('logged out user', () => {
-	test.beforeEach(async ({ page }) => {
-		await page.goto(testUrl);
-
-		await page.getByTestId(LOGIN_BUTTON).waitFor();
-	});
-
-	test('should display homepage in logged out state', async ({ page }) => {
-		await hideHeroAnimation(page);
-
-		await expect(page).toHaveScreenshot({ fullPage: true });
-	});
+	await expect(page).toHaveScreenshot({ fullPage: true });
 });
 
-testWithII.describe('logged in user', () => {
-	testWithII.beforeEach(async ({ page, iiPage }) => {
-		const url = 'http://127.0.0.1:4943';
-		const canisterId = 'rdmx6-jaaaa-aaaaa-aaadq-cai';
-		await iiPage.waitReady({ url, canisterId });
+testWithII('should display homepage in logged in state', async ({ page, iiPage }) => {
+	await iiPage.waitReady({ url: DEFAULT_ROOT_URL, canisterId: getInternetIdentityCanisterId() });
 
-		await page.goto(testUrl);
+	await page.goto(HOMEPAGE_URL);
+	await iiPage.signInWithNewIdentity();
+	await page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
 
-		await iiPage.signInWithNewIdentity();
+	await hideHeroAnimation(page);
 
-		await page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
-	});
-
-	testWithII('should display homepage in logged in state', async ({ page }) => {
-		await hideHeroAnimation(page);
-
-		await expect(page).toHaveScreenshot({ fullPage: true });
-	});
+	await expect(page).toHaveScreenshot({ fullPage: true });
 });
