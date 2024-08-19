@@ -12,12 +12,11 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
-import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
+import type { SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -92,7 +91,7 @@ const saveTokenAddressForFutureSignIn = async <T extends Address>({
 }: {
 	identity: OptionIdentity;
 	address: T;
-	setIdbAddress: (params: { address: IdbAddress<T>; principal: Principal }) => Promise<void>;
+	setIdbAddress: (params: SetIdbAddressParams<T>) => Promise<void>;
 }) => {
 	// Should not happen given the current layout and guards. Moreover, the backend throws an error if the caller is anonymous.
 	assertNonNullish(identity, 'Cannot continue without an identity.');
