@@ -94,6 +94,7 @@ fn test_by_default_no_migration_is_in_progress() {
 #[test]
 fn test_migration() {
     let pic_setup = MigrationTestEnv::default();
+    // Create users
     const NUM_USERS: u8 = 20;
     let user_range = 0..NUM_USERS;
     let expected_users = pic_setup.old_backend.create_users(user_range.clone());
@@ -128,8 +129,9 @@ fn test_migration() {
             .update::<()>(user.principal, "set_many_custom_tokens", &custom_tokens)
             .expect("Test setup error: Failed to set user tokens");
     }
-
-    // Initially no migrations should be in progress.
+    // Test the migration.
+    //
+    // Initially no migration should be in progress.
     pic_setup.assert_migration_is(None);
     // There should be users in the old backend.
     assert_eq!(
