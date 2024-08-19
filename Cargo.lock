@@ -1590,9 +1590,9 @@ dependencies = [
 
 [[package]]
 name = "ic-canister-sig-creation"
-version = "1.0.1"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d1fc58d747480967a25810d8a90d460e7e9ea4c669ab0286541a148736513f9"
+checksum = "5db33deb06e0edb366d8d86ef67d7bc1e1759bc7046b0323a33b85b21b8d8d87"
 dependencies = [
  "candid",
  "hex",
