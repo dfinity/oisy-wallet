@@ -167,6 +167,48 @@ export const loadIdbEthAddress = async (): Promise<ResultSuccess> =>
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
 	});
 
+const safeLoadTokenAddress = async ({
+	loadIdbTokenAddress,
+	loadTokenAddress,
+	onIdbNotSuccessful
+}: {
+	loadIdbTokenAddress: () => Promise<ResultSuccess>;
+	loadTokenAddress: () => Promise<ResultSuccess>;
+	onIdbNotSuccessful: () => void;
+}): Promise<ResultSuccess> => {
+	const { success: addressIdbSuccess } = await loadIdbTokenAddress();
+
+	if (addressIdbSuccess) {
+		return { success: true };
+	}
+
+	onIdbNotSuccessful();
+
+	const { success: addressSuccess } = await loadTokenAddress();
+
+	if (addressSuccess) {
+		return { success: true };
+	}
+
+	return { success: false };
+};
+
+export const safeLoadBtcAddressMainnet = async (
+	onIdbNotSuccessful: () => void
+): Promise<ResultSuccess> =>
+	safeLoadTokenAddress({
+		loadIdbTokenAddress: loadIdbBtcAddressMainnet,
+		loadTokenAddress: loadBtcAddressMainnet,
+		onIdbNotSuccessful
+	});
+
+export const safeLoadEthAddress = async (onIdbNotSuccessful: () => void): Promise<ResultSuccess> =>
+	safeLoadTokenAddress({
+		loadIdbTokenAddress: loadIdbEthAddress,
+		loadTokenAddress: loadEthAddress,
+		onIdbNotSuccessful
+	});
+
 export const certifyAddress = async (address: string): Promise<ResultSuccess<string>> => {
 	const tokenId = ETHEREUM_TOKEN_ID;
 
