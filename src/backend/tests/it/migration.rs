@@ -10,7 +10,7 @@ use candid::Principal;
 use pocket_ic::PocketIc;
 use shared::types::{
     custom_token::{CustomToken, IcrcToken, Token},
-    MigrationReport, Stats,
+    MigrationProgress, MigrationReport, Stats,
 };
 
 struct MigrationTestEnv {
@@ -48,10 +48,31 @@ impl Default for MigrationTestEnv {
     }
 }
 impl MigrationTestEnv {
+    /// Steps the migration.
     fn step_migration(&self) {
         self.old_backend
             .update::<()>(controller(), "step_migration", ())
             .expect("Failed to stop migration tmer")
+    }
+    /// Verifies that the migration is in an expected state.
+    fn assert_migration_is(&self, expected: Option<MigrationReport>) {
+        assert_eq!(
+            self.old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ())
+                .expect("Failed to get migration report"),
+            expected,
+        );
+    }
+    /// Verifies that migration progress is as expected.
+    fn assert_migration_progress_is(&self, expected: MigrationProgress) {
+        assert_eq!(
+            self.old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ())
+                .expect("Failed to get migration report")
+                .expect("Migration should be in progress")
+                .progress,
+            expected,
+        );
     }
 }
 
@@ -108,20 +129,7 @@ fn test_migration() {
     }
 
     // Initially no migrations should be in progress.
-    assert_eq!(
-        pic_setup
-            .old_backend
-            .query::<Option<MigrationReport>>(controller(), "migration", ()),
-        Ok(None),
-        "Initially, no migration should be in progress"
-    );
-    assert_eq!(
-        pic_setup
-            .new_backend
-            .query::<Option<MigrationReport>>(controller(), "migration", ()),
-        Ok(None),
-        "Initially, no migration should be in progress"
-    );
+    pic_setup.assert_migration_is(None);
     // There should be users in the old backend.
     assert_eq!(
         pic_setup
@@ -162,6 +170,7 @@ fn test_migration() {
                 progress: shared::types::MigrationProgress::Pending
             }),
         );
+        // Stop the timer so that we can control the migration.
         assert_eq!(
             pic_setup
                 .old_backend
@@ -170,74 +179,29 @@ fn test_migration() {
             Ok(()),
         );
         // Migration should be in progress.
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::Pending,
-            })),
-            "Migration should be in progress"
-        );
+        pic_setup.assert_migration_progress_is(MigrationProgress::Pending);
     }
     // Step the timer: User data writing should be locked.
     {
         pic_setup.step_migration();
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::Locked,
-            })),
-            "Migration should be in progress"
-        );
+        pic_setup.assert_migration_progress_is(MigrationProgress::Locked);
         // TODO: Check that the old backend really is locked.
     }
     // Step the timer: Target canister should be locked.
     {
         pic_setup.step_migration();
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::TargetLocked,
-            })),
-            "Migration should be in progress"
-        );
+        pic_setup.assert_migration_progress_is(MigrationProgress::TargetLocked);
         // TODO: Check that the target really is locked:
     }
     // Step the timer: Should have found the target canister to be empty.
     {
         pic_setup.step_migration();
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::TargetPreCheckOk,
-            })),
-            "Migration should be in progress"
-        );
+        pic_setup.assert_migration_progress_is(MigrationProgress::TargetPreCheckOk);
     }
     // Step the timer: Should have started the user token migration.
     {
         pic_setup.step_migration();
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::MigratedUserTokensUpTo(None),
-            })),
-            "User token migration should be in progress"
-        );
+        pic_setup.assert_migration_progress_is(MigrationProgress::MigratedUserTokensUpTo(None));
     }
     // Keep stepping until the user tokens have been migrated.
     {
@@ -252,18 +216,9 @@ fn test_migration() {
             pic_setup.step_migration();
         }
     }
-    // Step the timer: Should have started the custom token migration.
+    // Should have started the custom token migration.
     {
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::MigratedCustomTokensUpTo(None),
-            })),
-            "Custom token migration should be in progress"
-        );
+        pic_setup.assert_migration_progress_is(MigrationProgress::MigratedCustomTokensUpTo(None));
     }
     // Keep stepping until the custom tokens have been migrated.
     {
@@ -278,18 +233,9 @@ fn test_migration() {
             pic_setup.step_migration();
         }
     }
-    // Step the timer: Should have started the user timestamp migration migration.
+    // Should have started the user timestamp migration migration.
     {
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::MigratedUserTimestampsUpTo(None),
-            })),
-            "User timestamp migration should be in progress"
-        );
+        pic_setup.assert_migration_progress_is(MigrationProgress::MigratedUserTimestampsUpTo(None));
     }
     // Keep stepping until the user timestamps have been migrated.
     {
@@ -304,18 +250,9 @@ fn test_migration() {
             pic_setup.step_migration();
         }
     }
-    // Step the timer: Should have started the user profile migration.
+    // Should have started the user profile migration.
     {
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::MigratedUserProfilesUpTo(None),
-            })),
-            "User timestamp migration should be in progress"
-        );
+        pic_setup.assert_migration_progress_is(MigrationProgress::MigratedUserProfilesUpTo(None));
     }
     // Keep stepping until the user profiles have been migrated.
     {
@@ -330,36 +267,15 @@ fn test_migration() {
             pic_setup.step_migration();
         }
     }
-    // Step the timer: Should be checking the migration.
+    // Should be checking the migration.
     {
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::CheckingTargetCanister,
-            })),
-            "Should be checking that all data bas been migrated to the target canister"
-        );
+        pic_setup.assert_migration_progress_is(MigrationProgress::CheckingTargetCanister);
     }
     // Step the timer: Migration should be complete, and stay complete.
     {
-        for stepnum in 0..5 {
+        for _ in 0..5 {
             pic_setup.step_migration();
-            assert_eq!(
-                pic_setup.old_backend.query::<Option<MigrationReport>>(
-                    controller(),
-                    "migration",
-                    ()
-                ),
-                Ok(Some(MigrationReport {
-                    to: pic_setup.new_backend.canister_id(),
-                    progress: shared::types::MigrationProgress::Completed,
-                })),
-                "Should be completed {} steps after the migration finished.",
-                stepnum
-            );
+            pic_setup.assert_migration_progress_is(MigrationProgress::Completed);
         }
     }
 }
