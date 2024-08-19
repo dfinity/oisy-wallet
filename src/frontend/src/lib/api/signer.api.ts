@@ -1,19 +1,7 @@
-import type {
-	AddUserCredentialError,
-	BitcoinNetwork,
-	CredentialSpec,
-	CustomToken,
-	GetUserProfileError,
-	SignRequest,
-	UserProfile,
-	UserToken
-} from '$declarations/signer/signer.did';
+import type { BitcoinNetwork, SignRequest } from '$declarations/signer/signer.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
-import type { Principal } from '@dfinity/principal';
-import { toNullable, type QueryParams } from '@dfinity/utils';
 
 export const getBtcAddress = async ({
 	identity,

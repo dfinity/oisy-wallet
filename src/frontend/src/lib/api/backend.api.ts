@@ -1,15 +1,12 @@
 import type {
 	AddUserCredentialError,
-	BitcoinNetwork,
 	CredentialSpec,
 	CustomToken,
 	GetUserProfileError,
-	SignRequest,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
-import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
