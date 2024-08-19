@@ -48,6 +48,12 @@ impl Default for MigrationTestEnv {
     }
 }
 impl MigrationTestEnv {
+    /// Gets the old backend migration state.
+    fn migration_state(&self) -> Option<MigrationReport> {
+        self.old_backend
+            .query::<Option<MigrationReport>>(controller(), "migration", ())
+            .expect("Failed to get migration report")
+    }
     /// Steps the migration.
     fn step_migration(&self) {
         self.old_backend
@@ -56,12 +62,7 @@ impl MigrationTestEnv {
     }
     /// Verifies that the migration is in an expected state.
     fn assert_migration_is(&self, expected: Option<MigrationReport>) {
-        assert_eq!(
-            self.old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ())
-                .expect("Failed to get migration report"),
-            expected,
-        );
+        assert_eq!(self.migration_state(), expected,);
     }
     /// Verifies that migration progress is as expected.
     fn assert_migration_progress_is(&self, expected: MigrationProgress) {
@@ -208,10 +209,7 @@ fn test_migration() {
         while let Some(MigrationReport {
             progress: shared::types::MigrationProgress::MigratedUserTokensUpTo(_),
             ..
-        }) = pic_setup
-            .old_backend
-            .query::<Option<MigrationReport>>(controller(), "migration", ())
-            .expect("Failed to get migration report")
+        }) = pic_setup.migration_state()
         {
             pic_setup.step_migration();
         }
@@ -225,10 +223,7 @@ fn test_migration() {
         while let Some(MigrationReport {
             progress: shared::types::MigrationProgress::MigratedCustomTokensUpTo(_),
             ..
-        }) = pic_setup
-            .old_backend
-            .query::<Option<MigrationReport>>(controller(), "migration", ())
-            .expect("Failed to get migration report")
+        }) = pic_setup.migration_state()
         {
             pic_setup.step_migration();
         }
@@ -242,10 +237,7 @@ fn test_migration() {
         while let Some(MigrationReport {
             progress: shared::types::MigrationProgress::MigratedUserTimestampsUpTo(_),
             ..
-        }) = pic_setup
-            .old_backend
-            .query::<Option<MigrationReport>>(controller(), "migration", ())
-            .expect("Failed to get migration report")
+        }) = pic_setup.migration_state()
         {
             pic_setup.step_migration();
         }
@@ -259,10 +251,7 @@ fn test_migration() {
         while let Some(MigrationReport {
             progress: shared::types::MigrationProgress::MigratedUserProfilesUpTo(_),
             ..
-        }) = pic_setup
-            .old_backend
-            .query::<Option<MigrationReport>>(controller(), "migration", ())
-            .expect("Failed to get migration report")
+        }) = pic_setup.migration_state()
         {
             pic_setup.step_migration();
         }
