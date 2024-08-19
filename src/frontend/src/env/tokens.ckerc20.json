@@ -1,5 +1,10 @@
 {
 	"production": {
+		"ckEURC": {
+			"ledgerCanisterId": "pe5t5-diaaa-aaaar-qahwa-cai",
+			"indexCanisterId": "pd4vj-oqaaa-aaaar-qahwq-cai",
+			"erc20ContractAddress": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c"
+		},
 		"ckUNI": {
 			"ledgerCanisterId": "ilzky-ayaaa-aaaar-qahha-cai",
 			"indexCanisterId": "imymm-naaaa-aaaar-qahhq-cai",
