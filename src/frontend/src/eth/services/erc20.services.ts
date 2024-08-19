@@ -29,7 +29,7 @@ export const loadErc20Tokens = async ({
 };
 
 // TODO(GIX-2740): use environment static metadata
-const loadDefaultErc20Tokens = async (): Promise<{ success: boolean }> => {
+const loadDefaultErc20Tokens = async (): Promise<SuccessOrNot> => {
 	try {
 		type ContractData = Erc20Contract &
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
