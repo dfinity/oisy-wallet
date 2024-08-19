@@ -17,6 +17,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { UserTokenState } from '$lib/types/token-toggleable';
+import type { SuccessOrNot } from '$lib/types/utils';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
