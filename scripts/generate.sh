@@ -46,7 +46,7 @@ function install_did_files() {
 # Download .did files listed in dfx.json
 install_did_files
 # Generate bindings
-for canister in backend  frontend  signer; do
+for canister in backend frontend signer; do
   echo "Generating bindings for $canister"
   dfx generate "$canister"
 done
