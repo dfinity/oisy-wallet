@@ -47,7 +47,52 @@ impl Default for MigrationTestEnv {
         }
     }
 }
+
 impl MigrationTestEnv {
+    /// Creates a test environment with the given stats.
+    fn new(stats: &Stats) -> Self {
+        let pic_setup = MigrationTestEnv::default();
+        let Stats {
+            user_profile_count,
+            user_token_count,
+            custom_token_count,
+        } = stats;
+        // Create users
+        let expected_users = pic_setup.old_backend.create_users(
+            0..u8::try_from(*user_profile_count).expect("Test setup requested too many users"),
+        );
+        // Create users with tokens.
+        let user_tokens = vec![MOCK_TOKEN.clone(), ANOTHER_TOKEN.clone()];
+        for user in &expected_users[0..*user_token_count as usize] {
+            pic_setup
+                .old_backend
+                .update::<()>(user.principal, "set_many_user_tokens", &user_tokens)
+                .expect("Test setup error: Failed to set user tokens");
+        }
+        // Create custom tokens
+        let custom_tokens = vec![CustomToken {
+            token: Token::Icrc(IcrcToken {
+                ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
+                index_id: Some(
+                    Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
+                ),
+            }),
+            enabled: true,
+            version: None,
+        }];
+        for user in expected_users
+            .iter()
+            .rev()
+            .take(*custom_token_count as usize)
+        {
+            pic_setup
+                .old_backend
+                .update::<()>(user.principal, "set_many_custom_tokens", &custom_tokens)
+                .expect("Test setup error: Failed to set user tokens");
+        }
+        pic_setup
+    }
+
     /// Gets the old backend migration state.
     fn migration_state(&self) -> Option<MigrationReport> {
         self.old_backend
@@ -93,42 +138,12 @@ fn test_by_default_no_migration_is_in_progress() {
 
 #[test]
 fn test_migration() {
-    let pic_setup = MigrationTestEnv::default();
-    // Create users
-    const NUM_USERS: u8 = 20;
-    let user_range = 0..NUM_USERS;
-    let expected_users = pic_setup.old_backend.create_users(user_range.clone());
-    // Create users with tokens.
-    let user_tokens = vec![MOCK_TOKEN.clone(), ANOTHER_TOKEN.clone()];
-    const NUM_USERS_WITH_TOKENS: usize = 0;
-    for user in &expected_users[0..NUM_USERS_WITH_TOKENS] {
-        pic_setup
-            .old_backend
-            .update::<()>(user.principal, "set_many_user_tokens", &user_tokens)
-            .expect("Test setup error: Failed to set user tokens");
-    }
-    // Create custom tokens
-    const NUM_USERS_WITH_CUSTOM_TOKENS: usize = 0;
-    let custom_tokens = vec![CustomToken {
-        token: Token::Icrc(IcrcToken {
-            ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
-            index_id: Some(
-                Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
-            ),
-        }),
-        enabled: true,
-        version: None,
-    }];
-    for user in expected_users
-        .iter()
-        .rev()
-        .take(NUM_USERS_WITH_CUSTOM_TOKENS)
-    {
-        pic_setup
-            .old_backend
-            .update::<()>(user.principal, "set_many_custom_tokens", &custom_tokens)
-            .expect("Test setup error: Failed to set user tokens");
-    }
+    let stats = Stats {
+        user_profile_count: 20,
+        user_token_count: 10,
+        custom_token_count: 5,
+    };
+    let pic_setup = MigrationTestEnv::new(&stats);
     // Test the migration.
     //
     // Initially no migration should be in progress.
@@ -138,11 +153,7 @@ fn test_migration() {
         pic_setup
             .old_backend
             .query::<Stats>(controller(), "stats", ()),
-        Ok(Stats {
-            user_profile_count: NUM_USERS as u64,
-            custom_token_count: NUM_USERS_WITH_CUSTOM_TOKENS as u64,
-            user_token_count: NUM_USERS_WITH_TOKENS as u64,
-        }),
+        Ok(stats),
         "Initially, there should be users in the old backend"
     );
     // There should be no users in the new backend.
@@ -150,11 +161,7 @@ fn test_migration() {
         pic_setup
             .new_backend
             .query::<Stats>(controller(), "stats", ()),
-        Ok(Stats {
-            user_profile_count: 0,
-            custom_token_count: 0,
-            user_token_count: 0,
-        }),
+        Ok(Stats::default()),
         "Initially, there should be no users in the new backend"
     );
     // Start migration
