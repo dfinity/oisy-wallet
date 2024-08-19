@@ -49,14 +49,9 @@ impl Default for MigrationTestEnv {
 }
 impl MigrationTestEnv {
     fn step_migration(&self) {
-            self
-                .old_backend
-                .update::<()>(
-                    controller(),
-                    "step_migration",
-                    ()
-                )
-                .expect("Failed to stop migration tmer")
+        self.old_backend
+            .update::<()>(controller(), "step_migration", ())
+            .expect("Failed to stop migration tmer")
     }
 }
 
@@ -170,11 +165,7 @@ fn test_migration() {
         assert_eq!(
             pic_setup
                 .old_backend
-                .update::<Result<(), String>>(
-                    controller(),
-                    "migration_stop_timer",
-                    ()
-                )
+                .update::<Result<(), String>>(controller(), "migration_stop_timer", ())
                 .expect("Failed to stop migration tmer"),
             Ok(()),
         );
