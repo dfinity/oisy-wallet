@@ -187,9 +187,7 @@ const certifyAddress = async ({
 	return { success: true };
 };
 
-export const certifyBtcAddressMainnet = async (
-	address: string
-): Promise<{ success: boolean; err?: string }> =>
+export const certifyBtcAddressMainnet = async (address: string): Promise<ResultSuccess<string>> =>
 	certifyAddress({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		address,
@@ -201,9 +199,7 @@ export const certifyBtcAddressMainnet = async (
 		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage
 	});
 
-export const certifyEthAddress = async (
-	address: EthAddress
-): Promise<{ success: boolean; err?: string }> =>
+export const certifyEthAddress = async (address: EthAddress): Promise<ResultSuccess<string>> =>
 	certifyAddress({
 		tokenId: ETHEREUM_TOKEN_ID,
 		address,
