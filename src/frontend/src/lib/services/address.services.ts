@@ -1,6 +1,6 @@
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
-import { getEthAddress } from '$lib/api/signer.api';
 import { getIdbEthAddress, setIdbEthAddress, updateIdbEthAddressLastUsage } from '$lib/api/idb.api';
+import { getEthAddress } from '$lib/api/signer.api';
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
