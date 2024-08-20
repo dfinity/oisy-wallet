@@ -313,7 +313,10 @@ fn test_migration() {
     // Step the migration.  Should be unlocking the source.
     {
         pic_setup.step_migration();
+        // TODO: Verify that the target has been unlocked.
         pic_setup.assert_migration_progress_is(MigrationProgress::Unlocking);
+        pic_setup.step_migration();
+        // TODO: Verify that the source has been unlocked
     }
     // Step the migration: Migration should be complete, and stay complete.
     {
