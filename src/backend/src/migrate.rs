@@ -146,7 +146,7 @@ fn next_user_timestamp_chunk(user_maybe: Option<Principal>) -> Vec<(Principal, T
 }
 
 macro_rules! migrate {
-    ($migration:ident, $chunk:ident, $progress_variant:ident, $chunk_variant:ident) => {
+    ($migration:ident, $chunk:ident, $progress_variant:ident, $chunk_variant:ident) => {{
         let last = $chunk.last().map(|(k, _)| k).cloned();
         let next_state = last
             .map(|last| MigrationProgress::$progress_variant(Some(last)))
@@ -158,7 +158,7 @@ macro_rules! migrate {
             .await
             .expect("failed to bulk up"); // TODO: Handle errors
         set_progress(next_state)
-    };
+    }};
 }
 pub(crate) use migrate;
 
@@ -290,6 +290,6 @@ pub async fn step_migration() -> Result<Option<MigrationProgress>, MigrationErro
             }
         }
         None => return Err(MigrationError::NoMigrationInProgress),
-    }
+    };
     Ok(progress)
 }
