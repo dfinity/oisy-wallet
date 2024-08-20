@@ -189,13 +189,15 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                 }
                 MigrationProgress::Locked => {
                     // Lock the target canister APIs.
-                    let lock_target = Service(migration.to)
+                    Service(migration.to)
                         .set_guards(Guards {
                             threshold_key: ApiEnabled::ReadOnly,
                             user_data: ApiEnabled::ReadOnly,
                         })
-                        .await;
-                    assert!(lock_target.is_ok()); // TODO: Handle errors
+                        .await.map_err(|e| {
+                            eprintln!("Failed to lock target canister: {:?}", e);
+                            MigrationError::TargetLockFailed
+                        })?;
                     set_progress(migration.progress.next());
                 }
                 MigrationProgress::TargetLocked => {

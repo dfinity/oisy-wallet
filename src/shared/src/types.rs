@@ -273,6 +273,8 @@ pub enum MigrationError {
     Unknown,
     /// No migration is in progress.
     NoMigrationInProgress,
+    /// Failed to lock target canister.
+    TargetLockFailed,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]
