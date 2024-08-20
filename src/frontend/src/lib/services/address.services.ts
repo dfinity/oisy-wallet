@@ -91,10 +91,10 @@ const loadEthAddress = async (): Promise<ResultSuccess> =>
 
 export const loadAddresses = async (tokenIds: TokenId[]): Promise<ResultSuccess> => {
 	const results = await Promise.all([
-		...tokenIds
-			.filter((tokenId) => tokenId === BTC_MAINNET_TOKEN_ID)
-			.map(() => loadBtcAddressMainnet()),
-		...tokenIds.filter((tokenId) => tokenId === ETHEREUM_TOKEN_ID).map(() => loadEthAddress())
+		NETWORK_BITCOIN_ENABLED && tokenIds.includes(BTC_MAINNET_TOKEN_ID)
+			? loadBtcAddressMainnet()
+			: Promise.resolve({ success: true }),
+		tokenIds.includes(ETHEREUM_TOKEN_ID) ? loadEthAddress() : Promise.resolve({ success: true })
 	]);
 
 	return { success: results.every(({ success }) => success) };
