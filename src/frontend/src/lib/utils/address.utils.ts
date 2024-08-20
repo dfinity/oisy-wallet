@@ -3,7 +3,7 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { Address, OptionAddress } from '$lib/types/address';
 import type { TokenId } from '$lib/types/token';
 
-export const getNullableAddress = ({
+export const mapAddress = ({
 	$addressStore,
 	tokenId
 }: {
