@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { addressStore } from '$lib/stores/address.store';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { certifyBtcAddressMainnet, certifyEthAddress } from '$lib/services/address.services';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import {
@@ -26,17 +26,20 @@
 				: Promise.resolve({ success: true, err: null })
 		]);
 
-		let err: string | undefined = undefined;
+		const { success, err } = results.reduce(
+			(acc, { success: s, err: e }) => ({
+				success: acc.success && s,
+				err: nonNullish(e) ? (acc.err ? `${acc.err}, ${e}` : e) : acc.err
+			}),
+			{ success: true }
+		);
 
-		results.map(({ success, err: e }) => {
-			if (!success && nonNullish(e)) {
-				err = isNullish(err) ? e : `${err}, ${e}`;
-			}
-		});
-
-		if (nonNullish(err)) {
-			await warnSignOut(err);
+		if (success) {
+			// The addresses are valid
+			return;
 		}
+
+		await warnSignOut(err ?? 'Error while certifying your address');
 	};
 
 	$: $addressStore, (async () => await validateAddress())();
