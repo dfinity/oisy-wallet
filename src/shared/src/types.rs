@@ -279,6 +279,8 @@ pub enum MigrationError {
     CouldNotGetTargetPriorStats,
     /// There were already user profiles in the target canister.
     TargetCanisterNotEmpty,
+    /// Could not get target stats after migration.
+    CouldNotGetTargetPostStats,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]

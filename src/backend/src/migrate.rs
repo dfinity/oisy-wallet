@@ -4,7 +4,6 @@ use crate::{
 };
 use candid::{decode_one, encode_one, CandidType, Principal};
 use ic_cdk_timers::clear_timer;
-use pretty_assertions::assert_eq;
 use serde::Deserialize;
 use shared::{
     backend_api::Service,
@@ -194,7 +193,8 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                             threshold_key: ApiEnabled::ReadOnly,
                             user_data: ApiEnabled::ReadOnly,
                         })
-                        .await.map_err(|e| {
+                        .await
+                        .map_err(|e| {
                             eprintln!("Failed to lock target canister: {:?}", e);
                             MigrationError::TargetLockFailed
                         })?;
@@ -202,10 +202,14 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                 }
                 MigrationProgress::TargetLocked => {
                     // Check that the target canister is empty.
-                    let stats = Service(migration.to).stats().await.map_err(|e| {
-                        eprintln!("Failed to get stats from the target canister: {:?}", e);
-                        MigrationError::CouldNotGetTargetPriorStats
-                    })?.0;
+                    let stats = Service(migration.to)
+                        .stats()
+                        .await
+                        .map_err(|e| {
+                            eprintln!("Failed to get stats from the target canister: {:?}", e);
+                            MigrationError::CouldNotGetTargetPriorStats
+                        })?
+                        .0;
                     if stats.user_profile_count != 0 {
                         return Err(MigrationError::TargetCanisterNotEmpty);
                     }
@@ -237,7 +241,17 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                     migrate!(migration, chunk, MigratedUserProfilesUpTo, UserProfile);
                 }
                 MigrationProgress::CheckingTargetCanister => {
-                    // TODO: Check that the target canister has all the data.
+                    let stats = Service(migration.to)
+                        .stats()
+                        .await
+                        .map_err(|e| {
+                            eprintln!("Failed to get stats from the target canister: {:?}", e);
+                            MigrationError::CouldNotGetTargetPostStats
+                        })?
+                        .0;
+                    if stats.user_profile_count != 0 {
+                        return Err(MigrationError::TargetCanisterNotEmpty);
+                    }
                     set_progress(migration.progress.next());
                 }
                 MigrationProgress::Completed => {
