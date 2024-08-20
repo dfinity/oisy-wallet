@@ -175,6 +175,7 @@ export interface UserTokenId {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
+	btc_balance: ActorMethod<[string, BitcoinNetwork], bigint>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
 	caller_btc_address: ActorMethod<[BitcoinNetwork], string>;
 	caller_eth_address: ActorMethod<[], string>;
