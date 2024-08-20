@@ -156,6 +156,7 @@ export const idlFactory = ({ IDL }) => {
 		progress: MigrationProgress
 	});
 	const Result_2 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
+	const Result_3 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
@@ -192,6 +193,7 @@ export const idlFactory = ({ IDL }) => {
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse], ['query']),
 		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_2], []),
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
+		migration_stop_timer: IDL.Func([], [Result_3], []),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
