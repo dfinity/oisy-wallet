@@ -275,6 +275,10 @@ pub enum MigrationError {
     NoMigrationInProgress,
     /// Failed to lock target canister.
     TargetLockFailed,
+    /// Could not get target stats before starting migration.
+    CouldNotGetTargetPriorStats,
+    /// There were already user profiles in the target canister.
+    TargetCanisterNotEmpty,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]

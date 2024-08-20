@@ -202,11 +202,13 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                 }
                 MigrationProgress::TargetLocked => {
                     // Check that the target canister is empty.
-                    let stats = Service(migration.to).stats().await;
-                    let stats = stats
-                        .expect("failed to get stats from the target canister")
-                        .0; // TODO: Handle errors
-                    assert_eq!(stats.user_profile_count, 0); // TODO: Handle errors
+                    let stats = Service(migration.to).stats().await.map_err(|e| {
+                        eprintln!("Failed to get stats from the target canister: {:?}", e);
+                        MigrationError::CouldNotGetTargetPriorStats
+                    })?.0;
+                    if stats.user_profile_count != 0 {
+                        return Err(MigrationError::TargetCanisterNotEmpty);
+                    }
                     set_progress(migration.progress.next());
                 }
                 MigrationProgress::TargetPreCheckOk => {
