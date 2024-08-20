@@ -13,7 +13,12 @@ import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
+import type {
+	Address,
+	BtcAddress,
+	EthAddress,
+	SafeLoadTokenAddressParams
+} from '$lib/types/address';
 import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
@@ -170,15 +175,16 @@ export const loadIdbEthAddress = async (): Promise<ResultSuccess> =>
 const safeLoadTokenAddress = async ({
 	loadIdbTokenAddress,
 	loadTokenAddress,
-	displayProgressModal
+	displayProgressModal,
+	onIdbSuccess
 }: {
 	loadIdbTokenAddress: () => Promise<ResultSuccess>;
 	loadTokenAddress: () => Promise<ResultSuccess>;
-	displayProgressModal: () => void;
-}): Promise<ResultSuccess> => {
+} & SafeLoadTokenAddressParams): Promise<ResultSuccess> => {
 	const { success: addressIdbSuccess } = await loadIdbTokenAddress();
 
 	if (addressIdbSuccess) {
+		onIdbSuccess();
 		return { success: true };
 	}
 
@@ -194,21 +200,21 @@ const safeLoadTokenAddress = async ({
 };
 
 export const safeLoadBtcAddressMainnet = async (
-	displayProgressModal: () => void
+	params: SafeLoadTokenAddressParams
 ): Promise<ResultSuccess> =>
 	safeLoadTokenAddress({
 		loadIdbTokenAddress: loadIdbBtcAddressMainnet,
 		loadTokenAddress: loadBtcAddressMainnet,
-		displayProgressModal
+		...params
 	});
 
 export const safeLoadEthAddress = async (
-	displayProgressModal: () => void
+	params: SafeLoadTokenAddressParams
 ): Promise<ResultSuccess> =>
 	safeLoadTokenAddress({
 		loadIdbTokenAddress: loadIdbEthAddress,
 		loadTokenAddress: loadEthAddress,
-		displayProgressModal
+		...params
 	});
 
 export const certifyAddress = async (address: string): Promise<ResultSuccess<string>> => {

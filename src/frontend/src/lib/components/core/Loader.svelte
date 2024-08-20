@@ -69,12 +69,24 @@
 		}
 	};
 
+	let idbBtcMainnetSuccess = false;
+	let idbEthSuccess = false;
+
+	$: {
+		if ($loading && idbBtcMainnetSuccess && idbEthSuccess) {
+			loading.set(false);
+		}
+	}
+
 	onMount(async () => {
 		const results = await Promise.all([
 			NETWORK_BITCOIN_ENABLED
-				? safeLoadBtcAddressMainnet(displayProgressModal)
+				? safeLoadBtcAddressMainnet({
+						displayProgressModal,
+						onIdbSuccess: () => (idbBtcMainnetSuccess = true)
+					})
 				: Promise.resolve({ success: true }),
-			safeLoadEthAddress(displayProgressModal)
+			safeLoadEthAddress({ displayProgressModal, onIdbSuccess: () => (idbEthSuccess = true) })
 		]);
 
 		if (results.every(({ success }) => success)) {
