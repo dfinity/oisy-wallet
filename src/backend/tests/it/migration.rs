@@ -185,7 +185,7 @@ fn test_migration() {
             pic_setup
                 .old_backend
                 .update::<Result<(), String>>(controller(), "migration_stop_timer", ())
-                .expect("Failed to stop migration tmer"),
+                .expect("Failed to stop migration timer"),
             Ok(()),
         );
         // Migration should be in progress.
