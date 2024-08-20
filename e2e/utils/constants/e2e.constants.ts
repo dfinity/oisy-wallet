@@ -1,3 +1,7 @@
 export const HOMEPAGE_URL = '/';
 
 export const LOCAL_REPLICA_URL = 'http://127.0.0.1:4943';
+
+export const ABOUT_MODALS_VIEWPORT_WIDTH = 800;
+export const ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT = 930;
+export const ABOUT_HOW_MODAL_VIEWPORT_HEIGHT = 1600;

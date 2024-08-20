@@ -1,10 +1,14 @@
 import {
+	ABOUT_HOW_MODAL,
+	ABOUT_HOW_MODAL_OPEN_BUTTON,
+	ABOUT_WHAT_MODAL,
+	ABOUT_WHAT_MODAL_OPEN_BUTTON,
 	HERO_ANIMATION_CANVAS,
 	LOGIN_BUTTON,
 	TOKENS_SKELETONS_INITIALIZED
 } from '$lib/constants/test-ids.constant';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
-import { type Page } from '@playwright/test';
+import { type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 
 type HomepageParams = {
@@ -42,6 +46,24 @@ abstract class Homepage {
 		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
 	}
 
+	protected async waitForModal({
+		modalOpenButtonTestId,
+		modalTestId
+	}: {
+		modalOpenButtonTestId: string;
+		modalTestId: string;
+	}): Promise<Locator> {
+		await this.#page.getByTestId(modalOpenButtonTestId).click();
+		const modal = this.#page.getByTestId(modalTestId);
+		await modal.waitFor();
+
+		return modal;
+	}
+
+	async setViewportSize(viewportSize: ViewportSize) {
+		await this.#page.setViewportSize(viewportSize);
+	}
+
 	abstract waitForReady(): Promise<void>;
 }
 
@@ -55,6 +77,20 @@ export class HomepageLoggedOut extends Homepage {
 	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForHomepageReady();
+	}
+
+	async waitForAboutHowModal(): Promise<Locator> {
+		return this.waitForModal({
+			modalOpenButtonTestId: ABOUT_HOW_MODAL_OPEN_BUTTON,
+			modalTestId: ABOUT_HOW_MODAL
+		});
+	}
+
+	async waitForAboutWhatModal(): Promise<Locator> {
+		return this.waitForModal({
+			modalOpenButtonTestId: ABOUT_WHAT_MODAL_OPEN_BUTTON,
+			modalTestId: ABOUT_WHAT_MODAL
+		});
 	}
 }
 

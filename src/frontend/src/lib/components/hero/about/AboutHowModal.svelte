@@ -10,9 +10,10 @@
 	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
 	import CoverHow from '$lib/assets/cover-how-it-works.png';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { ABOUT_HOW_MODAL } from '$lib/constants/test-ids.constant';
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal on:nnsClose={modalStore.close} testId={ABOUT_HOW_MODAL}>
 	<svelte:fragment slot="title"
 		><p class="text-xl">{replaceOisyPlaceholders($i18n.about.how.text.title)}</p>
 	</svelte:fragment>
