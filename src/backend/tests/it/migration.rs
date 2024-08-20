@@ -197,31 +197,21 @@ fn test_migration() {
                 progress: shared::types::MigrationProgress::Pending
             }),
         );
-        // Migration should be in progress.
+        // Stop the timer so that we can control the migration.
         assert_eq!(
             pic_setup
                 .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::Pending,
-            })),
-            "Migration should be in progress"
+                .update::<Result<(), String>>(controller(), "migration_stop_timer", ())
+                .expect("Failed to stop migration timer"),
+            Ok(()),
         );
+        // Migration should be in progress.
+        pic_setup.assert_migration_progress_is(MigrationProgress::Pending);
     }
     // Step the timer: User data writing should be locked.
     {
-        pic_setup.pic.tick();
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::Locked,
-            })),
-            "Migration should be in progress"
-        );
+        pic_setup.step_migration();
+        pic_setup.assert_migration_progress_is(MigrationProgress::Locked);
         let old_config = pic_setup
             .old_backend
             .query::<shared::types::Config>(controller(), "config", ())
