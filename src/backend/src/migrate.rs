@@ -16,6 +16,7 @@ use shared::{
 use std::ops::Bound;
 use steps::{
     assert_target_empty, assert_target_has_all_data, lock_migration_target, make_this_readonly,
+    unlock_local, unlock_target,
 };
 pub mod steps;
 
@@ -180,79 +181,58 @@ pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
     }
     let migration = read_state(|s| s.migration.clone());
     let progress = match migration {
-        Some(migration) => {
-            match migration.progress {
-                MigrationProgress::Pending => {
-                    make_this_readonly();
-                    migration.progress.next()
-                }
-                MigrationProgress::LockingTarget => {
-                    lock_migration_target(&migration).await?;
-                    migration.progress.next()
-                }
-                MigrationProgress::CheckingTarget => {
-                    assert_target_empty(&migration).await?;
-                    migration.progress.next()
-                }
-                MigrationProgress::MigratedUserTokensUpTo(last) => {
-                    let chunk = next_user_token_chunk(last);
-                    migrate!(migration, chunk, MigratedUserTokensUpTo, UserToken)
-                }
-                MigrationProgress::MigratedCustomTokensUpTo(last_custom_token) => {
-                    let chunk = next_custom_token_chunk(last_custom_token);
-                    migrate!(migration, chunk, MigratedCustomTokensUpTo, CustomToken)
-                }
-                MigrationProgress::MigratedUserTimestampsUpTo(user_maybe) => {
-                    let chunk = next_user_timestamp_chunk(user_maybe);
-                    migrate!(
-                        migration,
-                        chunk,
-                        MigratedUserTimestampsUpTo,
-                        UserProfileUpdated
-                    )
-                }
-                MigrationProgress::MigratedUserProfilesUpTo(last_user_profile) => {
-                    let chunk = next_user_profile_chunk(last_user_profile);
-                    migrate!(migration, chunk, MigratedUserProfilesUpTo, UserProfile)
-                }
-                MigrationProgress::CheckingDataMigration => {
-                    assert_target_has_all_data(&migration).await?;
-                    migration.progress.next()
-                }
-                MigrationProgress::UnlockingTarget => {
-                    // Unlock the target canister APIs.
-                    Service(migration.to)
-                        .set_guards(Guards {
-                            threshold_key: ApiEnabled::Disabled,
-                            user_data: ApiEnabled::Enabled,
-                        })
-                        .await
-                        .map_err(|e| {
-                            eprintln!("Failed to unlock target canister: {e:?}");
-                            MigrationError::TargetUnlockFailed
-                        })?;
-                    migration.progress.next()
-                }
-                MigrationProgress::Unlocking => {
-                    // Unlock the local canister APIs.
-                    mutate_state(|state| {
-                        modify_state_config(state, |config| {
-                            config.api = Some(Guards {
-                                threshold_key: ApiEnabled::Enabled,
-                                user_data: ApiEnabled::Disabled,
-                            });
-                        });
-                    });
-                    migration.progress.next()
-                }
-                MigrationProgress::Completed => {
-                    // Migration is complete.
-                    clear_timer(migration.timer_id);
-                    migration.progress.next()
-                }
-                MigrationProgress::Failed(e) => return Err(e),
+        Some(migration) => match migration.progress {
+            MigrationProgress::Pending => {
+                make_this_readonly();
+                migration.progress.next()
             }
-        }
+            MigrationProgress::LockingTarget => {
+                lock_migration_target(&migration).await?;
+                migration.progress.next()
+            }
+            MigrationProgress::CheckingTarget => {
+                assert_target_empty(&migration).await?;
+                migration.progress.next()
+            }
+            MigrationProgress::MigratedUserTokensUpTo(last) => {
+                let chunk = next_user_token_chunk(last);
+                migrate!(migration, chunk, MigratedUserTokensUpTo, UserToken)
+            }
+            MigrationProgress::MigratedCustomTokensUpTo(last_custom_token) => {
+                let chunk = next_custom_token_chunk(last_custom_token);
+                migrate!(migration, chunk, MigratedCustomTokensUpTo, CustomToken)
+            }
+            MigrationProgress::MigratedUserTimestampsUpTo(user_maybe) => {
+                let chunk = next_user_timestamp_chunk(user_maybe);
+                migrate!(
+                    migration,
+                    chunk,
+                    MigratedUserTimestampsUpTo,
+                    UserProfileUpdated
+                )
+            }
+            MigrationProgress::MigratedUserProfilesUpTo(last_user_profile) => {
+                let chunk = next_user_profile_chunk(last_user_profile);
+                migrate!(migration, chunk, MigratedUserProfilesUpTo, UserProfile)
+            }
+            MigrationProgress::CheckingDataMigration => {
+                assert_target_has_all_data(&migration).await?;
+                migration.progress.next()
+            }
+            MigrationProgress::UnlockingTarget => {
+                unlock_target(&migration).await?;
+                migration.progress.next()
+            }
+            MigrationProgress::Unlocking => {
+                unlock_local();
+                migration.progress.next()
+            }
+            MigrationProgress::Completed => {
+                clear_timer(migration.timer_id);
+                migration.progress.next()
+            }
+            MigrationProgress::Failed(e) => return Err(e),
+        },
         None => return Err(MigrationError::NoMigrationInProgress),
     };
     set_progress(progress);

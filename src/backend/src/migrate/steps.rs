@@ -65,3 +65,29 @@ pub async fn assert_target_has_all_data(migration: &Migration) -> Result<(), Mig
     }
     Ok(())
 }
+
+/// Unlocks the target canister APIs.
+pub async fn unlock_target(migration: &Migration) -> Result<(), MigrationError> {
+    Service(migration.to)
+        .set_guards(Guards {
+            threshold_key: ApiEnabled::Disabled,
+            user_data: ApiEnabled::Enabled,
+        })
+        .await
+        .map_err(|e| {
+            eprintln!("Failed to unlock target canister: {e:?}");
+            MigrationError::TargetUnlockFailed
+        })
+}
+
+/// Unlocks the local signing APIs.  Disables local user data APIs.
+pub fn unlock_local() {
+    mutate_state(|state| {
+        modify_state_config(state, |config| {
+            config.api = Some(Guards {
+                threshold_key: ApiEnabled::Enabled,
+                user_data: ApiEnabled::Disabled,
+            });
+        });
+    });
+}
