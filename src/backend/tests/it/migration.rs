@@ -238,8 +238,8 @@ fn test_migration() {
         assert_eq!(
             new_config.api,
             Some(Guards {
-                threshold_key: ApiEnabled::ReadOnly,
-                user_data: ApiEnabled::ReadOnly
+                threshold_key: ApiEnabled::Disabled,
+                user_data: ApiEnabled::Disabled
             }),
             "Target canister user data writes should be locked."
         );
