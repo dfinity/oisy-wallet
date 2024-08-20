@@ -625,10 +625,20 @@ fn migration_stop_timer() -> Result<(), String> {
     })
 }
 
-/// Steps the migration
+/// Steps the migration.
+///
+/// On error, the migration is marked as failed and the timer is cleared.
 #[update(guard = "caller_is_allowed")]
 async fn step_migration() {
-    migrate::step_migration().await;
+    if let Err(msg) = migrate::step_migration().await {
+        mutate_state(|s| {
+            if let Some(migration) = &mut s.migration {
+                migration.progress = MigrationProgress::Failed(msg);
+                clear_timer(migration.timer_id);
+            }
+            eprintln!("Migration failed: {msg:?}");
+        })
+    };
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.

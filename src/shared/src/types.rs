@@ -261,6 +261,18 @@ pub enum MigrationProgress {
     CheckingTargetCanister,
     /// Migration has been completed.
     Completed,
+    /// Migration failed.
+    Failed(MigrationError),
+}
+
+#[derive(
+    CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
+)]
+pub enum MigrationError {
+    #[default]
+    Unknown,
+    /// No migration is in progress.
+    NoMigrationInProgress,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]

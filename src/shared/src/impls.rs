@@ -255,6 +255,7 @@ impl MigrationProgress {
             MigrationProgress::CheckingTargetCanister | MigrationProgress::Completed => {
                 MigrationProgress::Completed
             }
+            MigrationProgress::Failed(e) => MigrationProgress::Failed(*e),
         }
     }
 }

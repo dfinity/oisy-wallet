@@ -10,7 +10,7 @@ use shared::{
     backend_api::Service,
     types::{
         custom_token::CustomToken, token::UserToken, user_profile::StoredUserProfile, ApiEnabled,
-        Guards, MigrationProgress, Timestamp,
+        Guards, MigrationError, MigrationProgress, Timestamp,
     },
 };
 use std::ops::Bound;
@@ -163,7 +163,7 @@ macro_rules! migrate {
 }
 pub(crate) use migrate;
 
-pub async fn step_migration() {
+pub async fn step_migration() -> Result<(), MigrationError> {
     fn set_progress(progress: MigrationProgress) {
         mutate_state(|state| {
             state.migration.iter_mut().for_each(|migration| {
@@ -240,10 +240,10 @@ pub async fn step_migration() {
                     // Migration is complete.
                     clear_timer(migration.timer_id);
                 }
+                MigrationProgress::Failed(e) => return Err(e),
             }
         }
-        None => {
-            ic_cdk::trap("migration is not in progress");
-        }
+        None => return Err(MigrationError::NoMigrationInProgress),
     }
+    Ok(())
 }
