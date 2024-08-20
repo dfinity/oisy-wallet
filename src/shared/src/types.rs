@@ -238,17 +238,13 @@ pub mod user_profile {
     CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
 )]
 pub enum MigrationProgress {
-    // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
-    // TODO: Remove warning once the migration has been implemented.
     /// Migration has been requested.
     #[default]
     Pending,
-    /// APIs have been locked on the current canister.
-    Locked,
-    /// APIs have been locked on the target canister.
-    TargetLocked,
-    /// Target canister was empty.
-    TargetPreCheckOk,
+    /// APIs are being locked on the target canister.
+    LockingTarget,
+    /// Checking that the target canister is empty.
+    CheckingTarget,
     /// Tokens have been migrated up to (but excluding) the given principal.
     MigratedUserTokensUpTo(Option<Principal>),
     /// Custom tokens have been migrated up to (but excluding) the given principal.
@@ -258,9 +254,39 @@ pub enum MigrationProgress {
     /// Migrated user profiles up to the given timestamp/user pair.
     MigratedUserProfilesUpTo(Option<(Timestamp, Principal)>),
     /// Checking that the target canister has all the data.
-    CheckingTargetCanister,
+    CheckingDataMigration,
+    /// Unlock user data operations in the target canister.
+    UnlockingTarget,
+    // Unlock signing operations in the current canister.
+    Unlocking,
     /// Migration has been completed.
     Completed,
+    /// Migration failed.
+    Failed(MigrationError),
+}
+
+#[derive(
+    CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
+)]
+pub enum MigrationError {
+    #[default]
+    Unknown,
+    /// No migration is in progress.
+    NoMigrationInProgress,
+    /// Failed to lock target canister.
+    TargetLockFailed,
+    /// Could not get target stats before starting migration.
+    CouldNotGetTargetPriorStats,
+    /// There were already user profiles in the target canister.
+    TargetCanisterNotEmpty(Stats),
+    /// Failed to migrate data.
+    DataMigrationFailed,
+    /// Could not get target stats after migration.
+    CouldNotGetTargetPostStats,
+    /// Target stats do not match source stats.
+    TargetStatsMismatch(Stats, Stats),
+    /// Could not unlock target canister.
+    TargetUnlockFailed,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]

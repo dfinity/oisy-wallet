@@ -139,17 +139,36 @@ export const idlFactory = ({ IDL }) => {
 		users: IDL.Vec(OisyUser),
 		matches_max_length: IDL.Nat64
 	});
+	const Stats = IDL.Record({
+		user_profile_count: IDL.Nat64,
+		custom_token_count: IDL.Nat64,
+		user_timestamps_count: IDL.Nat64,
+		user_token_count: IDL.Nat64
+	});
+	const MigrationError = IDL.Variant({
+		TargetLockFailed: IDL.Null,
+		TargetUnlockFailed: IDL.Null,
+		CouldNotGetTargetPostStats: IDL.Null,
+		CouldNotGetTargetPriorStats: IDL.Null,
+		DataMigrationFailed: IDL.Null,
+		TargetStatsMismatch: IDL.Tuple(Stats, Stats),
+		Unknown: IDL.Null,
+		TargetCanisterNotEmpty: Stats,
+		NoMigrationInProgress: IDL.Null
+	});
 	const MigrationProgress = IDL.Variant({
 		MigratedUserTokensUpTo: IDL.Opt(IDL.Principal),
+		Failed: MigrationError,
 		MigratedUserTimestampsUpTo: IDL.Opt(IDL.Principal),
-		TargetPreCheckOk: IDL.Null,
 		MigratedCustomTokensUpTo: IDL.Opt(IDL.Principal),
-		Locked: IDL.Null,
+		CheckingDataMigration: IDL.Null,
 		MigratedUserProfilesUpTo: IDL.Opt(IDL.Tuple(IDL.Nat64, IDL.Principal)),
-		CheckingTargetCanister: IDL.Null,
-		TargetLocked: IDL.Null,
+		UnlockingTarget: IDL.Null,
+		Unlocking: IDL.Null,
 		Completed: IDL.Null,
-		Pending: IDL.Null
+		Pending: IDL.Null,
+		LockingTarget: IDL.Null,
+		CheckingTarget: IDL.Null
 	});
 	const MigrationReport = IDL.Record({
 		to: IDL.Principal,
@@ -170,12 +189,6 @@ export const idlFactory = ({ IDL }) => {
 		max_fee_per_gas: IDL.Nat,
 		chain_id: IDL.Nat,
 		nonce: IDL.Nat
-	});
-	const Stats = IDL.Record({
-		user_profile_count: IDL.Nat64,
-		custom_token_count: IDL.Nat64,
-		user_timestamps_count: IDL.Nat64,
-		user_token_count: IDL.Nat64
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
