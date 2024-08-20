@@ -13,7 +13,9 @@ use shared::{
         Guards, MigrationError, MigrationProgress, Timestamp,
     },
 };
+use steps::make_this_readonly;
 use std::ops::Bound;
+pub mod steps;
 
 /// A chunk of data to be migrated.
 ///
@@ -179,15 +181,7 @@ pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
         Some(migration) => {
             match migration.progress {
                 MigrationProgress::Pending => {
-                    // Lock the local canister APIs.
-                    mutate_state(|state| {
-                        modify_state_config(state, |config| {
-                            config.api = Some(Guards {
-                                threshold_key: ApiEnabled::ReadOnly,
-                                user_data: ApiEnabled::ReadOnly,
-                            });
-                        });
-                    });
+                    make_this_readonly();
                     migration.progress.next()
                 }
                 MigrationProgress::LockingTarget => {
