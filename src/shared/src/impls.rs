@@ -236,10 +236,9 @@ impl MigrationProgress {
     #[must_use]
     pub fn next(&self) -> Self {
         match self {
-            MigrationProgress::Pending => MigrationProgress::Locked,
-            MigrationProgress::Locked => MigrationProgress::TargetLocked,
-            MigrationProgress::TargetLocked => MigrationProgress::TargetPreCheckOk,
-            MigrationProgress::TargetPreCheckOk => MigrationProgress::MigratedUserTokensUpTo(None),
+            MigrationProgress::Pending => MigrationProgress::LockingTarget,
+            MigrationProgress::LockingTarget => MigrationProgress::CheckingTarget,
+            MigrationProgress::CheckingTarget => MigrationProgress::MigratedUserTokensUpTo(None),
             MigrationProgress::MigratedUserTokensUpTo(_) => {
                 MigrationProgress::MigratedCustomTokensUpTo(None)
             }

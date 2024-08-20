@@ -212,7 +212,7 @@ fn test_migration() {
     // Step the timer: User data writing should be locked.
     {
         pic_setup.step_migration();
-        pic_setup.assert_migration_progress_is(MigrationProgress::Locked);
+        pic_setup.assert_migration_progress_is(MigrationProgress::LockingTarget);
         let old_config = pic_setup
             .old_backend
             .query::<shared::types::Config>(controller(), "config", ())
@@ -229,7 +229,7 @@ fn test_migration() {
     // Step the timer: Target canister should be locked.
     {
         pic_setup.step_migration();
-        pic_setup.assert_migration_progress_is(MigrationProgress::TargetLocked);
+        pic_setup.assert_migration_progress_is(MigrationProgress::CheckingTarget);
         // Check that the target really is locked:
         let new_config = pic_setup
             .new_backend

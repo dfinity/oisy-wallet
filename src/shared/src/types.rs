@@ -238,17 +238,13 @@ pub mod user_profile {
     CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
 )]
 pub enum MigrationProgress {
-    // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
-    // TODO: Remove warning once the migration has been implemented.
     /// Migration has been requested.
     #[default]
     Pending,
-    /// APIs have been locked on the current canister.
-    Locked,
-    /// APIs have been locked on the target canister.
-    TargetLocked,
-    /// Target canister was empty.
-    TargetPreCheckOk,
+    /// APIs are being locked on the target canister.
+    LockingTarget,
+    /// Checking that the target canister is empty.
+    CheckingTarget,
     /// Tokens have been migrated up to (but excluding) the given principal.
     MigratedUserTokensUpTo(Option<Principal>),
     /// Custom tokens have been migrated up to (but excluding) the given principal.

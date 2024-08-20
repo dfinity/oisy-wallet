@@ -186,7 +186,7 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                     });
                     set_progress(migration.progress.next());
                 }
-                MigrationProgress::Locked => {
+                MigrationProgress::LockingTarget => {
                     // Lock the target canister APIs.
                     Service(migration.to)
                         .set_guards(Guards {
@@ -200,7 +200,7 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                         })?;
                     set_progress(migration.progress.next());
                 }
-                MigrationProgress::TargetLocked => {
+                MigrationProgress::CheckingTarget => {
                     // Check that the target canister is empty.
                     let stats = Service(migration.to)
                         .stats()
@@ -213,10 +213,6 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                     if stats.user_profile_count != 0 {
                         return Err(MigrationError::TargetCanisterNotEmpty);
                     }
-                    set_progress(migration.progress.next());
-                }
-                MigrationProgress::TargetPreCheckOk => {
-                    // Start migrating user tokens.
                     set_progress(migration.progress.next());
                 }
                 MigrationProgress::MigratedUserTokensUpTo(last) => {
