@@ -185,21 +185,13 @@ export const loadIdbAddresses = async (): Promise<ResultSuccess<TokenId[]>> => {
 		loadIdbEthAddress()
 	]);
 
-	let success = true;
-	const err: TokenId[] = [];
-
-	results.map(({ success: s, err: e }) => {
-		if (success) {
-			success &&= s;
-			if (s) {
-				return;
-			}
-		}
-
-		if (nonNullish(e)) {
-			err.push(e);
-		}
-	});
+	const { success, err } = results.reduce(
+		(acc, { success: s, err: e }) => ({
+			success: acc.success && s,
+			err: nonNullish(e) ? [...acc.err, e] : acc.err
+		}),
+		{ success: true, err: [] as TokenId[] }
+	);
 
 	return { success, err };
 };
