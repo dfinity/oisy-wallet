@@ -14,7 +14,7 @@ use shared::{
     },
 };
 use std::ops::Bound;
-use steps::{lock_migration_target, make_this_readonly};
+use steps::{assert_target_empty, lock_migration_target, make_this_readonly};
 pub mod steps;
 
 /// A chunk of data to be migrated.
@@ -185,22 +185,12 @@ pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
                     migration.progress.next()
                 }
                 MigrationProgress::LockingTarget => {
-                    lock_migration_target(migration.to).await?;
+                    lock_migration_target(&migration).await?;
                     migration.progress.next()
                 }
                 MigrationProgress::CheckingTarget => {
+                    assert_target_empty(&migration).await?;
                     // Check that the target canister is empty.
-                    let stats = Service(migration.to)
-                        .stats()
-                        .await
-                        .map_err(|e| {
-                            eprintln!("Failed to get stats from the target canister: {:?}", e);
-                            MigrationError::CouldNotGetTargetPriorStats
-                        })?
-                        .0;
-                    if stats.user_profile_count != 0 {
-                        return Err(MigrationError::TargetCanisterNotEmpty(stats));
-                    }
                     migration.progress.next()
                 }
                 MigrationProgress::MigratedUserTokensUpTo(last) => {
