@@ -93,6 +93,7 @@ export type MigrationError =
 	| { TargetUnlockFailed: null }
 	| { CouldNotGetTargetPostStats: null }
 	| { CouldNotGetTargetPriorStats: null }
+	| { DataMigrationFailed: null }
 	| { TargetStatsMismatch: [Stats, Stats] }
 	| { Unknown: null }
 	| { TargetCanisterNotEmpty: Stats }

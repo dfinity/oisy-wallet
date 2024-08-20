@@ -84,6 +84,7 @@ type MigrationError = variant {
   TargetUnlockFailed;
   CouldNotGetTargetPostStats;
   CouldNotGetTargetPriorStats;
+  DataMigrationFailed;
   TargetStatsMismatch : record { Stats; Stats };
   Unknown;
   TargetCanisterNotEmpty : Stats;

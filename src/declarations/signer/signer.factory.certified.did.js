@@ -150,6 +150,7 @@ export const idlFactory = ({ IDL }) => {
 		TargetUnlockFailed: IDL.Null,
 		CouldNotGetTargetPostStats: IDL.Null,
 		CouldNotGetTargetPriorStats: IDL.Null,
+		DataMigrationFailed: IDL.Null,
 		TargetStatsMismatch: IDL.Tuple(Stats, Stats),
 		Unknown: IDL.Null,
 		TargetCanisterNotEmpty: Stats,
