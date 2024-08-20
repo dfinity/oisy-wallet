@@ -5,6 +5,7 @@
 	import { warnSignOut } from '$lib/services/auth.services';
 	import {
 		btcAddressMainnet,
+		btcAddressMainnetData,
 		btcAddressMainnetNotCertified,
 		ethAddress,
 		ethAddressData,
@@ -13,7 +14,7 @@
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env.js';
 
 	const validateAddress = async () => {
-		if (isNullish($btcAddressMainnet) && isNullish($ethAddressData)) {
+		if (isNullish($btcAddressMainnetData) && isNullish($ethAddressData)) {
 			// No address is loaded, we don't have to verify it
 			return;
 		}
