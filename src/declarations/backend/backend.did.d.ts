@@ -88,19 +88,31 @@ export interface ListUsersResponse {
 	users: Array<OisyUser>;
 	matches_max_length: bigint;
 }
+export type MigrationError =
+	| { TargetLockFailed: null }
+	| { TargetUnlockFailed: null }
+	| { CouldNotGetTargetPostStats: null }
+	| { CouldNotGetTargetPriorStats: null }
+	| { DataMigrationFailed: null }
+	| { TargetStatsMismatch: [Stats, Stats] }
+	| { Unknown: null }
+	| { TargetCanisterNotEmpty: Stats }
+	| { NoMigrationInProgress: null };
 export type MigrationProgress =
 	| {
 			MigratedUserTokensUpTo: [] | [Principal];
 	  }
+	| { Failed: MigrationError }
 	| { MigratedUserTimestampsUpTo: [] | [Principal] }
-	| { TargetPreCheckOk: null }
 	| { MigratedCustomTokensUpTo: [] | [Principal] }
-	| { Locked: null }
+	| { CheckingDataMigration: null }
 	| { MigratedUserProfilesUpTo: [] | [[bigint, Principal]] }
-	| { CheckingTargetCanister: null }
-	| { TargetLocked: null }
+	| { UnlockingTarget: null }
+	| { Unlocking: null }
 	| { Completed: null }
-	| { Pending: null };
+	| { Pending: null }
+	| { LockingTarget: null }
+	| { CheckingTarget: null };
 export interface MigrationReport {
 	to: Principal;
 	progress: MigrationProgress;
