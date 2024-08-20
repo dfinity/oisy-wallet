@@ -629,7 +629,7 @@ fn migration_stop_timer() -> Result<(), String> {
 ///
 /// On error, the migration is marked as failed and the timer is cleared.
 #[update(guard = "caller_is_allowed")]
-async fn step_migration() -> Result<(), MigrationError> {
+async fn step_migration() -> Result<Option<MigrationProgress>, MigrationError> {
     let result = migrate::step_migration().await;
     if let Err(msg) = result {
         mutate_state(|s| {
