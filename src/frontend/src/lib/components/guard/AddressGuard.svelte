@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { addressStore } from '$lib/stores/address.store';
 	import { isNullish } from '@dfinity/utils';
-	import { certifyAddress } from '$lib/services/address.services';
+	import { certifyEthAddress } from '$lib/services/address.services';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 
@@ -20,7 +20,7 @@
 			return;
 		}
 
-		const { success, err } = await certifyAddress(ethAddress);
+		const { success, err } = await certifyEthAddress(ethAddress);
 
 		if (success) {
 			// The address is valid

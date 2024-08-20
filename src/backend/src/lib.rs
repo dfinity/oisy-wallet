@@ -18,6 +18,7 @@ use ic_cdk::api::management_canister::ecdsa::{
 };
 use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
+use ic_cdk_timers::{clear_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -37,9 +38,12 @@ use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, Guards, InitArg, Migration, MigrationReport, Stats};
+use shared::types::{
+    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
+};
 use std::cell::RefCell;
 use std::str::FromStr;
+use std::time::Duration;
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -96,7 +100,7 @@ pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
 /// Reads the internal canister configuration, normally set at canister install or upgrade.
 ///
 /// # Panics
-/// - If the config is not initialized.
+/// - If the `STATE.config` is not initialized.
 pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     read_state(|state| {
         f(state
@@ -107,7 +111,7 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
-/// Modifies config, given the state.
+/// Modifies `state.config` with the provided function.
 fn modify_state_config(state: &mut State, f: impl FnOnce(&mut Config)) {
     let config: &Candid<Config> = state
         .config
@@ -578,6 +582,53 @@ fn stats() -> Stats {
 #[allow(clippy::needless_pass_by_value)]
 fn bulk_up(data: Vec<u8>) {
     migrate::bulk_up(&data);
+}
+
+/// Starts user data migration to a given canister.
+///
+/// # Errors
+/// - There is a current migration in progress to a different canister.
+#[update(guard = "caller_is_allowed")]
+fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            if migration.to == to {
+                Ok(MigrationReport::from(migration))
+            } else {
+                Err("migration in progress to a different canister".to_string())
+            }
+        } else {
+            let timer_id =
+                set_timer_interval(Duration::from_secs(0), || ic_cdk::spawn(step_migration()));
+            let migration = Migration {
+                to,
+                progress: MigrationProgress::Pending,
+                timer_id,
+            };
+            let migration_report = MigrationReport::from(&migration);
+            s.migration = Some(migration);
+            Ok(migration_report)
+        }
+    })
+}
+
+/// Switch off the migration timer; migrate with manual API calls instead.
+#[update(guard = "caller_is_allowed")]
+fn migration_stop_timer() -> Result<(), String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            clear_timer(migration.timer_id);
+            Ok(())
+        } else {
+            Err("no migration in progress".to_string())
+        }
+    })
+}
+
+/// Steps the migration
+#[update(guard = "caller_is_allowed")]
+async fn step_migration() {
+    migrate::step_migration().await;
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
