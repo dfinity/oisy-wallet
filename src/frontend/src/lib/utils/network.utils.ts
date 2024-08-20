@@ -8,9 +8,9 @@ import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 
-export const isNetworkICP = ({ id }: Network): boolean => isNetworkIdICP(id);
+export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
 
-export const isNetworkIdICP = (id: NetworkId | undefined): boolean =>
+export const isNetworkIdICP = (id: NetworkId | undefined): id is typeof ICP_NETWORK_ID =>
 	nonNullish(id) && ICP_NETWORK_ID === id;
 
 export const isNetworkIdEthereum = (id: NetworkId | undefined): boolean =>

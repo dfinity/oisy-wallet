@@ -21,7 +21,6 @@
 
 	let nativeIcp: boolean;
 	$: nativeIcp =
-		nonNullish(targetNetwork) &&
 		isNetworkICP(targetNetwork) &&
 		[ERC20_CONTRACT_ICP.address, ERC20_CONTRACT_ICP_GOERLI.address].includes(
 			(token as Erc20Token)?.address

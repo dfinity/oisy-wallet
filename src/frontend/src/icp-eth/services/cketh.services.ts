@@ -3,7 +3,6 @@ import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import type { IcCkMetadata } from '$icp/types/ic';
 import { queryAndUpdate } from '$lib/actors/query.ic';
-import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Network } from '$lib/types/network';
@@ -54,7 +53,7 @@ export const assertCkEthMinterInfoLoaded = ({
 	minterInfo: OptionCertifiedMinterInfo;
 	network: Network | undefined;
 }): { valid: boolean } => {
-	if (!isNetworkICP(network ?? DEFAULT_ETHEREUM_NETWORK)) {
+	if (!isNetworkICP(network)) {
 		return { valid: true };
 	}
 

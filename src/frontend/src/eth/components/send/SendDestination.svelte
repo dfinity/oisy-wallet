@@ -10,7 +10,6 @@
 	import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 	import type { Network } from '$lib/types/network';
 	import { isNetworkICP } from '$lib/utils/network.utils';
-	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { isNullish } from '@dfinity/utils';
 
 	export let token: OptionToken;
@@ -19,7 +18,7 @@
 	export let invalidDestination = false;
 
 	let networkICP = false;
-	$: networkICP = isNetworkICP(network ?? DEFAULT_ETHEREUM_NETWORK);
+	$: networkICP = isNetworkICP(network);
 
 	let erc20Icp = false;
 	$: erc20Icp = isErc20Icp(token);

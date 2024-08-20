@@ -8,9 +8,8 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
-import type { Network } from '$lib/types/network';
-import { isNetworkICP } from '$lib/utils/network.utils';
-import { nonNullish } from '@dfinity/utils';
+import type { Network, NetworkId } from '$lib/types/network';
+import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export interface GetFeeData {
@@ -42,10 +41,11 @@ export const getErc20FeeData = async ({
 	targetNetwork: Network | undefined;
 }): Promise<BigNumber> => {
 	try {
-		const { getFeeData: fn } =
-			nonNullish(targetNetwork) && isNetworkICP(targetNetwork)
-				? infuraErc20IcpProviders(targetNetwork.id)
-				: infuraErc20Providers(targetNetwork?.id ?? sourceNetworkId);
+		const targetNetworkId: NetworkId | undefined = targetNetwork?.id;
+
+		const { getFeeData: fn } = isNetworkIdICP(targetNetworkId)
+			? infuraErc20IcpProviders(targetNetworkId)
+			: infuraErc20Providers(targetNetworkId ?? sourceNetworkId);
 		const fee = await fn(rest);
 
 		// The cross-chain team recommended adding 10% to the fee to provide some buffer for when the transaction is effectively executed.
