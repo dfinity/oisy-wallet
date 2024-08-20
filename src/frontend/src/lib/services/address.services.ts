@@ -185,12 +185,12 @@ export const loadIdbAddresses = async (): Promise<ResultSuccess<TokenId[]>> => {
 		loadIdbEthAddress()
 	]);
 
-	let success = false;
+	let success = true;
 	const err: TokenId[] = [];
 
 	results.map(({ success: s, err: e }) => {
 		if (s) {
-			success ||= s;
+			success &&= s;
 			return;
 		}
 
