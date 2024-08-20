@@ -62,7 +62,7 @@
 	let progressModal = false;
 
 	onMount(async () => {
-		const { success: addressIdbSuccess, err: tokenIdsNotLoaded } = await loadIdbAddresses();
+		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
 
 		if (addressIdbSuccess) {
 			loading.set(false);
@@ -75,7 +75,9 @@
 		// We are loading the BTC and ETH address from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 		progressModal = true;
 
-		const { success: addressSuccess } = await loadAddresses(tokenIdsNotLoaded ?? []);
+		const { success: addressSuccess } = await loadAddresses(
+			err?.map(({ tokenId }) => tokenId) ?? []
+		);
 
 		if (!addressSuccess) {
 			await signOut();

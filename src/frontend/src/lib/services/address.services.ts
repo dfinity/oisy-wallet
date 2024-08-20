@@ -15,7 +15,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
-import { AddressError } from '$lib/types/errors';
+import { LoadIdbAddressError } from '$lib/types/errors';
 import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
@@ -133,7 +133,7 @@ const loadIdbTokenAddress = async <T extends Address>({
 	tokenId: TokenId;
 	getIdbAddress: (principal: Principal) => Promise<IdbAddress<T> | undefined>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
-}): Promise<ResultSuccess<AddressError>> => {
+}): Promise<ResultSuccess<LoadIdbAddressError>> => {
 	try {
 		const { identity } = get(authStore);
 
@@ -141,13 +141,13 @@ const loadIdbTokenAddress = async <T extends Address>({
 		assertNonNullish(identity, 'Cannot continue without an identity.');
 
 		if (identity.getPrincipal().isAnonymous()) {
-			return { success: false, err: new AddressError(tokenId) };
+			return { success: false, err: new LoadIdbAddressError(tokenId) };
 		}
 
 		const idbAddress = await getIdbAddress(identity.getPrincipal());
 
 		if (isNullish(idbAddress)) {
-			return { success: false, err: new AddressError(tokenId) };
+			return { success: false, err: new LoadIdbAddressError(tokenId) };
 		}
 
 		const { address } = idbAddress;
@@ -160,40 +160,40 @@ const loadIdbTokenAddress = async <T extends Address>({
 			`Error encountered while searching for locally stored ${tokenId.description} public address in the browser.`
 		);
 
-		return { success: false, err: new AddressError(tokenId) };
+		return { success: false, err: new LoadIdbAddressError(tokenId) };
 	}
 
 	return { success: true };
 };
 
-const loadIdbBtcAddressMainnet = async (): Promise<ResultSuccess<AddressError>> =>
+const loadIdbBtcAddressMainnet = async (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	loadIdbTokenAddress<BtcAddress>({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		getIdbAddress: getIdbBtcAddressMainnet,
 		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage
 	});
 
-const loadIdbEthAddress = async (): Promise<ResultSuccess<AddressError>> =>
+const loadIdbEthAddress = async (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	loadIdbTokenAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		getIdbAddress: getIdbEthAddress,
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
 	});
 
-export const loadIdbAddresses = async (): Promise<ResultSuccess<TokenId[]>> => {
+export const loadIdbAddresses = async (): Promise<ResultSuccess<LoadIdbAddressError[]>> => {
 	const results = await Promise.all([
 		NETWORK_BITCOIN_ENABLED
 			? loadIdbBtcAddressMainnet()
-			: Promise.resolve<ResultSuccess<AddressError>>({ success: true }),
+			: Promise.resolve<ResultSuccess<LoadIdbAddressError>>({ success: true }),
 		loadIdbEthAddress()
 	]);
 
 	const { success, err } = results.reduce(
 		(acc, { success: s, err: e }) => ({
 			success: acc.success && s,
-			err: nonNullish(e?.tokenId) ? [...acc.err, e?.tokenId] : acc.err
+			err: nonNullish(e) ? [...acc.err, e] : acc.err
 		}),
-		{ success: true, err: [] as TokenId[] }
+		{ success: true, err: [] as LoadIdbAddressError[] }
 	);
 
 	return { success, err };

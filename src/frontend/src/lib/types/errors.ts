@@ -2,12 +2,12 @@ import type { TokenId } from '$lib/types/token';
 
 export class UserProfileNotFoundError extends Error {}
 
-export class AddressError extends Error {
-	tokenId: TokenId;
-
-	constructor(tokenId: TokenId) {
+export class LoadIdbAddressError extends Error {
+	constructor(private readonly _tokenId: TokenId) {
 		super();
-		Object.setPrototypeOf(this, AddressError.prototype);
-		this.tokenId = tokenId;
+	}
+
+	get tokenId(): TokenId {
+		return this._tokenId;
 	}
 }
