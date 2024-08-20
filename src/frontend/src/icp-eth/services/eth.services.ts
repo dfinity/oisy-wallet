@@ -4,9 +4,8 @@ import {
 } from '$env/networks.cketh.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
-import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-
 import type { Erc20Token } from '$eth/types/erc20';
+import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import {
 	mapCkErc20PendingTransaction,
 	mapCkEthPendingTransaction,
