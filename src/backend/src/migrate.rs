@@ -156,7 +156,10 @@ macro_rules! migrate {
         Service($migration.to)
             .bulk_up(migration_bytes)
             .await
-            .expect("failed to bulk up"); // TODO: Handle errors
+            .map_err(|e| {
+                eprintln!("Failed to transfer data {:?}", e);
+                MigrationError::DataMigrationFailed
+            })?;
         set_progress(next_state)
     }};
 }
