@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
-	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
@@ -10,6 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 
 	/**
 	 * Send modal context store
@@ -27,7 +27,7 @@
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={$i18n.convert.text.convert_to_cketh}
 >
-	<IconBurn size="28" slot="icon" />
+	<IconConvert slot="icon" />
 	<span> {$i18n.convert.text.convert_to_cketh} </span>
 </ConvertETH>
 

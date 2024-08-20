@@ -1,6 +1,5 @@
 <script lang="ts">
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
-	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -12,6 +11,7 @@
 	} from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 </script>
 
 <ConvertETH
@@ -21,7 +21,7 @@
 		$token: $ckEthereumTwinToken.symbol
 	})}
 >
-	<IconBurn size="28" slot="icon" />
+	<IconConvert slot="icon" />
 	<span
 		>{replacePlaceholders($i18n.convert.text.convert_to_token, {
 			$token: $ckEthereumTwinToken.symbol
