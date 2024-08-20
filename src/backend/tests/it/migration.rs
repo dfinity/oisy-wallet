@@ -9,8 +9,7 @@ use crate::{
 use candid::Principal;
 use pocket_ic::PocketIc;
 use shared::types::{
-    custom_token::{CustomToken, IcrcToken, Token},
-    ApiEnabled, Guards, MigrationReport, Stats,
+    custom_token::{CustomToken, IcrcToken, Token}, ApiEnabled, Guards, MigrationProgress, MigrationReport, Stats
 };
 
 struct MigrationTestEnv {
@@ -45,6 +44,82 @@ impl Default for MigrationTestEnv {
             old_backend,
             new_backend,
         }
+    }
+}
+
+impl MigrationTestEnv {
+    /// Creates a test environment with the given stats.
+    fn new(stats: &Stats) -> Self {
+        let pic_setup = MigrationTestEnv::default();
+        let Stats {
+            user_profile_count,
+            user_timestamps_count,
+            user_token_count,
+            custom_token_count,
+        } = stats;
+        assert_eq!(user_profile_count, user_timestamps_count, "Test setup failure: Stats indicate that the database is inconsistent.  Donen't affect the migration but should be fixed.");
+        // Create users
+        let expected_users = pic_setup.old_backend.create_users(
+            0..u8::try_from(*user_profile_count).expect("Test setup requested too many users"),
+        );
+        // Create users with tokens.
+        let user_tokens = vec![MOCK_TOKEN.clone(), ANOTHER_TOKEN.clone()];
+        for user in &expected_users[0..*user_token_count as usize] {
+            pic_setup
+                .old_backend
+                .update::<()>(user.principal, "set_many_user_tokens", &user_tokens)
+                .expect("Test setup error: Failed to set user tokens");
+        }
+        // Create custom tokens
+        let custom_tokens = vec![CustomToken {
+            token: Token::Icrc(IcrcToken {
+                ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai".to_string()).unwrap(),
+                index_id: Some(
+                    Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai".to_string()).unwrap(),
+                ),
+            }),
+            enabled: true,
+            version: None,
+        }];
+        for user in expected_users
+            .iter()
+            .rev()
+            .take(*custom_token_count as usize)
+        {
+            pic_setup
+                .old_backend
+                .update::<()>(user.principal, "set_many_custom_tokens", &custom_tokens)
+                .expect("Test setup error: Failed to set user tokens");
+        }
+        pic_setup
+    }
+
+    /// Gets the old backend migration state.
+    fn migration_state(&self) -> Option<MigrationReport> {
+        self.old_backend
+            .query::<Option<MigrationReport>>(controller(), "migration", ())
+            .expect("Failed to get migration report")
+    }
+    /// Steps the migration.
+    fn step_migration(&self) {
+        self.old_backend
+            .update::<()>(controller(), "step_migration", ())
+            .expect("Failed to stop migration tmer")
+    }
+    /// Verifies that the migration is in an expected state.
+    fn assert_migration_is(&self, expected: Option<MigrationReport>) {
+        assert_eq!(self.migration_state(), expected,);
+    }
+    /// Verifies that migration progress is as expected.
+    fn assert_migration_progress_is(&self, expected: MigrationProgress) {
+        assert_eq!(
+            self.old_backend
+                .query::<Option<MigrationReport>>(controller(), "migration", ())
+                .expect("Failed to get migration report")
+                .expect("Migration should be in progress")
+                .progress,
+            expected,
+        );
     }
 }
 
