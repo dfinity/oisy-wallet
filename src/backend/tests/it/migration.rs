@@ -122,6 +122,25 @@ impl MigrationTestEnv {
             expected,
         );
     }
+    /// Verifies that old and new canister locks are as expected.
+    fn assert_canister_locks_are(&self, old: Option<Guards>, new: Option<Guards>, context: &str) {
+        assert_eq!(
+            self.old_backend
+                .query::<shared::types::Config>(controller(), "config", ())
+                .expect("Failed to get config")
+                .api,
+            old,
+            "Old canister locks are not as expected {}", context
+        );
+        assert_eq!(
+            self.new_backend
+                .query::<shared::types::Config>(controller(), "config", ())
+                .expect("Failed to get config")
+                .api,
+            new,
+            "New canister locks are not as expected {}", context
+        );
+    }
 }
 
 #[test]
@@ -213,18 +232,7 @@ fn test_migration() {
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::LockingTarget);
-        let old_config = pic_setup
-            .old_backend
-            .query::<shared::types::Config>(controller(), "config", ())
-            .expect("Failed to get config");
-        assert_eq!(
-            old_config.api,
-            Some(Guards {
-                threshold_key: ApiEnabled::ReadOnly,
-                user_data: ApiEnabled::ReadOnly
-            }),
-            "Local user data writes should be locked."
-        );
+        pic_setup.assert_canister_locks_are(Some(Guards{threshold_key: ApiEnabled::ReadOnly, user_data: ApiEnabled::ReadOnly}), None, "after locking the source canister");
     }
     // Step the migration: Target canister should be locked.
     {
