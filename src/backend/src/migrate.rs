@@ -163,11 +163,17 @@ macro_rules! migrate {
 pub(crate) use migrate;
 
 pub async fn step_migration() -> Result<Option<MigrationProgress>, MigrationError> {
+    /// Sets the progress in the state, if a migration is in progress.
+    ///
+    /// Returns the new progress (if any).
     fn set_progress(progress: MigrationProgress) -> Option<MigrationProgress> {
         mutate_state(|state| {
-            state.migration.iter_mut().for_each(|migration| {
+            if let Some(migration) = &mut state.migration {
                 migration.progress = progress;
-            })
+                Some(progress)
+            } else {
+                None
+            }
         });
         Some(progress)
     }

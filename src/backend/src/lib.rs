@@ -40,7 +40,7 @@ use shared::types::user_profile::{
     ListUsersResponse, OisyUser, UserProfile,
 };
 use shared::types::{
-    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats
+    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
 use std::cell::RefCell;
 use std::str::FromStr;
