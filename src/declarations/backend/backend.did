@@ -79,8 +79,10 @@ type ListUsersResponse = record {
   users : vec OisyUser;
   matches_max_length : nat64;
 };
+type MigrationError = variant { Unknown; NoMigrationInProgress };
 type MigrationProgress = variant {
   MigratedUserTokensUpTo : opt principal;
+  Failed : MigrationError;
   MigratedUserTimestampsUpTo : opt principal;
   TargetPreCheckOk;
   MigratedCustomTokensUpTo : opt principal;

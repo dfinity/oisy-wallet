@@ -139,8 +139,13 @@ export const idlFactory = ({ IDL }) => {
 		users: IDL.Vec(OisyUser),
 		matches_max_length: IDL.Nat64
 	});
+	const MigrationError = IDL.Variant({
+		Unknown: IDL.Null,
+		NoMigrationInProgress: IDL.Null
+	});
 	const MigrationProgress = IDL.Variant({
 		MigratedUserTokensUpTo: IDL.Opt(IDL.Principal),
+		Failed: MigrationError,
 		MigratedUserTimestampsUpTo: IDL.Opt(IDL.Principal),
 		TargetPreCheckOk: IDL.Null,
 		MigratedCustomTokensUpTo: IDL.Opt(IDL.Principal),

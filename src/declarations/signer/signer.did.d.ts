@@ -88,10 +88,12 @@ export interface ListUsersResponse {
 	users: Array<OisyUser>;
 	matches_max_length: bigint;
 }
+export type MigrationError = { Unknown: null } | { NoMigrationInProgress: null };
 export type MigrationProgress =
 	| {
 			MigratedUserTokensUpTo: [] | [Principal];
 	  }
+	| { Failed: MigrationError }
 	| { MigratedUserTimestampsUpTo: [] | [Principal] }
 	| { TargetPreCheckOk: null }
 	| { MigratedCustomTokensUpTo: [] | [Principal] }

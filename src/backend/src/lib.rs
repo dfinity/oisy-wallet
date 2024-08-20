@@ -628,6 +628,7 @@ fn migration_stop_timer() -> Result<(), String> {
 /// Steps the migration.
 ///
 /// On error, the migration is marked as failed and the timer is cleared.
+// TODO: Return the error type.  Needed for testing error conditions.
 #[update(guard = "caller_is_allowed")]
 async fn step_migration() {
     if let Err(msg) = migrate::step_migration().await {
