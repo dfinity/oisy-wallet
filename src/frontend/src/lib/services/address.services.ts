@@ -67,7 +67,7 @@ const loadBtcAddress = async ({
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,
-		getAddress: (identity) =>
+		getAddress: (identity: OptionIdentity) =>
 			getBtcAddress({
 				identity,
 				network: network === 'testnet' ? { testnet: null } : { mainnet: null }
@@ -208,11 +208,13 @@ const certifyAddress = async ({
 	return { success: true };
 };
 
-export const certifyBtcAddressMainnet = async (address: string): Promise<ResultSuccess<string>> =>
+export const certifyBtcAddressMainnet = async (
+	address: BtcAddress
+): Promise<ResultSuccess<string>> =>
 	certifyAddress({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		address,
-		getAddress: (identity) =>
+		getAddress: (identity: OptionIdentity) =>
 			getBtcAddress({
 				identity,
 				network: { mainnet: null }
