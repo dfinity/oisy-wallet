@@ -174,6 +174,7 @@ export const idlFactory = ({ IDL }) => {
 	const Stats = IDL.Record({
 		user_profile_count: IDL.Nat64,
 		custom_token_count: IDL.Nat64,
+		user_timestamps_count: IDL.Nat64,
 		user_token_count: IDL.Nat64
 	});
 	return IDL.Service({
