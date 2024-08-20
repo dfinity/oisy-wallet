@@ -209,7 +209,7 @@ fn test_migration() {
         // Migration should be in progress.
         pic_setup.assert_migration_progress_is(MigrationProgress::Pending);
     }
-    // Step the timer: User data writing should be locked.
+    // Step the migration: User data writing should be locked.
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::LockingTarget);
@@ -226,7 +226,7 @@ fn test_migration() {
             "Local user data writes should be locked."
         );
     }
-    // Step the timer: Target canister should be locked.
+    // Step the migration: Target canister should be locked.
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::CheckingTarget);
@@ -244,7 +244,7 @@ fn test_migration() {
             "Target canister user data writes should be locked."
         );
     }
-    // Step the timer: Should have started the user token migration.
+    // Step the migration: Should have started the user token migration.
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::MigratedUserTokensUpTo(None));
@@ -305,7 +305,17 @@ fn test_migration() {
     {
         pic_setup.assert_migration_progress_is(MigrationProgress::CheckingDataMigration);
     }
-    // Step the timer: Migration should be complete, and stay complete.
+    // Step the migration.  Should be unlocking the target.
+    {
+        pic_setup.step_migration();
+        pic_setup.assert_migration_progress_is(MigrationProgress::UnlockingTarget);
+    }
+    // Step the migration.  Should be unlocking the source.
+    {
+        pic_setup.step_migration();
+        pic_setup.assert_migration_progress_is(MigrationProgress::Unlocking);
+    }
+    // Step the migration: Migration should be complete, and stay complete.
     {
         for _ in 0..5 {
             pic_setup.step_migration();
