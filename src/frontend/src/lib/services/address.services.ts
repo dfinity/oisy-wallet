@@ -170,11 +170,11 @@ export const loadIdbEthAddress = async (): Promise<ResultSuccess> =>
 const safeLoadTokenAddress = async ({
 	loadIdbTokenAddress,
 	loadTokenAddress,
-	onIdbNotSuccessful
+	displayProgressModal
 }: {
 	loadIdbTokenAddress: () => Promise<ResultSuccess>;
 	loadTokenAddress: () => Promise<ResultSuccess>;
-	onIdbNotSuccessful: () => void;
+	displayProgressModal: () => void;
 }): Promise<ResultSuccess> => {
 	const { success: addressIdbSuccess } = await loadIdbTokenAddress();
 
@@ -182,7 +182,7 @@ const safeLoadTokenAddress = async ({
 		return { success: true };
 	}
 
-	onIdbNotSuccessful();
+	displayProgressModal();
 
 	const { success: addressSuccess } = await loadTokenAddress();
 
@@ -194,19 +194,21 @@ const safeLoadTokenAddress = async ({
 };
 
 export const safeLoadBtcAddressMainnet = async (
-	onIdbNotSuccessful: () => void
+	displayProgressModal: () => void
 ): Promise<ResultSuccess> =>
 	safeLoadTokenAddress({
 		loadIdbTokenAddress: loadIdbBtcAddressMainnet,
 		loadTokenAddress: loadBtcAddressMainnet,
-		onIdbNotSuccessful
+		displayProgressModal
 	});
 
-export const safeLoadEthAddress = async (onIdbNotSuccessful: () => void): Promise<ResultSuccess> =>
+export const safeLoadEthAddress = async (
+	displayProgressModal: () => void
+): Promise<ResultSuccess> =>
 	safeLoadTokenAddress({
 		loadIdbTokenAddress: loadIdbEthAddress,
 		loadTokenAddress: loadEthAddress,
-		onIdbNotSuccessful
+		displayProgressModal
 	});
 
 export const certifyAddress = async (address: string): Promise<ResultSuccess<string>> => {

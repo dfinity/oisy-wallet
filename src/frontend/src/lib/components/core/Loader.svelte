@@ -63,14 +63,18 @@
 	let progressModal = false;
 
 	// We are loading the BTC and ETH address from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
-	const setProgressModal = () => (progressModal = true);
+	const displayProgressModal = () => {
+		if (!progressModal) {
+			progressModal = true;
+		}
+	};
 
 	onMount(async () => {
 		const results = await Promise.all([
 			NETWORK_BITCOIN_ENABLED
-				? safeLoadBtcAddressMainnet(setProgressModal)
+				? safeLoadBtcAddressMainnet(displayProgressModal)
 				: Promise.resolve({ success: true }),
-			safeLoadEthAddress(setProgressModal)
+			safeLoadEthAddress(displayProgressModal)
 		]);
 
 		if (results.every(({ success }) => success)) {
