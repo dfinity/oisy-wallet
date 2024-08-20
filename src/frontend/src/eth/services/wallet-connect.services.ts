@@ -7,7 +7,7 @@ import {
 	getSignParamsMessageTypedDataV4Hash
 } from '$eth/utils/wallet-connect.utils';
 import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
-import { signMessage as signMessageApi, signPrehash } from '$lib/api/backend.api';
+import { signMessage as signMessageApi, signPrehash } from '$lib/api/signer.api';
 import {
 	TRACK_COUNT_WC_ETH_SEND_ERROR,
 	TRACK_COUNT_WC_ETH_SEND_SUCCESS,

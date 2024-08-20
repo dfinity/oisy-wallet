@@ -1,6 +1,5 @@
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
-import { getBtcAddress, getEthAddress } from '$lib/api/backend.api';
 import {
 	getIdbBtcAddressMainnet,
 	getIdbEthAddress,
@@ -9,6 +8,7 @@ import {
 	updateIdbBtcAddressMainnetLastUsage,
 	updateIdbEthAddressLastUsage
 } from '$lib/api/idb.api';
+import { getBtcAddress, getEthAddress } from '$lib/api/signer.api';
 import { addressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
