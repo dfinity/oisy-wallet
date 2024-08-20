@@ -1,26 +1,19 @@
-import { LOGIN_BUTTON, TOKENS_SKELETONS_INITIALIZED } from '$lib/constants/test-ids.constant';
 import { testWithII } from '@dfinity/internet-identity-playwright';
 import { expect, test } from '@playwright/test';
-import { DEFAULT_ROOT_URL, HOMEPAGE_URL } from './shared/constants';
-import { getInternetIdentityCanisterId, hideHeroAnimation } from './shared/utils';
+import { Homepage, HomepageLoggedIn } from './utils/pages/homepage.page';
 
 test('should display homepage in logged out state', async ({ page }) => {
-	await page.goto(HOMEPAGE_URL);
-	await page.getByTestId(LOGIN_BUTTON).waitFor();
+	const homepage = new Homepage(page);
 
-	await hideHeroAnimation(page);
+	await homepage.waitForLoggedOut();
 
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await expect(homepage.page).toHaveScreenshot({ fullPage: true });
 });
 
 testWithII('should display homepage in logged in state', async ({ page, iiPage }) => {
-	await iiPage.waitReady({ url: DEFAULT_ROOT_URL, canisterId: getInternetIdentityCanisterId() });
+	const homepageLoggedIn = new HomepageLoggedIn(page, iiPage);
 
-	await page.goto(HOMEPAGE_URL);
-	await iiPage.signInWithNewIdentity();
-	await page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
+	await homepageLoggedIn.waitForLoggedIn();
 
-	await hideHeroAnimation(page);
-
-	await expect(page).toHaveScreenshot({ fullPage: true });
+	await expect(homepageLoggedIn.page).toHaveScreenshot({ fullPage: true });
 });

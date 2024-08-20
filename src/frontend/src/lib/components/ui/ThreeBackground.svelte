@@ -10,7 +10,7 @@
 		WebGLRenderer
 	} from 'three';
 	import { isNullish } from '@dfinity/utils';
-	import { THREE_BACKGROUND_CANVAS } from '$lib/constants/test-ids.constant';
+	import { HERO_ANIMATION_CANVAS } from '$lib/constants/test-ids.constant';
 
 	let container: HTMLDivElement | undefined | null;
 
@@ -115,7 +115,7 @@ void main(){
 		renderer = new WebGLRenderer();
 		renderer.domElement.style.width = '100%';
 		renderer.domElement.style.height = '100%';
-		renderer.domElement.setAttribute('data-tid', THREE_BACKGROUND_CANVAS);
+		renderer.domElement.setAttribute('data-tid', HERO_ANIMATION_CANVAS);
 		container.appendChild(renderer.domElement);
 
 		material = new ShaderMaterial({
