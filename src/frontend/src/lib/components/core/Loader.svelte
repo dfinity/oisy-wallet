@@ -2,7 +2,7 @@
 	import { Modal, type ProgressStep } from '@dfinity/gix-components';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
-	import { safeLoadBtcAddressMainnet, safeLoadEthAddress } from '$lib/services/address.services';
+	import { loadAddresses, loadIdbAddresses } from '$lib/services/address.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
@@ -13,7 +13,6 @@
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authStore } from '$lib/stores/auth.store';
-	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 
 	let progressStep: string = ProgressStepsLoader.BTC_ETH_ADDRESS;
 
@@ -62,36 +61,24 @@
 
 	let progressModal = false;
 
-	// We are loading the BTC and ETH address from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
-	const displayProgressModal = () => {
-		if (!progressModal) {
-			progressModal = true;
-		}
-	};
-
-	let idbBtcMainnetSuccess = false;
-	let idbEthSuccess = false;
-
-	$: {
-		if ($loading && idbBtcMainnetSuccess && idbEthSuccess) {
-			loading.set(false);
-		}
-	}
-
 	onMount(async () => {
-		const results = await Promise.all([
-			NETWORK_BITCOIN_ENABLED
-				? safeLoadBtcAddressMainnet({
-						displayProgressModal,
-						onIdbSuccess: () => (idbBtcMainnetSuccess = true)
-					})
-				: Promise.resolve({ success: true }),
-			safeLoadEthAddress({ displayProgressModal, onIdbSuccess: () => (idbEthSuccess = true) })
-		]);
+		const { success: addressIdbSuccess, err: tokenIdsNotLoaded } = await loadIdbAddresses();
 
-		if (results.every(({ success }) => success)) {
+		if (addressIdbSuccess) {
+			loading.set(false);
+
 			await progressAndLoad();
 
+			return;
+		}
+
+		// We are loading the BTC and ETH address from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
+		progressModal = true;
+
+		const { success: addressSuccess } = await loadAddresses(tokenIdsNotLoaded ?? []);
+
+		if (!addressSuccess) {
+			await signOut();
 			return;
 		}
 
