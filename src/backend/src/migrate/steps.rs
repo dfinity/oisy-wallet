@@ -45,3 +45,23 @@ pub async fn assert_target_empty(migration: &Migration) -> Result<(), MigrationE
     }
     Ok(())
 }
+
+/// Verifies that the target canister has all the data.
+pub async fn assert_target_has_all_data(migration: &Migration) -> Result<(), MigrationError> {
+    let source_stats = crate::stats();
+    let target_stats = Service(migration.to)
+        .stats()
+        .await
+        .map_err(|e| {
+            eprintln!("Failed to get stats from the target canister: {e:?}");
+            MigrationError::CouldNotGetTargetPostStats
+        })?
+        .0;
+    if source_stats != target_stats {
+        return Err(MigrationError::TargetStatsMismatch(
+            source_stats,
+            target_stats,
+        ));
+    }
+    Ok(())
+}

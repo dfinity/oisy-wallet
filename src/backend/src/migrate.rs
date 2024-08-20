@@ -14,7 +14,9 @@ use shared::{
     },
 };
 use std::ops::Bound;
-use steps::{assert_target_empty, lock_migration_target, make_this_readonly};
+use steps::{
+    assert_target_empty, assert_target_has_all_data, lock_migration_target, make_this_readonly,
+};
 pub mod steps;
 
 /// A chunk of data to be migrated.
@@ -190,7 +192,6 @@ pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
                 }
                 MigrationProgress::CheckingTarget => {
                     assert_target_empty(&migration).await?;
-                    // Check that the target canister is empty.
                     migration.progress.next()
                 }
                 MigrationProgress::MigratedUserTokensUpTo(last) => {
@@ -215,21 +216,7 @@ pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
                     migrate!(migration, chunk, MigratedUserProfilesUpTo, UserProfile)
                 }
                 MigrationProgress::CheckingDataMigration => {
-                    let source_stats = crate::stats();
-                    let target_stats = Service(migration.to)
-                        .stats()
-                        .await
-                        .map_err(|e| {
-                            eprintln!("Failed to get stats from the target canister: {e:?}");
-                            MigrationError::CouldNotGetTargetPostStats
-                        })?
-                        .0;
-                    if source_stats != target_stats {
-                        return Err(MigrationError::TargetStatsMismatch(
-                            source_stats,
-                            target_stats,
-                        ));
-                    }
+                    assert_target_has_all_data(&migration).await?;
                     migration.progress.next()
                 }
                 MigrationProgress::UnlockingTarget => {
