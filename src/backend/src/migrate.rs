@@ -77,54 +77,61 @@ pub async fn step_migration() {
         });
     }
     let migration = read_state(|s| s.migration.clone());
-    match migration {
+    let progress = match migration {
         Some(migration) => {
             match migration.progress {
                 MigrationProgress::Pending => {
                     // TODO: Lock the local canister APIs.
-                    set_progress(migration.progress.next());
+                    migration.progress.next()
                 }
-                MigrationProgress::Locked => {
+                MigrationProgress::LockingTarget => {
                     // TODO: Lock the target canister APIs.
-                    set_progress(migration.progress.next());
+                    migration.progress.next()
                 }
-                MigrationProgress::TargetLocked => {
+                MigrationProgress::CheckingTarget => {
                     // TODO: Check that the target canister is empty.
-                    set_progress(migration.progress.next());
-                }
-                MigrationProgress::TargetPreCheckOk => {
-                    // TODO: Start migrating user tokens.
-                    set_progress(migration.progress.next());
+                    migration.progress.next()
                 }
                 MigrationProgress::MigratedUserTokensUpTo(_last) => {
                     // TODO: Migrate user tokens, then move on to the next stage.
-                    set_progress(migration.progress.next());
+                    migration.progress.next()
                 }
                 MigrationProgress::MigratedCustomTokensUpTo(_last_custom_token) => {
                     // TODO: Migrate custom tokens, then move on to the next stage.
-                    set_progress(migration.progress.next());
+                    migration.progress.next()
                 }
                 MigrationProgress::MigratedUserTimestampsUpTo(_user_maybe) => {
                     // TODO: Migrate user timestamps, then move on to the next stage.
-                    set_progress(migration.progress.next());
+                    migration.progress.next()
                 }
                 MigrationProgress::MigratedUserProfilesUpTo(_last_user_profile) => {
                     // TODO: Migrate user profiles, then move on to the next stage.
-                    set_progress(migration.progress.next());
+                    migration.progress.next()
                 }
-                MigrationProgress::CheckingTargetCanister => {
+                MigrationProgress::CheckingDataMigration => {
                     // TODO: Check that the target canister has all the data.
-                    set_progress(migration.progress.next());
+                    migration.progress.next()
+                }
+                MigrationProgress::UnlockingTarget => {
+                    // TODO: Unlock user profiles in the target canister
+                    migration.progress.next()
+                }
+                MigrationProgress::Unlocking => {
+                    // TODO: Unlock signing in this canister
+                    migration.progress.next()
                 }
                 // TODO: Add steps to unlock APIs.
                 MigrationProgress::Completed => {
                     // Migration is complete.
                     clear_timer(migration.timer_id);
+                    migration.progress.next()
                 }
+                MigrationProgress::Failed(_) => ic_cdk::trap("Migration error."),
             }
         }
         None => {
             ic_cdk::trap("migration is not in progress");
         }
-    }
+    };
+    set_progress(progress);
 }
