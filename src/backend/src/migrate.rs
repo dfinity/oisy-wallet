@@ -33,8 +33,7 @@ pub fn bulk_up(data: &[u8]) {
                 for (principal, token) in tokens {
                     state
                         .user_token
-                        .insert(StoredPrincipal(principal), Candid(token))
-                        .expect("failed to insert user token");
+                        .insert(StoredPrincipal(principal), Candid(token));
                 }
             });
         }
@@ -43,8 +42,7 @@ pub fn bulk_up(data: &[u8]) {
                 for (principal, token) in tokens {
                     state
                         .custom_token
-                        .insert(StoredPrincipal(principal), Candid(token))
-                        .expect("failed to insert custom token");
+                        .insert(StoredPrincipal(principal), Candid(token));
                 }
             });
         }
@@ -53,8 +51,7 @@ pub fn bulk_up(data: &[u8]) {
                 for ((timestamp, principal), profile) in profiles {
                     state
                         .user_profile
-                        .insert((timestamp, StoredPrincipal(principal)), Candid(profile))
-                        .expect("failed to insert user profile");
+                        .insert((timestamp, StoredPrincipal(principal)), Candid(profile));
                 }
             });
         }
@@ -63,8 +60,7 @@ pub fn bulk_up(data: &[u8]) {
                 for (principal, timestamp) in users {
                     state
                         .user_profile_updated
-                        .insert(StoredPrincipal(principal), timestamp)
-                        .expect("failed to insert user profile update");
+                        .insert(StoredPrincipal(principal), timestamp);
                 }
             });
         }
