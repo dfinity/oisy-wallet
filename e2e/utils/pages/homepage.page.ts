@@ -50,6 +50,9 @@ export class HomepageLoggedOut extends Homepage {
 		super(page);
 	}
 
+	/**
+	 * @override
+	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForHomepageReady();
 	}
@@ -67,7 +70,7 @@ export class HomepageLoggedIn extends Homepage {
 	async waitForAuthentication(): Promise<void> {
 		await this.#iiPage.waitReady({
 			url: LOCAL_REPLICA_URL,
-			// TODO: take this value from vite.utils or FE constants
+			// TODO: take this value from env vars
 			canisterId: 'rdmx6-jaaaa-aaaaa-aaadq-cai'
 		});
 
@@ -76,6 +79,9 @@ export class HomepageLoggedIn extends Homepage {
 		await this.#iiPage.signInWithNewIdentity();
 	}
 
+	/**
+	 * @override
+	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForAuthentication();
 
