@@ -58,7 +58,7 @@ impl MigrationTestEnv {
             user_token_count,
             custom_token_count,
         } = stats;
-        assert_eq!(user_profile_count, user_timestamps_count, "Test setup failure: Stats indicate that the database is inconsistent.  Donen't affect the migration but should be fixed.");
+        assert_eq!(user_profile_count, user_timestamps_count, "Test setup failure: Stats indicate that the database is inconsistent.  Doesn't affect the migration but should be fixed.");
         // Create users
         let expected_users = pic_setup.old_backend.create_users(
             0..u8::try_from(*user_profile_count).expect("Test setup requested too many users"),
