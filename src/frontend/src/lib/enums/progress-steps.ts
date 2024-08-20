@@ -20,7 +20,7 @@ export enum ProgressStepsSign {
 
 export enum ProgressStepsLoader {
 	INITIALIZATION = 'initialization',
-	ETH_ADDRESS = 'eth_address',
+	BTC_ETH_ADDRESS = 'btc_eth_address',
 	DONE = 'done'
 }
 
