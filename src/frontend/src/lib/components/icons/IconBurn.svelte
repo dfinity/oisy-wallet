@@ -1,12 +1,11 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
 	export let styleClass: string | undefined = undefined;
-	export let size = '24';
 </script>
 
 <svg
-	width={size}
-	height={size}
+	width="24"
+	height="24"
 	class={styleClass}
 	viewBox="0 0 24 24"
 	fill="none"
