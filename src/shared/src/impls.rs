@@ -252,7 +252,9 @@ impl MigrationProgress {
             MigrationProgress::MigratedUserProfilesUpTo(_) => {
                 MigrationProgress::CheckingTargetCanister
             }
-            MigrationProgress::CheckingTargetCanister | MigrationProgress::Completed => {
+            MigrationProgress::CheckingTargetCanister => MigrationProgress::UnlockingTarget,
+            MigrationProgress::UnlockingTarget => MigrationProgress::Unlocking,
+            &MigrationProgress::Unlocking | MigrationProgress::Completed => {
                 MigrationProgress::Completed
             }
             MigrationProgress::Failed(e) => MigrationProgress::Failed(*e),

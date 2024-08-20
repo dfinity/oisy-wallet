@@ -259,6 +259,10 @@ pub enum MigrationProgress {
     MigratedUserProfilesUpTo(Option<(Timestamp, Principal)>),
     /// Checking that the target canister has all the data.
     CheckingTargetCanister,
+    /// Unlock user data operations in the target canister.
+    UnlockingTarget,
+    // Unlock signing operations in the current canister.
+    Unlocking,
     /// Migration has been completed.
     Completed,
     /// Migration failed.
@@ -281,6 +285,8 @@ pub enum MigrationError {
     TargetCanisterNotEmpty,
     /// Could not get target stats after migration.
     CouldNotGetTargetPostStats,
+    /// Could not unlock target canister.
+    TargetUnlockFailed,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]

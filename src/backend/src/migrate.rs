@@ -254,6 +254,32 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                     }
                     set_progress(migration.progress.next());
                 }
+                MigrationProgress::UnlockingTarget => {
+                    // Unlock the target canister APIs.
+                    Service(migration.to)
+                        .set_guards(Guards {
+                            threshold_key: ApiEnabled::Disabled,
+                            user_data: ApiEnabled::Enabled,
+                        })
+                        .await
+                        .map_err(|e| {
+                            eprintln!("Failed to unlock target canister: {:?}", e);
+                            MigrationError::TargetUnlockFailed
+                        })?;
+                    set_progress(migration.progress.next());
+                }
+                MigrationProgress::Unlocking => {
+                    // Unlock the local canister APIs.
+                    mutate_state(|state| {
+                        modify_state_config(state, |config| {
+                            config.api = Some(Guards {
+                                threshold_key: ApiEnabled::Enabled,
+                                user_data: ApiEnabled::Disabled,
+                            })
+                        });
+                    });
+                    set_progress(migration.progress.next());
+                }
                 MigrationProgress::Completed => {
                     // Migration is complete.
                     clear_timer(migration.timer_id);
