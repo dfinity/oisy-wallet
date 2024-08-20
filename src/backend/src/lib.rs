@@ -39,7 +39,7 @@ use shared::types::user_profile::{
     ListUsersResponse, OisyUser, UserProfile,
 };
 use shared::types::{
-    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
+    Arg, Config, Guards, InitArg, Migration, MigrationError, MigrationProgress, MigrationReport, Stats
 };
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -628,10 +628,10 @@ fn migration_stop_timer() -> Result<(), String> {
 /// Steps the migration.
 ///
 /// On error, the migration is marked as failed and the timer is cleared.
-// TODO: Return the error type.  Needed for testing error conditions.
 #[update(guard = "caller_is_allowed")]
-async fn step_migration() {
-    if let Err(msg) = migrate::step_migration().await {
+async fn step_migration() -> Result<(), MigrationError> {
+    let result = migrate::step_migration().await;
+    if let Err(msg) = result {
         mutate_state(|s| {
             if let Some(migration) = &mut s.migration {
                 migration.progress = MigrationProgress::Failed(msg);
@@ -640,6 +640,7 @@ async fn step_migration() {
             eprintln!("Migration failed: {msg:?}");
         })
     };
+    result
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
