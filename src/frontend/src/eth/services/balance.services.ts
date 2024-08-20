@@ -10,11 +10,12 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const reloadBalance = async (token: Token): Promise<{ success: boolean }> => {
+export const reloadBalance = async (token: Token): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(token.id)) {
 		return loadBalance({ networkId: token.network.id, tokenId: token.id });
 	}
@@ -28,7 +29,7 @@ export const loadBalance = async ({
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
 	const {
@@ -70,7 +71,7 @@ const loadErc20Balance = async ({
 }: {
 	token: Erc20Token;
 	address?: OptionEthAddress;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const address = optionAddress ?? get(addressStore);
 
 	const {
@@ -109,7 +110,7 @@ const loadErc20Balance = async ({
 	return { success: true };
 };
 
-export const loadBalances = async (): Promise<{ success: boolean }> => {
+export const loadBalances = async (): Promise<ResultSuccess> => {
 	const results = await Promise.all([
 		...SUPPORTED_ETHEREUM_TOKENS.map(({ network: { id: networkId }, id: tokenId }) =>
 			loadBalance({ networkId, tokenId })
@@ -125,7 +126,7 @@ export const loadErc20Balances = async ({
 }: {
 	address: OptionEthAddress;
 	erc20Tokens: Erc20Token[];
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const results = await Promise.all([
 		...erc20Tokens.map((token) => loadErc20Balance({ token, address }))
 	]);

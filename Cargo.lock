@@ -127,9 +127,9 @@ dependencies = [
  "candid",
  "ethers-core",
  "futures",
- "getrandom 0.2.13",
+ "getrandom 0.2.14",
  "hex",
- "ic-cdk 0.15.0",
+ "ic-cdk 0.15.1",
  "ic-cdk-macros 0.15.0",
  "ic-cdk-timers",
  "ic-stable-structures 0.6.4",
@@ -411,9 +411,9 @@ dependencies = [
 
 [[package]]
 name = "candid"
-version = "0.10.9"
+version = "0.10.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7df77a80c72fcd356cf37ff59c812f37ff06dc9a81232b3aff0a308cb5996904"
+checksum = "6c30ee7f886f296b6422c0ff017e89dd4f831521dfdcc76f3f71aae1ce817222"
 dependencies = [
  "anyhow",
  "binread",
@@ -1292,9 +1292,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.13"
+version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a06fddc2749e0528d2813f95e050e87e52c8cbbae56223b9babf73b3e53b0cc6"
+checksum = "94b22e06ecb0110981051723910cbf0b5f5e09a2062dd7663334ee79a9d1286c"
 dependencies = [
  "cfg-if",
  "libc",
@@ -1591,9 +1591,9 @@ dependencies = [
 
 [[package]]
 name = "ic-canister-sig-creation"
-version = "1.0.1"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d1fc58d747480967a25810d8a90d460e7e9ea4c669ab0286541a148736513f9"
+checksum = "5db33deb06e0edb366d8d86ef67d7bc1e1759bc7046b0323a33b85b21b8d8d87"
 dependencies = [
  "candid",
  "hex",
@@ -1649,9 +1649,9 @@ dependencies = [
 
 [[package]]
 name = "ic-cdk"
-version = "0.15.0"
+version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c44983d6e97135d86132111bae5b86c34c498d96b4f182638bebcc7ac07e03c"
+checksum = "038ff230bf0fc8630943e3c52e989d248a7c89834ccb65da408fabc5817a475b"
 dependencies = [
  "candid",
  "ic-cdk-macros 0.15.0",
@@ -1723,7 +1723,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "61fdca8e1d9ffb65ae68019b342c182009de9dc206fd849db0b0e90ee19f6fa4"
 dependencies = [
  "futures",
- "ic-cdk 0.15.0",
+ "ic-cdk 0.15.1",
  "ic0 0.23.0",
  "serde",
  "serde_bytes",
@@ -1797,7 +1797,7 @@ name = "ic-crypto-getrandom-for-wasm"
 version = "0.9.0"
 source = "git+https://github.com/dfinity/ic?rev=e69bcc7b319cbb3ebc22ec55af35287741244db6#e69bcc7b319cbb3ebc22ec55af35287741244db6"
 dependencies = [
- "getrandom 0.2.13",
+ "getrandom 0.2.14",
 ]
 
 [[package]]
@@ -3283,7 +3283,7 @@ version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
- "getrandom 0.2.13",
+ "getrandom 0.2.14",
 ]
 
 [[package]]
@@ -3410,7 +3410,7 @@ checksum = "c17fa4cb658e3583423e915b9f3acc01cceaee1860e33d59ebae66adc3a2dc0d"
 dependencies = [
  "cc",
  "cfg-if",
- "getrandom 0.2.13",
+ "getrandom 0.2.14",
  "libc",
  "spin 0.9.8",
  "untrusted",
@@ -3661,9 +3661,9 @@ dependencies = [
 
 [[package]]
 name = "serde_bytes"
-version = "0.11.14"
+version = "0.11.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b8497c313fd43ab992087548117643f6fcd935cbf36f176ffda0aacf9591734"
+checksum = "387cc504cb06bb40a96c8e04e951fe01854cf6bc921053c954e4a606d9675c6a"
 dependencies = [
  "serde",
 ]
@@ -3829,7 +3829,7 @@ version = "0.0.2"
 dependencies = [
  "candid",
  "ic-canister-sig-creation",
- "ic-cdk 0.15.0",
+ "ic-cdk 0.15.1",
  "ic-cdk-macros 0.15.0",
  "ic-cdk-timers",
  "ic-metrics-encoder",

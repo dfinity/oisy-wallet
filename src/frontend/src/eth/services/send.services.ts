@@ -19,7 +19,7 @@ import {
 	toCkErc20HelperContractAddress,
 	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
-import { signTransaction } from '$lib/api/backend.api';
+import { signTransaction } from '$lib/api/signer.api';
 import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';

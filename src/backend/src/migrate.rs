@@ -241,6 +241,7 @@ pub async fn step_migration() {
                     set_progress(migration.progress.next());
                 }
                 MigrationProgress::Completed => {
+                    // Migration is complete.
                     clear_timer(migration.timer_id);
                 }
             }

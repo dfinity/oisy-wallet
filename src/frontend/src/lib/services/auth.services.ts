@@ -1,4 +1,4 @@
-import { deleteIdbEthAddress } from '$lib/api/idb.api';
+import { deleteIdbBtcAddressMainnet, deleteIdbEthAddress } from '$lib/api/idb.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -13,6 +13,7 @@ import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { replaceHistory } from '$lib/utils/route.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
+import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -79,7 +80,7 @@ export const idleSignOut = (): Promise<void> =>
 		clearStorages: false
 	});
 
-const emptyIdbEthAddress = async () => {
+const emptyIdbAddress = async (deleteIdbAddress: (principal: Principal) => Promise<void>) => {
 	const { identity } = get(authStore);
 
 	if (isNullish(identity)) {
@@ -87,13 +88,17 @@ const emptyIdbEthAddress = async () => {
 	}
 
 	try {
-		await deleteIdbEthAddress(identity.getPrincipal());
+		await deleteIdbAddress(identity.getPrincipal());
 	} catch (err: unknown) {
 		// We silence the error.
 		// Effective logout is more important here.
 		console.error(err);
 	}
 };
+
+const emptyIdbBtcAddressMainnet = async () => emptyIdbAddress(deleteIdbBtcAddressMainnet);
+
+const emptyIdbEthAddress = async () => emptyIdbAddress(deleteIdbEthAddress);
 
 const clearTestnetsOption = async () => {
 	testnetsStore.reset({ key: 'testnets' });
@@ -110,7 +115,7 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([emptyIdbEthAddress(), clearTestnetsOption()]);
+		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), clearTestnetsOption()]);
 	}
 
 	await authStore.signOut();

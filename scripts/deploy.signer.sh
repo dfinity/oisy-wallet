@@ -7,18 +7,18 @@ case $ENV in
 "staging")
   ECDSA_KEY_NAME="test_key_1"
   WALLET="cvthj-wyaaa-aaaad-aaaaq-cai"
-  # For security reasons, mainnet root key will be hardcoded in the backend canister.
+  # For security reasons, mainnet root key will be hardcoded in the signer canister.
   ic_root_key_der="null"
-  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
+  # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
   # Represents more an ID than a URL
   POUH_ISSUER_VC_URL="https://${POUH_ISSUER_CANISTER_ID}.icp0.io/"
   ;;
 "ic")
   ECDSA_KEY_NAME="key_1"
   WALLET="yit3i-lyaaa-aaaan-qeavq-cai"
-  # For security reasons, mainnet root key will be hardcoded in the backend canister.
+  # For security reasons, mainnet root key will be hardcoded in the signer canister.
   ic_root_key_der="null"
-  # URL used by issuer in the issued verifiable credentials (tipically hard-coded)
+  # URL used by issuer in the issued verifiable credentials (typically hard-coded)
   # Represents more an ID than a URL
   POUH_ISSUER_VC_URL="https://id.decideai.xyz/"
   ;;
@@ -42,10 +42,10 @@ esac
 # Represents more an ID than a URL
 II_VC_URL="https://identity.ic0.app"
 
-echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
+echo "Deploying signer with the following arguments: ${POUH_ISSUER_VC_URL}"
 
 if [ -n "${ENV+1}" ]; then
-  dfx deploy backend --argument "(variant {
+  dfx deploy signer --argument "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = vec {};
@@ -62,8 +62,8 @@ if [ -n "${ENV+1}" ]; then
      }
   })" --network "$ENV" --wallet "$WALLET"
 else
-  DEFAULT_CANISTER_ID="$(dfx canister id --network staging backend)"
-  dfx deploy backend --argument "(variant {
+  DEFAULT_CANISTER_ID="$(dfx canister id --network staging signer)"
+  dfx deploy signer --argument "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = vec {};

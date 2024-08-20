@@ -1,6 +1,13 @@
 {
 	"dfx": "0.20.0",
 	"canisters": {
+		"signer": {
+			"candid": "src/backend/backend.did",
+			"package": "backend",
+			"type": "rust",
+			"optimize": "cycles",
+			"gzip": true
+		},
 		"backend": {
 			"candid": "src/backend/backend.did",
 			"package": "backend",

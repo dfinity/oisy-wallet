@@ -10,6 +10,7 @@ import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import type { ResultSuccess } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { popupCenter } from '$lib/utils/window.utils';
@@ -31,7 +32,7 @@ const addPouhCredential = async ({
 	identity: Identity;
 	credentialJwt: string;
 	issuerCanisterId: Principal;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const { auth: authI18n } = get(i18n);
 	try {
 		const userProfile = get(userProfileStore);
@@ -81,7 +82,7 @@ const handleSuccess = async ({
 	response: VerifiablePresentationResponse;
 	identity: Identity;
 	issuerCanisterId: Principal;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const { auth: authI18n } = get(i18n);
 	if ('Ok' in response) {
 		const { success } = await addPouhCredential({
@@ -104,7 +105,7 @@ export const requestPouhCredential = async ({
 	identity
 }: {
 	identity: Identity;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const credentialSubject = identity.getPrincipal();
 	const { auth: authI18n } = get(i18n);
 	return new Promise((resolve, reject) => {

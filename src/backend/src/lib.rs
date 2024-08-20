@@ -18,7 +18,7 @@ use ic_cdk::api::management_canister::ecdsa::{
 };
 use ic_cdk::api::time;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
-use ic_cdk_timers::set_timer_interval;
+use ic_cdk_timers::{clear_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -592,10 +592,10 @@ fn bulk_up(data: Vec<u8>) {
 fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
     mutate_state(|s| {
         if let Some(migration) = &s.migration {
-            if migration.to != to {
-                Err("migration in progress to a different canister".to_string())
-            } else {
+            if migration.to == to {
                 Ok(MigrationReport::from(migration))
+            } else {
+                Err("migration in progress to a different canister".to_string())
             }
         } else {
             let timer_id =
@@ -608,6 +608,19 @@ fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
             let migration_report = MigrationReport::from(&migration);
             s.migration = Some(migration);
             Ok(migration_report)
+        }
+    })
+}
+
+/// Switch off the migration timer; migrate with manual API calls instead.
+#[update(guard = "caller_is_allowed")]
+fn migration_stop_timer() -> Result<(), String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            clear_timer(migration.timer_id);
+            Ok(())
+        } else {
+            Err("no migration in progress".to_string())
         }
     })
 }
