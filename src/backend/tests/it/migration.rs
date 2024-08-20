@@ -105,7 +105,7 @@ impl MigrationTestEnv {
     fn step_migration(&self) {
         self.old_backend
             .update::<()>(controller(), "step_migration", ())
-            .expect("Failed to stop migration tmer")
+            .expect("Failed to stop migration timer")
     }
     /// Verifies that the migration is in an expected state.
     fn assert_migration_is(&self, expected: Option<MigrationReport>) {
@@ -357,5 +357,15 @@ fn test_migration() {
             pic_setup.step_migration();
             pic_setup.assert_migration_progress_is(MigrationProgress::Completed);
         }
+    }
+    // Finally, make sure that the new canister has all the data.
+    {
+        assert_eq!(
+            pic_setup
+                .new_backend
+                .query::<Stats>(controller(), "stats", ()),
+            Ok(stats),
+            "Initially, there should be users in the old backend"
+        );
     }
 }

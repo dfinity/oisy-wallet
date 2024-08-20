@@ -111,6 +111,7 @@ fn next_custom_token_chunk(
     })
 }
 
+/// The next chunk of user profiles to be migrated.
 fn next_user_profile_chunk(
     last_user_profile: Option<(Timestamp, Principal)>,
 ) -> Vec<((Timestamp, Principal), StoredUserProfile)> {
@@ -152,6 +153,13 @@ fn next_user_timestamp_chunk(user_maybe: Option<Principal>) -> Vec<(Principal, T
     })
 }
 
+/// Migrates a chunk of data.
+///
+/// # Returns
+/// The updated progress.
+///
+/// # Errors
+/// - Throws a `MigrationError::DataMigrationFailed` if the data transfer fails.
 macro_rules! migrate {
     ($migration:ident, $chunk:ident, $progress_variant:ident, $chunk_variant:ident) => {{
         let last = $chunk.last().map(|(k, _)| k).cloned();
