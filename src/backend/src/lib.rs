@@ -267,7 +267,7 @@ async fn caller_btc_address(network: BitcoinNetwork) -> String {
 }
 
 /// Returns the balance of the given Bitcoin address.
-#[update]
+#[query]
 async fn btc_balance(address: String, network: BitcoinNetwork) -> u64 {
     bitcoin_lib::get_balance(network, address).await
 }
