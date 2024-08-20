@@ -156,6 +156,9 @@ const loadPendingTransactions = async ({
 
 		const pendingTransactions = await Promise.all(pendingLogs.map(loadTransaction));
 
+		// TODO(fix): filter pendingTransactions which match the token
+		// i.e. do not display pending LINK -> ckLINK as "Converting USDC to ckUSDC"
+
 		icPendingTransactionsStore.set({
 			tokenId,
 			data: pendingTransactions.filter(nonNullish).map((transaction) => ({
