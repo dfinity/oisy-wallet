@@ -130,7 +130,8 @@ impl MigrationTestEnv {
                 .expect("Failed to get config")
                 .api,
             old,
-            "Old canister locks are not as expected {}", context
+            "Old canister locks are not as expected {}",
+            context
         );
         assert_eq!(
             self.new_backend
@@ -138,7 +139,8 @@ impl MigrationTestEnv {
                 .expect("Failed to get config")
                 .api,
             new,
-            "New canister locks are not as expected {}", context
+            "New canister locks are not as expected {}",
+            context
         );
     }
 }
@@ -232,24 +234,30 @@ fn test_migration() {
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::LockingTarget);
-        pic_setup.assert_canister_locks_are(Some(Guards{threshold_key: ApiEnabled::ReadOnly, user_data: ApiEnabled::ReadOnly}), None, "after locking the source canister");
+        pic_setup.assert_canister_locks_are(
+            Some(Guards {
+                threshold_key: ApiEnabled::ReadOnly,
+                user_data: ApiEnabled::ReadOnly,
+            }),
+            None,
+            "after locking the source canister",
+        );
     }
     // Step the migration: Target canister should be locked.
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::CheckingTarget);
         // Check that the target really is locked:
-        let new_config = pic_setup
-            .new_backend
-            .query::<shared::types::Config>(controller(), "config", ())
-            .expect("Failed to get config");
-        assert_eq!(
-            new_config.api,
+        pic_setup.assert_canister_locks_are(
+            Some(Guards {
+                threshold_key: ApiEnabled::ReadOnly,
+                user_data: ApiEnabled::ReadOnly,
+            }),
             Some(Guards {
                 threshold_key: ApiEnabled::Disabled,
-                user_data: ApiEnabled::Disabled
+                user_data: ApiEnabled::Disabled,
             }),
-            "Target canister user data writes should be locked."
+            "after locking the target canister",
         );
     }
     // Step the migration: Should have started the user token migration.
@@ -313,18 +321,35 @@ fn test_migration() {
     {
         pic_setup.assert_migration_progress_is(MigrationProgress::CheckingDataMigration);
     }
-    // Step the migration.  Should be unlocking the target.
+    // Step the migration.  Should be unlocking.
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::UnlockingTarget);
-    }
-    // Step the migration.  Should be unlocking the source.
-    {
         pic_setup.step_migration();
-        // TODO: Verify that the target has been unlocked.
+        pic_setup.assert_canister_locks_are(
+            Some(Guards {
+                threshold_key: ApiEnabled::ReadOnly,
+                user_data: ApiEnabled::ReadOnly,
+            }),
+            Some(Guards {
+                threshold_key: ApiEnabled::Disabled,
+                user_data: ApiEnabled::Enabled,
+            }),
+            "after locking the target canister",
+        );
         pic_setup.assert_migration_progress_is(MigrationProgress::Unlocking);
         pic_setup.step_migration();
-        // TODO: Verify that the source has been unlocked
+        pic_setup.assert_canister_locks_are(
+            Some(Guards {
+                threshold_key: ApiEnabled::Enabled,
+                user_data: ApiEnabled::Disabled,
+            }),
+            Some(Guards {
+                threshold_key: ApiEnabled::Disabled,
+                user_data: ApiEnabled::Enabled,
+            }),
+            "after locking the target canister",
+        );
     }
     // Step the migration: Migration should be complete, and stay complete.
     {
