@@ -244,11 +244,6 @@ fn test_migration() {
             "Target canister user data writes should be locked."
         );
     }
-    // Step the timer: Should have found the target canister to be empty.
-    {
-        pic_setup.step_migration();
-        pic_setup.assert_migration_progress_is(MigrationProgress::TargetPreCheckOk);
-    }
     // Step the timer: Should have started the user token migration.
     {
         pic_setup.step_migration();
