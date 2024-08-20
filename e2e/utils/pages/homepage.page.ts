@@ -5,6 +5,7 @@ import {
 } from '$lib/constants/test-ids.constant';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { type Page } from '@playwright/test';
+import { readCanisterIds } from '../../../vite.utils';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 
 export class Homepage {
@@ -45,10 +46,13 @@ export class HomepageLoggedIn extends Homepage {
 	}
 
 	async signInWithNewIdentity(): Promise<void> {
+		const canisterIds = readCanisterIds({});
+		const iiCanisterId = canisterIds.LOCAL_INTERNET_IDENTITY_CANISTER_ID;
+		// eslint-disable-next-line no-console
+		console.log({ canisterIds, iiCanisterId });
 		await this._iiPage.waitReady({
 			url: LOCAL_REPLICA_URL,
-			// TODO: take this value from vite.utils or FE constants
-			canisterId: 'rdmx6-jaaaa-aaaaa-aaadq-cai'
+			...(iiCanisterId && { canisterId: iiCanisterId })
 		});
 
 		await this.waitForLoggedOut();
