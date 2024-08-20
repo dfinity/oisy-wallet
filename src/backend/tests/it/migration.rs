@@ -194,24 +194,19 @@ fn test_migration() {
         // Migration should be in progress.
         pic_setup.assert_migration_progress_is(MigrationProgress::Pending);
     }
-    // Step the timer: User data writing should be locked.
+    // Step the migration: User data writing should be locked.
     {
         pic_setup.step_migration();
-        pic_setup.assert_migration_progress_is(MigrationProgress::Locked);
+        pic_setup.assert_migration_progress_is(MigrationProgress::LockingTarget);
         // TODO: Check that the old backend really is locked.
     }
-    // Step the timer: Target canister should be locked.
+    // Step the migration: Target canister should be locked.
     {
         pic_setup.step_migration();
-        pic_setup.assert_migration_progress_is(MigrationProgress::TargetLocked);
+        pic_setup.assert_migration_progress_is(MigrationProgress::CheckingTarget);
         // TODO: Check that the target really is locked:
     }
-    // Step the timer: Should have found the target canister to be empty.
-    {
-        pic_setup.step_migration();
-        pic_setup.assert_migration_progress_is(MigrationProgress::TargetPreCheckOk);
-    }
-    // Step the timer: Should have started the user token migration.
+    // Step the migration: Should have started the user token migration.
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::MigratedUserTokensUpTo(None));
@@ -270,9 +265,22 @@ fn test_migration() {
     }
     // Should be checking the migration.
     {
-        pic_setup.assert_migration_progress_is(MigrationProgress::CheckingTargetCanister);
+        pic_setup.assert_migration_progress_is(MigrationProgress::CheckingDataMigration);
     }
-    // Step the timer: Migration should be complete, and stay complete.
+    // Step the migration.  Should be unlocking the target.
+    {
+        pic_setup.step_migration();
+        pic_setup.assert_migration_progress_is(MigrationProgress::UnlockingTarget);
+    }
+    // Step the migration.  Should be unlocking the source.
+    {
+        pic_setup.step_migration();
+        // TODO: Verify that the target has been unlocked.
+        pic_setup.assert_migration_progress_is(MigrationProgress::Unlocking);
+        pic_setup.step_migration();
+        // TODO: Verify that the source has been unlocked
+    }
+    // Step the migration: Migration should be complete, and stay complete.
     {
         for _ in 0..5 {
             pic_setup.step_migration();
