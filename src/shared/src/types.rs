@@ -280,7 +280,7 @@ pub struct MigrationReport {
     pub progress: MigrationProgress,
 }
 
-#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub struct Stats {
     pub user_profile_count: u64,
     pub user_token_count: u64,
