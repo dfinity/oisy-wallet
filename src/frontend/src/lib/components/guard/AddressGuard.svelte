@@ -1,33 +1,43 @@
 <script lang="ts">
 	import { addressStore } from '$lib/stores/address.store';
-	import { isNullish } from '@dfinity/utils';
-	import { certifyEthAddress } from '$lib/services/address.services';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { certifyBtcAddressMainnet, certifyEthAddress } from '$lib/services/address.services';
 	import { warnSignOut } from '$lib/services/auth.services';
-	import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
+	import {
+		addressesCertified,
+		btcAddressMainnet,
+		btcAddressMainnetNotCertified,
+		ethAddress,
+		ethAddressNotCertified
+	} from '$lib/derived/address.derived';
+	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env.js';
 
 	const validateAddress = async () => {
-		const ethAddressData = $addressStore?.[ETHEREUM_TOKEN_ID];
-
-		if (isNullish(ethAddressData)) {
-			// No address is loaded, we don't have to verify it
+		if ($addressesCertified) {
+			// The addresses are certified, all good
 			return;
 		}
 
-		const { certified, data: ethAddress } = ethAddressData;
+		const results = await Promise.all([
+			NETWORK_BITCOIN_ENABLED && nonNullish($btcAddressMainnet) && $btcAddressMainnetNotCertified
+				? certifyBtcAddressMainnet($btcAddressMainnet)
+				: Promise.resolve({ success: true, err: null }),
+			nonNullish($ethAddress) && $ethAddressNotCertified
+				? certifyEthAddress($ethAddress)
+				: Promise.resolve({ success: true, err: null })
+		]);
 
-		if (certified === true) {
-			// The address is certified, all good
-			return;
+		let err: string | undefined = undefined;
+
+		results.map(({ success, err: e }) => {
+			if (!success && nonNullish(e)) {
+				err = isNullish(err) ? e : `${err}, ${e}`;
+			}
+		});
+
+		if (nonNullish(err)) {
+			await warnSignOut(err);
 		}
-
-		const { success, err } = await certifyEthAddress(ethAddress);
-
-		if (success) {
-			// The address is valid
-			return;
-		}
-
-		await warnSignOut(err ?? 'Error while certifying your address');
 	};
 
 	$: $addressStore, (async () => await validateAddress())();
