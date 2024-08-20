@@ -82,7 +82,7 @@
 			return;
 		}
 
-		await signOut();
+		await progressAndLoad();
 	});
 </script>
 
