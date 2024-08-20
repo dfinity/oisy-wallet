@@ -182,7 +182,9 @@ const loadIdbEthAddress = async (): Promise<ResultSuccess<AddressError>> =>
 
 export const loadIdbAddresses = async (): Promise<ResultSuccess<TokenId[]>> => {
 	const results = await Promise.all([
-		NETWORK_BITCOIN_ENABLED ? loadIdbBtcAddressMainnet() : { success: true, err: null },
+		NETWORK_BITCOIN_ENABLED
+			? loadIdbBtcAddressMainnet()
+			: Promise.resolve<ResultSuccess<AddressError>>({ success: true }),
 		loadIdbEthAddress()
 	]);
 
