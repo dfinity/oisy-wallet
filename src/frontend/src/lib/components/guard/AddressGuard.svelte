@@ -1,17 +1,23 @@
 <script lang="ts">
 	import { addressStore } from '$lib/stores/address.store';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { certifyBtcAddressMainnet, certifyEthAddress } from '$lib/services/address.services';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import {
 		btcAddressMainnet,
 		btcAddressMainnetNotCertified,
 		ethAddress,
+		ethAddressData,
 		ethAddressNotCertified
 	} from '$lib/derived/address.derived';
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env.js';
 
 	const validateAddress = async () => {
+		if (isNullish($btcAddressMainnet) && isNullish($ethAddressData)) {
+			// No address is loaded, we don't have to verify it
+			return;
+		}
+
 		if (!$btcAddressMainnetNotCertified && !$ethAddressNotCertified) {
 			// The addresses are certified, all good
 			return;

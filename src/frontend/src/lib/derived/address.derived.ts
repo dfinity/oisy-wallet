@@ -9,12 +9,12 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 	isNullish($addressStore)
 );
 
-const btcAddressMainnetData: Readable<AddressData | null | undefined> = derived(
+export const btcAddressMainnetData: Readable<AddressData | null | undefined> = derived(
 	[addressStore],
 	([$addressStore]) => $addressStore?.[BTC_MAINNET_TOKEN_ID]
 );
 
-const ethAddressData: Readable<AddressData | null | undefined> = derived(
+export const ethAddressData: Readable<AddressData | null | undefined> = derived(
 	[addressStore],
 	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]
 );
