@@ -278,9 +278,11 @@ pub enum MigrationError {
     /// Could not get target stats before starting migration.
     CouldNotGetTargetPriorStats,
     /// There were already user profiles in the target canister.
-    TargetCanisterNotEmpty,
+    TargetCanisterNotEmpty(Stats),
     /// Could not get target stats after migration.
     CouldNotGetTargetPostStats,
+    /// Target stats do not match source stats.
+    TargetStatsMismatch(Stats, Stats),
     /// Could not unlock target canister.
     TargetUnlockFailed,
 }
