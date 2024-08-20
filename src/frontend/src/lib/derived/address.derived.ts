@@ -30,28 +30,12 @@ export const ethAddress: Readable<OptionEthAddress> = derived(
 	([$ethAddressData]) => ($ethAddressData === null ? null : $ethAddressData?.data)
 );
 
-const btcAddressMainnetCertified: Readable<boolean> = derived(
-	[btcAddressMainnetData],
-	([$btcAddressMainnetData]) => $btcAddressMainnetData?.certified === true
-);
-
 export const btcAddressMainnetNotCertified: Readable<boolean> = derived(
-	[btcAddressMainnetCertified],
-	([$btcAddressMainnetCertified]) => !$btcAddressMainnetCertified
-);
-
-const ethAddressCertified: Readable<boolean> = derived(
-	[ethAddressData],
-	([$ethAddressData]) => $ethAddressData?.certified === true
+	[btcAddressMainnetData],
+	([$btcAddressMainnetData]) => $btcAddressMainnetData?.certified !== true
 );
 
 export const ethAddressNotCertified: Readable<boolean> = derived(
-	[ethAddressCertified],
-	([$ethAddressCertified]) => !$ethAddressCertified
-);
-
-export const addressesCertified: Readable<boolean> = derived(
-	[btcAddressMainnetCertified, ethAddressCertified],
-	([$btcAddressMainnetCertified, $ethAddressCertified]) =>
-		$btcAddressMainnetCertified && $ethAddressCertified
+	[ethAddressData],
+	([$ethAddressData]) => $ethAddressData?.certified !== true
 );

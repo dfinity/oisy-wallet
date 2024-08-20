@@ -4,7 +4,6 @@
 	import { certifyBtcAddressMainnet, certifyEthAddress } from '$lib/services/address.services';
 	import { warnSignOut } from '$lib/services/auth.services';
 	import {
-		addressesCertified,
 		btcAddressMainnet,
 		btcAddressMainnetNotCertified,
 		ethAddress,
@@ -13,7 +12,7 @@
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env.js';
 
 	const validateAddress = async () => {
-		if ($addressesCertified) {
+		if (!$btcAddressMainnetNotCertified && !$ethAddressNotCertified) {
 			// The addresses are certified, all good
 			return;
 		}
