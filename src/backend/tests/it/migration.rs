@@ -227,17 +227,8 @@ fn test_migration() {
     }
     // Step the timer: Target canister should be locked.
     {
-        pic_setup.pic.tick();
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::TargetLocked,
-            })),
-            "Migration should be in progress"
-        );
+        pic_setup.step_migration();
+        pic_setup.assert_migration_progress_is(MigrationProgress::TargetLocked);
         // Check that the target really is locked:
         let new_config = pic_setup
             .new_backend
@@ -254,43 +245,75 @@ fn test_migration() {
     }
     // Step the timer: Should have found the target canister to be empty.
     {
-        pic_setup.pic.tick();
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::TargetPreCheckOk,
-            })),
-            "Migration should be in progress"
-        );
+        pic_setup.step_migration();
+        pic_setup.assert_migration_progress_is(MigrationProgress::TargetPreCheckOk);
     }
     // Step the timer: Should have started the user token migration.
     {
-        pic_setup.pic.tick();
-        assert_eq!(
-            pic_setup
-                .old_backend
-                .query::<Option<MigrationReport>>(controller(), "migration", ()),
-            Ok(Some(MigrationReport {
-                to: pic_setup.new_backend.canister_id(),
-                progress: shared::types::MigrationProgress::MigratedUserTokensUpTo(None),
-            })),
-            "Migration should be in progress"
-        );
+        pic_setup.step_migration();
+        pic_setup.assert_migration_progress_is(MigrationProgress::MigratedUserTokensUpTo(None));
     }
     // Keep stepping until the user tokens have been migrated.
     {
         while let Some(MigrationReport {
             progress: shared::types::MigrationProgress::MigratedUserTokensUpTo(_),
             ..
-        }) = pic_setup
-            .old_backend
-            .query::<Option<MigrationReport>>(controller(), "migration", ())
-            .expect("Failed to get migration report")
+        }) = pic_setup.migration_state()
         {
-            pic_setup.pic.tick();
+            pic_setup.step_migration();
+        }
+    }
+    // Should have started the custom token migration.
+    {
+        pic_setup.assert_migration_progress_is(MigrationProgress::MigratedCustomTokensUpTo(None));
+    }
+    // Keep stepping until the custom tokens have been migrated.
+    {
+        while let Some(MigrationReport {
+            progress: shared::types::MigrationProgress::MigratedCustomTokensUpTo(_),
+            ..
+        }) = pic_setup.migration_state()
+        {
+            pic_setup.step_migration();
+        }
+    }
+    // Should have started the user timestamp migration.
+    {
+        pic_setup.assert_migration_progress_is(MigrationProgress::MigratedUserTimestampsUpTo(None));
+    }
+    // Keep stepping until the user timestamps have been migrated.
+    {
+        while let Some(MigrationReport {
+            progress: shared::types::MigrationProgress::MigratedUserTimestampsUpTo(_),
+            ..
+        }) = pic_setup.migration_state()
+        {
+            pic_setup.step_migration();
+        }
+    }
+    // Should have started the user profile migration.
+    {
+        pic_setup.assert_migration_progress_is(MigrationProgress::MigratedUserProfilesUpTo(None));
+    }
+    // Keep stepping until the user profiles have been migrated.
+    {
+        while let Some(MigrationReport {
+            progress: shared::types::MigrationProgress::MigratedUserProfilesUpTo(_),
+            ..
+        }) = pic_setup.migration_state()
+        {
+            pic_setup.step_migration();
+        }
+    }
+    // Should be checking the migration.
+    {
+        pic_setup.assert_migration_progress_is(MigrationProgress::CheckingTargetCanister);
+    }
+    // Step the timer: Migration should be complete, and stay complete.
+    {
+        for _ in 0..5 {
+            pic_setup.step_migration();
+            pic_setup.assert_migration_progress_is(MigrationProgress::Completed);
         }
     }
 }
