@@ -640,7 +640,7 @@ async fn step_migration() {
                 clear_timer(migration.timer_id);
             }
             eprintln!("Migration failed: {err:?}");
-        })
+        });
     };
 }
 

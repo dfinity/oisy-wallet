@@ -3,6 +3,7 @@ use crate::{
     types::{Candid, StoredPrincipal},
 };
 use candid::{decode_one, encode_one, CandidType, Principal};
+use ic_cdk::eprintln;
 use ic_cdk_timers::clear_timer;
 use serde::Deserialize;
 use shared::{
@@ -157,7 +158,7 @@ macro_rules! migrate {
             .bulk_up(migration_bytes)
             .await
             .map_err(|e| {
-                eprintln!("Failed to transfer data {:?}", e);
+                eprintln!("Failed to transfer data {e:?}");
                 MigrationError::DataMigrationFailed
             })?;
         next_state
@@ -184,7 +185,7 @@ pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
                             config.api = Some(Guards {
                                 threshold_key: ApiEnabled::ReadOnly,
                                 user_data: ApiEnabled::ReadOnly,
-                            })
+                            });
                         });
                     });
                     migration.progress.next()
@@ -245,7 +246,7 @@ pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
                         .stats()
                         .await
                         .map_err(|e| {
-                            eprintln!("Failed to get stats from the target canister: {:?}", e);
+                            eprintln!("Failed to get stats from the target canister: {e:?}");
                             MigrationError::CouldNotGetTargetPostStats
                         })?
                         .0;
@@ -266,7 +267,7 @@ pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
                         })
                         .await
                         .map_err(|e| {
-                            eprintln!("Failed to unlock target canister: {:?}", e);
+                            eprintln!("Failed to unlock target canister: {e:?}");
                             MigrationError::TargetUnlockFailed
                         })?;
                     migration.progress.next()
@@ -278,7 +279,7 @@ pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
                             config.api = Some(Guards {
                                 threshold_key: ApiEnabled::Enabled,
                                 user_data: ApiEnabled::Disabled,
-                            })
+                            });
                         });
                     });
                     migration.progress.next()
