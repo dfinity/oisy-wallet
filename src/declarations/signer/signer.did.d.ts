@@ -127,6 +127,7 @@ export interface SignRequest {
 export interface Stats {
 	user_profile_count: bigint;
 	custom_token_count: bigint;
+	user_timestamps_count: bigint;
 	user_token_count: bigint;
 }
 export interface SupportedCredential {
