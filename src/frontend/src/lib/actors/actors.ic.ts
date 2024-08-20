@@ -2,6 +2,8 @@ import type { _SERVICE as BackendActor } from '$declarations/backend/backend.did
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import type { _SERVICE as SignerActor } from '$declarations/signer/signer.did';
+import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
+import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { BACKEND_CANISTER_ID, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -58,7 +60,7 @@ export const getSignerActor = async ({
 	if (isNullish(signer)) {
 		const actor = await createActor<SignerActor>({
 			canisterId: SIGNER_CANISTER_ID,
-			idlFactory: certified ? idlCertifiedFactoryBackend : idlFactoryBackend,
+			idlFactory: certified ? idlCertifiedFactorySigner : idlFactorySigner,
 			identity
 		});
 
