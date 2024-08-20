@@ -189,9 +189,11 @@ export const loadIdbAddresses = async (): Promise<ResultSuccess<TokenId[]>> => {
 	const err: TokenId[] = [];
 
 	results.map(({ success: s, err: e }) => {
-		if (s) {
+		if (success) {
 			success &&= s;
-			return;
+			if (s) {
+				return;
+			}
 		}
 
 		if (nonNullish(e)) {
