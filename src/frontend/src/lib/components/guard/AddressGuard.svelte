@@ -12,6 +12,7 @@
 		ethAddressNotCertified
 	} from '$lib/derived/address.derived';
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env.js';
+	import type { ResultSuccess } from '$lib/types/utils';
 
 	const validateAddress = async () => {
 		if (isNullish($btcAddressMainnetData) && isNullish($ethAddressData)) {
@@ -27,10 +28,10 @@
 		const results = await Promise.all([
 			NETWORK_BITCOIN_ENABLED && nonNullish($btcAddressMainnet) && $btcAddressMainnetNotCertified
 				? certifyBtcAddressMainnet($btcAddressMainnet)
-				: Promise.resolve({ success: true, err: null }),
+				: Promise.resolve<ResultSuccess<never>>({ success: true }),
 			nonNullish($ethAddress) && $ethAddressNotCertified
 				? certifyEthAddress($ethAddress)
-				: Promise.resolve({ success: true, err: null })
+				: Promise.resolve<ResultSuccess<never>>({ success: true })
 		]);
 
 		const { success, err } = results.reduce(
