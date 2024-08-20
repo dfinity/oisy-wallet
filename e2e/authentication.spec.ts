@@ -1,8 +1,8 @@
 import { testWithII } from '@dfinity/internet-identity-playwright';
-import { HOMEPAGE_URL } from './shared/constants';
+import { HomepageLoggedIn } from './utils/pages/homepage.page';
 
 testWithII('should sign-in', async ({ page, iiPage }) => {
-	await page.goto(HOMEPAGE_URL);
+	const homepageLoggedIn = new HomepageLoggedIn(page, iiPage);
 
-	await iiPage.signInWithNewIdentity();
+	await homepageLoggedIn.signInWithNewIdentity();
 });
