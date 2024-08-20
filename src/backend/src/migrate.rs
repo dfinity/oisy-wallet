@@ -1,5 +1,5 @@
 use crate::{
-    modify_state_config, mutate_state, read_state,
+    mutate_state, read_state,
     types::{Candid, StoredPrincipal},
 };
 use candid::{decode_one, encode_one, CandidType, Principal};
@@ -9,8 +9,8 @@ use serde::Deserialize;
 use shared::{
     backend_api::Service,
     types::{
-        custom_token::CustomToken, token::UserToken, user_profile::StoredUserProfile, ApiEnabled,
-        Guards, MigrationError, MigrationProgress, Timestamp,
+        custom_token::CustomToken, token::UserToken, user_profile::StoredUserProfile,
+        MigrationError, MigrationProgress, Timestamp,
     },
 };
 use std::ops::Bound;
@@ -80,9 +80,9 @@ pub fn bulk_up(data: &[u8]) {
 /// The next chunk of user tokens to be migrated.
 fn next_user_token_chunk(last_user_token: Option<Principal>) -> Vec<(Principal, Vec<UserToken>)> {
     let chunk_size = 5;
-    let range = last_user_token
-        .map(|token| (Bound::Excluded(StoredPrincipal(token)), Bound::Unbounded))
-        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+    let range = last_user_token.map_or((Bound::Unbounded, Bound::Unbounded), |token| {
+        (Bound::Excluded(StoredPrincipal(token)), Bound::Unbounded)
+    });
     read_state(|state| {
         state
             .user_token
@@ -98,9 +98,9 @@ fn next_custom_token_chunk(
     last_custom_token: Option<Principal>,
 ) -> Vec<(Principal, Vec<CustomToken>)> {
     let chunk_size = 5;
-    let range = last_custom_token
-        .map(|token| (Bound::Excluded(StoredPrincipal(token)), Bound::Unbounded))
-        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+    let range = last_custom_token.map_or((Bound::Unbounded, Bound::Unbounded), |token| {
+        (Bound::Excluded(StoredPrincipal(token)), Bound::Unbounded)
+    });
     read_state(|state| {
         state
             .custom_token
@@ -115,14 +115,15 @@ fn next_user_profile_chunk(
     last_user_profile: Option<(Timestamp, Principal)>,
 ) -> Vec<((Timestamp, Principal), StoredUserProfile)> {
     let chunk_size = 5;
-    let range = last_user_profile
-        .map(|(timestamp, principal)| {
+    let range = last_user_profile.map_or(
+        (Bound::Unbounded, Bound::Unbounded),
+        |(timestamp, principal)| {
             (
                 Bound::Excluded((timestamp, StoredPrincipal(principal))),
                 Bound::Unbounded,
             )
-        })
-        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+        },
+    );
     read_state(|state| {
         state
             .user_profile
@@ -138,9 +139,9 @@ fn next_user_profile_chunk(
 /// The next chunk of user timestamps to be migrated.
 fn next_user_timestamp_chunk(user_maybe: Option<Principal>) -> Vec<(Principal, Timestamp)> {
     let chunk_size = 5;
-    let range = user_maybe
-        .map(|user| (Bound::Excluded(StoredPrincipal(user)), Bound::Unbounded))
-        .unwrap_or((Bound::Unbounded, Bound::Unbounded));
+    let range = user_maybe.map_or((Bound::Unbounded, Bound::Unbounded), |user| {
+        (Bound::Excluded(StoredPrincipal(user)), Bound::Unbounded)
+    });
     read_state(|state| {
         state
             .user_profile_updated

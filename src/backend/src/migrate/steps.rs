@@ -1,4 +1,5 @@
 use crate::{modify_state_config, mutate_state};
+use ic_cdk::eprintln;
 use shared::{
     backend_api::Service,
     types::{ApiEnabled, Guards, Migration, MigrationError, Stats},
