@@ -249,9 +249,9 @@ impl MigrationProgress {
                 MigrationProgress::MigratedUserProfilesUpTo(None)
             }
             MigrationProgress::MigratedUserProfilesUpTo(_) => {
-                MigrationProgress::CheckingTargetCanister
+                MigrationProgress::CheckingDataMigration
             }
-            MigrationProgress::CheckingTargetCanister => MigrationProgress::UnlockingTarget,
+            MigrationProgress::CheckingDataMigration => MigrationProgress::UnlockingTarget,
             MigrationProgress::UnlockingTarget => MigrationProgress::Unlocking,
             &MigrationProgress::Unlocking | MigrationProgress::Completed => {
                 MigrationProgress::Completed

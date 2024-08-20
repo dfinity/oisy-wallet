@@ -254,7 +254,7 @@ pub enum MigrationProgress {
     /// Migrated user profiles up to the given timestamp/user pair.
     MigratedUserProfilesUpTo(Option<(Timestamp, Principal)>),
     /// Checking that the target canister has all the data.
-    CheckingTargetCanister,
+    CheckingDataMigration,
     /// Unlock user data operations in the target canister.
     UnlockingTarget,
     // Unlock signing operations in the current canister.

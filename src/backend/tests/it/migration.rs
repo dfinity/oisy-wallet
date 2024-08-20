@@ -303,7 +303,7 @@ fn test_migration() {
     }
     // Should be checking the migration.
     {
-        pic_setup.assert_migration_progress_is(MigrationProgress::CheckingTargetCanister);
+        pic_setup.assert_migration_progress_is(MigrationProgress::CheckingDataMigration);
     }
     // Step the timer: Migration should be complete, and stay complete.
     {

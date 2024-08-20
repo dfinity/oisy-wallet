@@ -211,7 +211,7 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                         })?
                         .0;
                     if stats.user_profile_count != 0 {
-                        return Err(MigrationError::TargetCanisterNotEmpty);
+                        return Err(MigrationError::TargetCanisterNotEmpty(stats));
                     }
                     set_progress(migration.progress.next());
                 }
@@ -236,8 +236,9 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                     let chunk = next_user_profile_chunk(last_user_profile);
                     migrate!(migration, chunk, MigratedUserProfilesUpTo, UserProfile);
                 }
-                MigrationProgress::CheckingTargetCanister => {
-                    let stats = Service(migration.to)
+                MigrationProgress::CheckingDataMigration => {
+                    let source_stats = crate::stats();
+                    let target_stats = Service(migration.to)
                         .stats()
                         .await
                         .map_err(|e| {
@@ -245,8 +246,11 @@ pub async fn step_migration() -> Result<(), MigrationError> {
                             MigrationError::CouldNotGetTargetPostStats
                         })?
                         .0;
-                    if stats.user_profile_count != 0 {
-                        return Err(MigrationError::TargetCanisterNotEmpty);
+                    if source_stats != target_stats {
+                        return Err(MigrationError::TargetStatsMismatch(
+                            source_stats,
+                            target_stats,
+                        ));
                     }
                     set_progress(migration.progress.next());
                 }
