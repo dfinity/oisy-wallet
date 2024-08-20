@@ -67,7 +67,7 @@ const loadBtcAddress = async ({
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,
-		getAddress: (identity) =>
+		getAddress: (identity: OptionIdentity) =>
 			getBtcAddress({
 				identity,
 				network: network === 'testnet' ? { testnet: null } : { mainnet: null }
@@ -167,9 +167,17 @@ export const loadIdbEthAddress = async (): Promise<ResultSuccess> =>
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
 	});
 
-export const certifyAddress = async (address: string): Promise<ResultSuccess<string>> => {
-	const tokenId = ETHEREUM_TOKEN_ID;
-
+const certifyAddress = async ({
+	tokenId,
+	address,
+	getAddress,
+	updateIdbAddressLastUsage
+}: {
+	tokenId: TokenId;
+	address: Address;
+	getAddress: (identity: OptionIdentity) => Promise<Address>;
+	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
+}): Promise<ResultSuccess<string>> => {
 	try {
 		const { identity } = get(authStore);
 
@@ -179,23 +187,45 @@ export const certifyAddress = async (address: string): Promise<ResultSuccess<str
 			return { success: false, err: 'Using the dapp with an anonymous user if not supported.' };
 		}
 
-		const certifiedAddress = await getEthAddress(identity);
+		const certifiedAddress = await getAddress(identity);
 
 		if (address.toLowerCase() !== certifiedAddress.toLowerCase()) {
 			return {
 				success: false,
-				err: 'The address used to load the data did not match your actual wallet address, which is why your session was ended. Please sign in again to reload your own data.'
+				err: `The address used to load the data did not match your actual ${tokenId.description} wallet address, which is why your session was ended. Please sign in again to reload your own data.`
 			};
 		}
 
 		addressStore.set({ tokenId, data: { data: address, certified: true } });
 
-		await updateIdbEthAddressLastUsage(identity.getPrincipal());
+		await updateIdbAddressLastUsage(identity.getPrincipal());
 	} catch (err: unknown) {
 		addressStore.reset(tokenId);
 
-		return { success: false, err: 'Error while loading the ETH address.' };
+		return { success: false, err: `Error while loading the ${tokenId.description} address.` };
 	}
 
 	return { success: true };
 };
+
+export const certifyBtcAddressMainnet = async (
+	address: BtcAddress
+): Promise<ResultSuccess<string>> =>
+	certifyAddress({
+		tokenId: BTC_MAINNET_TOKEN_ID,
+		address,
+		getAddress: (identity: OptionIdentity) =>
+			getBtcAddress({
+				identity,
+				network: { mainnet: null }
+			}),
+		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage
+	});
+
+export const certifyEthAddress = async (address: EthAddress): Promise<ResultSuccess<string>> =>
+	certifyAddress({
+		tokenId: ETHEREUM_TOKEN_ID,
+		address,
+		getAddress: getEthAddress,
+		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
+	});
