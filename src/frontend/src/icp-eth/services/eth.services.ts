@@ -6,6 +6,7 @@ import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 
+import type { Erc20Token } from '$eth/types/erc20';
 import {
 	mapCkErc20PendingTransaction,
 	mapCkEthPendingTransaction,
@@ -89,7 +90,7 @@ const loadCkErc20PendingTransactions = async ({
 } & IcCkLinkedAssets) => {
 	const logsTopics = (to: EthAddress): (string | null)[] => [
 		CKERC20_HELPER_CONTRACT_SIGNATURE,
-		null,
+		(twinToken as Erc20Token).address,
 		null,
 		to
 	];
@@ -155,9 +156,6 @@ const loadPendingTransactions = async ({
 			getTransaction(transactionHash);
 
 		const pendingTransactions = await Promise.all(pendingLogs.map(loadTransaction));
-
-		// TODO(fix): filter pendingTransactions which match the token
-		// i.e. do not display pending LINK -> ckLINK as "Converting USDC to ckUSDC"
 
 		icPendingTransactionsStore.set({
 			tokenId,
