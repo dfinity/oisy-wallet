@@ -79,17 +79,30 @@ type ListUsersResponse = record {
   users : vec OisyUser;
   matches_max_length : nat64;
 };
+type MigrationError = variant {
+  TargetLockFailed;
+  TargetUnlockFailed;
+  CouldNotGetTargetPostStats;
+  CouldNotGetTargetPriorStats;
+  DataMigrationFailed;
+  TargetStatsMismatch : record { Stats; Stats };
+  Unknown;
+  TargetCanisterNotEmpty : Stats;
+  NoMigrationInProgress;
+};
 type MigrationProgress = variant {
   MigratedUserTokensUpTo : opt principal;
+  Failed : MigrationError;
   MigratedUserTimestampsUpTo : opt principal;
-  TargetPreCheckOk;
   MigratedCustomTokensUpTo : opt principal;
-  Locked;
+  CheckingDataMigration;
   MigratedUserProfilesUpTo : opt record { nat64; principal };
-  CheckingTargetCanister;
-  TargetLocked;
+  UnlockingTarget;
+  Unlocking;
   Completed;
   Pending;
+  LockingTarget;
+  CheckingTarget;
 };
 type MigrationReport = record { to : principal; progress : MigrationProgress };
 type OisyUser = record {
