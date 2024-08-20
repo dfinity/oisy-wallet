@@ -7,45 +7,49 @@ import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright
 import { type Page } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 
-export class Homepage {
-	protected readonly _page: Page;
+type HomepageParams = {
+	page: Page;
+};
 
-	constructor(page: Page) {
-		this._page = page;
+type HomepageLoggedInParams = {
+	iiPage: InternetIdentityPage;
+} & HomepageParams;
+
+export class Homepage {
+	readonly page: Page;
+
+	constructor({ page }: HomepageParams) {
+		this.page = page;
 	}
 
 	protected async hideHeroAnimation(): Promise<void> {
-		await this._page
+		await this.page
 			.getByTestId(HERO_ANIMATION_CANVAS)
 			.evaluate((element) => (element.style.display = 'none'));
 	}
 
-	get page(): Page {
-		return this._page;
-	}
-
 	async goto(): Promise<void> {
-		await this._page.goto(HOMEPAGE_URL);
+		await this.page.goto(HOMEPAGE_URL);
 	}
 
 	async waitForLoggedOut(): Promise<void> {
 		await this.goto();
-		await this._page.getByTestId(LOGIN_BUTTON).waitFor();
+		await this.page.getByTestId(LOGIN_BUTTON).waitFor();
 		await this.hideHeroAnimation();
 	}
 }
 
 export class HomepageLoggedIn extends Homepage {
-	private readonly _iiPage: InternetIdentityPage;
+	readonly iiPage: InternetIdentityPage;
 
-	constructor(page: Page, iiPage: InternetIdentityPage) {
-		super(page);
+	constructor({ page, iiPage }: HomepageLoggedInParams) {
+		super({ page });
 
-		this._iiPage = iiPage;
+		this.iiPage = iiPage;
 	}
 
 	async signInWithNewIdentity(): Promise<void> {
-		await this._iiPage.waitReady({
+		await this.iiPage.waitReady({
 			url: LOCAL_REPLICA_URL,
 			// TODO: take this value from vite.utils or FE constants
 			canisterId: 'rdmx6-jaaaa-aaaaa-aaadq-cai'
@@ -53,12 +57,12 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForLoggedOut();
 
-		await this._iiPage.signInWithNewIdentity();
+		await this.iiPage.signInWithNewIdentity();
 	}
 
 	async waitForLoggedIn(): Promise<void> {
 		await this.signInWithNewIdentity();
 
-		await this._page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
+		await this.page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
 	}
 }
