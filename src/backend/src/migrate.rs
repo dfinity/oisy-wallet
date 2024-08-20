@@ -160,12 +160,12 @@ macro_rules! migrate {
                 eprintln!("Failed to transfer data {:?}", e);
                 MigrationError::DataMigrationFailed
             })?;
-        set_progress(next_state)
+        next_state
     }};
 }
 pub(crate) use migrate;
 
-pub async fn step_migration() -> Result<Option<MigrationProgress>, MigrationError> {
+pub async fn step_migration() -> Result<MigrationProgress, MigrationError> {
     /// Sets the progress in the state, if a migration is in progress.
     ///
     /// Returns the new progress (if any).
@@ -194,7 +194,7 @@ pub async fn step_migration() -> Result<Option<MigrationProgress>, MigrationErro
                             })
                         });
                     });
-                    set_progress(migration.progress.next())
+                    migration.progress.next()
                 }
                 MigrationProgress::LockingTarget => {
                     // Lock the target canister APIs.
@@ -208,7 +208,7 @@ pub async fn step_migration() -> Result<Option<MigrationProgress>, MigrationErro
                             eprintln!("Failed to lock target canister: {:?}", e);
                             MigrationError::TargetLockFailed
                         })?;
-                    set_progress(migration.progress.next())
+                    migration.progress.next()
                 }
                 MigrationProgress::CheckingTarget => {
                     // Check that the target canister is empty.
@@ -223,7 +223,7 @@ pub async fn step_migration() -> Result<Option<MigrationProgress>, MigrationErro
                     if stats.user_profile_count != 0 {
                         return Err(MigrationError::TargetCanisterNotEmpty(stats));
                     }
-                    set_progress(migration.progress.next())
+                    migration.progress.next()
                 }
                 MigrationProgress::MigratedUserTokensUpTo(last) => {
                     let chunk = next_user_token_chunk(last);
@@ -262,7 +262,7 @@ pub async fn step_migration() -> Result<Option<MigrationProgress>, MigrationErro
                             target_stats,
                         ));
                     }
-                    set_progress(migration.progress.next())
+                    migration.progress.next()
                 }
                 MigrationProgress::UnlockingTarget => {
                     // Unlock the target canister APIs.
@@ -276,7 +276,7 @@ pub async fn step_migration() -> Result<Option<MigrationProgress>, MigrationErro
                             eprintln!("Failed to unlock target canister: {:?}", e);
                             MigrationError::TargetUnlockFailed
                         })?;
-                    set_progress(migration.progress.next())
+                    migration.progress.next()
                 }
                 MigrationProgress::Unlocking => {
                     // Unlock the local canister APIs.
@@ -288,17 +288,18 @@ pub async fn step_migration() -> Result<Option<MigrationProgress>, MigrationErro
                             })
                         });
                     });
-                    set_progress(migration.progress.next())
+                    migration.progress.next()
                 }
                 MigrationProgress::Completed => {
                     // Migration is complete.
                     clear_timer(migration.timer_id);
-                    set_progress(migration.progress.next())
+                    migration.progress.next()
                 }
                 MigrationProgress::Failed(e) => return Err(e),
             }
         }
         None => return Err(MigrationError::NoMigrationInProgress),
     };
+    set_progress(progress);
     Ok(progress)
 }
