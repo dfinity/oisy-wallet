@@ -9,8 +9,3 @@ export type OptionAddress<T extends Address> = T | undefined | null;
 export type OptionBtcAddress = OptionAddress<BtcAddress>;
 
 export type OptionEthAddress = OptionAddress<EthAddress>;
-
-export interface SafeLoadTokenAddressParams {
-	displayProgressModal: () => void;
-	onIdbSuccess: () => void;
-}
