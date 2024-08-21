@@ -1,3 +1,4 @@
+import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -20,6 +21,7 @@ export const exchanges: Readable<ExchangesData> = derived(
 		const icpPrice = $exchangeStore?.['internet-computer'];
 
 		return {
+			[BTC_MAINNET_TOKEN_ID]: btcPrice,
 			[ETHEREUM_TOKEN_ID]: ethPrice,
 			[SEPOLIA_TOKEN_ID]: ethPrice,
 			[ICP_TOKEN_ID]: icpPrice,
