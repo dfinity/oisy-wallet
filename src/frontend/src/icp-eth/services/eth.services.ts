@@ -4,8 +4,8 @@ import {
 } from '$env/networks.cketh.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
-import type { Erc20Token } from '$eth/types/erc20';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+
 import {
 	mapCkErc20PendingTransaction,
 	mapCkEthPendingTransaction,
@@ -89,7 +89,7 @@ const loadCkErc20PendingTransactions = async ({
 } & IcCkLinkedAssets) => {
 	const logsTopics = (to: EthAddress): (string | null)[] => [
 		CKERC20_HELPER_CONTRACT_SIGNATURE,
-		(twinToken as Erc20Token).address,
+		null,
 		null,
 		to
 	];
