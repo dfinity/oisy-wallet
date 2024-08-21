@@ -74,6 +74,7 @@ A list of useful faucets and ERC20 tokens on Sepolia:
 - ETH: [Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia) from Alchemy
 - USDC: [Circle faucet](https://faucet.circle.com/)
 - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
+- Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
 
 ## Testing
 
