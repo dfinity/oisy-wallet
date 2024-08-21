@@ -34,13 +34,14 @@
 			<svelte:fragment slot="label">{$i18n.fee.text.estimated_eth}</svelte:fragment>
 
 			<div>
-				&ZeroWidthSpace;
 				{#if nonNullish(maxTransactionFee)}
 					<FeeAmountDisplay
 						fee={BigNumber.from(maxTransactionFee)}
 						feeSymbol={feeToken.symbol}
 						feeTokenId={feeToken.id}
 					/>
+				{:else}
+					&ZeroWidthSpace;
 				{/if}
 			</div>
 		</Value>
