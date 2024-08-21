@@ -1,14 +1,10 @@
 import {
-	ABOUT_HOW_MODAL,
-	ABOUT_HOW_MODAL_OPEN_BUTTON,
-	ABOUT_WHAT_MODAL,
-	ABOUT_WHAT_MODAL_OPEN_BUTTON,
 	HERO_ANIMATION_CANVAS,
 	LOGIN_BUTTON,
 	TOKENS_SKELETONS_INITIALIZED
 } from '$lib/constants/test-ids.constant';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
-import { type Locator, type Page, type ViewportSize } from '@playwright/test';
+import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 
 type HomepageParams = {
@@ -18,6 +14,15 @@ type HomepageParams = {
 type HomepageLoggedInParams = {
 	iiPage: InternetIdentityPage;
 } & HomepageParams;
+
+type WaitForModalParams = {
+	modalOpenButtonTestId: string;
+	modalTestId: string;
+};
+
+type TakeModalSnapshotParams = {
+	viewportSize?: ViewportSize;
+} & WaitForModalParams;
 
 abstract class Homepage {
 	readonly #page: Page;
@@ -36,6 +41,21 @@ abstract class Homepage {
 		await this.#page.goto(HOMEPAGE_URL);
 	}
 
+	private async waitForModal({
+		modalOpenButtonTestId,
+		modalTestId
+	}: WaitForModalParams): Promise<Locator> {
+		await this.#page.getByTestId(modalOpenButtonTestId).click();
+		const modal = this.#page.getByTestId(modalTestId);
+		await modal.waitFor();
+
+		return modal;
+	}
+
+	private async setViewportSize(viewportSize: ViewportSize) {
+		await this.#page.setViewportSize(viewportSize);
+	}
+
 	protected async waitForHomepageReady(): Promise<void> {
 		await this.goto();
 		await this.#page.getByTestId(LOGIN_BUTTON).waitFor();
@@ -46,22 +66,23 @@ abstract class Homepage {
 		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
 	}
 
-	protected async waitForModal({
+	async takeModalSnapshot({
+		viewportSize,
 		modalOpenButtonTestId,
 		modalTestId
-	}: {
-		modalOpenButtonTestId: string;
-		modalTestId: string;
-	}): Promise<Locator> {
-		await this.#page.getByTestId(modalOpenButtonTestId).click();
-		const modal = this.#page.getByTestId(modalTestId);
-		await modal.waitFor();
+	}: TakeModalSnapshotParams): Promise<void> {
+		if (viewportSize) {
+			await this.setViewportSize(viewportSize);
+		}
 
-		return modal;
-	}
+		await this.waitForHomepageReady();
 
-	async setViewportSize(viewportSize: ViewportSize) {
-		await this.#page.setViewportSize(viewportSize);
+		const modal = await this.waitForModal({
+			modalOpenButtonTestId,
+			modalTestId
+		});
+
+		await expect(modal).toHaveScreenshot();
 	}
 
 	abstract waitForReady(): Promise<void>;
@@ -77,20 +98,6 @@ export class HomepageLoggedOut extends Homepage {
 	 */
 	async waitForReady(): Promise<void> {
 		await this.waitForHomepageReady();
-	}
-
-	async waitForAboutHowModal(): Promise<Locator> {
-		return this.waitForModal({
-			modalOpenButtonTestId: ABOUT_HOW_MODAL_OPEN_BUTTON,
-			modalTestId: ABOUT_HOW_MODAL
-		});
-	}
-
-	async waitForAboutWhatModal(): Promise<Locator> {
-		return this.waitForModal({
-			modalOpenButtonTestId: ABOUT_WHAT_MODAL_OPEN_BUTTON,
-			modalTestId: ABOUT_WHAT_MODAL
-		});
 	}
 }
 

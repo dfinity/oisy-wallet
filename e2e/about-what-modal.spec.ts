@@ -1,21 +1,19 @@
-import { expect, test } from '@playwright/test';
-import {
-	ABOUT_MODALS_VIEWPORT_WIDTH,
-	ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT
-} from './utils/constants/e2e.constants';
+import { ABOUT_WHAT_MODAL, ABOUT_WHAT_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constant';
+import { test } from '@playwright/test';
+import { ABOUT_MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedOut } from './utils/pages/homepage.page';
+
+export const ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT = 930;
 
 test('should display about-what modal', async ({ page }) => {
 	const homepageLoggedOut = new HomepageLoggedOut({ page });
 
-	// make sure we capture the whole modal content by setting specific viewport size
-	await homepageLoggedOut.setViewportSize({
-		width: ABOUT_MODALS_VIEWPORT_WIDTH,
-		height: ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT
+	await homepageLoggedOut.takeModalSnapshot({
+		viewportSize: {
+			width: ABOUT_MODALS_VIEWPORT_WIDTH,
+			height: ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT
+		},
+		modalOpenButtonTestId: ABOUT_WHAT_MODAL_OPEN_BUTTON,
+		modalTestId: ABOUT_WHAT_MODAL
 	});
-	await homepageLoggedOut.waitForReady();
-
-	const aboutWhatModal = await homepageLoggedOut.waitForAboutWhatModal();
-
-	await expect(aboutWhatModal).toHaveScreenshot();
 });

@@ -1,21 +1,22 @@
-import { expect, test } from '@playwright/test';
+import { test } from '@playwright/test';
 import {
-	ABOUT_HOW_MODAL_VIEWPORT_HEIGHT,
-	ABOUT_MODALS_VIEWPORT_WIDTH
-} from './utils/constants/e2e.constants';
+	ABOUT_HOW_MODAL,
+	ABOUT_HOW_MODAL_OPEN_BUTTON
+} from '../src/frontend/src/lib/constants/test-ids.constant';
+import { ABOUT_MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedOut } from './utils/pages/homepage.page';
+
+export const ABOUT_HOW_MODAL_VIEWPORT_HEIGHT = 1600;
 
 test('should display about-how modal', async ({ page }) => {
 	const homepageLoggedOut = new HomepageLoggedOut({ page });
 
-	// make sure we capture the whole modal content by setting specific viewport size
-	await homepageLoggedOut.setViewportSize({
-		width: ABOUT_MODALS_VIEWPORT_WIDTH,
-		height: ABOUT_HOW_MODAL_VIEWPORT_HEIGHT
+	await homepageLoggedOut.takeModalSnapshot({
+		viewportSize: {
+			width: ABOUT_MODALS_VIEWPORT_WIDTH,
+			height: ABOUT_HOW_MODAL_VIEWPORT_HEIGHT
+		},
+		modalOpenButtonTestId: ABOUT_HOW_MODAL_OPEN_BUTTON,
+		modalTestId: ABOUT_HOW_MODAL
 	});
-	await homepageLoggedOut.waitForReady();
-
-	const aboutHowModal = await homepageLoggedOut.waitForAboutHowModal();
-
-	await expect(aboutHowModal).toHaveScreenshot();
 });
