@@ -124,7 +124,7 @@ interface I18nSettings {
 		pouh_credential_verified: string;
 		sign_in: string;
 	};
-	alt: { testnets_toggle: string };
+	alt: { testnets_toggle: string; github_release: string };
 	error: { loading_profile: string };
 }
 
