@@ -2,11 +2,6 @@
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { combinedDerivedEnabledNetworkTokensUi } from '$lib/derived/network-tokens.derived';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { balance, balanceZero } from '$lib/derived/balances.derived';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
-	import { tokenSymbol } from '$lib/derived/token.derived';
-	import Amount from '$lib/components/ui/Amount.svelte';
 
 	let totalUsd: number;
 	$: totalUsd = $combinedDerivedEnabledNetworkTokensUi.reduce(
