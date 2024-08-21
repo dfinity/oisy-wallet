@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { formatToken } from '$lib/utils/format.utils.js';
-	import { balancesStore } from '$lib/stores/balances.store.js';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Token } from '$lib/types/token';
 
