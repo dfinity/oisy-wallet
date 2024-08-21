@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Settings from '$lib/components/pages/Settings.svelte';
+	import Settings from '$lib/components/settings/Settings.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
