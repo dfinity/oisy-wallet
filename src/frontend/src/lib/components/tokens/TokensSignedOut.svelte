@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { combinedDerivedSortedNetworkTokens } from '$lib/derived/network-tokens.derived.js';
+	import { combinedDerivedSortedNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
 	import { onMount } from 'svelte';
 	import { unsafeLoadDefaultPublicIcrcTokens } from '$icp/services/icrc.services';

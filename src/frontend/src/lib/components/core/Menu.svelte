@@ -17,7 +17,7 @@
 	import { page } from '$app/stores';
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
