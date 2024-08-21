@@ -4,6 +4,7 @@ import {
 	TOKENS_SKELETONS_INITIALIZED
 } from '$lib/constants/test-ids.constant';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
+import { nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 
@@ -20,7 +21,7 @@ type WaitForModalParams = {
 	modalTestId: string;
 };
 
-type TakeModalSnapshotParams = {
+type TestModalSnapshotParams = {
 	viewportSize?: ViewportSize;
 } & WaitForModalParams;
 
@@ -66,12 +67,12 @@ abstract class Homepage {
 		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
 	}
 
-	async takeModalSnapshot({
+	async testModalSnapshot({
 		viewportSize,
 		modalOpenButtonTestId,
 		modalTestId
-	}: TakeModalSnapshotParams): Promise<void> {
-		if (viewportSize) {
+	}: TestModalSnapshotParams): Promise<void> {
+		if (nonNullish(viewportSize)) {
 			await this.setViewportSize(viewportSize);
 		}
 

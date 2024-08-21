@@ -6,12 +6,12 @@ import {
 import { ABOUT_MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedOut } from './utils/pages/homepage.page';
 
-export const ABOUT_HOW_MODAL_VIEWPORT_HEIGHT = 1600;
+const ABOUT_HOW_MODAL_VIEWPORT_HEIGHT = 1600;
 
 test('should display about-how modal', async ({ page }) => {
 	const homepageLoggedOut = new HomepageLoggedOut({ page });
 
-	await homepageLoggedOut.takeModalSnapshot({
+	await homepageLoggedOut.testModalSnapshot({
 		viewportSize: {
 			width: ABOUT_MODALS_VIEWPORT_WIDTH,
 			height: ABOUT_HOW_MODAL_VIEWPORT_HEIGHT
