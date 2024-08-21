@@ -10,7 +10,7 @@ use candid::Principal;
 use pocket_ic::PocketIc;
 use shared::types::{
     custom_token::{CustomToken, IcrcToken, Token},
-    MigrationProgress, MigrationReport, Stats,
+    ApiEnabled, Guards, MigrationProgress, MigrationReport, Stats,
 };
 
 struct MigrationTestEnv {
@@ -105,7 +105,7 @@ impl MigrationTestEnv {
     fn step_migration(&self) {
         self.old_backend
             .update::<()>(controller(), "step_migration", ())
-            .expect("Failed to stop migration tmer")
+            .expect("Failed to stop migration timer")
     }
     /// Verifies that the migration is in an expected state.
     fn assert_migration_is(&self, expected: Option<MigrationReport>) {
@@ -120,6 +120,27 @@ impl MigrationTestEnv {
                 .expect("Migration should be in progress")
                 .progress,
             expected,
+        );
+    }
+    /// Verifies that old and new canister locks are as expected.
+    fn assert_canister_locks_are(&self, old: Option<Guards>, new: Option<Guards>, context: &str) {
+        assert_eq!(
+            self.old_backend
+                .query::<shared::types::Config>(controller(), "config", ())
+                .expect("Failed to get config")
+                .api,
+            old,
+            "Old canister locks are not as expected {}",
+            context
+        );
+        assert_eq!(
+            self.new_backend
+                .query::<shared::types::Config>(controller(), "config", ())
+                .expect("Failed to get config")
+                .api,
+            new,
+            "New canister locks are not as expected {}",
+            context
         );
     }
 }
@@ -167,6 +188,21 @@ fn test_migration() {
         Ok(Stats::default()),
         "Initially, there should be no users in the new backend"
     );
+    // Initially no migrations should be in progress.
+    assert_eq!(
+        pic_setup
+            .old_backend
+            .query::<Option<MigrationReport>>(controller(), "migration", ()),
+        Ok(None),
+        "Initially, no migration should be in progress"
+    );
+    assert_eq!(
+        pic_setup
+            .new_backend
+            .query::<Option<MigrationReport>>(controller(), "migration", ()),
+        Ok(None),
+        "Initially, no migration should be in progress"
+    );
     // Start migration
     {
         assert_eq!(
@@ -198,13 +234,31 @@ fn test_migration() {
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::LockingTarget);
-        // TODO: Check that the old backend really is locked.
+        pic_setup.assert_canister_locks_are(
+            Some(Guards {
+                threshold_key: ApiEnabled::ReadOnly,
+                user_data: ApiEnabled::ReadOnly,
+            }),
+            None,
+            "after locking the source canister",
+        );
     }
     // Step the migration: Target canister should be locked.
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::CheckingTarget);
-        // TODO: Check that the target really is locked:
+        // Check that the target really is locked:
+        pic_setup.assert_canister_locks_are(
+            Some(Guards {
+                threshold_key: ApiEnabled::ReadOnly,
+                user_data: ApiEnabled::ReadOnly,
+            }),
+            Some(Guards {
+                threshold_key: ApiEnabled::Disabled,
+                user_data: ApiEnabled::Disabled,
+            }),
+            "after locking the target canister",
+        );
     }
     // Step the migration: Should have started the user token migration.
     {
@@ -267,18 +321,35 @@ fn test_migration() {
     {
         pic_setup.assert_migration_progress_is(MigrationProgress::CheckingDataMigration);
     }
-    // Step the migration.  Should be unlocking the target.
+    // Step the migration.  Should be unlocking.
     {
         pic_setup.step_migration();
         pic_setup.assert_migration_progress_is(MigrationProgress::UnlockingTarget);
-    }
-    // Step the migration.  Should be unlocking the source.
-    {
         pic_setup.step_migration();
-        // TODO: Verify that the target has been unlocked.
+        pic_setup.assert_canister_locks_are(
+            Some(Guards {
+                threshold_key: ApiEnabled::ReadOnly,
+                user_data: ApiEnabled::ReadOnly,
+            }),
+            Some(Guards {
+                threshold_key: ApiEnabled::Disabled,
+                user_data: ApiEnabled::Enabled,
+            }),
+            "after locking the target canister",
+        );
         pic_setup.assert_migration_progress_is(MigrationProgress::Unlocking);
         pic_setup.step_migration();
-        // TODO: Verify that the source has been unlocked
+        pic_setup.assert_canister_locks_are(
+            Some(Guards {
+                threshold_key: ApiEnabled::Enabled,
+                user_data: ApiEnabled::Disabled,
+            }),
+            Some(Guards {
+                threshold_key: ApiEnabled::Disabled,
+                user_data: ApiEnabled::Enabled,
+            }),
+            "after locking the target canister",
+        );
     }
     // Step the migration: Migration should be complete, and stay complete.
     {
@@ -286,5 +357,15 @@ fn test_migration() {
             pic_setup.step_migration();
             pic_setup.assert_migration_progress_is(MigrationProgress::Completed);
         }
+    }
+    // Finally, make sure that the new canister has all the data.
+    {
+        assert_eq!(
+            pic_setup
+                .new_backend
+                .query::<Stats>(controller(), "stats", ()),
+            Ok(stats),
+            "Initially, there should be users in the old backend"
+        );
     }
 }
