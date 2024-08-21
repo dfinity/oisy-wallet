@@ -2,6 +2,7 @@
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import SettingsSignedIn from '$lib/components/pages/SettingsSignedIn.svelte';
 	import SettingsSignedOut from '$lib/components/pages/SettingsSignedOut.svelte';
+	import SettingsVersion from '$lib/components/pages/SettingsVersion.svelte';
 </script>
 
 {#if $authSignedIn}
@@ -9,3 +10,5 @@
 {:else}
 	<SettingsSignedOut />
 {/if}
+
+<SettingsVersion />
