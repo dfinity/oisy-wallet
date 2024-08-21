@@ -5,7 +5,7 @@
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { balancesStore } from '$lib/stores/balances.store.js';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { TokenId } from '$lib/types/token';
 
