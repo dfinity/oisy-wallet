@@ -50,6 +50,7 @@ use types::{
 };
 use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
+use crate::bitcoin_lib::get_balance;
 
 mod assertions;
 mod bitcoin_lib;
@@ -269,7 +270,7 @@ async fn caller_btc_address(network: BitcoinNetwork) -> String {
 /// Returns the balance of the given Bitcoin address.
 #[query]
 async fn btc_balance(address: String, network: BitcoinNetwork) -> u64 {
-    bitcoin_lib::get_balance(network, address).await
+    get_balance(network, address).await
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
