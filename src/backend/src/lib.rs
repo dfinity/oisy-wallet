@@ -17,6 +17,7 @@ use ic_cdk::api::management_canister::ecdsa::{
     SignWithEcdsaArgument,
 };
 use ic_cdk::api::time;
+use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{clear_timer, set_timer_interval};
 use ic_stable_structures::{
@@ -625,10 +626,22 @@ fn migration_stop_timer() -> Result<(), String> {
     })
 }
 
-/// Steps the migration
+/// Steps the migration.
+///
+/// On error, the migration is marked as failed and the timer is cleared.
 #[update(guard = "caller_is_allowed")]
 async fn step_migration() {
-    migrate::step_migration().await;
+    let result = migrate::step_migration().await;
+    eprintln!("Stepped migration: {:?}", result);
+    if let Err(err) = result {
+        mutate_state(|s| {
+            if let Some(migration) = &mut s.migration {
+                migration.progress = MigrationProgress::Failed(err);
+                clear_timer(migration.timer_id);
+            }
+            eprintln!("Migration failed: {err:?}");
+        });
+    };
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
