@@ -147,7 +147,8 @@
 			"sign_in": "Sign in to start using Oisy Wallet."
 		},
 		"alt": {
-			"testnets_toggle": "Toggle to show or hide testnets"
+			"testnets_toggle": "Toggle to show or hide testnets",
+			"github_release": "Oisy release notes on GitHub"
 		},
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."

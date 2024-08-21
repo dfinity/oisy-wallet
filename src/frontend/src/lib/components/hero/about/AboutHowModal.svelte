@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store.js';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { Html, Modal } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
