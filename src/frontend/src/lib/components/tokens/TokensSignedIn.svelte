@@ -27,15 +27,13 @@
 
 	let tokensToDisplay: Token[] = [];
 
+	const parseTokenKey = (token: Token) => `${token.id.description}-${token.network.id.description}`;
+
 	let tokenKeys: string;
-	$: tokenKeys = tokens
-		.map((token) => `${token.id.description}-${token.network.id.description}`)
-		.join(',');
+	$: tokenKeys = tokens.map(parseTokenKey).join(',');
 
 	let tokensToDisplayKeys: string;
-	$: tokensToDisplayKeys = tokensToDisplay
-		.map((token) => `${token.id.description}-${token.network.id.description}`)
-		.join(',');
+	$: tokensToDisplayKeys = tokensToDisplay.map(parseTokenKey).join(',');
 
 	const defineTokensToDisplay = (): Token[] => {
 		if (!$pointerEventStore) {
@@ -52,13 +50,9 @@
 		}
 
 		// The order is not the same, so the list is the same as the one currently showed, but the balances are updated.
-		const tokenMap = new Map(
-			tokens.map((token) => [`${token.id.description}-${token.network.id.description}`, token])
-		);
+		const tokenMap = new Map(tokens.map((token) => [parseTokenKey(token), token]));
 
-		return tokensToDisplay.map(
-			(token) => tokenMap.get(`${token.id.description}-${token.network.id.description}`) ?? token
-		);
+		return tokensToDisplay.map((token) => tokenMap.get(parseTokenKey(token)) ?? token);
 	};
 
 	const updateTokensToDisplay = () => (tokensToDisplay = defineTokensToDisplay());
