@@ -8,32 +8,19 @@ on:
 
 jobs:
 
-  docker-build-e2e:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Delete unnecessary tools folder to prevent "out of space" error
-        run: rm -rf /opt/hostedtoolcache
-
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build E2E Docker Image
-        uses: ./.github/actions/docker-build-e2e
-        with:
-          name: oisy-e2e-image
-
   e2e:
     runs-on: ubuntu-latest
-    needs: docker-build-e2e
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Download E2E Docker image artifact
-        uses: actions/download-artifact@v4
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v6
         with:
-          name: oisy-e2e-image
-          path: .
+          workflow: e2e-tests-build-docker-image.yml
+          branch: main
+          if_no_artifact_found: fail
 
       - name: Load Docker image
         run: |

@@ -1,0 +1,16 @@
+name: Docker Image Builder For E2E Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker-build-e2e:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build E2E Docker Image
+        uses: ./.github/actions/docker-build-e2e
+        with:
+          name: oisy-e2e-image
