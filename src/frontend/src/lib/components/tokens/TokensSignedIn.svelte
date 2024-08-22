@@ -14,7 +14,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { pointerEventStore } from '$lib/stores/events.store';
 	import { pointerEventsHandler } from '$lib/utils/events.utils';
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
