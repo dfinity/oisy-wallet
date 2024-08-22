@@ -5,6 +5,7 @@ import {
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
 import {
+	CKETH_LEDGER_CANISTER_IDS,
 	IC_CKETH_LEDGER_CANISTER_ID,
 	STAGING_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks.icrc.env';
@@ -39,14 +40,12 @@ export const mapCkEthereumTransaction = ({
 	Partial<Pick<Network, 'env'>>): IcTransactionUi => {
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
-	const ckETHExplorerUrl =
-		IC_CKETH_LEDGER_CANISTER_ID === ledgerCanisterId && nonNullish(env)
-			? env === 'testnet' && nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID)
-				? ledgerCanisterId !== STAGING_CKETH_LEDGER_CANISTER_ID
-					? `${CKETH_SEPOLIA_EXPLORER_URL}/${ledgerCanisterId}`
-					: CKETH_SEPOLIA_EXPLORER_URL
-				: CKETH_EXPLORER_URL
-			: undefined;
+	const ckETHExplorerUrl = nonNullish(env)
+		? (env === 'testnet' && nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID)
+				? CKETH_SEPOLIA_EXPLORER_URL
+				: CKETH_EXPLORER_URL) +
+			(!CKETH_LEDGER_CANISTER_IDS.includes(ledgerCanisterId) ? `/${ledgerCanisterId}` : '')
+		: undefined;
 
 	const tx: IcTransactionUi = {
 		id,
