@@ -1,6 +1,6 @@
 use crate::utils::assertion::{assert_custom_tokens_eq, assert_tokens_data_eq};
 use crate::utils::mock::CALLER;
-use crate::utils::pocketic::{query_call, setup, update_call};
+use crate::utils::pocketic::{setup, PicCanisterTrait};
 use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::custom_token::{CustomToken, CustomTokenId, IcrcToken, Token};
@@ -52,16 +52,16 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let before_set = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+    let before_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert!(before_set.is_ok());
     assert_eq!(before_set.unwrap().len(), 0);
 
-    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
+    let result = pic_setup.update::<()>(caller, "set_custom_token", user_token.clone());
 
     assert!(result.is_ok());
 
-    let after_set = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+    let after_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![user_token.clone_with_incremented_version()];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
@@ -82,11 +82,11 @@ fn test_update_custom_token(user_token: &CustomToken) {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
+    let result = pic_setup.update::<()>(caller, "set_custom_token", user_token.clone());
 
     assert!(result.is_ok());
 
-    let results = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+    let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![user_token.clone_with_incremented_version()];
 
@@ -100,13 +100,11 @@ fn test_update_custom_token(user_token: &CustomToken) {
         version: results.unwrap().get(0).unwrap().version,
     };
 
-    let update_result =
-        update_call::<()>(&pic_setup, caller, "set_custom_token", update_token.clone());
+    let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
 
     assert!(update_result.is_ok());
 
-    let updated_results =
-        query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+    let updated_results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_updated_tokens: Vec<CustomToken> =
         vec![update_token.clone_with_incremented_version()];
@@ -133,18 +131,18 @@ fn test_add_many_custom_tokens(user_token: &CustomToken) {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let before_set = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+    let before_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert!(before_set.is_ok());
     assert_eq!(before_set.unwrap().len(), 0);
 
     let tokens: Vec<CustomToken> = vec![user_token.clone(), ANOTHER_USER_TOKEN.clone()];
 
-    let result = update_call::<()>(&pic_setup, caller, "set_many_custom_tokens", tokens);
+    let result = pic_setup.update::<()>(caller, "set_many_custom_tokens", tokens);
 
     assert!(result.is_ok());
 
-    let after_set = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+    let after_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![
         user_token.clone_with_incremented_version(),
@@ -170,11 +168,11 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
 
     let tokens: Vec<CustomToken> = vec![user_token.clone(), ANOTHER_USER_TOKEN.clone()];
 
-    let result = update_call::<()>(&pic_setup, caller, "set_many_custom_tokens", tokens.clone());
+    let result = pic_setup.update::<()>(caller, "set_many_custom_tokens", tokens.clone());
 
     assert!(result.is_ok());
 
-    let results = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+    let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert!(results.is_ok());
 
@@ -199,17 +197,12 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
 
     let update_tokens: Vec<CustomToken> = vec![update_token.clone(), update_another_token.clone()];
 
-    let update_result = update_call::<()>(
-        &pic_setup,
-        caller,
-        "set_many_custom_tokens",
-        update_tokens.clone(),
-    );
+    let update_result =
+        pic_setup.update::<()>(caller, "set_many_custom_tokens", update_tokens.clone());
 
     assert!(update_result.is_ok());
 
-    let updated_results =
-        query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+    let updated_results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     assert!(updated_results.is_ok());
 
@@ -229,16 +222,11 @@ fn test_list_custom_tokens() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let _ = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
+    let _ = pic_setup.update::<()>(caller, "set_custom_token", USER_TOKEN.clone());
 
-    let _ = update_call::<()>(
-        &pic_setup,
-        caller,
-        "set_custom_token",
-        ANOTHER_USER_TOKEN.clone(),
-    );
+    let _ = pic_setup.update::<()>(caller, "set_custom_token", ANOTHER_USER_TOKEN.clone());
 
-    let results = query_call::<Vec<CustomToken>>(&pic_setup, caller, "list_custom_tokens", ());
+    let results = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
 
     let expected_tokens: Vec<CustomToken> = vec![
         USER_TOKEN.clone_with_incremented_version(),
@@ -267,7 +255,7 @@ fn test_cannot_update_custom_token_without_version(user_token: &CustomToken) {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
+    let result = pic_setup.update::<()>(caller, "set_custom_token", user_token.clone());
 
     assert!(result.is_ok());
 
@@ -277,8 +265,7 @@ fn test_cannot_update_custom_token_without_version(user_token: &CustomToken) {
         version: None,
     };
 
-    let update_result =
-        update_call::<()>(&pic_setup, caller, "set_custom_token", update_token.clone());
+    let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
 
     assert!(update_result.is_err());
     assert!(update_result
@@ -301,7 +288,7 @@ fn test_cannot_update_custom_token_with_invalid_version(user_token: &CustomToken
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let result = update_call::<()>(&pic_setup, caller, "set_custom_token", user_token.clone());
+    let result = pic_setup.update::<()>(caller, "set_custom_token", user_token.clone());
 
     assert!(result.is_ok());
 
@@ -311,8 +298,7 @@ fn test_cannot_update_custom_token_with_invalid_version(user_token: &CustomToken
         version: Some(123456789),
     };
 
-    let update_result =
-        update_call::<()>(&pic_setup, caller, "set_custom_token", update_token.clone());
+    let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
 
     assert!(update_result.is_err());
     assert!(update_result
@@ -324,8 +310,7 @@ fn test_cannot_update_custom_token_with_invalid_version(user_token: &CustomToken
 fn test_anonymous_cannot_add_custom_token() {
     let pic_setup = setup();
 
-    let result = update_call::<()>(
-        &pic_setup,
+    let result = pic_setup.update::<()>(
         Principal::anonymous(),
         "set_custom_token",
         USER_TOKEN.clone(),
@@ -342,8 +327,7 @@ fn test_anonymous_cannot_add_custom_token() {
 fn test_anonymous_cannot_list_custom_tokens() {
     let pic_setup = setup();
 
-    let result = query_call::<()>(
-        &pic_setup,
+    let result = pic_setup.query::<()>(
         Principal::anonymous(),
         "list_custom_tokens",
         USER_TOKEN.clone(),
@@ -362,14 +346,13 @@ fn test_user_cannot_list_another_custom_tokens() {
 
     let caller = Principal::from_text(CALLER).unwrap();
 
-    let _ = update_call::<()>(&pic_setup, caller, "set_custom_token", USER_TOKEN.clone());
+    let _ = pic_setup.update::<()>(caller, "set_custom_token", USER_TOKEN.clone());
 
     let another_caller =
         Principal::from_text("yaa3n-twfur-6xz6e-3z7ep-xln56-222kz-w2b2m-y5wqz-vu6kk-s3fdg-lqe")
             .unwrap();
 
-    let results =
-        query_call::<Vec<CustomToken>>(&pic_setup, another_caller, "list_custom_tokens", ());
+    let results = pic_setup.query::<Vec<CustomToken>>(another_caller, "list_custom_tokens", ());
 
     assert!(results.is_ok());
 

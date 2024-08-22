@@ -3,7 +3,6 @@
 	import { modalConvertCkBTCToBTC } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { isNullish } from '@dfinity/utils';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -13,6 +12,8 @@
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 
 	const isDisabled = (): boolean =>
 		isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);
@@ -31,15 +32,14 @@
 	$: networkId = ($token as OptionIcCkToken)?.twinToken?.network.id ?? BTC_MAINNET_NETWORK_ID;
 </script>
 
-<button
-	class="hero col-span-2"
+<ButtonHero
 	disabled={$isBusy}
-	class:opacity-50={$isBusy}
 	on:click={async () => await openSend()}
+	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
-	<IconBurn size="28" />
+	<IconConvert slot="icon" />
 	{$i18n.convert.text.convert_to_btc}
-</button>
+</ButtonHero>
 
 {#if $modalConvertCkBTCToBTC}
 	<IcSendModal {networkId} />

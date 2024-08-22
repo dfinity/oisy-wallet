@@ -1,47 +1,16 @@
-import type { CustomToken, SignRequest, UserToken } from '$declarations/backend/backend.did';
+import type {
+	AddUserCredentialError,
+	CredentialSpec,
+	CustomToken,
+	GetUserProfileError,
+	UserProfile,
+	UserToken
+} from '$declarations/backend/backend.did';
 import { getBackendActor } from '$lib/actors/actors.ic';
-import type { ECDSA_PUBLIC_KEY } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
-import type { QueryParams } from '@dfinity/utils';
-
-export const getEthAddress = async (identity: OptionIdentity): Promise<ECDSA_PUBLIC_KEY> => {
-	const { caller_eth_address } = await getBackendActor({ identity });
-	return caller_eth_address();
-};
-
-export const signTransaction = async ({
-	transaction,
-	identity
-}: {
-	transaction: SignRequest;
-	identity: OptionIdentity;
-}): Promise<string> => {
-	const { sign_transaction } = await getBackendActor({ identity });
-	return sign_transaction(transaction);
-};
-
-export const signMessage = async ({
-	message,
-	identity
-}: {
-	message: string;
-	identity: OptionIdentity;
-}): Promise<string> => {
-	const { personal_sign } = await getBackendActor({ identity });
-	return personal_sign(message);
-};
-
-export const signPrehash = async ({
-	hash,
-	identity
-}: {
-	hash: string;
-	identity: OptionIdentity;
-}): Promise<string> => {
-	const { sign_prehash } = await getBackendActor({ identity });
-	return sign_prehash(hash);
-};
+import type { Principal } from '@dfinity/principal';
+import { toNullable, type QueryParams } from '@dfinity/utils';
 
 export const listUserTokens = async ({
 	identity,
@@ -101,4 +70,45 @@ export const setUserToken = async ({
 }): Promise<void> => {
 	const { set_user_token } = await getBackendActor({ identity });
 	return set_user_token(token);
+};
+
+export const createUserProfile = async ({
+	identity
+}: {
+	identity: OptionIdentity;
+}): Promise<UserProfile> => {
+	const { create_user_profile } = await getBackendActor({ identity });
+	return create_user_profile();
+};
+
+export const getUserProfile = async ({
+	identity,
+	certified = true
+}: { identity: OptionIdentity } & QueryParams): Promise<
+	{ Ok: UserProfile } | { Err: GetUserProfileError }
+> => {
+	const { get_user_profile } = await getBackendActor({ identity, certified });
+	return get_user_profile();
+};
+
+export const addUserCredential = async ({
+	identity,
+	credentialJwt,
+	issuerCanisterId,
+	currentUserVersion,
+	credentialSpec
+}: {
+	identity: Identity;
+	credentialJwt: string;
+	issuerCanisterId: Principal;
+	currentUserVersion?: bigint;
+	credentialSpec: CredentialSpec;
+}): Promise<{ Ok: null } | { Err: AddUserCredentialError }> => {
+	const { add_user_credential } = await getBackendActor({ identity });
+	return add_user_credential({
+		credential_jwt: credentialJwt,
+		issuer_canister_id: issuerCanisterId,
+		current_user_version: toNullable(currentUserVersion),
+		credential_spec: credentialSpec
+	});
 };

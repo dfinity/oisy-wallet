@@ -3,7 +3,7 @@ import { ETHERSCAN_API_URL_HOMESTEAD, ETHERSCAN_API_URL_SEPOLIA } from '$env/net
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EtherscanRestTransaction } from '$eth/types/etherscan-transaction';
 import { i18n } from '$lib/stores/i18n.store';
-import type { ETH_ADDRESS } from '$lib/types/address';
+import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Transaction } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -20,7 +20,7 @@ export class EtherscanRest {
 		address,
 		contract: { address: contractAddress }
 	}: {
-		address: ETH_ADDRESS;
+		address: EthAddress;
 		contract: Erc20Token;
 	}): Promise<Transaction[]> => {
 		const url = new URL(this.apiUrl);

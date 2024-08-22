@@ -3,16 +3,16 @@ import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
-import type {
-	EstimateWithdrawalFee,
-	EstimateWithdrawalFeeParams,
-	MinterInfo,
-	RetrieveBtcOk,
-	RetrieveBtcStatusV2WithId,
-	UpdateBalanceOk,
-	Utxo
+import {
+	CkBTCMinterCanister,
+	type EstimateWithdrawalFee,
+	type EstimateWithdrawalFeeParams,
+	type MinterInfo,
+	type RetrieveBtcOk,
+	type RetrieveBtcStatusV2WithId,
+	type UpdateBalanceOk,
+	type Utxo
 } from '@dfinity/ckbtc';
-import { CkBTCMinterCanister } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
@@ -132,10 +132,9 @@ const minterCanister = async ({
 	});
 };
 
-const minterAccountParams = ({ identity }: { identity: Identity }): { owner: Principal } => {
+const minterAccountParams = ({ identity }: { identity: Identity }): { owner: Principal } =>
 	// We use the identity to follow NNS-dapp's scheme but, if it would not be provided, it would be the same result.
 	// If "owner" is not provided, the minter canister uses the "caller" as a fallback.
-	return {
+	({
 		owner: identity.getPrincipal()
-	};
-};
+	});

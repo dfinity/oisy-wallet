@@ -1,23 +1,20 @@
 <script lang="ts">
-	import type { ProgressStep } from '@dfinity/gix-components';
+	import { Modal, type ProgressStep } from '@dfinity/gix-components';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
-	import { loadAddress, loadIdbAddress } from '$lib/services/address.services';
+	import { loadAddresses, loadIdbAddresses } from '$lib/services/address.services';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import banner from '$lib/assets/banner.svg';
-	import { Modal } from '@dfinity/gix-components';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { browser } from '$app/environment';
-	import { isNullish } from '@dfinity/utils';
 	import { loading } from '$lib/stores/loader.store';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authStore } from '$lib/stores/auth.store';
 
-	let progressStep: string = ProgressStepsLoader.ETH_ADDRESS;
+	let progressStep: string = ProgressStepsLoader.BTC_ETH_ADDRESS;
 
 	let steps: [ProgressStep, ...ProgressStep[]];
 	$: steps = [
@@ -27,8 +24,8 @@
 			state: 'completed'
 		} as ProgressStep,
 		{
-			step: ProgressStepsLoader.ETH_ADDRESS,
-			text: $i18n.init.text.retrieving_eth_key,
+			step: ProgressStepsLoader.BTC_ETH_ADDRESS,
+			text: $i18n.init.text.retrieving_public_keys,
 			state: 'in_progress'
 		} as ProgressStep
 	];
@@ -38,21 +35,9 @@
 			return;
 		}
 
-		if (confirm) {
-			return;
-		}
-
 		// A small delay for display animation purpose.
 		setTimeout(() => loading.set(false), 1000);
 	})();
-
-	const { oisy_introduction }: Storage = browser
-		? localStorage
-		: ({ oisy_introduction: null } as unknown as Storage);
-	const confirm = isNullish(oisy_introduction);
-
-	let disabledConfirm = true;
-	$: disabledConfirm = progressStep !== ProgressStepsLoader.DONE;
 
 	const loadData = async () => {
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
@@ -77,7 +62,7 @@
 	let progressModal = false;
 
 	onMount(async () => {
-		const { success: addressIdbSuccess } = await loadIdbAddress();
+		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
 
 		if (addressIdbSuccess) {
 			loading.set(false);
@@ -87,10 +72,12 @@
 			return;
 		}
 
-		// We are loading the ETH address from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
+		// We are loading the BTC and ETH address from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 		progressModal = true;
 
-		const { success: addressSuccess } = await loadAddress();
+		const { success: addressSuccess } = await loadAddresses(
+			err?.map(({ tokenId }) => tokenId) ?? []
+		);
 
 		if (!addressSuccess) {
 			await signOut();
@@ -99,11 +86,6 @@
 
 		await progressAndLoad();
 	});
-
-	const confirmIntroduction = () => {
-		localStorage.setItem('oisy_introduction', 'done');
-		loading.set(false);
-	};
 </script>
 
 {#if $loading}
@@ -121,15 +103,6 @@
 
 					<InProgress {progressStep} {steps} />
 				</div>
-
-				{#if confirm}
-					<button
-						on:click={confirmIntroduction}
-						class="primary full center"
-						disabled={disabledConfirm}
-						class:opacity-0={disabledConfirm}>{$i18n.init.text.lets_go}</button
-					>
-				{/if}
 			</Modal>
 		</div>
 	{/if}

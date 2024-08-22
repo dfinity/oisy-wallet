@@ -4,7 +4,7 @@
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendNetworkICP from './SendNetworkICP.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import type { Network } from '$lib/types/network';
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import { isNullish } from '@dfinity/utils';
@@ -38,14 +38,20 @@
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<div class="stretch">
 		{#if destinationEditable}
-			<SendDestination bind:destination bind:invalidDestination on:icQRCodeScan />
+			<SendDestination
+				token={$sendToken}
+				{network}
+				bind:destination
+				bind:invalidDestination
+				on:icQRCodeScan
+			/>
 
 			<SendNetworkICP {destination} {sourceNetwork} bind:network />
 		{/if}
 
 		<SendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds />
 
-		<SendSource token={$sendToken} balance={$sendBalance} source={$address ?? ''} />
+		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
 
 		<FeeDisplay />
 	</div>

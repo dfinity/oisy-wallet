@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WebSocketListener } from '$eth/types/listener';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import { address } from '$lib/derived/address.derived';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
@@ -28,6 +28,7 @@
 	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import type { Token } from '$lib/types/token';
+	import { isNetworkICP } from '$lib/utils/network.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -52,9 +53,9 @@
 		try {
 			const params: GetFeeData = {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				to: mapAddressStartsWith0x(destination !== '' ? destination : $address!),
+				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress!),
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				from: mapAddressStartsWith0x($address!)
+				from: mapAddressStartsWith0x($ethAddress!)
 			};
 
 			const { getFeeData } = infuraProviders($sendToken.network.id);
@@ -97,7 +98,11 @@
 				...(await getFeeData()),
 				gas: await getErc20FeeData({
 					...erc20GasFeeParams,
-					targetNetwork
+					targetNetwork,
+					to:
+						// When converting "ICP Erc20" to native ICP, the destination address is an "old" ICP hex account identifier.
+						// Therefore, it should not be prefixed with 0x.
+						isNetworkICP(targetNetwork) ? destination : erc20GasFeeParams.to
 				})
 			});
 		} catch (err: unknown) {

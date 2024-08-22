@@ -53,13 +53,13 @@
 		"indexCanisterId": "6dfr2-giaaa-aaaaq-aaawq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "HotOrNot",
-			"symbol": "HOT",
+			"name": "YRAL",
+			"symbol": "DOLR",
 			"fee": {
 				"__bigint__": "100000"
 			},
-			"alternativeName": "Hot or Not",
-			"url": "https://hotornot.wtf"
+			"alternativeName": "YRAL",
+			"url": "https://yral.com"
 		},
 		"indexCanisterVersion": "up-to-date"
 	},
@@ -411,7 +411,7 @@
 				"__bigint__": "1000000"
 			},
 			"alternativeName": "WaterNeuron",
-			"url": "https://forum.dfinity.org/t/introducing-waterneuron/30897"
+			"url": "https://waterneuron.fi/stake/"
 		},
 		"indexCanisterVersion": "up-to-date"
 	},
@@ -428,6 +428,38 @@
 			},
 			"alternativeName": "CYCLES-TRANSFER-STATION",
 			"url": "https://cycles-transfer-station.com"
+		},
+		"indexCanisterVersion": "up-to-date"
+	},
+	{
+		"ledgerCanisterId": "np5km-uyaaa-aaaaq-aadrq-cai",
+		"rootCanisterId": "nb7he-piaaa-aaaaq-aadqq-cai",
+		"indexCanisterId": "n535v-yiaaa-aaaaq-aadsq-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "DOGMI",
+			"symbol": "DOGMI",
+			"fee": {
+				"__bigint__": "5000000000"
+			},
+			"alternativeName": "DOGMI",
+			"url": "https://qu2gy-uqaaa-aaaal-qcv6a-cai.icp0.io"
+		},
+		"indexCanisterVersion": "up-to-date"
+	},
+	{
+		"ledgerCanisterId": "m6xut-mqaaa-aaaaq-aadua-cai",
+		"rootCanisterId": "nuywj-oaaaa-aaaaq-aadta-cai",
+		"indexCanisterId": "mqvz3-xaaaa-aaaaq-aadva-cai",
+		"metadata": {
+			"decimals": 8,
+			"name": "ICVC",
+			"symbol": "ICVC",
+			"fee": {
+				"__bigint__": "10000"
+			},
+			"alternativeName": "ICVC",
+			"url": "https://mnc6b-aaaaa-aaaap-qhnrq-cai.icp0.io/"
 		},
 		"indexCanisterVersion": "up-to-date"
 	}

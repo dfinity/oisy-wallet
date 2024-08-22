@@ -4,18 +4,18 @@
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
-	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-
-	export let compact = false;
+	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
+	import { erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { authStore } from '$lib/stores/auth.store';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
-
-	const modalId = Symbol();
 
 	/**
 	 * Send modal context store
@@ -32,11 +32,23 @@
 
 	$: sendToken.set($ckEthereumTwinToken);
 
-	const openReceive = async () => modalStore.openCkETHReceive(modalId);
+	const openReceive = async (modalId: symbol) => {
+		const { result } = await autoLoadUserToken({
+			erc20UserTokens: $erc20UserTokens,
+			sendToken: $tokenWithFallback,
+			identity: $authStore.identity
+		});
+
+		if (result === 'error') {
+			return;
+		}
+
+		modalStore.openCkETHReceive(modalId);
+	};
+
+	const openModal = async (modalId: symbol) => await open(async () => openReceive(modalId));
 </script>
 
-<ReceiveButton {compact} on:click={async () => await open(openReceive)} />
-
-{#if $modalCkETHReceive && $modalStore?.data === modalId}
-	<IcReceiveCkEthereumModal on:nnsClose={close} />
-{/if}
+<ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>
+	<IcReceiveCkEthereumModal on:nnsClose={close} slot="modal" />
+</ReceiveButtonWithModal>

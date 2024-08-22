@@ -17,6 +17,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { UserTokenState } from '$lib/types/token-toggleable';
+import type { ResultSuccess } from '$lib/types/utils';
 import { fromNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -28,7 +29,8 @@ export const loadErc20Tokens = async ({
 	await Promise.all([loadDefaultErc20Tokens(), loadUserTokens({ identity })]);
 };
 
-const loadDefaultErc20Tokens = async (): Promise<{ success: boolean }> => {
+// TODO(GIX-2740): use environment static metadata
+const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 	try {
 		type ContractData = Erc20Contract &
 			Erc20Metadata & { network: EthereumNetwork } & Pick<Erc20Token, 'category'> &
@@ -116,6 +118,9 @@ const loadErc20UserTokens = async (params: {
 							version: fromNullable(version),
 							enabled: fromNullable(enabled) ?? true
 						},
+						// 1. TODO(GIX-2740): check uf user token is actually a match in the environment static metadata
+						// +
+						// 2. TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
 						...(await infuraErc20Providers(network.id).metadata({ address }))
 					};
 				}

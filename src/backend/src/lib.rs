@@ -1,24 +1,33 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
-use crate::guards::{caller_is_allowed, caller_is_not_anonymous};
+use crate::bitcoin_utils::public_key_to_p2pkh_address;
+use crate::guards::{
+    caller_is_allowed, caller_is_allowed_and_may_read_threshold_keys, may_read_threshold_keys,
+    may_read_user_data, may_threshold_sign, may_write_user_data,
+};
 use crate::token::{add_to_user_token, remove_from_user_token};
-use candid::{CandidType, Deserialize, Nat, Principal};
-use core::ops::Deref;
+use candid::{Nat, Principal};
+use config::find_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
+use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
 use ic_cdk::api::time;
+use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
+use ic_cdk_timers::{clear_timer, set_timer_interval};
 use ic_stable_structures::{
-    memory_manager::{MemoryId, MemoryManager, VirtualMemory},
-    storable::{Blob, Bound, Storable},
-    DefaultMemoryImpl, StableBTreeMap, StableCell,
+    memory_manager::{MemoryId, MemoryManager},
+    DefaultMemoryImpl,
 };
+use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
+use oisy_user::oisy_users;
+use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
@@ -27,28 +36,40 @@ use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
-    AddUserCredentialRequest, GetUsersRequest, GetUsersResponse, OisyUser, UserCredential,
-    UserProfile,
+    AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
+    ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, InitArg};
-use std::borrow::Cow;
+use shared::types::{
+    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
+};
 use std::cell::RefCell;
 use std::str::FromStr;
+use std::time::Duration;
+use types::{
+    Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
+    UserTokenMap,
+};
+use user_profile::{add_credential, create_profile, find_profile};
+use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bitcoin_utils;
+mod config;
 mod guards;
+mod impls;
+mod migrate;
+mod oisy_user;
 mod token;
-
-type VMem = VirtualMemory<DefaultMemoryImpl>;
-type ConfigCell = StableCell<Option<Candid<Config>>, VMem>;
-type UserTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<UserToken>>, VMem>;
-type CustomTokenMap = StableBTreeMap<StoredPrincipal, Candid<Vec<CustomToken>>, VMem>;
+mod types;
+mod user_profile;
+mod user_profile_model;
 
 const CONFIG_MEMORY_ID: MemoryId = MemoryId::new(0);
 const USER_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(1);
 const USER_CUSTOM_TOKEN_MEMORY_ID: MemoryId = MemoryId::new(2);
+const USER_PROFILE_MEMORY_ID: MemoryId = MemoryId::new(3);
+const USER_PROFILE_UPDATED_MEMORY_ID: MemoryId = MemoryId::new(4);
 
-const DEFAULT_LIMIT_GET_USERS_RESPONSE: u64 = 10_000;
 const MAX_SYMBOL_LENGTH: usize = 20;
 
 thread_local! {
@@ -61,6 +82,10 @@ thread_local! {
             config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
+            // Use `UserProfileModel` to access and manage access to these states
+            user_profile: UserProfileMap::init(mm.borrow().get(USER_PROFILE_MEMORY_ID)),
+            user_profile_updated: UserProfileUpdatedMap::init(mm.borrow().get(USER_PROFILE_UPDATED_MEMORY_ID)),
+            migration: None,
         })
     );
 }
@@ -76,7 +101,7 @@ pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
 /// Reads the internal canister configuration, normally set at canister install or upgrade.
 ///
 /// # Panics
-/// - If the config is not initialized.
+/// - If the `STATE.config` is not initialized.
 pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     read_state(|state| {
         f(state
@@ -87,35 +112,19 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
-#[derive(Default)]
-struct Candid<T>(T)
-where
-    T: CandidType + for<'de> Deserialize<'de>;
-
-impl<T> Storable for Candid<T>
-where
-    T: CandidType + for<'de> Deserialize<'de>,
-{
-    const BOUND: Bound = Bound::Unbounded;
-
-    fn to_bytes(&self) -> Cow<'_, [u8]> {
-        Cow::Owned(candid::encode_one(&self.0).expect("encoding should always succeed"))
-    }
-
-    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
-        Self(candid::decode_one(bytes.as_ref()).expect("decoding should succeed"))
-    }
-}
-
-impl<T> Deref for Candid<T>
-where
-    T: CandidType + for<'de> Deserialize<'de>,
-{
-    type Target = T;
-
-    fn deref(&self) -> &T {
-        &self.0
-    }
+/// Modifies `state.config` with the provided function.
+fn modify_state_config(state: &mut State, f: impl FnOnce(&mut Config)) {
+    let config: &Candid<Config> = state
+        .config
+        .get()
+        .as_ref()
+        .expect("config is not initialized");
+    let mut config: Config = (*config).clone();
+    f(&mut config);
+    state
+        .config
+        .set(Some(Candid(config)))
+        .expect("setting config should succeed");
 }
 
 pub struct State {
@@ -125,65 +134,48 @@ pub struct State {
     /// Introduced to support a broader range of user-defined custom tokens, beyond just ERC20.
     /// Future updates may include migrating existing ERC20 tokens to this more flexible structure.
     custom_token: CustomTokenMap,
+    user_profile: UserProfileMap,
+    user_profile_updated: UserProfileUpdatedMap,
+    migration: Option<Migration>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-struct StoredPrincipal(Principal);
-
-impl Storable for StoredPrincipal {
-    const BOUND: Bound = Blob::<29>::BOUND;
-
-    fn to_bytes(&self) -> Cow<'_, [u8]> {
-        Cow::Owned(
-            Blob::<29>::try_from(self.0.as_slice())
-                .expect("principal length should not exceed 29 bytes")
-                .to_bytes()
-                .into_owned(),
-        )
-    }
-
-    fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
-        Self(Principal::from_slice(
-            Blob::<29>::from_bytes(bytes).as_slice(),
-        ))
-    }
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct Config {
-    pub ecdsa_key_name: String,
-    // A list of allowed callers to restrict access to endpoints that do not particularly check or use the caller()
-    pub allowed_callers: Vec<Principal>,
+fn set_config(arg: InitArg) {
+    let config = Config::from(arg);
+    mutate_state(|state| {
+        state
+            .config
+            .set(Some(Candid(config)))
+            .expect("setting config should succeed");
+    });
 }
 
 #[init]
 fn init(arg: Arg) {
     match arg {
-        Arg::Init(InitArg {
-            ecdsa_key_name,
-            allowed_callers,
-        }) => mutate_state(|state| {
-            state
-                .config
-                .set(Some(Candid(Config {
-                    ecdsa_key_name,
-                    allowed_callers,
-                })))
-                .expect("setting config should succeed");
-        }),
+        Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
 }
 
 #[post_upgrade]
-fn post_upgrade(_: Option<Arg>) {
-    read_state(|s| {
-        let _ = s
-            .config
-            .get()
-            .as_ref()
-            .expect("config is not initialized: reinstall the canister instead of upgrading");
-    });
+fn post_upgrade(arg: Option<Arg>) {
+    match arg {
+        Some(Arg::Init(arg)) => set_config(arg),
+        _ => {
+            read_state(|s| {
+                let _ = s.config.get().as_ref().expect(
+                    "config is not initialized: reinstall the canister instead of upgrading",
+                );
+            });
+        }
+    }
+}
+
+/// Show the canister configuration.
+#[query(guard = "caller_is_allowed")]
+#[must_use]
+fn config() -> Config {
+    read_config(std::clone::Clone::clone)
 }
 
 /// Processes external HTTP requests.
@@ -254,18 +246,24 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
 }
 
 /// Returns the Ethereum address of the caller.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_read_threshold_keys")]
 async fn caller_eth_address() -> String {
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
-/// Returns the Ethereum address of the specified .
-#[update(guard = "caller_is_allowed")]
+/// Returns the Ethereum address of the specified user.
+#[update(guard = "caller_is_allowed_and_may_read_threshold_keys")]
 async fn eth_address_of(p: Principal) -> String {
     if p == Principal::anonymous() {
         ic_cdk::trap("Anonymous principal is not authorized");
     }
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&p).await)
+}
+
+/// Returns the Bitcoin address of the caller.
+#[update(guard = "may_read_threshold_keys")]
+async fn caller_btc_address(network: BitcoinNetwork) -> String {
+    public_key_to_p2pkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
@@ -299,7 +297,7 @@ async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec
 }
 
 /// Computes a signature for an [EIP-1559](https://eips.ethereum.org/EIPS/eip-1559) transaction.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn sign_transaction(req: SignRequest) -> String {
     use ethers_core::types::transaction::eip1559::Eip1559TransactionRequest;
     use ethers_core::types::Signature;
@@ -347,7 +345,7 @@ async fn sign_transaction(req: SignRequest) -> String {
 }
 
 /// Computes a signature for a hex-encoded message according to [EIP-191](https://eips.ethereum.org/EIPS/eip-191).
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn personal_sign(plaintext: String) -> String {
     let caller = ic_cdk::caller();
 
@@ -372,7 +370,7 @@ async fn personal_sign(plaintext: String) -> String {
 }
 
 /// Computes a signature for a precomputed hash.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_threshold_sign")]
 async fn sign_prehash(prehash: String) -> String {
     let caller = ic_cdk::caller();
 
@@ -387,7 +385,7 @@ async fn sign_prehash(prehash: String) -> String {
     format!("0x{}", hex::encode(&signature))
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn set_user_token(token: UserToken) {
     assert_token_symbol_length(&token).unwrap_or_else(|e| ic_cdk::trap(&e));
@@ -404,7 +402,7 @@ fn set_user_token(token: UserToken) {
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.user_token, &token, &find));
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 fn set_many_user_tokens(tokens: Vec<UserToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -423,7 +421,7 @@ fn set_many_user_tokens(tokens: Vec<UserToken>) {
     });
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
@@ -436,14 +434,14 @@ fn remove_user_token(token_id: UserTokenId) {
     mutate_state(|s| remove_from_user_token(stored_principal, &mut s.user_token, &find));
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[query(guard = "may_read_user_data")]
 fn list_user_tokens() -> Vec<UserToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
 /// Add, remove or update custom token for the user.
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn set_custom_token(token: CustomToken) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
@@ -455,7 +453,7 @@ fn set_custom_token(token: CustomToken) {
     mutate_state(|s| add_to_user_token(stored_principal, &mut s.custom_token, &token, &find));
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
 
@@ -470,42 +468,85 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     });
 }
 
-#[query(guard = "caller_is_not_anonymous")]
+#[query(guard = "may_read_user_data")]
 fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
-#[update(guard = "caller_is_not_anonymous")]
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
-#[allow(unused_variables)]
-fn add_user_credential(request: AddUserCredentialRequest) {
-    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2649
+fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+    let current_time_ns = time() as u128;
+
+    let (vc_flow_signers, root_pk_raw, credential_type) =
+        read_config(|config| find_credential_config(&request, config))
+            .ok_or(AddUserCredentialError::ConfigurationError)?;
+
+    match validate_ii_presentation_and_claims(
+        &request.credential_jwt,
+        user_principal,
+        &vc_flow_signers,
+        &request.credential_spec,
+        &root_pk_raw,
+        current_time_ns as u128,
+    ) {
+        Ok(()) => mutate_state(|s| {
+            let mut user_profile_model =
+                UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+            add_credential(
+                stored_principal,
+                request.current_user_version,
+                &credential_type,
+                vc_flow_signers.issuer_origin,
+                &mut user_profile_model,
+            )
+        }),
+        Err(_) => Err(AddUserCredentialError::InvalidCredential),
+    }
 }
 
-#[query(guard = "caller_is_not_anonymous")]
-fn get_or_create_user_profile() -> UserProfile {
-    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2648
-    let credentials: Vec<UserCredential> = Vec::new();
-    UserProfile {
-        credentials,
-        created_timestamp: time(),
-        updated_timestamp: time(),
-        version: None,
-    }
+/// It create a new user profile for the caller.
+/// If the user has already a profile, it will return that profile.
+#[update(guard = "may_write_user_data")]
+fn create_user_profile() -> UserProfile {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        let stored_user = create_profile(stored_principal, &mut user_profile_model);
+        UserProfile::from(&stored_user)
+    })
+}
+
+#[query(guard = "may_read_user_data")]
+fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        match find_profile(stored_principal, &mut user_profile_model) {
+            Ok(stored_user) => Ok(UserProfile::from(&stored_user)),
+            Err(err) => Err(err),
+        }
+    })
 }
 
 #[query(guard = "caller_is_allowed")]
 #[allow(clippy::needless_pass_by_value)]
-fn get_users(request: GetUsersRequest) -> GetUsersResponse {
-    // TODO: Implement https://dfinity.atlassian.net/browse/GIX-2650
-    // WARNING: The value `DEFAULT_LIMIT_GET_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
-    let users: Vec<OisyUser> = Vec::new();
-    GetUsersResponse {
+fn list_users(request: ListUsersRequest) -> ListUsersResponse {
+    // WARNING: The value `DEFAULT_LIMIT_LIST_USERS_RESPONSE` must also be determined by the cycles consumption when reading BTreeMap.
+
+    let (users, matches_max_length): (Vec<OisyUser>, u64) =
+        read_state(|s| oisy_users(&request, &s.user_profile));
+
+    ListUsersResponse {
         users,
-        matches_max_length: request
-            .matches_max_length
-            .unwrap_or(DEFAULT_LIMIT_GET_USERS_RESPONSE),
+        matches_max_length,
     }
 }
 
@@ -513,6 +554,94 @@ fn get_users(request: GetUsersRequest) -> GetUsersResponse {
 #[update]
 async fn get_canister_status() -> std_canister_status::CanisterStatusResultV2 {
     std_canister_status::get_canister_status_v2().await
+}
+
+/// Gets the state of any migration currently in progress.
+#[query(guard = "caller_is_allowed")]
+fn migration() -> Option<MigrationReport> {
+    read_state(|s| s.migration.as_ref().map(MigrationReport::from))
+}
+
+/// Sets the lock state of the canister APIs.  This can be used to enable or disable the APIs, or to enable an API in read-only mode.
+#[update(guard = "caller_is_allowed")]
+fn set_guards(guards: Guards) {
+    mutate_state(|state| modify_state_config(state, |config| config.api = Some(guards)));
+}
+
+/// Gets statistics about the canister.
+///
+/// Note: This is a private method, restricted to authorized users, as some stats may not be suitable for public consumption.
+#[query(guard = "caller_is_allowed")]
+fn stats() -> Stats {
+    read_state(|s| Stats::from(s))
+}
+
+/// Bulk uploads data to this canister.
+///
+/// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur only if a migration failed and had to be restarted.
+#[update(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
+fn bulk_up(data: Vec<u8>) {
+    migrate::bulk_up(&data);
+}
+
+/// Starts user data migration to a given canister.
+///
+/// # Errors
+/// - There is a current migration in progress to a different canister.
+#[update(guard = "caller_is_allowed")]
+fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            if migration.to == to {
+                Ok(MigrationReport::from(migration))
+            } else {
+                Err("migration in progress to a different canister".to_string())
+            }
+        } else {
+            let timer_id =
+                set_timer_interval(Duration::from_secs(0), || ic_cdk::spawn(step_migration()));
+            let migration = Migration {
+                to,
+                progress: MigrationProgress::Pending,
+                timer_id,
+            };
+            let migration_report = MigrationReport::from(&migration);
+            s.migration = Some(migration);
+            Ok(migration_report)
+        }
+    })
+}
+
+/// Switch off the migration timer; migrate with manual API calls instead.
+#[update(guard = "caller_is_allowed")]
+fn migration_stop_timer() -> Result<(), String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            clear_timer(migration.timer_id);
+            Ok(())
+        } else {
+            Err("no migration in progress".to_string())
+        }
+    })
+}
+
+/// Steps the migration.
+///
+/// On error, the migration is marked as failed and the timer is cleared.
+#[update(guard = "caller_is_allowed")]
+async fn step_migration() {
+    let result = migrate::step_migration().await;
+    eprintln!("Stepped migration: {:?}", result);
+    if let Err(err) = result {
+        mutate_state(|s| {
+            if let Some(migration) = &mut s.migration {
+                migration.progress = MigrationProgress::Failed(err);
+                clear_timer(migration.timer_id);
+            }
+            eprintln!("Migration failed: {err:?}");
+        });
+    };
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.

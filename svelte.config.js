@@ -26,19 +26,20 @@ const config = {
 		},
 		alias: {
 			$declarations: './src/declarations',
+			$btc: './src/frontend/src/btc',
 			$eth: './src/frontend/src/eth',
 			$icp: './src/frontend/src/icp',
 			'$icp-eth': './src/frontend/src/icp-eth',
 			$env: './src/frontend/src/env'
+		},
+
+		serviceWorker: {
+			register: false
+		},
+
+		version: {
+			name: version
 		}
-	},
-
-	serviceWorker: {
-		register: false
-	},
-
-	version: {
-		name: version
 	}
 };
 

@@ -5,7 +5,10 @@
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
-	import { address } from '$lib/derived/address.derived';
+	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
+	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 
 	const dispatch = createEventDispatcher();
 
@@ -25,7 +28,9 @@
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
 		copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 	>
-		{$i18n.receive.icp.text.internet_computer}
+		{$i18n.receive.icp.text.principal}
+
+		<p slot="notes" class="text-sm text-dark">{$i18n.receive.icp.text.use_for_icrc_deposit}</p>
 	</ReceiveAddressWithLogo>
 
 	<ReceiveAddressWithLogo
@@ -38,19 +43,44 @@
 		token={ICP_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_icp_account_qr}
 		copyAriaLabel={$i18n.receive.icp.text.icp_account_copied}
+		invisibleLogo
 	>
 		{$i18n.receive.icp.text.icp_account}
 
-		<p slot="notes" class="text-sm text-dark">{$i18n.receive.icp.text.icp_account_notes}</p>
+		<p slot="notes" class="text-sm text-dark">{$i18n.receive.icp.text.use_for_icp_deposit}</p>
 	</ReceiveAddressWithLogo>
+
+	{#if NETWORK_BITCOIN_ENABLED}
+		<div class="mb-6">
+			<Hr />
+		</div>
+
+		<ReceiveAddressWithLogo
+			on:click={() =>
+				displayQRCode({
+					address: $btcAddressMainnet ?? '',
+					addressLabel: $i18n.receive.bitcoin.text.bitcoin_address
+				})}
+			address={$btcAddressMainnet ?? ''}
+			token={BTC_MAINNET_TOKEN}
+			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+		>
+			{$i18n.receive.bitcoin.text.bitcoin_address}
+		</ReceiveAddressWithLogo>
+	{/if}
+
+	<div class="mb-6">
+		<Hr />
+	</div>
 
 	<ReceiveAddressWithLogo
 		on:click={() =>
 			displayQRCode({
-				address: $address ?? '',
+				address: $ethAddress ?? '',
 				addressLabel: $i18n.receive.ethereum.text.ethereum_address
 			})}
-		address={$address ?? ''}
+		address={$ethAddress ?? ''}
 		token={ETHEREUM_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.ethereum.text.display_ethereum_address_qr}
 		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}

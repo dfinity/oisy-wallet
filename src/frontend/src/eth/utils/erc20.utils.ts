@@ -1,14 +1,11 @@
 import oneInch from '$eth/assets/1inch.svg';
 import dai from '$eth/assets/dai.svg';
 import dmail from '$eth/assets/dmail.svg';
-import fet from '$eth/assets/fet.svg';
 import floki from '$eth/assets/floki.svg';
 import icpDark from '$eth/assets/icp_dark.svg';
 import jasmy from '$eth/assets/jasmy.svg';
 import matic from '$eth/assets/matic.svg';
 import rndr from '$eth/assets/rndr.svg';
-import uniswap from '$eth/assets/uniswap.svg';
-import usdt from '$eth/assets/usdt.svg';
 import weeth from '$eth/assets/weeth.svg';
 import wsteth from '$eth/assets/wsteth.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
@@ -52,8 +49,6 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return dai;
 		case 'dmail':
 			return dmail;
-		case 'fet':
-			return fet;
 		case 'floki':
 			return floki;
 		case 'jasmy':
@@ -62,10 +57,6 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return matic;
 		case 'rndr':
 			return rndr;
-		case 'uni':
-			return uniswap;
-		case 'usdt':
-			return usdt;
 		case 'weeth':
 			return weeth;
 		case 'wsteth':

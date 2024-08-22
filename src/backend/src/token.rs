@@ -1,4 +1,4 @@
-use crate::{Candid, StoredPrincipal, VMem};
+use crate::types::{Candid, StoredPrincipal, VMem};
 use candid::{CandidType, Deserialize};
 use ic_stable_structures::StableBTreeMap;
 use shared::types::TokenVersion;

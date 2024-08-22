@@ -1,0 +1,10 @@
+disallowed-macros = [
+    { path = "std::print", reason = "Use ic_cdk::print instead" },
+    { path = "std::println", reason = "Use ic_cdk::println instead" },
+    { path = "std::eprint", reason = "Use ic_cdk::eprint instead" },
+    { path = "std::eprintln", reason = "Use ic_cdk::eprintln instead" },
+    { path = "std::assert_eq", reason = "Use pretty_assertions::assert_eq instead" },
+]
+disallowed-methods = [
+    { path = "dfn_core::api::print", reason = "Use ic_cdk::print or ic_cdk::println instead" },
+]

@@ -3,18 +3,19 @@ import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-import { address as addressStore } from '$lib/derived/address.derived';
+import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionAddress } from '$lib/types/address';
+import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const reloadBalance = async (token: Token): Promise<{ success: boolean }> => {
+export const reloadBalance = async (token: Token): Promise<ResultSuccess> => {
 	if (isSupportedEthTokenId(token.id)) {
 		return loadBalance({ networkId: token.network.id, tokenId: token.id });
 	}
@@ -28,7 +29,7 @@ export const loadBalance = async ({
 }: {
 	networkId: NetworkId;
 	tokenId: TokenId;
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const address = get(addressStore);
 
 	const {
@@ -69,8 +70,8 @@ const loadErc20Balance = async ({
 	address: optionAddress
 }: {
 	token: Erc20Token;
-	address?: OptionAddress;
-}): Promise<{ success: boolean }> => {
+	address?: OptionEthAddress;
+}): Promise<ResultSuccess> => {
 	const address = optionAddress ?? get(addressStore);
 
 	const {
@@ -109,7 +110,7 @@ const loadErc20Balance = async ({
 	return { success: true };
 };
 
-export const loadBalances = async (): Promise<{ success: boolean }> => {
+export const loadBalances = async (): Promise<ResultSuccess> => {
 	const results = await Promise.all([
 		...SUPPORTED_ETHEREUM_TOKENS.map(({ network: { id: networkId }, id: tokenId }) =>
 			loadBalance({ networkId, tokenId })
@@ -123,9 +124,9 @@ export const loadErc20Balances = async ({
 	address,
 	erc20Tokens
 }: {
-	address: OptionAddress;
+	address: OptionEthAddress;
 	erc20Tokens: Erc20Token[];
-}): Promise<{ success: boolean }> => {
+}): Promise<ResultSuccess> => {
 	const results = await Promise.all([
 		...erc20Tokens.map((token) => loadErc20Balance({ token, address }))
 	]);

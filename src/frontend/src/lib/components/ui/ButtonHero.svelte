@@ -1,23 +1,19 @@
 <script lang="ts">
-	import Img from '$lib/components/ui/Img.svelte';
-
 	export let disabled = false;
 	export let button: HTMLButtonElement | undefined = undefined;
 	export let ariaLabel: string;
-	export let imgSrc: string;
-	export let imgAlt: string;
 </script>
 
 <button
-	class="token icon desktop-wide"
+	class="w-16 flex flex-col text-white text-xs font-normal text-center"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}
 	{disabled}
 	class:opacity-50={disabled}
 >
-	<span class="block w-[22px] h-[22px]">
-		<Img src={imgSrc} alt={imgAlt} width="100%" height="100%" rounded />
-	</span>
-	<span class="text-black font-bold"><slot /></span>
+	<div class="rounded-full p-2 bg-black bg-opacity-30 border border-white border-opacity-20">
+		<slot name="icon" />
+	</div>
+	<slot />
 </button>

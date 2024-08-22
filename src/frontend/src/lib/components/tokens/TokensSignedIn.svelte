@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Token } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
@@ -16,12 +14,16 @@
 	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
 	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
 	import { flip } from 'svelte/animate';
+	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
+	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { BigNumber } from '@ethersproject/bignumber';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
 
-	let tokens: Token[];
-	$: tokens = $enabledNetworkTokens.filter(
+	let tokens: TokenUi[];
+	$: tokens = $combinedDerivedSortedNetworkTokensUi.filter(
 		({ id: tokenId }) =>
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
@@ -42,23 +44,13 @@
 			on:animationend={handleAnimationEnd}
 			class:pointer-events-none={animating}
 		>
-			<Listener {token}>
-				<TokenCard {token}>
-					<output class="break-all" slot="description">
-						{formatToken({
-							value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
-							unitName: token.decimals
-						})}
-						{token.symbol}
-					</output>
-
-					<CardAmount slot="exchange">
-						<ExchangeTokenValue {token} />
-					</CardAmount>
-
-					<TokenReceiveSend {token} slot="actions" />
-				</TokenCard>
-			</Listener>
+		<Listener {token}>
+			<div in:fade>
+				<TokenCardWithUrl {token}>
+					<TokenCardContent {token} />
+				</TokenCardWithUrl>
+			</div>
+		</Listener>
 		</div>
 	{/each}
 

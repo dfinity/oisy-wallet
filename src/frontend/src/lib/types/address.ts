@@ -1,4 +1,11 @@
-export type ETH_ADDRESS = string;
-export type ECDSA_PUBLIC_KEY = ETH_ADDRESS;
+export type Address = string;
 
-export type OptionAddress = ECDSA_PUBLIC_KEY | undefined | null;
+export type BtcAddress = Address;
+
+export type EthAddress = Address;
+
+export type OptionAddress<T extends Address> = T | undefined | null;
+
+export type OptionBtcAddress = OptionAddress<BtcAddress>;
+
+export type OptionEthAddress = OptionAddress<EthAddress>;
