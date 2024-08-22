@@ -13,6 +13,7 @@
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { debounce } from '@dfinity/utils';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -25,9 +26,21 @@
 
 	let animating = false;
 
-	const handleAnimationStart = () => (animating = true);
+	const handleAnimationStart = () => {
+		animating = true;
+
+		// The following is to guarantee that the function is triggered, even if 'animationend' event is not triggered.
+		// It may happen if the animation aborts before reaching completion.
+		debouncedHandleAnimationEnd();
+	};
 
 	const handleAnimationEnd = () => (animating = false);
+
+	const debouncedHandleAnimationEnd = debounce(() => {
+		if (animating) {
+			handleAnimationEnd();
+		}
+	}, 250);
 </script>
 
 <TokensSkeletons>
@@ -40,11 +53,9 @@
 			class:pointer-events-none={animating}
 		>
 			<Listener {token}>
-				<div in:fade>
-					<TokenCardWithUrl {token}>
-						<TokenCardContent {token} />
-					</TokenCardWithUrl>
-				</div>
+				<TokenCardWithUrl {token}>
+					<TokenCardContent {token} />
+				</TokenCardWithUrl>
 			</Listener>
 		</div>
 	{/each}
