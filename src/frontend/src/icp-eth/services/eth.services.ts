@@ -6,6 +6,7 @@ import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 
+import type { Erc20Token } from '$eth/types/erc20';
 import {
 	mapCkErc20PendingTransaction,
 	mapCkEthPendingTransaction,
@@ -134,18 +135,35 @@ const loadPendingTransactions = async ({
 	} = twinToken;
 
 	try {
+		const topics = logsTopics(encodePrincipalToEthAddress(identity.getPrincipal()));
+		const [helperContractSignature] = topics;
+
 		const { getLogs } = infuraCkETHProviders(twinTokenNetworkId);
 		const pendingLogs = await getLogs({
 			contract: { address: toAddress },
 			startBlock: Number(lastObservedBlockNumber),
-			topics: logsTopics(encodePrincipalToEthAddress(identity.getPrincipal()))
+			topics
 		});
+
+		// Filtered by twinToken address on the topics in case of ckErc20 tokens, since the logs arrive for all ckErc20 tokens.
+		const filteredPendingLogs =
+			helperContractSignature === CKERC20_HELPER_CONTRACT_SIGNATURE
+				? pendingLogs.filter(({ topics }) =>
+						nonNullish(
+							topics.find(
+								(topic) =>
+									topic[0] === helperContractSignature &&
+									topic[1] === (twinToken as Erc20Token).address
+							)
+						)
+					)
+				: pendingLogs;
 
 		const { id: tokenId } = token;
 
 		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore we reset the store.
 		// This can be useful if there was a previous pending transactions displayed and the transaction has now been processed.
-		if (pendingLogs.length === 0) {
+		if (filteredPendingLogs.length === 0) {
 			icPendingTransactionsStore.reset(tokenId);
 			return;
 		}
@@ -154,7 +172,7 @@ const loadPendingTransactions = async ({
 		const loadTransaction = ({ transactionHash }: Log): Promise<TransactionResponse | null> =>
 			getTransaction(transactionHash);
 
-		const pendingTransactions = await Promise.all(pendingLogs.map(loadTransaction));
+		const pendingTransactions = await Promise.all(filteredPendingLogs.map(loadTransaction));
 
 		icPendingTransactionsStore.set({
 			tokenId,
