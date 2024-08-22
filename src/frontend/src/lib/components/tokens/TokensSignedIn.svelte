@@ -14,7 +14,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { pointerEventStore } from '$lib/stores/events.store';
 	import { pointerEventsHandler } from '$lib/utils/events.utils';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -25,7 +25,8 @@
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
 
-	let tokensToDisplay: Token[] = [];
+	// We start it as undefined to avoid showing an empty list before the first update.
+	let tokensToDisplay: Token[] | undefined = undefined;
 
 	const parseTokenKey = (token: Token) => `${token.id.description}-${token.network.id.description}`;
 
@@ -33,9 +34,9 @@
 	$: tokenKeys = tokens.map(parseTokenKey).join(',');
 
 	let tokensToDisplayKeys: string;
-	$: tokensToDisplayKeys = tokensToDisplay.map(parseTokenKey).join(',');
+	$: tokensToDisplayKeys = tokensToDisplay?.map(parseTokenKey).join(',') ?? '';
 
-	const defineTokensToDisplay = (): Token[] => {
+	const defineTokensToDisplay = (): Token[] | undefined => {
 		if (!$pointerEventStore) {
 			// No pointer events, so we are not worried about possible glitches on user's interaction.
 			return tokens;
@@ -52,7 +53,7 @@
 		// The order is not the same, so the list is the same as the one currently showed, but the balances are updated.
 		const tokenMap = new Map(tokens.map((token) => [parseTokenKey(token), token]));
 
-		return tokensToDisplay.map((token) => tokenMap.get(parseTokenKey(token)) ?? token);
+		return tokensToDisplay?.map((token) => tokenMap.get(parseTokenKey(token)) ?? token) ?? [];
 	};
 
 	const updateTokensToDisplay = () => (tokensToDisplay = defineTokensToDisplay());
@@ -62,9 +63,9 @@
 	$: $pointerEventStore, tokens, debounceUpdateTokensToDisplay();
 </script>
 
-<TokensSkeletons>
+<TokensSkeletons loading={isNullish(tokensToDisplay)}>
 	<div use:pointerEventsHandler>
-		{#each tokensToDisplay as token (token.id)}
+		{#each tokensToDisplay ?? [] as token (token.id)}
 			<Listener {token}>
 				<div in:fade>
 					<TokenCardWithUrl {token}>
@@ -75,7 +76,7 @@
 		{/each}
 	</div>
 
-	{#if tokensToDisplay.length === 0}
+	{#if tokensToDisplay?.length === 0}
 		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
 	{/if}
 
