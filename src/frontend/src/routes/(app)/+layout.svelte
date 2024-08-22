@@ -9,7 +9,6 @@
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import Loaders from '$lib/components/core/Loaders.svelte';
 	import NoLoaders from '$lib/components/core/NoLoaders.svelte';
-	import { pointerEventsHandler } from '$lib/utils/events.utils';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -31,12 +30,10 @@
 	actions={route !== 'settings'}
 />
 
-<div use:pointerEventsHandler>
-	<main class="pt-12">
-		<svelte:component this={cmpLoaders}>
-			<slot />
-		</svelte:component>
-	</main>
-</div>
+<main class="pt-12">
+	<svelte:component this={cmpLoaders}>
+		<slot />
+	</svelte:component>
+</main>
 
 <Modals />

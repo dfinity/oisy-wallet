@@ -13,6 +13,7 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { pointerEventStore } from '$lib/stores/events.store';
+	import { pointerEventsHandler } from '$lib/utils/events.utils';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -34,7 +35,7 @@
 		newTokensList: Token[];
 	}): Token[] => {
 		if (sortingEnabled) {
-			return newTokensList;
+			return tokens;
 		}
 
 		const tokenMap = new Map(
@@ -53,15 +54,17 @@
 </script>
 
 <TokensSkeletons>
-	{#each tokensToDisplay as token (token.id)}
-		<Listener {token}>
-			<div in:fade>
-				<TokenCardWithUrl {token}>
-					<TokenCardContent {token} />
-				</TokenCardWithUrl>
-			</div>
-		</Listener>
-	{/each}
+	<div use:pointerEventsHandler>
+		{#each tokensToDisplay as token (token.id)}
+			<Listener {token}>
+				<div in:fade>
+					<TokenCardWithUrl {token}>
+						<TokenCardContent {token} />
+					</TokenCardWithUrl>
+				</div>
+			</Listener>
+		{/each}
+	</div>
 
 	{#if tokensToDisplay.length === 0}
 		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
