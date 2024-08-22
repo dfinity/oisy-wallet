@@ -205,7 +205,7 @@
 			"alternativeName": "TRAX",
 			"url": "https://trax.so"
 		},
-		"indexCanisterVersion": "up-to-date"
+		"indexCanisterVersion": "outdated"
 	},
 	{
 		"ledgerCanisterId": "f54if-eqaaa-aaaaq-aacea-cai",
