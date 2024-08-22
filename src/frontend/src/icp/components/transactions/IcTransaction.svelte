@@ -36,17 +36,16 @@
 	$: pending = transaction?.status === 'pending';
 
 	let icon: ComponentType;
-	$: icon = ['burn', 'approve'].includes(transactionType)
-		? pending
+	$: icon =
+		['burn', 'approve', 'mint'].includes(transactionType) && pending
 			? IconConvert
-			: IconBurn
-		: transactionType === 'mint'
-			? pending
-				? IconConvert
-				: IconMint
-			: incoming === false
-				? IconSend
-				: IconReceive;
+			: ['burn', 'approve'].includes(transactionType)
+				? IconBurn
+				: transactionType === 'mint'
+					? IconMint
+					: incoming === false
+						? IconSend
+						: IconReceive;
 
 	let amount: bigint | undefined;
 	$: amount = !incoming && nonNullish(value) ? value * -1n : value;
