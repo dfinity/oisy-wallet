@@ -43,7 +43,6 @@
 		/>
 		<span class="w-[70%]"
 			>{replacePlaceholders($i18n.info.ethereum.title, {
-				$token: $ckEthereumTwinToken.symbol,
 				$ckToken: $tokenWithFallback.symbol
 			})}</span
 		>
@@ -52,15 +51,20 @@
 	<p class="text-misty-rose mt-3">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.description), {
 			$token: $ckEthereumTwinToken.symbol,
-			$tkName: $ckEthereumTwinToken.name,
 			$ckToken: $tokenWithFallback.symbol,
 			$network: $ckEthereumTwinTokenNetwork.name
 		})}
 	</p>
 
+	<p class="text-misty-rose mt-3">
+		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.note), {
+			$token: $ckEthereumTwinToken.symbol,
+			$ckToken: $tokenWithFallback.symbol
+		})}
+	</p>
+
 	<button class="primary mt-6" disabled={$isBusy} class:opacity-50={$isBusy} on:click={openReceive}>
 		{replacePlaceholders($i18n.info.ethereum.how_to, {
-			$token: $ckEthereumTwinToken.symbol,
 			$ckToken: $tokenWithFallback.symbol
 		})}</button
 	>

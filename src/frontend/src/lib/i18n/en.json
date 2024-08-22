@@ -427,15 +427,16 @@
 	},
 	"info": {
 		"bitcoin": {
-			"title": "Receive from Bitcoin Network (BTC)",
-			"description": "ckBTC is a multi-chain bitcoin twin on the Internet Computer created by canister smart contract that directly hold native bitcoin.",
-			"note": "Note that incoming Bitcoin transactions require 6 confirmations. Check status on a block explorer.",
-			"receive": "Receive from BTC network"
+			"title": "Receive BTC & convert to ckBTC",
+			"description": "Convert Bitcoin into ckBTC and benefit from the fastest and cheapest Bitcoin transaction available. The conversion process can take up to an hour.",
+			"note": "You can convert ckBTC at any time back to BTC.",
+			"how_to": "How to convert to ckBTC"
 		},
 		"ethereum": {
-			"title": "Receive $token and convert to $ckToken",
-			"description": "With a few steps, transfer and convert your $tkName ($token) from the $network Network to $ckToken directly within the $oisy_name.",
-			"how_to": "How to convert $token to $ckToken",
+			"title": "Convert to $ckToken",
+			"description": "With a few steps, transfer and convert your $token from the $network Network to $ckToken directly within the $oisy_name. The conversion process can take up to 20 minutes.",
+			"note": "You can convert $ckToken at any time back to $token.",
+			"how_to": "How to convert to $ckToken",
 			"how_to_short": "How to convert $token"
 		}
 	},
