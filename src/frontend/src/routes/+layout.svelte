@@ -18,6 +18,7 @@
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
 	import { nonNullish } from '@dfinity/utils';
+	import BannerTemp from '$lib/components/core/BannerTemp.svelte';
 
 	/**
 	 * Init dApp
@@ -94,5 +95,6 @@
 {/await}
 
 <Banner />
+<BannerTemp />
 <Toasts maxVisible={3} />
 <Busy />
