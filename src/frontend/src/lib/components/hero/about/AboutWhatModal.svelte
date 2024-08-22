@@ -7,9 +7,10 @@
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import CoverWhat from '$lib/assets/cover-features.png';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { ABOUT_WHAT_MODAL } from '$lib/constants/test-ids.constant';
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal on:nnsClose={modalStore.close} testId={ABOUT_WHAT_MODAL}>
 	<svelte:fragment slot="title"
 		><p class="text-xl">{replaceOisyPlaceholders($i18n.about.what.text.title)}</p></svelte:fragment
 	>
