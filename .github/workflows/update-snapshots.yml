@@ -22,6 +22,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v6
         with:
           workflow: e2e-tests-build-docker-image.yml
+          name: oisy-e2e-image
           branch: main
           if_no_artifact_found: fail
 
