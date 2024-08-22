@@ -4,7 +4,8 @@ import {
 	TOKENS_SKELETONS_INITIALIZED
 } from '$lib/constants/test-ids.constant';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
-import { type Page } from '@playwright/test';
+import { nonNullish } from '@dfinity/utils';
+import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 
 type HomepageParams = {
@@ -14,6 +15,15 @@ type HomepageParams = {
 type HomepageLoggedInParams = {
 	iiPage: InternetIdentityPage;
 } & HomepageParams;
+
+type WaitForModalParams = {
+	modalOpenButtonTestId: string;
+	modalTestId: string;
+};
+
+type TestModalSnapshotParams = {
+	viewportSize?: ViewportSize;
+} & WaitForModalParams;
 
 abstract class Homepage {
 	readonly #page: Page;
@@ -32,6 +42,21 @@ abstract class Homepage {
 		await this.#page.goto(HOMEPAGE_URL);
 	}
 
+	private async waitForModal({
+		modalOpenButtonTestId,
+		modalTestId
+	}: WaitForModalParams): Promise<Locator> {
+		await this.#page.getByTestId(modalOpenButtonTestId).click();
+		const modal = this.#page.getByTestId(modalTestId);
+		await modal.waitFor();
+
+		return modal;
+	}
+
+	private async setViewportSize(viewportSize: ViewportSize) {
+		await this.#page.setViewportSize(viewportSize);
+	}
+
 	protected async waitForHomepageReady(): Promise<void> {
 		await this.goto();
 		await this.#page.getByTestId(LOGIN_BUTTON).waitFor();
@@ -40,6 +65,25 @@ abstract class Homepage {
 
 	protected async waitForTokenSkeletonsInitialization(): Promise<void> {
 		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
+	}
+
+	async testModalSnapshot({
+		viewportSize,
+		modalOpenButtonTestId,
+		modalTestId
+	}: TestModalSnapshotParams): Promise<void> {
+		if (nonNullish(viewportSize)) {
+			await this.setViewportSize(viewportSize);
+		}
+
+		await this.waitForHomepageReady();
+
+		const modal = await this.waitForModal({
+			modalOpenButtonTestId,
+			modalTestId
+		});
+
+		await expect(modal).toHaveScreenshot();
 	}
 
 	abstract waitForReady(): Promise<void>;
