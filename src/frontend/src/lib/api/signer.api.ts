@@ -1,5 +1,5 @@
 import type { BitcoinNetwork, SignRequest } from '$declarations/signer/signer.did';
-import { getBackendActor } from '$lib/actors/actors.ic';
+import { getSignerActor } from '$lib/actors/actors.ic';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 
@@ -10,12 +10,12 @@ export const getBtcAddress = async ({
 	identity: OptionIdentity;
 	network: BitcoinNetwork;
 }): Promise<EthAddress> => {
-	const { caller_btc_address } = await getBackendActor({ identity });
+	const { caller_btc_address } = await getSignerActor({ identity });
 	return caller_btc_address(network);
 };
 
 export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
-	const { caller_eth_address } = await getBackendActor({ identity });
+	const { caller_eth_address } = await getSignerActor({ identity });
 	return caller_eth_address();
 };
 
@@ -26,7 +26,7 @@ export const signTransaction = async ({
 	transaction: SignRequest;
 	identity: OptionIdentity;
 }): Promise<string> => {
-	const { sign_transaction } = await getBackendActor({ identity });
+	const { sign_transaction } = await getSignerActor({ identity });
 	return sign_transaction(transaction);
 };
 
@@ -37,7 +37,7 @@ export const signMessage = async ({
 	message: string;
 	identity: OptionIdentity;
 }): Promise<string> => {
-	const { personal_sign } = await getBackendActor({ identity });
+	const { personal_sign } = await getSignerActor({ identity });
 	return personal_sign(message);
 };
 
@@ -48,6 +48,6 @@ export const signPrehash = async ({
 	hash: string;
 	identity: OptionIdentity;
 }): Promise<string> => {
-	const { sign_prehash } = await getBackendActor({ identity });
+	const { sign_prehash } = await getSignerActor({ identity });
 	return sign_prehash(hash);
 };
