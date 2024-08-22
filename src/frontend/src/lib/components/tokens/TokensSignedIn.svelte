@@ -8,11 +8,6 @@
 	import { fade } from 'svelte/transition';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
-	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
-	import { formatToken } from '$lib/utils/format.utils';
-	import CardAmount from '$lib/components/ui/CardAmount.svelte';
-	import ExchangeTokenValue from '$lib/components/exchange/ExchangeTokenValue.svelte';
-	import TokenReceiveSend from '$lib/components/tokens/TokenReceiveSend.svelte';
 	import { flip } from 'svelte/animate';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
@@ -44,13 +39,13 @@
 			on:animationend={handleAnimationEnd}
 			class:pointer-events-none={animating}
 		>
-		<Listener {token}>
-			<div in:fade>
-				<TokenCardWithUrl {token}>
-					<TokenCardContent {token} />
-				</TokenCardWithUrl>
-			</div>
-		</Listener>
+			<Listener {token}>
+				<div in:fade>
+					<TokenCardWithUrl {token}>
+						<TokenCardContent {token} />
+					</TokenCardWithUrl>
+				</div>
+			</Listener>
 		</div>
 	{/each}
 
