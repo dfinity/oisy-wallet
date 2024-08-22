@@ -69,6 +69,7 @@
 	export let targetNetwork: Network | undefined = undefined;
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
+	export let warning: string | undefined;
 	// Required for the fee and also to retrieve ck minter information.
 	// i.e. Ethereum or Sepolia "main" token.
 	export let nativeEthereumToken: Token;
@@ -282,6 +283,7 @@
 			{nativeEthereumToken}
 			{destinationEditable}
 			{sourceNetwork}
+			{warning}
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}

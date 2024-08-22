@@ -7,13 +7,14 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import type { Network } from '$lib/types/network';
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import SendDestination from '$eth/components/send/SendDestination.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { Token } from '$lib/types/token';
+	import Warning from '$lib/components/ui/Warning.svelte';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -22,6 +23,7 @@
 	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
+	export let warning: string | undefined;
 
 	let insufficientFunds: boolean;
 	let invalidDestination: boolean;
@@ -54,6 +56,10 @@
 		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
 
 		<FeeDisplay />
+
+		{#if nonNullish(warning)}
+			<Warning><p>{warning}</p></Warning>
+		{/if}
 	</div>
 
 	<ButtonGroup>
