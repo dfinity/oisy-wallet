@@ -20,7 +20,7 @@
 			return;
 		}
 
-		if (!$btcAddressMainnetNotCertified && !$ethAddressNotCertified) {
+		if ((!NETWORK_BITCOIN_ENABLED || !$btcAddressMainnetNotCertified) && !$ethAddressNotCertified) {
 			// The addresses are certified, all good
 			return;
 		}
