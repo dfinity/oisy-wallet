@@ -14,6 +14,7 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 
 	export let transaction: IcTransactionUi;
 
@@ -35,13 +36,16 @@
 	$: pending = transaction?.status === 'pending';
 
 	let icon: ComponentType;
-	$: icon = ['burn', 'approve'].includes(transactionType)
-		? IconBurn
-		: transactionType === 'mint'
-			? IconMint
-			: incoming === false
-				? IconSend
-				: IconReceive;
+	$: icon =
+		['burn', 'approve', 'mint'].includes(transactionType) && pending
+			? IconConvert
+			: ['burn', 'approve'].includes(transactionType)
+				? IconBurn
+				: transactionType === 'mint'
+					? IconMint
+					: incoming === false
+						? IconSend
+						: IconReceive;
 
 	let amount: bigint | undefined;
 	$: amount = !incoming && nonNullish(value) ? value * -1n : value;
