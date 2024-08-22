@@ -36,9 +36,8 @@
 <TokensSkeletons>
 	{#each tokens as token (token.id)}
 		<div
-			in:fade
-			out:fade
-			animate:flip={{ duration: 500 }}
+			transition:fade
+			animate:flip={{ duration: 250 }}
 			on:animationstart={handleAnimationStart}
 			on:animationend={handleAnimationEnd}
 			class:pointer-events-none={animating}
