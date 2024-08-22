@@ -14,6 +14,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { pointerEventStore } from '$lib/stores/events.store';
 	import { pointerEventsHandler } from '$lib/utils/events.utils';
+	import { debounce } from '@dfinity/utils';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -24,33 +25,47 @@
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
 
-	let sortingEnabled = true;
-	$: $pointerEventStore, (sortingEnabled = !$pointerEventStore);
+	let tokensToDisplay: Token[] = [];
 
-	const updateTokensToDisplay = ({
-		tokensToDisplay,
-		newTokensList
-	}: {
-		tokensToDisplay: Token[];
-		newTokensList: Token[];
-	}): Token[] => {
-		if (sortingEnabled) {
+	let tokenKeys: string;
+	$: tokenKeys = tokens
+		.map((token) => `${token.id.description}-${token.network.id.description}`)
+		.join(',');
+
+	let tokensToDisplayKeys: string;
+	$: tokensToDisplayKeys = tokensToDisplay
+		.map((token) => `${token.id.description}-${token.network.id.description}`)
+		.join(',');
+
+	const defineTokensToDisplay = (): Token[] => {
+		if (!$pointerEventStore) {
+			// No pointer events, so we are not worried about possible glitches on user's interaction.
 			return tokens;
 		}
 
+		// If there are pointer events, we need to avoid visually re-sorting the tokens, to prevent glitches on user's interaction.
+
+		if (tokenKeys === tokensToDisplayKeys) {
+			// The order is the same, so there will be no re-sorting and no possible glitches on user's interaction.
+			// However, we need to update the tokensToDisplay to make sure the balances are up-to-date.
+			return tokens;
+		}
+
+		// The order is not the same, so the list is the same as the one currently showed, but the balances are updated.
 		const tokenMap = new Map(
-			newTokensList.map((token) => [
-				`${token.id.description}-${token.network.id.description}`,
-				token
-			])
+			tokens.map((token) => [`${token.id.description}-${token.network.id.description}`, token])
 		);
+
 		return tokensToDisplay.map(
 			(token) => tokenMap.get(`${token.id.description}-${token.network.id.description}`) ?? token
 		);
 	};
 
-	let tokensToDisplay: Token[] = [];
-	$: tokensToDisplay = updateTokensToDisplay({ tokensToDisplay, newTokensList: tokens });
+	const updateTokensToDisplay = () => (tokensToDisplay = defineTokensToDisplay());
+
+	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 500);
+
+	$: $pointerEventStore, tokens, debounceUpdateTokensToDisplay();
 </script>
 
 <TokensSkeletons>
