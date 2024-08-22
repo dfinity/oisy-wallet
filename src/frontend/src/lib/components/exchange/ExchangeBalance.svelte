@@ -17,7 +17,7 @@
 		{#if $exchangeInitialized}
 			{formatUSD(totalUsd)}
 		{:else}
-			&ZeroWidthSpace;
+			<span class="animate-pulse">{formatUSD(0)}</span>
 		{/if}
 	</output>
 </span>
