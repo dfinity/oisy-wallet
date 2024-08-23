@@ -15,6 +15,10 @@ runs:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Delete unnecessary tools folder to prevent "out of space" error
+      run: rm -rf /opt/hostedtoolcache
+      shell: bash
+
     - name: Update system packages
       run: sudo apt-get update
       shell: bash
