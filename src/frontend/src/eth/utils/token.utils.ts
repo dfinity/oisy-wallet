@@ -10,3 +10,6 @@ export const isSupportedErc20TwinTokenId = (tokenId: TokenId): boolean =>
 
 export const isNotSupportedErc20TwinTokenId = (tokenId: TokenId): boolean =>
 	!isSupportedErc20TwinTokenId(tokenId);
+
+export const tokenAddressToHex = (address: string): string =>
+	'0x' + address.toLowerCase().substring(2).padStart(64, '0');
