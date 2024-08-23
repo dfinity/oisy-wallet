@@ -166,7 +166,7 @@ button {
 		);
 		opacity: 0.6;
 		box-shadow:
-			0 2px 8px 0 rgba(255, 255, 255, 0.35) inset,
+			0 2px 8px 0 rgba(255, 255, 255, var(--box-shadow-opacity, 0.35)) inset,
 			0 4px 16px 0 rgba(0, 0, 0, 0.25);
 		transition:
 			opacity 0.5s ease-in-out,
@@ -175,8 +175,6 @@ button {
 
 	&.authenticate:hover::before {
 		opacity: 1;
-		box-shadow:
-			0 2px 8px 0 rgba(255, 255, 255, 0.75) inset,
-			0 4px 16px 0 rgba(0, 0, 0, 0.25);
+		--box-shadow-opacity: 0.75;
 	}
 }
