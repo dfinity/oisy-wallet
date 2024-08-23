@@ -1,11 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv, { type DotenvPopulateInput } from 'dotenv';
 import { join } from 'node:path';
-import { readCanisterIdsFromJSONFile } from './shared.utils';
+import { readCanisterIds } from './env.utils';
 
 dotenv.populate(
 	process.env as DotenvPopulateInput,
-	readCanisterIdsFromJSONFile({
+	readCanisterIds({
 		filePath: join(process.cwd(), 'canister_e2e_ids.json'),
 		prefix: 'E2E_'
 	})

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readCanisterIdsFromJSONFile } from './shared.utils';
+import { readCanisterIds as readIds } from './env.utils';
 
 /**
  * Read all the locally deployed canister IDs. For example Oisy backend, ckBTC|ETH, ICP etc.
@@ -10,7 +10,7 @@ import { readCanisterIdsFromJSONFile } from './shared.utils';
 const readLocalCanisterIds = ({ prefix }: { prefix?: string }): Record<string, string> => {
 	const dfxCanisterIdsJsonFile = join(process.cwd(), '.dfx', 'local', 'canister_ids.json');
 	const e2eCanisterIdsJsonFile = join(process.cwd(), 'canister_e2e_ids.json');
-	return readCanisterIdsFromJSONFile({
+	return readIds({
 		filePath: existsSync(dfxCanisterIdsJsonFile) ? dfxCanisterIdsJsonFile : e2eCanisterIdsJsonFile,
 		prefix
 	});
@@ -22,7 +22,7 @@ const readLocalCanisterIds = ({ prefix }: { prefix?: string }): Record<string, s
  */
 const readOisyCanisterIds = ({ prefix }: { prefix?: string }): Record<string, string> => {
 	const canisterIdsJsonFile = join(process.cwd(), 'canister_ids.json');
-	return readCanisterIdsFromJSONFile({ filePath: canisterIdsJsonFile, prefix });
+	return readIds({ filePath: canisterIdsJsonFile, prefix });
 };
 
 /**

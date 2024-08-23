@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 /**
  * Read a JSON file with canister IDs and transform it into a dictionary. Optionally add prefix to all dictionary keys.
  */
-export const readCanisterIdsFromJSONFile = ({
+export const readCanisterIds = ({
 	filePath,
 	prefix
 }: {
