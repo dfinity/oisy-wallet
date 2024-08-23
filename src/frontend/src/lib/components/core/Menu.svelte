@@ -4,6 +4,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { goto } from '$app/navigation';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import { NAVIGATION_MENU_BUTTON } from '$lib/constants/test-ids.constant';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { isRouteSettings, networkParam } from '$lib/utils/nav.utils';
@@ -36,7 +37,12 @@
 	$: walletOptions = !settingsRoute;
 </script>
 
-<ButtonHero bind:button on:click={() => (visible = true)} ariaLabel={$i18n.navigation.alt.menu}>
+<ButtonHero
+	bind:button
+	on:click={() => (visible = true)}
+	ariaLabel={$i18n.navigation.alt.menu}
+	testId={NAVIGATION_MENU_BUTTON}
+>
 	<IconUser slot="icon" />
 </ButtonHero>
 

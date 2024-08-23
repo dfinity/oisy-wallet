@@ -1,6 +1,8 @@
 import {
 	HERO_ANIMATION_CANVAS,
 	LOGIN_BUTTON,
+	LOGOUT_BUTTON,
+	NAVIGATION_MENU_BUTTON,
 	TOKENS_SKELETONS_INITIALIZED
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
@@ -24,6 +26,14 @@ type WaitForModalParams = {
 type TestModalSnapshotParams = {
 	viewportSize?: ViewportSize;
 } & WaitForModalParams;
+
+type ClickMenuItemParams = {
+	menuItemTestId: string;
+};
+
+type WaitForLocatorOptions = {
+	state: 'attached' | 'detached' | 'visible' | 'hidden';
+};
 
 abstract class Homepage {
 	readonly #page: Page;
@@ -57,14 +67,26 @@ abstract class Homepage {
 		await this.#page.setViewportSize(viewportSize);
 	}
 
+	protected async waitForLoginButton(options?: WaitForLocatorOptions): Promise<void> {
+		await this.#page.getByTestId(LOGIN_BUTTON).waitFor(options);
+	}
+
 	protected async waitForHomepageReady(): Promise<void> {
 		await this.goto();
-		await this.#page.getByTestId(LOGIN_BUTTON).waitFor();
+		await this.waitForLoginButton();
 		await this.hideHeroAnimation();
 	}
 
-	protected async waitForTokenSkeletonsInitialization(): Promise<void> {
-		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor();
+	protected async waitForTokenSkeletonsInitialization(
+		options?: WaitForLocatorOptions
+	): Promise<void> {
+		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor(options);
+	}
+
+	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
+		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).click();
+
+		await this.#page.getByTestId(menuItemTestId).click();
 	}
 
 	async testModalSnapshot({
@@ -120,6 +142,13 @@ export class HomepageLoggedIn extends Homepage {
 		await this.waitForHomepageReady();
 
 		await this.#iiPage.signInWithNewIdentity();
+	}
+
+	async waitForLogout(): Promise<void> {
+		await this.clickMenuItem({ menuItemTestId: LOGOUT_BUTTON });
+
+		await this.waitForLoginButton();
+		await this.waitForTokenSkeletonsInitialization({ state: 'detached' });
 	}
 
 	/**
