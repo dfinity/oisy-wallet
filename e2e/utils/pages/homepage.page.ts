@@ -114,8 +114,7 @@ export class HomepageLoggedIn extends Homepage {
 	async waitForAuthentication(): Promise<void> {
 		await this.#iiPage.waitReady({
 			url: LOCAL_REPLICA_URL,
-			// TODO: take this value from env vars
-			canisterId: 'rdmx6-jaaaa-aaaaa-aaadq-cai'
+			canisterId: process.env.E2E_LOCAL_INTERNET_IDENTITY_CANISTER_ID
 		});
 
 		await this.waitForHomepageReady();
