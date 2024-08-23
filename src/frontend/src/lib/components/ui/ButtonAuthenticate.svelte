@@ -2,25 +2,32 @@
 	import IconArrowAstronaut from '$lib/components/icons/IconArrowAstronaut.svelte';
 </script>
 
-<button
-	on:click
-	class="h-[72px] px-[74px] py-2 rounded-full gap-4 font-bold text-lg leading-6 bg-brandeis-blue"
-	data-tid="login-button"
->
-	<slot />
-	<IconArrowAstronaut />
-</button>
+<div class="rounded-full border-overlay">
+	<button
+		on:click
+		class="h-[72px] px-[74px] py-2 rounded-full border-0 gap-4 font-bold text-lg leading-6 bg-brandeis-blue"
+		data-tid="login-button"
+	>
+		<slot />
+		<IconArrowAstronaut />
+	</button>
+</div>
 
 <style lang="scss">
-	button {
-		position: relative;
-		z-index: 0;
+	.border-overlay {
 		border: solid 4px rgba(7, 22, 137, 0.15);
 		transition: border-color 0.5s ease-in-out;
 	}
 
-	button:hover {
+	.border-overlay:hover {
 		border-color: rgba(7, 22, 137, 0.25);
+	}
+
+	button {
+		position: relative;
+		z-index: 0;
+		//border: solid 4px rgba(7, 22, 137, 0.15);
+		transition: border-color 0.5s ease-in-out;
 	}
 
 	button::before {
