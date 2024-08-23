@@ -159,7 +159,11 @@ button {
 		bottom: 0;
 		left: 0;
 		z-index: -1;
-		background: radial-gradient(49.28% 49.28% at 50% 100%, #59e7d6 0%, #147bff 100%);
+		background: radial-gradient(
+			49.28% 49.28% at 50% 100%,
+			var(--color-turquoise) 0%,
+			var(--color-crayola-blue) 100%
+		);
 		opacity: 0.6;
 		box-shadow:
 			0 2px 8px 0 rgba(255, 255, 255, 0.35) inset,
