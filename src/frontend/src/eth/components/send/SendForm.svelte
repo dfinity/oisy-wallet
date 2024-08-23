@@ -37,8 +37,8 @@
 
 	const { sendToken, sendBalance, sendPurpose } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let warning: string | undefined = undefined;
-	$: warning =
+	let info: string | undefined = undefined;
+	$: info =
 		sendPurpose === 'convert-eth-to-cketh'
 			? $i18n.convert.text.cketh_conversions_may_take
 			: sendPurpose === 'convert-erc20-to-ckerc20'
@@ -68,8 +68,8 @@
 
 		<FeeDisplay />
 
-		{#if nonNullish(warning)}
-			<Warning><p>{warning}</p></Warning>
+		{#if nonNullish(info)}
+			<Warning info><p>{info}</p></Warning>
 		{/if}
 	</div>
 
