@@ -39,12 +39,6 @@
 	let otherSteps: WizardStep[];
 	$: [firstStep, ...otherSteps] = sendWizardStepsWithQrCodeScan($i18n);
 
-	let ckErc20TokenSymbol: string | undefined;
-	$: ckErc20TokenSymbol =
-		sendPurpose === 'convert-erc20-to-ckerc20'
-			? ($sendToken as Erc20Token).twinTokenSymbol
-			: undefined;
-
 	let steps: WizardSteps;
 	$: steps = [
 		{
@@ -54,22 +48,12 @@
 					? $i18n.convert.text.convert_to_cketh
 					: sendPurpose === 'convert-erc20-to-ckerc20'
 						? replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
-								$ckErc20: ckErc20TokenSymbol ?? 'ckETH'
+								$ckErc20: ($sendToken as Erc20Token).twinTokenSymbol ?? 'ckETH'
 							})
 						: $i18n.send.text.send
 		},
 		...otherSteps
 	];
-
-	let warning: string | undefined = undefined;
-	$: warning =
-		sendPurpose === 'convert-eth-to-cketh'
-			? $i18n.convert.text.cketh_conversions_may_take
-			: sendPurpose === 'convert-erc20-to-ckerc20'
-				? replacePlaceholders($i18n.convert.text.ckerc20_conversions_may_take, {
-						$ckErc20: ckErc20TokenSymbol ?? 'ckETH'
-					})
-				: undefined;
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -107,7 +91,6 @@
 		bind:targetNetwork
 		bind:amount
 		bind:sendProgressStep
-		{warning}
 		on:icBack={modal.back}
 		on:icNext={modal.next}
 		on:icClose={close}

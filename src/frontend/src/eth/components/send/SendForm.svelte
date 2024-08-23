@@ -15,6 +15,8 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { Token } from '$lib/types/token';
 	import Warning from '$lib/components/ui/Warning.svelte';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { Erc20Token } from '$eth/types/erc20';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -23,7 +25,6 @@
 	export let nativeEthereumToken: Token;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
-	export let warning: string | undefined;
 
 	let insufficientFunds: boolean;
 	let invalidDestination: boolean;
@@ -34,7 +35,17 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendBalance, sendPurpose } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let warning: string | undefined = undefined;
+	$: warning =
+		sendPurpose === 'convert-eth-to-cketh'
+			? $i18n.convert.text.cketh_conversions_may_take
+			: sendPurpose === 'convert-erc20-to-ckerc20'
+				? replacePlaceholders($i18n.convert.text.ckerc20_conversions_may_take, {
+						$ckErc20: ($sendToken as Erc20Token).twinTokenSymbol ?? 'ckETH'
+					})
+				: undefined;
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
