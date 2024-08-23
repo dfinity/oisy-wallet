@@ -6,7 +6,7 @@
 <div class="rounded-full border-overlay">
 	<button
 		on:click
-		class="authenticate h-[72px] px-[74px] py-2 rounded-full border-0 gap-4 font-bold text-lg leading-6 bg-brandeis-blue"
+		class="authenticate h-16 px-12 py-2 rounded-full border-0 gap-4 font-bold text-lg leading-6 bg-brandeis-blue"
 		data-tid="login-button"
 	>
 		<slot />
