@@ -2,6 +2,9 @@
 	"backend": {
 		"local": "tdxud-2yaaa-aaaad-aadiq-cai"
 	},
+	"signer": {
+		"local": "tdxud-2yaaa-aaaad-aadiq-cai"
+	},
 	"ckbtc_index": {
 		"local": "mm444-5iaaa-aaaar-qaabq-cai"
 	},
