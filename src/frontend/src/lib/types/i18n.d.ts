@@ -370,8 +370,14 @@ interface I18nFee {
 }
 
 interface I18nInfo {
-	bitcoin: { title: string; description: string; note: string; receive: string };
-	ethereum: { title: string; description: string; how_to: string; how_to_short: string };
+	bitcoin: { title: string; description: string; note: string; how_to: string };
+	ethereum: {
+		title: string;
+		description: string;
+		note: string;
+		how_to: string;
+		how_to_short: string;
+	};
 }
 
 interface I18nWallet_connect {
