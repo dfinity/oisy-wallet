@@ -2,6 +2,7 @@
 	import IconArrowAstronaut from '$lib/components/icons/IconArrowAstronaut.svelte';
 </script>
 
+<!-- This overlay is needed, otherwise the border opacity would show the gradient instead of the background. -->
 <div class="rounded-full border-overlay">
 	<button
 		on:click
@@ -26,8 +27,6 @@
 	button {
 		position: relative;
 		z-index: 0;
-		//border: solid 4px rgba(7, 22, 137, 0.15);
-		transition: border-color 0.5s ease-in-out;
 	}
 
 	button::before {
