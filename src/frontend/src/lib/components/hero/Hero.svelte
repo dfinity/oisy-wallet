@@ -28,7 +28,8 @@
 	<Header />
 
 	<article
-		class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 pb-2 px-8 relative main 2xl:mt-[-70px] items-center"
+		class="flex flex-col text-off-white rounded-lg pt-1 sm:pt-3 px-8 relative main 2xl:mt-[-70px] items-center"
+		style="padding-bottom: 32px"
 	>
 		<Alpha />
 
