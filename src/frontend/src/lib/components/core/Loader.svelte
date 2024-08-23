@@ -13,6 +13,7 @@
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authStore } from '$lib/stores/auth.store';
+	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 
 	let progressStep: string = ProgressStepsLoader.BTC_ETH_ADDRESS;
 
@@ -25,7 +26,9 @@
 		} as ProgressStep,
 		{
 			step: ProgressStepsLoader.BTC_ETH_ADDRESS,
-			text: $i18n.init.text.retrieving_public_keys,
+			text: NETWORK_BITCOIN_ENABLED
+				? $i18n.init.text.retrieving_public_keys
+				: $i18n.init.text.retrieving_public_key_only_eth,
 			state: 'in_progress'
 		} as ProgressStep
 	];

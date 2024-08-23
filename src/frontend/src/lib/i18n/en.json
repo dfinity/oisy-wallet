@@ -81,6 +81,7 @@
 		"text": {
 			"initializing_wallet": "Initializing your wallet",
 			"securing_session": "Securing session with Internet Identity",
+			"retrieving_public_key_only_eth": "Retrieving your Ethereum public key",
 			"retrieving_public_keys": "Retrieving your Bitcoin and Ethereum public keys"
 		},
 		"info": {
