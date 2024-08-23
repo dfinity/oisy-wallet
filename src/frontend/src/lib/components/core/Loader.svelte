@@ -14,7 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { authStore } from '$lib/stores/auth.store';
 
-	let progressStep: string = ProgressStepsLoader.BTC_ETH_ADDRESS;
+	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
 	let steps: [ProgressStep, ...ProgressStep[]];
 	$: steps = [
@@ -24,7 +24,7 @@
 			state: 'completed'
 		} as ProgressStep,
 		{
-			step: ProgressStepsLoader.BTC_ETH_ADDRESS,
+			step: ProgressStepsLoader.ADDRESSES,
 			text: $i18n.init.text.retrieving_public_keys,
 			state: 'in_progress'
 		} as ProgressStep
@@ -72,7 +72,7 @@
 			return;
 		}
 
-		// We are loading the BTC and ETH address from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
+		// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 		progressModal = true;
 
 		const { success: addressSuccess } = await loadAddresses(
