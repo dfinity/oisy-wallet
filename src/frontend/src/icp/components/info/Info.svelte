@@ -6,8 +6,8 @@
 	} from '$icp/derived/ic-token.derived';
 	import InfoBitcoin from '$icp/components/info/InfoBitcoin.svelte';
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$icp/utils/ck.utils';
-	import { isNullish, nonNullish } from '@dfinity/utils';
 	import InfoBox from '$icp/components/info/InfoBox.svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import InfoEthereum from '$lib/components/info/InfoEthereum.svelte';
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
