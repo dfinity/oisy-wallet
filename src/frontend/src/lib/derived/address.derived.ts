@@ -1,3 +1,4 @@
+import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 import { addressStore, type AddressData } from '$lib/stores/address.store';
@@ -30,12 +31,23 @@ export const ethAddress: Readable<OptionEthAddress> = derived(
 	([$ethAddressData]) => ($ethAddressData === null ? null : $ethAddressData?.data)
 );
 
-export const btcAddressMainnetNotCertified: Readable<boolean> = derived(
+export const btcAddressMainnetCertified: Readable<boolean> = derived(
 	[btcAddressMainnetData],
-	([$btcAddressMainnetData]) => $btcAddressMainnetData?.certified !== true
+	([$btcAddressMainnetData]) =>
+		$btcAddressMainnetData?.certified === true || !NETWORK_BITCOIN_ENABLED
+);
+
+export const btcAddressMainnetNotCertified: Readable<boolean> = derived(
+	[btcAddressMainnetCertified],
+	([$btcAddressMainnetCertified]) => !$btcAddressMainnetCertified
+);
+
+export const ethAddressCertified: Readable<boolean> = derived(
+	[ethAddressData],
+	([$ethAddressData]) => $ethAddressData?.certified === true
 );
 
 export const ethAddressNotCertified: Readable<boolean> = derived(
-	[ethAddressData],
-	([$ethAddressData]) => $ethAddressData?.certified !== true
+	[ethAddressCertified],
+	([$ethAddressCertified]) => !$ethAddressCertified
 );

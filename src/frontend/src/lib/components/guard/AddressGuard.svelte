@@ -5,9 +5,11 @@
 	import { warnSignOut } from '$lib/services/auth.services';
 	import {
 		btcAddressMainnet,
+		btcAddressMainnetCertified,
 		btcAddressMainnetData,
 		btcAddressMainnetNotCertified,
 		ethAddress,
+		ethAddressCertified,
 		ethAddressData,
 		ethAddressNotCertified
 	} from '$lib/derived/address.derived';
@@ -20,13 +22,13 @@
 			return;
 		}
 
-		if ((!NETWORK_BITCOIN_ENABLED || !$btcAddressMainnetNotCertified) && !$ethAddressNotCertified) {
+		if ($btcAddressMainnetCertified && $ethAddressCertified) {
 			// The addresses are certified, all good
 			return;
 		}
 
 		const results = await Promise.all([
-			NETWORK_BITCOIN_ENABLED && nonNullish($btcAddressMainnet) && $btcAddressMainnetNotCertified
+			nonNullish($btcAddressMainnet) && $btcAddressMainnetNotCertified
 				? certifyBtcAddressMainnet($btcAddressMainnet)
 				: Promise.resolve<ResultSuccess<never>>({ success: true }),
 			nonNullish($ethAddress) && $ethAddressNotCertified
