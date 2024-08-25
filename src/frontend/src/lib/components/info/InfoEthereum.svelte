@@ -7,10 +7,12 @@
 	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
-	import { ckEthereumTwinToken, ckEthereumTwinTokenNetwork } from '$icp-eth/derived/cketh.derived';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import type { Token } from '$lib/types/token';
+
+	export let token: Token;
+	export let ckTokenSymbol: string;
 
 	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth();
 
@@ -19,18 +21,15 @@
 	 */
 
 	const { sendToken, ...rest } = initSendContext({
-		sendPurpose:
-			$ckEthereumTwinToken.standard === 'erc20'
-				? 'convert-erc20-to-ckerc20'
-				: 'convert-eth-to-cketh',
-		token: $ckEthereumTwinToken
+		sendPurpose: token.standard === 'erc20' ? 'convert-erc20-to-ckerc20' : 'convert-eth-to-cketh',
+		token: token
 	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
 		sendToken,
 		...rest
 	});
 
-	$: sendToken.set($ckEthereumTwinToken);
+	$: sendToken.set(token);
 </script>
 
 <div class="pr-2">
@@ -38,34 +37,34 @@
 		<Logo
 			src={eth}
 			alt={replacePlaceholders($i18n.core.alt.logo, {
-				$name: $ckEthereumTwinToken.name
+				$name: token.name
 			})}
 		/>
 		<span class="w-[70%]"
-			>{replacePlaceholders($i18n.info.ethereum.title, {
-				$ckToken: $tokenWithFallback.symbol
-			})}</span
+		>{replacePlaceholders($i18n.info.ethereum.title, {
+			$ckToken: ckTokenSymbol
+		})}</span
 		>
 	</h4>
 
 	<p class="text-misty-rose mt-3">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.description), {
-			$token: $ckEthereumTwinToken.symbol,
-			$ckToken: $tokenWithFallback.symbol,
-			$network: $ckEthereumTwinTokenNetwork.name
+			$token: token.symbol,
+			$ckToken: ckTokenSymbol,
+			$network: token.network.name
 		})}
 	</p>
 
 	<p class="text-misty-rose mt-3">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.note), {
-			$token: $ckEthereumTwinToken.symbol,
-			$ckToken: $tokenWithFallback.symbol
+			$token: token.symbol,
+			$ckToken: ckTokenSymbol
 		})}
 	</p>
 
 	<button class="primary mt-6" disabled={$isBusy} class:opacity-50={$isBusy} on:click={openReceive}>
 		{replacePlaceholders($i18n.info.ethereum.how_to, {
-			$ckToken: $tokenWithFallback.symbol
+			$ckToken: ckTokenSymbol
 		})}</button
 	>
 </div>

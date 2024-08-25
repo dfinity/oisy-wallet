@@ -15,6 +15,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
+	import Info from '$eth/components/info/Info.svelte';
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
@@ -57,6 +58,8 @@
 		? ($modalStore?.data as TransactionType | undefined)
 		: undefined;
 </script>
+
+<Info />
 
 <Header>{$i18n.transactions.text.title}</Header>
 
