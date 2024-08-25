@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store.js';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { Html, Modal } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -7,9 +7,10 @@
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import CoverWhat from '$lib/assets/cover-features.png';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { ABOUT_WHAT_MODAL } from '$lib/constants/test-ids.constant';
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal on:nnsClose={modalStore.close} testId={ABOUT_WHAT_MODAL}>
 	<svelte:fragment slot="title"
 		><p class="text-xl">{replaceOisyPlaceholders($i18n.about.what.text.title)}</p></svelte:fragment
 	>
