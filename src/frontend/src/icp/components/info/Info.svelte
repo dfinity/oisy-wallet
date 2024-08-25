@@ -5,8 +5,9 @@
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
 	import InfoBitcoin from '$icp/components/info/InfoBitcoin.svelte';
-	import type { HideInfoKey } from '$icp/utils/ck.utils';
-	import InfoBox from '$lib/components/info/InfoBox.svelte';
+	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$icp/utils/ck.utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import InfoBox from '$icp/components/info/InfoBox.svelte';
 	import InfoEthereum from '$lib/components/info/InfoEthereum.svelte';
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
@@ -36,10 +37,23 @@
 			: ckErc20
 				? 'oisy_ic_hide_erc20_info'
 				: undefined;
+
+	let hideInfo = true;
+	$: hideInfo = nonNullish(key) ? shouldHideInfo(key) : true;
+
+	const close = () => {
+		hideInfo = true;
+
+		if (isNullish(key)) {
+			return;
+		}
+
+		saveHideInfo(key);
+	};
 </script>
 
 {#if ckBTC || ckETH || ckErc20}
-	<InfoBox {key}>
+	<InfoBox {hideInfo} on:click={close}>
 		{#if ckBTC}
 			<InfoBitcoin />
 		{:else}
