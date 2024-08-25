@@ -13,7 +13,6 @@
 		ethAddressData,
 		ethAddressNotCertified
 	} from '$lib/derived/address.derived';
-	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env.js';
 	import type { ResultSuccess } from '$lib/types/utils';
 
 	const validateAddress = async () => {
