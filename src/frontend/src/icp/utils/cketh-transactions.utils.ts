@@ -7,7 +7,6 @@ import {
 import {
 	CKETH_LEDGER_CANISTER_IDS,
 	ICRC_LEDGER_CANISTER_TESTNET_IDS,
-	IC_CKETH_LEDGER_CANISTER_ID,
 	STAGING_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks.icrc.env';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
