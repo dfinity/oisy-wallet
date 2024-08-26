@@ -434,7 +434,7 @@
 		},
 		"ethereum": {
 			"title": "Convert to $ckToken",
-			"description": "With a few steps, transfer and convert your $token from the $network Network to $ckToken directly within the $oisy_name. The conversion process can take up to 20 minutes.",
+			"description": "With a few steps, convert your native $network $token to its twinned ICP $ckToken directly within the $oisy_name. The conversion process can take up to 20 minutes.",
 			"note": "You can convert $ckToken at any time back to $token.",
 			"how_to": "How to convert to $ckToken",
 			"how_to_short": "How to convert $token"
