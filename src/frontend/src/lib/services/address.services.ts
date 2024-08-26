@@ -19,11 +19,12 @@ import { LoadIdbAddressError } from '$lib/types/errors';
 import type { IdbAddress, SetIdbAddressParams } from '$lib/types/idb';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenId } from '$lib/types/token';
-import type { ResultSuccess } from '$lib/types/utils';
+import type { ResultSuccess, ResultSuccessReduced } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { reduceResults } from '$lib/utils/results.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import type { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const loadTokenAddress = async <T extends Address>({
@@ -180,7 +181,7 @@ const loadIdbEthAddress = async (): Promise<ResultSuccess<LoadIdbAddressError>> 
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
 	});
 
-export const loadIdbAddresses = async (): Promise<ResultSuccess<LoadIdbAddressError[]>> => {
+export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
 	const results = await Promise.all([
 		NETWORK_BITCOIN_ENABLED
 			? loadIdbBtcAddressMainnet()
@@ -188,13 +189,7 @@ export const loadIdbAddresses = async (): Promise<ResultSuccess<LoadIdbAddressEr
 		loadIdbEthAddress()
 	]);
 
-	const { success, err } = results.reduce(
-		(acc, { success: s, err: e }) => ({
-			success: acc.success && s,
-			err: nonNullish(e) ? [...acc.err, e] : acc.err
-		}),
-		{ success: true, err: [] as LoadIdbAddressError[] }
-	);
+	const { success, err } = reduceResults<LoadIdbAddressError>(results);
 
 	return { success, err };
 };
