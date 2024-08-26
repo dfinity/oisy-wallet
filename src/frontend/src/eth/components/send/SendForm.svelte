@@ -7,16 +7,14 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import type { Network } from '$lib/types/network';
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import SendDestination from '$eth/components/send/SendDestination.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { Token } from '$lib/types/token';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { Erc20Token } from '$eth/types/erc20';
-	import Info from '$lib/components/ui/Info.svelte';
+	import SendInfo from '$eth/components/send/SendInfo.svelte';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -35,17 +33,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance, sendPurpose } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	let info: string | undefined = undefined;
-	$: info =
-		sendPurpose === 'convert-eth-to-cketh'
-			? $i18n.convert.text.cketh_conversions_may_take
-			: sendPurpose === 'convert-erc20-to-ckerc20'
-				? replacePlaceholders($i18n.convert.text.ckerc20_conversions_may_take, {
-						$ckErc20: ($sendToken as Erc20Token).twinTokenSymbol ?? 'ckETH'
-					})
-				: undefined;
+	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
@@ -68,9 +56,7 @@
 
 		<FeeDisplay />
 
-		{#if nonNullish(info)}
-			<Info><p>{info}</p></Info>
-		{/if}
+		<SendInfo />
 	</div>
 
 	<ButtonGroup>
