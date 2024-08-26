@@ -13,6 +13,7 @@ import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 
 type HomepageParams = {
 	page: Page;
+	viewportSize?: ViewportSize;
 };
 
 type HomepageLoggedInParams = {
@@ -24,10 +25,6 @@ type WaitForModalParams = {
 	modalTestId: string;
 };
 
-type TestModalSnapshotParams = {
-	viewportSize?: ViewportSize;
-} & WaitForModalParams;
-
 type ClickMenuItemParams = {
 	menuItemTestId: string;
 };
@@ -38,9 +35,11 @@ type WaitForLocatorOptions = {
 
 abstract class Homepage {
 	readonly #page: Page;
+	readonly #viewportSize?: ViewportSize;
 
-	protected constructor(page: Page) {
+	protected constructor({ page, viewportSize }: HomepageParams) {
 		this.#page = page;
+		this.#viewportSize = viewportSize;
 	}
 
 	private async hideHeroAnimation(): Promise<void> {
@@ -77,6 +76,10 @@ abstract class Homepage {
 	}
 
 	protected async waitForHomepageReady(): Promise<void> {
+		if (nonNullish(this.#viewportSize)) {
+			await this.setViewportSize(this.#viewportSize);
+		}
+
 		await this.goto();
 		await this.waitForLoginButton();
 		await this.hideHeroAnimation();
@@ -96,16 +99,9 @@ abstract class Homepage {
 	}
 
 	async testModalSnapshot({
-		viewportSize,
 		modalOpenButtonTestId,
 		modalTestId
-	}: TestModalSnapshotParams): Promise<void> {
-		if (nonNullish(viewportSize)) {
-			await this.setViewportSize(viewportSize);
-		}
-
-		await this.waitForHomepageReady();
-
+	}: WaitForModalParams): Promise<void> {
 		const modal = await this.waitForModal({
 			modalOpenButtonTestId,
 			modalTestId
@@ -118,8 +114,8 @@ abstract class Homepage {
 }
 
 export class HomepageLoggedOut extends Homepage {
-	constructor({ page }: HomepageParams) {
-		super(page);
+	constructor(params: HomepageParams) {
+		super(params);
 	}
 
 	/**
@@ -133,8 +129,8 @@ export class HomepageLoggedOut extends Homepage {
 export class HomepageLoggedIn extends Homepage {
 	readonly #iiPage: InternetIdentityPage;
 
-	constructor({ page, iiPage }: HomepageLoggedInParams) {
-		super(page);
+	constructor({ page, viewportSize, iiPage }: HomepageLoggedInParams) {
+		super({ page, viewportSize });
 
 		this.#iiPage = iiPage;
 	}

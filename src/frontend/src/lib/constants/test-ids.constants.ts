@@ -13,3 +13,6 @@ export const ABOUT_WHAT_MODAL = 'about-what-modal';
 
 export const ABOUT_HOW_MODAL_OPEN_BUTTON = 'about-how-modal-open-button';
 export const ABOUT_HOW_MODAL = 'about-how-modal';
+
+export const RECEIVE_TOKENS_MODAL_OPEN_BUTTON = 'receive-tokens-modal-open-button';
+export const RECEIVE_TOKENS_MODAL = 'receive-tokens-modal';
