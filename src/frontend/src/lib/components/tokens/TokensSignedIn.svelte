@@ -3,7 +3,7 @@
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { TokenUi } from '$lib/types/token';
+	import type { Token, TokenUi } from '$lib/types/token';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { fade } from 'svelte/transition';
 	import { modalManageTokens } from '$lib/derived/modal.derived';
@@ -13,7 +13,7 @@
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { debounce } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -23,6 +23,15 @@
 		({ id: tokenId }) =>
 			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
 	);
+
+	// We start it as undefined to avoid showing an empty list before the first update.
+	let tokensToDisplay: Token[] | undefined = undefined;
+
+	const updateTokensToDisplay = () => (tokensToDisplay = tokens);
+
+	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 500);
+
+	$: tokens, debounceUpdateTokensToDisplay();
 
 	let animating = false;
 
@@ -43,8 +52,8 @@
 	}, 250);
 </script>
 
-<TokensSkeletons>
-	{#each tokens as token (token.id)}
+<TokensSkeletons loading={isNullish(tokensToDisplay)}>
+	{#each tokensToDisplay ?? [] as token (token.id)}
 		<div
 			transition:fade
 			animate:flip={{ duration: 250 }}
@@ -60,7 +69,7 @@
 		</div>
 	{/each}
 
-	{#if tokens.length === 0}
+	{#if tokensToDisplay?.length === 0}
 		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
 	{/if}
 
