@@ -10,7 +10,7 @@ describe('reduceResults', () => {
 
 		const reduced = reduceResults(results);
 
-		expect(reduced).toEqual({ success: true, err: [] });
+		expect(reduced).toEqual({ success: true, err: undefined });
 	});
 
 	it('should return a failed result with errors when any result is unsuccessful', () => {
