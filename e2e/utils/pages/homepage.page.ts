@@ -2,6 +2,7 @@ import {
 	HERO_ANIMATION_CANVAS,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
+	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
 	TOKENS_SKELETONS_INITIALIZED
 } from '$lib/constants/test-ids.constants';
@@ -67,6 +68,10 @@ abstract class Homepage {
 		await this.#page.setViewportSize(viewportSize);
 	}
 
+	private async waitForNavigationMenu(options?: WaitForLocatorOptions): Promise<void> {
+		await this.#page.getByTestId(NAVIGATION_MENU).waitFor(options);
+	}
+
 	protected async waitForLoginButton(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(LOGIN_BUTTON).waitFor(options);
 	}
@@ -85,6 +90,7 @@ abstract class Homepage {
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
 		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).click();
+		await this.waitForNavigationMenu();
 
 		await this.#page.getByTestId(menuItemTestId).click();
 	}

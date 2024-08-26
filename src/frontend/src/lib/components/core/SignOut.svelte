@@ -3,7 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { LOGOUT_BUTTON } from '$lib/constants/test-ids.constant';
+	import { LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
 
 	const dispatch = createEventDispatcher();
 

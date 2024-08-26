@@ -1,4 +1,5 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
+export const NAVIGATION_MENU = 'navigation-menu';
 
 export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
