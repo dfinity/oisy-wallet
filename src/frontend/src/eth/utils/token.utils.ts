@@ -12,5 +12,6 @@ export const isSupportedErc20TwinTokenId = (tokenId: TokenId): boolean =>
 export const isNotSupportedErc20TwinTokenId = (tokenId: TokenId): boolean =>
 	!isSupportedErc20TwinTokenId(tokenId);
 
+// ERC20 token addresses are zero-padded to 32 bytes (64 characters) string in hex format, when they need to be ABI-encoded.
 export const tokenAddressToHex = (address: string): string =>
 	ethers.utils.hexZeroPad(address.toLowerCase(), 32);
