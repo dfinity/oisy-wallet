@@ -8,7 +8,7 @@
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$icp/utils/ck.utils';
 	import InfoBox from '$icp/components/info/InfoBox.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import InfoEthereum from '$lib/components/info/InfoEthereum.svelte';
+	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
 	import { token } from '$lib/stores/token.store';
