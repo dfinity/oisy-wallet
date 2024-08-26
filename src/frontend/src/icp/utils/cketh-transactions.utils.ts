@@ -41,10 +41,11 @@ export const mapCkEthereumTransaction = ({
 	const { id, from, to, ...txRest } = mapIcrcTransaction({ transaction, identity });
 
 	const ckETHExplorerUrl = nonNullish(env)
-		? (env === 'testnet' && nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID)
-				? CKETH_SEPOLIA_EXPLORER_URL
-				: CKETH_EXPLORER_URL) +
-			(!CKETH_LEDGER_CANISTER_IDS.includes(ledgerCanisterId) ? `/${ledgerCanisterId}` : '')
+		? `${
+				env === 'testnet' && nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID)
+					? CKETH_SEPOLIA_EXPLORER_URL
+					: CKETH_EXPLORER_URL
+			}${!CKETH_LEDGER_CANISTER_IDS.includes(ledgerCanisterId) ? `/${ledgerCanisterId}` : ''}`
 		: undefined;
 
 	const tx: IcTransactionUi = {
