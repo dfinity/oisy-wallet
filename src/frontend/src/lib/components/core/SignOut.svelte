@@ -3,6 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import IconLogout from '$lib/components/icons/IconLogout.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { LOGOUT_BUTTON } from '$lib/constants/test-ids.constants';
 
 	const dispatch = createEventDispatcher();
 
@@ -12,7 +13,7 @@
 	};
 </script>
 
-<button on:click={logout} class="text gap-2">
+<button on:click={logout} class="text gap-2" data-tid={LOGOUT_BUTTON}>
 	<IconLogout />
 	{$i18n.auth.text.logout}
 </button>
