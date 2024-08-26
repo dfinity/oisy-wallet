@@ -27,7 +27,7 @@
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={$i18n.convert.text.convert_to_cketh}
 >
-	<IconConvert slot="icon" />
+	<IconConvert size="28" slot="icon" />
 	<span> {$i18n.convert.text.convert_to_cketh} </span>
 </ConvertETH>
 
