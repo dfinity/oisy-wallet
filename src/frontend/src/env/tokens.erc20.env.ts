@@ -10,6 +10,7 @@ import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.en
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
 import { WSTETH_TOKEN } from '$env/tokens-erc20/tokens.wsteth.env';
+import { XAUT_TOKEN } from '$env/tokens-erc20/tokens.xaut.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
@@ -130,7 +131,8 @@ export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	USDT_TOKEN,
 	WSTETH_TOKEN,
 	UNI_TOKEN,
-	EURC_TOKEN
+	EURC_TOKEN,
+	XAUT_TOKEN
 ];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
