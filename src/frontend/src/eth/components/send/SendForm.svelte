@@ -14,9 +14,9 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { Token } from '$lib/types/token';
-	import Warning from '$lib/components/ui/Warning.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Erc20Token } from '$eth/types/erc20';
+	import Info from '$lib/components/ui/Info.svelte';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -69,7 +69,7 @@
 		<FeeDisplay />
 
 		{#if nonNullish(info)}
-			<Warning info><p>{info}</p></Warning>
+			<Info><p>{info}</p></Info>
 		{/if}
 	</div>
 

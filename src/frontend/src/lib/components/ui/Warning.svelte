@@ -1,16 +1,10 @@
 <script lang="ts">
-	import { IconInfo, IconWarning } from '@dfinity/gix-components';
-	import type { ComponentType } from 'svelte';
-
-	export let info = false;
-
-	let icon: ComponentType;
-	$: icon = info ? IconInfo : IconWarning;
+	import { IconWarning } from '@dfinity/gix-components';
 </script>
 
-<div class="bg-dark-blue text-off-white rounded-lg p-4 mb-4 flex gap-4 items-center">
-	<div class:min-w-5={info} class:min-w-11={!info} class:text-goldenrod={!info}>
-		<svelte:component this={icon} size={info ? '20px' : '44px'} />
+<div class="bg-dark-blue text-off-white rounded-lg p-4 mb-4 flex gap-4">
+	<div style="min-width: 44px" class="text-goldenrod">
+		<IconWarning size="44px" />
 	</div>
 	<div>
 		<slot />
