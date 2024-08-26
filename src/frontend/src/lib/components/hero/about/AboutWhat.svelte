@@ -4,7 +4,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { createEventDispatcher } from 'svelte';
-	import { ABOUT_WHAT_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constant';
+	import { ABOUT_WHAT_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let asMenuItem = false;
 

@@ -1,4 +1,4 @@
-import { ABOUT_WHAT_MODAL, ABOUT_WHAT_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constant';
+import { ABOUT_WHAT_MODAL, ABOUT_WHAT_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 import { test } from '@playwright/test';
 import { ABOUT_MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedOut } from './utils/pages/homepage.page';

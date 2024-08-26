@@ -7,7 +7,7 @@
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
 	import CoverWhat from '$lib/assets/cover-features.png';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { ABOUT_WHAT_MODAL } from '$lib/constants/test-ids.constant';
+	import { ABOUT_WHAT_MODAL } from '$lib/constants/test-ids.constants';
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_WHAT_MODAL}>

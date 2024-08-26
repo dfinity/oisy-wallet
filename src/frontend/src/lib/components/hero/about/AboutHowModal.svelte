@@ -10,7 +10,7 @@
 	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
 	import CoverHow from '$lib/assets/cover-how-it-works.png';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { ABOUT_HOW_MODAL } from '$lib/constants/test-ids.constant';
+	import { ABOUT_HOW_MODAL } from '$lib/constants/test-ids.constants';
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_HOW_MODAL}>
