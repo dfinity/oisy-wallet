@@ -2,7 +2,7 @@ import {
 	HERO_ANIMATION_CANVAS,
 	LOGIN_BUTTON,
 	TOKENS_SKELETONS_INITIALIZED
-} from '$lib/constants/test-ids.constant';
+} from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
