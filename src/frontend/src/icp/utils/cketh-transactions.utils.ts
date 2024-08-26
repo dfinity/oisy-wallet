@@ -5,6 +5,7 @@ import {
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
 import {
+	ICRC_LEDGER_CANISTER_TESTNET_IDS,
 	IC_CKETH_LEDGER_CANISTER_ID,
 	STAGING_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks.icrc.env';
@@ -67,8 +68,9 @@ export const mapCkEthereumTransaction = ({
 	const mint = fromNullable(rawMint);
 	const burn = fromNullable(rawBurn);
 
-	const ethExplorerUrl =
-		IC_CKETH_LEDGER_CANISTER_ID === ledgerCanisterId ? ETHEREUM_EXPLORER_URL : SEPOLIA_EXPLORER_URL;
+	const ethExplorerUrl = ICRC_LEDGER_CANISTER_TESTNET_IDS.includes(ledgerCanisterId)
+		? SEPOLIA_EXPLORER_URL
+		: ETHEREUM_EXPLORER_URL;
 
 	if (nonNullish(mint)) {
 		const memo = fromNullable(mint.memo);
