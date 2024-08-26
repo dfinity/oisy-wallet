@@ -10,7 +10,7 @@
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
 	import { token } from '$lib/stores/token.store';
-	import InfoBanner from '$lib/components/info/InfoBanner.svelte';
+	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
 
 	let mainnet = true;
 	$: mainnet =
@@ -37,11 +37,11 @@
 </script>
 
 {#if ckBTC || ckETH || ckErc20}
-	<InfoBanner {key}>
+	<InfoBoxWrapper {key}>
 		{#if ckBTC}
 			<InfoBitcoin />
 		{:else}
 			<InfoEthereum />
 		{/if}
-	</InfoBanner>
+	</InfoBoxWrapper>
 {/if}
