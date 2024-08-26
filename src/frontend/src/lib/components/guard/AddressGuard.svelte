@@ -14,6 +14,7 @@
 		ethAddressNotCertified
 	} from '$lib/derived/address.derived';
 	import type { ResultSuccess } from '$lib/types/utils';
+	import { reduceResults } from '$lib/utils/results.utils';
 
 	const validateAddress = async () => {
 		if (isNullish($btcAddressMainnetData) && isNullish($ethAddressData)) {
@@ -35,20 +36,14 @@
 				: Promise.resolve<ResultSuccess<never>>({ success: true })
 		]);
 
-		const { success, err } = results.reduce(
-			(acc, { success: s, err: e }) => ({
-				success: acc.success && s,
-				err: nonNullish(e) ? (acc.err ? `${acc.err}, ${e}` : e) : acc.err
-			}),
-			{ success: true }
-		);
+		const { success, err } = reduceResults<string>(results);
 
 		if (success) {
 			// The addresses are valid
 			return;
 		}
 
-		await warnSignOut(err ?? 'Error while certifying your address');
+		await warnSignOut(nonNullish(err) ? err.join(', ') : 'Error while certifying your address');
 	};
 
 	$: $addressStore, (async () => await validateAddress())();
