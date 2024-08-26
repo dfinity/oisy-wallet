@@ -4,10 +4,10 @@ import { nonNullish } from '@dfinity/utils';
 export const reduceResults = <T = unknown>(
 	results: [ResultSuccess<T>, ...ResultSuccess<T>[]]
 ): ResultSuccessReduced<T> =>
-	results.reduce(
+	results.reduce<ResultSuccessReduced<T>>(
 		(acc, { success: s, err: e }) => ({
 			success: acc.success && s,
-			err: nonNullish(e) ? [...acc.err, e] : acc.err
+			err: nonNullish(e) ? [...(acc.err ?? []), e] : acc.err
 		}),
-		{ success: true as boolean, err: [] as T[] }
+		{ success: true, err: undefined }
 	);
