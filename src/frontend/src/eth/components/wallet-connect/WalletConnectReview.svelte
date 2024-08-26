@@ -10,7 +10,7 @@
 	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-	import { addressNotCertified } from '$lib/derived/address.derived';
+	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -98,7 +98,7 @@
 				<button
 					class="secondary block flex-1"
 					on:click={() => dispatch('icCancel')}
-					disabled={$isBusy || $addressNotCertified}>{$i18n.core.text.cancel}</button
+					disabled={$isBusy || $ethAddressNotCertified}>{$i18n.core.text.cancel}</button
 				>
 			</ButtonGroup>
 		</div>
