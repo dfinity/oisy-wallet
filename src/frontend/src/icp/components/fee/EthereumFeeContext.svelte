@@ -23,8 +23,8 @@
 	let ckETH = false;
 	$: ckETH = isTokenCkEthLedger($tokenWithFallbackAsIcToken);
 
-	let ckEr20 = false;
-	$: ckEr20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
+	let ckErc20 = false;
+	$: ckErc20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
 
 	let ethNetwork = false;
 	$: ethNetwork = isNetworkIdEthereum(networkId);
@@ -48,7 +48,7 @@
 
 	let maxTransactionFee: bigint | undefined = undefined;
 	$: maxTransactionFee =
-		nonNullish(maxTransactionFeePlusEthLedgerApprove) && ckEr20
+		nonNullish(maxTransactionFeePlusEthLedgerApprove) && ckErc20
 			? maxTransactionFeePlusEthLedgerApprove + CKERC20_TO_ERC20_MAX_TRANSACTION_FEE
 			: maxTransactionFeePlusEthLedgerApprove;
 
@@ -56,7 +56,7 @@
 	$: store.setFee({ maxTransactionFee });
 
 	const updateContext = () => {
-		if ((!ckETH && !ckEr20) || !ethNetwork) {
+		if ((!ckETH && !ckErc20) || !ethNetwork) {
 			store.setFee(null);
 			return;
 		}
@@ -69,7 +69,7 @@
 	const loadFee = async () => {
 		clearTimer();
 
-		if ((!ckETH && !ckEr20) || !ethNetwork) {
+		if ((!ckETH && !ckErc20) || !ethNetwork) {
 			updateContext();
 			return;
 		}
