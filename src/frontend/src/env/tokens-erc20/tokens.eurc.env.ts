@@ -1,6 +1,6 @@
 import { ETHEREUM_NETWORK } from '$env/networks.env';
-import type { RequiredErc20Token } from '$eth/types/erc20';
 import eurc from '$eth/assets/eurc.svg';
+import type { RequiredErc20Token } from '$eth/types/erc20';
 
 export const EURC_DECIMALS = 6;
 
