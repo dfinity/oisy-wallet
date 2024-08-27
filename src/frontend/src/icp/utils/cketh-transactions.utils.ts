@@ -5,7 +5,6 @@ import {
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
 import {
-	CKETH_LEDGER_CANISTER_IDS,
 	ICRC_LEDGER_CANISTER_TESTNET_IDS,
 	STAGING_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks.icrc.env';
@@ -17,6 +16,7 @@ import {
 	decodeBurnMemo,
 	decodeMintMemo
 } from '$icp/utils/cketh-memo.utils';
+import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
@@ -45,7 +45,7 @@ export const mapCkEthereumTransaction = ({
 				env === 'testnet' && nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID)
 					? CKETH_SEPOLIA_EXPLORER_URL
 					: CKETH_EXPLORER_URL
-			}${!CKETH_LEDGER_CANISTER_IDS.includes(ledgerCanisterId) ? `/${ledgerCanisterId}` : ''}`
+			}${isTokenCkErc20Ledger({ ledgerCanisterId }) ? `/${ledgerCanisterId}` : ''}`
 		: undefined;
 
 	const tx: IcTransactionUi = {
