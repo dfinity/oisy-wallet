@@ -9,7 +9,6 @@ import { formatToken } from '$lib/utils/format.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensAtTop, pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -65,7 +64,7 @@ export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derive
 				usdBalance: nonNullish($exchanges?.[token.id]?.usd)
 					? usdValue({
 							token,
-							balance: balance ?? BigNumber.from(0),
+							balances: $balancesStore,
 							exchanges: $exchanges
 						})
 					: undefined
