@@ -13,6 +13,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import SendInfo from '$eth/components/send/SendInfo.svelte';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
@@ -46,6 +47,8 @@
 
 		<SendReviewNetwork {targetNetwork} {sourceNetwork} token={$sendToken} slot="network" />
 	</SendData>
+
+	<SendInfo />
 </div>
 
 <ButtonGroup>

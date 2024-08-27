@@ -261,6 +261,8 @@ interface I18nConvert {
 		convert_to_cketh: string;
 		convert_to_ckerc20: string;
 		convert_eth_to_cketh: string;
+		cketh_conversions_may_take: string;
+		ckerc20_conversions_may_take: string;
 		how_to_convert_eth_to_cketh: string;
 		send_eth: string;
 		wait_eth_current_balance: string;
