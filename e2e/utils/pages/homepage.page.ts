@@ -25,6 +25,10 @@ type WaitForModalParams = {
 	modalTestId: string;
 };
 
+type TestModalSnapshotParams = {
+	selectorsToMask?: string[];
+} & WaitForModalParams;
+
 type ClickMenuItemParams = {
 	menuItemTestId: string;
 };
@@ -100,14 +104,22 @@ abstract class Homepage {
 
 	async testModalSnapshot({
 		modalOpenButtonTestId,
-		modalTestId
-	}: WaitForModalParams): Promise<void> {
+		modalTestId,
+		selectorsToMask
+	}: TestModalSnapshotParams): Promise<void> {
 		const modal = await this.waitForModal({
 			modalOpenButtonTestId,
 			modalTestId
 		});
+		const toHaveScreenshotOptions: { mask?: Locator[] } = {};
 
-		await expect(modal).toHaveScreenshot();
+		if (nonNullish(selectorsToMask)) {
+			toHaveScreenshotOptions.mask = await Promise.all(
+				selectorsToMask.map(async (selector) => this.#page.locator(selector))
+			);
+		}
+
+		await expect(modal).toHaveScreenshot(toHaveScreenshotOptions);
 	}
 
 	abstract waitForReady(): Promise<void>;
