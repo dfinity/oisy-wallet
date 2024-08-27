@@ -9,17 +9,17 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 	isNullish($addressStore)
 );
 
-const ethAddressData: Readable<OptionAddressData> = derived(
-	[addressStore],
-	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]
-);
-
 export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
 	[addressStore],
 	([$addressStore]) =>
 		$addressStore?.[BTC_MAINNET_TOKEN_ID] === null
 			? null
 			: $addressStore?.[BTC_MAINNET_TOKEN_ID]?.data
+);
+
+const ethAddressData: Readable<OptionAddressData> = derived(
+	[addressStore],
+	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]
 );
 
 export const ethAddress: Readable<OptionEthAddress> = derived(
