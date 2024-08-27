@@ -121,8 +121,6 @@ abstract class Homepage {
 		modalTestId,
 		selectorsToMock
 	}: TestModalSnapshotParams): Promise<void> {
-		await this.waitForHomepageReady();
-
 		const modal = await this.waitForModal({
 			modalOpenButtonTestId,
 			modalTestId
