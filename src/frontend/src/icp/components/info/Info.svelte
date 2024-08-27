@@ -10,6 +10,8 @@
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
 	import { token } from '$lib/stores/token.store';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
 
 	let mainnet = true;
@@ -41,7 +43,7 @@
 		{#if ckBTC}
 			<InfoBitcoin />
 		{:else}
-			<InfoEthereum />
+			<InfoEthereum twinToken={$ckEthereumTwinToken} ckTokenSymbol={$tokenWithFallback.symbol} />
 		{/if}
 	</InfoBoxWrapper>
 {/if}
