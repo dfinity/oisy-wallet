@@ -11,7 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 
-	export let token: Token;
+	export let twinToken: Token;
 	export let ckTokenSymbol: string;
 
 	const openReceive = () => modalStore.openHowToConvertToTwinTokenEth();
@@ -21,15 +21,16 @@
 	 */
 
 	const { sendToken, ...rest } = initSendContext({
-		sendPurpose: token.standard === 'erc20' ? 'convert-erc20-to-ckerc20' : 'convert-eth-to-cketh',
-		token: token
+		sendPurpose:
+			twinToken.standard === 'erc20' ? 'convert-erc20-to-ckerc20' : 'convert-eth-to-cketh',
+		token: twinToken
 	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
 		sendToken,
 		...rest
 	});
 
-	$: sendToken.set(token);
+	$: sendToken.set(twinToken);
 </script>
 
 <div class="pr-2">
@@ -37,27 +38,27 @@
 		<Logo
 			src={eth}
 			alt={replacePlaceholders($i18n.core.alt.logo, {
-				$name: token.name
+				$name: twinToken.name
 			})}
 		/>
 		<span class="w-[70%]"
-		>{replacePlaceholders($i18n.info.ethereum.title, {
-			$ckToken: ckTokenSymbol
-		})}</span
+			>{replacePlaceholders($i18n.info.ethereum.title, {
+				$ckToken: ckTokenSymbol
+			})}</span
 		>
 	</h4>
 
 	<p class="text-misty-rose mt-3">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.description), {
-			$token: token.symbol,
+			$token: twinToken.symbol,
 			$ckToken: ckTokenSymbol,
-			$network: token.network.name
+			$network: twinToken.network.name
 		})}
 	</p>
 
 	<p class="text-misty-rose mt-3">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.note), {
-			$token: token.symbol,
+			$token: twinToken.symbol,
 			$ckToken: ckTokenSymbol
 		})}
 	</p>

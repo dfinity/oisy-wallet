@@ -36,7 +36,7 @@
 		$ckErc20: converToSymbol
 	})}
 >
-	<IconConvert slot="icon" />
+	<IconConvert size="28" slot="icon" />
 	<span>
 		{replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
 			$ckErc20: converToSymbol
