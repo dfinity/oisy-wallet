@@ -43,7 +43,7 @@
 		{#if ckBTC}
 			<InfoBitcoin />
 		{:else}
-			<InfoEthereum token={$ckEthereumTwinToken} ckTokenSymbol={$tokenWithFallback.symbol} />
+			<InfoEthereum twinToken={$ckEthereumTwinToken} ckTokenSymbol={$tokenWithFallback.symbol} />
 		{/if}
 	</InfoBoxWrapper>
 {/if}
