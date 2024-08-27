@@ -1,6 +1,6 @@
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
-import { addressStore, type AddressData } from '$lib/stores/address.store';
+import { addressStore, type OptionAddressData } from '$lib/stores/address.store';
 import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -9,7 +9,7 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 	isNullish($addressStore)
 );
 
-const ethAddressData: Readable<AddressData | null | undefined> = derived(
+const ethAddressData: Readable<OptionAddressData> = derived(
 	[addressStore],
 	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]
 );
