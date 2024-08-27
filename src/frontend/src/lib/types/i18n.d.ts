@@ -65,7 +65,7 @@ interface I18nWallet {
 }
 
 interface I18nInit {
-	text: { initializing_wallet: string; securing_session: string; retrieving_eth_key: string };
+	text: { initializing_wallet: string; securing_session: string; retrieving_public_keys: string };
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
@@ -124,7 +124,7 @@ interface I18nSettings {
 		pouh_credential_verified: string;
 		sign_in: string;
 	};
-	alt: { testnets_toggle: string };
+	alt: { testnets_toggle: string; github_release: string };
 	error: { loading_profile: string };
 }
 
@@ -370,8 +370,14 @@ interface I18nFee {
 }
 
 interface I18nInfo {
-	bitcoin: { title: string; description: string; note: string; receive: string };
-	ethereum: { title: string; description: string; how_to: string; how_to_short: string };
+	bitcoin: { title: string; description: string; note: string; how_to: string };
+	ethereum: {
+		title: string;
+		description: string;
+		note: string;
+		how_to: string;
+		how_to_short: string;
+	};
 }
 
 interface I18nWallet_connect {

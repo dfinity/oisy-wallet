@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived.js';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import TokensSignedIn from '$lib/components/tokens/TokensSignedIn.svelte';

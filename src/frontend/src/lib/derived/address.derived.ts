@@ -19,12 +19,12 @@ export const ethAddress: Readable<OptionEthAddress> = derived([addressStore], ([
 	mapAddress({ $addressStore, tokenId: ETHEREUM_TOKEN_ID })
 );
 
-export const addressCertified: Readable<boolean> = derived(
+export const ethAddressCertified: Readable<boolean> = derived(
 	[addressStore],
 	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]?.certified === true
 );
 
-export const addressNotCertified: Readable<boolean> = derived(
-	[addressCertified],
-	([$addressCertified]) => !$addressCertified
+export const ethAddressNotCertified: Readable<boolean> = derived(
+	[ethAddressCertified],
+	([$ethAddressCertified]) => !$ethAddressCertified
 );

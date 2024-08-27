@@ -50,7 +50,7 @@ const mapTransaction = ({
 	}
 
 	if (nonNullish(ledgerId) && (isTokenCkEthLedger(ledgerId) || isTokenCkErc20Ledger(ledgerId))) {
-		return mapCkEthereumTransaction({ transaction, identity, ...ledgerId });
+		return mapCkEthereumTransaction({ transaction, identity, ...env, ...ledgerId });
 	}
 
 	return mapIcrcTransaction({ transaction, identity });
