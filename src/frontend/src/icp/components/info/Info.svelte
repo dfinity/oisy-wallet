@@ -5,7 +5,7 @@
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
 	import InfoBitcoin from '$icp/components/info/InfoBitcoin.svelte';
-	import { type HideInfoKey } from '$icp/utils/ck.utils';
+	import type { HideInfoKey } from '$icp/utils/ck.utils';
 	import InfoEthereum from '$icp/components/info/InfoEthereum.svelte';
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
