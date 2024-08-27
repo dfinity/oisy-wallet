@@ -22,6 +22,7 @@ export default {
 			'dark-blue': '#321469',
 			'navy-blue': '#01016d',
 			'brandeis-blue': '#016dfc',
+			'crayola-blue': '#147bff',
 			'spiro-disco-ball': '#1bb5ff',
 			'misty-rose': '#937993',
 			goldenrod: '#dfa81b',
@@ -29,7 +30,8 @@ export default {
 			'medium-purple': '#8969d5',
 			platinum: '#e4e4e4',
 			'mountain-meadow': '#30af91',
-			'dodger-blue': '#1e90ff'
+			'dodger-blue': '#1e90ff',
+			turquoise: '#59e7d6'
 		}
 	},
 	plugins: []

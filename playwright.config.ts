@@ -1,4 +1,15 @@
 import { defineConfig, devices } from '@playwright/test';
+import dotenv, { type DotenvPopulateInput } from 'dotenv';
+import { join } from 'node:path';
+import { readCanisterIds } from './env.utils';
+
+dotenv.populate(
+	process.env as DotenvPopulateInput,
+	readCanisterIds({
+		filePath: join(process.cwd(), 'canister_e2e_ids.json'),
+		prefix: 'E2E_'
+	})
+);
 
 const DEV = (process.env.NODE_ENV ?? 'production') === 'development';
 
