@@ -119,7 +119,7 @@ function build_canister() {
     # adds the content of $canister.did to the `icp:public candid:service` custom section of the public metadata in the wasm
     ic-wasm "$canister.wasm" -o "$canister.wasm" metadata candid:service -f "$SRC_DIR/$canister.did" -v public
 
-    gzip "./$canister.wasm"
+    gzip -fn "./$canister.wasm"
   fi
 }
 
