@@ -11,6 +11,8 @@ const ABOUT_HOW_MODAL_VIEWPORT_HEIGHT = 1600;
 test('should display about-how modal', async ({ page }) => {
 	const homepageLoggedOut = new HomepageLoggedOut({ page });
 
+	await homepageLoggedOut.waitForReady();
+
 	await homepageLoggedOut.testModalSnapshot({
 		viewportSize: {
 			width: MODALS_VIEWPORT_WIDTH,
