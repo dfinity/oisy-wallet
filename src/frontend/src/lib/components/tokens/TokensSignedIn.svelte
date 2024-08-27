@@ -16,6 +16,7 @@
 	import { pointerEventStore } from '$lib/stores/events.store';
 	import { pointerEventsHandler } from '$lib/utils/events.utils';
 	import { debounce, isNullish } from '@dfinity/utils';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -80,9 +81,12 @@
 			handleAnimationEnd();
 		}
 	}, 250);
+
+	let loading: boolean;
+	$: loading = $erc20UserTokensNotInitialized;
 </script>
 
-<TokensSkeletons loading={isNullish(tokensToDisplay)}>
+<TokensSkeletons {loading}>
 	<div use:pointerEventsHandler>
 		{#each tokensToDisplay ?? [] as token (token.id)}
 			<div
