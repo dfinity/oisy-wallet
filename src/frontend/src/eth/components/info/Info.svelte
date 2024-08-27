@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$icp/utils/ck.utils';
-	import InfoBox from '$lib/components/info/InfoBox.svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { HideInfoKey } from '$icp/utils/ck.utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import InfoEthereum from '$icp/components/info/InfoEthereum.svelte';
+	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';
+	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
 
 	let mainnet = true;
 	$: mainnet =
@@ -29,23 +29,10 @@
 			: isSupportedErc20TwinTokenId($tokenWithFallback.id)
 				? ($tokenWithFallback as Erc20Token).twinTokenSymbol
 				: undefined;
-
-	let hideInfo = true;
-	$: hideInfo = nonNullish(key) ? shouldHideInfo(key) : true;
-
-	const close = () => {
-		hideInfo = true;
-
-		if (isNullish(key)) {
-			return;
-		}
-
-		saveHideInfo(key);
-	};
 </script>
 
 {#if (ckETH || ckErc20) && nonNullish(twinTokenSymbol)}
-	<InfoBox {hideInfo} on:click={close}>
+	<InfoBoxWrapper {key}>
 		<InfoEthereum twinToken={$tokenWithFallback} ckTokenSymbol={twinTokenSymbol} />
-	</InfoBox>
+	</InfoBoxWrapper>
 {/if}
