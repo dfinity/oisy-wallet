@@ -106,10 +106,7 @@ abstract class Homepage {
 	protected async waitForTokenSkeletonsInitialization(
 		options?: WaitForLocatorOptions
 	): Promise<void> {
-		await this.#page
-			.getByTestId(TOKENS_SKELETONS_INITIALIZED)
-			// it takes more time than default timeout to load tokens with slow internet connection
-			.waitFor({ timeout: 60000, ...options });
+		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor(options);
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
