@@ -37,8 +37,8 @@
 	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
 </script>
 
-<TokensSkeletons {loading}>
-	<TokensDisplayHandler bind:tokens>
+<TokensDisplayHandler bind:tokens>
+	<TokensSkeletons {loading}>
 		{#each tokens ?? [] as token (token.id)}
 			<div
 				transition:fade
@@ -54,13 +54,13 @@
 				</Listener>
 			</div>
 		{/each}
-	</TokensDisplayHandler>
 
-	{#if tokens?.length === 0}
-		<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
-	{/if}
+		{#if tokens?.length === 0}
+			<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
+		{/if}
 
-	{#if $modalManageTokens}
-		<ManageTokensModal />
-	{/if}
-</TokensSkeletons>
+		{#if $modalManageTokens}
+			<ManageTokensModal />
+		{/if}
+	</TokensSkeletons>
+</TokensDisplayHandler>
