@@ -1,7 +1,7 @@
 import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
-import { addressStore, type AddressData } from '$lib/stores/address.store';
+import { addressStore, type OptionAddressData } from '$lib/stores/address.store';
 import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -10,25 +10,15 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 	isNullish($addressStore)
 );
 
-export const btcAddressMainnetData: Readable<AddressData | null | undefined> = derived(
+export const btcAddressMainnetData: Readable<OptionAddressData> = derived(
 	[addressStore],
 	([$addressStore]) => $addressStore?.[BTC_MAINNET_TOKEN_ID]
-);
-
-export const ethAddressData: Readable<AddressData | null | undefined> = derived(
-	[addressStore],
-	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]
 );
 
 export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
 	[btcAddressMainnetData],
 	([$btcAddressMainnetData]) =>
 		$btcAddressMainnetData === null ? null : $btcAddressMainnetData?.data
-);
-
-export const ethAddress: Readable<OptionEthAddress> = derived(
-	[ethAddressData],
-	([$ethAddressData]) => ($ethAddressData === null ? null : $ethAddressData?.data)
 );
 
 export const btcAddressMainnetCertified: Readable<boolean> = derived(
@@ -40,6 +30,15 @@ export const btcAddressMainnetCertified: Readable<boolean> = derived(
 export const btcAddressMainnetNotCertified: Readable<boolean> = derived(
 	[btcAddressMainnetCertified],
 	([$btcAddressMainnetCertified]) => !$btcAddressMainnetCertified
+
+const ethAddressData: Readable<OptionAddressData> = derived(
+	[addressStore],
+	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]
+);
+
+export const ethAddress: Readable<OptionEthAddress> = derived(
+	[ethAddressData],
+	([$ethAddressData]) => ($ethAddressData === null ? null : $ethAddressData?.data)
 );
 
 export const ethAddressCertified: Readable<boolean> = derived(

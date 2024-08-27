@@ -1,6 +1,7 @@
 <script lang="ts">
 	export let disabled = false;
 	export let button: HTMLButtonElement | undefined = undefined;
+	export let testId: string | undefined = undefined;
 	export let ariaLabel: string;
 </script>
 
@@ -11,6 +12,7 @@
 	aria-label={ariaLabel}
 	{disabled}
 	class:opacity-50={disabled}
+	data-tid={testId}
 >
 	<div class="rounded-full p-2 bg-black bg-opacity-30 border border-white border-opacity-20">
 		<slot name="icon" />

@@ -2,7 +2,7 @@ import { test } from '@playwright/test';
 import {
 	ABOUT_HOW_MODAL,
 	ABOUT_HOW_MODAL_OPEN_BUTTON
-} from '../src/frontend/src/lib/constants/test-ids.constant';
+} from '../src/frontend/src/lib/constants/test-ids.constants';
 import { ABOUT_MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
 import { HomepageLoggedOut } from './utils/pages/homepage.page';
 
