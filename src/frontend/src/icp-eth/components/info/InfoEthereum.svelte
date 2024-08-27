@@ -71,5 +71,5 @@
 </div>
 
 {#if $modalHowToConvertToTwinTokenEth}
-	<HowToConvertEthereumModal />
+	<HowToConvertEthereumModal {twinToken} />
 {/if}

@@ -11,13 +11,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		ckEthereumNativeToken,
-		ckEthereumNativeTokenBalance,
-		ckEthereumTwinToken
+		ckEthereumNativeTokenBalance
 	} from '$icp-eth/derived/cketh.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 
 	export let formCancelAction: 'back' | 'close' = 'back';
+	export let twinTokenSymbol: string;
 
 	let ckErc20 = false;
 	$: ckErc20 = $tokenCkErc20Ledger;
@@ -33,7 +33,7 @@
 			{replacePlaceholders(
 				replaceOisyPlaceholders($i18n.convert.text.how_to_convert_eth_to_cketh),
 				{
-					$token: $ckEthereumTwinToken.symbol,
+					$token: twinTokenSymbol,
 					$ckToken: $tokenWithFallback.symbol
 				}
 			)}:
@@ -85,7 +85,7 @@
 		>
 			<svelte:fragment slot="title"
 				>{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
-					$token: $ckEthereumTwinToken.symbol
+					$token: twinTokenSymbol
 				})}</svelte:fragment
 			>
 		</ReceiveAddress>
@@ -103,7 +103,7 @@
 			<Value element="div">
 				<svelte:fragment slot="label"
 					>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
-						$token: $ckEthereumTwinToken.symbol
+						$token: twinTokenSymbol
 					})}</svelte:fragment
 				>
 
@@ -129,7 +129,7 @@
 			<Value element="div">
 				<svelte:fragment slot="label"
 					>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
-						$token: $ckEthereumTwinToken.symbol,
+						$token: twinTokenSymbol,
 						$ckToken: $tokenWithFallback.symbol
 					})}</svelte:fragment
 				>
