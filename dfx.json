@@ -2,11 +2,19 @@
 	"dfx": "0.20.0",
 	"canisters": {
 		"signer": {
-			"candid": "src/backend/backend.did",
-			"package": "backend",
-			"type": "rust",
-			"optimize": "cycles",
-			"gzip": true
+			"type": "custom",
+			"candid": "https://raw.githubusercontent.com/dfinity/chain-fusion-signer/v0.1.1/src/signer/signer.did?token=GHSAT0AAAAAAB5TRPY4UAMPHJ7MFCSLIMH6ZWN4D2A",
+			"wasm": "https://github.com/dfinity/chain-fusion-signer/releases/download/v0.1.1/signer.wasm.gz",
+			"init_arg": "(variant { Init = record { ecdsa_key_name = \"key_1\"; ic_root_key_der = null;}})"
+			"shrink": false,
+			"remote": {
+				"id": {
+					                "ic": "grghe-syaaa-aaaar-qabyq-cai",
+                "beta": "grghe-syaaa-aaaar-qabyq-cai",
+                "old_backend": "cab24-4qaaa-aaaan-qecca-cai",
+                "staging": "tdxud-2yaaa-aaaad-aadiq-cai"
+				}
+			}
 		},
 		"backend": {
 			"candid": "src/backend/backend.did",

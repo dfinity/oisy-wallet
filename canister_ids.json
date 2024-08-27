@@ -3,12 +3,6 @@
 		"ic": "fiefn-syaaa-aaaan-qectq-cai",
 		"staging": "t7tos-nyaaa-aaaad-aadkq-cai"
 	},
-	"signer": {
-		"ic": "grghe-syaaa-aaaar-qabyq-cai",
-		"beta": "grghe-syaaa-aaaar-qabyq-cai",
-		"old_backend": "cab24-4qaaa-aaaan-qecca-cai",
-		"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
-	},
 	"backend": {
 		"ic": "doked-biaaa-aaaar-qag2a-cai",
 		"beta": "doked-biaaa-aaaar-qag2a-cai",
