@@ -14,6 +14,7 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { debounce } from '@dfinity/utils';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 
 	let displayZeroBalance: boolean;
 	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
@@ -41,9 +42,12 @@
 			handleAnimationEnd();
 		}
 	}, 250);
+
+	let loading: boolean;
+	$: loading = $erc20UserTokensNotInitialized;
 </script>
 
-<TokensSkeletons>
+<TokensSkeletons {loading}>
 	{#each tokens as token (token.id)}
 		<div
 			transition:fade
