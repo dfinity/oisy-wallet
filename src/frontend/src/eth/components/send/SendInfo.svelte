@@ -22,7 +22,7 @@
 				{$i18n.convert.text.cketh_conversions_may_take}
 			{:else}
 				{replacePlaceholders($i18n.convert.text.ckerc20_conversions_may_take, {
-					$ckErc20: sendTokenAsErc20?.twinTokenSymbol ?? 'ckETH'
+					$ckErc20: sendTokenAsErc20?.twinTokenSymbol ?? ''
 				})}
 			{/if}
 		</p>
