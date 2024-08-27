@@ -1,5 +1,11 @@
+export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
+export const NAVIGATION_MENU = 'navigation-menu';
+
+export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
+
 export const TOKENS_SKELETONS_INITIALIZED = 'tokens-skeletons-initialized';
+
 export const HERO_ANIMATION_CANVAS = 'hero-animation-canvas';
 
 export const ABOUT_WHAT_MODAL_OPEN_BUTTON = 'about-what-modal-open-button';
