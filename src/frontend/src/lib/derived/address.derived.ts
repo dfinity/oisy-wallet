@@ -30,8 +30,9 @@ export const btcAddressMainnetCertified: Readable<boolean> = derived(
 export const btcAddressMainnetNotCertified: Readable<boolean> = derived(
 	[btcAddressMainnetCertified],
 	([$btcAddressMainnetCertified]) => !$btcAddressMainnetCertified
+);
 
-const ethAddressData: Readable<OptionAddressData> = derived(
+export const ethAddressData: Readable<OptionAddressData> = derived(
 	[addressStore],
 	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]
 );
