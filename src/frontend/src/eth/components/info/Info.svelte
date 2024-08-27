@@ -7,7 +7,7 @@
 	import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import InfoEthereum from '$lib/components/info/InfoEthereum.svelte';
+	import InfoEthereum from '$icp/components/info/InfoEthereum.svelte';
 
 	let mainnet = true;
 	$: mainnet =
@@ -46,6 +46,6 @@
 
 {#if (ckETH || ckErc20) && nonNullish(twinTokenSymbol)}
 	<InfoBox {hideInfo} on:click={close}>
-		<InfoEthereum token={$tokenWithFallback} ckTokenSymbol={twinTokenSymbol} />
+		<InfoEthereum twinToken={$tokenWithFallback} ckTokenSymbol={twinTokenSymbol} />
 	</InfoBox>
 {/if}
