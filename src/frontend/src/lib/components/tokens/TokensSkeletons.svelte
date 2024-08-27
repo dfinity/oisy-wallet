@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { fade } from 'svelte/transition';
 	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { TOKENS_SKELETONS_INITIALIZED } from '$lib/constants/test-ids.constants';
+
+	export let loading: boolean;
 </script>
 
-{#if $erc20UserTokensNotInitialized}
+{#if loading}
 	<SkeletonCards rows={5} />
 {:else}
 	<div in:fade data-tid={TOKENS_SKELETONS_INITIALIZED}>
