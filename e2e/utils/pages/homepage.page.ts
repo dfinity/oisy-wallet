@@ -20,13 +20,17 @@ type HomepageLoggedInParams = {
 	iiPage: InternetIdentityPage;
 } & HomepageParams;
 
+type SelectorOperationParams = {
+	selector: string;
+};
+
 type WaitForModalParams = {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
 };
 
 type TestModalSnapshotParams = {
-	selectorsToMask?: string[];
+	selectorsToMock?: string[];
 } & WaitForModalParams;
 
 type ClickMenuItemParams = {
@@ -46,10 +50,20 @@ abstract class Homepage {
 		this.#viewportSize = viewportSize;
 	}
 
-	private async hideHeroAnimation(): Promise<void> {
-		await this.#page
-			.getByTestId(HERO_ANIMATION_CANVAS)
-			.evaluate((element) => (element.style.display = 'none'));
+	private async isSelectorVisible({ selector }: SelectorOperationParams): Promise<boolean> {
+		return this.#page.isVisible(selector);
+	}
+
+	private async hideSelector({ selector }: SelectorOperationParams): Promise<void> {
+		if (await this.isSelectorVisible({ selector })) {
+			await this.#page.locator(selector).evaluate((element) => (element.style.display = 'none'));
+		}
+	}
+
+	private async mockSelector({ selector }: SelectorOperationParams): Promise<void> {
+		if (await this.isSelectorVisible({ selector })) {
+			await this.#page.locator(selector).evaluate((element) => (element.innerHTML = 'placeholder'));
+		}
 	}
 
 	private async goto(): Promise<void> {
@@ -86,7 +100,7 @@ abstract class Homepage {
 
 		await this.goto();
 		await this.waitForLoginButton();
-		await this.hideHeroAnimation();
+		await this.hideSelector({ selector: `[data-tid="${HERO_ANIMATION_CANVAS}"]` });
 	}
 
 	protected async waitForTokenSkeletonsInitialization(
@@ -105,21 +119,18 @@ abstract class Homepage {
 	async testModalSnapshot({
 		modalOpenButtonTestId,
 		modalTestId,
-		selectorsToMask
+		selectorsToMock
 	}: TestModalSnapshotParams): Promise<void> {
 		const modal = await this.waitForModal({
 			modalOpenButtonTestId,
 			modalTestId
 		});
-		const toHaveScreenshotOptions: { mask?: Locator[] } = {};
 
-		if (nonNullish(selectorsToMask)) {
-			toHaveScreenshotOptions.mask = await Promise.all(
-				selectorsToMask.map(async (selector) => this.#page.locator(selector))
-			);
+		if (nonNullish(selectorsToMock)) {
+			await Promise.all(selectorsToMock.map(async (selector) => this.mockSelector({ selector })));
 		}
 
-		await expect(modal).toHaveScreenshot(toHaveScreenshotOptions);
+		await expect(modal).toHaveScreenshot();
 	}
 
 	abstract waitForReady(): Promise<void>;

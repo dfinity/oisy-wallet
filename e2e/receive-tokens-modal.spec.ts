@@ -18,7 +18,7 @@ const ICP_ADDRESS_LABEL_SELECTOR = `[data-tid="${RECEIVE_TOKENS_MODAL_ICP_SECTIO
 const ETH_ADDRESS_LABEL_SELECTOR = `[data-tid="${RECEIVE_TOKENS_MODAL_ETH_SECTION}"] >> [data-tid="${RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}"]`;
 const BTC_ADDRESS_LABEL_SELECTOR = `[data-tid="${RECEIVE_TOKENS_MODAL_BTC_SECTION}"] >> [data-tid="${RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}"]`;
 
-testWithII.only('should display receive-tokens modal', async ({ page, iiPage }) => {
+testWithII('should display receive-tokens modal', async ({ page, iiPage }) => {
 	const homepageLoggedIn = new HomepageLoggedIn({
 		page,
 		iiPage,
@@ -33,7 +33,7 @@ testWithII.only('should display receive-tokens modal', async ({ page, iiPage }) 
 	await homepageLoggedIn.testModalSnapshot({
 		modalOpenButtonTestId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 		modalTestId: RECEIVE_TOKENS_MODAL,
-		selectorsToMask: [
+		selectorsToMock: [
 			ICRC_ADDRESS_LABEL_SELECTOR,
 			ICP_ADDRESS_LABEL_SELECTOR,
 			ETH_ADDRESS_LABEL_SELECTOR,
