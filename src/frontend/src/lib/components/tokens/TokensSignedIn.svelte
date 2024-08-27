@@ -44,7 +44,7 @@
 	}, 250);
 
 	let loading: boolean;
-	$: $erc20UserTokensNotInitialized, (loading = $erc20UserTokensNotInitialized);
+	$: loading = $erc20UserTokensNotInitialized;
 </script>
 
 <TokensSkeletons {loading}>
