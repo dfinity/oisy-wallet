@@ -6,15 +6,17 @@ import { HomepageLoggedOut } from './utils/pages/homepage.page';
 const ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT = 930;
 
 test('should display about-what modal', async ({ page }) => {
-	const homepageLoggedOut = new HomepageLoggedOut({ page });
+	const homepageLoggedOut = new HomepageLoggedOut({
+		page,
+		viewportSize: {
+			width: MODALS_VIEWPORT_WIDTH,
+			height: ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT
+		}
+	});
 
 	await homepageLoggedOut.waitForReady();
 
 	await homepageLoggedOut.testModalSnapshot({
-		viewportSize: {
-			width: MODALS_VIEWPORT_WIDTH,
-			height: ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT
-		},
 		modalOpenButtonTestId: ABOUT_WHAT_MODAL_OPEN_BUTTON,
 		modalTestId: ABOUT_WHAT_MODAL
 	});
