@@ -53,6 +53,9 @@ COPY --chown=apprunner:apprunner . .
 RUN /bin/bash -c "source /home/apprunner/.cargo/env"
 RUN /bin/bash -c "cargo locate-project"
 
+RUN echo "Use existing backend.wasm.gz canister."
+RUN export BACKEND_WASM_PATH="../../backend.wasm.gz"
+
 # Deploy
 RUN ./docker/deploy
 

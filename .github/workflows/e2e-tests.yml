@@ -2,20 +2,34 @@ name: E2E Tests
 
 on:
   pull_request:
-    paths:
-      - 'e2e/**'
   workflow_dispatch:
 
 jobs:
 
+  oisy-backend-wasm:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run oisy-backend
+        uses: ./.github/actions/oisy-backend
+
   docker-build-e2e:
     runs-on: ubuntu-20.04
+    needs: oisy-backend-wasm
     steps:
       - name: Delete unnecessary tools folder to prevent "out of space" error
         run: rm -rf /opt/hostedtoolcache
 
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download Oisy backend WASM
+        uses: actions/download-artifact@v4
+        with:
+          name: backend.wasm.gz
+          path: .
 
       - name: Build E2E Docker Image
         uses: ./.github/actions/docker-build-e2e
