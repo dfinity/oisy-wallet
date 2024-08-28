@@ -9,6 +9,12 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+	import {
+		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
+		RECEIVE_TOKENS_MODAL_ICP_SECTION,
+		RECEIVE_TOKENS_MODAL_ETH_SECTION,
+		RECEIVE_TOKENS_MODAL_BTC_SECTION
+	} from '$lib/constants/test-ids.constants';
 
 	const dispatch = createEventDispatcher();
 
@@ -27,6 +33,7 @@
 		token={ICP_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_internet_computer_principal_qr}
 		copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+		testId={RECEIVE_TOKENS_MODAL_ICRC_SECTION}
 	>
 		{$i18n.receive.icp.text.principal}
 
@@ -43,6 +50,7 @@
 		token={ICP_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_icp_account_qr}
 		copyAriaLabel={$i18n.receive.icp.text.icp_account_copied}
+		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 		invisibleLogo
 	>
 		{$i18n.receive.icp.text.icp_account}
@@ -65,6 +73,7 @@
 			token={BTC_MAINNET_TOKEN}
 			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			testId={RECEIVE_TOKENS_MODAL_BTC_SECTION}
 		>
 			{$i18n.receive.bitcoin.text.bitcoin_address}
 		</ReceiveAddressWithLogo>
@@ -84,6 +93,7 @@
 		token={ETHEREUM_TOKEN}
 		qrCodeAriaLabel={$i18n.receive.ethereum.text.display_ethereum_address_qr}
 		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
+		testId={RECEIVE_TOKENS_MODAL_ETH_SECTION}
 	>
 		{$i18n.receive.ethereum.text.ethereum}
 	</ReceiveAddressWithLogo>

@@ -4,6 +4,7 @@
 	import type { ComponentType } from 'svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
+	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 
 	export let infoCmp: ComponentType;
 
@@ -37,7 +38,7 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose>
+<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose testId={RECEIVE_TOKENS_MODAL}>
 	<svelte:fragment slot="title">{$i18n.receive.text.receive}</svelte:fragment>
 
 	{#if currentStep?.name === steps[1].name}
