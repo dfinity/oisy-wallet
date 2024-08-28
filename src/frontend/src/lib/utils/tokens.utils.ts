@@ -76,7 +76,8 @@ export const pinTokensWithBalanceAtTop = ($tokens: TokenUi[]): TokenUi[] => {
 		...positiveBalances.sort(
 			(a, b) =>
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				Number(b.formattedBalance ?? 0) - Number(a.formattedBalance ?? 0) ||
+				+(b.balance ?? BigNumber.from(0)).gt(a.balance ?? BigNumber.from(0)) -
+					+(b.balance ?? BigNumber.from(0)).lt(a.balance ?? BigNumber.from(0)) ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
 		),
