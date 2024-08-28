@@ -3,13 +3,14 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import type { Token } from '$lib/types/token';
 	import { ZERO } from '$lib/constants/utils.constants';
+	import type { TokenUi } from '$lib/types/token';
 
-	export let token: Token;
+	export let token: TokenUi;
 </script>
 
 <output class="break-all">
 	{formatToken({
-		value: $balancesStore?.[token.id]?.data ?? ZERO,
+		value: token.balance ?? ZERO,
 		unitName: token.decimals
 	})}
 	{token.symbol}
