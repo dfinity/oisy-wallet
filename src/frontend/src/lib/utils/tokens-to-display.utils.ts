@@ -3,7 +3,7 @@ import type { Token, TokenUi } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const parseTokenKey = (token: Token): string =>
+export const parseTokenKey = (token: Token): string =>
 	`${token.id.description}-${token.network.id.description}`;
 
 export const defineTokensToDisplay = ({
