@@ -1,18 +1,17 @@
 import { currentTokensKeysStore } from '$lib/stores/tokens-to-display.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 const parseTokenKey = (token: Token): string =>
 	`${token.id.description}-${token.network.id.description}`;
 
 export const defineTokensToDisplay = ({
 	$sortedTokens,
-	$pointerEventStore,
-	$currentTokensKeys
+	$pointerEventStore
 }: {
 	$sortedTokens: TokenUi[];
 	$pointerEventStore: boolean;
-	$currentTokensKeys: string[];
 }): TokenUi[] => {
 	const sortedTokensKeys: string[] = $sortedTokens.map((token) => parseTokenKey(token));
 
@@ -24,7 +23,10 @@ export const defineTokensToDisplay = ({
 
 	// If there are pointer events, we need to avoid visually re-sorting the tokens, to prevent glitches on user's interaction.
 
-	if ($currentTokensKeys.join(',') === sortedTokensKeys.join(',')) {
+	// We are statically getting the current tokens keys, as it should not trigger any reactivity.
+	const currentTokensKeys: string[] = get(currentTokensKeysStore);
+
+	if (currentTokensKeys.join(',') === sortedTokensKeys.join(',')) {
 		// The order is the same, so there will be no re-sorting and no possible glitches on user's interaction.
 		// However, we need to update the tokensToDisplay to make sure the balances are up-to-date.
 		return $sortedTokens;
@@ -36,11 +38,8 @@ export const defineTokensToDisplay = ({
 	);
 
 	// return $tokensKeys.map((tokenKey) => tokenMap.get(tokenKey) ?? undefined).filter(nonNullish);
-	return $currentTokensKeys.reduce<TokenUi[]>((acc, tokenKey) => {
+	return currentTokensKeys.reduce<TokenUi[]>((acc, tokenKey) => {
 		const token = tokenMap.get(tokenKey);
-		if (nonNullish(token)) {
-			acc.push(token);
-		}
-		return acc;
+		return nonNullish(token) ? [...acc, token] : acc;
 	}, []);
 };
