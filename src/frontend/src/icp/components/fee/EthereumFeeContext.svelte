@@ -20,9 +20,6 @@
 
 	export let networkId: NetworkId | undefined = undefined;
 
-	let ckETH = false;
-	$: ckETH = isTokenCkEthLedger($tokenWithFallbackAsIcToken);
-
 	let ckErc20 = false;
 	$: ckErc20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
 
@@ -56,7 +53,7 @@
 	$: store.setFee({ maxTransactionFee });
 
 	const updateContext = () => {
-		if ((ckETH || ckErc20) && ethNetwork) {
+		if (ckErc20 && ethNetwork) {
 			store.setFee({ maxTransactionFee });
 			return;
 		}
@@ -69,7 +66,7 @@
 	const loadFee = async () => {
 		clearTimer();
 
-		if ((!ckETH && !ckErc20) || !ethNetwork) {
+		if (!ckErc20 || !ethNetwork) {
 			updateContext();
 			return;
 		}
