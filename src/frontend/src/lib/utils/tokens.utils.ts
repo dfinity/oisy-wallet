@@ -1,8 +1,5 @@
-import type { BalancesData } from '$lib/stores/balances.store';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Token, TokenToPin, TokenUi, TokenWithBalance } from '$lib/types/token';
-import { formatToken } from '$lib/utils/format.utils';
+import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -58,37 +55,15 @@ export const sortTokens = ({
  * In case of a tie, it sorts by token name and network name.
  *
  * @param $tokens - The list of tokens to sort.
- * @param $exchanges - The exchange rates for the tokens.
- * @param $balancesStore - The balances for the tokens.
  * @returns The sorted list of tokens.
  *
  */
-export const pinTokensWithBalanceAtTop = ({
-	$tokens,
-	$balancesStore
-}: {
-	$tokens: TokenUi[];
-	$balancesStore: CertifiedStoreData<BalancesData>;
-}): TokenUi[] => {
-	const tokensWithBalance: TokenWithBalance[] = $tokens.map(
-		(token) =>
-			({
-				...token,
-				balance: Number(
-					formatToken({
-						value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
-						unitName: token.decimals,
-						displayDecimals: token.decimals
-					})
-				)
-			}) as TokenWithBalance
-	);
-
-	const [positiveBalances, nonPositiveBalances] = tokensWithBalance.reduce<
-		[TokenWithBalance[], TokenWithBalance[]]
-	>(
+export const pinTokensWithBalanceAtTop = ($tokens: TokenUi[]): TokenUi[] => {
+	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
 		(acc, token) => (
-			(token.usdBalance ?? 0) > 0 || token.balance > 0 ? acc[0].push(token) : acc[1].push(token),
+			(token.usdBalance ?? 0) > 0 || (token.balance ?? BigNumber.from(0)).gt(0)
+				? acc[0].push(token)
+				: acc[1].push(token),
 			acc
 		),
 		[[], []]
@@ -98,10 +73,11 @@ export const pinTokensWithBalanceAtTop = ({
 		...positiveBalances.sort(
 			(a, b) =>
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				b.balance - a.balance ||
+				+(b.balance ?? BigNumber.from(0)).gt(a.balance ?? BigNumber.from(0)) -
+					+(b.balance ?? BigNumber.from(0)).lt(a.balance ?? BigNumber.from(0)) ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
 		),
 		...nonPositiveBalances
-	].map(({ balance: _, ...rest }) => rest);
+	];
 };

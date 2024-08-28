@@ -75,10 +75,6 @@ export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derive
  * All tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
  */
 export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[combinedDerivedEnabledNetworkTokensUi, balancesStore],
-	([$enabledNetworkTokensUi, $balancesStore]) =>
-		pinTokensWithBalanceAtTop({
-			$tokens: $enabledNetworkTokensUi,
-			$balancesStore: $balancesStore
-		})
+	[combinedDerivedEnabledNetworkTokensUi],
+	([$enabledNetworkTokensUi]) => pinTokensWithBalanceAtTop($enabledNetworkTokensUi)
 );
