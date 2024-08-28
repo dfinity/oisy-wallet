@@ -36,5 +36,5 @@ export const CKERC20_ABI = [
 	}
 ];
 
-// As discussed with cross-chain team, we decided to hardcode gas estimation for ERC20 to ckERC29 deposit for now.
+// As discussed with cross-chain team, we decided to hardcode gas estimation for ERC20 to ckERC20 deposit for now.
 export const CKERC20_FEE = 60_000n;
