@@ -71,12 +71,6 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
-
-	// In case we are converting ERC20 to ckERC20, we need to include ckETH fees in the transaction.
-	let ckEthMaxTransactionFee: bigint | undefined = undefined;
-	$: ckEthMaxTransactionFee = $ethereumFeeStore.maxTransactionFee;
-
 	/**
 	 * Send
 	 */
@@ -196,6 +190,12 @@
 	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
 		store: initEthereumFeeStore()
 	});
+
+	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
+
+	// In case we are converting ERC20 to ckERC20, we need to include ckETH fees in the transaction.
+	let ckEthMaxTransactionFee: bigint | undefined = undefined;
+	$: ckEthMaxTransactionFee = $ethereumFeeStore?.maxTransactionFee;
 
 	const back = () => dispatch('icBack');
 	const close = () => dispatch('icClose');
