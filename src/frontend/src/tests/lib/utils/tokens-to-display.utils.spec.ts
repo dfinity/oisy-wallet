@@ -27,7 +27,7 @@ describe('defineTokensToDisplay', () => {
 		expect(get(currentTokensKeysStore)).toEqual(sortedTokensKeys);
 	});
 
-	it('should return sorted tokens when order has not changed when there is a pointer events', () => {
+	it('should return sorted tokens when order has not changed and there are pointer events', () => {
 		let pointerEventStore = false;
 
 		defineTokensToDisplay({
