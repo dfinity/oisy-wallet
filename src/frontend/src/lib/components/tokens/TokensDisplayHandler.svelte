@@ -5,8 +5,6 @@
 	import { debounce } from '@dfinity/utils';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
-	import { balancesStore } from '$lib/stores/balances.store';
-	import { BigNumber } from '@ethersproject/bignumber';
 
 	// We start it as undefined to avoid showing an empty list before the first update.
 	export let tokens: Token[] | undefined = undefined;
@@ -16,8 +14,7 @@
 
 	let sortedTokens: TokenUi[];
 	$: sortedTokens = $combinedDerivedSortedNetworkTokensUi.filter(
-		({ id: tokenId }) =>
-			($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n) || displayZeroBalance
+		({ usdBalance }) => (usdBalance ?? 0) || displayZeroBalance
 	);
 
 	const parseTokenKey = (token: Token) => `${token.id.description}-${token.network.id.description}`;
