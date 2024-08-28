@@ -1,6 +1,7 @@
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export const pinTokensAtTop = ({
 	$tokens,
@@ -63,7 +64,7 @@ export const sortTokens = ({
 export const pinTokensWithBalanceAtTop = ($tokens: TokenUi[]): TokenUi[] => {
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
 		(acc, token) => (
-			(token.usdBalance ?? 0) > 0 || Number(token.formattedBalance ?? 0) > 0
+			(token.usdBalance ?? 0) > 0 || (token.balance ?? BigNumber.from(0)).gt(0)
 				? acc[0].push(token)
 				: acc[1].push(token),
 			acc
