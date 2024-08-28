@@ -5,6 +5,8 @@
 	import { nonNullish } from '@dfinity/utils';
 
 	export let token: TokenUi;
+
+	const noBalance = formatUSD(0, { minFraction: 0, maxFraction: 0 }).replace('0', '-');
 </script>
 
 <output class="break-all">
@@ -12,11 +14,9 @@
 		{#if nonNullish(token.usdBalance)}
 			{formatUSD(token.usdBalance)}
 		{:else}
-			{formatUSD(0, { minFraction: 0, maxFraction: 0 }).replace('0', '-')}
+			{noBalance}
 		{/if}
 	{:else}
-		<span class="animate-pulse"
-			>{formatUSD(0, { minFraction: 0, maxFraction: 0 }).replace('0', '-')}
-		</span>
+		<span class="animate-pulse">{noBalance}</span>
 	{/if}
 </output>
