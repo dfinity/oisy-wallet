@@ -6,11 +6,20 @@ import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
-export const pinTokensAtTop = ({
+/**
+ * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
+ *
+ * @param $tokens - The list of tokens to sort.
+ * @param $tokensToPin - The list of tokens to pin at the top of the list.
+ * @param $exchanges - The exchange rates for the tokens.
+ */
+export const sortTokens = ({
 	$tokens,
+	$exchanges,
 	$tokensToPin
 }: {
 	$tokens: Token[];
+	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
 }): Token[] => {
 	const pinnedTokens = $tokensToPin
@@ -28,28 +37,16 @@ export const pinTokensAtTop = ({
 			)
 	);
 
-	return [...pinnedTokens, ...otherTokens];
+	return [
+		...pinnedTokens,
+		...otherTokens.sort(
+			(a, b) =>
+				($exchanges[b.id]?.usd_market_cap ?? 0) - ($exchanges[a.id]?.usd_market_cap ?? 0) ||
+				a.name.localeCompare(b.name) ||
+				a.network.name.localeCompare(b.network.name)
+		)
+	];
 };
-
-/**
- * Sorts tokens by market cap, name and network name.
- *
- * @param $tokens - The list of tokens to sort.
- * @param $exchanges - The exchange rates for the tokens.
- */
-export const sortTokens = ({
-	$tokens,
-	$exchanges
-}: {
-	$tokens: Token[];
-	$exchanges: ExchangesData;
-}) =>
-	$tokens.sort(
-		(a, b) =>
-			($exchanges[b.id]?.usd_market_cap ?? 0) - ($exchanges[a.id]?.usd_market_cap ?? 0) ||
-			a.name.localeCompare(b.name) ||
-			a.network.name.localeCompare(b.network.name)
-	);
 
 /**
  * Pins tokens by USD value, balance and name.
@@ -73,16 +70,19 @@ export const pinTokensWithBalanceAtTop = ({
 	$tokens: TokenUi[];
 	$balancesStore: CertifiedStoreData<BalancesData>;
 }): TokenUi[] => {
-	const tokensWithBalance: TokenWithBalance[] = $tokens.map((token) => ({
-		...token,
-		balance: Number(
-			formatToken({
-				value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
-				unitName: token.decimals,
-				displayDecimals: token.decimals
-			})
-		)
-	}));
+	const tokensWithBalance: TokenWithBalance[] = $tokens.map(
+		(token) =>
+			({
+				...token,
+				balance: Number(
+					formatToken({
+						value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
+						unitName: token.decimals,
+						displayDecimals: token.decimals
+					})
+				)
+			}) as TokenWithBalance
+	);
 
 	const [positiveBalances, nonPositiveBalances] = tokensWithBalance.reduce<
 		[TokenWithBalance[], TokenWithBalance[]]
