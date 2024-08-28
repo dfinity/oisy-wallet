@@ -15,6 +15,8 @@
 			{formatUSD(0, { minFraction: 0, maxFraction: 0 }).replace('0', '-')}
 		{/if}
 	{:else}
-		&ZeroWidthSpace;
+		<span class="animate-pulse"
+			>{formatUSD(0, { minFraction: 0, maxFraction: 0 }).replace('0', '-')}
+		</span>
 	{/if}
 </output>
