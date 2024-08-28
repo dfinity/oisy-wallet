@@ -36,7 +36,6 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import type { ExchangesData } from '$lib/types/exchange';
-	import Tag from '$lib/components/ui/Tag.svelte';
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 
 	const dispatch = createEventDispatcher();
