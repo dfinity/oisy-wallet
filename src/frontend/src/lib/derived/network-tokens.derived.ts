@@ -5,9 +5,11 @@ import { tokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensAtTop, pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -46,16 +48,28 @@ export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
 export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[combinedDerivedSortedNetworkTokens, balancesStore, exchanges],
 	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
-		$enabledNetworkTokens.map((token) => ({
-			...token,
-			usdBalance: nonNullish($exchanges?.[token.id]?.usd)
-				? usdValue({
-						token,
-						balances: $balancesStore,
-						exchanges: $exchanges
-					})
-				: undefined
-		}))
+		$enabledNetworkTokens.map((token) => {
+			const balance: BigNumber | undefined = $balancesStore?.[token.id]?.data;
+
+			return {
+				...token,
+				balance,
+				formattedBalance: nonNullish(balance)
+					? formatToken({
+							value: balance,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})
+					: undefined,
+				usdBalance: nonNullish($exchanges?.[token.id]?.usd)
+					? usdValue({
+							token,
+							balances: $balancesStore,
+							exchanges: $exchanges
+						})
+					: undefined
+			};
+		})
 );
 
 /**
