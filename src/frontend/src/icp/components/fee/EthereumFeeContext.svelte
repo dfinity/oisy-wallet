@@ -7,7 +7,6 @@
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { CKERC20_TO_ERC20_MAX_TRANSACTION_FEE } from '$icp/constants/cketh.constants';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { getContext, onDestroy } from 'svelte';
 	import {
@@ -29,8 +28,14 @@
 	let ethNetwork = false;
 	$: ethNetwork = isNetworkIdEthereum(networkId);
 
-	let maxTransactionFeeEth: bigint | undefined = undefined;
-	$: maxTransactionFeeEth = nonNullish($tokenId)
+	// This is the amount of ckETH to be burned to cover for the fees of the transaction eth_sendRawTransaction(destination_eth_address, amount) described in the withdrawal scheme.
+	// It is fetched from the endpoint eip_1559_transaction_price of the minter. The amount is refreshed everytime there is a new pending transaction in the minter.
+	// However, it is already conservatively doubled by the minter, because the minter will not allow a withdrawal if the amount of ckETH is not enough to cover the fees.
+	// NOTE: the endpoint gives even a timestamp of the last update of the data, that could come in handy.
+	// This amount will be request to be approved using the transaction icrc2_approve(minter, tx_fee) described in the first step of the withdrawal scheme.
+	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
+	let maxTransactionFee: bigint | undefined = undefined;
+	$: maxTransactionFee = nonNullish($tokenId)
 		? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee
 		: undefined;
 
@@ -41,19 +46,15 @@
 			(tokenCkEth) => isTokenIcrcTestnet(tokenCkEth ?? {}) === isTokenIcrcTestnet($token ?? {})
 		);
 
-	let maxTransactionFeePlusEthLedgerApprove: bigint | undefined = undefined;
-	$: maxTransactionFeePlusEthLedgerApprove = nonNullish(maxTransactionFeeEth)
-		? maxTransactionFeeEth + CKERC20_TO_ERC20_MAX_TRANSACTION_FEE + (tokenCkEth?.fee ?? 0n)
+	// Include the fees for the transaction icrc2_approve(minter, tx_fee) described in the first step of the withdrawal scheme must be included in the maxTransactionFee.
+	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
+	let maxTransactionFeePlusLedgerApprove: bigint | undefined = undefined;
+	$: maxTransactionFeePlusLedgerApprove = nonNullish(maxTransactionFee)
+		? maxTransactionFee + (tokenCkEth?.fee ?? 0n)
 		: undefined;
 
-	let maxTransactionFee: bigint | undefined = undefined;
-	$: maxTransactionFee =
-		nonNullish(maxTransactionFeePlusEthLedgerApprove) && ckErc20
-			? maxTransactionFeePlusEthLedgerApprove + CKERC20_TO_ERC20_MAX_TRANSACTION_FEE
-			: maxTransactionFeePlusEthLedgerApprove;
-
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
-	$: store.setFee({ maxTransactionFee });
+	$: store.setFee({ maxTransactionFee: maxTransactionFeePlusLedgerApprove });
 
 	const updateContext = () => {
 		if ((ckETH || ckErc20) && ethNetwork) {
