@@ -21,7 +21,7 @@
 	const parseTokenKey = (token: Token) => `${token.id.description}-${token.network.id.description}`;
 
 	let sortedTokensKeys: TokenIndexKey[];
-	$: sortedTokensKeys = sortedTokens?.map(parseTokenKey);
+	$: sortedTokensKeys = sortedTokens.map(parseTokenKey);
 
 	const updateTokensToDisplay = () => {
 		if (!$pointerEventStore) {
