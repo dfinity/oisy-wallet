@@ -73,16 +73,19 @@ export const pinTokensWithBalanceAtTop = ({
 	$tokens: TokenUi[];
 	$balancesStore: CertifiedStoreData<BalancesData>;
 }): TokenUi[] => {
-	const tokensWithBalance: TokenWithBalance[] = $tokens.map((token) => ({
-		...token,
-		balance: Number(
-			formatToken({
-				value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
-				unitName: token.decimals,
-				displayDecimals: token.decimals
-			})
-		)
-	}));
+	const tokensWithBalance: TokenWithBalance[] = $tokens.map(
+		(token) =>
+			({
+				...token,
+				balance: Number(
+					formatToken({
+						value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
+						unitName: token.decimals,
+						displayDecimals: token.decimals
+					})
+				)
+			}) as TokenWithBalance
+	);
 
 	const [positiveBalances, nonPositiveBalances] = tokensWithBalance.reduce<
 		[TokenWithBalance[], TokenWithBalance[]]
