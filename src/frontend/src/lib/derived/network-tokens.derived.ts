@@ -52,7 +52,7 @@ export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derive
 
 			return {
 				...token,
-				balance: nonNullish(balance)
+				formattedBalance: nonNullish(balance)
 					? Number(
 							formatToken({
 								value: balance,
