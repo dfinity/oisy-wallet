@@ -7,14 +7,14 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { ZERO } from '$lib/constants/app.constants';
 
 	const dispatch = createEventDispatcher();
 
 	let tokens: TokenUi[];
 	$: tokens = $combinedDerivedSortedNetworkTokensUi.filter(({ balance }) =>
-		(balance ?? BigNumber.from(0n)).gt(0n)
+		(balance ?? ZERO).gt(0n)
 	);
 
 	let loading: boolean;

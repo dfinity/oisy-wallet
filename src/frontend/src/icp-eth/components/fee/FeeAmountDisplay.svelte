@@ -2,7 +2,7 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { fade, slide } from 'svelte/transition';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -14,9 +14,7 @@
 	export let feeTokenId: TokenId;
 
 	let balance: BigNumber | undefined;
-	$: balance = nonNullish($balancesStore)
-		? $balancesStore[feeTokenId]?.data ?? BigNumber.from(0n)
-		: undefined;
+	$: balance = nonNullish($balancesStore) ? $balancesStore[feeTokenId]?.data ?? ZERO : undefined;
 
 	let insufficientFeeFunds = false;
 

@@ -28,6 +28,7 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { token } from '$lib/stores/token.store';
+	import { ZERO } from '$lib/constants/app.constants';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
@@ -79,9 +80,9 @@
 		}
 
 		const assertBalance = (): IcAmountAssertionError | undefined => {
-			const total = userAmount.add(fee ?? BigNumber.from(0n));
+			const total = userAmount.add(fee ?? ZERO);
 
-			if (total.gt($balance ?? BigNumber.from(0n))) {
+			if (total.gt($balance ?? ZERO)) {
 				return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 			}
 

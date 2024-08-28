@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { formatToken } from '$lib/utils/format.utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { TokenUi } from '$lib/types/token';
+	import { ZERO } from '$lib/constants/app.constants';
 
 	export let token: TokenUi;
 </script>
 
 <output class="break-all">
 	{formatToken({
-		value: token.balance ?? BigNumber.from(0n),
+		value: token.balance ?? ZERO,
 		unitName: token.decimals
 	})}
 	{token.symbol}

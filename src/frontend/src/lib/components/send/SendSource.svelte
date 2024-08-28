@@ -5,6 +5,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nonNullish } from '@dfinity/utils';
+	import { ZERO } from '$lib/constants/app.constants';
 
 	export let token: OptionToken;
 	export let balance: BigNumber | undefined | null;
@@ -20,7 +21,7 @@
 	<svelte:fragment slot="label">{$i18n.send.text.balance}</svelte:fragment>
 	{#if nonNullish(token)}
 		{formatToken({
-			value: balance ?? BigNumber.from(0n),
+			value: balance ?? ZERO,
 			unitName: token.decimals,
 			displayDecimals: token.decimals
 		})}

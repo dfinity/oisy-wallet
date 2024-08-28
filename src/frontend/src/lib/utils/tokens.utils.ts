@@ -1,7 +1,7 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -61,7 +61,7 @@ export const sortTokens = ({
 export const pinTokensWithBalanceAtTop = ($tokens: TokenUi[]): TokenUi[] => {
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
 		(acc, token) => (
-			(token.usdBalance ?? 0) > 0 || (token.balance ?? BigNumber.from(0)).gt(0)
+			(token.usdBalance ?? 0) > 0 || (token.balance ?? ZERO).gt(0)
 				? acc[0].push(token)
 				: acc[1].push(token),
 			acc
@@ -73,8 +73,7 @@ export const pinTokensWithBalanceAtTop = ($tokens: TokenUi[]): TokenUi[] => {
 		...positiveBalances.sort(
 			(a, b) =>
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+(b.balance ?? BigNumber.from(0)).gt(a.balance ?? BigNumber.from(0)) -
-					+(b.balance ?? BigNumber.from(0)).lt(a.balance ?? BigNumber.from(0)) ||
+				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO) ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
 		),
