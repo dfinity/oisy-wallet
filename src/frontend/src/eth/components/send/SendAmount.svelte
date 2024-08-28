@@ -11,7 +11,8 @@
 	import { InsufficientFundsError } from '$lib/types/send';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import type { Token } from '$lib/types/token';
-	import { ZERO } from '$lib/constants/utils.constants';
+
+	import { ZERO } from '$lib/constants/app.constants';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;

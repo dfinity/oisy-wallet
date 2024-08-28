@@ -8,7 +8,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import { ZERO } from '$lib/constants/utils.constants';
+
+	import { ZERO } from '$lib/constants/app.constants';
 
 	const dispatch = createEventDispatcher();
 

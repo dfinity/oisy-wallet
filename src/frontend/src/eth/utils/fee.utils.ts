@@ -1,4 +1,4 @@
-import { ZERO } from '$lib/constants/utils.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';

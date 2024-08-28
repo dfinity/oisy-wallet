@@ -1,4 +1,4 @@
-import { ZERO } from '$lib/constants/utils.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';

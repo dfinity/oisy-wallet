@@ -2,7 +2,7 @@ import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import type { EthereumFeeStoreData } from '$icp/stores/ethereum-fee.store';
 import type { IcToken } from '$icp/types/ic';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
-import { ZERO } from '$lib/constants/utils.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { fromNullable, isNullish } from '@dfinity/utils';

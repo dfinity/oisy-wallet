@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { formatToken } from '$lib/utils/format.utils';
 	import type { TokenUi } from '$lib/types/token';
-	import { ZERO } from '$lib/constants/utils.constants';
+
+	import { ZERO } from '$lib/constants/app.constants';
 
 	export let token: TokenUi;
 </script>
