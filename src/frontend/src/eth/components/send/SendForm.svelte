@@ -14,6 +14,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { Token } from '$lib/types/token';
+	import SendInfo from '$eth/components/send/SendInfo.svelte';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -54,6 +55,8 @@
 		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
 
 		<FeeDisplay />
+
+		<SendInfo />
 	</div>
 
 	<ButtonGroup>
