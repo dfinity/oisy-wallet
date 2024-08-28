@@ -239,6 +239,7 @@ interface I18nSend {
 		address_unknown: string;
 		minter_info_not_loaded: string;
 		minter_info_not_certified: string;
+		cketh_max_transaction_fee_missing: string;
 	};
 	error: {
 		unexpected: string;

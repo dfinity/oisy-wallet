@@ -17,7 +17,7 @@
 		type BitcoinFeeContext as BitcoinFeeContextType,
 		initBitcoinFeeStore
 	} from '$icp/stores/bitcoin-fee.store';
-	import { createEventDispatcher, setContext } from 'svelte';
+	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import {
@@ -70,6 +70,12 @@
 	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const dispatch = createEventDispatcher();
+
+	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
+
+	// In case we are converting ERC20 to ckERC20, we need to include ckETH fees in the transaction.
+	let ckEthMaxTransactionFee: bigint | undefined = undefined;
+	$: ckEthMaxTransactionFee = $ethereumFeeStore.maxTransactionFee;
 
 	/**
 	 * Send
@@ -126,7 +132,8 @@
 			await sendIc({
 				...params,
 				token: $tokenAsIcToken,
-				targetNetworkId: networkId
+				targetNetworkId: networkId,
+				ckEthMaxTransactionFee
 			});
 
 			await Promise.allSettled([

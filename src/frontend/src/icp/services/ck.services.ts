@@ -1,7 +1,6 @@
 import { retrieveBtc } from '$icp/api/ckbtc-minter.api';
 import { withdrawErc20, withdrawEth } from '$icp/api/cketh-minter.api';
 import { approve } from '$icp/api/icrc-ledger.api';
-import { CKERC20_TO_ERC20_MAX_TRANSACTION_FEE } from '$icp/constants/cketh.constants';
 import type { IcCanisters, IcCkMetadata, IcCkToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
@@ -54,7 +53,8 @@ export const convertCkErc20ToErc20 = async ({
 	progress,
 	identity,
 	to,
-	amount: amountBigNumber
+	amount: amountBigNumber,
+	ckEthMaxTransactionFee
 }: IcTransferParams & {
 	token: IcCkToken;
 }): Promise<void> => {
@@ -69,12 +69,17 @@ export const convertCkErc20ToErc20 = async ({
 
 	// 1. Approve fees on ckETH Ledger for minter
 
+	assertNonNullish(
+		ckEthMaxTransactionFee,
+		get(i18n).send.assertion.cketh_max_transaction_fee_missing
+	);
+
 	await approveTransfer({
 		canisters: { ledgerCanisterId: ckEthLedgerCanisterId, minterCanisterId },
 		identity,
 		progress,
 		progressStep: ProgressStepsSendIc.APPROVE_FEES,
-		amount: CKERC20_TO_ERC20_MAX_TRANSACTION_FEE,
+		amount: ckEthMaxTransactionFee,
 		to
 	});
 
