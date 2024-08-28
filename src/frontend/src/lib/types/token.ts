@@ -47,5 +47,3 @@ interface TokenFinancialData {
 }
 
 export type TokenUi = Token & TokenFinancialData;
-
-export type TokenWithBalance = TokenUi & { balance: number };
