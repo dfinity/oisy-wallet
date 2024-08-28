@@ -9,6 +9,7 @@ import { formatToken } from '$lib/utils/format.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensAtTop, pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
+import type { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -48,18 +49,17 @@ export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derive
 	[combinedDerivedSortedNetworkTokens, balancesStore, exchanges],
 	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
 		$enabledNetworkTokens.map((token) => {
-			const balance = $balancesStore?.[token.id]?.data;
+			const balance: BigNumber | undefined = $balancesStore?.[token.id]?.data;
 
 			return {
 				...token,
+				balance,
 				formattedBalance: nonNullish(balance)
-					? Number(
-							formatToken({
-								value: balance,
-								unitName: token.decimals,
-								displayDecimals: token.decimals
-							})
-						)
+					? formatToken({
+							value: balance,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})
 					: undefined,
 				usdBalance: nonNullish($exchanges?.[token.id]?.usd)
 					? usdValue({
