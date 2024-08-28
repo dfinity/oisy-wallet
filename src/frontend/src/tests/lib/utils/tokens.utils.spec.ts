@@ -1,5 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+import { ZERO } from '$lib/constants/utils.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
@@ -10,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 
 const usd = 1;
 
-const bn0 = BigNumber.from(0);
+const bn0 = ZERO;
 const bn50 = BigNumber.from(50);
 const bn100 = BigNumber.from(100);
 const bn200 = BigNumber.from(200);

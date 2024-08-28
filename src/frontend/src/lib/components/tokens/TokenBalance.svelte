@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { formatToken } from '$lib/utils/format.utils';
 	import { balancesStore } from '$lib/stores/balances.store';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Token } from '$lib/types/token';
+	import { ZERO } from '$lib/constants/utils.constants';
 
 	export let token: Token;
 </script>
 
 <output class="break-all">
 	{formatToken({
-		value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0n),
+		value: $balancesStore?.[token.id]?.data ?? ZERO,
 		unitName: token.decimals
 	})}
 	{token.symbol}

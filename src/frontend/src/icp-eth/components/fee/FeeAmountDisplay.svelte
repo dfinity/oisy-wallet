@@ -8,15 +8,14 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { TokenId } from '$lib/types/token';
+	import { ZERO } from '$lib/constants/utils.constants';
 
 	export let fee: BigNumber;
 	export let feeSymbol: string;
 	export let feeTokenId: TokenId;
 
 	let balance: BigNumber | undefined;
-	$: balance = nonNullish($balancesStore)
-		? $balancesStore[feeTokenId]?.data ?? BigNumber.from(0n)
-		: undefined;
+	$: balance = nonNullish($balancesStore) ? $balancesStore[feeTokenId]?.data ?? ZERO : undefined;
 
 	let insufficientFeeFunds = false;
 

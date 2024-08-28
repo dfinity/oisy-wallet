@@ -1,10 +1,10 @@
+import { ZERO } from '$lib/constants/utils.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi, TokenWithBalance } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -76,7 +76,7 @@ export const pinTokensWithBalanceAtTop = ({
 				...token,
 				balance: Number(
 					formatToken({
-						value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
+						value: $balancesStore?.[token.id]?.data ?? ZERO,
 						unitName: token.decimals,
 						displayDecimals: token.decimals
 					})
