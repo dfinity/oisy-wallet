@@ -56,12 +56,12 @@
 	$: store.setFee({ maxTransactionFee });
 
 	const updateContext = () => {
-		if ((!ckETH && !ckErc20) || !ethNetwork) {
-			store.setFee(null);
+		if ((ckETH || ckErc20) && ethNetwork) {
+			store.setFee({ maxTransactionFee });
 			return;
 		}
 
-		store.setFee({ maxTransactionFee });
+		store.setFee(null);
 	};
 
 	$: maxTransactionFee, updateContext();
