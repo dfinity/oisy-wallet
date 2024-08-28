@@ -32,7 +32,7 @@
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import type { IcCkToken } from '$icp/types/ic';
-	import { pinTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { sortTokens } from '$lib/utils/tokens.utils';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import type { ExchangesData } from '$lib/types/exchange';
@@ -99,8 +99,9 @@
 
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
-		? pinTokensAtTop({
-				$tokens: sortTokens({ $tokens: allTokens, $exchanges: exchangesStaticData }),
+		? sortTokens({
+				$tokens: allTokens,
+				$exchanges: exchangesStaticData,
 				$tokensToPin: $tokensToPin
 			})
 		: [];
