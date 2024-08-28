@@ -50,7 +50,7 @@ describe('defineTokensToDisplay', () => {
 		expect(result).toEqual(newSortedTokens);
 	});
 
-	it('should preserve the original order but update balances when order has changed and pointer events are enabled', () => {
+	it('should preserve the original order but update balances when order has changed and there are pointer events', () => {
 		let pointerEventStore = false;
 
 		defineTokensToDisplay({
