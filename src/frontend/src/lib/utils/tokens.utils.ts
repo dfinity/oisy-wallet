@@ -1,6 +1,4 @@
 import { ZERO } from '$lib/constants/utils.constants';
-import type { BalancesData } from '$lib/stores/balances.store';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
@@ -75,8 +73,7 @@ export const pinTokensWithBalanceAtTop = ($tokens: TokenUi[]): TokenUi[] => {
 		...positiveBalances.sort(
 			(a, b) =>
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				+(b.balance ?? BigNumber.from(0)).gt(a.balance ?? BigNumber.from(0)) -
-					+(b.balance ?? BigNumber.from(0)).lt(a.balance ?? BigNumber.from(0)) ||
+				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO) ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
 		),

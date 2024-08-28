@@ -1,7 +1,5 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
-import type { BalancesData } from '$lib/stores/balances.store';
-import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
