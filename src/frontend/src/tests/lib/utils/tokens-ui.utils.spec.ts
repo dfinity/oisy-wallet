@@ -2,7 +2,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import { currentTokensKeysStore } from '$lib/stores/tokens-to-display.store';
 import type { TokenUi } from '$lib/types/token';
-import { defineTokensToDisplay, parseTokenKey } from '$lib/utils/tokens-to-display.utils';
+import { defineTokensToDisplay, parseTokenKey } from '$lib/utils/tokens-ui.utils';
 import { get } from 'svelte/store';
 
 const sortedTokens: TokenUi[] = [
