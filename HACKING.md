@@ -22,7 +22,8 @@ Following terminal commands are useful to deploy `frontend` and `backend`.
 npm run deploy
 ```
 
-**NOTE**: for macOS, you might need to manually install `llvm` and patch `clang` lib path. See example for `zsh` shell:
+> [!NOTE]
+> For macOS, you might need to manually install `llvm` and patch `clang` lib path. See example for `zsh` shell:
 
 ```bash
 brew install llvm
