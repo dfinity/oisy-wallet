@@ -24,7 +24,7 @@ describe('sortTokens', () => {
 			[BTC_MAINNET_TOKEN.id]: { usd },
 			[ETHEREUM_TOKEN.id]: { usd_market_cap: 300, usd }
 		};
-		const sortedTokens = sortTokens({ $tokens: tokens, $tokensToPin: [], $exchanges: exchanges });
+		const sortedTokens = sortTokens({ $tokens: tokens, $exchanges: exchanges, $tokensToPin: [] });
 		expect(sortedTokens).toEqual([ETHEREUM_TOKEN, ICP_TOKEN, BTC_MAINNET_TOKEN]);
 	});
 
@@ -34,7 +34,7 @@ describe('sortTokens', () => {
 			[BTC_MAINNET_TOKEN.id]: { usd_market_cap: 200, usd },
 			[ETHEREUM_TOKEN.id]: { usd_market_cap: 200, usd }
 		};
-		const sortedTokens = sortTokens({ $tokens: tokens, $tokensToPin: [], $exchanges: exchanges });
+		const sortedTokens = sortTokens({ $tokens: tokens, $exchanges: exchanges, $tokensToPin: [] });
 		expect(sortedTokens).toEqual([BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN]);
 	});
 
@@ -44,7 +44,7 @@ describe('sortTokens', () => {
 			[BTC_MAINNET_TOKEN.id]: { usd },
 			[ETHEREUM_TOKEN.id]: { usd }
 		};
-		const sortedTokens = sortTokens({ $tokens: tokens, $tokensToPin: [], $exchanges: exchanges });
+		const sortedTokens = sortTokens({ $tokens: tokens, $exchanges: exchanges, $tokensToPin: [] });
 		expect(sortedTokens).toEqual([BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN]);
 	});
 
@@ -57,8 +57,8 @@ describe('sortTokens', () => {
 		};
 		const sortedTokens = sortTokens({
 			$tokens: newTokens,
-			$tokensToPin: [],
-			$exchanges: exchanges
+			$exchanges: exchanges,
+			$tokensToPin: []
 		});
 		expect(sortedTokens).toEqual(
 			[BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN].map((token) => ({
@@ -77,8 +77,8 @@ describe('sortTokens', () => {
 		};
 		const sortedTokens = sortTokens({
 			$tokens: newTokens,
-			$tokensToPin: [],
-			$exchanges: exchanges
+			$exchanges: exchanges,
+			$tokensToPin: []
 		});
 		expect(sortedTokens).toEqual(
 			[BTC_MAINNET_TOKEN, ETHEREUM_TOKEN, ICP_TOKEN].map((token) => ({
@@ -97,8 +97,8 @@ describe('sortTokens', () => {
 		const tokensToPin: TokenToPin[] = [ETHEREUM_TOKEN, BTC_MAINNET_TOKEN];
 		const sortedTokens = sortTokens({
 			$tokens: tokens,
-			$tokensToPin: tokensToPin,
-			$exchanges: exchanges
+			$exchanges: exchanges,
+			$tokensToPin: tokensToPin
 		});
 		expect(sortedTokens).toEqual([ETHEREUM_TOKEN, BTC_MAINNET_TOKEN, ICP_TOKEN]);
 	});

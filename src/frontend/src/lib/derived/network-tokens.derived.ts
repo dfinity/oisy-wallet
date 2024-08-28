@@ -38,7 +38,7 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
  */
 export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
 	[enabledNetworkTokens, tokensToPin, exchanges],
-	([$tokens, $tokensToPin, $exchanges]) => sortTokens({ $tokens, $tokensToPin, $exchanges })
+	([$tokens, $tokensToPin, $exchanges]) => sortTokens({ $tokens, $exchanges, $tokensToPin })
 );
 
 /**

@@ -101,8 +101,8 @@
 	$: allTokensSorted = nonNullish(exchangesStaticData)
 		? sortTokens({
 				$tokens: allTokens,
-				$tokensToPin: $tokensToPin,
-				$exchanges: exchangesStaticData
+				$exchanges: exchangesStaticData,
+				$tokensToPin: $tokensToPin
 			})
 		: [];
 

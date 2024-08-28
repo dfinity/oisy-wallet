@@ -15,12 +15,12 @@ import { BigNumber } from '@ethersproject/bignumber';
  */
 export const sortTokens = ({
 	$tokens,
-	$tokensToPin,
-	$exchanges
+	$exchanges,
+	$tokensToPin
 }: {
 	$tokens: Token[];
-	$tokensToPin: TokenToPin[];
 	$exchanges: ExchangesData;
+	$tokensToPin: TokenToPin[];
 }): Token[] => {
 	const pinnedTokens = $tokensToPin
 		.map(({ id: pinnedId, network: { id: pinnedNetworkId } }) =>
