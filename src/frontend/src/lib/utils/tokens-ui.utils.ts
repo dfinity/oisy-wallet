@@ -23,7 +23,7 @@ export const defineTokensToDisplay = ({
 
 	// If there are pointer events, we need to avoid visually re-sorting the tokens, to prevent glitches on user's interaction.
 
-	// We are statically getting the current tokens keys, as it should not trigger any reactivity.
+	// We are imperatively getting the current tokens keys, as it should not trigger any reactivity.
 	const currentTokensKeys: string[] = get(currentTokensKeysStore);
 
 	if (currentTokensKeys.join(',') === sortedTokensKeys.join(',')) {
