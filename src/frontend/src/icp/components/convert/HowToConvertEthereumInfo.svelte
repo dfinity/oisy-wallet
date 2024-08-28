@@ -15,7 +15,6 @@
 	} from '$icp-eth/derived/cketh.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
-
 	import { ZERO } from '$lib/constants/app.constants';
 
 	export let formCancelAction: 'back' | 'close' = 'back';

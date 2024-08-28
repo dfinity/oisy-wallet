@@ -5,7 +5,6 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nonNullish } from '@dfinity/utils';
-
 	import { ZERO } from '$lib/constants/app.constants';
 
 	export let token: OptionToken;

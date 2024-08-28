@@ -28,7 +28,6 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import { token } from '$lib/stores/token.store';
-
 	import { ZERO } from '$lib/constants/app.constants';
 
 	export let amount: number | undefined = undefined;
