@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 as deps
+FROM --platform=linux/amd64 ubuntu:22.04 AS deps
 
 ENV TZ=UTC
 
@@ -46,7 +46,7 @@ RUN mkdir -p src/backend/src \
     && ./docker/build --only-dependencies \
     && rm -rf src
 
-FROM deps as build_backend
+FROM deps AS build_backend
 
 COPY . .
 
