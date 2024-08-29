@@ -47,3 +47,5 @@ interface TokenFinancialData {
 }
 
 export type TokenUi = Token & TokenFinancialData;
+
+export type TokenIndexKey = string;
