@@ -4,7 +4,7 @@
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { isNullish } from '@dfinity/utils';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -128,6 +128,17 @@
 				token: $tokenAsIcToken,
 				targetNetworkId: networkId
 			});
+			
+			const endTime = performance.now();
+			const duration = endTime - timedEvent.startTime;
+
+			// format duration to seconds and show it in a toast
+			toastsShow({
+				text: `Sent ${amount} ICP in less than ${(duration / 1000).toFixed(2)} seconds.`,
+				level: 'success',
+				duration: 5000
+			});
+
 
 			await Promise.allSettled([
 				trackTimedEventSuccess(timedEvent),
