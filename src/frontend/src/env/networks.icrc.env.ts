@@ -445,7 +445,8 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKUSDT_IC_DATA) ? [CKUSDT_IC_DATA] : []),
 	...(nonNullish(CKWSTETH_IC_DATA) ? [CKWSTETH_IC_DATA] : []),
 	...(nonNullish(CKUNI_IC_DATA) ? [CKUNI_IC_DATA] : []),
-	...(nonNullish(CKEURC_IC_DATA) ? [CKEURC_IC_DATA] : [])
+	...(nonNullish(CKEURC_IC_DATA) ? [CKEURC_IC_DATA] : []),
+	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_TOKENS.map(
