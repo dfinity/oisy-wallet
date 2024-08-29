@@ -54,6 +54,12 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type GetUserProfileError = { NotFound: null };
+export interface GetUtxosResponse {
+	next_page: [] | [Uint8Array | number[]];
+	tip_height: number;
+	tip_block_hash: Uint8Array | number[];
+	utxos: Array<Utxo>;
+}
 export interface Guards {
 	user_data: ApiEnabled;
 	threshold_key: ApiEnabled;
@@ -122,10 +128,19 @@ export interface OisyUser {
 	pouh_verified: boolean;
 	updated_timestamp: bigint;
 }
+export interface Outpoint {
+	txid: Uint8Array | number[];
+	vout: number;
+}
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_2 = { Ok: MigrationReport } | { Err: string };
 export type Result_3 = { Ok: null } | { Err: string };
+export interface SendBtcParams {
+	dst_address: string;
+	network: BitcoinNetwork;
+	amount: bigint;
+}
 export interface SignRequest {
 	to: string;
 	gas: bigint;
@@ -173,6 +188,11 @@ export interface UserTokenId {
 	chain_id: bigint;
 	contract_address: string;
 }
+export interface Utxo {
+	height: number;
+	value: bigint;
+	outpoint: Outpoint;
+}
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
@@ -181,6 +201,8 @@ export interface _SERVICE {
 	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	eth_address_of: ActorMethod<[Principal], string>;
+	get_btc_balance: ActorMethod<[string, BitcoinNetwork], bigint>;
+	get_btc_utxos: ActorMethod<[string, BitcoinNetwork], GetUtxosResponse>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_user_profile: ActorMethod<[], Result_1>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
@@ -192,6 +214,7 @@ export interface _SERVICE {
 	migration_stop_timer: ActorMethod<[], Result_3>;
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
+	send_btc: ActorMethod<[SendBtcParams], string>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;

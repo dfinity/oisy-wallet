@@ -1,5 +1,6 @@
 import type {
 	AddUserCredentialError,
+	BitcoinNetwork,
 	CredentialSpec,
 	CustomToken,
 	GetUserProfileError,
@@ -111,4 +112,52 @@ export const addUserCredential = async ({
 		current_user_version: toNullable(currentUserVersion),
 		credential_spec: credentialSpec
 	});
+};
+
+export const getBtcAddress = async ({
+	identity,
+	network
+}: {
+	identity: OptionIdentity;
+	network: BitcoinNetwork;
+}): Promise<string> => {
+	const { caller_btc_address } = await getBackendActor({ identity });
+	return caller_btc_address(network);
+};
+
+export const getBtcBalance = async ({
+	identity,
+	address,
+	network
+}: {
+	identity: Identity;
+	address: string;
+	network: BitcoinNetwork;
+}): Promise<bigint> => {
+	const { get_btc_balance } = await getBackendActor({ identity });
+	return get_btc_balance(address, network);
+};
+
+export const sendBtc = async ({
+	network,
+	amount,
+	destination,
+	identity
+}: {
+	network: BitcoinNetwork;
+	amount: bigint;
+	destination: string;
+	identity: Identity;
+}): Promise<string> => {
+	const { send_btc } = await getBackendActor({ identity });
+	return send_btc({ network, amount, dst_address: destination });
+};
+
+export const getBtcUtxos = async (params: {
+	identity: Identity;
+	address: string;
+	network: BitcoinNetwork;
+}) => {
+	const { get_btc_utxos } = await getBackendActor(params);
+	return get_btc_utxos(params.address, params.network);
 };
