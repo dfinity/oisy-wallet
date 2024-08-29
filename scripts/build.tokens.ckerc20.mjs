@@ -20,7 +20,11 @@ const SKIP_CANISTER_IDS_LOGOS = [
 	// ckUSDT
 	'cngnf-vqaaa-aaaar-qag4q-cai',
 	// ckSepoliaUSDC
-	'yfumr-cyaaa-aaaar-qaela-cai'
+	'yfumr-cyaaa-aaaar-qaela-cai',
+	// ckEURC
+	'pe5t5-diaaa-aaaar-qahwa-cai',
+	// ckXAUT
+	'nza5v-qaaaa-aaaar-qahzq-cai'
 ];
 
 const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
