@@ -50,7 +50,11 @@ type DefiniteCanisterSettingsArgs = record {
   memory_allocation : nat;
   compute_allocation : nat;
 };
-type GetBalanceRequest = record { address : text; network : BitcoinNetwork ; min_confirmations : opt nat32 };
+type GetBalanceRequest = record {
+  network : BitcoinNetwork;
+  address : text;
+  min_confirmations : opt nat32;
+};
 type GetUserProfileError = variant { NotFound };
 type Guards = record { user_data : ApiEnabled; threshold_key : ApiEnabled };
 type HttpRequest = record {
@@ -112,10 +116,10 @@ type OisyUser = record {
   updated_timestamp : nat64;
 };
 type Result = variant { Ok; Err : AddUserCredentialError };
-type Result_1 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_2 = variant { Ok : MigrationReport; Err : text };
-type Result_3 = variant { Ok; Err : text };
-type Result_4 = variant { Ok : nat64 ; Err : text };
+type Result_1 = variant { Ok : nat64; Err : text };
+type Result_2 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_3 = variant { Ok : MigrationReport; Err : text };
+type Result_4 = variant { Ok; Err : text };
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -162,7 +166,7 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
-  btc_balance : (GetBalanceRequest) -> (Result_4);
+  btc_balance : (GetBalanceRequest) -> (Result_1);
   bulk_up : (blob) -> ();
   caller_btc_address : (BitcoinNetwork) -> (text);
   caller_eth_address : () -> (text);
@@ -170,14 +174,14 @@ service : (Arg) -> {
   create_user_profile : () -> (UserProfile);
   eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
-  get_user_profile : () -> (Result_1) query;
+  get_user_profile : () -> (Result_2) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
-  migrate_user_data_to : (principal) -> (Result_2);
+  migrate_user_data_to : (principal) -> (Result_3);
   migration : () -> (opt MigrationReport) query;
-  migration_stop_timer : () -> (Result_3);
+  migration_stop_timer : () -> (Result_4);
   personal_sign : (text) -> (text);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
