@@ -20,7 +20,7 @@
 	$: feeToken = $ethereumFeeTokenCkEth ?? $ckEthereumNativeToken;
 
 	let maxTransactionFee: bigint | undefined | null = undefined;
-	$: maxTransactionFee = $store?.maxTransactionFee ?? 100_000_000_000_000_000n;
+	$: maxTransactionFee = $store?.maxTransactionFee;
 </script>
 
 {#if nonNullish($store)}
