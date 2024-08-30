@@ -34,15 +34,17 @@
 		? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee
 		: undefined;
 
-	let maxTransactionFeeLastUpdateBigInt: bigint | undefined = undefined;
+	let maxTransactionFeeLastUpdateBigInt: [] | [bigint] | undefined = undefined;
 	$: maxTransactionFeeLastUpdateBigInt = nonNullish($tokenId)
-		? $eip1559TransactionPriceStore?.[$tokenId]?.data.timestamp[0]
+		? $eip1559TransactionPriceStore?.[$tokenId]?.data.timestamp
 		: undefined;
 
 	let maxTransactionFeeLastUpdate: number | undefined = undefined;
-	$: maxTransactionFeeLastUpdate = nonNullish(maxTransactionFeeLastUpdateBigInt)
-		? Number(maxTransactionFeeLastUpdateBigInt)
-		: undefined;
+	$: maxTransactionFeeLastUpdate =
+		nonNullish(maxTransactionFeeLastUpdateBigInt) &&
+		nonNullish(maxTransactionFeeLastUpdateBigInt[0])
+			? Number(maxTransactionFeeLastUpdateBigInt[0])
+			: undefined;
 
 	let tokenCkEth: IcToken | undefined;
 	$: tokenCkEth = $icrcTokens
