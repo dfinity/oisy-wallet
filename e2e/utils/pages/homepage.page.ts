@@ -71,6 +71,17 @@ abstract class Homepage {
 		await this.#page.goto(HOMEPAGE_URL);
 	}
 
+	private async waitForModal({
+		modalOpenButtonTestId,
+		modalTestId
+	}: WaitForModalParams): Promise<Locator> {
+		await this.#page.getByTestId(modalOpenButtonTestId).click();
+		const modal = this.#page.getByTestId(modalTestId);
+		await modal.waitFor();
+
+		return modal;
+	}
+
 	private async setViewportSize(viewportSize: ViewportSize) {
 		await this.#page.setViewportSize(viewportSize);
 	}
@@ -108,17 +119,6 @@ abstract class Homepage {
 		if (nonNullish(dataUrl)) {
 			return getQRCodeValueFromDataURL({ dataUrl });
 		}
-	}
-
-	protected async waitForModal({
-		modalOpenButtonTestId,
-		modalTestId
-	}: WaitForModalParams): Promise<Locator> {
-		await this.#page.getByTestId(modalOpenButtonTestId).click();
-		const modal = this.#page.getByTestId(modalTestId);
-		await modal.waitFor();
-
-		return modal;
 	}
 
 	protected async waitForHomepageReady(): Promise<void> {
