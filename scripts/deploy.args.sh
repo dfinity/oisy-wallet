@@ -28,7 +28,6 @@ esac
 # Represents more an ID than a URL
 II_VC_URL="https://identity.ic0.app"
 
-
 echo "(variant {
   Init = record {
         ecdsa_key_name = \"$ECDSA_KEY_NAME\";
