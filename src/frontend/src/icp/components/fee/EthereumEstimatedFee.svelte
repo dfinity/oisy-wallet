@@ -10,19 +10,14 @@
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
-	import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
-	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import type { Token } from '$lib/types/token';
 	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
-
-	let ckEr20 = false;
-	$: ckEr20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	let feeToken: Token;
-	$: feeToken = ckEr20 ? $ethereumFeeTokenCkEth ?? $ckEthereumNativeToken : $ckEthereumNativeToken;
+	$: feeToken = $ethereumFeeTokenCkEth ?? $ckEthereumNativeToken;
 
 	let maxTransactionFee: bigint | undefined | null = undefined;
 	$: maxTransactionFee = $store?.maxTransactionFee;
