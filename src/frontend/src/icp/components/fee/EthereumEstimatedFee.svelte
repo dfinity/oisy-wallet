@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { getContext } from 'svelte';
+	import { getContext, onDestroy } from 'svelte';
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -31,6 +31,16 @@
 	$: lastUpdateSecondsAgo = nonNullish(maxTransactionFeeLastUpdate)
 		? Math.floor((Date.now() - maxTransactionFeeLastUpdate) / 1000)
 		: 30;
+
+	const interval = setInterval(() => {
+		if (nonNullish(maxTransactionFeeLastUpdate)) {
+			lastUpdateSecondsAgo = Math.floor((Date.now() - maxTransactionFeeLastUpdate) / 1000);
+		}
+	}, 1000);
+
+	onDestroy(() => {
+		clearInterval(interval);
+	});
 </script>
 
 {#if nonNullish($store)}
