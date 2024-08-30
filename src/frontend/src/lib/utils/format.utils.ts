@@ -88,7 +88,7 @@ export const formatUSD = (
 };
 
 export const formatDuration = (seconds: number): string => {
-	if (seconds === 0) {
+	if (Math.floor(seconds) === 0) {
 		return '0s';
 	}
 
