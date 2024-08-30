@@ -1,4 +1,5 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
+use crate::bitcoin_api::get_balance;
 use crate::bitcoin_utils::public_key_to_p2pkh_address;
 use crate::guards::{
     caller_is_allowed, caller_is_allowed_and_may_read_threshold_keys, may_read_threshold_keys,
@@ -53,6 +54,7 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
 mod guards;
@@ -264,6 +266,12 @@ async fn eth_address_of(p: Principal) -> String {
 #[update(guard = "may_read_threshold_keys")]
 async fn caller_btc_address(network: BitcoinNetwork) -> String {
     public_key_to_p2pkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
+}
+
+/// Returns the balance of the given Bitcoin address.
+#[update]
+async fn btc_balance(address: String, network: BitcoinNetwork) -> Result<u64, String> {
+    get_balance(network, address).await
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
