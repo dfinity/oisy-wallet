@@ -34,6 +34,16 @@
 		? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee
 		: undefined;
 
+	let maxTransactionFeeLastUpdateBigInt: bigint | undefined = undefined;
+	$: maxTransactionFeeLastUpdateBigInt = nonNullish($tokenId)
+		? $eip1559TransactionPriceStore?.[$tokenId]?.data.timestamp[0]
+		: undefined;
+
+	let maxTransactionFeeLastUpdate: number | undefined = undefined;
+	$: maxTransactionFeeLastUpdate = nonNullish(maxTransactionFeeLastUpdateBigInt)
+		? Number(maxTransactionFeeLastUpdateBigInt)
+		: undefined;
+
 	let tokenCkEth: IcToken | undefined;
 	$: tokenCkEth = $icrcTokens
 		.filter(isTokenCkEthLedger)
@@ -53,11 +63,11 @@
 			: maxTransactionFeePlusEthLedgerApprove;
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
-	$: store.setFee({ maxTransactionFee });
+	$: store.setFee({ maxTransactionFee, maxTransactionFeeLastUpdate });
 
 	const updateContext = () => {
 		if ((ckETH || ckErc20) && ethNetwork) {
-			store.setFee({ maxTransactionFee });
+			store.setFee({ maxTransactionFee, maxTransactionFeeLastUpdate });
 			return;
 		}
 
