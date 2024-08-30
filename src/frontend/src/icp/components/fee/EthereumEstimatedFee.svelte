@@ -27,10 +27,10 @@
 	let maxTransactionFeeLastUpdate: number | undefined | null = undefined;
 	$: maxTransactionFeeLastUpdate = $store?.maxTransactionFeeLastUpdate ?? 1725000089000;
 
-	let lastUpdateSecondsAgo: number;
+	let lastUpdateSecondsAgo: number | undefined;
 	$: lastUpdateSecondsAgo = nonNullish(maxTransactionFeeLastUpdate)
 		? Math.floor((Date.now() - maxTransactionFeeLastUpdate) / 1000)
-		: 30;
+		: undefined;
 
 	const interval = setInterval(() => {
 		if (nonNullish(maxTransactionFeeLastUpdate)) {
@@ -48,7 +48,9 @@
 		<Value ref="kyt-fee">
 			<svelte:fragment slot="label"
 				>{replacePlaceholders($i18n.fee.text.estimated_eth, {
-					$timePassed: formatDuration(lastUpdateSecondsAgo)
+					$timePassed: nonNullish(lastUpdateSecondsAgo)
+						? formatDuration(lastUpdateSecondsAgo)
+						: '≈30s'
 				})}</svelte:fragment
 			>
 
