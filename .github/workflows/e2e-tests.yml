@@ -43,9 +43,6 @@ jobs:
           name: oisy-e2e-image
           path: .
 
-      - name: Display structure of downloaded files
-        run: ls -R
-
       - name: Load Docker image
         run: |
           gzip -d oisy-e2e-image.tar.gz

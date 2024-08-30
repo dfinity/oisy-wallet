@@ -29,10 +29,9 @@ runs:
       uses: actions/download-artifact@v4
       with:
         name: backend.wasm.gz
-        path: .
+        path: /apprunner
 
-    - name: Display structure of downloaded files
-      run: ls -R
+    - run: ls -l
       shell: bash
 
     - name: Build E2E Docker image
