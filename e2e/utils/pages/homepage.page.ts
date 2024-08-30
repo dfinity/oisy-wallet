@@ -10,6 +10,7 @@ import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright
 import { nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
+import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 
 type HomepageParams = {
 	page: Page;
@@ -91,6 +92,33 @@ abstract class Homepage {
 
 	protected async waitForLoginButton(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(LOGIN_BUTTON).waitFor(options);
+	}
+
+	private async getCanvasAsDataURL({
+		selector
+	}: SelectorOperationParams): Promise<string | undefined> {
+		return this.#page.evaluate<string | undefined, { selector: string }>(
+			({ selector }) => {
+				const canvas = document.querySelector<HTMLCanvasElement>(selector);
+
+				if (nonNullish(canvas)) {
+					return canvas.toDataURL();
+				}
+			},
+			{
+				selector
+			}
+		);
+	}
+
+	private async readQRCode({ selector }: SelectorOperationParams): Promise<string | undefined> {
+		await this.#page.locator(selector).waitFor();
+
+		const dataUrl = await this.getCanvasAsDataURL({ selector });
+
+		if (nonNullish(dataUrl)) {
+			return getQRCodeValueFromDataURL({ dataUrl });
+		}
 	}
 
 	protected async waitForHomepageReady(): Promise<void> {
