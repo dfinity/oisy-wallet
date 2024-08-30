@@ -67,12 +67,12 @@ export const convertCkErc20ToErc20 = async ({
 
 	assertNonNullish(ckEthLedgerCanisterId, get(i18n).init.error.ledger_cketh_eth);
 
-	// 1. Approve fees on ckETH Ledger for minter
-
 	assertNonNullish(
 		ckEthMaxTransactionFee,
 		get(i18n).send.assertion.cketh_max_transaction_fee_missing
 	);
+
+	// 1. Approve fees on ckETH Ledger for minter
 
 	await approveTransfer({
 		canisters: { ledgerCanisterId: ckEthLedgerCanisterId, minterCanisterId },
