@@ -5,7 +5,7 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 
-	const { maxGasFee, feeSymbolStore, feeTokenIdStore }: FeeContext =
+	const { maxGasFee, feeSymbolStore, feeTokenIdStore, feeDecimalsStore }: FeeContext =
 		getContext<FeeContext>(FEE_CONTEXT_KEY);
 
 	let fee: BigNumber | undefined | null = undefined;
@@ -45,7 +45,12 @@
 	>Max fee <small>(likely in &lt; 30 seconds)</small>:</label
 >
 <div id="balance" class="font-normal px-4.5 mb-4 break-all min-h-6">
-	{#if nonNullish(fee) && nonNullish($feeSymbolStore) && nonNullish($feeTokenIdStore)}
-		<FeeAmountDisplay {fee} feeSymbol={$feeSymbolStore} feeTokenId={$feeTokenIdStore} />
+	{#if nonNullish(fee) && nonNullish($feeSymbolStore) && nonNullish($feeTokenIdStore) && nonNullish($feeDecimalsStore)}
+		<FeeAmountDisplay
+			{fee}
+			feeSymbol={$feeSymbolStore}
+			feeTokenId={$feeTokenIdStore}
+			feeDecimals={$feeDecimalsStore}
+		/>
 	{/if}
 </div>
