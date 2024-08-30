@@ -1,5 +1,4 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
-use crate::bitcoin_api::get_balance;
 use crate::bitcoin_utils::public_key_to_p2pkh_address;
 use crate::guards::{
     caller_is_allowed, caller_is_allowed_and_may_read_threshold_keys, may_read_threshold_keys,
@@ -12,7 +11,9 @@ use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
-use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, GetBalanceRequest};
+use ic_cdk::api::management_canister::bitcoin::{
+    bitcoin_get_balance, BitcoinNetwork, GetBalanceRequest,
+};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
@@ -54,7 +55,6 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
-mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
 mod guards;
@@ -268,10 +268,18 @@ async fn caller_btc_address(network: BitcoinNetwork) -> String {
     public_key_to_p2pkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
-/// Returns the balance of the given Bitcoin address.
+/// Returns the balance of the given bitcoin address.
+///
+/// Relies on the `bitcoin_get_balance` endpoint.
+/// See [IC Bitcoin Documentation](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_balance)
 #[update]
 async fn btc_balance(request: GetBalanceRequest) -> Result<u64, String> {
-    get_balance(request).await
+    let balance_res = bitcoin_get_balance(request).await;
+
+    match balance_res {
+        Ok(balance) => Ok(balance.0),
+        Err(e) => Err(format!("Failed to get Bitcoin balance: {:?}", e)),
+    }
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
