@@ -34,6 +34,7 @@
 						fee={BigNumber.from(maxTransactionFee)}
 						feeSymbol={feeToken.symbol}
 						feeTokenId={feeToken.id}
+						feeDecimals={feeToken.decimals}
 					/>
 				{:else}
 					&ZeroWidthSpace;
