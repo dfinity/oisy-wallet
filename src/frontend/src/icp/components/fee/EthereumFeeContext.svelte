@@ -46,11 +46,11 @@
 			(tokenCkEth) => isTokenIcrcTestnet(tokenCkEth ?? {}) === isTokenIcrcTestnet($token ?? {})
 		);
 
-	// Include the fees for the transaction icrc2_approve(minter, tx_fee) described in the first step of the withdrawal scheme must be included in the maxTransactionFee.
+	// For ckERC20, include the fees for the transaction icrc2_approve(minter, tx_fee) described in the first step of the withdrawal scheme.
 	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
 	let maxTransactionFeePlusLedgerApprove: bigint | undefined = undefined;
 	$: maxTransactionFeePlusLedgerApprove = nonNullish(maxTransactionFee)
-		? maxTransactionFee + (tokenCkEth?.fee ?? 0n)
+		? maxTransactionFee + (ckErc20 ? tokenCkEth?.fee ?? 0n : 0n)
 		: undefined;
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
