@@ -25,7 +25,7 @@
 	$: maxTransactionFee = $store?.maxTransactionFee;
 
 	let maxTransactionFeeLastUpdate: number | undefined | null = undefined;
-	$: maxTransactionFeeLastUpdate = $store?.maxTransactionFeeLastUpdate ?? 1725000089000;
+	$: maxTransactionFeeLastUpdate = $store?.maxTransactionFeeLastUpdate;
 
 	let lastUpdateSecondsAgo: number | undefined;
 	$: lastUpdateSecondsAgo = nonNullish(maxTransactionFeeLastUpdate)
