@@ -50,6 +50,7 @@ type DefiniteCanisterSettingsArgs = record {
   memory_allocation : nat;
   compute_allocation : nat;
 };
+type GetBalanceRequest = record { address : text; network : BitcoinNetwork ; min_confirmations : opt nat32 };
 type GetUserProfileError = variant { NotFound };
 type Guards = record { user_data : ApiEnabled; threshold_key : ApiEnabled };
 type HttpRequest = record {
@@ -114,6 +115,7 @@ type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_2 = variant { Ok : MigrationReport; Err : text };
 type Result_3 = variant { Ok; Err : text };
+type Result_4 = variant { Ok : nat64 ; Err : text };
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -160,6 +162,7 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
+  btc_balance : (GetBalanceRequest) -> (Result_4);
   bulk_up : (blob) -> ();
   caller_btc_address : (BitcoinNetwork) -> (text);
   caller_eth_address : () -> (text);
