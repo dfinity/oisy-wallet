@@ -25,12 +25,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download Oisy backend WASM
-        uses: actions/download-artifact@v4
-        with:
-          name: backend.wasm.gz
-          path: .
-
       - name: Build E2E Docker Image
         uses: ./.github/actions/docker-build-e2e
         with:
@@ -48,6 +42,9 @@ jobs:
         with:
           name: oisy-e2e-image
           path: .
+
+      - name: Display structure of downloaded files
+        run: ls -R
 
       - name: Load Docker image
         run: |
