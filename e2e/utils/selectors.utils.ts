@@ -11,7 +11,7 @@ export const getNestedSelector = ({
 	innerSelector: string;
 }) => `[data-tid="${parentSelector}"] >> [data-tid="${innerSelector}"]`;
 
-export const getReceiveTokensModalAddressLabelSelectorBySection = ({
+export const getReceiveTokensModalAddressLabelSelector = ({
 	sectionSelector
 }: {
 	sectionSelector: string;
