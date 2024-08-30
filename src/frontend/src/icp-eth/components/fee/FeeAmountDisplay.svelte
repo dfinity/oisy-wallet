@@ -12,6 +12,7 @@
 	export let fee: BigNumber;
 	export let feeSymbol: string;
 	export let feeTokenId: TokenId;
+	export let feeDecimals: number;
 
 	let balance: BigNumber | undefined;
 	$: balance = nonNullish($balancesStore) ? $balancesStore[feeTokenId]?.data ?? ZERO : undefined;
@@ -37,7 +38,7 @@
 		{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 			$balance: formatToken({
 				value: balance,
-				displayDecimals: EIGHT_DECIMALS
+				displayDecimals: feeDecimals
 			}),
 			$symbol: feeSymbol ?? ''
 		})}
