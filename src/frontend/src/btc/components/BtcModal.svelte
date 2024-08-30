@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { getBtcAddress, getBtcBalance, getBtcUtxos, sendBtc } from '$lib/api/backend.api';
+	import { getBtcBalance, getBtcUtxos, sendBtc } from '$lib/api/backend.api';
+	import { getBtcAddress } from '$lib/api/signer.api';
 	import { authStore } from '$lib/stores/auth.store';
 	import { Input, Modal } from '@dfinity/gix-components';
 
@@ -22,6 +23,7 @@
 						address,
 						network: { regtest: null }
 					});
+					console.log(utxosResponse);
 					utxosCount = utxosResponse.utxos.length;
 				} catch (e) {
 					address = 'error';
@@ -51,15 +53,17 @@
 		}
 	}
 
+	let sending = false;
 	const sendSatoshis = async () => {
 		if ($authStore?.identity && destination && amount) {
+			sending = true;
 			await sendBtc({
 				identity: $authStore.identity,
 				destination,
 				amount: BigInt(amount),
 				network: { regtest: null }
 			});
-			console.log('Sent');
+			sending = false;
 		}
 	};
 </script>
@@ -97,7 +101,7 @@
 		</Input>
 
 		<div>
-			<button on:click={sendSatoshis} class="primary">Send</button>
+			<button on:click={sendSatoshis} class="primary" disabled={sending}>Send</button>
 		</div>
 	</div>
 </Modal>
