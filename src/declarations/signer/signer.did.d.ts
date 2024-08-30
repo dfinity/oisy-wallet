@@ -53,6 +53,11 @@ export interface DefiniteCanisterSettingsArgs {
 	memory_allocation: bigint;
 	compute_allocation: bigint;
 }
+export interface GetBalanceRequest {
+	network: BitcoinNetwork;
+	address: string;
+	min_confirmations: [] | [number];
+}
 export type GetUserProfileError = { NotFound: null };
 export interface Guards {
 	user_data: ApiEnabled;
@@ -123,9 +128,10 @@ export interface OisyUser {
 	updated_timestamp: bigint;
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
-export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_2 = { Ok: MigrationReport } | { Err: string };
-export type Result_3 = { Ok: null } | { Err: string };
+export type Result_1 = { Ok: bigint } | { Err: string };
+export type Result_2 = { Ok: UserProfile } | { Err: GetUserProfileError };
+export type Result_3 = { Ok: MigrationReport } | { Err: string };
+export type Result_4 = { Ok: null } | { Err: string };
 export interface SignRequest {
 	to: string;
 	gas: bigint;
@@ -175,6 +181,7 @@ export interface UserTokenId {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
+	btc_balance: ActorMethod<[GetBalanceRequest], Result_1>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
 	caller_btc_address: ActorMethod<[BitcoinNetwork], string>;
 	caller_eth_address: ActorMethod<[], string>;
@@ -182,14 +189,14 @@ export interface _SERVICE {
 	create_user_profile: ActorMethod<[], UserProfile>;
 	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-	get_user_profile: ActorMethod<[], Result_1>;
+	get_user_profile: ActorMethod<[], Result_2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-	migrate_user_data_to: ActorMethod<[Principal], Result_2>;
+	migrate_user_data_to: ActorMethod<[Principal], Result_3>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_3>;
+	migration_stop_timer: ActorMethod<[], Result_4>;
 	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
