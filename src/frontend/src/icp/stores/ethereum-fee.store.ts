@@ -3,7 +3,7 @@ import { writable, type Readable } from 'svelte/store';
 export type EthereumFeeStoreData =
 	| {
 			maxTransactionFee?: bigint | undefined;
-			maxTransactionFeeLastUpdate?: number | undefined;
+			maxTransactionFeeLastUpdate?: bigint | undefined;
 	  }
 	| undefined
 	| null;

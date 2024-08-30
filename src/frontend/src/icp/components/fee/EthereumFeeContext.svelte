@@ -6,7 +6,7 @@
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import { fromDefinedNullable, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
+	import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import { CKERC20_TO_ERC20_MAX_TRANSACTION_FEE } from '$icp/constants/cketh.constants';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { getContext, onDestroy } from 'svelte';
@@ -34,15 +34,17 @@
 		? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee
 		: undefined;
 
-	let maxTransactionFeeLastUpdateBigInt: [] | [bigint] | undefined = undefined;
-	$: maxTransactionFeeLastUpdateBigInt = nonNullish($tokenId)
-		? $eip1559TransactionPriceStore?.[$tokenId]?.data.timestamp
-		: undefined;
+	let maxTransactionFeeLastUpdate: bigint | undefined = undefined;
 
-	let maxTransactionFeeLastUpdate: number | undefined = undefined;
-	$: maxTransactionFeeLastUpdate = nonNullish(maxTransactionFeeLastUpdateBigInt)
-		? Number(fromDefinedNullable(maxTransactionFeeLastUpdateBigInt))
-		: undefined;
+	const updateMaxTransactionFeeLastUpdate = () => {
+		const timestamp = nonNullish($tokenId)
+			? $eip1559TransactionPriceStore?.[$tokenId]?.data.timestamp
+			: undefined;
+
+		maxTransactionFeeLastUpdate = nonNullish(timestamp) ? fromNullable(timestamp) : undefined;
+	};
+
+	$: $tokenId, $eip1559TransactionPriceStore, updateMaxTransactionFeeLastUpdate();
 
 	let tokenCkEth: IcToken | undefined;
 	$: tokenCkEth = $icrcTokens
@@ -74,7 +76,7 @@
 		store.setFee(null);
 	};
 
-	$: maxTransactionFee, updateContext();
+	$: maxTransactionFee, maxTransactionFeeLastUpdate, updateContext();
 
 	const loadFee = async () => {
 		clearTimer();
