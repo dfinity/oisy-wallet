@@ -12,7 +12,7 @@ use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
-use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, GetBalanceRequest};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
@@ -270,12 +270,8 @@ async fn caller_btc_address(network: BitcoinNetwork) -> String {
 
 /// Returns the balance of the given Bitcoin address.
 #[update]
-async fn btc_balance(
-    address: String,
-    network: BitcoinNetwork,
-    min_confirmations: Option<u32>,
-) -> Result<u64, String> {
-    get_balance(network, address, min_confirmations).await
+async fn btc_balance(request: GetBalanceRequest) -> Result<u64, String> {
+    get_balance(request).await
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
