@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { nonNullish } from '@dfinity/utils';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { getContext, onDestroy } from 'svelte';
+	import { getContext, onDestroy, onMount } from 'svelte';
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -24,23 +24,29 @@
 	let maxTransactionFee: bigint | undefined | null = undefined;
 	$: maxTransactionFee = $store?.maxTransactionFee;
 
-	let maxTransactionFeeLastUpdate: number | undefined | null = undefined;
-	$: maxTransactionFeeLastUpdate = $store?.maxTransactionFeeLastUpdate;
+	let timePassed: string | undefined;
 
-	let lastUpdateSecondsAgo: number | undefined;
-	$: lastUpdateSecondsAgo = nonNullish(maxTransactionFeeLastUpdate)
-		? Math.floor((Date.now() - maxTransactionFeeLastUpdate) / 1000)
-		: undefined;
+	const updateTimePassed = () => {
+		timePassed = nonNullish($store?.maxTransactionFeeLastUpdate)
+			? formatDuration(
+					Math.floor(Date.now() - Number($store?.maxTransactionFeeLastUpdate) / 1e6) / 1000
+				)
+			: undefined;
 
-	const interval = setInterval(() => {
-		if (nonNullish(maxTransactionFeeLastUpdate)) {
-			lastUpdateSecondsAgo = Math.floor((Date.now() - maxTransactionFeeLastUpdate) / 1000);
-		}
-	}, 1000);
+		console.warn('updateTimePassed', timePassed);
+	};
 
-	onDestroy(() => {
-		clearInterval(interval);
-	});
+	const debouncedUpdateTimePassed = debounce(updateTimePassed, 500);
+
+	onMount(debouncedUpdateTimePassed);
+
+	let timer: NodeJS.Timeout | undefined;
+
+	timer = setInterval(updateTimePassed, 1000);
+
+	const clearTimer = () => clearInterval(timer);
+
+	onDestroy(clearTimer);
 </script>
 
 {#if nonNullish($store)}
@@ -48,9 +54,7 @@
 		<Value ref="kyt-fee">
 			<svelte:fragment slot="label"
 				>{replacePlaceholders($i18n.fee.text.estimated_eth, {
-					$timePassed: nonNullish(lastUpdateSecondsAgo)
-						? formatDuration(lastUpdateSecondsAgo)
-						: '≈30s'
+					$timePassed: timePassed ?? '≈30s'
 				})}</svelte:fragment
 			>
 
