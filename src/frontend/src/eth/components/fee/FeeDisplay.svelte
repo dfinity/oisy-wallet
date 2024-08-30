@@ -45,7 +45,7 @@
 	>Max fee <small>(likely in &lt; 30 seconds)</small>:</label
 >
 <div id="balance" class="font-normal px-4.5 mb-4 break-all min-h-6">
-	{#if nonNullish(fee) && nonNullish($feeSymbolStore) && nonNullish($feeTokenIdStore)}
+	{#if nonNullish(fee) && nonNullish($feeSymbolStore) && nonNullish($feeTokenIdStore) && nonNullish($feeDecimalsStore)}
 		<FeeAmountDisplay
 			{fee}
 			feeSymbol={$feeSymbolStore}
