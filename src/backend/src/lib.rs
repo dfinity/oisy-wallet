@@ -270,8 +270,12 @@ async fn caller_btc_address(network: BitcoinNetwork) -> String {
 
 /// Returns the balance of the given Bitcoin address.
 #[update]
-async fn btc_balance(address: String, network: BitcoinNetwork) -> Result<u64, String> {
-    get_balance(network, address).await
+async fn btc_balance(
+    address: String,
+    network: BitcoinNetwork,
+    min_confirmations: Option<u32>,
+) -> Result<u64, String> {
+    get_balance(network, address, min_confirmations).await
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
