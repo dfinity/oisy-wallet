@@ -6,7 +6,7 @@
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { fromDefinedNullable, fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 	import { CKERC20_TO_ERC20_MAX_TRANSACTION_FEE } from '$icp/constants/cketh.constants';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { getContext, onDestroy } from 'svelte';
@@ -40,11 +40,9 @@
 		: undefined;
 
 	let maxTransactionFeeLastUpdate: number | undefined = undefined;
-	$: maxTransactionFeeLastUpdate =
-		nonNullish(maxTransactionFeeLastUpdateBigInt) &&
-		nonNullish(maxTransactionFeeLastUpdateBigInt[0])
-			? Number(maxTransactionFeeLastUpdateBigInt[0])
-			: undefined;
+	$: maxTransactionFeeLastUpdate = nonNullish(maxTransactionFeeLastUpdateBigInt)
+		? Number(fromDefinedNullable(maxTransactionFeeLastUpdateBigInt))
+		: undefined;
 
 	let tokenCkEth: IcToken | undefined;
 	$: tokenCkEth = $icrcTokens
