@@ -278,7 +278,7 @@ async fn btc_balance(request: GetBalanceRequest) -> Result<u64, String> {
 
     match balance_res {
         Ok(balance) => Ok(balance.0),
-        Err(e) => Err(format!("Failed to get Bitcoin balance: {:?}", e)),
+        Err(e) => Err(format!("Failed to get Bitcoin balance: {e:?}")),
     }
 }
 
