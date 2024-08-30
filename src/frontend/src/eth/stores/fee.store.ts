@@ -27,6 +27,7 @@ export interface FeeContext {
 	feeStore: FeeStore;
 	feeSymbolStore: Writable<string | undefined>;
 	feeTokenIdStore: Writable<TokenId | undefined>;
+	feeDecimalsStore: Writable<number | undefined>;
 	maxGasFee: Readable<BigNumber | undefined>;
 	minGasFee: Readable<BigNumber | undefined>;
 	evaluateFee?: () => void;
