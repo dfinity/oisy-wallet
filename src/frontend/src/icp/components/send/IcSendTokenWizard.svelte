@@ -56,7 +56,7 @@
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import { token } from '$lib/stores/token.store';
-	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
+	import { tokenAsIcToken, tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 
 	/**
 	 * Props
@@ -127,7 +127,7 @@
 				...params,
 				token: $tokenAsIcToken,
 				targetNetworkId: networkId,
-				ckErc20ToErc20MaxEthFees
+				ckErc20ToErc20MaxCkEthFees
 			});
 
 			await Promise.allSettled([
@@ -193,9 +193,12 @@
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	// In case we are converting ERC20 to ckERC20, we need to include ckETH fees in the transaction.
-	let ckErc20ToErc20MaxEthFees: bigint | undefined = undefined;
-	$: ckErc20ToErc20MaxEthFees = $ethereumFeeStore?.maxTransactionFee;
+	// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
+	let ckErc20ToErc20MaxCkEthFees: bigint | undefined = undefined;
+	$: ckErc20ToErc20MaxCkEthFees =
+		isNetworkIdETH(networkId) && $tokenCkErc20Ledger
+			? $ethereumFeeStore?.maxTransactionFee
+			: undefined;
 
 	const back = () => dispatch('icBack');
 	const close = () => dispatch('icClose');
