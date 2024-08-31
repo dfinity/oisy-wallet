@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { NetworkId } from '$lib/types/network';
-	import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
+	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import { tokenId } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { isNullish, nonNullish } from '@dfinity/utils';
@@ -16,18 +15,19 @@
 	} from '$icp/stores/ethereum-fee.store';
 	import { token } from '$lib/stores/token.store';
 	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
-	import { tokenAsIcToken, tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
+	import {
+		isConvertCkErc20ToErc20,
+		isConvertCkEthToEth
+	} from '$icp-eth/utils/cketh-transactions.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
 
-	let ckETH = false;
-	$: ckETH = isTokenCkEthLedger($tokenWithFallbackAsIcToken);
+	let ckEthConvert = false;
+	$: ckEthConvert = isConvertCkEthToEth({ token: $tokenAsIcToken, networkId });
 
-	let ckErc20 = false;
-	$: ckErc20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
-
-	let ethNetwork = false;
-	$: ethNetwork = isNetworkIdEthereum(networkId);
+	let ckErc20Convert = false;
+	$: ckErc20Convert = isConvertCkErc20ToErc20({ token: $tokenAsIcToken, networkId });
 
 	let maxTransactionFeeEth: bigint | undefined = undefined;
 	$: maxTransactionFeeEth = nonNullish($tokenId)
@@ -48,7 +48,7 @@
 
 	let maxTransactionFee: bigint | undefined = undefined;
 	$: maxTransactionFee =
-		nonNullish(maxTransactionFeePlusEthLedgerApprove) && ckErc20
+		nonNullish(maxTransactionFeePlusEthLedgerApprove) && ckErc20Convert
 			? maxTransactionFeePlusEthLedgerApprove + CKERC20_TO_ERC20_MAX_TRANSACTION_FEE
 			: maxTransactionFeePlusEthLedgerApprove;
 
@@ -56,7 +56,7 @@
 	$: store.setFee({ maxTransactionFee });
 
 	const updateContext = () => {
-		if ((ckETH || ckErc20) && ethNetwork) {
+		if (ckEthConvert || ckErc20Convert) {
 			store.setFee({ maxTransactionFee });
 			return;
 		}
@@ -69,7 +69,7 @@
 	const loadFee = async () => {
 		clearTimer();
 
-		if ((!ckETH && !ckErc20) || !ethNetwork) {
+		if (!ckEthConvert && !ckErc20Convert) {
 			updateContext();
 			return;
 		}
