@@ -33,7 +33,8 @@
 	// It is fetched from the endpoint eip_1559_transaction_price of the minter. The amount is refreshed everytime there is a new pending transaction in the minter.
 	// However, it is already conservatively doubled by the minter, because the minter will not allow a withdrawal if the amount of ckETH is not enough to cover the fees.
 	// NOTE: the endpoint gives a timestamp of the last update too, that could come in handy.
-	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
+	// For ckETH, see https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/cketh.adoc#cost-of-a-withdrawal
+	// For ckERC20, see https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
 	let maxTransactionFeeCkEth: bigint | undefined = undefined;
 	$: maxTransactionFeeCkEth = nonNullish($tokenId)
 		? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee
