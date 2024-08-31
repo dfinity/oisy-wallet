@@ -55,7 +55,11 @@
 		: undefined;
 
 	let maxTransactionFee: bigint | undefined = undefined;
-	$: maxTransactionFee = ckETH ? maxTransactionFeeCkEth : maxTransactionFeePlusLedgerApproveCkEth;
+	$: maxTransactionFee = ckETH
+		? maxTransactionFeeCkEth
+		: ckErc20
+			? maxTransactionFeePlusLedgerApproveCkEth
+			: undefined;
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 	$: store.setFee({ maxTransactionFee });
