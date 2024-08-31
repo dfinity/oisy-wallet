@@ -46,8 +46,9 @@
 			(tokenCkEth) => isTokenIcrcTestnet(tokenCkEth ?? {}) === isTokenIcrcTestnet($token ?? {})
 		);
 
-	// For ckERC20, include the fees for the transaction icrc2_approve(minter, tx_fee) described in the first step of the withdrawal scheme.
+	// For ckERC20, include the fees for the transaction icrc2_approve(minter, tx_fee) to the ckETH ledger, described in the first step of the withdrawal scheme.
 	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
+	// This fee is only used to assert that the balance of the ckETH ledger is enough for both fees.
 	let maxTransactionFeePlusLedgerApprove: bigint | undefined = undefined;
 	$: maxTransactionFeePlusLedgerApprove = nonNullish(maxTransactionFee)
 		? maxTransactionFee + (ckErc20 ? tokenCkEth?.fee ?? 0n : 0n)
