@@ -54,7 +54,7 @@ export const convertCkErc20ToErc20 = async ({
 	identity,
 	to,
 	amount: amountBigNumber,
-	ckEthMaxTransactionFee
+	ckErc20ToErc20MaxEthFees
 }: IcTransferParams & {
 	token: IcCkToken;
 }): Promise<void> => {
@@ -68,7 +68,7 @@ export const convertCkErc20ToErc20 = async ({
 	assertNonNullish(ckEthLedgerCanisterId, get(i18n).init.error.ledger_cketh_eth);
 
 	assertNonNullish(
-		ckEthMaxTransactionFee,
+		ckErc20ToErc20MaxEthFees,
 		get(i18n).send.assertion.cketh_max_transaction_fee_missing
 	);
 
@@ -79,7 +79,7 @@ export const convertCkErc20ToErc20 = async ({
 		identity,
 		progress,
 		progressStep: ProgressStepsSendIc.APPROVE_FEES,
-		amount: ckEthMaxTransactionFee,
+		amount: ckErc20ToErc20MaxEthFees,
 		to
 	});
 
