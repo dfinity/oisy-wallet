@@ -49,6 +49,7 @@ export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derive
 	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
 		$enabledNetworkTokens.map((token) => {
 			const balance: BigNumber | undefined = $balancesStore?.[token.id]?.data;
+			const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
 
 			return {
 				...token,
@@ -60,11 +61,11 @@ export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derive
 							displayDecimals: token.decimals
 						})
 					: undefined,
-				usdBalance: nonNullish($exchanges?.[token.id]?.usd)
+				usdBalance: nonNullish(exchangeRate)
 					? usdValue({
 							token,
-							balances: $balancesStore,
-							exchanges: $exchanges
+							balance,
+							exchangeRate
 						})
 					: undefined
 			};
