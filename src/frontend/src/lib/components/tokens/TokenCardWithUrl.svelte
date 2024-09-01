@@ -17,6 +17,7 @@
 		aria-label={replacePlaceholders($i18n.transactions.text.open_transactions, {
 			token: token.symbol
 		})}
+		tabindex="-1"
 	>
 		<slot />
 	</a>
