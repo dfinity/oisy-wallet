@@ -44,7 +44,7 @@ export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
 /**
  * All tokens matching the selected network or Chain Fusion, with their financial data.
  */
-export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derived(
+const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[combinedDerivedSortedNetworkTokens, balancesStore, exchanges],
 	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
 		$enabledNetworkTokens.map((token) => {
