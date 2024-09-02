@@ -7,17 +7,16 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
-import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from 'alchemy-sdk';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, type MockedFunction } from 'vitest';
 
 const usd = 1;
 
 const certified = true;
 
-const bn1 = BigNumber.from(100000000n);
-const bn2 = BigNumber.from(200000000n);
-const bn3 = BigNumber.from(3000000000000000000n);
+const bn1 = BigNumber.from(1n);
+const bn2 = BigNumber.from(2n);
+const bn3 = BigNumber.from(3n);
 
 const $tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
 
@@ -31,6 +30,10 @@ const $exchanges: ExchangesData = $tokens.reduce<ExchangesData>((acc, token) => 
 	acc[token.id] = { usd };
 	return acc;
 }, {});
+
+vi.mock('$lib/utils/exchange.utils', () => ({
+	usdValue: vi.fn()
+}));
 
 describe('sortTokens', () => {
 	it('should sort tokens by market cap, then by name, and finally by network name', () => {
@@ -120,6 +123,8 @@ describe('sortTokens', () => {
 });
 
 describe('pinTokensWithBalanceAtTop', () => {
+	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+
 	beforeEach(() => {
 		vi.resetAllMocks();
 	});
@@ -130,20 +135,18 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[BTC_MAINNET_TOKEN.id]: { data: bn2, certified }
 		};
 
+		mockUsdValue.mockImplementation(({ token: { id } }) => {
+			switch (id) {
+				case ICP_TOKEN.id:
+					return Number(bn1) * usd;
+				case BTC_MAINNET_TOKEN.id:
+					return Number(bn2) * usd;
+				default:
+					return 0;
+			}
+		});
+
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
-
-		const balance: BigNumber | undefined = newBalances?.[BTC_MAINNET_TOKEN.id]?.data;
-		const exchangeRate: number | undefined = $exchanges?.[BTC_MAINNET_TOKEN.id]?.usd;
-
-		const usdBalance: number | undefined = nonNullish(exchangeRate)
-			? usdValue({
-					token: BTC_MAINNET_TOKEN,
-					balance,
-					exchangeRate
-				})
-			: undefined;
-
-		expect({ balance, usdBalance, exchangeRate, result }).toEqual({ usd });
 
 		expect(result).toContainEqual({
 			...ICP_TOKEN,
@@ -167,6 +170,17 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ICP_TOKEN.id]: { usd },
 			[BTC_MAINNET_TOKEN.id]: { usd }
 		};
+
+		mockUsdValue.mockImplementation(({ token: { id } }) => {
+			switch (id) {
+				case ICP_TOKEN.id:
+					return Number(bn1) * usd;
+				case BTC_MAINNET_TOKEN.id:
+					return Number(bn2) * usd;
+				default:
+					return Number(bn3) * usd;
+			}
+		});
 
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances, $exchanges: newExchanges });
 
