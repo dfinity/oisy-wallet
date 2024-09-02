@@ -15,7 +15,7 @@
 	} from '$icp/stores/ethereum-fee.store';
 	import { token } from '$lib/stores/token.store';
 	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
-	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
+	import { tokenAsIcToken, tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
@@ -24,10 +24,10 @@
 	export let networkId: NetworkId | undefined = undefined;
 
 	let ckEthConvert = false;
-	$: ckEthConvert = isConvertCkEthToEth({ token: $tokenAsIcToken, networkId });
+	$: ckEthConvert = isConvertCkEthToEth({ token: $tokenWithFallbackAsIcToken, networkId });
 
 	let ckErc20Convert = false;
-	$: ckErc20Convert = isConvertCkErc20ToErc20({ token: $tokenAsIcToken, networkId });
+	$: ckErc20Convert = isConvertCkErc20ToErc20({ token: $tokenWithFallbackAsIcToken, networkId });
 
 	let maxTransactionFeeEth: bigint | undefined = undefined;
 	$: maxTransactionFeeEth = nonNullish($tokenId)
