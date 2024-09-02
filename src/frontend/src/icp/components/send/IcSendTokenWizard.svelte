@@ -113,6 +113,12 @@
 		});
 
 		try {
+			// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
+			const ckErc20ToErc20MaxCkEthFees: bigint | undefined =
+				isNetworkIdETH(networkId) && $tokenCkErc20Ledger
+					? $ethereumFeeStore?.maxTransactionFee
+					: undefined;
+
 			const params: IcTransferParams = {
 				to: destination,
 				amount: parseToken({
@@ -120,14 +126,14 @@
 					unitName: $token.decimals
 				}),
 				identity: $authStore.identity,
-				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
+				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step),
+				ckErc20ToErc20MaxCkEthFees
 			};
 
 			await sendIc({
 				...params,
 				token: $tokenAsIcToken,
-				targetNetworkId: networkId,
-				ckErc20ToErc20MaxCkEthFees
+				targetNetworkId: networkId
 			});
 
 			await Promise.allSettled([
@@ -192,13 +198,6 @@
 	});
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
-
-	// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
-	let ckErc20ToErc20MaxCkEthFees: bigint | undefined = undefined;
-	$: ckErc20ToErc20MaxCkEthFees =
-		isNetworkIdETH(networkId) && $tokenCkErc20Ledger
-			? $ethereumFeeStore?.maxTransactionFee
-			: undefined;
 
 	const back = () => dispatch('icBack');
 	const close = () => dispatch('icClose');
