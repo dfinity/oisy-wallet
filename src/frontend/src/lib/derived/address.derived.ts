@@ -1,6 +1,6 @@
 import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
-import { addressStore } from '$lib/stores/address.store';
+import { addressStore, type OptionAddressData } from '$lib/stores/address.store';
 import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
 import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
@@ -10,18 +10,29 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 	isNullish($addressStore)
 );
 
-export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
+const btcAddressData: Readable<OptionAddressData> = derived(
 	[addressStore],
-	([$addressStore]) => mapAddress({ $addressStore, tokenId: BTC_MAINNET_TOKEN_ID })
+	([$addressStore]) => $addressStore?.[BTC_MAINNET_TOKEN_ID]
 );
 
-export const ethAddress: Readable<OptionEthAddress> = derived([addressStore], ([$addressStore]) =>
-	mapAddress({ $addressStore, tokenId: ETHEREUM_TOKEN_ID })
+export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
+	[btcAddressData],
+	([$btcAddressData]) => mapAddress($btcAddressData)
+);
+
+const ethAddressData: Readable<OptionAddressData> = derived(
+	[addressStore],
+	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]
+);
+
+export const ethAddress: Readable<OptionEthAddress> = derived(
+	[ethAddressData],
+	([$ethAddressData]) => mapAddress($ethAddressData)
 );
 
 export const ethAddressCertified: Readable<boolean> = derived(
-	[addressStore],
-	([$addressStore]) => $addressStore?.[ETHEREUM_TOKEN_ID]?.certified === true
+	[ethAddressData],
+	([$ethAddressData]) => $ethAddressData?.certified === true
 );
 
 export const ethAddressNotCertified: Readable<boolean> = derived(

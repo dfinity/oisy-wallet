@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { TransactionFeeData } from '$lib/types/transaction';
 import { isNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -11,5 +12,4 @@ export const maxGasFee = ({
 export const minGasFee = ({
 	maxPriorityFeePerGas,
 	gas: estimatedGasFee
-}: TransactionFeeData): BigNumber =>
-	(maxPriorityFeePerGas ?? BigNumber.from(0)).mul(estimatedGasFee);
+}: TransactionFeeData): BigNumber => (maxPriorityFeePerGas ?? ZERO).mul(estimatedGasFee);

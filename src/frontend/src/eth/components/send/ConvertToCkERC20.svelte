@@ -25,21 +25,21 @@
 	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 
-	let converToSymbol: string;
-	$: converToSymbol = ($token as OptionErc20Token)?.twinTokenSymbol ?? 'ckETH';
+	let convertToSymbol: string;
+	$: convertToSymbol = ($token as OptionErc20Token)?.twinTokenSymbol ?? '';
 </script>
 
 <ConvertETH
 	nativeTokenId={$ethereumTokenId}
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
-		$ckErc20: converToSymbol
+		$ckErc20: convertToSymbol
 	})}
 >
 	<IconConvert size="28" slot="icon" />
 	<span>
 		{replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
-			$ckErc20: converToSymbol
+			$ckErc20: convertToSymbol
 		})}
 	</span>
 </ConvertETH>

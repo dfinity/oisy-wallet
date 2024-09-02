@@ -39,7 +39,7 @@
 	},
 	"auth": {
 		"text": {
-			"title": "A wallet that lives on-chain for 100% decentralization",
+			"title": "100% on-chain wallet for full decentralization",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
@@ -275,7 +275,8 @@
 			"max_gas_fee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
 			"address_unknown": "Address is unknown.",
 			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
-			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified."
+			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
+			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -297,6 +298,8 @@
 			"convert_to_cketh": "Convert to ckETH",
 			"convert_to_ckerc20": "Convert to $ckErc20",
 			"convert_eth_to_cketh": "Convert $token to $ckToken",
+			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes.",
+			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes.",
 			"how_to_convert_eth_to_cketh": "Here is how to can convert $token to $ckToken on $oisy_name",
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
@@ -419,7 +422,7 @@
 			"fee": "Fee",
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
-			"estimated_eth": "Estimated Ethereum Fee (Updated ≈30 Seconds)"
+			"estimated_eth": "Estimated Ethereum Fee"
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."
