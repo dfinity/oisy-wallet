@@ -5,7 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let token: Token;
-	export let disableTabSelector: boolean = false;
+	export let disableTabSelector = false;
 
 	let url: string;
 	$: url = transactionsUrl({ token });
