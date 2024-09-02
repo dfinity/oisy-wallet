@@ -147,7 +147,7 @@ describe('pinTokensWithBalanceAtTop', () => {
 		});
 	});
 
-	it('should return a list of tokens with usdBalance as prop if exchange data not undefined', () => {
+	it('should return a list of tokens with usd balance as prop if exchange data not undefined', () => {
 		const newExchanges: ExchangesData = {
 			[ICP_TOKEN.id]: { usd },
 			[BTC_MAINNET_TOKEN.id]: { usd }
@@ -172,7 +172,7 @@ describe('pinTokensWithBalanceAtTop', () => {
 		});
 	});
 
-	it('should pin tokens with usd balance at the top', () => {
+	it('should pin tokens with usd balance at the top and sort by usd balance', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
 			[ICP_TOKEN.id]: { data: bn2, certified },
 			[BTC_MAINNET_TOKEN.id]: { data: bn1, certified },
@@ -188,7 +188,21 @@ describe('pinTokensWithBalanceAtTop', () => {
 		]);
 	});
 
-	it('should return the same array if no tokens have balance', () => {
+	it('should put tokens with no usd balance after the ones with and sort them by balance', () => {
+		const newExchanges: ExchangesData = {
+			[ICP_TOKEN.id]: { usd }
+		};
+
+		const result = pinTokensWithBalanceAtTop({ $tokens, $balances, $exchanges: newExchanges });
+
+		expect(result.map((token) => token.id)).toEqual([
+			ICP_TOKEN.id,
+			ETHEREUM_TOKEN.id,
+			BTC_MAINNET_TOKEN.id
+		]);
+	});
+
+	it('should return the same array if all tokens have no balance', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
 			[ICP_TOKEN.id]: { data: ZERO, certified },
 			[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
