@@ -143,16 +143,16 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 	it('should put tokens with no exchange price (undefined balance) after tokens with balance', () => {
 		const tokens: TokenUi[] = [
-			{ ...ICP_TOKEN, formattedBalance: '200' },
-			{ ...BTC_MAINNET_TOKEN, usdBalance: 50, formattedBalance: '100' },
-			{ ...ETHEREUM_TOKEN, usdBalance: 200, formattedBalance: '100' }
+			ICP_TOKEN,
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
+			{ ...ETHEREUM_TOKEN, usdBalance: 200 }
 		];
 
 		const result = pinTokensWithBalanceAtTop(tokens);
 		expect(result).toEqual([
-			{ ...ETHEREUM_TOKEN, usdBalance: 200, formattedBalance: '100' },
-			{ ...BTC_MAINNET_TOKEN, usdBalance: 50, formattedBalance: '100' },
-			{ ...ICP_TOKEN, formattedBalance: '200' }
+			{ ...ETHEREUM_TOKEN, usdBalance: 200 },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
+			ICP_TOKEN
 		]);
 	});
 });
