@@ -127,6 +127,10 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 	beforeEach(() => {
 		vi.resetAllMocks();
+
+		mockUsdValue.mockImplementation(
+			({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
+		);
 	});
 
 	it('should return a list of tokens with balance as prop if balance data not undefined', () => {
@@ -134,17 +138,6 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ICP_TOKEN.id]: { data: bn1, certified },
 			[BTC_MAINNET_TOKEN.id]: { data: bn2, certified }
 		};
-
-		mockUsdValue.mockImplementation(({ token: { id } }) => {
-			switch (id) {
-				case ICP_TOKEN.id:
-					return Number(bn1) * usd;
-				case BTC_MAINNET_TOKEN.id:
-					return Number(bn2) * usd;
-				default:
-					return 0;
-			}
-		});
 
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
@@ -171,17 +164,6 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[BTC_MAINNET_TOKEN.id]: { usd }
 		};
 
-		mockUsdValue.mockImplementation(({ token: { id } }) => {
-			switch (id) {
-				case ICP_TOKEN.id:
-					return Number(bn1) * usd;
-				case BTC_MAINNET_TOKEN.id:
-					return Number(bn2) * usd;
-				default:
-					return Number(bn3) * usd;
-			}
-		});
-
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances, $exchanges: newExchanges });
 
 		expect(result).toContainEqual({
@@ -207,6 +189,10 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[BTC_MAINNET_TOKEN.id]: { data: bn1, certified },
 			[ETHEREUM_TOKEN.id]: { data: bn3, certified }
 		};
+
+		mockUsdValue.mockImplementation(
+			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
+		);
 
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
@@ -238,6 +224,10 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 		};
 
+		mockUsdValue.mockImplementation(
+			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
+		);
+
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
 		expect(result.map((token) => token.id)).toEqual([
@@ -254,6 +244,10 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 		};
 
+		mockUsdValue.mockImplementation(
+			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
+		);
+
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
 		expect(result.map((token) => token.id)).toEqual([
@@ -264,12 +258,16 @@ describe('pinTokensWithBalanceAtTop', () => {
 	});
 
 	it('should put tokens with no exchange data after tokens with balance', () => {
-		const $balances: CertifiedStoreData<BalancesData> = {
+		const newBalances: CertifiedStoreData<BalancesData> = {
 			[BTC_MAINNET_TOKEN.id]: { data: bn1, certified },
 			[ETHEREUM_TOKEN.id]: { data: bn3, certified }
 		};
 
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances, $exchanges });
+		mockUsdValue.mockImplementation(
+			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
+		);
+
+		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
 		expect(result.map((token) => token.id)).toEqual([
 			ETHEREUM_TOKEN.id,
