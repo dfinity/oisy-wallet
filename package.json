@@ -49,7 +49,7 @@
 		"@dfinity/candid": "^2.0.0",
 		"@dfinity/ckbtc": "^3.0.0",
 		"@dfinity/cketh": "^3.3.0",
-		"@dfinity/gix-components": "^4.6.0-next-2024-08-26",
+		"@dfinity/gix-components": "^4.7.0",
 		"@dfinity/ic-management": "^5.2.0",
 		"@dfinity/ledger-icp": "^2.5.0",
 		"@dfinity/ledger-icrc": "^2.5.0",
@@ -68,7 +68,7 @@
 	},
 	"devDependencies": {
 		"@dfinity/identity-secp256k1": "^2.0.0",
-		"@dfinity/internet-identity-playwright": "^0.0.1",
+		"@dfinity/internet-identity-playwright": "^0.0.3",
 		"@playwright/test": "^1.45.0",
 		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.2",

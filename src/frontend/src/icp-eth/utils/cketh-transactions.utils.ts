@@ -1,6 +1,9 @@
 import type { EthereumNetwork } from '$eth/types/network';
 import type { IcCkLinkedAssets, IcToken, IcTransactionUi } from '$icp/types/ic';
+import { isNetworkIdETH, isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { i18n } from '$lib/stores/i18n.store';
+import type { NetworkId } from '$lib/types/network';
+import type { OptionToken } from '$lib/types/token';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -81,3 +84,19 @@ const decodeCkErc20DepositAbiDataValue = (data: string): BigNumber => {
 
 	return value;
 };
+
+export const isConvertCkEthToEth = ({
+	token,
+	networkId
+}: {
+	token: OptionToken;
+	networkId: NetworkId | undefined;
+}) => nonNullish(token) && isNetworkIdETH(networkId) && isTokenCkEthLedger(token);
+
+export const isConvertCkErc20ToErc20 = ({
+	token,
+	networkId
+}: {
+	token: OptionToken;
+	networkId: NetworkId | undefined;
+}) => nonNullish(token) && isNetworkIdETH(networkId) && isTokenCkErc20Ledger(token);

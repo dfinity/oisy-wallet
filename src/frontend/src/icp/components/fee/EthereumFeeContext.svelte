@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { NetworkId } from '$lib/types/network';
-	import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
+	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import { tokenId } from '$lib/derived/token.derived';
 	import type { IcToken } from '$icp/types/ic';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { isNullish, nonNullish } from '@dfinity/utils';
@@ -16,17 +15,18 @@
 	import { token } from '$lib/stores/token.store';
 	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 	import { tokenAsIcToken, tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import {
+		isConvertCkErc20ToErc20,
+		isConvertCkEthToEth
+	} from '$icp-eth/utils/cketh-transactions.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
 
-	let ckETH = false;
-	$: ckETH = isTokenCkEthLedger($tokenWithFallbackAsIcToken);
+	let ckEthConvert = false;
+	$: ckEthConvert = isConvertCkEthToEth({ token: $tokenWithFallbackAsIcToken, networkId });
 
-	let ckErc20 = false;
-	$: ckErc20 = isTokenCkErc20Ledger($tokenWithFallbackAsIcToken);
-
-	let ethNetwork = false;
-	$: ethNetwork = isNetworkIdEthereum(networkId);
+	let ckErc20Convert = false;
+	$: ckErc20Convert = isConvertCkErc20ToErc20({ token: $tokenWithFallbackAsIcToken, networkId });
 
 	// This is the amount of ckETH to be burned to cover for the fees of the transaction eth_sendRawTransaction(destination_eth_address, amount) described in the withdrawal scheme.
 	// It will be requested to be approved using the transaction icrc2_approve(minter, tx_fee) described in the first step of the withdrawal scheme.
@@ -56,9 +56,9 @@
 		: undefined;
 
 	let maxTransactionFee: bigint | undefined = undefined;
-	$: maxTransactionFee = ckETH
+	$: maxTransactionFee = ckEthConvert
 		? maxTransactionFeeCkEth
-		: ckErc20
+		: ckErc20Convert
 			? maxTransactionFeePlusLedgerApproveCkEth
 			: undefined;
 
@@ -66,7 +66,7 @@
 	$: store.setFee({ maxTransactionFee });
 
 	const updateContext = () => {
-		if ((ckETH || ckErc20) && ethNetwork) {
+		if (ckEthConvert || ckErc20Convert) {
 			store.setFee({ maxTransactionFee });
 			return;
 		}
@@ -79,7 +79,7 @@
 	const loadFee = async () => {
 		clearTimer();
 
-		if ((!ckETH && !ckErc20) || !ethNetwork) {
+		if (!ckEthConvert && !ckErc20Convert) {
 			updateContext();
 			return;
 		}
