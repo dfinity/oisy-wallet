@@ -9,44 +9,39 @@ import { assertNonNullish } from '@dfinity/utils';
 interface BitcoinCanisterParams {
 	identity: OptionIdentity;
 	address: string;
-	certified: boolean;
 	network: BitcoinNetwork;
 	bitcoinCanisterId: CanisterIdText;
 }
 
-export const getUtxos = async ({
+export const getUtxosQuery = async ({
 	identity,
 	address,
 	network,
-	certified,
 	bitcoinCanisterId
 }: BitcoinCanisterParams): Promise<get_utxos_response> => {
 	assertNonNullish(identity);
 
-	const { getUtxos } = await bitcoinCanister({ identity, bitcoinCanisterId });
+	const { getUtxosQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
 
-	return getUtxos({
+	return getUtxosQuery({
 		address,
-		network,
-		certified
+		network
 	});
 };
 
-export const getBalance = async ({
+export const getBalanceQuery = async ({
 	identity,
 	address,
 	network,
-	certified,
 	bitcoinCanisterId
 }: BitcoinCanisterParams): Promise<bigint> => {
 	assertNonNullish(identity);
 
-	const { getBalance } = await bitcoinCanister({ identity, bitcoinCanisterId });
+	const { getBalanceQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
 
-	return getBalance({
+	return getBalanceQuery({
 		address,
-		network,
-		certified
+		network
 	});
 };
 
