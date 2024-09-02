@@ -20,7 +20,7 @@ RUN apt-get install nodejs -y
 RUN useradd -ms /bin/bash apprunner
 USER apprunner
 
-# Define working directories¯
+# Define working directories
 WORKDIR /oisy-wallet
 
 # Install dfx
@@ -37,15 +37,8 @@ ENV PATH="/home/apprunner/.local/share/dfx/bin:$PATH"
 # Copy resources
 COPY --chown=apprunner:apprunner . .
 
-RUN ls -l
-
-RUN (ls oisy-wallet/backend.wasm.gz && echo yes) || echo no
-RUN (ls backend.wasm.gz/backend.wasm.gz && echo yes) || echo no
-RUN (ls backend.wasm.gz && echo yes) || echo no
-RUN (ls ../backend.wasm.gz && echo yes) || echo no
-
 # Update dfx.json with custom backend WASM file
-RUN jq --argjson new_value '{"candid": "src/backend/backend.did", "wasm": "backend.wasm.gz", "type": "custom", "gzip": true}' \
+RUN jq --argjson new_value '{"candid": "src/backend/backend.did", "wasm": "oisy-wallet/backend.wasm.gz", "type": "custom", "gzip": true}' \
     '.canisters.signer = $new_value | .canisters.new_backend = $new_value | .canisters.backend = $new_value' \
     dfx.json > tmp.json && mv tmp.json dfx.json
 

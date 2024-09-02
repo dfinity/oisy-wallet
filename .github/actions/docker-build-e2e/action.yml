@@ -29,7 +29,7 @@ runs:
       uses: actions/download-artifact@v4
       with:
         name: backend.wasm.gz
-        path: /apprunner
+        path: .
 
     - run: ls -l
       shell: bash
