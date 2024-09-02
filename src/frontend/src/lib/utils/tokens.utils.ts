@@ -81,8 +81,8 @@ export const pinTokensWithBalanceAtTop = ({
 			const usdBalance: number | undefined = nonNullish(exchangeRate)
 				? usdValue({
 						token,
-						balances: $balances,
-						exchanges: $exchanges
+						balance,
+						exchangeRate
 					})
 				: undefined;
 
