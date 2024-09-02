@@ -421,7 +421,7 @@
 			"fee": "Fee",
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
-			"estimated_eth": "Estimated Ethereum Fee (Updated ≈30 Seconds)"
+			"estimated_eth": "Estimated Ethereum Fee"
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."
