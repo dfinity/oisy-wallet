@@ -86,7 +86,7 @@ export const pinTokensWithBalanceAtTop = ({
 					})
 				: undefined;
 
-			const tokenUI = {
+			const tokenUI: TokenUi = {
 				...token,
 				balance,
 				usdBalance
