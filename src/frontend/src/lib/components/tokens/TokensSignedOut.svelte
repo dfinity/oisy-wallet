@@ -9,7 +9,7 @@
 </script>
 
 {#each $combinedDerivedSortedNetworkTokens as token (token.id)}
-	<TokenCardWithUrl {token}>
+	<TokenCardWithUrl {token} disableTabSelector>
 		<TokenCardSignedOut {token} />
 	</TokenCardWithUrl>
 {/each}
