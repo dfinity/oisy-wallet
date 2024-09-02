@@ -1,5 +1,6 @@
 import type { Network } from '$lib/types/network';
 import type { RequiredExcept } from '$lib/types/utils';
+import type { BigNumber } from '@ethersproject/bignumber';
 
 export type TokenId = symbol;
 
@@ -40,9 +41,10 @@ export type OptionTokenStandard = TokenStandard | undefined | null;
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 
 interface TokenFinancialData {
+	balance?: BigNumber;
 	usdBalance?: number;
 }
 
 export type TokenUi = Token & TokenFinancialData;
 
-export type TokenWithBalance = TokenUi & { balance: number };
+export type TokenIndexKey = string;

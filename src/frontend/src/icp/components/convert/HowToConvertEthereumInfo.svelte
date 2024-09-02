@@ -4,7 +4,6 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -16,6 +15,7 @@
 	} from '$icp-eth/derived/cketh.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
+	import { ZERO } from '$lib/constants/app.constants';
 
 	export let formCancelAction: 'back' | 'close' = 'back';
 
@@ -57,7 +57,7 @@
 			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
-						value: $ckEthereumNativeTokenBalance ?? BigNumber.from(0n),
+						value: $ckEthereumNativeTokenBalance ?? ZERO,
 						unitName: $ckEthereumNativeToken.decimals
 					})}
 					{$ckEthereumNativeToken.symbol}</output
@@ -109,7 +109,7 @@
 
 				<p class="mb-6">
 					{formatToken({
-						value: $sendBalance ?? BigNumber.from(0n),
+						value: $sendBalance ?? ZERO,
 						unitName: $sendTokenDecimals,
 						displayDecimals: $sendTokenDecimals
 					})}

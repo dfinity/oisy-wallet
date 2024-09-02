@@ -1,4 +1,5 @@
-FROM ubuntu:22.04 as deps
+FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS deps
+# Note: The above is ubuntu 22.04
 
 ENV TZ=UTC
 
@@ -46,7 +47,7 @@ RUN mkdir -p src/backend/src \
     && ./docker/build --only-dependencies \
     && rm -rf src
 
-FROM deps as build_backend
+FROM deps AS build_backend
 
 COPY . .
 
