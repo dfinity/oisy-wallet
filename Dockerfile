@@ -1,4 +1,5 @@
-FROM --platform=linux/amd64 ubuntu:22.04 AS deps
+FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS deps
+# Note: The above is ubuntu 22.04
 
 ENV TZ=UTC
 
