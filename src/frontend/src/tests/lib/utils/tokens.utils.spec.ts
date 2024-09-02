@@ -5,7 +5,9 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin } from '$lib/types/token';
+import { usdValue } from '$lib/utils/exchange.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
+import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it } from 'vitest';
 
@@ -130,7 +132,18 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
-		expect($exchanges).toEqual({ usd });
+		const balance: BigNumber | undefined = newBalances?.[BTC_MAINNET_TOKEN.id]?.data;
+		const exchangeRate: number | undefined = $exchanges?.[BTC_MAINNET_TOKEN.id]?.usd;
+
+		const usdBalance: number | undefined = nonNullish(exchangeRate)
+			? usdValue({
+					token: BTC_MAINNET_TOKEN,
+					balance,
+					exchangeRate
+				})
+			: undefined;
+
+		expect({ balance, usdBalance, exchangeRate, result }).toEqual({ usd });
 
 		expect(result).toContainEqual({
 			...ICP_TOKEN,
