@@ -1,5 +1,5 @@
 import { BITCOIN_CANISTER_IDS } from '$env/networks.btc.env';
-import { getUtxos } from '$icp/api/bitcoin.api';
+import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getBtcAddress, getKnownUtxos, updateBalance } from '$icp/api/ckbtc-minter.api';
 import { CKBTC_UPDATE_BALANCE_TIMER_INTERVAL_MILLIS } from '$icp/constants/ckbtc.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$icp/schedulers/scheduler';
@@ -149,9 +149,8 @@ export class CkBTCUpdateBalanceScheduler
 		}
 
 		const [{ utxos: allUtxos }, knownUtxos] = await Promise.all([
-			getUtxos({
+			getUtxosQuery({
 				identity,
-				certified: false,
 				network,
 				address,
 				bitcoinCanisterId
