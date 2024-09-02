@@ -5,7 +5,6 @@ import { tokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
-import { formatToken } from '$lib/utils/format.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -53,13 +52,6 @@ export const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derive
 			return {
 				...token,
 				balance,
-				formattedBalance: nonNullish(balance)
-					? formatToken({
-							value: balance,
-							unitName: token.decimals,
-							displayDecimals: token.decimals
-						})
-					: undefined,
 				usdBalance: nonNullish($exchanges?.[token.id]?.usd)
 					? usdValue({
 							token,
