@@ -39,7 +39,7 @@
 	},
 	"auth": {
 		"text": {
-			"title": "A wallet that lives on-chain for 100% decentralization",
+			"title": "100% on-chain wallet for full decentralization",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
