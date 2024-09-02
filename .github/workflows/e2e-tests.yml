@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'e2e/**'
-      - 'src/frontend/**'
+
   workflow_dispatch:
 
 jobs:
