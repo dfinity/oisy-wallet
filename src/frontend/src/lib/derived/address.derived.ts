@@ -2,6 +2,7 @@ import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 import { addressStore, type OptionAddressData } from '$lib/stores/address.store';
 import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
+import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -9,12 +10,14 @@ export const addressNotLoaded: Readable<boolean> = derived([addressStore], ([$ad
 	isNullish($addressStore)
 );
 
-export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
+const btcAddressData: Readable<OptionAddressData> = derived(
 	[addressStore],
-	([$addressStore]) =>
-		$addressStore?.[BTC_MAINNET_TOKEN_ID] === null
-			? null
-			: $addressStore?.[BTC_MAINNET_TOKEN_ID]?.data
+	([$addressStore]) => $addressStore?.[BTC_MAINNET_TOKEN_ID]
+);
+
+export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
+	[btcAddressData],
+	([$btcAddressData]) => mapAddress($btcAddressData)
 );
 
 const ethAddressData: Readable<OptionAddressData> = derived(
@@ -24,7 +27,7 @@ const ethAddressData: Readable<OptionAddressData> = derived(
 
 export const ethAddress: Readable<OptionEthAddress> = derived(
 	[ethAddressData],
-	([$ethAddressData]) => ($ethAddressData === null ? null : $ethAddressData?.data)
+	([$ethAddressData]) => mapAddress($ethAddressData)
 );
 
 export const ethAddressCertified: Readable<boolean> = derived(
