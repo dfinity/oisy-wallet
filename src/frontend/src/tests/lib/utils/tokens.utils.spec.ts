@@ -130,6 +130,8 @@ describe('pinTokensWithBalanceAtTop', () => {
 
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
+		expect($exchanges).toEqual({ usd });
+
 		expect(result).toContainEqual({
 			...ICP_TOKEN,
 			balance: bn1,
