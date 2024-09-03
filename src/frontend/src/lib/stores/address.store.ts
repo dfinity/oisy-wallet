@@ -4,7 +4,7 @@ import { writable, type Readable } from 'svelte/store';
 
 type AddressData<T extends Address> = CertifiedData<T>;
 
-type OptionAddressData<T extends Address> = AddressData<T> | undefined | null;
+export type OptionAddressData<T extends Address> = AddressData<T> | undefined | null;
 
 export interface AddressStore<T extends Address> extends Readable<OptionAddressData<T>> {
 	set: (data: AddressData<T>) => void;
