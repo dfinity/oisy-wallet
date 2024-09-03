@@ -10,7 +10,11 @@ import {
 	updateIdbEthAddressLastUsage
 } from '$lib/api/idb.api';
 import { getBtcAddress, getEthAddress } from '$lib/api/signer.api';
-import { addressStore } from '$lib/stores/address.store';
+import {
+	btcAddressMainnetStore,
+	ethAddressStore,
+	type AddressStore
+} from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -30,21 +34,23 @@ import { get } from 'svelte/store';
 const loadTokenAddress = async <T extends Address>({
 	tokenId,
 	getAddress,
-	setIdbAddress
+	setIdbAddress,
+	addressStore
 }: {
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
 	setIdbAddress: (params: SetIdbAddressParams<T>) => Promise<void>;
+	addressStore: AddressStore<T>;
 }): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
 		const address = await getAddress(identity);
-		addressStore.set({ tokenId, data: { data: address, certified: true } });
+		addressStore.set({ data: address, certified: true });
 
 		await saveTokenAddressForFutureSignIn({ address, identity, setIdbAddress });
 	} catch (err: unknown) {
-		addressStore.reset(tokenId);
+		addressStore.reset();
 
 		toastsError({
 			msg: {
@@ -75,7 +81,8 @@ const loadBtcAddress = async ({
 				identity,
 				network: network === 'testnet' ? { testnet: null } : { mainnet: null }
 			}),
-		setIdbAddress: setIdbBtcAddressMainnet
+		setIdbAddress: setIdbBtcAddressMainnet,
+		addressStore: btcAddressMainnetStore
 	});
 
 const loadBtcAddressMainnet = async (): Promise<ResultSuccess> =>
@@ -88,7 +95,8 @@ const loadEthAddress = async (): Promise<ResultSuccess> =>
 	loadTokenAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		getAddress: getEthAddress,
-		setIdbAddress: setIdbEthAddress
+		setIdbAddress: setIdbEthAddress,
+		addressStore: ethAddressStore
 	});
 
 export const loadAddresses = async (tokenIds: TokenId[]): Promise<ResultSuccess> => {
@@ -129,11 +137,13 @@ const saveTokenAddressForFutureSignIn = async <T extends Address>({
 const loadIdbTokenAddress = async <T extends Address>({
 	tokenId,
 	getIdbAddress,
-	updateIdbAddressLastUsage
+	updateIdbAddressLastUsage,
+	addressStore
 }: {
 	tokenId: TokenId;
 	getIdbAddress: (principal: Principal) => Promise<IdbAddress<T> | undefined>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
+	addressStore: AddressStore<T>;
 }): Promise<ResultSuccess<LoadIdbAddressError>> => {
 	try {
 		const { identity } = get(authStore);
@@ -152,7 +162,7 @@ const loadIdbTokenAddress = async <T extends Address>({
 		}
 
 		const { address } = idbAddress;
-		addressStore.set({ tokenId, data: { data: address, certified: false } });
+		addressStore.set({ data: address, certified: false });
 
 		await updateIdbAddressLastUsage(identity.getPrincipal());
 	} catch (err: unknown) {
@@ -171,14 +181,16 @@ const loadIdbBtcAddressMainnet = async (): Promise<ResultSuccess<LoadIdbAddressE
 	loadIdbTokenAddress<BtcAddress>({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		getIdbAddress: getIdbBtcAddressMainnet,
-		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage
+		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage,
+		addressStore: btcAddressMainnetStore
 	});
 
 const loadIdbEthAddress = async (): Promise<ResultSuccess<LoadIdbAddressError>> =>
 	loadIdbTokenAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		getIdbAddress: getIdbEthAddress,
-		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
+		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage,
+		addressStore: ethAddressStore
 	});
 
 export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAddressError>> => {
@@ -198,12 +210,14 @@ const certifyAddress = async ({
 	tokenId,
 	address,
 	getAddress,
-	updateIdbAddressLastUsage
+	updateIdbAddressLastUsage,
+	addressStore
 }: {
 	tokenId: TokenId;
 	address: Address;
 	getAddress: (identity: OptionIdentity) => Promise<Address>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
+	addressStore: AddressStore<Address>;
 }): Promise<ResultSuccess<string>> => {
 	try {
 		const { identity } = get(authStore);
@@ -223,11 +237,11 @@ const certifyAddress = async ({
 			};
 		}
 
-		addressStore.set({ tokenId, data: { data: address, certified: true } });
+		addressStore.set({ data: address, certified: true });
 
 		await updateIdbAddressLastUsage(identity.getPrincipal());
 	} catch (err: unknown) {
-		addressStore.reset(tokenId);
+		addressStore.reset();
 
 		return { success: false, err: `Error while loading the ${tokenId.description} address.` };
 	}
@@ -246,7 +260,8 @@ export const certifyBtcAddressMainnet = async (
 				identity,
 				network: { mainnet: null }
 			}),
-		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage
+		updateIdbAddressLastUsage: updateIdbBtcAddressMainnetLastUsage,
+		addressStore: btcAddressMainnetStore
 	});
 
 export const certifyEthAddress = async (address: EthAddress): Promise<ResultSuccess<string>> =>
@@ -254,5 +269,6 @@ export const certifyEthAddress = async (address: EthAddress): Promise<ResultSucc
 		tokenId: ETHEREUM_TOKEN_ID,
 		address,
 		getAddress: getEthAddress,
-		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage
+		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage,
+		addressStore: ethAddressStore
 	});

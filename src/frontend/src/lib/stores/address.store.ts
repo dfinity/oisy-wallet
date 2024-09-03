@@ -1,18 +1,15 @@
-import { initCertifiedSetterStore } from '$lib/stores/certified-setter.store';
 import type { StorageStoreData } from '$lib/stores/storage.store';
 import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 
-export type AddressData<T extends Address = Address> = CertifiedData<T>;
+type AddressData<T extends Address = Address> = CertifiedData<T>;
 
 export type OptionAddressData = StorageStoreData<AddressData>;
 
-export const addressStore = initCertifiedSetterStore<AddressData>();
+export type OptionCertifiedAddressData<T extends Address> = AddressData<T> | undefined | null;
 
-type OptionCertifiedAddressData<T extends Address> = AddressData<T> | undefined | null;
-
-interface AddressStore<T extends Address> extends Readable<OptionCertifiedAddressData<T>> {
+export interface AddressStore<T extends Address> extends Readable<OptionCertifiedAddressData<T>> {
 	set: (data: AddressData<T>) => void;
 	reset: () => void;
 }
