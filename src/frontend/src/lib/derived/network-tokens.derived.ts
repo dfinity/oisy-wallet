@@ -42,6 +42,17 @@ export const enabledIcNetworkTokens: Readable<IcToken[]> = derived(
 );
 
 /**
+ * The following store is use as reference for the list of WalletWorkers that are started/stopped in the main token page.
+ */
+export const enabledIcNetworkTokens: Readable<IcToken[]> = derived(
+	[enabledNetworkTokens],
+	([$enabledNetworkTokens]) =>
+		$enabledNetworkTokens.filter(
+			({ standard }) => standard === 'icp' || standard === 'icrc'
+		) as IcToken[]
+);
+
+/**
  * Network tokens sorted by market cap, with the ones to pin at the top of the list.
  */
 export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
