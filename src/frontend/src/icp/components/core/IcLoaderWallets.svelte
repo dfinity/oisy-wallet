@@ -6,6 +6,9 @@
 	import { enabledIcNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import type { TokenId } from '$lib/types/token';
 	import { debounce, nonNullish } from '@dfinity/utils';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let workers: Map<TokenId, WalletWorker> = new Map<TokenId, WalletWorker>();
 
@@ -26,12 +29,26 @@
 		await Promise.all(
 			$enabledIcNetworkTokens.map(async (token) => {
 				if (!workers.has(token.id)) {
-					const worker = await (token.standard === 'icrc'
-						? initIcrcWalletWorker(token)
-						: initIcpWalletWorker());
+					try {
+						const worker = await (token.standard === 'icrc'
+							? initIcrcWalletWorker(token)
+							: initIcpWalletWorker());
 
-					worker.start();
-					workers.set(token.id, worker);
+						worker.stop();
+						worker.start();
+
+						workers.set(token.id, worker);
+					} catch (err: unknown) {
+						// We show the error to the user, but we keep loading the rest of the workers
+						toastsError({
+							msg: {
+								text: replacePlaceholders($i18n.tokens.error.loading_ic_wallet, {
+									$symbol: token.symbol
+								})
+							},
+							err
+						});
+					}
 				}
 			})
 		);
