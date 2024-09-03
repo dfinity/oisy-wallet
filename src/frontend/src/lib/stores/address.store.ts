@@ -10,9 +10,9 @@ export type OptionAddressData = StorageStoreData<AddressData>;
 
 export const addressStore = initCertifiedSetterStore<AddressData>();
 
-export type OptionCertifiedAddressData<T extends Address> = AddressData<T> | undefined | null;
+type OptionCertifiedAddressData<T extends Address> = AddressData<T> | undefined | null;
 
-export interface AddressStore<T extends Address> extends Readable<OptionCertifiedAddressData<T>> {
+interface AddressStore<T extends Address> extends Readable<OptionCertifiedAddressData<T>> {
 	set: (data: AddressData<T>) => void;
 	reset: () => void;
 }
