@@ -4,7 +4,7 @@
 	import { modalEthSend } from '$lib/derived/modal.derived';
 	import EthSendModal from '$eth/components/send/EthSendModal.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import { loadTokenAndRun } from '$icp/services/token.services';
+	import { loadTokenAndRun } from '$lib/services/token.services';
 	import type { Token } from '$lib/types/token';
 	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
 
