@@ -22,7 +22,7 @@
 			workers.delete(tokenId);
 		});
 
-		await Promise.all(
+		await Promise.allSettled(
 			$enabledIcNetworkTokens.map(async (token) => {
 				if (!workers.has(token.id)) {
 					try {
