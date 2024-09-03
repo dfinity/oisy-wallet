@@ -57,6 +57,8 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return matic;
 		case 'rndr':
 			return rndr;
+		case 'weth':
+			return weth;
 		case 'weeth':
 			return weeth;
 		case 'wsteth':
