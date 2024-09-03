@@ -206,7 +206,7 @@ export const loadIdbAddresses = async (): Promise<ResultSuccessReduced<LoadIdbAd
 	return { success, err };
 };
 
-const certifyAddress = async ({
+const certifyAddress = async <T extends Address>({
 	tokenId,
 	address,
 	getAddress,
@@ -214,10 +214,10 @@ const certifyAddress = async ({
 	addressStore
 }: {
 	tokenId: TokenId;
-	address: Address;
-	getAddress: (identity: OptionIdentity) => Promise<Address>;
+	address: T;
+	getAddress: (identity: OptionIdentity) => Promise<T>;
 	updateIdbAddressLastUsage: (principal: Principal) => Promise<void>;
-	addressStore: AddressStore<Address>;
+	addressStore: AddressStore<T>;
 }): Promise<ResultSuccess<string>> => {
 	try {
 		const { identity } = get(authStore);
@@ -252,7 +252,7 @@ const certifyAddress = async ({
 export const certifyBtcAddressMainnet = async (
 	address: BtcAddress
 ): Promise<ResultSuccess<string>> =>
-	certifyAddress({
+	certifyAddress<BtcAddress>({
 		tokenId: BTC_MAINNET_TOKEN_ID,
 		address,
 		getAddress: (identity: OptionIdentity) =>
@@ -265,7 +265,7 @@ export const certifyBtcAddressMainnet = async (
 	});
 
 export const certifyEthAddress = async (address: EthAddress): Promise<ResultSuccess<string>> =>
-	certifyAddress({
+	certifyAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		address,
 		getAddress: getEthAddress,
