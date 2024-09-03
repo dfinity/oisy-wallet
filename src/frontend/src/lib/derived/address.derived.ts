@@ -4,8 +4,7 @@ import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-// TODO: rename it to ethAddressNotLoaded
-export const addressNotLoaded: Readable<boolean> = derived(
+export const ethAddressNotLoaded: Readable<boolean> = derived(
 	[ethAddressStore],
 	([$ethAddressStore]) => isNullish($ethAddressStore)
 );

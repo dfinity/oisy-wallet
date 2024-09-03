@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { modalEthSend } from '$lib/derived/modal.derived';
 	import EthSendModal from '$eth/components/send/EthSendModal.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
@@ -10,7 +10,7 @@
 
 	export let token: Token;
 
-	const isDisabled = (): boolean => $addressNotLoaded;
+	const isDisabled = (): boolean => $ethAddressNotLoaded;
 
 	const openSend = async (modalId: symbol) => {
 		if (isDisabled()) {

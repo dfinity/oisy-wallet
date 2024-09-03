@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { modalStore } from '$lib/stores/modal.store';
-	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
@@ -19,7 +19,7 @@
 	export let nativeNetworkId: NetworkId;
 
 	const isDisabled = (): boolean =>
-		$addressNotLoaded ||
+		$ethAddressNotLoaded ||
 		// We can convert to ETH - i.e. we can convert to Ethereum or Sepolia, not an ERC20 token
 		isNotSupportedEthTokenId(nativeTokenId) ||
 		isNullish(
