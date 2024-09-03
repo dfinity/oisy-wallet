@@ -1,4 +1,5 @@
 import type { Erc20Token } from '$eth/types/erc20';
+import type { IcToken } from '$icp/types/ic';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 import { tokens, tokensToPin } from '$lib/derived/tokens.derived';
@@ -30,6 +31,17 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 	[enabledNetworkTokens],
 	([$enabledNetworkTokens]) =>
 		$enabledNetworkTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
+);
+
+/**
+ * The following store is use as reference for the list of WalletWorkers that are started/stopped in the main token page.
+ */
+export const enabledIcNetworkTokens: Readable<IcToken[]> = derived(
+	[enabledNetworkTokens],
+	([$enabledNetworkTokens]) =>
+		$enabledNetworkTokens.filter(
+			({ standard }) => standard === 'icp' || standard === 'icrc'
+		) as IcToken[]
 );
 
 /**
