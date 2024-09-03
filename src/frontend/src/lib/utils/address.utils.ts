@@ -1,5 +1,6 @@
-import type { OptionAddressData } from '$lib/stores/address.store';
+import type { OptionCertifiedAddressData } from '$lib/stores/address.store';
 import type { Address, OptionAddress } from '$lib/types/address';
 
-export const mapAddress = ($addressData: OptionAddressData): OptionAddress<Address> =>
-	$addressData === null ? null : $addressData?.data;
+export const mapAddress = <T extends Address>(
+	$addressStore: OptionCertifiedAddressData<T>
+): OptionAddress<T> => ($addressStore === null ? null : $addressStore?.address);
