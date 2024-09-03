@@ -33,14 +33,6 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 		$enabledNetworkTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
 );
 
-export const enabledIcNetworkTokens: Readable<IcToken[]> = derived(
-	[enabledNetworkTokens],
-	([$enabledNetworkTokens]) =>
-		$enabledNetworkTokens.filter(
-			({ standard }) => standard === 'icp' || standard === 'icrc'
-		) as IcToken[]
-);
-
 /**
  * The following store is use as reference for the list of WalletWorkers that are started/stopped in the main token page.
  */
