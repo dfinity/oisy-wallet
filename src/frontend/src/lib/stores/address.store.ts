@@ -3,20 +3,20 @@ import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 
-type AddressData<T extends Address> = CertifiedData<T>;
+type CertifiedAddressData<T extends Address> = CertifiedData<T>;
 
-export type OptionAddressData<T extends Address> = StorageStoreData<AddressData<T>>;
+export type StorageAddressData<T extends Address> = StorageStoreData<CertifiedAddressData<T>>;
 
-export interface AddressStore<T extends Address> extends Readable<OptionAddressData<T>> {
-	set: (data: AddressData<T>) => void;
+export interface AddressStore<T extends Address> extends Readable<StorageAddressData<T>> {
+	set: (data: CertifiedAddressData<T>) => void;
 	reset: () => void;
 }
 
 const initAddressStore = <T extends Address>(): AddressStore<T> => {
-	const { subscribe, set } = writable<OptionAddressData<T>>(undefined);
+	const { subscribe, set } = writable<StorageAddressData<T>>(undefined);
 
 	return {
-		set: (data: AddressData<T>) => set(data),
+		set: (data: CertifiedAddressData<T>) => set(data),
 		reset: () => set(null),
 		subscribe
 	};
