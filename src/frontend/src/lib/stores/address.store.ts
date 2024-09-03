@@ -2,7 +2,7 @@ import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
 import type { CertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 
-export type AddressData<T extends Address = Address> = CertifiedData<T>;
+type AddressData<T extends Address = Address> = CertifiedData<T>;
 
 type OptionAddressData<T extends Address> = AddressData<T> | undefined | null;
 
