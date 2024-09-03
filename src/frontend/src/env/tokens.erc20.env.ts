@@ -66,6 +66,12 @@ const ERC20_CONTRACT_ADDRESS_WEEETH: Erc20Contract = {
 	exchange: 'erc20'
 };
 
+const ERC20_CONTRACT_ADDRESS_WETH: Erc20Contract = {
+	// Wrapped Ether (WETH)
+	address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+	exchange: 'erc20'
+};
+
 export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	{
 		// Weenus
@@ -95,7 +101,8 @@ export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ADDRESS_DAI,
 	ERC20_CONTRACT_ADDRESS_FLOKI,
 	ERC20_CONTRACT_ADDRESS_RNDR,
-	ERC20_CONTRACT_ADDRESS_WEEETH
+	ERC20_CONTRACT_ADDRESS_WEEETH,
+	ERC20_CONTRACT_ADDRESS_WETH
 ];
 
 export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = [
