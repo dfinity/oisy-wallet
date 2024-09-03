@@ -18,12 +18,8 @@
 		);
 
 		unusedWorkers.forEach((tokenId) => {
-			const worker = workers.get(tokenId);
-
-			if (nonNullish(worker)) {
-				worker.stop();
-				workers.delete(tokenId);
-			}
+			workers.get(tokenId)?.stop();
+			workers.delete(tokenId);
 		});
 
 		await Promise.all(
