@@ -85,6 +85,7 @@ export const pinTokensWithBalanceAtTop = ($tokens: TokenUi[]): TokenUi[] => {
  * Calculates total USD balance of the provided tokens list.
  *
  * @param $tokens - The list of tokens for total USD balance calculation.
+ * @returns The sum of tokens USD balance.
  */
-export const getTokensTotalUsdBalance = ($tokens: TokenUi[]): number =>
+export const sumTokensUsdBalance = ($tokens: TokenUi[]): number =>
 	$tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);

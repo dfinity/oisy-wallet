@@ -3,9 +3,9 @@ import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import {
-	getTokensTotalUsdBalance,
 	pinTokensWithBalanceAtTop,
-	sortTokens
+	sortTokens,
+	sumTokensUsdBalance
 } from '$lib/utils/tokens.utils';
 import { describe, expect, it } from 'vitest';
 
@@ -161,15 +161,31 @@ describe('pinTokensWithBalanceAtTop', () => {
 	});
 });
 
-describe('getTokensTotalUsdBalance', () => {
-	it('should correctly calculate tokens USD total balance', () => {
+describe('sumTokensTotalUsdBalance', () => {
+	it('should correctly calculate USD total balance when tokens have usdBalance', () => {
 		const tokens: TokenUi[] = [
 			{ ...ICP_TOKEN, usdBalance: 50 },
 			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
 			{ ...ETHEREUM_TOKEN, usdBalance: 100 }
 		];
 
-		const result = getTokensTotalUsdBalance(tokens);
+		const result = sumTokensUsdBalance(tokens);
 		expect(result).toEqual(200);
+	});
+
+	it('should correctly calculate USD total balance when some tokens do not have usdBalance', () => {
+		const tokens: TokenUi[] = [
+			{ ...ICP_TOKEN, usdBalance: 50 },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 0 },
+			{ ...ETHEREUM_TOKEN }
+		];
+
+		const result = sumTokensUsdBalance(tokens);
+		expect(result).toEqual(50);
+	});
+
+	it('should correctly calculate USD total balance when tokens list is empty', () => {
+		const result = sumTokensUsdBalance([]);
+		expect(result).toEqual(0);
 	});
 });
