@@ -10,7 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let workers: Map<TokenId, WalletWorker> = new Map<TokenId, WalletWorker>();
+	const workers: Map<TokenId, WalletWorker> = new Map<TokenId, WalletWorker>();
 
 	const manageWorkers = async () => {
 		const unusedWorkers: TokenId[] = Array.from(workers.keys()).filter(
