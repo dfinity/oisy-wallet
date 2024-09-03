@@ -8,7 +8,7 @@
 	import type { Token } from '$lib/types/token';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { loadTokenAndRun } from '$lib/services/token.services';
-	import { addressNotLoaded } from '$lib/derived/address.derived';
+	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import type { Network, NetworkId } from '$lib/types/network';
@@ -45,7 +45,7 @@
 			dispatch('nnsClose');
 		});
 
-	const isDisabled = (): boolean => $addressNotLoaded;
+	const isDisabled = (): boolean => $ethAddressNotLoaded;
 
 	const nextStep = async ({ detail: token }: CustomEvent<Token>) => {
 		if (isDisabled()) {
