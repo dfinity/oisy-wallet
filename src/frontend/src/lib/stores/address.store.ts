@@ -4,15 +4,15 @@ import { writable, type Readable } from 'svelte/store';
 
 export type AddressData<T extends Address = Address> = CertifiedData<T>;
 
-type OptionCertifiedAddressData<T extends Address> = AddressData<T> | undefined | null;
+type OptionAddressData<T extends Address> = AddressData<T> | undefined | null;
 
-interface AddressStore<T extends Address> extends Readable<OptionCertifiedAddressData<T>> {
+export interface AddressStore<T extends Address> extends Readable<OptionAddressData<T>> {
 	set: (data: AddressData<T>) => void;
 	reset: () => void;
 }
 
 const initAddressStore = <T extends Address>(): AddressStore<T> => {
-	const { subscribe, set } = writable<OptionCertifiedAddressData<T>>(undefined);
+	const { subscribe, set } = writable<OptionAddressData<T>>(undefined);
 
 	return {
 		set: (data: AddressData<T>) => set(data),
