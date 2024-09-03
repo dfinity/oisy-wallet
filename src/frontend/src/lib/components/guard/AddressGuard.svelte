@@ -1,31 +1,24 @@
 <script lang="ts">
-	import { ethAddressStore } from '$lib/stores/address.store';
-	import { isNullish } from '@dfinity/utils';
-	import { certifyEthAddress } from '$lib/services/address.services';
-	import { warnSignOut } from '$lib/services/auth.services';
+	import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
+	import { certifyBtcAddressMainnet, certifyEthAddress } from '$lib/services/address.services';
+	import { validateAddress } from '$lib/utils/address.utils';
+	import type { BtcAddress, EthAddress } from '$lib/types/address';
 
-	const validateAddress = async () => {
-		if (isNullish($ethAddressStore)) {
-			// No address is loaded, we don't have to verify it
-			return;
-		}
+	const validateBtcAddressMainnet = async () =>
+		await validateAddress<BtcAddress>({
+			$addressStore: $btcAddressMainnetStore,
+			certifyAddress: certifyBtcAddressMainnet
+		});
 
-		if ($ethAddressStore.certified === true) {
-			// The address is certified, all good
-			return;
-		}
+	const validateEthAddress = async () =>
+		await validateAddress<EthAddress>({
+			$addressStore: $ethAddressStore,
+			certifyAddress: certifyEthAddress
+		});
 
-		const { success, err } = await certifyEthAddress($ethAddressStore.data);
+	$: $btcAddressMainnetStore, validateBtcAddressMainnet();
 
-		if (success) {
-			// The address is valid
-			return;
-		}
-
-		await warnSignOut(err ?? 'Error while certifying your address');
-	};
-
-	$: $ethAddressStore, (async () => await validateAddress())();
+	$: $ethAddressStore, validateEthAddress();
 </script>
 
 <slot />
