@@ -2,7 +2,11 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
-import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
+import {
+	getTokensTotalUsdBalance,
+	pinTokensWithBalanceAtTop,
+	sortTokens
+} from '$lib/utils/tokens.utils';
 import { describe, expect, it } from 'vitest';
 
 const usd = 1;
@@ -154,5 +158,18 @@ describe('pinTokensWithBalanceAtTop', () => {
 			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
 			ICP_TOKEN
 		]);
+	});
+});
+
+describe('getTokensTotalUsdBalance', () => {
+	it('should correctly calculate tokens USD total balance', () => {
+		const tokens: TokenUi[] = [
+			{ ...ICP_TOKEN, usdBalance: 50 },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
+			{ ...ETHEREUM_TOKEN, usdBalance: 100 }
+		];
+
+		const result = getTokensTotalUsdBalance(tokens);
+		expect(result).toEqual(200);
 	});
 });
