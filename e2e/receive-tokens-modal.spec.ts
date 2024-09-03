@@ -22,7 +22,6 @@ testWithII('should display receive-tokens modal', async ({ page, iiPage }) => {
 			height: RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT
 		}
 	});
-
 	await homepageLoggedIn.waitForReady();
 
 	await homepageLoggedIn.testModalSnapshot({
