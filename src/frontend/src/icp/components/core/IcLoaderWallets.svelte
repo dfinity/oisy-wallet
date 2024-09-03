@@ -59,7 +59,6 @@
 	$: $enabledIcNetworkTokens, debounceManageWorkers();
 
 	onDestroy(() => {
-		console.log('onDestroy');
 		workers.forEach((worker) => worker.stop());
 		workers.clear();
 	});
