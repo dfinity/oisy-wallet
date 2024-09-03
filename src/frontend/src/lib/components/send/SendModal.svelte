@@ -7,7 +7,7 @@
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 	import type { Token } from '$lib/types/token';
 	import { waitWalletReady } from '$lib/services/actions.services';
-	import { loadTokenAndRun } from '$icp/services/token.services';
+	import { loadTokenAndRun } from '$lib/services/token.services';
 	import { addressNotLoaded } from '$lib/derived/address.derived';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
