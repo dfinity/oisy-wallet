@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { ethAddressStore } from '$lib/stores/address.store';
-	import { certifyEthAddress } from '$lib/services/address.services';
-	import { validateAddress } from '$lib/utils/address.utils';
+	import { certifyEthAddress, validateAddress } from '$lib/services/address.services';
 	import type { EthAddress } from '$lib/types/address';
 
 	const validateEthAddress = async () =>
