@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
-	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import {
@@ -22,6 +21,7 @@
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
+	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
