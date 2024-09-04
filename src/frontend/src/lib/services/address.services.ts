@@ -302,6 +302,12 @@ const validateAddress = async <T extends Address>({
 	await warnSignOut(err ?? 'Error while certifying your address');
 };
 
+export const validateBtcAddressMainnet = async ($addressStore: StorageAddressData<BtcAddress>) =>
+	await validateAddress<BtcAddress>({
+		$addressStore,
+		certifyAddress: certifyBtcAddressMainnet
+	});
+
 export const validateEthAddress = async ($addressStore: StorageAddressData<EthAddress>) =>
 	await validateAddress<EthAddress>({
 		$addressStore,
