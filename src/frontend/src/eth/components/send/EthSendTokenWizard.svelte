@@ -1,54 +1,54 @@
 <script lang="ts">
-	import { toastsError } from '$lib/stores/toasts.store';
-	import { send as executeSend } from '$eth/services/send.services';
-	import { isNullish } from '@dfinity/utils';
 	import { type WizardStep } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { writable } from 'svelte/store';
 	import SendForm from './SendForm.svelte';
 	import SendReview from './SendReview.svelte';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import { sendSteps } from '$eth/constants/steps.constants';
+	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { send as executeSend } from '$eth/services/send.services';
 	import {
 		FEE_CONTEXT_KEY,
 		type FeeContext as FeeContextType,
 		initFeeContext,
 		initFeeStore
 	} from '$eth/stores/fee.store';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import { sendSteps } from '$eth/constants/steps.constants';
-	import { parseToken } from '$lib/utils/parse.utils';
-	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { authStore } from '$lib/stores/auth.store';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-	import type { Network } from '$lib/types/network';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { writable } from 'svelte/store';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { decodeQrCode } from '$eth/utils/qr-code.utils';
+	import { shouldSendWithApproval } from '$eth/utils/send.utils';
+	import { isErc20Icp } from '$eth/utils/token.utils';
+	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
+	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import {
+		TRACK_COUNT_ETH_SEND_ERROR,
+		TRACK_COUNT_ETH_SEND_SUCCESS,
+		TRACK_DURATION_ETH_SEND
+	} from '$lib/constants/analytics.contants';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import {
 		initTimedEvent,
 		trackTimedEventError,
 		trackTimedEventSuccess,
 		trackEvent
 	} from '$lib/services/analytics.services';
-	import {
-		TRACK_COUNT_ETH_SEND_ERROR,
-		TRACK_COUNT_ETH_SEND_SUCCESS,
-		TRACK_DURATION_ETH_SEND
-	} from '$lib/constants/analytics.contants';
-	import { shouldSendWithApproval } from '$eth/utils/send.utils';
-	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import type { OptionToken, Token, TokenId } from '$lib/types/token';
-	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
-	import { decodeQrCode } from '$eth/utils/qr-code.utils';
+	import { authStore } from '$lib/stores/auth.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { Network } from '$lib/types/network';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
-	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
-	import { isErc20Icp } from '$eth/utils/token.utils';
+	import type { OptionToken, Token, TokenId } from '$lib/types/token';
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'close';

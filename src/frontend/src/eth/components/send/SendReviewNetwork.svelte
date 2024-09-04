@@ -1,19 +1,19 @@
 <script lang="ts">
-	import type { Network } from '$lib/types/network';
 	import { nonNullish } from '@dfinity/utils';
-	import Value from '$lib/components/ui/Value.svelte';
-	import { isNetworkICP } from '$lib/utils/network.utils';
+	import { ICP_NETWORK } from '$env/networks.env';
+	import { ERC20_CONTRACT_ICP, ERC20_CONTRACT_ICP_GOERLI } from '$env/tokens.erc20.env';
+	import icpDark from '$eth/assets/icp_dark.svg';
+	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import eth from '$icp-eth/assets/eth.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import icpDark from '$eth/assets/icp_dark.svg';
-	import type { Token } from '$lib/types/token';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { ICP_NETWORK } from '$env/networks.env';
-	import type { Erc20Token } from '$eth/types/erc20';
-	import { ERC20_CONTRACT_ICP, ERC20_CONTRACT_ICP_GOERLI } from '$env/tokens.erc20.env';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNetworkICP } from '$lib/utils/network.utils';
 
 	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
+	import type { OptionToken, Token } from '$lib/types/token';
 
 	export let token: OptionToken;
 

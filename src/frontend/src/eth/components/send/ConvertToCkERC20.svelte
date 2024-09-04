@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
-	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
-	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { OptionErc20Token } from '$eth/types/erc20';
-	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { token } from '$lib/stores/token.store';
+	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import type { OptionErc20Token } from '$eth/types/erc20';
+	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
+	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	/**
 	 * Send modal context store
