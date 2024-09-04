@@ -94,6 +94,7 @@ export const pinTokensWithBalanceAtTop = ({
 
 			if ((usdBalance ?? 0) > 0 || (balance ?? ZERO).gt(0)) {
 				acc[0] = [...acc[0], tokenUI];
+
 				return acc;
 			}
 
