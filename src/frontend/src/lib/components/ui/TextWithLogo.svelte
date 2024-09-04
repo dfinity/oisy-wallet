@@ -6,14 +6,23 @@
 	export let name: string;
 	export let icon: string | undefined;
 	export let logo: 'start' | 'end' = 'end';
+	export let description: string | undefined = undefined;
 </script>
 
 <span
-	class="flex items-center"
+	class="flex"
+	class:items-center={!description}
 	class:gap-2={logo === 'start'}
 	class:gap-1={logo === 'end'}
 	class:flex-row-reverse={logo === 'start'}
 >
-	<span>{name}</span>
+	{#if description}
+		<span class="flex flex-col gap-0.5">
+			<span class="leading-5">{name}</span>
+			<span class="leading-none text-xs text-misty-rose text-left">{description}</span>
+		</span>
+	{:else}
+		<span>{name}</span>
+	{/if}
 	<Logo src={icon} alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })} />
 </span>

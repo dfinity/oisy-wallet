@@ -10,4 +10,4 @@
 	$: ({ id, name, icon } = network);
 </script>
 
-<NetworkButton {id} {name} {icon} on:icSelected description={undefined} />
+<NetworkButton {id} {name} {icon} on:icSelected />

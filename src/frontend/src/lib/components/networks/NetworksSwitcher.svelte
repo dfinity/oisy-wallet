@@ -40,7 +40,6 @@
 				id={undefined}
 				name={$i18n.networks.chain_fusion}
 				icon={chainFusion}
-				description={undefined}
 				on:icSelected={close}
 			/>
 		</li>

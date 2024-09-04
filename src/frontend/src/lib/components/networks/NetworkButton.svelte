@@ -6,12 +6,12 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
-	import TextWithDescriptionAndLogo from '$lib/components/ui/TextWithDescriptionAndLogo.svelte';
+	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
-	export let description: string | undefined;
 	export let icon: string | undefined;
+	export let description: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -28,7 +28,7 @@
 </script>
 
 <button class="w-full flex justify-between items-start" on:click={onClick}>
-	<TextWithDescriptionAndLogo {name} {description} {icon} />
+	<TextWithLogo {name} {description} {icon} logo="start" />
 
 	{#if id === $networkId}
 		<span in:fade><IconCheck size="20px" /></span>
