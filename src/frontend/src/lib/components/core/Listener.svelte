@@ -2,7 +2,6 @@
 	import type { ComponentType } from 'svelte';
 	import type { OptionToken } from '$lib/types/token';
 	import EthListener from '$eth/components/core/EthListener.svelte';
-	import IcListener from '$icp/components/core/IcListener.svelte';
 	import { isNetworkIdBitcoin, isNetworkIdICP } from '$lib/utils/network.utils';
 	import { isNullish } from '@dfinity/utils';
 	import NoListener from '$lib/components/core/NoListener.svelte';
@@ -16,7 +15,7 @@
 		isNullish(token) || !$authSignedIn
 			? NoListener
 			: isNetworkIdICP(token.network.id)
-				? IcListener
+				? NoListener
 				: isNetworkIdBitcoin(token.network.id)
 					? BitcoinListener
 					: EthListener;
