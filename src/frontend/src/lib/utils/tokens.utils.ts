@@ -1,16 +1,26 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Token, TokenToPin, TokenUi, TokenWithBalance } from '$lib/types/token';
-import { formatToken } from '$lib/utils/format.utils';
+import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import { usdValue } from '$lib/utils/exchange.utils';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
+import type { BigNumber } from '@ethersproject/bignumber';
 
-export const pinTokensAtTop = ({
+/**
+ * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
+ *
+ * @param $tokens - The list of tokens to sort.
+ * @param $tokensToPin - The list of tokens to pin at the top of the list.
+ * @param $exchanges - The exchange rates for the tokens.
+ */
+export const sortTokens = ({
 	$tokens,
+	$exchanges,
 	$tokensToPin
 }: {
 	$tokens: Token[];
+	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
 }): Token[] => {
 	const pinnedTokens = $tokensToPin
@@ -28,28 +38,16 @@ export const pinTokensAtTop = ({
 			)
 	);
 
-	return [...pinnedTokens, ...otherTokens];
+	return [
+		...pinnedTokens,
+		...otherTokens.sort(
+			(a, b) =>
+				($exchanges[b.id]?.usd_market_cap ?? 0) - ($exchanges[a.id]?.usd_market_cap ?? 0) ||
+				a.name.localeCompare(b.name) ||
+				a.network.name.localeCompare(b.network.name)
+		)
+	];
 };
-
-/**
- * Sorts tokens by market cap, name and network name.
- *
- * @param $tokens - The list of tokens to sort.
- * @param $exchanges - The exchange rates for the tokens.
- */
-export const sortTokens = ({
-	$tokens,
-	$exchanges
-}: {
-	$tokens: Token[];
-	$exchanges: ExchangesData;
-}) =>
-	$tokens.sort(
-		(a, b) =>
-			($exchanges[b.id]?.usd_market_cap ?? 0) - ($exchanges[a.id]?.usd_market_cap ?? 0) ||
-			a.name.localeCompare(b.name) ||
-			a.network.name.localeCompare(b.network.name)
-	);
 
 /**
  * Pins tokens by USD value, balance and name.
@@ -61,36 +59,49 @@ export const sortTokens = ({
  * In case of a tie, it sorts by token name and network name.
  *
  * @param $tokens - The list of tokens to sort.
- * @param $exchanges - The exchange rates for the tokens.
- * @param $balancesStore - The balances for the tokens.
+ * @param $balancesStore - The balances data for the tokens.
+ * @param $exchanges - The exchange rates data for the tokens.
  * @returns The sorted list of tokens.
  *
  */
 export const pinTokensWithBalanceAtTop = ({
 	$tokens,
-	$balancesStore
+	$balances,
+	$exchanges
 }: {
-	$tokens: TokenUi[];
-	$balancesStore: CertifiedStoreData<BalancesData>;
+	$tokens: Token[];
+	$balances: CertifiedStoreData<BalancesData>;
+	$exchanges: ExchangesData;
 }): TokenUi[] => {
-	const tokensWithBalance: TokenWithBalance[] = $tokens.map((token) => ({
-		...token,
-		balance: Number(
-			formatToken({
-				value: $balancesStore?.[token.id]?.data ?? BigNumber.from(0),
-				unitName: token.decimals,
-				displayDecimals: token.decimals
-			})
-		)
-	}));
+	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
+		(acc, token) => {
+			const balance: BigNumber | undefined = $balances?.[token.id]?.data;
+			const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
 
-	const [positiveBalances, nonPositiveBalances] = tokensWithBalance.reduce<
-		[TokenWithBalance[], TokenWithBalance[]]
-	>(
-		(acc, token) => (
-			(token.usdBalance ?? 0) > 0 || token.balance > 0 ? acc[0].push(token) : acc[1].push(token),
-			acc
-		),
+			const usdBalance: number | undefined = nonNullish(exchangeRate)
+				? usdValue({
+						token,
+						balance,
+						exchangeRate
+					})
+				: undefined;
+
+			const tokenUI: TokenUi = {
+				...token,
+				balance,
+				usdBalance
+			};
+
+			if ((usdBalance ?? 0) > 0 || (balance ?? ZERO).gt(0)) {
+				acc[0] = [...acc[0], tokenUI];
+
+				return acc;
+			}
+
+			acc[1] = [...acc[1], tokenUI];
+
+			return acc;
+		},
 		[[], []]
 	);
 
@@ -98,10 +109,19 @@ export const pinTokensWithBalanceAtTop = ({
 		...positiveBalances.sort(
 			(a, b) =>
 				(b.usdBalance ?? 0) - (a.usdBalance ?? 0) ||
-				b.balance - a.balance ||
+				+(b.balance ?? ZERO).gt(a.balance ?? ZERO) - +(b.balance ?? ZERO).lt(a.balance ?? ZERO) ||
 				a.name.localeCompare(b.name) ||
 				a.network.name.localeCompare(b.network.name)
 		),
 		...nonPositiveBalances
-	].map(({ balance: _, ...rest }) => rest);
+	];
 };
+
+/**
+ * Calculates total USD balance of the provided tokens list.
+ *
+ * @param tokens - The list of tokens for total USD balance calculation.
+ * @returns The sum of tokens USD balance.
+ */
+export const sumTokensUsdBalance = (tokens: TokenUi[]): number =>
+	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);

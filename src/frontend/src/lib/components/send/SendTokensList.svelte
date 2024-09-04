@@ -7,18 +7,21 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
-	import { balancesStore } from '$lib/stores/balances.store';
-	import { BigNumber } from '@ethersproject/bignumber';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import { ZERO } from '$lib/constants/app.constants';
 
 	const dispatch = createEventDispatcher();
 
 	let tokens: TokenUi[];
-	$: tokens = $combinedDerivedSortedNetworkTokensUi.filter(({ id: tokenId }) =>
-		($balancesStore?.[tokenId]?.data ?? BigNumber.from(0n)).gt(0n)
+	$: tokens = $combinedDerivedSortedNetworkTokensUi.filter(({ balance }) =>
+		(balance ?? ZERO).gt(0n)
 	);
+
+	let loading: boolean;
+	$: loading = $erc20UserTokensNotInitialized;
 </script>
 
-<TokensSkeletons>
+<TokensSkeletons {loading}>
 	{#each tokens as token (token.id)}
 		<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
 			<TokenCardContent {token} />

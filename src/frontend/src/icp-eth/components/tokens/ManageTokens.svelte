@@ -32,10 +32,11 @@
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import type { IcCkToken } from '$icp/types/ic';
-	import { pinTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { sortTokens } from '$lib/utils/tokens.utils';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import type { ExchangesData } from '$lib/types/exchange';
+	import TokenName from '$lib/components/tokens/TokenName.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -98,8 +99,9 @@
 
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
-		? pinTokensAtTop({
-				$tokens: sortTokens({ $tokens: allTokens, $exchanges: exchangesStaticData }),
+		? sortTokens({
+				$tokens: allTokens,
+				$exchanges: exchangesStaticData,
 				$tokensToPin: $tokensToPin
 			})
 		: [];
@@ -225,7 +227,7 @@
 	<div class="container md:max-h-[26rem] pr-2 pt-1 overflow-y-auto overscroll-contain">
 		{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 			<Card>
-				{token.name}
+				<TokenName {token} />
 
 				<TokenLogo slot="icon" color="white" {token} />
 

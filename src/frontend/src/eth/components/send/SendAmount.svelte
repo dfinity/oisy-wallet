@@ -11,6 +11,7 @@
 	import { InsufficientFundsError } from '$lib/types/send';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 	import type { Token } from '$lib/types/token';
+	import { ZERO } from '$lib/constants/app.constants';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
@@ -36,9 +37,9 @@
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId)) {
-			const total = userAmount.add($minGasFee ?? BigNumber.from(0));
+			const total = userAmount.add($minGasFee ?? ZERO);
 
-			if (total.gt($sendBalance ?? BigNumber.from(0n))) {
+			if (total.gt($sendBalance ?? ZERO)) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
 			}
 
@@ -46,12 +47,12 @@
 		}
 
 		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the user
-		if (userAmount.gt($sendBalance ?? BigNumber.from(0n))) {
+		if (userAmount.gt($sendBalance ?? ZERO)) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount);
 		}
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
-		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? BigNumber.from(0n);
+		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
 		if (nonNullish($maxGasFee) && ethBalance.lt($maxGasFee)) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees

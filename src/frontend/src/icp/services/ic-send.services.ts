@@ -1,4 +1,8 @@
 import {
+	isConvertCkErc20ToErc20,
+	isConvertCkEthToEth
+} from '$icp-eth/utils/cketh-transactions.utils';
+import {
 	icrc1Transfer as icrc1TransferIcp,
 	transfer as transferIcp
 } from '$icp/api/icp-ledger.api';
@@ -10,7 +14,6 @@ import {
 } from '$icp/services/ck.services';
 import type { IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
-import { isNetworkIdETH, isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
@@ -55,7 +58,7 @@ const send = async ({
 		return;
 	}
 
-	if (isNetworkIdETH(targetNetworkId) && isTokenCkEthLedger(token)) {
+	if (isConvertCkEthToEth({ token, networkId: targetNetworkId })) {
 		await convertCkETHToEth({
 			...rest,
 			token
@@ -63,7 +66,7 @@ const send = async ({
 		return;
 	}
 
-	if (isNetworkIdETH(targetNetworkId) && isTokenCkErc20Ledger(token)) {
+	if (isConvertCkErc20ToErc20({ token, networkId: targetNetworkId })) {
 		await convertCkErc20ToErc20({
 			...rest,
 			token

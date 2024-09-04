@@ -1,4 +1,5 @@
 import { nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
@@ -77,3 +78,5 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_MILLISECOND * 1_000n * 60n
 // For some use case we want to display some amount to a maximal number of decimals which is not related to the number of decimals of the selected token.
 // Just a value that looks good visually.
 export const EIGHT_DECIMALS = 8;
+
+export const ZERO = BigNumber.from(0n);

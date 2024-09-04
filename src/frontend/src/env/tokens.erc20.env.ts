@@ -10,6 +10,7 @@ import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.en
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
 import { WSTETH_TOKEN } from '$env/tokens-erc20/tokens.wsteth.env';
+import { XAUT_TOKEN } from '$env/tokens-erc20/tokens.xaut.env';
 import type { Erc20Contract, RequiredErc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
@@ -65,6 +66,12 @@ const ERC20_CONTRACT_ADDRESS_WEEETH: Erc20Contract = {
 	exchange: 'erc20'
 };
 
+const ERC20_CONTRACT_ADDRESS_WETH: Erc20Contract = {
+	// Wrapped Ether (WETH)
+	address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+	exchange: 'erc20'
+};
+
 export const ERC20_CONTRACTS_SEPOLIA: Erc20Contract[] = [
 	{
 		// Weenus
@@ -94,7 +101,8 @@ export const ERC20_CONTRACTS_PRODUCTION: Erc20Contract[] = [
 	ERC20_CONTRACT_ADDRESS_DAI,
 	ERC20_CONTRACT_ADDRESS_FLOKI,
 	ERC20_CONTRACT_ADDRESS_RNDR,
-	ERC20_CONTRACT_ADDRESS_WEEETH
+	ERC20_CONTRACT_ADDRESS_WEEETH,
+	ERC20_CONTRACT_ADDRESS_WETH
 ];
 
 export const ERC20_CONTRACTS: (Erc20Contract & { network: EthereumNetwork })[] = [
@@ -130,7 +138,8 @@ export const ERC20_TWIN_TOKENS_MAINNET: RequiredErc20Token[] = [
 	USDT_TOKEN,
 	WSTETH_TOKEN,
 	UNI_TOKEN,
-	EURC_TOKEN
+	EURC_TOKEN,
+	XAUT_TOKEN
 ];
 
 export const ERC20_TWIN_TOKENS: RequiredErc20Token[] = [
