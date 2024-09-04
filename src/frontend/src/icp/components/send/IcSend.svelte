@@ -4,7 +4,7 @@
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ICP_NETWORK_ID } from '$env/networks.env';
 	import type { Token } from '$lib/types/token';
-	import { loadTokenAndRun } from '$icp/services/token.services';
+	import { loadTokenAndRun } from '$lib/services/token.services';
 	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
 
 	export let token: Token;
