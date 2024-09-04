@@ -87,7 +87,7 @@
 <Info />
 
 <Header>
-	<h2 class="text-base">{$i18n.transactions.text.title}</h2>
+	{$i18n.transactions.text.title}
 
 	<svelte:fragment slot="end">
 		{#if $tokenCkBtcLedger}
