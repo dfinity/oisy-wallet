@@ -10,10 +10,12 @@ import {
 	updateIdbEthAddressLastUsage
 } from '$lib/api/idb.api';
 import { getBtcAddress, getEthAddress } from '$lib/api/signer.api';
+import { warnSignOut } from '$lib/services/auth.services';
 import {
 	btcAddressMainnetStore,
 	ethAddressStore,
-	type AddressStore
+	type AddressStore,
+	type StorageAddressData
 } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
@@ -271,4 +273,37 @@ export const certifyEthAddress = async (address: EthAddress): Promise<ResultSucc
 		getAddress: getEthAddress,
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage,
 		addressStore: ethAddressStore
+	});
+
+const validateAddress = async <T extends Address>({
+	$addressStore,
+	certifyAddress
+}: {
+	$addressStore: StorageAddressData<T>;
+	certifyAddress: (address: T) => Promise<ResultSuccess<string>>;
+}) => {
+	if (isNullish($addressStore)) {
+		// No address is loaded, we don't have to verify it
+		return;
+	}
+
+	if ($addressStore.certified) {
+		// The address is certified, all good
+		return;
+	}
+
+	const { success, err } = await certifyAddress($addressStore.data);
+
+	if (success) {
+		// The address is valid
+		return;
+	}
+
+	await warnSignOut(err ?? 'Error while certifying your address');
+};
+
+export const validateEthAddress = async ($addressStore: StorageAddressData<EthAddress>) =>
+	await validateAddress<EthAddress>({
+		$addressStore,
+		certifyAddress: certifyEthAddress
 	});
