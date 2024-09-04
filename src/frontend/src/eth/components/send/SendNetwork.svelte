@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
+	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
+	import type { EthereumNetwork } from '$eth/types/network';
+	import { isDestinationContractAddress } from '$eth/utils/send.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
-	import { isDestinationContractAddress } from '$eth/utils/send.utils';
-	import { getContext } from 'svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import type { EthereumNetwork } from '$eth/types/network';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;

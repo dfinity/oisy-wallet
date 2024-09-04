@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
-	import { getContext } from 'svelte';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { balancesStore } from '$lib/stores/balances.store';
+	import { getContext } from 'svelte';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
-	import { InsufficientFundsError } from '$lib/types/send';
-	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
-	import type { Token } from '$lib/types/token';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { InsufficientFundsError } from '$lib/types/send';
+	import type { Token } from '$lib/types/token';
+	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;

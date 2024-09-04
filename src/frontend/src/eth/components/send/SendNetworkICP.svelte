@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { isErc20Icp } from '$eth/utils/token.utils';
-	import SendNetwork from './SendNetwork.svelte';
-	import type { Network } from '$lib/types/network';
 	import { getContext } from 'svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import SendNetwork from './SendNetwork.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isErc20Icp } from '$eth/utils/token.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import type { Network } from '$lib/types/network';
 
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;

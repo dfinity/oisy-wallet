@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
-	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
-	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
+	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
+	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
+	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	/**
 	 * Send modal context store

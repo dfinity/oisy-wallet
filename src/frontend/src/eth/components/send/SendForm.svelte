@@ -1,20 +1,20 @@
 <script lang="ts">
-	import SendSource from '$lib/components/send/SendSource.svelte';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
-	import SendNetworkICP from './SendNetworkICP.svelte';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import type { Network } from '$lib/types/network';
-	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import { isNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext } from 'svelte';
+	import SendNetworkICP from './SendNetworkICP.svelte';
+	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import SendDestination from '$eth/components/send/SendDestination.svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import type { EthereumNetwork } from '$eth/types/network';
-	import type { Token } from '$lib/types/token';
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
+	import type { EthereumNetwork } from '$eth/types/network';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import SendSource from '$lib/components/send/SendSource.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
