@@ -36,6 +36,7 @@ export const cleanWorkers = ({
 	Array.from(workers.keys())
 		.filter((tokenId) => !tokens.some(({ id: icTokenId }) => icTokenId === tokenId))
 		.forEach((tokenId) => {
+			// TODO: use a more functional approach instead of deleting the worker from the map.
 			workers.get(tokenId)?.stop();
 			workers.delete(tokenId);
 		});
