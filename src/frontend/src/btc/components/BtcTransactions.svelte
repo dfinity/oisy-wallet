@@ -4,7 +4,7 @@
 </script>
 
 <Header>
-	<h2 class="text-base">{$i18n.transactions.text.title}</h2>
+	{$i18n.transactions.text.title}
 </Header>
 
 <!-- TODO: Implement https://dfinity.atlassian.net/browse/GIX-2883 -->
