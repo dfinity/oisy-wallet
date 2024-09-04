@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext, onDestroy } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
