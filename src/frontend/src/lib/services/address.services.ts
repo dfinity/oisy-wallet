@@ -275,7 +275,7 @@ export const certifyEthAddress = async (address: EthAddress): Promise<ResultSucc
 		addressStore: ethAddressStore
 	});
 
-export const validateAddress = async <T extends Address>({
+const validateAddress = async <T extends Address>({
 	$addressStore,
 	certifyAddress
 }: {
@@ -301,3 +301,9 @@ export const validateAddress = async <T extends Address>({
 
 	await warnSignOut(err ?? 'Error while certifying your address');
 };
+
+export const validateEthAddress = async ($addressStore: StorageAddressData<EthAddress>) =>
+	await validateAddress<EthAddress>({
+		$addressStore,
+		certifyAddress: certifyEthAddress
+	});
