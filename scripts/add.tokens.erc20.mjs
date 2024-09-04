@@ -26,7 +26,7 @@ if (isNullish(ETHERSCAN_API_KEY)) {
 const DATA_DIR = 'src/frontend/src/env';
 const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
 
-const ERC20_DATA_DIR = DATA_DIR + '/tokens-erc20';
+const ERC20_DATA_DIR = `${DATA_DIR}/tokens-erc20`;
 const ERC20_DATA_DIR_PATH = resolve(process.cwd(), ERC20_DATA_DIR);
 
 const SVG_DIR = 'src/frontend/src/icp-eth/assets';
