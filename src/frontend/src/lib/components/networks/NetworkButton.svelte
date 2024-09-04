@@ -27,7 +27,7 @@
 	};
 </script>
 
-<button class="w-full flex justify-between items-start" on:click={onClick}>
+<button class="w-full flex justify-between" on:click={onClick}>
 	<TextWithLogo {name} {description} {icon} logo="start" />
 
 	{#if id === $networkId}
