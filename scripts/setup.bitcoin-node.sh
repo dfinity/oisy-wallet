@@ -1,5 +1,22 @@
 #!/bin/bash
 
+# Initialize a flag for the --reset option
+reset_flag=false
+
+# Loop through the arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --reset)
+            reset_flag=true  # Set the reset flag to true if --reset is provided
+            shift            # Move to the next argument
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
 # Determine the OS
 OS="$(uname -s)"
 case "$OS" in
@@ -51,9 +68,8 @@ if [ ! -d $BITCOIN_DIR ]; then
     if [ ! -d "$DATA_DIR" ]; then
         echo "Creating data directory..."
         mkdir -p "$DATA_DIR"
-    fi
-    # Create the bitcoin.conf file
-    if [ ! -f "$BITCOIN_CONF" ]; then
+        # Create the bitcoin.conf file
+        # This file needs to be created initially, we take advantage of the fact that the DATA_DIR is not present after initial setup.
         echo "Creating bitcoin.conf..."
         cat <<EOL > "$BITCOIN_CONF"
 # Enable regtest mode. This is required to setup a private bitcoin network.
@@ -73,5 +89,12 @@ echo "Starting bitcoind..."
 if [ "$OS_TYPE" = "windows" ]; then
     ./$BITCOIN_DIR/bin/bitcoind.exe -conf="$(pwd)/$BITCOIN_CONF" -datadir="$(pwd)/$DATA_DIR" --port=18444
 else
-    ./$BITCOIN_DIR/bin/bitcoind -conf="$(pwd)/$BITCOIN_CONF" -datadir="$(pwd)/$DATA_DIR" --port=18444
+    if [ "$reset_flag" = true ]; then
+        rm -r $DATA_DIR
+        mkdir -p $DATA_DIR
+    fi
+    # -debug=0 Disables debug logging to reduce the size and frequency of log files.
+    # -prune=550 If don’t need the full historical blockchain, you can use pruned mode to limit how much of the blockchain is stored on disk
+    # -maxmempool=50 The memory pool holds unconfirmed transactions. Limiting its size can reduce the memory usage and slow the cache increase
+    ./$BITCOIN_DIR/bin/bitcoind -conf="$(pwd)/$BITCOIN_CONF" -datadir="$(pwd)/$DATA_DIR" --port=18444 -debug=0 -prune=550 -maxmempool=50
 fi
