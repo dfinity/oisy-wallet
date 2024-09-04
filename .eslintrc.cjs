@@ -39,7 +39,9 @@ module.exports = {
 				'src/frontend/src/eth/components/core/**/*.svelte',
 				'src/frontend/src/eth/components/fee/**/*.svelte',
 				'src/frontend/src/eth/components/receive/**/*.svelte',
-				'src/frontend/src/eth/components/send/**/*.svelte'
+				'src/frontend/src/eth/components/send/**/*.svelte',
+				'src/frontend/src/eth/components/tokens/**/*.svelte',
+				'src/frontend/src/eth/components/transactions/**/*.svelte'
 			],
 			rules: {
 				'import/order': [
