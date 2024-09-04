@@ -21,7 +21,7 @@ serde_bytes = "0.11"
 getrandom = { version = "0.2", features = ["custom"] }
 hex = "0.4"
 k256 = "0.13"
-lazy_static = "1.4.0"
+lazy_static = "1.5.0"
 pocket-ic = "2.2.0"
 pretty_assertions = "1.4.0"
 bitcoin = "0.32.2"
