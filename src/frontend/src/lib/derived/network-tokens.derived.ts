@@ -7,40 +7,32 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import {
-	filterEnabledNetworkTokens,
+	filterEnabledTokens,
 	pinTokensWithBalanceAtTop,
 	sortTokens
 } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
+ * All enabled by user tokens.
+ */
+const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);
+
+/**
  * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not.
  */
-const selectedNetworkTokens: Readable<Token[]> = derived(
-	[tokens, selectedNetwork, pseudoNetworkChainFusion],
+const enabledNetworkTokens: Readable<Token[]> = derived(
+	[enabledTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
-);
-
-/**
- * All enabled network tokens, regardless if they are selected by the user or not.
- */
-const enabledNetworkTokens: Readable<Token[]> = derived([tokens], filterEnabledNetworkTokens);
-
-/**
- * All enabled network tokens that matching the selected network or chain fusion and are enabled by user
- */
-const enabledSelectedNetworkTokens: Readable<Token[]> = derived(
-	[selectedNetworkTokens],
-	filterEnabledNetworkTokens
 );
 
 /**
  * It isn't performant to post filter again the Erc20 tokens that are enabled but, it's code wise convenient to avoid duplication of logic.
  */
 export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
-	[enabledNetworkTokens],
-	([$enabledNetworkTokens]) =>
-		$enabledNetworkTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
+	[enabledTokens],
+	([$enabledTokens]) =>
+		$enabledTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
 );
 
 /**
@@ -49,18 +41,16 @@ export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 // TODO: The several dependencies of enabledIcNetworkTokens are not strictly only IC tokens, but other tokens too.
 //  We should find a better way to handle this, improving the store.
 export const enabledIcNetworkTokens: Readable<IcToken[]> = derived(
-	[enabledNetworkTokens],
-	([$enabledNetworkTokens]) =>
-		$enabledNetworkTokens.filter(
-			({ standard }) => standard === 'icp' || standard === 'icrc'
-		) as IcToken[]
+	[enabledTokens],
+	([$enabledTokens]) =>
+		$enabledTokens.filter(({ standard }) => standard === 'icp' || standard === 'icrc') as IcToken[]
 );
 
 /**
  * Network tokens sorted by market cap, with the ones to pin at the top of the list.
  */
 export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
-	[enabledSelectedNetworkTokens, tokensToPin, exchanges],
+	[enabledNetworkTokens, tokensToPin, exchanges],
 	([$tokens, $tokensToPin, $exchanges]) => sortTokens({ $tokens, $exchanges, $tokensToPin })
 );
 
