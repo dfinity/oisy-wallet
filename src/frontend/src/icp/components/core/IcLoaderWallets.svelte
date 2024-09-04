@@ -19,6 +19,9 @@
 
 	const debounceManageWorkers = debounce(manageWorkers, 500);
 
+	// TODO: here we debounce the manageWorkers function to avoid multiple calls in a short period
+	//  of time due to the several dependencies of enabledIcNetworkTokens, that are not strictly only IC tokens.
+	//  This is a temporary solution, and we should find a better way to handle this, improving the store.
 	$: $enabledIcNetworkTokens, debounceManageWorkers();
 
 	onDestroy(() => {
