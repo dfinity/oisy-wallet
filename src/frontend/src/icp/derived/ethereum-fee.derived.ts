@@ -1,7 +1,8 @@
 import { icrcTokens } from '$icp/derived/icrc.derived';
-import type { IcToken, OptionIcCkToken } from '$icp/types/ic';
+import type { IcCkToken, IcToken } from '$icp/types/ic';
+import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 import { token } from '$lib/stores/token.store';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -10,7 +11,17 @@ import { derived, type Readable } from 'svelte/store';
 export const ethereumFeeTokenCkEth: Readable<IcToken | undefined> = derived(
 	[token, icrcTokens],
 	([$token, $icrcTokens]) => {
-		const feeLedgerCanisterId = ($token as OptionIcCkToken)?.feeLedgerCanisterId;
+		if (isNullish($token)) {
+			return undefined;
+		}
+
+		// In case the token is already ckEth, we don't need to look for the fee ledger.
+		// The Ethereum fees are paid burning ckEth, that is the same token as the one in question.
+		if (isTokenCkEthLedger($token)) {
+			return $token as IcToken;
+		}
+
+		const feeLedgerCanisterId = ($token as IcCkToken).feeLedgerCanisterId;
 		return nonNullish(feeLedgerCanisterId)
 			? $icrcTokens.find(({ ledgerCanisterId }) => ledgerCanisterId === feeLedgerCanisterId)
 			: undefined;

@@ -49,6 +49,10 @@
 			background: radial-gradient(66.11% 97.11% at 50% 115.28%, #300097 0%, #1f005e 100%);
 		}
 
+		&.btc {
+			background: radial-gradient(55.76% 76.98% at 52.05% 0%, #7e4600 0%, #000000 100%);
+		}
+
 		&.eth {
 			background: linear-gradient(61.79deg, #321469 62.5%, var(--color-misty-rose) 100%);
 		}

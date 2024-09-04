@@ -13,4 +13,5 @@ DFX_NETWORK=local
 
 dfx canister call ckbtc_ledger --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"$PRINCIPAL\";}; amount=1000000000; fee=null; memo=null; created_at_time=null;})"
 dfx canister call cketh_ledger --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"$PRINCIPAL\";}; amount=77000000000; fee=null; memo=null; created_at_time=null;})"
+dfx canister call ckusdc_ledger --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"$PRINCIPAL\";}; amount=90000000; fee=null; memo=null; created_at_time=null;})"
 dfx canister call icp_ledger --network "$DFX_NETWORK" icrc1_transfer "(record {from=null; to=record { owner= principal \"$PRINCIPAL\";}; amount=120000000; fee=null; memo=null; created_at_time=null;})"

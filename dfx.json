@@ -44,8 +44,8 @@
 		},
 		"internet_identity": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2024-04-05/internet_identity.did",
-			"wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2024-04-05/internet_identity_dev.wasm.gz",
+			"candid": "https://github.com/dfinity/internet-identity/releases/download/release-2024-08-21/internet_identity.did",
+			"wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2024-08-21/internet_identity_dev.wasm.gz",
 			"shrink": false,
 			"remote": {
 				"candid": "internet_identity.did",

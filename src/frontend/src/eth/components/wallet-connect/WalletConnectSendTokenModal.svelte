@@ -67,12 +67,16 @@
 	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	$: feeTokenIdStore.set($sendToken.id);
 
+	let feeDecimalsStore = writable<number | undefined>(undefined);
+	$: feeDecimalsStore.set($sendToken.decimals);
+
 	setContext<FeeContextType>(
 		FEE_CONTEXT_KEY,
 		initFeeContext({
 			feeStore,
 			feeSymbolStore,
-			feeTokenIdStore
+			feeTokenIdStore,
+			feeDecimalsStore
 		})
 	);
 

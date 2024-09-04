@@ -239,6 +239,7 @@ interface I18nSend {
 		address_unknown: string;
 		minter_info_not_loaded: string;
 		minter_info_not_certified: string;
+		cketh_max_transaction_fee_missing: string;
 	};
 	error: {
 		unexpected: string;
@@ -261,6 +262,8 @@ interface I18nConvert {
 		convert_to_cketh: string;
 		convert_to_ckerc20: string;
 		convert_eth_to_cketh: string;
+		cketh_conversions_may_take: string;
+		ckerc20_conversions_may_take: string;
 		how_to_convert_eth_to_cketh: string;
 		send_eth: string;
 		wait_eth_current_balance: string;
