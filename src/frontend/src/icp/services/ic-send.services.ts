@@ -2,7 +2,6 @@ import {
 	isConvertCkErc20ToErc20,
 	isConvertCkEthToEth
 } from '$icp-eth/utils/cketh-transactions.utils';
-import { invalidIcpAddress } from '$icp-eth/utils/icp-account.utils';
 import {
 	icrc1Transfer as icrc1TransferIcp,
 	transfer as transferIcp
@@ -20,6 +19,7 @@ import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
+import { invalidIcpAddress } from '$lib/utils/account.utils';
 import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';

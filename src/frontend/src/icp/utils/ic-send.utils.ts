@@ -4,12 +4,11 @@ import {
 	CKERC20_LEDGER_CANISTER_IDS,
 	CKETH_LEDGER_CANISTER_IDS
 } from '$env/networks.icrc.env';
-import { invalidIcpAddress } from '$icp-eth/utils/icp-account.utils';
 import type { IcToken } from '$icp/types/ic';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
-import { isEthAddress } from '$lib/utils/account.utils';
+import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 import { BtcNetwork, parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';

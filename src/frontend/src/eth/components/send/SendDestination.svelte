@@ -1,13 +1,12 @@
 <script lang="ts">
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isEthAddress } from '$lib/utils/account.utils';
+	import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { isErc20Icp } from '$eth/utils/token.utils';
-	import { invalidIcpAddress } from '$icp-eth/utils/icp-account.utils';
 	import type { Network } from '$lib/types/network';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { isNullish } from '@dfinity/utils';
