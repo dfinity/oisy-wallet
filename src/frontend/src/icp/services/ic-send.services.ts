@@ -27,15 +27,19 @@ import { get } from 'svelte/store';
 
 export const sendIc = async ({
 	progress,
+	sendCompleted,
 	...rest
 }: IcTransferParams & {
 	token: IcToken;
 	targetNetworkId: NetworkId | undefined;
+	sendCompleted: () => Promise<void>;
 }): Promise<void> => {
 	await send({
 		progress,
 		...rest
 	});
+
+	await sendCompleted();
 
 	progress(ProgressStepsSendIc.RELOAD);
 
