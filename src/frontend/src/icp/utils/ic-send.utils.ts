@@ -4,8 +4,8 @@ import {
 	CKERC20_LEDGER_CANISTER_IDS,
 	CKETH_LEDGER_CANISTER_IDS
 } from '$env/networks.icrc.env';
+import { invalidIcpAddress } from '$icp-eth/utils/icp-account.utils';
 import type { IcToken } from '$icp/types/ic';
-import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';

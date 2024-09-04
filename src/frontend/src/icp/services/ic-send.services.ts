@@ -2,6 +2,7 @@ import {
 	isConvertCkErc20ToErc20,
 	isConvertCkEthToEth
 } from '$icp-eth/utils/cketh-transactions.utils';
+import { invalidIcpAddress } from '$icp-eth/utils/icp-account.utils';
 import {
 	icrc1Transfer as icrc1TransferIcp,
 	transfer as transferIcp
@@ -15,7 +16,6 @@ import {
 import type { IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
 import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
-import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';

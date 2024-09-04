@@ -7,7 +7,7 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { isErc20Icp } from '$eth/utils/token.utils';
-	import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
+	import { invalidIcpAddress } from '$icp-eth/utils/icp-account.utils';
 	import type { Network } from '$lib/types/network';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { isNullish } from '@dfinity/utils';
