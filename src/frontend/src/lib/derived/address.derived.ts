@@ -1,5 +1,10 @@
 import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
-import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
+import type {
+	BtcAddress,
+	EthAddress,
+	OptionBtcAddress,
+	OptionEthAddress
+} from '$lib/types/address';
 import { mapAddress } from '$lib/utils/address.utils';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -11,12 +16,12 @@ export const ethAddressNotLoaded: Readable<boolean> = derived(
 
 export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
 	[btcAddressMainnetStore],
-	([$btcAddressMainnetStore]) => mapAddress($btcAddressMainnetStore)
+	([$btcAddressMainnetStore]) => mapAddress<BtcAddress>($btcAddressMainnetStore)
 );
 
 export const ethAddress: Readable<OptionEthAddress> = derived(
 	[ethAddressStore],
-	([$ethAddressStore]) => mapAddress($ethAddressStore)
+	([$ethAddressStore]) => mapAddress<EthAddress>($ethAddressStore)
 );
 
 export const ethAddressCertified: Readable<boolean> = derived(

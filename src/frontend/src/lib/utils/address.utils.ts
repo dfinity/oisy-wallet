@@ -1,17 +1,18 @@
 import { warnSignOut } from '$lib/services/auth.services';
-import type { OptionAddressData } from '$lib/stores/address.store';
+import type { StorageAddressData } from '$lib/stores/address.store';
 import type { Address, OptionAddress } from '$lib/types/address';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
 
-export const mapAddress = ($addressStore: OptionAddressData): OptionAddress<Address> =>
-	$addressStore === null ? null : $addressStore?.data;
+export const mapAddress = <T extends Address>(
+	$addressStore: StorageAddressData<T>
+): OptionAddress<Address> => ($addressStore === null ? null : $addressStore?.data);
 
 export const validateAddress = async <T extends Address>({
 	$addressStore,
 	certifyAddress
 }: {
-	$addressStore: OptionAddressData;
+	$addressStore: StorageAddressData<T>;
 	certifyAddress: (address: T) => Promise<ResultSuccess<string>>;
 }) => {
 	if (isNullish($addressStore)) {
