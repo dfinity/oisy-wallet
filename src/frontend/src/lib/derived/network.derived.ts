@@ -4,7 +4,7 @@ import { routeNetwork } from '$lib/derived/nav.derived';
 import { networks } from '$lib/derived/networks.derived';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
-import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+import { isNetworkIdBitcoin, isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -23,6 +23,10 @@ export const selectedNetwork: Readable<Network | undefined> = derived(
 
 export const networkICP: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdICP($networkId)
+);
+
+export const networkBitcoin: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdBitcoin($networkId)
 );
 
 export const networkEthereum: Readable<boolean> = derived([networkId], ([$networkId]) =>
