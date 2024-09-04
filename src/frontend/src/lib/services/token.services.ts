@@ -11,8 +11,3 @@ export const loadTokenAndRun = async ({
 	tokenStore.set(token);
 	await callback();
 };
-
-export const runAndResetToken = (callback: () => void) => {
-	callback();
-	tokenStore.set(null);
-};

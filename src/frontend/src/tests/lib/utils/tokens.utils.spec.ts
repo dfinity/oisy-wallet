@@ -4,9 +4,13 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Token, TokenToPin } from '$lib/types/token';
+import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
-import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
+import {
+	pinTokensWithBalanceAtTop,
+	sortTokens,
+	sumTokensUsdBalance
+} from '$lib/utils/tokens.utils';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
 
@@ -274,5 +278,34 @@ describe('pinTokensWithBalanceAtTop', () => {
 			BTC_MAINNET_TOKEN.id,
 			ICP_TOKEN.id
 		]);
+	});
+});
+
+describe('sumTokensTotalUsdBalance', () => {
+	it('should correctly calculate USD total balance when tokens have usdBalance', () => {
+		const tokens: TokenUi[] = [
+			{ ...ICP_TOKEN, usdBalance: 50 },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 50 },
+			{ ...ETHEREUM_TOKEN, usdBalance: 100 }
+		];
+
+		const result = sumTokensUsdBalance(tokens);
+		expect(result).toEqual(200);
+	});
+
+	it('should correctly calculate USD total balance when some tokens do not have usdBalance', () => {
+		const tokens: TokenUi[] = [
+			{ ...ICP_TOKEN, usdBalance: 50 },
+			{ ...BTC_MAINNET_TOKEN, usdBalance: 0 },
+			{ ...ETHEREUM_TOKEN }
+		];
+
+		const result = sumTokensUsdBalance(tokens);
+		expect(result).toEqual(50);
+	});
+
+	it('should correctly calculate USD total balance when tokens list is empty', () => {
+		const result = sumTokensUsdBalance([]);
+		expect(result).toEqual(0);
 	});
 });
