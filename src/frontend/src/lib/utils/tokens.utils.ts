@@ -125,3 +125,12 @@ export const pinTokensWithBalanceAtTop = ({
  */
 export const sumTokensUsdBalance = (tokens: TokenUi[]): number =>
 	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);
+
+/**
+ * Filters and returns a list of "enabled" by user network tokens
+ *
+ * @param $tokens - The list of network tokens.
+ * @returns The list of "enabled" network tokens.
+ */
+export const filterEnabledNetworkTokens = ([$tokens]: [$tokens: Token[]]): Token[] =>
+	$tokens.filter((token) => ('enabled' in token ? token.enabled : true));

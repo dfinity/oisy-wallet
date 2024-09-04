@@ -6,23 +6,36 @@ import { tokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
+import {
+	filterEnabledNetworkTokens,
+	pinTokensWithBalanceAtTop,
+	sortTokens
+} from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
  * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not.
  */
-const networkTokens: Readable<Token[]> = derived(
+const selectedNetworkTokens: Readable<Token[]> = derived(
 	[tokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
 );
 
-const enabledNetworkTokens: Readable<Token[]> = derived([networkTokens], ([$networkTokens]) =>
-	$networkTokens.filter((token) => ('enabled' in token ? token.enabled : true))
+/**
+ * All enabled network tokens, regardless if they are selected by the user or not.
+ */
+const enabledNetworkTokens: Readable<Token[]> = derived([tokens], filterEnabledNetworkTokens);
+
+/**
+ * All enabled network tokens that matching the selected network or chain fusion and are enabled by user
+ */
+const enabledSelectedNetworkTokens: Readable<Token[]> = derived(
+	[selectedNetworkTokens],
+	filterEnabledNetworkTokens
 );
 
 /**
- * It isn't performant to post filter again the Erc20 tokens that are enabled for the specific selected network or no network selected but, it's code wise convenient to avoid duplication of logic.
+ * It isn't performant to post filter again the Erc20 tokens that are enabled but, it's code wise convenient to avoid duplication of logic.
  */
 export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 	[enabledNetworkTokens],
@@ -47,7 +60,7 @@ export const enabledIcNetworkTokens: Readable<IcToken[]> = derived(
  * Network tokens sorted by market cap, with the ones to pin at the top of the list.
  */
 export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
-	[enabledNetworkTokens, tokensToPin, exchanges],
+	[enabledSelectedNetworkTokens, tokensToPin, exchanges],
 	([$tokens, $tokensToPin, $exchanges]) => sortTokens({ $tokens, $exchanges, $tokensToPin })
 );
 
