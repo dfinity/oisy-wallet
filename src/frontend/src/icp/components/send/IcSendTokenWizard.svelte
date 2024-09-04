@@ -132,6 +132,16 @@
 			};
 
 			const trackAnalyticsOnSendComplete = async () => {
+				const endTime = performance.now();
+				const duration = endTime - timedEvent.startTime;
+
+				// format duration to seconds and show it in a toast
+				toastsShow({
+					text: `Sent ${amount} ICP in less than ${(duration / 1000).toFixed(2)} seconds.`,
+					level: 'success',
+					duration: 5000
+				});
+
 				await Promise.allSettled([
 					trackTimedEventSuccess(timedEvent),
 					trackEvent({
@@ -156,15 +166,6 @@
 				sendCompleted: trackAnalyticsOnSendComplete
 			});
 			
-			const endTime = performance.now();
-			const duration = endTime - timedEvent.startTime;
-
-			// format duration to seconds and show it in a toast
-			toastsShow({
-				text: `Sent ${amount} ICP in less than ${(duration / 1000).toFixed(2)} seconds.`,
-				level: 'success',
-				duration: 5000
-			});
 
 
 			sendProgressStep = ProgressStepsSendIc.DONE;
