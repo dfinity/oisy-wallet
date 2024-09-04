@@ -42,8 +42,9 @@ export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], '
 
 interface TokenFinancialData {
 	balance?: BigNumber;
-	formattedBalance?: string;
 	usdBalance?: number;
 }
 
 export type TokenUi = Token & TokenFinancialData;
+
+export type TokenIndexKey = string;

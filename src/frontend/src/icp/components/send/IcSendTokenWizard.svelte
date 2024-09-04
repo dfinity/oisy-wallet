@@ -17,14 +17,9 @@
 		type BitcoinFeeContext as BitcoinFeeContextType,
 		initBitcoinFeeStore
 	} from '$icp/stores/bitcoin-fee.store';
-	import { createEventDispatcher, setContext } from 'svelte';
+	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
-	import {
-		isNetworkIdETH,
-		isTokenCkErc20Ledger,
-		isTokenCkEthLedger
-	} from '$icp/utils/ic-send.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		initTimedEvent,
@@ -57,6 +52,10 @@
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import { token } from '$lib/stores/token.store';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
+	import {
+		isConvertCkErc20ToErc20,
+		isConvertCkEthToEth
+	} from '$icp-eth/utils/cketh-transactions.utils';
 
 	/**
 	 * Props
@@ -102,9 +101,9 @@
 		const timedEvent = initTimedEvent({
 			name: isNetworkIdBitcoin(networkId)
 				? TRACK_DURATION_CONVERT_CKBTC_TO_BTC
-				: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
+				: isConvertCkEthToEth({ token: $token, networkId })
 					? TRACK_DURATION_CONVERT_CKETH_TO_ETH
-					: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
+					: isConvertCkErc20ToErc20({ token: $token, networkId })
 						? TRACK_DURATION_CONVERT_CKERC20_TO_ERC20
 						: TRACK_DURATION_IC_SEND,
 			metadata: {
@@ -113,6 +112,14 @@
 		});
 
 		try {
+			// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
+			const ckErc20ToErc20MaxCkEthFees: bigint | undefined = isConvertCkErc20ToErc20({
+				token: $tokenAsIcToken,
+				networkId
+			})
+				? $ethereumFeeStore?.maxTransactionFee
+				: undefined;
+
 			const params: IcTransferParams = {
 				to: destination,
 				amount: parseToken({
@@ -120,13 +127,33 @@
 					unitName: $token.decimals
 				}),
 				identity: $authStore.identity,
-				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step)
+				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step),
+				ckErc20ToErc20MaxCkEthFees
+			};
+
+			const trackAnalyticsOnSendComplete = async () => {
+				await Promise.allSettled([
+					trackTimedEventSuccess(timedEvent),
+					trackEvent({
+						name: isNetworkIdBitcoin(networkId)
+							? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
+							: isConvertCkEthToEth({ token: $token, networkId })
+								? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
+								: isConvertCkErc20ToErc20({ token: $token, networkId })
+									? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS
+									: TRACK_COUNT_IC_SEND_SUCCESS,
+						metadata: {
+							token: $token.symbol
+						}
+					})
+				]);
 			};
 
 			await sendIc({
 				...params,
 				token: $tokenAsIcToken,
-				targetNetworkId: networkId
+				targetNetworkId: networkId,
+				sendCompleted: trackAnalyticsOnSendComplete
 			});
 			
 			const endTime = performance.now();
@@ -140,22 +167,6 @@
 			});
 
 
-			await Promise.allSettled([
-				trackTimedEventSuccess(timedEvent),
-				trackEvent({
-					name: isNetworkIdBitcoin(networkId)
-						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
-						: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
-							? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
-							: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
-								? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS
-								: TRACK_COUNT_IC_SEND_SUCCESS,
-					metadata: {
-						token: $token.symbol
-					}
-				})
-			]);
-
 			sendProgressStep = ProgressStepsSendIc.DONE;
 
 			setTimeout(() => close(), 750);
@@ -165,9 +176,9 @@
 				trackEvent({
 					name: isNetworkIdBitcoin(networkId)
 						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
-						: isNetworkIdETH(networkId) && isTokenCkEthLedger($token)
+						: isConvertCkEthToEth({ token: $token, networkId })
 							? TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR
-							: isNetworkIdETH(networkId) && isTokenCkErc20Ledger($token)
+							: isConvertCkErc20ToErc20({ token: $token, networkId })
 								? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR
 								: TRACK_COUNT_IC_SEND_ERROR,
 					metadata: {
@@ -200,6 +211,8 @@
 	setContext<EthereumFeeContextType>(ETHEREUM_FEE_CONTEXT_KEY, {
 		store: initEthereumFeeStore()
 	});
+
+	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	const back = () => dispatch('icBack');
 	const close = () => dispatch('icClose');

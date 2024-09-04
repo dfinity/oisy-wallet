@@ -39,7 +39,7 @@
 	},
 	"auth": {
 		"text": {
-			"title": "A wallet that lives on-chain for 100% decentralization",
+			"title": "100% on-chain wallet for full decentralization",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
@@ -275,7 +275,8 @@
 			"max_gas_fee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
 			"address_unknown": "Address is unknown.",
 			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
-			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified."
+			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
+			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -421,7 +422,7 @@
 			"fee": "Fee",
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
-			"estimated_eth": "Estimated Ethereum Fee (Updated ≈30 Seconds)"
+			"estimated_eth": "Estimated Ethereum Fee"
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."

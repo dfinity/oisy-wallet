@@ -11,6 +11,7 @@
 	export let id: NetworkId | undefined;
 	export let name: string;
 	export let icon: string | undefined;
+	export let description: string | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -26,8 +27,8 @@
 	};
 </script>
 
-<button class="w-full flex justify-between items-center" on:click={onClick}>
-	<TextWithLogo {name} {icon} logo="start" />
+<button class="w-full flex justify-between" on:click={onClick}>
+	<TextWithLogo {name} {description} {icon} logo="start" />
 
 	{#if id === $networkId}
 		<span in:fade><IconCheck size="20px" /></span>
