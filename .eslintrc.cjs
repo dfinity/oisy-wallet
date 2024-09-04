@@ -34,6 +34,7 @@ module.exports = {
 			}
 		},
 		{
+			// TODO: slowly add all related folders, and ultimately remove this override and include the rule in the main rules
 			files: ['src/frontend/src/eth/**/*.svelte'],
 			rules: {
 				'import/order': [
@@ -41,9 +42,9 @@ module.exports = {
 					{
 						alphabetize: { order: 'asc' }
 					}
-				],
-			},
-		},
+				]
+			}
+		}
 	],
 	rules: {
 		'no-unused-vars': 'off',
