@@ -1,7 +1,11 @@
 import { ZERO } from '$lib/constants/app.constants';
+import type { BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import { usdValue } from '$lib/utils/exchange.utils';
 import { nonNullish } from '@dfinity/utils';
+import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -55,17 +59,49 @@ export const sortTokens = ({
  * In case of a tie, it sorts by token name and network name.
  *
  * @param $tokens - The list of tokens to sort.
+ * @param $balancesStore - The balances data for the tokens.
+ * @param $exchanges - The exchange rates data for the tokens.
  * @returns The sorted list of tokens.
  *
  */
-export const pinTokensWithBalanceAtTop = ($tokens: TokenUi[]): TokenUi[] => {
+export const pinTokensWithBalanceAtTop = ({
+	$tokens,
+	$balances,
+	$exchanges
+}: {
+	$tokens: Token[];
+	$balances: CertifiedStoreData<BalancesData>;
+	$exchanges: ExchangesData;
+}): TokenUi[] => {
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
-		(acc, token) => (
-			(token.usdBalance ?? 0) > 0 || (token.balance ?? ZERO).gt(0)
-				? acc[0].push(token)
-				: acc[1].push(token),
-			acc
-		),
+		(acc, token) => {
+			const balance: BigNumber | undefined = $balances?.[token.id]?.data;
+			const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
+
+			const usdBalance: number | undefined = nonNullish(exchangeRate)
+				? usdValue({
+						token,
+						balance,
+						exchangeRate
+					})
+				: undefined;
+
+			const tokenUI: TokenUi = {
+				...token,
+				balance,
+				usdBalance
+			};
+
+			if ((usdBalance ?? 0) > 0 || (balance ?? ZERO).gt(0)) {
+				acc[0] = [...acc[0], tokenUI];
+
+				return acc;
+			}
+
+			acc[1] = [...acc[1], tokenUI];
+
+			return acc;
+		},
 		[[], []]
 	);
 
