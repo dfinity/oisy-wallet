@@ -3,13 +3,9 @@ import { initIcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
 import { initIcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
 import type { IcToken } from '$icp/types/ic';
 import type { WalletWorker } from '$icp/types/ic-listener';
-import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
-import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
-import { get } from 'svelte/store';
 
 /**
  * Wait few seconds and trigger the wallet to fetch optimistically new transactions twice.
@@ -58,25 +54,13 @@ export const loadWorker = async ({
 	token: IcToken;
 }) => {
 	if (!workers.has(token.id)) {
-		try {
-			const worker = await (token.standard === 'icrc'
-				? initIcrcWalletWorker(token)
-				: initIcpWalletWorker());
+		const worker = await (token.standard === 'icrc'
+			? initIcrcWalletWorker(token)
+			: initIcpWalletWorker());
 
-			worker.stop();
-			worker.start();
+		worker.stop();
+		worker.start();
 
-			workers.set(token.id, worker);
-		} catch (err: unknown) {
-			// We show the error to the user, but we keep loading the rest of the workers
-			toastsError({
-				msg: {
-					text: replacePlaceholders(get(i18n).tokens.error.loading_ic_wallet, {
-						$symbol: token.symbol
-					})
-				},
-				err
-			});
-		}
+		workers.set(token.id, worker);
 	}
 };

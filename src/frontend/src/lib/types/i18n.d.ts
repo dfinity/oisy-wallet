@@ -359,7 +359,6 @@ interface I18nTokens {
 		incomplete_metadata: string;
 		duplicate_metadata: string;
 		unexpected_undefined: string;
-		loading_ic_wallet: string;
 	};
 }
 
