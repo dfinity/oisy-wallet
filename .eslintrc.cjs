@@ -12,7 +12,7 @@ module.exports = {
 		sourceType: 'module',
 		ecmaVersion: 2020,
 		extraFileExtensions: ['.svelte'],
-		project: ['./tsconfig.eslint.json'],
+		project: ['./tsconfig.eslint.json']
 	},
 	env: {
 		browser: true,
@@ -30,7 +30,7 @@ module.exports = {
 		{
 			files: ['scripts/**/*.mjs', 'scripts/**/*.ts'],
 			rules: {
-				'no-console': 'off',
+				'no-console': 'off'
 			}
 		}
 	],
@@ -51,9 +51,10 @@ module.exports = {
 		'no-continue': 'warn',
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'no-delete-var': 'error',
-		'curly': 'error',
+		curly: 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],
+		'@typescript-eslint/no-inferrable-types': 'error'
 	},
 	globals: {
 		NodeJS: true

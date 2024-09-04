@@ -22,6 +22,17 @@ Following terminal commands are useful to deploy `frontend` and `backend`.
 npm run deploy
 ```
 
+> [!NOTE]
+> For macOS, you might need to manually install `llvm` and patch `clang` lib path. See example for `zsh` shell:
+
+```bash
+brew install llvm
+
+echo 'export CC=$(brew --prefix llvm)/bin/clang' >> ~/.zshrc
+echo 'export AR=$(brew --prefix llvm)/bin/llvm-ar' >> ~/.zshrc
+echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
+```
+
 ### Staging
 
 > To perform staging development, you'll need a `.env.staging` file.
