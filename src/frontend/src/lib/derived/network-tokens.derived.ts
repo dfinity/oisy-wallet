@@ -5,11 +5,8 @@ import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.
 import { tokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
-import { usdValue } from '$lib/utils/exchange.utils';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
-import { nonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -53,33 +50,14 @@ export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
 );
 
 /**
- * All tokens matching the selected network or Chain Fusion, with their financial data.
- */
-const combinedDerivedEnabledNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[combinedDerivedSortedNetworkTokens, balancesStore, exchanges],
-	([$enabledNetworkTokens, $balancesStore, $exchanges]) =>
-		$enabledNetworkTokens.map((token) => {
-			const balance: BigNumber | undefined = $balancesStore?.[token.id]?.data;
-			const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
-
-			return {
-				...token,
-				balance,
-				usdBalance: nonNullish(exchangeRate)
-					? usdValue({
-							token,
-							balance,
-							exchangeRate
-						})
-					: undefined
-			};
-		})
-);
-
-/**
  * All tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
  */
 export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived(
-	[combinedDerivedEnabledNetworkTokensUi],
-	([$enabledNetworkTokensUi]) => pinTokensWithBalanceAtTop($enabledNetworkTokensUi)
+	[combinedDerivedSortedNetworkTokens, balancesStore, exchanges],
+	([$enabledNetworkTokens, $balances, $exchanges]) =>
+		pinTokensWithBalanceAtTop({
+			$tokens: $enabledNetworkTokens,
+			$balances,
+			$exchanges
+		})
 );
