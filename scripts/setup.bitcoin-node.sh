@@ -16,10 +16,7 @@ BITCOIN_DIR="bitcoin-core"
 BITCOIN_CONF="$BITCOIN_DIR/bitcoin.conf"
 DATA_DIR="$BITCOIN_DIR/data"
 
-# https://bitcoin.org/bin/bitcoin-core-27.0/bitcoin-27.0-x86_64-apple-darwin.tar.gz
-# https://bitcoin.org/bin/bitcoin-core-27.0/bitcoin-27.0-arm64-apple-darwin.tar.gz
-
-# Download Bitcoin Core based on OS type (only if not already downloaded)
+# Download and set up Bitcoin Local Node
 if [ ! -d $BITCOIN_DIR ]; then
     case "$OS_TYPE" in
         linux)
@@ -33,6 +30,11 @@ if [ ! -d $BITCOIN_DIR ]; then
             curl -O $BITCOIN_URL/bitcoin-core-$BITCOIN_CORE_VERSION/bitcoin-$BITCOIN_CORE_VERSION-$(uname -m)-apple-darwin.tar.gz
             tar -xzf bitcoin-$BITCOIN_CORE_VERSION-$(uname -m)-apple-darwin.tar.gz
             mv bitcoin-$BITCOIN_CORE_VERSION $BITCOIN_DIR
+            # Reference: 
+            if [ "$(uname -m)" = "arm64" ]; then
+                codesign -s - ./$BITCOIN_DIR/bin/bitcoind
+                codesign -s - ./$BITCOIN_DIR/bin/bitcoin-cli
+            fi
             ;;
         windows)
             echo "Downloading Bitcoin Core $BITCOIN_CORE_VERSION for Windows..."
@@ -69,10 +71,7 @@ fi
 # Start bitcoind with the specified configuration
 echo "Starting bitcoind..."
 if [ "$OS_TYPE" = "windows" ]; then
-    ./bitcoin-core/bin/bitcoind.exe -conf="$(pwd)/$BITCOIN_CONF" -datadir="$(pwd)/$DATA_DIR" --port=18444
+    ./$BITCOIN_DIR/bin/bitcoind.exe -conf="$(pwd)/$BITCOIN_CONF" -datadir="$(pwd)/$DATA_DIR" --port=18444
 else
-    if [ "$(uname -m)" = "arm64" ]; then
-        codesign -s - ./bitcoin-core/bin/bitcoind
-    fi
-    ./bitcoin-core/bin/bitcoind -conf="$(pwd)/bitcoin-core/bitcoin.conf" -datadir="$(pwd)/bitcoin-core/data" --port=18444
+    ./$BITCOIN_DIR/bin/bitcoind -conf="$(pwd)/$BITCOIN_CONF" -datadir="$(pwd)/$DATA_DIR" --port=18444
 fi
