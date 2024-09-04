@@ -7,7 +7,8 @@ use crate::{
     },
 };
 use candid::Principal;
-use shared::types::user_profile::{OisyUser, Stats};
+use shared::types::user_profile::OisyUser;
+use shared::types::Stats;
 
 #[test]
 fn stats_returns_correct_number_of_users() {
@@ -26,6 +27,7 @@ fn stats_returns_correct_number_of_users() {
     // That should give us these stats:
     let expected_stats = Stats {
         user_profile_count: expected_users.len() as u64,
+        user_timestamps_count: expected_users.len() as u64,
         user_token_count: NUM_USERS_WITH_TOKENS as u64,
         custom_token_count: 0,
     };

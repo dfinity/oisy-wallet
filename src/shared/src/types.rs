@@ -1,6 +1,7 @@
 use candid::{CandidType, Deserialize, Principal};
 use ic_cdk_timers::TimerId;
 use std::fmt::Debug;
+use strum_macros::{EnumCount as EnumCountMacro, EnumIter};
 
 pub type Timestamp = u64;
 
@@ -230,37 +231,62 @@ pub mod user_profile {
     pub enum GetUserProfileError {
         NotFound,
     }
-
-    #[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
-    pub struct Stats {
-        pub user_profile_count: u64,
-        pub user_token_count: u64,
-        pub custom_token_count: u64,
-    }
 }
 
 /// The current state of progress of a user data migration.
-#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default)]
+#[derive(
+    CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
+)]
 pub enum MigrationProgress {
-    // WARNING: The following are subject to change.  The migration has NOT been implemented yet.
-    // TODO: Remove warning once the migration has been implemented.
     /// Migration has been requested.
     #[default]
     Pending,
-    /// APIs have been locked on the current canister.
-    Locked,
-    /// APIs have been locked on the target canister.
-    TargetLocked,
-    /// Target canister was empty.
-    TargetPreCheckOk,
-    /// Tokens have been migrated up to but excluding the given principal.
-    MigratedUserTokensUpTo(Principal),
-    /// Custom tokens have been migrated up to but excluding the given principal.
-    MigratedCustomTokensUpTo(Principal),
+    /// APIs are being locked on the target canister.
+    LockingTarget,
+    /// Checking that the target canister is empty.
+    CheckingTarget,
+    /// Tokens have been migrated up to (but excluding) the given principal.
+    MigratedUserTokensUpTo(Option<Principal>),
+    /// Custom tokens have been migrated up to (but excluding) the given principal.
+    MigratedCustomTokensUpTo(Option<Principal>),
+    /// Migrated user profile timestamps up to the given principal.
+    MigratedUserTimestampsUpTo(Option<Principal>),
+    /// Migrated user profiles up to the given timestamp/user pair.
+    MigratedUserProfilesUpTo(Option<(Timestamp, Principal)>),
     /// Checking that the target canister has all the data.
-    CheckingTargetCanister,
+    CheckingDataMigration,
+    /// Unlock user data operations in the target canister.
+    UnlockingTarget,
+    // Unlock signing operations in the current canister.
+    Unlocking,
     /// Migration has been completed.
     Completed,
+    /// Migration failed.
+    Failed(MigrationError),
+}
+
+#[derive(
+    CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default, EnumCountMacro, EnumIter,
+)]
+pub enum MigrationError {
+    #[default]
+    Unknown,
+    /// No migration is in progress.
+    NoMigrationInProgress,
+    /// Failed to lock target canister.
+    TargetLockFailed,
+    /// Could not get target stats before starting migration.
+    CouldNotGetTargetPriorStats,
+    /// There were already user profiles in the target canister.
+    TargetCanisterNotEmpty(Stats),
+    /// Failed to migrate data.
+    DataMigrationFailed,
+    /// Could not get target stats after migration.
+    CouldNotGetTargetPostStats,
+    /// Target stats do not match source stats.
+    TargetStatsMismatch(Stats, Stats),
+    /// Could not unlock target canister.
+    TargetUnlockFailed,
 }
 
 #[derive(Clone, Eq, PartialEq, Debug)]
@@ -280,9 +306,10 @@ pub struct MigrationReport {
     pub progress: MigrationProgress,
 }
 
-#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug)]
+#[derive(CandidType, Deserialize, Copy, Clone, Eq, PartialEq, Debug, Default)]
 pub struct Stats {
     pub user_profile_count: u64,
+    pub user_timestamps_count: u64,
     pub user_token_count: u64,
     pub custom_token_count: u64,
 }

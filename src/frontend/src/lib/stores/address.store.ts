@@ -1,26 +1,27 @@
-import type { EthAddress } from '$lib/types/address';
+import type { StorageStoreData } from '$lib/stores/storage.store';
+import type { Address, BtcAddress, EthAddress } from '$lib/types/address';
+import type { CertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 
-export interface CertifiedAddressData {
-	address: EthAddress;
-	certified: boolean;
-}
+type CertifiedAddressData<T extends Address> = CertifiedData<T>;
 
-export type AddressData = CertifiedAddressData | undefined | null;
+export type StorageAddressData<T extends Address> = StorageStoreData<CertifiedAddressData<T>>;
 
-export interface AddressStore extends Readable<AddressData> {
-	set: (data: CertifiedAddressData) => void;
+export interface AddressStore<T extends Address> extends Readable<StorageAddressData<T>> {
+	set: (data: CertifiedAddressData<T>) => void;
 	reset: () => void;
 }
 
-const initAddressStore = (): AddressStore => {
-	const { subscribe, set } = writable<AddressData>(undefined);
+const initAddressStore = <T extends Address>(): AddressStore<T> => {
+	const { subscribe, set } = writable<StorageAddressData<T>>(undefined);
 
 	return {
-		set: (data: CertifiedAddressData) => set(data),
+		set: (data: CertifiedAddressData<T>) => set(data),
 		reset: () => set(null),
 		subscribe
 	};
 };
 
-export const addressStore = initAddressStore();
+export const btcAddressMainnetStore = initAddressStore<BtcAddress>();
+
+export const ethAddressStore = initAddressStore<EthAddress>();

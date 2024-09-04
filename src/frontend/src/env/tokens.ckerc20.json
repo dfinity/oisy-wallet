@@ -1,5 +1,10 @@
 {
 	"production": {
+		"ckEURC": {
+			"ledgerCanisterId": "pe5t5-diaaa-aaaar-qahwa-cai",
+			"indexCanisterId": "pd4vj-oqaaa-aaaar-qahwq-cai",
+			"erc20ContractAddress": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c"
+		},
 		"ckUNI": {
 			"ledgerCanisterId": "ilzky-ayaaa-aaaar-qahha-cai",
 			"indexCanisterId": "imymm-naaaa-aaaar-qahhq-cai",
@@ -14,6 +19,11 @@
 			"ledgerCanisterId": "g4tto-rqaaa-aaaar-qageq-cai",
 			"indexCanisterId": "gvqys-hyaaa-aaaar-qagfa-cai",
 			"erc20ContractAddress": "0x514910771AF9Ca656af840dff83E8264EcF986CA"
+		},
+		"ckXAUT": {
+			"ledgerCanisterId": "nza5v-qaaaa-aaaar-qahzq-cai",
+			"indexCanisterId": "nmhmy-riaaa-aaaar-qah2a-cai",
+			"erc20ContractAddress": "0x68749665FF8D2d112Fa859AA293F07A622782F38"
 		},
 		"ckPEPE": {
 			"ledgerCanisterId": "etik7-oiaaa-aaaar-qagia-cai",

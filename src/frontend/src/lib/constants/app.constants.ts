@@ -1,4 +1,5 @@
 import { nonNullish } from '@dfinity/utils';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
@@ -43,6 +44,12 @@ export const BACKEND_CANISTER_ID = LOCAL
 		? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
 		: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
 
+export const SIGNER_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_SIGNER_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_SIGNER_CANISTER_ID
+		: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
+
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
@@ -71,3 +78,5 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_MILLISECOND * 1_000n * 60n
 // For some use case we want to display some amount to a maximal number of decimals which is not related to the number of decimals of the selected token.
 // Just a value that looks good visually.
 export const EIGHT_DECIMALS = 8;
+
+export const ZERO = BigNumber.from(0n);

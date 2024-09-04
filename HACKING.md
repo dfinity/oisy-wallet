@@ -22,6 +22,17 @@ Following terminal commands are useful to deploy `frontend` and `backend`.
 npm run deploy
 ```
 
+> [!NOTE]
+> For macOS, you might need to manually install `llvm` and patch `clang` lib path. See example for `zsh` shell:
+
+```bash
+brew install llvm
+
+echo 'export CC=$(brew --prefix llvm)/bin/clang' >> ~/.zshrc
+echo 'export AR=$(brew --prefix llvm)/bin/llvm-ar' >> ~/.zshrc
+echo 'export PATH=$(brew --prefix llvm)/bin:$PATH' >> ~/.zshrc
+```
+
 ### Staging
 
 > To perform staging development, you'll need a `.env.staging` file.
@@ -72,8 +83,11 @@ Translations are handled in JSON files but, as we are consuming these through a 
 A list of useful faucets and ERC20 tokens on Sepolia:
 
 - ETH: [Ethereum Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia) from Alchemy
-- USDC: [Circle faucet](https://faucet.circle.com/)
+- ckERC20:
+  - USDC: [Circle faucet](https://faucet.circle.com/)
+  - LINK: [Chainlink Sepolia faucet](https://faucets.chain.link/sepolia)
 - ERC20: [Weenus 💪 Token Faucet](https://github.com/bokkypoobah/WeenusTokenFaucet)
+- Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
 
 ## Testing
 

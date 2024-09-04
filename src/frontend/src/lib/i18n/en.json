@@ -39,12 +39,16 @@
 	},
 	"auth": {
 		"text": {
-			"title": "A wallet that lives on-chain for 100% decentralisation",
+			"title": "100% on-chain wallet for full decentralization",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
 		"alt": {
 			"sign_in": "Sign in with Internet Identity to start using Oisy Wallet."
+		},
+		"warning": {
+			"not_signed_in": "You are not signed in. Please sign in to continue.",
+			"session_expired": "You have been logged out because your session has expired."
 		},
 		"error": {
 			"no_internet_identity": "No internet identity.",
@@ -53,7 +57,9 @@
 			"error_validating_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential.",
 			"error_requesting_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
 			"missing_pouh_issuer_origin": "Sorry, but there was an error while requesting the Humanity Credential. The issuer origin is missing.",
-			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?"
+			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?",
+			"error_while_signing_in": "Something went wrong while sign-in.",
+			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
 		}
 	},
 	"wallet": {
@@ -75,7 +81,7 @@
 		"text": {
 			"initializing_wallet": "Initializing your wallet",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_eth_key": "Retrieving your Ethereum public key"
+			"retrieving_public_keys": "Retrieving your public keys"
 		},
 		"info": {
 			"hold_loading": "Hold tight, we are loading some information...",
@@ -93,6 +99,7 @@
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
+			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading the ETH balance.",
 			"loading_balance_symbol": "Error while loading $symbol balance.",
 			"erc20_contracts": "Error while loading the ERC20 contracts.",
@@ -140,7 +147,8 @@
 			"sign_in": "Sign in to start using Oisy Wallet."
 		},
 		"alt": {
-			"testnets_toggle": "Toggle to show or hide testnets"
+			"testnets_toggle": "Toggle to show or hide testnets",
+			"github_release": "Oisy release notes on GitHub"
 		},
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
@@ -160,7 +168,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP Account ID",
-				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users or other apps that support this address format.",
+				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users, or other apps that support this address format.",
 				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
 				"display_account_id_qr": "Display ICP Account ID as a QR code",
@@ -266,8 +274,9 @@
 			"gas_fees_not_defined": "Gas fees are not defined.",
 			"max_gas_fee_per_gas_undefined": "Max fee per gas or max priority fee per gas is undefined.",
 			"address_unknown": "Address is unknown.",
-			"minter_info_not_loaded": "Try again in few seconds, a ckETH configuration parameter is not yet loaded.",
-			"minter_info_not_certified": "Try again in few seconds, a ckETH configuration parameter has not yet certified."
+			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
+			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
+			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -289,6 +298,8 @@
 			"convert_to_cketh": "Convert to ckETH",
 			"convert_to_ckerc20": "Convert to $ckErc20",
 			"convert_eth_to_cketh": "Convert $token to $ckToken",
+			"cketh_conversions_may_take": "ckETH conversions may take up to 20 minutes.",
+			"ckerc20_conversions_may_take": "$ckErc20 conversions may take up to 20 minutes.",
 			"how_to_convert_eth_to_cketh": "Here is how to can convert $token to $ckToken on $oisy_name",
 			"send_eth": "Send $token to your $oisy_name address",
 			"wait_eth_current_balance": "Wait for $token to arrive. Current balance",
@@ -339,10 +350,10 @@
 			},
 			"error": {
 				"loading_metadata": "Error while loading the metadata of the token.",
-				"no_metadata": "No metadata for the token are provided. This is unexpected.",
+				"no_metadata": "No metadata for the token is provided. This is unexpected.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
 				"unexpected_index_ledger": "Something went wrong while loading the Ledger ID related to the Index canister.",
-				"invalid_ledger_id": "The Ledger ID is not related the Index canister.",
+				"invalid_ledger_id": "The Ledger ID is not related to the Index canister.",
 				"missing_ledger_id": "The Ledger ID is missing. Did you provide a value?",
 				"missing_index_id": "The Index ID is missing. Did you provide a value?",
 				"missing_contract_address": "The contract address is missing. Did you provide a value?",
@@ -389,7 +400,7 @@
 			"search_token": "Search for the token"
 		},
 		"warning": {
-			"trust_token": "Make sure that you trust the token that you are adding. If the token you are adding is controlled by a malicious party, they could try and scam you e.g. by making you believe you received a significant amount of tokens in order to trick you into sending them tokens in return or perform other undesired actions. Learn more about scams and security risks e.g. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">here</a>."
+			"trust_token": "Make sure you trust the token you are adding. If the token you are adding is controlled by a malicious party, they could try and scam you e.g., by making you believe you received a significant amount of tokens in order to trick you into sending them tokens in return or perform other undesired actions. Learn more about scams and security risks e.g. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">here</a>."
 		},
 		"error": {
 			"invalid_contract_address": "Contract address is invalid.",
@@ -401,7 +412,7 @@
 			"already_available": "Token is already available.",
 			"loading_metadata": "Error while loading the ERC20 contract metadata.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
-			"incomplete_metadata": "No name or symbol are provided in the metadata.",
+			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
 			"unexpected_undefined": "Token is undefined. This is unexpected."
 		}
@@ -411,7 +422,7 @@
 			"fee": "Fee",
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
-			"estimated_eth": "Estimated Ethereum Fee (Updated ≈30 Seconds)"
+			"estimated_eth": "Estimated Ethereum Fee"
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."
@@ -419,15 +430,16 @@
 	},
 	"info": {
 		"bitcoin": {
-			"title": "Receive from Bitcoin Network (BTC)",
-			"description": "ckBTC is a multi-chain bitcoin twin on the Internet Computer created by canister smart contract that directly hold native bitcoin.",
-			"note": "Note that incoming Bitcoin transactions require 6 confirmations. Check status on a block explorer.",
-			"receive": "Receive from BTC network"
+			"title": "Receive BTC & convert to ckBTC",
+			"description": "Convert Bitcoin into ckBTC and benefit from the fastest and cheapest Bitcoin transaction available. The conversion process can take up to an hour.",
+			"note": "You can convert ckBTC at any time back to BTC.",
+			"how_to": "How to convert to ckBTC"
 		},
 		"ethereum": {
-			"title": "Receive $token and convert to $ckToken",
-			"description": "With a few steps, transfer and convert your $tkName ($token) from the $network Network to $ckToken directly within the $oisy_name.",
-			"how_to": "How to convert $token to $ckToken",
+			"title": "Convert to $ckToken",
+			"description": "With a few steps, convert your native $network $token to its twinned ICP $ckToken directly within the $oisy_name. The conversion process can take up to 20 minutes.",
+			"note": "You can convert $ckToken at any time back to $token.",
+			"how_to": "How to convert to $ckToken",
 			"how_to_short": "How to convert $token"
 		}
 	},
@@ -472,7 +484,7 @@
 		},
 		"error": {
 			"qr_code_read": "Cannot read QR code.",
-			"missing_uri": "An uri to connect to should be provided.",
+			"missing_uri": "A URI to connect to should be provided.",
 			"disconnect": "An unexpected error happened while disconnecting the wallet. Resetting the connection anyway.",
 			"connect": "An unexpected error happened while trying to connect the wallet.",
 			"manual_workflow": "Please finalize the manual workflow that has already been initiated by opening the WalletConnect modal.",
@@ -515,8 +527,8 @@
 		},
 		"label": {
 			"reimbursement": "Reimbursement",
-			"twin_token_received": "$twinToken received",
 			"twin_token_sent": "$twinToken sent",
+			"twin_token_converted": "Converted from $twinToken",
 			"receiving_twin_token": "Receiving $twinToken",
 			"sending_twin_token": "Sending $twinToken",
 			"sending_twin_token_failed": "Sending $twinToken failed",
@@ -572,7 +584,7 @@
 				"fully_on_chain": "<strong>Fully on-chain</strong><br>Not only the keys but the entire wallet application is <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">stored on chain</a> and served directly into users’ browsers from ICP. Therefore the entire wallet is secured by a decentralized trust model making it tamper-proof.",
 				"cross_device": "<strong>Cross-device</strong><br>Using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a> means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
 				"verifiable_credentials": "<strong>Compatible with verifiable credentials</strong><br>$oisy_name is designed to integrate with Internet Computer’s <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials platform</a>. Users can access additional functionality, like airdrops, if they acquire credentials of a certain type.",
-				"open_source": "<strong>Open source</strong><br>Oisy is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organisation’s 200 world-leading cryptographers and engineers."
+				"open_source": "<strong>Open source</strong><br>Oisy is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organization’s 200 world-leading cryptographers and engineers."
 			}
 		}
 	}

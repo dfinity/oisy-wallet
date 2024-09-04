@@ -14,6 +14,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { Token } from '$lib/types/token';
+	import SendInfo from '$eth/components/send/SendInfo.svelte';
 
 	export let destination = '';
 	export let network: Network | undefined = undefined;
@@ -38,7 +39,13 @@
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<div class="stretch">
 		{#if destinationEditable}
-			<SendDestination bind:destination bind:invalidDestination on:icQRCodeScan />
+			<SendDestination
+				token={$sendToken}
+				{network}
+				bind:destination
+				bind:invalidDestination
+				on:icQRCodeScan
+			/>
 
 			<SendNetworkICP {destination} {sourceNetwork} bind:network />
 		{/if}
@@ -48,6 +55,8 @@
 		<SendSource token={$sendToken} balance={$sendBalance} source={$ethAddress ?? ''} />
 
 		<FeeDisplay />
+
+		<SendInfo />
 	</div>
 
 	<ButtonGroup>

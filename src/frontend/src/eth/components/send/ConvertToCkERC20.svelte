@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
-	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import EthSendTokenModal from '$eth/components/send/EthSendTokenModal.svelte';
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
@@ -14,6 +13,7 @@
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { token } from '$lib/stores/token.store';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 
 	/**
 	 * Send modal context store
@@ -25,21 +25,21 @@
 	});
 	setContext<SendContext>(SEND_CONTEXT_KEY, context);
 
-	let converToSymbol: string;
-	$: converToSymbol = ($token as OptionErc20Token)?.twinTokenSymbol ?? 'ckETH';
+	let convertToSymbol: string;
+	$: convertToSymbol = ($token as OptionErc20Token)?.twinTokenSymbol ?? '';
 </script>
 
 <ConvertETH
 	nativeTokenId={$ethereumTokenId}
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
-		$ckErc20: converToSymbol
+		$ckErc20: convertToSymbol
 	})}
 >
-	<IconBurn size="28" slot="icon" />
+	<IconConvert size="28" slot="icon" />
 	<span>
 		{replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
-			$ckErc20: converToSymbol
+			$ckErc20: convertToSymbol
 		})}
 	</span>
 </ConvertETH>

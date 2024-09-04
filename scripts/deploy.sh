@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
+dfx canister create internet_identity --specified-id rdmx6-jaaaa-aaaaa-aaadq-cai
+dfx canister create pouh_issuer --specified-id qbw6f-caaaa-aaaah-qdcwa-cai
+
 ./scripts/deploy.backend.sh
+./scripts/deploy.signer.sh
 
 mkdir -p ./target/ic
 

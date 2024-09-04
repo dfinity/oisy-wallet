@@ -1,4 +1,5 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
+use crate::bitcoin_utils::public_key_to_p2pkh_address;
 use crate::guards::{
     caller_is_allowed, caller_is_allowed_and_may_read_threshold_keys, may_read_threshold_keys,
     may_read_user_data, may_threshold_sign, may_write_user_data,
@@ -10,12 +11,15 @@ use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
+use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
 use ic_cdk::api::time;
+use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
+use ic_cdk_timers::{clear_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
     DefaultMemoryImpl,
@@ -33,11 +37,14 @@ use shared::types::token::{UserToken, UserTokenId};
 use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
-    ListUsersResponse, OisyUser, Stats, UserProfile,
+    ListUsersResponse, OisyUser, UserProfile,
 };
-use shared::types::{Arg, Config, Guards, InitArg, Migration, MigrationReport};
+use shared::types::{
+    Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
+};
 use std::cell::RefCell;
 use std::str::FromStr;
+use std::time::Duration;
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -46,9 +53,11 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bitcoin_utils;
 mod config;
 mod guards;
 mod impls;
+mod migrate;
 mod oisy_user;
 mod token;
 mod types;
@@ -92,7 +101,7 @@ pub fn mutate_state<R>(f: impl FnOnce(&mut State) -> R) -> R {
 /// Reads the internal canister configuration, normally set at canister install or upgrade.
 ///
 /// # Panics
-/// - If the config is not initialized.
+/// - If the `STATE.config` is not initialized.
 pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     read_state(|state| {
         f(state
@@ -103,7 +112,7 @@ pub fn read_config<R>(f: impl FnOnce(&Config) -> R) -> R {
     })
 }
 
-/// Modifies config, given the state.
+/// Modifies `state.config` with the provided function.
 fn modify_state_config(state: &mut State, f: impl FnOnce(&mut Config)) {
     let config: &Candid<Config> = state
         .config
@@ -249,6 +258,12 @@ async fn eth_address_of(p: Principal) -> String {
         ic_cdk::trap("Anonymous principal is not authorized");
     }
     pubkey_bytes_to_address(&ecdsa_pubkey_of(&p).await)
+}
+
+/// Returns the Bitcoin address of the caller.
+#[update(guard = "may_read_threshold_keys")]
+async fn caller_btc_address(network: BitcoinNetwork) -> String {
+    public_key_to_p2pkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
@@ -559,6 +574,74 @@ fn set_guards(guards: Guards) {
 #[query(guard = "caller_is_allowed")]
 fn stats() -> Stats {
     read_state(|s| Stats::from(s))
+}
+
+/// Bulk uploads data to this canister.
+///
+/// Note: In case of conflict, existing data is overwritten.  This situation is expected to occur only if a migration failed and had to be restarted.
+#[update(guard = "caller_is_allowed")]
+#[allow(clippy::needless_pass_by_value)]
+fn bulk_up(data: Vec<u8>) {
+    migrate::bulk_up(&data);
+}
+
+/// Starts user data migration to a given canister.
+///
+/// # Errors
+/// - There is a current migration in progress to a different canister.
+#[update(guard = "caller_is_allowed")]
+fn migrate_user_data_to(to: Principal) -> Result<MigrationReport, String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            if migration.to == to {
+                Ok(MigrationReport::from(migration))
+            } else {
+                Err("migration in progress to a different canister".to_string())
+            }
+        } else {
+            let timer_id =
+                set_timer_interval(Duration::from_secs(0), || ic_cdk::spawn(step_migration()));
+            let migration = Migration {
+                to,
+                progress: MigrationProgress::Pending,
+                timer_id,
+            };
+            let migration_report = MigrationReport::from(&migration);
+            s.migration = Some(migration);
+            Ok(migration_report)
+        }
+    })
+}
+
+/// Switch off the migration timer; migrate with manual API calls instead.
+#[update(guard = "caller_is_allowed")]
+fn migration_stop_timer() -> Result<(), String> {
+    mutate_state(|s| {
+        if let Some(migration) = &s.migration {
+            clear_timer(migration.timer_id);
+            Ok(())
+        } else {
+            Err("no migration in progress".to_string())
+        }
+    })
+}
+
+/// Steps the migration.
+///
+/// On error, the migration is marked as failed and the timer is cleared.
+#[update(guard = "caller_is_allowed")]
+async fn step_migration() {
+    let result = migrate::step_migration().await;
+    eprintln!("Stepped migration: {:?}", result);
+    if let Err(err) = result {
+        mutate_state(|s| {
+            if let Some(migration) = &mut s.migration {
+                migration.progress = MigrationProgress::Failed(err);
+                clear_timer(migration.timer_id);
+            }
+            eprintln!("Migration failed: {err:?}");
+        });
+    };
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.

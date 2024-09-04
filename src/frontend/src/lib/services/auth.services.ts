@@ -1,4 +1,4 @@
-import { deleteIdbEthAddress } from '$lib/api/idb.api';
+import { deleteIdbBtcAddressMainnet, deleteIdbEthAddress } from '$lib/api/idb.api';
 import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
@@ -7,11 +7,13 @@ import {
 import { trackEvent } from '$lib/services/analytics.services';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { replaceHistory } from '$lib/utils/route.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
+import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -46,7 +48,7 @@ export const signIn = async (
 		});
 
 		toastsError({
-			msg: { text: `Something went wrong while sign-in.` },
+			msg: { text: get(i18n).auth.error.error_while_signing_in },
 			err
 		});
 
@@ -67,18 +69,18 @@ export const warnSignOut = (text: string): Promise<void> =>
 	});
 
 export const nullishSignOut = (): Promise<void> =>
-	warnSignOut('You are not signed in. Please sign in to continue.');
+	warnSignOut(get(i18n).auth.warning.not_signed_in);
 
 export const idleSignOut = (): Promise<void> =>
 	logout({
 		msg: {
-			text: 'You have been logged out because your session has expired.',
+			text: get(i18n).auth.warning.session_expired,
 			level: 'warn'
 		},
 		clearStorages: false
 	});
 
-const emptyIdbEthAddress = async () => {
+const emptyIdbAddress = async (deleteIdbAddress: (principal: Principal) => Promise<void>) => {
 	const { identity } = get(authStore);
 
 	if (isNullish(identity)) {
@@ -86,13 +88,17 @@ const emptyIdbEthAddress = async () => {
 	}
 
 	try {
-		await deleteIdbEthAddress(identity.getPrincipal());
+		await deleteIdbAddress(identity.getPrincipal());
 	} catch (err: unknown) {
 		// We silence the error.
 		// Effective logout is more important here.
 		console.error(err);
 	}
 };
+
+const emptyIdbBtcAddressMainnet = async () => emptyIdbAddress(deleteIdbBtcAddressMainnet);
+
+const emptyIdbEthAddress = async () => emptyIdbAddress(deleteIdbEthAddress);
 
 const clearTestnetsOption = async () => {
 	testnetsStore.reset({ key: 'testnets' });
@@ -109,7 +115,7 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([emptyIdbEthAddress(), clearTestnetsOption()]);
+		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), clearTestnetsOption()]);
 	}
 
 	await authStore.signOut();

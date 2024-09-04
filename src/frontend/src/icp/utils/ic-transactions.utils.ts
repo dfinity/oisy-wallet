@@ -30,7 +30,10 @@ export const mapIcTransaction = ({
 	token: IcToken;
 	identity: OptionIdentity;
 }): IcTransactionUi => {
-	const { id: tokenId } = token;
+	const {
+		id: tokenId,
+		network: { env }
+	} = token;
 
 	if (tokenId === ICP_TOKEN_ID) {
 		return mapIcpTransaction({ transaction: transaction as IcpTransaction, ...rest });
@@ -40,7 +43,7 @@ export const mapIcTransaction = ({
 		return mapCkBTCTransaction({
 			transaction: transaction as IcrcTransaction,
 			ledgerCanisterId: (token as IcCkToken).ledgerCanisterId,
-			env: token.network.env,
+			env,
 			...rest
 		});
 	}
@@ -49,6 +52,7 @@ export const mapIcTransaction = ({
 		return mapCkEthereumTransaction({
 			transaction: transaction as IcrcTransaction,
 			ledgerCanisterId: (token as IcCkToken).ledgerCanisterId,
+			env,
 			...rest
 		});
 	}

@@ -36,6 +36,7 @@ interface I18nNavigation {
 interface I18nAuth {
 	text: { title: string; authenticate: string; logout: string };
 	alt: { sign_in: string };
+	warning: { not_signed_in: string; session_expired: string };
 	error: {
 		no_internet_identity: string;
 		invalid_pouh_credential: string;
@@ -44,6 +45,8 @@ interface I18nAuth {
 		error_requesting_pouh_credential: string;
 		missing_pouh_issuer_origin: string;
 		no_pouh_credential: string;
+		error_while_signing_in: string;
+		unexpected_issue_with_syncing: string;
 	};
 }
 
@@ -62,7 +65,7 @@ interface I18nWallet {
 }
 
 interface I18nInit {
-	text: { initializing_wallet: string; securing_session: string; retrieving_eth_key: string };
+	text: { initializing_wallet: string; securing_session: string; retrieving_public_keys: string };
 	info: { hold_loading: string; hold_loading_wallet: string };
 	error: {
 		no_alchemy_config: string;
@@ -76,6 +79,7 @@ interface I18nInit {
 		no_infura_erc20_provider: string;
 		no_infura_erc20_icp_provider: string;
 		eth_address_unknown: string;
+		loading_address: string;
 		loading_balance: string;
 		loading_balance_symbol: string;
 		erc20_contracts: string;
@@ -120,7 +124,7 @@ interface I18nSettings {
 		pouh_credential_verified: string;
 		sign_in: string;
 	};
-	alt: { testnets_toggle: string };
+	alt: { testnets_toggle: string; github_release: string };
 	error: { loading_profile: string };
 }
 
@@ -235,6 +239,7 @@ interface I18nSend {
 		address_unknown: string;
 		minter_info_not_loaded: string;
 		minter_info_not_certified: string;
+		cketh_max_transaction_fee_missing: string;
 	};
 	error: {
 		unexpected: string;
@@ -257,6 +262,8 @@ interface I18nConvert {
 		convert_to_cketh: string;
 		convert_to_ckerc20: string;
 		convert_eth_to_cketh: string;
+		cketh_conversions_may_take: string;
+		ckerc20_conversions_may_take: string;
 		how_to_convert_eth_to_cketh: string;
 		send_eth: string;
 		wait_eth_current_balance: string;
@@ -366,8 +373,14 @@ interface I18nFee {
 }
 
 interface I18nInfo {
-	bitcoin: { title: string; description: string; note: string; receive: string };
-	ethereum: { title: string; description: string; how_to: string; how_to_short: string };
+	bitcoin: { title: string; description: string; note: string; how_to: string };
+	ethereum: {
+		title: string;
+		description: string;
+		note: string;
+		how_to: string;
+		how_to_short: string;
+	};
 }
 
 interface I18nWallet_connect {
@@ -451,8 +464,8 @@ interface I18nTransaction {
 	status: { included: string; safe: string; finalised: string };
 	label: {
 		reimbursement: string;
-		twin_token_received: string;
 		twin_token_sent: string;
+		twin_token_converted: string;
 		receiving_twin_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;

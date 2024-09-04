@@ -4,6 +4,7 @@ import {
 	CKETH_EXPLORER_URL,
 	CKETH_SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
+import { EURC_TOKEN } from '$env/tokens-erc20/tokens.eurc.env';
 import { LINK_TOKEN, SEPOLIA_LINK_TOKEN } from '$env/tokens-erc20/tokens.link.env';
 import { OCT_TOKEN } from '$env/tokens-erc20/tokens.oct.env';
 import { PEPE_TOKEN, SEPOLIA_PEPE_TOKEN } from '$env/tokens-erc20/tokens.pepe.env';
@@ -13,6 +14,7 @@ import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens-erc20/tokens.usdc.en
 import { USDT_TOKEN } from '$env/tokens-erc20/tokens.usdt.env';
 import { WBTC_TOKEN } from '$env/tokens-erc20/tokens.wbtc.env';
 import { WSTETH_TOKEN } from '$env/tokens-erc20/tokens.wsteth.env';
+import { XAUT_TOKEN } from '$env/tokens-erc20/tokens.xaut.env';
 import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ckErc20Production, ckErc20Staging } from '$env/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
@@ -366,6 +368,22 @@ const CKUNI_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_D
 		}
 	: undefined;
 
+const CKEURC_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckEURC)
+	? {
+			...CKERC20_PRODUCTION_DATA.ckEURC,
+			position: 10,
+			twinToken: EURC_TOKEN
+		}
+	: undefined;
+
+const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_DATA?.ckXAUT)
+	? {
+			...CKERC20_PRODUCTION_DATA.ckXAUT,
+			position: 11,
+			twinToken: XAUT_TOKEN
+		}
+	: undefined;
+
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
 	...(nonNullish(CKUSDC_STAGING_DATA?.ledgerCanisterId)
@@ -388,7 +406,9 @@ export const CKERC20_LEDGER_CANISTER_IC_IDS: CanisterIdText[] = [
 	...(nonNullish(CKWBTC_IC_DATA?.ledgerCanisterId) ? [CKWBTC_IC_DATA.ledgerCanisterId] : []),
 	...(nonNullish(CKUSDT_IC_DATA?.ledgerCanisterId) ? [CKUSDT_IC_DATA.ledgerCanisterId] : []),
 	...(nonNullish(CKWSTETH_IC_DATA?.ledgerCanisterId) ? [CKWSTETH_IC_DATA.ledgerCanisterId] : []),
-	...(nonNullish(CKUNI_IC_DATA?.ledgerCanisterId) ? [CKUNI_IC_DATA.ledgerCanisterId] : [])
+	...(nonNullish(CKUNI_IC_DATA?.ledgerCanisterId) ? [CKUNI_IC_DATA.ledgerCanisterId] : []),
+	...(nonNullish(CKEURC_IC_DATA?.ledgerCanisterId) ? [CKEURC_IC_DATA.ledgerCanisterId] : []),
+	...(nonNullish(CKXAUT_IC_DATA?.ledgerCanisterId) ? [CKXAUT_IC_DATA.ledgerCanisterId] : [])
 ];
 
 export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
@@ -424,7 +444,9 @@ export const ICRC_TOKENS: IcCkInterface[] = [
 	...(nonNullish(CKWBTC_IC_DATA) ? [CKWBTC_IC_DATA] : []),
 	...(nonNullish(CKUSDT_IC_DATA) ? [CKUSDT_IC_DATA] : []),
 	...(nonNullish(CKWSTETH_IC_DATA) ? [CKWSTETH_IC_DATA] : []),
-	...(nonNullish(CKUNI_IC_DATA) ? [CKUNI_IC_DATA] : [])
+	...(nonNullish(CKUNI_IC_DATA) ? [CKUNI_IC_DATA] : []),
+	...(nonNullish(CKEURC_IC_DATA) ? [CKEURC_IC_DATA] : []),
+	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
 ];
 
 export const ICRC_TOKENS_LEDGER_CANISTER_IDS: LedgerCanisterIdText[] = ICRC_TOKENS.map(
