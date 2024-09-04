@@ -1,26 +1,21 @@
 <script lang="ts">
-	import { addressStore } from '$lib/stores/address.store';
+	import { ethAddressStore } from '$lib/stores/address.store';
 	import { isNullish } from '@dfinity/utils';
 	import { certifyEthAddress } from '$lib/services/address.services';
 	import { warnSignOut } from '$lib/services/auth.services';
-	import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 
 	const validateAddress = async () => {
-		const ethAddressData = $addressStore?.[ETHEREUM_TOKEN_ID];
-
-		if (isNullish(ethAddressData)) {
+		if (isNullish($ethAddressStore)) {
 			// No address is loaded, we don't have to verify it
 			return;
 		}
 
-		const { certified, data: ethAddress } = ethAddressData;
-
-		if (certified === true) {
+		if ($ethAddressStore.certified === true) {
 			// The address is certified, all good
 			return;
 		}
 
-		const { success, err } = await certifyEthAddress(ethAddress);
+		const { success, err } = await certifyEthAddress($ethAddressStore.data);
 
 		if (success) {
 			// The address is valid
@@ -30,7 +25,7 @@
 		await warnSignOut(err ?? 'Error while certifying your address');
 	};
 
-	$: $addressStore, (async () => await validateAddress())();
+	$: $ethAddressStore, (async () => await validateAddress())();
 </script>
 
 <slot />
