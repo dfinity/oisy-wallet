@@ -48,7 +48,7 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 /**
  * The following store is use as reference for the list of WalletWorkers that are started/stopped in the main token page.
  */
-// TODO: The several dependencies of enabledIcNetworkTokens are not strictly only IC tokens, but other tokens too.
+// TODO: The several dependencies of enabledIcTokens are not strictly only IC tokens, but other tokens too.
 //  We should find a better way to handle this, improving the store.
 export const enabledIcTokens: Readable<IcToken[]> = derived(
 	[enabledTokens],
