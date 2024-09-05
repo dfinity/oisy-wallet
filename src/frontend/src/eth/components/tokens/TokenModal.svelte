@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { tokenStandard } from '$lib/derived/token.derived';
-	import type { OptionErc20Token } from '$eth/types/erc20';
+	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import Value from '$lib/components/ui/Value.svelte';
+	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
+	import type { OptionErc20Token } from '$eth/types/erc20';
+	import Token from '$lib/components/tokens/Token.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { tokenStandard } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { Modal } from '@dfinity/gix-components';
-	import Token from '$lib/components/tokens/Token.svelte';
 	import { token } from '$lib/stores/token.store';
 
 	let contractAddress: string | undefined;
