@@ -27,24 +27,18 @@
 
 	let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;
 
-	let firstStep: WizardStep;
-	let otherSteps: WizardStep[];
-	$: [firstStep, ...otherSteps] = sendWizardStepsWithQrCodeScan({ i18n: $i18n });
-
 	let steps: WizardSteps;
-	$: steps = [
-		{
-			...firstStep,
-			title: isNetworkIdBitcoin(networkId)
-				? $i18n.convert.text.convert_to_btc
-				: isNetworkIdEthereum(networkId)
-					? replacePlaceholders($i18n.convert.text.convert_to_token, {
-							$token: $ckEthereumTwinToken.symbol
-						})
-					: $i18n.send.text.send
-		},
-		...otherSteps
-	];
+	$: steps = sendWizardStepsWithQrCodeScan({
+		i18n: $i18n,
+		converting: isNetworkIdBitcoin(networkId) || isNetworkIdEthereum(networkId),
+		alternativeFirstStepTitle: isNetworkIdBitcoin(networkId)
+			? $i18n.convert.text.convert_to_btc
+			: isNetworkIdEthereum(networkId)
+				? replacePlaceholders($i18n.convert.text.convert_to_token, {
+						$token: $ckEthereumTwinToken.symbol
+					})
+				: undefined
+	});
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;

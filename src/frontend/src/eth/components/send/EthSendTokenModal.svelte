@@ -35,37 +35,20 @@
 	 * Wizard modal
 	 */
 
-	let sendStep: WizardStep;
-	let reviewStep: WizardStep;
-	let sendingStep: WizardStep;
-	let otherSteps: WizardStep[];
-	$: [sendStep, reviewStep, sendingStep, ...otherSteps] = sendWizardStepsWithQrCodeScan({
-		i18n: $i18n
-	});
-
 	let steps: WizardSteps;
-	$: steps = [
-		{
-			...sendStep,
-			title:
-				sendPurpose === 'convert-eth-to-cketh'
-					? $i18n.convert.text.convert_to_cketh
-					: sendPurpose === 'convert-erc20-to-ckerc20'
-						? replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
-								$ckErc20: ($sendToken as Erc20Token).twinTokenSymbol ?? 'ckETH'
-							})
-						: $i18n.send.text.send
-		},
-		reviewStep,
-		{
-			...sendingStep,
-			title:
-				sendPurpose === 'convert-eth-to-cketh' || sendPurpose === 'convert-erc20-to-ckerc20'
-					? $i18n.convert.text.converting
-					: $i18n.send.text.sending
-		},
-		...otherSteps
-	];
+	$: steps = sendWizardStepsWithQrCodeScan({
+		i18n: $i18n,
+		converting:
+			sendPurpose === 'convert-eth-to-cketh' || sendPurpose === 'convert-erc20-to-ckerc20',
+		alternativeFirstStepTitle:
+			sendPurpose === 'convert-eth-to-cketh'
+				? $i18n.convert.text.convert_to_cketh
+				: sendPurpose === 'convert-erc20-to-ckerc20'
+					? replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
+							$ckErc20: ($sendToken as Erc20Token).twinTokenSymbol ?? 'ckETH'
+						})
+					: undefined
+	});
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;

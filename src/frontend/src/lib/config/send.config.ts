@@ -1,15 +1,20 @@
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
-import type { WizardSteps } from '@dfinity/gix-components';
+import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
 
 interface SendWizardStepsParams {
 	i18n: I18n;
 	converting?: boolean;
+	alternativeFirstStepTitle?: WizardStep['title'] | undefined;
 }
 
-export const sendWizardSteps = ({ i18n, converting }: SendWizardStepsParams): WizardSteps => [
+export const sendWizardSteps = ({
+	i18n,
+	converting,
+	alternativeFirstStepTitle
+}: SendWizardStepsParams): WizardSteps => [
 	{
 		name: WizardStepsSend.SEND,
-		title: i18n.send.text.send
+		title: alternativeFirstStepTitle ?? i18n.send.text.send
 	},
 	{
 		name: WizardStepsSend.REVIEW,
