@@ -7,6 +7,7 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	filterEnabledTokens,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
 	sumTokensUsdBalance
@@ -307,5 +308,35 @@ describe('sumTokensTotalUsdBalance', () => {
 	it('should correctly calculate USD total balance when tokens list is empty', () => {
 		const result = sumTokensUsdBalance([]);
 		expect(result).toEqual(0);
+	});
+});
+
+describe('filterEnabledTokens', () => {
+	it('should correctly return filtered tokens when all tokens have "enabled" property', () => {
+		const ENABLED_ICP_TOKEN = { ...ICP_TOKEN, enabled: true };
+		const ENABLED_ETHEREUM_TOKEN = { ...ENABLED_ICP_TOKEN, enabled: true };
+
+		const tokens: (Token & { enabled?: boolean })[] = [
+			ENABLED_ICP_TOKEN,
+			ENABLED_ETHEREUM_TOKEN,
+			{ ...BTC_MAINNET_TOKEN, enabled: false }
+		];
+
+		const result = filterEnabledTokens([tokens]);
+		expect(result).toEqual([ENABLED_ICP_TOKEN, ENABLED_ETHEREUM_TOKEN]);
+	});
+
+	it('should correctly return filtered tokens when not all tokens have "enabled" property', () => {
+		const ENABLED_BY_DEFAULT_ICP_TOKEN = ICP_TOKEN;
+		const ENABLED_BY_DEFAULT_ETHEREUM_TOKEN = ETHEREUM_TOKEN;
+
+		const tokens: (Token & { enabled?: boolean })[] = [
+			ENABLED_BY_DEFAULT_ICP_TOKEN,
+			ENABLED_BY_DEFAULT_ETHEREUM_TOKEN,
+			{ ...BTC_MAINNET_TOKEN, enabled: false }
+		];
+
+		const result = filterEnabledTokens([tokens]);
+		expect(result).toEqual([ENABLED_BY_DEFAULT_ICP_TOKEN, ENABLED_BY_DEFAULT_ETHEREUM_TOKEN]);
 	});
 });
