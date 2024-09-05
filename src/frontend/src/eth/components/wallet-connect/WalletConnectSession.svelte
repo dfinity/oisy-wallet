@@ -1,31 +1,31 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { onDestroy } from 'svelte';
-	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import WalletConnectForm from './WalletConnectForm.svelte';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { getSdkError } from '@walletconnect/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import { onDestroy } from 'svelte';
+	import WalletConnectButton from './WalletConnectButton.svelte';
+	import WalletConnectForm from './WalletConnectForm.svelte';
+	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import WalletConnectReview from './WalletConnectReview.svelte';
-	import { busy } from '$lib/stores/busy.store';
-	import type { WalletConnectListener } from '$eth/types/wallet-connect';
-	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		SESSION_REQUEST_SEND_TRANSACTION,
 		SESSION_REQUEST_PERSONAL_SIGN,
 		SESSION_REQUEST_ETH_SIGN,
 		SESSION_REQUEST_ETH_SIGN_V4
 	} from '$eth/constants/wallet-connect.constants';
-	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
-	import WalletConnectButton from './WalletConnectButton.svelte';
-	import { getSdkError } from '@walletconnect/utils';
-	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
-	import { loading } from '$lib/stores/loader.store';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
+	import type { WalletConnectListener } from '$eth/types/wallet-connect';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
+	import { busy } from '$lib/stores/busy.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { loading } from '$lib/stores/loader.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let listener: WalletConnectListener | undefined | null;
 

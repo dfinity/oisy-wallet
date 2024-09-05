@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 
 	const dispatch = createEventDispatcher();
 

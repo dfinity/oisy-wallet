@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
+	import { nonNullish } from '@dfinity/utils';
+	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import WalletConnectSendModal from './WalletConnectSendModal.svelte';
+	import { EIP155_CHAINS } from '$env/eip155-chains.env';
+	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
+	import type { EthereumNetwork } from '$eth/types/network';
 	import type {
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
 	} from '$eth/types/wallet-connect';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { nonNullish } from '@dfinity/utils';
-	import WalletConnectSendModal from './WalletConnectSendModal.svelte';
-	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
-	import type { EthereumNetwork } from '$eth/types/network';
-	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 
 	export let listener: WalletConnectListener | undefined | null;
 

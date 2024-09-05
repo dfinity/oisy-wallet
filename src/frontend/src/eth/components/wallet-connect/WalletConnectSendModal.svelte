@@ -1,15 +1,15 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
 	import WalletConnectSendTokenModal from '$eth/components/wallet-connect/WalletConnectSendTokenModal.svelte';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import type { EthereumNetwork } from '$eth/types/network';
 	import type {
 		WalletConnectEthSendTransactionParams,
 		WalletConnectListener
 	} from '$eth/types/wallet-connect';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import type { Token } from '$lib/types/token';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { nonNullish } from '@dfinity/utils';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
