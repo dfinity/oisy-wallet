@@ -10,9 +10,10 @@
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/stores/token.store';
 	import Actions from '$lib/components/hero/Actions.svelte';
+	import type { OptionToken } from '$lib/types/token';
 
+	export let token: OptionToken;
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
@@ -28,9 +29,9 @@
 			{#if displayTokenSymbol}
 				<div in:fade>
 					<Logo
-						src={$token?.icon}
+						src={token?.icon}
 						size="big"
-						alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
+						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token?.name ?? '' })}
 						color="off-white"
 					/>
 				</div>
@@ -58,7 +59,7 @@
 	</div>
 {/if}
 
-{#if isErc20Icp($token)}
+{#if isErc20Icp(token)}
 	<Erc20Icp />
 {/if}
 

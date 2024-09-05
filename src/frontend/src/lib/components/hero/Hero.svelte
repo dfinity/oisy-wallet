@@ -6,7 +6,9 @@
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import ThreeBackground from '$lib/components/ui/ThreeBackground.svelte';
+	import type { OptionToken } from '$lib/types/token';
 
+	export let token: OptionToken;
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
@@ -34,7 +36,7 @@
 		<Alpha />
 
 		{#if $authSignedIn}
-			<HeroContent {usdTotal} {summary} {actions} {more} />
+			<HeroContent {token} {usdTotal} {summary} {actions} {more} />
 		{:else if heroContent}
 			<HeroSignIn />
 		{/if}

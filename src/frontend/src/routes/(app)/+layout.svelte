@@ -24,6 +24,7 @@
 </script>
 
 <Hero
+	token={$pageToken}
 	usdTotal={route === 'tokens'}
 	summary={route === 'transactions'}
 	more={route === 'transactions'}
