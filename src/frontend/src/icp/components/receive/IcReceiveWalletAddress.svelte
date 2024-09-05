@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const { token } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
