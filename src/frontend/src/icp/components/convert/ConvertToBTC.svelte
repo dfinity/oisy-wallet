@@ -1,19 +1,19 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
+	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
+	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import type { OptionIcCkToken } from '$icp/types/ic';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertCkBTCToBTC } from '$lib/derived/modal.derived';
-	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { waitWalletReady } from '$lib/services/actions.services';
-	import { isNullish } from '@dfinity/utils';
-	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { tokenId } from '$lib/derived/token.derived';
-	import type { NetworkId } from '$lib/types/network';
-	import type { OptionIcCkToken } from '$icp/types/ic';
-	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
+	import { waitWalletReady } from '$lib/services/actions.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
-	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import type { NetworkId } from '$lib/types/network';
 
 	const isDisabled = (): boolean =>
 		isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);

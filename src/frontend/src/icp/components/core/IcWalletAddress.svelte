@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import Copy from '$lib/components/ui/Copy.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import Copy from '$lib/components/ui/Copy.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 </script>
 
 <div>

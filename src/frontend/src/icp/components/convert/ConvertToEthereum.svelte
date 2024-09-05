@@ -1,17 +1,17 @@
 <script lang="ts">
-	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
-	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import {
 		ckEthereumTwinTokenNetworkId,
 		ckEthereumTwinToken,
 		ckEthereumNativeTokenId,
 		ckEthereumNativeToken
 	} from '$icp-eth/derived/cketh.derived';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 </script>
 
 <ConvertETH
