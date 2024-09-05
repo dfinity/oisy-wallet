@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
-	import { modalCkBTCReceive } from '$lib/derived/modal.derived';
-	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
-	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
-	import { authStore } from '$lib/stores/auth.store';
-	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
+	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
+	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
+	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
-	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
+	import { modalCkBTCReceive } from '$lib/derived/modal.derived';
+	import { authStore } from '$lib/stores/auth.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	const { token, tokenId, ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);

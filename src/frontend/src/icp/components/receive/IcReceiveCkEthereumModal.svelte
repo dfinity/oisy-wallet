@@ -1,29 +1,29 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { createEventDispatcher } from 'svelte';
+	import { ICP_NETWORK } from '$env/networks.env';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
-	import type { Network } from '$lib/types/network';
+	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
-	import IcReceiveInfoCkEthereum from '$icp/components/receive/IcReceiveInfoCkEthereum.svelte';
-	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import { closeModal } from '$lib/utils/modal.utils';
-	import { ICP_NETWORK } from '$env/networks.env';
 	import {
 		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
 	} from '$icp-eth/derived/cketh.derived';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { createEventDispatcher } from 'svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
+	import { closeModal } from '$lib/utils/modal.utils';
 
 	/**
 	 * Props

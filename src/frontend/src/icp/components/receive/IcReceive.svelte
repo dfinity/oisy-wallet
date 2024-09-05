@@ -1,16 +1,9 @@
 <script lang="ts">
+	import { createEventDispatcher, setContext } from 'svelte';
+	import IcReceiveCkBTC from '$icp/components/receive/IcReceiveCkBTC.svelte';
 	import IcReceiveCkEthereum from '$icp/components/receive/IcReceiveCkEthereum.svelte';
 	import IcReceiveIcp from '$icp/components/receive/IcReceiveICP.svelte';
-	import IcReceiveCkBTC from '$icp/components/receive/IcReceiveCkBTC.svelte';
 	import IcReceiveIcrc from '$icp/components/receive/IcReceiveIcrc.svelte';
-	import type { Token } from '$lib/types/token';
-	import {
-		isTokenCkBtcLedger,
-		isTokenCkErc20Ledger,
-		isTokenCkEthLedger
-	} from '$icp/utils/ic-send.utils';
-	import type { IcToken } from '$icp/types/ic';
-	import { createEventDispatcher, setContext } from 'svelte';
 	import {
 		type CloseModalAndResetToken,
 		initReceiveTokenContext,
@@ -18,8 +11,15 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import type { IcToken } from '$icp/types/ic';
+	import {
+		isTokenCkBtcLedger,
+		isTokenCkErc20Ledger,
+		isTokenCkEthLedger
+	} from '$icp/utils/ic-send.utils';
 	import { loadTokenAndRun } from '$lib/services/token.services';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
 

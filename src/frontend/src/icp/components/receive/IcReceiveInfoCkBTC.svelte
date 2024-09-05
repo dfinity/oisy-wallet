@@ -1,21 +1,21 @@
 <script lang="ts">
-	import Hr from '$lib/components/ui/Hr.svelte';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
-	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { btcAddressStore } from '$icp/stores/btc.store';
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
+	import { btcAddressStore } from '$icp/stores/btc.store';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const { tokenId, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
