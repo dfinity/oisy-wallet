@@ -13,7 +13,7 @@
 	--padding-6x: calc(var(--padding) * 6);
 	--padding-8x: calc(var(--padding) * 8);
 
-	--border-radius-xs: 4px;
+	--border-radius-xs: calc(var(--border-radius-sm) * 0.5);
 	--border-radius-sm: 8px;
 	--border-radius-md: calc(var(--border-radius-sm) * 2);
 	--border-radius-lg: calc(var(--border-radius-sm) * 4);
