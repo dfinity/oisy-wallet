@@ -35,17 +35,17 @@ export const BTC_TESTNET_TOKEN: Token = {
 	icon: bitcoinTestnet
 };
 
-export const BTC_REGSTEST_SYMBOL = 'BTC (Regtest)';
+export const BTC_REGTEST_SYMBOL = 'BTC (Regtest)';
 
-export const BTC_REGSTEST_TOKEN_ID: unique symbol = Symbol(BTC_REGSTEST_SYMBOL);
+export const BTC_REGTEST_TOKEN_ID: unique symbol = Symbol(BTC_REGTEST_SYMBOL);
 
-export const BTC_REGSTEST_TOKEN: Token = {
-	id: BTC_REGSTEST_TOKEN_ID,
+export const BTC_REGTEST_TOKEN: Token = {
+	id: BTC_REGTEST_TOKEN_ID,
 	network: BTC_REGTEST_NETWORK,
 	standard: 'bitcoin',
 	category: 'default',
 	name: 'Bitcoin (Regtest)',
-	symbol: BTC_REGSTEST_SYMBOL,
+	symbol: BTC_REGTEST_SYMBOL,
 	decimals: BTC_DECIMALS,
 	icon: bitcoinTestnet
 };
