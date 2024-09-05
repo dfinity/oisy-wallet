@@ -1,34 +1,34 @@
 <script lang="ts">
-	import type { WebSocketListener } from '$eth/types/listener';
-	import type { Erc20Token } from '$eth/types/erc20';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import { debounce } from '@dfinity/utils';
-	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import { getContext, onDestroy, onMount } from 'svelte';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { infuraProviders } from '$eth/providers/infura.providers';
+	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import {
 		getCkErc20FeeData,
 		getErc20FeeData,
 		getEthFeeData,
 		type GetFeeData
 	} from '$eth/services/fee.services';
-	import type { Network } from '$lib/types/network';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
-	import { infuraProviders } from '$eth/providers/infura.providers';
+	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import type { Erc20Token } from '$eth/types/erc20';
+	import type { WebSocketListener } from '$eth/types/listener';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
+	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let observe: boolean;
 	export let destination = '';

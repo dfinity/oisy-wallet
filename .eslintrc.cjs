@@ -32,6 +32,23 @@ module.exports = {
 			rules: {
 				'no-console': 'off'
 			}
+		},
+		{
+			// TODO: slowly add all related folders, and ultimately remove this override and include the rule in the main rules
+			files: [
+				'src/frontend/src/eth/components/core/**/*.svelte',
+				'src/frontend/src/eth/components/fee/**/*.svelte',
+				'src/frontend/src/eth/components/receive/**/*.svelte',
+				'src/frontend/src/eth/components/send/**/*.svelte'
+			],
+			rules: {
+				'import/order': [
+					'error',
+					{
+						alphabetize: { order: 'asc' }
+					}
+				]
+			}
 		}
 	],
 	rules: {

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { openMetamaskTransaction } from '$eth/services/metamask.services';
 	import { metamaskAvailable } from '$eth/derived/metamask.derived';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import { networkEthereum } from '$lib/derived/network.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { openMetamaskTransaction } from '$eth/services/metamask.services';
+	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { networkEthereum } from '$lib/derived/network.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	const receiveModal = async () => {
 		if (!$metamaskAvailable) {

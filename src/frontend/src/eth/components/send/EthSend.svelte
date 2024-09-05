@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
+	import EthSendModal from '$eth/components/send/EthSendModal.svelte';
+	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { modalEthSend } from '$lib/derived/modal.derived';
-	import EthSendModal from '$eth/components/send/EthSendModal.svelte';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { loadTokenAndRun } from '$lib/services/token.services';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
-	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
 
 	export let token: Token;
 
