@@ -39,7 +39,9 @@
 	let reviewStep: WizardStep;
 	let sendingStep: WizardStep;
 	let otherSteps: WizardStep[];
-	$: [sendStep, reviewStep, sendingStep, ...otherSteps] = sendWizardStepsWithQrCodeScan($i18n);
+	$: [sendStep, reviewStep, sendingStep, ...otherSteps] = sendWizardStepsWithQrCodeScan({
+		i18n: $i18n
+	});
 
 	let steps: WizardSteps;
 	$: steps = [

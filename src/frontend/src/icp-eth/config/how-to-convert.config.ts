@@ -11,7 +11,7 @@ export const howToConvertWizardSteps = ({
 	i18n: I18n;
 	twinToken: Token;
 }): WizardSteps => {
-	const [send, ...rest] = sendWizardSteps(i18n);
+	const [send, ...rest] = sendWizardSteps({ i18n });
 
 	const { id: tokenId, symbol } = twinToken;
 
