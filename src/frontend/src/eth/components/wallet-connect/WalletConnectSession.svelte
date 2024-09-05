@@ -16,16 +16,16 @@
 	} from '$eth/constants/wallet-connect.constants';
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
+	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
+	import type { WalletConnectListener } from '$eth/types/wallet-connect';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { busy } from '$lib/stores/busy.store';
-	import type { WalletConnectListener } from '$eth/types/wallet-connect';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 
 	export let listener: WalletConnectListener | undefined | null;
 
