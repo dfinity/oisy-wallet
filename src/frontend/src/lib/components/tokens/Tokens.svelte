@@ -6,6 +6,17 @@
 	import TokensSignedOut from '$lib/components/tokens/TokensSignedOut.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
+	import BtcModal from '$btc/components/BtcModal.svelte';
+
+	let showBtc = false;
+
+	const openBtc = () => {
+		showBtc = true;
+	};
+
+	const closeBtc = () => {
+		showBtc = false;
+	};
 </script>
 
 <div class:pointer-events-none={$authNotSignedIn} class:blur-[1.5px]={$authNotSignedIn}>
@@ -22,4 +33,12 @@
 	{/if}
 
 	<ManageTokensButton />
+
+	{#if showBtc}
+		<BtcModal on:nnsClose={closeBtc} />
+	{/if}
+
+	<div>
+		<button on:click={openBtc} class="primary">Open BTC</button>
+	</div>
 </div>

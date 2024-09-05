@@ -69,6 +69,21 @@ export const idlFactory = ({ IDL }) => {
 		created_timestamp: IDL.Nat64,
 		updated_timestamp: IDL.Nat64
 	});
+	const Outpoint = IDL.Record({
+		txid: IDL.Vec(IDL.Nat8),
+		vout: IDL.Nat32
+	});
+	const Utxo = IDL.Record({
+		height: IDL.Nat32,
+		value: IDL.Nat64,
+		outpoint: Outpoint
+	});
+	const GetUtxosResponse = IDL.Record({
+		next_page: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		tip_height: IDL.Nat32,
+		tip_block_hash: IDL.Vec(IDL.Nat8),
+		utxos: IDL.Vec(Utxo)
+	});
 	const CanisterStatusType = IDL.Variant({
 		stopped: IDL.Null,
 		stopping: IDL.Null,
@@ -180,6 +195,11 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
+	const SendBtcParams = IDL.Record({
+		dst_address: IDL.Text,
+		network: BitcoinNetwork,
+		amount: IDL.Nat64
+	});
 	const SignRequest = IDL.Record({
 		to: IDL.Text,
 		gas: IDL.Nat,
@@ -198,6 +218,8 @@ export const idlFactory = ({ IDL }) => {
 		config: IDL.Func([], [Config]),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
+		get_btc_balance: IDL.Func([IDL.Text, BitcoinNetwork], [IDL.Nat64], []),
+		get_btc_utxos: IDL.Func([IDL.Text, BitcoinNetwork], [GetUtxosResponse], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_user_profile: IDL.Func([], [Result_1]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
@@ -209,6 +231,7 @@ export const idlFactory = ({ IDL }) => {
 		migration_stop_timer: IDL.Func([], [Result_3], []),
 		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
+		send_btc: IDL.Func([SendBtcParams], [IDL.Text], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),

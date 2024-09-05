@@ -5,19 +5,21 @@ use crate::guards::{
     may_read_user_data, may_threshold_sign, may_write_user_data,
 };
 use crate::token::{add_to_user_token, remove_from_user_token};
-use candid::{Nat, Principal};
+use bitcoin::consensus::serialize;
+use bitcoin::{Address as BtcAddress, Network};
+use candid::{CandidType, Nat, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
 use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
-use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, GetUtxosResponse};
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
     SignWithEcdsaArgument,
 };
 use ic_cdk::api::time;
-use ic_cdk::eprintln;
+use ic_cdk::{eprintln, println};
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{clear_timer, set_timer_interval};
 use ic_stable_structures::{
@@ -27,7 +29,9 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
 use oisy_user::oisy_users;
+use p2pkh::{build_p2pkh_spend_tx, ecdsa_sign_transaction};
 use pretty_assertions::assert_eq;
+use serde::Deserialize;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
@@ -53,12 +57,15 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
+mod ecdsa_api;
 mod guards;
 mod impls;
 mod migrate;
 mod oisy_user;
+mod p2pkh;
 mod token;
 mod types;
 mod user_profile;
@@ -642,6 +649,117 @@ async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
+}
+
+#[update]
+async fn get_btc_balance(address: String, network: BitcoinNetwork) -> u64 {
+    bitcoin_api::get_balance(network, address).await
+}
+
+#[update]
+async fn get_btc_utxos(address: String, network: BitcoinNetwork) -> GetUtxosResponse {
+    bitcoin_api::get_utxos(network, address).await
+}
+
+async fn get_fee_per_byte(network: BitcoinNetwork) -> u64 {
+    // Get fee percentiles from previous transactions to estimate our own fee.
+    let fee_percentiles = bitcoin_api::get_current_fee_percentiles(network).await;
+
+    if fee_percentiles.is_empty() {
+        // There are no fee percentiles. This case can only happen on a regtest
+        // network where there are no non-coinbase transactions. In this case,
+        // we use a default of 2000 millisatoshis/byte (i.e. 2 satoshi/byte)
+        2000
+    } else {
+        // Choose the 50th percentile for sending fees.
+        fee_percentiles[50]
+    }
+}
+
+fn transform_network(network: BitcoinNetwork) -> Network {
+    match network {
+        BitcoinNetwork::Mainnet => Network::Bitcoin,
+        BitcoinNetwork::Testnet => Network::Testnet,
+        BitcoinNetwork::Regtest => Network::Regtest,
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+struct SendBtcParams {
+    pub network: BitcoinNetwork,
+    pub dst_address: String,
+    pub amount: u64,
+}
+
+/// Signs a transaction to the network that transfers the given amount to the
+/// given destination, where the source of the funds is the canister itself
+/// at the given derivation path.
+#[update(guard = "may_threshold_sign")]
+async fn send_btc(params: SendBtcParams) -> String {
+    let principal = &ic_cdk::caller();
+    let derivation_path = principal_to_derivation_path(principal);
+    let key_name = "dfx_test_key".to_string();
+    let network = params.network;
+    let dst_address = params.dst_address;
+    let amount = params.amount;
+    let fee_per_byte = get_fee_per_byte(network).await;
+
+    // Fetch our public key, P2PKH address, and UTXOs.
+    // let own_public_key =
+    //     ecdsa_api::get_ecdsa_public_key(key_name.clone(), derivation_path.clone()).await;
+    // let own_address = public_key_to_p2pkh_address(network, &own_public_key);
+    // We use the caller's pub key and address
+    // TODO: Add source address as optional param.
+    let user_public_key = ecdsa_pubkey_of(&principal).await;
+    let source_address = public_key_to_p2pkh_address(network, &user_public_key);
+
+    println!("Source address {}", source_address.to_string());
+
+    // TODO: Note that pagination may have to be used to get all UTXOs for the given address.
+    // For the sake of simplicity, it is assumed here that the `utxo` field in the response
+    // contains all UTXOs.
+    let own_utxos = bitcoin_api::get_utxos(network, source_address.clone())
+        .await
+        .utxos;
+
+    println!("After getting utxos: {}", own_utxos.len().to_string());
+
+    let own_address = BtcAddress::from_str(&source_address)
+        .unwrap()
+        .require_network(transform_network(network))
+        .expect("Network check failed");
+    let dst_address = BtcAddress::from_str(&dst_address)
+        .unwrap()
+        .require_network(transform_network(network))
+        .expect("Network check failed");
+
+    // Build the transaction that sends `amount` to the destination address.
+    let transaction = build_p2pkh_spend_tx(
+        &user_public_key,
+        &own_address,
+        &own_utxos,
+        &dst_address,
+        amount,
+        fee_per_byte,
+    )
+    .await;
+
+    // Sign the transaction.
+    let signed_transaction = ecdsa_sign_transaction(
+        &user_public_key,
+        &own_address,
+        transaction,
+        key_name,
+        derivation_path,
+        ecdsa_api::get_ecdsa_signature,
+    )
+    .await;
+
+    let signed_transaction_bytes = serialize(&signed_transaction);
+
+    bitcoin_api::send_transaction(network, signed_transaction_bytes).await;
+
+    signed_transaction.compute_txid().to_string()
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.

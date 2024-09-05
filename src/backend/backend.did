@@ -51,6 +51,12 @@ type DefiniteCanisterSettingsArgs = record {
   compute_allocation : nat;
 };
 type GetUserProfileError = variant { NotFound };
+type GetUtxosResponse = record {
+  next_page : opt blob;
+  tip_height : nat32;
+  tip_block_hash : blob;
+  utxos : vec Utxo;
+};
 type Guards = record { user_data : ApiEnabled; threshold_key : ApiEnabled };
 type HttpRequest = record {
   url : text;
@@ -110,10 +116,16 @@ type OisyUser = record {
   pouh_verified : bool;
   updated_timestamp : nat64;
 };
+type Outpoint = record { txid : blob; vout : nat32 };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_2 = variant { Ok : MigrationReport; Err : text };
 type Result_3 = variant { Ok; Err : text };
+type SendBtcParams = record {
+  dst_address : text;
+  network : BitcoinNetwork;
+  amount : nat64;
+};
 type SignRequest = record {
   to : text;
   gas : nat;
@@ -158,6 +170,7 @@ type UserToken = record {
   symbol : opt text;
 };
 type UserTokenId = record { chain_id : nat64; contract_address : text };
+type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
   bulk_up : (blob) -> ();
@@ -166,6 +179,8 @@ service : (Arg) -> {
   config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
   eth_address_of : (principal) -> (text);
+  get_btc_balance : (text, BitcoinNetwork) -> (nat64);
+  get_btc_utxos : (text, BitcoinNetwork) -> (GetUtxosResponse);
   get_canister_status : () -> (CanisterStatusResultV2);
   get_user_profile : () -> (Result_1) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
@@ -177,6 +192,7 @@ service : (Arg) -> {
   migration_stop_timer : () -> (Result_3);
   personal_sign : (text) -> (text);
   remove_user_token : (UserTokenId) -> ();
+  send_btc : (SendBtcParams) -> (text);
   set_custom_token : (CustomToken) -> ();
   set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
