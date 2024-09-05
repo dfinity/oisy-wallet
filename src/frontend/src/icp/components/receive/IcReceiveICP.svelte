@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
-	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
-	import { isRouteTokens } from '$lib/utils/nav.utils';
+	import { getContext } from 'svelte';
 	import { page } from '$app/stores';
 	import IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
-	import { modalIcpReceive } from '$lib/derived/modal.derived';
-	import { getContext } from 'svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
+	import { modalIcpReceive } from '$lib/derived/modal.derived';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
 
 	const { tokenStandard, open, close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
