@@ -2,7 +2,7 @@
 	import { loadBalances, loadErc20Balances } from '$eth/services/balance.services';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { debounce } from '@dfinity/utils';
-	import { enabledErc20NetworkTokens } from '$lib/derived/network-tokens.derived';
+	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 
 	const load = async () => {
 		await Promise.allSettled([
@@ -10,14 +10,14 @@
 			loadBalances(),
 			loadErc20Balances({
 				address: $ethAddress,
-				erc20Tokens: $enabledErc20NetworkTokens
+				erc20Tokens: $enabledErc20Tokens
 			})
 		]);
 	};
 
 	const debounceLoad = debounce(load, 500);
 
-	$: $ethAddress, $enabledErc20NetworkTokens, debounceLoad();
+	$: $ethAddress, $enabledErc20Tokens, debounceLoad();
 </script>
 
 <slot />

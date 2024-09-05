@@ -125,3 +125,12 @@ export const pinTokensWithBalanceAtTop = ({
  */
 export const sumTokensUsdBalance = (tokens: TokenUi[]): number =>
 	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);
+
+/**
+ * Filters and returns a list of "enabled" by user tokens
+ *
+ * @param $tokens - The list of tokens.
+ * @returns The list of "enabled" tokens.
+ */
+export const filterEnabledTokens = ([$tokens]: [$tokens: Token[]]): Token[] =>
+	$tokens.filter((token) => ('enabled' in token ? token.enabled : true));
