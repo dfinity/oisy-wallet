@@ -1,29 +1,8 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import type {
-		WalletConnectEthSendTransactionParams,
-		WalletConnectListener
-	} from '$eth/types/wallet-connect';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
-	import { getContext, setContext } from 'svelte';
-	import {
-		FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
-		initFeeStore
-	} from '$eth/stores/fee.store';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
-	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
-	import {
-		send as sendServices,
-		reject as rejectServices
-	} from '$eth/services/wallet-connect.services';
+	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
+	import { getContext, setContext } from 'svelte';
 	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { authStore } from '$lib/stores/auth.store';
@@ -33,13 +12,34 @@
 	import { ICP_NETWORK } from '$env/networks.env';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { writable } from 'svelte/store';
-	import { i18n } from '$lib/stores/i18n.store';
+	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
+	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import {
+		send as sendServices,
+		reject as rejectServices
+	} from '$eth/services/wallet-connect.services';
+	import {
+		FEE_CONTEXT_KEY,
+		type FeeContext as FeeContextType,
+		initFeeContext,
+		initFeeStore
+	} from '$eth/stores/fee.store';
+	import type {
+		WalletConnectEthSendTransactionParams,
+		WalletConnectListener
+	} from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
-	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
+	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { TokenId } from '$lib/types/token';
 
 	export let request: Web3WalletTypes.SessionRequest;

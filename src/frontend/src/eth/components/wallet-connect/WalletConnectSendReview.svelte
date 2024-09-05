@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { formatToken } from '$lib/utils/format.utils';
-	import SendData from '$lib/components/send/SendData.svelte';
-	import type { BigNumber } from '@ethersproject/bignumber';
-	import WalletConnectActions from './WalletConnectActions.svelte';
 	import { nonNullish } from '@dfinity/utils';
-	import WalletConnectSendData from './WalletConnectSendData.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
-	import type { Network } from '$lib/types/network';
-	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
-	import { balance } from '$lib/derived/balances.derived';
-	import type { EthereumNetwork } from '$eth/types/network';
+	import type { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import WalletConnectActions from './WalletConnectActions.svelte';
+	import WalletConnectSendData from './WalletConnectSendData.svelte';
+	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
+	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import SendData from '$lib/components/send/SendData.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { balance } from '$lib/derived/balances.derived';
+	import type { Network } from '$lib/types/network';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	export let amount: BigNumber;
 	export let destination: string;
