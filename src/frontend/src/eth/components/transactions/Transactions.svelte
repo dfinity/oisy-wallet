@@ -1,20 +1,20 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import Transaction from './Transaction.svelte';
+	import TransactionModal from './TransactionModal.svelte';
+	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
+	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
+	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import { sortedTransactions } from '$eth/derived/transactions.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
-	import type { TokenId } from '$lib/types/token';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { modalToken, modalTransaction } from '$lib/derived/modal.derived';
-	import TransactionModal from './TransactionModal.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { nonNullish } from '@dfinity/utils';
-	import type { Transaction as TransactionType } from '$lib/types/transaction';
-	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
-	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { tokenNotInitialized } from '$eth/derived/nav.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import Header from '$lib/components/ui/Header.svelte';
-	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
+	import { modalToken, modalTransaction } from '$lib/derived/modal.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { TokenId } from '$lib/types/token';
+	import type { Transaction as TransactionType } from '$lib/types/transaction';
+	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
