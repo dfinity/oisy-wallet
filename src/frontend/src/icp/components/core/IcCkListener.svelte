@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import type { OptionIcCkToken } from '$icp/types/ic';
 	import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
-	import type { Token } from '$lib/types/token';
+	import type { OptionIcCkToken } from '$icp/types/ic';
 	import type { CanisterIdText } from '$lib/types/canister';
+	import type { Token } from '$lib/types/token';
 
 	export let initFn: IcCkWorker;
 	export let token: Token;

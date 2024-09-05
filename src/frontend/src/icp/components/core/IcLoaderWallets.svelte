@@ -1,11 +1,11 @@
 <script lang="ts">
+	import { debounce } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
+	import type { IcToken } from '$icp/types/ic';
 	import type { WalletWorker } from '$icp/types/ic-listener';
+	import { cleanWorkers, loadWorker } from '$icp/utils/ic-wallet.utils';
 	import { enabledIcNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import type { TokenId } from '$lib/types/token';
-	import { debounce } from '@dfinity/utils';
-	import { cleanWorkers, loadWorker } from '$icp/utils/ic-wallet.utils';
-	import type { IcToken } from '$icp/types/ic';
 
 	const workers: Map<TokenId, WalletWorker> = new Map<TokenId, WalletWorker>();
 
