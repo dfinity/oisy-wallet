@@ -3,12 +3,11 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isErc20Icp } from '$eth/utils/token.utils';
-	import { invalidIcpAddress } from '$icp/utils/icp-account.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { OptionToken } from '$lib/types/token';
-	import { isEthAddress } from '$lib/utils/account.utils';
+	import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 
