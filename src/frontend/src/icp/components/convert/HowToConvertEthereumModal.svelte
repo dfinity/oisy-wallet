@@ -7,12 +7,7 @@
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { ICP_NETWORK } from '$env/networks.env';
-	import {
-		ckEthereumTwinTokenStandard,
-		ckEthereumTwinToken,
-		ckEthereumNativeTokenId,
-		ckEthereumNativeToken
-	} from '$icp-eth/derived/cketh.derived';
+	import { ckEthereumNativeTokenId, ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		toCkErc20HelperContractAddress,
@@ -20,6 +15,9 @@
 	} from '$icp-eth/utils/cketh.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import type { Token } from '$lib/types/token';
+
+	export let twinToken: Token;
 
 	/**
 	 * Props
@@ -27,7 +25,7 @@
 
 	let destination = '';
 	$: destination =
-		$ckEthereumTwinTokenStandard === 'erc20'
+		twinToken.standard === 'erc20'
 			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
 			: toCkEthHelperContractAddress(
 					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
@@ -44,7 +42,7 @@
 	 */
 
 	let steps: WizardSteps;
-	$: steps = howToConvertWizardSteps({ i18n: $i18n, twinToken: $ckEthereumTwinToken });
+	$: steps = howToConvertWizardSteps({ i18n: $i18n, twinToken });
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -85,6 +83,7 @@
 			on:icQRCode={modal.next}
 			on:icConvert={() => modal.set(2)}
 			formCancelAction="close"
+			twinTokenSymbol={twinToken.symbol}
 		/>
 	</ConvertETHToCkETHWizard>
 </WizardModal>

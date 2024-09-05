@@ -107,6 +107,7 @@
 				on:icBack={() => modal.set(0)}
 				on:icQRCode={modal.next}
 				on:icConvert={() => modal.set(4)}
+				twinTokenSymbol={$ckEthereumTwinToken.symbol}
 			/>
 		{:else if currentStep?.name === steps[1].name}
 			<ReceiveAddressQRCode on:icBack={modal.back} address={$icrcAccountIdentifierText ?? ''} />
