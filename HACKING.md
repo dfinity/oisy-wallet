@@ -195,6 +195,8 @@ You can also run it by cleaning up the state:
 
 You would normally do this along resetting the bitcoin node as mentioned before.
 
+**IMPORTANT: If you were running a local replica before without bitcoin, use the `--clean` flag.**
+
 ### Mining Bitcoins
 
 To start testing Bitcoin feature you'll need some tokens.
