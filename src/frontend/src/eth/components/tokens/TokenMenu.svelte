@@ -1,14 +1,14 @@
 <script lang="ts">
-	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
+	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
+	import type { Erc20Token } from '$eth/types/erc20';
+	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
-	import type { Erc20Token } from '$eth/types/erc20';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
-	import { fade } from 'svelte/transition';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 
 	let explorerUrl: string | undefined;

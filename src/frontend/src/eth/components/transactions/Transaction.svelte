@@ -1,19 +1,19 @@
 <script lang="ts">
-	import type { Transaction } from '$lib/types/transaction';
+	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import type { ComponentType } from 'svelte';
 	import { isTransactionPending } from '$eth/utils/transactions.utils';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import type { ComponentType } from 'svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import { nonNullish } from '@dfinity/utils';
-	import Card from '$lib/components/ui/Card.svelte';
-	import { formatSecondsToDate } from '$lib/utils/format.utils';
-	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import Amount from '$lib/components/ui/Amount.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
+	import Amount from '$lib/components/ui/Amount.svelte';
+	import Card from '$lib/components/ui/Card.svelte';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { Transaction } from '$lib/types/transaction';
+	import { formatSecondsToDate } from '$lib/utils/format.utils';
 
 	export let transaction: Transaction;
 

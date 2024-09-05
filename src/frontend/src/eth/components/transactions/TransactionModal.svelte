@@ -1,22 +1,22 @@
 <script lang="ts">
-	import type { Transaction } from '$lib/types/transaction';
-	import type { BigNumber } from '@ethersproject/bignumber';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import { Modal } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import type { BigNumber } from '@ethersproject/bignumber';
+	import TransactionStatus from './TransactionStatus.svelte';
+	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
+	import Copy from '$lib/components/ui/Copy.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { Transaction } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import TransactionStatus from './TransactionStatus.svelte';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import Value from '$lib/components/ui/Value.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let transaction: Transaction;

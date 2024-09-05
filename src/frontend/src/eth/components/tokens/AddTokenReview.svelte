@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Erc20Metadata } from '$eth/types/erc20';
 	import { isNullish } from '@dfinity/utils';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import Value from '$lib/components/ui/Value.svelte';
-	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
-	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
-	import type { Network } from '$lib/types/network';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+	import type { Erc20Metadata } from '$eth/types/erc20';
+	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { Network } from '$lib/types/network';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let contractAddress: string | undefined;
 	export let metadata: Erc20Metadata | undefined;

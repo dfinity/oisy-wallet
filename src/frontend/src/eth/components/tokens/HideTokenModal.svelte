@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
 	import type { Identity } from '@dfinity/agent';
-	import { onMount } from 'svelte';
 	import { assertNonNullish } from '@dfinity/utils';
-	import { token } from '$lib/stores/token.store';
-	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
+	import { onMount } from 'svelte';
 	import { loadUserTokens } from '$eth/services/erc20.services';
+	import type { OptionErc20UserToken } from '$eth/types/erc20-user-token';
 	import { setUserToken } from '$icp-eth/services/user-token.services';
+	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import { token } from '$lib/stores/token.store';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	let selectedToken: OptionErc20UserToken;
 
