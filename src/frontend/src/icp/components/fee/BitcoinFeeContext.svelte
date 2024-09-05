@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { NetworkId } from '$lib/types/network';
-	import { getContext } from 'svelte';
-	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import { debounce, isNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
+	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import { queryEstimateFee } from '$icp/services/ckbtc.services';
+	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
 	import { tokenDecimals } from '$lib/derived/token.derived';
-	import { parseToken } from '$lib/utils/parse.utils';
 	import { authStore } from '$lib/stores/auth.store';
-	import { queryEstimateFee } from '$icp/services/ckbtc.services';
+	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
-	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let amount: string | number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
