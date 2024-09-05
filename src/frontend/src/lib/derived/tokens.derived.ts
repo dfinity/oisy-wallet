@@ -5,6 +5,7 @@ import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import type { Token, TokenToPin } from '$lib/types/token';
+import { filterEnabledTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
@@ -27,3 +28,8 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		...$icrcChainFusionDefaultTokens
 	]
 );
+
+/**
+ * All user-enabled tokens.
+ */
+export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);

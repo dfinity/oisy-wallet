@@ -2,24 +2,15 @@ import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
-import { tokens, tokensToPin } from '$lib/derived/tokens.derived';
+import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-import {
-	filterEnabledTokens,
-	pinTokensWithBalanceAtTop,
-	sortTokens
-} from '$lib/utils/tokens.utils';
+import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * All enabled by user tokens.
- */
-const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);
-
-/**
- * All tokens matching the selected network or chain fusion, regardless if they are enabled by the user or not.
+ * All user-enabled tokens matching the selected network or chain fusion.
  */
 const enabledNetworkTokens: Readable<Token[]> = derived(
 	[enabledTokens, selectedNetwork, pseudoNetworkChainFusion],
@@ -27,7 +18,7 @@ const enabledNetworkTokens: Readable<Token[]> = derived(
 );
 
 /**
- * It isn't performant to post filter again the Erc20 tokens that are enabled but, it's code wise convenient to avoid duplication of logic.
+ * It isn't performant to post filter again the Erc20 tokens that are enabled but it's code wise convenient to avoid duplication of logic.
  */
 export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
 	[enabledTokens],
