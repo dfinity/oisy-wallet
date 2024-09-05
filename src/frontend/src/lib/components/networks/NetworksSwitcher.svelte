@@ -13,6 +13,8 @@
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import ButtonSwitcher from '$lib/components/ui/ButtonSwitcher.svelte';
+	import { enabledMainnetTokensTotalUsd } from '$lib/derived/tokens.derived';
+	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 
 	export let disabled = false;
 
@@ -23,6 +25,9 @@
 
 	let testnets: boolean;
 	$: testnets = $testnetsStore?.enabled ?? false;
+
+	let mainnetTokensTotalUsd: number;
+	$: mainnetTokensTotalUsd = $enabledMainnetTokensTotalUsd;
 </script>
 
 <ButtonSwitcher
@@ -40,13 +45,14 @@
 				id={undefined}
 				name={$i18n.networks.chain_fusion}
 				icon={chainFusion}
+				totalUsd={mainnetTokensTotalUsd}
 				on:icSelected={close}
 			/>
 		</li>
 
 		{#each $networksMainnets as network}
 			<li>
-				<Network {network} on:icSelected={close} />
+				<MainnetNetwork {network} on:icSelected={close} />
 			</li>
 		{/each}
 	</ul>

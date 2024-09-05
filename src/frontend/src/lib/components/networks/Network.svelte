@@ -3,6 +3,7 @@
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 
 	export let network: Network;
+	export let totalUsd: number | undefined = undefined;
 
 	let id: NetworkId;
 	let name: string;
@@ -10,4 +11,4 @@
 	$: ({ id, name, icon } = network);
 </script>
 
-<NetworkButton {id} {name} {icon} on:icSelected />
+<NetworkButton {id} {name} {icon} {totalUsd} on:icSelected />

@@ -50,6 +50,36 @@ export const sortTokens = ({
 };
 
 /**
+ * Calculates USD balance for the provided token.
+ *
+ * @param token - Token for which USD balance will be calculated.
+ * @param $balancesStore - The balances data for the tokens.
+ * @param $exchanges - The exchange rates data for the tokens.
+ * @returns The USD balance or undefined in case the number cannot be calculated.
+ *
+ */
+export const calculateTokenUsdBalance = ({
+	token,
+	$balances,
+	$exchanges
+}: {
+	token: Token;
+	$balances: CertifiedStoreData<BalancesData>;
+	$exchanges: ExchangesData;
+}): number | undefined => {
+	const balance: BigNumber | undefined = $balances?.[token.id]?.data;
+	const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
+
+	return nonNullish(exchangeRate)
+		? usdValue({
+				token,
+				balance,
+				exchangeRate
+			})
+		: undefined;
+};
+
+/**
  * Pins tokens by USD value, balance and name.
  *
  * The function pins on top of the list the tokens that have a balance and/or an exchange rate.
@@ -76,15 +106,7 @@ export const pinTokensWithBalanceAtTop = ({
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
 		(acc, token) => {
 			const balance: BigNumber | undefined = $balances?.[token.id]?.data;
-			const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
-
-			const usdBalance: number | undefined = nonNullish(exchangeRate)
-				? usdValue({
-						token,
-						balance,
-						exchangeRate
-					})
-				: undefined;
+			const usdBalance = calculateTokenUsdBalance({ token, $balances, $exchanges });
 
 			const tokenUI: TokenUi = {
 				...token,
@@ -118,13 +140,41 @@ export const pinTokensWithBalanceAtTop = ({
 };
 
 /**
- * Calculates total USD balance of the provided tokens list.
+ * Calculates total USD balance of the provided UI tokens list.
  *
- * @param tokens - The list of tokens for total USD balance calculation.
- * @returns The sum of tokens USD balance.
+ * @param tokens - The list of UI tokens for total USD balance calculation.
+ * @returns The sum of UI tokens USD balance.
  */
-export const sumTokensUsdBalance = (tokens: TokenUi[]): number =>
+export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
 	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);
+
+/**
+ * Calculates total USD balance of mainnet tokens from the provided tokens list.
+ *
+ * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
+ * @param $balancesStore - The balances data for the tokens.
+ * @param $exchanges - The exchange rates data for the tokens.
+ * @returns The sum of mainnet tokens USD balance.
+ *
+ */
+export const sumMainnetTokensUsdBalance = ({
+	$tokens,
+	$balances,
+	$exchanges
+}: {
+	$tokens: Token[];
+	$balances: CertifiedStoreData<BalancesData>;
+	$exchanges: ExchangesData;
+}) =>
+	$tokens.reduce((acc, token) => {
+		if (token.network.env === 'mainnet') {
+			const usdBalance = calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0;
+
+			return acc + usdBalance;
+		}
+
+		return acc;
+	}, 0);
 
 /**
  * Filters and returns a list of "enabled" by user tokens

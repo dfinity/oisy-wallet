@@ -4,14 +4,16 @@
 	import { fade } from 'svelte/transition';
 	import type { NetworkId } from '$lib/types/network';
 	import { networkId } from '$lib/derived/network.derived';
+	import { formatUSD } from '$lib/utils/format.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
 	export let icon: string | undefined;
-	export let description: string | undefined = undefined;
+	export let totalUsd: number | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -28,7 +30,12 @@
 </script>
 
 <button class="w-full flex justify-between" on:click={onClick}>
-	<TextWithLogo {name} {description} {icon} logo="start" />
+	<TextWithLogo
+		{name}
+		{icon}
+		logo="start"
+		description={nonNullish(totalUsd) ? formatUSD(totalUsd) : undefined}
+	/>
 
 	{#if id === $networkId}
 		<span in:fade><IconCheck size="20px" /></span>
