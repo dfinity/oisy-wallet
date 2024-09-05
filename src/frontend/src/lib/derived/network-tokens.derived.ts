@@ -1,5 +1,3 @@
-import type { Erc20Token } from '$eth/types/erc20';
-import type { IcToken } from '$icp/types/ic';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
@@ -15,26 +13,6 @@ import { derived, type Readable } from 'svelte/store';
 const enabledNetworkTokens: Readable<Token[]> = derived(
 	[enabledTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
-);
-
-/**
- * It isn't performant to post filter again the Erc20 tokens that are enabled but it's code wise convenient to avoid duplication of logic.
- */
-export const enabledErc20NetworkTokens: Readable<Erc20Token[]> = derived(
-	[enabledTokens],
-	([$enabledTokens]) =>
-		$enabledTokens.filter(({ standard }) => standard === 'erc20') as Erc20Token[]
-);
-
-/**
- * The following store is use as reference for the list of WalletWorkers that are started/stopped in the main token page.
- */
-// TODO: The several dependencies of enabledIcNetworkTokens are not strictly only IC tokens, but other tokens too.
-//  We should find a better way to handle this, improving the store.
-export const enabledIcNetworkTokens: Readable<IcToken[]> = derived(
-	[enabledTokens],
-	([$enabledTokens]) =>
-		$enabledTokens.filter(({ standard }) => standard === 'icp' || standard === 'icrc') as IcToken[]
 );
 
 /**
