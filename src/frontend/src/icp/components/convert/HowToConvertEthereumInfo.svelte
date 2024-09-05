@@ -1,21 +1,21 @@
 <script lang="ts">
-	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import Value from '$lib/components/ui/Value.svelte';
-	import { formatToken } from '$lib/utils/format.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
 		ckEthereumNativeToken,
 		ckEthereumNativeTokenBalance,
 		ckEthereumTwinToken
 	} from '$icp-eth/derived/cketh.derived';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
+	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let formCancelAction: 'back' | 'close' = 'back';
 
