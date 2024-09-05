@@ -38,7 +38,9 @@ module.exports = {
 			files: [
 				'src/frontend/src/eth/**/*.svelte',
 				'src/frontend/src/icp/components/convert/**/*.svelte',
-				'src/frontend/src/icp/components/core/**/*.svelte'
+				'src/frontend/src/icp/components/core/**/*.svelte',
+				'src/frontend/src/icp/components/fee/**/*.svelte',
+				'src/frontend/src/icp/components/info/**/*.svelte'
 			],
 			rules: {
 				'import/order': [

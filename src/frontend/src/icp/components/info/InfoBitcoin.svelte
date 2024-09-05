@@ -2,8 +2,8 @@
 	import bitcoin from '$icp/assets/bitcoin.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
-	import { emit } from '$lib/utils/events.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { emit } from '$lib/utils/events.utils';
 
 	const openReceive = () => emit({ message: 'oisyReceiveCkBTC' });
 </script>
