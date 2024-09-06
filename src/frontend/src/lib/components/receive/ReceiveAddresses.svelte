@@ -1,23 +1,28 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
-	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 	import {
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_ICP_SECTION,
 		RECEIVE_TOKENS_MODAL_ETH_SECTION,
 		RECEIVE_TOKENS_MODAL_BTC_SECTION
 	} from '$lib/constants/test-ids.constants';
-	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet,
+		ethAddress
+	} from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { testnets } from '$lib/derived/testnets.derived';
+	import { LOCAL } from '$lib/constants/app.constants';
 
 	const dispatch = createEventDispatcher();
-
 	const displayQRCode = (details: { address: string; addressLabel: string }) =>
 		dispatch('icQRCode', details);
 </script>
@@ -77,6 +82,38 @@
 		>
 			{$i18n.receive.bitcoin.text.bitcoin_address}
 		</ReceiveAddressWithLogo>
+
+		{#if $testnets && nonNullish($btcAddressTestnet)}
+			<ReceiveAddressWithLogo
+				on:click={() =>
+					displayQRCode({
+						address: $btcAddressTestnet,
+						addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address
+					})}
+				address={$btcAddressTestnet ?? ''}
+				token={BTC_TESTNET_TOKEN}
+				qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+				copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			>
+				{$i18n.receive.bitcoin.text.bitcoin_testnet_address}
+			</ReceiveAddressWithLogo>
+		{/if}
+
+		{#if LOCAL && nonNullish($btcAddressRegtest)}
+			<ReceiveAddressWithLogo
+				on:click={() =>
+					displayQRCode({
+						address: $btcAddressRegtest,
+						addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address
+					})}
+				address={$btcAddressRegtest}
+				token={BTC_TESTNET_TOKEN}
+				qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
+				copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			>
+				{$i18n.receive.bitcoin.text.bitcoin_regtest_address}
+			</ReceiveAddressWithLogo>
+		{/if}
 	{/if}
 
 	<div class="mb-6">
