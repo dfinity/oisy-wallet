@@ -41,7 +41,8 @@ module.exports = {
 				'src/frontend/src/icp/components/core/**/*.svelte',
 				'src/frontend/src/icp/components/fee/**/*.svelte',
 				'src/frontend/src/icp/components/info/**/*.svelte',
-				'src/frontend/src/icp/components/receive/**/*.svelte'
+				'src/frontend/src/icp/components/receive/**/*.svelte',
+				'src/frontend/src/icp/components/send/**/*.svelte'
 			],
 			rules: {
 				'import/order': [
