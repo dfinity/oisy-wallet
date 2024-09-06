@@ -2,11 +2,11 @@
 	import { IconCheck } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import type { NetworkId } from '$lib/types/network';
-	import { networkId } from '$lib/derived/network.derived';
-	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 	import { page } from '$app/stores';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import { networkId } from '$lib/derived/network.derived';
+	import type { NetworkId } from '$lib/types/network';
+	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
