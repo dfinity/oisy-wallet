@@ -29,7 +29,7 @@
 	};
 </script>
 
-<button class="w-full flex justify-between" on:click={onClick}>
+<button class="w-full flex justify-between items-start" on:click={onClick}>
 	<TextWithLogo
 		{name}
 		{icon}
