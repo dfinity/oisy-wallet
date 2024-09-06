@@ -1,20 +1,20 @@
 <script lang="ts">
-	import IconSync from '$lib/components/icons/IconSync.svelte';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { updateBalance } from '$icp/services/ckbtc.services';
-	import { authStore } from '$lib/stores/auth.store';
-	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
-	import { Modal } from '@dfinity/gix-components';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
-	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
-	import type { SyncState } from '$lib/types/sync';
-	import { blur } from 'svelte/transition';
+	import { Modal } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/stores/token.store';
+	import { blur } from 'svelte/transition';
+	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
+	import { updateBalance } from '$icp/services/ckbtc.services';
+	import IconSync from '$lib/components/icons/IconSync.svelte';
+	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
+	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
+	import { authStore } from '$lib/stores/auth.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { token } from '$lib/stores/token.store';
+	import type { SyncState } from '$lib/types/sync';
 
 	let receiveProgressStep: string | undefined = undefined;
 

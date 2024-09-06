@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import { Modal } from '@dfinity/gix-components';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
-	import Value from '$lib/components/ui/Value.svelte';
-	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { BigNumber } from '@ethersproject/bignumber';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
+	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+	import Copy from '$lib/components/ui/Copy.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
+	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	export let transaction: IcTransactionUi;
 

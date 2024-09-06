@@ -1,36 +1,36 @@
 <script lang="ts">
-	import IcTransactionsSkeletons from './IcTransactionsSkeletons.svelte';
-	import IcTransaction from './IcTransaction.svelte';
 	import { InfiniteScroll } from '@dfinity/gix-components';
-	import { last } from '$lib/utils/array.utils';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { authStore } from '$lib/stores/auth.store';
-	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
-	import { modalStore } from '$lib/stores/modal.store';
-	import IcpTransactionModal from './IcTransactionModal.svelte';
-	import type { IcTransactionUi } from '$icp/types/ic';
-	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
-	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
-	import Info from '$icp/components/info/Info.svelte';
-	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 	import type { ComponentType } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import IcTransaction from './IcTransaction.svelte';
+	import IcpTransactionModal from './IcTransactionModal.svelte';
+	import IcTransactionsSkeletons from './IcTransactionsSkeletons.svelte';
+	import Info from '$icp/components/info/Info.svelte';
+	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
+	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
+	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
+	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
+	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 	import {
 		tokenAsIcToken,
 		tokenCkBtcLedger,
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
-	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
-	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
-	import { slide } from 'svelte/transition';
-	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
-	import { nullishSignOut } from '$lib/services/auth.services';
-	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
+	import type { IcTransactionUi } from '$icp/types/ic';
 	import Header from '$lib/components/ui/Header.svelte';
-	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { authStore } from '$lib/stores/auth.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
+	import { last } from '$lib/utils/array.utils';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
