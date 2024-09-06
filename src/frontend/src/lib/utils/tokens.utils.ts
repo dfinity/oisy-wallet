@@ -2,12 +2,8 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type {
-	Token,
-	TokensTotalUsdBalancesPerNetwork,
-	TokenToPin,
-	TokenUi
-} from '$lib/types/token';
+import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import { calculateTokenUsdBalance } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -137,7 +133,7 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
  * @returns A NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  *
  */
-export const calculateMainnetTokensUsdBalancesPerNetwork = ({
+export const sumMainnetTokensUsdBalancesPerNetwork = ({
 	$tokens,
 	$balances,
 	$exchanges
@@ -145,9 +141,9 @@ export const calculateMainnetTokensUsdBalancesPerNetwork = ({
 	$tokens: Token[];
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}): TokensTotalUsdBalancesPerNetwork =>
+}): TokensTotalUsdBalancePerNetwork =>
 	nonNullish($exchanges) && nonNullish($balances)
-		? $tokens.reduce<TokensTotalUsdBalancesPerNetwork>(
+		? $tokens.reduce<TokensTotalUsdBalancePerNetwork>(
 				(acc, token) =>
 					token.network.env === 'mainnet'
 						? {

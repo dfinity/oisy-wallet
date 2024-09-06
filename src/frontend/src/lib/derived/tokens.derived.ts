@@ -8,10 +8,11 @@ import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icr
 import type { IcToken } from '$icp/types/ic';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { Token, TokenToPin, TokensTotalUsdBalancesPerNetwork } from '$lib/types/token';
+import type { Token, TokenToPin } from '$lib/types/token';
+import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import {
-	calculateMainnetTokensUsdBalancesPerNetwork,
-	filterEnabledTokens
+	filterEnabledTokens,
+	sumMainnetTokensUsdBalancesPerNetwork
 } from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -64,9 +65,9 @@ export const enabledIcTokens: Readable<IcToken[]> = derived(
 /**
  * A store with NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  */
-export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancesPerNetwork> =
+export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
 	derived([enabledTokens, balancesStore, exchanges], ([$enabledTokens, $balances, $exchanges]) =>
-		calculateMainnetTokensUsdBalancesPerNetwork({
+		sumMainnetTokensUsdBalancesPerNetwork({
 			$tokens: $enabledTokens,
 			$balances,
 			$exchanges

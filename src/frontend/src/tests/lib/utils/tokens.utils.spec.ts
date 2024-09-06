@@ -8,10 +8,10 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
-	calculateMainnetTokensUsdBalancesPerNetwork,
 	filterEnabledTokens,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
+	sumMainnetTokensUsdBalancesPerNetwork,
 	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
 import { describe, expect, it, type MockedFunction } from 'vitest';
@@ -324,7 +324,7 @@ describe('filterEnabledTokens', () => {
 	});
 });
 
-describe('sumMainnetTokensUsdBalance', () => {
+describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
 
 	beforeEach(() => {
@@ -342,7 +342,7 @@ describe('sumMainnetTokensUsdBalance', () => {
 		};
 		const tokens = [...$tokens, BTC_TESTNET_TOKEN];
 
-		const result = calculateMainnetTokensUsdBalancesPerNetwork({
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
 			$tokens: tokens,
 			$balances: balances,
 			$exchanges
@@ -363,7 +363,7 @@ describe('sumMainnetTokensUsdBalance', () => {
 		};
 		const tokens = [...$tokens, BTC_TESTNET_TOKEN];
 
-		const result = calculateMainnetTokensUsdBalancesPerNetwork({
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
 			$tokens: tokens,
 			$balances: balances,
 			$exchanges
@@ -382,7 +382,7 @@ describe('sumMainnetTokensUsdBalance', () => {
 		};
 		const tokens = [BTC_TESTNET_TOKEN];
 
-		const result = calculateMainnetTokensUsdBalancesPerNetwork({
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
 			$tokens: tokens,
 			$balances: balances,
 			$exchanges
@@ -391,7 +391,7 @@ describe('sumMainnetTokensUsdBalance', () => {
 	});
 
 	it('should return an empty dictionary if no tokens are provided', () => {
-		const result = calculateMainnetTokensUsdBalancesPerNetwork({
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
 			$tokens: [],
 			$balances,
 			$exchanges

@@ -1,4 +1,4 @@
-import type { Network, NetworkId } from '$lib/types/network';
+import type { Network } from '$lib/types/network';
 import type { RequiredExcept } from '$lib/types/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
@@ -48,5 +48,3 @@ interface TokenFinancialData {
 export type TokenUi = Token & TokenFinancialData;
 
 export type TokenIndexKey = string;
-
-export type TokensTotalUsdBalancesPerNetwork = Record<NetworkId, number>;
