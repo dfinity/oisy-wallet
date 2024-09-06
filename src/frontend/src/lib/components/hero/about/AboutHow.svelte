@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import AboutItem from '$lib/components/hero/about/AboutItem.svelte';
+	import { ABOUT_HOW_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { createEventDispatcher } from 'svelte';
-	import { ABOUT_HOW_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let asMenuItem = false;
 

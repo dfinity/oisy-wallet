@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import { Html, Modal } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
-	import IconKey from '$lib/components/icons/IconKey.svelte';
-	import IconIcLogoPlain from '$lib/components/icons/IconIcLogoPlain.svelte';
-	import IconWorld from '$lib/components/icons/IconWorld.svelte';
-	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
 	import CoverHow from '$lib/assets/cover-how-it-works.png';
+	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
+	import IconIcLogoPlain from '$lib/components/icons/IconIcLogoPlain.svelte';
+	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
+	import IconKey from '$lib/components/icons/IconKey.svelte';
+	import IconWorld from '$lib/components/icons/IconWorld.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { ABOUT_HOW_MODAL } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_HOW_MODAL}>

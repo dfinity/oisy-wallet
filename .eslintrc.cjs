@@ -43,6 +43,7 @@ module.exports = {
 				'src/frontend/src/lib/components/core/**/*.svelte',
 				'src/frontend/src/lib/components/exchange/**/*.svelte',
 				'src/frontend/src/lib/components/guard/**/*.svelte',
+				'src/frontend/src/lib/components/hero/**/*.svelte',
 				'src/frontend/src/lib/components/icons/**/*.svelte',
 				'src/frontend/src/lib/components/info/**/*.svelte',
 				'src/frontend/src/lib/components/networks/**/*.svelte'

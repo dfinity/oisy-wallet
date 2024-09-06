@@ -1,16 +1,16 @@
 <script lang="ts">
-	import Menu from '$lib/components/core/Menu.svelte';
-	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
-	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { page } from '$app/stores';
+	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
 	import Back from '$lib/components/core/Back.svelte';
-	import { isSubRoute } from '$lib/utils/nav.utils';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
-	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
-	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
+	import Menu from '$lib/components/core/Menu.svelte';
 	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
+	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
+	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
+	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { isSubRoute } from '$lib/utils/nav.utils';
 
 	let back = false;
 	$: back = isSubRoute($page);
