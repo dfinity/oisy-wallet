@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { formatUSD } from '$lib/utils/format.utils';
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
-	import { sumTokensUsdBalance } from '$lib/utils/tokens.utils';
+	import { formatUSD } from '$lib/utils/format.utils';
+	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
 	let totalUsd: number;
-	$: totalUsd = sumTokensUsdBalance($combinedDerivedSortedNetworkTokensUi);
+	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
 </script>
 
 <span class="text-off-white block">

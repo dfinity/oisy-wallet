@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let invalid: boolean;
 

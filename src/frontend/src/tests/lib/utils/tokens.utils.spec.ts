@@ -1,4 +1,5 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID, ICP_NETWORK_ID } from '$env/networks.env';
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -10,31 +11,13 @@ import {
 	filterEnabledTokens,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
-	sumTokensUsdBalance
+	sumMainnetTokensUsdBalancesPerNetwork,
+	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
-import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
-
-const usd = 1;
-
-const certified = true;
-
-const bn1 = BigNumber.from(1n);
-const bn2 = BigNumber.from(2n);
-const bn3 = BigNumber.from(3n);
-
-const $tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
-
-const $balances: CertifiedStoreData<BalancesData> = {
-	[ICP_TOKEN.id]: { data: bn1, certified },
-	[BTC_MAINNET_TOKEN.id]: { data: bn2, certified },
-	[ETHEREUM_TOKEN.id]: { data: bn3, certified }
-};
-
-const $exchanges: ExchangesData = $tokens.reduce<ExchangesData>((acc, token) => {
-	acc[token.id] = { usd };
-	return acc;
-}, {});
+import { $balances, bn1, bn2, bn3, certified } from '../../mocks/balances.mock';
+import { $exchanges, usd } from '../../mocks/exchanges.mock';
+import { $tokens } from '../../mocks/tokens.mock';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
@@ -282,7 +265,7 @@ describe('pinTokensWithBalanceAtTop', () => {
 	});
 });
 
-describe('sumTokensTotalUsdBalance', () => {
+describe('sumTokensUiUsdBalance', () => {
 	it('should correctly calculate USD total balance when tokens have usdBalance', () => {
 		const tokens: TokenUi[] = [
 			{ ...ICP_TOKEN, usdBalance: 50 },
@@ -290,7 +273,7 @@ describe('sumTokensTotalUsdBalance', () => {
 			{ ...ETHEREUM_TOKEN, usdBalance: 100 }
 		];
 
-		const result = sumTokensUsdBalance(tokens);
+		const result = sumTokensUiUsdBalance(tokens);
 		expect(result).toEqual(200);
 	});
 
@@ -301,12 +284,12 @@ describe('sumTokensTotalUsdBalance', () => {
 			{ ...ETHEREUM_TOKEN }
 		];
 
-		const result = sumTokensUsdBalance(tokens);
+		const result = sumTokensUiUsdBalance(tokens);
 		expect(result).toEqual(50);
 	});
 
 	it('should correctly calculate USD total balance when tokens list is empty', () => {
-		const result = sumTokensUsdBalance([]);
+		const result = sumTokensUiUsdBalance([]);
 		expect(result).toEqual(0);
 	});
 });
@@ -338,5 +321,81 @@ describe('filterEnabledTokens', () => {
 
 		const result = filterEnabledTokens([tokens]);
 		expect(result).toEqual([ENABLED_BY_DEFAULT_ICP_TOKEN, ENABLED_BY_DEFAULT_ETHEREUM_TOKEN]);
+	});
+});
+
+describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
+	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		mockUsdValue.mockImplementation(
+			({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
+		);
+	});
+
+	it('should return a dictionary with correct balances for the list of mainnet and testnet tokens', () => {
+		const balances = {
+			...$balances,
+			[BTC_TESTNET_TOKEN.id]: { data: bn3, certified }
+		};
+		const tokens = [...$tokens, BTC_TESTNET_TOKEN];
+
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: tokens,
+			$balances: balances,
+			$exchanges
+		});
+		expect(result).toEqual({
+			[BTC_MAINNET_NETWORK_ID]: bn2.toNumber(),
+			[ETHEREUM_NETWORK_ID]: bn3.toNumber(),
+			[ICP_NETWORK_ID]: bn1.toNumber()
+		});
+	});
+
+	it('should return a dictionary with correct balances if all token balances are 0', () => {
+		const balances = {
+			[ICP_TOKEN.id]: { data: ZERO, certified },
+			[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
+			[ETHEREUM_TOKEN.id]: { data: ZERO, certified },
+			[BTC_TESTNET_TOKEN.id]: { data: ZERO, certified }
+		};
+		const tokens = [...$tokens, BTC_TESTNET_TOKEN];
+
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: tokens,
+			$balances: balances,
+			$exchanges
+		});
+		expect(result).toEqual({
+			[BTC_MAINNET_NETWORK_ID]: ZERO.toNumber(),
+			[ETHEREUM_NETWORK_ID]: ZERO.toNumber(),
+			[ICP_NETWORK_ID]: ZERO.toNumber()
+		});
+	});
+
+	it('should return an empty dictionary if no mainnet tokens are in the list', () => {
+		const balances = {
+			...$balances,
+			[BTC_TESTNET_TOKEN.id]: { data: bn2, certified }
+		};
+		const tokens = [BTC_TESTNET_TOKEN];
+
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: tokens,
+			$balances: balances,
+			$exchanges
+		});
+		expect(result).toEqual({});
+	});
+
+	it('should return an empty dictionary if no tokens are provided', () => {
+		const result = sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: [],
+			$balances,
+			$exchanges
+		});
+		expect(result).toEqual({});
 	});
 });
