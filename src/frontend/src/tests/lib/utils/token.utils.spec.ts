@@ -12,6 +12,10 @@ const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
 const balance = 1000000000n;
 const fee = 10000000n;
 
+vi.mock('$lib/utils/exchange.utils', () => ({
+	usdValue: vi.fn()
+}));
+
 describe('getMaxTransactionAmount', () => {
 	it('should return the correct maximum amount for a transaction for each token standard', () => {
 		tokenStandards.forEach((tokenStandard) => {
