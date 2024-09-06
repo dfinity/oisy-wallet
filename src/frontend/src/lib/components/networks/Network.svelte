@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Network, NetworkId } from '$lib/types/network';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
+	import type { Network, NetworkId } from '$lib/types/network';
 
 	export let network: Network;
 

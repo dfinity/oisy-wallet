@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type HideInfoKey, saveHideInfo, shouldHideInfo } from '$icp/utils/ck.utils';
 	import InfoBox from '$lib/components/info/InfoBox.svelte';
-	import { isNullish, nonNullish } from '@dfinity/utils';
 
 	export let key: HideInfoKey | undefined;
 
