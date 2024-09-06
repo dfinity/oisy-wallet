@@ -6,6 +6,7 @@ import eth from '$icp-eth/assets/eth.svg';
 import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import icpLight from '$icp/assets/icp_light.svg';
+import { LOCAL } from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 
 /**
@@ -104,14 +105,13 @@ export const BTC_REGTEST_NETWORK_ID = Symbol(BTC_REGTEST_NETWORK_SYMBOL);
 export const BTC_REGTEST_NETWORK: Network = {
 	id: BTC_REGTEST_NETWORK_ID,
 	env: 'testnet',
-	name: 'Bitcoin (Regtest)',
-	icon: bitcoinTestnet
+	name: 'Bitcoin (Regtest)'
 };
 
 export const BITCOIN_NETWORKS: Network[] = [
 	BTC_MAINNET_NETWORK,
 	BTC_TESTNET_NETWORK,
-	BTC_REGTEST_NETWORK
+	...(LOCAL ? [BTC_REGTEST_NETWORK] : [])
 ];
 
 export const BITCOIN_NETWORKS_IDS: symbol[] = BITCOIN_NETWORKS.map(({ id }) => id);
