@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
-	import { networks, networksMainnets } from '$lib/derived/networks.derived';
-	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
-	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
-	import { fade } from 'svelte/transition';
-	import type { Network } from '$lib/types/network';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { isNetworkIdICP, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { createEventDispatcher } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
+	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
 	import AddTokenByNetworkToolbar from '$icp-eth/components/tokens/AddTokenByNetworkToolbar.svelte';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { networks, networksMainnets } from '$lib/derived/networks.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isNetworkIdICP, isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	export let network: Network | undefined;
 	export let tokenData: Partial<AddTokenData>;
