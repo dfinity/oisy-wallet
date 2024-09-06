@@ -38,11 +38,6 @@ export const pseudoNetworkChainFusion: Readable<boolean> = derived(
 	([$selectedNetwork]) => isNullish($selectedNetwork)
 );
 
-export const notPseudoNetworkChainFusion: Readable<boolean> = derived(
-	[pseudoNetworkChainFusion],
-	([$pseudoNetworkChainFusion]) => !$pseudoNetworkChainFusion
-);
-
 export const networkAddress: Readable<OptionEthAddress | string> = derived(
 	[ethAddress, icrcAccountIdentifierText, networkICP],
 	([$address, $icrcAccountIdentifierStore, $networkICP]) =>
