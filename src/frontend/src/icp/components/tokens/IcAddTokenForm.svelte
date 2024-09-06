@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let ledgerCanisterId = '';
 	export let indexCanisterId = '';

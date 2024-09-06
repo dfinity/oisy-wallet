@@ -1,16 +1,16 @@
 <script lang="ts">
+	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
-	import type { Token as TokenType } from '$lib/types/token';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { Modal } from '@dfinity/gix-components';
 	import Token from '$lib/components/tokens/Token.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import Value from '$lib/components/ui/Value.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
+	import type { Token as TokenType } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let twinToken: TokenType | undefined;
 	$: twinToken = ($token as OptionIcCkToken)?.twinToken;
