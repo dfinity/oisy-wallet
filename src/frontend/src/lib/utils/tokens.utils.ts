@@ -4,9 +4,8 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
-import { calculateTokenUsdBalance } from '$lib/utils/token.utils';
+import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -76,21 +75,13 @@ export const pinTokensWithBalanceAtTop = ({
 }): TokenUi[] => {
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
 		(acc, token) => {
-			const balance: BigNumber | undefined = $balances?.[token.id]?.data;
-
-			const usdBalance: number | undefined = calculateTokenUsdBalance({
+			const tokenUI: TokenUi = mapTokenUi({
 				token,
 				$balances,
 				$exchanges
 			});
 
-			const tokenUI: TokenUi = {
-				...token,
-				balance,
-				usdBalance
-			};
-
-			if ((usdBalance ?? 0) > 0 || (balance ?? ZERO).gt(0)) {
+			if ((tokenUI.usdBalance ?? 0) > 0 || (tokenUI.balance ?? ZERO).gt(0)) {
 				acc[0] = [...acc[0], tokenUI];
 
 				return acc;
