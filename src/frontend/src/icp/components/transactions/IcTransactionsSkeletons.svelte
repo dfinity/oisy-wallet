@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
-	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
+	import SkeletonCards from '$lib/components/ui/SkeletonCards.svelte';
 	import { token } from '$lib/stores/token.store';
 
 	let transactionsInitialized: boolean;
