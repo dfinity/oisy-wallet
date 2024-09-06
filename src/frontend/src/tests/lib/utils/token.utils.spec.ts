@@ -1,7 +1,11 @@
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import type { TokenStandard } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
-import { calculateTokenUsdBalance, getMaxTransactionAmount } from '$lib/utils/token.utils';
+import {
+	calculateTokenUsdBalance,
+	getMaxTransactionAmount,
+	mapTokenUi
+} from '$lib/utils/token.utils';
 import { describe, expect, it, type MockedFunction } from 'vitest';
 import { $balances, bn3 } from '../../mocks/balances.mock';
 import { $exchanges } from '../../mocks/exchanges.mock';
@@ -108,5 +112,44 @@ describe('calculateTokenUsdBalance', () => {
 	it('should return 0 if balances store is not available', () => {
 		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
 		expect(result).toEqual(0);
+	});
+});
+
+describe('mapTokenUi', () => {
+	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		mockUsdValue.mockImplementation(
+			({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
+		);
+	});
+
+	it('should return an object TokenUi with the correct values', () => {
+		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances, $exchanges });
+		expect(result).toEqual({
+			...ETHEREUM_TOKEN,
+			balance: bn3,
+			usdBalance: bn3.toNumber()
+		});
+	});
+
+	it('should return an object TokenUi with undefined usdBalance if exchange rate is not available', () => {
+		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances, $exchanges: {} });
+		expect(result).toEqual({
+			...ETHEREUM_TOKEN,
+			balance: bn3,
+			usdBalance: undefined
+		});
+	});
+
+	it('should return an object TokenUi with undefined balance if balances store is not available', () => {
+		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
+		expect(result).toEqual({
+			...ETHEREUM_TOKEN,
+			balance: undefined,
+			usdBalance: 0
+		});
 	});
 });
