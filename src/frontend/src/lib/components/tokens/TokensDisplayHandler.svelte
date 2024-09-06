@@ -15,7 +15,7 @@
 
 	let sortedTokens: TokenUi[];
 	$: sortedTokens = $combinedDerivedSortedNetworkTokensUi.filter(
-		({ usdBalance }) => (usdBalance ?? 0) || displayZeroBalance
+		({ balance, usdBalance }) => Number(balance ?? 0n) || (usdBalance ?? 0) || displayZeroBalance
 	);
 
 	const updateTokensToDisplay = () =>
