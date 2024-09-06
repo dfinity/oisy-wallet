@@ -5,6 +5,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -25,13 +26,16 @@ export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
 
 /**
  * All tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
+ * It will not execute the sorting if the balance store is not yet initiated to avoid looping without data.
  */
 export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[combinedDerivedSortedNetworkTokens, balancesStore, exchanges],
 	([$enabledNetworkTokens, $balances, $exchanges]) =>
-		pinTokensWithBalanceAtTop({
-			$tokens: $enabledNetworkTokens,
-			$balances,
-			$exchanges
-		})
+		nonNullish($balances)
+			? pinTokensWithBalanceAtTop({
+					$tokens: $enabledNetworkTokens,
+					$balances,
+					$exchanges
+				})
+			: $enabledNetworkTokens
 );
