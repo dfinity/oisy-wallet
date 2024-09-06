@@ -1,5 +1,5 @@
 import { exchanges } from '$lib/derived/exchange.derived';
-import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
+import { selectedNetwork } from '$lib/derived/network.derived';
 import { enabledTokens, tokensToPin } from '$lib/derived/tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
@@ -11,7 +11,7 @@ import { derived, type Readable } from 'svelte/store';
  * All user-enabled tokens matching the selected network or chain fusion.
  */
 const enabledNetworkTokens: Readable<Token[]> = derived(
-	[enabledTokens, selectedNetwork, pseudoNetworkChainFusion],
+	[enabledTokens, selectedNetwork],
 	filterTokensForSelectedNetwork
 );
 
