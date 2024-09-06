@@ -8,8 +8,11 @@ import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icr
 import type { IcToken } from '$icp/types/ic';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { Token, TokenToPin } from '$lib/types/token';
-import { filterEnabledTokens, sumMainnetTokensUsdBalance } from '$lib/utils/tokens.utils';
+import type { Token, TokenToPin, TokensTotalUsdBalancesPerNetwork } from '$lib/types/token';
+import {
+	calculateMainnetTokensUsdBalancesPerNetwork,
+	filterEnabledTokens
+} from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
@@ -58,19 +61,14 @@ export const enabledIcTokens: Readable<IcToken[]> = derived(
 		$enabledTokens.filter(({ standard }) => standard === 'icp' || standard === 'icrc') as IcToken[]
 );
 
-export const enabledMainnetErc20TokensTotalUsd: Readable<number> = derived(
-	[enabledErc20Tokens, balancesStore, exchanges],
-	([$enabledErc20Tokens, $balances, $exchanges]) =>
-		sumMainnetTokensUsdBalance({ $tokens: $enabledErc20Tokens, $balances, $exchanges })
-);
-
-export const enabledMainnetIcTokensTotalUsd: Readable<number> = derived(
-	[enabledIcTokens, balancesStore, exchanges],
-	([$enabledIcTokens, $balances, $exchanges]) =>
-		sumMainnetTokensUsdBalance({ $tokens: $enabledIcTokens, $balances, $exchanges })
-);
-
-export const enabledMainnetTokensTotalUsd: Readable<number> = derived(
-	[enabledMainnetErc20TokensTotalUsd, enabledMainnetIcTokensTotalUsd],
-	([$erc20TokensTotalUsd, $icTokensTotalUsd]) => $erc20TokensTotalUsd + $icTokensTotalUsd
-);
+/**
+ * A store with NetworkId-number dictionary with total USD balance of mainnet tokens per network.
+ */
+export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancesPerNetwork> =
+	derived([enabledTokens, balancesStore, exchanges], ([$enabledTokens, $balances, $exchanges]) =>
+		calculateMainnetTokensUsdBalancesPerNetwork({
+			$tokens: $enabledTokens,
+			$balances,
+			$exchanges
+		})
+	);

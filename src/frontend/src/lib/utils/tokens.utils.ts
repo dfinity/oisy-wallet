@@ -2,9 +2,14 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import type {
+	Token,
+	TokensTotalUsdBalancesPerNetwork,
+	TokenToPin,
+	TokenUi
+} from '$lib/types/token';
 import { calculateTokenUsdBalance } from '$lib/utils/token.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
@@ -124,15 +129,15 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
 	tokens.reduce((acc, token) => acc + (token.usdBalance ?? 0), 0);
 
 /**
- * Calculates total USD balance of mainnet tokens from the provided tokens list.
+ * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
  *
  * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
  * @param $balancesStore - The balances data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
- * @returns The sum of mainnet tokens USD balance if balances and exchanges stores are available.
+ * @returns A NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  *
  */
-export const sumMainnetTokensUsdBalance = ({
+export const calculateMainnetTokensUsdBalancesPerNetwork = ({
 	$tokens,
 	$balances,
 	$exchanges
@@ -140,17 +145,25 @@ export const sumMainnetTokensUsdBalance = ({
 	$tokens: Token[];
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}): number | undefined =>
+}): TokensTotalUsdBalancesPerNetwork =>
 	nonNullish($exchanges) && nonNullish($balances)
-		? $tokens.reduce(
-				(acc, token) =>
-					acc +
-					(token.network.env === 'mainnet'
-						? calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0
-						: 0),
-				0
-			)
-		: undefined;
+		? $tokens.reduce<TokensTotalUsdBalancesPerNetwork>((acc, token) => {
+				if (token.network.env === 'mainnet') {
+					if (isNullish(acc[token.network.id])) {
+						acc[token.network.id] = 0;
+					}
+
+					return {
+						...acc,
+						[token.network.id]:
+							acc[token.network.id] +
+							(calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0)
+					};
+				}
+
+				return acc;
+			}, {})
+		: {};
 
 /**
  * Filters and returns a list of "enabled" by user tokens
