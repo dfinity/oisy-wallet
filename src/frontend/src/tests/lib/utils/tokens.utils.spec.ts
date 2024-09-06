@@ -14,29 +14,10 @@ import {
 	sumMainnetTokensUsdBalance,
 	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
-import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
-
-const usd = 1;
-
-const certified = true;
-
-const bn1 = BigNumber.from(1n);
-const bn2 = BigNumber.from(2n);
-const bn3 = BigNumber.from(3n);
-
-const $tokens: Token[] = [ICP_TOKEN, BTC_MAINNET_TOKEN, ETHEREUM_TOKEN];
-
-const $balances: CertifiedStoreData<BalancesData> = {
-	[ICP_TOKEN.id]: { data: bn1, certified },
-	[BTC_MAINNET_TOKEN.id]: { data: bn2, certified },
-	[ETHEREUM_TOKEN.id]: { data: bn3, certified }
-};
-
-const $exchanges: ExchangesData = $tokens.reduce<ExchangesData>((acc, token) => {
-	acc[token.id] = { usd };
-	return acc;
-}, {});
+import { $balances, bn1, bn2, bn3, certified } from '../../mocks/balances.mock';
+import { $exchanges, usd } from '../../mocks/exchanges.mock';
+import { $tokens } from '../../mocks/tokens.mock';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
 	usdValue: vi.fn()
