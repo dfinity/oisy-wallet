@@ -1,11 +1,20 @@
+import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import type { TokenStandard } from '$lib/types/token';
-import { getMaxTransactionAmount } from '$lib/utils/token.utils';
+import { usdValue } from '$lib/utils/exchange.utils';
+import { calculateTokenUsdBalance, getMaxTransactionAmount } from '$lib/utils/token.utils';
+import { describe, expect, it, type MockedFunction } from 'vitest';
+import { $balances, bn3 } from '../../mocks/balances.mock';
+import { $exchanges } from '../../mocks/exchanges.mock';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
 
 const balance = 1000000000n;
 const fee = 10000000n;
+
+vi.mock('$lib/utils/exchange.utils', () => ({
+	usdValue: vi.fn()
+}));
 
 describe('getMaxTransactionAmount', () => {
 	it('should return the correct maximum amount for a transaction for each token standard', () => {
@@ -72,5 +81,32 @@ describe('getMaxTransactionAmount', () => {
 			tokenStandard: 'erc20'
 		});
 		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+	});
+});
+
+describe('calculateTokenUsdBalance', () => {
+	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		mockUsdValue.mockImplementation(
+			({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
+		);
+	});
+
+	it('should correctly calculate USD balance for the token', () => {
+		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances, $exchanges });
+		expect(result).toEqual(bn3.toNumber());
+	});
+
+	it('should return undefined if exchange rate is not available', () => {
+		const result = calculateTokenUsdBalance({ token: ICP_TOKEN, $balances, $exchanges: {} });
+		expect(result).toEqual(undefined);
+	});
+
+	it('should return 0 if balances store is not available', () => {
+		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
+		expect(result).toEqual(0);
 	});
 });

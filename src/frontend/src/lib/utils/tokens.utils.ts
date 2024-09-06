@@ -3,7 +3,7 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
-import { usdValue } from '$lib/utils/exchange.utils';
+import { calculateTokenUsdBalance } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
@@ -47,35 +47,6 @@ export const sortTokens = ({
 				a.network.name.localeCompare(b.network.name)
 		)
 	];
-};
-
-/**
- * Calculates USD balance for the provided token.
- *
- * @param token - Token for which USD balance will be calculated.
- * @param $balancesStore - The balances data for the tokens.
- * @param $exchanges - The exchange rates data for the tokens.
- * @returns The USD balance or undefined in case the number cannot be calculated.
- *
- */
-export const calculateTokenUsdBalance = ({
-	token,
-	$balances,
-	$exchanges
-}: {
-	token: Token;
-	$balances: CertifiedStoreData<BalancesData>;
-	$exchanges: ExchangesData;
-}): number | undefined => {
-	const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
-
-	return nonNullish(exchangeRate)
-		? usdValue({
-				token,
-				balance: $balances?.[token.id]?.data,
-				exchangeRate
-			})
-		: undefined;
 };
 
 /**
