@@ -1,7 +1,12 @@
 import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
+import type { BalancesData } from '$lib/stores/balances.store';
+import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CanisterIdText } from '$lib/types/canister';
+import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenStandard } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import { usdValue } from '$lib/utils/exchange.utils';
+import { nonNullish } from '@dfinity/utils';
 
 /**
  * Calculates the maximum amount for a transaction.
@@ -54,3 +59,32 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 		userToken?.enabled === true,
 	version: userToken?.version
 });
+
+/**
+ * Calculates USD balance for the provided token.
+ *
+ * @param token - Token for which USD balance will be calculated.
+ * @param $balancesStore - The balances data for the tokens.
+ * @param $exchanges - The exchange rates data for the tokens.
+ * @returns The USD balance or undefined in case the number cannot be calculated.
+ *
+ */
+export const calculateTokenUsdBalance = ({
+	token,
+	$balances,
+	$exchanges
+}: {
+	token: Token;
+	$balances: CertifiedStoreData<BalancesData>;
+	$exchanges: ExchangesData;
+}): number | undefined => {
+	const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
+
+	return nonNullish(exchangeRate)
+		? usdValue({
+				token,
+				balance: $balances?.[token.id]?.data,
+				exchangeRate
+			})
+		: undefined;
+};
