@@ -38,7 +38,13 @@ module.exports = {
 			files: [
 				'src/frontend/src/eth/**/*.svelte',
 				'src/frontend/src/icp/**/*.svelte',
-				'src/frontend/src/icp-eth/**/*.svelte'
+				'src/frontend/src/icp-eth/**/*.svelte',
+				'src/frontend/src/lib/components/common/**/*.svelte',
+				'src/frontend/src/lib/components/exchange/**/*.svelte',
+				'src/frontend/src/lib/components/guard/**/*.svelte',
+				'src/frontend/src/lib/components/icons/**/*.svelte',
+				'src/frontend/src/lib/components/info/**/*.svelte',
+				'src/frontend/src/lib/components/networks/**/*.svelte'
 			],
 			rules: {
 				'import/order': [
