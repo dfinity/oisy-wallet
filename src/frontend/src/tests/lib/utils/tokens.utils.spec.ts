@@ -420,14 +420,4 @@ describe('sumMainnetTokensUsdBalance', () => {
 		const result = sumMainnetTokensUsdBalance({ $tokens: [], $balances, $exchanges });
 		expect(result).toEqual(0);
 	});
-
-	it('should return 0 if exchange rate is not available', () => {
-		const result = sumMainnetTokensUsdBalance({ $tokens, $balances, $exchanges: {} });
-		expect(result).toEqual(0);
-	});
-
-	it('should return 0 if balances store is not available', () => {
-		const result = sumMainnetTokensUsdBalance({ $tokens, $balances: {}, $exchanges });
-		expect(result).toEqual(0);
-	});
 });

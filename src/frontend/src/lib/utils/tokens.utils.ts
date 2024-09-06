@@ -170,15 +170,14 @@ export const sumMainnetTokensUsdBalance = ({
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
 }) =>
-	$tokens.reduce((acc, token) => {
-		if (token.network.env === 'mainnet') {
-			const usdBalance = calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0;
-
-			return acc + usdBalance;
-		}
-
-		return acc;
-	}, 0);
+	$tokens.reduce(
+		(acc, token) =>
+			acc +
+			(token.network.env === 'mainnet'
+				? calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0
+				: 0),
+		0
+	);
 
 /**
  * Filters and returns a list of "enabled" by user tokens
