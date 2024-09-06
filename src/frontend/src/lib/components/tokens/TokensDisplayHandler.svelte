@@ -3,15 +3,15 @@
 	import { pointerEventStore } from '$lib/stores/events.store';
 	import { pointerEventsHandler } from '$lib/utils/events.utils';
 	import { debounce } from '@dfinity/utils';
-	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { defineTokensToDisplay } from '$lib/utils/tokens-ui.utils';
+	import { hideZeroBalances } from '$lib/derived/settings.derived';
 
 	// We start it as undefined to avoid showing an empty list before the first update.
 	export let tokens: Token[] | undefined = undefined;
 
 	let displayZeroBalance: boolean;
-	$: displayZeroBalance = $hideZeroBalancesStore?.enabled !== true;
+	$: displayZeroBalance = !$hideZeroBalances;
 
 	let sortedTokens: TokenUi[];
 	$: sortedTokens = $combinedDerivedSortedNetworkTokensUi.filter(

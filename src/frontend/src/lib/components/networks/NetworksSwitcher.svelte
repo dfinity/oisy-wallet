@@ -14,7 +14,7 @@
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { testnetsStore } from '$lib/stores/settings.store';
+	import { testnetsEnabled } from '$lib/derived/settings.derived';
 
 	export let disabled = false;
 
@@ -23,8 +23,6 @@
 
 	const close = () => (visible = false);
 
-	let testnets: boolean;
-	$: testnets = $testnetsStore?.enabled ?? false;
 
 	let mainnetTokensUsdBalance: number;
 	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
@@ -65,7 +63,7 @@
 		<NetworksTestnetsToggle />
 	</div>
 
-	{#if testnets}
+	{#if $testnetsEnabled}
 		<ul
 			class="flex flex-col gap-4 list-none mb-2 font-normal"
 			transition:slide={{ easing: quintOut, axis: 'y' }}
