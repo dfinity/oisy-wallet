@@ -6,8 +6,14 @@ import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
 import type { IcToken } from '$icp/types/ic';
+import { exchanges } from '$lib/derived/exchange.derived';
+import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenToPin } from '$lib/types/token';
-import { filterEnabledTokens } from '$lib/utils/tokens.utils';
+import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import {
+	filterEnabledTokens,
+	sumMainnetTokensUsdBalancesPerNetwork
+} from '$lib/utils/tokens.utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
@@ -55,3 +61,15 @@ export const enabledIcTokens: Readable<IcToken[]> = derived(
 	([$enabledTokens]) =>
 		$enabledTokens.filter(({ standard }) => standard === 'icp' || standard === 'icrc') as IcToken[]
 );
+
+/**
+ * A store with NetworkId-number dictionary with total USD balance of mainnet tokens per network.
+ */
+export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdBalancePerNetwork> =
+	derived([enabledTokens, balancesStore, exchanges], ([$enabledTokens, $balances, $exchanges]) =>
+		sumMainnetTokensUsdBalancesPerNetwork({
+			$tokens: $enabledTokens,
+			$balances,
+			$exchanges
+		})
+	);
