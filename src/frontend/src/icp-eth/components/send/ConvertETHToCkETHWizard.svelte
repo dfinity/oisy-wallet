@@ -1,16 +1,16 @@
 <script lang="ts">
-	import { ethAddress } from '$lib/derived/address.derived';
-	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
-	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
-	import type { Network } from '$lib/types/network';
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
+	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import {
 		ckEthereumNativeToken,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenNetwork
 	} from '$icp-eth/derived/cketh.derived';
+	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network } from '$lib/types/network';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
