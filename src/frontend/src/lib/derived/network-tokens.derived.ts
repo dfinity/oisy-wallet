@@ -37,5 +37,5 @@ export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived
 					$balances,
 					$exchanges
 				})
-			: $enabledNetworkTokens
+			: ($enabledNetworkTokens as TokenUi[])
 );
