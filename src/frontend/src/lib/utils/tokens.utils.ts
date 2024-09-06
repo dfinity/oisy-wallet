@@ -50,6 +50,35 @@ export const sortTokens = ({
 };
 
 /**
+ * Calculates USD balance for the provided token.
+ *
+ * @param token - Token for which USD balance will be calculated.
+ * @param $balancesStore - The balances data for the tokens.
+ * @param $exchanges - The exchange rates data for the tokens.
+ * @returns The USD balance or undefined in case the number cannot be calculated.
+ *
+ */
+export const calculateTokenUsdBalance = ({
+	token,
+	$balances,
+	$exchanges
+}: {
+	token: Token;
+	$balances: CertifiedStoreData<BalancesData>;
+	$exchanges: ExchangesData;
+}): number | undefined => {
+	const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
+
+	return nonNullish(exchangeRate)
+		? usdValue({
+				token,
+				balance: $balances?.[token.id]?.data,
+				exchangeRate
+			})
+		: undefined;
+};
+
+/**
  * Pins tokens by USD value, balance and name.
  *
  * The function pins on top of the list the tokens that have a balance and/or an exchange rate.
@@ -76,15 +105,12 @@ export const pinTokensWithBalanceAtTop = ({
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
 		(acc, token) => {
 			const balance: BigNumber | undefined = $balances?.[token.id]?.data;
-			const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
 
-			const usdBalance: number | undefined = nonNullish(exchangeRate)
-				? usdValue({
-						token,
-						balance,
-						exchangeRate
-					})
-				: undefined;
+			const usdBalance: number | undefined = calculateTokenUsdBalance({
+				token,
+				$balances,
+				$exchanges
+			});
 
 			const tokenUI: TokenUi = {
 				...token,
