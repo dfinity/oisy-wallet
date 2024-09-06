@@ -1,21 +1,21 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
+	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
+	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
+	import WalletAddresses from '$lib/components/core/WalletAddresses.svelte';
+	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import {
 		networkEthereum,
 		networkICP,
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
-	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
-	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
-	import WalletAddresses from '$lib/components/core/WalletAddresses.svelte';
-	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
-	import { createEventDispatcher } from 'svelte';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	const dispatch = createEventDispatcher();
 

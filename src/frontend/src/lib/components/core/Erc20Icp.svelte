@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { ERC20_ICP_REPO_URL } from '$eth/constants/erc20-icp.constants';
 	import { IconInfo } from '@dfinity/gix-components';
+	import { ERC20_ICP_REPO_URL } from '$eth/constants/erc20-icp.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
