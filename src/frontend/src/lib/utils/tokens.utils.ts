@@ -158,7 +158,7 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
  * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
  * @param $balancesStore - The balances data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
- * @returns The sum of mainnet tokens USD balance.
+ * @returns The sum of mainnet tokens USD balance if balances and exchanges stores are available.
  *
  */
 export const sumMainnetTokensUsdBalance = ({
@@ -169,15 +169,17 @@ export const sumMainnetTokensUsdBalance = ({
 	$tokens: Token[];
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
-}) =>
-	$tokens.reduce(
-		(acc, token) =>
-			acc +
-			(token.network.env === 'mainnet'
-				? calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0
-				: 0),
-		0
-	);
+}): number | undefined =>
+	nonNullish($exchanges) && nonNullish($balances)
+		? $tokens.reduce(
+				(acc, token) =>
+					acc +
+					(token.network.env === 'mainnet'
+						? calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0
+						: 0),
+				0
+			)
+		: undefined;
 
 /**
  * Filters and returns a list of "enabled" by user tokens
