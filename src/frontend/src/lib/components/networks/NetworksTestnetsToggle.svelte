@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
+	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { testnetsStore } from '$lib/stores/settings.store';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
 
 	let checked: boolean;
 	$: checked = $testnetsEnabled;

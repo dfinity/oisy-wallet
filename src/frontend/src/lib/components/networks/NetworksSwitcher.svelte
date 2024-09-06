@@ -12,9 +12,9 @@
 	import ButtonSwitcher from '$lib/components/ui/ButtonSwitcher.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
+	import { testnetsEnabled } from '$lib/derived/settings.derived';
 	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { testnetsEnabled } from '$lib/derived/settings.derived';
 
 	export let disabled = false;
 
@@ -22,7 +22,6 @@
 	let button: HTMLButtonElement | undefined;
 
 	const close = () => (visible = false);
-
 
 	let mainnetTokensUsdBalance: number;
 	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
