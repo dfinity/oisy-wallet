@@ -26,9 +26,9 @@
 	let testnets: boolean;
 	$: testnets = $testnetsStore?.enabled ?? false;
 
-	let mainnetTokensTotalUsd: number;
-	$: mainnetTokensTotalUsd = $networksMainnets.reduce(
-		(acc, { id }) => acc + $enabledMainnetTokensUsdBalancesPerNetwork[id],
+	let mainnetTokensUsdBalance: number;
+	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
+		(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
 		0
 	);
 </script>
@@ -48,7 +48,7 @@
 				id={undefined}
 				name={$i18n.networks.chain_fusion}
 				icon={chainFusion}
-				totalUsd={mainnetTokensTotalUsd}
+				usdBalance={mainnetTokensUsdBalance}
 				on:icSelected={close}
 			/>
 		</li>

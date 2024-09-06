@@ -13,7 +13,7 @@
 	export let id: NetworkId | undefined;
 	export let name: string;
 	export let icon: string | undefined;
-	export let totalUsd: number | undefined = undefined;
+	export let usdBalance: number | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -34,7 +34,7 @@
 		{name}
 		{icon}
 		logo="start"
-		description={nonNullish(totalUsd) ? formatUSD(totalUsd) : undefined}
+		description={nonNullish(usdBalance) ? formatUSD(usdBalance) : undefined}
 	/>
 
 	{#if id === $networkId}

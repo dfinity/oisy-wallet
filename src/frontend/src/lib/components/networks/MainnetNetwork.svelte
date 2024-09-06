@@ -5,8 +5,8 @@
 
 	export let network: Network;
 
-	let totalUsd: number;
-	$: totalUsd = $enabledMainnetTokensUsdBalancesPerNetwork[network.id];
+	let usdBalance: number;
+	$: usdBalance = $enabledMainnetTokensUsdBalancesPerNetwork[network.id] ?? 0;
 </script>
 
-<NetworkComponent {network} {totalUsd} on:icSelected />
+<NetworkComponent {network} {usdBalance} on:icSelected />
