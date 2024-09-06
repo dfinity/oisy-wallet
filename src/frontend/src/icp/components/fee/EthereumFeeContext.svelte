@@ -1,24 +1,24 @@
 <script lang="ts">
-	import type { NetworkId } from '$lib/types/network';
-	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
-	import { tokenId } from '$lib/derived/token.derived';
-	import type { IcToken } from '$icp/types/ic';
-	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { getContext, onDestroy } from 'svelte';
+	import { tokenAsIcToken, tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
+	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
 	import {
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
-	import { token } from '$lib/stores/token.store';
+	import type { IcToken } from '$icp/types/ic';
+	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
-	import { tokenAsIcToken, tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
+	import { tokenId } from '$lib/derived/token.derived';
+	import { token } from '$lib/stores/token.store';
+	import type { NetworkId } from '$lib/types/network';
 
 	export let networkId: NetworkId | undefined = undefined;
 

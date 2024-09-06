@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { nonNullish } from '@dfinity/utils';
-	import Value from '$lib/components/ui/Value.svelte';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { slide } from 'svelte/transition';
+	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
 	import {
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
-	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
-	import type { Token } from '$lib/types/token';
 	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
+	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 

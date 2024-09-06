@@ -131,27 +131,30 @@
 				ckErc20ToErc20MaxCkEthFees
 			};
 
+			const trackAnalyticsOnSendComplete = async () => {
+				await Promise.allSettled([
+					trackTimedEventSuccess(timedEvent),
+					trackEvent({
+						name: isNetworkIdBitcoin(networkId)
+							? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
+							: isConvertCkEthToEth({ token: $token, networkId })
+								? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
+								: isConvertCkErc20ToErc20({ token: $token, networkId })
+									? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS
+									: TRACK_COUNT_IC_SEND_SUCCESS,
+						metadata: {
+							token: $token.symbol
+						}
+					})
+				]);
+			};
+
 			await sendIc({
 				...params,
 				token: $tokenAsIcToken,
-				targetNetworkId: networkId
+				targetNetworkId: networkId,
+				sendCompleted: trackAnalyticsOnSendComplete
 			});
-
-			await Promise.allSettled([
-				trackTimedEventSuccess(timedEvent),
-				trackEvent({
-					name: isNetworkIdBitcoin(networkId)
-						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
-						: isConvertCkEthToEth({ token: $token, networkId })
-							? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
-							: isConvertCkErc20ToErc20({ token: $token, networkId })
-								? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS
-								: TRACK_COUNT_IC_SEND_SUCCESS,
-					metadata: {
-						token: $token.symbol
-					}
-				})
-			]);
 
 			sendProgressStep = ProgressStepsSendIc.DONE;
 

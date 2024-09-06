@@ -24,3 +24,6 @@ export const isEthAddress = (address: string | undefined): boolean => {
 
 	return isAddress(address);
 };
+
+export const invalidIcpAddress = (address: string | undefined): boolean =>
+	!isIcpAccountIdentifier(address);

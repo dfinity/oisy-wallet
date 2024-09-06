@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import type { WebSocketListener } from '$eth/types/listener';
-	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import { infuraProviders } from '$eth/providers/infura.providers';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
+	import type { WebSocketListener } from '$eth/types/listener';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	export let blockNumber: number;
 
