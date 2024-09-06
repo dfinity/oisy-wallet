@@ -10,7 +10,7 @@ import {
 	filterEnabledTokens,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
-	sumTokensUsdBalance
+	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
@@ -282,7 +282,7 @@ describe('pinTokensWithBalanceAtTop', () => {
 	});
 });
 
-describe('sumTokensTotalUsdBalance', () => {
+describe('sumTokensUiUsdBalance', () => {
 	it('should correctly calculate USD total balance when tokens have usdBalance', () => {
 		const tokens: TokenUi[] = [
 			{ ...ICP_TOKEN, usdBalance: 50 },
@@ -290,7 +290,7 @@ describe('sumTokensTotalUsdBalance', () => {
 			{ ...ETHEREUM_TOKEN, usdBalance: 100 }
 		];
 
-		const result = sumTokensUsdBalance(tokens);
+		const result = sumTokensUiUsdBalance(tokens);
 		expect(result).toEqual(200);
 	});
 
@@ -301,12 +301,12 @@ describe('sumTokensTotalUsdBalance', () => {
 			{ ...ETHEREUM_TOKEN }
 		];
 
-		const result = sumTokensUsdBalance(tokens);
+		const result = sumTokensUiUsdBalance(tokens);
 		expect(result).toEqual(50);
 	});
 
 	it('should correctly calculate USD total balance when tokens list is empty', () => {
-		const result = sumTokensUsdBalance([]);
+		const result = sumTokensUiUsdBalance([]);
 		expect(result).toEqual(0);
 	});
 });
