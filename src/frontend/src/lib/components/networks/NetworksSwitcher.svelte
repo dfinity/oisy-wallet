@@ -5,12 +5,14 @@
 	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
+	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import ButtonSwitcher from '$lib/components/ui/ButtonSwitcher.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
+	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { testnetsStore } from '$lib/stores/settings.store';
 
@@ -23,6 +25,12 @@
 
 	let testnets: boolean;
 	$: testnets = $testnetsStore?.enabled ?? false;
+
+	let mainnetTokensUsdBalance: number;
+	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
+		(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
+		0
+	);
 </script>
 
 <ButtonSwitcher
@@ -40,13 +48,14 @@
 				id={undefined}
 				name={$i18n.networks.chain_fusion}
 				icon={chainFusion}
+				usdBalance={mainnetTokensUsdBalance}
 				on:icSelected={close}
 			/>
 		</li>
 
 		{#each $networksMainnets as network}
 			<li>
-				<Network {network} on:icSelected={close} />
+				<MainnetNetwork {network} on:icSelected={close} />
 			</li>
 		{/each}
 	</ul>

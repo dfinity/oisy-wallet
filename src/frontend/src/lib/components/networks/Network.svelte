@@ -3,6 +3,7 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 
 	export let network: Network;
+	export let usdBalance: number | undefined = undefined;
 
 	let id: NetworkId;
 	let name: string;
@@ -10,4 +11,4 @@
 	$: ({ id, name, icon } = network);
 </script>
 
-<NetworkButton {id} {name} {icon} on:icSelected />
+<NetworkButton {id} {name} {usdBalance} {icon} on:icSelected />
