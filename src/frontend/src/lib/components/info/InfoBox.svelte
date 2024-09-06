@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconClose } from '@dfinity/gix-components';
-	import { slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
+	import { slide } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let hideInfo: boolean;

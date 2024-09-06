@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
+	import { quintOut } from 'svelte/easing';
+	import { slide } from 'svelte/transition';
+	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
+	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
+	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
+	import ButtonSwitcher from '$lib/components/ui/ButtonSwitcher.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
-	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
-	import { testnetsStore } from '$lib/stores/settings.store';
-	import { slide } from 'svelte/transition';
-	import { quintOut } from 'svelte/easing';
 	import { i18n } from '$lib/stores/i18n.store';
-	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
-	import chainFusion from '$lib/assets/chain_fusion.svg';
-	import ButtonSwitcher from '$lib/components/ui/ButtonSwitcher.svelte';
+	import { testnetsStore } from '$lib/stores/settings.store';
 
 	export let disabled = false;
 

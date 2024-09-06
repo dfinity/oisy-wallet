@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
-	import { validateBtcAddressMainnet, validateEthAddress } from '$lib/services/address.services';
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
+	import { validateBtcAddressMainnet, validateEthAddress } from '$lib/services/address.services';
+	import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
 
 	$: $btcAddressMainnetStore,
 		(async () =>
