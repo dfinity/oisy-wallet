@@ -1,4 +1,4 @@
-import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
@@ -11,6 +11,7 @@ import {
 	filterEnabledTokens,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
+	sumMainnetTokensUsdBalance,
 	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
 import { BigNumber } from 'alchemy-sdk';
@@ -365,6 +366,58 @@ describe('calculateTokenUsdBalance', () => {
 
 	it('should return 0 if balances store is not available', () => {
 		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
+		expect(result).toEqual(0);
+	});
+});
+
+describe('sumMainnetTokensUsdBalance', () => {
+	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		mockUsdValue.mockImplementation(
+			({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
+		);
+	});
+
+	it('should correctly calculate USD total balance for the list of mainnet and testnet tokens', () => {
+		const balances = {
+			...$balances,
+			[BTC_TESTNET_TOKEN.id]: { data: bn3, certified }
+		};
+		const tokens = [...$tokens, BTC_TESTNET_TOKEN];
+
+		const result = sumMainnetTokensUsdBalance({ $tokens: tokens, $balances: balances, $exchanges });
+		expect(result).toEqual(bn1.toNumber() + bn2.toNumber() + bn3.toNumber());
+	});
+
+	it('should return 0 if no mainnet tokens are in the list', () => {
+		const balances = {
+			...$balances,
+			[BTC_TESTNET_TOKEN.id]: { data: bn2, certified }
+		};
+		const tokens = [BTC_TESTNET_TOKEN];
+
+		const result = sumMainnetTokensUsdBalance({ $tokens: tokens, $balances: balances, $exchanges });
+		expect(result).toEqual(0);
+	});
+
+	it('should return 0 if all token balances are 0', () => {
+		const balances = {
+			[ICP_TOKEN.id]: { data: ZERO, certified },
+			[BTC_MAINNET_TOKEN.id]: { data: ZERO, certified },
+			[ETHEREUM_TOKEN.id]: { data: ZERO, certified },
+			[BTC_TESTNET_TOKEN.id]: { data: ZERO, certified }
+		};
+		const tokens = [...$tokens, BTC_TESTNET_TOKEN];
+
+		const result = sumMainnetTokensUsdBalance({ $tokens: tokens, $balances: balances, $exchanges });
+		expect(result).toEqual(0);
+	});
+
+	it('should return 0 if no tokens are provided', () => {
+		const result = sumMainnetTokensUsdBalance({ $tokens: [], $balances, $exchanges });
 		expect(result).toEqual(0);
 	});
 });
