@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { blur } from 'svelte/transition';
-	import type { SyncState } from '$lib/types/sync';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { SyncState } from '$lib/types/sync';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let ckEthPendingTransactionsSyncState: SyncState | undefined = undefined;
 	const onSyncPendingState = ({ detail: state }: CustomEvent<SyncState>) =>
