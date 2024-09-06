@@ -9,7 +9,7 @@ import type {
 	TokenUi
 } from '$lib/types/token';
 import { calculateTokenUsdBalance } from '$lib/utils/token.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
@@ -147,22 +147,18 @@ export const calculateMainnetTokensUsdBalancesPerNetwork = ({
 	$exchanges: ExchangesData;
 }): TokensTotalUsdBalancesPerNetwork =>
 	nonNullish($exchanges) && nonNullish($balances)
-		? $tokens.reduce<TokensTotalUsdBalancesPerNetwork>((acc, token) => {
-				if (token.network.env === 'mainnet') {
-					if (isNullish(acc[token.network.id])) {
-						acc[token.network.id] = 0;
-					}
-
-					return {
-						...acc,
-						[token.network.id]:
-							acc[token.network.id] +
-							(calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0)
-					};
-				}
-
-				return acc;
-			}, {})
+		? $tokens.reduce<TokensTotalUsdBalancesPerNetwork>(
+				(acc, token) =>
+					token.network.env === 'mainnet'
+						? {
+								...acc,
+								[token.network.id]:
+									(acc[token.network.id] ?? 0) +
+									(calculateTokenUsdBalance({ token, $balances, $exchanges }) ?? 0)
+							}
+						: acc,
+				{}
+			)
 		: {};
 
 /**
