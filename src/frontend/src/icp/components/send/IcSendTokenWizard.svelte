@@ -1,32 +1,31 @@
 <script lang="ts">
 	import { type WizardStep } from '@dfinity/gix-components';
-	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
+	import { isNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
-	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import { isNullish } from '@dfinity/utils';
-	import { sendIc } from '$icp/services/ic-send.services';
-	import { parseToken } from '$lib/utils/parse.utils';
-	import { authStore } from '$lib/stores/auth.store';
-	import type { NetworkId } from '$lib/types/network';
+	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
+	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
-	import type { IcTransferParams } from '$icp/types/ic-send';
+	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
+	import { sendIc } from '$icp/services/ic-send.services';
 	import {
 		BITCOIN_FEE_CONTEXT_KEY,
 		type BitcoinFeeContext as BitcoinFeeContextType,
 		initBitcoinFeeStore
 	} from '$icp/stores/bitcoin-fee.store';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
-	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
-	import { i18n } from '$lib/stores/i18n.store';
 	import {
-		initTimedEvent,
-		trackTimedEventSuccess,
-		trackEvent,
-		trackTimedEventError
-	} from '$lib/services/analytics.services';
+		ETHEREUM_FEE_CONTEXT_KEY,
+		type EthereumFeeContext as EthereumFeeContextType,
+		initEthereumFeeStore
+	} from '$icp/stores/ethereum-fee.store';
+	import type { IcTransferParams } from '$icp/types/ic-send';
+	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
+	import {
+		isConvertCkErc20ToErc20,
+		isConvertCkEthToEth
+	} from '$icp-eth/utils/cketh-transactions.utils';
+	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import {
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR,
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS,
@@ -41,21 +40,22 @@
 		TRACK_DURATION_CONVERT_CKETH_TO_ETH,
 		TRACK_DURATION_IC_SEND
 	} from '$lib/constants/analytics.contants';
-	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
-	import {
-		ETHEREUM_FEE_CONTEXT_KEY,
-		type EthereumFeeContext as EthereumFeeContextType,
-		initEthereumFeeStore
-	} from '$icp/stores/ethereum-fee.store';
+	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
-	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
-	import { token } from '$lib/stores/token.store';
-	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import {
-		isConvertCkErc20ToErc20,
-		isConvertCkEthToEth
-	} from '$icp-eth/utils/cketh-transactions.utils';
+		initTimedEvent,
+		trackTimedEventSuccess,
+		trackEvent,
+		trackTimedEventError
+	} from '$lib/services/analytics.services';
+	import { authStore } from '$lib/stores/auth.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import { token } from '$lib/stores/token.store';
+	import type { NetworkId } from '$lib/types/network';
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	/**
 	 * Props

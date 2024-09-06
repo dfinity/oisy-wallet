@@ -1,34 +1,34 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { tokenDecimals } from '$lib/derived/token.derived';
-	import type { OptionIcToken } from '$icp/types/ic';
-	import { balance } from '$lib/derived/balances.derived';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import type { NetworkId } from '$lib/types/network';
-	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
-	import { IcAmountAssertionError } from '$icp/types/ic-send';
+	import { getContext } from 'svelte';
+	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
+	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
+	import {
+		ETHEREUM_FEE_CONTEXT_KEY,
+		type EthereumFeeContext
+	} from '$icp/stores/ethereum-fee.store';
+	import type { OptionIcToken } from '$icp/types/ic';
+	import { IcAmountAssertionError } from '$icp/types/ic-send';
+	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import {
 		assertCkETHBalanceEstimatedFee,
 		assertCkETHMinFee,
 		assertCkETHMinWithdrawalAmount
 	} from '$icp/utils/cketh.utils';
-	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
-	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
-	import { getContext } from 'svelte';
-	import {
-		ETHEREUM_FEE_CONTEXT_KEY,
-		type EthereumFeeContext
-	} from '$icp/stores/ethereum-fee.store';
-	import { balancesStore } from '$lib/stores/balances.store';
-	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
-	import { token } from '$lib/stores/token.store';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { balance } from '$lib/derived/balances.derived';
+	import { tokenDecimals } from '$lib/derived/token.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
+	import type { NetworkId } from '$lib/types/network';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;

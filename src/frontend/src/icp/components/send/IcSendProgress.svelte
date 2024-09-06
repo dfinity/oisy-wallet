@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import type { ProgressStep } from '@dfinity/gix-components';
-	import type { NetworkId } from '$lib/types/network';
-	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
+	import { isNetworkIdETH } from '$icp/utils/ic-send.utils';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 
 	export let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;

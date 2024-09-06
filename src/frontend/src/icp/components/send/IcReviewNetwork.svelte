@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { NetworkId } from '$lib/types/network';
 	import { nonNullish } from '@dfinity/utils';
-	import Value from '$lib/components/ui/Value.svelte';
+	import bitcoin from '$icp/assets/bitcoin.svg';
+	import icpLight from '$icp/assets/icp_light.svg';
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
-	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import eth from '$icp-eth/assets/eth.svg';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import icpLight from '$icp/assets/icp_light.svg';
-	import bitcoin from '$icp/assets/bitcoin.svg';
-	import eth from '$icp-eth/assets/eth.svg';
-	import { i18n } from '$lib/stores/i18n.store';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkId } from '$lib/types/network';
+	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
 

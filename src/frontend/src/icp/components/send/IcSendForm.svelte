@@ -1,18 +1,18 @@
 <script lang="ts">
-	import SendSource from '$lib/components/send/SendSource.svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IcFeeDisplay from './IcFeeDisplay.svelte';
-	import type { NetworkId } from '$lib/types/network';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
+	import SendSource from '$lib/components/send/SendSource.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { token } from '$lib/stores/token.store';
+	import type { NetworkId } from '$lib/types/network';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;

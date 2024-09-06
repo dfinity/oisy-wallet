@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
-	import { modalIcSend } from '$lib/derived/modal.derived';
-	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ICP_NETWORK_ID } from '$env/networks.env';
-	import type { Token } from '$lib/types/token';
-	import { loadTokenAndRun } from '$lib/services/token.services';
+	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
+	import { modalIcSend } from '$lib/derived/modal.derived';
+	import { loadTokenAndRun } from '$lib/services/token.services';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
 
