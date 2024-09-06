@@ -40,6 +40,7 @@ module.exports = {
 				'src/frontend/src/icp/**/*.svelte',
 				'src/frontend/src/icp-eth/**/*.svelte',
 				'src/frontend/src/lib/components/common/**/*.svelte',
+				'src/frontend/src/lib/components/core/**/*.svelte',
 				'src/frontend/src/lib/components/exchange/**/*.svelte',
 				'src/frontend/src/lib/components/guard/**/*.svelte',
 				'src/frontend/src/lib/components/icons/**/*.svelte',

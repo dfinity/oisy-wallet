@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { Modal, type ProgressStep } from '@dfinity/gix-components';
-	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { onMount } from 'svelte';
-	import { loadAddresses, loadIdbAddresses } from '$lib/services/address.services';
 	import { fade } from 'svelte/transition';
-	import { signOut } from '$lib/services/auth.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
+	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { loading } from '$lib/stores/loader.store';
+	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
-	import { loadIcrcTokens } from '$icp/services/icrc.services';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { loadAddresses, loadIdbAddresses } from '$lib/services/address.services';
+	import { signOut } from '$lib/services/auth.services';
 	import { authStore } from '$lib/stores/auth.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { loading } from '$lib/stores/loader.store';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
