@@ -67,13 +67,12 @@ export const calculateTokenUsdBalance = ({
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
 }): number | undefined => {
-	const balance: BigNumber | undefined = $balances?.[token.id]?.data;
 	const exchangeRate: number | undefined = $exchanges?.[token.id]?.usd;
 
 	return nonNullish(exchangeRate)
 		? usdValue({
 				token,
-				balance,
+				balance: $balances?.[token.id]?.data,
 				exchangeRate
 			})
 		: undefined;
@@ -107,7 +106,11 @@ export const pinTokensWithBalanceAtTop = ({
 		(acc, token) => {
 			const balance: BigNumber | undefined = $balances?.[token.id]?.data;
 
-			const usdBalance = calculateTokenUsdBalance({ token, $balances, $exchanges });
+			const usdBalance: number | undefined = calculateTokenUsdBalance({
+				token,
+				$balances,
+				$exchanges
+			});
 
 			const tokenUI: TokenUi = {
 				...token,
