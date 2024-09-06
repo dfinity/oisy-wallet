@@ -7,10 +7,11 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
+	calculateTokenUsdBalance,
 	filterEnabledTokens,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
-	sumTokensUsdBalance
+	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
@@ -282,7 +283,7 @@ describe('pinTokensWithBalanceAtTop', () => {
 	});
 });
 
-describe('sumTokensTotalUsdBalance', () => {
+describe('sumTokensUiUsdBalance', () => {
 	it('should correctly calculate USD total balance when tokens have usdBalance', () => {
 		const tokens: TokenUi[] = [
 			{ ...ICP_TOKEN, usdBalance: 50 },
@@ -290,7 +291,7 @@ describe('sumTokensTotalUsdBalance', () => {
 			{ ...ETHEREUM_TOKEN, usdBalance: 100 }
 		];
 
-		const result = sumTokensUsdBalance(tokens);
+		const result = sumTokensUiUsdBalance(tokens);
 		expect(result).toEqual(200);
 	});
 
@@ -301,12 +302,12 @@ describe('sumTokensTotalUsdBalance', () => {
 			{ ...ETHEREUM_TOKEN }
 		];
 
-		const result = sumTokensUsdBalance(tokens);
+		const result = sumTokensUiUsdBalance(tokens);
 		expect(result).toEqual(50);
 	});
 
 	it('should correctly calculate USD total balance when tokens list is empty', () => {
-		const result = sumTokensUsdBalance([]);
+		const result = sumTokensUiUsdBalance([]);
 		expect(result).toEqual(0);
 	});
 });
@@ -338,5 +339,32 @@ describe('filterEnabledTokens', () => {
 
 		const result = filterEnabledTokens([tokens]);
 		expect(result).toEqual([ENABLED_BY_DEFAULT_ICP_TOKEN, ENABLED_BY_DEFAULT_ETHEREUM_TOKEN]);
+	});
+});
+
+describe('calculateTokenUsdBalance', () => {
+	const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		mockUsdValue.mockImplementation(
+			({ balance, exchangeRate }) => Number(balance ?? 0) * exchangeRate
+		);
+	});
+
+	it('should correctly calculate USD balance for the token', () => {
+		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances, $exchanges });
+		expect(result).toEqual(bn3.toNumber());
+	});
+
+	it('should return undefined if exchange rate is not available', () => {
+		const result = calculateTokenUsdBalance({ token: ICP_TOKEN, $balances, $exchanges: {} });
+		expect(result).toEqual(undefined);
+	});
+
+	it('should return 0 if balances store is not available', () => {
+		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
+		expect(result).toEqual(0);
 	});
 });
