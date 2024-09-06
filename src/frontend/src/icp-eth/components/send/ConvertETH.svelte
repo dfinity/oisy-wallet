@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
+	import { isNullish } from '@dfinity/utils';
+	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
-	import { waitWalletReady } from '$lib/services/actions.services';
-	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
-	import { isNullish } from '@dfinity/utils';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { networkICP } from '$lib/derived/network.derived';
-	import type { TokenId } from '$lib/types/token';
-	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
-	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
+	import { waitWalletReady } from '$lib/services/actions.services';
+	import { modalStore } from '$lib/stores/modal.store';
 	import type { NetworkId } from '$lib/types/network';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import type { TokenId } from '$lib/types/token';
 
 	export let nativeTokenId: TokenId;
 	export let ariaLabel: string;

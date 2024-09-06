@@ -1,42 +1,42 @@
 <script lang="ts">
 	import { IconClose, Input } from '@dfinity/gix-components';
-	import { createEventDispatcher, onMount } from 'svelte';
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import Card from '$lib/components/ui/Card.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import IconSearch from '$lib/components/icons/IconSearch.svelte';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { ICP_TOKEN } from '$env/tokens.env';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
+	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
+	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
+	import type { LedgerCanisterIdText } from '$icp/types/canister';
+	import type { IcCkToken } from '$icp/types/ic';
+	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { Token } from '$lib/types/token';
+	import IconSearch from '$lib/components/icons/IconSearch.svelte';
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
+	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
+	import TokenName from '$lib/components/tokens/TokenName.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import Card from '$lib/components/ui/Card.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		networkEthereum,
 		networkICP,
 		pseudoNetworkChainFusion,
 		selectedNetwork
 	} from '$lib/derived/network.derived';
-	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
-	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
-	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-	import type { IcCkToken } from '$icp/types/ic';
-	import { sortTokens } from '$lib/utils/tokens.utils';
-	import { exchanges } from '$lib/derived/exchange.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { ExchangesData } from '$lib/types/exchange';
-	import TokenName from '$lib/components/tokens/TokenName.svelte';
+	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
+	import { sortTokens } from '$lib/utils/tokens.utils';
 
 	const dispatch = createEventDispatcher();
 

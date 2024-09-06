@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import { fade, slide } from 'svelte/transition';
-	import { formatToken } from '$lib/utils/format.utils';
-	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { balancesStore } from '$lib/stores/balances.store';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { fade, slide } from 'svelte/transition';
+	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
+	import { balancesStore } from '$lib/stores/balances.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenId } from '$lib/types/token';
+	import { formatToken } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let fee: BigNumber;
 	export let feeSymbol: string;

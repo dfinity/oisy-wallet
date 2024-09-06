@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { debounce } from '@dfinity/utils';
 	import { loadBalances, loadErc20Balances } from '$eth/services/balance.services';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { debounce } from '@dfinity/utils';
 	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
 
 	const load = async () => {

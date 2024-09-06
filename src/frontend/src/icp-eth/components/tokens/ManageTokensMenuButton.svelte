@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
-	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher();
 
