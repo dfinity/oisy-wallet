@@ -5,7 +5,6 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Token, TokenUi } from '$lib/types/token';
 import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 import { pinTokensWithBalanceAtTop, sortTokens } from '$lib/utils/tokens.utils';
-import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 /**
@@ -31,11 +30,9 @@ export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
 export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[combinedDerivedSortedNetworkTokens, balancesStore, exchanges],
 	([$enabledNetworkTokens, $balances, $exchanges]) =>
-		nonNullish($balances)
-			? pinTokensWithBalanceAtTop({
-					$tokens: $enabledNetworkTokens,
-					$balances,
-					$exchanges
-				})
-			: ($enabledNetworkTokens as TokenUi[])
+		pinTokensWithBalanceAtTop({
+			$tokens: $enabledNetworkTokens,
+			$balances,
+			$exchanges
+		})
 );
