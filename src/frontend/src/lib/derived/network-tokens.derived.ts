@@ -25,7 +25,6 @@ export const combinedDerivedSortedNetworkTokens: Readable<Token[]> = derived(
 
 /**
  * All tokens matching the selected network or Chain Fusion, with the ones with non-null balance at the top of the list.
- * It will not execute the sorting if the balance store is not yet initiated to avoid looping without data.
  */
 export const combinedDerivedSortedNetworkTokensUi: Readable<TokenUi[]> = derived(
 	[combinedDerivedSortedNetworkTokens, balancesStore, exchanges],
