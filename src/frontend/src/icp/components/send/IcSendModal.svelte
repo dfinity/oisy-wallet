@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
-	import type { NetworkId } from '$lib/types/network';
 	import { createEventDispatcher } from 'svelte';
+	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
+	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkId } from '$lib/types/network';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
-	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
-	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 
 	/**
 	 * Props

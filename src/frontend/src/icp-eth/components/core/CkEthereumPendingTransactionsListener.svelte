@@ -1,34 +1,34 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { onDestroy } from 'svelte';
-	import type { WebSocketListener } from '$eth/types/listener';
-	import type { OptionEthAddress } from '$lib/types/address';
-	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { tokenId } from '$lib/derived/token.derived';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
-	import { balance } from '$lib/derived/balances.derived';
+	import type { TransactionResponse } from '@ethersproject/abstract-provider';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { authStore } from '$lib/stores/auth.store';
-	import {
-		loadPendingCkEthereumTransaction,
-		loadCkEthereumPendingTransactions
-	} from '$icp-eth/services/eth.services';
+	import { onDestroy } from 'svelte';
+	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
+	import type { WebSocketListener } from '$eth/types/listener';
+	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
+	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import {
 		ckEthereumNativeToken,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
 	} from '$icp-eth/derived/cketh.derived';
-	import type { NetworkId } from '$lib/types/network';
+	import {
+		loadPendingCkEthereumTransaction,
+		loadCkEthereumPendingTransactions
+	} from '$icp-eth/services/eth.services';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
-	import type { TransactionResponse } from '@ethersproject/abstract-provider';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { balance } from '$lib/derived/balances.derived';
+	import { tokenId } from '$lib/derived/token.derived';
+	import { authStore } from '$lib/stores/auth.store';
 	import { token } from '$lib/stores/token.store';
-	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
+	import type { OptionEthAddress } from '$lib/types/address';
+	import type { NetworkId } from '$lib/types/network';
 
 	let listener: WebSocketListener | undefined = undefined;
 

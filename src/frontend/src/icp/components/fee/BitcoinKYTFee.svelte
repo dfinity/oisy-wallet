@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
-	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
-	import { tokenId } from '$lib/derived/token.derived';
 	import { nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import { slide } from 'svelte/transition';
+	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { tokenId } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { BigNumber } from '@ethersproject/bignumber';
-	import Value from '$lib/components/ui/Value.svelte';
-	import { BTC_DECIMALS } from '$env/tokens.btc.env';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
-	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 
 	export let networkId: NetworkId | undefined = undefined;
 

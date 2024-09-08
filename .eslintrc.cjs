@@ -32,6 +32,30 @@ module.exports = {
 			rules: {
 				'no-console': 'off'
 			}
+		},
+		{
+			// TODO: slowly add all related folders, and ultimately remove this override and include the rule in the main rules
+			files: [
+				'src/frontend/src/eth/**/*.svelte',
+				'src/frontend/src/icp/**/*.svelte',
+				'src/frontend/src/icp-eth/**/*.svelte',
+				'src/frontend/src/lib/components/common/**/*.svelte',
+				'src/frontend/src/lib/components/core/**/*.svelte',
+				'src/frontend/src/lib/components/exchange/**/*.svelte',
+				'src/frontend/src/lib/components/guard/**/*.svelte',
+				'src/frontend/src/lib/components/hero/**/*.svelte',
+				'src/frontend/src/lib/components/icons/**/*.svelte',
+				'src/frontend/src/lib/components/info/**/*.svelte',
+				'src/frontend/src/lib/components/networks/**/*.svelte'
+			],
+			rules: {
+				'import/order': [
+					'error',
+					{
+						alphabetize: { order: 'asc' }
+					}
+				]
+			}
 		}
 	],
 	rules: {
@@ -54,7 +78,8 @@ module.exports = {
 		curly: 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],
-		'@typescript-eslint/no-inferrable-types': 'error'
+		'@typescript-eslint/no-inferrable-types': 'error',
+		'prefer-template': 'error'
 	},
 	globals: {
 		NodeJS: true

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { slide } from 'svelte/transition';
 	import { nonNullish } from '@dfinity/utils';
-	import { formatToken } from '$lib/utils/format.utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import Value from '$lib/components/ui/Value.svelte';
 	import { getContext } from 'svelte';
-	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
+	import { slide } from 'svelte/transition';
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
+	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	const { store: storeFeeData } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 

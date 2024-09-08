@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
-	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import { Modal } from '@dfinity/gix-components';
+	import EthReceiveMetamask from '$eth/components/receive/EthReceiveMetamask.svelte';
+	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { networkAddress, networkEthereum } from '$lib/derived/network.derived';
-	import EthReceiveMetamask from '$eth/components/receive/EthReceiveMetamask.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 </script>
 
 <Modal on:nnsClose={modalStore.close}>

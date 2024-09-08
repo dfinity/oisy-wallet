@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
-	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import { type ComponentType } from 'svelte';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import { BigNumber } from '@ethersproject/bignumber';
+	import { type ComponentType } from 'svelte';
+	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
+	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+	import IconBurn from '$lib/components/icons/IconBurn.svelte';
+	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import IconMint from '$lib/components/icons/IconMint.svelte';
+	import IconReceive from '$lib/components/icons/IconReceive.svelte';
+	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
+	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
-	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
-	import IconMint from '$lib/components/icons/IconMint.svelte';
-	import IconBurn from '$lib/components/icons/IconBurn.svelte';
-	import Amount from '$lib/components/ui/Amount.svelte';
-	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
-	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
-	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
 
 	export let transaction: IcTransactionUi;
 
