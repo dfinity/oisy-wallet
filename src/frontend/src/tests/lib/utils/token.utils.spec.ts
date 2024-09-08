@@ -113,6 +113,15 @@ describe('calculateTokenUsdBalance', () => {
 		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
 		expect(result).toEqual(0);
 	});
+
+	it('should return 0 if balances store is undefined', () => {
+		const result = calculateTokenUsdBalance({
+			token: ETHEREUM_TOKEN,
+			$balances: undefined,
+			$exchanges
+		});
+		expect(result).toEqual(0);
+	});
 });
 
 describe('mapTokenUi', () => {
