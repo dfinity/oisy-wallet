@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { isBusy } from '$lib/derived/busy.derived';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { RECEIVE_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
+	import { isBusy } from '$lib/derived/busy.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <ButtonHero

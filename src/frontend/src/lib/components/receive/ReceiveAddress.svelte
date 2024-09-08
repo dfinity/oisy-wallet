@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Value from '$lib/components/ui/Value.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	export let labelRef: string;
 	export let address: string;
