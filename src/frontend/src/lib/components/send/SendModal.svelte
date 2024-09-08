@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { sendWizardStepsComplete } from '$lib/config/send.config';
 	import { createEventDispatcher } from 'svelte';
-	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
-	import type { Token } from '$lib/types/token';
-	import { waitWalletReady } from '$lib/services/actions.services';
-	import { loadTokenAndRun } from '$lib/services/token.services';
-	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
-	import { closeModal } from '$lib/utils/modal.utils';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
-	import type { Network, NetworkId } from '$lib/types/network';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
+	import { sendWizardStepsComplete } from '$lib/config/send.config';
+	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
+	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { waitWalletReady } from '$lib/services/actions.services';
+	import { loadTokenAndRun } from '$lib/services/token.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Network, NetworkId } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
+	import { closeModal } from '$lib/utils/modal.utils';
+	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
