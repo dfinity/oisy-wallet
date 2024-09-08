@@ -153,11 +153,33 @@ describe('mapTokenUi', () => {
 		});
 	});
 
+	it('should return an object TokenUi with undefined balance if balances store is not initiated', () => {
+		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: undefined, $exchanges });
+		expect(result).toEqual({
+			...ETHEREUM_TOKEN,
+			balance: undefined,
+			usdBalance: 0
+		});
+	});
+
 	it('should return an object TokenUi with undefined balance if balances store is not available', () => {
 		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
 			balance: undefined,
+			usdBalance: 0
+		});
+	});
+
+	it('should return an object TokenUi with null balance if balances data is null', () => {
+		const result = mapTokenUi({
+			token: ETHEREUM_TOKEN,
+			$balances: { [ETHEREUM_TOKEN.id]: null },
+			$exchanges
+		});
+		expect(result).toEqual({
+			...ETHEREUM_TOKEN,
+			balance: null,
 			usdBalance: 0
 		});
 	});
