@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -20,4 +21,4 @@ export const usdValue = ({
 					displayDecimals: decimals
 				})
 			) * exchangeRate
-		: 0;
+		: ZERO.toNumber();
