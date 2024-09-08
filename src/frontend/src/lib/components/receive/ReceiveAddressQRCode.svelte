@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { createEventDispatcher } from 'svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let address: undefined | string;

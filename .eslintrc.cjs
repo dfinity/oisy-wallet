@@ -46,7 +46,8 @@ module.exports = {
 				'src/frontend/src/lib/components/hero/**/*.svelte',
 				'src/frontend/src/lib/components/icons/**/*.svelte',
 				'src/frontend/src/lib/components/info/**/*.svelte',
-				'src/frontend/src/lib/components/networks/**/*.svelte'
+				'src/frontend/src/lib/components/networks/**/*.svelte',
+				'src/frontend/src/lib/components/receive/**/*.svelte'
 			],
 			rules: {
 				'import/order': [

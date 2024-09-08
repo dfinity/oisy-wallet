@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { createEventDispatcher } from 'svelte';
-	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
-	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
-	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
-	import Hr from '$lib/components/ui/Hr.svelte';
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
+	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
+	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import {
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_ICP_SECTION,
 		RECEIVE_TOKENS_MODAL_ETH_SECTION,
 		RECEIVE_TOKENS_MODAL_BTC_SECTION
 	} from '$lib/constants/test-ids.constants';
+	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	const dispatch = createEventDispatcher();
 
