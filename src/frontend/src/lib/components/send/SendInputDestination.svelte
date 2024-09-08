@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
-	import type { NetworkId } from '$lib/types/network';
-	import { slide } from 'svelte/transition';
 	import { debounce, nonNullish } from '@dfinity/utils';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { slide } from 'svelte/transition';
 	import QRButton from '$lib/components/common/QRButton.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkId } from '$lib/types/network';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;

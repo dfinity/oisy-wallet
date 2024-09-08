@@ -1,10 +1,10 @@
 <script lang="ts">
-	import SendSource from '$lib/components/send/SendSource.svelte';
-	import SendDataDestination from './SendDataDestination.svelte';
-	import type { Token } from '$lib/types/token';
-	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import SendDataDestination from './SendDataDestination.svelte';
+	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
+	import SendSource from '$lib/components/send/SendSource.svelte';
+	import type { Token } from '$lib/types/token';
 
 	export let destination: string | null;
 	export let amount: string | number | undefined = undefined;

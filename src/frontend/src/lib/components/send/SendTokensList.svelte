@@ -1,14 +1,14 @@
 <script lang="ts">
-	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
-	import type { TokenUi } from '$lib/types/token';
 	import { createEventDispatcher } from 'svelte';
-	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { i18n } from '$lib/stores/i18n.store';
-	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
+	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
+	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { TokenUi } from '$lib/types/token';
 
 	const dispatch = createEventDispatcher();
 
