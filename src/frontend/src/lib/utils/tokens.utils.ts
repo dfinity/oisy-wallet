@@ -5,7 +5,7 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -73,6 +73,11 @@ export const pinTokensWithBalanceAtTop = ({
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
 }): TokenUi[] => {
+	// If balances data are nullish, there is no need to sort.
+	if (isNullish($balances)) {
+		return $tokens.map((token) => mapTokenUi({ token, $balances, $exchanges }));
+	}
+
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
 		(acc, token) => {
 			const tokenUI: TokenUi = mapTokenUi({
