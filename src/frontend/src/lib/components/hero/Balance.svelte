@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { balance, balanceZero } from '$lib/derived/balances.derived';
-	import { tokenSymbol } from '$lib/derived/token.derived';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import Amount from '$lib/components/ui/Amount.svelte';
+	import { balance, balanceZero } from '$lib/derived/balances.derived';
+	import { tokenSymbol } from '$lib/derived/token.derived';
 </script>
 
 <span class="text-off-white">

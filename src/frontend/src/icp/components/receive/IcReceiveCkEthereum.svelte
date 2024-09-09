@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { modalCkETHReceive } from '$lib/derived/modal.derived';
 	import { getContext, setContext } from 'svelte';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { erc20UserTokens } from '$eth/derived/erc20.derived';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
-	import { erc20UserTokens } from '$eth/derived/erc20.derived';
-	import { authStore } from '$lib/stores/auth.store';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
+	import { modalCkETHReceive } from '$lib/derived/modal.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { authStore } from '$lib/stores/auth.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);

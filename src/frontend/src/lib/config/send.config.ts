@@ -1,7 +1,12 @@
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import type { WizardSteps } from '@dfinity/gix-components';
 
-export const sendWizardSteps = (i18n: I18n): WizardSteps => [
+interface SendWizardStepsParams {
+	i18n: I18n;
+	converting?: boolean;
+}
+
+export const sendWizardSteps = ({ i18n, converting }: SendWizardStepsParams): WizardSteps => [
 	{
 		name: WizardStepsSend.SEND,
 		title: i18n.send.text.send
@@ -12,22 +17,22 @@ export const sendWizardSteps = (i18n: I18n): WizardSteps => [
 	},
 	{
 		name: WizardStepsSend.SENDING,
-		title: i18n.send.text.sending
+		title: converting ? i18n.convert.text.converting : i18n.send.text.sending
 	}
 ];
 
-export const sendWizardStepsWithQrCodeScan = (i18n: I18n): WizardSteps => [
-	...sendWizardSteps(i18n),
+export const sendWizardStepsWithQrCodeScan = (params: SendWizardStepsParams): WizardSteps => [
+	...sendWizardSteps(params),
 	{
 		name: WizardStepsSend.QR_CODE_SCAN,
-		title: i18n.send.text.scan_qr
+		title: params.i18n.send.text.scan_qr
 	}
 ];
 
-export const sendWizardStepsComplete = (i18n: I18n): WizardSteps => [
+export const sendWizardStepsComplete = (params: SendWizardStepsParams): WizardSteps => [
 	{
 		name: WizardStepsSend.TOKENS_LIST,
-		title: i18n.send.text.send
+		title: params.i18n.send.text.send
 	},
-	...sendWizardStepsWithQrCodeScan(i18n)
+	...sendWizardStepsWithQrCodeScan(params)
 ];
