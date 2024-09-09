@@ -121,66 +121,12 @@ describe('pinTokensWithBalanceAtTop', () => {
 		);
 	});
 
-	it('should return a list of tokens with balance as prop if balance data not undefined', () => {
-		const newBalances: CertifiedStoreData<BalancesData> = {
-			[ICP_TOKEN.id]: { data: bn1, certified },
-			[BTC_MAINNET_TOKEN.id]: { data: bn2, certified }
-		};
-
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
-
-		expect(result).toContainEqual({
-			...ICP_TOKEN,
-			balance: bn1,
-			usdBalance: 1
-		});
-		expect(result).toContainEqual({
-			...BTC_MAINNET_TOKEN,
-			balance: bn2,
-			usdBalance: 2
-		});
-		expect(result).toContainEqual({
-			...ETHEREUM_TOKEN,
-			balance: undefined,
-			usdBalance: 0
-		});
-	});
-
-	it('should return a list of tokens with usd balance as prop if exchange data not undefined', () => {
-		const newExchanges: ExchangesData = {
-			[ICP_TOKEN.id]: { usd },
-			[BTC_MAINNET_TOKEN.id]: { usd }
-		};
-
-		const result = pinTokensWithBalanceAtTop({ $tokens, $balances, $exchanges: newExchanges });
-
-		expect(result).toContainEqual({
-			...ICP_TOKEN,
-			balance: bn1,
-			usdBalance: 1
-		});
-		expect(result).toContainEqual({
-			...BTC_MAINNET_TOKEN,
-			balance: bn2,
-			usdBalance: 2
-		});
-		expect(result).toContainEqual({
-			...ETHEREUM_TOKEN,
-			balance: bn3,
-			usdBalance: undefined
-		});
-	});
-
 	it('should pin tokens with usd balance at the top and sort by usd balance', () => {
 		const newBalances: CertifiedStoreData<BalancesData> = {
 			[ICP_TOKEN.id]: { data: bn2, certified },
 			[BTC_MAINNET_TOKEN.id]: { data: bn1, certified },
 			[ETHEREUM_TOKEN.id]: { data: bn3, certified }
 		};
-
-		mockUsdValue.mockImplementation(
-			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
-		);
 
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
@@ -212,10 +158,6 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 		};
 
-		mockUsdValue.mockImplementation(
-			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
-		);
-
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
 		expect(result.map((token) => token.id)).toEqual([
@@ -232,10 +174,6 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[ETHEREUM_TOKEN.id]: { data: ZERO, certified }
 		};
 
-		mockUsdValue.mockImplementation(
-			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
-		);
-
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
 		expect(result.map((token) => token.id)).toEqual([
@@ -250,10 +188,6 @@ describe('pinTokensWithBalanceAtTop', () => {
 			[BTC_MAINNET_TOKEN.id]: { data: bn1, certified },
 			[ETHEREUM_TOKEN.id]: { data: bn3, certified }
 		};
-
-		mockUsdValue.mockImplementation(
-			({ token: { id } }) => Number(newBalances[id]?.data ?? 0n) * usd
-		);
 
 		const result = pinTokensWithBalanceAtTop({ $tokens, $balances: newBalances, $exchanges });
 
