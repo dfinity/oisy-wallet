@@ -14,7 +14,7 @@ export const UNI_TOKEN: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: 'Uniswap',
-	symbol: 'UNI',
+	symbol: UNI_SYMBOL,
 	decimals: UNI_DECIMALS,
 	icon: uni,
 	address: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',

@@ -24,7 +24,7 @@ export const ETHEREUM_TOKEN: RequiredToken = {
 	standard: 'ethereum',
 	category: 'default',
 	name: 'Ethereum',
-	symbol: 'ETH',
+	symbol: ETHEREUM_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth
 };
@@ -39,7 +39,7 @@ export const SEPOLIA_TOKEN: RequiredToken = {
 	standard: 'ethereum',
 	category: 'default',
 	name: 'SepoliaETH',
-	symbol: 'SepoliaETH',
+	symbol: SEPOLIA_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth
 };
