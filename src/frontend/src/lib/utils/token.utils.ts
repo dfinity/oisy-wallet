@@ -6,6 +6,7 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenStandard, TokenUi } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { usdValue } from '$lib/utils/exchange.utils';
+import { formatBigNumberish } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
 
 /**
@@ -29,7 +30,10 @@ export const getMaxTransactionAmount = ({
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
 }): number =>
-	Math.max(Number(balance - (tokenStandard !== 'erc20' ? fee : 0n)), 0) / 10 ** tokenDecimals;
+	formatBigNumberish({
+		value: Math.max(Number(balance - (tokenStandard !== 'erc20' ? fee : 0n)), 0),
+		decimals: tokenDecimals
+	});
 
 /**
  * /**

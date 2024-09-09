@@ -11,6 +11,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { InsufficientFundsError } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import { formatBigNumberish } from '$lib/utils/format.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let amount: number | undefined = undefined;
@@ -35,11 +37,16 @@
 			return;
 		}
 
+		const parsedSendBalance = parseToken({
+			value: `${formatBigNumberish({ value: $sendBalance ?? ZERO, decimals: $sendTokenDecimals })}`,
+			unitName: $sendTokenDecimals
+		});
+
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId)) {
 			const total = userAmount.add($minGasFee ?? ZERO);
 
-			if (total.gt($sendBalance ?? ZERO)) {
+			if (total.gt(parsedSendBalance)) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
 			}
 
@@ -47,7 +54,7 @@
 		}
 
 		// If ERC20, the balance of the token - e.g. 20 DAI - should cover the amount entered by the user
-		if (userAmount.gt($sendBalance ?? ZERO)) {
+		if (userAmount.gt(parsedSendBalance)) {
 			return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_amount);
 		}
 

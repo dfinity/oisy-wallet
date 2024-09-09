@@ -86,3 +86,18 @@ export const formatUSD = (
 		.format(value)
 		.replace(/,/g, '’');
 };
+
+/**
+ * Formats and if needed rounds in an Upward direction provided BigNumberish
+ *
+ * @param value BigNumberish to format.
+ * @param decimals The decimals to format with.
+ * @returns Formated and rounded number.
+ */
+export const formatBigNumberish = ({
+	value,
+	decimals
+}: {
+	value: BigNumberish;
+	decimals: number;
+}): number => Number(value) / 10 ** decimals;

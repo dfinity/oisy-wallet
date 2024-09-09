@@ -1,6 +1,7 @@
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import type { TokenStandard } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
+import { formatBigNumberish } from '$lib/utils/format.utils';
 import {
 	calculateTokenUsdBalance,
 	getMaxTransactionAmount,
@@ -29,7 +30,7 @@ describe('getMaxTransactionAmount', () => {
 				tokenDecimals,
 				tokenStandard
 			});
-			expect(result).toBe(Number(balance - fee) / 10 ** tokenDecimals);
+			expect(result).toBe(formatBigNumberish({ value: balance - fee, decimals: tokenDecimals }));
 		});
 	});
 
@@ -73,7 +74,7 @@ describe('getMaxTransactionAmount', () => {
 				tokenDecimals,
 				tokenStandard
 			});
-			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+			expect(result).toBe(formatBigNumberish({ value: balance, decimals: tokenDecimals }));
 		});
 	});
 
@@ -84,7 +85,7 @@ describe('getMaxTransactionAmount', () => {
 			tokenDecimals: tokenDecimals,
 			tokenStandard: 'erc20'
 		});
-		expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+		expect(result).toBe(formatBigNumberish({ value: balance, decimals: tokenDecimals }));
 	});
 });
 
