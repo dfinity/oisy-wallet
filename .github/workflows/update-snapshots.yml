@@ -5,8 +5,15 @@ on:
 
 jobs:
 
+  oisy-backend-wasm:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Build oisy-backend WASM
+        uses: ./.github/actions/oisy-backend
+
   docker-build-e2e:
     runs-on: ubuntu-20.04
+    needs: oisy-backend-wasm
     steps:
       - name: Fail if branch is main
         if: ${{ github.ref == 'refs/heads/main' }}
