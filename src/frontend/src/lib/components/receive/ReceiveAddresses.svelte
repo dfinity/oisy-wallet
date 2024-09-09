@@ -22,6 +22,7 @@
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { nonNullish } from '@dfinity/utils';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	const dispatch = createEventDispatcher();
 	const displayQRCode = (details: { address: string; addressLabel: string }) =>
