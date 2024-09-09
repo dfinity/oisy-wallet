@@ -48,7 +48,9 @@ module.exports = {
 				'src/frontend/src/lib/components/info/**/*.svelte',
 				'src/frontend/src/lib/components/networks/**/*.svelte',
 				'src/frontend/src/lib/components/receive/**/*.svelte',
-				'src/frontend/src/lib/components/send/**/*.svelte'
+				'src/frontend/src/lib/components/send/**/*.svelte',
+				'src/frontend/src/lib/components/settings/**/*.svelte',
+				'src/frontend/src/lib/components/transactions/**/*.svelte'
 			],
 			rules: {
 				'import/order': [
