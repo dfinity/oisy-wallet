@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { TokenUi } from '$lib/types/token';
-	import { exchangeInitialized } from '$lib/derived/exchange.derived';
-	import { formatUSD } from '$lib/utils/format.utils';
 	import { nonNullish } from '@dfinity/utils';
+	import { exchangeInitialized } from '$lib/derived/exchange.derived';
+	import type { TokenUi } from '$lib/types/token';
+	import { formatUSD } from '$lib/utils/format.utils';
 
 	export let token: TokenUi;
 </script>

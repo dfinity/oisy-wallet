@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
-	import { signIn } from '$lib/services/auth.services';
-	import IconHeaderICP from '$lib/components/icons/IconHeaderICP.svelte';
 	import IconHeaderBTC from '$lib/components/icons/IconHeaderBTC.svelte';
 	import IconHeaderETH from '$lib/components/icons/IconHeaderETH.svelte';
+	import IconHeaderICP from '$lib/components/icons/IconHeaderICP.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
+	import { signIn } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div class="flex -space-x-2.5 mt-6 xl:mt-12">

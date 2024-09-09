@@ -3,7 +3,7 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
-import type { Token, TokenStandard } from '$lib/types/token';
+import type { Token, TokenStandard, TokenUi } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -88,3 +88,31 @@ export const calculateTokenUsdBalance = ({
 			})
 		: undefined;
 };
+
+/** Maps a Token object to a TokenUi object, meaning it adds the balance and the USD balance to the token.
+ *
+ * @param token - The given token.
+ * @param $balancesStore - The balances data for the tokens.
+ * @param $exchanges - The exchange rates data for the tokens.
+ * @returns The token UI.
+ */
+export const mapTokenUi = ({
+	token,
+	$balances,
+	$exchanges
+}: {
+	token: Token;
+	$balances: CertifiedStoreData<BalancesData>;
+	$exchanges: ExchangesData;
+}): TokenUi => ({
+	...token,
+	// There is a difference between undefined and null for the balance.
+	// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.
+	// If the balance loader was initiated at some point, it will either contain data or be null, but not undefined.
+	balance: $balances?.[token.id] === null ? null : $balances?.[token.id]?.data,
+	usdBalance: calculateTokenUsdBalance({
+		token,
+		$balances,
+		$exchanges
+	})
+});

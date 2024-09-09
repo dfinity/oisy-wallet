@@ -1,23 +1,23 @@
 <script lang="ts">
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { KeyValuePairInfo } from '@dfinity/gix-components';
-	import Copy from '$lib/components/ui/Copy.svelte';
-	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
-	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import type { Principal } from '@dfinity/principal';
-	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
-	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
-	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
+	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { busy } from '$lib/stores/busy.store';
+	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
+	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
+	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
-	import type { OptionIdentity } from '$lib/types/identity';
-	import { loadUserProfile } from '$lib/services/load-user-profile.services';
-	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import { authSignedIn } from '$lib/derived/auth.derived';
+	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+	import { loadUserProfile } from '$lib/services/load-user-profile.services';
+	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
+	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
+	import { busy } from '$lib/stores/busy.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { userProfileStore } from '$lib/stores/user-profile.store';
+	import type { OptionIdentity } from '$lib/types/identity';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	let remainingTimeMilliseconds: number | undefined;
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
