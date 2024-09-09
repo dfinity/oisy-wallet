@@ -1,7 +1,7 @@
 <script lang="ts">
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { APP_VERSION } from '$lib/constants/app.constants';
 	import { OISY_NAME, OISY_REPO_URL } from '$lib/constants/oisy.constants';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	const version = `v${APP_VERSION}`;

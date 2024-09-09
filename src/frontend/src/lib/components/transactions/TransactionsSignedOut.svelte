@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
-	import Header from '$lib/components/ui/Header.svelte';
 	import { fade } from 'svelte/transition';
+	import Header from '$lib/components/ui/Header.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <Header>{$i18n.transactions.text.title}</Header>
