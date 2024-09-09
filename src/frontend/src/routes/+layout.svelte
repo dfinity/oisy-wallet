@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Spinner, Toasts } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
@@ -17,7 +18,6 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { nonNullish } from '@dfinity/utils';
 
 	/**
 	 * Init dApp
