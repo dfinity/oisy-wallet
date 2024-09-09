@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { authSignedIn } from '$lib/derived/auth.derived';
 	import TransactionsSignedIn from '$lib/components/transactions/TransactionsSignedIn.svelte';
 	import TransactionsSignedOut from '$lib/components/transactions/TransactionsSignedOut.svelte';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 </script>
 
 {#if $authSignedIn}
