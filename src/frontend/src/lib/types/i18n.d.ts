@@ -368,6 +368,7 @@ interface I18nFee {
 		estimated_btc: string;
 		estimated_inter_network: string;
 		estimated_eth: string;
+		max_fee_eth: string;
 	};
 	error: { cannot_fetch_gas_fee: string };
 }
