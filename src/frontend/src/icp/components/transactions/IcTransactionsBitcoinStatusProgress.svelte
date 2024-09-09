@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import type { ProgressStep } from '@dfinity/gix-components';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let receiveProgressStep: string = ProgressStepsUpdateBalanceCkBtc.INITIALIZATION;

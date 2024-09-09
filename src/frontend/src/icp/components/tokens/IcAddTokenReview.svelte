@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import Value from '$lib/components/ui/Value.svelte';
 	import { fade, blur } from 'svelte/transition';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import {
 		loadAndAssertAddCustomToken,
 		type ValidateTokenData
 	} from '$icp/services/ic-add-custom-tokens.service';
-	import { authStore } from '$lib/stores/auth.store';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
-	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
+	import Value from '$lib/components/ui/Value.svelte';
+	import { authStore } from '$lib/stores/auth.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let ledgerCanisterId: string | undefined;
 	export let indexCanisterId: string | undefined;

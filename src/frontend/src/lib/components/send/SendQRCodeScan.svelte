@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { QRCodeReader } from '@dfinity/gix-components';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import { nonNullish } from '@dfinity/utils';
-	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { OptionToken } from '$lib/types/token';
 
 	export let expectedToken: OptionToken;

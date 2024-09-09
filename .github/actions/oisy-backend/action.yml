@@ -1,0 +1,37 @@
+name: Build Oisy Backend Canister WASM
+
+description: An action that provides Oisy backend canister WASM as an artifact
+
+outputs: {}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Cache backend canister WASM
+      uses: actions/cache@v4
+      id: backend-wasm-cache
+      with:
+        path: |
+          backend.wasm.gz
+        key: backend-wasm-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
+
+    - name: Upload backend canister WASM
+      if: steps.backend-wasm-cache.outputs.cache-hit == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend.wasm.gz
+        path: ./backend.wasm.gz
+
+    - name: Build base docker image
+      if: steps.backend-wasm-cache.outputs.cache-hit != 'true'
+      uses: ./.github/actions/docker-build-base
+
+    - name: Build backend canister WASM
+      if: steps.backend-wasm-cache.outputs.cache-hit != 'true'
+      uses: ./.github/actions/docker-build-backend
+      with:
+        name: backend.wasm.gz
+        target: scratch_backend

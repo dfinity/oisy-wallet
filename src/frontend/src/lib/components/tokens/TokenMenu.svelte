@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
-	import IconMore from '$lib/components/icons/IconMore.svelte';
-	import { networkICP } from '$lib/derived/network.derived';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { tokenToggleable } from '$lib/derived/token.derived';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
-	import { token } from '$lib/stores/token.store';
+	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
+	import { networkICP } from '$lib/derived/network.derived';
+	import { tokenToggleable } from '$lib/derived/token.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { token } from '$lib/stores/token.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { type WizardStep } from '@dfinity/gix-components';
+	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
+	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
-	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
-	import type { Network, NetworkId } from '$lib/types/network';
-	import { token } from '$lib/stores/token.store';
-	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
+	import { token } from '$lib/stores/token.store';
+	import type { Network, NetworkId } from '$lib/types/network';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 
 	export let destination: string;

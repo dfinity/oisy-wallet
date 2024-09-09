@@ -1,7 +1,7 @@
 <script lang="ts">
-	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
-	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import { Popover } from '@dfinity/gix-components';
+	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
+	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconMenu from '$lib/components/icons/IconMenu.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';

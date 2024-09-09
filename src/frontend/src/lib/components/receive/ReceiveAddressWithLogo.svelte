@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import Card from '$lib/components/ui/Card.svelte';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
-	import type { Token } from '$lib/types/token';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { i18n } from '$lib/stores/i18n.store';
+	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let token: Token;
 	export let address: string;

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
 	import { Html } from '@dfinity/gix-components';
-	import Logo from '$lib/components/ui/Logo.svelte';
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { nonNullish } from '@dfinity/utils';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const dispatch = createEventDispatcher();
 </script>

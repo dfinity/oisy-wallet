@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div class="content">
