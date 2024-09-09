@@ -1,14 +1,14 @@
 <script lang="ts">
-	import Hero from '$lib/components/hero/Hero.svelte';
-	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
+	import type { ComponentType } from 'svelte';
 	import { page } from '$app/stores';
+	import Loaders from '$lib/components/core/Loaders.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import NoLoaders from '$lib/components/core/NoLoaders.svelte';
+	import Hero from '$lib/components/hero/Hero.svelte';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import type { ComponentType } from 'svelte';
-	import { authSignedIn } from '$lib/derived/auth.derived';
-	import Loaders from '$lib/components/core/Loaders.svelte';
-	import NoLoaders from '$lib/components/core/NoLoaders.svelte';
+	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
