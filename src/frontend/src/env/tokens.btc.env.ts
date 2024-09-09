@@ -46,5 +46,6 @@ export const BTC_REGTEST_TOKEN: Token = {
 	category: 'default',
 	name: 'Bitcoin (Regtest)',
 	symbol: BTC_REGTEST_SYMBOL,
-	decimals: BTC_DECIMALS
+	decimals: BTC_DECIMALS,
+	icon: bitcoinTestnet
 };
