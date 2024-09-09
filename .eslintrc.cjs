@@ -32,17 +32,6 @@ module.exports = {
 			rules: {
 				'no-console': 'off'
 			}
-		},
-		{
-			files: ['*.svelte'],
-			rules: {
-				'import/order': [
-					'error',
-					{
-						alphabetize: { order: 'asc' }
-					}
-				]
-			}
 		}
 	],
 	rules: {
@@ -56,6 +45,12 @@ module.exports = {
 			}
 		],
 		'no-console': ['error', { allow: ['error', 'warn'] }],
+		'import/order': [
+			'error',
+			{
+				alphabetize: { order: 'asc' }
+			}
+		],
 		'no-else-return': ['warn', { allowElseIf: false }],
 		'local-rules/no-svelte-store-in-api': 'error',
 		'@typescript-eslint/prefer-nullish-coalescing': 'error',
