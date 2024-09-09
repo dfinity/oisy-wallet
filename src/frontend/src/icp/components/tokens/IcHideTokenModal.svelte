@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
-	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import type { Identity } from '@dfinity/agent';
+	import { Principal } from '@dfinity/principal';
+	import { assertNonNullish, toNullable } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { loadCustomTokens } from '$icp/services/icrc.services';
+	import type { LedgerCanisterIdText } from '$icp/types/canister';
+	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { setCustomToken } from '$lib/api/backend.api';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
-	import type { Identity } from '@dfinity/agent';
-	import type { LedgerCanisterIdText } from '$icp/types/canister';
-	import { assertNonNullish, toNullable } from '@dfinity/utils';
-	import { Principal } from '@dfinity/principal';
-	import { onMount } from 'svelte';
-	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { loadCustomTokens } from '$icp/services/icrc.services';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	let selectedToken: OptionIcrcCustomToken;
 

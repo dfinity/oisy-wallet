@@ -1,33 +1,33 @@
 <script lang="ts">
-	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import ManageTokens from '$icp-eth/components/tokens/ManageTokens.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { addTokenSteps } from '$lib/constants/steps.constants';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import { authStore } from '$lib/stores/auth.store';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import type { Erc20Metadata } from '$eth/types/erc20';
-	import AddTokenByNetwork from '$icp-eth/components/tokens/AddTokenByNetwork.svelte';
-	import type { Network } from '$lib/types/network';
-	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
-	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
-	import { selectedNetwork } from '$lib/derived/network.derived';
-	import type { AddTokenData } from '$icp-eth/types/add-token';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { get } from 'svelte/store';
+	import AddTokenReview from '$eth/components/tokens/AddTokenReview.svelte';
+	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+	import type { EthereumNetwork } from '$eth/types/network';
+	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
+	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
+	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+	import AddTokenByNetwork from '$icp-eth/components/tokens/AddTokenByNetwork.svelte';
+	import ManageTokens from '$icp-eth/components/tokens/ManageTokens.svelte';
 	import {
 		saveErc20UserTokens,
 		saveIcrcCustomTokens
 	} from '$icp-eth/services/manage-tokens.services';
-	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
+	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import { addTokenSteps } from '$lib/constants/steps.constants';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+	import { authStore } from '$lib/stores/auth.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
-	import type { EthereumNetwork } from '$eth/types/network';
+	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 
 	const steps: WizardSteps = [
 		{

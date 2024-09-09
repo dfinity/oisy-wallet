@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import ReceiveButton from '$lib/components/receive/ReceiveButton.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	export let open: (modalId: symbol) => void | Promise<void>;
 	export let isOpen: boolean;

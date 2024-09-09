@@ -1,11 +1,11 @@
 <script lang="ts">
+	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
-	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
-	import { authSignedIn } from '$lib/derived/auth.derived';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
-	import Alpha from '$lib/components/core/Alpha.svelte';
 	import ThreeBackground from '$lib/components/ui/ThreeBackground.svelte';
+	import { authSignedIn } from '$lib/derived/auth.derived';
+	import { pseudoNetworkChainFusion, selectedNetwork } from '$lib/derived/network.derived';
 
 	export let usdTotal = false;
 	export let summary = false;

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { NetworkId } from '$lib/types/network';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
 	import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
+	import type { NetworkId } from '$lib/types/network';
 
 	export let networkId: NetworkId;
 </script>

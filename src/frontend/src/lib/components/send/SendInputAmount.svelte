@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { parseToken } from '$lib/utils/parse.utils';
-	import { slide } from 'svelte/transition';
-	import { i18n } from '$lib/stores/i18n.store';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { invalidAmount } from '$lib/utils/input.utils';
-	import MaxButton from '$lib/components/common/MaxButton.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import { slide } from 'svelte/transition';
+	import MaxButton from '$lib/components/common/MaxButton.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { invalidAmount } from '$lib/utils/input.utils';
+	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let amount: number | undefined = undefined;
 	export let tokenDecimals: number | undefined = undefined;
