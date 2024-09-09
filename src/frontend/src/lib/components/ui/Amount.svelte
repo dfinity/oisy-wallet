@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import { formatToken } from '$lib/utils/format.utils';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	export let amount: BigNumber;
 

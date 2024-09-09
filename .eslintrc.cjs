@@ -39,19 +39,7 @@ module.exports = {
 				'src/frontend/src/eth/**/*.svelte',
 				'src/frontend/src/icp/**/*.svelte',
 				'src/frontend/src/icp-eth/**/*.svelte',
-				'src/frontend/src/lib/components/common/**/*.svelte',
-				'src/frontend/src/lib/components/core/**/*.svelte',
-				'src/frontend/src/lib/components/exchange/**/*.svelte',
-				'src/frontend/src/lib/components/guard/**/*.svelte',
-				'src/frontend/src/lib/components/hero/**/*.svelte',
-				'src/frontend/src/lib/components/icons/**/*.svelte',
-				'src/frontend/src/lib/components/info/**/*.svelte',
-				'src/frontend/src/lib/components/networks/**/*.svelte',
-				'src/frontend/src/lib/components/receive/**/*.svelte',
-				'src/frontend/src/lib/components/send/**/*.svelte',
-				'src/frontend/src/lib/components/settings/**/*.svelte',
-				'src/frontend/src/lib/components/tokens/**/*.svelte',
-				'src/frontend/src/lib/components/transactions/**/*.svelte'
+				'src/frontend/src/lib/**/*.svelte'
 			],
 			rules: {
 				'import/order': [

@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { Spinner } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { busy } from '$lib/stores/busy.store';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { Spinner } from '@dfinity/gix-components';
 
 	const close = () => {
 		if (isNullish($busy) || !$busy.close) {
