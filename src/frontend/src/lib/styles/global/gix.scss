@@ -15,7 +15,7 @@
 	--value-color: var(--color-dark);
 
 	--border-radius-2x: var(--border-radius-lg);
-	--border-radius-0_5x: calc(0.5 * var(--border-radius-sm));
+	--border-radius-0_5x: var(--border-radius-xs);
 	--border-radius: var(--border-radius-sm);
 
 	--animation-time-normal: 0.2s;
@@ -57,7 +57,7 @@
 	--alert-width: calc(100% - var(--padding-8x));
 	--alert-max-width: calc(100vw - var(--padding-4x));
 	--alert-max-height: calc(100vh - var(--padding-4x));
-	--alert-border-radius: var(--border-radius-md);
+	--alert-border-radius: var(--border-radius-xs);
 	--alert-padding-y: var(--padding-4x);
 	--alert-padding-x: var(--padding-2x);
 
@@ -118,7 +118,7 @@ div.input-field input[id]::placeholder {
 }
 
 div.modal {
-	--overlay-background: var(--color-light-blue);
+	--overlay-background: var(--color-cetacean-blue);
 	--overlay-background-contrast: var(--color-dark);
 	--overlay-content-background: var(--color-white);
 	--overlay-content-background-contrast: var(--color-dark);
@@ -126,8 +126,16 @@ div.modal {
 	color: var(--color-dark);
 	font-weight: var(--font-weight-normal);
 
+	div.wrapper.dialog {
+		color: var(--color-white);
+	}
+
 	div.wrapper.dialog div.container-wrapper {
 		margin: var(--padding-1_5x) var(--padding-1_5x) auto;
+
+		div.container {
+			border-radius: var(--border-radius-0_5x);
+		}
 	}
 
 	div.container {
