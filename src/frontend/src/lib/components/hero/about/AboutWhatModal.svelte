@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import { Html, Modal } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import CoverWhat from '$lib/assets/cover-features.png';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
-	import CoverWhat from '$lib/assets/cover-features.png';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { ABOUT_WHAT_MODAL } from '$lib/constants/test-ids.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_WHAT_MODAL}>

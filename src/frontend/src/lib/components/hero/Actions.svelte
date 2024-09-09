@@ -1,24 +1,24 @@
 <script lang="ts">
-	import EthSend from '$eth/components/send/EthSend.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
-	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
+	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
+	import EthSend from '$eth/components/send/EthSend.svelte';
+	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
+	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
+	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
+	import IcReceive from '$icp/components/receive/IcReceive.svelte';
+	import IcSend from '$icp/components/send/IcSend.svelte';
+	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
+	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
+	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
+	import Receive from '$lib/components/receive/Receive.svelte';
+	import Send from '$lib/components/send/Send.svelte';
 	import {
 		networkEthereum,
 		networkICP,
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
-	import IcSend from '$icp/components/send/IcSend.svelte';
-	import IcReceive from '$icp/components/receive/IcReceive.svelte';
-	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
-	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
-	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
-	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import Receive from '$lib/components/receive/Receive.svelte';
-	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
-	import Send from '$lib/components/send/Send.svelte';
 
 	export let more = false;
 

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import type { ComponentType } from 'svelte';
+	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
+	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
-	import { RECEIVE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 
 	export let infoCmp: ComponentType;
 

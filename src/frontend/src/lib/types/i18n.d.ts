@@ -257,6 +257,7 @@ interface I18nSend {
 
 interface I18nConvert {
 	text: {
+		converting: string;
 		convert_to_btc: string;
 		convert_to_token: string;
 		convert_to_cketh: string;
@@ -368,6 +369,7 @@ interface I18nFee {
 		estimated_btc: string;
 		estimated_inter_network: string;
 		estimated_eth: string;
+		max_fee_eth: string;
 	};
 	error: { cannot_fetch_gas_fee: string };
 }

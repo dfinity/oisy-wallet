@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
-	import { type ExchangeWorker, initExchangeWorker } from '$lib/services/worker.exchange.services';
-	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
 	import { debounce } from '@dfinity/utils';
+	import { onDestroy, onMount } from 'svelte';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
+	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';
+	import { type ExchangeWorker, initExchangeWorker } from '$lib/services/worker.exchange.services';
 
 	let worker: ExchangeWorker | undefined;
 
