@@ -32,6 +32,17 @@ module.exports = {
 			rules: {
 				'no-console': 'off'
 			}
+		},
+		{
+			files: ['*.svelte'],
+			rules: {
+				'import/order': [
+					'error',
+					{
+						alphabetize: { order: 'asc' }
+					}
+				]
+			}
 		}
 	],
 	rules: {
@@ -55,8 +66,7 @@ module.exports = {
 		'arrow-body-style': ['warn', 'as-needed'],
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],
 		'@typescript-eslint/no-inferrable-types': 'error',
-		'prefer-template': 'error',
-		'import/order': ['error', { alphabetize: { order: 'asc' } }]
+		'prefer-template': 'error'
 	},
 	globals: {
 		NodeJS: true
