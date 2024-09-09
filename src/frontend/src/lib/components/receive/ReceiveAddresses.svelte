@@ -1,11 +1,13 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
+	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
+	import { LOCAL } from '$lib/constants/app.constants';
 	import {
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_ICP_SECTION,
@@ -18,10 +20,8 @@
 		btcAddressTestnet,
 		ethAddress
 	} from '$lib/derived/address.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { testnets } from '$lib/derived/testnets.derived';
-	import { LOCAL } from '$lib/constants/app.constants';
-	import { nonNullish } from '@dfinity/utils';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
 	const dispatch = createEventDispatcher();
