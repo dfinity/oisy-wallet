@@ -5,10 +5,7 @@
 	import Modals from '$lib/components/core/Modals.svelte';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
-	import type { ComponentType } from 'svelte';
-	import { authSignedIn } from '$lib/derived/auth.derived';
-	import Loaders from '$lib/components/core/Loaders.svelte';
-	import NoLoaders from '$lib/components/core/NoLoaders.svelte';
+	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 
 	let route: 'transactions' | 'tokens' | 'settings' = 'tokens';
 	$: route = isRouteSettings($page)
@@ -18,9 +15,6 @@
 			: 'tokens';
 
 	$: token.set($pageToken);
-
-	let cmpLoaders: ComponentType;
-	$: cmpLoaders = $authSignedIn ? Loaders : NoLoaders;
 </script>
 
 <Hero
@@ -31,9 +25,9 @@
 />
 
 <main class="pt-12">
-	<svelte:component this={cmpLoaders}>
+	<LoadersGuard>
 		<slot />
-	</svelte:component>
+	</LoadersGuard>
 </main>
 
 <Modals />
