@@ -293,6 +293,7 @@
 	},
 	"convert": {
 		"text": {
+			"converting": "Converting...",
 			"convert_to_btc": "Convert to BTC",
 			"convert_to_token": "Convert to $token",
 			"convert_to_cketh": "Convert to ckETH",

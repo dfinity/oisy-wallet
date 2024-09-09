@@ -25,7 +25,7 @@
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let steps: WizardSteps;
-	$: steps = sendWizardStepsComplete($i18n);
+	$: steps = sendWizardStepsComplete({ i18n: $i18n });
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;

@@ -37,7 +37,10 @@
 
 	let firstStep: WizardStep;
 	let otherSteps: WizardStep[];
-	$: [firstStep, ...otherSteps] = sendWizardStepsWithQrCodeScan($i18n);
+	$: [firstStep, ...otherSteps] = sendWizardStepsWithQrCodeScan({
+		i18n: $i18n,
+		converting: sendPurpose === 'convert-eth-to-cketh' || sendPurpose === 'convert-erc20-to-ckerc20'
+	});
 
 	let steps: WizardSteps;
 	$: steps = [

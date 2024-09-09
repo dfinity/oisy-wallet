@@ -257,6 +257,7 @@ interface I18nSend {
 
 interface I18nConvert {
 	text: {
+		converting: string;
 		convert_to_btc: string;
 		convert_to_token: string;
 		convert_to_cketh: string;
