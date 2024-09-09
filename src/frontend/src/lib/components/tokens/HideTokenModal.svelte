@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { i18n } from '$lib/stores/i18n.store';
+	import type { Identity } from '@dfinity/agent';
 	import {
 		type ProgressStep,
 		WizardModal,
 		type WizardStep,
 		type WizardSteps
 	} from '@dfinity/gix-components';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import { isNullish } from '@dfinity/utils';
-	import { authStore } from '$lib/stores/auth.store';
-	import { nullishSignOut } from '$lib/services/auth.services';
-	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
-	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
-	import type { Identity } from '@dfinity/agent';
+	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { tokenToggleable } from '$lib/derived/token.derived';
+	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { authStore } from '$lib/stores/auth.store';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;

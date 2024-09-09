@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { i18n } from '$lib/stores/i18n.store';
 
 	export let token: Token;
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';

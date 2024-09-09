@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Card from '$lib/components/ui/Card.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import type { Token } from '$lib/types/token';
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
+	import Card from '$lib/components/ui/Card.svelte';
+	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
 </script>
