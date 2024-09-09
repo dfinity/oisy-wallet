@@ -1,7 +1,7 @@
 <script lang="ts">
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 </script>
 
 <Card noMargin>

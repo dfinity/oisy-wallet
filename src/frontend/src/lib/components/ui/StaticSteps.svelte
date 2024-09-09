@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconCheckCircle, IconInfo } from '@dfinity/gix-components';
-	import type { StaticStep } from '$lib/types/steps';
 	import { nonNullish } from '@dfinity/utils';
+	import type { StaticStep } from '$lib/types/steps';
 
 	export let steps: [StaticStep, ...StaticStep[]];
 </script>
