@@ -1,6 +1,10 @@
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
-import { BTC_MAINNET_TOKEN_ID, BTC_TESTNET_TOKEN_ID } from '$env/tokens.btc.env';
+import {
+	BTC_MAINNET_TOKEN_ID,
+	BTC_REGTEST_TOKEN_ID,
+	BTC_TESTNET_TOKEN_ID
+} from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 import {
 	getIdbBtcAddressMainnet,
@@ -49,7 +53,7 @@ export const listenTestnetNetworksToAddBtcTestnetAddresses = async (): Promise<v
 		}
 		if (data?.enabled && LOCAL) {
 			loadBtcAddress({
-				tokenId: Symbol('regtest'),
+				tokenId: BTC_REGTEST_TOKEN_ID,
 				network: 'regtest'
 			});
 		}
@@ -94,20 +98,20 @@ const loadTokenAddress = async <T extends Address>({
 	return { success: true };
 };
 
-const bitcoinStoreMapper: Record<BitcoinNetwork | 'regtest', AddressStore<BtcAddress>> = {
+const bitcoinStoreMapper: Record<BitcoinNetwork, AddressStore<BtcAddress>> = {
 	mainnet: btcAddressMainnetStore,
 	testnet: btcAddressTestnetStore,
 	regtest: btcAddressRegtestStore
 };
 
-const bitcoinNetworkMapper: Record<BitcoinNetwork | 'regtest', SignerBitcoinNetwork> = {
+const bitcoinNetworkMapper: Record<BitcoinNetwork, SignerBitcoinNetwork> = {
 	mainnet: { mainnet: null },
 	testnet: { testnet: null },
 	regtest: { regtest: null }
 };
 
 const idbBtcAddressMapper: Record<
-	BitcoinNetwork | 'regtest',
+	BitcoinNetwork,
 	((params: SetIdbAddressParams<BtcAddress>) => Promise<void>) | undefined
 > = {
 	mainnet: setIdbBtcAddressMainnet,
@@ -120,8 +124,7 @@ const loadBtcAddress = async ({
 	network
 }: {
 	tokenId: symbol;
-	// TODO: Add "regtest" to the network type
-	network: BitcoinNetwork | 'regtest';
+	network: BitcoinNetwork;
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,

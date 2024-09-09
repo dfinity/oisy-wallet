@@ -5,7 +5,7 @@
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { BTC_MAINNET_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
+	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
 	import {
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_ICP_SECTION,
@@ -21,6 +21,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { LOCAL } from '$lib/constants/app.constants';
+	import { nonNullish } from '@dfinity/utils';
 
 	const dispatch = createEventDispatcher();
 	const displayQRCode = (details: { address: string; addressLabel: string }) =>
@@ -107,7 +108,7 @@
 						addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address
 					})}
 				address={$btcAddressRegtest}
-				token={BTC_TESTNET_TOKEN}
+				token={BTC_REGTEST_TOKEN}
 				qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 				copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
 			>
