@@ -41,7 +41,7 @@ export type OptionTokenStandard = TokenStandard | undefined | null;
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 
 interface TokenFinancialData {
-	balance?: BigNumber;
+	balance?: BigNumber | null;
 	usdBalance?: number;
 }
 

@@ -106,7 +106,10 @@ export const mapTokenUi = ({
 	$exchanges: ExchangesData;
 }): TokenUi => ({
 	...token,
-	balance: $balances?.[token.id]?.data,
+	// There is a difference between undefined and null for the balance.
+	// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.
+	// If the balance loader was initiated at some point, it will either contain data or be null, but not undefined.
+	balance: $balances?.[token.id] === null ? null : $balances?.[token.id]?.data,
 	usdBalance: calculateTokenUsdBalance({
 		token,
 		$balances,
