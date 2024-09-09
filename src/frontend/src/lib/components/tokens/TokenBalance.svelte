@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SkeletonTokenBalance from '$lib/components/tokens/SkeletonTokenBalance.svelte';
+	import TokenBalanceSkeleton from '$lib/components/tokens/TokenBalanceSkeleton.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import type { TokenUi } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -7,7 +7,7 @@
 	export let token: TokenUi;
 </script>
 
-<SkeletonTokenBalance {token}>
+<TokenBalanceSkeleton {token}>
 	<output class="break-all">
 		{formatToken({
 			value: token.balance ?? ZERO,
@@ -15,4 +15,4 @@
 		})}
 		{token.symbol}
 	</output>
-</SkeletonTokenBalance>
+</TokenBalanceSkeleton>
