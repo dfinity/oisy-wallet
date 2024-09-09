@@ -1,17 +1,17 @@
 <script lang="ts">
+	import { debounce, isNullish } from '@dfinity/utils';
+	import { flip } from 'svelte/animate';
+	import { fade } from 'svelte/transition';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
 	import Listener from '$lib/components/core/Listener.svelte';
+	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
+	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
+	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TokenUi } from '$lib/types/token';
-	import { fade } from 'svelte/transition';
-	import { modalManageTokens } from '$lib/derived/modal.derived';
-	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
-	import { flip } from 'svelte/animate';
-	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
-	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
-	import { debounce, isNullish } from '@dfinity/utils';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
 
 	let tokens: TokenUi[] | undefined;
 
