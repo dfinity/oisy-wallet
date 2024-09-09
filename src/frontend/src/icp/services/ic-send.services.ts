@@ -1,3 +1,4 @@
+import { saveTwinTokenInUserTokens } from '$eth/services/erc20-user-tokens-services';
 import {
 	isConvertCkErc20ToErc20,
 	isConvertCkEthToEth
@@ -42,6 +43,16 @@ export const sendIc = async ({
 	await sendCompleted();
 
 	progress(ProgressStepsSendIc.RELOAD);
+
+	// In case of conversion to ERC20, we make sure that the token is enabled in the list of tokens.
+	// No need to do it for ETH as it is always enabled by default.
+	const { token, targetNetworkId, identity, twinTokenAsErc20 } = rest;
+	if (isConvertCkErc20ToErc20({ token, networkId: targetNetworkId })) {
+		await saveTwinTokenInUserTokens({
+			identity,
+			twinToken: twinTokenAsErc20
+		});
+	}
 
 	await waitAndTriggerWallet();
 };

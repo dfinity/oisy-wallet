@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { type WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
+	import type { Erc20Token } from '$eth/types/erc20';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
@@ -21,6 +22,7 @@
 	} from '$icp/stores/ethereum-fee.store';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
@@ -112,12 +114,19 @@
 		});
 
 		try {
-			// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
-			const ckErc20ToErc20MaxCkEthFees: bigint | undefined = isConvertCkErc20ToErc20({
+			const convertCkErc20ToErc20 = isConvertCkErc20ToErc20({
 				token: $tokenAsIcToken,
 				networkId
-			})
+			});
+
+			// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
+			const ckErc20ToErc20MaxCkEthFees: bigint | undefined = convertCkErc20ToErc20
 				? $ethereumFeeStore?.maxTransactionFee
+				: undefined;
+
+			// In case we are converting ckERC20 to ERC20, we need to include the Twin Token to be enabled.
+			const twinTokenAsErc20: Erc20Token | undefined = convertCkErc20ToErc20
+				? ($ckEthereumTwinToken as Erc20Token)
 				: undefined;
 
 			const params: IcTransferParams = {
@@ -128,7 +137,8 @@
 				}),
 				identity: $authStore.identity,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step),
-				ckErc20ToErc20MaxCkEthFees
+				ckErc20ToErc20MaxCkEthFees,
+				twinTokenAsErc20
 			};
 
 			const trackAnalyticsOnSendComplete = async () => {
