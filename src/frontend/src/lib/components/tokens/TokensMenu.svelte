@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import ManageTokensMenuButton from '$icp-eth/components/tokens/ManageTokensMenuButton.svelte';
 	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import ManageTokensMenuButton from '$icp-eth/components/tokens/ManageTokensMenuButton.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;

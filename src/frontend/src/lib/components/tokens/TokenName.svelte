@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Token } from '$lib/types/token';
 	import { nonNullish } from '@dfinity/utils';
 	import Tag from '$lib/components/ui/Tag.svelte';
+	import type { Token } from '$lib/types/token';
 
 	export let token: Token;
 
