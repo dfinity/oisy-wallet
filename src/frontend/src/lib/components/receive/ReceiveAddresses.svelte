@@ -85,7 +85,7 @@
 			{$i18n.receive.bitcoin.text.bitcoin_address}
 		</ReceiveAddressWithLogo>
 
-		{#if $testnets && nonNullish($btcAddressTestnet)}
+		{#if $testnets && nonNullish($btcAddressTestnet) && $testnets}
 			<ReceiveAddressWithLogo
 				on:click={() =>
 					displayQRCode({
@@ -101,7 +101,7 @@
 			</ReceiveAddressWithLogo>
 		{/if}
 
-		{#if LOCAL && nonNullish($btcAddressRegtest)}
+		{#if LOCAL && nonNullish($btcAddressRegtest) && $testnets}
 			<ReceiveAddressWithLogo
 				on:click={() =>
 					displayQRCode({
