@@ -4,6 +4,7 @@
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import TransactionStatus from './TransactionStatus.svelte';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
+	import type { EthTransactionType } from '$eth/types/eth-transaction';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -11,7 +12,7 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Transaction, TransactionType } from '$lib/types/transaction';
+	import type { Transaction } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -30,7 +31,7 @@
 
 	$: ({ from, value, timestamp, hash, blockNumber, to } = transaction);
 
-	let type: TransactionType;
+	let type: EthTransactionType;
 	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
 
 	let explorerUrl: string | undefined;
