@@ -1,5 +1,19 @@
 #!/bin/bash
 
+print_help() {
+  cat <<-EOF
+
+	Mines blocks to a given address.
+
+Arguments:
+--amount <amount>  Amount of BTC to mine.
+--address <address>  Address to mine to.
+
+If no amount and no address are provided, it will mine a block to a random address.
+	EOF
+  # TODO: Consider using clap for argument parsing.  If not, describe the flags here.
+}
+
 BITCOIN_DIR="bitcoin-core"
 
 # Initialize variables for the parameters
@@ -9,6 +23,7 @@ address=""
 # Loop through the parameters
 while [[ "$#" -gt 0 ]]; do
   case $1 in
+  --help) print_help && exit 0 ;;
   --amount)
     amount="$2"
     shift 2

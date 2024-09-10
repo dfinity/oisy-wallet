@@ -1,11 +1,26 @@
 #!/bin/bash
 
+print_help() {
+  cat <<-EOF
+
+	Sets up and starts a local bitcoin node.
+
+If the bitcoin node artifacts are not present, it will download them.
+
+Arguments:
+
+--reset Resets the bitcoin node.
+	EOF
+  # TODO: Consider using clap for argument parsing.  If not, describe the flags here.
+}
+
 # Initialize a flag for the --reset option
 reset_flag=false
 
 # Loop through the arguments
 while [[ "$#" -gt 0 ]]; do
   case $1 in
+  --help) print_help && exit 0 ;;
   --reset)
     reset_flag=true # Set the reset flag to true if --reset is provided
     shift           # Move to the next argument
