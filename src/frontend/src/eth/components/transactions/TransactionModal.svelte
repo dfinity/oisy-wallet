@@ -11,7 +11,7 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Transaction } from '$lib/types/transaction';
+	import type { Transaction, TransactionType } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -30,7 +30,7 @@
 
 	$: ({ from, value, timestamp, hash, blockNumber, to } = transaction);
 
-	let type: 'send' | 'receive';
+	let type: TransactionType;
 	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
 
 	let explorerUrl: string | undefined;

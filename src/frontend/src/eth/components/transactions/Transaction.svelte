@@ -12,7 +12,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Transaction } from '$lib/types/transaction';
+	import type { Transaction, TransactionType } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 
 	export let transaction: Transaction;
@@ -24,7 +24,7 @@
 
 	$: ({ from, value, timestamp, displayTimestamp } = transaction);
 
-	let type: 'send' | 'receive';
+	let type: TransactionType;
 	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
 
 	let icon: ComponentType;

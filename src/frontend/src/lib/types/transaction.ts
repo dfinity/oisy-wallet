@@ -12,3 +12,5 @@ export type Transaction = Omit<EthTransaction, 'data'> &
 export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
 	gas: BigNumber;
 };
+
+export type TransactionType = 'send' | 'receive';
