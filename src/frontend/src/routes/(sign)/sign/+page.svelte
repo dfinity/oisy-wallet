@@ -4,11 +4,13 @@
 	import { onDestroy } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
+	import SignerPermissions from '$lib/components/signer/SignerPermissions.svelte';
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
 	import { REPLICA_HOST } from '$lib/constants/app.constants';
 	import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
+	import type { OptionSigner } from '$lib/types/signer';
 
-	let signer: Signer | undefined | null;
+	let signer: OptionSigner;
 
 	const reset = () => {
 		signer?.disconnect();
@@ -42,6 +44,6 @@
 			<SignerIdle />
 		</div>
 	{:else}
-		Doing something
+		<SignerPermissions {signer} />
 	{/if}
 </article>
