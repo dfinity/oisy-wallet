@@ -1,4 +1,5 @@
 import { ICRC_CHAIN_FUSION_DEFAULT_LEDGER_CANISTER_IDS } from '$env/networks.icrc.env';
+import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { CanisterIdText } from '$lib/types/canister';
@@ -6,30 +7,43 @@ import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenStandard, TokenUi } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { usdValue } from '$lib/utils/exchange.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
+import type { BigNumber } from '@ethersproject/bignumber';
 
 /**
  * Calculates the maximum amount for a transaction.
  *
  * @param {Object} params
- * @param {bigint | undefined} params.balance The balance of the account.
- * @param {bigint | undefined} params.fee The fee of the transaction.
+ * @param {BigNumber | undefined} params.balance The balance of the account.
+ * @param {BigNumber | undefined} params.fee The fee of the transaction.
  * @param {number} params.tokenDecimals The decimals of the token.
  * @param {string} params.tokenStandard The standard of the token.
  * @returns {number} The maximum amount for the transaction.
  */
 export const getMaxTransactionAmount = ({
-	balance = 0n,
-	fee = 0n,
+	balance = ZERO,
+	fee = ZERO,
 	tokenDecimals,
 	tokenStandard
 }: {
-	balance?: bigint;
-	fee?: bigint;
+	balance?: BigNumber;
+	fee?: BigNumber;
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
-}): number =>
-	Math.max(Number(balance - (tokenStandard !== 'erc20' ? fee : 0n)), 0) / 10 ** tokenDecimals;
+}): number => {
+	const value = balance.sub(tokenStandard !== 'erc20' ? fee : 0n);
+
+	return Number(
+		value.isNegative()
+			? ZERO
+			: formatToken({
+					value,
+					unitName: tokenDecimals,
+					displayDecimals: tokenDecimals
+				})
+	);
+};
 
 /**
  * /**
