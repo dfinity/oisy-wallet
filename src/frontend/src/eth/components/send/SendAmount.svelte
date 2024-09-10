@@ -38,7 +38,7 @@
 		}
 
 		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
-		const parsedSendBalance = $sendBalance
+		const parsedSendBalance = nonNullish($sendBalance)
 			? Utils.parseUnits(
 					formatToken({
 						value: $sendBalance,
