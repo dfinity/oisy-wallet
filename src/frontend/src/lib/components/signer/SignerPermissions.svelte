@@ -38,9 +38,11 @@
 		<div class="bg-light-blue p-6 mb-6 rounded-lg">
 			<p class="break-normal font-bold">The dApp is requesting following permissions:</p>
 
+			<ul class="flex flex-col gap-1 list-disc mt-2 mx-4">
 			{#each scopes as scope}
-				<p class="break-normal pt-2.5 flex items-center gap-2">{scope.scope.method}</p>
+				<li>{scope.scope.method}</li>
 			{/each}
+			</ul>
 		</div>
 
 		<ButtonGroup>

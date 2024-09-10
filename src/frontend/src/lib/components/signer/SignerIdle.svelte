@@ -15,3 +15,5 @@
 		>
 	</span>
 </div>
+
+<p class="text-center mt-6 text-sm">Do not close this window until you are finished.</p>
