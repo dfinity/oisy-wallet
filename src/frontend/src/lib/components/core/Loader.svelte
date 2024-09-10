@@ -7,10 +7,10 @@
 	import banner from '$lib/assets/banner.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { loadAddresses, loadIdbAddresses } from '$lib/services/address.services';
 	import { signOut } from '$lib/services/auth.services';
-	import { authStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 
@@ -43,10 +43,10 @@
 		// Load Erc20 contracts and ICRC metadata before loading balances and transactions
 		await Promise.all([
 			loadErc20Tokens({
-				identity: $authStore.identity
+				identity: $authIdentity
 			}),
 			loadIcrcTokens({
-				identity: $authStore.identity
+				identity: $authIdentity
 			})
 		]);
 	};

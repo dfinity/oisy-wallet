@@ -9,10 +9,10 @@
 	import { isNullish } from '@dfinity/utils';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokenToggleable } from '$lib/derived/token.derived';
 	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { authStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -36,7 +36,7 @@
 			return;
 		}
 
-		if (isNullish($authStore.identity)) {
+		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
 		}
@@ -47,7 +47,7 @@
 			hideProgressStep = ProgressStepsHideToken.HIDE;
 
 			await hideToken({
-				identity: $authStore.identity
+				identity: $authIdentity
 			});
 
 			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
@@ -56,7 +56,7 @@
 			await gotoReplaceRoot();
 
 			await updateUi({
-				identity: $authStore.identity
+				identity: $authIdentity
 			});
 
 			hideProgressStep = ProgressStepsHideToken.DONE;
