@@ -7,14 +7,9 @@
 	import {
 		ckEthereumTwinTokenStandard,
 		ckEthereumTwinToken,
-		ckEthereumNativeTokenId,
-		ckEthereumNativeToken
+		ckEthereumNativeTokenEthHelperContractAddress,
+		ckEthereumNativeTokenErc20HelperContractAddress
 	} from '$icp-eth/derived/cketh.derived';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import {
-		toCkErc20HelperContractAddress,
-		toCkEthHelperContractAddress
-	} from '$icp-eth/utils/cketh.utils';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -28,11 +23,8 @@
 	let destination = '';
 	$: destination =
 		$ckEthereumTwinTokenStandard === 'erc20'
-			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
-			: toCkEthHelperContractAddress(
-					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					$ckEthereumNativeToken.network.id
-				) ?? '';
+			? $ckEthereumNativeTokenErc20HelperContractAddress ?? ''
+			: $ckEthereumNativeTokenEthHelperContractAddress ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 

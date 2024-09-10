@@ -5,7 +5,7 @@
 		ckEthereumTwinTokenNetworkId,
 		ckEthereumTwinToken,
 		ckEthereumNativeTokenId,
-		ckEthereumNativeToken
+		ckEthereumNativeTokenNetworkId
 	} from '$icp-eth/derived/cketh.derived';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -16,7 +16,7 @@
 
 <ConvertETH
 	nativeTokenId={$ckEthereumNativeTokenId}
-	nativeNetworkId={$ckEthereumNativeToken.network.id}
+	nativeNetworkId={$ckEthereumNativeTokenNetworkId}
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {
 		$token: $ckEthereumTwinToken.symbol
 	})}

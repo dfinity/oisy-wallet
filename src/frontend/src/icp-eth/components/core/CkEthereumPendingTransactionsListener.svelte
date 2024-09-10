@@ -8,7 +8,8 @@
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 	import {
-		ckEthereumNativeToken,
+		ckEthereumNativeTokenErc20HelperContractAddress,
+		ckEthereumNativeTokenEthHelperContractAddress,
 		ckEthereumNativeTokenId,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
@@ -18,10 +19,6 @@
 		loadCkEthereumPendingTransactions
 	} from '$icp-eth/services/eth.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import {
-		toCkErc20HelperContractAddress,
-		toCkEthHelperContractAddress
-	} from '$icp-eth/utils/cketh.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
@@ -120,11 +117,8 @@
 	let toContractAddress = '';
 	$: toContractAddress =
 		$ckEthereumTwinTokenStandard === 'erc20'
-			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
-			: toCkEthHelperContractAddress(
-					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					$ckEthereumNativeToken.network.id
-				) ?? '';
+			? $ckEthereumNativeTokenErc20HelperContractAddress ?? ''
+			: $ckEthereumNativeTokenEthHelperContractAddress ?? '';
 
 	$: (async () =>
 		init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();

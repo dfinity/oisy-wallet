@@ -8,16 +8,11 @@
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
 	import {
-		ckEthereumNativeToken,
-		ckEthereumNativeTokenId,
+		ckEthereumNativeTokenErc20HelperContractAddress,
+		ckEthereumNativeTokenEthHelperContractAddress,
 		ckEthereumTwinToken,
 		ckEthereumTwinTokenStandard
 	} from '$icp-eth/derived/cketh.derived';
-	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import {
-		toCkErc20HelperContractAddress,
-		toCkEthHelperContractAddress
-	} from '$icp-eth/utils/cketh.utils';
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -32,11 +27,8 @@
 	let destination = '';
 	$: destination =
 		$ckEthereumTwinTokenStandard === 'erc20'
-			? toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? ''
-			: toCkEthHelperContractAddress(
-					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					$ckEthereumNativeToken.network.id
-				) ?? '';
+			? $ckEthereumNativeTokenErc20HelperContractAddress ?? ''
+			: $ckEthereumNativeTokenEthHelperContractAddress ?? '';
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
 

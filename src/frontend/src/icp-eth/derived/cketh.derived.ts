@@ -93,9 +93,36 @@ export const ckEthereumNativeTokenId: Readable<TokenId> = derived(
 	([{ id }]) => id
 );
 
+export const ckEthereumNativeTokenNetworkId: Readable<NetworkId> = derived(
+	[ckEthereumNativeToken],
+	([
+		{
+			network: { id }
+		}
+	]) => id
+);
+
 export const ckEthereumNativeTokenBalance: Readable<BigNumber | undefined | null> = derived(
 	[balancesStore, ckEthereumNativeToken],
 	([$balanceStore, { id }]) => $balanceStore?.[id]?.data
+);
+
+/**
+ * The contract helper used to convert ETH -> ckETH for ckEthereumNativeToken.
+ */
+export const ckEthereumNativeTokenEthHelperContractAddress: Readable<OptionEthAddress> = derived(
+	[ckEthMinterInfoStore, ckEthereumNativeTokenId, ckEthereumNativeTokenNetworkId],
+	([$ckEthMinterInfoStore, $tokenId, $networkId]) =>
+		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$tokenId], $networkId)
+);
+
+/**
+ * The contract helper used to convert Erc20 -> ckErc20 for ckEthereumNativeToken.
+ */
+export const ckEthereumNativeTokenErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
+	[ckEthMinterInfoStore, ckEthereumNativeTokenId],
+	([$ckEthMinterInfoStore, $ckEthereumNativeTokenId]) =>
+		toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId])
 );
 
 /**
