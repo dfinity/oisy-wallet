@@ -2,11 +2,10 @@
 	"dfx": "0.20.0",
 	"canisters": {
 		"signer": {
-			"candid": "src/backend/backend.did",
-			"package": "backend",
-			"type": "rust",
-			"optimize": "cycles",
-			"gzip": true
+			"candid": "https://raw.githubusercontent.com/dfinity/chain-fusion-signer/v0.1.1/src/signer/signer.did",
+			"type": "custom",
+			"wasm": "https://github.com/dfinity/chain-fusion-signer/releases/download/v0.1.1/signer.wasm.gz",
+			"shrink": false
 		},
 		"backend": {
 			"candid": "src/backend/backend.did",
