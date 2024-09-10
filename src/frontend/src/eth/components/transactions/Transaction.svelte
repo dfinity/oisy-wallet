@@ -6,7 +6,7 @@
 	import type { EthTransactionType } from '$eth/types/eth-transaction';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isTransactionPending } from '$eth/utils/transactions.utils';
-	import { ckHelpersContractAddresses } from '$icp-eth/derived/cketh.derived';
+	import { ckMinterInfoAddresses } from '$icp-eth/derived/cketh.derived';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import IconMint from '$lib/components/icons/IconMint.svelte';
@@ -37,9 +37,9 @@
 	$: ({ from, to, value, timestamp, displayTimestamp } = transaction);
 
 	let type: EthTransactionType;
-	$: type = $ckHelpersContractAddresses.includes(from.toLowerCase())
+	$: type = $ckMinterInfoAddresses.includes(from.toLowerCase())
 		? 'withdraw'
-		: $ckHelpersContractAddresses.includes(to?.toLowerCase())
+		: $ckMinterInfoAddresses.includes(to?.toLowerCase())
 			? 'deposit'
 			: from?.toLowerCase() === $ethAddress?.toLowerCase()
 				? 'send'

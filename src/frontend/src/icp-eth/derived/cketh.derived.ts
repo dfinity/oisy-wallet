@@ -98,6 +98,16 @@ export const ckEthereumNativeTokenBalance: Readable<BigNumber | undefined | null
 	([$balanceStore, { id }]) => $balanceStore?.[id]?.data
 );
 
+const ckEthMinterInfoInitialized: Readable<boolean> = derived(
+	[ckEthMinterInfoStore],
+	([$ckEthMinterInfoStore]) => $ckEthMinterInfoStore !== undefined
+);
+
+export const ckEthMinterInfoNotInitialized: Readable<boolean> = derived(
+	[ckEthMinterInfoInitialized],
+	($ckEthMinterInfoInitialized) => !$ckEthMinterInfoInitialized
+);
+
 /**
  * The contract helper used to convert ETH -> ckETH.
  */
@@ -122,13 +132,13 @@ export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
 /**
  * The minter address.
  */
-export const ckMinterAddress: Readable<OptionEthAddress> = derived(
+const ckMinterAddress: Readable<OptionEthAddress> = derived(
 	[ckEthMinterInfoStore, ethereumTokenId],
 	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
 		toCkMinterAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
 );
 
-export const ckHelpersContractAddresses: Readable<OptionEthAddress[]> = derived(
+export const ckMinterInfoAddresses: Readable<OptionEthAddress[]> = derived(
 	[ckEthHelperContractAddress, ckErc20HelperContractAddress, ckMinterAddress],
 	([$ckEthHelperContractAddress, $ckErc20HelperContractAddress, $ckMinterAddress]) =>
 		[$ckEthHelperContractAddress, $ckErc20HelperContractAddress, $ckMinterAddress].map((address) =>
