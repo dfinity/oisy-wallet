@@ -22,7 +22,7 @@ const initAddressStore = <T extends Address>(): AddressStore<T> => {
 	};
 };
 
-// We use the Testenet address for Regtest.
+// We use the Testnet address for Regtest.
 export const btcAddressTestnetStore = initAddressStore<BtcAddress>();
 export const btcAddressMainnetStore = initAddressStore<BtcAddress>();
 

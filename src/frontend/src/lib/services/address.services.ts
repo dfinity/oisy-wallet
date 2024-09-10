@@ -72,21 +72,21 @@ const loadTokenAddress = async <T extends Address>({
 	return { success: true };
 };
 
-// We use the Testenet address for Regtest.
+// We use the Testnet address for Regtest.
 type BtcTokenIdsWithAddresses = typeof BTC_MAINNET_TOKEN_ID | typeof BTC_TESTNET_TOKEN_ID;
-type BtcTokenIdsStringWithAddresses = Exclude<BitcoinNetwork, 'regtest'>;
-const bitcoinStoreMapper: Record<BtcTokenIdsStringWithAddresses, AddressStore<BtcAddress>> = {
+type BtcNetworkWithAddresses = Exclude<BitcoinNetwork, 'regtest'>;
+const bitcoinStoreMapper: Record<BtcNetworkWithAddresses, AddressStore<BtcAddress>> = {
 	mainnet: btcAddressMainnetStore,
 	testnet: btcAddressTestnetStore
 };
 
-const bitcoinNetworkMapper: Record<BtcTokenIdsStringWithAddresses, SignerBitcoinNetwork> = {
+const bitcoinNetworkMapper: Record<BtcNetworkWithAddresses, SignerBitcoinNetwork> = {
 	mainnet: { mainnet: null },
 	testnet: { testnet: null }
 };
 
 const idbBtcAddressMapper: Record<
-	BtcTokenIdsStringWithAddresses,
+	BtcNetworkWithAddresses,
 	(params: SetIdbAddressParams<BtcAddress>) => Promise<void>
 > = {
 	mainnet: setIdbBtcAddressMainnet,
@@ -98,7 +98,7 @@ const loadBtcAddress = async ({
 	network
 }: {
 	tokenId: BtcTokenIdsWithAddresses;
-	network: BtcTokenIdsStringWithAddresses;
+	network: BtcNetworkWithAddresses;
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,
