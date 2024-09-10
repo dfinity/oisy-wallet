@@ -5,6 +5,7 @@
 			"candid": "https://raw.githubusercontent.com/dfinity/chain-fusion-signer/v0.1.1/src/signer/signer.did",
 			"type": "custom",
 			"wasm": "https://github.com/dfinity/chain-fusion-signer/releases/download/v0.1.1/signer.wasm.gz",
+			"init_arg": "(variant { Init = record { ecdsa_key_name = \"key_1\"; ic_root_key_der = null;}})",
 			"shrink": false
 		},
 		"backend": {
