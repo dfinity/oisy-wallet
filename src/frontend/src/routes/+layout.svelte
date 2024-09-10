@@ -18,6 +18,7 @@
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
 	import { nonNullish } from '@dfinity/utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	/**
 	 * Init dApp
@@ -34,7 +35,7 @@
 			await authStore.sync();
 
 			await trackEvent({
-				name: nonNullish($authStore.identity)
+				name: nonNullish($authIdentity)
 					? TRACK_SYNC_AUTH_AUTHENTICATED_COUNT
 					: TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 			});

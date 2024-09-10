@@ -24,9 +24,9 @@
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import type { IcTransactionUi } from '$icp/types/ic';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
-	import { authStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
@@ -45,7 +45,7 @@
 	let disableInfiniteScroll = false;
 
 	const onIntersect = async () => {
-		if (isNullish($authStore.identity)) {
+		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
 		}
@@ -69,8 +69,8 @@
 		}
 
 		await loadNextTransactions({
-			owner: $authStore.identity.getPrincipal(),
-			identity: $authStore.identity,
+			owner: $authIdentity.getPrincipal(),
+			identity: $authIdentity,
 			maxResults: WALLET_PAGINATION,
 			start: lastId,
 			token: $tokenAsIcToken,
