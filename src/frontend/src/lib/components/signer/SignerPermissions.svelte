@@ -1,40 +1,20 @@
 <script lang="ts">
-	import {
-		ICRC25_REQUEST_PERMISSIONS,
-		type IcrcScope,
-		type PermissionsConfirmation,
-		type PermissionsPromptPayload
-	} from '@dfinity/oisy-wallet-signer';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { type IcrcScope, type PermissionsConfirmation } from '@dfinity/oisy-wallet-signer';
+	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import type { OptionSigner } from '$lib/types/signer';
+	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 
-	export let signer: OptionSigner;
-
-	let payload: PermissionsPromptPayload | undefined;
+	const {
+		permissionsPrompt: { payload, reset: resetPrompt }
+	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
 	let scopes: IcrcScope[] | undefined;
-	$: scopes = payload?.requestedScopes;
+	$: scopes = $payload?.requestedScopes;
 
 	let confirm: PermissionsConfirmation | undefined;
-	$: confirm = payload?.confirmScopes;
-
-	const resetPrompt = () => (payload = undefined);
-
-	const init = () => {
-		if (isNullish(signer)) {
-			resetPrompt();
-			return;
-		}
-
-		signer.register({
-			method: ICRC25_REQUEST_PERMISSIONS,
-			prompt: (p: PermissionsPromptPayload) => (payload = p)
-		});
-	};
-
-	$: signer, init();
+	$: confirm = $payload?.confirmScopes;
 
 	const onReject = () => {
 		// TODO: assert no undefined and toast error
