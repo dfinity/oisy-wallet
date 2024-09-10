@@ -1,23 +1,23 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
-	import { onMount } from 'svelte';
-	import { initAuthWorker } from '$lib/services/worker.auth.services';
-	import { fade } from 'svelte/transition';
 	import { Spinner, Toasts } from '@dfinity/gix-components';
-	import Busy from '$lib/components/ui/Busy.svelte';
-	import '$lib/styles/global.scss';
+	import { nonNullish } from '@dfinity/utils';
+	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
-	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import { initAnalytics, trackEvent } from '$lib/services/analytics.services';
-	import { i18n } from '$lib/stores/i18n.store';
+	import Busy from '$lib/components/ui/Busy.svelte';
 	import {
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
-	import { nonNullish } from '@dfinity/utils';
+	import { initAnalytics, trackEvent } from '$lib/services/analytics.services';
+	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
+	import { initAuthWorker } from '$lib/services/worker.auth.services';
+	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
+	import '$lib/styles/global.scss';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	/**
 	 * Init dApp

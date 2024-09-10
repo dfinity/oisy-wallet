@@ -34,13 +34,7 @@ module.exports = {
 			}
 		},
 		{
-			// TODO: slowly add all related folders, and ultimately remove this override and include the rule in the main rules
-			files: [
-				'src/frontend/src/eth/**/*.svelte',
-				'src/frontend/src/icp/**/*.svelte',
-				'src/frontend/src/icp-eth/**/*.svelte',
-				'src/frontend/src/lib/**/*.svelte'
-			],
+			files: ['*.svelte'],
 			rules: {
 				'import/order': [
 					'error',
