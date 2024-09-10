@@ -9,7 +9,11 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
-	import { loadAddresses, loadIdbAddresses } from '$lib/services/address.services';
+	import {
+		listenTestnetNetworksToAddBtcTestnetAddresses,
+		loadAddresses,
+		loadIdbAddresses
+	} from '$lib/services/address.services';
 	import { signOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
@@ -63,6 +67,10 @@
 
 	onMount(async () => {
 		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
+
+		// Listen to the user changing the testnets flag to load testnet btc addresses.
+		// We don't load them on init to avoid unnecessary requests.
+		listenTestnetNetworksToAddBtcTestnetAddresses();
 
 		if (addressIdbSuccess) {
 			loading.set(false);
