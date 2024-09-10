@@ -6,7 +6,7 @@ import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
-import type { RequiredToken, TokenAppearance } from '$lib/types/token';
+import type { RequiredToken, TokenAppearance, TokenId } from '$lib/types/token';
 import type { RequiredExcept } from '$lib/types/utils';
 
 /**
@@ -54,6 +54,12 @@ export const SUPPORTED_ETHEREUM_TOKENS: [...RequiredToken[], RequiredToken] = [
 ];
 
 export const SUPPORTED_ETHEREUM_TOKEN_IDS: symbol[] = SUPPORTED_ETHEREUM_TOKENS.map(({ id }) => id);
+
+export const MAP_SUPPORTED_ETHEREUM_TWIN_TOKEN_SYMBOLS: Record<TokenId, string> =
+	SUPPORTED_ETHEREUM_TOKENS.reduce<Record<TokenId, string>>(
+		(acc, token) => ({ ...acc, [token.id]: `ck${token.symbol}` }),
+		{}
+	);
 
 /**
  * ICP

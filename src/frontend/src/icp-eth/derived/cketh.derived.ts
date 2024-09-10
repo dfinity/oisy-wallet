@@ -1,8 +1,9 @@
 import { ETHEREUM_NETWORK } from '$env/networks.env';
-import { ETHEREUM_TOKEN } from '$env/tokens.env';
+import { ETHEREUM_TOKEN, MAP_SUPPORTED_ETHEREUM_TWIN_TOKEN_SYMBOLS } from '$env/tokens.env';
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens.erc20.env';
 import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import {
@@ -96,6 +97,17 @@ export const ckEthereumNativeTokenId: Readable<TokenId> = derived(
 export const ckEthereumNativeTokenBalance: Readable<BigNumber | undefined | null> = derived(
 	[balancesStore, ckEthereumNativeToken],
 	([$balanceStore, { id }]) => $balanceStore?.[id]?.data
+);
+
+/**
+ * The twin token symbol for the current token if it is an Ethereum token (native or ERC20).
+ */
+export const ckTwinTokenSymbol: Readable<string> = derived(
+	[tokenWithFallback],
+	([$tokenWithFallback]) =>
+		MAP_SUPPORTED_ETHEREUM_TWIN_TOKEN_SYMBOLS[$tokenWithFallback.id] ??
+		($tokenWithFallback as Erc20Token).twinTokenSymbol ??
+		''
 );
 
 /**
