@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { ComponentType } from 'svelte';
+	import type { EthTransactionType } from '$eth/types/eth-transaction';
 	import { isTransactionPending } from '$eth/utils/transactions.utils';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
@@ -24,7 +25,7 @@
 
 	$: ({ from, value, timestamp, displayTimestamp } = transaction);
 
-	let type: 'send' | 'receive';
+	let type: EthTransactionType;
 	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
 
 	let icon: ComponentType;

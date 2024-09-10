@@ -5,6 +5,7 @@ import type {
 } from '$icp/types/canister';
 import type { CoingeckoCoinsId } from '$lib/types/coingecko';
 import type { Token } from '$lib/types/token';
+import type { TransactionType } from '$lib/types/transaction';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type {
 	IcrcTransaction as IcrcTransactionCandid,
@@ -25,7 +26,7 @@ export type IcrcTransaction = {
 
 export type IcTransaction = IcpTransaction | IcrcTransaction;
 
-export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'send' | 'receive';
+export type IcTransactionType = TransactionType | 'approve' | 'burn' | 'mint';
 
 export type IcTransactionIdText = string;
 
