@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Token } from '$lib/types/token';
-	import { transactionsUrl } from '$lib/utils/nav.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { transactionsUrl } from '$lib/utils/nav.utils';
 
 	export let token: Token;
 	export let disableTabSelector = false;

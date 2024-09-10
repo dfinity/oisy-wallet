@@ -40,6 +40,7 @@
 		TRACK_DURATION_CONVERT_CKETH_TO_ETH,
 		TRACK_DURATION_IC_SEND
 	} from '$lib/constants/analytics.contants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import {
@@ -48,7 +49,6 @@
 		trackEvent,
 		trackTimedEventError
 	} from '$lib/services/analytics.services';
-	import { authStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
@@ -126,7 +126,7 @@
 					value: `${amount}`,
 					unitName: $token.decimals
 				}),
-				identity: $authStore.identity,
+				identity: $authIdentity,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step),
 				ckErc20ToErc20MaxCkEthFees
 			};

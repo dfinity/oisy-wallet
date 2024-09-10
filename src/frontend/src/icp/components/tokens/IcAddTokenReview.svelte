@@ -14,7 +14,7 @@
 	import SkeletonCardWithoutAmount from '$lib/components/ui/SkeletonCardWithoutAmount.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { authStore } from '$lib/stores/auth.store';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -33,7 +33,7 @@
 		const { result, data } = await loadAndAssertAddCustomToken({
 			ledgerCanisterId,
 			indexCanisterId,
-			identity: $authStore.identity,
+			identity: $authIdentity,
 			icrcTokens: $icrcTokens
 		});
 
