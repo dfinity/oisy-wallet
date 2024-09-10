@@ -6,8 +6,7 @@
 	import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
 	import { REPLICA_HOST } from '$lib/constants/app.constants';
-	import { authNotSignedIn } from '$lib/derived/auth.derived';
-	import { authStore } from '$lib/stores/auth.store';
+	import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
 
 	let signer: Signer | undefined | null;
 
@@ -17,20 +16,20 @@
 	};
 
 	const init = async () => {
-		if (isNullish($authStore.identity)) {
+		if (isNullish($authIdentity)) {
 			reset();
 			return;
 		}
 
 		signer = Signer.init({
-			owner: $authStore.identity,
+			owner: $authIdentity,
 			host: REPLICA_HOST
 		});
 	};
 
 	onDestroy(reset);
 
-	$: $authStore, (async () => init())();
+	$: $authIdentity, (async () => init())();
 
 	let idle = true;
 </script>
