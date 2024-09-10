@@ -133,3 +133,88 @@ Note that setting up the twin token counterpart or collecting their logo is unne
 To help with steps 3 to 5, one can use the script [./scripts/add.tokens.erc20.mjs] (or [./scripts/add.tokens.erc20.sh]) to generate the environment files for the new tokens. It requires the EtherScan API key to fetch the token information from the Ethereum network, to be set in the `.env` file as `VITE_ETHERSCAN_API_KEY`.
 The script will run through the supported ckERC20 tokens in the production dashboard and will automatically generate the necessary environment files for the new tokens that have a respective testnet token, and that do not yet exist in the repository.
 Please be aware of the instructions provided by the script and follow them accordingly, if there are any, and possibly double-check the generated files.
+
+## Bitcoin
+
+Some setup is necessary to be able to develop locally with Bitcoin tokens.
+
+There are three necessary items before starting to develop locally:
+
+- Environment variables.
+- Local Bitcoin node running (regtest).
+- Start dfx with bitcoin.
+
+### Bitcoin Environment Variables
+
+You need to set the following variables to `true` in the file `.env.development`.
+
+```
+VITE_NETWORK_BITCOIN_ENABLED=true
+VITE_BITCOIN_MAINNET=true
+```
+
+### Local Bitcoin Node (Or Regtest)
+
+To interact with a Bitcoun network, we can set up a local test node.
+
+The script to set it up and start running it is `./scripts/setup.bitcoin-node.sh`.
+
+The first time you will run it withuot arguments:
+
+```bash
+./scripts/setup.bitcoin-node.sh
+```
+
+This script will download and set up a local bitcoin node from [Bitcoin.org](https://bitcoin.org/en/download).
+
+Running this script again will start the node without doing the initial setup again.
+
+**Resetting Node:**
+
+It's recommended to reset the node from time to time:
+
+```bash
+./scripts/setup.bitcoin-node.sh --reset
+```
+
+### Start dfx with Bitcoin
+
+Dfx needs to be aware that a Bitcoin node is running.
+
+There is a script to run dfx with Bitcoin:
+
+```bash
+./scripts/dfx.start-with-bitcoin.sh
+```
+
+You can also run it by cleaning up the state:
+
+```bash
+./scripts/dfx.start-with-bitcoin.sh --clean
+```
+
+You would normally do this along resetting the bitcoin node as mentioned before.
+
+**IMPORTANT: If you were running a local replica before without bitcoin, use the `--clean` flag.**
+
+### Mining Bitcoins
+
+To start testing Bitcoin feature you'll need some tokens.
+
+For that, you can get the address of your test user from the UI and get yourlsef some bitcoins:
+
+```bash
+./scripts/add.tokens.bitcoin.sh --amount <amount-in-blocks> --address <test-user-address>
+```
+
+**One block equals 50 Bitcoin.**
+
+### Mining After Transactions
+
+Tokens transferred are not immediately available in the new destination.
+
+Before they become available, there must be a new block mined. You can mine one:
+
+```bash
+./scripts/add.tokens.bitcoin.sh
+```

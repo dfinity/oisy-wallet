@@ -10,6 +10,10 @@
 # dfx temporary files
 .dfx/
 
+# bitcoin
+bitcoin-core/
+bitcoin*.gz
+
 # rust and downloaded wasm|did files
 target/
 
