@@ -1,3 +1,3 @@
 import type { TransactionType } from '$lib/types/transaction';
 
-export type EthTransactionType = TransactionType;
+export type EthTransactionType = TransactionType | 'withdraw' | 'deposit';

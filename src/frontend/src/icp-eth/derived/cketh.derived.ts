@@ -1,4 +1,3 @@
-import { ETHEREUM_NETWORK } from '$env/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens.env';
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens.erc20.env';
 import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
@@ -7,7 +6,8 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import {
 	toCkErc20HelperContractAddress,
-	toCkEthHelperContractAddress
+	toCkEthHelperContractAddress,
+	toCkMinterAddress
 } from '$icp-eth/utils/cketh.utils';
 import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 import type { IcCkToken } from '$icp/types/ic';
@@ -64,7 +64,7 @@ export const ckEthereumTwinTokenStandard: Readable<TokenStandard> = derived(
 
 export const ckEthereumTwinTokenNetwork: Readable<EthereumNetwork> = derived(
 	[ckEthereumTwinToken],
-	([{ network }]) => (network as EthereumNetwork | undefined) ?? ETHEREUM_NETWORK
+	([{ network }]) => network as EthereumNetwork
 );
 
 export const ckEthereumTwinTokenNetworkId: Readable<NetworkId> = derived(
@@ -117,4 +117,21 @@ export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
 	[ckEthMinterInfoStore, ethereumTokenId],
 	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
 		toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
+);
+
+/**
+ * The minter address.
+ */
+export const ckMinterAddress: Readable<OptionEthAddress> = derived(
+	[ckEthMinterInfoStore, ethereumTokenId],
+	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
+		toCkMinterAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
+);
+
+export const ckHelpersContractAddresses: Readable<OptionEthAddress[]> = derived(
+	[ckEthHelperContractAddress, ckErc20HelperContractAddress, ckMinterAddress],
+	([$ckEthHelperContractAddress, $ckErc20HelperContractAddress, $ckMinterAddress]) =>
+		[$ckEthHelperContractAddress, $ckErc20HelperContractAddress, $ckMinterAddress].map((address) =>
+			address?.toLowerCase()
+		)
 );
