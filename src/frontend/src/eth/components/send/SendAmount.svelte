@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { Utils } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -11,8 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { InsufficientFundsError } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
-	import { formatBigNumberish } from '$lib/utils/format.utils';
-	import { parseToken } from '$lib/utils/parse.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let amount: number | undefined = undefined;
@@ -37,10 +37,17 @@
 			return;
 		}
 
-		const parsedSendBalance = parseToken({
-			value: `${formatBigNumberish({ value: $sendBalance ?? ZERO, decimals: $sendTokenDecimals })}`,
-			unitName: $sendTokenDecimals
-		});
+		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
+		const parsedSendBalance = $sendBalance
+			? Utils.parseUnits(
+					formatToken({
+						value: $sendBalance,
+						unitName: $sendTokenDecimals,
+						displayDecimals: $sendTokenDecimals
+					}),
+					$sendTokenDecimals
+				)
+			: ZERO;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId)) {
@@ -72,8 +79,8 @@
 		? undefined
 		: (): number =>
 				getMaxTransactionAmount({
-					balance: $sendBalance?.toBigInt(),
-					fee: $maxGasFee?.toBigInt(),
+					balance: $sendBalance ?? ZERO,
+					fee: $maxGasFee,
 					tokenDecimals: $sendTokenDecimals,
 					tokenStandard: $sendTokenStandard
 				});
