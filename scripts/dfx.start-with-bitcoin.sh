@@ -6,7 +6,7 @@ print_help() {
 	Starts local replica with dfx supporting bitcoin.
 
 This script assumes a local Regtest Bitcoin Core node is running.
-You can run one by executing the `setup.bitcoin-node.sh` script.
+You can run one by executing the "setup.bitcoin-node.sh" script.
 
 Arguments:
 
