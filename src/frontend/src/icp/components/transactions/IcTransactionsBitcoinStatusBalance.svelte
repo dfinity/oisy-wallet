@@ -7,9 +7,9 @@
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { updateBalance } from '$icp/services/ckbtc.services';
 	import IconSync from '$lib/components/icons/IconSync.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
 	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
-	import { authStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -33,7 +33,7 @@
 		try {
 			await updateBalance({
 				token: $tokenAsIcToken,
-				identity: $authStore.identity,
+				identity: $authIdentity,
 				progress: (step: ProgressStepsUpdateBalanceCkBtc) => (receiveProgressStep = step)
 			});
 
