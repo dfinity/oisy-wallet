@@ -1,11 +1,8 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
 	import { page } from '$app/stores';
-	import Loaders from '$lib/components/core/Loaders.svelte';
+	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
-	import NoLoaders from '$lib/components/core/NoLoaders.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
-	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
@@ -18,9 +15,6 @@
 			: 'tokens';
 
 	$: token.set($pageToken);
-
-	let cmpLoaders: ComponentType;
-	$: cmpLoaders = $authSignedIn ? Loaders : NoLoaders;
 </script>
 
 <Hero
@@ -31,9 +25,9 @@
 />
 
 <main class="pt-12">
-	<svelte:component this={cmpLoaders}>
+	<LoadersGuard>
 		<slot />
-	</svelte:component>
+	</LoadersGuard>
 </main>
 
 <Modals />

@@ -189,7 +189,7 @@ export const ${mainnetToken}: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: '${mainnetName}',
-	symbol: '${mainnetSymbol}',
+	symbol: ${symbol}_SYMBOL,
 	decimals: ${symbol}_DECIMALS,
 	icon: ${icon},
 	address: '${contractAddress}',

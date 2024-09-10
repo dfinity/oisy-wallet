@@ -14,7 +14,7 @@ export const XAUT_TOKEN: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: 'Tether Gold',
-	symbol: 'XAUt',
+	symbol: XAUT_SYMBOL,
 	decimals: XAUT_DECIMALS,
 	icon: xaut,
 	address: '0x68749665FF8D2d112Fa859AA293F07A622782F38',

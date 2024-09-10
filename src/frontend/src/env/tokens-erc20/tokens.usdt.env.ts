@@ -14,7 +14,7 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: 'Tether USD',
-	symbol: 'USDT',
+	symbol: USDT_SYMBOL,
 	decimals: USDT_DECIMALS,
 	icon: usdt,
 	address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
