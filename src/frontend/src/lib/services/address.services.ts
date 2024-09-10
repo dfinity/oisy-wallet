@@ -1,10 +1,12 @@
+import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
-import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
+import { BTC_MAINNET_TOKEN_ID, BTC_TESTNET_TOKEN_ID } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 import {
 	getIdbBtcAddressMainnet,
 	getIdbEthAddress,
 	setIdbBtcAddressMainnet,
+	setIdbBtcAddressTestnet,
 	setIdbEthAddress,
 	updateIdbBtcAddressMainnetLastUsage,
 	updateIdbEthAddressLastUsage
@@ -13,6 +15,7 @@ import { getBtcAddress, getEthAddress } from '$lib/api/signer.api';
 import { warnSignOut } from '$lib/services/auth.services';
 import {
 	btcAddressMainnetStore,
+	btcAddressTestnetStore,
 	ethAddressStore,
 	type AddressStore,
 	type StorageAddressData
@@ -69,22 +72,43 @@ const loadTokenAddress = async <T extends Address>({
 	return { success: true };
 };
 
+// We use the Testnet address for Regtest.
+type TokenIdBtcPublicNetwork = typeof BTC_MAINNET_TOKEN_ID | typeof BTC_TESTNET_TOKEN_ID;
+type BtcPublicNetwork = Exclude<BitcoinNetwork, 'regtest'>;
+const bitcoinStoreMapper: Record<BtcPublicNetwork, AddressStore<BtcAddress>> = {
+	mainnet: btcAddressMainnetStore,
+	testnet: btcAddressTestnetStore
+};
+
+const bitcoinNetworkMapper: Record<BtcPublicNetwork, SignerBitcoinNetwork> = {
+	mainnet: { mainnet: null },
+	testnet: { testnet: null }
+};
+
+const idbBtcAddressMapper: Record<
+	BtcPublicNetwork,
+	(params: SetIdbAddressParams<BtcAddress>) => Promise<void>
+> = {
+	mainnet: setIdbBtcAddressMainnet,
+	testnet: setIdbBtcAddressTestnet
+};
+
 const loadBtcAddress = async ({
 	tokenId,
 	network
 }: {
-	tokenId: typeof BTC_MAINNET_TOKEN_ID;
-	network: BitcoinNetwork;
+	tokenId: TokenIdBtcPublicNetwork;
+	network: BtcPublicNetwork;
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,
 		getAddress: (identity: OptionIdentity) =>
 			getBtcAddress({
 				identity,
-				network: network === 'testnet' ? { testnet: null } : { mainnet: null }
+				network: bitcoinNetworkMapper[network]
 			}),
-		setIdbAddress: setIdbBtcAddressMainnet,
-		addressStore: btcAddressMainnetStore
+		setIdbAddress: idbBtcAddressMapper[network],
+		addressStore: bitcoinStoreMapper[network]
 	});
 
 const loadBtcAddressMainnet = async (): Promise<ResultSuccess> =>
