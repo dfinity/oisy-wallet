@@ -120,8 +120,8 @@
 		isNullish($token)
 			? undefined
 			: getMaxTransactionAmount({
-					balance: $balance?.toBigInt(),
-					fee: fee,
+					balance: $balance ?? ZERO,
+					fee: BigNumber.from(fee),
 					tokenDecimals: $token.decimals,
 					tokenStandard: $token.standard
 				});
