@@ -1,10 +1,12 @@
+import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
-import { BTC_MAINNET_TOKEN_ID } from '$env/tokens.btc.env';
+import { BTC_MAINNET_TOKEN_ID, type BTC_SYMBOL } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 import {
 	getIdbBtcAddressMainnet,
 	getIdbEthAddress,
 	setIdbBtcAddressMainnet,
+	setIdbBtcAddressTestnet,
 	setIdbEthAddress,
 	updateIdbBtcAddressMainnetLastUsage,
 	updateIdbEthAddressLastUsage
@@ -13,6 +15,8 @@ import { getBtcAddress, getEthAddress } from '$lib/api/signer.api';
 import { warnSignOut } from '$lib/services/auth.services';
 import {
 	btcAddressMainnetStore,
+	btcAddressRegtestStore,
+	btcAddressTestnetStore,
 	ethAddressStore,
 	type AddressStore,
 	type StorageAddressData
@@ -30,7 +34,7 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { reduceResults } from '$lib/utils/results.utils';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import type { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const loadTokenAddress = async <T extends Address>({
@@ -41,7 +45,7 @@ const loadTokenAddress = async <T extends Address>({
 }: {
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
-	setIdbAddress: (params: SetIdbAddressParams<T>) => Promise<void>;
+	setIdbAddress?: (params: SetIdbAddressParams<T>) => Promise<void>;
 	addressStore: AddressStore<T>;
 }): Promise<ResultSuccess> => {
 	try {
@@ -50,7 +54,9 @@ const loadTokenAddress = async <T extends Address>({
 		const address = await getAddress(identity);
 		addressStore.set({ data: address, certified: true });
 
-		await saveTokenAddressForFutureSignIn({ address, identity, setIdbAddress });
+		if (nonNullish(setIdbAddress)) {
+			await saveTokenAddressForFutureSignIn({ address, identity, setIdbAddress });
+		}
 	} catch (err: unknown) {
 		addressStore.reset();
 
@@ -69,11 +75,32 @@ const loadTokenAddress = async <T extends Address>({
 	return { success: true };
 };
 
+const bitcoinStoreMapper: Record<BitcoinNetwork, AddressStore<BtcAddress>> = {
+	mainnet: btcAddressMainnetStore,
+	testnet: btcAddressTestnetStore,
+	regtest: btcAddressRegtestStore
+};
+
+const bitcoinNetworkMapper: Record<BitcoinNetwork, SignerBitcoinNetwork> = {
+	mainnet: { mainnet: null },
+	testnet: { testnet: null },
+	regtest: { regtest: null }
+};
+
+const idbBtcAddressMapper: Record<
+	BitcoinNetwork,
+	((params: SetIdbAddressParams<BtcAddress>) => Promise<void>) | undefined
+> = {
+	mainnet: setIdbBtcAddressMainnet,
+	testnet: setIdbBtcAddressTestnet,
+	regtest: undefined
+};
+
 const loadBtcAddress = async ({
 	tokenId,
 	network
 }: {
-	tokenId: typeof BTC_MAINNET_TOKEN_ID;
+	tokenId: BTC_SYMBOL;
 	network: BitcoinNetwork;
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
@@ -81,10 +108,10 @@ const loadBtcAddress = async ({
 		getAddress: (identity: OptionIdentity) =>
 			getBtcAddress({
 				identity,
-				network: network === 'testnet' ? { testnet: null } : { mainnet: null }
+				network: bitcoinNetworkMapper[network]
 			}),
-		setIdbAddress: setIdbBtcAddressMainnet,
-		addressStore: btcAddressMainnetStore
+		setIdbAddress: idbBtcAddressMapper[network],
+		addressStore: bitcoinStoreMapper[network]
 	});
 
 const loadBtcAddressMainnet = async (): Promise<ResultSuccess> =>

@@ -49,3 +49,8 @@ export const BTC_REGTEST_TOKEN: Token = {
 	decimals: BTC_DECIMALS,
 	icon: bitcoinTestnet
 };
+
+export type BTC_SYMBOL =
+	| typeof BTC_MAINNET_TOKEN_ID
+	| typeof BTC_TESTNET_TOKEN_ID
+	| typeof BTC_REGTEST_TOKEN_ID;
