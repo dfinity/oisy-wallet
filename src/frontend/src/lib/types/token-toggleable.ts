@@ -10,4 +10,4 @@ export type UserTokenState = Omit<
 	enabled: boolean;
 };
 
-export type TokenToggleable<T extends Token = Token> = T & UserTokenState;
+export type TokenToggleable<T extends Token> = T & UserTokenState;
