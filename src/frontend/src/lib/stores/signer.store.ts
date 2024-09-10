@@ -3,6 +3,8 @@ import type { OptionSigner } from '$lib/types/signer';
 import type { Identity } from '@dfinity/agent';
 import {
 	ICRC25_REQUEST_PERMISSIONS,
+	ICRC27_ACCOUNTS,
+	type AccountsPromptPayload,
 	type PermissionsPromptPayload
 } from '@dfinity/oisy-wallet-signer';
 import { Signer } from '@dfinity/oisy-wallet-signer/signer';
@@ -17,6 +19,10 @@ export interface SignerContext {
 		payload: Readable<PermissionsPromptPayload | undefined | null>;
 		reset: () => void;
 	};
+	accountsPrompt: {
+		payload: Readable<AccountsPromptPayload | undefined | null>;
+		reset: () => void;
+	};
 }
 
 export const initSignerContext = (): SignerContext => {
@@ -26,13 +32,22 @@ export const initSignerContext = (): SignerContext => {
 		undefined
 	);
 
+	const accountsPromptPayloadStore = writable<AccountsPromptPayload | undefined | null>(undefined);
+
 	const permissionsPromptPayload = derived(
 		[permissionsPromptPayloadStore],
 		([$permissionsPromptPayloadStore]) => $permissionsPromptPayloadStore
 	);
 
-	const idle = derived([permissionsPromptPayload], ([$permissionsPromptPayload]) =>
-		isNullish($permissionsPromptPayload)
+	const accountsPromptPayload = derived(
+		[accountsPromptPayloadStore],
+		([$accountsPromptPayloadStore]) => $accountsPromptPayloadStore
+	);
+
+	const idle = derived(
+		[permissionsPromptPayload, accountsPromptPayload],
+		([$permissionsPromptPayload, $accountsPromptPayload]) =>
+			isNullish($permissionsPromptPayload) && isNullish($accountsPromptPayload)
 	);
 
 	const init = ({ owner }: { owner: Identity }) => {
@@ -45,12 +60,20 @@ export const initSignerContext = (): SignerContext => {
 			method: ICRC25_REQUEST_PERMISSIONS,
 			prompt: (payload: PermissionsPromptPayload) => permissionsPromptPayloadStore.set(payload)
 		});
+
+		signer.register({
+			method: ICRC27_ACCOUNTS,
+			prompt: (payload: AccountsPromptPayload) => accountsPromptPayloadStore.set(payload)
+		});
 	};
 
 	const resetPermissionsPromptPayload = () => permissionsPromptPayloadStore.set(null);
 
+	const resetAccountsPromptPayload = () => accountsPromptPayloadStore.set(null);
+
 	const reset = () => {
 		resetPermissionsPromptPayload();
+		resetAccountsPromptPayload();
 
 		signer?.disconnect();
 		signer = null;
@@ -63,6 +86,10 @@ export const initSignerContext = (): SignerContext => {
 		permissionsPrompt: {
 			payload: permissionsPromptPayload,
 			reset: resetPermissionsPromptPayload
+		},
+		accountsPrompt: {
+			payload: accountsPromptPayload,
+			reset: resetAccountsPromptPayload
 		}
 	};
 };

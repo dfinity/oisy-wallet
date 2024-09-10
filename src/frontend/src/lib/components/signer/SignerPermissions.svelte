@@ -39,9 +39,9 @@
 			<p class="break-normal font-bold">The dApp is requesting following permissions:</p>
 
 			<ul class="flex flex-col gap-1 list-disc mt-2 mx-4">
-			{#each scopes as scope}
-				<li>{scope.scope.method}</li>
-			{/each}
+				{#each scopes as scope}
+					<li>{scope.scope.method}</li>
+				{/each}
 			</ul>
 		</div>
 

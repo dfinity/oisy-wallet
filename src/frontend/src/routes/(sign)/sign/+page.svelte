@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy, setContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import SignerAccounts from '$lib/components/signer/SignerAccounts.svelte';
 	import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
 	import SignerPermissions from '$lib/components/signer/SignerPermissions.svelte';
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
@@ -34,5 +35,7 @@
 		</div>
 	{:else}
 		<SignerPermissions />
+
+		<SignerAccounts />
 	{/if}
 </article>
