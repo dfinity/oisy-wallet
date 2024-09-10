@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { authNotSignedIn } from '$lib/derived/auth.derived';
-	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
-	import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
 	import { Signer } from '@dfinity/oisy-wallet-signer/signer';
-	import { authStore } from '$lib/stores/auth.store';
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
-	import { REPLICA_HOST } from '$lib/constants/app.constants';
 	import { fade } from 'svelte/transition';
+	import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
+	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
+	import { REPLICA_HOST } from '$lib/constants/app.constants';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
+	import { authStore } from '$lib/stores/auth.store';
 
 	let signer: Signer | undefined | null;
 

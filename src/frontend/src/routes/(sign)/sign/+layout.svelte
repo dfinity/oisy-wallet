@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Modals from '$lib/components/core/Modals.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
+	import Modals from '$lib/components/core/Modals.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 </script>
 
