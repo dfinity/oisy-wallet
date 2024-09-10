@@ -5,8 +5,16 @@
 			"candid": "https://raw.githubusercontent.com/dfinity/chain-fusion-signer/v0.1.1/src/signer/signer.did",
 			"type": "custom",
 			"wasm": "https://github.com/dfinity/chain-fusion-signer/releases/download/v0.1.1/signer.wasm.gz",
-			"init_arg": "(variant { Init = record { ecdsa_key_name = \"key_1\"; ic_root_key_der = null;}})",
-			"shrink": false
+			"init_arg": "(variant { Init = record { ecdsa_key_name = \"dfx_test_key\"; ic_root_key_der = null;}})",
+			"shrink": false,
+			"remote": {
+				"id": {
+					"ic": "grghe-syaaa-aaaar-qabyq-cai",
+					"beta": "grghe-syaaa-aaaar-qabyq-cai",
+					"old_backend": "cab24-4qaaa-aaaan-qecca-cai",
+					"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
+				}
+			}
 		},
 		"backend": {
 			"candid": "src/backend/backend.did",
