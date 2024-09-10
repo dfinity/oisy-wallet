@@ -98,16 +98,6 @@ export const ckEthereumNativeTokenBalance: Readable<BigNumber | undefined | null
 	([$balanceStore, { id }]) => $balanceStore?.[id]?.data
 );
 
-const ckEthMinterInfoInitialized: Readable<boolean> = derived(
-	[ckEthMinterInfoStore],
-	([$ckEthMinterInfoStore]) => $ckEthMinterInfoStore !== undefined
-);
-
-export const ckEthMinterInfoNotInitialized: Readable<boolean> = derived(
-	[ckEthMinterInfoInitialized],
-	($ckEthMinterInfoInitialized) => !$ckEthMinterInfoInitialized
-);
-
 /**
  * The contract helper used to convert ETH -> ckETH.
  */
