@@ -23,9 +23,9 @@
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import { tokenId } from '$lib/derived/token.derived';
-	import { authStore } from '$lib/stores/auth.store';
 	import { token } from '$lib/stores/token.store';
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { NetworkId } from '$lib/types/network';
@@ -70,7 +70,7 @@
 		await loadCkEthereumPendingTransactions({
 			token: $tokenAsIcToken,
 			lastObservedBlockNumber,
-			identity: $authStore.identity,
+			identity: $authIdentity,
 			toAddress,
 			twinToken: $ckEthereumTwinToken
 		});

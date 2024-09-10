@@ -33,6 +33,7 @@
 		try {
 			await authStore.sync();
 
+			// We are using $authStore.identity here and not the derived $authIdentity because we track the event imperatively right after authStore.sync
 			await trackEvent({
 				name: nonNullish($authStore.identity)
 					? TRACK_SYNC_AUTH_AUTHENTICATED_COUNT
