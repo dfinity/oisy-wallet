@@ -23,10 +23,16 @@
 	let timestamp: number | undefined;
 	let displayTimestamp: number | undefined;
 
+	let pending: boolean;
+	$: pending = isTransactionPending(transaction);
+
 	$: ({ from, value, timestamp, displayTimestamp } = transaction);
 
 	let type: EthTransactionType;
 	$: type = from?.toLowerCase() === $ethAddress?.toLowerCase() ? 'send' : 'receive';
+
+	let label: string;
+	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
 
 	let icon: ComponentType;
 	$: icon = type === 'send' ? IconSend : IconReceive;
@@ -34,16 +40,13 @@
 	let amount: BigNumber;
 	$: amount = type == 'send' ? value.mul(BigNumber.from(-1)) : value;
 
-	let pending: boolean;
-	$: pending = isTransactionPending(transaction);
-
 	let transactionDate: number | undefined;
 	$: transactionDate = timestamp ?? displayTimestamp;
 </script>
 
 <button on:click={() => modalStore.openTransaction(transaction)} class="contents">
 	<Card>
-		{`${type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}`}
+		{label}
 
 		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-10' : ''} />
 
