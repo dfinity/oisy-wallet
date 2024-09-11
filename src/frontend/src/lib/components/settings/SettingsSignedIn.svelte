@@ -7,11 +7,11 @@
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
-	import { authSignedIn } from '$lib/derived/auth.derived';
+	import { authSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
-	import { authRemainingTimeStore, authStore } from '$lib/stores/auth.store';
+	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -23,7 +23,7 @@
 	$: remainingTimeMilliseconds = $authRemainingTimeStore;
 
 	let identity: OptionIdentity;
-	$: identity = $authStore?.identity;
+	$: identity = $authIdentity;
 
 	let principal: Principal | undefined | null;
 	$: principal = identity?.getPrincipal();

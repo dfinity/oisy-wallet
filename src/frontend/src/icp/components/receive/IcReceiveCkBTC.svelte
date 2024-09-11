@@ -12,8 +12,8 @@
 	} from '$icp/stores/receive-token.store';
 	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalCkBTCReceive } from '$lib/derived/modal.derived';
-	import { authStore } from '$lib/stores/auth.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
 	const { token, tokenId, ckEthereumTwinToken, open, close } =
@@ -33,7 +33,7 @@
 
 		await loadAllCkBtcInfo({
 			...$token,
-			identity: $authStore.identity
+			identity: $authIdentity
 		});
 
 		modalStore.openCkBTCReceive(modalId);

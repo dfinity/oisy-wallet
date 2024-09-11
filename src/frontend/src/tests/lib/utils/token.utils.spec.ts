@@ -6,6 +6,7 @@ import {
 	getMaxTransactionAmount,
 	mapTokenUi
 } from '$lib/utils/token.utils';
+import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
 import { $balances, bn3 } from '../../mocks/balances.mock';
 import { $exchanges } from '../../mocks/exchanges.mock';
@@ -24,8 +25,8 @@ describe('getMaxTransactionAmount', () => {
 	it('should return the correct maximum amount for a transaction for each token standard', () => {
 		tokenStandards.forEach((tokenStandard) => {
 			const result = getMaxTransactionAmount({
-				balance,
-				fee,
+				balance: BigNumber.from(balance),
+				fee: BigNumber.from(fee),
 				tokenDecimals,
 				tokenStandard
 			});
@@ -36,8 +37,8 @@ describe('getMaxTransactionAmount', () => {
 	it('should return 0 if balance is less than fee', () => {
 		tokenStandards.forEach((tokenStandard) => {
 			const result = getMaxTransactionAmount({
-				balance: fee,
-				fee: balance,
+				fee: BigNumber.from(balance),
+				balance: BigNumber.from(fee),
 				tokenDecimals,
 				tokenStandard
 			});
@@ -61,14 +62,14 @@ describe('getMaxTransactionAmount', () => {
 		tokenStandards.forEach((tokenStandard) => {
 			let result = getMaxTransactionAmount({
 				balance: undefined,
-				fee,
+				fee: BigNumber.from(fee),
 				tokenDecimals,
 				tokenStandard
 			});
 			expect(result).toBe(0);
 
 			result = getMaxTransactionAmount({
-				balance,
+				balance: BigNumber.from(balance),
 				fee: undefined,
 				tokenDecimals,
 				tokenStandard
@@ -79,8 +80,8 @@ describe('getMaxTransactionAmount', () => {
 
 	it('should return the untouched amount if the token is ERC20', () => {
 		const result = getMaxTransactionAmount({
-			balance,
-			fee,
+			balance: BigNumber.from(balance),
+			fee: BigNumber.from(fee),
 			tokenDecimals: tokenDecimals,
 			tokenStandard: 'erc20'
 		});
