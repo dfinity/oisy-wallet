@@ -3,9 +3,10 @@
 	import {
 		type IcrcScope,
 		type IcrcScopedMethod,
+		type Origin,
 		type PermissionsConfirmation
 	} from '@dfinity/oisy-wallet-signer';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type ComponentType, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -25,6 +26,23 @@
 
 	let confirm: PermissionsConfirmation | undefined;
 	$: confirm = $payload?.confirmScopes;
+
+	const hostOrigin = (origin: Origin | undefined): string | undefined => {
+		if (isNullish(origin)) {
+			return undefined;
+		}
+
+		try {
+			// If set we actually for sure that the $payload.origin is a valid URL but, for the state of the art, we still catch potential errors here too.
+			const { host } = new URL(origin);
+			return host;
+		} catch {
+			return undefined;
+		}
+	};
+
+	let origin: Origin | undefined;
+	$: origin = hostOrigin($payload?.origin);
 
 	const onReject = () => {
 		// TODO: assert no undefined and toast error
@@ -58,12 +76,12 @@
 	};
 </script>
 
-{#if nonNullish(scopes)}
+{#if nonNullish(scopes) && nonNullish(origin)}
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
 		<h2 class="text-center mb-6">Connect your wallet</h2>
 
 		<div class="bg-light-blue p-6 mb-6 rounded-lg">
-			<p class="break-normal font-bold">By connecting, ORIGIN will:</p>
+			<p class="break-normal font-bold">By connecting, {origin} will:</p>
 
 			<ul class="flex flex-col gap-1 list-none mt-2.5">
 				{#each scopes as scope}
