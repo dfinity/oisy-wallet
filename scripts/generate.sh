@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -exuo pipefail
 
 [[ "${1:-}" != "--help" ]] || {
   cat <<-EOF
