@@ -25,7 +25,7 @@
 	$: scopes = $payload?.requestedScopes;
 
 	let confirm: PermissionsConfirmation | undefined;
-	$: confirm = $payload?.confirmScopes;
+	$: confirm = $payload?.confirm;
 
 	const hostOrigin = (origin: Origin | undefined): string | undefined => {
 		if (isNullish(origin)) {
