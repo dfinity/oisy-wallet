@@ -1,4 +1,3 @@
-import { ETHEREUM_NETWORK } from '$env/networks.env';
 import { ETHEREUM_TOKEN } from '$env/tokens.env';
 import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens.erc20.env';
 import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
@@ -64,7 +63,7 @@ export const ckEthereumTwinTokenStandard: Readable<TokenStandard> = derived(
 
 export const ckEthereumTwinTokenNetwork: Readable<EthereumNetwork> = derived(
 	[ckEthereumTwinToken],
-	([{ network }]) => (network as EthereumNetwork | undefined) ?? ETHEREUM_NETWORK
+	([{ network }]) => network as EthereumNetwork
 );
 
 export const ckEthereumTwinTokenNetworkId: Readable<NetworkId> = derived(
