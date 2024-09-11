@@ -8,7 +8,7 @@
 			><ExternalLink
 				iconVisible={false}
 				color="inherit"
-				href="https://forum.dfinity.org/t/cketh-a-canister-issued-ether-twin-token-on-the-ic"
+				href="https://forum.dfinity.org/t/cketh-a-canister-issued-ether-twin-token-on-the-ic/22819/210"
 				ariaLabel="A forum post discussing the ongoing incident">More information</ExternalLink
 			></span
 		>.
