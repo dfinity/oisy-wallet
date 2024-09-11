@@ -165,8 +165,4 @@ export const filterEnabledTokens = ([$tokens]: [$tokens: Token[]]): Token[] =>
 export const pinEnabledTokensAtTop = <T extends Token>(
 	$tokens: TokenToggleable<T>[]
 ): TokenToggleable<T>[] =>
-	$tokens
-		.reduce<
-			[TokenToggleable<T>[], TokenToggleable<T>[]]
-		>(([active, inactive], token) => (token.enabled ? [[...active, token], inactive] : [active, [...inactive, token]]), [[], []])
-		.flat();
+	$tokens.sort((a, b) => (a.enabled === b.enabled ? 0 : a.enabled ? -1 : 1));
