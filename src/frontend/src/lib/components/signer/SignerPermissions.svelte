@@ -11,6 +11,10 @@
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { IconWallet } from '@dfinity/gix-components';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
+	import {shortenWithMiddleEllipsis} from "$lib/utils/format.utils";
+	import OisyWalletLogo from "$lib/components/icons/OisyWalletLogo.svelte";
+	import { i18n } from '$lib/stores/i18n.store';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 
 	const {
 		permissionsPrompt: { payload, reset: resetPrompt }
@@ -70,6 +74,20 @@
 					</li>
 				{/each}
 			</ul>
+		</div>
+
+		<div class="border border-dust bg-white rounded-lg flex p-4 mb-6">
+			<OisyWalletLogo />
+
+			<div>
+				<label class="block text-sm font-bold" for="ic-wallet-address"
+				>{$i18n.wallet.text.wallet_address}:</label
+				>
+
+				<output id="ic-wallet-address" class="break-all"
+				>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
+				>
+			</div>
 		</div>
 
 		<ButtonGroup>
