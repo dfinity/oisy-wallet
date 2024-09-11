@@ -46,11 +46,11 @@ export const sendIc = async ({
 
 	// In case of conversion to ERC20, we make sure that the token is enabled in the list of tokens.
 	// No need to do it for ETH as it is always enabled by default.
-	const { token, targetNetworkId, identity, twinTokenAsErc20 } = rest;
+	const { token, targetNetworkId, identity, ckErc20ToErc20TwinToken } = rest;
 	if (isConvertCkErc20ToErc20({ token, networkId: targetNetworkId })) {
 		await saveTwinTokenInUserTokens({
 			identity,
-			twinToken: twinTokenAsErc20
+			twinToken: ckErc20ToErc20TwinToken
 		});
 	}
 

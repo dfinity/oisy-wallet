@@ -4,6 +4,7 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
@@ -22,7 +23,10 @@
 	} from '$icp/stores/ethereum-fee.store';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
-	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import {
+		ckEthereumTwinTokenId,
+		ckEthereumTwinTokenNetworkId
+	} from '$icp-eth/derived/cketh.derived';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
@@ -58,6 +62,7 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import type { Erc20UserToken } from '$eth/types/erc20-user-token.js';
 
 	/**
 	 * Props
@@ -125,8 +130,11 @@
 				: undefined;
 
 			// In case we are converting ckERC20 to ERC20, we need to include the Twin Token to be enabled.
-			const twinTokenAsErc20: Erc20Token | undefined = convertCkErc20ToErc20
-				? ($ckEthereumTwinToken as Erc20Token)
+			const ckErc20ToErc20TwinToken: Erc20UserToken | undefined = convertCkErc20ToErc20
+				? $erc20Tokens.find(
+						({ id: tokenId, network: { id: networkId } }) =>
+							tokenId === $ckEthereumTwinTokenId && networkId === $ckEthereumTwinTokenNetworkId
+					)
 				: undefined;
 
 			const params: IcTransferParams = {
@@ -138,7 +146,7 @@
 				identity: $authIdentity,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step),
 				ckErc20ToErc20MaxCkEthFees,
-				twinTokenAsErc20
+				ckErc20ToErc20TwinToken
 			};
 
 			const trackAnalyticsOnSendComplete = async () => {
