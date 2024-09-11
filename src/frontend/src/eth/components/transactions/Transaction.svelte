@@ -77,6 +77,9 @@
 					? $i18n.send.text.send
 					: $i18n.receive.text.receive;
 
+	let label: string;
+	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
+
 	let icon: ComponentType;
 	$: icon =
 		(type === 'withdraw' || type === 'deposit') && pending
