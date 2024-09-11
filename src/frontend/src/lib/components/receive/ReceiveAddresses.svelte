@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 	import { BTC_MAINNET_TOKEN, BTC_REGTEST_TOKEN, BTC_TESTNET_TOKEN } from '$env/tokens.btc.env';
