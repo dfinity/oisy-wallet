@@ -17,7 +17,7 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { tokenId, tokenWithFallback } from '$lib/derived/token.derived';
+	import { tokenId, tokenSymbol, tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Transaction } from '$lib/types/transaction';
@@ -48,7 +48,7 @@
 	let twinTokenSymbol: string;
 	$: twinTokenSymbol =
 		nonNullish($tokenId) && isSupportedEthTokenId($tokenId)
-			? 'ckETH'
+			? `ck${$tokenSymbol}`
 			: ($tokenWithFallback as Erc20Token).twinTokenSymbol ?? '';
 
 	let label: string;
@@ -76,9 +76,6 @@
 				: type === 'send'
 					? $i18n.send.text.send
 					: $i18n.receive.text.receive;
-
-	let label: string;
-	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
 
 	let icon: ComponentType;
 	$: icon =
