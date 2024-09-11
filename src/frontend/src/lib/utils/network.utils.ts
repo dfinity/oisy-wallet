@@ -4,6 +4,7 @@ import {
 	SUPPORTED_ETHEREUM_NETWORKS_IDS
 } from '$env/networks.env';
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
+import { selectedNetworkStore } from '$lib/stores/settings.store';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
@@ -37,3 +38,15 @@ export const filterTokensForSelectedNetwork = ([
 			$selectedNetwork?.id === networkId
 		);
 	});
+
+export const saveSelectedNetwork = (networkId: NetworkId | undefined) => {
+	const params = {
+		key: 'selected-network'
+	};
+
+	if (nonNullish(networkId) && nonNullish(networkId.description)) {
+		selectedNetworkStore.set({ ...params, value: { option: networkId.description } });
+	} else {
+		selectedNetworkStore.reset(params);
+	}
+};

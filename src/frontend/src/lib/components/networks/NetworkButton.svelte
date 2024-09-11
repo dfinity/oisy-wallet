@@ -9,6 +9,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
+	import { saveSelectedNetwork } from '$lib/utils/network.utils';
 
 	export let id: NetworkId | undefined;
 	export let name: string;
@@ -18,6 +19,7 @@
 	const dispatch = createEventDispatcher();
 
 	const onClick = async () => {
+		saveSelectedNetwork(id);
 		await switchNetwork(id);
 
 		if (isRouteTransactions($page)) {

@@ -1,8 +1,17 @@
 import { initStorageStore } from '$lib/stores/storage.store';
 
-export interface SettingsData {
+interface ToggleableSettingsData {
 	enabled: boolean;
 }
 
-export const testnetsStore = initStorageStore<SettingsData>({ key: 'testnets' });
-export const hideZeroBalancesStore = initStorageStore<SettingsData>({ key: 'hide-zero-balances' });
+interface SelectableSettingsData {
+	option: string;
+}
+
+export const testnetsStore = initStorageStore<ToggleableSettingsData>({ key: 'testnets' });
+export const hideZeroBalancesStore = initStorageStore<ToggleableSettingsData>({
+	key: 'hide-zero-balances'
+});
+export const selectedNetworkStore = initStorageStore<SelectableSettingsData>({
+	key: 'selected-network'
+});

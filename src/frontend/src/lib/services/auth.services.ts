@@ -8,7 +8,7 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { testnetsStore } from '$lib/stores/settings.store';
+import { selectedNetworkStore, testnetsStore } from '$lib/stores/settings.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { ToastMsg } from '$lib/types/toast';
 import { replaceHistory } from '$lib/utils/route.utils';
@@ -104,6 +104,10 @@ const clearTestnetsOption = async () => {
 	testnetsStore.reset({ key: 'testnets' });
 };
 
+const clearSelectedNetwork = async () => {
+	selectedNetworkStore.reset({ key: 'selected-network' });
+};
+
 const logout = async ({
 	msg = undefined,
 	clearStorages = true
@@ -115,7 +119,12 @@ const logout = async ({
 	busy.start();
 
 	if (clearStorages) {
-		await Promise.all([emptyIdbBtcAddressMainnet(), emptyIdbEthAddress(), clearTestnetsOption()]);
+		await Promise.all([
+			emptyIdbBtcAddressMainnet(),
+			emptyIdbEthAddress(),
+			clearTestnetsOption(),
+			clearSelectedNetwork()
+		]);
 	}
 
 	await authStore.signOut();
