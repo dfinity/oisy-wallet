@@ -33,10 +33,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
+	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-	import { sortTokens } from '$lib/utils/tokens.utils';
+	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -82,7 +83,7 @@
 	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
 
 	// TODO: Bitcoin tokens ($enabledBitcoinTokens) are not included yet.
-	let allTokens: Token[] = [];
+	let allTokens: TokenToggleable<Token>[] = [];
 	$: allTokens = filterTokensForSelectedNetwork([
 		[
 			{
@@ -99,11 +100,13 @@
 
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
-		? sortTokens({
-				$tokens: allTokens,
-				$exchanges: exchangesStaticData,
-				$tokensToPin: $tokensToPin
-			})
+		? pinEnabledTokensAtTop(
+				sortTokens({
+					$tokens: allTokens,
+					$exchanges: exchangesStaticData,
+					$tokensToPin: $tokensToPin
+				})
+			)
 		: [];
 
 	let filterTokens = '';
