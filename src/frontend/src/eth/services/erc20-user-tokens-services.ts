@@ -53,7 +53,7 @@ export const saveUserTokens = async ({
 	await loadUserTokens({ identity });
 };
 
-export const saveTwinTokenInUserTokens = async ({
+export const enableTwinTokenInUserTokens = async ({
 	identity,
 	twinToken
 }: {
