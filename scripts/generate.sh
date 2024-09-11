@@ -42,7 +42,10 @@ function install_did_files() {
 }
 
 # Create local .did files
+# .. gets candid from Rust code
 ./scripts/did.sh
+# .. downloads candid for the signer
+./scripts/build.signer.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate bindings for canisters with directories in `declarations`:
