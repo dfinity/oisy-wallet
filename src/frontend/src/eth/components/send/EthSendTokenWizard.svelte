@@ -19,7 +19,9 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeQrCode } from '$eth/utils/qr-code.utils';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
-	import { isErc20Icp } from '$eth/utils/token.utils';
+	import { isErc20Icp, isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
+	import { enableCkTwinTokenInCustomTokens } from '$icp/services/ic-custom-tokens.services';
 	import { assertCkEthMinterInfoLoaded } from '$icp-eth/services/cketh.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
@@ -48,6 +50,7 @@
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { OptionToken, Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let currentStep: WizardStep | undefined;
@@ -208,6 +211,17 @@
 					}
 				})
 			]);
+
+			// In case of conversion to ckERC20, we make sure that the token is enabled in the list of tokens.
+			// No need to do it for ckETH as it is always enabled by default.
+			// The flow does not wait for the token to be enabled, as it is not critical for the user,
+			// and it actually changes `icrcCustomTokensStore` that re-triggers variables/stores in Manage Modal (such as `ckEthereumTwinToken` and `steps`).
+			if (isSupportedErc20TwinTokenId($sendToken.id) && isNetworkICP(targetNetwork)) {
+				enableCkTwinTokenInCustomTokens({
+					identity: $authIdentity,
+					ckTwinToken: $icrcTokens.find(({ symbol }) => symbol === $sendToken.symbol)
+				});
+			}
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
