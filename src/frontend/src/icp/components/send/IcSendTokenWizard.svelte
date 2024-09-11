@@ -5,7 +5,6 @@
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import type { Erc20Token } from '$eth/types/erc20';
 	import type { Erc20UserToken } from '$eth/types/erc20-user-token.js';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
