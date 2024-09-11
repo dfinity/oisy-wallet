@@ -48,7 +48,7 @@ export const sendIc = async ({
 	// No need to do it for ETH as it is always enabled by default.
 	const { token, targetNetworkId, identity, ckErc20ToErc20TwinToken } = rest;
 	if (isConvertCkErc20ToErc20({ token, networkId: targetNetworkId })) {
-		enableTwinTokenInUserTokens({
+		await enableTwinTokenInUserTokens({
 			identity,
 			twinToken: ckErc20ToErc20TwinToken
 		});
