@@ -54,6 +54,7 @@ export interface SignRequest {
 }
 export interface _SERVICE {
 	caller_btc_address: ActorMethod<[BitcoinNetwork], string>;
+	caller_btc_balance: ActorMethod<[BitcoinNetwork], bigint>;
 	caller_eth_address: ActorMethod<[], string>;
 	config: ActorMethod<[], Config>;
 	eth_address_of: ActorMethod<[Principal], string>;
