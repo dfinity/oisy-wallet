@@ -6,6 +6,7 @@
 	import IcSendReview from './IcSendReview.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
+	import type { Erc20UserToken } from '$eth/types/erc20-user-token.js';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
@@ -62,7 +63,6 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { Erc20UserToken } from '$eth/types/erc20-user-token.js';
 
 	/**
 	 * Props
