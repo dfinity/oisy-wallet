@@ -7,9 +7,11 @@
 	import type { Token } from '$lib/types/token';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import SkeletonText from '../ui/SkeletonText.svelte';
 
 	export let token: Token;
-	export let address: string;
+	export let address: string | undefined | null;
 	export let qrCodeAriaLabel: string;
 	export let copyAriaLabel: string;
 	export let invisibleLogo = false;
@@ -34,12 +36,20 @@
 				<Card noMargin>
 					<slot />
 
-					<span class="break-all" slot="description" data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}>
-						{shortenWithMiddleEllipsis(address)}
-					</span>
+					<svelte:fragment slot="description">
+						{#if isNullish(address)}
+							<span class="w-full max-w-[150px] mt-2"><SkeletonText /></span>
+						{:else}
+							<span class="break-all" data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}>
+								{shortenWithMiddleEllipsis(address)}
+							</span>
+						{/if}
+					</svelte:fragment>
 				</Card>
 
-				<ReceiveActions on:click {address} {qrCodeAriaLabel} {copyAriaLabel} />
+				{#if nonNullish(address)}
+					<ReceiveActions on:click {address} {qrCodeAriaLabel} {copyAriaLabel} />
+				{/if}
 			</div>
 			<slot name="notes" />
 		</div>
