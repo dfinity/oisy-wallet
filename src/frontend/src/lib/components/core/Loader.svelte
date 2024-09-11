@@ -19,6 +19,7 @@
 	import { signOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import { debounce, nonNullish } from '@dfinity/utils';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -67,9 +68,11 @@
 
 	let progressModal = false;
 
+	const debounceLadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
+
 	$: {
-		if ($testnets && !$btcAddressTestnet) {
-			loadBtcAddressTestnet();
+		if ($testnets && nonNullish($btcAddressTestnet)) {
+			debounceLadBtcAddressTestnet();
 		}
 	}
 
