@@ -2,11 +2,20 @@
 	"dfx": "0.20.0",
 	"canisters": {
 		"signer": {
-			"candid": "src/backend/backend.did",
-			"package": "backend",
-			"type": "rust",
-			"optimize": "cycles",
-			"gzip": true
+			"type": "custom",
+			"build": "scripts/build.signer.sh",
+			"candid": "target/signer.did",
+			"wasm": "target/signer.wasm.gz",
+			"init_arg_file": "target/signer.arg.did",
+			"shrink": false,
+			"remote": {
+				"id": {
+					"ic": "grghe-syaaa-aaaar-qabyq-cai",
+					"beta": "grghe-syaaa-aaaar-qabyq-cai",
+					"old_backend": "cab24-4qaaa-aaaan-qecca-cai",
+					"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
+				}
+			}
 		},
 		"backend": {
 			"candid": "src/backend/backend.did",
