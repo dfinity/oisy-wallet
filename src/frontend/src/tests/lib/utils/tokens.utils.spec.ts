@@ -338,7 +338,7 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 
 describe('pinEnabledTokensAtTop', () => {
 	it('should pin enabled tokens at the top while preserving the order', () => {
-		const tokens: TokenToggleable[] = [
+		const tokens: TokenToggleable<Token>[] = [
 			{ ...ICP_TOKEN, enabled: false },
 			{ ...BTC_MAINNET_TOKEN, enabled: true },
 			{ ...ETHEREUM_TOKEN, enabled: true }
@@ -354,7 +354,7 @@ describe('pinEnabledTokensAtTop', () => {
 	});
 
 	it('should return the same array when all tokens are enabled', () => {
-		const tokens: TokenToggleable[] = $tokens.map((t) => ({ ...t, enabled: true }));
+		const tokens: TokenToggleable<Token>[] = $tokens.map((t) => ({ ...t, enabled: true }));
 
 		const result = pinEnabledTokensAtTop(tokens);
 
@@ -362,7 +362,7 @@ describe('pinEnabledTokensAtTop', () => {
 	});
 
 	it('should return the same array when all tokens are disabled', () => {
-		const tokens: TokenToggleable[] = $tokens.map((t) => ({ ...t, enabled: false }));
+		const tokens: TokenToggleable<Token>[] = $tokens.map((t) => ({ ...t, enabled: false }));
 
 		const result = pinEnabledTokensAtTop(tokens);
 
