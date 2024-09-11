@@ -38,6 +38,9 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+	import BtcManageTokenToggle from '$btc/components/BtcManageTokenToggle.svelte';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -90,6 +93,7 @@
 				...ICP_TOKEN,
 				enabled: true
 			},
+			...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
 			...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
 			...(manageEthereumTokens ? allErc20Tokens : []),
 			...(manageIcTokens ? allIcrcTokens : [])
@@ -243,6 +247,8 @@
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
 					{:else if icTokenEthereumUserToken(token)}
 						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
+					{:else if isBitcoinToken(token)}
+						<BtcManageTokenToggle />
 					{/if}
 				</svelte:fragment>
 			</Card>
