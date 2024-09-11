@@ -69,7 +69,7 @@
 					address: $btcAddressMainnet ?? '',
 					addressLabel: $i18n.receive.bitcoin.text.bitcoin_address
 				})}
-			address={$btcAddressMainnet ?? ''}
+			address={$btcAddressMainnet}
 			token={BTC_MAINNET_TOKEN}
 			qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
