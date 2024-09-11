@@ -68,11 +68,11 @@
 
 	let progressModal = false;
 
-	const debounceLadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
+	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
 
 	$: {
 		if ($testnets && nonNullish($btcAddressTestnet)) {
-			debounceLadBtcAddressTestnet();
+			debounceLoadBtcAddressTestnet();
 		}
 	}
 
