@@ -5,7 +5,7 @@
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
+	import { enableTwinTokenInUserTokens } from '$eth/services/erc20-user-tokens-services';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
@@ -128,14 +128,6 @@
 				? $ethereumFeeStore?.maxTransactionFee
 				: undefined;
 
-			// In case we are converting ckERC20 to ERC20, we need to include the Twin Token to be enabled.
-			const ckErc20ToErc20TwinToken: Erc20TokenToggleable | undefined = convertCkErc20ToErc20
-				? $erc20Tokens.find(
-						({ id: tokenId, network: { id: networkId } }) =>
-							tokenId === $ckEthereumTwinTokenId && networkId === $ckEthereumTwinTokenNetworkId
-					)
-				: undefined;
-
 			const params: IcTransferParams = {
 				to: destination,
 				amount: parseToken({
@@ -144,8 +136,7 @@
 				}),
 				identity: $authIdentity,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step),
-				ckErc20ToErc20MaxCkEthFees,
-				ckErc20ToErc20TwinToken
+				ckErc20ToErc20MaxCkEthFees
 			};
 
 			const trackAnalyticsOnSendComplete = async () => {
@@ -172,6 +163,20 @@
 				targetNetworkId: networkId,
 				sendCompleted: trackAnalyticsOnSendComplete
 			});
+
+			// In case of conversion to ERC20, we make sure that the token is enabled in the list of tokens.
+			// No need to do it for ETH as it is always enabled by default.
+			// The flow does not wait for the token to be enabled, as it is not critical for the user,
+			// and it actually changes `erc20UserTokensStore` that re-triggers variables/stores in Manage Modal (such as `ckEthereumTwinToken` and `steps`).
+			if (convertCkErc20ToErc20) {
+				enableTwinTokenInUserTokens({
+					identity: $authIdentity,
+					twinToken: $erc20Tokens.find(
+						({ id: tokenId, network: { id: networkId } }) =>
+							tokenId === $ckEthereumTwinTokenId && networkId === $ckEthereumTwinTokenNetworkId
+					)
+				});
+			}
 
 			sendProgressStep = ProgressStepsSendIc.DONE;
 

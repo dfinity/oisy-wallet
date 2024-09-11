@@ -1,4 +1,3 @@
-import { enableTwinTokenInUserTokens } from '$eth/services/erc20-user-tokens-services';
 import {
 	isConvertCkErc20ToErc20,
 	isConvertCkEthToEth
@@ -43,18 +42,6 @@ export const sendIc = async ({
 	await sendCompleted();
 
 	progress(ProgressStepsSendIc.RELOAD);
-
-	// In case of conversion to ERC20, we make sure that the token is enabled in the list of tokens.
-	// No need to do it for ETH as it is always enabled by default.
-	// The flow does not wait for the token to be enabled, as it is not critical for the user,
-	// and it actually changes `erc20UserTokensStore` that re-triggers variables/stores in Manage Modal (such as `ckEthereumTwinToken` and `steps`).
-	const { token, targetNetworkId, identity, ckErc20ToErc20TwinToken } = rest;
-	if (isConvertCkErc20ToErc20({ token, networkId: targetNetworkId })) {
-		enableTwinTokenInUserTokens({
-			identity,
-			twinToken: ckErc20ToErc20TwinToken
-		});
-	}
 
 	await waitAndTriggerWallet();
 };
