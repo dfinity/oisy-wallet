@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import SkeletonText from '../ui/SkeletonText.svelte';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -7,8 +9,6 @@
 	import type { Token } from '$lib/types/token';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import SkeletonText from '../ui/SkeletonText.svelte';
 
 	export let token: Token;
 	export let address: string | undefined | null;
