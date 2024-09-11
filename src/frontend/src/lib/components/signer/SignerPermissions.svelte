@@ -74,6 +74,11 @@
 			label: 'Initiate transactions to approve in Oisy'
 		}
 	};
+
+	let requestAccountsPermissions = false;
+	$: requestAccountsPermissions = nonNullish(
+		scopes?.find(({ scope: { method } }) => method === 'icrc27_accounts')
+	);
 </script>
 
 {#if nonNullish(scopes) && nonNullish(origin)}
@@ -95,7 +100,7 @@
 			</ul>
 		</div>
 
-		{#if nonNullish(listItems['icrc27_accounts'])}
+		{#if requestAccountsPermissions}
 			<div class="border border-dust bg-white rounded-lg flex p-4 mb-6">
 				<OisyWalletLogo />
 

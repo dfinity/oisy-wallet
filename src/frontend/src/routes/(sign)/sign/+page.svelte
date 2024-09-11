@@ -8,14 +8,15 @@
 	import SignerSignIn from '$lib/components/signer/SignerSignIn.svelte';
 	import { authNotSignedIn, authIdentity } from '$lib/derived/auth.derived';
 	import { initSignerContext, SIGNER_CONTEXT_KEY } from '$lib/stores/signer.store';
+	import SignerConsentMessage from "$lib/components/signer/SignerConsentMessage.svelte";
 
-	const accountsPrompt = ({ confirmAccounts }: AccountsPromptPayload) => {
+	const accountsPrompt = ({ approve }: AccountsPromptPayload) => {
 		if (isNullish($authIdentity)) {
 			// TODO show error
 			return;
 		}
 
-		confirmAccounts([{ owner: $authIdentity.getPrincipal().toText() }]);
+		approve([{ owner: $authIdentity.getPrincipal().toText() }]);
 	};
 
 	// TODO: display test on notifyErrors
@@ -46,5 +47,7 @@
 		</div>
 	{:else}
 		<SignerPermissions />
+
+		<SignerConsentMessage />
 	{/if}
 </article>
