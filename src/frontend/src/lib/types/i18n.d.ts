@@ -175,6 +175,8 @@ interface I18nReceive {
 			checking_incoming: string;
 			refreshing_wallet: string;
 			bitcoin_address: string;
+			bitcoin_testnet_address: string;
+			bitcoin_regtest_address: string;
 			display_bitcoin_address_qr: string;
 			bitcoin_address_copied: string;
 			from_network: string;
