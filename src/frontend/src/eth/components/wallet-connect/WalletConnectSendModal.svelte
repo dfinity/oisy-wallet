@@ -6,15 +6,15 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type {
-		WalletConnectEthSendTransactionParams,
-		WalletConnectListener
+		OptionalNullableWalletConnectListener,
+		WalletConnectEthSendTransactionParams
 	} from '$eth/types/wallet-connect';
 	import type { Token } from '$lib/types/token';
 
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
 	export let sourceNetwork: EthereumNetwork;
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionalNullableWalletConnectListener;
 
 	let token: Token | undefined;
 	$: token = $enabledEthereumTokens.find(
