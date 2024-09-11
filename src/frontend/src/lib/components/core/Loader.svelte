@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Modal, type ProgressStep } from '@dfinity/gix-components';
+	import { debounce, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
@@ -19,7 +20,6 @@
 	import { signOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
-	import { debounce, nonNullish } from '@dfinity/utils';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
