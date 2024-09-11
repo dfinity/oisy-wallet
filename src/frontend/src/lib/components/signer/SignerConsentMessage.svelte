@@ -1,8 +1,9 @@
 <script lang="ts">
-	import {
-		type icrc21_consent_info,
-		type ConsentMessageApproval,
-		type Rejection
+	import { Markdown } from '@dfinity/gix-components';
+	import type {
+		icrc21_consent_info,
+		ConsentMessageApproval,
+		Rejection
 	} from '@dfinity/oisy-wallet-signer';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
@@ -46,8 +47,7 @@
 		<h2 class="text-center mb-6">Connect your wallet</h2>
 
 		<div class="bg-light-blue p-6 mb-6 rounded-lg">
-
-			{displayMessage}
+			<Markdown text={displayMessage} />
 		</div>
 
 		<ButtonGroup>
