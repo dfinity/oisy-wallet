@@ -114,6 +114,12 @@ const loadBtcAddress = async ({
 		...bitcoinMapper[network]
 	});
 
+export const loadBtcAddressTestnet = async (): Promise<ResultSuccess> =>
+	loadBtcAddress({
+		tokenId: BTC_TESTNET_TOKEN_ID,
+		network: 'testnet'
+	});
+
 const loadBtcAddressMainnet = async (): Promise<ResultSuccess> =>
 	loadBtcAddress({
 		tokenId: BTC_MAINNET_TOKEN_ID,
