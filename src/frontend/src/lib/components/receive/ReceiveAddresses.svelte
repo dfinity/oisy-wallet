@@ -81,14 +81,14 @@
 			{$i18n.receive.bitcoin.text.bitcoin_address}
 		</ReceiveAddressWithLogo>
 
-		{#if $testnets && nonNullish($btcAddressTestnet) && $testnets}
+		{#if $testnets}
 			<ReceiveAddressWithLogo
 				on:click={() =>
 					displayQRCode({
-						address: $btcAddressTestnet,
+						address: $btcAddressTestnet ?? '',
 						addressLabel: $i18n.receive.bitcoin.text.bitcoin_testnet_address
 					})}
-				address={$btcAddressTestnet ?? ''}
+				address={$btcAddressTestnet}
 				token={BTC_TESTNET_TOKEN}
 				qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 				copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
@@ -101,7 +101,7 @@
 				<ReceiveAddressWithLogo
 					on:click={() =>
 						displayQRCode({
-							address: $btcAddressTestnet,
+							address: $btcAddressTestnet ?? '',
 							addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address
 						})}
 					address={$btcAddressTestnet}
