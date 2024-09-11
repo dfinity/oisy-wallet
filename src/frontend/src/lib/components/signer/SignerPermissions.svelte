@@ -85,7 +85,7 @@
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
 		<h2 class="text-center mb-6">Connect your wallet</h2>
 
-		<div class="bg-light-blue p-6 mb-6 rounded-lg">
+		<div class="bg-light-blue border border-light-blue p-6 mb-6 rounded-lg">
 			<p class="break-normal font-bold">By connecting, {origin} will:</p>
 
 			<ul class="flex flex-col gap-1 list-none mt-2.5">

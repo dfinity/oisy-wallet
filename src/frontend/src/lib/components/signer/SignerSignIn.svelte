@@ -7,7 +7,7 @@
 
 <h2 class="text-center mb-6">Authenticate to connect</h2>
 
-<div class="bg-light-blue p-6 mb-6 rounded-lg">
+<div class="bg-light-blue border border-light-blue p-6 mb-6 rounded-lg">
 	<p class="break-normal font-bold">By connecting, the dApp will:</p>
 
 	<p class="break-normal pt-2.5 flex items-center gap-2">

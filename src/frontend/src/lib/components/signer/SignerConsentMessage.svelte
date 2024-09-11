@@ -5,7 +5,7 @@
 		ConsentMessageApproval,
 		Rejection
 	} from '@dfinity/oisy-wallet-signer';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -29,6 +29,24 @@
 		? (consentInfo.consent_message as { GenericDisplayMessage: string }).GenericDisplayMessage
 		: undefined;
 
+	type Text = { title: string; content: string } | undefined;
+
+	const mapText = (markdown: string | undefined): Text => {
+		if (isNullish(markdown)) {
+			return undefined;
+		}
+
+		const [title, ...rest] = markdown.split('\n\n');
+
+		return {
+			title: title.replaceAll('#', '').trim(),
+			content: (rest ?? []).join('\n\n')
+		};
+	};
+
+	let text: Text;
+	$: text = mapText(displayMessage);
+
 	const onApprove = () => {
 		// TODO: handle error if not defined?
 		approve?.();
@@ -42,12 +60,14 @@
 	};
 </script>
 
-{#if nonNullish(displayMessage)}
-	<form in:fade on:submit|preventDefault={onApprove} method="POST">
-		<h2 class="text-center mb-6">Connect your wallet</h2>
+{#if nonNullish(text)}
+	{@const { title, content } = text}
 
-		<div class="bg-light-blue p-6 mb-6 rounded-lg">
-			<Markdown text={displayMessage} />
+	<form in:fade on:submit|preventDefault={onApprove} method="POST">
+		<h2 class="text-center mb-6">{title}</h2>
+
+		<div class="bg-off-white border border-light-blue p-6 mb-6 rounded-lg msg">
+			<Markdown text={content} />
 		</div>
 
 		<ButtonGroup>
@@ -56,3 +76,15 @@
 		</ButtonGroup>
 	</form>
 {/if}
+
+<style lang="scss">
+	.msg {
+		:global(p) {
+			margin: 0 0 var(--padding);
+		}
+
+		:global(strong) {
+			display: block;
+		}
+	}
+</style>
