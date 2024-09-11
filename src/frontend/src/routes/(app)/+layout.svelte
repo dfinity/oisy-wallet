@@ -18,9 +18,6 @@
 	$: token.set($pageToken);
 </script>
 
-<!-- TODO: remove me -->
-<AlertBanner />
-
 <Hero
 	usdTotal={route === 'tokens'}
 	summary={route === 'transactions'}
