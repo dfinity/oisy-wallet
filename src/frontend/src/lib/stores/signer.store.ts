@@ -19,35 +19,26 @@ export interface SignerContext {
 		payload: Readable<PermissionsPromptPayload | undefined | null>;
 		reset: () => void;
 	};
-	accountsPrompt: {
-		payload: Readable<AccountsPromptPayload | undefined | null>;
-		reset: () => void;
-	};
 }
 
-export const initSignerContext = (): SignerContext => {
+export const initSignerContext = ({
+	accountsPrompt
+}: {
+	accountsPrompt: (payload: AccountsPromptPayload) => void;
+}): SignerContext => {
 	let signer: OptionSigner;
 
 	const permissionsPromptPayloadStore = writable<PermissionsPromptPayload | undefined | null>(
 		undefined
 	);
 
-	const accountsPromptPayloadStore = writable<AccountsPromptPayload | undefined | null>(undefined);
-
 	const permissionsPromptPayload = derived(
 		[permissionsPromptPayloadStore],
 		([$permissionsPromptPayloadStore]) => $permissionsPromptPayloadStore
 	);
 
-	const accountsPromptPayload = derived(
-		[accountsPromptPayloadStore],
-		([$accountsPromptPayloadStore]) => $accountsPromptPayloadStore
-	);
-
-	const idle = derived(
-		[permissionsPromptPayload, accountsPromptPayload],
-		([$permissionsPromptPayload, $accountsPromptPayload]) =>
-			isNullish($permissionsPromptPayload) && isNullish($accountsPromptPayload)
+	const idle = derived([permissionsPromptPayload], ([$permissionsPromptPayload]) =>
+		isNullish($permissionsPromptPayload)
 	);
 
 	const init = ({ owner }: { owner: Identity }) => {
@@ -63,17 +54,14 @@ export const initSignerContext = (): SignerContext => {
 
 		signer.register({
 			method: ICRC27_ACCOUNTS,
-			prompt: (payload: AccountsPromptPayload) => accountsPromptPayloadStore.set(payload)
+			prompt: accountsPrompt
 		});
 	};
 
 	const resetPermissionsPromptPayload = () => permissionsPromptPayloadStore.set(null);
 
-	const resetAccountsPromptPayload = () => accountsPromptPayloadStore.set(null);
-
 	const reset = () => {
 		resetPermissionsPromptPayload();
-		resetAccountsPromptPayload();
 
 		signer?.disconnect();
 		signer = null;
@@ -86,10 +74,6 @@ export const initSignerContext = (): SignerContext => {
 		permissionsPrompt: {
 			payload: permissionsPromptPayload,
 			reset: resetPermissionsPromptPayload
-		},
-		accountsPrompt: {
-			payload: accountsPromptPayload,
-			reset: resetAccountsPromptPayload
 		}
 	};
 };

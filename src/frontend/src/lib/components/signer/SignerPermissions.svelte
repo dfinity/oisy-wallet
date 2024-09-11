@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { IconWallet } from '@dfinity/gix-components';
 	import {
 		type IcrcScope,
 		type IcrcScopedMethod,
@@ -7,14 +8,13 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { type ComponentType, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
-	import { IconWallet } from '@dfinity/gix-components';
-	import IconShield from '$lib/components/icons/IconShield.svelte';
-	import {shortenWithMiddleEllipsis} from "$lib/utils/format.utils";
-	import OisyWalletLogo from "$lib/components/icons/OisyWalletLogo.svelte";
-	import { i18n } from '$lib/stores/i18n.store';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import IconShield from '$lib/components/icons/IconShield.svelte';
+	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	const {
 		permissionsPrompt: { payload, reset: resetPrompt }
@@ -67,10 +67,11 @@
 
 			<ul class="flex flex-col gap-1 list-none mt-2.5">
 				{#each scopes as scope}
-					{@const {icon, label} = listItems[scope.scope.method]}
+					{@const { icon, label } = listItems[scope.scope.method]}
 
 					<li class="break-normal pb-1.5 flex items-center gap-2">
-						<svelte:component this={icon} /> {label}
+						<svelte:component this={icon} />
+						{label}
 					</li>
 				{/each}
 			</ul>
@@ -81,11 +82,11 @@
 
 			<div>
 				<label class="block text-sm font-bold" for="ic-wallet-address"
-				>{$i18n.wallet.text.wallet_address}:</label
+					>{$i18n.wallet.text.wallet_address}:</label
 				>
 
 				<output id="ic-wallet-address" class="break-all"
-				>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
+					>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
 				>
 			</div>
 		</div>
