@@ -25,25 +25,8 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-      - name: Cache backend wasm
-        uses: actions/cache@v4
-        id: backend-wasm-cache
-        with:
-          path: |
-            target/wasm32-unknown-unknown/release/backend.wasm
-          key: backend-wasm-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
-      - name: Cache cargo dependencies
-        if: steps.backend-wasm-cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-backend-tests-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
-      - name: Remove the old Wasm to force a rebuild
-        if: steps.backend-wasm-cache.outputs.cache-hit != 'true'
-        run: rm -f target/wasm32-unknown-unknown/release/backend.wasm
+      - name: Build oisy-backend WASM
+        uses: ./.github/actions/oisy-backend
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Install dfx
@@ -60,7 +43,7 @@ jobs:
         run: npm run generate
       - name: Check bindings
         run: |
-          test -z "$(git status --porcelain)" || {
+          test -z "$(git status --porcelain | tee /dev/stderr)" || {
                   echo "FIX: Please execute npm run generate"
                   git diff
                   exit 1

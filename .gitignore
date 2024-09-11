@@ -17,6 +17,9 @@ bitcoin*.gz
 # rust and downloaded wasm|did files
 target/
 
+# files created by docker buildx
+out/
+
 # frontend code
 node_modules/
 build/
