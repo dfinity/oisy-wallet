@@ -1,6 +1,6 @@
 import { loadUserTokens } from '$eth/services/erc20.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
-import type { Erc20Token } from '$eth/types/erc20';
+import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import { setManyUserTokens } from '$lib/api/backend.api';
@@ -58,8 +58,12 @@ export const enableTwinTokenInUserTokens = async ({
 	twinToken
 }: {
 	identity: OptionIdentity;
-	twinToken: Erc20Token | undefined;
+	twinToken: Erc20TokenToggleable | undefined;
 }) => {
+	if (twinToken?.enabled) {
+		return;
+	}
+
 	assertNonNullish(identity);
 
 	assertNonNullish(twinToken, get(i18n).send.assertion.ckerc20_twin_token_missing);

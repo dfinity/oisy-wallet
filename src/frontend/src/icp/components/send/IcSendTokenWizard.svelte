@@ -5,7 +5,7 @@
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import type { Erc20UserToken } from '$eth/types/erc20-user-token.js';
+	import type { Erc20TokenToggleable } from '$eth/types/erc20-token-toggleable';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
@@ -129,7 +129,7 @@
 				: undefined;
 
 			// In case we are converting ckERC20 to ERC20, we need to include the Twin Token to be enabled.
-			const ckErc20ToErc20TwinToken: Erc20UserToken | undefined = convertCkErc20ToErc20
+			const ckErc20ToErc20TwinToken: Erc20TokenToggleable | undefined = convertCkErc20ToErc20
 				? $erc20Tokens.find(
 						({ id: tokenId, network: { id: networkId } }) =>
 							tokenId === $ckEthereumTwinTokenId && networkId === $ckEthereumTwinTokenNetworkId
