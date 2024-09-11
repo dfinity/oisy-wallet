@@ -95,19 +95,21 @@
 			</ul>
 		</div>
 
-		<div class="border border-dust bg-white rounded-lg flex p-4 mb-6">
-			<OisyWalletLogo />
+		{#if nonNullish(listItems['icrc27_accounts'])}
+			<div class="border border-dust bg-white rounded-lg flex p-4 mb-6">
+				<OisyWalletLogo />
 
-			<div>
-				<label class="block text-sm font-bold" for="ic-wallet-address"
-					>{$i18n.wallet.text.wallet_address}:</label
-				>
+				<div>
+					<label class="block text-sm font-bold" for="ic-wallet-address"
+						>{$i18n.wallet.text.wallet_address}:</label
+					>
 
-				<output id="ic-wallet-address" class="break-all"
-					>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
-				>
+					<output id="ic-wallet-address" class="break-all"
+						>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
+					>
+				</div>
 			</div>
-		</div>
+		{/if}
 
 		<ButtonGroup>
 			<button type="button" class="secondary block flex-1" on:click={onReject}>Reject</button>
