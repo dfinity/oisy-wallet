@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Modal, type ProgressStep } from '@dfinity/gix-components';
-	import { debounce, nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
@@ -71,7 +71,7 @@
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
 
 	$: {
-		if ($testnets && nonNullish($btcAddressTestnet)) {
+		if ($testnets && isNullish($btcAddressTestnet)) {
 			debounceLoadBtcAddressTestnet();
 		}
 	}
