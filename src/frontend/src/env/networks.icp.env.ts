@@ -1,4 +1,5 @@
 import { LOCAL } from '$lib/constants/app.constants';
+import type { OptionalNullableCanisterIdText } from '$lib/types/canister';
 
 export const ICP_LEDGER_CANISTER_ID =
 	(LOCAL
