@@ -14,7 +14,7 @@
 	export let request: Web3WalletTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
 	export let sourceNetwork: EthereumNetwork;
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionalNullableWalletConnectListener;
 
 	let token: Token | undefined;
 	$: token = $enabledEthereumTokens.find(

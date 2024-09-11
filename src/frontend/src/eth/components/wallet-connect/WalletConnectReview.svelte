@@ -15,7 +15,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
+	export let proposal: OptionalNullable<Web3WalletTypes.SessionProposal>;
 
 	let params: ProposalTypes.Struct | undefined;
 	$: params = proposal?.params;

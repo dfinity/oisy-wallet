@@ -11,7 +11,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionalNullableWalletConnectListener;
 	export let request: Web3WalletTypes.SessionRequest;
 
 	/**

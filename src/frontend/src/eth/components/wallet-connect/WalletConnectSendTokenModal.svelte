@@ -125,7 +125,7 @@
 	 * WalletConnect
 	 */
 
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionalNullableWalletConnectListener;
 
 	/**
 	 * Reject a transaction

@@ -1,8 +1,9 @@
 import { LOCAL } from '$lib/constants/app.constants';
+import type { OptionalNullable } from '$lib/types/utils';
 import type { HttpAgent, Identity } from '@dfinity/agent';
 import { createAgent as createAgentUtils, isNullish } from '@dfinity/utils';
 
-let agents: Record<string, HttpAgent> | undefined | null = undefined;
+let agents: OptionalNullable<Record<string, HttpAgent>> = undefined;
 
 export const getAgent = async ({ identity }: { identity: Identity }): Promise<HttpAgent> => {
 	const key = identity.getPrincipal().toText();

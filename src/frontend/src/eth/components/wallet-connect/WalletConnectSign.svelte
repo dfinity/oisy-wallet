@@ -6,7 +6,7 @@
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionalNullableWalletConnectListener;
 
 	let request: Web3WalletTypes.SessionRequest | undefined;
 	$: request = $modalWalletConnectSign

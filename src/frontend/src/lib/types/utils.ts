@@ -3,3 +3,7 @@ export type RequiredExcept<T, K extends keyof T> = Required<Omit<T, K>> & Pick<T
 export type ResultSuccess<T = unknown> = { success: boolean; err?: T };
 
 export type ResultSuccessReduced<T = unknown> = ResultSuccess<T[]>;
+
+export type Nullable<T> = T | null;
+
+export type OptionalNullable<T> = Nullable<T> | undefined;

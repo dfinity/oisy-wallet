@@ -25,9 +25,10 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import type { OptionalNullable } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionalNullableWalletConnectListener;
 
 	const STEP_CONNECT: WizardStep = {
 		name: 'Connect',
@@ -50,7 +51,7 @@
 		close();
 	};
 
-	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
+	let proposal: OptionalNullable<Web3WalletTypes.SessionProposal>;
 
 	const disconnect = async () => {
 		await disconnectListener();

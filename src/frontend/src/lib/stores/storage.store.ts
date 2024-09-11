@@ -1,7 +1,8 @@
 import { del, get, set as setStorage } from '$icp/utils/storage.utils';
+import type { OptionalNullable } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type StorageStoreData<T> = T | null | undefined;
+export type StorageStoreData<T> = OptionalNullable<T>;
 
 export interface StorageStore<T> extends Readable<StorageStoreData<T>> {
 	set: (params: { key: string; value: T }) => void;

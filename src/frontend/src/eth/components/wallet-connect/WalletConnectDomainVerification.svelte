@@ -4,7 +4,7 @@
 	import { CONTEXT_VALIDATION_ISSCAM } from '$eth/constants/wallet-connect.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let proposal: Web3WalletTypes.SessionProposal | undefined | null;
+	export let proposal: OptionalNullable<Web3WalletTypes.SessionProposal>;
 
 	let context: Verify.Context | undefined = undefined;
 	$: context = proposal?.verifyContext;
