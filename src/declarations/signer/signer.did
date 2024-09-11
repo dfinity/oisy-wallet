@@ -44,6 +44,7 @@ type SignRequest = record {
 };
 service : (Arg) -> {
   caller_btc_address : (BitcoinNetwork) -> (text);
+  caller_btc_balance : (BitcoinNetwork) -> (nat64);
   caller_eth_address : () -> (text);
   config : () -> (Config) query;
   eth_address_of : (principal) -> (text);
