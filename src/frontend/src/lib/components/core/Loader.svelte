@@ -7,11 +7,13 @@
 	import banner from '$lib/assets/banner.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import { btcAddressTestnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { testnets } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import {
-		listenTestnetNetworksToAddBtcTestnetAddresses,
 		loadAddresses,
+		loadBtcAddressTestnet,
 		loadIdbAddresses
 	} from '$lib/services/address.services';
 	import { signOut } from '$lib/services/auth.services';
@@ -65,12 +67,14 @@
 
 	let progressModal = false;
 
+	$: {
+		if ($testnets && !$btcAddressTestnet) {
+			loadBtcAddressTestnet();
+		}
+	}
+
 	onMount(async () => {
 		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
-
-		// Listen to the user changing the testnets flag to load testnet btc addresses.
-		// We don't load them on init to avoid unnecessary requests.
-		listenTestnetNetworksToAddBtcTestnetAddresses();
 
 		if (addressIdbSuccess) {
 			loading.set(false);
