@@ -3,6 +3,9 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import BtcManageTokenToggle from '$btc/components/BtcManageTokenToggle.svelte';
+	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -38,9 +41,6 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-	import BtcManageTokenToggle from '$btc/components/BtcManageTokenToggle.svelte';
-	import { isBitcoinToken } from '$btc/utils/token.utils';
 
 	const dispatch = createEventDispatcher();
 
