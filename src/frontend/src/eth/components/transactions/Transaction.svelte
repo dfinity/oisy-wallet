@@ -1,12 +1,18 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { ComponentType } from 'svelte';
+	import { ethereumToken } from '$eth/derived/token.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionType } from '$eth/types/eth-transaction';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isTransactionPending } from '$eth/utils/transactions.utils';
-	import { ckMinterInfoAddresses } from '$icp-eth/derived/cketh.derived';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import {
+		toCkErc20HelperContractAddress,
+		toCkEthHelperContractAddress,
+		toCkMinterAddress
+	} from '$icp-eth/utils/cketh.utils';
 	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import IconMint from '$lib/components/icons/IconMint.svelte';
@@ -20,6 +26,7 @@
 	import { tokenId, tokenSymbol, tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { EthAddress } from '$lib/types/address';
 	import type { Transaction } from '$lib/types/transaction';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -31,15 +38,33 @@
 	let timestamp: number | undefined;
 	let displayTimestamp: number | undefined;
 
+	let ckMinterInfoAddresses: (EthAddress | undefined)[];
+	$: $ckEthMinterInfoStore,
+		$ethereumToken,
+		(() => {
+			const ckMinterInfoData = $ckEthMinterInfoStore?.[$ethereumToken.id];
+
+			if (isNullish(ckMinterInfoData)) {
+				ckMinterInfoAddresses = [];
+				return;
+			}
+
+			ckMinterInfoAddresses = [
+				toCkEthHelperContractAddress(ckMinterInfoData, $ethereumToken.network.id),
+				toCkErc20HelperContractAddress(ckMinterInfoData),
+				toCkMinterAddress(ckMinterInfoData)
+			].map((address) => address?.toLowerCase());
+		})();
+
 	let pending: boolean;
 	$: pending = isTransactionPending(transaction);
 
 	$: ({ from, to, value, timestamp, displayTimestamp } = transaction);
 
 	let type: EthTransactionType;
-	$: type = $ckMinterInfoAddresses.includes(from.toLowerCase())
+	$: type = ckMinterInfoAddresses.includes(from.toLowerCase())
 		? 'withdraw'
-		: $ckMinterInfoAddresses.includes(to?.toLowerCase())
+		: ckMinterInfoAddresses.includes(to?.toLowerCase())
 			? 'deposit'
 			: from?.toLowerCase() === $ethAddress?.toLowerCase()
 				? 'send'

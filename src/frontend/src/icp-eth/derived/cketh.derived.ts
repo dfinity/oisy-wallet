@@ -6,8 +6,7 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import {
 	toCkErc20HelperContractAddress,
-	toCkEthHelperContractAddress,
-	toCkMinterAddress
+	toCkEthHelperContractAddress
 } from '$icp-eth/utils/cketh.utils';
 import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 import type { IcCkToken } from '$icp/types/ic';
@@ -117,21 +116,4 @@ export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
 	[ckEthMinterInfoStore, ethereumTokenId],
 	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
 		toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
-);
-
-/**
- * The minter address.
- */
-const ckMinterAddress: Readable<OptionEthAddress> = derived(
-	[ckEthMinterInfoStore, ethereumTokenId],
-	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
-		toCkMinterAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
-);
-
-export const ckMinterInfoAddresses: Readable<OptionEthAddress[]> = derived(
-	[ckEthHelperContractAddress, ckErc20HelperContractAddress, ckMinterAddress],
-	([$ckEthHelperContractAddress, $ckErc20HelperContractAddress, $ckMinterAddress]) =>
-		[$ckEthHelperContractAddress, $ckErc20HelperContractAddress, $ckMinterAddress].map((address) =>
-			address?.toLowerCase()
-		)
 );
