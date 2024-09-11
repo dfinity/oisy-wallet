@@ -49,10 +49,10 @@ export const gotoReplaceRoot = async () => {
 };
 
 export type RouteParams = {
-	token: string | null | undefined;
-	network: string | null | undefined;
+	token: OptionalNullableCanisterIdText;
+	network: OptionalNullableCanisterIdText;
 	// WalletConnect URI parameter
-	uri: string | null | undefined;
+	uri: OptionalNullableCanisterIdText;
 };
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
