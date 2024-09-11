@@ -20,7 +20,7 @@ print_help() {
 
 DFX_NETWORK="${DFX_NETWORK:-local}"
 
-SIGNER_RELEASE="v0.1.1"
+SIGNER_RELEASE="v0.1.2"
 CANDID_URL="https://raw.githubusercontent.com/dfinity/chain-fusion-signer/${SIGNER_RELEASE}/src/signer/signer.did"
 WASM_URL="https://github.com/dfinity/chain-fusion-signer/releases/download/${SIGNER_RELEASE}/signer.wasm.gz"
 
