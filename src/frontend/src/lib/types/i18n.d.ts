@@ -240,7 +240,6 @@ interface I18nSend {
 		minter_info_not_loaded: string;
 		minter_info_not_certified: string;
 		cketh_max_transaction_fee_missing: string;
-		ckerc20_twin_token_missing: string;
 	};
 	error: {
 		unexpected: string;

@@ -4,8 +4,6 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import IcSendForm from './IcSendForm.svelte';
 	import IcSendReview from './IcSendReview.svelte';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { enableTwinTokenInUserTokens } from '$eth/services/erc20-user-tokens-services';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
@@ -23,10 +21,6 @@
 	} from '$icp/stores/ethereum-fee.store';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
-	import {
-		ckEthereumTwinTokenId,
-		ckEthereumTwinTokenNetworkId
-	} from '$icp-eth/derived/cketh.derived';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
@@ -163,20 +157,6 @@
 				targetNetworkId: networkId,
 				sendCompleted: trackAnalyticsOnSendComplete
 			});
-
-			// In case of conversion to ERC20, we make sure that the token is enabled in the list of tokens.
-			// No need to do it for ETH as it is always enabled by default.
-			// The flow does not wait for the token to be enabled, as it is not critical for the user,
-			// and it actually changes `erc20UserTokensStore` that re-triggers variables/stores in Manage Modal (such as `ckEthereumTwinToken` and `steps`).
-			if (convertCkErc20ToErc20) {
-				enableTwinTokenInUserTokens({
-					identity: $authIdentity,
-					twinToken: $erc20Tokens.find(
-						({ id: tokenId, network: { id: networkId } }) =>
-							tokenId === $ckEthereumTwinTokenId && networkId === $ckEthereumTwinTokenNetworkId
-					)
-				});
-			}
 
 			sendProgressStep = ProgressStepsSendIc.DONE;
 
