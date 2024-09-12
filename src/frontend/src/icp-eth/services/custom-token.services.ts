@@ -1,6 +1,5 @@
-import type { Erc20Token } from '$eth/types/erc20';
 import type { CustomToken } from '$declarations/backend/backend.did';
-import type { OptionErc20Token } from '$eth/types/erc20';
+import type { Erc20Token } from '$eth/types/erc20';
 import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
