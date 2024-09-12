@@ -25,7 +25,7 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import type { OptionalNullable } from '$lib/types/utils';
+	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let listener: OptionWalletConnectListener;
@@ -51,7 +51,7 @@
 		close();
 	};
 
-	let proposal: OptionalNullable<Web3WalletTypes.SessionProposal>;
+	let proposal: Option<Web3WalletTypes.SessionProposal>;
 
 	const disconnect = async () => {
 		await disconnectListener();

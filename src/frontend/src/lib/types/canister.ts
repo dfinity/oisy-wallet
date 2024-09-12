@@ -1,5 +1,5 @@
-import type { OptionalNullable } from '$lib/types/utils';
+import type { Option } from '$lib/types/utils';
 
 export type CanisterIdText = string;
 
-export type OptionCanisterIdText = OptionalNullable<CanisterIdText>;
+export type OptionCanisterIdText = Option<CanisterIdText>;

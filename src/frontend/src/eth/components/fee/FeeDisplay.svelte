@@ -6,12 +6,12 @@
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionalNullable } from '$lib/types/utils';
+	import type { Option } from '$lib/types/utils';
 
 	const { maxGasFee, feeSymbolStore, feeTokenIdStore, feeDecimalsStore }: FeeContext =
 		getContext<FeeContext>(FEE_CONTEXT_KEY);
 
-	let fee: OptionalNullable<BigNumber> = undefined;
+	let fee: Option<BigNumber> = undefined;
 
 	let timer: NodeJS.Timeout | undefined;
 

@@ -6,7 +6,7 @@ import type {
 import type { CoingeckoCoinsId } from '$lib/types/coingecko';
 import type { Token } from '$lib/types/token';
 import type { TransactionType } from '$lib/types/transaction';
-import type { OptionalNullable } from '$lib/types/utils';
+import type { Option } from '$lib/types/utils';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type {
 	IcrcTransaction as IcrcTransactionCandid,
@@ -83,5 +83,5 @@ export type IcAppMetadata = {
 	explorerUrl?: string;
 };
 
-export type OptionIcToken = OptionalNullable<IcToken>;
-export type OptionIcCkToken = OptionalNullable<IcCkToken>;
+export type OptionIcToken = Option<IcToken>;
+export type OptionIcCkToken = Option<IcCkToken>;

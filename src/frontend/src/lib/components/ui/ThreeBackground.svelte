@@ -11,9 +11,9 @@
 		WebGLRenderer
 	} from 'three';
 	import { HERO_ANIMATION_CANVAS } from '$lib/constants/test-ids.constants';
-	import type { OptionalNullable } from '$lib/types/utils.js';
+	import type { Option } from '$lib/types/utils.js';
 
-	let container: OptionalNullable<HTMLDivElement>;
+	let container: Option<HTMLDivElement>;
 
 	const colors = ['#89cee0', '#5dcabf', '#041093', '#010155'];
 

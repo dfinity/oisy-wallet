@@ -1,4 +1,4 @@
-import type { OptionalNullable } from '$lib/types/utils';
+import type { Option } from '$lib/types/utils';
 
 export type Address = string;
 
@@ -6,7 +6,7 @@ export type BtcAddress = Address;
 
 export type EthAddress = Address;
 
-export type OptionAddress<T extends Address> = OptionalNullable<T>;
+export type OptionAddress<T extends Address> = Option<T>;
 
 export type OptionBtcAddress = OptionAddress<BtcAddress>;
 

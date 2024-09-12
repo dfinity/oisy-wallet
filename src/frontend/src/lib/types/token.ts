@@ -1,6 +1,6 @@
 import type { OptionBalance } from '$lib/types/balance';
 import type { Network } from '$lib/types/network';
-import type { OptionalNullable, RequiredExcept } from '$lib/types/utils';
+import type { Option, RequiredExcept } from '$lib/types/utils';
 
 export type TokenId = symbol;
 
@@ -34,9 +34,9 @@ export type TokenOisyName = {
 
 export type RequiredToken = RequiredExcept<Token, keyof TokenAppearance>;
 
-export type OptionToken = OptionalNullable<Token>;
-export type OptionTokenId = OptionalNullable<TokenId>;
-export type OptionTokenStandard = OptionalNullable<TokenStandard>;
+export type OptionToken = Option<Token>;
+export type OptionTokenId = Option<TokenId>;
+export type OptionTokenStandard = Option<TokenStandard>;
 
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 

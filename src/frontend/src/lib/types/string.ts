@@ -1,3 +1,3 @@
-import type { OptionalNullable } from '$lib/types/utils';
+import type { Option } from '$lib/types/utils';
 
-export type OptionString = OptionalNullable<string>;
+export type OptionString = Option<string>;

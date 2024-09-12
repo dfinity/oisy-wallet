@@ -13,14 +13,14 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
-	import type { OptionalNullable } from '$lib/types/utils';
+	import type { Option } from '$lib/types/utils';
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	let feeToken: Token;
 	$: feeToken = $ethereumFeeTokenCkEth ?? $ckEthereumNativeToken;
 
-	let maxTransactionFee: OptionalNullable<bigint> = undefined;
+	let maxTransactionFee: Option<bigint> = undefined;
 	$: maxTransactionFee = $store?.maxTransactionFee;
 </script>
 
