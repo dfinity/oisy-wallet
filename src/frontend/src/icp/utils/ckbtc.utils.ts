@@ -1,5 +1,6 @@
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
+import type { Option } from '$lib/types/utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { isNullish } from '@dfinity/utils';
@@ -12,7 +13,7 @@ export const assertCkBTCUserInputAmount = ({
 	i18n
 }: {
 	amount: BigNumber;
-	minterInfo: CkBtcMinterInfoData | undefined | null;
+	minterInfo: Option<CkBtcMinterInfoData>;
 	tokenDecimals: number;
 	i18n: I18n;
 }): IcAmountAssertionError | undefined => {

@@ -1,3 +1,4 @@
+import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface Modal<T> {
@@ -31,7 +32,7 @@ export interface Modal<T> {
 	data?: T;
 }
 
-export type ModalData<T> = Modal<T> | undefined | null;
+export type ModalData<T> = Option<Modal<T>>;
 
 export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openEthReceive: <D extends T>(data: D) => void;

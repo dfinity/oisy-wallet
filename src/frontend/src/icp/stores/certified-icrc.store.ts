@@ -2,9 +2,10 @@ import type { IcToken } from '$icp/types/ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
+import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type CertifiedIcrcTokensData<T extends IcToken> = CertifiedData<T>[] | undefined | null;
+export type CertifiedIcrcTokensData<T extends IcToken> = Option<CertifiedData<T>[]>;
 
 export interface CertifiedIcrcTokensStore<D extends Omit<IcToken, 'id'>, T extends IcToken>
 	extends Readable<CertifiedIcrcTokensData<T>> {

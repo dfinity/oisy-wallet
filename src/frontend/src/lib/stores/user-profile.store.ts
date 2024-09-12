@@ -1,4 +1,5 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
+import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 type CertifiedUserProfileData = {
@@ -9,7 +10,7 @@ type CertifiedUserProfileData = {
 // * `undefined` means the store is not loaded yet.
 // * `null` means there was an error.
 // * `UserProfile` is the data.
-export type UserProfileStoreData = CertifiedUserProfileData | undefined | null;
+export type UserProfileStoreData = Option<CertifiedUserProfileData>;
 
 export interface UserProfileStore extends Readable<UserProfileStoreData> {
 	set: (data: CertifiedUserProfileData | null) => void;

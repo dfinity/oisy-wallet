@@ -7,6 +7,7 @@ import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.fact
 import { BACKEND_CANISTER_ID, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { Option } from '$lib/types/utils';
 import { Actor, type ActorMethod, type ActorSubclass, type Identity } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 import type { Principal } from '@dfinity/principal';
@@ -14,7 +15,7 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import { getAgent } from './agents.ic';
 
-let actors: { backend?: BackendActor; signer?: SignerActor } | undefined | null = undefined;
+let actors: Option<{ backend?: BackendActor; signer?: SignerActor }> = undefined;
 
 export const getBackendActor = async ({
 	identity,

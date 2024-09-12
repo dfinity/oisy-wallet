@@ -5,6 +5,7 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID
 } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
+import type { Option } from '$lib/types/utils';
 import { createAuthClient, getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { AuthClient } from '@dfinity/auth-client';
@@ -15,7 +16,7 @@ export interface AuthStoreData {
 	identity: OptionIdentity;
 }
 
-let authClient: AuthClient | undefined | null;
+let authClient: Option<AuthClient>;
 
 export interface AuthSignInParams {
 	domain?: 'ic0.app' | 'internetcomputer.org';
