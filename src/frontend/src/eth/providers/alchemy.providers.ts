@@ -83,6 +83,15 @@ export const initPendingTransactionsListener = ({
 		listener
 	);
 
+	// const API_KEY = import.meta.env.VITE_INFURA_API_KEY;
+	// const provider2 = new InfuraWebSocketProvider(INFURA_NETWORK_SEPOLIA, API_KEY);
+	// provider2.on(
+	// 	{
+	// 		method: 'newPendingTransactions'
+	// 	},
+	// 	(data) => console.log(data)
+	// );
+
 	return {
 		disconnect: async () => {
 			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have for effect to double the triggers. That's why we reset it to null.
