@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-dfx deploy signer --network "$ENV"
+dfx deploy signer --network "${ENV:-local}"
