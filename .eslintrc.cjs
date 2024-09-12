@@ -66,7 +66,8 @@ module.exports = {
 		'arrow-body-style': ['warn', 'as-needed'],
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],
 		'@typescript-eslint/no-inferrable-types': 'error',
-		'prefer-template': 'error'
+		'prefer-template': 'error',
+		'@typescript-eslint/prefer-reduce-type-parameter': 'error'
 	},
 	globals: {
 		NodeJS: true
