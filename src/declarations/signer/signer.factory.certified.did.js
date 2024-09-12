@@ -60,6 +60,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		caller_btc_address: IDL.Func([BitcoinNetwork], [IDL.Text], []),
+		caller_btc_balance: IDL.Func([BitcoinNetwork], [IDL.Nat64], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		config: IDL.Func([], [Config]),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),

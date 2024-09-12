@@ -1,8 +1,8 @@
 import { ZERO } from '$lib/constants/app.constants';
+import type { OptionBalance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
 
 export const usdValue = ({
 	token: { decimals },
@@ -10,7 +10,7 @@ export const usdValue = ({
 	exchangeRate
 }: {
 	token: Token;
-	balance: BigNumber | undefined;
+	balance: Exclude<OptionBalance, null>;
 	exchangeRate: number;
 }): number =>
 	nonNullish(balance)

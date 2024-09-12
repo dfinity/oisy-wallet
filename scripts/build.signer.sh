@@ -20,7 +20,7 @@ print_help() {
 
 DFX_NETWORK="${DFX_NETWORK:-local}"
 
-SIGNER_RELEASE="v0.1.1"
+SIGNER_RELEASE="v0.1.2"
 CANDID_URL="https://raw.githubusercontent.com/dfinity/chain-fusion-signer/${SIGNER_RELEASE}/src/signer/signer.did"
 WASM_URL="https://github.com/dfinity/chain-fusion-signer/releases/download/${SIGNER_RELEASE}/signer.wasm.gz"
 
@@ -78,12 +78,12 @@ esac
 rm -f "$ARG_FILE"
 mkdir -p "$(dirname "$ARG_FILE")"
 cat <<EOF >"$ARG_FILE"
-"(variant {
+(variant {
     Init = record {
-         ecdsa_key_name = \"$ECDSA_KEY_NAME\";
+         ecdsa_key_name = "$ECDSA_KEY_NAME";
          ic_root_key_der = $ic_root_key_der;
      }
-  })"
+  })
 EOF
 
 ####

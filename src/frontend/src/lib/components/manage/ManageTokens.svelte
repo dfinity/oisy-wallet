@@ -3,6 +3,9 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import BtcManageTokenToggle from '$btc/components/BtcManageTokenToggle.svelte';
+	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -82,7 +85,6 @@
 	let manageEthereumTokens = false;
 	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
 
-	// TODO: Bitcoin tokens ($enabledBitcoinTokens) are not included yet.
 	let allTokens: TokenToggleable<Token>[] = [];
 	$: allTokens = filterTokensForSelectedNetwork([
 		[
@@ -90,6 +92,7 @@
 				...ICP_TOKEN,
 				enabled: true
 			},
+			...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
 			...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
 			...(manageEthereumTokens ? allErc20Tokens : []),
 			...(manageIcTokens ? allIcrcTokens : [])
@@ -243,6 +246,8 @@
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
 					{:else if icTokenEthereumUserToken(token)}
 						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
+					{:else if isBitcoinToken(token)}
+						<BtcManageTokenToggle />
 					{/if}
 				</svelte:fragment>
 			</Card>
