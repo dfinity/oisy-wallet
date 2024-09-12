@@ -5,4 +5,4 @@ export type Balance = BigNumber;
 
 export type NullableBalance = Nullable<Balance>;
 
-export type OptionalNullableBalance = OptionalNullable<Balance>;
+export type OptionBalance = OptionalNullable<Balance>;

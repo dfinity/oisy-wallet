@@ -1,10 +1,7 @@
 import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
 import type { FeeStoreData } from '$eth/stores/fee.store';
 import type { SendParams } from '$eth/types/send';
-import type {
-	OptionalNullableWalletConnectListener,
-	WalletConnectListener
-} from '$eth/types/wallet-connect';
+import type { OptionWalletConnectListener, WalletConnectListener } from '$eth/types/wallet-connect';
 import {
 	getSignParamsMessageHex,
 	getSignParamsMessageTypedDataV4Hash
@@ -42,11 +39,11 @@ export type WalletConnectCallBackParams = {
 };
 
 export type WalletConnectExecuteParams = Pick<WalletConnectCallBackParams, 'request'> & {
-	listener: OptionalNullableWalletConnectListener;
+	listener: OptionWalletConnectListener;
 };
 
 export type WalletConnectSendParams = WalletConnectExecuteParams & {
-	listener: OptionalNullableWalletConnectListener;
+	listener: OptionWalletConnectListener;
 	address: OptionEthAddress;
 	fee: FeeStoreData;
 	modalNext: () => void;
@@ -54,7 +51,7 @@ export type WalletConnectSendParams = WalletConnectExecuteParams & {
 } & SendParams;
 
 export type WalletConnectSignMessageParams = WalletConnectExecuteParams & {
-	listener: OptionalNullableWalletConnectListener;
+	listener: OptionWalletConnectListener;
 	modalNext: () => void;
 	progress: (step: ProgressStepsSign) => void;
 };

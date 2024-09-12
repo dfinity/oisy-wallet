@@ -17,7 +17,7 @@
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
-	import type { OptionalNullableWalletConnectListener } from '$eth/types/wallet-connect';
+	import type { OptionWalletConnectListener } from '$eth/types/wallet-connect';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { busy } from '$lib/stores/busy.store';
@@ -28,7 +28,7 @@
 	import type { OptionalNullable } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let listener: OptionalNullableWalletConnectListener;
+	export let listener: OptionWalletConnectListener;
 
 	const STEP_CONNECT: WizardStep = {
 		name: 'Connect',

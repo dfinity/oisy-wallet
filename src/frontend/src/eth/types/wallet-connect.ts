@@ -16,7 +16,7 @@ export interface WalletConnectListener extends WebSocketListener {
 	approveRequest: (params: { id: number; topic: string; message: string }) => Promise<void>;
 }
 
-export type OptionalNullableWalletConnectListener = OptionalNullable<WalletConnectListener>;
+export type OptionWalletConnectListener = OptionalNullable<WalletConnectListener>;
 
 export interface WalletConnectEthSendTransactionParams {
 	from: string;

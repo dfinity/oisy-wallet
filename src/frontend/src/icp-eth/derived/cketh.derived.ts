@@ -15,7 +15,7 @@ import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { tokenStandard, tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionEthAddress } from '$lib/types/address';
-import type { OptionalNullableBalance } from '$lib/types/balance';
+import type { OptionBalance } from '$lib/types/balance';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
@@ -92,7 +92,7 @@ export const ckEthereumNativeTokenId: Readable<TokenId> = derived(
 	([{ id }]) => id
 );
 
-export const ckEthereumNativeTokenBalance: Readable<OptionalNullableBalance> = derived(
+export const ckEthereumNativeTokenBalance: Readable<OptionBalance> = derived(
 	[balancesStore, ckEthereumNativeToken],
 	([$balanceStore, { id }]) => $balanceStore?.[id]?.data
 );
