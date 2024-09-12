@@ -88,14 +88,14 @@ export const autoLoadUserToken = async ({
 };
 
 export const toUserToken = ({
-	address,
+	address: contract_address,
 	network,
 	decimals,
 	symbol,
 	version,
 	enabled
 }: SaveUserToken): UserToken => ({
-	contract_address: address,
+	contract_address,
 	chain_id: (network as EthereumNetwork).chainId,
 	decimals: toNullable(decimals),
 	symbol: toNullable(symbol),
