@@ -6,12 +6,13 @@
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionString } from '$lib/types/string';
 	import type { Token } from '$lib/types/token';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let token: Token;
-	export let address: string | undefined | null;
+	export let address: OptionString;
 	export let qrCodeAriaLabel: string;
 	export let copyAriaLabel: string;
 	export let invisibleLogo = false;

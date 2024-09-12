@@ -13,6 +13,7 @@ import { MINT_MEMO_KYT_FAIL, decodeBurnMemo, decodeMintMemo } from '$icp/utils/c
 import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
+import type { OptionString } from '$lib/types/string';
 import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
 import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -190,7 +191,7 @@ const isMemoReimbursement = (memo: Uint8Array | number[]) => {
 	}
 };
 
-const burnMemoAddress = (memo: Uint8Array | number[]): string | undefined | null => {
+const burnMemoAddress = (memo: Uint8Array | number[]): OptionString => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
 		return toAddress;
