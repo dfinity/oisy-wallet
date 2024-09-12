@@ -102,6 +102,7 @@ export const autoLoadToken = async <
 			enabled: true
 		});
 
+		// TODO(GIX-2740): Only reload the tokens we need.
 		await loadTokens({ identity });
 	} catch (err: unknown) {
 		toastsError({
