@@ -14,6 +14,17 @@ export const getBtcAddress = async ({
 	return caller_btc_address(network);
 };
 
+export const getBtcBalance = async ({
+	identity,
+	network
+}: {
+	identity: OptionIdentity;
+	network: BitcoinNetwork;
+}): Promise<bigint> => {
+	const { caller_btc_balance } = await getSignerActor({ identity });
+	return caller_btc_balance(network);
+};
+
 export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
 	const { caller_eth_address } = await getSignerActor({ identity });
 	return caller_eth_address();
