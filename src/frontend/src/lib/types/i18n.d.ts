@@ -98,6 +98,7 @@ interface I18nInit {
 		icrc_canisters: string;
 		erc20_user_tokens: string;
 		erc20_user_token: string;
+		icrc_custom_tokens: string;
 		loading_wallet_timeout: string;
 	};
 }
@@ -175,6 +176,8 @@ interface I18nReceive {
 			checking_incoming: string;
 			refreshing_wallet: string;
 			bitcoin_address: string;
+			bitcoin_testnet_address: string;
+			bitcoin_regtest_address: string;
 			display_bitcoin_address_qr: string;
 			bitcoin_address_copied: string;
 			from_network: string;

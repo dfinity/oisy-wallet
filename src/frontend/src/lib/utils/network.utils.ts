@@ -22,11 +22,11 @@ export const isNetworkIdBitcoin = (id: NetworkId | undefined): boolean =>
 /**
  * Filter the tokens that either lives on the selected network or, if no network is provided, pseud Chain Fusion, then those that are not testnets.
  */
-export const filterTokensForSelectedNetwork = ([
+export const filterTokensForSelectedNetwork = <T extends Token>([
 	$tokens,
 	$selectedNetwork,
 	$pseudoNetworkChainFusion
-]: [Token[], Network | undefined, boolean]) =>
+]: [T[], Network | undefined, boolean]): T[] =>
 	$tokens.filter((token) => {
 		const {
 			network: { id: networkId, env }

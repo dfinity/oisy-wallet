@@ -6,9 +6,11 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	filterEnabledTokens,
+	pinEnabledTokensAtTop,
 	pinTokensWithBalanceAtTop,
 	sortTokens,
 	sumMainnetTokensUsdBalancesPerNetwork,
@@ -331,5 +333,39 @@ describe('sumMainnetTokensUsdBalancesPerNetwork', () => {
 			$exchanges
 		});
 		expect(result).toEqual({});
+	});
+});
+
+describe('pinEnabledTokensAtTop', () => {
+	it('should pin enabled tokens at the top while preserving the order', () => {
+		const tokens: TokenToggleable<Token>[] = [
+			{ ...ICP_TOKEN, enabled: false },
+			{ ...BTC_MAINNET_TOKEN, enabled: true },
+			{ ...ETHEREUM_TOKEN, enabled: true }
+		];
+
+		const result = pinEnabledTokensAtTop(tokens);
+
+		expect(result).toEqual([
+			{ ...BTC_MAINNET_TOKEN, enabled: true },
+			{ ...ETHEREUM_TOKEN, enabled: true },
+			{ ...ICP_TOKEN, enabled: false }
+		]);
+	});
+
+	it('should return the same array when all tokens are enabled', () => {
+		const tokens: TokenToggleable<Token>[] = $tokens.map((t) => ({ ...t, enabled: true }));
+
+		const result = pinEnabledTokensAtTop(tokens);
+
+		expect(result).toEqual(tokens);
+	});
+
+	it('should return the same array when all tokens are disabled', () => {
+		const tokens: TokenToggleable<Token>[] = $tokens.map((t) => ({ ...t, enabled: false }));
+
+		const result = pinEnabledTokensAtTop(tokens);
+
+		expect(result).toEqual(tokens);
 	});
 });
