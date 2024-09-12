@@ -110,7 +110,6 @@ else
     mkdir -p $DATA_DIR
   fi
   # -debug=0 Disables debug logging to reduce the size and frequency of log files.
-  # -prune=550 If don’t need the full historical blockchain, you can use pruned mode to limit how much of the blockchain is stored on disk
   # -maxmempool=50 The memory pool holds unconfirmed transactions. Limiting its size can reduce the memory usage and slow the cache increase
-  ./$BITCOIN_DIR/bin/bitcoind -conf="$(pwd)/$BITCOIN_CONF" -datadir="$(pwd)/$DATA_DIR" --port=18444 -debug=0 -prune=550 -maxmempool=50
+  ./$BITCOIN_DIR/bin/bitcoind -conf="$(pwd)/$BITCOIN_CONF" -datadir="$(pwd)/$DATA_DIR" --port=18444 -debug=0 -maxmempool=50
 fi
