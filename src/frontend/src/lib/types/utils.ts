@@ -4,6 +4,4 @@ export type ResultSuccess<T = unknown> = { success: boolean; err?: T };
 
 export type ResultSuccessReduced<T = unknown> = ResultSuccess<T[]>;
 
-export type Nullable<T> = T | null;
-
-export type OptionalNullable<T> = Nullable<T> | undefined;
+export type OptionalNullable<T> = T | null | undefined;

@@ -1,6 +1,6 @@
 import type { OptionBalance } from '$lib/types/balance';
 import type { Network } from '$lib/types/network';
-import type { RequiredExcept } from '$lib/types/utils';
+import type { OptionalNullable, RequiredExcept } from '$lib/types/utils';
 
 export type TokenId = symbol;
 
