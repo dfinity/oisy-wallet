@@ -112,13 +112,11 @@
 		});
 
 		try {
-			const convertCkErc20ToErc20 = isConvertCkErc20ToErc20({
+			// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
+			const ckErc20ToErc20MaxCkEthFees: bigint | undefined = isConvertCkErc20ToErc20({
 				token: $tokenAsIcToken,
 				networkId
-			});
-
-			// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
-			const ckErc20ToErc20MaxCkEthFees: bigint | undefined = convertCkErc20ToErc20
+			})
 				? $ethereumFeeStore?.maxTransactionFee
 				: undefined;
 
