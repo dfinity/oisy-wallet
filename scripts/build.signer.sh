@@ -78,12 +78,12 @@ esac
 rm -f "$ARG_FILE"
 mkdir -p "$(dirname "$ARG_FILE")"
 cat <<EOF >"$ARG_FILE"
-"(variant {
+(variant {
     Init = record {
-         ecdsa_key_name = \"$ECDSA_KEY_NAME\";
+         ecdsa_key_name = "$ECDSA_KEY_NAME";
          ic_root_key_der = $ic_root_key_der;
      }
-  })"
+  })
 EOF
 
 ####
