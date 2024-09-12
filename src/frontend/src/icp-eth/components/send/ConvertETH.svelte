@@ -1,21 +1,21 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
+	import { autoLoadCustomToken } from '$icp-eth/services/custom-token.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { networkICP } from '$lib/derived/network.derived';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
-	import { autoLoadCustomToken } from '$icp-eth/services/custom-token.services';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { icrcTokens } from '$icp/derived/icrc.derived';
 
 	export let nativeTokenId: TokenId;
 	export let ariaLabel: string;
@@ -48,7 +48,7 @@
 		const { result: resultCustomToken } = await autoLoadCustomToken({
 			icrcCustomTokens: $icrcTokens,
 			sendToken: $tokenWithFallback,
-			identity:$authIdentity
+			identity: $authIdentity
 		});
 
 		if (resultCustomToken === 'error') {
