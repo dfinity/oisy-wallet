@@ -1,3 +1,5 @@
+import type { UserToken } from '$declarations/backend/backend.did';
+import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
 import { loadUserTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
@@ -85,6 +87,22 @@ export const autoLoadUserToken = async ({
 	return { result: 'loaded' };
 };
 
+export const toUserToken = ({
+	address: contract_address,
+	network,
+	decimals,
+	symbol,
+	version,
+	enabled
+}: SaveUserToken): UserToken => ({
+	contract_address,
+	chain_id: (network as EthereumNetwork).chainId,
+	decimals: toNullable(decimals),
+	symbol: toNullable(symbol),
+	version: toNullable(version),
+	enabled: toNullable(enabled)
+});
+
 export const setUserToken = async ({
 	token,
 	identity,
@@ -93,19 +111,11 @@ export const setUserToken = async ({
 	identity: Identity;
 	token: Erc20UserToken;
 	enabled: boolean;
-}) => {
-	const { version, symbol, network, address, decimals } = token;
-	const { chainId } = network as EthereumNetwork;
-
+}) =>
 	await setUserTokenApi({
 		identity,
-		token: {
-			chain_id: chainId,
-			decimals: toNullable(decimals),
-			contract_address: address,
-			symbol: toNullable(symbol),
-			version: toNullable(version),
-			enabled: toNullable(enabled)
-		}
+		token: toUserToken({
+			...token,
+			enabled
+		})
 	});
-};
