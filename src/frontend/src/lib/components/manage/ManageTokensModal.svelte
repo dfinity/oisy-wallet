@@ -10,13 +10,13 @@
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import AddTokenByNetwork from '$icp-eth/components/tokens/AddTokenByNetwork.svelte';
-	import ManageTokens from '$icp-eth/components/tokens/ManageTokens.svelte';
 	import {
 		saveErc20UserTokens,
 		saveIcrcCustomTokens
 	} from '$icp-eth/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
+	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
