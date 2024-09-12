@@ -1,4 +1,7 @@
 import type { Erc20Token } from '$eth/types/erc20';
+import type { CustomToken } from '$declarations/backend/backend.did';
+import type { OptionErc20Token } from '$eth/types/erc20';
+import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { setCustomToken as setCustomTokenasApi } from '$lib/api/backend.api';
@@ -55,6 +58,22 @@ export const autoLoadCustomToken = async ({
 		errorMessage: get(i18n).init.error.icrc_custom_token
 	});
 
+export const toCustomToken = ({
+	enabled,
+	version,
+	ledgerCanisterId,
+	indexCanisterId
+}: SaveCustomToken): CustomToken => ({
+	enabled,
+	version: toNullable(version),
+	token: {
+		Icrc: {
+			ledger_id: Principal.fromText(ledgerCanisterId),
+			index_id: toNullable(Principal.fromText(indexCanisterId))
+		}
+	}
+});
+
 export const setCustomToken = async ({
 	token,
 	identity,
@@ -63,20 +82,8 @@ export const setCustomToken = async ({
 	identity: Identity;
 	token: IcrcCustomToken;
 	enabled: boolean;
-}) => {
-	const { version, ledgerCanisterId, indexCanisterId } = token;
-
+}) =>
 	await setCustomTokenasApi({
 		identity,
-		token: {
-			enabled,
-			version: toNullable(version),
-			token: {
-				Icrc: {
-					ledger_id: Principal.fromText(ledgerCanisterId),
-					index_id: toNullable(Principal.fromText(indexCanisterId))
-				}
-			}
-		}
+		token: toCustomToken({ ...token, enabled })
 	});
-};
