@@ -1,1 +1,1 @@
-export type OptionalNullableString = string | null | undefined;
+export type OptionString = string | null | undefined;

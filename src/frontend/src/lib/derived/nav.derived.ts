@@ -1,8 +1,8 @@
 import { page } from '$app/stores';
-import type { OptionalNullableString } from '$lib/types/string';
+import type { OptionString } from '$lib/types/string';
 import { derived, type Readable } from 'svelte/store';
 
-export const routeToken: Readable<OptionalNullableString> = derived(
+export const routeToken: Readable<OptionString> = derived(
 	[page],
 	([
 		{
@@ -11,7 +11,7 @@ export const routeToken: Readable<OptionalNullableString> = derived(
 	]) => token
 );
 
-export const routeNetwork: Readable<OptionalNullableString> = derived(
+export const routeNetwork: Readable<OptionString> = derived(
 	[page],
 	([
 		{

@@ -1,8 +1,8 @@
 import { page } from '$app/stores';
-import type { OptionalNullableString } from '$lib/types/string';
+import type { OptionString } from '$lib/types/string';
 import { derived, type Readable } from 'svelte/store';
 
-export const walletConnectUri: Readable<OptionalNullableString> = derived([page], ([$page]) => {
+export const walletConnectUri: Readable<OptionString> = derived([page], ([$page]) => {
 	const {
 		data: { uri }
 	} = $page;

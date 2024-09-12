@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import type { NetworkId } from '$lib/types/network';
-import type { OptionalNullableString } from '$lib/types/string';
+import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { LoadEvent, Page } from '@sveltejs/kit';
@@ -50,10 +50,10 @@ export const gotoReplaceRoot = async () => {
 };
 
 export type RouteParams = {
-	token: OptionalNullableString;
-	network: OptionalNullableString;
+	token: OptionString;
+	network: OptionString;
 	// WalletConnect URI parameter
-	uri: OptionalNullableString;
+	uri: OptionString;
 };
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
