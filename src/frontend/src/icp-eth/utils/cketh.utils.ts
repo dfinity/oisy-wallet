@@ -3,7 +3,7 @@ import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
-import { fromNullable } from '@dfinity/utils';
+import { fromNullable, nonNullish } from '@dfinity/utils';
 
 export const toCkEthHelperContractAddress = (
 	minterInfo: OptionCertifiedMinterInfo,
@@ -20,3 +20,15 @@ export const toCkErc20HelperContractAddress = (
 
 export const toCkMinterAddress = (minterInfo: OptionCertifiedMinterInfo): OptionEthAddress =>
 	fromNullable(minterInfo?.data.minter_address ?? []);
+
+export const toCkMinterInfoAddresses = (
+	minterInfo: OptionCertifiedMinterInfo,
+	networkId: NetworkId
+): OptionEthAddress[] =>
+	nonNullish(minterInfo)
+		? [
+				toCkEthHelperContractAddress(minterInfo, networkId),
+				toCkErc20HelperContractAddress(minterInfo),
+				toCkMinterAddress(minterInfo)
+			].map((address) => address?.toLowerCase())
+		: [];
