@@ -18,7 +18,7 @@ export const toCkErc20HelperContractAddress = (
 	minterInfo: OptionCertifiedMinterInfo
 ): OptionEthAddress => fromNullable(minterInfo?.data.erc20_helper_contract_address ?? []);
 
-export const toCkMinterAddress = (minterInfo: OptionCertifiedMinterInfo): OptionEthAddress =>
+const toCkMinterAddress = (minterInfo: OptionCertifiedMinterInfo): OptionEthAddress =>
 	fromNullable(minterInfo?.data.minter_address ?? []);
 
 export const toCkMinterInfoAddresses = (
