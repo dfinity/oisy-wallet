@@ -49,6 +49,10 @@ export const autoLoadCustomToken = async ({
 		return { result: 'skipped' };
 	}
 
+	if (icrcCustomToken.standard !== 'icrc') {
+		return { result: 'skipped' };
+	}
+
 	if (icrcCustomToken.enabled) {
 		return { result: 'skipped' };
 	}
