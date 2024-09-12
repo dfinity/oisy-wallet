@@ -12,6 +12,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
+	import { autoLoadCustomToken } from '$icp-eth/services/custom-token.services';
+	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { icrcTokens } from '$icp/derived/icrc.derived';
 
 	export let nativeTokenId: TokenId;
 	export let ariaLabel: string;
@@ -38,6 +42,16 @@
 
 		if ($networkICP) {
 			modalStore.openConvertToTwinTokenEth();
+			return;
+		}
+
+		const { result: resultCustomToken } = await autoLoadCustomToken({
+			icrcCustomTokens: $icrcTokens,
+			sendToken: $tokenWithFallback,
+			identity:$authIdentity
+		});
+
+		if (resultCustomToken === 'error') {
 			return;
 		}
 
