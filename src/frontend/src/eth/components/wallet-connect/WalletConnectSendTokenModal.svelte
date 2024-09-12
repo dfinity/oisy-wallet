@@ -22,8 +22,8 @@
 	} from '$eth/stores/fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type {
-		WalletConnectEthSendTransactionParams,
-		WalletConnectListener
+		OptionWalletConnectListener,
+		WalletConnectEthSendTransactionParams
 	} from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
@@ -125,7 +125,7 @@
 	 * WalletConnect
 	 */
 
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionWalletConnectListener;
 
 	/**
 	 * Reject a transaction
