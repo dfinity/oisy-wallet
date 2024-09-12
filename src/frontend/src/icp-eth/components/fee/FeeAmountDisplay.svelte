@@ -5,7 +5,7 @@
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionalNullableBalance } from '$lib/types/balance';
+	import type { OptionBalance } from '$lib/types/balance';
 	import type { TokenId } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -15,7 +15,7 @@
 	export let feeTokenId: TokenId;
 	export let feeDecimals: number;
 
-	let balance: Exclude<OptionalNullableBalance, null>;
+	let balance: Exclude<OptionBalance, null>;
 	$: balance = nonNullish($balancesStore) ? $balancesStore[feeTokenId]?.data ?? ZERO : undefined;
 
 	let insufficientFeeFunds = false;

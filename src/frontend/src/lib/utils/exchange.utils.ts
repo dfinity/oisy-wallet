@@ -1,5 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { OptionalNullableBalance } from '$lib/types/balance';
+import type { OptionBalance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -10,7 +10,7 @@ export const usdValue = ({
 	exchangeRate
 }: {
 	token: Token;
-	balance: Exclude<OptionalNullableBalance, null>;
+	balance: Exclude<OptionBalance, null>;
 	exchangeRate: number;
 }): number =>
 	nonNullish(balance)

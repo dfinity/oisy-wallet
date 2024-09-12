@@ -1,5 +1,5 @@
 import { balancesStore } from '$lib/stores/balances.store';
-import type { OptionalNullableBalance } from '$lib/types/balance';
+import type { OptionBalance } from '$lib/types/balance';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { derived, writable, type Readable } from 'svelte/store';
 
@@ -53,7 +53,7 @@ export interface SendContext {
 	sendTokenDecimals: Readable<number>;
 	sendTokenId: Readable<TokenId>;
 	sendTokenStandard: Readable<TokenStandard>;
-	sendBalance: Readable<OptionalNullableBalance>;
+	sendBalance: Readable<OptionBalance>;
 	sendPurpose: SendContextPurpose;
 }
 

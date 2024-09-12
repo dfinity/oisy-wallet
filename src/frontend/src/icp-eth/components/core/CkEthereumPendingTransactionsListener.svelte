@@ -27,12 +27,12 @@
 	import { tokenId } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { OptionEthAddress } from '$lib/types/address';
-	import type { OptionalNullableBalance } from '$lib/types/balance';
+	import type { OptionBalance } from '$lib/types/balance';
 	import type { NetworkId } from '$lib/types/network';
 
 	let listener: WebSocketListener | undefined = undefined;
 
-	let loadBalance: OptionalNullableBalance = undefined;
+	let loadBalance: OptionBalance = undefined;
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 

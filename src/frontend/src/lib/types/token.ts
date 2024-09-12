@@ -1,4 +1,4 @@
-import type { NullableBalance } from '$lib/types/balance';
+import type { OptionBalance } from '$lib/types/balance';
 import type { Network } from '$lib/types/network';
 import type { RequiredExcept } from '$lib/types/utils';
 
@@ -41,7 +41,7 @@ export type OptionTokenStandard = TokenStandard | undefined | null;
 export type TokenToPin = Pick<Token, 'id'> & { network: Pick<Token['network'], 'id'> };
 
 interface TokenFinancialData {
-	balance?: NullableBalance;
+	balance?: Exclude<OptionBalance, undefined>;
 	usdBalance?: number;
 }
 
