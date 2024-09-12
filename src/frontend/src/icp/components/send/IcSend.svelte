@@ -16,5 +16,5 @@
 </script>
 
 <SendButtonWithModal open={openSend} isOpen={$modalIcSend}>
-	<IcSendModal networkId={ICP_NETWORK_ID} on:nnsClose slot="modal" />
+	<IcSendModal networkId={ICP_NETWORK_ID} slot="modal" />
 </SendButtonWithModal>
