@@ -3,6 +3,7 @@ import type { EthereumFeeStoreData } from '$icp/stores/ethereum-fee.store';
 import type { IcToken } from '$icp/types/ic';
 import { IcAmountAssertionError } from '$icp/types/ic-send';
 import { ZERO } from '$lib/constants/app.constants';
+import type { OptionBalance } from '$lib/types/balance';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { fromNullable, isNullish } from '@dfinity/utils';
@@ -93,7 +94,7 @@ export const assertCkETHBalanceEstimatedFee = ({
 	feeStoreData,
 	i18n
 }: {
-	balance: BigNumber | undefined | null;
+	balance: OptionBalance;
 	tokenCkEth: IcToken | undefined;
 	feeStoreData: EthereumFeeStoreData;
 	i18n: I18n;
