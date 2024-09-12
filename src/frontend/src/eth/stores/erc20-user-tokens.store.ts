@@ -1,9 +1,10 @@
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
+import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type CertifiedErc20UserTokensData = CertifiedData<Erc20UserToken>[] | undefined | null;
+export type CertifiedErc20UserTokensData = Option<CertifiedData<Erc20UserToken>[]>;
 
 export interface CertifiedErc20UserTokensStore extends Readable<CertifiedErc20UserTokensData> {
 	setAll: (tokens: CertifiedData<Erc20UserToken>[]) => void;

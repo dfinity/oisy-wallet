@@ -1,1 +1,3 @@
-export type OptionString = string | null | undefined;
+import type { Option } from '$lib/types/utils';
+
+export type OptionString = Option<string>;

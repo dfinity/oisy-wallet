@@ -3,6 +3,7 @@ import { goto } from '$app/navigation';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
+import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { LoadEvent, Page } from '@sveltejs/kit';
 
@@ -90,7 +91,7 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	};
 };
 
-export const switchNetwork = async (networkId: NetworkId | undefined | null) => {
+export const switchNetwork = async (networkId: Option<NetworkId>) => {
 	const url = new URL(window.location.href);
 
 	if (isNullish(networkId) || isNullish(networkId.description)) {
