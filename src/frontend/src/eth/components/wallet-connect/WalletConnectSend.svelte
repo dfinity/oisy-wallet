@@ -6,13 +6,13 @@
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type {
-		WalletConnectEthSendTransactionParams,
-		WalletConnectListener
+		OptionWalletConnectListener,
+		WalletConnectEthSendTransactionParams
 	} from '$eth/types/wallet-connect';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionWalletConnectListener;
 
 	let request: Web3WalletTypes.SessionRequest | undefined;
 	$: request = $modalWalletConnectSend

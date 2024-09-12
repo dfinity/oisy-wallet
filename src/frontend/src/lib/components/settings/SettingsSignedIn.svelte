@@ -16,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import type { OptionIdentity } from '$lib/types/identity';
+	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -25,7 +26,7 @@
 	let identity: OptionIdentity;
 	$: identity = $authIdentity;
 
-	let principal: Principal | undefined | null;
+	let principal: Option<Principal>;
 	$: principal = identity?.getPrincipal();
 
 	const getPouhCredential = async () => {

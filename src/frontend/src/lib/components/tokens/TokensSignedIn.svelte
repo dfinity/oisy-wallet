@@ -3,8 +3,8 @@
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import ManageTokensModal from '$icp-eth/components/tokens/ManageTokensModal.svelte';
 	import Listener from '$lib/components/core/Listener.svelte';
+	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';

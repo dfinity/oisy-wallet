@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
+	import { erc20UserTokens } from '$eth/derived/erc20.derived';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import CkEthLoader from '$icp-eth/components/core/CkEthLoader.svelte';
 	import { autoLoadCustomToken } from '$icp-eth/services/custom-token.services';
+	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
@@ -41,6 +43,16 @@
 		}
 
 		if ($networkICP) {
+			const { result } = await autoLoadUserToken({
+				erc20UserTokens: $erc20UserTokens,
+				sendToken: $tokenWithFallback,
+				identity: $authIdentity
+			});
+
+			if (result === 'error') {
+				return;
+			}
+
 			modalStore.openConvertToTwinTokenEth();
 			return;
 		}
