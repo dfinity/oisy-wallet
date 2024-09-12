@@ -43,13 +43,13 @@
 		}
 
 		if ($networkICP) {
-			const { result } = await autoLoadUserToken({
+			const { result: resultUserToken } = await autoLoadUserToken({
 				erc20UserTokens: $erc20UserTokens,
 				sendToken: $tokenWithFallback,
 				identity: $authIdentity
 			});
 
-			if (result === 'error') {
+			if (resultUserToken === 'error') {
 				return;
 			}
 
