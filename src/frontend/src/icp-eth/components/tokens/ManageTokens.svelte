@@ -85,7 +85,6 @@
 	let manageEthereumTokens = false;
 	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
 
-	// TODO: Bitcoin tokens ($enabledBitcoinTokens) are not included yet.
 	let allTokens: TokenToggleable<Token>[] = [];
 	$: allTokens = filterTokensForSelectedNetwork([
 		[
