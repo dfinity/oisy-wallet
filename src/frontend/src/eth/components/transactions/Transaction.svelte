@@ -38,7 +38,7 @@
 	$: ckTokenSymbol =
 		nonNullish($tokenId) && isSupportedEthTokenId($tokenId)
 			? `ck${$tokenSymbol}`
-			: ($token as Erc20Token).twinTokenSymbol ?? '';
+			: ($token as Erc20Token | undefined)?.twinTokenSymbol ?? '';
 
 	let label: string;
 	$: label =
