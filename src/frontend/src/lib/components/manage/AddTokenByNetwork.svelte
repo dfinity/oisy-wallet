@@ -5,8 +5,8 @@
 	import { fade } from 'svelte/transition';
 	import AddTokenForm from '$eth/components/tokens/AddTokenForm.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
-	import AddTokenByNetworkToolbar from '$icp-eth/components/tokens/AddTokenByNetworkToolbar.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks, networksMainnets } from '$lib/derived/networks.derived';
