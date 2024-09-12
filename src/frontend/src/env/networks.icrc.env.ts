@@ -22,37 +22,37 @@ import { type EnvTokenSymbol, type EnvTokens } from '$env/types/env-token-ckerc2
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface } from '$icp/types/ic';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
-import type { CanisterIdText } from '$lib/types/canister';
+import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import { nonNullish } from '@dfinity/utils';
 
 export const IC_CKBTC_LEDGER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined) ??
+	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
 	'mxzaz-hqaaa-aaaar-qaada-cai';
 
 export const IC_CKBTC_INDEX_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKBTC_INDEX_CANISTER_ID as CanisterIdText | null | undefined) ??
+	(import.meta.env.VITE_IC_CKBTC_INDEX_CANISTER_ID as OptionCanisterIdText) ??
 	'n5wcd-faaaa-aaaar-qaaea-cai';
 
 export const IC_CKBTC_MINTER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKBTC_MINTER_CANISTER_ID as CanisterIdText | null | undefined) ??
+	(import.meta.env.VITE_IC_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText) ??
 	'mqygn-kiaaa-aaaar-qaadq-cai';
 
 export const STAGING_CKBTC_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKBTC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_STAGING_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText;
 export const STAGING_CKBTC_INDEX_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKBTC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_STAGING_CKBTC_INDEX_CANISTER_ID as OptionCanisterIdText;
 export const STAGING_CKBTC_MINTER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKBTC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_STAGING_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
 
 export const LOCAL_CKBTC_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKBTC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_LOCAL_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText;
 export const LOCAL_CKBTC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKBTC_INDEX_CANISTER_ID as
 	| CanisterIdText
 	| null
 	| undefined;
 export const LOCAL_CKBTC_MINTER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
 
 const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
@@ -113,32 +113,32 @@ export const CKBTC_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
  */
 
 export const IC_CKETH_LEDGER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKETH_LEDGER_CANISTER_ID as CanisterIdText | null | undefined) ??
+	(import.meta.env.VITE_IC_CKETH_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
 	'ss2fx-dyaaa-aaaar-qacoq-cai';
 
 export const IC_CKETH_INDEX_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKETH_INDEX_CANISTER_ID as CanisterIdText | null | undefined) ??
+	(import.meta.env.VITE_IC_CKETH_INDEX_CANISTER_ID as OptionCanisterIdText) ??
 	's3zol-vqaaa-aaaar-qacpa-cai';
 
 export const IC_CKETH_MINTER_CANISTER_ID =
-	(import.meta.env.VITE_IC_CKETH_MINTER_CANISTER_ID as CanisterIdText | null | undefined) ??
+	(import.meta.env.VITE_IC_CKETH_MINTER_CANISTER_ID as OptionCanisterIdText) ??
 	'sv3dd-oaaaa-aaaar-qacoa-cai';
 
 export const STAGING_CKETH_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKETH_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_STAGING_CKETH_LEDGER_CANISTER_ID as OptionCanisterIdText;
 export const STAGING_CKETH_INDEX_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKETH_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_STAGING_CKETH_INDEX_CANISTER_ID as OptionCanisterIdText;
 export const STAGING_CKETH_MINTER_CANISTER_ID = import.meta.env
-	.VITE_STAGING_CKETH_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_STAGING_CKETH_MINTER_CANISTER_ID as OptionCanisterIdText;
 
 export const LOCAL_CKETH_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKETH_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_LOCAL_CKETH_LEDGER_CANISTER_ID as OptionCanisterIdText;
 export const LOCAL_CKETH_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKETH_INDEX_CANISTER_ID as
 	| CanisterIdText
 	| null
 	| undefined;
 export const LOCAL_CKETH_MINTER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKETH_MINTER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_LOCAL_CKETH_MINTER_CANISTER_ID as OptionCanisterIdText;
 
 const CKETH_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
@@ -199,9 +199,9 @@ export const CKETH_LEDGER_CANISTER_IDS: [CanisterIdText, ...CanisterIdText[]] = 
  */
 
 export const LOCAL_CKUSDC_LEDGER_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKUSDC_LEDGER_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_LOCAL_CKUSDC_LEDGER_CANISTER_ID as OptionCanisterIdText;
 export const LOCAL_CKUSDC_INDEX_CANISTER_ID = import.meta.env
-	.VITE_LOCAL_CKUSDC_INDEX_CANISTER_ID as CanisterIdText | null | undefined;
+	.VITE_LOCAL_CKUSDC_INDEX_CANISTER_ID as OptionCanisterIdText;
 
 const CKUSDC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
@@ -228,8 +228,8 @@ const mapCkErc20Data = ({
 	env
 }: {
 	ckErc20Tokens: EnvTokens;
-	minterCanisterId: string | null | undefined;
-	ledgerCanisterId: string | null | undefined;
+	minterCanisterId: OptionCanisterIdText;
+	ledgerCanisterId: OptionCanisterIdText;
 	env: NetworkEnvironment;
 }): Record<EnvTokenSymbol, Omit<IcCkInterface, 'twinToken' | 'position'>> =>
 	Object.entries(ckErc20Tokens).reduce(
