@@ -6,8 +6,8 @@
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type {
-		WalletConnectEthSendTransactionParams,
-		WalletConnectListener
+		OptionalNullableWalletConnectListener,
+		WalletConnectEthSendTransactionParams
 	} from '$eth/types/wallet-connect';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';

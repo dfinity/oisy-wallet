@@ -5,7 +5,7 @@
 	import WalletConnectSignReview from './WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
 	import { signMessage, reject as rejectServices } from '$eth/services/wallet-connect.services';
-	import type { WalletConnectListener } from '$eth/types/wallet-connect';
+	import type { OptionalNullableWalletConnectListener } from '$eth/types/wallet-connect';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import { ProgressStepsSign } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';

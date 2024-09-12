@@ -6,8 +6,8 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type {
-		WalletConnectEthSendTransactionParams,
-		WalletConnectListener
+		OptionalNullableWalletConnectListener,
+		WalletConnectEthSendTransactionParams
 	} from '$eth/types/wallet-connect';
 	import type { Token } from '$lib/types/token';
 

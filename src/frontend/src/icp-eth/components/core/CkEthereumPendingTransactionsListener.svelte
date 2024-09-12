@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { TransactionResponse } from '@ethersproject/abstract-provider';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import type { WebSocketListener } from '$eth/types/listener';
@@ -30,7 +29,6 @@
 	import type { OptionEthAddress } from '$lib/types/address';
 	import type { OptionalNullableBalance } from '$lib/types/balance';
 	import type { NetworkId } from '$lib/types/network';
-	import type { OptionalNullable } from '$lib/types/utils';
 
 	let listener: WebSocketListener | undefined = undefined;
 

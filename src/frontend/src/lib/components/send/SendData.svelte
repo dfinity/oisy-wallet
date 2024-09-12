@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { BigNumber } from '@ethersproject/bignumber';
 	import SendDataDestination from './SendDataDestination.svelte';
 	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';

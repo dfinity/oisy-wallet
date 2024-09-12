@@ -2,7 +2,7 @@
 	import WalletConnectSend from './WalletConnectSend.svelte';
 	import WalletConnectSession from './WalletConnectSession.svelte';
 	import WalletConnectSign from './WalletConnectSign.svelte';
-	import type { WalletConnectListener } from '$eth/types/wallet-connect';
+	import type { OptionalNullableWalletConnectListener } from '$eth/types/wallet-connect';
 
 	let listener: OptionalNullableWalletConnectListener;
 </script>

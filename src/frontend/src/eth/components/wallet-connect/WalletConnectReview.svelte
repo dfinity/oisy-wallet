@@ -13,6 +13,7 @@
 	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionalNullable } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let proposal: OptionalNullable<Web3WalletTypes.SessionProposal>;
