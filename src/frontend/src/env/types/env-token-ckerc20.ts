@@ -1,17 +1,13 @@
+import { envIcToken } from '$env/types/env-icrc-token';
+import { envTokenSymbol } from '$env/types/env-token-common';
 import { isEthAddress } from '$lib/utils/account.utils';
 import { z } from 'zod';
 
 const envErc20ContractAddress = z.custom<string>(isEthAddress, 'Invalid ERC20 Contract Address');
 
-const envTokenData = z.object({
-	ledgerCanisterId: z.string(),
-	indexCanisterId: z.string(),
+const envTokenData = envIcToken.extend({
 	erc20ContractAddress: envErc20ContractAddress
 });
-
-const envTokenSymbol = z.string();
-
-export type EnvTokenSymbol = z.infer<typeof envTokenSymbol>;
 
 const envTokens = z.record(envTokenSymbol, z.union([z.undefined(), envTokenData]));
 
