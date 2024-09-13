@@ -10,18 +10,18 @@
 	import IcAddTokenReview from '$icp/components/tokens/IcAddTokenReview.svelte';
 	import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import AddTokenByNetwork from '$icp-eth/components/tokens/AddTokenByNetwork.svelte';
-	import ManageTokens from '$icp-eth/components/tokens/ManageTokens.svelte';
 	import {
 		saveErc20UserTokens,
 		saveIcrcCustomTokens
 	} from '$icp-eth/services/manage-tokens.services';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
+	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
-	import { authStore } from '$lib/stores/auth.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -130,7 +130,7 @@
 			modalNext: () => modal.set(3),
 			onSuccess: close,
 			onError: () => modal.set(0),
-			identity: $authStore.identity
+			identity: $authIdentity
 		});
 
 	const saveErc20 = (tokens: SaveUserToken[]): Promise<void> =>
@@ -140,7 +140,7 @@
 			modalNext: () => modal.set(3),
 			onSuccess: close,
 			onError: () => modal.set(0),
-			identity: $authStore.identity
+			identity: $authIdentity
 		});
 
 	const close = () => {

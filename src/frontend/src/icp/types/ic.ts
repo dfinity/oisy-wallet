@@ -5,6 +5,8 @@ import type {
 } from '$icp/types/canister';
 import type { CoingeckoCoinsId } from '$lib/types/coingecko';
 import type { Token } from '$lib/types/token';
+import type { TransactionType } from '$lib/types/transaction';
+import type { Option } from '$lib/types/utils';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type {
 	IcrcTransaction as IcrcTransactionCandid,
@@ -25,7 +27,7 @@ export type IcrcTransaction = {
 
 export type IcTransaction = IcpTransaction | IcrcTransaction;
 
-export type IcTransactionType = 'approve' | 'burn' | 'mint' | 'send' | 'receive';
+export type IcTransactionType = TransactionType | 'approve' | 'burn' | 'mint';
 
 export type IcTransactionIdText = string;
 
@@ -81,5 +83,5 @@ export type IcAppMetadata = {
 	explorerUrl?: string;
 };
 
-export type OptionIcToken = IcToken | undefined | null;
-export type OptionIcCkToken = IcCkToken | undefined | null;
+export type OptionIcToken = Option<IcToken>;
+export type OptionIcCkToken = Option<IcCkToken>;

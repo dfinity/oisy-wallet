@@ -1,5 +1,6 @@
 import type { UserCredential, UserProfile } from '$declarations/backend/backend.did';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
+import type { Option } from '$lib/types/utils';
 import { isNullish } from '@dfinity/utils';
 
 const isVerifiedCredential = (credential: UserCredential): boolean =>
@@ -16,7 +17,7 @@ const isVerifiedPouhCredential = (credential: UserCredential): boolean =>
  * @param profile {UserProfile | null | undefined} The user profile.
  * @returns {boolean | undefined}
  */
-export const hasPouhCredential = (profile: UserProfile | null | undefined): boolean | undefined => {
+export const hasPouhCredential = (profile: Option<UserProfile>): boolean | undefined => {
 	if (isNullish(profile)) {
 		return undefined;
 	}

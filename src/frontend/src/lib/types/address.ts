@@ -1,10 +1,12 @@
+import type { Option } from '$lib/types/utils';
+
 export type Address = string;
 
 export type BtcAddress = Address;
 
 export type EthAddress = Address;
 
-export type OptionAddress<T extends Address> = T | undefined | null;
+export type OptionAddress<T extends Address> = Option<T>;
 
 export type OptionBtcAddress = OptionAddress<BtcAddress>;
 

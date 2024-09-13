@@ -14,7 +14,7 @@ export const EURC_TOKEN: RequiredErc20Token = {
 	standard: 'erc20',
 	category: 'default',
 	name: 'Euro Coin',
-	symbol: 'EURC',
+	symbol: EURC_SYMBOL,
 	decimals: EURC_DECIMALS,
 	icon: eurc,
 	address: '0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c',

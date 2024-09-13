@@ -6,6 +6,7 @@ import {
 	getMaxTransactionAmount,
 	mapTokenUi
 } from '$lib/utils/token.utils';
+import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
 import { $balances, bn3 } from '../../mocks/balances.mock';
 import { $exchanges } from '../../mocks/exchanges.mock';
@@ -24,8 +25,8 @@ describe('getMaxTransactionAmount', () => {
 	it('should return the correct maximum amount for a transaction for each token standard', () => {
 		tokenStandards.forEach((tokenStandard) => {
 			const result = getMaxTransactionAmount({
-				balance,
-				fee,
+				balance: BigNumber.from(balance),
+				fee: BigNumber.from(fee),
 				tokenDecimals,
 				tokenStandard
 			});
@@ -36,8 +37,8 @@ describe('getMaxTransactionAmount', () => {
 	it('should return 0 if balance is less than fee', () => {
 		tokenStandards.forEach((tokenStandard) => {
 			const result = getMaxTransactionAmount({
-				balance: fee,
-				fee: balance,
+				fee: BigNumber.from(balance),
+				balance: BigNumber.from(fee),
 				tokenDecimals,
 				tokenStandard
 			});
@@ -61,14 +62,14 @@ describe('getMaxTransactionAmount', () => {
 		tokenStandards.forEach((tokenStandard) => {
 			let result = getMaxTransactionAmount({
 				balance: undefined,
-				fee,
+				fee: BigNumber.from(fee),
 				tokenDecimals,
 				tokenStandard
 			});
 			expect(result).toBe(0);
 
 			result = getMaxTransactionAmount({
-				balance,
+				balance: BigNumber.from(balance),
 				fee: undefined,
 				tokenDecimals,
 				tokenStandard
@@ -79,8 +80,8 @@ describe('getMaxTransactionAmount', () => {
 
 	it('should return the untouched amount if the token is ERC20', () => {
 		const result = getMaxTransactionAmount({
-			balance,
-			fee,
+			balance: BigNumber.from(balance),
+			fee: BigNumber.from(fee),
 			tokenDecimals: tokenDecimals,
 			tokenStandard: 'erc20'
 		});
@@ -111,6 +112,15 @@ describe('calculateTokenUsdBalance', () => {
 
 	it('should return 0 if balances store is not available', () => {
 		const result = calculateTokenUsdBalance({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
+		expect(result).toEqual(0);
+	});
+
+	it('should return 0 if balances store is undefined', () => {
+		const result = calculateTokenUsdBalance({
+			token: ETHEREUM_TOKEN,
+			$balances: undefined,
+			$exchanges
+		});
 		expect(result).toEqual(0);
 	});
 });
@@ -144,11 +154,33 @@ describe('mapTokenUi', () => {
 		});
 	});
 
+	it('should return an object TokenUi with undefined balance if balances store is not initiated', () => {
+		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: undefined, $exchanges });
+		expect(result).toEqual({
+			...ETHEREUM_TOKEN,
+			balance: undefined,
+			usdBalance: 0
+		});
+	});
+
 	it('should return an object TokenUi with undefined balance if balances store is not available', () => {
 		const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: {}, $exchanges });
 		expect(result).toEqual({
 			...ETHEREUM_TOKEN,
 			balance: undefined,
+			usdBalance: 0
+		});
+	});
+
+	it('should return an object TokenUi with null balance if balances data is null', () => {
+		const result = mapTokenUi({
+			token: ETHEREUM_TOKEN,
+			$balances: { [ETHEREUM_TOKEN.id]: null },
+			$exchanges
+		});
+		expect(result).toEqual({
+			...ETHEREUM_TOKEN,
+			balance: null,
 			usdBalance: 0
 		});
 	});

@@ -1,6 +1,6 @@
 import { balancesStore } from '$lib/stores/balances.store';
+import type { OptionBalance } from '$lib/types/balance';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
-import type { BigNumber } from '@ethersproject/bignumber';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export type SendData = Token;
@@ -53,7 +53,7 @@ export interface SendContext {
 	sendTokenDecimals: Readable<number>;
 	sendTokenId: Readable<TokenId>;
 	sendTokenStandard: Readable<TokenStandard>;
-	sendBalance: Readable<BigNumber | undefined | null>;
+	sendBalance: Readable<OptionBalance>;
 	sendPurpose: SendContextPurpose;
 }
 

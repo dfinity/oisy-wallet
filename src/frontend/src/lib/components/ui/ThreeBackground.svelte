@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import {
 		Color,
@@ -9,10 +10,10 @@
 		ShaderMaterial,
 		WebGLRenderer
 	} from 'three';
-	import { isNullish } from '@dfinity/utils';
 	import { HERO_ANIMATION_CANVAS } from '$lib/constants/test-ids.constants';
+	import type { Option } from '$lib/types/utils.js';
 
-	let container: HTMLDivElement | undefined | null;
+	let container: Option<HTMLDivElement>;
 
 	const colors = ['#89cee0', '#5dcabf', '#041093', '#010155'];
 

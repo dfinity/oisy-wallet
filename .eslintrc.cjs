@@ -34,20 +34,7 @@ module.exports = {
 			}
 		},
 		{
-			// TODO: slowly add all related folders, and ultimately remove this override and include the rule in the main rules
-			files: [
-				'src/frontend/src/eth/**/*.svelte',
-				'src/frontend/src/icp/**/*.svelte',
-				'src/frontend/src/icp-eth/**/*.svelte',
-				'src/frontend/src/lib/components/common/**/*.svelte',
-				'src/frontend/src/lib/components/core/**/*.svelte',
-				'src/frontend/src/lib/components/exchange/**/*.svelte',
-				'src/frontend/src/lib/components/guard/**/*.svelte',
-				'src/frontend/src/lib/components/hero/**/*.svelte',
-				'src/frontend/src/lib/components/icons/**/*.svelte',
-				'src/frontend/src/lib/components/info/**/*.svelte',
-				'src/frontend/src/lib/components/networks/**/*.svelte'
-			],
+			files: ['*.svelte'],
 			rules: {
 				'import/order': [
 					'error',
@@ -59,7 +46,8 @@ module.exports = {
 		}
 	],
 	rules: {
-		'no-unused-vars': 'off',
+		'@typescript-eslint/no-inferrable-types': 'error',
+		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'@typescript-eslint/no-unused-vars': [
 			'warn',
 			{
@@ -68,17 +56,18 @@ module.exports = {
 				caughtErrorsIgnorePattern: '^_'
 			}
 		],
-		'no-console': ['error', { allow: ['error', 'warn'] }],
-		'no-else-return': ['warn', { allowElseIf: false }],
-		'local-rules/no-svelte-store-in-api': 'error',
 		'@typescript-eslint/prefer-nullish-coalescing': 'error',
-		'no-continue': 'warn',
-		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
-		'no-delete-var': 'error',
-		curly: 'error',
+    '@typescript-eslint/prefer-reduce-type-parameter': 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
+		curly: 'error',
+		'local-rules/no-svelte-store-in-api': 'error',
+		'local-rules/use-option-type-wrapper': 'warn',
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],
-		'@typescript-eslint/no-inferrable-types': 'error',
+		'no-console': ['error', { allow: ['error', 'warn'] }],
+		'no-continue': 'warn',
+		'no-delete-var': 'error',
+		'no-else-return': ['warn', { allowElseIf: false }],
+		'no-unused-vars': 'off',
 		'prefer-template': 'error'
 	},
 	globals: {

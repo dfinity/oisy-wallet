@@ -4,8 +4,9 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import type { TokenToggleable } from '$lib/types/token-toggleable';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.
@@ -14,15 +15,15 @@ import { nonNullish } from '@dfinity/utils';
  * @param $tokensToPin - The list of tokens to pin at the top of the list.
  * @param $exchanges - The exchange rates for the tokens.
  */
-export const sortTokens = ({
+export const sortTokens = <T extends Token>({
 	$tokens,
 	$exchanges,
 	$tokensToPin
 }: {
-	$tokens: Token[];
+	$tokens: T[];
 	$exchanges: ExchangesData;
 	$tokensToPin: TokenToPin[];
-}): Token[] => {
+}): T[] => {
 	const pinnedTokens = $tokensToPin
 		.map(({ id: pinnedId, network: { id: pinnedNetworkId } }) =>
 			$tokens.find(
@@ -73,6 +74,11 @@ export const pinTokensWithBalanceAtTop = ({
 	$balances: CertifiedStoreData<BalancesData>;
 	$exchanges: ExchangesData;
 }): TokenUi[] => {
+	// If balances data are nullish, there is no need to sort.
+	if (isNullish($balances)) {
+		return $tokens.map((token) => mapTokenUi({ token, $balances, $exchanges }));
+	}
+
 	const [positiveBalances, nonPositiveBalances] = $tokens.reduce<[TokenUi[], TokenUi[]]>(
 		(acc, token) => {
 			const tokenUI: TokenUi = mapTokenUi({
@@ -150,3 +156,12 @@ export const sumMainnetTokensUsdBalancesPerNetwork = ({
  */
 export const filterEnabledTokens = ([$tokens]: [$tokens: Token[]]): Token[] =>
 	$tokens.filter((token) => ('enabled' in token ? token.enabled : true));
+
+/** Pins enabled tokens at the top of the list, preserving the order of the parts.
+ *
+ * @param $tokens - The list of tokens.
+ * @returns The list of tokens with enabled tokens at the top.
+ * */
+export const pinEnabledTokensAtTop = <T extends Token>(
+	$tokens: TokenToggleable<T>[]
+): TokenToggleable<T>[] => $tokens.sort(({ enabled: a }, { enabled: b }) => Number(b) - Number(a));

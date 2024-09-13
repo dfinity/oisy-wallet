@@ -5,16 +5,38 @@
 	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
 	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
+	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
 	import { sortedTransactions } from '$eth/derived/transactions.derived';
 	import { loadTransactions } from '$eth/services/transactions.services';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
+	import { mapTransactionUi } from '$eth/utils/transactions.utils';
+	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalToken, modalTransaction } from '$lib/derived/modal.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionEthAddress } from '$lib/types/address';
 	import type { TokenId } from '$lib/types/token';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+
+	let ckMinterInfoAddresses: OptionEthAddress[] = [];
+	$: ckMinterInfoAddresses = toCkMinterInfoAddresses(
+		$ckEthMinterInfoStore?.[$ethereumTokenId],
+		$ethereumToken.network.id
+	);
+
+	let sortedTransactionsUi: EthTransactionUi[];
+	$: sortedTransactionsUi = $sortedTransactions.map((transaction) =>
+		mapTransactionUi({
+			transaction,
+			ckMinterInfoAddresses,
+			$ethAddress: $ethAddress
+		})
+	);
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
@@ -61,7 +83,7 @@
 <Header>{$i18n.transactions.text.title}</Header>
 
 <TransactionsSkeletons>
-	{#each $sortedTransactions as transaction, index (`${transaction.hash}-${index}`)}
+	{#each sortedTransactionsUi as transaction, index (`${transaction.hash}-${index}`)}
 		<Transaction {transaction} />
 	{/each}
 

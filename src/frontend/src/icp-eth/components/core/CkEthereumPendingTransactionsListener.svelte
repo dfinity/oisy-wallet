@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { TransactionResponse } from '@ethersproject/abstract-provider';
-	import type { BigNumber } from '@ethersproject/bignumber';
 	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import type { WebSocketListener } from '$eth/types/listener';
@@ -23,16 +22,17 @@
 		toCkEthHelperContractAddress
 	} from '$icp-eth/utils/cketh.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import { tokenId } from '$lib/derived/token.derived';
-	import { authStore } from '$lib/stores/auth.store';
 	import { token } from '$lib/stores/token.store';
 	import type { OptionEthAddress } from '$lib/types/address';
+	import type { OptionBalance } from '$lib/types/balance';
 	import type { NetworkId } from '$lib/types/network';
 
 	let listener: WebSocketListener | undefined = undefined;
 
-	let loadBalance: BigNumber | undefined | null = undefined;
+	let loadBalance: OptionBalance = undefined;
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 
@@ -70,7 +70,7 @@
 		await loadCkEthereumPendingTransactions({
 			token: $tokenAsIcToken,
 			lastObservedBlockNumber,
-			identity: $authStore.identity,
+			identity: $authIdentity,
 			toAddress,
 			twinToken: $ckEthereumTwinToken
 		});

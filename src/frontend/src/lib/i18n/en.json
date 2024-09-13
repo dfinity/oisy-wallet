@@ -116,8 +116,9 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
-			"erc20_user_tokens": "Error while loading the Erc20 user tokens.",
-			"erc20_user_token": "Error while enabling the Erc20 twin token.",
+			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
+			"erc20_user_token": "Error while enabling the ERC20 twin token.",
+			"icrc_custom_tokens": "Error while loading the ICRC custom tokens.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again."
 		}
 	},
@@ -204,7 +205,9 @@
 				"initializing": "Initializing...",
 				"checking_incoming": "Checking for incoming BTC...",
 				"refreshing_wallet": "Refreshing wallet...",
-				"bitcoin_address": "Bitcoin Address",
+				"bitcoin_address": "Bitcoin",
+				"bitcoin_testnet_address": "Bitcoin (Testnet)",
+				"bitcoin_regtest_address": "Bitcoin (Regtest)",
 				"display_bitcoin_address_qr": "Display Bitcoin Address as a QR code",
 				"bitcoin_address_copied": "Bitcoin Address copied to clipboard.",
 				"from_network": "Transfer Bitcoin on the BTC network to this address to receive ckBTC.",
@@ -293,6 +296,7 @@
 	},
 	"convert": {
 		"text": {
+			"converting": "Converting...",
 			"convert_to_btc": "Convert to BTC",
 			"convert_to_token": "Convert to $token",
 			"convert_to_cketh": "Convert to ckETH",
@@ -422,7 +426,8 @@
 			"fee": "Fee",
 			"estimated_btc": "Estimated BTC Network Fee",
 			"estimated_inter_network": "Estimated Inter-network Fee",
-			"estimated_eth": "Estimated Ethereum Fee"
+			"estimated_eth": "Estimated Ethereum Fee",
+			"max_fee_eth": "Max fee <small>(likely in &lt; 30 seconds)</small>:"
 		},
 		"error": {
 			"cannot_fetch_gas_fee": "Cannot fetch gas fee."
@@ -528,11 +533,14 @@
 		"label": {
 			"reimbursement": "Reimbursement",
 			"twin_token_sent": "$twinToken sent",
+			"ck_token_sent": "$ckToken sent",
 			"twin_token_converted": "Converted from $twinToken",
+			"ck_token_converted": "Converted from $ckToken",
 			"receiving_twin_token": "Receiving $twinToken",
 			"sending_twin_token": "Sending $twinToken",
 			"sending_twin_token_failed": "Sending $twinToken failed",
 			"converting_twin_token": "Converting $twinToken to $ckToken",
+			"converting_ck_token": "Converting $ckToken to $twinToken",
 			"twin_network": "$twinNetwork network"
 		},
 		"alt": {
