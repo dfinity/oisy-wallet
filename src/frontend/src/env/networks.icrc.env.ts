@@ -21,7 +21,7 @@ import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
 import type { EnvTokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCkInterface } from '$icp/types/ic';
+import type { IcCkInterface, IcInterface } from '$icp/types/ic';
 import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
@@ -422,13 +422,13 @@ export const CKERC20_LEDGER_CANISTER_IDS: CanisterIdText[] = [
  */
 
 // The subset of the ICRC tokens that are also displayed if the user is not signed in.
-export const PUBLIC_ICRC_TOKENS: IcCkInterface[] = [
+export const PUBLIC_ICRC_TOKENS: IcInterface[] = [
 	...(nonNullish(CKBTC_IC_DATA) ? [CKBTC_IC_DATA] : []),
 	...(nonNullish(CKETH_IC_DATA) ? [CKETH_IC_DATA] : []),
 	...(nonNullish(CKUSDC_IC_DATA) ? [CKUSDC_IC_DATA] : [])
 ];
 
-export const ICRC_TOKENS: IcCkInterface[] = [
+export const ICRC_TOKENS: IcInterface[] = [
 	...PUBLIC_ICRC_TOKENS,
 	...(nonNullish(CKBTC_LOCAL_DATA) ? [CKBTC_LOCAL_DATA] : []),
 	...(nonNullish(CKBTC_STAGING_DATA) ? [CKBTC_STAGING_DATA] : []),
