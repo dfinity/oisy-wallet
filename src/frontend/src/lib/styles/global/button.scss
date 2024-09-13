@@ -177,4 +177,11 @@ button {
 		opacity: 1;
 		--box-shadow-opacity: 0.75;
 	}
+
+	&[disabled],
+	&.disabled {
+		background: var(--color-grey);
+		color: var(--color-white);
+		opacity: 1;
+	}
 }
