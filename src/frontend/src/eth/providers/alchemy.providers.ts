@@ -86,18 +86,6 @@ export const initPendingTransactionsListener = ({
 		listener
 	);
 
-	provider.ws.on(
-		{
-			method: AlchemySubscription.MINED_TRANSACTIONS,
-			addresses: [{ to: toAddress }],
-			hashesOnly,
-			includeRemoved: false
-		},
-		(data) => {
-			console.log(data);
-		}
-	);
-
 	return {
 		disconnect: async () => {
 			// Alchemy is buggy. Despite successfully removing all listeners, attaching new similar events would have for effect to double the triggers. That's why we reset it to null.
