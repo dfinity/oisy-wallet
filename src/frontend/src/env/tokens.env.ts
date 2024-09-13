@@ -6,8 +6,7 @@ import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
-import type { RequiredToken, TokenAppearance } from '$lib/types/token';
-import type { RequiredExcept } from '$lib/types/utils';
+import type { RequiredToken } from '$lib/types/token';
 
 /**
  * Ethereum
@@ -62,7 +61,7 @@ export const ICP_SYMBOL = 'ICP';
 
 export const ICP_TOKEN_ID = Symbol(ICP_SYMBOL);
 
-export const ICP_TOKEN: RequiredExcept<IcToken, keyof TokenAppearance> = {
+export const ICP_TOKEN: RequiredToken<IcToken> = {
 	id: ICP_TOKEN_ID,
 	network: ICP_NETWORK,
 	standard: 'icp',
