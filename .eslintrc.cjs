@@ -57,10 +57,11 @@ module.exports = {
 			}
 		],
 		'@typescript-eslint/prefer-nullish-coalescing': 'error',
-    '@typescript-eslint/prefer-reduce-type-parameter': 'error',
+		'@typescript-eslint/prefer-reduce-type-parameter': 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
 		curly: 'error',
 		'local-rules/no-svelte-store-in-api': 'error',
+		'local-rules/use-nullish-checks': 'warn',
 		'local-rules/use-option-type-wrapper': 'warn',
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],
 		'no-console': ['error', { allow: ['error', 'warn'] }],
