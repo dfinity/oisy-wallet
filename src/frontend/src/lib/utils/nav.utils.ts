@@ -73,7 +73,7 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	const token = searchParams?.get('token');
 
 	const replaceEmoji = (input: string | null): string | null => {
-		if (input === null) {
+		if (isNullish(input)) {
 			return null;
 		}
 
