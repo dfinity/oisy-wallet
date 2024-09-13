@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
 	import Transaction from './Transaction.svelte';
 	import TransactionModal from './TransactionModal.svelte';
 	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
@@ -83,8 +84,10 @@
 <Header>{$i18n.transactions.text.title}</Header>
 
 <TransactionsSkeletons>
-	{#each sortedTransactionsUi as transaction, index (`${transaction.hash}-${index}`)}
-		<Transaction {transaction} />
+	{#each sortedTransactionsUi as transaction (transaction.hash)}
+		<div transition:slide={{ duration: 250 }}>
+			<Transaction {transaction} />
+		</div>
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
