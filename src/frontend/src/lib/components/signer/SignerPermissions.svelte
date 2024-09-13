@@ -11,9 +11,9 @@
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
-	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
+	import OisyWalletLogoDarkCircle from '$lib/components/icons/OisyWalletLogoDarkCircle.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
@@ -27,7 +27,7 @@
 	let confirm: PermissionsConfirmation | undefined;
 	$: confirm = $payload?.confirm;
 
-	const hostOrigin = (origin: Origin | undefined): string | undefined => {
+	const mapHost = (origin: Origin | undefined): string | undefined => {
 		if (isNullish(origin)) {
 			return undefined;
 		}
@@ -42,7 +42,10 @@
 	};
 
 	let origin: Origin | undefined;
-	$: origin = hostOrigin($payload?.origin);
+	$: origin = $payload?.origin;
+
+	let host: string | undefined;
+	$: host = mapHost(origin);
 
 	const onReject = () => {
 		// TODO: assert no undefined and toast error
@@ -81,19 +84,29 @@
 	);
 </script>
 
-{#if nonNullish(scopes) && nonNullish(origin)}
+{#if nonNullish(scopes) && nonNullish(host) && nonNullish(origin)}
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
-		<h2 class="text-center mb-6">Connect your wallet</h2>
+		<h2 class="text-center mb-6">Review permissions</h2>
+
+		<p class="break-normal text-center mb-6">
+			Request from: <span class="font-bold text-brandeis-blue"
+				><ExternalLink
+					ariaLabel="Link to the dApp requesting permissions"
+					href={origin}
+					iconVisible={false}>{host}</ExternalLink
+				></span
+			>
+		</p>
 
 		<div class="bg-light-blue border border-light-blue p-6 mb-6 rounded-lg">
-			<p class="break-normal font-bold">By connecting, {origin} will:</p>
+			<p class="break-normal font-bold">The dapp is requesting the following permissions</p>
 
 			<ul class="flex flex-col gap-1 list-none mt-2.5">
 				{#each scopes as scope}
 					{@const { icon, label } = listItems[scope.scope.method]}
 
 					<li class="break-normal pb-1.5 flex items-center gap-2">
-						<svelte:component this={icon} />
+						<svelte:component this={icon} size="24" />
 						{label}
 					</li>
 				{/each}
@@ -101,13 +114,11 @@
 		</div>
 
 		{#if requestAccountsPermissions}
-			<div class="border border-dust bg-white rounded-lg flex p-4 mb-6">
-				<OisyWalletLogo />
+			<div class="flex gap-4 border border-dust bg-white rounded-lg flex p-4 mb-10">
+				<OisyWalletLogoDarkCircle />
 
 				<div>
-					<label class="block text-sm font-bold" for="ic-wallet-address"
-						>{$i18n.wallet.text.wallet_address}:</label
-					>
+					<label class="block text-sm font-bold" for="ic-wallet-address">Your wallet address</label>
 
 					<output id="ic-wallet-address" class="break-all"
 						>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
