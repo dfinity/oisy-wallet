@@ -32,7 +32,7 @@ export type TokenOisyName = {
 	oisyName: string;
 };
 
-export type RequiredToken = RequiredExcept<Token, keyof TokenAppearance>;
+export type RequiredToken<T extends Token = Token> = RequiredExcept<T, keyof TokenAppearance>;
 
 export type OptionToken = Option<Token>;
 export type OptionTokenId = Option<TokenId>;

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import AlertBanner from '$lib/components/core/AlertBanner.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
@@ -17,9 +16,6 @@
 
 	$: token.set($pageToken);
 </script>
-
-<!-- TODO: remove me -->
-<AlertBanner />
 
 <Hero
 	usdTotal={route === 'tokens'}

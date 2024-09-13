@@ -470,11 +470,14 @@ interface I18nTransaction {
 	label: {
 		reimbursement: string;
 		twin_token_sent: string;
+		ck_token_sent: string;
 		twin_token_converted: string;
+		ck_token_converted: string;
 		receiving_twin_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;
 		converting_twin_token: string;
+		converting_ck_token: string;
 		twin_network: string;
 	};
 	alt: {
