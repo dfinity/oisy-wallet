@@ -1,6 +1,6 @@
 import type { ContractAddress } from '$eth/types/address';
 import type { Exchange } from '$lib/types/exchange';
-import type { RequiredToken, Token, TokenMetadata } from '$lib/types/token';
+import type { RequiredToken, Token, TokenMetadata, TwinToken } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 
 export type Erc20Token = Erc20Contract & Token;
@@ -8,7 +8,7 @@ export type Erc20Token = Erc20Contract & Token;
 export type RequiredErc20Token = RequiredToken<Erc20Token>;
 
 export type Erc20ContractAddress = ContractAddress;
-export type Erc20Contract = Erc20ContractAddress & { exchange: Exchange; twinTokenSymbol?: string };
+export type Erc20Contract = Erc20ContractAddress & { exchange: Exchange } & TwinToken;
 
 export type Erc20Metadata = TokenMetadata;
 
