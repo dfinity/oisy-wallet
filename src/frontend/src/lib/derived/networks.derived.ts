@@ -19,12 +19,12 @@ interface NetworksEnvs {
 }
 
 const networksEnvs: Readable<NetworksEnvs> = derived([networks], ([$networks]) =>
-	$networks.reduce(
+	$networks.reduce<NetworksEnvs>(
 		({ mainnets, testnets }, network) => ({
 			mainnets: [...mainnets, ...(network.env === 'mainnet' ? [network] : [])],
 			testnets: [...testnets, ...(network.env === 'testnet' ? [network] : [])]
 		}),
-		{ mainnets: [], testnets: [] } as NetworksEnvs
+		{ mainnets: [], testnets: [] }
 	)
 );
 

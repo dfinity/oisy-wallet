@@ -62,12 +62,12 @@ export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcC
 		response: RetrieveBtcStatusV2WithId[];
 		certified: boolean;
 	}) => {
-		const statuses = response.reduce(
+		const statuses = response.reduce<BtcWithdrawalStatuses>(
 			(acc, { id, status }) => ({
 				...acc,
 				...(nonNullish(status) && { [`${id}`]: status })
 			}),
-			{} as BtcWithdrawalStatuses
+			{}
 		);
 
 		const data: CertifiedData<BtcWithdrawalStatuses> = {
