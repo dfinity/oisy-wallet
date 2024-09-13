@@ -138,7 +138,7 @@ export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token i
 const icCkToken = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
 
-export const mapCkTokenOisyName = (token: IcInterface): IcInterface => ({
+export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
 	...(icCkToken(token) && nonNullish(token.twinToken)
 		? {
