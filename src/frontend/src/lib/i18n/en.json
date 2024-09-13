@@ -533,11 +533,14 @@
 		"label": {
 			"reimbursement": "Reimbursement",
 			"twin_token_sent": "$twinToken sent",
+			"ck_token_sent": "$ckToken sent",
 			"twin_token_converted": "Converted from $twinToken",
+			"ck_token_converted": "Converted from $ckToken",
 			"receiving_twin_token": "Receiving $twinToken",
 			"sending_twin_token": "Sending $twinToken",
 			"sending_twin_token_failed": "Sending $twinToken failed",
 			"converting_twin_token": "Converting $twinToken to $ckToken",
+			"converting_ck_token": "Converting $ckToken to $twinToken",
 			"twin_network": "$twinNetwork network"
 		},
 		"alt": {

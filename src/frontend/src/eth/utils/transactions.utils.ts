@@ -1,4 +1,6 @@
 import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
+import type { EthTransactionUi } from '$eth/types/eth-transaction';
+import type { OptionEthAddress } from '$lib/types/address';
 import type { Transaction } from '$lib/types/transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { BigNumber } from '@ethersproject/bignumber';
@@ -17,4 +19,30 @@ export const decodeErc20AbiDataValue = (data: string): BigNumber => {
 	);
 
 	return value;
+};
+
+/** It maps a transaction to a transaction UI object
+ *
+ */
+export const mapTransactionUi = ({
+	transaction,
+	ckMinterInfoAddresses,
+	$ethAddress
+}: {
+	transaction: Transaction;
+	ckMinterInfoAddresses: OptionEthAddress[];
+	$ethAddress: OptionEthAddress;
+}): EthTransactionUi => {
+	const { from, to } = transaction;
+
+	return {
+		...transaction,
+		uiType: ckMinterInfoAddresses.includes(from.toLowerCase())
+			? 'withdraw'
+			: ckMinterInfoAddresses.includes(to?.toLowerCase())
+				? 'deposit'
+				: from?.toLowerCase() === $ethAddress?.toLowerCase()
+					? 'send'
+					: 'receive'
+	};
 };
