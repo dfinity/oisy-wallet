@@ -3,17 +3,16 @@
 	import {
 		type IcrcScope,
 		type IcrcScopedMethod,
-		type Origin,
 		type PermissionsConfirmation
 	} from '@dfinity/oisy-wallet-signer';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { type ComponentType, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
 	import OisyWalletLogoDarkCircle from '$lib/components/icons/OisyWalletLogoDarkCircle.svelte';
+	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
@@ -26,26 +25,6 @@
 
 	let confirm: PermissionsConfirmation | undefined;
 	$: confirm = $payload?.confirm;
-
-	const mapHost = (origin: Origin | undefined): string | undefined => {
-		if (isNullish(origin)) {
-			return undefined;
-		}
-
-		try {
-			// If set we actually for sure that the $payload.origin is a valid URL but, for the state of the art, we still catch potential errors here too.
-			const { host } = new URL(origin);
-			return host;
-		} catch {
-			return undefined;
-		}
-	};
-
-	let origin: Origin | undefined;
-	$: origin = $payload?.origin;
-
-	let host: string | undefined;
-	$: host = mapHost(origin);
 
 	const onReject = () => {
 		// TODO: assert no undefined and toast error
@@ -84,19 +63,11 @@
 	);
 </script>
 
-{#if nonNullish(scopes) && nonNullish(host) && nonNullish(origin)}
+{#if nonNullish(scopes) && nonNullish($payload)}
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
 		<h2 class="text-center mb-6">Review permissions</h2>
 
-		<p class="break-normal text-center mb-6">
-			Request from: <span class="font-bold text-brandeis-blue"
-				><ExternalLink
-					ariaLabel="Link to the dApp requesting permissions"
-					href={origin}
-					iconVisible={false}>{host}</ExternalLink
-				></span
-			>
-		</p>
+		<SignerOrigin payload={$payload} />
 
 		<div class="bg-light-blue border border-light-blue p-6 mb-6 rounded-lg">
 			<p class="break-normal font-bold">The dapp is requesting the following permissions</p>

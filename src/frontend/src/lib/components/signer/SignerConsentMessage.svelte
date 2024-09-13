@@ -8,6 +8,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 
@@ -66,7 +67,9 @@
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
 		<h2 class="text-center mb-6">{title}</h2>
 
-		<div class="bg-off-white border border-light-blue p-6 mb-6 rounded-lg msg">
+		<SignerOrigin payload={$payload} />
+
+		<div class="border border-light-blue p-8 mb-6 rounded-lg msg">
 			<Markdown text={content} />
 		</div>
 
