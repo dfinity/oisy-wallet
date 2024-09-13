@@ -2,7 +2,7 @@
 	import type { Origin, PromptPayload } from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-    import type { Option } from '$lib/types/utils';
+	import type { Option } from '$lib/types/utils';
 
 	export let payload: Option<PromptPayload>;
 
