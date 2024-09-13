@@ -36,6 +36,7 @@ export const generateUrn = (
 
 	const queryString = new URLSearchParams();
 	for (const [key, value] of Object.entries(params)) {
+		// eslint-disable-next-line local-rules/use-nullish-checks -- We want to check for not-undefined values but null is allowed
 		if (value !== undefined) {
 			queryString.append(key, value.toString());
 		}
