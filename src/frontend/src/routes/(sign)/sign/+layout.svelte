@@ -4,7 +4,7 @@
 	import OisyWalletLogoDark from '$lib/components/icons/OisyWalletLogoDark.svelte';
 </script>
 
-<main class="pt-12 flex flex-col gap-y-10">
+<main class="pt-10 flex flex-col gap-y-8">
 	<OisyWalletLogoDark />
 
 	<LoadersGuard>

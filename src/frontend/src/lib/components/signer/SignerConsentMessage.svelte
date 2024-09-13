@@ -65,11 +65,11 @@
 	{@const { title, content } = text}
 
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
-		<h2 class="text-center mb-6">{title}</h2>
+		<h2 class="text-center mb-4">{title}</h2>
 
 		<SignerOrigin payload={$payload} />
 
-		<div class="border border-light-blue p-8 mb-6 rounded-lg msg">
+		<div class="border border-light-blue px-8 py-4 mb-6 rounded-lg msg">
 			<Markdown text={content} />
 		</div>
 
@@ -88,6 +88,10 @@
 
 		:global(strong) {
 			display: block;
+		}
+
+		:global(p:last-of-type) {
+			margin-bottom: 0;
 		}
 	}
 </style>
