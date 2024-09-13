@@ -25,6 +25,10 @@ type SelectorOperationParams = {
 	selector: string;
 };
 
+type TestIdOperationParams = {
+	testId: string;
+};
+
 type WaitForModalParams = {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
@@ -71,21 +75,6 @@ abstract class Homepage {
 		await this.#page.goto(HOMEPAGE_URL);
 	}
 
-	private async waitForModal({
-		modalOpenButtonTestId,
-		modalTestId
-	}: WaitForModalParams): Promise<Locator> {
-		await this.#page.getByTestId(modalOpenButtonTestId).click();
-		const modal = this.#page.getByTestId(modalTestId);
-		await modal.waitFor();
-
-		return modal;
-	}
-
-	private async setViewportSize(viewportSize: ViewportSize) {
-		await this.#page.setViewportSize(viewportSize);
-	}
-
 	private async waitForNavigationMenu(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(NAVIGATION_MENU).waitFor(options);
 	}
@@ -100,10 +89,7 @@ abstract class Homepage {
 		return this.#page.evaluate<string | undefined, { selector: string }>(
 			({ selector }) => {
 				const canvas = document.querySelector<HTMLCanvasElement>(selector);
-
-				if (nonNullish(canvas)) {
-					return canvas.toDataURL();
-				}
+				return canvas?.toDataURL();
 			},
 			{
 				selector
@@ -111,7 +97,7 @@ abstract class Homepage {
 		);
 	}
 
-	private async readQRCode({ selector }: SelectorOperationParams): Promise<string | undefined> {
+	protected async readQRCode({ selector }: SelectorOperationParams): Promise<string | undefined> {
 		await this.#page.locator(selector).waitFor();
 
 		const dataUrl = await this.getCanvasAsDataURL({ selector });
@@ -119,6 +105,21 @@ abstract class Homepage {
 		if (nonNullish(dataUrl)) {
 			return getQRCodeValueFromDataURL({ dataUrl });
 		}
+	}
+
+	protected async waitForModal({
+		modalOpenButtonTestId,
+		modalTestId
+	}: WaitForModalParams): Promise<Locator> {
+		await this.#page.getByTestId(modalOpenButtonTestId).click();
+		const modal = this.#page.getByTestId(modalTestId);
+		await modal.waitFor();
+
+		return modal;
+	}
+
+	private async setViewportSize(viewportSize: ViewportSize) {
+		await this.#page.setViewportSize(viewportSize);
 	}
 
 	protected async waitForHomepageReady(): Promise<void> {
@@ -142,6 +143,14 @@ abstract class Homepage {
 		await this.waitForNavigationMenu();
 
 		await this.#page.getByTestId(menuItemTestId).click();
+	}
+
+	protected async clickSelector({ selector }: SelectorOperationParams): Promise<void> {
+		await this.#page.locator(selector).click();
+	}
+
+	protected async getLocatorByTestId({ testId }: TestIdOperationParams): Promise<Locator> {
+		return this.#page.getByTestId(testId);
 	}
 
 	async testModalSnapshot({

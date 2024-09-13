@@ -11,10 +11,13 @@ export const envIcrcTokenMetadata = z.object({
 
 const indexCanisterVersion = z.union([z.literal('up-to-date'), z.literal('outdated')]);
 
-export const envIcrcToken = z.object({
+export const envIcToken = z.object({
 	ledgerCanisterId: z.string(),
+	indexCanisterId: z.string()
+});
+
+export const envIcrcToken = envIcToken.extend({
 	rootCanisterId: z.string(),
-	indexCanisterId: z.string(),
 	metadata: envIcrcTokenMetadata,
 	indexCanisterVersion
 });

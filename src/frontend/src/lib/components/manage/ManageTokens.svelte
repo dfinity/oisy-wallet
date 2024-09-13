@@ -3,6 +3,9 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import BtcManageTokenToggle from '$btc/components/BtcManageTokenToggle.svelte';
+	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -33,10 +36,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
+	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
-	import { sortTokens } from '$lib/utils/tokens.utils';
+	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	const dispatch = createEventDispatcher();
 
@@ -81,14 +85,14 @@
 	let manageEthereumTokens = false;
 	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
 
-	// TODO: Bitcoin tokens ($enabledBitcoinTokens) are not included yet.
-	let allTokens: Token[] = [];
+	let allTokens: TokenToggleable<Token>[] = [];
 	$: allTokens = filterTokensForSelectedNetwork([
 		[
 			{
 				...ICP_TOKEN,
 				enabled: true
 			},
+			...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
 			...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
 			...(manageEthereumTokens ? allErc20Tokens : []),
 			...(manageIcTokens ? allIcrcTokens : [])
@@ -99,11 +103,13 @@
 
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
-		? sortTokens({
-				$tokens: allTokens,
-				$exchanges: exchangesStaticData,
-				$tokensToPin: $tokensToPin
-			})
+		? pinEnabledTokensAtTop(
+				sortTokens({
+					$tokens: allTokens,
+					$exchanges: exchangesStaticData,
+					$tokensToPin: $tokensToPin
+				})
+			)
 		: [];
 
 	let filterTokens = '';
@@ -167,7 +173,10 @@
 		icrc: [],
 		erc20: []
 	};
-	$: groupModifiedTokens = Object.values(modifiedTokens).reduce(
+	$: groupModifiedTokens = Object.values(modifiedTokens).reduce<{
+		icrc: IcrcCustomToken[];
+		erc20: Erc20UserToken[];
+	}>(
 		({ icrc, erc20 }, token) => ({
 			icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
 			erc20: [
@@ -175,7 +184,7 @@
 				...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
 			]
 		}),
-		{ icrc: [], erc20: [] } as { icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] }
+		{ icrc: [], erc20: [] }
 	);
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
@@ -240,6 +249,8 @@
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
 					{:else if icTokenEthereumUserToken(token)}
 						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
+					{:else if isBitcoinToken(token)}
+						<BtcManageTokenToggle />
 					{/if}
 				</svelte:fragment>
 			</Card>

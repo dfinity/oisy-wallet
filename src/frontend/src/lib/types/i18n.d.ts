@@ -98,6 +98,7 @@ interface I18nInit {
 		icrc_canisters: string;
 		erc20_user_tokens: string;
 		erc20_user_token: string;
+		icrc_custom_token: string;
 		loading_wallet_timeout: string;
 	};
 }
@@ -175,6 +176,8 @@ interface I18nReceive {
 			checking_incoming: string;
 			refreshing_wallet: string;
 			bitcoin_address: string;
+			bitcoin_testnet_address: string;
+			bitcoin_regtest_address: string;
 			display_bitcoin_address_qr: string;
 			bitcoin_address_copied: string;
 			from_network: string;
@@ -467,11 +470,14 @@ interface I18nTransaction {
 	label: {
 		reimbursement: string;
 		twin_token_sent: string;
+		ck_token_sent: string;
 		twin_token_converted: string;
+		ck_token_converted: string;
 		receiving_twin_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;
 		converting_twin_token: string;
+		converting_ck_token: string;
 		twin_network: string;
 	};
 	alt: {

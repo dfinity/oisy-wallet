@@ -17,7 +17,7 @@
 	import { walletConnectUri } from '$eth/derived/wallet-connect.derived';
 	import { initWalletConnectListener } from '$eth/services/eth-listener.services';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
-	import type { WalletConnectListener } from '$eth/types/wallet-connect';
+	import type { OptionWalletConnectListener } from '$eth/types/wallet-connect';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { busy } from '$lib/stores/busy.store';
@@ -25,9 +25,10 @@
 	import { loading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let listener: WalletConnectListener | undefined | null;
+	export let listener: OptionWalletConnectListener;
 
 	const STEP_CONNECT: WizardStep = {
 		name: 'Connect',
@@ -50,7 +51,7 @@
 		close();
 	};
 
-	let proposal: Web3WalletTypes.SessionProposal | undefined | null;
+	let proposal: Option<Web3WalletTypes.SessionProposal>;
 
 	const disconnect = async () => {
 		await disconnectListener();
