@@ -53,7 +53,7 @@ export interface IcTransactionUi {
 	txExplorerUrl?: string;
 }
 
-export type IcToken = Omit<Token, 'twinTokenSymbol'> & IcFee & IcInterface;
+export type IcToken = Token & IcFee & IcInterface;
 export type IcTokenWithoutId = Omit<IcToken, 'id'>;
 
 export type IcFee = { fee: bigint };
