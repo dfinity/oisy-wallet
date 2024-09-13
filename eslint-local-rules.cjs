@@ -113,13 +113,13 @@ module.exports = {
 			const binaryReportCheck = (node) => {
 				context.report({
 					node,
-					message: node.operator === '===' ? isNullishMessage : nonNullishMessage
-					// fix(fixer) {
-					// 	return fixer.replaceText(
-					// 		node,
-					// 		`${node.operator === '===' ? 'isNullish' : 'nonNullish'}(${context.getSourceCode().getText(node.left)})`
-					// 	);
-					// }
+					message: node.operator === '===' ? isNullishMessage : nonNullishMessage,
+					fix(fixer) {
+						return fixer.replaceText(
+							node,
+							`${node.operator === '===' ? 'isNullish' : 'nonNullish'}(${context.getSourceCode().getText(node.left)})`
+						);
+					}
 				});
 			};
 
