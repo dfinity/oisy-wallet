@@ -42,8 +42,12 @@ button {
 	}
 
 	&.primary {
-		background: var(--color-dodger-blue);
+		background: var(--color-brandeis-blue);
 		color: var(--color-white);
+
+		&:hover {
+			background: var(--color-brilliant-azure);
+		}
 	}
 
 	&.secondary {

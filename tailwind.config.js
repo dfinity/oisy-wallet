@@ -24,6 +24,7 @@ export default {
 			'brandeis-blue': '#016dfc',
 			'crayola-blue': '#147bff',
 			'cetacean-blue': '#0e002d',
+			'brilliant-azure': '#348afd',
 			'spiro-disco-ball': '#1bb5ff',
 			'misty-rose': '#937993',
 			goldenrod: '#dfa81b',
