@@ -57,6 +57,7 @@ module.exports = {
 			}
 		],
 		'@typescript-eslint/prefer-nullish-coalescing': 'error',
+    '@typescript-eslint/prefer-reduce-type-parameter': 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
 		curly: 'error',
 		'local-rules/no-svelte-store-in-api': 'error',

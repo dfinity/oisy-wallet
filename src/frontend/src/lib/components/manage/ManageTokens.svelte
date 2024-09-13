@@ -173,7 +173,10 @@
 		icrc: [],
 		erc20: []
 	};
-	$: groupModifiedTokens = Object.values(modifiedTokens).reduce(
+	$: groupModifiedTokens = Object.values(modifiedTokens).reduce<{
+		icrc: IcrcCustomToken[];
+		erc20: Erc20UserToken[];
+	}>(
 		({ icrc, erc20 }, token) => ({
 			icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
 			erc20: [
@@ -181,7 +184,7 @@
 				...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
 			]
 		}),
-		{ icrc: [], erc20: [] } as { icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] }
+		{ icrc: [], erc20: [] }
 	);
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
