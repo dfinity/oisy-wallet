@@ -9,7 +9,7 @@
 	<SignerAnimatedIconInfinite />
 </div>
 
-<h2 class="text-center mt-12 mb-6">Connect to this app and many more</h2>
+<h2 class="text-center mt-12 mb-6">Authenticate to connect</h2>
 
 <button class="primary full center text-center h-14 px-12" on:click={async () => await signIn({})}
 	>{$i18n.auth.text.authenticate} <IconArrowAstronaut /></button
