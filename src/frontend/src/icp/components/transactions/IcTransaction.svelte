@@ -4,9 +4,9 @@
 	import { type ComponentType } from 'svelte';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
-	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
-	import IconMint from '$lib/components/icons/IconMint.svelte';
+	import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
+	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
@@ -40,9 +40,9 @@
 		['burn', 'approve', 'mint'].includes(transactionType) && pending
 			? IconConvert
 			: ['burn', 'approve'].includes(transactionType)
-				? IconBurn
+				? IconConvertTo
 				: transactionType === 'mint'
-					? IconMint
+					? IconConvertFrom
 					: incoming === false
 						? IconSend
 						: IconReceive;

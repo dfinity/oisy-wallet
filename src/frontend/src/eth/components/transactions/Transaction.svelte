@@ -6,9 +6,9 @@
 	import type { EthTransactionType, EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isTransactionPending } from '$eth/utils/transactions.utils';
-	import IconBurn from '$lib/components/icons/IconBurn.svelte';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
-	import IconMint from '$lib/components/icons/IconMint.svelte';
+	import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
+	import IconConvertTo from '$lib/components/icons/IconConvertTo.svelte';
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import TransactionPending from '$lib/components/transactions/TransactionPending.svelte';
@@ -73,9 +73,9 @@
 		(type === 'withdraw' || type === 'deposit') && pending
 			? IconConvert
 			: type === 'withdraw'
-				? IconMint
+				? IconConvertFrom
 				: type === 'deposit'
-					? IconBurn
+					? IconConvertTo
 					: type === 'send'
 						? IconSend
 						: IconReceive;
