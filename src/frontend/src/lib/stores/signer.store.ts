@@ -1,5 +1,5 @@
 import { REPLICA_HOST } from '$lib/constants/app.constants';
-import type { OptionSigner } from '$lib/types/signer';
+import type { Option } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import {
 	ICRC25_REQUEST_PERMISSIONS,
@@ -32,7 +32,7 @@ export const initSignerContext = ({
 }: {
 	accountsPrompt: (payload: AccountsPromptPayload) => void;
 }): SignerContext => {
-	let signer: OptionSigner;
+	let signer: Option<Signer>;
 
 	const permissionsPromptPayloadStore = writable<PermissionsPromptPayload | undefined | null>(
 		undefined
