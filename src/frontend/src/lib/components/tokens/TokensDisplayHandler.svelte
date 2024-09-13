@@ -19,6 +19,4 @@
 	$: sortedTokens, debounceUpdateTokensToDisplay();
 </script>
 
-<div>
-	<slot />
-</div>
+<slot />
