@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -38,9 +38,11 @@
 		}
 
 		if (
-			$erc20Tokens?.find(
-				({ address }) => address.toLowerCase() === contractAddress?.toLowerCase()
-			) !== undefined
+			nonNullish(
+				$erc20Tokens?.find(
+					({ address }) => address.toLowerCase() === contractAddress?.toLowerCase()
+				)
+			)
 		) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.already_available }
@@ -64,11 +66,13 @@
 			}
 
 			if (
-				$erc20Tokens?.find(
-					({ symbol, name }) =>
-						symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
-						name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
-				) !== undefined
+				nonNullish(
+					$erc20Tokens?.find(
+						({ symbol, name }) =>
+							symbol.toLowerCase() === (metadata?.symbol.toLowerCase() ?? '') ||
+							name.toLowerCase() === (metadata?.name.toLowerCase() ?? '')
+					)
+				)
 			) {
 				toastsError({
 					msg: { text: $i18n.tokens.error.duplicate_metadata }

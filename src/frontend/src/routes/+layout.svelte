@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Spinner, Toasts } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
@@ -75,7 +75,7 @@
 		}
 
 		// We want to display a spinner until the authentication is loaded. This to avoid a glitch when either the landing page or effective content (sign-in / sign-out) is presented.
-		if ($authStore === undefined) {
+		if (isNullish($authStore)) {
 			return;
 		}
 
