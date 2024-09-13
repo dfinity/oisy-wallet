@@ -14,7 +14,8 @@ export type Token = {
 	standard: TokenStandard;
 	category: TokenCategory;
 } & TokenMetadata &
-	TokenAppearance;
+	TokenAppearance &
+	TwinToken;
 
 export interface TokenMetadata {
 	name: string;
@@ -32,7 +33,13 @@ export type TokenOisyName = {
 	oisyName: string;
 };
 
-export type RequiredToken = RequiredExcept<Token, keyof TokenAppearance>;
+export type TwinToken = {
+	twinTokenSymbol?: string;
+};
+
+export type NotRequiredTokenProps = TokenAppearance & TwinToken;
+
+export type RequiredToken<T extends Token = Token> = RequiredExcept<T, keyof NotRequiredTokenProps>;
 
 export type OptionToken = Option<Token>;
 export type OptionTokenId = Option<TokenId>;
