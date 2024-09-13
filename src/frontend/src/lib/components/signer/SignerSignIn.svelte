@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { IconWallet } from '@dfinity/gix-components';
 	import IconArrowAstronaut from '$lib/components/icons/IconArrowAstronaut.svelte';
+	import SignerAnimatedIconInfinite from '$lib/components/signer/SignerAnimatedIconInfinite.svelte';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import SignerAnimatedIconInfinite from '$lib/components/signer/SignerAnimatedIconInfinite.svelte';
 </script>
 
 <div class="flex justify-center pt-8">
