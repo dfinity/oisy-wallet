@@ -1,11 +1,9 @@
+import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
-export type EthereumFeeStoreData =
-	| {
-			maxTransactionFee?: bigint | undefined;
-	  }
-	| undefined
-	| null;
+export type EthereumFeeStoreData = Option<{
+	maxTransactionFee?: bigint | undefined;
+}>;
 
 export interface EthereumFeeStore extends Readable<EthereumFeeStoreData> {
 	setFee: (data: EthereumFeeStoreData) => void;

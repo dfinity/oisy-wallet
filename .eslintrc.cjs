@@ -46,7 +46,8 @@ module.exports = {
 		}
 	],
 	rules: {
-		'no-unused-vars': 'off',
+		'@typescript-eslint/no-inferrable-types': 'error',
+		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'@typescript-eslint/no-unused-vars': [
 			'warn',
 			{
@@ -55,17 +56,17 @@ module.exports = {
 				caughtErrorsIgnorePattern: '^_'
 			}
 		],
-		'no-console': ['error', { allow: ['error', 'warn'] }],
-		'no-else-return': ['warn', { allowElseIf: false }],
-		'local-rules/no-svelte-store-in-api': 'error',
 		'@typescript-eslint/prefer-nullish-coalescing': 'error',
-		'no-continue': 'warn',
-		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
-		'no-delete-var': 'error',
-		curly: 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
+		curly: 'error',
+		'local-rules/no-svelte-store-in-api': 'error',
+		'local-rules/use-option-type-wrapper': 'warn',
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],
-		'@typescript-eslint/no-inferrable-types': 'error',
+		'no-console': ['error', { allow: ['error', 'warn'] }],
+		'no-continue': 'warn',
+		'no-delete-var': 'error',
+		'no-else-return': ['warn', { allowElseIf: false }],
+		'no-unused-vars': 'off',
 		'prefer-template': 'error'
 	},
 	globals: {
