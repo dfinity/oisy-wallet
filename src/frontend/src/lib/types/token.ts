@@ -32,11 +32,11 @@ export type TokenOisyName = {
 	oisyName: string;
 };
 
-export interface TwinToken {
+export interface TokenLinkedData {
 	twinTokenSymbol?: string;
 }
 
-export type TokenWithLinkedData = Token & TwinToken;
+export type TokenWithLinkedData = Token & TokenLinkedData;
 
 export type RequiredToken<T extends Token = Token> = RequiredExcept<T, keyof TokenAppearance>;
 
