@@ -37,6 +37,6 @@
 	</TokensSkeletons>
 </div>
 
-<button class="secondary block flex-1 mb-2" on:click={modalStore.close}>
+<button class="secondary full center text-center mb-2" on:click={modalStore.close}>
 	{$i18n.core.text.close}
 </button>
