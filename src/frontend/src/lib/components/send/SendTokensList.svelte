@@ -4,7 +4,6 @@
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -38,8 +37,6 @@
 	</TokensSkeletons>
 </div>
 
-<ButtonGroup>
-	<button class="secondary block flex-1" on:click={modalStore.close}>
-		{$i18n.core.text.close}
-	</button>
-</ButtonGroup>
+<button class="secondary block flex-1 mb-2" on:click={modalStore.close}>
+	{$i18n.core.text.close}
+</button>
