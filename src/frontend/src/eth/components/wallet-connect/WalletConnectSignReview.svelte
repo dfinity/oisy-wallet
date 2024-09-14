@@ -8,6 +8,7 @@
 	} from '$eth/utils/wallet-connect.utils';
 	import Json from '$lib/components/ui/Json.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
 
 	export let request: Web3WalletTypes.SessionRequest;
 
@@ -24,7 +25,7 @@
 	})();
 </script>
 
-<div class="stretch">
+<ContentWithButtons>
 	<p class="font-bold">{$i18n.wallet_connect.text.method}</p>
 	<p class="mb-4 font-normal">
 		{request.params.request.method}
@@ -40,6 +41,7 @@
 			<output class="break-all">{getSignParamsMessageUtf8(request.params.request.params)}</output>
 		</p>
 	{/if}
-</div>
 
-<WalletConnectActions on:icApprove on:icReject />
+
+<WalletConnectActions on:icApprove on:icReject  slot="buttons" />
+</ContentWithButtons>
