@@ -6,6 +6,7 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token, TokenStandard, TokenUi } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { usdValue } from '$lib/utils/exchange.utils';
 import { formatToken } from '$lib/utils/format.utils';
 import { nonNullish } from '@dfinity/utils';
@@ -123,7 +124,7 @@ export const mapTokenUi = ({
 	// There is a difference between undefined and null for the balance.
 	// The balance is undefined if the balance store is not initiated or the specific balance loader for the token is not initiated.
 	// If the balance loader was initiated at some point, it will either contain data or be null, but not undefined.
-	balance: $balances?.[token.id] === null ? null : $balances?.[token.id]?.data,
+	balance: mapCertifiedData($balances?.[token.id]),
 	usdBalance: calculateTokenUsdBalance({
 		token,
 		$balances,
