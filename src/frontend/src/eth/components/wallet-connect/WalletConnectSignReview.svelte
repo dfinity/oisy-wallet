@@ -6,9 +6,9 @@
 		getSignParamsMessageUtf8,
 		getSignParamsMessageHex
 	} from '$eth/utils/wallet-connect.utils';
+	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
 	import Json from '$lib/components/ui/Json.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
 
 	export let request: Web3WalletTypes.SessionRequest;
 
@@ -42,6 +42,5 @@
 		</p>
 	{/if}
 
-
-<WalletConnectActions on:icApprove on:icReject  slot="buttons" />
+	<WalletConnectActions on:icApprove on:icReject slot="buttons" />
 </ContentWithButtons>
