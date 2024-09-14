@@ -5,6 +5,7 @@
 	import TransactionStatus from './TransactionStatus.svelte';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionType } from '$eth/types/eth-transaction';
+	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -19,7 +20,6 @@
 		shortenWithMiddleEllipsis
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
 
 	export let transaction: Transaction;
 
@@ -133,9 +133,8 @@
 			</output>
 		</Value>
 
-
-	<button class="primary full center text-center" on:click={modalStore.close} slot="buttons"
-		>{$i18n.core.text.close}</button
-	>
+		<button class="primary full center text-center" on:click={modalStore.close} slot="buttons"
+			>{$i18n.core.text.close}</button
+		>
 	</ContentWithButtons>
 </Modal>
