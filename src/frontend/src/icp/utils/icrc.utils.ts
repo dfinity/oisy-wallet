@@ -135,12 +135,17 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
 	(token.standard === 'icp' || token.standard === 'icrc') && 'enabled' in token;
 
-export const mapCkTokenOisyName = (token: IcCkInterface): IcCkInterface => ({
+const icCkToken = (token: IcInterface): token is IcCkInterface =>
+	'minterCanisterId' in token && 'twinToken' in token;
+
+export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
-	...(nonNullish(token.twinToken) && {
-		oisyName: {
-			prefix: 'ck',
-			oisyName: token.twinToken.name
-		}
-	})
+	...(icCkToken(token) && nonNullish(token.twinToken)
+		? {
+				oisyName: {
+					prefix: 'ck',
+					oisyName: token.twinToken.name
+				}
+			}
+		: {})
 });
