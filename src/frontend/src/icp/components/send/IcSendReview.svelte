@@ -7,6 +7,7 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -35,25 +36,25 @@
 	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
-<div class="stretch">
+<ContentWithButtons>
 	{#if nonNullish($token)}
 		<SendData {amount} {destination} token={$token} balance={$balance} {source}>
 			<IcFeeDisplay slot="fee" {networkId} />
 			<IcReviewNetwork {networkId} slot="network" />
 		</SendData>
 	{/if}
-</div>
 
-<ButtonGroup>
-	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
-		>{$i18n.core.text.back}</button
-	>
-	<button
-		class="primary block flex-1"
-		disabled={invalid}
-		class:opacity-10={invalid}
-		on:click={() => dispatch('icSend')}
-	>
-		{$i18n.send.text.send}
-	</button>
-</ButtonGroup>
+	<ButtonGroup slot="buttons">
+		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
+			>{$i18n.core.text.back}</button
+		>
+		<button
+			class="primary block flex-1"
+			disabled={invalid}
+			class:opacity-10={invalid}
+			on:click={() => dispatch('icSend')}
+		>
+			{$i18n.send.text.send}
+		</button>
+	</ButtonGroup>
+</ContentWithButtons>

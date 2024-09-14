@@ -10,6 +10,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -37,7 +38,7 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<div class="stretch">
+	<ContentWithButtons>
 		{#if destinationEditable}
 			<SendDestination
 				token={$sendToken}
@@ -57,17 +58,17 @@
 		<FeeDisplay />
 
 		<SendInfo />
-	</div>
 
-	<ButtonGroup>
-		<slot name="cancel" />
-		<button
-			class="primary block flex-1"
-			type="submit"
-			disabled={invalid}
-			class:opacity-10={invalid}
-		>
-			{$i18n.core.text.next}
-		</button>
-	</ButtonGroup>
+		<ButtonGroup slot="buttons">
+			<slot name="cancel" />
+			<button
+				class="primary block flex-1"
+				type="submit"
+				disabled={invalid}
+				class:opacity-10={invalid}
+			>
+				{$i18n.core.text.next}
+			</button>
+		</ButtonGroup>
+	</ContentWithButtons>
 </form>
