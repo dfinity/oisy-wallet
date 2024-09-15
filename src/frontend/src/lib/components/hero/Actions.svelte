@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ONRAMPER_ENABLED } from '$env/onramper.env';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
@@ -20,7 +21,6 @@
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { ONRAMPER_ENABLED } from '$env/onramper.env';
 
 	export let more = false;
 
