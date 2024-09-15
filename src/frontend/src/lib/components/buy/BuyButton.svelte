@@ -7,5 +7,5 @@
 
 <ButtonHero on:click disabled={$isBusy} ariaLabel={$i18n.send.text.send}>
 	<IconSend size="28" slot="icon" />
-	{$i18n.send.text.send}
+	{$i18n.buy.text.buy}
 </ButtonHero>
