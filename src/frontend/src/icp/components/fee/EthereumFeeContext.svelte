@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy } from 'svelte';
-	import { tokenAsIcToken, tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
 	import { eip1559TransactionPriceStore } from '$icp/stores/cketh.store';
@@ -23,10 +23,10 @@
 	export let networkId: NetworkId | undefined = undefined;
 
 	let ckEthConvert = false;
-	$: ckEthConvert = isConvertCkEthToEth({ token: $tokenWithFallbackAsIcToken, networkId });
+	$: ckEthConvert = isConvertCkEthToEth({ token: $tokenAsIcToken, networkId });
 
 	let ckErc20Convert = false;
-	$: ckErc20Convert = isConvertCkErc20ToErc20({ token: $tokenWithFallbackAsIcToken, networkId });
+	$: ckErc20Convert = isConvertCkErc20ToErc20({ token: $tokenAsIcToken, networkId });
 
 	// This is the amount of ckETH to be burned to cover for the fees of the transaction eth_sendRawTransaction(destination_eth_address, amount) described in the withdrawal scheme.
 	// It will be requested to be approved using the transaction icrc2_approve(minter, tx_fee) described in the first step of the withdrawal scheme.
