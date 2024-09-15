@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
-	import { sendWizardStepsComplete } from '$lib/config/send.config';
+	import { sendWizardStepsComplete, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { waitWalletReady } from '$lib/services/actions.services';
@@ -25,7 +27,9 @@
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let steps: WizardSteps;
-	$: steps = sendWizardStepsComplete({ i18n: $i18n });
+	$: steps = isNullish($pageToken)
+		? sendWizardStepsComplete({ i18n: $i18n })
+		: sendWizardStepsWithQrCodeScan({ i18n: $i18n });
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -82,6 +86,7 @@
 			bind:targetNetwork
 			bind:amount
 			bind:sendProgressStep
+			formCancelAction={isNullish($pageToken) ? 'back' : 'close'}
 			on:icBack={modal.back}
 			on:icSendBack={modal.back}
 			on:icNext={modal.next}
