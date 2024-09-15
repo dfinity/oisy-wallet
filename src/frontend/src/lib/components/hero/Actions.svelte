@@ -20,6 +20,7 @@
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { ONRAMPER_ENABLED } from '$env/onramper.env';
 
 	export let more = false;
 
@@ -74,5 +75,7 @@
 		<ContextMenu />
 	{/if}
 
-	<Buy />
+	{#if ONRAMPER_ENABLED}
+		<Buy />
+	{/if}
 </div>
