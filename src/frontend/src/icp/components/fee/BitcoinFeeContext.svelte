@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
+	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { queryEstimateFee } from '$icp/services/ckbtc.services';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
@@ -15,7 +15,7 @@
 	export let networkId: NetworkId | undefined = undefined;
 
 	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger($tokenWithFallbackAsIcToken);
+	$: ckBTC = isTokenCkBtcLedger($tokenAsIcToken);
 
 	const { store } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 
@@ -40,7 +40,7 @@
 				value: `${amount}`,
 				unitName: $tokenDecimals
 			}).toBigInt(),
-			...$tokenWithFallbackAsIcToken
+			...$tokenAsIcToken
 		});
 
 		if (isNullish(fee) || result === 'error') {
