@@ -7,7 +7,7 @@
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -94,7 +94,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<ContentWithButtons>
+<ContentWithToolbar>
 	<Value ref="contractAddress" element="div">
 		<svelte:fragment slot="label">{$i18n.tokens.text.contract_address}</svelte:fragment>
 		{contractAddress}
@@ -134,7 +134,7 @@
 
 	<AddTokenWarning />
 
-	<ButtonGroup slot="buttons">
+	<ButtonGroup slot="toolbar">
 		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 			>{$i18n.core.text.back}</button
 		>
@@ -147,4 +147,4 @@
 			{$i18n.tokens.import.text.add_the_token}
 		</button>
 	</ButtonGroup>
-</ContentWithButtons>
+</ContentWithToolbar>

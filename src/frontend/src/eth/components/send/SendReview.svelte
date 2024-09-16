@@ -9,7 +9,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -36,7 +36,7 @@
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<ContentWithButtons>
+<ContentWithToolbar>
 	<SendData
 		{amount}
 		destination={destinationEditable ? destination : null}
@@ -51,7 +51,7 @@
 
 	<SendInfo />
 
-	<ButtonGroup slot="buttons">
+	<ButtonGroup slot="toolbar">
 		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 			>{$i18n.core.text.back}</button
 		>
@@ -64,4 +64,4 @@
 			{$i18n.send.text.send}
 		</button>
 	</ButtonGroup>
-</ContentWithButtons>
+</ContentWithToolbar>

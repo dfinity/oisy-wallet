@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
 	import Token from '$lib/components/tokens/Token.svelte';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -23,7 +23,7 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.tokens.details.title}</svelte:fragment>
 
-	<ContentWithButtons>
+	<ContentWithToolbar>
 		{#if nonNullish($token)}
 			<Token token={$token}>
 				{#if nonNullish(twinToken)}
@@ -83,8 +83,8 @@
 			</Token>
 		{/if}
 
-		<button class="primary full center text-center" on:click={modalStore.close} slot="buttons"
+		<button class="primary full center text-center" on:click={modalStore.close} slot="toolbar"
 			>{$i18n.core.text.done}</button
 		>
-	</ContentWithButtons>
+	</ContentWithToolbar>
 </Modal>

@@ -8,7 +8,7 @@
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
@@ -33,7 +33,7 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<ContentWithButtons>
+	<ContentWithToolbar>
 		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
 
 		<IcSendAmount bind:amount bind:amountError {networkId} />
@@ -42,7 +42,7 @@
 
 		<IcFeeDisplay {networkId} />
 
-		<ButtonGroup slot="buttons">
+		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
 			<button
 				class="primary block flex-1"
@@ -53,5 +53,5 @@
 				{$i18n.core.text.next}
 			</button>
 		</ButtonGroup>
-	</ContentWithButtons>
+	</ContentWithToolbar>
 </form>

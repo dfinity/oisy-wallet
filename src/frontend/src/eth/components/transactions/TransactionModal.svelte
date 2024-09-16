@@ -5,7 +5,7 @@
 	import TransactionStatus from './TransactionStatus.svelte';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionType } from '$eth/types/eth-transaction';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -48,7 +48,7 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
-	<ContentWithButtons>
+	<ContentWithToolbar>
 		{#if nonNullish(hash)}
 			<Value ref="hash">
 				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
@@ -133,8 +133,8 @@
 			</output>
 		</Value>
 
-		<button class="primary full center text-center" on:click={modalStore.close} slot="buttons"
+		<button class="primary full center text-center" on:click={modalStore.close} slot="toolbar"
 			>{$i18n.core.text.close}</button
 		>
-	</ContentWithButtons>
+	</ContentWithToolbar>
 </Modal>

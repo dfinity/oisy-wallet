@@ -6,7 +6,7 @@
 		getSignParamsMessageUtf8,
 		getSignParamsMessageHex
 	} from '$eth/utils/wallet-connect.utils';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Json from '$lib/components/ui/Json.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -25,7 +25,7 @@
 	})();
 </script>
 
-<ContentWithButtons>
+<ContentWithToolbar>
 	<p class="font-bold">{$i18n.wallet_connect.text.method}</p>
 	<p class="mb-4 font-normal">
 		{request.params.request.method}
@@ -42,5 +42,5 @@
 		</p>
 	{/if}
 
-	<WalletConnectActions on:icApprove on:icReject slot="buttons" />
-</ContentWithButtons>
+	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+</ContentWithToolbar>

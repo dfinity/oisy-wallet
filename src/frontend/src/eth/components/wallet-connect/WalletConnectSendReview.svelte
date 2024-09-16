@@ -10,7 +10,7 @@
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import type { Network } from '$lib/types/network';
@@ -29,7 +29,7 @@
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<ContentWithButtons>
+<ContentWithToolbar>
 	<SendData
 		amount={formatToken({ value: amountDisplay })}
 		{destination}
@@ -44,5 +44,5 @@
 		<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
 	</SendData>
 
-	<WalletConnectActions on:icApprove on:icReject slot="buttons" />
-</ContentWithButtons>
+	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+</ContentWithToolbar>

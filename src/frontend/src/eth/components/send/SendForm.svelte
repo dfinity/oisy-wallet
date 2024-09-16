@@ -10,7 +10,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -38,7 +38,7 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<ContentWithButtons>
+	<ContentWithToolbar>
 		{#if destinationEditable}
 			<SendDestination
 				token={$sendToken}
@@ -59,7 +59,7 @@
 
 		<SendInfo />
 
-		<ButtonGroup slot="buttons">
+		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
 			<button
 				class="primary block flex-1"
@@ -70,5 +70,5 @@
 				{$i18n.core.text.next}
 			</button>
 		</ButtonGroup>
-	</ContentWithButtons>
+	</ContentWithToolbar>
 </form>

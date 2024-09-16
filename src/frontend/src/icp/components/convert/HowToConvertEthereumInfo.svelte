@@ -8,7 +8,7 @@
 	} from '$icp-eth/derived/cketh.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
-	import ContentWithButtons from '$lib/components/ui/ContentWithButtons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -28,7 +28,7 @@
 	const { sendBalance, sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<ContentWithButtons>
+<ContentWithToolbar>
 	<div>
 		<p>
 			{replacePlaceholders(
@@ -142,7 +142,7 @@
 		</div>
 	</div>
 
-	<div slot="buttons">
+	<div slot="toolbar">
 		{#if formCancelAction === 'back'}
 			<button
 				type="button"
@@ -155,4 +155,4 @@
 			>
 		{/if}
 	</div>
-</ContentWithButtons>
+</ContentWithToolbar>
