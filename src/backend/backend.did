@@ -13,7 +13,6 @@ type AddUserCredentialRequest = record {
 type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
-type BitcoinNetwork = variant { mainnet; regtest; testnet };
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -114,16 +113,6 @@ type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_2 = variant { Ok : MigrationReport; Err : text };
 type Result_3 = variant { Ok; Err : text };
-type SignRequest = record {
-  to : text;
-  gas : nat;
-  value : nat;
-  max_priority_fee_per_gas : nat;
-  data : opt text;
-  max_fee_per_gas : nat;
-  chain_id : nat;
-  nonce : nat;
-};
 type Stats = record {
   user_profile_count : nat64;
   custom_token_count : nat64;
@@ -161,11 +150,8 @@ type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
   bulk_up : (blob) -> ();
-  caller_btc_address : (BitcoinNetwork) -> (text);
-  caller_eth_address : () -> (text);
   config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
-  eth_address_of : (principal) -> (text);
   get_canister_status : () -> (CanisterStatusResultV2);
   get_user_profile : () -> (Result_1) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
@@ -175,15 +161,12 @@ service : (Arg) -> {
   migrate_user_data_to : (principal) -> (Result_2);
   migration : () -> (opt MigrationReport) query;
   migration_stop_timer : () -> (Result_3);
-  personal_sign : (text) -> (text);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
   set_guards : (Guards) -> ();
   set_many_custom_tokens : (vec CustomToken) -> ();
   set_many_user_tokens : (vec UserToken) -> ();
   set_user_token : (UserToken) -> ();
-  sign_prehash : (text) -> (text);
-  sign_transaction : (SignRequest) -> (text);
   stats : () -> (Stats) query;
   step_migration : () -> ();
 }
