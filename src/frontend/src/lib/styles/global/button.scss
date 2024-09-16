@@ -39,6 +39,13 @@ button {
 	&.primary,
 	&.secondary {
 		font-weight: var(--font-weight-bold);
+
+		&[disabled],
+		&.disabled {
+			background: var(--color-grey);
+			color: var(--color-white);
+			opacity: 1;
+		}
 	}
 
 	&.primary {
