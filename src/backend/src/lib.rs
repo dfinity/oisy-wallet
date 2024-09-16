@@ -201,38 +201,6 @@ fn principal_to_derivation_path(p: &Principal) -> Vec<Vec<u8>> {
     vec![vec![SCHEMA], p.as_slice().to_vec()]
 }
 
-/// Converts the public key bytes to an Ethereum address with a checksum.
-fn pubkey_bytes_to_address(pubkey_bytes: &[u8]) -> String {
-    use k256::elliptic_curve::sec1::ToEncodedPoint;
-
-    let key =
-        PublicKey::from_sec1_bytes(pubkey_bytes).expect("failed to parse the public key as SEC1");
-    let point = key.to_encoded_point(false);
-    // we re-encode the key to the decompressed representation.
-    let point_bytes = point.as_bytes();
-    assert_eq!(point_bytes[0], 0x04);
-
-    let hash = keccak256(&point_bytes[1..]);
-
-    ethers_core::utils::to_checksum(&Address::from_slice(&hash[12..32]), None)
-}
-
-/// Computes the public key of the specified principal.
-async fn ecdsa_pubkey_of(principal: &Principal) -> Vec<u8> {
-    let name = read_config(|s| s.ecdsa_key_name.clone());
-    let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
-        canister_id: None,
-        derivation_path: principal_to_derivation_path(principal),
-        key_id: EcdsaKeyId {
-            curve: EcdsaCurve::Secp256k1,
-            name,
-        },
-    })
-    .await
-    .expect("failed to get public key");
-    key.public_key
-}
-
 fn parse_eth_address(address: &str) -> [u8; 20] {
     match address.parse() {
         Ok(H160(addr)) => addr,
@@ -240,36 +208,6 @@ fn parse_eth_address(address: &str) -> [u8; 20] {
             "failed to parse contract address {address}: {err}",
         )),
     }
-}
-
-fn nat_to_u256(n: &Nat) -> U256 {
-    let be_bytes = n.0.to_bytes_be();
-    U256::from_big_endian(&be_bytes)
-}
-
-fn nat_to_u64(n: &Nat) -> U64 {
-    let be_bytes = n.0.to_bytes_be();
-    U64::from_big_endian(&be_bytes)
-}
-
-/// Returns the public key and a message signature for the specified principal.
-async fn pubkey_and_signature(caller: &Principal, message_hash: Vec<u8>) -> (Vec<u8>, Vec<u8>) {
-    // Fetch the pubkey and the signature concurrently to reduce latency.
-    let (pubkey, response) = futures::join!(
-        ecdsa_pubkey_of(caller),
-        sign_with_ecdsa(SignWithEcdsaArgument {
-            message_hash,
-            derivation_path: principal_to_derivation_path(caller),
-            key_id: EcdsaKeyId {
-                curve: EcdsaCurve::Secp256k1,
-                name: read_config(|s| s.ecdsa_key_name.clone()),
-            },
-        })
-    );
-    (
-        pubkey,
-        response.expect("failed to sign the message").0.signature,
-    )
 }
 
 #[update(guard = "may_write_user_data")]
@@ -529,32 +467,6 @@ async fn step_migration() {
             eprintln!("Migration failed: {err:?}");
         });
     };
-}
-
-/// Computes the parity bit allowing to recover the public key from the signature.
-fn y_parity(prehash: &[u8], sig: &[u8], pubkey: &[u8]) -> u64 {
-    use k256::ecdsa::{RecoveryId, Signature, VerifyingKey};
-
-    let orig_key = VerifyingKey::from_sec1_bytes(pubkey).expect("failed to parse the pubkey");
-    let signature = Signature::try_from(sig).unwrap();
-    for parity in [0u8, 1] {
-        let recid = RecoveryId::try_from(parity).unwrap();
-        let recovered_key = VerifyingKey::recover_from_prehash(prehash, &signature, recid)
-            .expect("failed to recover key");
-        if recovered_key == orig_key {
-            return u64::from(parity);
-        }
-    }
-
-    panic!(
-        "failed to recover the parity bit from a signature; sig: {}, pubkey: {}",
-        hex::encode(sig),
-        hex::encode(pubkey)
-    )
-}
-
-fn decode_hex(hex: &str) -> Bytes {
-    Bytes::from(hex::decode(hex.trim_start_matches("0x")).expect("failed to decode hex"))
 }
 
 export_candid!();
