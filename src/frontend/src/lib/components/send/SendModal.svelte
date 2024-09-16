@@ -28,7 +28,7 @@
 	$: steps = allSendWizardSteps({ i18n: $i18n });
 
 	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;§
+	let modal: WizardModal;
 
 	const dispatch = createEventDispatcher();
 
