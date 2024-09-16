@@ -4,6 +4,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -44,7 +45,7 @@
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
 
-	<div class="stretch">
+	<ContentWithToolbar>
 		<Value ref="id" element="div">
 			<svelte:fragment slot="label">{$i18n.transaction.text.id}</svelte:fragment>
 			<output>{id}</output><Copy
@@ -148,9 +149,9 @@
 				{/if}
 			</Value>
 		{/if}
-	</div>
 
-	<button class="primary full center text-center" on:click={modalStore.close}
-		>{$i18n.core.text.close}</button
-	>
+		<button class="primary full center text-center" on:click={modalStore.close} slot="toolbar"
+			>{$i18n.core.text.close}</button
+		>
+	</ContentWithToolbar>
 </Modal>
