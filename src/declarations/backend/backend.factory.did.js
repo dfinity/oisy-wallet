@@ -46,11 +46,6 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
-	const BitcoinNetwork = IDL.Variant({
-		mainnet: IDL.Null,
-		regtest: IDL.Null,
-		testnet: IDL.Null
-	});
 	const Config = IDL.Record({
 		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
@@ -180,24 +175,11 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
-	const SignRequest = IDL.Record({
-		to: IDL.Text,
-		gas: IDL.Nat,
-		value: IDL.Nat,
-		max_priority_fee_per_gas: IDL.Nat,
-		data: IDL.Opt(IDL.Text),
-		max_fee_per_gas: IDL.Nat,
-		chain_id: IDL.Nat,
-		nonce: IDL.Nat
-	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
-		caller_btc_address: IDL.Func([BitcoinNetwork], [IDL.Text], []),
-		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		config: IDL.Func([], [Config], ['query']),
 		create_user_profile: IDL.Func([], [UserProfile], []),
-		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
 		get_user_profile: IDL.Func([], [Result_1], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
@@ -207,15 +189,12 @@ export const idlFactory = ({ IDL }) => {
 		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_2], []),
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
 		migration_stop_timer: IDL.Func([], [Result_3], []),
-		personal_sign: IDL.Func([IDL.Text], [IDL.Text], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),
 		set_many_user_tokens: IDL.Func([IDL.Vec(UserToken)], [], []),
 		set_user_token: IDL.Func([UserToken], [], []),
-		sign_prehash: IDL.Func([IDL.Text], [IDL.Text], []),
-		sign_transaction: IDL.Func([SignRequest], [IDL.Text], []),
 		stats: IDL.Func([], [Stats], ['query']),
 		step_migration: IDL.Func([], [], [])
 	});

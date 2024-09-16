@@ -39,28 +39,3 @@ pub fn may_read_user_data() -> Result<(), String> {
         Err("User data cannot be read at this time due to a migration.".to_string())
     }
 }
-
-/// Is getting threshold public keys is enabled?
-pub fn may_read_threshold_keys() -> Result<(), String> {
-    caller_is_not_anonymous()?;
-    if read_config(|s| s.api.unwrap_or_default().threshold_key.readable()) {
-        Ok(())
-    } else {
-        Err("Reading threshold keys is disabled.".to_string())
-    }
-}
-/// Caller is allowed AND reading threshold keys is enabled.
-pub fn caller_is_allowed_and_may_read_threshold_keys() -> Result<(), String> {
-    caller_is_allowed()?;
-    may_read_threshold_keys()
-}
-
-/// Is signing with threshold keys is enabled?
-pub fn may_threshold_sign() -> Result<(), String> {
-    caller_is_not_anonymous()?;
-    if read_config(|s| s.api.unwrap_or_default().threshold_key.writable()) {
-        Ok(())
-    } else {
-        Err("Threshold signing is disabled.".to_string())
-    }
-}
