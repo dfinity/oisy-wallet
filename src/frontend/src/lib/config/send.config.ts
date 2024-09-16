@@ -29,7 +29,7 @@ export const sendWizardStepsWithQrCodeScan = (params: SendWizardStepsParams): Wi
 	}
 ];
 
-export const sendWizardStepsComplete = (params: SendWizardStepsParams): WizardSteps => [
+export const allSendWizardSteps = (params: SendWizardStepsParams): WizardSteps => [
 	{
 		name: WizardStepsSend.TOKENS_LIST,
 		title: params.i18n.send.text.send
