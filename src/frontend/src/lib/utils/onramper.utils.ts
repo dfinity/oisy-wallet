@@ -1,4 +1,4 @@
-import { ONRAMPER_BASE_URL } from '$env/onramper.env';
+import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/onramper.env';
 import type {
 	CryptoId,
 	CryptoNetworkId,
@@ -18,8 +18,6 @@ interface BuildOnRamperLinkParams {
 	enableCountrySelector: boolean;
 }
 
-const API_KEY = import.meta.env.VITE_ONRAMPER_API_KEY;
-
 const arrayToParam = (array: CryptoId[] | CryptoNetworkId[]) => array.join(',');
 
 const walletToParam = ({ cryptoId, wallet }: CryptoWallet) => `${cryptoId.toUpperCase()}:${wallet}`;
@@ -32,4 +30,4 @@ const toQueryString = (params: Omit<BuildOnRamperLinkParams, 'wallets'>) =>
 		.join('&');
 
 export const buildOnRamperLink = ({ wallets, ...params }: BuildOnRamperLinkParams) =>
-	`${ONRAMPER_BASE_URL}?apiKey=${API_KEY}&${toQueryString(params)}&wallets=${walletsToParam(wallets)}`;
+	`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}&${toQueryString(params)}&wallets=${walletsToParam(wallets)}`;
