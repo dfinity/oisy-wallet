@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { buildOnRamperLink } from '$lib/utils/onramper.utils';
+	import { networks } from '$lib/derived/networks.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { networks } from '$lib/derived/networks.derived';
+	import { buildOnRamperLink } from '$lib/utils/onramper.utils';
 
 	let src: string;
 	$: src = buildOnRamperLink({
