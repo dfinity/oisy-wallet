@@ -71,6 +71,10 @@
 		<ConvertToBTC />
 	{/if}
 
+	{#if ONRAMPER_ENABLED}
+		<Buy />
+	{/if}
+
 	{#if more}
 		<ContextMenu />
 	{/if}
