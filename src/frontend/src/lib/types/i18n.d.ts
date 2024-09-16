@@ -98,7 +98,7 @@ interface I18nInit {
 		icrc_canisters: string;
 		erc20_user_tokens: string;
 		erc20_user_token: string;
-		icrc_custom_tokens: string;
+		icrc_custom_token: string;
 		loading_wallet_timeout: string;
 	};
 }
