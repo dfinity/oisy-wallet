@@ -2,6 +2,7 @@
 	import { Input, QRCodeReader } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
 		TRACK_COUNT_WALLET_CONNECT,
 		TRACK_COUNT_WALLET_CONNECT_QR_CODE
@@ -63,7 +64,7 @@
 	};
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<div class="rounded-lg qr-code">
 		{#if renderQRCodeReader}
 			<QRCodeReader on:nnsQRCode={onQRCodeSuccess} on:nnsQRCodeError={error} />
@@ -88,13 +89,13 @@
 		placeholder="e.g. wc:a281567bb3e4..."
 		bind:value={uri}
 	/>
-</div>
 
-<ButtonGroup>
-	<button class="primary block flex-1" disabled={invalid} on:click={onClick}>
-		{$i18n.wallet_connect.text.connect}
-	</button>
-</ButtonGroup>
+	<ButtonGroup slot="toolbar">
+		<button class="primary block flex-1" disabled={invalid} on:click={onClick}>
+			{$i18n.wallet_connect.text.connect}
+		</button>
+	</ButtonGroup>
+</ContentWithToolbar>
 
 <style lang="scss">
 	.qr-code {
