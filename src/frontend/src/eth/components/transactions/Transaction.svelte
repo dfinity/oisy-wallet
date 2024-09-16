@@ -4,7 +4,7 @@
 	import type { ComponentType } from 'svelte';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionType, EthTransactionUi } from '$eth/types/eth-transaction';
-	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { isSupportedEthToken } from '$eth/utils/eth.utils';
 	import { isTransactionPending } from '$eth/utils/transactions.utils';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
 	import IconConvertFrom from '$lib/components/icons/IconConvertFrom.svelte';
@@ -15,7 +15,7 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import { tokenId, tokenSymbol } from '$lib/derived/token.derived';
+	import { tokenSymbol } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
@@ -35,12 +35,10 @@
 	$: ({ value, timestamp, displayTimestamp, uiType: type } = transaction);
 
 	let ckTokenSymbol: string;
-	$: ckTokenSymbol =
-		nonNullish($tokenId) && isSupportedEthTokenId($tokenId)
-			? // TODO: improve the way we link ETH and SepoliaETH to their twin tokens
-				`ck${$tokenSymbol}`
-			: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
-				($token as Erc20Token | undefined)?.twinTokenSymbol ?? '';
+	$: ckTokenSymbol = isSupportedEthToken($token)
+		? $token.twinTokenSymbol
+		: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
+			($token as Erc20Token | undefined)?.twinTokenSymbol ?? '';
 
 	let label: string;
 	$: label =
