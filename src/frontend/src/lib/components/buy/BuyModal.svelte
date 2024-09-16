@@ -5,9 +5,5 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title"
-		><p class="text-xl">
-			{$i18n.buy.text.buy}
-		</p></svelte:fragment
-	>
+	<svelte:fragment slot="title">{$i18n.buy.text.buy}</svelte:fragment>
 </Modal>
