@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import { sendWizardStepsComplete, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
-	import { pageToken } from '$lib/derived/page-token.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { waitWalletReady } from '$lib/services/actions.services';
@@ -19,15 +17,13 @@
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
+	export let isTokenPage: boolean;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = targetNetwork?.id;
 
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
-
-	let isTokenPage: boolean;
-	$: isTokenPage = nonNullish($pageToken);
 
 	let steps: WizardSteps;
 	$: steps = isTokenPage

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
@@ -17,6 +18,7 @@
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
+	import { isRouteTokens } from '$lib/utils/nav.utils';
 
 	export let more = false;
 
@@ -28,6 +30,9 @@
 
 	let convertBtc = false;
 	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
+
+	let isTokenPage = false;
+	$: isTokenPage = isRouteTokens($page);
 </script>
 
 <div role="toolbar" class="flex w-full gap-6 justify-center pt-10 pb-3 px-1 max-w-96">
@@ -39,7 +44,7 @@
 		<Receive />
 	{/if}
 
-	<Send />
+	<Send {isTokenPage} />
 
 	{#if convertEth}
 		{#if $networkICP}
