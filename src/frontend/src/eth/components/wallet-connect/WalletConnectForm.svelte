@@ -91,12 +91,7 @@
 	/>
 
 	<ButtonGroup slot="toolbar">
-		<button
-			class="primary block flex-1"
-			disabled={invalid}
-			class:opacity-10={invalid}
-			on:click={onClick}
-		>
+		<button class="primary block flex-1" disabled={invalid} on:click={onClick}>
 			{$i18n.wallet_connect.text.connect}
 		</button>
 	</ButtonGroup>
