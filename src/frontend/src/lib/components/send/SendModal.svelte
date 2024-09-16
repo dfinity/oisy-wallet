@@ -26,8 +26,11 @@
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
+	let isTokenPage: boolean;
+	$: isTokenPage = isNullish($pageToken);
+
 	let steps: WizardSteps;
-	$: steps = isNullish($pageToken)
+	$: steps = isTokenPage
 		? sendWizardStepsComplete({ i18n: $i18n })
 		: sendWizardStepsWithQrCodeScan({ i18n: $i18n });
 
@@ -86,7 +89,7 @@
 			bind:targetNetwork
 			bind:amount
 			bind:sendProgressStep
-			formCancelAction={isNullish($pageToken) ? 'back' : 'close'}
+			formCancelAction={isTokenPage ? 'back' : 'close'}
 			on:icBack={modal.back}
 			on:icSendBack={modal.back}
 			on:icNext={modal.next}
