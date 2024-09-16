@@ -12,6 +12,7 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatToken } from '$lib/utils/format.utils';
@@ -34,7 +35,7 @@
 	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
 	{#if nonNullish(btcAddress)}
@@ -63,6 +64,8 @@
 			</svelte:fragment>
 		</ReceiveAddress>
 	{/if}
-</div>
 
-<button class="primary full center text-center" on:click={close}>{$i18n.core.text.done}</button>
+	<button class="primary full center text-center" on:click={close} slot="toolbar"
+		>{$i18n.core.text.done}</button
+	>
+</ContentWithToolbar>

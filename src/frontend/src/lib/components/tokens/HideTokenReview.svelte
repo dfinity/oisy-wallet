@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
@@ -11,7 +12,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<div class="icon flex flex-col items-center gap-3">
 		<Logo
 			src={$token?.icon}
@@ -32,16 +33,16 @@
 	<p class="break-normal py-10">
 		<Html text={$i18n.tokens.hide.info} />
 	</p>
-</div>
 
-<ButtonGroup>
-	<button class="secondary block flex-1" on:click={() => dispatch('icCancel')}
-		>{$i18n.core.text.cancel}</button
-	>
-	<button class="primary block flex-1" on:click={() => dispatch('icHide')}>
-		{$i18n.tokens.hide.confirm}
-	</button>
-</ButtonGroup>
+	<ButtonGroup slot="toolbar">
+		<button class="secondary block flex-1" on:click={() => dispatch('icCancel')}
+			>{$i18n.core.text.cancel}</button
+		>
+		<button class="primary block flex-1" on:click={() => dispatch('icHide')}>
+			{$i18n.tokens.hide.confirm}
+		</button>
+	</ButtonGroup>
+</ContentWithToolbar>
 
 <style lang="scss">
 	.icon {

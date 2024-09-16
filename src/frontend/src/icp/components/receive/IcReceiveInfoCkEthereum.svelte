@@ -5,6 +5,7 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -16,7 +17,7 @@
 	const dispatch = createEventDispatcher();
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
 	<div class="mb-6">
@@ -41,18 +42,18 @@
 			)}
 		</p>
 	</Value>
-</div>
 
-<button class="secondary full center mb-8" on:click={() => dispatch('icConvert')}>
-	<span class="text-dark-slate-blue font-bold"
-		>{replacePlaceholders(
-			replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
-			{
-				$token: $ckEthereumTwinToken.symbol,
-				$ckToken: $token.symbol
-			}
-		)}</span
-	>
-</button>
+	<button class="secondary full center mb-8" on:click={() => dispatch('icConvert')} slot="toolbar">
+		<span class="text-dark-slate-blue font-bold"
+			>{replacePlaceholders(
+				replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
+				{
+					$token: $ckEthereumTwinToken.symbol,
+					$ckToken: $token.symbol
+				}
+			)}</span
+		>
+	</button>
+</ContentWithToolbar>
 
 <button class="primary full center text-center" on:click={close}>{$i18n.core.text.done}</button>
