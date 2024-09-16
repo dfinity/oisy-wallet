@@ -6,7 +6,7 @@ import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
 import { ICP_TRANSACTION_FEE_E8S } from '$icp/constants/icp.constants';
 import type { IcToken } from '$icp/types/ic';
-import type { RequiredToken } from '$lib/types/token';
+import type { RequiredToken, TokenWithLinkedData } from '$lib/types/token';
 
 /**
  * Ethereum
@@ -17,7 +17,7 @@ const ETHEREUM_SYMBOL = 'ETH';
 
 export const ETHEREUM_TOKEN_ID: unique symbol = Symbol(ETHEREUM_SYMBOL);
 
-export const ETHEREUM_TOKEN: RequiredToken = {
+export const ETHEREUM_TOKEN: RequiredToken<TokenWithLinkedData> = {
 	id: ETHEREUM_TOKEN_ID,
 	network: ETHEREUM_NETWORK,
 	standard: 'ethereum',
@@ -25,14 +25,15 @@ export const ETHEREUM_TOKEN: RequiredToken = {
 	name: 'Ethereum',
 	symbol: ETHEREUM_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
-	icon: eth
+	icon: eth,
+	twinTokenSymbol: 'ckETH'
 };
 
 export const SEPOLIA_SYMBOL = 'SepoliaETH';
 
 export const SEPOLIA_TOKEN_ID: unique symbol = Symbol(SEPOLIA_SYMBOL);
 
-export const SEPOLIA_TOKEN: RequiredToken = {
+export const SEPOLIA_TOKEN: RequiredToken<TokenWithLinkedData> = {
 	id: SEPOLIA_TOKEN_ID,
 	network: SEPOLIA_NETWORK,
 	standard: 'ethereum',
@@ -40,7 +41,8 @@ export const SEPOLIA_TOKEN: RequiredToken = {
 	name: 'SepoliaETH',
 	symbol: SEPOLIA_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
-	icon: eth
+	icon: eth,
+	twinTokenSymbol: 'ckSepoliaETH'
 };
 
 /**
