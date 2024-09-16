@@ -1,4 +1,3 @@
-mod address;
 mod config;
 mod custom_token;
 mod guard;
