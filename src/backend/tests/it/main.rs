@@ -3,7 +3,6 @@ mod custom_token;
 mod guard;
 mod list_users;
 mod migration;
-mod sign;
 mod stats;
 mod token;
 mod upgrade;
