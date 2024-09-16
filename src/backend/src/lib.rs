@@ -1,5 +1,4 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
-use crate::bitcoin_utils::public_key_to_p2pkh_address;
 use crate::guards::{caller_is_allowed, may_read_user_data, may_write_user_data};
 use crate::token::{add_to_user_token, remove_from_user_token};
 use candid::{Nat, Principal};
@@ -9,10 +8,6 @@ use ethers_core::types::transaction::eip2930::AccessList;
 use ethers_core::types::Bytes;
 use ethers_core::utils::keccak256;
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
-use ic_cdk::api::management_canister::ecdsa::{
-    ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
-    SignWithEcdsaArgument,
-};
 use ic_cdk::api::time;
 use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
@@ -22,16 +17,13 @@ use ic_stable_structures::{
     DefaultMemoryImpl,
 };
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
-use k256::PublicKey;
 use oisy_user::oisy_users;
-use pretty_assertions::assert_eq;
 use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
 use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
-use shared::types::transaction::SignRequest;
 use shared::types::user_profile::{
     AddUserCredentialError, AddUserCredentialRequest, GetUserProfileError, ListUsersRequest,
     ListUsersResponse, OisyUser, UserProfile,
@@ -50,7 +42,6 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
-mod bitcoin_utils;
 mod config;
 mod guards;
 mod impls;
@@ -193,12 +184,6 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
             body: ByteBuf::from(String::from("Not found.")),
         },
     }
-}
-
-fn principal_to_derivation_path(p: &Principal) -> Vec<Vec<u8>> {
-    const SCHEMA: u8 = 1;
-
-    vec![vec![SCHEMA], p.as_slice().to_vec()]
 }
 
 fn parse_eth_address(address: &str) -> [u8; 20] {
