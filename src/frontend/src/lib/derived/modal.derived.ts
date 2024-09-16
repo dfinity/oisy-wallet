@@ -29,6 +29,10 @@ export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
 );
+export const modalBuy: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'buy'
+);
 export const modalConvertCkBTCToBTC: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-ckbtc-btc'

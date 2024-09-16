@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { ONRAMPER_ENABLED } from '$env/onramper.env';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
@@ -9,6 +10,7 @@
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
+	import Buy from '$lib/components/buy/Buy.svelte';
 	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
@@ -64,6 +66,10 @@
 
 	{#if convertBtc}
 		<ConvertToBTC />
+	{/if}
+
+	{#if ONRAMPER_ENABLED}
+		<Buy />
 	{/if}
 
 	{#if more}

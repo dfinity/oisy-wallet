@@ -12,7 +12,7 @@
 	<button type="button" class="secondary block flex-1" on:click={() => dispatch('icBack')}
 		>{$i18n.core.text.back}</button
 	>
-	<button class="primary block flex-1" type="submit" disabled={invalid} class:opacity-10={invalid}>
+	<button class="primary block flex-1" type="submit" disabled={invalid}>
 		{$i18n.core.text.next}
 	</button>
 </ButtonGroup>
