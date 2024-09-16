@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
@@ -27,12 +27,12 @@
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let isTokenPage: boolean;
-	$: isTokenPage = isNullish($pageToken);
+	$: isTokenPage = nonNullish($pageToken);
 
 	let steps: WizardSteps;
 	$: steps = isTokenPage
-		? sendWizardStepsComplete({ i18n: $i18n })
-		: sendWizardStepsWithQrCodeScan({ i18n: $i18n });
+		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
+		: sendWizardStepsComplete({ i18n: $i18n });
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
