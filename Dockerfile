@@ -74,3 +74,4 @@ RUN npm run build
 
 FROM scratch AS scratch_backend
 COPY --from=build_backend /backend.wasm.gz /
+COPY --from=build_backend /build /build
