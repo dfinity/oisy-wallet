@@ -316,6 +316,11 @@
 			"loading_cketh_helper": "Error while loading the ckETH helper contract address. No minter canister ID has been initialized."
 		}
 	},
+	"buy": {
+		"text": {
+			"buy": "Buy"
+		}
+	},
 	"tokens": {
 		"text": {
 			"contract_address": "Contract address",

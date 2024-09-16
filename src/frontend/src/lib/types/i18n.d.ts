@@ -279,6 +279,10 @@ interface I18nConvert {
 	error: { loading_cketh_helper: string };
 }
 
+interface I18nBuy {
+	text: { buy: string };
+}
+
 interface I18nTokens {
 	text: {
 		contract_address: string;
@@ -542,6 +546,7 @@ interface I18n {
 	receive: I18nReceive;
 	send: I18nSend;
 	convert: I18nConvert;
+	buy: I18nBuy;
 	tokens: I18nTokens;
 	fee: I18nFee;
 	info: I18nInfo;

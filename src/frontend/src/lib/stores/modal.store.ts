@@ -10,6 +10,7 @@ export interface Modal<T> {
 		| 'cketh-receive'
 		| 'receive'
 		| 'send'
+		| 'buy'
 		| 'eth-send'
 		| 'convert-ckbtc-btc'
 		| 'convert-to-twin-token-cketh'
@@ -42,6 +43,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openCkETHReceive: <D extends T>(data: D) => void;
 	openReceive: <D extends T>(data: D) => void;
 	openSend: <D extends T>(data: D) => void;
+	openBuy: <D extends T>(data: D) => void;
 	openEthSend: <D extends T>(data: D) => void;
 	openConvertCkBTCToBTC: () => void;
 	openConvertToTwinTokenCkEth: () => void;
@@ -75,6 +77,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openCkETHReceive: <D extends T>(data: D) => set({ type: 'cketh-receive', data }),
 		openReceive: <D extends T>(data: D) => set({ type: 'receive', data }),
 		openSend: <D extends T>(data: D) => set({ type: 'send', data }),
+		openBuy: <D extends T>(data: D) => set({ type: 'buy', data }),
 		openEthSend: <D extends T>(data: D) => set({ type: 'eth-send', data }),
 		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
 		openConvertToTwinTokenCkEth: () => set({ type: 'convert-to-twin-token-cketh' }),
