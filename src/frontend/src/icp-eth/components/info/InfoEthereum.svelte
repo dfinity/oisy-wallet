@@ -63,7 +63,7 @@
 		})}
 	</p>
 
-	<button class="primary mt-6" disabled={$isBusy} class:opacity-50={$isBusy} on:click={openReceive}>
+	<button class="primary mt-6" disabled={$isBusy} on:click={openReceive}>
 		{replacePlaceholders($i18n.info.ethereum.how_to, {
 			$ckToken: ckTokenSymbol
 		})}</button

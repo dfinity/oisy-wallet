@@ -22,7 +22,7 @@
 		{$i18n.info.bitcoin.note}
 	</p>
 
-	<button class="primary mt-6" disabled={$isBusy} class:opacity-50={$isBusy} on:click={openReceive}>
+	<button class="primary mt-6" disabled={$isBusy} on:click={openReceive}>
 		{$i18n.info.bitcoin.how_to}</button
 	>
 </div>

@@ -61,12 +61,7 @@
 
 	<ButtonGroup>
 		<slot name="cancel" />
-		<button
-			class="primary block flex-1"
-			type="submit"
-			disabled={invalid}
-			class:opacity-10={invalid}
-		>
+		<button class="primary block flex-1" type="submit" disabled={invalid}>
 			{$i18n.core.text.next}
 		</button>
 	</ButtonGroup>

@@ -55,12 +55,7 @@
 	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 		>{$i18n.core.text.back}</button
 	>
-	<button
-		class="primary block flex-1"
-		disabled={invalid}
-		class:opacity-10={invalid}
-		on:click={() => dispatch('icSend')}
-	>
+	<button class="primary block flex-1" disabled={invalid} on:click={() => dispatch('icSend')}>
 		{$i18n.send.text.send}
 	</button>
 </ButtonGroup>
