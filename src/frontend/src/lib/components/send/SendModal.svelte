@@ -3,8 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
-	import { sendWizardStepsComplete, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
-	import { allSendWizardSteps } from '$lib/config/send.config';
+	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
