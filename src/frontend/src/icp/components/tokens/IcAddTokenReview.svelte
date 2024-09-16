@@ -98,12 +98,7 @@
 	<div in:fade>
 		<ButtonGroup>
 			<button class="secondary block flex-1" on:click={back}>{$i18n.core.text.back}</button>
-			<button
-				class="primary block flex-1"
-				disabled={invalid}
-				class:opacity-10={invalid}
-				on:click={() => dispatch('icSave')}
-			>
+			<button class="primary block flex-1" disabled={invalid} on:click={() => dispatch('icSave')}>
 				{$i18n.tokens.import.text.add_the_token}
 			</button>
 		</ButtonGroup>
