@@ -1,13 +1,9 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, may_read_user_data, may_write_user_data};
 use crate::token::{add_to_user_token, remove_from_user_token};
-use candid::{Nat, Principal};
+use candid::Principal;
 use config::find_credential_config;
-use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
-use ethers_core::types::transaction::eip2930::AccessList;
-use ethers_core::types::Bytes;
-use ethers_core::utils::keccak256;
-use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+use ethers_core::abi::ethereum_types::H160;
 use ic_cdk::api::time;
 use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
@@ -32,7 +28,6 @@ use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
 use std::cell::RefCell;
-use std::str::FromStr;
 use std::time::Duration;
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
