@@ -3,7 +3,7 @@
 </script>
 
 <!-- This overlay is needed, otherwise the border opacity would show the gradient instead of the background. -->
-<div class="rounded-full border-overlay">
+<div class="rounded-full border-overlay text-off-white">
 	<button
 		on:click
 		class="authenticate h-16 px-12 py-2 rounded-full border-0 gap-4 font-bold text-lg leading-6 bg-brandeis-blue"

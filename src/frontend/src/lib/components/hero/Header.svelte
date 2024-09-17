@@ -23,7 +23,7 @@
 	{#if back}
 		<Back />
 	{:else}
-		<div class="flex p-4 items-center text-off-white">
+		<div class="flex p-4 items-center">
 			<OisyWalletLogo hideName={$authSignedIn} />
 
 			{#if $authNotSignedIn}
