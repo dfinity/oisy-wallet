@@ -7,9 +7,8 @@
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
 	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { isSubRoute } from '$lib/utils/nav.utils';
 
 	let back = false;
@@ -25,14 +24,6 @@
 	{:else}
 		<div class="flex p-4 items-center text-off-white">
 			<OisyWalletLogo hideName={$authSignedIn} />
-
-			{#if $authNotSignedIn}
-				<div
-					class="absolute max-w-[3rem] leading-none text-[8px] uppercase font-semibold translate-x-[112%] translate-y-[130%] hidden md:flex"
-				>
-					{$i18n.hero.text.never_download}
-				</div>
-			{/if}
 		</div>
 	{/if}
 
