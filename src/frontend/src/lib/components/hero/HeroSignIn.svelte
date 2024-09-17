@@ -14,7 +14,7 @@
 </div>
 
 <div class="mt-5 mb-7 pt-2">
-	<h1 class="text-off-white text-4xl text-center">
+	<h1 class="text-4xl text-center">
 		{$i18n.auth.text.title}
 	</h1>
 </div>

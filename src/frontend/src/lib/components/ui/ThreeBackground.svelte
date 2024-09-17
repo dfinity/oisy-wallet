@@ -1,4 +1,5 @@
 <script lang="ts">
+	// TODO: remove this component and all related packages, classes and tests
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import {
