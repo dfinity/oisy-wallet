@@ -32,18 +32,18 @@ export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
 	!isBtcAddress(address);
 
 const isTokenCkLedger = (
-	{ ledgerCanisterId }: Partial<IcToken>,
+	ledgerCanisterId: CanisterIdText | undefined,
 	ledgerCanisterIds: CanisterIdText[]
 ): boolean => nonNullish(ledgerCanisterId) && ledgerCanisterIds.includes(ledgerCanisterId);
 
 export const isTokenCkBtcLedger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
-	isTokenCkLedger({ ledgerCanisterId }, CKBTC_LEDGER_CANISTER_IDS);
+	isTokenCkLedger(ledgerCanisterId, CKBTC_LEDGER_CANISTER_IDS);
 
 export const isTokenCkEthLedger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
-	isTokenCkLedger({ ledgerCanisterId }, CKETH_LEDGER_CANISTER_IDS);
+	isTokenCkLedger(ledgerCanisterId, CKETH_LEDGER_CANISTER_IDS);
 
 export const isTokenCkErc20Ledger = ({ ledgerCanisterId }: Partial<IcToken>): boolean =>
-	isTokenCkLedger({ ledgerCanisterId }, CKERC20_LEDGER_CANISTER_IDS);
+	isTokenCkLedger(ledgerCanisterId, CKERC20_LEDGER_CANISTER_IDS);
 
 export const isNetworkIdETHMainnet = (networkId: NetworkId | undefined): boolean =>
 	ETHEREUM_NETWORK_ID === networkId;
