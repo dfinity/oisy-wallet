@@ -1,20 +1,18 @@
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
-	import type { IcToken } from '$icp/types/ic';
-	import type { WalletWorker } from '$icp/types/ic-listener';
-	import { cleanWorkers, loadWorker } from '$icp/utils/ic-wallet.utils';
-	import { enabledIcTokens } from '$lib/derived/tokens.derived';
-	import type { TokenId } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
+	import type { WalletWorker } from '$lib/types/wallet';
+	import { cleanWorkers, loadWorker } from '$lib/utils/wallet.utils';
+
+	export let tokens: Token[];
 
 	const workers: Map<TokenId, WalletWorker> = new Map<TokenId, WalletWorker>();
 
 	const manageWorkers = async () => {
-		cleanWorkers({ workers, tokens: $enabledIcTokens });
+		cleanWorkers({ workers, tokens });
 
-		await Promise.allSettled(
-			$enabledIcTokens.map(async (token: IcToken) => await loadWorker({ workers, token }))
-		);
+		await Promise.allSettled(tokens.map(async (token) => await loadWorker({ workers, token })));
 	};
 
 	const debounceManageWorkers = debounce(manageWorkers, 500);
@@ -22,7 +20,7 @@
 	// TODO: here we debounce the manageWorkers function to avoid multiple calls in a short period
 	//  of time due to the several dependencies of enabledIcTokens, that are not strictly only IC tokens.
 	//  This is a temporary solution, and we should find a better way to handle this, improving the store.
-	$: $enabledIcTokens, debounceManageWorkers();
+	$: tokens, debounceManageWorkers();
 
 	onDestroy(() => {
 		workers.forEach((worker) => worker.stop());

@@ -1,14 +1,14 @@
+import type { PostMessageWalletData as PostMessageBtcWalletData } from '$btc/types/btc.post-message';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
-import type { PostMessageWalletData } from '$icp/types/ic.post-message';
-import type {
-	CoingeckoSimplePriceResponse,
-	CoingeckoSimpleTokenPriceResponse
-} from '$lib/types/coingecko';
-
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
+import type { PostMessageWalletData as PostMessageIcWalletData } from '$icp/types/ic.post-message';
+import type {
+	CoingeckoSimplePriceResponse,
+	CoingeckoSimpleTokenPriceResponse
+} from '$lib/types/coingecko';
 import type { Network } from '$lib/types/network';
 import type { SyncState } from '$lib/types/sync';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
@@ -26,6 +26,9 @@ export type PostMessageRequest =
 	| 'stopIcrcWalletTimer'
 	| 'startIcrcWalletTimer'
 	| 'triggerIcrcWalletTimer'
+	| 'stopBtcWalletTimer'
+	| 'startBtcWalletTimer'
+	| 'triggerBtcWalletTimer'
 	| 'stopBtcStatusesTimer'
 	| 'startBtcStatusesTimer'
 	| 'triggerBtcStatusesTimer'
@@ -47,13 +50,18 @@ export type PostMessageDataRequestIcrc = IcCanisters & Pick<Network, 'env'>;
 
 export type PostMessageDataRequestIcCk = Partial<Pick<IcCkMetadata, 'minterCanisterId'>>;
 
+export type PostMessageDataRequestBtc = {
+	bitcoinNetwork: BitcoinNetwork;
+};
+
 export type PostMessageDataRequestIcCkBTCUpdateBalance = PostMessageDataRequestIcCk & {
 	btcAddress: string | undefined;
 	bitcoinNetwork: BitcoinNetwork;
 };
 
 export type PostMessageResponseStatus =
-	| 'syncWalletStatus'
+	| 'syncIcWalletStatus'
+	| 'syncBtcWalletStatus'
 	| 'syncBtcStatusesStatus'
 	| 'syncCkMinterInfoStatus'
 	| 'syncCkBTCUpdateBalanceStatus';
@@ -65,10 +73,13 @@ export type PostMessageResponse =
 	| 'syncExchangeError'
 	| 'syncIcpWallet'
 	| 'syncIcrcWallet'
+	| 'syncBtcWallet'
 	| 'syncIcpWalletError'
 	| 'syncIcrcWalletError'
+	| 'syncBtcWalletError'
 	| 'syncIcpWalletCleanUp'
 	| 'syncIcrcWalletCleanUp'
+	| 'syncBtcWalletCleanUp'
 	| 'syncBtcStatuses'
 	| 'syncBtcStatusesError'
 	| 'syncCkMinterInfo'
@@ -94,8 +105,12 @@ export interface PostMessageDataResponseExchangeError extends PostMessageDataRes
 	err: string | undefined;
 }
 
-export interface PostMessageDataResponseWallet<T> extends PostMessageDataResponse {
-	wallet: PostMessageWalletData<T>;
+export interface PostMessageDataResponseIcWallet<T> extends PostMessageDataResponse {
+	wallet: PostMessageIcWalletData<T>;
+}
+
+export interface PostMessageDataResponseBtcWallet extends PostMessageDataResponse {
+	wallet: PostMessageBtcWalletData;
 }
 
 export interface PostMessageDataResponseError extends PostMessageDataResponse {

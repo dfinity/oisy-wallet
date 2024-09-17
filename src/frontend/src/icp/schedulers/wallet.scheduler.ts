@@ -2,21 +2,21 @@ import { WALLET_TIMER_INTERVAL_MILLIS } from '$icp/constants/ic.constants';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import {
+	SchedulerTimer,
+	type Scheduler,
+	type SchedulerJobData,
+	type SchedulerJobParams
+} from '$lib/schedulers/scheduler';
 import type {
 	PostMessageDataResponseError,
-	PostMessageDataResponseWallet,
+	PostMessageDataResponseIcWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { isNullish, jsonReplacer } from '@dfinity/utils';
-import {
-	SchedulerTimer,
-	type Scheduler,
-	type SchedulerJobData,
-	type SchedulerJobParams
-} from './scheduler';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
@@ -34,7 +34,7 @@ export class WalletScheduler<
 	PostMessageDataRequest
 > implements Scheduler<PostMessageDataRequest>
 {
-	private timer = new SchedulerTimer('syncWalletStatus');
+	private timer = new SchedulerTimer('syncIcWalletStatus');
 
 	private store: WalletStore<T> = {
 		balance: undefined,
@@ -213,7 +213,7 @@ export class WalletScheduler<
 	}) {
 		const certifiedTransactions = newTransactions.map((data) => ({ data, certified }));
 
-		this.timer.postMsg<PostMessageDataResponseWallet<GetTransactions>>({
+		this.timer.postMsg<PostMessageDataResponseIcWallet<GetTransactions>>({
 			msg: this.msg,
 			data: {
 				wallet: {

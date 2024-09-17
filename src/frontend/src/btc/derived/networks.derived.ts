@@ -7,9 +7,11 @@ import { derived, type Readable } from 'svelte/store';
 
 export const enabledBitcoinNetworks: Readable<Network[]> = derived([testnets], ([$testnets]) =>
 	NETWORK_BITCOIN_ENABLED
-		? [
-				...(BTC_MAINNET_ENABLED ? [BTC_MAINNET_NETWORK] : []),
-				...($testnets ? [BTC_TESTNET_NETWORK, ...(LOCAL ? [BTC_REGTEST_NETWORK] : [])] : [])
-			]
+		? LOCAL
+			? [BTC_REGTEST_NETWORK]
+			: [
+					...(BTC_MAINNET_ENABLED ? [BTC_MAINNET_NETWORK] : []),
+					...($testnets ? [BTC_TESTNET_NETWORK] : [])
+				]
 		: []
 );

@@ -1,9 +1,10 @@
+import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
 import { INDEX_RELOAD_DELAY } from '$icp/constants/ic.constants';
 import { initIcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
 import { initIcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
 import type { IcToken } from '$icp/types/ic';
-import type { WalletWorker } from '$icp/types/ic-listener';
-import type { TokenId } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
+import type { WalletWorker } from '$lib/types/wallet';
 import { emit } from '$lib/utils/events.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 
@@ -31,10 +32,10 @@ export const cleanWorkers = ({
 	tokens
 }: {
 	workers: Map<TokenId, WalletWorker>;
-	tokens: IcToken[];
+	tokens: Token[];
 }) =>
 	Array.from(workers.keys())
-		.filter((tokenId) => !tokens.some(({ id: icTokenId }) => icTokenId === tokenId))
+		.filter((tokenId) => !tokens.some(({ id: workerTokenId }) => workerTokenId === tokenId))
 		.forEach((tokenId) => {
 			// TODO: use a more functional approach instead of deleting the worker from the map.
 			workers.get(tokenId)?.stop();
@@ -45,19 +46,21 @@ export const cleanWorkers = ({
  * Load the worker for the token if it is not already loaded.
  *
  * @param workers The map of workers defined as `Map<TokenId, WalletWorker>`.
- * @param token The IC token to load the worker for.
+ * @param token The token to load the worker for.
  */
 export const loadWorker = async ({
 	workers,
 	token
 }: {
 	workers: Map<TokenId, WalletWorker>;
-	token: IcToken;
+	token: Token;
 }) => {
 	if (!workers.has(token.id)) {
 		const worker = await (token.standard === 'icrc'
-			? initIcrcWalletWorker(token)
-			: initIcpWalletWorker());
+			? initIcrcWalletWorker(token as IcToken)
+			: token.standard === 'bitcoin'
+				? initBtcWalletWorker(token)
+				: initIcpWalletWorker());
 
 		worker.stop();
 		worker.start();
