@@ -15,7 +15,7 @@
 
 <div class="mt-5 mb-7 pt-2">
 	<h1 class="text-4xl text-center">
-		{$i18n.auth.text.title}
+		{$i18n.auth.text.title_part_1} <span class="text-primary">{$i18n.auth.text.title_part_2}</span>
 	</h1>
 </div>
 
