@@ -78,8 +78,4 @@
 	{#if more}
 		<ContextMenu />
 	{/if}
-
-	{#if ONRAMPER_ENABLED}
-		<Buy />
-	{/if}
 </div>
