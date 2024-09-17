@@ -16,7 +16,6 @@ export interface AddUserCredentialRequest {
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
-export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -126,16 +125,6 @@ export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_2 = { Ok: MigrationReport } | { Err: string };
 export type Result_3 = { Ok: null } | { Err: string };
-export interface SignRequest {
-	to: string;
-	gas: bigint;
-	value: bigint;
-	max_priority_fee_per_gas: bigint;
-	data: [] | [string];
-	max_fee_per_gas: bigint;
-	chain_id: bigint;
-	nonce: bigint;
-}
 export interface Stats {
 	user_profile_count: bigint;
 	custom_token_count: bigint;
@@ -176,11 +165,8 @@ export interface UserTokenId {
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
-	caller_btc_address: ActorMethod<[BitcoinNetwork], string>;
-	caller_eth_address: ActorMethod<[], string>;
 	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
-	eth_address_of: ActorMethod<[Principal], string>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	get_user_profile: ActorMethod<[], Result_1>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
@@ -190,15 +176,12 @@ export interface _SERVICE {
 	migrate_user_data_to: ActorMethod<[Principal], Result_2>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
 	migration_stop_timer: ActorMethod<[], Result_3>;
-	personal_sign: ActorMethod<[string], string>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;
 	set_many_user_tokens: ActorMethod<[Array<UserToken>], undefined>;
 	set_user_token: ActorMethod<[UserToken], undefined>;
-	sign_prehash: ActorMethod<[string], string>;
-	sign_transaction: ActorMethod<[SignRequest], string>;
 	stats: ActorMethod<[], Stats>;
 	step_migration: ActorMethod<[], undefined>;
 }
