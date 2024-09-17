@@ -1,12 +1,6 @@
 FROM --platform=linux/amd64 ubuntu@sha256:bbf3d1baa208b7649d1d0264ef7d522e1dc0deeeaaf6085bf8e4618867f03494 AS deps
 # Note: The above is ubuntu 22.04
 
-ARG network="staging"
-ENV ENV=$network
-ENV DFX_NETWORK=$network
-
-RUN echo $ENV
-RUN echo $DFX_NETWORK
 ENV TZ=UTC
 
 # Install required tools
@@ -74,6 +68,14 @@ RUN touch src/*/src/lib.rs
 RUN ./docker/build --backend
 
 RUN sha256sum /backend.wasm.gz
+
+
+ARG network="staging"
+ENV ENV=$network
+ENV DFX_NETWORK=$network
+
+RUN echo $ENV
+RUN echo $DFX_NETWORK
 
 RUN npm ci
 RUN npm run build
