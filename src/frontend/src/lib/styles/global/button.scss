@@ -23,16 +23,14 @@ button {
 	--button-padding: var(--padding) var(--padding-3x);
 
 	&.primary,
-	&.secondary,
-	&.token {
+	&.secondary {
 		justify-content: flex-start;
 
 		padding: var(--button-padding);
 	}
 
 	&.secondary,
-	&.user,
-	&.token {
+	&.user {
 		border: 1px solid var(--color-blue);
 	}
 
@@ -98,7 +96,6 @@ button {
 		padding: var(--button-padding);
 	}
 
-	&.token,
 	&.wallet-connect,
 	&.about {
 		&.icon {
@@ -126,25 +123,6 @@ button {
 
 					span {
 						display: block;
-					}
-				}
-			}
-		}
-	}
-
-	&.token {
-		border-width: 0;
-		background: var(--color-white);
-
-		&.icon {
-			@include media.min-width(medium) {
-				background: var(--color-white);
-				border-width: 1px;
-
-				&.desktop-wide {
-					span {
-						display: flex;
-						gap: var(--padding);
 					}
 				}
 			}
