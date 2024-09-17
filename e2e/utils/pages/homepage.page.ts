@@ -4,6 +4,9 @@ import {
 	LOGOUT_BUTTON,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
+	RECEIVE_TOKENS_MODAL,
+	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
 	TOKENS_SKELETONS_INITIALIZED
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
@@ -11,6 +14,7 @@ import { nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
+import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
 
 type HomepageParams = {
 	page: Page;
@@ -75,6 +79,10 @@ abstract class Homepage {
 		await this.#page.goto(HOMEPAGE_URL);
 	}
 
+	private async setViewportSize(viewportSize: ViewportSize) {
+		await this.#page.setViewportSize(viewportSize);
+	}
+
 	private async waitForNavigationMenu(options?: WaitForLocatorOptions): Promise<void> {
 		await this.#page.getByTestId(NAVIGATION_MENU).waitFor(options);
 	}
@@ -116,10 +124,6 @@ abstract class Homepage {
 		await modal.waitFor();
 
 		return modal;
-	}
-
-	private async setViewportSize(viewportSize: ViewportSize) {
-		await this.#page.setViewportSize(viewportSize);
 	}
 
 	protected async waitForHomepageReady(): Promise<void> {
@@ -211,6 +215,34 @@ export class HomepageLoggedIn extends Homepage {
 
 		await this.waitForLoginButton();
 		await this.waitForTokenSkeletonsInitialization({ state: 'detached' });
+	}
+
+	async testReceiveModalQrCode({
+		receiveModalSectionSelector
+	}: {
+		receiveModalSectionSelector: string;
+	}): Promise<void> {
+		await this.waitForModal({
+			modalOpenButtonTestId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+			modalTestId: RECEIVE_TOKENS_MODAL
+		});
+
+		await this.clickSelector({
+			selector: getReceiveTokensModalQrCodeButtonSelector({
+				sectionSelector: receiveModalSectionSelector
+			})
+		});
+
+		const qrCodeOutputLocator = await this.getLocatorByTestId({
+			testId: RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT
+		});
+		await qrCodeOutputLocator.waitFor();
+
+		const qrCode = await this.readQRCode({
+			selector: `[data-tid="${RECEIVE_TOKENS_MODAL}"] canvas`
+		});
+
+		await expect(qrCodeOutputLocator).toHaveText(qrCode ?? '');
 	}
 
 	/**

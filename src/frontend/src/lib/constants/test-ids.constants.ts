@@ -21,4 +21,6 @@ export const RECEIVE_TOKENS_MODAL_ICRC_SECTION = 'receive-tokens-modal-icrc-sect
 export const RECEIVE_TOKENS_MODAL_ICP_SECTION = 'receive-tokens-modal-icp-section';
 export const RECEIVE_TOKENS_MODAL_BTC_SECTION = 'receive-tokens-modal-btc-section';
 export const RECEIVE_TOKENS_MODAL_ETH_SECTION = 'receive-tokens-modal-eth-section';
-export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-qr-code';
+export const RECEIVE_TOKENS_MODAL_ADDRESS_LABEL = 'receive-tokens-modal-address-label';
+export const RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON = 'receive-tokens-modal-qr-code-button';
+export const RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT = 'receive-tokens-modal-qr-code-output';

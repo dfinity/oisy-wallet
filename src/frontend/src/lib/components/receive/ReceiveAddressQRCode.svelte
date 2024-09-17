@@ -2,6 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
+	import { RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let address: undefined | string;
@@ -13,7 +14,7 @@
 <div class="stretch min-h-[50vh]">
 	<p class="font-bold text-center">{addressLabel ?? $i18n.wallet.text.address}:</p>
 	<p class="mb-4 font-normal text-center px-2">
-		<output class="break-all">{address}</output><Copy
+		<output class="break-all" data-tid={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}>{address}</output><Copy
 			inline
 			value={address ?? ''}
 			text={$i18n.wallet.text.address_copied}
