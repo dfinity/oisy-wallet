@@ -20,7 +20,8 @@
 		"src/frontend/src/lib/components/common/**/*.svelte",
 		"src/frontend/src/lib/components/exchange/**/*.svelte",
 		"src/frontend/src/lib/components/guard/**/*.svelte",
-		"src/frontend/src/lib/components/info/**/*.svelte"
+		"src/frontend/src/lib/components/info/**/*.svelte",
+		"src/frontend/src/lib/components/core/**/*.svelte"
 	  ],
       "options": {
         "plugins": ["prettier-plugin-svelte", "prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"],
