@@ -6,4 +6,4 @@ export interface WalletWorker {
 	trigger: () => void;
 }
 
-export type InitWallerWorkerParams = { token: Token };
+export type InitWalletWorkerFn = (params: { token: Token }) => Promise<WalletWorker>;

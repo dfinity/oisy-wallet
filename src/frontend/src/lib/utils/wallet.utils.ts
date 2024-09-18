@@ -1,5 +1,5 @@
 import { INDEX_RELOAD_DELAY } from '$lib/constants/app.constants';
-import type { InitWallerWorkerParams, WalletWorker } from '$lib/types/listener';
+import type { InitWalletWorkerFn, WalletWorker } from '$lib/types/listener';
 import type { Token, TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
@@ -52,7 +52,7 @@ export const loadWorker = async ({
 }: {
 	workers: Map<TokenId, WalletWorker>;
 	token: Token;
-	initWalletWorker: (params: InitWallerWorkerParams) => Promise<WalletWorker>;
+	initWalletWorker: InitWalletWorkerFn;
 }) => {
 	if (!workers.has(token.id)) {
 		const worker = await initWalletWorker({ token });
