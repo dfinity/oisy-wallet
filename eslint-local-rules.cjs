@@ -1,3 +1,4 @@
+const { isNullish, nonNullish } = require('@dfinity/utils');
 module.exports = {
 	'no-svelte-store-in-api': {
 		meta: {
@@ -98,21 +99,54 @@ module.exports = {
 			const checkForMoreThanOneParameter = (node) => {
 				const parent = node.parent;
 
+				// Check if it is a callback for looping methods
 				if (
-					parent &&
+					nonNullish(parent) &&
 					parent.type === 'CallExpression' &&
 					parent.callee.type === 'MemberExpression' &&
-					['map', 'reduce', 'forEach', 'filter', 'sort'].includes(parent.callee.property.name)
+					['map', 'reduce', 'forEach', 'filter', 'sort', 'replace'].includes(
+						parent.callee.property.name
+					)
 				) {
 					return;
 				}
 
+				// Check if it is a callback for Array.from
 				if (
-					parent &&
+					nonNullish(parent) &&
 					parent.type === 'CallExpression' &&
 					parent.callee.type === 'MemberExpression' &&
 					parent.callee.object.name === 'Array' &&
 					parent.callee.property.name === 'from'
+				) {
+					return;
+				}
+
+				// Check if it is a callback in a Promise constructor
+				if (
+					nonNullish(parent) &&
+					parent.type === 'NewExpression' &&
+					parent.callee.name === 'Promise'
+				) {
+					return;
+				}
+
+				// Check if it is a callback in JSON.stringify
+				if (
+					nonNullish(parent) &&
+					parent.type === 'CallExpression' &&
+					parent.callee.type === 'MemberExpression' &&
+					parent.callee.object.name === 'JSON' &&
+					parent.callee.property.name === 'stringify'
+				) {
+					return;
+				}
+
+				// Check if it is inside a class constructor
+				if (
+					nonNullish(parent) &&
+					parent.type === 'MethodDefinition' &&
+					parent.kind === 'constructor'
 				) {
 					return;
 				}
