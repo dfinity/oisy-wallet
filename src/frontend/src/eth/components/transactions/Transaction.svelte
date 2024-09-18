@@ -38,7 +38,7 @@
 	$: ckTokenSymbol = isSupportedEthToken($token)
 		? $token.twinTokenSymbol
 		: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
-			($token as Erc20Token | undefined)?.twinTokenSymbol ?? '';
+			(($token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
 
 	let label: string;
 	$: label =
