@@ -2,9 +2,9 @@
 	import { debounce } from '@dfinity/utils';
 	import { onDestroy } from 'svelte';
 	import type { IcToken } from '$icp/types/ic';
-	import type { WalletWorker } from '$icp/types/ic-listener';
 	import { cleanWorkers, loadWorker } from '$icp/utils/ic-wallet.utils';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
+	import type { WalletWorker } from '$lib/types/listener';
 	import type { TokenId } from '$lib/types/token';
 
 	const workers: Map<TokenId, WalletWorker> = new Map<TokenId, WalletWorker>();

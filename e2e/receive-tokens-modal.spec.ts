@@ -1,6 +1,5 @@
 import {
 	RECEIVE_TOKENS_MODAL,
-	RECEIVE_TOKENS_MODAL_BTC_SECTION,
 	RECEIVE_TOKENS_MODAL_ETH_SECTION,
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
 	RECEIVE_TOKENS_MODAL_ICRC_SECTION,
@@ -12,9 +11,10 @@ import { HomepageLoggedIn } from './utils/pages/homepage.page';
 import { getReceiveTokensModalAddressLabelSelector } from './utils/selectors.utils';
 
 const RECEIVE_TOKENS_MODAL_VIEWPORT_HEIGHT = 900;
+let homepageLoggedIn: HomepageLoggedIn;
 
-testWithII('should display receive-tokens modal', async ({ page, iiPage }) => {
-	const homepageLoggedIn = new HomepageLoggedIn({
+testWithII.beforeEach(async ({ page, iiPage }) => {
+	homepageLoggedIn = new HomepageLoggedIn({
 		page,
 		iiPage,
 		viewportSize: {
@@ -24,7 +24,9 @@ testWithII('should display receive-tokens modal', async ({ page, iiPage }) => {
 	});
 
 	await homepageLoggedIn.waitForReady();
+});
 
+testWithII('should display receive-tokens modal', async () => {
 	await homepageLoggedIn.testModalSnapshot({
 		modalOpenButtonTestId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 		modalTestId: RECEIVE_TOKENS_MODAL,
@@ -37,10 +39,25 @@ testWithII('should display receive-tokens modal', async ({ page, iiPage }) => {
 			}),
 			getReceiveTokensModalAddressLabelSelector({
 				sectionSelector: RECEIVE_TOKENS_MODAL_ETH_SECTION
-			}),
-			getReceiveTokensModalAddressLabelSelector({
-				sectionSelector: RECEIVE_TOKENS_MODAL_BTC_SECTION
 			})
 		]
+	});
+});
+
+testWithII('should display correct QR codes for receiving ICP tokens', async () => {
+	await homepageLoggedIn.testReceiveModalQrCode({
+		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ICP_SECTION
+	});
+});
+
+testWithII('should display correct QR codes for receiving ICRC tokens', async () => {
+	await homepageLoggedIn.testReceiveModalQrCode({
+		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ICRC_SECTION
+	});
+});
+
+testWithII('should display correct QR codes for receiving ETH tokens', async () => {
+	await homepageLoggedIn.testReceiveModalQrCode({
+		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ETH_SECTION
 	});
 });
