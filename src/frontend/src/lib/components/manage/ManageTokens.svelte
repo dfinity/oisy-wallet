@@ -213,7 +213,7 @@
 </div>
 
 {#if nonNullish($selectedNetwork)}
-	<p class="text-misty-rose pt-1 pb-2 mb-4">
+	<p class="mb-4 pb-2 pt-1 text-misty-rose">
 		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
 			$network: $selectedNetwork.name
 		})}
@@ -222,18 +222,18 @@
 
 {#if noTokensMatch}
 	<button
-		class="flex flex-col items-center justify-center py-16 w-full"
+		class="flex w-full flex-col items-center justify-center py-16"
 		in:fade
 		on:click={() => dispatch('icAddToken')}
 	>
 		<span class="text-7xl">🤔</span>
 
-		<span class="py-4 text-center text-blue font-bold no-underline"
+		<span class="py-4 text-center font-bold text-blue no-underline"
 			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
 {:else}
-	<div class="container md:max-h-[26rem] pr-2 pt-1 overflow-y-auto overscroll-contain">
+	<div class="container overflow-y-auto overscroll-contain pr-2 pt-1 md:max-h-[26rem]">
 		{#each tokens as token (`${token.network.id.description}-${token.id.description}`)}
 			<Card>
 				<TokenName {token} />
@@ -260,7 +260,7 @@
 	<Hr />
 
 	<button
-		class="flex justify-center pt-4 pb-5 text-center w-full text-blue font-bold no-underline"
+		class="flex w-full justify-center pb-5 pt-4 text-center font-bold text-blue no-underline"
 		on:click={() => dispatch('icAddToken')}>+ {$i18n.tokens.manage.text.do_not_see_import}</button
 	>
 
