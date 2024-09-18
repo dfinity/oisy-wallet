@@ -5,7 +5,7 @@
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import type { OptionIcCkToken } from '$icp/types/ic';
 	import IconConvert from '$lib/components/icons/IconConvert.svelte';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import ButtonAction from '$lib/components/ui/ButtonAction.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertCkBTCToBTC } from '$lib/derived/modal.derived';
 	import { tokenId } from '$lib/derived/token.derived';
@@ -32,14 +32,14 @@
 	$: networkId = ($token as OptionIcCkToken)?.twinToken?.network.id ?? BTC_MAINNET_NETWORK_ID;
 </script>
 
-<ButtonHero
+<ButtonAction
 	disabled={$isBusy}
 	on:click={async () => await openSend()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
 	<IconConvert size="28" slot="icon" />
 	{$i18n.convert.text.convert_to_btc}
-</ButtonHero>
+</ButtonAction>
 
 {#if $modalConvertCkBTCToBTC}
 	<IcSendModal {networkId} />

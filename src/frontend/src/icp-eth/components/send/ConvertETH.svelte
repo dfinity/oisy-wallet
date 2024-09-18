@@ -8,7 +8,7 @@
 	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import ButtonAction from '$lib/components/ui/ButtonAction.svelte';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
@@ -72,8 +72,8 @@
 </script>
 
 <CkEthLoader {nativeTokenId}>
-	<ButtonHero on:click={async () => await openSend()} disabled={$isBusy} {ariaLabel}>
+	<ButtonAction on:click={async () => await openSend()} disabled={$isBusy} {ariaLabel}>
 		<slot name="icon" slot="icon" />
 		<slot />
-	</ButtonHero>
+	</ButtonAction>
 </CkEthLoader>
