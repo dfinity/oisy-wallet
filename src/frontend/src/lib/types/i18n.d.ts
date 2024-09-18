@@ -98,7 +98,7 @@ interface I18nInit {
 		icrc_canisters: string;
 		erc20_user_tokens: string;
 		erc20_user_token: string;
-		icrc_custom_tokens: string;
+		icrc_custom_token: string;
 		loading_wallet_timeout: string;
 	};
 }
@@ -277,6 +277,10 @@ interface I18nConvert {
 		current_balance: string;
 	};
 	error: { loading_cketh_helper: string };
+}
+
+interface I18nBuy {
+	text: { buy: string };
 }
 
 interface I18nTokens {
@@ -470,11 +474,14 @@ interface I18nTransaction {
 	label: {
 		reimbursement: string;
 		twin_token_sent: string;
+		ck_token_sent: string;
 		twin_token_converted: string;
+		ck_token_converted: string;
 		receiving_twin_token: string;
 		sending_twin_token: string;
 		sending_twin_token_failed: string;
 		converting_twin_token: string;
+		converting_ck_token: string;
 		twin_network: string;
 	};
 	alt: {
@@ -539,6 +546,7 @@ interface I18n {
 	receive: I18nReceive;
 	send: I18nSend;
 	convert: I18nConvert;
+	buy: I18nBuy;
 	tokens: I18nTokens;
 	fee: I18nFee;
 	info: I18nInfo;

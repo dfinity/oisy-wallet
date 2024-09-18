@@ -5,6 +5,7 @@
 	import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddressWithLogo from '$lib/components/receive/ReceiveAddressWithLogo.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
@@ -24,7 +25,7 @@
 		dispatch('icQRCode', details);
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<ReceiveAddressWithLogo
 		on:click={() =>
 			displayQRCode({
@@ -132,8 +133,8 @@
 	>
 		{$i18n.receive.ethereum.text.ethereum}
 	</ReceiveAddressWithLogo>
-</div>
 
-<button class="primary full center text-center" on:click={modalStore.close}
-	>{$i18n.core.text.done}</button
->
+	<button class="primary full center text-center" on:click={modalStore.close} slot="toolbar"
+		>{$i18n.core.text.done}</button
+	>
+</ContentWithToolbar>
