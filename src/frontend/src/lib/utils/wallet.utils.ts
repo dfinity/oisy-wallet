@@ -1,6 +1,4 @@
-import { initIcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
-import { initIcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
-import type { IcToken } from '$icp/types/ic';
+import { initWalletWorker as initIcWalletWorker } from '$icp/utils/wallet.utils';
 import { INDEX_RELOAD_DELAY } from '$lib/constants/app.constants';
 import type { WalletWorker } from '$lib/types/listener';
 import type { Token, TokenId } from '$lib/types/token';
@@ -55,9 +53,7 @@ export const loadWorker = async ({
 	token: Token;
 }) => {
 	if (!workers.has(token.id)) {
-		const worker = await (token.standard === 'icrc'
-			? initIcrcWalletWorker(token as IcToken)
-			: initIcpWalletWorker());
+		const worker = await initIcWalletWorker({ token });
 
 		worker.stop();
 		worker.start();
