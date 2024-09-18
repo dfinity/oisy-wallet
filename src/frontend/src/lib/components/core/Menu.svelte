@@ -84,7 +84,7 @@
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			class="flex gap-2 items-center no-underline"
+			class="flex items-center gap-2 no-underline"
 			aria-label={$i18n.navigation.text.source_code_on_github}
 		>
 			<IconGitHub />
