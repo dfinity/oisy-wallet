@@ -2,7 +2,7 @@ import { INDEX_RELOAD_DELAY } from '$icp/constants/ic.constants';
 import { initIcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
 import { initIcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
 import type { IcToken } from '$icp/types/ic';
-import type { WalletWorker } from '$icp/types/ic-listener';
+import type { WalletWorker } from '$lib/types/listener';
 import type { TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';

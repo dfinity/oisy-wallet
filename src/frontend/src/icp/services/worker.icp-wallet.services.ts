@@ -3,7 +3,7 @@ import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
-import type { WalletWorker } from '$icp/types/ic-listener';
+import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
 	PostMessageDataResponseError,
