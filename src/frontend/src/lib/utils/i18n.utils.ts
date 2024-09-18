@@ -43,7 +43,13 @@ interface MaybeI18n extends I18n {
 	[key: string]: any;
 }
 
-export const resolveText = (i18n: MaybeI18n, path: string | undefined): string | undefined => {
+export const resolveText = ({
+	i18n,
+	path
+}: {
+	i18n: MaybeI18n;
+	path: string | undefined;
+}): string | undefined => {
 	// For simplicity reason, we defer this checks within that function that way we can keep our components concise and use optional chaining within those.
 	if (isNullish(path)) {
 		return undefined;
