@@ -5,6 +5,7 @@
 	import IconMenu from '$lib/components/icons/IconMenu.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -18,12 +19,12 @@
 </div>
 
 <div class="flex md:hidden">
-	<button
-		class="about icon desktop-wide"
-		bind:this={button}
+	<ButtonHero
+		bind:button
 		on:click={() => (visible = !visible)}
-		aria-label={replaceOisyPlaceholders($i18n.about.text.title)}><IconMenu /></button
-	>
+		ariaLabel={replaceOisyPlaceholders($i18n.about.text.title)}>
+		<IconMenu slot="icon" />
+	</ButtonHero>
 
 	<Popover bind:visible anchor={button} direction="rtl">
 		<ul class="flex flex-col gap-4 list-none">
