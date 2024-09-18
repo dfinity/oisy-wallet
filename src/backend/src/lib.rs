@@ -750,6 +750,7 @@ async fn send_btc(params: SendBtcParams) -> String {
         &user_public_key,
         &own_address,
         transaction,
+        &own_utxos,
         key_name,
         derivation_path,
         ecdsa_api::get_ecdsa_signature,

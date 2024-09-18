@@ -1,4 +1,4 @@
-use bitcoin::script::{Builder, PushBytesBuf};
+use bitcoin::script::PushBytesBuf;
 use bitcoin::transaction::Version;
 use bitcoin::Amount;
 use bitcoin::{
@@ -132,6 +132,7 @@ pub async fn build_p2wpkh_spend_tx(
             own_public_key,
             own_address,
             transaction.clone(),
+            own_utxos,
             String::from(""), // mock key name
             vec![],           // mock derivation path
             mock_signer,
@@ -183,7 +184,7 @@ fn sec1_to_der(sec1_signature: Vec<u8>) -> Vec<u8> {
     .collect()
 }
 
-fn get_input_value(input: &TxIn, outputs: &Vec<TxOut>) -> Option<Amount> {
+fn get_input_value(input: &TxIn, outputs: &[Utxo]) -> Option<Amount> {
     // The `previous_output` field in `TxIn` contains the `OutPoint`, which includes
     // the TXID and the output index (vout) that this input is spending from.
     let previous_output = &input.previous_output;
@@ -193,7 +194,7 @@ fn get_input_value(input: &TxIn, outputs: &Vec<TxOut>) -> Option<Amount> {
         // The index of the output in the transaction (vout) should match the input's vout.
         if i == previous_output.vout as usize {
             // If we find the matching output, return the value as an `Amount` type.
-            return Some(output.value);
+            return Some(Amount::from_sat(output.value));
         }
     }
 
@@ -212,6 +213,7 @@ pub async fn ecdsa_sign_transaction<SignFun, Fut>(
     own_public_key: &[u8],
     own_address: &Address,
     mut transaction: Transaction,
+    own_utxos: &[Utxo],
     key_name: String,
     derivation_path: Vec<Vec<u8>>,
     signer: SignFun,
@@ -229,17 +231,13 @@ where
 
     let txclone = transaction.clone();
     for (index, input) in transaction.input.iter_mut().enumerate() {
-        let value = get_input_value(&input, &transaction.output)
-            .expect("input value not found in passed utxos");
+        let value =
+            get_input_value(&input, own_utxos).expect("input value not found in passed utxos");
         let sighash = SighashCache::new(&txclone)
             .p2wpkh_signature_hash(
-                // It fails if I pass the wrong index
                 index,
-                // It fails if I pass the input.script_sig
                 &own_address.script_pubkey(),
                 value,
-                // It doesn't fail with the wrong value
-                // Amount::ONE_SAT,
                 ECDSA_SIG_HASH_TYPE,
             )
             .unwrap();
@@ -257,21 +255,12 @@ where
         let mut sig_with_hashtype: Vec<u8> = der_signature;
         sig_with_hashtype.push(ECDSA_SIG_HASH_TYPE.to_u32() as u8);
 
-        // // It doesn't fail withuot Witness
-        // let mut witness = Witness::new();
-        // // It doesn't fail if I change the order of the pushes.
-        // witness.push(sig_with_hashtype);
-        // witness.push(&own_public_key.to_vec());
-        // input.witness = witness;
-
-        // It doesn't fail to set the witness like the following.
         let sig_with_hashtype_push_bytes = PushBytesBuf::try_from(sig_with_hashtype).unwrap();
         let own_public_key_push_bytes = PushBytesBuf::try_from(own_public_key.to_vec()).unwrap();
-        input.script_sig = Builder::new()
-            .push_slice(sig_with_hashtype_push_bytes)
-            .push_slice(own_public_key_push_bytes)
-            .into_script();
-        input.witness.clear();
+        let mut witness = Witness::new();
+        witness.push(&sig_with_hashtype_push_bytes.as_bytes());
+        witness.push(&own_public_key_push_bytes.as_bytes());
+        input.witness = witness;
     }
 
     transaction
