@@ -41,6 +41,7 @@
 	disabled={$erc20UserTokensNotInitialized}
 >
 	<IconMore size="28" slot="icon" />
+	{$i18n.core.text.more}
 </ButtonHero>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
