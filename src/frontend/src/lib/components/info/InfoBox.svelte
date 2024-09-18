@@ -9,10 +9,10 @@
 
 {#if !hideInfo}
 	<div
-		class="border-2 border-dust bg-white rounded-lg mb-12 py-4 px-6 relative"
+		class="relative mb-12 rounded-lg border-2 border-dust bg-white px-6 py-4"
 		transition:slide={{ easing: quintOut, axis: 'y' }}
 	>
-		<button class="text absolute top-2 right-2" on:click aria-label={$i18n.core.text.close}
+		<button class="text absolute right-2 top-2" on:click aria-label={$i18n.core.text.close}
 			><IconClose size="24px" /></button
 		>
 
