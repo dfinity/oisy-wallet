@@ -57,11 +57,9 @@ export const signPrehash = async ({
 	return sign_prehash(hash);
 };
 
-export const signerCanister = async ({
-	identity
-}: {
-	identity: Identity;
-}): Promise<SignerCanister> => {
+// TODO: implement updateBtcBalance method
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const signerCanister = async ({ identity }: { identity: Identity }): Promise<SignerCanister> => {
 	const agent = await getAgent({ identity });
 
 	return SignerCanister.create({
