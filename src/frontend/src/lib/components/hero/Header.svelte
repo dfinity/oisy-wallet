@@ -9,10 +9,10 @@
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
-	import { isSubRoute } from '$lib/utils/nav.utils';
+	import { isRouteSettings } from '$lib/utils/nav.utils';
 
 	let back = false;
-	$: back = isSubRoute($page);
+	$: back = isRouteSettings($page);
 </script>
 
 <header

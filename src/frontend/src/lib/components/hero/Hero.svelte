@@ -8,7 +8,6 @@
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
-	export let more = false;
 
 	// We only want to display the "Sign-in" call to action on pages that actually are displaying any content in the Hero pane.
 	let heroContent = true;
@@ -25,7 +24,7 @@
 		<Alpha />
 
 		{#if $authSignedIn}
-			<HeroContent {usdTotal} {summary} {actions} {more} />
+			<HeroContent {usdTotal} {summary} {actions} />
 		{:else if heroContent}
 			<HeroSignIn />
 		{/if}

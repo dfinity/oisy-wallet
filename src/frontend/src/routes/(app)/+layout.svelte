@@ -20,7 +20,6 @@
 <Hero
 	usdTotal={route === 'tokens'}
 	summary={route === 'transactions'}
-	more={route === 'transactions'}
 	actions={route !== 'settings'}
 />
 
