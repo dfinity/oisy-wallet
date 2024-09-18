@@ -5,6 +5,9 @@
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	let ariaLabel: string;
+	$: ariaLabel = replacePlaceholders($i18n.core.alt.logo, { $name: OISY_NAME });
 </script>
 
 <div class="mr-3">
@@ -21,7 +24,7 @@
 	</svg>
 </div>
 
-<picture>
+<picture aria-label={ariaLabel}>
 	<source srcset={oisyLogoSmall} media="(max-width: 640px)" />
-	<Img src={oisyLogoLarge} alt={replacePlaceholders($i18n.core.alt.logo, { $name: OISY_NAME })} />
+	<Img src={oisyLogoLarge} alt={ariaLabel} />
 </picture>
