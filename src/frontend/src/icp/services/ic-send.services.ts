@@ -14,13 +14,13 @@ import {
 } from '$icp/services/ck.services';
 import type { IcToken } from '$icp/types/ic';
 import type { IcTransferParams } from '$icp/types/ic-send';
-import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
 import { invalidIcpAddress } from '$lib/utils/account.utils';
 import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
+import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { BlockHeight } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, type IcrcBlockIndex } from '@dfinity/ledger-icrc';
 import { get } from 'svelte/store';
