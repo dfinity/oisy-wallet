@@ -1,3 +1,4 @@
+use bitcoin::key::CompressedPublicKey;
 use bitcoin::{Address, Network, PublicKey};
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 
@@ -14,6 +15,14 @@ fn transform_network(network: BitcoinNetwork) -> Network {
 pub fn public_key_to_p2pkh_address(network: BitcoinNetwork, public_key: &[u8]) -> String {
     Address::p2pkh(
         PublicKey::from_slice(public_key).expect("failed to parse public key"),
+        transform_network(network),
+    )
+    .to_string()
+}
+
+pub fn public_key_to_p2wpkh_address(network: BitcoinNetwork, public_key: &[u8]) -> String {
+    Address::p2wpkh(
+        &CompressedPublicKey::from_slice(public_key).expect("failed to parse public key"),
         transform_network(network),
     )
     .to_string()

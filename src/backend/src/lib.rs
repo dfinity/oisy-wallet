@@ -1,5 +1,4 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
-use crate::bitcoin_utils::public_key_to_p2pkh_address;
 use crate::guards::{
     caller_is_allowed, caller_is_allowed_and_may_read_threshold_keys, may_read_threshold_keys,
     may_read_user_data, may_threshold_sign, may_write_user_data,
@@ -7,6 +6,7 @@ use crate::guards::{
 use crate::token::{add_to_user_token, remove_from_user_token};
 use bitcoin::consensus::serialize;
 use bitcoin::{Address as BtcAddress, Network};
+use bitcoin_utils::public_key_to_p2wpkh_address;
 use candid::{CandidType, Nat, Principal};
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::{Address, H160, U256, U64};
@@ -29,7 +29,7 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
 use oisy_user::oisy_users;
-use p2pkh::{build_p2pkh_spend_tx, ecdsa_sign_transaction};
+use p2wpkh::{build_p2wpkh_spend_tx, ecdsa_sign_transaction};
 use pretty_assertions::assert_eq;
 use serde::Deserialize;
 use serde_bytes::ByteBuf;
@@ -66,6 +66,7 @@ mod impls;
 mod migrate;
 mod oisy_user;
 mod p2pkh;
+mod p2wpkh;
 mod token;
 mod types;
 mod user_profile;
@@ -270,7 +271,7 @@ async fn eth_address_of(p: Principal) -> String {
 /// Returns the Bitcoin address of the caller.
 #[update(guard = "may_read_threshold_keys")]
 async fn caller_btc_address(network: BitcoinNetwork) -> String {
-    public_key_to_p2pkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
+    public_key_to_p2wpkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
@@ -711,7 +712,7 @@ async fn send_btc(params: SendBtcParams) -> String {
     // We use the caller's pub key and address
     // TODO: Add source address as optional param.
     let user_public_key = ecdsa_pubkey_of(&principal).await;
-    let source_address = public_key_to_p2pkh_address(network, &user_public_key);
+    let source_address = public_key_to_p2wpkh_address(network, &user_public_key);
 
     println!("Source address {}", source_address.to_string());
 
@@ -734,7 +735,7 @@ async fn send_btc(params: SendBtcParams) -> String {
         .expect("Network check failed");
 
     // Build the transaction that sends `amount` to the destination address.
-    let transaction = build_p2pkh_spend_tx(
+    let transaction = build_p2wpkh_spend_tx(
         &user_public_key,
         &own_address,
         &own_utxos,
