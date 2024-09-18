@@ -31,7 +31,7 @@
 		<Back />
 
 		<div>
-			<div class="icon flex justify-evenly items-center mb-0.5 pt-2">
+			<div class="icon flex justify-center items-center mb-0.5 pt-2">
 				{#if displayTokenSymbol}
 					<div in:fade>
 						<Logo
