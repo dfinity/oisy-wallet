@@ -3,9 +3,9 @@
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconMenu from '$lib/components/icons/IconMenu.svelte';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -22,7 +22,8 @@
 	<ButtonHero
 		bind:button
 		on:click={() => (visible = !visible)}
-		ariaLabel={replaceOisyPlaceholders($i18n.about.text.title)}>
+		ariaLabel={replaceOisyPlaceholders($i18n.about.text.title)}
+	>
 		<IconMenu slot="icon" />
 	</ButtonHero>
 
