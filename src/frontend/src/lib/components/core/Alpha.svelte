@@ -8,7 +8,7 @@
 	href={OISY_ALPHA_WARNING_URL}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="inline-flex items-center gap-2 no-underline px-6 py-2 font-bold text-xs md:text-base mx-auto max-w-72 md:max-w-[100%]"
+	class="mx-auto inline-flex max-w-72 items-center gap-2 px-6 py-2 text-xs font-bold no-underline md:max-w-[100%] md:text-base"
 >
 	<IconWarning inline />
 	<span>{$i18n.hero.text.use_with_caution}</span>
