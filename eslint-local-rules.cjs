@@ -82,5 +82,61 @@ module.exports = {
 				}
 			};
 		}
+	},
+	'prefer-object-params': {
+		meta: {
+			type: 'suggestion',
+			docs: {
+				description:
+					'Enforce passing parameters as an object when a function has more than one parameter',
+				category: 'Best Practices',
+				recommended: true
+			},
+			schema: []
+		},
+		create(context) {
+			const checkForMoreThanOneParameter = (node) => {
+				const parent = node.parent;
+
+				if (
+					parent &&
+					parent.type === 'CallExpression' &&
+					parent.callee.type === 'MemberExpression' &&
+					['map', 'reduce', 'forEach', 'filter', 'sort'].includes(parent.callee.property.name)
+				) {
+					return;
+				}
+
+				if (
+					parent &&
+					parent.type === 'CallExpression' &&
+					parent.callee.type === 'MemberExpression' &&
+					parent.callee.object.name === 'Array' &&
+					parent.callee.property.name === 'from'
+				) {
+					return;
+				}
+
+				if (node.params.length > 1) {
+					context.report({
+						node,
+						message:
+							'Functions with more than one parameter should accept an object and use destructuring.'
+					});
+				}
+			};
+
+			return {
+				FunctionDeclaration(node) {
+					checkForMoreThanOneParameter(node);
+				},
+				FunctionExpression(node) {
+					checkForMoreThanOneParameter(node);
+				},
+				ArrowFunctionExpression(node) {
+					checkForMoreThanOneParameter(node);
+				}
+			};
+		}
 	}
 };
