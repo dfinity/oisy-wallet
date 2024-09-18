@@ -1,6 +1,5 @@
-import { initWalletWorker as initIcWalletWorker } from '$icp/utils/wallet.utils';
 import { INDEX_RELOAD_DELAY } from '$lib/constants/app.constants';
-import type { WalletWorker } from '$lib/types/listener';
+import type { InitWallerWorkerParams, WalletWorker } from '$lib/types/listener';
 import type { Token, TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
@@ -44,16 +43,19 @@ export const cleanWorkers = ({
  *
  * @param workers The map of workers defined as `Map<TokenId, WalletWorker>`.
  * @param token The token to load the worker for.
+ * @param initWalletWorker The initialisation function of a wallet worker.
  */
 export const loadWorker = async ({
 	workers,
-	token
+	token,
+	initWalletWorker
 }: {
 	workers: Map<TokenId, WalletWorker>;
 	token: Token;
+	initWalletWorker: (params: InitWallerWorkerParams) => Promise<WalletWorker>;
 }) => {
 	if (!workers.has(token.id)) {
-		const worker = await initIcWalletWorker({ token });
+		const worker = await initWalletWorker({ token });
 
 		worker.stop();
 		worker.start();
