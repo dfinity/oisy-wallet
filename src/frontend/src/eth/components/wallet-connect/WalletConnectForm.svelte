@@ -111,11 +111,11 @@
 		width: 100%;
 		max-width: calc(100% - var(--padding-3x));
 
+		aspect-ratio: 4 / 3;
+
 		@media only screen and (hover: none) and (pointer: coarse) {
 			aspect-ratio: 1 / 1;
 		}
-
-		aspect-ratio: 4 / 3;
 
 		:global(article.reader) {
 			position: absolute !important;
