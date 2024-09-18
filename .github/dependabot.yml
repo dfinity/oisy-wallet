@@ -19,7 +19,4 @@ updates:
       - dependency-name: "@typescript-eslint/*"
       - dependency-name: "eslint"
       - dependency-name: "eslint-*"
-      - dependency-name: "sass"
-      - dependency-name: "svelte"
       - dependency-name: "typescript"
-      - dependency-name: "vite"
