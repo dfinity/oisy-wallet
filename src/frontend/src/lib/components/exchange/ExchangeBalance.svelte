@@ -10,7 +10,7 @@
 
 <span class="block">
 	<output
-		class={`break-all text-5xl font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} inline-block mt-8`}
+		class={`break-all text-5xl font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} mt-8 inline-block`}
 	>
 		{#if $exchangeInitialized}
 			{formatUSD(totalUsd)}
