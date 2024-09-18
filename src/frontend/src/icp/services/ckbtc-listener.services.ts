@@ -4,7 +4,6 @@ import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { BtcWithdrawalStatuses } from '$icp/types/btc';
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import type { UtxoTxidText } from '$icp/types/ckbtc';
-import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type {
@@ -15,6 +14,7 @@ import type { CertifiedData } from '$lib/types/store';
 import type { SyncState } from '$lib/types/sync';
 import type { TokenId } from '$lib/types/token';
 import { emit } from '$lib/utils/events.utils';
+import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { MinterInfo, PendingUtxo } from '@dfinity/ckbtc';
 import { jsonReviver } from '@dfinity/utils';
 import { get } from 'svelte/store';
