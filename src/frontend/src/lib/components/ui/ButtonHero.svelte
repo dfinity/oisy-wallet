@@ -6,7 +6,7 @@
 </script>
 
 <button
-	class="min-w-[72px] w-full flex flex-col text-white text-lg font-bold text-center gap-3.5 border border-r-white border-opacity-25 rounded-none px-2 overflow-hidden text-ellipsis break-words"
+	class="w-16 flex flex-col text-white text-xs font-normal text-center"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}
@@ -14,8 +14,8 @@
 	class:opacity-50={disabled}
 	data-tid={testId}
 >
-	<slot name="icon" />
-	<div class="max-w-[72px]">
-		<slot />
+	<div class="rounded-full p-2 bg-black bg-opacity-30 border border-white border-opacity-20">
+		<slot name="icon" />
 	</div>
+	<slot />
 </button>
