@@ -17,12 +17,12 @@
 		<svelte:fragment slot="label"><slot name="title" /></svelte:fragment>
 
 		{#if text}
-			<p class="text-misty-rose break-normal py-2">
+			<p class="break-normal py-2 text-misty-rose">
 				<slot name="text" />
 			</p>
 		{/if}
 
-		<div class="flex justify-between gap-4 items-start">
+		<div class="flex items-start justify-between gap-4">
 			<output id="ic-wallet-address" class="break-all">{address}</output>
 
 			<ReceiveActions on:click {qrCodeAriaLabel} {address} {copyAriaLabel} />

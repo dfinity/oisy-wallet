@@ -12,8 +12,8 @@
 </script>
 
 <div class="stretch min-h-[50vh]">
-	<p class="font-bold text-center">{addressLabel ?? $i18n.wallet.text.address}:</p>
-	<p class="mb-4 font-normal text-center px-2">
+	<p class="text-center font-bold">{addressLabel ?? $i18n.wallet.text.address}:</p>
+	<p class="mb-4 px-2 text-center font-normal">
 		<output class="break-all" data-tid={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}>{address}</output><Copy
 			inline
 			value={address ?? ''}
@@ -24,6 +24,6 @@
 	<ReceiveQRCode address={address ?? ''} />
 </div>
 
-<button class="secondary full center text-center mt-8" on:click={() => dispatch('icBack')}
+<button class="secondary full center mt-8 text-center" on:click={() => dispatch('icBack')}
 	>{$i18n.core.text.back}</button
 >

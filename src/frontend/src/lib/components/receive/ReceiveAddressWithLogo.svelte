@@ -19,8 +19,8 @@
 	export let testId: string | undefined = undefined;
 </script>
 
-<div class="flex gap-8 justify-between mb-6" data-tid={testId}>
-	<div class="grid grid-cols-[minmax(52px,auto),1fr] gap-4 content-center w-full">
+<div class="mb-6 flex justify-between gap-8" data-tid={testId}>
+	<div class="grid w-full grid-cols-[minmax(52px,auto),1fr] content-center gap-4">
 		<div class="col-start-1">
 			{#if !invisibleLogo}
 				<Logo
@@ -39,7 +39,7 @@
 
 					<svelte:fragment slot="description">
 						{#if isNullish(address)}
-							<span class="w-full max-w-[150px] mt-2"><SkeletonText /></span>
+							<span class="mt-2 w-full max-w-[150px]"><SkeletonText /></span>
 						{:else}
 							<span class="break-all" data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}>
 								{shortenWithMiddleEllipsis(address)}

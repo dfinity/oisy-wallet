@@ -39,7 +39,7 @@
 >
 
 <Popover bind:visible anchor={button}>
-	<ul class="flex flex-col gap-4 list-none font-normal">
+	<ul class="flex list-none flex-col gap-4 font-normal">
 		<li>
 			<NetworkButton
 				id={undefined}
@@ -57,14 +57,14 @@
 		{/each}
 	</ul>
 
-	<div class="flex justify-between items-center mt-8 mb-4">
-		<span class="font-bold px-4.5">{$i18n.networks.show_testnets}</span>
+	<div class="mb-4 mt-8 flex items-center justify-between">
+		<span class="px-4.5 font-bold">{$i18n.networks.show_testnets}</span>
 		<NetworksTestnetsToggle />
 	</div>
 
 	{#if $testnetsEnabled}
 		<ul
-			class="flex flex-col gap-4 list-none mb-2 font-normal"
+			class="mb-2 flex list-none flex-col gap-4 font-normal"
 			transition:slide={{ easing: quintOut, axis: 'y' }}
 		>
 			{#each $networksTestnets as network}
@@ -75,11 +75,11 @@
 		</ul>
 	{/if}
 
-	<hr class="bg-dark-blue opacity-10 my-4 w-10/12" style="border: 0.05rem solid" />
+	<hr class="my-4 w-10/12 bg-dark-blue opacity-10" style="border: 0.05rem solid" />
 
-	<ul class="flex flex-col gap-4 list-none font-normal">
-		<li class="flex justify-between items-center">
-			<div class="flex gap-2 items-center">
+	<ul class="flex list-none flex-col gap-4 font-normal">
+		<li class="flex items-center justify-between">
+			<div class="flex items-center gap-2">
 				<IconMorePlain />
 				<span class="text-grey">{$i18n.networks.more}</span>
 			</div>
