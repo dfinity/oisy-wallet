@@ -39,6 +39,7 @@ const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
 const buildOrchestratorInfo = async (orchestratorId) => {
 	const { managed_canisters } = await orchestratorInfo({ orchestratorId });
 
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a destructuring assignment
 	const mapManagedCanisters = (
 		acc,
 		{ ledger, index, ckerc20_token_symbol, erc20_contract: { address: erc20ContractAddress } }

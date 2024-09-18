@@ -18,6 +18,7 @@ export type I18nSubstitutions = { [from: string]: string };
  * @example
  * ("Why $1?", {$1: "World", Why: "Hello", "?": "!"}) => "Hello World!"
  */
+// eslint-disable-next-line local-rules/prefer-object-params -- This function is used a lot throughout the codebase, and it's easier/clearer to use it with separate arguments.
 export const replacePlaceholders = (text: string, substitutions: I18nSubstitutions): string => {
 	let result = text;
 	for (const [key, value] of Object.entries(substitutions)) {
