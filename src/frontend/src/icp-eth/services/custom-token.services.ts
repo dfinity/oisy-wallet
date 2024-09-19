@@ -19,12 +19,14 @@ const assertErc20SendTokenData = (sendToken: Erc20Token): AutoLoadTokenResult | 
 	}
 };
 
-// TODO: Remove ESLint exception and use object params
-// eslint-disable-next-line local-rules/prefer-object-params
-const findCustomToken = (
-	tokens: IcrcCustomToken[],
-	sendToken: Erc20Token
-): IcrcCustomToken | undefined => tokens.find(({ symbol }) => symbol === sendToken.twinTokenSymbol);
+const findCustomToken = ({
+	tokens,
+	sendToken
+}: {
+	tokens: IcrcCustomToken[];
+	sendToken: Erc20Token;
+}): IcrcCustomToken | undefined =>
+	tokens.find(({ symbol }) => symbol === sendToken.twinTokenSymbol);
 
 /**
  * When a user converts a ckERC20 token to an ERC20 twin token, the UI needs information about the counterpart token (ckERC20).
