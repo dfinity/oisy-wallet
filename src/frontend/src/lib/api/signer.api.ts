@@ -81,7 +81,6 @@ const signerCanister = async ({
 }: {
 	identity: OptionIdentity;
 }): Promise<SignerCanister> => {
-	// TODO: Delete this dependency once the signer has been stripped down.
 	assertNonNullish(identity);
 
 	if (isNullish(canister)) {
