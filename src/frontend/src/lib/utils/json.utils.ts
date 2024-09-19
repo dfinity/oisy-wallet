@@ -16,6 +16,8 @@ export const isPrincipal = (value: unknown): value is Principal =>
  * Transform bigint to string to avoid serialization error.
  * devMode transforms 123n -> "BigInt(123)"
  */
+// TODO: Remove ESLint exception and use object params
+// eslint-disable-next-line local-rules/prefer-object-params
 export const stringifyJson = (
 	value: unknown,
 	options?: {
