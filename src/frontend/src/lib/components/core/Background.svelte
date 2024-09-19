@@ -9,6 +9,6 @@
 	<Img
 		src={background}
 		alt={replaceOisyPlaceholders($i18n.core.alt.background)}
-		extraClass="min-w-[1280px] absolute left-1/2 top-0 transform -translate-x-1/2"
+		extraClass="min-w-[1280px] absolute left-1/2 top-0 transform -translate-x-1/2 sm:block hidden"
 	/>
 </div>
