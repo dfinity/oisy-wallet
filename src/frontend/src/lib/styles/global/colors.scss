@@ -24,11 +24,12 @@
 	--color-cetacean-blue: theme(colors.cetacean-blue);
 	--color-brilliant-azure: theme(colors.brilliant-azure);
 	--color-blue-ribbon: theme(colors.blue-ribbon);
+	--color-blue-ribbon-rgb: theme(colors.blue-ribbon-rgb);
 
 	// Brand
 	--color-wallet-connect: #3b99fc;
 
 	// Theme
 	--color-primary: var(--color-blue-ribbon);
-	--color-primary-rgb: 0, 102, 255;
+	--color-primary-rgb: var(--color-blue-ribbon-rgb);
 }
