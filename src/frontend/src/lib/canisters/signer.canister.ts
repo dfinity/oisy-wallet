@@ -5,12 +5,15 @@ import type {
 } from '$declarations/signer/signer.did';
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
+import { getAgent } from '$lib/actors/agents.ic';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
+import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { Canister, createServices, type CanisterOptions } from '@dfinity/utils';
 
-interface SignerCanisterOptions<T> extends Omit<CanisterOptions<T>, 'canisterId'> {
+interface SignerCanisterOptions<T> extends Omit<CanisterOptions<T>, 'canisterId' | 'agent'> {
 	canisterId: Principal;
+	identity: Identity;
 }
 
 type SignerCanisterFunctionParams<T = Record<string, never>> = T & {
@@ -18,9 +21,14 @@ type SignerCanisterFunctionParams<T = Record<string, never>> = T & {
 };
 
 export class SignerCanister extends Canister<SignerService> {
-	static create(options: SignerCanisterOptions<SignerService>) {
+	static async create({ identity, ...options }: SignerCanisterOptions<SignerService>) {
+		const agent = await getAgent({ identity });
+
 		const { service, certifiedService, canisterId } = createServices<SignerService>({
-			options,
+			options: {
+				...options,
+				agent
+			},
 			idlFactory: idlFactorySigner,
 			certifiedIdlFactory: idlCertifiedFactorySigner
 		});

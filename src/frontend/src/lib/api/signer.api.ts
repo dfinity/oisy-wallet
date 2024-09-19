@@ -1,5 +1,4 @@
 import type { BitcoinNetwork, SignRequest } from '$declarations/signer/signer.did';
-import { getAgent } from '$lib/actors/agents.ic';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
@@ -84,10 +83,8 @@ const signerCanister = async ({
 	assertNonNullish(identity);
 
 	if (isNullish(canister)) {
-		const agent = await getAgent({ identity });
-
-		canister = SignerCanister.create({
-			agent,
+		canister = await SignerCanister.create({
+			identity,
 			canisterId: Principal.fromText(SIGNER_CANISTER_ID)
 		});
 	}
