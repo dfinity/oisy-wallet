@@ -29,7 +29,10 @@
 		// We can convert to ETH - i.e. we can convert to Ethereum or Sepolia, not an ERC20 token
 		isNotSupportedEthTokenId(nativeTokenId) ||
 		isNullish(
-			toCkEthHelperContractAddress($ckEthMinterInfoStore?.[nativeTokenId], nativeNetworkId)
+			toCkEthHelperContractAddress({
+				minterInfo: $ckEthMinterInfoStore?.[nativeTokenId],
+				networkId: nativeNetworkId
+			})
 		) ||
 		($networkICP && isNullish($ckEthMinterInfoStore?.[nativeTokenId]));
 
