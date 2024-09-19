@@ -21,6 +21,7 @@
 	usdTotal={route === 'tokens'}
 	summary={route === 'transactions'}
 	actions={route !== 'settings'}
+	back={route === 'transactions'}
 />
 
 <main class="pt-12">

@@ -18,6 +18,7 @@
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
+	export let back = false;
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
@@ -28,7 +29,9 @@
 		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
 		class="flex flex-row items-start justify-between w-full mt-6 md:mt-12"
 	>
-		<Back />
+		{#if back}
+			<Back />
+		{/if}
 
 		<div>
 			<div class="icon flex justify-center items-center mb-0.5 pt-2">
