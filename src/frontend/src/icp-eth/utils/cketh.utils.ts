@@ -23,12 +23,13 @@ export const toCkErc20HelperContractAddress = (
 const toCkMinterAddress = (minterInfo: OptionCertifiedMinterInfo): OptionEthAddress =>
 	fromNullable(minterInfo?.data.minter_address ?? []);
 
-// TODO: Remove ESLint exception and use object params
-// eslint-disable-next-line local-rules/prefer-object-params
-export const toCkMinterInfoAddresses = (
-	minterInfo: OptionCertifiedMinterInfo,
-	networkId: NetworkId
-): OptionEthAddress[] =>
+export const toCkMinterInfoAddresses = ({
+	minterInfo,
+	networkId
+}: {
+	minterInfo: OptionCertifiedMinterInfo;
+	networkId: NetworkId;
+}): OptionEthAddress[] =>
 	nonNullish(minterInfo)
 		? [
 				toCkEthHelperContractAddress(minterInfo, networkId),
