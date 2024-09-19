@@ -19,7 +19,7 @@ describe('decodeUrn', () => {
 
 	tokenList.forEach((token) => {
 		it(`should decode a basic URN for the token ${token.name}`, () => {
-			const urn = generateUrn(token, destination, { amount });
+			const urn = generateUrn({ token, destination, params: { amount } });
 			assertNonNullish(urn);
 
 			const result = decodeQrCodeUrn(urn);
