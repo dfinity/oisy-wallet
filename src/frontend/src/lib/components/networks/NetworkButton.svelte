@@ -34,7 +34,7 @@
 		{name}
 		{icon}
 		logo="start"
-		description={nonNullish(usdBalance) ? formatUSD(usdBalance) : undefined}
+		description={nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : undefined}
 	/>
 
 	{#if id === $networkId}
