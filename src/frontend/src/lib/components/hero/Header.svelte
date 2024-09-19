@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
 	import Back from '$lib/components/core/Back.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
@@ -9,10 +8,8 @@
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
-	import { isRouteSettings } from '$lib/utils/nav.utils';
 
-	let back = false;
-	$: back = isRouteSettings($page);
+	export let back = false;
 </script>
 
 <header

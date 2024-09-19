@@ -8,7 +8,8 @@
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
-	export let back = false;
+	export let headerBack = false;
+	export let heroBack = false;
 
 	// We only want to display the "Sign-in" call to action on pages that actually are displaying any content in the Hero pane.
 	let heroContent = true;
@@ -16,7 +17,7 @@
 </script>
 
 <div class={`pb-4 md:pb-6`}>
-	<Header />
+	<Header back={headerBack} />
 
 	<article
 		class="flex flex-col rounded-lg pt-1 sm:pt-3 px-8 relative main 2xl:mt-[-70px] items-center"
@@ -25,7 +26,7 @@
 		<Alpha />
 
 		{#if $authSignedIn}
-			<HeroContent {usdTotal} {summary} {actions} {back} />
+			<HeroContent {usdTotal} {summary} {actions} back={heroBack} />
 		{:else if heroContent}
 			<HeroSignIn />
 		{/if}
