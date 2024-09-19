@@ -52,7 +52,7 @@
 		{#if nonNullish(hash)}
 			<Value ref="hash">
 				<svelte:fragment slot="label">{$i18n.transaction.text.hash}</svelte:fragment>
-				<output>{shortenWithMiddleEllipsis(hash)}</output><Copy
+				<output>{shortenWithMiddleEllipsis({ text: hash })}</output><Copy
 					value={hash}
 					text={replacePlaceholders($i18n.transaction.text.hash_copied, {
 						$hash: hash
