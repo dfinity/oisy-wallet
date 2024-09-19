@@ -35,10 +35,10 @@
 		if (
 			isDestinationContractAddress({
 				destination,
-				contractAddress: toCkEthHelperContractAddress(
-					$ckEthMinterInfoStore?.[$sendTokenId],
-					sourceNetwork.id
-				)
+				contractAddress: toCkEthHelperContractAddress({
+					minterInfo: $ckEthMinterInfoStore?.[$sendTokenId],
+					networkId: sourceNetwork.id
+				})
 			})
 		) {
 			networkName = ICP_NETWORK.name;

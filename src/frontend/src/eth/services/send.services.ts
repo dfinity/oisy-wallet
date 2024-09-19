@@ -322,7 +322,10 @@ const sendTransaction = async ({
 		return encodePrincipalToEthAddress(identity.getPrincipal());
 	};
 
-	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo, sourceNetwork.id);
+	const ckEthHelperContractAddress = toCkEthHelperContractAddress({
+		minterInfo,
+		networkId: sourceNetwork.id
+	});
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
 	const transferStandard: 'ethereum' | 'erc20' = isSupportedEthTokenId(token.id)

@@ -5,13 +5,14 @@ import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { fromNullable, nonNullish } from '@dfinity/utils';
 
-// TODO: Remove ESLint exception and use object params
-// eslint-disable-next-line local-rules/prefer-object-params
-export const toCkEthHelperContractAddress = (
-	minterInfo: OptionCertifiedMinterInfo,
+export const toCkEthHelperContractAddress = ({
+	minterInfo,
+	networkId
+}: {
+	minterInfo: OptionCertifiedMinterInfo;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
-	networkId: NetworkId
-): OptionEthAddress =>
+	networkId: NetworkId;
+}): OptionEthAddress =>
 	fromNullable(minterInfo?.data.eth_helper_contract_address ?? []) ??
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	(networkId === ETHEREUM_NETWORK_ID ? CKETH_HELPER_CONTRACT_ADDRESS_MAINNET : undefined);
@@ -32,7 +33,7 @@ export const toCkMinterInfoAddresses = ({
 }): OptionEthAddress[] =>
 	nonNullish(minterInfo)
 		? [
-				toCkEthHelperContractAddress(minterInfo, networkId),
+				toCkEthHelperContractAddress({ minterInfo, networkId }),
 				toCkErc20HelperContractAddress(minterInfo),
 				toCkMinterAddress(minterInfo)
 			].map((address) => address?.toLowerCase())

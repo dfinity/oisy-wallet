@@ -121,10 +121,10 @@
 	$: toContractAddress =
 		$ckEthereumTwinTokenStandard === 'erc20'
 			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
-			: (toCkEthHelperContractAddress(
-					$ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					$ckEthereumNativeToken.network.id
-				) ?? '');
+			: (toCkEthHelperContractAddress({
+					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
+					networkId: $ckEthereumNativeToken.network.id
+				}) ?? '');
 
 	$: (async () =>
 		init({ toAddress: toContractAddress, networkId: $ckEthereumTwinToken?.network.id }))();
