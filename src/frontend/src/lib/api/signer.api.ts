@@ -1,12 +1,13 @@
 import type { BitcoinNetwork, SignRequest } from '$declarations/signer/signer.did';
-import { getSignerActor } from '$lib/actors/actors.ic';
 import { getAgent } from '$lib/actors/agents.ic';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
-import type { EthAddress } from '$lib/types/address';
+import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
+
+let canister: SignerCanister | undefined = undefined;
 
 export const getBtcAddress = async ({
 	identity,
@@ -14,14 +15,29 @@ export const getBtcAddress = async ({
 }: {
 	identity: OptionIdentity;
 	network: BitcoinNetwork;
-}): Promise<EthAddress> => {
-	const { caller_btc_address } = await getSignerActor({ identity });
-	return caller_btc_address(network);
+}): Promise<BtcAddress> => {
+	const { getBtcAddress } = await signerCanister({ identity });
+
+	return getBtcAddress({ network });
+};
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const updateBtcBalance = async ({
+	identity,
+	network
+}: {
+	identity: OptionIdentity;
+	network: BitcoinNetwork;
+}): Promise<bigint> => {
+	const { updateBtcBalance } = await signerCanister({ identity });
+
+	return updateBtcBalance({ network });
 };
 
 export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
-	const { caller_eth_address } = await getSignerActor({ identity });
-	return caller_eth_address();
+	const { getEthAddress } = await signerCanister({ identity });
+
+	return getEthAddress({});
 };
 
 export const signTransaction = async ({
@@ -31,8 +47,9 @@ export const signTransaction = async ({
 	transaction: SignRequest;
 	identity: OptionIdentity;
 }): Promise<string> => {
-	const { sign_transaction } = await getSignerActor({ identity });
-	return sign_transaction(transaction);
+	const { signTransaction } = await signerCanister({ identity });
+
+	return signTransaction({ transaction });
 };
 
 export const signMessage = async ({
@@ -42,8 +59,9 @@ export const signMessage = async ({
 	message: string;
 	identity: OptionIdentity;
 }): Promise<string> => {
-	const { personal_sign } = await getSignerActor({ identity });
-	return personal_sign(message);
+	const { personalSign } = await signerCanister({ identity });
+
+	return personalSign({ message });
 };
 
 export const signPrehash = async ({
@@ -53,17 +71,27 @@ export const signPrehash = async ({
 	hash: string;
 	identity: OptionIdentity;
 }): Promise<string> => {
-	const { sign_prehash } = await getSignerActor({ identity });
-	return sign_prehash(hash);
+	const { signPrehash } = await signerCanister({ identity });
+
+	return signPrehash({ hash });
 };
 
-// TODO: implement updateBtcBalance method
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const signerCanister = async ({ identity }: { identity: Identity }): Promise<SignerCanister> => {
-	const agent = await getAgent({ identity });
+const signerCanister = async ({
+	identity
+}: {
+	identity: OptionIdentity;
+}): Promise<SignerCanister> => {
+	// TODO: Delete this dependency once the signer has been stripped down.
+	assertNonNullish(identity);
 
-	return SignerCanister.create({
-		agent,
-		canisterId: Principal.fromText(SIGNER_CANISTER_ID)
-	});
+	if (isNullish(canister)) {
+		const agent = await getAgent({ identity });
+
+		canister = SignerCanister.create({
+			agent,
+			canisterId: Principal.fromText(SIGNER_CANISTER_ID)
+		});
+	}
+
+	return canister;
 };
