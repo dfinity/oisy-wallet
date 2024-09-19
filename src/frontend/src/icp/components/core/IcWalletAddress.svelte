@@ -11,7 +11,7 @@
 	>
 
 	<output id="ic-wallet-address" class="break-all"
-		>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
+		>{shortenWithMiddleEllipsis({ text: $icrcAccountIdentifierText ?? '' })}</output
 	><Copy
 		color="inherit"
 		inline

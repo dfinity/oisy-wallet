@@ -52,7 +52,9 @@
 		><span class="font-bold">{$i18n.settings.text.principal}:</span></svelte:fragment
 	>
 	<svelte:fragment slot="value"
-		><output class="break-all">{shortenWithMiddleEllipsis(principal?.toText() ?? '')}</output><Copy
+		><output class="break-all"
+			>{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}</output
+		><Copy
 			inline
 			value={principal?.toText() ?? ''}
 			text={$i18n.settings.text.principal_copied}
