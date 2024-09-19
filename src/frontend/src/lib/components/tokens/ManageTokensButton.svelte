@@ -10,7 +10,7 @@
 </script>
 
 <button
-	class="  mx-auto mt-12 mb-4 font-bold"
+	class="tertiary mx-auto mt-12 mb-4"
 	class:text-grey={disabled}
 	class:text-blue={!disabled}
 	class:hover:text-dark-blue={!disabled}
