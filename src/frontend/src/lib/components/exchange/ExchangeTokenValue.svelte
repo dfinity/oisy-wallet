@@ -10,9 +10,9 @@
 <TokenExchangeValueSkeleton {token}>
 	<output class="break-all">
 		{#if nonNullish(token.balance) && nonNullish(token.usdBalance)}
-			{formatUSD(token.usdBalance)}
+			{formatUSD({ value: token.usdBalance })}
 		{:else}
-			{formatUSD(0, { minFraction: 0, maxFraction: 0 }).replace('0', '-')}
+			{formatUSD({ value: 0, options: { minFraction: 0, maxFraction: 0 } }).replace('0', '-')}
 		{/if}
 	</output>
 </TokenExchangeValueSkeleton>
