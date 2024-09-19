@@ -12,7 +12,7 @@
 	$: twinToken = ($token as OptionIcCkToken)?.twinToken;
 </script>
 
-{replacePlaceholders(resolveText($i18n, label) ?? fallback, {
+{replacePlaceholders(resolveText({ i18n: $i18n, path: label }) ?? fallback, {
 	$twinToken: twinToken?.symbol ?? '',
 	$twinNetwork: twinToken?.network.name ?? ''
 })}

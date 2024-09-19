@@ -19,6 +19,8 @@ const assertErc20SendTokenData = (sendToken: Erc20Token): AutoLoadTokenResult | 
 	}
 };
 
+// TODO: Remove ESLint exception and use object params
+// eslint-disable-next-line local-rules/prefer-object-params
 const findCustomToken = (
 	tokens: IcrcCustomToken[],
 	sendToken: Erc20Token

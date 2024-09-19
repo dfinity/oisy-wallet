@@ -92,6 +92,7 @@ const mapOptionalToken = (response: IcrcTokenMetadataResponse): IcrcTokenMetadat
 	return nullishToken as IcrcTokenMetadata;
 };
 
+// eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
 export const sortIcTokens = (
 	{ name: nameA, position: positionA, exchangeCoinId: exchangeCoinIdA }: IcToken,
 	{ name: nameB, position: positionB, exchangeCoinId: exchangeCoinIdB }: IcToken
