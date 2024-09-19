@@ -19,7 +19,8 @@
 			"test_banner": "For testing purposes only!"
 		},
 		"alt": {
-			"logo": "$name logo"
+			"logo": "$name logo",
+			"background": "$oisy_name background"
 		}
 	},
 	"navigation": {
