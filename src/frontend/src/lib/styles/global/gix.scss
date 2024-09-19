@@ -20,9 +20,9 @@
 
 	--animation-time-normal: 0.2s;
 
-	--progress-color: var(--color-medium-purple);
+	--progress-color: var(--color-primary);
 	--progress-color-contrast: var(--color-white);
-	--progress-color-rgb: 137, 105, 213;
+	--progress-color-rgb: var(--color-primary-rgb);
 
 	--overlay-background: var(--color-white);
 	--overlay-background-contrast: var(--color-dark);
