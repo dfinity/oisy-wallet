@@ -5,6 +5,8 @@ import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { fromNullable, nonNullish } from '@dfinity/utils';
 
+// TODO: Remove ESLint exception and use object params
+// eslint-disable-next-line local-rules/prefer-object-params
 export const toCkEthHelperContractAddress = (
 	minterInfo: OptionCertifiedMinterInfo,
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
@@ -21,6 +23,8 @@ export const toCkErc20HelperContractAddress = (
 const toCkMinterAddress = (minterInfo: OptionCertifiedMinterInfo): OptionEthAddress =>
 	fromNullable(minterInfo?.data.minter_address ?? []);
 
+// TODO: Remove ESLint exception and use object params
+// eslint-disable-next-line local-rules/prefer-object-params
 export const toCkMinterInfoAddresses = (
 	minterInfo: OptionCertifiedMinterInfo,
 	networkId: NetworkId

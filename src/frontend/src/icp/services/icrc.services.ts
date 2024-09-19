@@ -131,6 +131,7 @@ const loadCustomIcrcTokensData = async ({
 }): Promise<IcrcCustomTokenWithoutId[]> => {
 	const indexedIcrcCustomTokens = buildIndexedIcrcCustomTokens();
 
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
 		token: CustomToken,
 		index: number
