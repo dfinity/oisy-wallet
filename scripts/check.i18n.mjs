@@ -8,6 +8,8 @@ const PATH_FROM_ROOT = join(process.cwd(), 'src', 'frontend', 'src');
 const PATH_TO_EN_JSON = join(PATH_FROM_ROOT, 'lib', 'i18n', 'en.json');
 const PATH_TO_CODEBASE = join(PATH_FROM_ROOT);
 
+// TODO: Remove ESLint exception and use object params
+// eslint-disable-next-line local-rules/prefer-object-params
 const extractKeys = (obj, prefix = '') =>
 	Object.keys(obj).reduce((res, el) => {
 		if (typeof obj[el] === 'object') {
