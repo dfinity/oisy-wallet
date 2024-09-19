@@ -125,7 +125,7 @@
 	},
 	"hero": {
 		"text": {
-			"use_with_caution": "Learn more about this alpha version. Use with caution.",
+			"use_with_caution": "This is alpha version. Use with caution.",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},

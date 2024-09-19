@@ -16,6 +16,9 @@
 
 <style lang="scss">
 	a {
-		color: var(--alpha-color, var(--color-misty-rose));
+		color: var(--alpha-color, var(--color-american-orange));
+		background-color: var(--alpha-bg-color, var(--color-cornsilk));
+		border: 1px solid var(--alpha-border-color, var(--color-crayola-yellow));
+		border-radius: 8px;
 	}
 </style>
