@@ -20,12 +20,13 @@ const assertIcrcSendTokenData = (sendToken: IcCkToken): AutoLoadTokenResult | un
 	}
 };
 
-// TODO: Remove ESLint exception and use object params
-// eslint-disable-next-line local-rules/prefer-object-params
-const findUserToken = (
-	tokens: Erc20UserToken[],
-	sendToken: IcCkToken
-): Erc20UserToken | undefined =>
+const findUserToken = ({
+	tokens,
+	sendToken
+}: {
+	tokens: Erc20UserToken[];
+	sendToken: IcCkToken;
+}): Erc20UserToken | undefined =>
 	tokens.find(
 		({ address }) =>
 			address.toLowerCase() === (sendToken.twinToken as Erc20Token).address.toLowerCase()

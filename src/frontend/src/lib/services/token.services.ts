@@ -30,7 +30,7 @@ interface AutoLoadTokenParams<
 	identity: OptionIdentity;
 	expectedSendTokenStandard: TokenStandard;
 	assertSendTokenData: (sendToken: K) => AutoLoadTokenResult | undefined;
-	findToken: (tokens: T[], sendToken: K) => T | undefined;
+	findToken: (params: { tokens: T[]; sendToken: K }) => T | undefined;
 	setToken: (params: { identity: Identity; token: T; enabled: boolean }) => Promise<void>;
 	loadTokens: (params: { identity: OptionIdentity }) => Promise<void>;
 	errorMessage: string;
@@ -81,7 +81,7 @@ export const autoLoadToken = async <
 		return { result: resultAssertData };
 	}
 
-	const counterpartToken = findToken(tokens, sendToken);
+	const counterpartToken = findToken({ tokens, sendToken });
 
 	if (isNullish(counterpartToken)) {
 		return { result: 'skipped' };
