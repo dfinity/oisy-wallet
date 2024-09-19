@@ -4,6 +4,6 @@
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 </script>
 
-<LoaderWallets tokens={$enabledIcTokens} {initWalletWorker} />
-
-<slot />
+<LoaderWallets tokens={$enabledIcTokens} {initWalletWorker}>
+	<slot />
+</LoaderWallets>

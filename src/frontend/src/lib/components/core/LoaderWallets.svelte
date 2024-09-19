@@ -34,3 +34,5 @@
 </script>
 
 <svelte:window on:oisyTriggerWallet={triggerTimer} />
+
+<slot />
