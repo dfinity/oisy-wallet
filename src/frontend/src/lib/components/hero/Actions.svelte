@@ -12,7 +12,6 @@
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import Buy from '$lib/components/buy/Buy.svelte';
-	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
@@ -22,8 +21,6 @@
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
-
-	export let more = false;
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -75,10 +72,6 @@
 
 		{#if ONRAMPER_ENABLED}
 			<Buy />
-		{/if}
-
-		{#if more}
-			<ContextMenu />
 		{/if}
 	</HeroButtonGroup>
 </div>

@@ -16,13 +16,16 @@ export const isPrincipal = (value: unknown): value is Principal =>
  * Transform bigint to string to avoid serialization error.
  * devMode transforms 123n -> "BigInt(123)"
  */
-export const stringifyJson = (
-	value: unknown,
+export const stringifyJson = ({
+	value,
+	options
+}: {
+	value: unknown;
 	options?: {
 		indentation?: number;
 		devMode?: boolean;
-	}
-): string =>
+	};
+}): string =>
 	JSON.stringify(
 		value,
 		(_, value) => {
