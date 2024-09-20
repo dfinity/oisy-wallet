@@ -6,8 +6,6 @@ export const LOGIN_BUTTON = 'login-button';
 
 export const TOKEN_CARD = 'token-card';
 
-export const HERO_ANIMATION_CANVAS = 'hero-animation-canvas';
-
 export const ABOUT_WHAT_MODAL_OPEN_BUTTON = 'about-what-modal-open-button';
 export const ABOUT_WHAT_MODAL = 'about-what-modal';
 

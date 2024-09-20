@@ -1,5 +1,4 @@
 import {
-	HERO_ANIMATION_CANVAS,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
 	NAVIGATION_MENU,
@@ -133,7 +132,6 @@ abstract class Homepage {
 
 		await this.goto();
 		await this.waitForLoginButton();
-		await this.hideSelector({ selector: `[data-tid="${HERO_ANIMATION_CANVAS}"]` });
 	}
 
 	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {

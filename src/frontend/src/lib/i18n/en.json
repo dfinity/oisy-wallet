@@ -19,7 +19,8 @@
 			"test_banner": "For testing purposes only!"
 		},
 		"alt": {
-			"logo": "$name logo"
+			"logo": "$name logo",
+			"background": "Background image of $oisy_name with gradient logo"
 		}
 	},
 	"navigation": {
@@ -39,7 +40,8 @@
 	},
 	"auth": {
 		"text": {
-			"title": "100% on-chain wallet for full decentralization",
+			"title_part_1": "A wallet that lives on-chain for",
+			"title_part_2": "100% decentralization",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
@@ -124,9 +126,8 @@
 	},
 	"hero": {
 		"text": {
-			"use_with_caution": "Learn more about this alpha version. Use with caution.",
-			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
-			"never_download": "Never download an app"
+			"use_with_caution": "This is an alpha version. Use with caution.",
+			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
 	"settings": {

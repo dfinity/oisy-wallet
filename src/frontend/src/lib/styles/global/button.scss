@@ -1,4 +1,5 @@
 @use '../mixins/media';
+@use '../mixins/button';
 
 button {
 	display: flex;
@@ -23,7 +24,8 @@ button {
 	--button-padding: var(--padding) var(--padding-3x);
 
 	&.primary,
-	&.secondary {
+	&.secondary,
+	&.tertiary {
 		justify-content: flex-start;
 
 		padding: var(--button-padding);
@@ -35,7 +37,8 @@ button {
 	}
 
 	&.primary,
-	&.secondary {
+	&.secondary,
+	&.tertiary {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
@@ -60,6 +63,11 @@ button {
 		color: var(--color-white);
 	}
 
+	&.tertiary {
+		background: var(--color-alice-blue);
+		color: var(--color-primary);
+	}
+
 	&.hero {
 		justify-content: center;
 
@@ -72,7 +80,8 @@ button {
 	}
 
 	&.primary,
-	&.secondary {
+	&.secondary,
+	&.tertiary {
 		&.full {
 			width: 100%;
 		}
@@ -96,8 +105,7 @@ button {
 		padding: var(--button-padding);
 	}
 
-	&.wallet-connect,
-	&.about {
+	&.wallet-connect {
 		&.icon {
 			padding: 0;
 			border-radius: 50%;
@@ -129,41 +137,7 @@ button {
 		}
 	}
 
-	&.about {
-		background: rgba(0, 0, 0, 0.3);
-		border: 1px solid rgba(255, 255, 255, 0.3);
-	}
-
-	&.authenticate {
-		position: relative;
-		z-index: 0;
-	}
-
-	&.authenticate::before {
-		border-radius: 9999px;
-		position: absolute;
-		content: '';
-		top: 0;
-		right: 0;
-		bottom: 0;
-		left: 0;
-		z-index: -1;
-		background: radial-gradient(
-			49.28% 49.28% at 50% 100%,
-			var(--color-turquoise) 0%,
-			var(--color-crayola-blue) 100%
-		);
-		opacity: 0.6;
-		box-shadow:
-			0 2px 8px 0 rgba(255, 255, 255, var(--box-shadow-opacity, 0.35)) inset,
-			0 4px 16px 0 rgba(0, 0, 0, 0.25);
-		transition:
-			opacity 0.5s ease-in-out,
-			box-shadow 0.5s ease-in-out;
-	}
-
-	&.authenticate:hover::before {
-		opacity: 1;
-		--box-shadow-opacity: 0.75;
+	&.icon {
+		@include button.icon;
 	}
 }
