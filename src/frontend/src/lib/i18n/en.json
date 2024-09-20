@@ -20,7 +20,7 @@
 		},
 		"alt": {
 			"logo": "$name logo",
-			"background": "$oisy_name background"
+			"background": "Background image of $oisy_name with gradient logo"
 		}
 	},
 	"navigation": {
