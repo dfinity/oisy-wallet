@@ -23,43 +23,59 @@ describe('signer.canister', () => {
 			...services
 		});
 	const service = mock<ActorSubclass<SignerService>>();
+	const mockResponseError = new Error('Test response error');
+	const btcParams = {
+		network: { mainnet: null }
+	};
+	const signTransactionParams = {
+		transaction: {
+			to: 'to',
+			gas: 1n,
+			value: 2n,
+			max_priority_fee_per_gas: 1n,
+			data: [],
+			max_fee_per_gas: 5n,
+			chain_id: 10n,
+			nonce: 10n
+		} as SignRequest
+	};
+	const personalSignParams = {
+		message: 'message'
+	};
+	const signPrehashParams = {
+		hash: 'hash'
+	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it('returns correct BTC balance', async () => {
-		const response = 2n;
-		const params = {
-			network: { mainnet: null }
-		};
-		service.caller_btc_balance.mockResolvedValue(response);
-
-		const { updateBtcBalance } = await createSignerCanister({
-			serviceOverride: service
-		});
-
-		const res = await updateBtcBalance({ ...params, certified: false });
-
-		expect(res).toEqual(response);
-		expect(service.caller_btc_balance).toHaveBeenCalledWith(params.network);
-	});
-
 	it('returns correct BTC address', async () => {
 		const response = 'test-bitcoin-address';
-		const params = {
-			network: { mainnet: null }
-		};
 		service.caller_btc_address.mockResolvedValue(response);
 
 		const { getBtcAddress } = await createSignerCanister({
 			serviceOverride: service
 		});
 
-		const res = await getBtcAddress({ ...params, certified: false });
+		const res = await getBtcAddress({ ...btcParams, certified: false });
 
 		expect(res).toEqual(response);
-		expect(service.caller_btc_address).toHaveBeenCalledWith(params.network);
+		expect(service.caller_btc_address).toHaveBeenCalledWith(btcParams.network);
+	});
+
+	it('should throw an error if caller_btc_address throws', async () => {
+		service.caller_btc_address.mockImplementation(async () => {
+			throw mockResponseError;
+		});
+
+		const { getBtcAddress } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = getBtcAddress({ ...btcParams, certified: false });
+
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('returns correct ETH address', async () => {
@@ -75,63 +91,101 @@ describe('signer.canister', () => {
 		expect(res).toEqual(response);
 	});
 
+	it('should throw an error if caller_eth_address throws', async () => {
+		service.caller_eth_address.mockImplementation(async () => {
+			throw mockResponseError;
+		});
+
+		const { getEthAddress } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = getEthAddress({ certified: false });
+
+		await expect(res).rejects.toThrow(mockResponseError);
+	});
+
 	it('signs transaction', async () => {
 		const response = 'signed-transaction';
-		const params = {
-			transaction: {
-				to: 'to',
-				gas: 1n,
-				value: 2n,
-				max_priority_fee_per_gas: 1n,
-				data: [],
-				max_fee_per_gas: 5n,
-				chain_id: 10n,
-				nonce: 10n
-			} as SignRequest
-		};
 		service.sign_transaction.mockResolvedValue(response);
 
 		const { signTransaction } = await createSignerCanister({
 			serviceOverride: service
 		});
 
-		const res = await signTransaction({ ...params, certified: false });
+		const res = await signTransaction({ ...signTransactionParams, certified: false });
 
 		expect(res).toEqual(response);
-		expect(service.sign_transaction).toHaveBeenCalledWith(params.transaction);
+		expect(service.sign_transaction).toHaveBeenCalledWith(signTransactionParams.transaction);
+	});
+
+	it('should throw an error if sign_transaction throws', async () => {
+		service.sign_transaction.mockImplementation(async () => {
+			throw mockResponseError;
+		});
+
+		const { signTransaction } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = signTransaction({ ...signTransactionParams, certified: false });
+
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('calls personal sign', async () => {
 		const response = 'personal-sign';
-		const params = {
-			message: 'message'
-		};
 		service.personal_sign.mockResolvedValue(response);
 
 		const { personalSign } = await createSignerCanister({
 			serviceOverride: service
 		});
 
-		const res = await personalSign({ ...params, certified: false });
+		const res = await personalSign({ ...personalSignParams, certified: false });
 
 		expect(res).toEqual(response);
-		expect(service.personal_sign).toHaveBeenCalledWith(params.message);
+		expect(service.personal_sign).toHaveBeenCalledWith(personalSignParams.message);
+	});
+
+	it('should throw an error if personal_sign throws', async () => {
+		service.personal_sign.mockImplementation(async () => {
+			throw mockResponseError;
+		});
+
+		const { personalSign } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = personalSign({ ...personalSignParams, certified: false });
+
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('signs prehash', async () => {
 		const response = 'personal-sign';
-		const params = {
-			hash: 'hash'
-		};
 		service.sign_prehash.mockResolvedValue(response);
 
 		const { signPrehash } = await createSignerCanister({
 			serviceOverride: service
 		});
 
-		const res = await signPrehash({ ...params, certified: false });
+		const res = await signPrehash({ ...signPrehashParams, certified: false });
 
 		expect(res).toEqual(response);
-		expect(service.sign_prehash).toHaveBeenCalledWith(params.hash);
+		expect(service.sign_prehash).toHaveBeenCalledWith(signPrehashParams.hash);
+	});
+
+	it('should throw an error if sign_prehash throws', async () => {
+		service.sign_prehash.mockImplementation(async () => {
+			throw mockResponseError;
+		});
+
+		const { signPrehash } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = signPrehash({ ...signPrehashParams, certified: false });
+
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 });

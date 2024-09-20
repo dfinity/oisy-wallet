@@ -20,19 +20,6 @@ export const getBtcAddress = async ({
 	return getBtcAddress({ network });
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const updateBtcBalance = async ({
-	identity,
-	network
-}: {
-	identity: OptionIdentity;
-	network: BitcoinNetwork;
-}): Promise<bigint> => {
-	const { updateBtcBalance } = await signerCanister({ identity });
-
-	return updateBtcBalance({ network });
-};
-
 export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
 	const { getEthAddress } = await signerCanister({ identity });
 
