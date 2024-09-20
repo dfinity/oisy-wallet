@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Back from '$lib/components/core/Back.svelte';
@@ -10,10 +9,8 @@
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
-	import { isSubRoute } from '$lib/utils/nav.utils';
 
-	let back = false;
-	$: back = isSubRoute($page);
+	export let back = false;
 </script>
 
 <header
