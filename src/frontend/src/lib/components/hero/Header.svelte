@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
+	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Back from '$lib/components/core/Back.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
 	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
@@ -26,6 +27,12 @@
 			<OisyWalletLogo />
 		</div>
 	{/if}
+
+	<div
+		class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center"
+	>
+		<Alpha />
+	</div>
 
 	<div class="flex m-4 gap-4 pointer-events-auto ml-auto">
 		{#if $authSignedIn}
