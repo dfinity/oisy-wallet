@@ -3,7 +3,7 @@
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconMenu from '$lib/components/icons/IconMenu.svelte';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -19,13 +19,14 @@
 </div>
 
 <div class="flex md:hidden">
-	<ButtonHero
+	<ButtonIcon
 		bind:button
 		on:click={() => (visible = !visible)}
 		ariaLabel={replaceOisyPlaceholders($i18n.about.text.title)}
 	>
 		<IconMenu slot="icon" />
-	</ButtonHero>
+		{replaceOisyPlaceholders($i18n.about.text.title)}
+	</ButtonIcon>
 
 	<Popover bind:visible anchor={button} direction="rtl">
 		<ul class="flex flex-col gap-4 list-none">
