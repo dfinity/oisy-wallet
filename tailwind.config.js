@@ -35,7 +35,11 @@ export default {
 			platinum: '#e4e4e4',
 			'mountain-meadow': '#30af91',
 			'dodger-blue': '#1e90ff',
-			turquoise: '#59e7d6'
+			turquoise: '#59e7d6',
+			'alice-blue': '#ecf3fb',
+			'american-orange': '#ff8a00',
+			'crayola-yellow': '#ffe57f',
+			cornsilk: '#fff7d8'
 		}
 	},
 	plugins: []

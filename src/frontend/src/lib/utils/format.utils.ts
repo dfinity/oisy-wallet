@@ -34,9 +34,13 @@ export const formatToken = ({
  * @param splitLength An optional length for the split. e.g. 12345678 becomes, if splitLength = 2, 12...78
  * @returns text
  */
-// TODO: Remove ESLint exception and use object params
-// eslint-disable-next-line local-rules/prefer-object-params
-export const shortenWithMiddleEllipsis = (text: string, splitLength = 7): string => {
+export const shortenWithMiddleEllipsis = ({
+	text,
+	splitLength = 7
+}: {
+	text: string;
+	splitLength?: number;
+}): string => {
 	// Original min length was 16 to extract 7 split
 	const minLength = splitLength * 2 + 2;
 	return text.length > minLength
@@ -63,17 +67,18 @@ export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
 
-// TODO: Remove ESLint exception and use object params
-// eslint-disable-next-line local-rules/prefer-object-params
-export const formatUSD = (
-	value: number,
+export const formatUSD = ({
+	value,
+	options
+}: {
+	value: number;
 	options?: {
 		minFraction?: number;
 		maxFraction?: number;
 		maximumSignificantDigits?: number;
 		symbol?: boolean;
-	}
-): string => {
+	};
+}): string => {
 	const {
 		minFraction = 2,
 		maxFraction = 2,

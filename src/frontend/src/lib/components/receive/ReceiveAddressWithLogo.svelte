@@ -42,7 +42,7 @@
 							<span class="mt-2 w-full max-w-[150px]"><SkeletonText /></span>
 						{:else}
 							<span class="break-all" data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}>
-								{shortenWithMiddleEllipsis(address)}
+								{shortenWithMiddleEllipsis({ text: address })}
 							</span>
 						{/if}
 					</svelte:fragment>
