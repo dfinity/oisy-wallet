@@ -29,7 +29,7 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
 use oisy_user::oisy_users;
-use p2wpkh::{build_p2wpkh_spend_tx, ecdsa_sign_transaction};
+use p2wpkh::build_p2wpkh_spend_tx;
 use pretty_assertions::assert_eq;
 use serde::Deserialize;
 use serde_bytes::ByteBuf;
@@ -46,6 +46,7 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
+use signer::ecdsa_sign_transaction;
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Duration;
@@ -67,6 +68,7 @@ mod migrate;
 mod oisy_user;
 mod p2pkh;
 mod p2wpkh;
+mod signer;
 mod token;
 mod types;
 mod user_profile;
