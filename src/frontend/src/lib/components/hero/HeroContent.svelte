@@ -3,10 +3,12 @@
 	import { fade, slide } from 'svelte/transition';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { isErc20Icp } from '$eth/utils/token.utils';
+	import Back from '$lib/components/core/Back.svelte';
 	import Erc20Icp from '$lib/components/core/Erc20Icp.svelte';
 	import ExchangeBalance from '$lib/components/exchange/ExchangeBalance.svelte';
 	import Actions from '$lib/components/hero/Actions.svelte';
 	import Balance from '$lib/components/hero/Balance.svelte';
+	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import SkeletonLogo from '$lib/components/ui/SkeletonLogo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -16,30 +18,40 @@
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
-	export let more = false;
+	export let back = false;
 
 	let displayTokenSymbol = false;
 	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
 </script>
 
 {#if summary}
-	<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-		<div class="icon flex justify-center items-center mt-6 md:mt-12 mb-0.5 pt-2">
-			{#if displayTokenSymbol}
-				<div in:fade>
-					<Logo
-						src={$token?.icon}
-						size="big"
-						alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
-						color="off-white"
-					/>
-				</div>
-			{:else}
-				<SkeletonLogo size="big" />
-			{/if}
+	<div
+		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
+		class="flex flex-row items-start justify-between w-full mt-6 md:mt-12"
+	>
+		{#if back}
+			<Back />
+		{/if}
+
+		<div>
+			<div class="icon flex justify-center items-center mb-0.5 pt-2">
+				{#if displayTokenSymbol}
+					<div in:fade>
+						<Logo
+							src={$token?.icon}
+							size="big"
+							alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
+						/>
+					</div>
+				{:else}
+					<SkeletonLogo size="big" />
+				{/if}
+			</div>
+
+			<Balance />
 		</div>
 
-		<Balance />
+		<ContextMenu />
 	</div>
 {/if}
 
@@ -54,7 +66,7 @@
 		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
 		class="flex w-full justify-center"
 	>
-		<Actions {more} />
+		<Actions />
 	</div>
 {/if}
 

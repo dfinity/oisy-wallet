@@ -1,5 +1,4 @@
 import {
-	HERO_ANIMATION_CANVAS,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
 	NAVIGATION_MENU,
@@ -7,7 +6,7 @@ import {
 	RECEIVE_TOKENS_MODAL,
 	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
 	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
-	TOKENS_SKELETONS_INITIALIZED
+	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { nonNullish } from '@dfinity/utils';
@@ -133,13 +132,11 @@ abstract class Homepage {
 
 		await this.goto();
 		await this.waitForLoginButton();
-		await this.hideSelector({ selector: `[data-tid="${HERO_ANIMATION_CANVAS}"]` });
 	}
 
-	protected async waitForTokenSkeletonsInitialization(
-		options?: WaitForLocatorOptions
-	): Promise<void> {
-		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor(options);
+	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
+		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
@@ -214,7 +211,6 @@ export class HomepageLoggedIn extends Homepage {
 		await this.clickMenuItem({ menuItemTestId: LOGOUT_BUTTON });
 
 		await this.waitForLoginButton();
-		await this.waitForTokenSkeletonsInitialization({ state: 'detached' });
 	}
 
 	async testReceiveModalQrCode({
@@ -251,6 +247,6 @@ export class HomepageLoggedIn extends Homepage {
 	async waitForReady(): Promise<void> {
 		await this.waitForAuthentication();
 
-		await this.waitForTokenSkeletonsInitialization();
+		await this.waitForTokensInitialization();
 	}
 }
