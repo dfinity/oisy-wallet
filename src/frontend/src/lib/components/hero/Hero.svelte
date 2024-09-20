@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
@@ -22,8 +21,6 @@
 		class="flex flex-col rounded-lg pt-1 sm:pt-3 px-8 relative main 2xl:mt-[-70px] items-center"
 		style="padding-bottom: 32px"
 	>
-		<Alpha />
-
 		{#if $authSignedIn}
 			<HeroContent {usdTotal} {summary} {actions} {more} />
 		{:else if heroContent}
