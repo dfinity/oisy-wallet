@@ -18,7 +18,6 @@ export default {
 			grey: '#c0bbc4',
 			'light-blue': '#ede7fb',
 			blue: '#3b00b9',
-			'blue-ribbon': '#0066ff',
 			'blue-ribbon-rgb': '0, 102, 255',
 			dark: '#0e002d',
 			'dark-blue': '#321469',
