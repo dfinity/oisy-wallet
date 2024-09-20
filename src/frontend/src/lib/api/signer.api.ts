@@ -8,31 +8,34 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 let canister: SignerCanister | undefined = undefined;
 
+type CommonParams<T = unknown> = T & {
+	nullishIdentityErrorMessage?: string;
+	identity: OptionIdentity;
+};
+
 export const getBtcAddress = async ({
 	identity,
 	network
-}: {
-	identity: OptionIdentity;
+}: CommonParams<{
 	network: BitcoinNetwork;
-}): Promise<BtcAddress> => {
+}>): Promise<BtcAddress> => {
 	const { getBtcAddress } = await signerCanister({ identity });
 
 	return getBtcAddress({ network });
 };
 
-export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
+export const getEthAddress = async ({ identity }: CommonParams): Promise<EthAddress> => {
 	const { getEthAddress } = await signerCanister({ identity });
 
-	return getEthAddress({});
+	return getEthAddress();
 };
 
 export const signTransaction = async ({
 	transaction,
 	identity
-}: {
+}: CommonParams<{
 	transaction: SignRequest;
-	identity: OptionIdentity;
-}): Promise<string> => {
+}>): Promise<string> => {
 	const { signTransaction } = await signerCanister({ identity });
 
 	return signTransaction({ transaction });
@@ -41,10 +44,7 @@ export const signTransaction = async ({
 export const signMessage = async ({
 	message,
 	identity
-}: {
-	message: string;
-	identity: OptionIdentity;
-}): Promise<string> => {
+}: CommonParams<{ message: string }>): Promise<string> => {
 	const { personalSign } = await signerCanister({ identity });
 
 	return personalSign({ message });
@@ -53,21 +53,19 @@ export const signMessage = async ({
 export const signPrehash = async ({
 	hash,
 	identity
-}: {
+}: CommonParams<{
 	hash: string;
-	identity: OptionIdentity;
-}): Promise<string> => {
+}>): Promise<string> => {
 	const { signPrehash } = await signerCanister({ identity });
 
 	return signPrehash({ hash });
 };
 
 const signerCanister = async ({
-	identity
-}: {
-	identity: OptionIdentity;
-}): Promise<SignerCanister> => {
-	assertNonNullish(identity);
+	identity,
+	nullishIdentityErrorMessage
+}: CommonParams): Promise<SignerCanister> => {
+	assertNonNullish(identity, nullishIdentityErrorMessage);
 
 	if (isNullish(canister)) {
 		canister = await SignerCanister.create({

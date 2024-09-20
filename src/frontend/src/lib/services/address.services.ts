@@ -109,7 +109,8 @@ const loadBtcAddress = async ({
 		getAddress: (identity: OptionIdentity) =>
 			getBtcAddress({
 				identity,
-				network: bitcoinNetworkMapper[network]
+				network: bitcoinNetworkMapper[network],
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			}),
 		...bitcoinMapper[network]
 	});
@@ -129,7 +130,11 @@ const loadBtcAddressMainnet = async (): Promise<ResultSuccess> =>
 const loadEthAddress = async (): Promise<ResultSuccess> =>
 	loadTokenAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
-		getAddress: getEthAddress,
+		getAddress: (identity: OptionIdentity) =>
+			getEthAddress({
+				identity,
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			}),
 		setIdbAddress: setIdbEthAddress,
 		addressStore: ethAddressStore
 	});
@@ -303,7 +308,11 @@ export const certifyEthAddress = async (address: EthAddress): Promise<ResultSucc
 	certifyAddress<EthAddress>({
 		tokenId: ETHEREUM_TOKEN_ID,
 		address,
-		getAddress: getEthAddress,
+		getAddress: (identity: OptionIdentity) =>
+			getEthAddress({
+				identity,
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			}),
 		updateIdbAddressLastUsage: updateIdbEthAddressLastUsage,
 		addressStore: ethAddressStore
 	});

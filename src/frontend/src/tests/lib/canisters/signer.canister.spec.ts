@@ -14,13 +14,14 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 });
 
 describe('signer.canister', () => {
-	const createSignerCanister = async (
-		services: Pick<SignerCanisterOptions<SignerService>, 'serviceOverride'>
-	): Promise<SignerCanister> =>
+	const createSignerCanister = async ({
+		serviceOverride
+	}: Pick<SignerCanisterOptions, 'serviceOverride'>): Promise<SignerCanister> =>
 		SignerCanister.create({
 			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
 			identity: mockIdentity,
-			...services
+			certifiedServiceOverride: serviceOverride,
+			serviceOverride
 		});
 	const service = mock<ActorSubclass<SignerService>>();
 	const mockResponseError = new Error('Test response error');
@@ -58,7 +59,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = await getBtcAddress({ ...btcParams, certified: false });
+		const res = await getBtcAddress(btcParams);
 
 		expect(res).toEqual(response);
 		expect(service.caller_btc_address).toHaveBeenCalledWith(btcParams.network);
@@ -73,7 +74,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = getBtcAddress({ ...btcParams, certified: false });
+		const res = getBtcAddress(btcParams);
 
 		await expect(res).rejects.toThrow(mockResponseError);
 	});
@@ -86,7 +87,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = await getEthAddress({ certified: false });
+		const res = await getEthAddress();
 
 		expect(res).toEqual(response);
 	});
@@ -100,7 +101,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = getEthAddress({ certified: false });
+		const res = getEthAddress();
 
 		await expect(res).rejects.toThrow(mockResponseError);
 	});
@@ -113,7 +114,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = await signTransaction({ ...signTransactionParams, certified: false });
+		const res = await signTransaction(signTransactionParams);
 
 		expect(res).toEqual(response);
 		expect(service.sign_transaction).toHaveBeenCalledWith(signTransactionParams.transaction);
@@ -128,7 +129,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = signTransaction({ ...signTransactionParams, certified: false });
+		const res = signTransaction(signTransactionParams);
 
 		await expect(res).rejects.toThrow(mockResponseError);
 	});
@@ -141,7 +142,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = await personalSign({ ...personalSignParams, certified: false });
+		const res = await personalSign(personalSignParams);
 
 		expect(res).toEqual(response);
 		expect(service.personal_sign).toHaveBeenCalledWith(personalSignParams.message);
@@ -156,7 +157,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = personalSign({ ...personalSignParams, certified: false });
+		const res = personalSign(personalSignParams);
 
 		await expect(res).rejects.toThrow(mockResponseError);
 	});
@@ -169,7 +170,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = await signPrehash({ ...signPrehashParams, certified: false });
+		const res = await signPrehash(signPrehashParams);
 
 		expect(res).toEqual(response);
 		expect(service.sign_prehash).toHaveBeenCalledWith(signPrehashParams.hash);
@@ -184,7 +185,7 @@ describe('signer.canister', () => {
 			serviceOverride: service
 		});
 
-		const res = signPrehash({ ...signPrehashParams, certified: false });
+		const res = signPrehash(signPrehashParams);
 
 		await expect(res).rejects.toThrow(mockResponseError);
 	});

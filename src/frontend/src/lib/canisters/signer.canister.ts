@@ -11,17 +11,14 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { Canister, createServices, type CanisterOptions } from '@dfinity/utils';
 
-export interface SignerCanisterOptions<T> extends Omit<CanisterOptions<T>, 'canisterId' | 'agent'> {
+export interface SignerCanisterOptions
+	extends Omit<CanisterOptions<SignerService>, 'canisterId' | 'agent'> {
 	canisterId: Principal;
 	identity: Identity;
 }
 
-type SignerCanisterFunctionParams<T = unknown> = T & {
-	certified?: boolean;
-};
-
 export class SignerCanister extends Canister<SignerService> {
-	static async create({ identity, ...options }: SignerCanisterOptions<SignerService>) {
+	static async create({ identity, ...options }: SignerCanisterOptions) {
 		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<SignerService>({
@@ -36,61 +33,41 @@ export class SignerCanister extends Canister<SignerService> {
 		return new SignerCanister(canisterId, service, certifiedService);
 	}
 
-	getBtcAddress = ({
-		network,
-		certified = true
-	}: SignerCanisterFunctionParams<{
-		network: BitcoinNetwork;
-	}>): Promise<BtcAddress> => {
+	getBtcAddress = ({ network }: { network: BitcoinNetwork }): Promise<BtcAddress> => {
 		const { caller_btc_address } = this.caller({
-			certified
+			certified: true
 		});
 
 		return caller_btc_address(network);
 	};
 
-	getEthAddress = ({ certified = true }: SignerCanisterFunctionParams): Promise<EthAddress> => {
+	getEthAddress = (): Promise<EthAddress> => {
 		const { caller_eth_address } = this.caller({
-			certified
+			certified: true
 		});
 
 		return caller_eth_address();
 	};
 
-	signTransaction = ({
-		transaction,
-		certified = true
-	}: SignerCanisterFunctionParams<{
-		transaction: SignRequest;
-	}>): Promise<string> => {
+	signTransaction = ({ transaction }: { transaction: SignRequest }): Promise<string> => {
 		const { sign_transaction } = this.caller({
-			certified
+			certified: true
 		});
 
 		return sign_transaction(transaction);
 	};
 
-	personalSign = ({
-		message,
-		certified = true
-	}: SignerCanisterFunctionParams<{
-		message: string;
-	}>): Promise<string> => {
+	personalSign = ({ message }: { message: string }): Promise<string> => {
 		const { personal_sign } = this.caller({
-			certified
+			certified: true
 		});
 
 		return personal_sign(message);
 	};
 
-	signPrehash = ({
-		hash,
-		certified = true
-	}: SignerCanisterFunctionParams<{
-		hash: string;
-	}>): Promise<string> => {
+	signPrehash = ({ hash }: { hash: string }): Promise<string> => {
 		const { sign_prehash } = this.caller({
-			certified
+			certified: true
 		});
 
 		return sign_prehash(hash);
