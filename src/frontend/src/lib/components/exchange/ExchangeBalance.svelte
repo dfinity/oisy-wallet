@@ -13,9 +13,9 @@
 		class={`break-all text-5xl font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} mt-8 inline-block`}
 	>
 		{#if $exchangeInitialized}
-			{formatUSD(totalUsd)}
+			{formatUSD({ value: totalUsd })}
 		{:else}
-			<span class="animate-pulse">{formatUSD(0)}</span>
+			<span class="animate-pulse">{formatUSD({ value: 0 })}</span>
 		{/if}
 	</output>
 </span>

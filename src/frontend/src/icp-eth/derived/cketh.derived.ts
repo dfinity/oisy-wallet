@@ -103,10 +103,10 @@ export const ckEthereumNativeTokenBalance: Readable<OptionBalance> = derived(
 export const ckEthHelperContractAddress: Readable<OptionEthAddress> = derived(
 	[ckEthMinterInfoStore, ethereumTokenId, ethereumToken],
 	([$ckEthMinterInfoStore, $ethereumTokenId, $ethereumToken]) =>
-		toCkEthHelperContractAddress(
-			$ckEthMinterInfoStore?.[$ethereumTokenId],
-			$ethereumToken.network.id
-		)
+		toCkEthHelperContractAddress({
+			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
+			networkId: $ethereumToken.network.id
+		})
 );
 
 /**

@@ -67,17 +67,18 @@ export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
 	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
 };
 
-// TODO: Remove ESLint exception and use object params
-// eslint-disable-next-line local-rules/prefer-object-params
-export const formatUSD = (
-	value: number,
+export const formatUSD = ({
+	value,
+	options
+}: {
+	value: number;
 	options?: {
 		minFraction?: number;
 		maxFraction?: number;
 		maximumSignificantDigits?: number;
 		symbol?: boolean;
-	}
-): string => {
+	};
+}): string => {
 	const {
 		minFraction = 2,
 		maxFraction = 2,
