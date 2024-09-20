@@ -24,7 +24,7 @@
 	</svg>
 </div>
 
-<picture aria-label={ariaLabel}>
+<picture aria-label={ariaLabel} class="w-24">
 	<source srcset={oisyLogoSmall} media="(max-width: 640px)" />
 	<Img src={oisyLogoLarge} alt={ariaLabel} />
 </picture>
