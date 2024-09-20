@@ -15,6 +15,8 @@
 </a>
 
 <style lang="scss">
+	@use '../../styles/mixins/media';
+
 	a {
 		color: var(--alpha-color, var(--color-misty-rose));
 		margin: 0 auto;
