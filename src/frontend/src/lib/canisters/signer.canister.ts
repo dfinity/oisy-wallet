@@ -11,12 +11,12 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { Canister, createServices, type CanisterOptions } from '@dfinity/utils';
 
-interface SignerCanisterOptions<T> extends Omit<CanisterOptions<T>, 'canisterId' | 'agent'> {
+export interface SignerCanisterOptions<T> extends Omit<CanisterOptions<T>, 'canisterId' | 'agent'> {
 	canisterId: Principal;
 	identity: Identity;
 }
 
-type SignerCanisterFunctionParams<T = Record<string, never>> = T & {
+type SignerCanisterFunctionParams<T = unknown> = T & {
 	certified?: boolean;
 };
 
@@ -51,7 +51,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 	updateBtcBalance = ({
 		network,
-		certified = true
+		certified = false
 	}: SignerCanisterFunctionParams<{
 		network: BitcoinNetwork;
 	}>): Promise<bigint> => {
