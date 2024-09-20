@@ -23,7 +23,7 @@
 	--color-spiro-disco-ball: theme(colors.spiro-disco-ball);
 	--color-cetacean-blue: theme(colors.cetacean-blue);
 	--color-brilliant-azure: theme(colors.brilliant-azure);
-	--color-blue-ribbon: theme(colors.blue-ribbon);
+	--color-blue-ribbon-rgb: theme(colors.blue-ribbon-rgb);
 	--color-alice-blue: theme(colors.alice-blue);
 	--color-american-orange: theme(colors.american-orange);
 	--color-crayola-yellow: theme(colors.crayola-yellow);
@@ -33,5 +33,6 @@
 	--color-wallet-connect: #3b99fc;
 
 	// Theme
-	--color-primary: var(--color-blue-ribbon);
+	--color-primary-rgb: var(--color-blue-ribbon-rgb);
+	--color-primary: rgb(var(--color-primary-rgb));
 }
