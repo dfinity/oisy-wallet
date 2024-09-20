@@ -65,11 +65,14 @@
 	--dialog-max-width: 100vw;
 	--dialog-height: 100vh;
 	--dialog-border-radius: 0;
-	--dialog-padding-y: var(--padding-1_5x);
-	--dialog-padding-x: var(--padding-2x);
+	--dialog-padding-y: var(--padding-3x);
+	--dialog-padding-x: var(--padding-3x);
 
 	// CSS variables used when the content needs to fit the maximum height as when a QR-Code reader is embedded in a modal
 	--dialog-header-height: 74px;
+
+	--backdrop-contrast: var(--color-dark);
+	--backdrop-filter: blur(4px);
 
 	@supports (-webkit-touch-callout: none) {
 		--dialog-height: -webkit-fill-available;
@@ -85,7 +88,6 @@
 		--dialog-height: initial;
 		--dialog-max-height: var(--alert-max-height);
 		--dialog-border-radius: var(--alert-border-radius);
-		--dialog-padding-x: var(--padding-3x);
 
 		--section-max-width: 576px;
 	}
@@ -93,9 +95,6 @@
 	@media (min-width: 768px) and (min-height: 560px) {
 		--dialog-min-height: 200px;
 	}
-
-	--backdrop-contrast: var(--color-dark);
-	--backdrop-filter: blur(4px);
 }
 
 article.gix {

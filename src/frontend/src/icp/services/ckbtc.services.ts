@@ -8,7 +8,6 @@ import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkMetadata, IcCkToken, IcToken } from '$icp/types/ic';
-import { waitAndTriggerWallet } from '$icp/utils/ic-wallet.utils';
 import { queryAndUpdate, type QueryAndUpdateRequestParams } from '$lib/actors/query.ic';
 import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 import { waitWalletReady } from '$lib/services/actions.services';
@@ -19,6 +18,7 @@ import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
+import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import {
 	MinterNoNewUtxosError,
 	type EstimateWithdrawalFee,
