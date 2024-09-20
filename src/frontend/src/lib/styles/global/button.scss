@@ -1,4 +1,5 @@
 @use '../mixins/media';
+@use '../mixins/button';
 
 button {
 	display: flex;
@@ -134,5 +135,9 @@ button {
 				}
 			}
 		}
+	}
+  
+  	&.icon {
+		@include button.icon;
 	}
 }
