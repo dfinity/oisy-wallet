@@ -6,7 +6,7 @@ use bitcoin::{
     AddressType,
 };
 use ic_cdk::api::management_canister::bitcoin::Utxo;
-use ic_cdk::print;
+use ic_cdk::println;
 
 const ECDSA_SIG_HASH_TYPE: EcdsaSighashType = EcdsaSighashType::All;
 
@@ -50,9 +50,9 @@ fn get_input_value(input: &TxIn, outputs: &[Utxo]) -> Option<Amount> {
     let previous_output = &input.previous_output;
 
     // Loop through the provided outputs (UTXOs) to find the one that matches the input.
-    for (i, output) in outputs.iter().enumerate() {
+    for (_, output) in outputs.iter().enumerate() {
         // The index of the output in the transaction (vout) should match the input's vout.
-        if i == previous_output.vout as usize {
+        if output.outpoint.vout == previous_output.vout {
             // If we find the matching output, return the value as an `Amount` type.
             return Some(Amount::from_sat(output.value));
         }
@@ -89,9 +89,9 @@ where
         "This example supports signing p2wpkh addresses only."
     );
 
-    print!("in ta ecdsa_sign_transaction");
+    println!("in ta ecdsa_sign_transaction");
     for (_, utxo) in own_utxos.iter().enumerate() {
-        print!("utxo value: {}", utxo.value);
+        println!("utxo value: {}", utxo.value);
     }
 
     let txclone = transaction.clone();
