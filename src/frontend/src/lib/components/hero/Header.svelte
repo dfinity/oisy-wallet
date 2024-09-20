@@ -17,7 +17,7 @@
 </script>
 
 <header
-	class="flex justify-between md:px-4 relative z-10 pointer-events-none"
+	class="grid grid-cols-2 xl:grid-cols-3 items-center md:px-4 relative z-10 pointer-events-none"
 	style="min-height: 78px"
 >
 	{#if back}
@@ -29,7 +29,7 @@
 	{/if}
 
 	<div
-		class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center"
+		class="col-span-3 col-start-1 row-start-2 xl:col-span-1 xl:col-start-2 xl:row-start-1 flex px-4"
 	>
 		<Alpha />
 	</div>
