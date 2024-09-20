@@ -5,7 +5,7 @@
 </script>
 
 <button
-	class="no-underline text-blue w-full text-left font-bold"
+	class="no-underline text-primary w-full text-left font-bold"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}

@@ -9,7 +9,6 @@
 	--color-dark: theme(colors.dark);
 	--color-dark-blue: theme(colors.dark-blue);
 	--color-misty-rose: theme(colors.misty-rose);
-	--color-turquoise: theme(colors.turquoise);
 	--color-crayola-blue: theme(colors.crayola-blue);
 
 	// https://www.color-name.com
@@ -23,7 +22,16 @@
 	--color-spiro-disco-ball: theme(colors.spiro-disco-ball);
 	--color-cetacean-blue: theme(colors.cetacean-blue);
 	--color-brilliant-azure: theme(colors.brilliant-azure);
+	--color-blue-ribbon-rgb: theme(colors.blue-ribbon-rgb);
+	--color-alice-blue: theme(colors.alice-blue);
+	--color-american-orange: theme(colors.american-orange);
+	--color-crayola-yellow: theme(colors.crayola-yellow);
+	--color-cornsilk: theme(colors.cornsilk);
 
 	// Brand
 	--color-wallet-connect: #3b99fc;
+
+	// Theme
+	--color-primary-rgb: var(--color-blue-ribbon-rgb);
+	--color-primary: rgb(var(--color-primary-rgb));
 }

@@ -19,7 +19,7 @@ interface I18nCore {
 		more: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string };
+	alt: { logo: string; background: string };
 }
 
 interface I18nNavigation {
@@ -34,7 +34,7 @@ interface I18nNavigation {
 }
 
 interface I18nAuth {
-	text: { title: string; authenticate: string; logout: string };
+	text: { title_part_1: string; title_part_2: string; authenticate: string; logout: string };
 	alt: { sign_in: string };
 	warning: { not_signed_in: string; session_expired: string };
 	error: {
@@ -104,7 +104,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { use_with_caution: string; learn_more_about_erc20_icp: string; never_download: string };
+	text: { use_with_caution: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {

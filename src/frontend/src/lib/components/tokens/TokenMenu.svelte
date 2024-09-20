@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconMore from '$lib/components/icons/IconMore.svelte';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import IconEllipsisHorizontal from '$lib/components/icons/IconEllipsisHorizontal.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
 	import { tokenToggleable } from '$lib/derived/token.derived';
@@ -34,15 +33,15 @@
 	});
 </script>
 
-<ButtonHero
-	bind:button
+<button
+	class="pointer-events-auto ml-2 flex gap-0.5 font-bold text-primary"
+	bind:this={button}
 	on:click={() => (visible = true)}
-	ariaLabel={$i18n.tokens.alt.context_menu}
+	aria-label={$i18n.tokens.alt.context_menu}
 	disabled={$erc20UserTokensNotInitialized}
 >
-	<IconMore size="28" slot="icon" />
-	{$i18n.core.text.more}
-</ButtonHero>
+	<IconEllipsisHorizontal />
+</button>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
 	<div class="flex flex-col gap-3">

@@ -28,7 +28,7 @@
 	ariaLabel={$i18n.convert.text.convert_to_cketh}
 >
 	<IconConvert size="28" slot="icon" />
-	<span> {$i18n.convert.text.convert_to_cketh} </span>
+	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenCkEth}

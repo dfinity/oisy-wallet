@@ -7,3 +7,7 @@
 .clamp-4 {
 	@include text.clamp(2);
 }
+
+.text-primary {
+	color: var(--color-primary);
+}

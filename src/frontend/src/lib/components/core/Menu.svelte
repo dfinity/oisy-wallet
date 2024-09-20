@@ -9,7 +9,7 @@
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -37,14 +37,15 @@
 	$: walletOptions = !settingsRoute;
 </script>
 
-<ButtonHero
+<ButtonIcon
 	bind:button
 	on:click={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 >
 	<IconUser slot="icon" />
-</ButtonHero>
+	{$i18n.navigation.alt.menu}
+</ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
