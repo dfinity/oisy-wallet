@@ -1,12 +1,12 @@
 <script lang="ts">
 	import IconReceive from '$lib/components/icons/IconReceive.svelte';
-	import ButtonAction from '$lib/components/ui/ButtonAction.svelte';
+	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 	import { RECEIVE_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<ButtonAction
+<ButtonHero
 	on:click
 	disabled={$isBusy}
 	ariaLabel={$i18n.receive.text.receive}
@@ -14,4 +14,4 @@
 >
 	<IconReceive size="28" slot="icon" />
 	{$i18n.receive.text.receive}
-</ButtonAction>
+</ButtonHero>
