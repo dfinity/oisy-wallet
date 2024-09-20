@@ -43,7 +43,8 @@
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 >
-	<IconUser />
+	<IconUser slot="icon" />
+	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">

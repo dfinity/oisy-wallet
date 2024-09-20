@@ -24,7 +24,8 @@
 		on:click={() => (visible = !visible)}
 		ariaLabel={replaceOisyPlaceholders($i18n.about.text.title)}
 	>
-		<IconMenu />
+		<IconMenu slot="icon" />
+		{replaceOisyPlaceholders($i18n.about.text.title)}
 	</ButtonIcon>
 
 	<Popover bind:visible anchor={button} direction="rtl">
