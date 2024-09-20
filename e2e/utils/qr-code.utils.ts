@@ -1,5 +1,5 @@
 import { nonNullish } from '@dfinity/utils';
-import Jimp from 'jimp';
+import { Jimp } from 'jimp';
 import jsQR from 'jsqr';
 
 export const getQRCodeValueFromDataURL = async ({
