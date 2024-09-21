@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Back from '$lib/components/core/Back.svelte';
@@ -14,10 +13,6 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let back = false;
-
-	const gotoHome = async () => {
-		await goto('/');
-	};
 </script>
 
 <header
@@ -31,7 +26,6 @@
 			href="/"
 			class="flex p-4 items-center gap-0 pointer-events-auto no-underline"
 			aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
-			on:click={gotoHome}
 		>
 			<OisyWalletLogo />
 		</a>
