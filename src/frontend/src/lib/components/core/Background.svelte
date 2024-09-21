@@ -10,7 +10,7 @@
 		class="absolute left-1/2 top-0 w-full min-w-[1280px] -translate-x-1/2 transform"
 		aria-label={replaceOisyPlaceholders($i18n.core.alt.background)}
 	>
-		<source srcset={background} media="(min-width: 641px)" />
+		<source srcset={background} media="(min-width: 640px)" />
 		<Img src="" />
 	</picture>
 </div>
