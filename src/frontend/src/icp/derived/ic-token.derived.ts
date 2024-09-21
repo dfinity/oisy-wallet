@@ -10,7 +10,7 @@ import { derived, type Readable } from 'svelte/store';
 
 export const tokenAsIcToken: Readable<OptionIcToken> = derived(
 	[token],
-	([$token]) => $token as IcToken
+	([$token]) => $token as OptionIcToken
 );
 
 export const tokenWithFallbackAsIcToken: Readable<IcToken> = derived(

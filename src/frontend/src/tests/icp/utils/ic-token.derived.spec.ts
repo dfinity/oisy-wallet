@@ -1,4 +1,4 @@
-import { ICP_TOKEN } from '$env/tokens.env';
+import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 import { token } from '$lib/stores/token.store';
 import { get } from 'svelte/store';
@@ -9,13 +9,10 @@ describe('Derived store tokenAsIcToken', () => {
 		expect(get(tokenAsIcToken)).toBeUndefined();
 	});
 
-	it('should return token as IcToken when token is set', () => {
-		token.set(ICP_TOKEN);
+	it('should return token when token is set', () => {
+		token.set(ETHEREUM_TOKEN);
 
-		expect(get(tokenAsIcToken)).toBe(ICP_TOKEN);
-
-		expect(get(tokenAsIcToken)).toHaveProperty('ledgerCanisterId');
-		expect(get(tokenAsIcToken)).toHaveProperty('indexCanisterId');
+		expect(get(tokenAsIcToken)).toBe(ETHEREUM_TOKEN);
 	});
 
 	it('should return undefined when token is set to undefined', () => {
