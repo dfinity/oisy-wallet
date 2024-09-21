@@ -1,4 +1,4 @@
-import type { IcToken } from '$icp/types/ic';
+import type { IcToken, OptionIcToken } from '$icp/types/ic';
 import {
 	isTokenCkBtcLedger,
 	isTokenCkErc20Ledger,
@@ -8,7 +8,10 @@ import { tokenWithFallback } from '$lib/derived/token.derived';
 import { token } from '$lib/stores/token.store';
 import { derived, type Readable } from 'svelte/store';
 
-export const tokenAsIcToken: Readable<IcToken> = derived([token], ([$token]) => $token as IcToken);
+export const tokenAsIcToken: Readable<OptionIcToken> = derived(
+	[token],
+	([$token]) => $token as IcToken
+);
 
 export const tokenWithFallbackAsIcToken: Readable<IcToken> = derived(
 	[tokenWithFallback],
