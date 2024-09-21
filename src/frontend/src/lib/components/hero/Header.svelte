@@ -7,7 +7,9 @@
 	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
 	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
+	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
+	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -27,13 +29,14 @@
 	{#if back}
 		<Back />
 	{:else}
-		<button
-			class="flex p-4 items-center gap-0 pointer-events-auto"
+		<a
+			href="/"
+			class="flex p-4 items-center gap-0 pointer-events-auto no-underline"
 			aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
 			on:click={gotoHome}
 		>
 			<OisyWalletLogo />
-		</button>
+		</a>
 	{/if}
 
 	<div
