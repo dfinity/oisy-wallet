@@ -17,7 +17,7 @@
 </script>
 
 <header
-	class={`grid grid-cols-2 ${$mw}:grid-cols-[1fr_auto_1fr] items-center md:px-4 relative z-10 pointer-events-none`}
+	class={`grid grid-cols-2 ${$authSignedIn ? 'sm:grid-cols-[1fr_auto_1fr]' : 'xl:grid-cols-[1fr_auto_1fr]'} items-center md:px-4 relative z-10 pointer-events-none`}
 	style="min-height: 78px"
 >
 	{#if back}
@@ -29,7 +29,7 @@
 	{/if}
 
 	<div
-		class={`col-span-3 col-start-1 row-start-2 ${$mw}:col-span-1 ${$mw}:col-start-2 ${$mw}:row-start-1 ${$mw}:w-fit flex px-4`}
+		class={`col-span-3 col-start-1 row-start-2  ${$authSignedIn ? 'sm:col-span-1 sm:col-start-2 sm:row-start-1 sm:w-fit' : 'xl:col-span-1 xl:col-start-2 xl:row-start-1 xl:w-fit'}  flex px-4`}
 	>
 		<Alpha />
 	</div>
