@@ -22,10 +22,7 @@ const config: UserConfig = {
 	css: {
 		preprocessorOptions: {
 			scss: {
-				additionalData: `
-          @use "./node_modules/@dfinity/gix-components/dist/styles/mixins/media";
-          @use "./node_modules/@dfinity/gix-components/dist/styles/mixins/text";
-        `
+				api: 'modern-compiler'
 			}
 		}
 	},
