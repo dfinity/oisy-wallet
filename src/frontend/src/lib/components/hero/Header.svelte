@@ -7,9 +7,7 @@
 	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
 	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
-	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
-	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
