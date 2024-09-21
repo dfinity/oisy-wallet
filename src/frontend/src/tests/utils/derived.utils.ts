@@ -30,7 +30,6 @@ import { pageToken } from '$lib/derived/page-token.derived';
 import { hideZeroBalances, showZeroBalances, testnetsEnabled } from '$lib/derived/settings.derived';
 import { testnets } from '$lib/derived/testnets.derived';
 import {
-	testDer,
 	tokenDecimals,
 	tokenId,
 	tokenStandard,
@@ -48,7 +47,6 @@ import {
 } from '$lib/derived/tokens.derived';
 
 const derivedList = {
-	testDer,
 	authIdentity,
 	authNotSignedIn,
 	authSignedIn,
