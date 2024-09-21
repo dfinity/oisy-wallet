@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { derived, type Readable } from 'svelte/store';
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Back from '$lib/components/core/Back.svelte';
@@ -12,8 +11,6 @@
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
 
 	export let back = false;
-
-	const mw: Readable<'sm' | 'xl'> = derived(authSignedIn, ($signedIn) => ($signedIn ? 'sm' : 'xl'));
 </script>
 
 <header
