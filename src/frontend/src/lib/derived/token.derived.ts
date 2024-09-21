@@ -38,3 +38,8 @@ export const tokenToggleable: Readable<boolean> = derived(
 	[token],
 	([$token]) => nonNullish($token) && 'enabled' in $token
 );
+
+export const testDer: Readable<string | undefined> = derived(
+	[token, tokenStandard],
+	([$token, $asd]) => ($token?.decimals ?? 'a') + ($asd ?? 'a')
+);
