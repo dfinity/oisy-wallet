@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { derived, type Readable } from 'svelte/store';
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Back from '$lib/components/core/Back.svelte';
@@ -12,12 +13,11 @@
 
 	export let back = false;
 
-	let mw: 'sm' | 'xl';
-	$: mw = $authSignedIn ? 'sm' : 'xl';
+	const mw: Readable<'sm' | 'xl'> = derived(authSignedIn, ($signedIn) => ($signedIn ? 'sm' : 'xl'));
 </script>
 
 <header
-	class={`grid grid-cols-2 ${mw}:grid-cols-[1fr_auto_1fr] items-center md:px-4 relative z-10 pointer-events-none`}
+	class={`grid grid-cols-2 ${$mw}:grid-cols-[1fr_auto_1fr] items-center md:px-4 relative z-10 pointer-events-none`}
 	style="min-height: 78px"
 >
 	{#if back}
@@ -29,7 +29,7 @@
 	{/if}
 
 	<div
-		class={`col-span-3 col-start-1 row-start-2 ${mw}:col-span-1 ${mw}:col-start-2 ${mw}:row-start-1 ${mw}:w-fit flex px-4`}
+		class={`col-span-3 col-start-1 row-start-2 ${$mw}:col-span-1 ${$mw}:col-start-2 ${$mw}:row-start-1 ${$mw}:w-fit flex px-4`}
 	>
 		<Alpha />
 	</div>
