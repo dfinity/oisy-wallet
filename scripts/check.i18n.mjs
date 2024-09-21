@@ -8,12 +8,10 @@ const PATH_FROM_ROOT = join(process.cwd(), 'src', 'frontend', 'src');
 const PATH_TO_EN_JSON = join(PATH_FROM_ROOT, 'lib', 'i18n', 'en.json');
 const PATH_TO_CODEBASE = join(PATH_FROM_ROOT);
 
-// TODO: Remove ESLint exception and use object params
-// eslint-disable-next-line local-rules/prefer-object-params
-const extractKeys = (obj, prefix = '') =>
+const extractKeys = ({ obj, prefix = '' }) =>
 	Object.keys(obj).reduce((res, el) => {
 		if (typeof obj[el] === 'object') {
-			return [...res, ...extractKeys(obj[el], `${prefix}${el}.`)];
+			return [...res, ...extractKeys({ obj: obj[el], prefix: `${prefix}${el}.` })];
 		}
 		return [...res, `${prefix}${el}`];
 	}, []);
@@ -26,7 +24,7 @@ const checkKeyUsage = ({ key, content }) =>
 const main = async () => {
 	const en = JSON.parse(readFileSync(PATH_TO_EN_JSON, 'utf8'));
 
-	let potentialUnusedKeys = extractKeys(en);
+	let potentialUnusedKeys = extractKeys({ obj: en });
 
 	const files = findFiles({ dir: PATH_TO_CODEBASE, extensions: ['.svelte', '.ts'] });
 

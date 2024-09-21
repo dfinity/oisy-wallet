@@ -96,9 +96,7 @@ const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'env');
 
 const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
 
-// TODO: Remove ESLint exception and use object params
-// eslint-disable-next-line local-rules/prefer-object-params
-const saveTokenLogo = async (canisterId, name) => {
+const saveTokenLogo = async ({ canisterId, name }) => {
 	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
 	const file = join(LOGO_FOLDER, `${logoName}.svg`);
 
@@ -148,7 +146,7 @@ const findCkErc20 = async () => {
 			...tokens.staging
 		})
 			.filter(([_, { ledgerCanisterId }]) => !SKIP_CANISTER_IDS_LOGOS.includes(ledgerCanisterId))
-			.map(([name, { ledgerCanisterId }]) => saveTokenLogo(ledgerCanisterId, name))
+			.map(([name, { ledgerCanisterId }]) => saveTokenLogo({ canisterId: ledgerCanisterId, name }))
 	);
 };
 
