@@ -25,6 +25,6 @@
 </div>
 
 <picture aria-label={ariaLabel} class="w-24">
-	<source srcset={oisyLogoSmall} media="(max-width: 640px)" />
+	<source srcset={oisyLogoSmall} media="(max-width: 639px)" />
 	<Img src={oisyLogoLarge} alt={ariaLabel} />
 </picture>
