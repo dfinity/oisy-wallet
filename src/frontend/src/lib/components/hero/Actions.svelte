@@ -11,9 +11,9 @@
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import Buy from '$lib/components/buy/Buy.svelte';
-	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
+	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
 	import {
 		networkEthereum,
 		networkICP,
@@ -21,8 +21,6 @@
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { isRouteTokens } from '$lib/utils/nav.utils';
-
-	export let more = false;
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -37,42 +35,40 @@
 	$: isTokenPage = isRouteTokens($page);
 </script>
 
-<div role="toolbar" class="flex w-full gap-6 justify-center pt-10 pb-3 px-1 max-w-96">
-	{#if $networkICP}
-		<IcReceive token={$tokenWithFallback} />
-	{:else if $networkEthereum}
-		<EthReceive />
-	{:else if $pseudoNetworkChainFusion}
-		<Receive />
-	{/if}
-
-	<Send {isTokenPage} />
-
-	{#if convertEth}
+<div role="toolbar" class="flex w-full justify-center pt-10 pb-3">
+	<HeroButtonGroup>
 		{#if $networkICP}
-			<ConvertToEthereum />
-		{:else}
-			<ConvertToCkETH />
+			<IcReceive token={$tokenWithFallback} />
+		{:else if $networkEthereum}
+			<EthReceive />
+		{:else if $pseudoNetworkChainFusion}
+			<Receive />
 		{/if}
-	{/if}
 
-	{#if convertErc20}
-		{#if $networkICP}
-			<ConvertToEthereum />
-		{:else}
-			<ConvertToCkERC20 />
+		<Send {isTokenPage} />
+
+		{#if convertEth}
+			{#if $networkICP}
+				<ConvertToEthereum />
+			{:else}
+				<ConvertToCkETH />
+			{/if}
 		{/if}
-	{/if}
 
-	{#if convertBtc}
-		<ConvertToBTC />
-	{/if}
+		{#if convertErc20}
+			{#if $networkICP}
+				<ConvertToEthereum />
+			{:else}
+				<ConvertToCkERC20 />
+			{/if}
+		{/if}
 
-	{#if ONRAMPER_ENABLED}
-		<Buy />
-	{/if}
+		{#if convertBtc}
+			<ConvertToBTC />
+		{/if}
 
-	{#if more}
-		<ContextMenu />
-	{/if}
+		{#if ONRAMPER_ENABLED}
+			<Buy />
+		{/if}
+	</HeroButtonGroup>
 </div>

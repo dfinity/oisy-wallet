@@ -22,11 +22,7 @@
 	})}
 >
 	<IconConvert size="28" slot="icon" />
-	<span
-		>{replacePlaceholders($i18n.convert.text.convert_to_token, {
-			$token: $ckEthereumTwinToken.symbol
-		})}</span
-	>
+	<span>{$ckEthereumTwinToken.symbol}</span>
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenEth}

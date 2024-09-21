@@ -29,12 +29,12 @@
 	};
 </script>
 
-<button class="w-full flex justify-between items-start" on:click={onClick}>
+<button class="flex w-full items-start justify-between" on:click={onClick}>
 	<TextWithLogo
 		{name}
 		{icon}
 		logo="start"
-		description={nonNullish(usdBalance) ? formatUSD(usdBalance) : undefined}
+		description={nonNullish(usdBalance) ? formatUSD({ value: usdBalance }) : undefined}
 	/>
 
 	{#if id === $networkId}
