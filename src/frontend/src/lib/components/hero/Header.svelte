@@ -9,6 +9,8 @@
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let back = false;
 </script>
@@ -22,9 +24,13 @@
 	{#if back}
 		<Back />
 	{:else}
-		<div class="flex p-4 items-center">
+		<a
+			href="/"
+			class="flex p-4 items-center gap-0 pointer-events-auto no-underline"
+			aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
+		>
 			<OisyWalletLogo />
-		</div>
+		</a>
 	{/if}
 
 	<div
