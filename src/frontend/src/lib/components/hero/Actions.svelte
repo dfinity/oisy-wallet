@@ -20,7 +20,7 @@
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { isRouteTokens } from '$lib/utils/nav.utils';
+	import { isRouteTransactions } from '$lib/utils/nav.utils';
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -32,7 +32,7 @@
 	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
 
 	let isTokenPage = false;
-	$: isTokenPage = isRouteTokens($page);
+	$: isTokenPage = isRouteTransactions($page);
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10 pb-3">

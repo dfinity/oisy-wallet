@@ -85,7 +85,7 @@
 			bind:targetNetwork
 			bind:amount
 			bind:sendProgressStep
-			formCancelAction={isTokenPage ? 'back' : 'close'}
+			formCancelAction={isTokenPage ? 'close' : 'back'}
 			on:icBack={modal.back}
 			on:icSendBack={modal.back}
 			on:icNext={modal.next}
