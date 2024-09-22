@@ -1,6 +1,6 @@
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { token } from '$lib/stores/token.store';
-import type { OptionTokenId, OptionTokenStandard, Token, TokenCategory } from '$lib/types/token';
+import type { OptionTokenId, OptionTokenStandard, Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -27,11 +27,6 @@ export const tokenSymbol: Readable<string | undefined> = derived(
 export const tokenDecimals: Readable<number | undefined> = derived(
 	[token],
 	([$token]) => $token?.decimals
-);
-
-export const tokenCategory: Readable<TokenCategory | undefined> = derived(
-	[token],
-	([$token]) => $token?.category
 );
 
 export const tokenToggleable: Readable<boolean> = derived(
