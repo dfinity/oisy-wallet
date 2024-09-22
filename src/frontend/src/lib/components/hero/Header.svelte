@@ -7,17 +7,16 @@
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
 	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
 	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
-	import { authSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
 
 	export let back = false;
-
-	let mw: 'sm' | 'xl';
-	$: mw = $authSignedIn ? 'sm' : 'xl';
 </script>
 
 <header
-	class={`grid grid-cols-2 ${mw}:grid-cols-[1fr_auto_1fr] items-center md:px-4 relative z-10 pointer-events-none`}
+	class="grid grid-cols-2 items-center md:px-4 relative z-10 pointer-events-none"
+	class:sm:grid-cols-[1fr_auto_1fr]={$authSignedIn}
+	class:xl:grid-cols-[1fr_auto_1fr]={$authNotSignedIn}
 	style="min-height: 78px"
 >
 	{#if back}
@@ -29,7 +28,15 @@
 	{/if}
 
 	<div
-		class={`col-span-3 col-start-1 row-start-2 ${mw}:col-span-1 ${mw}:col-start-2 ${mw}:row-start-1 ${mw}:w-fit flex px-4`}
+		class="col-span-3 col-start-1 row-start-2 flex px-4"
+		class:sm:col-span-1={$authSignedIn}
+		class:xl:col-span-1={$authNotSignedIn}
+		class:sm:col-start-2={$authSignedIn}
+		class:xl:col-start-2={$authNotSignedIn}
+		class:sm:row-start-1={$authSignedIn}
+		class:xl:row-start-1={$authNotSignedIn}
+		class:sm:w-fit={$authSignedIn}
+		class:xl:w-fit={$authNotSignedIn}
 	>
 		<Alpha />
 	</div>
