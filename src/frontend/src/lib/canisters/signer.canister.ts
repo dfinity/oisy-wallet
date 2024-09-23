@@ -41,6 +41,14 @@ export class SignerCanister extends Canister<SignerService> {
 		return caller_btc_address(network);
 	};
 
+	getBtcBalance = ({ network }: { network: BitcoinNetwork }): Promise<bigint> => {
+		const { caller_btc_balance } = this.caller({
+			certified: true
+		});
+
+		return caller_btc_balance(network);
+	};
+
 	getEthAddress = (): Promise<EthAddress> => {
 		const { caller_eth_address } = this.caller({
 			certified: true
