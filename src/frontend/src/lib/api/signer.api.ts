@@ -1,53 +1,78 @@
 import type { BitcoinNetwork, SignRequest } from '$declarations/signer/signer.did';
-import { getSignerActor } from '$lib/actors/actors.ic';
-import type { EthAddress } from '$lib/types/address';
+import { SignerCanister } from '$lib/canisters/signer.canister';
+import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
+import { Principal } from '@dfinity/principal';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
+
+let canister: SignerCanister | undefined = undefined;
+
+type CommonParams<T = unknown> = T & {
+	nullishIdentityErrorMessage?: string;
+	identity: OptionIdentity;
+};
 
 export const getBtcAddress = async ({
 	identity,
 	network
-}: {
-	identity: OptionIdentity;
+}: CommonParams<{
 	network: BitcoinNetwork;
-}): Promise<EthAddress> => {
-	const { caller_btc_address } = await getSignerActor({ identity });
-	return caller_btc_address(network);
+}>): Promise<BtcAddress> => {
+	const { getBtcAddress } = await signerCanister({ identity });
+
+	return getBtcAddress({ network });
 };
 
-export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
-	const { caller_eth_address } = await getSignerActor({ identity });
-	return caller_eth_address();
+export const getEthAddress = async ({ identity }: CommonParams): Promise<EthAddress> => {
+	const { getEthAddress } = await signerCanister({ identity });
+
+	return getEthAddress();
 };
 
 export const signTransaction = async ({
 	transaction,
 	identity
-}: {
+}: CommonParams<{
 	transaction: SignRequest;
-	identity: OptionIdentity;
-}): Promise<string> => {
-	const { sign_transaction } = await getSignerActor({ identity });
-	return sign_transaction(transaction);
+}>): Promise<string> => {
+	const { signTransaction } = await signerCanister({ identity });
+
+	return signTransaction({ transaction });
 };
 
 export const signMessage = async ({
 	message,
 	identity
-}: {
-	message: string;
-	identity: OptionIdentity;
-}): Promise<string> => {
-	const { personal_sign } = await getSignerActor({ identity });
-	return personal_sign(message);
+}: CommonParams<{ message: string }>): Promise<string> => {
+	const { personalSign } = await signerCanister({ identity });
+
+	return personalSign({ message });
 };
 
 export const signPrehash = async ({
 	hash,
 	identity
-}: {
+}: CommonParams<{
 	hash: string;
-	identity: OptionIdentity;
-}): Promise<string> => {
-	const { sign_prehash } = await getSignerActor({ identity });
-	return sign_prehash(hash);
+}>): Promise<string> => {
+	const { signPrehash } = await signerCanister({ identity });
+
+	return signPrehash({ hash });
+};
+
+const signerCanister = async ({
+	identity,
+	nullishIdentityErrorMessage
+}: CommonParams): Promise<SignerCanister> => {
+	assertNonNullish(identity, nullishIdentityErrorMessage);
+
+	if (isNullish(canister)) {
+		canister = await SignerCanister.create({
+			identity,
+			canisterId: Principal.fromText(SIGNER_CANISTER_ID)
+		});
+	}
+
+	return canister;
 };

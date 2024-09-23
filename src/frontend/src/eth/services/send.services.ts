@@ -403,7 +403,11 @@ const sendTransaction = async ({
 
 	progress(ProgressStepsSend.SIGN_TRANSFER);
 
-	const rawTransaction = await signTransaction({ identity, transaction });
+	const rawTransaction = await signTransaction({
+		identity,
+		transaction,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 
 	progress(ProgressStepsSend.TRANSFER);
 
