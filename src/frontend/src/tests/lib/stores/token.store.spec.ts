@@ -7,7 +7,7 @@ import { testDerivedUpdates } from '../../utils/derived.utils';
 mockPageStore();
 
 describe('token store', () => {
-	it('should ensure derived stores update at most once when the store changes', () => {
-		testDerivedUpdates(() => token.set(ICP_TOKEN));
+	it('should ensure derived stores update at most once when the store changes', async () => {
+		await testDerivedUpdates(() => token.set(ICP_TOKEN));
 	});
 });

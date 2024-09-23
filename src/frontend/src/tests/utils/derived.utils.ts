@@ -1,3 +1,4 @@
+import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 import {
 	btcAddressMainnet,
 	btcAddressTestnet,
@@ -45,6 +46,7 @@ import {
 	tokens,
 	tokensToPin
 } from '$lib/derived/tokens.derived';
+import { tick } from 'svelte';
 
 const derivedList = {
 	authIdentity,
@@ -90,12 +92,13 @@ const derivedList = {
 	tokenSymbol,
 	tokenToggleable,
 	tokenWithFallback,
+	tokenWithFallbackAsIcToken,
 	tokens,
 	tokensToPin,
 	userHasPouhCredential
 };
 
-export const testDerivedUpdates = (changeStore: () => void) => {
+export const testDerivedUpdates = async (changeStore: () => void) => {
 	const derivedChangeCounters = new Map<string, number>();
 
 	Object.entries(derivedList).forEach(([name, derivedStore]) => {
@@ -112,6 +115,8 @@ export const testDerivedUpdates = (changeStore: () => void) => {
 	});
 
 	changeStore();
+
+	await tick();
 
 	Object.entries(derivedList).forEach(([name]) => {
 		const count = derivedChangeCounters.get(name) ?? 0;
