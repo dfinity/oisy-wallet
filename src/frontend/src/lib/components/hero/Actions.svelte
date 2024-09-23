@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { ONRAMPER_ENABLED } from '$env/onramper.env';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
@@ -12,17 +11,15 @@
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import Buy from '$lib/components/buy/Buy.svelte';
-	import ContextMenu from '$lib/components/hero/ContextMenu.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
+	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
 	import {
 		networkEthereum,
 		networkICP,
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
-
-	export let more = false;
 
 	let convertEth = false;
 	$: convertEth = $ethToCkETHEnabled && $erc20UserTokensInitialized;
@@ -34,48 +31,44 @@
 	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
 </script>
 
-<div role="toolbar" class="flex w-full gap-6 justify-center pt-10 pb-3 px-1 max-w-96">
-	{#if $networkICP}
-		<IcReceive token={$tokenWithFallback} />
-	{:else if $networkEthereum}
-		<EthReceive />
-	{:else if $pseudoNetworkChainFusion}
-		<Receive />
-	{/if}
-
-	{#if $networkICP}
-		<IcSend token={$tokenWithFallback} />
-	{:else if $networkEthereum}
-		<EthSend token={$tokenWithFallback} />
-	{:else if $pseudoNetworkChainFusion}
-		<Send />
-	{/if}
-
-	{#if convertEth}
+<div role="toolbar" class="flex w-full justify-center pt-10">
+	<HeroButtonGroup>
 		{#if $networkICP}
-			<ConvertToEthereum />
-		{:else}
-			<ConvertToCkETH />
+			<IcReceive token={$tokenWithFallback} />
+		{:else if $networkEthereum}
+			<EthReceive />
+		{:else if $pseudoNetworkChainFusion}
+			<Receive />
 		{/if}
-	{/if}
 
-	{#if convertErc20}
 		{#if $networkICP}
-			<ConvertToEthereum />
-		{:else}
-			<ConvertToCkERC20 />
+			<IcSend token={$tokenWithFallback} />
+		{:else if $networkEthereum}
+			<EthSend token={$tokenWithFallback} />
+		{:else if $pseudoNetworkChainFusion}
+			<Send />
 		{/if}
-	{/if}
 
-	{#if convertBtc}
-		<ConvertToBTC />
-	{/if}
+		{#if convertEth}
+			{#if $networkICP}
+				<ConvertToEthereum />
+			{:else}
+				<ConvertToCkETH />
+			{/if}
+		{/if}
 
-	{#if ONRAMPER_ENABLED}
+		{#if convertErc20}
+			{#if $networkICP}
+				<ConvertToEthereum />
+			{:else}
+				<ConvertToCkERC20 />
+			{/if}
+		{/if}
+
+		{#if convertBtc}
+			<ConvertToBTC />
+		{/if}
+
 		<Buy />
-	{/if}
-
-	{#if more}
-		<ContextMenu />
-	{/if}
+	</HeroButtonGroup>
 </div>

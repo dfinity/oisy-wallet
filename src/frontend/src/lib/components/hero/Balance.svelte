@@ -6,7 +6,7 @@
 	import { tokenSymbol } from '$lib/derived/token.derived';
 </script>
 
-<span class="text-off-white">
+<span>
 	<output
 		class={`break-all ${($balance?.toBigInt() ?? 0n) === 0n ? 'opacity-50' : 'opacity-100'} flex flex-col sm:block`}
 	>

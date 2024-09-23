@@ -90,7 +90,10 @@
 	let targetNetwork: Network | undefined = undefined;
 	$: targetNetwork =
 		destination ===
-		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId], sourceNetwork.id)
+		toCkEthHelperContractAddress({
+			minterInfo: $ckEthMinterInfoStore?.[$sendTokenId],
+			networkId: sourceNetwork.id
+		})
 			? ICP_NETWORK
 			: $sendToken.network;
 

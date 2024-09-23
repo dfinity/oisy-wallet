@@ -39,6 +39,7 @@ const orchestratorInfo = async ({ orchestratorId: canisterId }) => {
 const buildOrchestratorInfo = async (orchestratorId) => {
 	const { managed_canisters } = await orchestratorInfo({ orchestratorId });
 
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a destructuring assignment
 	const mapManagedCanisters = (
 		acc,
 		{ ledger, index, ckerc20_token_symbol, erc20_contract: { address: erc20ContractAddress } }
@@ -95,7 +96,7 @@ const DATA_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'env');
 
 const LOGO_FOLDER = join(process.cwd(), 'src', 'frontend', 'src', 'icp-eth', 'assets');
 
-const saveTokenLogo = async (canisterId, name) => {
+const saveTokenLogo = async ({ canisterId, name }) => {
 	const logoName = name.toLowerCase().replace('ck', '').replace('sepolia', '');
 	const file = join(LOGO_FOLDER, `${logoName}.svg`);
 
@@ -145,7 +146,7 @@ const findCkErc20 = async () => {
 			...tokens.staging
 		})
 			.filter(([_, { ledgerCanisterId }]) => !SKIP_CANISTER_IDS_LOGOS.includes(ledgerCanisterId))
-			.map(([name, { ledgerCanisterId }]) => saveTokenLogo(ledgerCanisterId, name))
+			.map(([name, { ledgerCanisterId }]) => saveTokenLogo({ canisterId: ledgerCanisterId, name }))
 	);
 };
 
