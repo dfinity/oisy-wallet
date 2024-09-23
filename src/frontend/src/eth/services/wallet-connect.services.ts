@@ -33,10 +33,10 @@ import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import { get } from 'svelte/store';
 import { send as executeSend } from './send.services';
 
-export type WalletConnectCallBackParams = {
+export interface WalletConnectCallBackParams {
 	request: Web3WalletTypes.SessionRequest;
 	listener: WalletConnectListener;
-};
+}
 
 export type WalletConnectExecuteParams = Pick<WalletConnectCallBackParams, 'request'> & {
 	listener: OptionWalletConnectListener;
