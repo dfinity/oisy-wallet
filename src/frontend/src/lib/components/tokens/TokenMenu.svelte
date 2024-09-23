@@ -34,7 +34,7 @@
 </script>
 
 <button
-	class="pointer-events-auto ml-2 flex gap-0.5 font-bold text-primary"
+	class="pointer-events-auto ml-auto flex gap-0.5 font-bold text-primary"
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.tokens.alt.context_menu}
