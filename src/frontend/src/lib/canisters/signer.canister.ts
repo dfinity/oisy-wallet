@@ -7,18 +7,11 @@ import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/si
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
-import { Canister, createServices, type CanisterOptions } from '@dfinity/utils';
-
-export interface SignerCanisterOptions
-	extends Omit<CanisterOptions<SignerService>, 'canisterId' | 'agent'> {
-	canisterId: Principal;
-	identity: Identity;
-}
+import type { CreateCanisterOptions } from '$lib/types/canister';
+import { Canister, createServices } from '@dfinity/utils';
 
 export class SignerCanister extends Canister<SignerService> {
-	static async create({ identity, ...options }: SignerCanisterOptions) {
+	static async create({ identity, ...options }: CreateCanisterOptions<SignerService>) {
 		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<SignerService>({
