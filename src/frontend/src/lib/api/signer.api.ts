@@ -32,16 +32,16 @@ export const getEthAddress = async ({ identity }: CommonParams): Promise<EthAddr
 	return getEthAddress();
 };
 
-export const updateBtcBalance = async ({
+export const getBtcBalance = async ({
 	identity,
 	network,
 	signerCanisterId
 }: CommonParams<{
 	network: BitcoinNetwork;
 }>): Promise<bigint> => {
-	const { updateBtcBalance } = await signerCanister({ identity, signerCanisterId });
+	const { getBtcBalance } = await signerCanister({ identity, signerCanisterId });
 
-	return updateBtcBalance({ network });
+	return getBtcBalance({ network });
 };
 
 export const signTransaction = async ({

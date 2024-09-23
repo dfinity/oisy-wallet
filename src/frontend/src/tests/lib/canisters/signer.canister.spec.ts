@@ -83,11 +83,11 @@ describe('signer.canister', () => {
 		const response = 2n;
 		service.caller_btc_balance.mockResolvedValue(response);
 
-		const { updateBtcBalance } = await createSignerCanister({
+		const { getBtcBalance } = await createSignerCanister({
 			serviceOverride: service
 		});
 
-		const res = await updateBtcBalance(btcParams);
+		const res = await getBtcBalance(btcParams);
 
 		expect(res).toEqual(response);
 		expect(service.caller_btc_balance).toHaveBeenCalledWith(btcParams.network);
@@ -98,11 +98,11 @@ describe('signer.canister', () => {
 			throw mockResponseError;
 		});
 
-		const { updateBtcBalance } = await createSignerCanister({
+		const { getBtcBalance } = await createSignerCanister({
 			serviceOverride: service
 		});
 
-		const res = updateBtcBalance(btcParams);
+		const res = getBtcBalance(btcParams);
 
 		await expect(res).rejects.toThrow(mockResponseError);
 	});
