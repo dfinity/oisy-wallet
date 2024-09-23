@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { ONRAMPER_ENABLED } from '$env/onramper.env';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
@@ -70,8 +69,6 @@
 			<ConvertToBTC />
 		{/if}
 
-		{#if ONRAMPER_ENABLED}
-			<Buy />
-		{/if}
+		<Buy />
 	</HeroButtonGroup>
 </div>
