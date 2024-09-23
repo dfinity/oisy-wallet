@@ -5,7 +5,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 
-export type SendParams = {
+export interface SendParams {
 	progress: (step: ProgressStepsSend) => void;
 	lastProgressStep?: ProgressStepsSend;
 	token: Token;
@@ -13,4 +13,4 @@ export type SendParams = {
 	targetNetwork?: Network | undefined;
 	identity: OptionIdentity;
 	minterInfo: OptionCertifiedMinterInfo;
-};
+}
