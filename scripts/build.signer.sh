@@ -21,8 +21,9 @@ print_help() {
 DFX_NETWORK="${DFX_NETWORK:-local}"
 
 SIGNER_RELEASE="v0.1.2"
-CANDID_URL="https://raw.githubusercontent.com/dfinity/chain-fusion-signer/${SIGNER_RELEASE}/src/signer/signer.did"
-WASM_URL="https://github.com/dfinity/chain-fusion-signer/releases/download/${SIGNER_RELEASE}/signer.wasm.gz"
+SIGNER_RELEASE_URL="https://github.com/dfinity/chain-fusion-signer/releases/download/${SIGNER_RELEASE}"
+CANDID_URL="${SIGNER_RELEASE_URL}/signer.did"
+WASM_URL="${SIGNER_RELEASE_URL}/signer.wasm.gz"
 
 CANDID_FILE="$(jq -r .canisters.signer.candid dfx.json)"
 WASM_FILE="$(jq -r .canisters.signer.wasm dfx.json)"
