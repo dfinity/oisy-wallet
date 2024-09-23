@@ -2,10 +2,10 @@ import type { UserProfile } from '$declarations/backend/backend.did';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
-type CertifiedUserProfileData = {
+interface CertifiedUserProfileData {
 	profile: UserProfile;
 	certified: boolean;
-};
+}
 
 // * `undefined` means the store is not loaded yet.
 // * `null` means there was an error.

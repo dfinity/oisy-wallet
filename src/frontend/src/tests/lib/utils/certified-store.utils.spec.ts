@@ -31,7 +31,10 @@ describe('mapCertifiedData', () => {
 	});
 
 	it('should return the data when certifiedData contains an object', () => {
-		type TestData = { prop: string; value: number };
+		interface TestData {
+			prop: string;
+			value: number;
+		}
 		const data: TestData = { prop: 'testData', value: 1 };
 		const certifiedData: Option<CertifiedData<TestData>> = { data, certified };
 

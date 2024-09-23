@@ -12,7 +12,9 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 const escapeRegExp = (regExpText: string): string =>
 	regExpText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 
-export type I18nSubstitutions = { [from: string]: string };
+export interface I18nSubstitutions {
+	[from: string]: string;
+}
 
 /**
  * @example

@@ -27,10 +27,10 @@ export interface TokenAppearance {
 	oisyName?: TokenOisyName;
 }
 
-export type TokenOisyName = {
+export interface TokenOisyName {
 	prefix: string | undefined;
 	oisyName: string;
-};
+}
 
 export interface TokenLinkedData {
 	twinTokenSymbol?: string;

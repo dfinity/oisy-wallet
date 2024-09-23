@@ -56,13 +56,15 @@ export interface IcTransactionUi {
 export type IcToken = Token & IcFee & IcInterface;
 export type IcTokenWithoutId = Omit<IcToken, 'id'>;
 
-export type IcFee = { fee: bigint };
+export interface IcFee {
+	fee: bigint;
+}
 
 export type IcInterface = IcCanisters & IcAppMetadata;
-export type IcCanisters = {
+export interface IcCanisters {
 	ledgerCanisterId: LedgerCanisterIdText;
 	indexCanisterId: IndexCanisterIdText;
-};
+}
 
 export type IcCkToken = IcToken & Partial<IcCkMetadata>;
 
@@ -72,16 +74,16 @@ export type IcCkMetadata = {
 	minterCanisterId: MinterCanisterIdText;
 } & Partial<IcCkLinkedAssets>;
 
-export type IcCkLinkedAssets = {
+export interface IcCkLinkedAssets {
 	twinToken: Token;
 	feeLedgerCanisterId?: LedgerCanisterIdText;
-};
+}
 
-export type IcAppMetadata = {
+export interface IcAppMetadata {
 	exchangeCoinId?: CoingeckoCoinsId;
 	position: number;
 	explorerUrl?: string;
-};
+}
 
 export type OptionIcToken = Option<IcToken>;
 export type OptionIcCkToken = Option<IcCkToken>;
