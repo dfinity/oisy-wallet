@@ -6,7 +6,7 @@
 </script>
 
 <button
-	class={asMenuItem ? 'text' : 'text-center text-white font-bold whitespace-nowrap'}
+	class={asMenuItem ? 'text' : 'text-center text-primary font-bold whitespace-nowrap'}
 	on:click
 	data-tid={testId}
 >

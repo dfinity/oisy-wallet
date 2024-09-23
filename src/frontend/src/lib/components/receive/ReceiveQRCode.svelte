@@ -15,7 +15,7 @@
 
 <svelte:window on:resize={rerender} />
 
-<div in:fade class="p-4 rounded-sm bg-off-white" class:opacity-0={!render}>
+<div in:fade class="rounded-sm bg-off-white p-4" class:opacity-0={!render}>
 	{#if render}
 		<QRCode value={address} />
 	{/if}

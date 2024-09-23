@@ -3,6 +3,7 @@
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 
 	export let noMargin = false;
+	export let testId: string | undefined = undefined;
 
 	let description = false;
 	$: description = nonNullish($$slots.description);
@@ -11,7 +12,7 @@
 	$: amount = nonNullish($$slots.amount);
 </script>
 
-<div class="flex items-center gap-4" class:mb-6={!noMargin}>
+<div class="flex items-center gap-4" class:mb-6={!noMargin} data-tid={testId}>
 	<slot name="icon" />
 
 	<div class="flex-1 flex flex-col justify-center">
