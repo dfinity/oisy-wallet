@@ -2,7 +2,7 @@
 	import Header from '$lib/components/hero/Header.svelte';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
-	import { authSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -14,12 +14,12 @@
 	$: heroContent = usdTotal || summary;
 </script>
 
-<div class={`pb-4 md:pb-6`}>
+<div class="pt-6 space-y-10">
 	<Header back={back === 'header'} />
 
 	<article
-		class="flex flex-col rounded-lg pt-1 sm:pt-3 px-8 relative main 2xl:mt-[-70px] items-center"
-		style="padding-bottom: 32px"
+		class="flex flex-col rounded-lg pb-6 relative main 2xl:mt-[-70px] items-center"
+		class:pb-16={$authNotSignedIn}
 	>
 		{#if $authSignedIn}
 			<HeroContent {usdTotal} {summary} {actions} back={back === 'hero'} />

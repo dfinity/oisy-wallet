@@ -20,7 +20,8 @@
 		},
 		"alt": {
 			"logo": "$name logo",
-			"background": "Background image of $oisy_name with gradient logo"
+			"background": "Background image of $oisy_name with gradient logo",
+			"go_to_home": "Go to the $oisy_name home page"
 		}
 	},
 	"navigation": {

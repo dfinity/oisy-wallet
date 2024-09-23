@@ -19,7 +19,7 @@ interface I18nCore {
 		more: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; background: string };
+	alt: { logo: string; background: string; go_to_home: string };
 }
 
 interface I18nNavigation {

@@ -3,7 +3,7 @@
 
 	export let icon: ComponentType;
 	export let iconSize = '2.9rem';
-	export let backgroundStyleClass = 'bg-dark-blue opacity-10';
+	export let backgroundStyleClass = 'bg-alice-blue';
 	export let iconStyleClass = '';
 	export let additionalStyleClass = '';
 </script>
