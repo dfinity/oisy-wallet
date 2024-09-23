@@ -5,10 +5,11 @@
 	import TokensSignedIn from '$lib/components/tokens/TokensSignedIn.svelte';
 	import TokensSignedOut from '$lib/components/tokens/TokensSignedOut.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import SignedOutBlur from '$lib/components/ui/SignedOutBlur.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 </script>
 
-<div class:pointer-events-none={$authNotSignedIn} class:blur-[1.5px]={$authNotSignedIn}>
+<SignedOutBlur>
 	<Header>
 		<NetworksSwitcher disabled={$authNotSignedIn} />
 
@@ -22,4 +23,4 @@
 	{/if}
 
 	<ManageTokensButton />
-</div>
+</SignedOutBlur>
