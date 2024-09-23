@@ -44,31 +44,31 @@ export class BackendCanister extends Canister<BackendService> {
 	};
 
 	setManyCustomTokens = async ({ tokens }: { tokens: CustomToken[] }): Promise<void> => {
-		const { set_many_custom_tokens } = this.caller({ certified: false });
+		const { set_many_custom_tokens } = this.caller({ certified: true });
 
 		return set_many_custom_tokens(tokens);
 	};
 
 	setCustomToken = async ({ token }: { token: CustomToken }): Promise<void> => {
-		const { set_custom_token } = this.caller({ certified: false });
+		const { set_custom_token } = this.caller({ certified: true });
 
 		return set_custom_token(token);
 	};
 
 	setManyUserTokens = async ({ tokens }: { tokens: UserToken[] }): Promise<void> => {
-		const { set_many_user_tokens } = this.caller({ certified: false });
+		const { set_many_user_tokens } = this.caller({ certified: true });
 
 		return set_many_user_tokens(tokens);
 	};
 
 	setUserToken = async ({ token }: { token: UserToken }): Promise<void> => {
-		const { set_user_token } = this.caller({ certified: false });
+		const { set_user_token } = this.caller({ certified: true });
 
 		return set_user_token(token);
 	};
 
 	createUserProfile = async (): Promise<UserProfile> => {
-		const { create_user_profile } = this.caller({ certified: false });
+		const { create_user_profile } = this.caller({ certified: true });
 
 		return create_user_profile();
 	};
@@ -85,7 +85,7 @@ export class BackendCanister extends Canister<BackendService> {
 		currentUserVersion,
 		credentialSpec
 	}: AddUserCredentialParams): Promise<AddUserCredentialResponse> => {
-		const { add_user_credential } = this.caller({ certified: false });
+		const { add_user_credential } = this.caller({ certified: true });
 
 		return add_user_credential({
 			credential_jwt: credentialJwt,
