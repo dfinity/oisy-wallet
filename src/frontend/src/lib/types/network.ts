@@ -1,4 +1,5 @@
 import type { OnRamperNetworkId } from '$lib/types/onramper';
+import type { AtLeastOne } from '$lib/types/utils';
 
 export type NetworkId = symbol;
 
@@ -9,8 +10,9 @@ export type Network = {
 	env: NetworkEnvironment;
 	name: string;
 	icon?: string;
-} & NetworkLinkedData;
+	buy?: AtLeastOne<NetworkBuy>;
+};
 
-export interface NetworkLinkedData {
+export type NetworkBuy = {
 	onRamperId?: OnRamperNetworkId;
-}
+};
