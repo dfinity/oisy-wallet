@@ -4,9 +4,9 @@
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let isTokenPage: boolean;
+	export let isTransactionsPage: boolean;
 </script>
 
 <SendButtonWithModal open={modalStore.openSend} isOpen={$modalSend}>
-	<SendModal {isTokenPage} on:nnsClose slot="modal" />
+	<SendModal {isTransactionsPage} on:nnsClose slot="modal" />
 </SendButtonWithModal>

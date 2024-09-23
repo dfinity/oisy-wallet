@@ -17,7 +17,7 @@
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
-	export let isTokenPage: boolean;
+	export let isTransactionsPage: boolean;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = targetNetwork?.id;
@@ -26,7 +26,7 @@
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let steps: WizardSteps;
-	$: steps = isTokenPage
+	$: steps = isTransactionsPage
 		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
 		: allSendWizardSteps({ i18n: $i18n });
 
@@ -85,7 +85,7 @@
 			bind:targetNetwork
 			bind:amount
 			bind:sendProgressStep
-			formCancelAction={isTokenPage ? 'close' : 'back'}
+			formCancelAction={isTransactionsPage ? 'close' : 'back'}
 			on:icBack={modal.back}
 			on:icSendBack={modal.back}
 			on:icNext={modal.next}

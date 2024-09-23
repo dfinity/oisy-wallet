@@ -31,8 +31,8 @@
 	let convertBtc = false;
 	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
 
-	let isTokenPage = false;
-	$: isTokenPage = isRouteTransactions($page);
+	let isTransactionsPage = false;
+	$: isTransactionsPage = isRouteTransactions($page);
 </script>
 
 <div role="toolbar" class="flex w-full justify-center pt-10 pb-3">
@@ -45,7 +45,7 @@
 			<Receive />
 		{/if}
 
-		<Send {isTokenPage} />
+		<Send {isTransactionsPage} />
 
 		{#if convertEth}
 			{#if $networkICP}
