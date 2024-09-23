@@ -32,7 +32,7 @@
 	$: convertBtc = $tokenCkBtcLedger && $erc20UserTokensInitialized;
 </script>
 
-<div role="toolbar" class="flex w-full justify-center pt-10 pb-3">
+<div role="toolbar" class="flex w-full justify-center pt-10">
 	<HeroButtonGroup>
 		{#if $networkICP}
 			<IcReceive token={$tokenWithFallback} />

@@ -16,17 +16,16 @@
 </script>
 
 <header
-	class="grid grid-cols-2 items-center md:px-4 relative z-10 pointer-events-none"
+	class="grid grid-cols-2 items-center px-4 sm:px-8 relative z-10 pointer-events-none gap-y-5"
 	class:sm:grid-cols-[1fr_auto_1fr]={$authSignedIn}
 	class:xl:grid-cols-[1fr_auto_1fr]={$authNotSignedIn}
-	style="min-height: 78px"
 >
 	{#if back}
 		<Back />
 	{:else}
 		<a
 			href="/"
-			class="flex p-4 items-center gap-0 pointer-events-auto no-underline"
+			class="flex items-center gap-0 pointer-events-auto no-underline"
 			aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
 		>
 			<OisyWalletLogo />
@@ -34,7 +33,7 @@
 	{/if}
 
 	<div
-		class="col-span-3 col-start-1 row-start-2 flex px-4"
+		class="col-span-3 col-start-1 row-start-2 flex"
 		class:sm:col-span-1={$authSignedIn}
 		class:xl:col-span-1={$authNotSignedIn}
 		class:sm:col-start-2={$authSignedIn}
@@ -47,7 +46,7 @@
 		<Alpha />
 	</div>
 
-	<div class="flex m-4 gap-4 pointer-events-auto ml-auto">
+	<div class="flex gap-4 pointer-events-auto ml-auto">
 		{#if $authSignedIn}
 			<WalletConnect />
 		{/if}

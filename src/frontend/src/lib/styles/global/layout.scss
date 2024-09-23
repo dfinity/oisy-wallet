@@ -3,7 +3,13 @@
 main,
 .main {
 	margin: 0 auto;
-	padding: 0 calc(2.5 * var(--padding)) var(--padding-3x);
+	padding-inline: calc(2.5 * var(--padding));
 
 	max-width: media.$breakpoint-small;
+}
+
+header {
+	margin: 0 auto;
+
+	max-width: media.$breakpoint-extra-large;
 }

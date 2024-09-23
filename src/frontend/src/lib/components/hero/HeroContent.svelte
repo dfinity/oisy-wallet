@@ -27,7 +27,7 @@
 {#if summary}
 	<div
 		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
-		class="flex flex-row items-start justify-between w-full mt-6 md:mt-12"
+		class="grid grid-cols-[1fr_auto_1fr] flex-row items-start justify-between w-full"
 	>
 		{#if back}
 			<Back />

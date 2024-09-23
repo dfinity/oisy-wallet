@@ -27,7 +27,7 @@
 	back={route === 'settings' ? 'header' : route === 'transactions' ? 'hero' : undefined}
 />
 
-<main class="pt-12">
+<main class="pt-8 pb-5 sm:pb-12">
 	<LoadersGuard>
 		<slot />
 	</LoadersGuard>
