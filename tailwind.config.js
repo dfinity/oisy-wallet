@@ -32,6 +32,11 @@ export default {
 			'american-orange': '#ff8a00',
 			'crayola-yellow': '#ffe57f',
 			cornsilk: '#fff7d8'
+		},
+		extend: {
+			minWidth: {
+				'2_5xl': '1728px'
+			}
 		}
 	},
 	plugins: []
