@@ -33,10 +33,6 @@ export const modalBuy: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'buy'
 );
-export const modalEthSend: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'eth-send'
-);
 export const modalConvertCkBTCToBTC: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'convert-ckbtc-btc'
@@ -52,10 +48,6 @@ export const modalConvertToTwinTokenEth: Readable<boolean> = derived(
 export const modalHowToConvertToTwinTokenEth: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'how-to-convert-to-twin-token-eth'
-);
-export const modalIcSend: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'ic-send'
 );
 export const modalWalletConnectAuth: Readable<boolean> = derived(
 	modalStore,
