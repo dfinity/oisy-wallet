@@ -79,6 +79,34 @@ describe('signer.canister', () => {
 		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
+	it('returns correct BTC balance', async () => {
+		const response = 2n;
+		service.caller_btc_balance.mockResolvedValue(response);
+
+		const { updateBtcBalance } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = await updateBtcBalance(btcParams);
+
+		expect(res).toEqual(response);
+		expect(service.caller_btc_balance).toHaveBeenCalledWith(btcParams.network);
+	});
+
+	it('should throw an error if caller_btc_balance throws', async () => {
+		service.caller_btc_balance.mockImplementation(async () => {
+			throw mockResponseError;
+		});
+
+		const { updateBtcBalance } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = updateBtcBalance(btcParams);
+
+		await expect(res).rejects.toThrow(mockResponseError);
+	});
+
 	it('returns correct ETH address', async () => {
 		const response = 'test-eth-address';
 		service.caller_eth_address.mockResolvedValue(response);
