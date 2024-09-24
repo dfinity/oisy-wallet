@@ -551,6 +551,16 @@ interface I18nSigner {
 		text: { loading: string };
 		error: { no_approve_callback: string; no_reject_callback: string; retrieve: string };
 	};
+	call_canister: {
+		text: {
+			processing: string;
+			executed: string;
+			close_window: string;
+			error: string;
+			try_again: string;
+		};
+		error: { cannot_call: string };
+	};
 }
 
 interface I18n {

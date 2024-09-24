@@ -53,6 +53,7 @@
 				? consentInfo.consent_message.GenericDisplayMessage
 				: undefined;
 	};
+
 	$: $payload, onPayload();
 
 	type Text = { title: string; content: string } | undefined;

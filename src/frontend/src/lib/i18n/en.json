@@ -648,6 +648,18 @@
 				"no_reject_callback": "No callback to reject the consent message, which is unexpected. Close the wallet and try again.",
 				"retrieve": "An error occurred while retrieving the consent message"
 			}
+		},
+		"call_canister": {
+			"text": {
+				"processing": "Processing the request...",
+				"executed": "The request has been executed",
+				"close_window": "You can close this window",
+				"error": "Request failed due to an error",
+				"try_again": "Please try again. If the issue persists, contact the developer of the dapp where you initiated the request."
+			},
+			"error": {
+				"cannot_call": "The call cannot be processed"
+			}
 		}
 	}
 }

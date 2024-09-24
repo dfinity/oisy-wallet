@@ -3,6 +3,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy, setContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import SignerCallCanister from '$lib/components/signer/SignerCallCanister.svelte';
 	import SignerConsentMessage from '$lib/components/signer/SignerConsentMessage.svelte';
 	import SignerIdle from '$lib/components/signer/SignerIdle.svelte';
 	import SignerPermissions from '$lib/components/signer/SignerPermissions.svelte';
@@ -49,5 +50,7 @@
 		<SignerPermissions />
 
 		<SignerConsentMessage />
+
+		<SignerCallCanister />
 	{/if}
 </article>

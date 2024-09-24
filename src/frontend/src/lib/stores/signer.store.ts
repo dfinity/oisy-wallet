@@ -5,7 +5,9 @@ import {
 	ICRC21_CALL_CONSENT_MESSAGE,
 	ICRC25_REQUEST_PERMISSIONS,
 	ICRC27_ACCOUNTS,
+	ICRC49_CALL_CANISTER,
 	type AccountsPromptPayload,
+	type CallCanisterPromptPayload,
 	type ConsentMessagePromptPayload,
 	type PermissionsPromptPayload
 } from '@dfinity/oisy-wallet-signer';
@@ -25,6 +27,10 @@ export interface SignerContext {
 		payload: Readable<ConsentMessagePromptPayload | undefined | null>;
 		reset: () => void;
 	};
+	callCanisterPrompt: {
+		payload: Readable<CallCanisterPromptPayload | undefined | null>;
+		reset: () => void;
+	};
 }
 
 export const initSignerContext = ({
@@ -42,6 +48,10 @@ export const initSignerContext = ({
 		undefined
 	);
 
+	const callCanisterPromptPayloadStore = writable<CallCanisterPromptPayload | undefined | null>(
+		undefined
+	);
+
 	const permissionsPromptPayload = derived(
 		[permissionsPromptPayloadStore],
 		([$permissionsPromptPayloadStore]) => $permissionsPromptPayloadStore
@@ -52,10 +62,17 @@ export const initSignerContext = ({
 		([$consentMessagePromptPayloadStore]) => $consentMessagePromptPayloadStore
 	);
 
+	const callCanisterPromptPayload = derived(
+		[callCanisterPromptPayloadStore],
+		([$callCanisterPromptPayloadStore]) => $callCanisterPromptPayloadStore
+	);
+
 	const idle = derived(
-		[permissionsPromptPayload, consentMessagePromptPayload],
-		([$permissionsPromptPayload, $consentMessagePromptPayload]) =>
-			isNullish($permissionsPromptPayload) && isNullish($consentMessagePromptPayload)
+		[permissionsPromptPayload, consentMessagePromptPayload, callCanisterPromptPayload],
+		([$permissionsPromptPayload, $consentMessagePromptPayload, $callCanisterPromptPayloadStore]) =>
+			isNullish($permissionsPromptPayload) &&
+			isNullish($consentMessagePromptPayload) &&
+			isNullish($callCanisterPromptPayloadStore)
 	);
 
 	const init = ({ owner }: { owner: Identity }) => {
@@ -80,14 +97,23 @@ export const initSignerContext = ({
 				consentMessagePromptPayloadStore.set(payload);
 			}
 		});
+
+		signer.register({
+			method: ICRC49_CALL_CANISTER,
+			prompt: (payload: CallCanisterPromptPayload) => {
+				callCanisterPromptPayloadStore.set(payload);
+			}
+		});
 	};
 
 	const resetPermissionsPromptPayload = () => permissionsPromptPayloadStore.set(null);
 	const resetConsentMessagePromptPayload = () => consentMessagePromptPayloadStore.set(null);
+	const resetCallCanisterPromptPayload = () => callCanisterPromptPayloadStore.set(null);
 
 	const reset = () => {
 		resetPermissionsPromptPayload();
 		resetConsentMessagePromptPayload();
+		resetCallCanisterPromptPayload();
 
 		signer?.disconnect();
 		signer = null;
@@ -104,6 +130,10 @@ export const initSignerContext = ({
 		consentMessagePrompt: {
 			payload: consentMessagePromptPayload,
 			reset: resetConsentMessagePromptPayload
+		},
+		callCanisterPrompt: {
+			payload: callCanisterPromptPayload,
+			reset: resetCallCanisterPromptPayload
 		}
 	};
 };
