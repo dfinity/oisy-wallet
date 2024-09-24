@@ -273,7 +273,10 @@ async fn eth_address_of(p: Principal) -> String {
 /// Returns the Bitcoin address of the caller.
 #[update(guard = "may_read_threshold_keys")]
 async fn caller_btc_address(network: BitcoinNetwork) -> String {
-    public_key_to_p2wpkh_address(network, &ecdsa_pubkey_of(&ic_cdk::caller()).await)
+    public_key_to_p2wpkh_address(
+        transform_network(network),
+        &ecdsa_pubkey_of(&ic_cdk::caller()).await,
+    )
 }
 
 fn nat_to_u256(n: &Nat) -> U256 {
@@ -700,8 +703,6 @@ struct SendBtcParams {
 #[update(guard = "may_threshold_sign")]
 async fn send_btc(params: SendBtcParams) -> String {
     let principal = &ic_cdk::caller();
-    let derivation_path = principal_to_derivation_path(principal);
-    let key_name = "dfx_test_key".to_string();
     let network = params.network;
     let dst_address = params.dst_address;
     let amount = params.amount;
@@ -714,7 +715,8 @@ async fn send_btc(params: SendBtcParams) -> String {
     // We use the caller's pub key and address
     // TODO: Add source address as optional param.
     let user_public_key = ecdsa_pubkey_of(&principal).await;
-    let source_address = public_key_to_p2wpkh_address(network, &user_public_key);
+    let bitcoin_network = transform_network(network);
+    let source_address = public_key_to_p2wpkh_address(bitcoin_network, &user_public_key);
 
     println!("Source address {}", source_address.to_string());
 
@@ -748,16 +750,8 @@ async fn send_btc(params: SendBtcParams) -> String {
     .await;
 
     // Sign the transaction.
-    let signed_transaction = ecdsa_sign_transaction(
-        &user_public_key,
-        &own_address,
-        transaction,
-        &own_utxos,
-        key_name,
-        derivation_path,
-        ecdsa_api::get_ecdsa_signature,
-    )
-    .await;
+    let signed_transaction =
+        ecdsa_sign_transaction(&principal, bitcoin_network, transaction, &own_utxos).await;
 
     let signed_transaction_bytes = serialize(&signed_transaction);
 

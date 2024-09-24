@@ -20,10 +20,10 @@ pub fn public_key_to_p2pkh_address(network: BitcoinNetwork, public_key: &[u8]) -
     .to_string()
 }
 
-pub fn public_key_to_p2wpkh_address(network: BitcoinNetwork, public_key: &[u8]) -> String {
+pub fn public_key_to_p2wpkh_address(network: Network, public_key: &[u8]) -> String {
     Address::p2wpkh(
         &CompressedPublicKey::from_slice(public_key).expect("failed to parse public key"),
-        transform_network(network),
+        network,
     )
     .to_string()
 }

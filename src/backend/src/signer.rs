@@ -1,12 +1,20 @@
+use crate::bitcoin_utils::public_key_to_p2wpkh_address;
+use crate::read_config;
 use bitcoin::script::PushBytesBuf;
 use bitcoin::Amount;
+use bitcoin::Network;
 use bitcoin::{blockdata::witness::Witness, hashes::Hash, Address, Transaction, TxIn};
 use bitcoin::{
     sighash::{EcdsaSighashType, SighashCache},
     AddressType,
 };
+use candid::Principal;
 use ic_cdk::api::management_canister::bitcoin::Utxo;
-use ic_cdk::println;
+use ic_cdk::api::management_canister::ecdsa::{
+    ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
+    SignWithEcdsaArgument,
+};
+use std::str::FromStr;
 
 const ECDSA_SIG_HASH_TYPE: EcdsaSighashType = EcdsaSighashType::All;
 
@@ -62,6 +70,46 @@ fn get_input_value(input: &TxIn, outputs: &[Utxo]) -> Option<Amount> {
     None
 }
 
+pub async fn get_ecdsa_signature(
+    key_name: String,
+    derivation_path: Vec<Vec<u8>>,
+    message_hash: Vec<u8>,
+) -> Vec<u8> {
+    let key_id = EcdsaKeyId {
+        curve: EcdsaCurve::Secp256k1,
+        name: key_name,
+    };
+
+    let res = sign_with_ecdsa(SignWithEcdsaArgument {
+        message_hash,
+        derivation_path,
+        key_id,
+    })
+    .await;
+
+    res.unwrap().0.signature
+}
+
+fn principal_to_derivation_path(p: &Principal) -> Vec<Vec<u8>> {
+    const SCHEMA: u8 = 1;
+
+    vec![vec![SCHEMA], p.as_slice().to_vec()]
+}
+
+async fn ecdsa_pubkey_of(key_name: String, derivation_path: Vec<Vec<u8>>) -> Vec<u8> {
+    let (key,) = ecdsa_public_key(EcdsaPublicKeyArgument {
+        canister_id: None,
+        derivation_path,
+        key_id: EcdsaKeyId {
+            curve: EcdsaCurve::Secp256k1,
+            name: key_name,
+        },
+    })
+    .await
+    .expect("failed to get public key");
+    key.public_key
+}
+
 // Sign a bitcoin transaction.
 //
 // IMPORTANT: This method is for demonstration purposes only and it only
@@ -69,30 +117,28 @@ fn get_input_value(input: &TxIn, outputs: &[Utxo]) -> Option<Amount> {
 //
 // 1. All the inputs are referencing outpoints that are owned by `own_address`.
 // 2. `own_address` is a P2WPKH address.
-pub async fn ecdsa_sign_transaction<SignFun, Fut>(
-    own_public_key: &[u8],
-    own_address: &Address,
+pub async fn ecdsa_sign_transaction(
+    principal: &Principal,
+    network: Network,
     mut transaction: Transaction,
     own_utxos: &[Utxo],
-    key_name: String,
-    derivation_path: Vec<Vec<u8>>,
-    signer: SignFun,
-) -> Transaction
-where
-    SignFun: Fn(String, Vec<Vec<u8>>, Vec<u8>) -> Fut,
-    Fut: std::future::Future<Output = Vec<u8>>,
-{
+) -> Transaction {
+    let key_name = read_config(|s| s.ecdsa_key_name.clone());
+    let derivation_path = principal_to_derivation_path(&principal);
+    let own_public_key = ecdsa_pubkey_of(key_name.clone(), derivation_path.clone()).await;
+
+    let source_address = public_key_to_p2wpkh_address(network, &own_public_key);
+    let own_address = Address::from_str(&source_address)
+        .unwrap()
+        .require_network(network)
+        .expect("Network check failed");
+
     // Verify that our own address is P2WPKH.
     assert_eq!(
         own_address.address_type(),
         Some(AddressType::P2wpkh),
         "This example supports signing p2wpkh addresses only."
     );
-
-    println!("in ta ecdsa_sign_transaction");
-    for (_, utxo) in own_utxos.iter().enumerate() {
-        println!("utxo value: {}", utxo.value);
-    }
 
     let txclone = transaction.clone();
     for (index, input) in transaction.input.iter_mut().enumerate() {
@@ -107,7 +153,7 @@ where
             )
             .unwrap();
 
-        let signature = signer(
+        let signature = get_ecdsa_signature(
             key_name.clone(),
             derivation_path.clone(),
             sighash.as_byte_array().to_vec(),
