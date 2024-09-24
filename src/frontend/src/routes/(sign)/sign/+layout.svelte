@@ -8,7 +8,7 @@
 <Background />
 
 <main class="pt-10 flex flex-col gap-y-8">
-	<div class="flex justify-center md:mt-24"><OisyWalletLogoLink /></div>
+	<div class="flex justify-center"><OisyWalletLogoLink /></div>
 
 	<LoadersGuard>
 		<slot />
