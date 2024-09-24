@@ -4,8 +4,10 @@ import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import { toUserToken } from '$icp-eth/services/user-token.services';
 import { setManyUserTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
+import { i18n } from '$lib/stores/i18n.store';
 import type { Identity } from '@dfinity/agent';
 import { nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export type SaveUserToken = Pick<
 	Erc20UserToken,
@@ -26,7 +28,8 @@ export const saveUserTokens = async ({
 
 	await setManyUserTokens({
 		identity,
-		tokens: tokens.map(toUserToken)
+		tokens: tokens.map(toUserToken),
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
 	progress(ProgressStepsAddToken.UPDATE_UI);

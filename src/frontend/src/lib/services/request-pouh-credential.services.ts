@@ -44,7 +44,8 @@ const addPouhCredential = async ({
 				arguments: []
 			},
 			issuerCanisterId,
-			currentUserVersion: fromNullable(userProfile?.profile.version ?? [])
+			currentUserVersion: fromNullable(userProfile?.profile.version ?? []),
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
 		if ('Ok' in response) {
 			return { success: true };

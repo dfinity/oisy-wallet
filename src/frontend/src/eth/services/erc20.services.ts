@@ -94,7 +94,10 @@ const loadErc20UserTokens = async (params: {
 	type ContractDataWithCustomToken = ContractData & UserTokenState;
 
 	const loadUserContracts = async (): Promise<Promise<ContractDataWithCustomToken>[]> => {
-		const contracts = await listUserTokens(params);
+		const contracts = await listUserTokens({
+			...params,
+			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+		});
 
 		return contracts
 			.filter(({ chain_id }) => SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS.includes(chain_id))

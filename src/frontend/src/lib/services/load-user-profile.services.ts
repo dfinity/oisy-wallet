@@ -15,7 +15,11 @@ const queryProfile = async ({
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<UserProfile> => {
-	const response = await getUserProfile({ identity, certified });
+	const response = await getUserProfile({
+		identity,
+		certified,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 	if ('Ok' in response) {
 		return response.Ok;
 	}
@@ -63,7 +67,10 @@ export const loadUserProfile = async ({
 	try {
 		let profile = await queryUnsafeProfile({ identity });
 		if (isNullish(profile)) {
-			profile = await createUserProfile({ identity });
+			profile = await createUserProfile({
+				identity,
+				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+			});
 			userProfileStore.set({ certified: true, profile });
 		} else {
 			// We set the store before the call to load the certified profile.
