@@ -1,32 +1,20 @@
-import type {
-	AddUserCredentialError,
-	CredentialSpec,
-	CustomToken,
-	GetUserProfileError,
-	UserProfile,
-	UserToken
-} from '$declarations/backend/backend.did';
+import type { CustomToken, UserProfile, UserToken } from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
+import type {
+	AddUserCredentialParams,
+	AddUserCredentialResponse,
+	GetUserProfileResponse
+} from '$lib/types/api';
 import type { CommonCanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
-
-export type AddUserCredentialParams = {
-	credentialJwt: string;
-	issuerCanisterId: Principal;
-	currentUserVersion?: bigint;
-	credentialSpec: CredentialSpec;
-};
-export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialError };
-
-export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
 
 let canister: BackendCanister | undefined = undefined;
 
 export const listUserTokens = async ({
 	identity,
-	certified
+	certified = true
 }: CommonCanisterApiFunctionParams<QueryParams>): Promise<UserToken[]> => {
 	const { listUserTokens } = await backendCanister({ identity });
 
@@ -35,7 +23,7 @@ export const listUserTokens = async ({
 
 export const listCustomTokens = async ({
 	identity,
-	certified
+	certified = true
 }: CommonCanisterApiFunctionParams<QueryParams>): Promise<CustomToken[]> => {
 	const { listCustomTokens } = await backendCanister({ identity });
 
@@ -94,7 +82,7 @@ export const createUserProfile = async ({
 
 export const getUserProfile = async ({
 	identity,
-	certified
+	certified = true
 }: CommonCanisterApiFunctionParams<QueryParams>): Promise<GetUserProfileResponse> => {
 	const { getUserProfile } = await backendCanister({ identity });
 

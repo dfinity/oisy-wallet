@@ -5,8 +5,8 @@ import type {
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
-import type { AddUserCredentialParams } from '$lib/api/backend.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
+import type { AddUserCredentialParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';

@@ -2,16 +2,23 @@ import type { BitcoinNetwork, SignRequest } from '$declarations/signer/signer.di
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
-import type { CommonCanisterApiFunctionParams } from '$lib/types/canister';
+import type { CanisterIdText } from '$lib/types/canister';
+import type { OptionIdentity } from '$lib/types/identity';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 let canister: SignerCanister | undefined = undefined;
 
+type CommonParams<T = unknown> = T & {
+	identity: OptionIdentity;
+	nullishIdentityErrorMessage?: string;
+	signerCanisterId?: CanisterIdText;
+};
+
 export const getBtcAddress = async ({
 	identity,
 	network
-}: CommonCanisterApiFunctionParams<{
+}: CommonParams<{
 	network: BitcoinNetwork;
 }>): Promise<BtcAddress> => {
 	const { getBtcAddress } = await signerCanister({ identity });
@@ -19,9 +26,7 @@ export const getBtcAddress = async ({
 	return getBtcAddress({ network });
 };
 
-export const getEthAddress = async ({
-	identity
-}: CommonCanisterApiFunctionParams): Promise<EthAddress> => {
+export const getEthAddress = async ({ identity }: CommonParams): Promise<EthAddress> => {
 	const { getEthAddress } = await signerCanister({ identity });
 
 	return getEthAddress();
@@ -30,11 +35,11 @@ export const getEthAddress = async ({
 export const getBtcBalance = async ({
 	identity,
 	network,
-	canisterId
-}: CommonCanisterApiFunctionParams<{
+	signerCanisterId
+}: CommonParams<{
 	network: BitcoinNetwork;
 }>): Promise<bigint> => {
-	const { getBtcBalance } = await signerCanister({ identity, canisterId });
+	const { getBtcBalance } = await signerCanister({ identity, signerCanisterId });
 
 	return getBtcBalance({ network });
 };
@@ -42,7 +47,7 @@ export const getBtcBalance = async ({
 export const signTransaction = async ({
 	transaction,
 	identity
-}: CommonCanisterApiFunctionParams<{
+}: CommonParams<{
 	transaction: SignRequest;
 }>): Promise<string> => {
 	const { signTransaction } = await signerCanister({ identity });
@@ -53,7 +58,7 @@ export const signTransaction = async ({
 export const signMessage = async ({
 	message,
 	identity
-}: CommonCanisterApiFunctionParams<{ message: string }>): Promise<string> => {
+}: CommonParams<{ message: string }>): Promise<string> => {
 	const { personalSign } = await signerCanister({ identity });
 
 	return personalSign({ message });
@@ -62,7 +67,7 @@ export const signMessage = async ({
 export const signPrehash = async ({
 	hash,
 	identity
-}: CommonCanisterApiFunctionParams<{
+}: CommonParams<{
 	hash: string;
 }>): Promise<string> => {
 	const { signPrehash } = await signerCanister({ identity });
@@ -73,14 +78,14 @@ export const signPrehash = async ({
 const signerCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
-	canisterId = SIGNER_CANISTER_ID
-}: CommonCanisterApiFunctionParams): Promise<SignerCanister> => {
+	signerCanisterId = SIGNER_CANISTER_ID
+}: CommonParams): Promise<SignerCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
 	if (isNullish(canister)) {
 		canister = await SignerCanister.create({
 			identity,
-			canisterId: Principal.fromText(canisterId)
+			canisterId: Principal.fromText(signerCanisterId)
 		});
 	}
 
