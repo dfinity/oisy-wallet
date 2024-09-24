@@ -6,11 +6,11 @@ export type OnramperNetworkId = 'icp' | 'bitcoin' | 'ethereum';
 // https://docs.onramper.com/docs/crypto-asset-support
 export type OnramperId = string;
 
-export type FiatId = string;
+export type OnramperFiatId = 'usd' | 'eur' | 'gbp' | 'chf';
 
 export type OnRamperMode = 'buy';
 
-export type CryptoWallet = {
-	cryptoId: CryptoId;
+export interface OnramperCryptoWallet {
+	cryptoId: OnramperId;
 	wallet: string;
-};
+}

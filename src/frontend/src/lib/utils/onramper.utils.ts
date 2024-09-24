@@ -1,28 +1,30 @@
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/onramper.env';
 import type {
-	CryptoId,
-	CryptoNetworkId,
-	CryptoWallet,
-	FiatId,
-	OnRamperMode
+	OnRamperMode,
+	OnramperCryptoWallet,
+	OnramperFiatId,
+	OnramperId,
+	OnramperNetworkId
 } from '$lib/types/onramper';
 
 interface BuildOnRamperLinkParams {
 	mode: OnRamperMode;
-	defaultFiat: FiatId;
-	defaultCrypto?: CryptoId;
-	onlyCryptos: CryptoId[];
-	onlyCryptoNetworks: CryptoNetworkId[];
-	wallets: CryptoWallet[];
+	defaultFiat: OnramperFiatId;
+	defaultCrypto?: OnramperId;
+	onlyCryptos: OnramperId[];
+	onlyCryptoNetworks: OnramperNetworkId[];
+	wallets: OnramperCryptoWallet[];
 	supportRecurringPayments: boolean;
 	enableCountrySelector: boolean;
 }
 
-const arrayToParam = (array: CryptoId[] | CryptoNetworkId[]) => array.join(',');
+const arrayToParam = (array: OnramperId[] | OnramperNetworkId[]) => array.join(',');
 
-const walletToParam = ({ cryptoId, wallet }: CryptoWallet) => `${cryptoId.toUpperCase()}:${wallet}`;
+const walletToParam = ({ cryptoId, wallet }: OnramperCryptoWallet) =>
+	`${cryptoId.toUpperCase()}:${wallet}`;
 
-const walletsToParam = (wallets: CryptoWallet[]) => arrayToParam(wallets.map(walletToParam));
+const walletsToParam = (wallets: OnramperCryptoWallet[]) =>
+	arrayToParam(wallets.map(walletToParam));
 
 const toQueryString = (params: Omit<BuildOnRamperLinkParams, 'wallets'>) =>
 	Object.entries(params)
