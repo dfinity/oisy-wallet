@@ -5,17 +5,13 @@ use bitcoin::{
     Sequence, Transaction, TxIn, TxOut, Txid,
 };
 use ic_cdk::api::management_canister::bitcoin::{MillisatoshiPerByte, Satoshi, Utxo};
-use ic_cdk::print;
-
-use crate::signer::ecdsa_sign_transaction;
-
-// PENDING: Use `estimate_fee` from ckBTC minter:
-// https://github.com/dfinity/ic/blob/master/rs/bitcoin/ckbtc/minter/src/lib.rs#L1286
 
 /// The threshold for the number of UTXOs under management before
 /// trying to match the number of outputs with the number of inputs
 /// when building transactions.
-pub const UTXOS_COUNT_THRESHOLD: usize = 1_000;
+const UTXOS_COUNT_THRESHOLD: usize = 1_000;
+// One output for the caller and one for the change.
+const DEFAULT_OUTPUT_COUNT: u64 = 2;
 
 /// Selects a subset of UTXOs with the specified total target value and removes
 /// the selected UTXOs from the available set.
@@ -107,25 +103,10 @@ pub fn tx_vsize_estimate(input_count: u64, output_count: u64) -> u64 {
 ///   * `available_utxos` - the list of UTXOs available to the minter.
 ///   * `maybe_amount` - the withdrawal amount.
 ///   * `median_fee_millisatoshi_per_vbyte` - the median network fee, in millisatoshi per vbyte.
-pub fn estimate_fee(
-    available_utxos: &[Utxo],
-    amount: u64,
-    median_fee_millisatoshi_per_vbyte: u64,
-) -> u64 {
-    const DEFAULT_INPUT_COUNT: u64 = 2;
-    // One output for the caller and one for the change.
-    const DEFAULT_OUTPUT_COUNT: u64 = 2;
-    // We simulate the algorithm that selects UTXOs for the
-    // specified amount. If the withdrawal rate is low, we
-    // should get the exact number of inputs that the minter
-    // will use.
-    let mut input_count = DEFAULT_INPUT_COUNT;
-    let mut utxos = available_utxos.to_vec();
-    let selected_utxos = utxos_selection(amount, &mut utxos, DEFAULT_OUTPUT_COUNT as usize - 1);
-
-    if !selected_utxos.is_empty() {
-        input_count = selected_utxos.len() as u64
-    }
+///
+/// Functions stolen from ckBTC Minter: https://github.com/dfinity/ic/blob/285a5db07da50a4e350ec43bf3b488cc6fe36102/rs/bitcoin/ckbtc/minter/src/lib.rs#L1258
+pub fn estimate_fee(selected_utxos: &[Utxo], median_fee_millisatoshi_per_vbyte: u64) -> u64 {
+    let input_count = selected_utxos.len() as u64;
 
     let vsize = tx_vsize_estimate(input_count, DEFAULT_OUTPUT_COUNT);
     // We subtract one from the outputs because the minter's output
@@ -135,40 +116,32 @@ pub fn estimate_fee(
     bitcoin_fee
 }
 
-pub fn build_transaction_with_fee(
-    own_utxos: &[Utxo],
+pub fn build_p2wpkh_spend_tx(
     own_address: &Address,
+    own_utxos: &[Utxo],
     dst_address: &Address,
-    amount: u64,
+    amount: Satoshi,
     fee_per_vbyte: MillisatoshiPerByte,
-) -> Result<(Transaction, Vec<TxOut>), String> {
-    let fee = estimate_fee(own_utxos, amount, fee_per_vbyte);
-    // Assume that any amount below this threshold is dust.
-    const DUST_THRESHOLD: u64 = 1_000;
+) -> Result<Transaction, String> {
+    // One output for the caller and one for the change.
+    const DEFAULT_OUTPUT_COUNT: u64 = 2;
+    let mut utxos = own_utxos.to_vec();
+    let selected_utxos = utxos_selection(amount, &mut utxos, DEFAULT_OUTPUT_COUNT as usize - 1);
 
-    // Select which UTXOs to spend. We naively spend the oldest available UTXOs,
-    // even if they were previously spent in a transaction. This isn't a
-    // problem as long as at most one transaction is created per block and
-    // we're using min_confirmations of 1.
-    let mut utxos_to_spend = vec![];
-    let mut total_spent = 0;
-    for utxo in own_utxos.iter().rev() {
-        total_spent += utxo.value;
-        utxos_to_spend.push(utxo);
-        if total_spent >= amount + fee {
-            // We have enough inputs to cover the amount we want to spend.
-            break;
-        }
-    }
-
-    if total_spent < amount + fee {
+    if selected_utxos.is_empty() {
         return Err(format!(
-            "Insufficient balance: {}, trying to transfer {} satoshi with fee {}",
-            total_spent, amount, fee
+            "Insufficient balance, trying to transfer {}",
+            amount,
         ));
     }
 
-    let inputs: Vec<TxIn> = utxos_to_spend
+    let fee = estimate_fee(own_utxos, fee_per_vbyte);
+    // Assume that any amount below this threshold is dust.
+    const DUST_THRESHOLD: u64 = 1_000;
+
+    let total_spent: u64 = selected_utxos.iter().map(|u| u.value).sum();
+
+    let inputs: Vec<TxIn> = selected_utxos
         .iter()
         .map(|utxo| TxIn {
             previous_output: OutPoint {
@@ -178,14 +151,6 @@ pub fn build_transaction_with_fee(
             sequence: Sequence(0xFFFFFFFF),
             witness: Witness::new(),
             script_sig: ScriptBuf::new(),
-        })
-        .collect();
-
-    let prevouts = utxos_to_spend
-        .into_iter()
-        .map(|utxo| TxOut {
-            value: Amount::from_sat(utxo.value),
-            script_pubkey: own_address.script_pubkey(),
         })
         .collect();
 
@@ -203,65 +168,10 @@ pub fn build_transaction_with_fee(
         });
     }
 
-    Ok((
-        Transaction {
-            input: inputs,
-            output: outputs,
-            lock_time: LockTime::ZERO,
-            version: Version::TWO,
-        },
-        prevouts,
-    ))
-}
-
-// Builds a transaction to send the given `amount` of satoshis to the
-// destination address.
-pub async fn build_p2wpkh_spend_tx(
-    own_public_key: &[u8],
-    own_address: &Address,
-    own_utxos: &[Utxo],
-    dst_address: &Address,
-    amount: Satoshi,
-    fee_per_vbyte: MillisatoshiPerByte,
-) -> Transaction {
-    let (transaction, _prevouts) =
-        build_transaction_with_fee(own_utxos, own_address, dst_address, amount, fee_per_vbyte)
-            .expect("Error building transaction.");
-    transaction
-    // We have a chicken-and-egg problem where we need to know the length
-    // of the transaction in order to compute its proper fee, but we need
-    // to know the proper fee in order to figure out the inputs needed for
-    // the transaction.
-    //
-    // We solve this problem iteratively. We start with a fee of zero, build
-    // and sign a transaction, see what its size is, and then update the fee,
-    // rebuild the transaction, until the fee is set to the correct amount.
-    // print("Building transaction...");
-    // let mut total_fee = 0;
-    // loop {
-    //     let (transaction, _prevouts) =
-    //         build_transaction_with_fee(own_utxos, own_address, dst_address, amount, total_fee)
-    //             .expect("Error building transaction.");
-
-    //     // Sign the transaction. In this case, we only care about the size
-    //     // of the signed transaction, so we use a mock signer here for efficiency.
-    //     let signed_transaction = ecdsa_sign_transaction(
-    //         own_public_key,
-    //         own_address,
-    //         transaction.clone(),
-    //         own_utxos,
-    //         String::from(""), // mock key name
-    //         vec![],           // mock derivation path
-    //     )
-    //     .await;
-
-    //     let tx_vsize = signed_transaction.vsize() as u64;
-
-    //     if (tx_vsize * fee_per_vbyte) / 1000 == total_fee {
-    //         print(format!("Transaction built with fee {}.", total_fee));
-    //         return transaction;
-    //     } else {
-    //         total_fee = (tx_vsize * fee_per_vbyte) / 1000;
-    //     }
-    // }
+    Ok(Transaction {
+        input: inputs,
+        output: outputs,
+        lock_time: LockTime::ZERO,
+        version: Version::TWO,
+    })
 }

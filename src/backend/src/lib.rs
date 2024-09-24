@@ -739,15 +739,8 @@ async fn send_btc(params: SendBtcParams) -> String {
         .expect("Network check failed");
 
     // Build the transaction that sends `amount` to the destination address.
-    let transaction = build_p2wpkh_spend_tx(
-        &user_public_key,
-        &own_address,
-        &own_utxos,
-        &dst_address,
-        amount,
-        fee_per_byte,
-    )
-    .await;
+    let transaction =
+        build_p2wpkh_spend_tx(&own_address, &own_utxos, &dst_address, amount, fee_per_byte).await;
 
     // Sign the transaction.
     let signed_transaction =
