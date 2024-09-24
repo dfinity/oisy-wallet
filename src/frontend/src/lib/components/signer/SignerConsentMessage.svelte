@@ -17,13 +17,13 @@
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
 	let approve: ConsentMessageApproval | undefined;
-	$: approve = $payload?.approve;
+	$: approve = $payload?.status === 'result' ? $payload?.approve : undefined;
 
 	let reject: Rejection | undefined;
-	$: reject = $payload?.reject;
+	$: reject = $payload?.status === 'result' ? $payload?.reject : undefined;
 
 	let consentInfo: icrc21_consent_info | undefined;
-	$: consentInfo = $payload?.consentInfo;
+	$: consentInfo = $payload?.status === 'result' ? $payload?.consentInfo : undefined;
 
 	let displayMessage: string | undefined;
 	$: displayMessage = nonNullish(consentInfo)
