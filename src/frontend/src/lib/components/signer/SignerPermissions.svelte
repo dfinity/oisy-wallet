@@ -9,8 +9,8 @@
 	import { type ComponentType, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import IconAstronautEmpty from '$lib/components/icons/IconAstronautEmpty.svelte';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
-	import OisyWalletLogoDarkCircle from '$lib/components/icons/OisyWalletLogoDarkCircle.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
@@ -86,7 +86,7 @@
 
 		{#if requestAccountsPermissions}
 			<div class="flex gap-4 border border-dust bg-white rounded-lg flex p-4 mb-10">
-				<OisyWalletLogoDarkCircle />
+				<IconAstronautEmpty />
 
 				<div>
 					<label class="block text-sm font-bold" for="ic-wallet-address">Your wallet address</label>

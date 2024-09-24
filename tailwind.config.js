@@ -16,7 +16,7 @@ export default {
 			'off-white': '#fcfaf6',
 			dust: '#dbd9d6',
 			grey: '#c0bbc4',
-			'light-blue': '#ede7fb',
+			'light-blue': '#e8f1ff',
 			blue: '#3b00b9',
 			'blue-ribbon-rgb': '0, 102, 255',
 			'dark-blue': '#321469',
