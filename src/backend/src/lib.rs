@@ -757,7 +757,7 @@ async fn send_btc(params: SendBtcParams) -> String {
         build_p2wpkh_pieces(&own_address, &own_utxos, &dst_address, amount, fee_per_byte).unwrap();
     let signed_response = ecdsa_sign_transaction_by_pieces(BtcSignRequest {
         principal,
-        network: bitcoin_network,
+        network: params.network,
         txouts,
         txins,
     })

@@ -1,5 +1,6 @@
 use crate::bitcoin_utils::public_key_to_p2wpkh_address;
 use crate::read_config;
+use crate::transform_network;
 use bitcoin::absolute::LockTime;
 use bitcoin::consensus::serialize;
 use bitcoin::script::PushBytesBuf;
@@ -17,6 +18,7 @@ use bitcoin::{
     AddressType,
 };
 use candid::Principal;
+use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
 use ic_cdk::api::management_canister::bitcoin::Utxo;
 use ic_cdk::api::management_canister::ecdsa::{
     ecdsa_public_key, sign_with_ecdsa, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument,
@@ -196,12 +198,17 @@ pub struct CfsTxIn {
 }
 
 pub struct BtcSignRequest {
+    // From candid
     pub principal: Principal,
-    pub network: Network,
+    // From ic_cdk
+    pub network: BitcoinNetwork,
+    // Custom for CFS
     pub txouts: Vec<CfsTxOut>,
+    // Custom for CFS
     pub txins: Vec<CfsTxIn>,
 }
 
+// Custom for CFS
 pub struct BtcSignResponse {
     pub signed_transaction_bytes: Vec<u8>,
     pub txid: String,
@@ -220,6 +227,8 @@ fn get_cfs_input_value(input: &TxIn, cfs_inputs: &[CfsTxIn]) -> Option<Amount> {
 }
 
 pub async fn ecdsa_sign_transaction_by_pieces(params: BtcSignRequest) -> BtcSignResponse {
+    let bitcoin_network = transform_network(params.network);
+
     let inputs: Vec<TxIn> = params
         .txins
         .iter()
@@ -240,7 +249,7 @@ pub async fn ecdsa_sign_transaction_by_pieces(params: BtcSignRequest) -> BtcSign
         .map(|txout| TxOut {
             script_pubkey: Address::from_str(&txout.address)
                 .unwrap()
-                .require_network(params.network)
+                .require_network(bitcoin_network)
                 .map(|address| address.script_pubkey())
                 .expect("Failed decoding address"),
             value: Amount::from_sat(txout.value),
@@ -258,10 +267,10 @@ pub async fn ecdsa_sign_transaction_by_pieces(params: BtcSignRequest) -> BtcSign
     let derivation_path = principal_to_derivation_path(&params.principal);
     let own_public_key = ecdsa_pubkey_of(key_name.clone(), derivation_path.clone()).await;
 
-    let source_address = public_key_to_p2wpkh_address(params.network, &own_public_key);
+    let source_address = public_key_to_p2wpkh_address(bitcoin_network, &own_public_key);
     let own_address = Address::from_str(&source_address)
         .unwrap()
-        .require_network(params.network)
+        .require_network(bitcoin_network)
         .expect("Network check failed");
 
     // Verify that our own address is P2WPKH.
