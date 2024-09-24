@@ -1,6 +1,7 @@
 import type { OptionBalance } from '$lib/types/balance';
 import type { Network } from '$lib/types/network';
-import type { Option, RequiredExcept } from '$lib/types/utils';
+import type { OnramperId } from '$lib/types/onramper';
+import type { AtLeastOne, Option, RequiredExcept } from '$lib/types/utils';
 
 export type TokenId = symbol;
 
@@ -14,7 +15,8 @@ export type Token = {
 	standard: TokenStandard;
 	category: TokenCategory;
 } & TokenMetadata &
-	TokenAppearance;
+	TokenAppearance &
+	TokenBuyable;
 
 export interface TokenMetadata {
 	name: string;
@@ -32,13 +34,23 @@ export interface TokenOisyName {
 	oisyName: string;
 }
 
+export interface TokenBuyable {
+	buy?: AtLeastOne<TokenBuy>;
+}
+
+export interface TokenBuy {
+	onramperId?: OnramperId;
+}
+
 export interface TokenLinkedData {
 	twinTokenSymbol?: string;
 }
 
 export type TokenWithLinkedData = Token & TokenLinkedData;
 
-export type RequiredToken<T extends Token = Token> = RequiredExcept<T, keyof TokenAppearance>;
+export type NonRequiredProps = TokenAppearance & TokenBuyable;
+
+export type RequiredToken<T extends Token = Token> = RequiredExcept<T, keyof NonRequiredProps>;
 
 export type RequiredTokenWithLinkedData = RequiredToken<TokenWithLinkedData>;
 
