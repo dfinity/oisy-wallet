@@ -629,6 +629,15 @@
 			"error": {
 				"no_confirm_callback": "No callback to confirm the permissions, which is unexpected. Close the wallet and try again."
 			}
+		},
+		"origin": {
+			"text": {
+				"request_from": "Request from:",
+				"invalid_origin": "Invalid origin️!!"
+			},
+			"alt": {
+				"link_to_dapp": "Link to the dApp requesting permissions"
+			}
 		}
 	}
 }

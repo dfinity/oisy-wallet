@@ -546,6 +546,7 @@ interface I18nSigner {
 		};
 		error: { no_confirm_callback: string };
 	};
+	origin: { text: { request_from: string; invalid_origin: string }; alt: { link_to_dapp: string } };
 }
 
 interface I18n {

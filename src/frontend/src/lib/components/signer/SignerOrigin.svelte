@@ -2,14 +2,17 @@
 	import type { Origin, PayloadOrigin } from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import type { Option } from '$lib/types/utils';
 
 	export let payload: Option<PayloadOrigin>;
 
+	$: console.log(payload);
+
 	let origin: Origin | undefined;
 	$: origin = payload?.origin;
 
-	const mapHost = (origin: Origin | undefined): string | undefined => {
+	const mapHost = (origin: Origin | undefined): Option<string> => {
 		if (isNullish(origin)) {
 			return undefined;
 		}
@@ -19,22 +22,26 @@
 			const { host } = new URL(origin);
 			return host;
 		} catch {
-			return undefined;
+			return null;
 		}
 	};
 
-	let host: string | undefined;
+	// Null being used if mapping the origin does not work - i.e. invalid origin. Probably an edge case.
+	// eslint-disable-next-line local-rules/use-option-type-wrapper
+	let host: string | null | undefined;
 	$: host = mapHost(origin);
 </script>
 
-{#if nonNullish(host) && nonNullish(origin)}
+{#if nonNullish(origin)}
 	<p class="break-normal text-center mb-6">
-		Request from: <span class="font-bold text-brandeis-blue"
-			><ExternalLink
-				ariaLabel="Link to the dApp requesting permissions"
-				href={origin}
-				iconVisible={false}>{host}</ExternalLink
-			></span
-		>
+		{$i18n.signer.origin.text.request_from}
+		{#if nonNullish(host)}<span class="font-bold text-brandeis-blue"
+				><ExternalLink
+					ariaLabel={$i18n.signer.origin.alt.link_to_dapp}
+					href={origin}
+					iconVisible={false}>{host}</ExternalLink
+				></span
+			>{:else}<span class="font-bold text-cyclamen">{$i18n.signer.origin.text.invalid_origin}</span
+			>{/if}
 	</p>
 {/if}
