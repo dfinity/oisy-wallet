@@ -1,5 +1,6 @@
 use crate::bitcoin_api;
 use crate::bitcoin_utils::public_key_to_p2wpkh_address;
+use crate::p2wpkh::estimate_fee;
 use crate::read_config;
 use crate::transform_network;
 use bitcoin::absolute::LockTime;
@@ -333,13 +334,25 @@ pub struct CfsOutput {
 pub struct SendBtcRequest {
     pub address_type: AddressType,
     pub utxos_to_spend: Vec<Utxo>,
-    pub fee_satoshis: u64,
+    pub fee_satoshis: Option<u64>,
     pub outputs: Vec<CfsOutput>,
     pub network: BitcoinNetwork,
 }
 
 pub struct SendBtcResponse {
     pub txid: String,
+}
+
+async fn get_default_fee(utxos: &Vec<Utxo>, network: BitcoinNetwork) -> u64 {
+    let fee_per_byte = bitcoin_api::get_fee_per_byte(network).await;
+    estimate_fee(utxos, fee_per_byte)
+}
+
+async fn calculate_fee(maybe_fee: Option<u64>, utxos: &Vec<Utxo>, network: BitcoinNetwork) -> u64 {
+    match maybe_fee {
+        Some(fee) => fee,
+        None => get_default_fee(utxos, network).await,
+    }
 }
 
 pub async fn btc_send_from_caller(params: SendBtcRequest) -> SendBtcResponse {
@@ -353,6 +366,7 @@ pub async fn btc_send_from_caller(params: SendBtcRequest) -> SendBtcResponse {
         .unwrap()
         .require_network(bitcoin_network)
         .expect("Network check failed");
+    let fee = calculate_fee(params.fee_satoshis, &params.utxos_to_spend, params.network).await;
 
     // Verify that our own address is P2WPKH.
     assert_eq!(
@@ -396,7 +410,7 @@ pub async fn btc_send_from_caller(params: SendBtcRequest) -> SendBtcResponse {
     let sent_amount: u64 = params.outputs.iter().map(|u| u.sent_satoshis).sum();
     // The fee is set with leaving that amount of difference between the inputs and outputs values.
     // For example, if the inputs sum 200 and the fee is 20, then the outputs should sum 180.
-    let remaining_amount = total_spent - sent_amount - params.fee_satoshis;
+    let remaining_amount = total_spent - sent_amount - fee;
 
     if remaining_amount >= DUST_THRESHOLD {
         outputs.push(TxOut {

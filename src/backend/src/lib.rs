@@ -670,21 +670,6 @@ async fn get_btc_utxos(address: String, network: BitcoinNetwork) -> GetUtxosResp
     bitcoin_api::get_utxos(network, address).await
 }
 
-async fn get_fee_per_byte(network: BitcoinNetwork) -> u64 {
-    // Get fee percentiles from previous transactions to estimate our own fee.
-    let fee_percentiles = bitcoin_api::get_current_fee_percentiles(network).await;
-
-    if fee_percentiles.is_empty() {
-        // There are no fee percentiles. This case can only happen on a regtest
-        // network where there are no non-coinbase transactions. In this case,
-        // we use a default of 2000 millisatoshis/byte (i.e. 2 satoshi/byte)
-        2000
-    } else {
-        // Choose the 50th percentile for sending fees.
-        fee_percentiles[50]
-    }
-}
-
 fn transform_network(network: BitcoinNetwork) -> Network {
     match network {
         BitcoinNetwork::Mainnet => Network::Bitcoin,
@@ -708,7 +693,7 @@ async fn send_btc(params: SendBtcParams) -> String {
     let principal = ic_cdk::caller();
     let network = params.network;
     let amount = params.amount;
-    let fee_per_byte = get_fee_per_byte(network).await;
+    let fee_per_byte = bitcoin_api::get_fee_per_byte(network).await;
 
     // Fetch our public key, P2PKH address, and UTXOs.
     // let own_public_key =
@@ -782,7 +767,7 @@ async fn send_btc(params: SendBtcParams) -> String {
     let params = SendBtcRequest {
         address_type: AddressType::P2wpkh,
         utxos_to_spend: selected_utxos,
-        fee_satoshis: fee,
+        fee_satoshis: Some(fee),
         outputs: vec![CfsOutput {
             destination_address: params.dst_address,
             sent_satoshis: params.amount,

@@ -48,6 +48,21 @@ pub async fn get_current_fee_percentiles(network: BitcoinNetwork) -> Vec<Millisa
     res.unwrap().0
 }
 
+pub async fn get_fee_per_byte(network: BitcoinNetwork) -> u64 {
+    // Get fee percentiles from previous transactions to estimate our own fee.
+    let fee_percentiles = get_current_fee_percentiles(network).await;
+
+    if fee_percentiles.is_empty() {
+        // There are no fee percentiles. This case can only happen on a regtest
+        // network where there are no non-coinbase transactions. In this case,
+        // we use a default of 2000 millisatoshis/byte (i.e. 2 satoshi/byte)
+        2000
+    } else {
+        // Choose the 50th percentile for sending fees.
+        fee_percentiles[50]
+    }
+}
+
 /// Sends a (signed) transaction to the bitcoin network.
 ///
 /// Relies on the `bitcoin_send_transaction` endpoint.
