@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "src/backend",
+    "src/cycles_ledger",
     "src/shared"
 ]
 resolver = "2"
