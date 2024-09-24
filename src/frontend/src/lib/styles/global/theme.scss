@@ -122,7 +122,14 @@ figcaption {
 }
 
 ::-webkit-scrollbar-thumb {
-	background-color: var(--color-misty-rose);
+	border: 1px solid rgba(var(--color-white-rgb), 0.25);
+	background: rgba(var(--color-black-rgb), 0.20);
+	border-radius: 16px;
+
+	&:hover {
+		border-color: rgba(var(--color-white-rgb), 0.70);
+		background: rgba(var(--color-black-rgb), 0.30);
+	}
 }
 
 ::-webkit-scrollbar-track {
