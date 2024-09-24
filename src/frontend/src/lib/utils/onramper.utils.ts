@@ -6,6 +6,7 @@ import type {
 	OnramperMode,
 	OnramperNetworkId
 } from '$lib/types/onramper';
+import { nonNullish } from '@dfinity/utils';
 
 export interface BuildOnramperLinkParams {
 	mode: OnramperMode;
@@ -27,7 +28,17 @@ const walletsToParam = (wallets: OnramperCryptoWallet[]) =>
 
 const toQueryString = (params: Omit<BuildOnramperLinkParams, 'wallets'>) =>
 	Object.entries(params)
-		.map(([key, value]) => `${key}=${Array.isArray(value) ? arrayToParam(value) : value}`)
+		.reduce<string[]>(
+			(acc, [key, value]) =>
+				Array.isArray(value)
+					? value.length > 0
+						? [...acc, `${key}=${arrayToParam(value)}`]
+						: acc
+					: nonNullish(value)
+						? [...acc, `${key}=${value}`]
+						: acc,
+			[]
+		)
 		.join('&');
 
 /**

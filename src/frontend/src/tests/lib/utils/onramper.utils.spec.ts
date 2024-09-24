@@ -2,7 +2,7 @@ import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/onramper.env';
 import { buildOnramperLink, type BuildOnramperLinkParams } from '$lib/utils/onramper.utils';
 import { describe, expect, it } from 'vitest';
 
-describe('buildOnRamperLink', () => {
+describe('buildOnramperLink', () => {
 	it('should build the correct URL with all parameters', () => {
 		const params: BuildOnramperLinkParams = {
 			mode: 'buy',
@@ -55,7 +55,7 @@ describe('buildOnRamperLink', () => {
 		const params: BuildOnramperLinkParams = {
 			mode: 'buy',
 			defaultFiat: 'eur',
-			onlyCryptos: ['BTC', 'ETH'],
+			onlyCryptos: ['btc', 'eth'],
 			onlyCryptoNetworks: ['bitcoin', 'ethereum'],
 			wallets: [],
 			supportRecurringPayments: false,
@@ -65,7 +65,7 @@ describe('buildOnRamperLink', () => {
 		const expectedUrl =
 			`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
 			`&mode=buy&defaultFiat=eur` +
-			`&onlyCryptos=BTC,ETH&onlyCryptoNetworks=bitcoin,ethereum` +
+			`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
 			`&supportRecurringPayments=false&enableCountrySelector=true&wallets=`;
 
 		const result = buildOnramperLink(params);
@@ -79,7 +79,7 @@ describe('buildOnRamperLink', () => {
 			defaultFiat: 'usd',
 			onlyCryptos: [],
 			onlyCryptoNetworks: [],
-			wallets: [{ cryptoId: 'BTC', wallet: 'bitcoin_wallet_address' }],
+			wallets: [{ cryptoId: 'btc', wallet: 'bitcoin_wallet_address' }],
 			supportRecurringPayments: false,
 			enableCountrySelector: true
 		};
@@ -87,8 +87,7 @@ describe('buildOnRamperLink', () => {
 		const expectedUrl =
 			`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
 			`&mode=buy&defaultFiat=usd` +
-			`&onlyCryptos=&onlyCryptoNetworks=` +
-			`&supportRecurringPayments=false&enableCountrySelector=true&wallets=BTC:bitcoin_wallet_address`;
+			`&supportRecurringPayments=false&enableCountrySelector=true&wallets=btc:bitcoin_wallet_address`;
 
 		const result = buildOnramperLink(params);
 
