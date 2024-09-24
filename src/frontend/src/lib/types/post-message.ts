@@ -53,7 +53,7 @@ export type PostMessageDataRequestIcCkBTCUpdateBalance = PostMessageDataRequestI
 };
 
 export type PostMessageResponseStatus =
-	| 'syncWalletStatus'
+	| 'syncIcWalletStatus'
 	| 'syncBtcStatusesStatus'
 	| 'syncCkMinterInfoStatus'
 	| 'syncCkBTCUpdateBalanceStatus';
