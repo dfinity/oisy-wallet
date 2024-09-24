@@ -33,6 +33,7 @@ type Config = record {
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_raw : opt blob;
   cycles_ledger_canister_id : opt principal;
+  signer_canister_id : opt principal;
 };
 type CredentialSpec = record {
   arguments : opt vec record { text; ArgumentValue };
@@ -72,6 +73,7 @@ type InitArg = record {
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
   cycles_ledger_canister_id : opt principal;
+  signer_canister_id : opt principal;
 };
 type ListUsersRequest = record {
   updated_after_timestamp : opt nat64;

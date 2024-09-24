@@ -23,7 +23,8 @@ export const idlFactory = ({ IDL }) => {
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
-		cycles_ledger_canister_id: IDL.Opt(IDL.Principal)
+		cycles_ledger_canister_id: IDL.Opt(IDL.Principal),
+		signer_canister_id: IDL.Opt(IDL.Principal)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const ArgumentValue = IDL.Variant({ Int: IDL.Int32, String: IDL.Text });
@@ -55,7 +56,8 @@ export const idlFactory = ({ IDL }) => {
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8)),
-		cycles_ledger_canister_id: IDL.Opt(IDL.Principal)
+		cycles_ledger_canister_id: IDL.Opt(IDL.Principal),
+		signer_canister_id: IDL.Opt(IDL.Principal)
 	});
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
@@ -229,7 +231,8 @@ export const init = ({ IDL }) => {
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
-		cycles_ledger_canister_id: IDL.Opt(IDL.Principal)
+		cycles_ledger_canister_id: IDL.Opt(IDL.Principal),
+		signer_canister_id: IDL.Opt(IDL.Principal)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	return [Arg];
