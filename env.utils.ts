@@ -11,11 +11,11 @@ export const readCanisterIds = ({
 	prefix?: string;
 }): Record<string, string> => {
 	try {
-		type Details = {
+		interface Details {
 			ic?: string;
 			staging?: string;
 			local?: string;
-		};
+		}
 
 		const config: Record<string, Details> = JSON.parse(readFileSync(filePath, 'utf8'));
 

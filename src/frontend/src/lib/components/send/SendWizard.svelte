@@ -15,6 +15,7 @@
 	export let amount: number | undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
+	export let formCancelAction: 'back' | 'close' = 'back';
 </script>
 
 {#if isNetworkIdEthereum($token?.network.id)}
@@ -22,7 +23,7 @@
 	<SendTokenContext token={$token}>
 		<EthSendTokenWizard
 			{currentStep}
-			formCancelAction="back"
+			{formCancelAction}
 			sourceNetwork={$selectedEthereumNetwork}
 			nativeEthereumToken={$ethereumToken}
 			bind:destination
@@ -40,7 +41,7 @@
 {:else if isNetworkIdICP($token?.network.id)}
 	<IcSendTokenWizard
 		{currentStep}
-		formCancelAction="back"
+		{formCancelAction}
 		bind:destination
 		bind:networkId
 		bind:amount
