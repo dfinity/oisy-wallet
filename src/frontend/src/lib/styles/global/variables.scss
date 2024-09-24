@@ -18,6 +18,5 @@
 	--border-radius-md: calc(var(--border-radius-sm) * 2);
 	--border-radius-lg: calc(var(--border-radius-sm) * 4);
 
-	// Overlays - based on --color-dark
-	--backdrop: rgba(14, 0, 45, 0.6);
+	--backdrop: rgba(var(--color-secondary-rgb), 0.6);
 }

@@ -40,7 +40,7 @@
 	>
 		{$i18n.receive.icp.text.principal}
 
-		<p slot="notes" class="text-sm text-dark">{$i18n.receive.icp.text.use_for_icrc_deposit}</p>
+		<p slot="notes" class="text-secondary text-sm">{$i18n.receive.icp.text.use_for_icrc_deposit}</p>
 	</ReceiveAddressWithLogo>
 
 	<ReceiveAddressWithLogo
@@ -58,7 +58,7 @@
 	>
 		{$i18n.receive.icp.text.icp_account}
 
-		<p slot="notes" class="text-sm text-dark">{$i18n.receive.icp.text.use_for_icp_deposit}</p>
+		<p slot="notes" class="text-secondary text-sm">{$i18n.receive.icp.text.use_for_icp_deposit}</p>
 	</ReceiveAddressWithLogo>
 
 	{#if NETWORK_BITCOIN_ENABLED}

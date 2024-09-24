@@ -58,7 +58,7 @@
 		</div>
 
 		{#if tokens?.length === 0}
-			<p class="mt-4 text-dark opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
+			<p class="mt-4 text-secondary opacity-50">{$i18n.tokens.text.all_tokens_with_zero_hidden}</p>
 		{/if}
 
 		{#if $modalManageTokens}

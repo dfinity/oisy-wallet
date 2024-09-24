@@ -31,7 +31,7 @@
 		{/each}
 
 		{#if tokens.length === 0}
-			<p class="mt-4 mb-6 text-dark opacity-50">
+			<p class="mt-4 mb-6 text-secondary opacity-50">
 				{$i18n.tokens.manage.text.all_tokens_zero_balance}
 			</p>
 		{/if}

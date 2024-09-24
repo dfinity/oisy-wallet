@@ -23,7 +23,7 @@
 
 <style lang="scss">
 	div {
-		border: 2px solid var(--color-dark);
+		border: 2px solid var(--color-secondary);
 		max-width: var(--qrcode-max-width, 300px);
 		margin: 0 auto;
 		height: var(--qrcode-height);
