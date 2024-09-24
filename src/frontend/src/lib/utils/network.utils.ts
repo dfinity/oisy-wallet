@@ -1,3 +1,4 @@
+import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import {
 	BITCOIN_NETWORKS_IDS,
 	ICP_NETWORK_ID,
@@ -6,6 +7,7 @@ import {
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { nonNullish } from '@dfinity/utils';
 
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
@@ -37,3 +39,10 @@ export const filterTokensForSelectedNetwork = <T extends Token>([
 			$selectedNetwork?.id === networkId
 		);
 	});
+
+export const mapToSignerBitcoinNetwork = ({
+	network
+}: {
+	network: BitcoinNetwork | 'regtest';
+}): SignerBitcoinNetwork =>
+	({ mainnet: { mainnet: null }, testnet: { testnet: null }, regtest: { regtest: null } })[network];
