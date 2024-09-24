@@ -41,7 +41,7 @@
 						<Logo
 							src={$token.icon}
 							size="big"
-							alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name ?? '' })}
+							alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
 						/>
 					</div>
 				{:else}
