@@ -131,6 +131,7 @@ dependencies = [
  "ic-cdk 0.15.1",
  "ic-cdk-macros 0.15.0",
  "ic-cdk-timers",
+ "ic-cycles-ledger-client",
  "ic-stable-structures 0.6.5",
  "ic-verifiable-credentials",
  "k256",
@@ -704,16 +705,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d2ae9bf77fbf2d39ef573205d554d87e86c12f1994e9ea335b0651b9b278bcf1"
 dependencies = [
  "cfg-if",
-]
-
-[[package]]
-name = "cycles-ledger-client"
-version = "0.1.0"
-dependencies = [
- "candid",
- "ic-cdk 0.15.1",
- "serde",
- "serde_bytes",
 ]
 
 [[package]]
@@ -2021,6 +2012,16 @@ dependencies = [
  "ic-crypto-internal-threshold-sig-bls12381-der",
  "ic-crypto-internal-types",
  "ic-types",
+]
+
+[[package]]
+name = "ic-cycles-ledger-client"
+version = "0.1.0"
+dependencies = [
+ "candid",
+ "ic-cdk 0.15.1",
+ "serde",
+ "serde_bytes",
 ]
 
 [[package]]
