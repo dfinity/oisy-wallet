@@ -6,5 +6,5 @@
 	<div class="text-[var(--color-primary)]">
 		<Spinner inline />
 	</div>
-	<span class="text-sm"><slot /></span>
+	<span><slot /></span>
 </div>
