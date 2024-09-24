@@ -7,8 +7,6 @@
 
 	export let payload: Option<PayloadOrigin>;
 
-	$: console.log(payload);
-
 	let origin: Origin | undefined;
 	$: origin = payload?.origin;
 
