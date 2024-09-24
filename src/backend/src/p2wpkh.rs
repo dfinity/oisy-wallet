@@ -63,7 +63,11 @@ fn greedy(target: u64, available_utxos: &mut Vec<Utxo>) -> Vec<Utxo> {
 /// PROPERTY: sum(u.value for u in available_set) ≥ target ⇒ !solution.is_empty()
 /// POSTCONDITION: !solution.is_empty() ⇒ sum(u.value for u in solution) ≥ target
 /// POSTCONDITION:  solution.is_empty() ⇒ available_utxos did not change.
-fn utxos_selection(target: u64, available_utxos: &mut Vec<Utxo>, output_count: usize) -> Vec<Utxo> {
+pub fn utxos_selection(
+    target: u64,
+    available_utxos: &mut Vec<Utxo>,
+    output_count: usize,
+) -> Vec<Utxo> {
     let mut input_utxos = greedy(target, available_utxos);
 
     if input_utxos.is_empty() {

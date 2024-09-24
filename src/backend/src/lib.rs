@@ -5,7 +5,7 @@ use crate::guards::{
 };
 use crate::token::{add_to_user_token, remove_from_user_token};
 use bitcoin::consensus::serialize;
-use bitcoin::{Address as BtcAddress, Network};
+use bitcoin::{Address as BtcAddress, AddressType, Network};
 use bitcoin_utils::public_key_to_p2wpkh_address;
 use candid::{CandidType, Nat, Principal};
 use config::find_credential_config;
@@ -29,7 +29,7 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
 use oisy_user::oisy_users;
-use p2wpkh::{build_p2wpkh_pieces, build_p2wpkh_spend_tx};
+use p2wpkh::{build_p2wpkh_pieces, build_p2wpkh_spend_tx, estimate_fee, utxos_selection};
 use pretty_assertions::assert_eq;
 use serde::Deserialize;
 use serde_bytes::ByteBuf;
@@ -46,7 +46,10 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
-use signer::{ecdsa_sign_transaction, ecdsa_sign_transaction_by_pieces, BtcSignRequest};
+use signer::{
+    btc_send_from_caller, ecdsa_sign_transaction, ecdsa_sign_transaction_by_pieces, BtcSignRequest,
+    CfsOutput, SendBtcRequest,
+};
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Duration;
@@ -704,7 +707,6 @@ struct SendBtcParams {
 async fn send_btc(params: SendBtcParams) -> String {
     let principal = ic_cdk::caller();
     let network = params.network;
-    let dst_address = params.dst_address;
     let amount = params.amount;
     let fee_per_byte = get_fee_per_byte(network).await;
 
@@ -727,16 +729,16 @@ async fn send_btc(params: SendBtcParams) -> String {
         .await
         .utxos;
 
-    println!("After getting utxos: {}", own_utxos.len().to_string());
+    // println!("After getting utxos: {}", own_utxos.len().to_string());
 
-    let own_address = BtcAddress::from_str(&source_address)
-        .unwrap()
-        .require_network(transform_network(network))
-        .expect("Network check failed");
-    let dst_address = BtcAddress::from_str(&dst_address)
-        .unwrap()
-        .require_network(transform_network(network))
-        .expect("Network check failed");
+    // let own_address = BtcAddress::from_str(&source_address)
+    //     .unwrap()
+    //     .require_network(transform_network(network))
+    //     .expect("Network check failed");
+    // let dst_address = BtcAddress::from_str(&params.dst_address)
+    //     .unwrap()
+    //     .require_network(transform_network(network))
+    //     .expect("Network check failed");
 
     // // Build the transaction that sends `amount` to the destination address.
     // let transaction =
@@ -753,19 +755,44 @@ async fn send_btc(params: SendBtcParams) -> String {
 
     // signed_transaction.compute_txid().to_string()
 
-    let (txins, txouts) =
-        build_p2wpkh_pieces(&own_address, &own_utxos, &dst_address, amount, fee_per_byte).unwrap();
-    let signed_response = ecdsa_sign_transaction_by_pieces(BtcSignRequest {
-        principal,
-        network: params.network,
-        txouts,
-        txins,
-    })
-    .await;
+    // let (txins, txouts) =
+    //     build_p2wpkh_pieces(&own_address, &own_utxos, &dst_address, amount, fee_per_byte).unwrap();
+    // let signed_response = ecdsa_sign_transaction_by_pieces(BtcSignRequest {
+    //     principal,
+    //     network: params.network,
+    //     txouts,
+    //     txins,
+    // })
+    // .await;
 
-    bitcoin_api::send_transaction(network, signed_response.signed_transaction_bytes).await;
+    // bitcoin_api::send_transaction(network, signed_response.signed_transaction_bytes).await;
 
-    signed_response.txid
+    // signed_response.txid
+
+    const DEFAULT_OUTPUT_COUNT: u64 = 2;
+    let mut utxos = own_utxos.to_vec();
+    let selected_utxos = utxos_selection(amount, &mut utxos, DEFAULT_OUTPUT_COUNT as usize - 1);
+
+    if selected_utxos.is_empty() {
+        panic!("selected utxos are empty");
+    }
+
+    let fee = estimate_fee(&selected_utxos, fee_per_byte);
+
+    let params = SendBtcRequest {
+        address_type: AddressType::P2wpkh,
+        utxos_to_spend: selected_utxos,
+        fee_satoshis: fee,
+        outputs: vec![CfsOutput {
+            destination_address: params.dst_address,
+            sent_satoshis: params.amount,
+        }],
+        network,
+    };
+
+    let send_response = btc_send_from_caller(params).await;
+
+    send_response.txid
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
