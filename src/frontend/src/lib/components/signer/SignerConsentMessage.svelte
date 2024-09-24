@@ -40,7 +40,7 @@
 		const [title, ...rest] = markdown.split('\n\n');
 
 		return {
-			title: title.replaceAll('#', '').trim(),
+			title: title.replace('#', '').trim(),
 			content: (rest ?? []).join('\n\n')
 		};
 	};
@@ -69,7 +69,7 @@
 
 		<SignerOrigin payload={$payload} />
 
-		<div class="border border-light-blue px-8 py-4 mb-6 rounded-lg msg">
+		<div class="border border-dust px-8 py-4 mb-6 rounded-lg msg">
 			<Markdown text={content} />
 		</div>
 
