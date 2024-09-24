@@ -261,6 +261,7 @@ pub(crate) fn init_arg() -> Arg {
         }]),
         api: None,
         cycles_ledger_canister_id: None,
+        signer_canister_id: None,
     })
 }
 
