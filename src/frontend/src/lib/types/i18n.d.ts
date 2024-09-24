@@ -27,10 +27,10 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		oisy_roadmap: string;
+		changelog: string;
 		submit_ticket: string;
 	};
-	alt: { more_settings: string; menu: string; oisy_roadmap: string; submit_ticket: string };
+	alt: { more_settings: string; menu: string; changelog: string; submit_ticket: string };
 }
 
 interface I18nAuth {

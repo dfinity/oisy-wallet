@@ -66,10 +66,10 @@
 		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
 
 		<ExternalLink
-			href="https://github.com/orgs/dfinity/projects/33"
-			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.oisy_roadmap)}
+			href="https://github.com/dfinity/oisy-wallet/releases"
+			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 		>
-			{replaceOisyPlaceholders($i18n.navigation.text.oisy_roadmap)}
+			{replaceOisyPlaceholders($i18n.navigation.text.changelog)}
 		</ExternalLink>
 
 		<ExternalLink
