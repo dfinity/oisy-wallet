@@ -13,6 +13,7 @@ export interface AddUserCredentialRequest {
 	current_user_version: [] | [bigint];
 	credential_spec: CredentialSpec;
 }
+export type AllowSigningError = { Other: string };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
@@ -34,6 +35,7 @@ export interface Config {
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array | number[]];
+	cycles_ledger_canister_id: [] | [Principal];
 }
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
@@ -78,6 +80,7 @@ export interface InitArg {
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
+	cycles_ledger_canister_id: [] | [Principal];
 }
 export interface ListUsersRequest {
 	updated_after_timestamp: [] | [bigint];
@@ -122,9 +125,10 @@ export interface OisyUser {
 	updated_timestamp: bigint;
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
-export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_2 = { Ok: MigrationReport } | { Err: string };
-export type Result_3 = { Ok: null } | { Err: string };
+export type Result_1 = { Ok: null } | { Err: AllowSigningError };
+export type Result_2 = { Ok: UserProfile } | { Err: GetUserProfileError };
+export type Result_3 = { Ok: MigrationReport } | { Err: string };
+export type Result_4 = { Ok: null } | { Err: string };
 export interface Stats {
 	user_profile_count: bigint;
 	custom_token_count: bigint;
@@ -164,18 +168,19 @@ export interface UserTokenId {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
+	allow_signing: ActorMethod<[], Result_1>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
 	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-	get_user_profile: ActorMethod<[], Result_1>;
+	get_user_profile: ActorMethod<[], Result_2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-	migrate_user_data_to: ActorMethod<[Principal], Result_2>;
+	migrate_user_data_to: ActorMethod<[Principal], Result_3>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_3>;
+	migration_stop_timer: ActorMethod<[], Result_4>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;

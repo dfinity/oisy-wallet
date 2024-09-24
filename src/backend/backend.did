@@ -10,6 +10,7 @@ type AddUserCredentialRequest = record {
   current_user_version : opt nat64;
   credential_spec : CredentialSpec;
 };
+type AllowSigningError = variant { Other : text };
 type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
@@ -31,6 +32,7 @@ type Config = record {
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_raw : opt blob;
+  cycles_ledger_canister_id : opt principal;
 };
 type CredentialSpec = record {
   arguments : opt vec record { text; ArgumentValue };
@@ -69,6 +71,7 @@ type InitArg = record {
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_der : opt blob;
+  cycles_ledger_canister_id : opt principal;
 };
 type ListUsersRequest = record {
   updated_after_timestamp : opt nat64;
@@ -110,9 +113,10 @@ type OisyUser = record {
   updated_timestamp : nat64;
 };
 type Result = variant { Ok; Err : AddUserCredentialError };
-type Result_1 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_2 = variant { Ok : MigrationReport; Err : text };
-type Result_3 = variant { Ok; Err : text };
+type Result_1 = variant { Ok; Err : AllowSigningError };
+type Result_2 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_3 = variant { Ok : MigrationReport; Err : text };
+type Result_4 = variant { Ok; Err : text };
 type Stats = record {
   user_profile_count : nat64;
   custom_token_count : nat64;
@@ -149,18 +153,19 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
+  allow_signing : () -> (Result_1) query;
   bulk_up : (blob) -> ();
   config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
   get_canister_status : () -> (CanisterStatusResultV2);
-  get_user_profile : () -> (Result_1) query;
+  get_user_profile : () -> (Result_2) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
-  migrate_user_data_to : (principal) -> (Result_2);
+  migrate_user_data_to : (principal) -> (Result_3);
   migration : () -> (opt MigrationReport) query;
-  migration_stop_timer : () -> (Result_3);
+  migration_stop_timer : () -> (Result_4);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
   set_guards : (Guards) -> ();

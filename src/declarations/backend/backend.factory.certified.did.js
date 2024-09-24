@@ -22,7 +22,8 @@ export const idlFactory = ({ IDL }) => {
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
-		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		cycles_ledger_canister_id: IDL.Opt(IDL.Principal)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	const ArgumentValue = IDL.Variant({ Int: IDL.Int32, String: IDL.Text });
@@ -46,12 +47,15 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
+	const AllowSigningError = IDL.Variant({ Other: IDL.Text });
+	const Result_1 = IDL.Variant({ Ok: IDL.Null, Err: AllowSigningError });
 	const Config = IDL.Record({
 		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
-		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		cycles_ledger_canister_id: IDL.Opt(IDL.Principal)
 	});
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
@@ -88,7 +92,7 @@ export const idlFactory = ({ IDL }) => {
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
-	const Result_1 = IDL.Variant({
+	const Result_2 = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
@@ -169,26 +173,27 @@ export const idlFactory = ({ IDL }) => {
 		to: IDL.Principal,
 		progress: MigrationProgress
 	});
-	const Result_2 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
-	const Result_3 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
+	const Result_3 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
+	const Result_4 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
+		allow_signing: IDL.Func([], [Result_1]),
 		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
 		config: IDL.Func([], [Config]),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		get_user_profile: IDL.Func([], [Result_1]),
+		get_user_profile: IDL.Func([], [Result_2]),
 		http_request: IDL.Func([HttpRequest], [HttpResponse]),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)]),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)]),
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse]),
-		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_2], []),
+		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_3], []),
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)]),
-		migration_stop_timer: IDL.Func([], [Result_3], []),
+		migration_stop_timer: IDL.Func([], [Result_4], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
@@ -223,7 +228,8 @@ export const init = ({ IDL }) => {
 		ecdsa_key_name: IDL.Text,
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
-		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
+		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8)),
+		cycles_ledger_canister_id: IDL.Opt(IDL.Principal)
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
 	return [Arg];
