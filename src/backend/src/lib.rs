@@ -44,6 +44,7 @@ mod impls;
 mod migrate;
 mod oisy_user;
 mod signer;
+mod state;
 mod token;
 mod types;
 mod user_profile;
@@ -345,7 +346,7 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 
 #[query(guard = "may_read_user_data")]
 fn allow_signing() -> Result<(), AllowSigningError> {
-  signer::allow_signing()
+    signer::allow_signing()
 }
 
 #[query(guard = "caller_is_allowed")]

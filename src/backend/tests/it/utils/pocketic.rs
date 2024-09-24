@@ -260,6 +260,7 @@ pub(crate) fn init_arg() -> Arg {
             credential_type: CredentialType::ProofOfUniqueness,
         }]),
         api: None,
+        cycles_ledger_canister_id: None,
     })
 }
 
