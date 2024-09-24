@@ -1,6 +1,6 @@
 import type { OptionBalance } from '$lib/types/balance';
 import type { Network } from '$lib/types/network';
-import type { OnramperCryptoId } from '$lib/types/onramper';
+import type { OnramperId } from '$lib/types/onramper';
 import type { AtLeastOne, Option, RequiredExcept } from '$lib/types/utils';
 
 export type TokenId = symbol;
@@ -39,7 +39,7 @@ export interface TokenBuyable {
 }
 
 export interface TokenBuy {
-	onramperId?: OnramperCryptoId;
+	onramperId?: OnramperId;
 }
 
 export interface TokenLinkedData {
