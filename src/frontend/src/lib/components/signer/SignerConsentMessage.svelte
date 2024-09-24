@@ -8,9 +8,12 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	const {
 		consentMessagePrompt: { payload, reset: resetPrompt }
@@ -25,10 +28,32 @@
 	let consentInfo: icrc21_consent_info | undefined;
 	$: consentInfo = $payload?.status === 'result' ? $payload?.consentInfo : undefined;
 
+	let loading = false;
 	let displayMessage: string | undefined;
-	$: displayMessage = nonNullish(consentInfo)
-		? (consentInfo.consent_message as { GenericDisplayMessage: string }).GenericDisplayMessage
-		: undefined;
+
+	const onPayload = () => {
+		if ($payload?.status === 'loading') {
+			displayMessage = undefined;
+			loading = true;
+			return;
+		}
+
+		loading = false;
+
+		if ($payload?.status === 'error') {
+			toastsError({
+				msg: { text: $i18n.signer.consent_message.error.retrieve },
+				err: $payload.details
+			});
+			return;
+		}
+
+		displayMessage =
+			nonNullish(consentInfo) && 'GenericDisplayMessage' in consentInfo.consent_message
+				? consentInfo.consent_message.GenericDisplayMessage
+				: undefined;
+	};
+	$: $payload, onPayload();
 
 	type Text = { title: string; content: string } | undefined;
 
@@ -37,11 +62,11 @@
 			return undefined;
 		}
 
-		const [title, ...rest] = markdown.split('\n\n');
+		const [title, ...rest] = markdown.split('\n');
 
 		return {
-			title: title.replace('#', '').trim(),
-			content: (rest ?? []).join('\n\n')
+			title: title.replace(/^#+\s*/, '').trim(),
+			content: (rest ?? []).join('\n')
 		};
 	};
 
@@ -49,19 +74,39 @@
 	$: text = mapText(displayMessage);
 
 	const onApprove = () => {
-		// TODO: handle error if not defined?
+		if (isNullish(approve)) {
+			toastsError({
+				msg: { text: $i18n.signer.consent_message.error.no_approve_callback }
+			});
+
+			resetPrompt();
+			return;
+		}
+
 		approve?.();
 		resetPrompt();
 	};
 
 	const onReject = () => {
-		// TODO: handle error if not defined?
+		if (isNullish(reject)) {
+			toastsError({
+				msg: { text: $i18n.signer.consent_message.error.no_reject_callback }
+			});
+
+			resetPrompt();
+			return;
+		}
+
 		reject?.();
 		resetPrompt();
 	};
 </script>
 
-{#if nonNullish(text)}
+{#if loading}
+	<SignerLoading>
+		{$i18n.signer.consent_message.text.loading}
+	</SignerLoading>
+{:else if nonNullish(text)}
 	{@const { title, content } = text}
 
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
@@ -74,8 +119,10 @@
 		</div>
 
 		<ButtonGroup>
-			<button type="button" class="secondary block flex-1" on:click={onReject}>Reject</button>
-			<button type="submit" class="primary block flex-1">Approve</button>
+			<button type="button" class="secondary block flex-1" on:click={onReject}
+				>{$i18n.core.text.reject}</button
+			>
+			<button type="submit" class="primary block flex-1">{$i18n.core.text.approve}</button>
 		</ButtonGroup>
 	</form>
 {/if}

@@ -638,6 +638,16 @@
 			"alt": {
 				"link_to_dapp": "Link to the dApp requesting permissions"
 			}
+		},
+		"consent_message": {
+			"text": {
+				"loading": "Loading consent message..."
+			},
+			"error": {
+				"no_approve_callback": "No callback to approve the consent message, which is unexpected. Close the wallet and try again.",
+				"no_reject_callback": "No callback to reject the consent message, which is unexpected. Close the wallet and try again.",
+				"retrieve": "An error occurred while retrieving the consent message"
+			}
 		}
 	}
 }

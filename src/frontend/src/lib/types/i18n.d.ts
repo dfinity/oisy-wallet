@@ -547,6 +547,10 @@ interface I18nSigner {
 		error: { no_confirm_callback: string };
 	};
 	origin: { text: { request_from: string; invalid_origin: string }; alt: { link_to_dapp: string } };
+	consent_message: {
+		text: { loading: string };
+		error: { no_approve_callback: string; no_reject_callback: string; retrieve: string };
+	};
 }
 
 interface I18n {
