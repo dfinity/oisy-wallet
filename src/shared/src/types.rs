@@ -30,6 +30,8 @@ pub struct InitArg {
     pub api: Option<Guards>,
     /// The cycles ledger canister ID.
     pub cycles_ledger_canister_id: Option<Principal>,
+    /// The signer canister ID.
+    pub signer_canister_id: Option<Principal>,
 }
 
 #[derive(CandidType, Deserialize, Eq, PartialEq, Debug, Copy, Clone)]
@@ -74,6 +76,8 @@ pub struct Config {
     pub api: Option<Guards>,
     /// The cycles ledger canister ID.
     pub cycles_ledger_canister_id: Option<Principal>,
+    /// The signer canister ID.
+    pub signer_canister_id: Option<Principal>,
 }
 
 pub mod transaction {

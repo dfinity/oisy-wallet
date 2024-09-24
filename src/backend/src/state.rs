@@ -12,4 +12,12 @@ lazy_static! {
             Principal::from_text(canister_id)
                 .expect("Invalid cycles ledger canister ID provided at compile time")
         }));
+    pub static ref SIGNER: Principal =
+        read_config(|config| config.signer_canister_id.unwrap_or_else(|| {
+            const MAINNET_SIGNER_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
+            let canister_id =
+                option_env!("CANISTER_ID_SIGNER").unwrap_or(MAINNET_SIGNER_CANISTER_ID);
+            Principal::from_text(canister_id)
+                .expect("Invalid signer canister ID provided at compile time")
+        }));
 }
