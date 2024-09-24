@@ -11,6 +11,6 @@
 
 <h2 class="text-center mt-12 mb-16">{$i18n.signer.sign_in.text.authenticate_to_connect}</h2>
 
-<ButtonAuthenticate on:click={async () => await signIn({})}>
+<ButtonAuthenticate fullWidth on:click={async () => await signIn({})}>
 	{$i18n.auth.text.authenticate}
 </ButtonAuthenticate>
