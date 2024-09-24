@@ -1,11 +1,14 @@
 <script lang="ts">
+	import Background from '$lib/components/core/Background.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
-	import OisyWalletLogoDark from '$lib/components/icons/OisyWalletLogoDark.svelte';
+	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 </script>
 
+<Background />
+
 <main class="pt-10 flex flex-col gap-y-8">
-	<OisyWalletLogoDark />
+	<div class="flex justify-center md:mt-24"><OisyWalletLogoLink /></div>
 
 	<LoadersGuard>
 		<slot />
