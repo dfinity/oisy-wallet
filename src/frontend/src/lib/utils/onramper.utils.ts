@@ -31,5 +31,7 @@ const toQueryString = (params: Omit<BuildOnRamperLinkParams, 'wallets'>) =>
 		.map(([key, value]) => `${key}=${Array.isArray(value) ? arrayToParam(value) : value}`)
 		.join('&');
 
+// The documentation for the OnRamper widget's parameters can be found here:
+// https://docs.onramper.com/docs/supported-widget-parameters
 export const buildOnRamperLink = ({ wallets, ...params }: BuildOnRamperLinkParams) =>
 	`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}&${toQueryString(params)}&wallets=${walletsToParam(wallets)}`;
