@@ -29,7 +29,7 @@ use ic_stable_structures::{
 use ic_verifiable_credentials::validate_ii_presentation_and_claims;
 use k256::PublicKey;
 use oisy_user::oisy_users;
-use p2wpkh::build_p2wpkh_spend_tx;
+use p2wpkh::{build_p2wpkh_pieces, build_p2wpkh_spend_tx};
 use pretty_assertions::assert_eq;
 use serde::Deserialize;
 use serde_bytes::ByteBuf;
@@ -46,7 +46,7 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
-use signer::ecdsa_sign_transaction;
+use signer::{ecdsa_sign_transaction, ecdsa_sign_transaction_by_pieces, BtcSignRequest};
 use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::Duration;
@@ -702,7 +702,7 @@ struct SendBtcParams {
 /// at the given derivation path.
 #[update(guard = "may_threshold_sign")]
 async fn send_btc(params: SendBtcParams) -> String {
-    let principal = &ic_cdk::caller();
+    let principal = ic_cdk::caller();
     let network = params.network;
     let dst_address = params.dst_address;
     let amount = params.amount;
@@ -738,14 +738,24 @@ async fn send_btc(params: SendBtcParams) -> String {
         .require_network(transform_network(network))
         .expect("Network check failed");
 
-    // Build the transaction that sends `amount` to the destination address.
-    let transaction =
-        build_p2wpkh_spend_tx(&own_address, &own_utxos, &dst_address, amount, fee_per_byte)
-            .expect("Error creating transaction");
+    // // Build the transaction that sends `amount` to the destination address.
+    // let transaction =
+    //     build_p2wpkh_spend_tx(&own_address, &own_utxos, &dst_address, amount, fee_per_byte)
+    //         .expect("Error creating transaction");
 
-    // Sign the transaction.
-    let signed_transaction =
-        ecdsa_sign_transaction(&principal, bitcoin_network, transaction, &own_utxos).await;
+    // // Sign the transaction.
+    // let signed_transaction =
+    //     ecdsa_sign_transaction(&principal, bitcoin_network, transaction, &own_utxos).await;
+
+    let (txins, txouts) =
+        build_p2wpkh_pieces(&own_address, &own_utxos, &dst_address, amount, fee_per_byte).unwrap();
+    let signed_transaction = ecdsa_sign_transaction_by_pieces(BtcSignRequest {
+        principal,
+        network: bitcoin_network,
+        txouts,
+        txins,
+    })
+    .await;
 
     let signed_transaction_bytes = serialize(&signed_transaction);
 

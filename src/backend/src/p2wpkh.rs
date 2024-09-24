@@ -6,6 +6,8 @@ use bitcoin::{
 };
 use ic_cdk::api::management_canister::bitcoin::{MillisatoshiPerByte, Satoshi, Utxo};
 
+use crate::signer::{CfsTxIn, CfsTxOut};
+
 /// The threshold for the number of UTXOs under management before
 /// trying to match the number of outputs with the number of inputs
 /// when building transactions.
@@ -174,4 +176,55 @@ pub fn build_p2wpkh_spend_tx(
         lock_time: LockTime::ZERO,
         version: Version::TWO,
     })
+}
+
+pub fn build_p2wpkh_pieces(
+    own_address: &Address,
+    own_utxos: &[Utxo],
+    dst_address: &Address,
+    amount: Satoshi,
+    fee_per_vbyte: MillisatoshiPerByte,
+) -> Result<(Vec<CfsTxIn>, Vec<CfsTxOut>), String> {
+    // One output for the caller and one for the change.
+    const DEFAULT_OUTPUT_COUNT: u64 = 2;
+    let mut utxos = own_utxos.to_vec();
+    let selected_utxos = utxos_selection(amount, &mut utxos, DEFAULT_OUTPUT_COUNT as usize - 1);
+
+    if selected_utxos.is_empty() {
+        return Err(format!(
+            "Insufficient balance, trying to transfer {}",
+            amount,
+        ));
+    }
+
+    let fee = estimate_fee(own_utxos, fee_per_vbyte);
+    // Assume that any amount below this threshold is dust.
+    const DUST_THRESHOLD: u64 = 1_000;
+
+    let total_spent: u64 = selected_utxos.iter().map(|u| u.value).sum();
+
+    let inputs: Vec<CfsTxIn> = selected_utxos
+        .iter()
+        .map(|utxo| CfsTxIn {
+            txid: utxo.outpoint.txid.clone(),
+            vout: utxo.outpoint.vout,
+            prev_output_value: utxo.value,
+        })
+        .collect();
+
+    let mut outputs = vec![CfsTxOut {
+        address: dst_address.to_string(),
+        value: amount,
+    }];
+
+    let remaining_amount = total_spent - amount - fee;
+
+    if remaining_amount >= DUST_THRESHOLD {
+        outputs.push(CfsTxOut {
+            address: own_address.to_string(),
+            value: remaining_amount,
+        });
+    }
+
+    Ok((inputs, outputs))
 }
