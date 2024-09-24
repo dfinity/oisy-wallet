@@ -5,7 +5,7 @@ export const ONRAMPER_ENABLED = JSON.parse(import.meta.env.VITE_ONRAMPER_ENABLED
 
 const ONRAMPER_ENV: 'dev' | 'prod' = LOCAL || STAGING ? 'dev' : 'prod';
 
-const isOnRamperDev = ONRAMPER_ENV === 'dev';
+export const isOnRamperDev = ONRAMPER_ENV === 'dev';
 
 export const ONRAMPER_BASE_URL = isOnRamperDev
 	? 'https://buy.onramper.dev'
