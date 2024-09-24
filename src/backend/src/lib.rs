@@ -740,7 +740,8 @@ async fn send_btc(params: SendBtcParams) -> String {
 
     // Build the transaction that sends `amount` to the destination address.
     let transaction =
-        build_p2wpkh_spend_tx(&own_address, &own_utxos, &dst_address, amount, fee_per_byte).await;
+        build_p2wpkh_spend_tx(&own_address, &own_utxos, &dst_address, amount, fee_per_byte)
+            .expect("Error creating transaction");
 
     // Sign the transaction.
     let signed_transaction =
