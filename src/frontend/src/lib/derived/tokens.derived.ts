@@ -1,4 +1,5 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
+import type { BtcToken } from '$btc/types/btc';
 import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN } from '$env/tokens.env';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -52,8 +53,13 @@ export const enabledErc20Tokens: Readable<Erc20Token[]> = derived(
 );
 
 /**
- * The following store is use as reference for the list of WalletWorkers that are started/stopped in the main token page.
+ * The following 2 stores are used as reference for the list of WalletWorkers that are started/stopped in the main token page.
  */
+export const enabledBtcTokens: Readable<BtcToken[]> = derived(
+	[enabledBitcoinTokens],
+	filterEnabledTokens
+);
+
 // TODO: The several dependencies of enabledIcTokens are not strictly only IC tokens, but other tokens too.
 //  We should find a better way to handle this, improving the store.
 export const enabledIcTokens: Readable<IcToken[]> = derived(
