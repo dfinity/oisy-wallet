@@ -1,8 +1,8 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
-import type { SchedulerJobData, SchedulerJobParams } from '$icp/schedulers/scheduler';
 import { WalletScheduler } from '$icp/schedulers/wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
+import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import type {
 	GetAccountIdentifierTransactionsResponse,
