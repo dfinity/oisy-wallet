@@ -27,6 +27,7 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
+use signer::AllowSigningError;
 use std::cell::RefCell;
 use std::time::Duration;
 use types::{
@@ -42,6 +43,7 @@ mod guards;
 mod impls;
 mod migrate;
 mod oisy_user;
+mod signer;
 mod token;
 mod types;
 mod user_profile;
@@ -339,6 +341,11 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
             Err(err) => Err(err),
         }
     })
+}
+
+#[query(guard = "may_read_user_data")]
+fn allow_signing() -> Result<(), AllowSigningError> {
+  signer::allow_signing()
 }
 
 #[query(guard = "caller_is_allowed")]
