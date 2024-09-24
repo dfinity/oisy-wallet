@@ -17,6 +17,8 @@ interface I18nCore {
 		amount: string;
 		max: string;
 		more: string;
+		reject: string;
+		approve: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; background: string; go_to_home: string };
@@ -396,8 +398,6 @@ interface I18nWallet_connect {
 	text: {
 		name: string;
 		session_proposal: string;
-		approve: string;
-		reject: string;
 		connect: string;
 		connecting: string;
 		disconnect: string;
@@ -536,6 +536,15 @@ interface I18nAbout {
 interface I18nSigner {
 	sign_in: { text: { authenticate_to_connect: string } };
 	idle: { text: { title: string; info: string }; alt: { img_placeholder: string } };
+	permissions: {
+		text: {
+			title: string;
+			the_dapp_is_requesting: string;
+			your_wallet_address: string;
+			icrc27_accounts: string;
+			icrc49_call_canister: string;
+		};
+	};
 }
 
 interface I18n {

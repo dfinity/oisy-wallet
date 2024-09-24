@@ -13,6 +13,7 @@
 	import IconShield from '$lib/components/icons/IconShield.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
@@ -49,11 +50,11 @@
 	> = {
 		icrc27_accounts: {
 			icon: IconWallet,
-			label: 'Learn your Oisy wallet address'
+			label: $i18n.signer.permissions.text.icrc27_accounts
 		},
 		icrc49_call_canister: {
 			icon: IconShield,
-			label: 'Initiate transactions to approve in Oisy'
+			label: $i18n.signer.permissions.text.icrc49_call_canister
 		}
 	};
 
@@ -65,12 +66,12 @@
 
 {#if nonNullish(scopes) && nonNullish($payload)}
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
-		<h2 class="text-center mb-4">Review permissions</h2>
+		<h2 class="text-center mb-4">{$i18n.signer.permissions.text.title}</h2>
 
 		<SignerOrigin payload={$payload} />
 
 		<div class="bg-light-blue border border-light-blue p-6 mb-6 rounded-lg">
-			<p class="break-normal font-bold">The dapp is requesting the following permissions</p>
+			<p class="break-normal font-bold">{$i18n.signer.permissions.text.the_dapp_is_requesting}</p>
 
 			<ul class="flex flex-col gap-1 list-none mt-2.5">
 				{#each scopes as scope}
@@ -85,11 +86,13 @@
 		</div>
 
 		{#if requestAccountsPermissions}
-			<div class="flex gap-4 border border-dust bg-white rounded-lg flex p-4 mb-10">
+			<div class="flex gap-4 border border-dust bg-white rounded-lg p-4 mb-10">
 				<IconAstronautEmpty />
 
 				<div>
-					<label class="block text-sm font-bold" for="ic-wallet-address">Your wallet address</label>
+					<label class="block text-sm font-bold" for="ic-wallet-address"
+						>{$i18n.signer.permissions.text.your_wallet_address}</label
+					>
 
 					<output id="ic-wallet-address" class="break-all"
 						>{shortenWithMiddleEllipsis({ text: $icrcAccountIdentifierText ?? '' })}</output
@@ -99,8 +102,10 @@
 		{/if}
 
 		<ButtonGroup>
-			<button type="button" class="secondary block flex-1" on:click={onReject}>Reject</button>
-			<button type="submit" class="primary block flex-1">Approve</button>
+			<button type="button" class="secondary block flex-1" on:click={onReject}
+				>{$i18n.core.text.reject}</button
+			>
+			<button type="submit" class="primary block flex-1">{$i18n.core.text.approve}</button>
 		</ButtonGroup>
 	</form>
 {/if}

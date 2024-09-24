@@ -13,7 +13,9 @@
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
-			"more": "More"
+			"more": "More",
+			"reject": "Reject",
+			"approve": "Approve"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -459,8 +461,6 @@
 		"text": {
 			"name": "WalletConnect",
 			"session_proposal": "Session Proposal",
-			"approve": "Approve",
-			"reject": "Reject",
 			"connect": "Connect",
 			"connecting": "Connecting...",
 			"disconnect": "Disconnect",
@@ -616,6 +616,15 @@
 			},
 			"alt": {
 				"img_placeholder": "An image displaying two dApps with wireframes and a checkbox indicating that they are connected"
+			}
+		},
+		"permissions": {
+			"text": {
+				"title": "Review permissions",
+				"the_dapp_is_requesting": "The dapp is requesting the following permissions",
+				"your_wallet_address": "Your wallet address",
+				"icrc27_accounts": "Learn your Oisy wallet address",
+				"icrc49_call_canister": "Initiate transactions to approve in Oisy"
 			}
 		}
 	}
