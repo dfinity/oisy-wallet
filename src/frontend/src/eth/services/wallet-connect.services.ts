@@ -33,10 +33,10 @@ import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import { get } from 'svelte/store';
 import { send as executeSend } from './send.services';
 
-export type WalletConnectCallBackParams = {
+export interface WalletConnectCallBackParams {
 	request: Web3WalletTypes.SessionRequest;
 	listener: WalletConnectListener;
-};
+}
 
 export type WalletConnectExecuteParams = Pick<WalletConnectCallBackParams, 'request'> & {
 	listener: OptionWalletConnectListener;
@@ -266,13 +266,21 @@ export const signMessage = ({
 
 					try {
 						const hash = getSignParamsMessageTypedDataV4Hash(params);
-						return signPrehash({ hash, identity });
+						return signPrehash({
+							hash,
+							identity,
+							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+						});
 					} catch (err: unknown) {
 						// If the above failed, it's because JSON.parse throw an exception.
 						// We are assuming that it did so because it tried to parse a string that does not represent an object.
 						// Therefore, we continue with a message as hex string.
 						const message = getSignParamsMessageHex(params);
-						return signMessageApi({ message, identity });
+						return signMessageApi({
+							message,
+							identity,
+							nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+						});
 					}
 				};
 

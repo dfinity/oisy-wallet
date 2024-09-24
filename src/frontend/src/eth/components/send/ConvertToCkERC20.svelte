@@ -37,11 +37,7 @@
 	})}
 >
 	<IconConvert size="28" slot="icon" />
-	<span>
-		{replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
-			$ckErc20: convertToSymbol
-		})}
-	</span>
+	<span>{convertToSymbol}</span>
 </ConvertETH>
 
 {#if $modalConvertToTwinTokenCkEth}

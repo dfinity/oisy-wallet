@@ -46,6 +46,7 @@ module.exports = {
 		}
 	],
 	rules: {
+		'@typescript-eslint/consistent-type-definitions': 'error',
 		'@typescript-eslint/no-inferrable-types': 'error',
 		'@typescript-eslint/no-unnecessary-type-assertion': 'error',
 		'@typescript-eslint/no-unused-vars': [
@@ -57,9 +58,10 @@ module.exports = {
 			}
 		],
 		'@typescript-eslint/prefer-nullish-coalescing': 'error',
-    '@typescript-eslint/prefer-reduce-type-parameter': 'error',
+		'@typescript-eslint/prefer-reduce-type-parameter': 'error',
 		'arrow-body-style': ['warn', 'as-needed'],
 		curly: 'error',
+		'local-rules/prefer-object-params': 'warn',
 		'local-rules/no-svelte-store-in-api': 'error',
 		'local-rules/use-option-type-wrapper': 'warn',
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],

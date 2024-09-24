@@ -35,6 +35,7 @@ export class AlchemyErc20Provider {
 	}): WebSocketListener => {
 		const erc20Contract = new ethers.Contract(contract.address, ERC20_ABI, this.provider);
 
+		// eslint-disable-next-line local-rules/prefer-object-params -- This function needs to have listed arguments to match the Listener type passed to ethers.js providers
 		const filterListener = async (
 			_from: string,
 			_address: string,

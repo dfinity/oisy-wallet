@@ -1,21 +1,17 @@
 <script lang="ts">
-	import IconHeaderBTC from '$lib/components/icons/IconHeaderBTC.svelte';
-	import IconHeaderETH from '$lib/components/icons/IconHeaderETH.svelte';
-	import IconHeaderICP from '$lib/components/icons/IconHeaderICP.svelte';
+	import IconHeaderTokens from '$lib/components/icons/IconHeaderTokens.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<div class="flex -space-x-2.5 mt-6 xl:mt-12">
-	<IconHeaderICP />
-	<IconHeaderBTC />
-	<IconHeaderETH />
+<div class="flex mt-6 xl:mt-12">
+	<IconHeaderTokens />
 </div>
 
 <div class="mt-5 mb-7 pt-2">
-	<h1 class="text-off-white text-4xl text-center">
-		{$i18n.auth.text.title}
+	<h1 class="text-4xl text-center">
+		{$i18n.auth.text.title_part_1} <span class="text-primary">{$i18n.auth.text.title_part_2}</span>
 	</h1>
 </div>
 
