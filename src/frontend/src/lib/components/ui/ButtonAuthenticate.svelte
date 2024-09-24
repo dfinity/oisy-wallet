@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconArrowAstronaut from '$lib/components/icons/IconArrowAstronaut.svelte';
+	import IconAstronautArrow from '$lib/components/icons/IconAstronautArrow.svelte';
 </script>
 
 <button
@@ -8,5 +8,5 @@
 	data-tid="login-button"
 >
 	<slot />
-	<IconArrowAstronaut />
+	<IconAstronautArrow />
 </button>
