@@ -2,9 +2,9 @@ import { REPLICA_HOST } from '$lib/constants/app.constants';
 import type { Option } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
 import {
+	ICRC21_CALL_CONSENT_MESSAGE,
 	ICRC25_REQUEST_PERMISSIONS,
 	ICRC27_ACCOUNTS,
-	ICRC49_CALL_CANISTER,
 	type AccountsPromptPayload,
 	type ConsentMessagePromptPayload,
 	type PermissionsPromptPayload
@@ -75,9 +75,10 @@ export const initSignerContext = ({
 		});
 
 		signer.register({
-			method: ICRC49_CALL_CANISTER,
-			prompt: (payload: ConsentMessagePromptPayload) =>
-				consentMessagePromptPayloadStore.set(payload)
+			method: ICRC21_CALL_CONSENT_MESSAGE,
+			prompt: (payload: ConsentMessagePromptPayload) => {
+				consentMessagePromptPayloadStore.set(payload);
+			}
 		});
 	};
 
