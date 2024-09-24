@@ -85,3 +85,7 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_MILLISECOND * 1_000n * 60n
 export const EIGHT_DECIMALS = 8;
 
 export const ZERO = BigNumber.from(0n);
+
+// Wallets
+export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
+export const WALLET_PAGINATION = 10n;

@@ -13,7 +13,6 @@
 	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
-	import { WALLET_PAGINATION } from '$icp/constants/ic.constants';
 	import {
 		tokenAsIcToken,
 		tokenCkBtcLedger,
@@ -24,6 +23,7 @@
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
 	import type { IcTransactionUi } from '$icp/types/ic';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalIcToken, modalIcTransaction } from '$lib/derived/modal.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
