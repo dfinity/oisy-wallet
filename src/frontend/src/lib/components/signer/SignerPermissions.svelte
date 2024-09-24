@@ -92,7 +92,7 @@
 					<label class="block text-sm font-bold" for="ic-wallet-address">Your wallet address</label>
 
 					<output id="ic-wallet-address" class="break-all"
-						>{shortenWithMiddleEllipsis($icrcAccountIdentifierText ?? '')}</output
+						>{shortenWithMiddleEllipsis({ text: $icrcAccountIdentifierText ?? '' })}</output
 					>
 				</div>
 			</div>
