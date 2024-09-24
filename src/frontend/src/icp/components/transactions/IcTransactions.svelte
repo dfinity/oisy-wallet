@@ -111,7 +111,7 @@
 		{/if}
 
 		{#if $icTransactions.length === 0}
-			<p class="mt-4 text-dark opacity-50">{$i18n.transactions.text.no_transactions}</p>
+			<p class="mt-4 text-secondary opacity-50">{$i18n.transactions.text.no_transactions}</p>
 		{/if}
 	</svelte:component>
 </IcTransactionsSkeletons>
