@@ -30,20 +30,20 @@
 	<SignerLoading>
 		{$i18n.signer.call_canister.text.processing}
 	</SignerLoading>
-{:else if $payload?.status === 'error'}
+{:else if $payload?.status === 'result'}
 	<h2 class="text-center mb-4">{$i18n.signer.call_canister.text.executed}</h2>
 
 	<SignerAlert type="ok">
 		<IconCheck />
 	</SignerAlert>
 
-	<p class="text-center mt-10 font-bold pb-12">{$i18n.signer.call_canister.text.close_window}</p>
-{:else if $payload?.status === 'result'}
+	<p class="text-center mt-10 font-bold">{$i18n.signer.call_canister.text.close_window}</p>
+{:else if $payload?.status === 'error'}
 	<h2 class="text-center mb-4">{$i18n.signer.call_canister.text.error}</h2>
 
 	<SignerAlert type="error">
 		<IconClose />
 	</SignerAlert>
 
-	<p class="text-center mt-10 font-bold pb-12">{$i18n.signer.call_canister.text.try_again}</p>
+	<p class="text-center mt-10 font-bold">{$i18n.signer.call_canister.text.try_again}</p>
 {/if}
