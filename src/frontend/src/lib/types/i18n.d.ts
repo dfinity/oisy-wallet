@@ -544,6 +544,7 @@ interface I18nSigner {
 			icrc27_accounts: string;
 			icrc49_call_canister: string;
 		};
+		error: { no_confirm_callback: string };
 	};
 }
 

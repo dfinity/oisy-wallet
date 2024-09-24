@@ -5,7 +5,7 @@
 		type IcrcScopedMethod,
 		type PermissionsConfirmation
 	} from '@dfinity/oisy-wallet-signer';
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type ComponentType, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -15,6 +15,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	const {
@@ -27,19 +28,22 @@
 	let confirm: PermissionsConfirmation | undefined;
 	$: confirm = $payload?.confirm;
 
-	const onReject = () => {
-		// TODO: assert no undefined and toast error
-		confirm?.((scopes ?? []).map((scope) => ({ ...scope, state: 'denied' })));
+	const confirmPermissions = (state: 'denied' | 'granted') => {
+		if (isNullish(confirm)) {
+			toastsError({
+				msg: { text: $i18n.signer.permissions.error.no_confirm_callback }
+			});
+			return;
+		}
+
+		confirm?.((scopes ?? []).map((scope) => ({ ...scope, state })));
 
 		resetPrompt();
 	};
 
-	const onApprove = () => {
-		// TODO: assert no undefined and toast error
-		confirm?.((scopes ?? []).map((scope) => ({ ...scope, state: 'granted' })));
+	const onReject = () => confirmPermissions('denied');
 
-		resetPrompt();
-	};
+	const onApprove = () => confirmPermissions('granted');
 
 	const listItems: Record<
 		IcrcScopedMethod,
