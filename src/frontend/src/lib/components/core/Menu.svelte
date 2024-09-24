@@ -67,9 +67,9 @@
 
 		<ExternalLink
 			href="https://github.com/dfinity/oisy-wallet/releases"
-			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.oisy_releases)}
+			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 		>
-			{replaceOisyPlaceholders($i18n.navigation.text.oisy_releases)}
+			{replaceOisyPlaceholders($i18n.navigation.text.changelog)}
 		</ExternalLink>
 
 		<ExternalLink
