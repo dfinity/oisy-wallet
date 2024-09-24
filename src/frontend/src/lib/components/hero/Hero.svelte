@@ -14,11 +14,11 @@
 	$: heroContent = usdTotal || summary;
 </script>
 
-<div class="pt-6 space-y-10">
+<div class="pt-6">
 	<Header back={back === 'header'} />
 
 	<article
-		class="flex flex-col rounded-lg pb-6 relative main 2xl:mt-[-70px] items-center"
+		class="flex flex-col rounded-lg pt-10 pb-6 relative main 2xl:mt-[-70px] items-center"
 		class:pb-16={$authNotSignedIn}
 	>
 		{#if $authSignedIn}
