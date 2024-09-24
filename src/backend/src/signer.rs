@@ -1,6 +1,7 @@
 use crate::bitcoin_utils::public_key_to_p2wpkh_address;
 use crate::read_config;
 use bitcoin::absolute::LockTime;
+use bitcoin::consensus::serialize;
 use bitcoin::script::PushBytesBuf;
 use bitcoin::transaction::Version;
 use bitcoin::Amount;
@@ -201,6 +202,11 @@ pub struct BtcSignRequest {
     pub txins: Vec<CfsTxIn>,
 }
 
+pub struct BtcSignResponse {
+    pub signed_transaction_bytes: Vec<u8>,
+    pub txid: String,
+}
+
 fn get_cfs_input_value(input: &TxIn, cfs_inputs: &[CfsTxIn]) -> Option<Amount> {
     let previous_output = &input.previous_output;
 
@@ -213,7 +219,7 @@ fn get_cfs_input_value(input: &TxIn, cfs_inputs: &[CfsTxIn]) -> Option<Amount> {
     None
 }
 
-pub async fn ecdsa_sign_transaction_by_pieces(params: BtcSignRequest) -> Transaction {
+pub async fn ecdsa_sign_transaction_by_pieces(params: BtcSignRequest) -> BtcSignResponse {
     let inputs: Vec<TxIn> = params
         .txins
         .iter()
@@ -299,5 +305,12 @@ pub async fn ecdsa_sign_transaction_by_pieces(params: BtcSignRequest) -> Transac
         input.witness = witness;
     }
 
-    transaction
+    let signed_transaction_bytes = serialize(&transaction);
+
+    let txid = transaction.compute_txid().to_string();
+
+    BtcSignResponse {
+        signed_transaction_bytes,
+        txid,
+    }
 }

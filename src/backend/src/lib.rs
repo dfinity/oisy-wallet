@@ -747,9 +747,15 @@ async fn send_btc(params: SendBtcParams) -> String {
     // let signed_transaction =
     //     ecdsa_sign_transaction(&principal, bitcoin_network, transaction, &own_utxos).await;
 
+    // let signed_transaction_bytes = serialize(&signed_transaction);
+
+    // bitcoin_api::send_transaction(network, signed_transaction_bytes).await;
+
+    // signed_transaction.compute_txid().to_string()
+
     let (txins, txouts) =
         build_p2wpkh_pieces(&own_address, &own_utxos, &dst_address, amount, fee_per_byte).unwrap();
-    let signed_transaction = ecdsa_sign_transaction_by_pieces(BtcSignRequest {
+    let signed_response = ecdsa_sign_transaction_by_pieces(BtcSignRequest {
         principal,
         network: bitcoin_network,
         txouts,
@@ -757,11 +763,9 @@ async fn send_btc(params: SendBtcParams) -> String {
     })
     .await;
 
-    let signed_transaction_bytes = serialize(&signed_transaction);
+    bitcoin_api::send_transaction(network, signed_response.signed_transaction_bytes).await;
 
-    bitcoin_api::send_transaction(network, signed_transaction_bytes).await;
-
-    signed_transaction.compute_txid().to_string()
+    signed_response.txid
 }
 
 /// Computes the parity bit allowing to recover the public key from the signature.
