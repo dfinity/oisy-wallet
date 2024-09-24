@@ -65,7 +65,7 @@
 
 {#if nonNullish(scopes) && nonNullish($payload)}
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
-		<h2 class="text-center mb-6">Review permissions</h2>
+		<h2 class="text-center mb-4">Review permissions</h2>
 
 		<SignerOrigin payload={$payload} />
 
