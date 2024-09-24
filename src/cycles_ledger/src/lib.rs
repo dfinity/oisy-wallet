@@ -224,7 +224,7 @@ pub struct ApproveArgs {
     pub expires_at: Option<u64>,
     pub spender: Account,
 }
-#[derive(CandidType, Deserialize, Debug, Clone)]
+#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
 pub enum ApproveError {
     GenericError {
         message: String,

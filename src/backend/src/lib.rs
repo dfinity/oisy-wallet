@@ -345,8 +345,8 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 }
 
 #[query(guard = "may_read_user_data")]
-fn allow_signing() -> Result<(), AllowSigningError> {
-    signer::allow_signing()
+async fn allow_signing() -> Result<(), AllowSigningError> {
+    signer::allow_signing().await
 }
 
 #[query(guard = "caller_is_allowed")]
