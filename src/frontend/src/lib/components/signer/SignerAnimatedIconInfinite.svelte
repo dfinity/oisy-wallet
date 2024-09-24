@@ -4,10 +4,10 @@
 
 <span class="relative flex w-16 aspect-square">
 	<span
-		class="animate-ping absolute inline-flex h-full w-full rounded-full bg-dodger-blue opacity-75"
+		class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--color-primary)] opacity-75"
 	></span>
 	<span
-		class="relative inline-flex items-center justify-center rounded-full h-16 w-16 bg-dodger-blue"
+		class="relative inline-flex items-center justify-center rounded-full h-16 w-16 bg-[var(--color-primary)]"
 		><IconInfinite /></span
 	>
 </span>

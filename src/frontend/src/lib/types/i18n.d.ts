@@ -533,6 +533,11 @@ interface I18nAbout {
 	};
 }
 
+interface I18nSigner {
+	sign_in: { text: { authenticate_to_connect: string } };
+	idle: { text: { title: string; info: string }; alt: { img_placeholder: string } };
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -554,4 +559,5 @@ interface I18n {
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;
+	signer: I18nSigner;
 }

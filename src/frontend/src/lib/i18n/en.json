@@ -602,5 +602,21 @@
 				"open_source": "<strong>Open source</strong><br>Oisy is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organization’s 200 world-leading cryptographers and engineers."
 			}
 		}
+	},
+	"signer": {
+		"sign_in": {
+			"text": {
+				"authenticate_to_connect": "Authenticate to connect"
+			}
+		},
+		"idle": {
+			"text": {
+				"title": "You’re all set!",
+				"info": "Continue on the app website"
+			},
+			"alt": {
+				"img_placeholder": "An image displaying two dApps with wireframes and a checkbox indicating that they are connected"
+			}
+		}
 	}
 }
