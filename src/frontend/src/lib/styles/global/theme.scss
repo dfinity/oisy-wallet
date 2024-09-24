@@ -123,12 +123,12 @@ figcaption {
 
 ::-webkit-scrollbar-thumb {
 	border: 1px solid rgba(var(--color-white-rgb), 0.25);
-	background: rgba(var(--color-black-rgb), 0.20);
+	background: rgba(var(--color-black-rgb), 0.2);
 	border-radius: 16px;
 
 	&:hover {
-		border-color: rgba(var(--color-white-rgb), 0.70);
-		background: rgba(var(--color-black-rgb), 0.30);
+		border-color: rgba(var(--color-white-rgb), 0.7);
+		background: rgba(var(--color-black-rgb), 0.3);
 	}
 }
 
