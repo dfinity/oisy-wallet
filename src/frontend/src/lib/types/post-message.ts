@@ -1,5 +1,4 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
-import type { PostMessageWalletData } from '$icp/types/ic.post-message';
 import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
@@ -10,6 +9,7 @@ import type { JsonText } from '$icp/types/btc.post-message';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
 import type { Network } from '$lib/types/network';
+import type { CertifiedData } from '$lib/types/store';
 import type { SyncState } from '$lib/types/sync';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 
@@ -94,8 +94,21 @@ export interface PostMessageDataResponseExchangeError extends PostMessageDataRes
 	err: string | undefined;
 }
 
+// Transactions & {certified: boolean}
+type JsonTransactionsText = string;
+
+type PostMessageWalletData<T = unknown> = Omit<T, 'transactions' | 'balance'> & {
+	balance: CertifiedData<bigint>;
+	newTransactions: JsonTransactionsText;
+};
+
 export interface PostMessageDataResponseWallet<T> extends PostMessageDataResponse {
 	wallet: PostMessageWalletData<T>;
+}
+
+// TODO: use common PostMessageDataResponseWallet interface after BTC transactions added to the worker
+export interface PostMessageDataResponseBtcWallet extends PostMessageDataResponse {
+	wallet: Omit<PostMessageWalletData, 'newTransactions'>;
 }
 
 export interface PostMessageDataResponseError extends PostMessageDataResponse {
