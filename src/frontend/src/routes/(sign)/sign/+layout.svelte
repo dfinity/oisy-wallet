@@ -22,3 +22,7 @@
 </main>
 
 <Modals />
+
+<style global lang="scss">
+	@import './+oisy.page.css';
+</style>

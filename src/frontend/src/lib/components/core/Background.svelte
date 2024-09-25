@@ -5,7 +5,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
-<div class="fixed inset-0 z-[-1] overflow-hidden bg-white">
+<div class="fixed inset-0 z-[-1] overflow-hidden">
 	<picture
 		class="absolute left-1/2 top-0 w-full min-w-2_5xl -translate-x-1/2 transform"
 		aria-label={replaceOisyPlaceholders($i18n.core.alt.background)}
