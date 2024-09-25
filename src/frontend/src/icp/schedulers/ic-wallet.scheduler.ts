@@ -23,12 +23,12 @@ type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 type IndexedTransactions<T> = Record<string, CertifiedData<IndexedTransaction<T>>>;
 
 // Not reactive, only used to hold values imperatively.
-interface WalletStore<T> {
+interface IcWalletStore<T> {
 	balance: CertifiedData<bigint> | undefined;
 	transactions: IndexedTransactions<T>;
 }
 
-export class WalletScheduler<
+export class IcWalletScheduler<
 	T extends IcrcTransaction | Transaction,
 	TWithId extends IcrcTransactionWithId | TransactionWithId,
 	PostMessageDataRequest
@@ -36,7 +36,7 @@ export class WalletScheduler<
 {
 	private timer = new SchedulerTimer('syncIcWalletStatus');
 
-	private store: WalletStore<T> = {
+	private store: IcWalletStore<T> = {
 		balance: undefined,
 		transactions: {}
 	};
