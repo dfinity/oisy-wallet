@@ -25,20 +25,21 @@ button {
 
 	&.primary,
 	&.secondary,
-	&.tertiary {
+	&.secondary-alt {
 		justify-content: flex-start;
 
 		padding: var(--button-padding);
 	}
 
-	&.secondary,
+	// TODO: check with Design team if this class is still needed
+	&.secondary-alt,
 	&.user {
 		border: 1px solid var(--color-blue);
 	}
 
 	&.primary,
 	&.secondary,
-	&.tertiary {
+	&.secondary-alt {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
@@ -59,13 +60,13 @@ button {
 	}
 
 	&.secondary {
-		background: var(--color-cetacean-blue);
-		color: var(--color-white);
-	}
-
-	&.tertiary {
 		background: var(--color-alice-blue);
 		color: var(--color-primary);
+	}
+
+	&.secondary-alt {
+		background: var(--color-cetacean-blue);
+		color: var(--color-white);
 	}
 
 	&.hero {
@@ -81,7 +82,7 @@ button {
 
 	&.primary,
 	&.secondary,
-	&.tertiary {
+	&.secondary-alt {
 		&.full {
 			width: 100%;
 		}
