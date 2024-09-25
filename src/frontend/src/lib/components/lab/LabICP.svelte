@@ -18,11 +18,11 @@
 			}
 
 			const {
-				location: { href }
+				location: { origin }
 			} = window;
 
 			wallet = await IcpWallet.connect({
-				url: `${href}sign`
+				url: `${origin}/sign`
 			});
 
 			const accounts = await wallet?.accounts();
