@@ -15,7 +15,7 @@
 
 <Modal on:nnsClose={modalStore.close} testId={ABOUT_HOW_MODAL}>
 	<svelte:fragment slot="title"
-		><p class="text-xl">{replaceOisyPlaceholders($i18n.about.how.text.title)}</p>
+		><span class="text-xl">{replaceOisyPlaceholders($i18n.about.how.text.title)}</span>
 	</svelte:fragment>
 
 	<div class="stretch pt-4">
