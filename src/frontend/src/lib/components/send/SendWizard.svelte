@@ -7,7 +7,12 @@
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 	import { token } from '$lib/stores/token.store';
 	import type { Network, NetworkId } from '$lib/types/network';
-	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
+	import {
+		isNetworkIdBitcoin,
+		isNetworkIdEthereum,
+		isNetworkIdICP
+	} from '$lib/utils/network.utils';
+	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 
 	export let destination: string;
 	export let targetNetwork: Network | undefined;
@@ -42,6 +47,19 @@
 	<IcSendTokenWizard
 		{currentStep}
 		{formCancelAction}
+		bind:destination
+		bind:networkId
+		bind:amount
+		bind:sendProgressStep
+		on:icBack
+		on:icNext
+		on:icClose
+		on:icQRCodeScan
+		on:icQRCodeBack
+	/>
+{:else if isNetworkIdBitcoin($token?.network.id)}
+	<BtcSendTokenWizard
+		{currentStep}
 		bind:destination
 		bind:networkId
 		bind:amount
