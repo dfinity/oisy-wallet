@@ -43,7 +43,7 @@
 	{#if $authNotSignedIn}
 		<SignerSignIn />
 	{:else if $idle}
-		<div in:fade>
+		<div in:fade={{ delay: 150, duration: 250 }}>
 			<SignerIdle />
 		</div>
 	{:else}
