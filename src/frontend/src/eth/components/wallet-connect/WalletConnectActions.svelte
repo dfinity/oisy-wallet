@@ -17,7 +17,7 @@
 
 	{#if approve}
 		<ButtonPrimary disabled={$isBusy} onClick={() => dispatch('icApprove')}>
-			{$i18n.tokens.import.text.add_the_token}
+			{$i18n.wallet_connect.text.approve}
 		</ButtonPrimary>
 	{/if}
 </ButtonGroup>
