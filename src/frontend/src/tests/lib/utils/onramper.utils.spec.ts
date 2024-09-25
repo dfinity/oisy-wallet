@@ -1,5 +1,13 @@
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/onramper.env';
-import { buildOnramperLink, type BuildOnramperLinkParams } from '$lib/utils/onramper.utils';
+import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
+import type { OnramperCryptoWallet, OnramperWalletAddress } from '$lib/types/onramper';
+import type { TokenStandard } from '$lib/types/token';
+import type { Option } from '$lib/types/utils';
+import {
+	buildOnramperLink,
+	mapOnramperWallets,
+	type BuildOnramperLinkParams
+} from '$lib/utils/onramper.utils';
 import { describe, expect, it } from 'vitest';
 
 describe('buildOnramperLink', () => {
@@ -92,5 +100,53 @@ describe('buildOnramperLink', () => {
 		const result = buildOnramperLink(params);
 
 		expect(result).toBe(expectedUrl);
+	});
+});
+
+describe('mapOnramperWallets', () => {
+	const walletMap: { [key in TokenStandard]: Option<OnramperWalletAddress> } = {
+		bitcoin: 'btc-address',
+		ethereum: 'eth-address',
+		erc20: 'eth-address',
+		icrc: 'icrc-address',
+		icp: 'icp-address'
+	};
+
+	it('should return correct wallets when tokens have valid cryptoIds and wallets', () => {
+		const tokens = [ICP_TOKEN, ETHEREUM_TOKEN, SEPOLIA_TOKEN];
+
+		const expectedWallets: OnramperCryptoWallet[] = [
+			{ cryptoId: ICP_TOKEN.buy?.onramperId ?? '', wallet: 'icp-address' },
+			{ cryptoId: ETHEREUM_TOKEN.buy?.onramperId ?? '', wallet: 'eth-address' }
+		];
+
+		const result = mapOnramperWallets({ tokens, walletMap });
+
+		expect(result).toEqual(expectedWallets);
+	});
+
+	it('should return an empty array if no valid tokens are present', () => {
+		const tokens = [SEPOLIA_TOKEN];
+
+		const result = mapOnramperWallets({ tokens, walletMap });
+
+		expect(result).toEqual([]);
+	});
+
+	it('should handle cases where wallet addresses are null or undefined', () => {
+		const tokens = [ICP_TOKEN, ETHEREUM_TOKEN];
+
+		const newWalletMap: { [key in TokenStandard]: Option<OnramperWalletAddress> } = {
+			...walletMap,
+			ethereum: undefined
+		};
+
+		const expectedWallets: OnramperCryptoWallet[] = [
+			{ cryptoId: ICP_TOKEN.buy?.onramperId ?? '', wallet: 'icp-address' }
+		];
+
+		const result = mapOnramperWallets({ tokens, walletMap: newWalletMap });
+
+		expect(result).toEqual(expectedWallets);
 	});
 });

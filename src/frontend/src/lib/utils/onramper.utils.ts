@@ -4,8 +4,11 @@ import type {
 	OnramperFiatId,
 	OnramperId,
 	OnramperMode,
-	OnramperNetworkId
+	OnramperNetworkId,
+	OnramperWalletAddress
 } from '$lib/types/onramper';
+import type { Token, TokenStandard } from '$lib/types/token';
+import type { Option } from '$lib/types/utils';
 import { nonNullish } from '@dfinity/utils';
 
 export interface BuildOnramperLinkParams {
@@ -59,3 +62,30 @@ const toQueryString = (params: Omit<BuildOnramperLinkParams, 'wallets'>) =>
  */
 export const buildOnramperLink = ({ wallets, ...params }: BuildOnramperLinkParams) =>
 	`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}&${toQueryString(params)}&wallets=${walletsToParam(wallets)}`;
+
+/** Map a list of tokens to a list of Onramper wallets.
+ *
+ * @param tokens - The list of tokens to map.
+ * @param walletMap - The map of token standards to wallet addresses.
+ */
+export const mapOnramperWallets = ({
+	tokens,
+	walletMap
+}: {
+	tokens: Token[];
+	walletMap: { [key in TokenStandard]: Option<OnramperWalletAddress> };
+}): OnramperCryptoWallet[] =>
+	tokens.reduce<OnramperCryptoWallet[]>((acc, { buy, standard }) => {
+		const { onramperId: cryptoId } = buy ?? {};
+		const wallet = walletMap[standard];
+
+		return nonNullish(cryptoId) && nonNullish(wallet)
+			? [
+					...acc,
+					{
+						cryptoId,
+						wallet
+					}
+				]
+			: acc;
+	}, []);
