@@ -10,11 +10,7 @@
 	import { networks } from '$lib/derived/networks.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { token } from '$lib/stores/token.store';
-	import type {
-		OnramperCryptoWallet,
-		OnramperId,
-		OnramperNetworkId,
-	} from '$lib/types/onramper';
+	import type { OnramperCryptoWallet, OnramperId, OnramperNetworkId } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperWallets } from '$lib/utils/onramper.utils';
 
 	let defaultCrypto: OnramperId | undefined;
