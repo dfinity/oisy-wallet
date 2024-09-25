@@ -63,7 +63,7 @@ const config: UserConfig = {
 			external: (id) => {
 				// A list of file to exclude because we parse those manually with custom scripts.
 				const filename = basename(id);
-				return !['+oisy.page.css'].includes(filename);
+				return ['+oisy.page.css'].includes(filename);
 			}
 		}
 	},
