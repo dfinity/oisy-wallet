@@ -125,7 +125,7 @@
 							{$i18n.settings.text.pouh_credential_verified}
 						</output>
 					{:else}
-						<button type="button" class="secondary" on:click={getPouhCredential}
+						<button type="button" class="secondary-alt" on:click={getPouhCredential}
 							>{$i18n.settings.text.present_pouh_credential}</button
 						>
 					{/if}
