@@ -46,15 +46,15 @@ const toQueryString = (params: Omit<BuildOnramperLinkParams, 'wallets'>) =>
  * The documentation for the Onramper widget's parameters can be found here:
  * https://docs.onramper.com/docs/supported-widget-parameters
  *
- * @param params - The parameters to build the link with.
- * @param params.mode - The mode of the widget (buy or sell).
- * @param params.defaultFiat - The default fiat currency.
- * @param params.defaultCrypto - The optional default cryptocurrency.
- * @param params.onlyCryptos - The list of allowed cryptocurrencies.
- * @param params.onlyCryptoNetworks - The list of allowed cryptocurrency networks.
- * @param params.wallets - The list of combination of cryptocurrency and wallet addresses.
- * @param params.supportRecurringPayments - Whether to support recurring payments.
- * @param params.enableCountrySelector - Whether to enable the country selector.
+ * @param {Object} params - The parameters to build the link with.
+ * @param {OnramperMode} params.mode - The mode of the widget (buy or sell).
+ * @param {OnramperFiatId} params.defaultFiat - The default fiat currency.
+ * @param {OnramperId} params.defaultCrypto - The optional default cryptocurrency.
+ * @param {OnramperId[]} params.onlyCryptos - The list of allowed cryptocurrencies.
+ * @param {OnramperNetworkId[]} params.onlyCryptoNetworks - The list of allowed cryptocurrency networks.
+ * @param {OnramperCryptoWallet} params.wallets - The list of combination of cryptocurrency and wallet addresses.
+ * @param {boolean} params.supportRecurringPayments - Whether to support recurring payments.
+ * @param {boolean} params.enableCountrySelector - Whether to enable the country selector.
  * @returns The Onramper source link.
  */
 export const buildOnramperLink = ({ wallets, ...params }: BuildOnramperLinkParams) =>
