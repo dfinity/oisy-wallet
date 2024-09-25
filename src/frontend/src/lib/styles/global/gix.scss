@@ -170,7 +170,7 @@ div.popover {
 
 		--border-radius: 16px;
 
-		max-width: calc(100vw - (2 * var(--padding)));
+		max-width: calc(100vw - var(--padding-2x));
 
 		@include media.min-width(xsmall) {
 			max-width: 300px;
