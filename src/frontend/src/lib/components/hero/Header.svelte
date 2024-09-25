@@ -16,7 +16,7 @@
 </script>
 
 <header
-	class="grid grid-cols-2 items-center px-4 sm:px-8 relative z-10 gap-y-5"
+	class="grid grid-cols-2 items-center px-4 sm:px-8 relative z-1 gap-y-5"
 	class:sm:grid-cols-[1fr_auto_1fr]={$authSignedIn}
 	class:xl:grid-cols-[1fr_auto_1fr]={$authNotSignedIn}
 >
