@@ -1,4 +1,8 @@
-import { BTC_MAINNET_TOKEN_ID, BTC_REGTEST_TOKEN_ID } from '$env/tokens.btc.env';
+import {
+	BTC_MAINNET_TOKEN_ID,
+	BTC_REGTEST_TOKEN_ID,
+	BTC_TESTNET_TOKEN_ID
+} from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID, ICP_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens.env';
 import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -21,6 +25,8 @@ export const exchanges: Readable<ExchangesData> = derived(
 		const icpPrice = $exchangeStore?.['internet-computer'];
 
 		return {
+			// TODO: improve feed price on BTC testnet, for now we assume that 1 BTC mainnet = 1 BTC testnet
+			[BTC_TESTNET_TOKEN_ID]: btcPrice,
 			[BTC_MAINNET_TOKEN_ID]: btcPrice,
 			[BTC_REGTEST_TOKEN_ID]: btcPrice,
 			[ETHEREUM_TOKEN_ID]: ethPrice,
