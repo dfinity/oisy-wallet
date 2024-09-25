@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import BtcWalletAddress from '$btc/components/core/BtcWalletAddress.svelte';
 	import EthWalletAddress from '$eth/components/core/EthWalletAddress.svelte';
 	import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 	import IcWalletAddress from '$icp/components/core/IcWalletAddress.svelte';
@@ -9,6 +10,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
 	import {
+		networkBitcoin,
 		networkEthereum,
 		networkICP,
 		pseudoNetworkChainFusion
@@ -35,6 +37,8 @@
 	<IcWalletAddress />
 {:else if $networkEthereum}
 	<EthWalletAddress />
+{:else if $networkBitcoin}
+	<BtcWalletAddress />
 {:else if $pseudoNetworkChainFusion}
 	<WalletAddresses on:icReceiveTriggered={click} />
 {/if}
