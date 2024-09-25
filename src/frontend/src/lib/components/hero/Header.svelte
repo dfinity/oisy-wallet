@@ -25,7 +25,7 @@
 	{:else}
 		<a
 			href="/"
-			class="flex items-center gap-0 no-underline"
+			class="flex items-center gap-0 no-underline w-fit"
 			aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
 		>
 			<OisyWalletLogo />
