@@ -122,12 +122,12 @@ div.modal {
 
 	div.wrapper.dialog {
 		color: var(--color-secondary);
-		padding: var(--padding-3x);
+		padding-block: var(--padding-3x);
+		padding-inline: var(--padding-0_5x);
 	}
 
 	div.wrapper.dialog div.header {
 		--padding: var(--padding-2x);
-		--padding-3x: 0;
 		--dialog-padding-y: 0;
 
 		margin: 0;
@@ -141,6 +141,11 @@ div.modal {
 
 		div.container {
 			border-radius: 0;
+			padding-right: var(--scrollbar-width);
+
+			div.content {
+				padding-inline: var(--padding-2_5x);
+			}
 		}
 	}
 
