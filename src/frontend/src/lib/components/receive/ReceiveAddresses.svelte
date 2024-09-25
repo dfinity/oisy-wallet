@@ -14,7 +14,12 @@
 		RECEIVE_TOKENS_MODAL_ETH_SECTION,
 		RECEIVE_TOKENS_MODAL_BTC_SECTION
 	} from '$lib/constants/test-ids.constants';
-	import { btcAddressMainnet, btcAddressTestnet, ethAddress } from '$lib/derived/address.derived';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet,
+		ethAddress
+	} from '$lib/derived/address.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -105,10 +110,10 @@
 				<ReceiveAddressWithLogo
 					on:click={() =>
 						displayQRCode({
-							address: $btcAddressTestnet ?? '',
+							address: $btcAddressRegtest ?? '',
 							addressLabel: $i18n.receive.bitcoin.text.bitcoin_regtest_address
 						})}
-					address={$btcAddressTestnet}
+					address={$btcAddressRegtest}
 					token={BTC_REGTEST_TOKEN}
 					qrCodeAriaLabel={$i18n.receive.bitcoin.text.display_bitcoin_address_qr}
 					copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}

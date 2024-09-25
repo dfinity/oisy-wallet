@@ -15,12 +15,14 @@
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import {
 		loadAddresses,
+		loadBtcAddressRegtest,
 		loadBtcAddressTestnet,
 		loadIdbAddresses
 	} from '$lib/services/address.services';
 	import { signOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import { LOCAL } from '$lib/constants/app.constants';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -70,10 +72,14 @@
 	let progressModal = false;
 
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
+	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
 	$: {
 		if (NETWORK_BITCOIN_ENABLED && $testnets && isNullish($btcAddressTestnet)) {
 			debounceLoadBtcAddressTestnet();
+			if (LOCAL) {
+				debounceLoadBtcAddressRegtest();
+			}
 		}
 	}
 
