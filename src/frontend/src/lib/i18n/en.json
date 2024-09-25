@@ -320,7 +320,8 @@
 	},
 	"buy": {
 		"text": {
-			"buy": "Buy"
+			"buy": "Buy",
+			"buy_dev": "Buy (Dev Environment)"
 		}
 	},
 	"tokens": {
