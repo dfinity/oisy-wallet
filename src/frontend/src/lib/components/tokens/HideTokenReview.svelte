@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonPrimary from '$lib/components/ui/ButtonPrimary.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -38,9 +39,9 @@
 		<button class="secondary block flex-1" on:click={() => dispatch('icCancel')}
 			>{$i18n.core.text.cancel}</button
 		>
-		<button class="primary block flex-1" on:click={() => dispatch('icHide')}>
+		<ButtonPrimary onClick={() => dispatch('icHide')}>
 			{$i18n.tokens.hide.confirm}
-		</button>
+		</ButtonPrimary>
 	</ButtonGroup>
 </ContentWithToolbar>
 

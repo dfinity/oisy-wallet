@@ -7,6 +7,7 @@
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonPrimary from '$lib/components/ui/ButtonPrimary.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { tokenStandard } from '$lib/derived/token.derived';
@@ -48,8 +49,8 @@
 		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 			>{$i18n.core.text.back}</button
 		>
-		<button class="primary block flex-1" disabled={invalid} on:click={() => dispatch('icSend')}>
+		<ButtonPrimary disabled={invalid} onClick={() => dispatch('icSend')}>
 			{$i18n.send.text.send}
-		</button>
+		</ButtonPrimary>
 	</ButtonGroup>
 </ContentWithToolbar>

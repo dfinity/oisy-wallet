@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonPrimary from '$lib/components/ui/ButtonPrimary.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -15,8 +16,8 @@
 	>
 
 	{#if approve}
-		<button class="primary block flex-1" on:click={() => dispatch('icApprove')} disabled={$isBusy}>
-			{$i18n.wallet_connect.text.approve}
-		</button>
+		<ButtonPrimary disabled={$isBusy} onClick={() => dispatch('icApprove')}>
+			{$i18n.tokens.import.text.add_the_token}
+		</ButtonPrimary>
 	{/if}
 </ButtonGroup>

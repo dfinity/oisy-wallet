@@ -10,6 +10,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonPrimary from '$lib/components/ui/ButtonPrimary.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -61,9 +62,9 @@
 
 		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
-			<button class="primary block flex-1" type="submit" disabled={invalid}>
+			<ButtonPrimary disabled={invalid}>
 				{$i18n.core.text.next}
-			</button>
+			</ButtonPrimary>
 		</ButtonGroup>
 	</ContentWithToolbar>
 </form>
