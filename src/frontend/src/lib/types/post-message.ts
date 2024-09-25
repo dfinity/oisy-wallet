@@ -4,6 +4,7 @@ import type {
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 
+import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
@@ -26,6 +27,9 @@ export type PostMessageRequest =
 	| 'stopIcrcWalletTimer'
 	| 'startIcrcWalletTimer'
 	| 'triggerIcrcWalletTimer'
+	| 'stopBtcWalletTimer'
+	| 'startBtcWalletTimer'
+	| 'triggerBtcWalletTimer'
 	| 'stopBtcStatusesTimer'
 	| 'startBtcStatusesTimer'
 	| 'triggerBtcStatusesTimer'
@@ -52,8 +56,13 @@ export type PostMessageDataRequestIcCkBTCUpdateBalance = PostMessageDataRequestI
 	bitcoinNetwork: BitcoinNetwork;
 };
 
+export interface PostMessageDataRequestBtc {
+	bitcoinNetwork: SignerBitcoinNetwork;
+}
+
 export type PostMessageResponseStatus =
 	| 'syncIcWalletStatus'
+	| 'syncBtcWalletStatus'
 	| 'syncBtcStatusesStatus'
 	| 'syncCkMinterInfoStatus'
 	| 'syncCkBTCUpdateBalanceStatus';
@@ -65,6 +74,7 @@ export type PostMessageResponse =
 	| 'syncExchangeError'
 	| 'syncIcpWallet'
 	| 'syncIcrcWallet'
+	| 'syncBtcWallet'
 	| 'syncIcpWalletError'
 	| 'syncIcrcWalletError'
 	| 'syncIcpWalletCleanUp'
