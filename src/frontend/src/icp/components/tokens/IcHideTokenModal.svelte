@@ -60,7 +60,8 @@
 						index_id: toNullable(Principal.fromText(indexCanisterId))
 					}
 				}
-			}
+			},
+			nullishIdentityErrorMessage: $i18n.auth.error.no_internet_identity
 		});
 	};
 

@@ -12,7 +12,7 @@ export type OnramperId = string;
 // https://docs.onramper.com/docs/fiat-currency-support
 export type OnramperFiatId = 'usd' | 'eur' | 'gbp' | 'chf';
 
-export type OnRamperMode = 'buy';
+export type OnramperMode = 'buy';
 
 export interface OnramperCryptoWallet {
 	cryptoId: OnramperId;

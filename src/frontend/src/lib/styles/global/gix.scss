@@ -194,3 +194,13 @@ div.segment-button {
 		color: var(--color-white);
 	}
 }
+
+div.step.completed {
+	svg {
+		--icon-check-circle-background: var(--color-primary);
+	}
+
+	div.line {
+		--line-color: var(--color-primary);
+	}
+}
