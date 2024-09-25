@@ -47,6 +47,7 @@ import {
 	tokensToPin
 } from '$lib/derived/tokens.derived';
 import { tick } from 'svelte';
+import type { Unsubscriber } from 'svelte/store';
 
 const derivedList = {
 	authIdentity,
@@ -101,9 +102,9 @@ const derivedList = {
 export const testDerivedUpdates = async (changeStore: () => void) => {
 	const derivedChangeCounters = new Map<string, number>();
 
-	Object.entries(derivedList).forEach(([name, derivedStore]) => {
+	const unsubscribers: Unsubscriber[] = Object.entries(derivedList).map(([name, derivedStore]) => {
 		derivedChangeCounters.set(name, 0);
-		derivedStore.subscribe(() =>
+		return derivedStore.subscribe(() =>
 			derivedChangeCounters.set(name, (derivedChangeCounters.get(name) ?? 0) + 1)
 		);
 	});
@@ -122,4 +123,6 @@ export const testDerivedUpdates = async (changeStore: () => void) => {
 		const count = derivedChangeCounters.get(name) ?? 0;
 		assert(count <= 2, `${name} was called ${count} times`);
 	});
+
+	unsubscribers.forEach((unsub) => unsub());
 };
