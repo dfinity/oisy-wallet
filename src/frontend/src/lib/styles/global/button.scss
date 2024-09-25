@@ -31,6 +31,7 @@ button {
 		padding: var(--button-padding);
 	}
 
+	// TODO: check with Design team if this class is still needed
 	&.secondary-alt,
 	&.user {
 		border: 1px solid var(--color-blue);
