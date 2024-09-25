@@ -43,16 +43,20 @@
 	});
 
 	let src: string;
-	$: src = buildOnramperLink({
-		mode: 'buy',
-		defaultFiat: 'usd',
-		defaultCrypto,
+	$: defaultCrypto,
 		onlyCryptos,
 		onlyCryptoNetworks,
 		wallets,
-		supportRecurringPayments: true,
-		enableCountrySelector: true
-	});
+		(src = buildOnramperLink({
+			mode: 'buy',
+			defaultFiat: 'usd',
+			defaultCrypto,
+			onlyCryptos,
+			onlyCryptoNetworks,
+			wallets,
+			supportRecurringPayments: true,
+			enableCountrySelector: true
+		}));
 </script>
 
 <iframe
