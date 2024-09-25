@@ -1,5 +1,5 @@
 import { syncWallet } from '$btc/services/btc-listener.services';
-import { isNetworkIdBTCMainnet, isNetworkIdBTCTestnet } from '$icp/utils/ic-send.utils';
+import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$icp/utils/ic-send.utils';
 import type { WalletWorker } from '$lib/types/listener';
 import type { PostMessage, PostMessageDataResponseBtcWallet } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
@@ -33,11 +33,11 @@ export const initBtcWalletWorker = async ({
 				msg: 'startBtcWalletTimer',
 				data: {
 					bitcoinNetwork: mapToSignerBitcoinNetwork({
-						network: isNetworkIdBTCMainnet(networkId)
-							? 'mainnet'
-							: isNetworkIdBTCTestnet(networkId)
-								? 'testnet'
-								: 'regtest'
+						network: isNetworkIdBTCTestnet(networkId)
+							? 'testnet'
+							: isNetworkIdBTCRegtest(networkId)
+								? 'regtest'
+								: 'mainnet'
 					})
 				}
 			});
