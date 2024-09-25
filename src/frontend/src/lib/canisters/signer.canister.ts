@@ -33,20 +33,34 @@ export class SignerCanister extends Canister<SignerService> {
 		return new SignerCanister(canisterId, service, certifiedService);
 	}
 
-	getBtcAddress = ({ network }: { network: BitcoinNetwork }): Promise<BtcAddress> => {
-		const { caller_btc_address } = this.caller({
+	getBtcAddress = async ({ network }: { network: BitcoinNetwork }): Promise<BtcAddress> => {
+		const { btc_caller_address } = this.caller({
 			certified: true
 		});
 
-		return caller_btc_address(network);
+		const response = await btc_caller_address({ network, address_type: { P2WPKH: null } }, []);
+
+		if ('Err' in response) {
+			// TODO: Manage different error types
+			throw new Error("Couldn't get BTC address");
+		}
+
+		return response.Ok.address;
 	};
 
-	getBtcBalance = ({ network }: { network: BitcoinNetwork }): Promise<bigint> => {
-		const { caller_btc_balance } = this.caller({
+	getBtcBalance = async ({ network }: { network: BitcoinNetwork }): Promise<bigint> => {
+		const { btc_caller_balance } = this.caller({
 			certified: true
 		});
 
-		return caller_btc_balance(network);
+		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, []);
+
+		if ('Err' in response) {
+			// TODO: Manage different error types
+			throw new Error("Couldn't get BTC balance");
+		}
+
+		return response.Ok.balance;
 	};
 
 	getEthAddress = (): Promise<EthAddress> => {
