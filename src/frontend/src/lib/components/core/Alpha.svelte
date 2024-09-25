@@ -8,7 +8,7 @@
 	href={OISY_ALPHA_WARNING_URL}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class="no-underline"
+	class="mx-auto no-underline"
 >
 	<WarningBanner>
 		{$i18n.hero.text.use_with_caution}

@@ -52,7 +52,7 @@
 		"@dfinity/cketh": "^3.3.0-next-2024-09-17",
 		"@dfinity/gix-components": "^4.7.0-next-2024-09-23",
 		"@dfinity/ic-management": "^5.2.0-next-2024-09-17",
-		"@dfinity/ledger-icp": "^2.5.0-next-2024-09-17",
+		"@dfinity/ledger-icp": "^2.5.0-next-2024-09-23",
 		"@dfinity/ledger-icrc": "^2.5.0-next-2024-09-17",
 		"@dfinity/oisy-wallet-signer": "file:dfinity-oisy-wallet-signer-0.0.1.tgz",
 		"@dfinity/principal": "^2.1.1",
