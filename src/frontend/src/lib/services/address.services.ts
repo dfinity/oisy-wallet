@@ -1,6 +1,10 @@
 import type { BitcoinNetwork } from '$btc/types/btc';
 import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
-import { BTC_MAINNET_TOKEN_ID, BTC_TESTNET_TOKEN_ID } from '$env/tokens.btc.env';
+import {
+	BTC_MAINNET_TOKEN_ID,
+	BTC_REGTEST_TOKEN_ID,
+	BTC_TESTNET_TOKEN_ID
+} from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
 import {
 	getIdbBtcAddressMainnet,
@@ -15,6 +19,7 @@ import { getBtcAddress, getEthAddress } from '$lib/api/signer.api';
 import { warnSignOut } from '$lib/services/auth.services';
 import {
 	btcAddressMainnetStore,
+	btcAddressRegtestStore,
 	btcAddressTestnetStore,
 	ethAddressStore,
 	type AddressStore,
@@ -33,13 +38,13 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { reduceResults } from '$lib/utils/results.utils';
 import type { Principal } from '@dfinity/principal';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 interface LoadTokenAddressParams<T extends Address> {
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
-	setIdbAddress: (params: SetIdbAddressParams<T>) => Promise<void>;
+	setIdbAddress?: (params: SetIdbAddressParams<T>) => Promise<void>;
 	addressStore: AddressStore<T>;
 }
 
@@ -55,7 +60,9 @@ const loadTokenAddress = async <T extends Address>({
 		const address = await getAddress(identity);
 		addressStore.set({ data: address, certified: true });
 
-		await saveTokenAddressForFutureSignIn({ address, identity, setIdbAddress });
+		if (nonNullish(setIdbAddress)) {
+			await saveTokenAddressForFutureSignIn({ address, identity, setIdbAddress });
+		}
 	} catch (err: unknown) {
 		addressStore.reset();
 
@@ -75,11 +82,13 @@ const loadTokenAddress = async <T extends Address>({
 };
 
 // We use the Testnet address for Regtest.
-type TokenIdBtcPublicNetwork = typeof BTC_MAINNET_TOKEN_ID | typeof BTC_TESTNET_TOKEN_ID;
-type BtcPublicNetwork = Exclude<BitcoinNetwork, 'regtest'>;
+type TokenIdBtcPublicNetwork =
+	| typeof BTC_MAINNET_TOKEN_ID
+	| typeof BTC_TESTNET_TOKEN_ID
+	| typeof BTC_REGTEST_TOKEN_ID;
 
 const bitcoinMapper: Record<
-	BtcPublicNetwork,
+	BitcoinNetwork,
 	Pick<LoadTokenAddressParams<BtcAddress>, 'addressStore' | 'setIdbAddress'>
 > = {
 	mainnet: {
@@ -89,6 +98,11 @@ const bitcoinMapper: Record<
 	testnet: {
 		addressStore: btcAddressTestnetStore,
 		setIdbAddress: setIdbBtcAddressTestnet
+	},
+	regtest: {
+		addressStore: btcAddressRegtestStore,
+		// No need to store the regtest in the local storage because it's only used locally.
+		setIdbAddress: undefined
 	}
 };
 
@@ -97,7 +111,7 @@ const loadBtcAddress = async ({
 	network
 }: {
 	tokenId: TokenIdBtcPublicNetwork;
-	network: BtcPublicNetwork;
+	network: BitcoinNetwork;
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,
@@ -114,6 +128,12 @@ export const loadBtcAddressTestnet = async (): Promise<ResultSuccess> =>
 	loadBtcAddress({
 		tokenId: BTC_TESTNET_TOKEN_ID,
 		network: 'testnet'
+	});
+
+export const loadBtcAddressRegtest = async (): Promise<ResultSuccess> =>
+	loadBtcAddress({
+		tokenId: BTC_REGTEST_TOKEN_ID,
+		network: 'regtest'
 	});
 
 const loadBtcAddressMainnet = async (): Promise<ResultSuccess> =>
