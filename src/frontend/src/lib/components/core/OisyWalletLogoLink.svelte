@@ -6,7 +6,7 @@
 
 <a
 	href="/"
-	class="pointer-events-auto flex items-center gap-0 no-underline"
+	class="flex w-fit items-center gap-0 no-underline"
 	aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
 >
 	<OisyWalletLogo />
