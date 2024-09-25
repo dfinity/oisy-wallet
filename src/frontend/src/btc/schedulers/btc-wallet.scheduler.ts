@@ -7,7 +7,7 @@ import type {
 } from '$lib/types/post-message';
 import { assertNonNullish } from '@dfinity/utils';
 
-export class WalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
+export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
 
 	stop() {
@@ -29,6 +29,7 @@ export class WalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
 		});
 	}
 
+	// TODO: fetch transactions and query uncertified balance
 	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestBtc>) => {
 		const bitcoinNetwork = data?.bitcoinNetwork;
 

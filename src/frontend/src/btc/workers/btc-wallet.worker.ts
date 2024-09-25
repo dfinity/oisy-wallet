@@ -1,7 +1,7 @@
-import { WalletScheduler } from '$btc/schedulers/wallet.scheduler';
+import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
 import type { PostMessage, PostMessageDataRequestBtc } from '$lib/types/post-message';
 
-const scheduler: WalletScheduler = new WalletScheduler();
+const scheduler: BtcWalletScheduler = new BtcWalletScheduler();
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequestBtc>>) => {
 	const { msg, data } = dataMsg;
