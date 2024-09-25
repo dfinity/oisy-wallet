@@ -9,6 +9,7 @@
 	import banner from '$lib/assets/banner.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import { LOCAL } from '$lib/constants/app.constants';
 	import { btcAddressTestnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
@@ -22,7 +23,6 @@
 	import { signOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
-	import { LOCAL } from '$lib/constants/app.constants';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
