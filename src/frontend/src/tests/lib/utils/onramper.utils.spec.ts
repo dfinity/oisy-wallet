@@ -107,7 +107,7 @@ describe('mapOnramperWallets', () => {
 	const walletMap: { [key in TokenStandard]: Option<OnramperWalletAddress> } = {
 		bitcoin: 'btc-address',
 		ethereum: 'eth-address',
-		erc20: 'eth-address',
+		erc20: 'erc20-address',
 		icrc: 'icrc-address',
 		icp: 'icp-address'
 	};
