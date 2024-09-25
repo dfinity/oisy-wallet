@@ -1,5 +1,6 @@
 import {
 	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
 	BTC_TESTNET_NETWORK_ID,
 	ETHEREUM_NETWORK_ID
 } from '$env/networks.env';
@@ -60,6 +61,9 @@ export const isNetworkIdBTCMainnet = (networkId: NetworkId | undefined): boolean
 
 export const isNetworkIdBTCTestnet = (networkId: NetworkId | undefined): boolean =>
 	BTC_TESTNET_NETWORK_ID === networkId;
+
+export const isNetworkIdBTCRegtest = (networkId: NetworkId | undefined): boolean =>
+	BTC_REGTEST_NETWORK_ID === networkId;
 
 export const isNetworkIdETH = (networkId: NetworkId | undefined): boolean =>
 	nonNullish(networkId) && isNetworkIdEthereum(networkId);
