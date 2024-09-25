@@ -1,3 +1,5 @@
+import type { BitcoinNetwork } from '$btc/types/btc';
+import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import {
 	BITCOIN_NETWORKS_IDS,
 	ICP_NETWORK_ID,
@@ -37,3 +39,10 @@ export const filterTokensForSelectedNetwork = <T extends Token>([
 			$selectedNetwork?.id === networkId
 		);
 	});
+
+export const mapToSignerBitcoinNetwork = ({
+	network
+}: {
+	network: BitcoinNetwork;
+}): SignerBitcoinNetwork =>
+	({ mainnet: { mainnet: null }, testnet: { testnet: null }, regtest: { regtest: null } })[network];
