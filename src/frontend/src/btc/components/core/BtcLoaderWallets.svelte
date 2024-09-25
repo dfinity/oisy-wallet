@@ -5,9 +5,12 @@
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { enabledBtcTokens } from '$lib/derived/tokens.derived';
 	import type { InitWalletWorkerFn } from '$lib/types/listener';
+	import type { Token } from '$lib/types/token';
+
+	let tokens: Token[];
 
 	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
-	const tokens = $enabledBtcTokens.filter((token) =>
+	$: tokens = $enabledBtcTokens.filter((token) =>
 		LOCAL
 			? token.network.id === BTC_REGTEST_NETWORK_ID
 			: token.network.id !== BTC_REGTEST_NETWORK_ID
