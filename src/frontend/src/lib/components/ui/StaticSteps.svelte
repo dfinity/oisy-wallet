@@ -103,7 +103,7 @@
 
 	.line {
 		height: 100%;
-		min-height: calc(4 * var(--padding));
+		min-height: var(--padding-4x);
 		--line-color: var(--positive-emphasis);
 		background: linear-gradient(var(--line-color), var(--line-color)) no-repeat center/1.5px 100%;
 	}
