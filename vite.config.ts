@@ -69,7 +69,6 @@ const config: UserConfig = {
 		}
 	},
 	optimizeDeps: {
-		include: ['three'],
 		esbuildOptions: {
 			define: {
 				global: 'globalThis'
