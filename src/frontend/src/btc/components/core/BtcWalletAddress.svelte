@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNetworkIdBTCMainnet } from '$icp/utils/ic-send.utils.js';
+	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$icp/utils/ic-send.utils.js';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { btcAddressMainnet, btcAddressTestnet } from '$lib/derived/address.derived';
 	import { networkId } from '$lib/derived/network.derived';
@@ -7,7 +7,10 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
 	// Regtest and Testnet BTC wallets have the same address
-	const address = isNetworkIdBTCMainnet($networkId) ? btcAddressMainnet : btcAddressTestnet;
+	const address =
+		isNetworkIdBTCTestnet($networkId) || isNetworkIdBTCRegtest($networkId)
+			? $btcAddressTestnet
+			: $btcAddressMainnet;
 </script>
 
 <div>
@@ -16,6 +19,6 @@
 	>
 
 	<output id="btc-wallet-address" class="break-all"
-		>{shortenWithMiddleEllipsis({ text: $address ?? '' })}</output
-	><Copy color="inherit" inline value={$address ?? ''} text={$i18n.wallet.text.address_copied} />
+		>{shortenWithMiddleEllipsis({ text: address ?? '' })}</output
+	><Copy color="inherit" inline value={address ?? ''} text={$i18n.wallet.text.address_copied} />
 </div>
