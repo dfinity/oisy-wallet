@@ -1,8 +1,6 @@
 <script lang="ts">
-	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
-	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -11,6 +9,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { createEventDispatcher } from 'svelte';
+	import BtcSendAmount from './BtcSendAmount.svelte';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: number | undefined = undefined;
@@ -26,7 +25,7 @@
 	<ContentWithToolbar>
 		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
 
-		<IcSendAmount bind:amount bind:amountError {networkId} />
+		<BtcSendAmount bind:amount bind:amountError />
 
 		<SendSource token={$token} balance={$balance} source="some-btc-address" />
 
