@@ -119,8 +119,16 @@ figcaption {
 	background: var(--color-pale-cornflower-blue);
 }
 
+// TODO: set the scrollbar style for Firefox too. Right now it is not ideal since the modifiable properties are limited and they go in conflict with what we set (https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_scrollbars_styling)
 ::-webkit-scrollbar-thumb {
-	background-color: var(--color-misty-rose);
+	border: 1px solid rgba(var(--color-white-rgb), 0.4);
+	background: rgba(var(--color-black-rgb), 0.2);
+	border-radius: 16px;
+
+	&:hover {
+		border-color: rgba(var(--color-white-rgb), 0.7);
+		background: rgba(var(--color-black-rgb), 0.3);
+	}
 }
 
 ::-webkit-scrollbar-track {
