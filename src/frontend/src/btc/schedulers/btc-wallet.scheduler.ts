@@ -29,7 +29,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
-	// TODO: fetch transactions and query uncertified balance
+	/* TODO: The following steps need to be done:
+	 * 1. Fetch uncertified transactions via BTC transaction API.
+	 * 2. Query uncertified balance in oder to improve UX (signer.getBtcBalance takes ~5s to complete).
+	 * 3. Fetch certified transactions via BE endpoint (to be discussed).
+	 * */
 	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestBtc>) => {
 		const bitcoinNetwork = data?.bitcoinNetwork;
 
