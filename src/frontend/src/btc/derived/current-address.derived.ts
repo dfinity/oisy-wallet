@@ -1,8 +1,8 @@
 import {
-	BTC_MAINNET_TOKEN_ID,
-	BTC_REGTEST_TOKEN_ID,
-	BTC_TESTNET_TOKEN_ID
-} from '$env/tokens.btc.env';
+	BTC_MAINNET_NETWORK_ID,
+	BTC_REGTEST_NETWORK_ID,
+	BTC_TESTNET_NETWORK_ID
+} from '$env/networks.env';
 import {
 	btcAddressMainnet,
 	btcAddressRegtest,
@@ -17,9 +17,9 @@ export const currentBtcAddress: Readable<OptionBtcAddress | undefined> = derived
 	[networkId, btcAddressMainnet, btcAddressTestnet, btcAddressRegtest],
 	([$networkId, $btcAddressMainnet, $btcAddressTestnet, $btcAddressRegtest]) => {
 		const mapper: Record<symbol, OptionBtcAddress> = {
-			[BTC_MAINNET_TOKEN_ID]: $btcAddressMainnet,
-			[BTC_TESTNET_TOKEN_ID]: $btcAddressTestnet,
-			[BTC_REGTEST_TOKEN_ID]: $btcAddressRegtest
+			[BTC_MAINNET_NETWORK_ID]: $btcAddressMainnet,
+			[BTC_TESTNET_NETWORK_ID]: $btcAddressTestnet,
+			[BTC_REGTEST_NETWORK_ID]: $btcAddressRegtest
 		};
 		if (nonNullish($networkId)) {
 			return mapper[$networkId];
