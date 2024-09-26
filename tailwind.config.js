@@ -32,7 +32,10 @@ export default {
 			'alice-blue': '#ecf3fb',
 			'american-orange': '#ff8a00',
 			'crayola-yellow': '#ffe57f',
-			cornsilk: '#fff7d8'
+			cornsilk: '#fff7d8',
+			zumthor: '#e8f1ff',
+			onahau: '#d1e3ff',
+			anakiwa: '#b0cdff'
 		},
 		extend: {
 			minWidth: {

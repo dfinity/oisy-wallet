@@ -60,11 +60,15 @@ button {
 	}
 
 	&.secondary {
-		background: var(--color-alice-blue);
+		background: var(--color-zumthor);
 		color: var(--color-primary);
 
 		&:hover {
-			filter: brightness(98%);
+			background: var(--color-onahau);
+		}
+
+		&:active {
+			background: var(--color-anakiwa);
 		}
 	}
 
