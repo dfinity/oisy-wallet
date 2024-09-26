@@ -9,6 +9,7 @@
 	import WalletConnectDomainVerification from './WalletConnectDomainVerification.svelte';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { isBusy } from '$lib/derived/busy.derived';
@@ -96,11 +97,10 @@
 	{#if displayCancel}
 		<div class="mt-8" in:fade>
 			<ButtonGroup>
-				<button
-					class="secondary block flex-1"
+				<ButtonCancel
 					on:click={() => dispatch('icCancel')}
-					disabled={$isBusy || $ethAddressNotCertified}>{$i18n.core.text.cancel}</button
-				>
+					disabled={$isBusy || $ethAddressNotCertified}
+				/>
 			</ButtonGroup>
 		</div>
 	{/if}
