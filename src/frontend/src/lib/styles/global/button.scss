@@ -11,7 +11,7 @@ button {
 		cursor: pointer;
 	}
 
-	--button-border-radius: var(--border-radius-xs);
+	--button-border-radius: var(--border-radius-md);
 	border-radius: var(--button-border-radius);
 
 	transition:
@@ -21,7 +21,7 @@ button {
 
 	border: 1px solid transparent;
 
-	--button-padding: var(--padding) var(--padding-3x);
+	--button-padding: var(--padding-2x) var(--padding-3x);
 
 	&.primary,
 	&.secondary,
