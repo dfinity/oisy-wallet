@@ -4,7 +4,6 @@
 		| { secondary: true; primary?: never };
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	// noinspection JSUnusedGlobalSymbols
 	type $$Props = HierarchyOptions & {
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
