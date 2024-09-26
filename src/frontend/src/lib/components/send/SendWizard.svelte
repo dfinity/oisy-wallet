@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { type WizardStep } from '@dfinity/gix-components';
+	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
@@ -12,7 +13,6 @@
 		isNetworkIdEthereum,
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
-	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 
 	export let destination: string;
 	export let targetNetwork: Network | undefined;

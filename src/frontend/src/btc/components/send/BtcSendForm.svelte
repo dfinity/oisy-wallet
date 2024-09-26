@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+	import BtcSendAmount from './BtcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import SendSource from '$lib/components/send/SendSource.svelte';
@@ -8,8 +10,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
-	import { createEventDispatcher } from 'svelte';
-	import BtcSendAmount from './BtcSendAmount.svelte';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: number | undefined = undefined;

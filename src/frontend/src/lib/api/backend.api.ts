@@ -1,4 +1,10 @@
-import type { CustomToken, UserProfile, UserToken } from '$declarations/backend/backend.did';
+import type {
+	CustomToken,
+	SelectedUtxosFeeRequest,
+	SelectedUtxosFeeResponse,
+	UserProfile,
+	UserToken
+} from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {
@@ -70,6 +76,17 @@ export const setUserToken = async ({
 	const { setUserToken } = await backendCanister({ identity });
 
 	return setUserToken({ token });
+};
+
+export const selectUtxos = async ({
+	transactionParams,
+	identity
+}: CommonCanisterApiFunctionParams<{
+	transactionParams: SelectedUtxosFeeRequest;
+}>): Promise<SelectedUtxosFeeResponse> => {
+	const { selectUtxosAndFee } = await backendCanister({ identity });
+
+	return selectUtxosAndFee(transactionParams);
 };
 
 export const createUserProfile = async ({

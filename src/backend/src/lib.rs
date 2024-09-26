@@ -18,6 +18,7 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
+use shared::types::bitcoin::{SelectedUtxosFeeRequest, SelectedUtxosFeeResponse};
 use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::user_profile::{
@@ -37,6 +38,7 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bitcoin_api;
 mod config;
 mod guards;
 mod impls;
@@ -243,6 +245,17 @@ fn remove_user_token(token_id: UserTokenId) {
 fn list_user_tokens() -> Vec<UserToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
+}
+
+#[update(guard = "may_read_user_data")]
+async fn select_user_utxos_fee(params: SelectedUtxosFeeRequest) -> SelectedUtxosFeeResponse {
+    let utxos = bitcoin_api::get_all_utxos(params.network, params.source_address)
+        .await
+        .expect("failed to get utxos");
+    SelectedUtxosFeeResponse {
+        utxos,
+        fee_satoshis: 0,
+    }
 }
 
 /// Add, remove or update custom token for the user.

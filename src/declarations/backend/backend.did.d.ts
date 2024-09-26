@@ -16,6 +16,7 @@ export interface AddUserCredentialRequest {
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
+export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -121,10 +122,23 @@ export interface OisyUser {
 	pouh_verified: boolean;
 	updated_timestamp: bigint;
 }
+export interface Outpoint {
+	txid: Uint8Array | number[];
+	vout: number;
+}
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_2 = { Ok: MigrationReport } | { Err: string };
 export type Result_3 = { Ok: null } | { Err: string };
+export interface SelectedUtxosFeeRequest {
+	network: BitcoinNetwork;
+	amount_satoshis: bigint;
+	source_address: string;
+}
+export interface SelectedUtxosFeeResponse {
+	fee_satoshis: bigint;
+	utxos: Array<Utxo>;
+}
 export interface Stats {
 	user_profile_count: bigint;
 	custom_token_count: bigint;
@@ -162,6 +176,11 @@ export interface UserTokenId {
 	chain_id: bigint;
 	contract_address: string;
 }
+export interface Utxo {
+	height: number;
+	value: bigint;
+	outpoint: Outpoint;
+}
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
@@ -177,6 +196,7 @@ export interface _SERVICE {
 	migration: ActorMethod<[], [] | [MigrationReport]>;
 	migration_stop_timer: ActorMethod<[], Result_3>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
+	select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], SelectedUtxosFeeResponse>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
 	set_many_custom_tokens: ActorMethod<[Array<CustomToken>], undefined>;

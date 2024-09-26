@@ -1,6 +1,5 @@
-import type { BitcoinNetwork, SignRequest } from '$declarations/signer/signer.did';
+import type { BitcoinNetwork, SendBtcRequest, SignRequest } from '$declarations/signer/signer.did';
 import { SignerCanister } from '$lib/canisters/signer.canister';
-import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -44,6 +43,19 @@ export const getBtcBalance = async ({
 	return getBtcBalance({ network });
 };
 
+export const sendBtcTokens = async ({
+	identity,
+	transactionParams
+}: CommonParams<{
+	transactionParams: SendBtcRequest;
+}>): Promise<string> => {
+	const { sendBtcTokens } = await signerCanister({ identity });
+
+	const response = await sendBtcTokens(transactionParams);
+
+	return response.txid;
+};
+
 export const signTransaction = async ({
 	transaction,
 	identity
@@ -78,7 +90,7 @@ export const signPrehash = async ({
 const signerCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
-	signerCanisterId = SIGNER_CANISTER_ID
+	signerCanisterId = 'bd3sg-teaaa-aaaaa-qaaba-cai'
 }: CommonParams): Promise<SignerCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 

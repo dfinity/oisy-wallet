@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher } from 'svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -7,8 +9,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
-	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
