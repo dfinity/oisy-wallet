@@ -48,7 +48,7 @@
 		"@dfinity/agent": "^2.1.1",
 		"@dfinity/auth-client": "^2.1.1",
 		"@dfinity/candid": "^2.1.1",
-		"@dfinity/ckbtc": "^3.0.0-next-2024-09-17",
+		"@dfinity/ckbtc": "^3.0.0-next-2024-09-26",
 		"@dfinity/cketh": "^3.3.0-next-2024-09-17",
 		"@dfinity/gix-components": "^4.7.0-next-2024-09-17",
 		"@dfinity/ic-management": "^5.2.0-next-2024-09-17",
