@@ -1,6 +1,6 @@
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { dirname, resolve } from 'node:path';
+import { basename, dirname, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { defineViteReplacements, readCanisterIds } from './vite.utils';
 
@@ -59,7 +59,12 @@ const config: UserConfig = {
 				inject({
 					modules: { Buffer: ['buffer', 'Buffer'] }
 				})
-			]
+			],
+			external: (id) => {
+				// A list of file to exclude because we parse those manually with custom scripts.
+				const filename = basename(id);
+				return ['+oisy.page.css'].includes(filename);
+			}
 		}
 	},
 	// proxy /api to port 4943 during development
