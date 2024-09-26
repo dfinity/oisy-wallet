@@ -56,7 +56,7 @@
 		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 			>{$i18n.core.text.back}</button
 		>
-		<ButtonPrimary disabled={invalid} onClick={() => dispatch('icSend')}>
+		<ButtonPrimary disabled={invalid} on:click={() => dispatch('icSend')}>
 			{$i18n.send.text.send}
 		</ButtonPrimary>
 	</ButtonGroup>

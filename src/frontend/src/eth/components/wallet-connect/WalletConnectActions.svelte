@@ -16,7 +16,7 @@
 	>
 
 	{#if approve}
-		<ButtonPrimary disabled={$isBusy} onClick={() => dispatch('icApprove')}>
+		<ButtonPrimary disabled={$isBusy} on:click={() => dispatch('icApprove')}>
 			{$i18n.wallet_connect.text.approve}
 		</ButtonPrimary>
 	{/if}

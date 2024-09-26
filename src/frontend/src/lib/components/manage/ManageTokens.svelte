@@ -269,7 +269,7 @@
 		<button class="secondary block flex-1" on:click={() => dispatch('icClose')}
 			>{$i18n.core.text.cancel}</button
 		>
-		<ButtonPrimary disabled={saveDisabled} onClick={save}>
+		<ButtonPrimary disabled={saveDisabled} on:click={save}>
 			{$i18n.core.text.save}
 		</ButtonPrimary>
 	</ButtonGroup>

@@ -89,10 +89,10 @@
 		inputType="text"
 		placeholder="e.g. wc:a281567bb3e4..."
 		bind:value={uri}
-	/>
+	/>on:click
 
 	<ButtonGroup slot="toolbar">
-		<ButtonPrimary disabled={invalid} {onClick}>
+		<ButtonPrimary disabled={invalid} on:click={onClick}>
 			{$i18n.wallet_connect.text.connect}
 		</ButtonPrimary>
 	</ButtonGroup>
