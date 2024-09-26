@@ -9,6 +9,7 @@
 	} from '$icp/services/ic-add-custom-tokens.service';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -98,7 +99,7 @@
 {#if nonNullish(token)}
 	<div in:fade>
 		<ButtonGroup>
-			<button class="secondary block flex-1" on:click={back}>{$i18n.core.text.back}</button>
+			<ButtonBack on:click={back} />
 			<Button disabled={invalid} on:click={() => dispatch('icSave')}>
 				{$i18n.tokens.import.text.add_the_token}
 			</Button>

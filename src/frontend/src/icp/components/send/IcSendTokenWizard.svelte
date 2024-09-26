@@ -26,6 +26,8 @@
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR,
 		TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS,
@@ -217,13 +219,9 @@
 			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
-						<button type="button" class="secondary block flex-1" on:click={back}
-							>{$i18n.core.text.back}</button
-						>
+						<ButtonBack type="button" on:click={back} />
 					{:else}
-						<button type="button" class="secondary block flex-1" on:click={close}
-							>{$i18n.core.text.cancel}</button
-						>
+						<ButtonCancel type="button" on:click={close} />
 					{/if}
 				</svelte:fragment>
 			</IcSendForm>
