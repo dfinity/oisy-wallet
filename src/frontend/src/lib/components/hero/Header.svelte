@@ -3,14 +3,12 @@
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Back from '$lib/components/core/Back.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
+	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import AboutHowModal from '$lib/components/hero/about/AboutHowModal.svelte';
 	import AboutMenu from '$lib/components/hero/about/AboutMenu.svelte';
 	import AboutWhatModal from '$lib/components/hero/about/AboutWhatModal.svelte';
-	import OisyWalletLogo from '$lib/components/icons/OisyWalletLogo.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutHow, modalAboutWhat } from '$lib/derived/modal.derived';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let back = false;
 </script>
@@ -23,13 +21,7 @@
 	{#if back}
 		<Back />
 	{:else}
-		<a
-			href="/"
-			class="flex items-center gap-0 no-underline w-fit"
-			aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
-		>
-			<OisyWalletLogo />
-		</a>
+		<OisyWalletLogoLink />
 	{/if}
 
 	<div
