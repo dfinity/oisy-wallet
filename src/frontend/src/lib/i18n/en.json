@@ -13,7 +13,9 @@
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
-			"more": "More"
+			"more": "More",
+			"reject": "Reject",
+			"approve": "Approve"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -459,8 +461,6 @@
 		"text": {
 			"name": "WalletConnect",
 			"session_proposal": "Session Proposal",
-			"approve": "Approve",
-			"reject": "Reject",
 			"connect": "Connect",
 			"connecting": "Connecting...",
 			"disconnect": "Disconnect",
