@@ -3,6 +3,7 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
@@ -71,7 +72,7 @@
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
 
 	$: {
-		if ($testnets && isNullish($btcAddressTestnet)) {
+		if (NETWORK_BITCOIN_ENABLED && $testnets && isNullish($btcAddressTestnet)) {
 			debounceLoadBtcAddressTestnet();
 		}
 	}
