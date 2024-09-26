@@ -51,6 +51,8 @@
 				request
 			});
 
+			await wallet?.disconnect();
+
 			toastsShow({
 				text: 'It worked out! 🥳',
 				level: 'info',
