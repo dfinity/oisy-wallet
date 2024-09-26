@@ -1,7 +1,7 @@
 <script lang="ts">
 	type HierarchyOptions =
-		| { primary: true; secondary?: never }
-		| { secondary: true; primary?: never };
+		| { primary: boolean; secondary?: never }
+		| { secondary: boolean; primary?: never };
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- We need to define the type for the props to mutually exclude hierarchy options; this constructor is defined in https://github.com/dummdidumm/rfcs/blob/ts-typedefs-within-svelte-components/text/ts-typing-props-slots-events.md#typescript-typing-propseventsslots--generics
 	type $$Props = HierarchyOptions & {
