@@ -17,6 +17,8 @@ interface I18nCore {
 		amount: string;
 		max: string;
 		more: string;
+		reject: string;
+		approve: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; background: string; go_to_home: string };
@@ -396,8 +398,6 @@ interface I18nWallet_connect {
 	text: {
 		name: string;
 		session_proposal: string;
-		approve: string;
-		reject: string;
 		connect: string;
 		connecting: string;
 		disconnect: string;
