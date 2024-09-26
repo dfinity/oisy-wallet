@@ -11,12 +11,12 @@
 
 <ButtonGroup>
 	<button class="secondary block flex-1" on:click={() => dispatch('icReject')} disabled={$isBusy}
-		>{$i18n.wallet_connect.text.reject}</button
+		>{$i18n.core.text.reject}</button
 	>
 
 	{#if approve}
 		<button class="primary block flex-1" on:click={() => dispatch('icApprove')} disabled={$isBusy}>
-			{$i18n.wallet_connect.text.approve}
+			{$i18n.core.text.approve}
 		</button>
 	{/if}
 </ButtonGroup>
