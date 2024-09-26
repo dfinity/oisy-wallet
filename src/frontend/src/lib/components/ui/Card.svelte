@@ -26,9 +26,9 @@
 				<CardAmount><slot name="amount" /></CardAmount>
 			{/if}
 		</div>
-		<p class="text-misty-rose text-left inline-flex items-center">
+		<span class="text-misty-rose text-left inline-flex items-center">
 			<slot name="description" />
-		</p>
+		</span>
 	</div>
 	<slot name="action" />
 </div>
