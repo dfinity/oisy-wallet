@@ -46,6 +46,7 @@ const toQueryString = (params: Omit<BuildOnramperLinkParams, 'wallets'>) =>
 
 /**
  * Build a source link for the Onramper widget, given a set of parameters.
+ *
  * The documentation for the Onramper widget's parameters can be found here:
  * https://docs.onramper.com/docs/supported-widget-parameters
  *
@@ -64,6 +65,12 @@ export const buildOnramperLink = ({ wallets, ...params }: BuildOnramperLinkParam
 	`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}&${toQueryString(params)}&wallets=${walletsToParam(wallets)}`;
 
 /** Map a list of tokens to a list of Onramper wallets.
+ *
+ * The Onramper widget requires a list wallet addresses that are a combination of a token ID and a wallet address, to which send the tokens.
+ * For example: `btc:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa` or `eth:0x0000000123456789abcdef0123456789abcdef0123`.
+ * The documentation can be found here: https://docs.onramper.com/docs/supported-widget-parameters#wallets
+ *
+ * So we map each token to a wallet address, based on the token standard, and create a list of objects with the token ID and the wallet address.
  *
  * @param tokens - The list of tokens to map.
  * @param walletMap - The map of token standards to wallet addresses.
