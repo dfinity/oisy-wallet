@@ -24,9 +24,11 @@
 		ICP_TOKEN.buy?.onramperId ??
 		undefined;
 
+	// List of Cryptocurrencies that are allowed to be bought
 	let onlyCryptos: OnramperId[];
 	$: onlyCryptos = $tokens.map((token) => token.buy?.onramperId).filter(nonNullish);
 
+	// List of Cryptocurrency Networks to which the tokens are allowed to be bought
 	let onlyCryptoNetworks: OnramperNetworkId[];
 	$: onlyCryptoNetworks = $networks.map((network) => network.buy?.onramperId).filter(nonNullish);
 
