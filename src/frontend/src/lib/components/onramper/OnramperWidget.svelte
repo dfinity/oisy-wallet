@@ -12,6 +12,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { OnramperCryptoWallet, OnramperId, OnramperNetworkId } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperWallets } from '$lib/utils/onramper.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	let defaultCrypto: OnramperId | undefined;
 	$: defaultCrypto =
@@ -63,7 +64,7 @@
 
 <iframe
 	{src}
-	title="Onramper Widget"
+	title={$i18n.buy.onramper.title}
 	height="630px"
 	width="100%"
 	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
