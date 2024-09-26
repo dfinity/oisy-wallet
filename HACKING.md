@@ -239,7 +239,7 @@ And in the CSS:
 
 ```css
 :root {
-  background: red;
+	background: red;
 }
 ```
 
@@ -248,7 +248,7 @@ Furthermore, given that parsing happens at build time, the developer might want 
 ```javascript
 <script lang="ts">
 	import { LOCAL } from '$lib/constants/app.constants';
-	
+
 	onMount(async () => {
 		if (!LOCAL) {
 			return;
