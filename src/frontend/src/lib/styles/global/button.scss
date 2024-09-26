@@ -47,6 +47,13 @@ button {
 			background: var(--color-grey);
 			color: var(--color-white);
 			opacity: 1;
+			cursor: not-allowed;
+
+			&:hover,
+			&:active {
+				background: var(--color-grey);
+				color: var(--color-white);
+			}
 		}
 	}
 
