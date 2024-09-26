@@ -15,39 +15,39 @@ import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
 
-type HomepageParams = {
+interface HomepageParams {
 	page: Page;
 	viewportSize?: ViewportSize;
-};
+}
 
 type HomepageLoggedInParams = {
 	iiPage: InternetIdentityPage;
 } & HomepageParams;
 
-type SelectorOperationParams = {
+interface SelectorOperationParams {
 	selector: string;
-};
+}
 
-type TestIdOperationParams = {
+interface TestIdOperationParams {
 	testId: string;
-};
+}
 
-type WaitForModalParams = {
+interface WaitForModalParams {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
-};
+}
 
 type TestModalSnapshotParams = {
 	selectorsToMock?: string[];
 } & WaitForModalParams;
 
-type ClickMenuItemParams = {
+interface ClickMenuItemParams {
 	menuItemTestId: string;
-};
+}
 
-type WaitForLocatorOptions = {
+interface WaitForLocatorOptions {
 	state: 'attached' | 'detached' | 'visible' | 'hidden';
-};
+}
 
 abstract class Homepage {
 	readonly #page: Page;

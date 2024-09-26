@@ -6,6 +6,6 @@
 
 <Header>{$i18n.transactions.text.title}</Header>
 
-<p class="mt-4 text-dark opacity-50" in:fade>
+<p class="mt-4 text-secondary opacity-50" in:fade>
 	{$i18n.transactions.text.sign_in}
 </p>

@@ -22,7 +22,8 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	name: 'Ethereum',
 	chainId: 1n,
 	icon: eth,
-	explorerUrl: ETHEREUM_EXPLORER_URL
+	explorerUrl: ETHEREUM_EXPLORER_URL,
+	buy: { onramperId: 'ethereum' }
 };
 
 export const { chainId: ETHEREUM_NETWORK_CHAIN_ID } = ETHEREUM_NETWORK;
@@ -70,7 +71,8 @@ export const ICP_NETWORK: Network = {
 	id: ICP_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Internet Computer',
-	icon: icpLight
+	icon: icpLight,
+	buy: { onramperId: 'icp' }
 };
 
 /**
@@ -84,7 +86,8 @@ export const BTC_MAINNET_NETWORK: Network = {
 	id: BTC_MAINNET_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Bitcoin',
-	icon: bitcoin
+	icon: bitcoin,
+	buy: { onramperId: 'bitcoin' }
 };
 
 export const BTC_TESTNET_NETWORK_SYMBOL = 'BTC (Testnet)';

@@ -26,7 +26,10 @@ export const ETHEREUM_TOKEN: RequiredTokenWithLinkedData = {
 	symbol: ETHEREUM_SYMBOL,
 	decimals: ETHEREUM_DEFAULT_DECIMALS,
 	icon: eth,
-	twinTokenSymbol: 'ckETH'
+	twinTokenSymbol: 'ckETH',
+	buy: {
+		onramperId: 'eth'
+	}
 };
 
 export const SEPOLIA_SYMBOL = 'SepoliaETH';
@@ -77,5 +80,8 @@ export const ICP_TOKEN: RequiredToken<IcToken> = {
 	fee: ICP_TRANSACTION_FEE_E8S,
 	ledgerCanisterId: ICP_LEDGER_CANISTER_ID,
 	indexCanisterId: ICP_INDEX_CANISTER_ID,
-	explorerUrl: ICP_EXPLORER_URL
+	explorerUrl: ICP_EXPLORER_URL,
+	buy: {
+		onramperId: 'icp_icp'
+	}
 };

@@ -26,6 +26,8 @@
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_ETH_SEND_ERROR,
@@ -289,13 +291,9 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<button type="button" class="secondary block flex-1" on:click={back}
-						>{$i18n.core.text.back}</button
-					>
+					<ButtonBack type="button" on:click={back} />
 				{:else}
-					<button type="button" class="secondary block flex-1" on:click={close}
-						>{$i18n.core.text.cancel}</button
-					>
+					<ButtonCancel type="button" on:click={close} />
 				{/if}
 			</svelte:fragment>
 		</SendForm>

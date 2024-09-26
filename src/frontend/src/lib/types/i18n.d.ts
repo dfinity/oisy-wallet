@@ -17,9 +17,11 @@ interface I18nCore {
 		amount: string;
 		max: string;
 		more: string;
+		reject: string;
+		approve: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; background: string };
+	alt: { logo: string; go_to_home: string };
 }
 
 interface I18nNavigation {
@@ -27,10 +29,10 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		oisy_roadmap: string;
+		changelog: string;
 		submit_ticket: string;
 	};
-	alt: { more_settings: string; menu: string; oisy_roadmap: string; submit_ticket: string };
+	alt: { more_settings: string; menu: string; changelog: string; submit_ticket: string };
 }
 
 interface I18nAuth {
@@ -396,8 +398,6 @@ interface I18nWallet_connect {
 	text: {
 		name: string;
 		session_proposal: string;
-		approve: string;
-		reject: string;
 		connect: string;
 		connecting: string;
 		disconnect: string;

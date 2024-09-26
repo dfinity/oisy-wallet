@@ -11,12 +11,10 @@ export interface Modal<T> {
 		| 'receive'
 		| 'send'
 		| 'buy'
-		| 'eth-send'
 		| 'convert-ckbtc-btc'
 		| 'convert-to-twin-token-cketh'
 		| 'convert-to-twin-token-eth'
 		| 'how-to-convert-to-twin-token-eth'
-		| 'ic-send'
 		| 'wallet-connect-auth'
 		| 'wallet-connect-sign'
 		| 'wallet-connect-send'
@@ -44,12 +42,10 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openReceive: <D extends T>(data: D) => void;
 	openSend: <D extends T>(data: D) => void;
 	openBuy: <D extends T>(data: D) => void;
-	openEthSend: <D extends T>(data: D) => void;
 	openConvertCkBTCToBTC: () => void;
 	openConvertToTwinTokenCkEth: () => void;
 	openConvertToTwinTokenEth: () => void;
 	openHowToConvertToTwinTokenEth: () => void;
-	openIcSend: <D extends T>(data: D) => void;
 	openWalletConnectAuth: () => void;
 	openWalletConnectSign: <D extends T>(data: D) => void;
 	openWalletConnectSend: <D extends T>(data: D) => void;
@@ -78,12 +74,10 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openReceive: <D extends T>(data: D) => set({ type: 'receive', data }),
 		openSend: <D extends T>(data: D) => set({ type: 'send', data }),
 		openBuy: <D extends T>(data: D) => set({ type: 'buy', data }),
-		openEthSend: <D extends T>(data: D) => set({ type: 'eth-send', data }),
 		openConvertCkBTCToBTC: () => set({ type: 'convert-ckbtc-btc' }),
 		openConvertToTwinTokenCkEth: () => set({ type: 'convert-to-twin-token-cketh' }),
 		openConvertToTwinTokenEth: () => set({ type: 'convert-to-twin-token-eth' }),
 		openHowToConvertToTwinTokenEth: () => set({ type: 'how-to-convert-to-twin-token-eth' }),
-		openIcSend: <D extends T>(data: D) => set({ type: 'ic-send', data }),
 		openWalletConnectAuth: () => set({ type: 'wallet-connect-auth' }),
 		openWalletConnectSign: <D extends T>(data: D) => set({ type: 'wallet-connect-sign', data }),
 		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),

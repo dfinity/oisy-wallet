@@ -1,7 +1,13 @@
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$icp/constants/ic.constants';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import { queryAndUpdate } from '$lib/actors/query.ic';
+import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import {
+	SchedulerTimer,
+	type Scheduler,
+	type SchedulerJobData,
+	type SchedulerJobParams
+} from '$lib/schedulers/scheduler';
 import type {
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet,
@@ -11,32 +17,26 @@ import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { isNullish, jsonReplacer } from '@dfinity/utils';
-import {
-	SchedulerTimer,
-	type Scheduler,
-	type SchedulerJobData,
-	type SchedulerJobParams
-} from './scheduler';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
 type IndexedTransactions<T> = Record<string, CertifiedData<IndexedTransaction<T>>>;
 
 // Not reactive, only used to hold values imperatively.
-interface WalletStore<T> {
+interface IcWalletStore<T> {
 	balance: CertifiedData<bigint> | undefined;
 	transactions: IndexedTransactions<T>;
 }
 
-export class WalletScheduler<
+export class IcWalletScheduler<
 	T extends IcrcTransaction | Transaction,
 	TWithId extends IcrcTransactionWithId | TransactionWithId,
 	PostMessageDataRequest
 > implements Scheduler<PostMessageDataRequest>
 {
-	private timer = new SchedulerTimer('syncWalletStatus');
+	private timer = new SchedulerTimer('syncIcWalletStatus');
 
-	private store: WalletStore<T> = {
+	private store: IcWalletStore<T> = {
 		balance: undefined,
 		transactions: {}
 	};

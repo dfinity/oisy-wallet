@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Input, QRCodeReader } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
@@ -88,12 +89,12 @@
 		inputType="text"
 		placeholder="e.g. wc:a281567bb3e4..."
 		bind:value={uri}
-	/>
+	/>on:click
 
 	<ButtonGroup slot="toolbar">
-		<button class="primary block flex-1" disabled={invalid} on:click={onClick}>
+		<Button disabled={invalid} on:click={onClick}>
 			{$i18n.wallet_connect.text.connect}
-		</button>
+		</Button>
 	</ButtonGroup>
 </ContentWithToolbar>
 
@@ -102,7 +103,7 @@
 		position: relative;
 
 		outline-offset: var(--padding-0_25x);
-		outline: var(--color-dark) dashed var(--padding-0_5x);
+		outline: var(--color-secondary) dashed var(--padding-0_5x);
 		--primary-rgb: 59, 0, 185;
 		overflow: hidden;
 
