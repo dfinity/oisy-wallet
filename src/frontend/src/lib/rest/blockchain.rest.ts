@@ -13,7 +13,7 @@ export const btcAddressData = async ({
 	btcAddress
 }: BlockchainBtcAddressDataParams): Promise<BitcoinAddressData> =>
 	fetchBlockchainApi<BitcoinAddressData>({
-		endpointPath: `/rawaddr/${btcAddress}`
+		endpointPath: `rawaddr/${btcAddress}`
 	});
 
 const fetchBlockchainApi = async <T>({ endpointPath }: { endpointPath: string }): Promise<T> => {
