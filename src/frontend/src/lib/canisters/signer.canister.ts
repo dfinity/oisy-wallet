@@ -1,5 +1,7 @@
 import type {
 	BitcoinNetwork,
+	SendBtcRequest,
+	SendBtcResponse,
 	_SERVICE as SignerService,
 	SignRequest
 } from '$declarations/signer/signer.did';
@@ -69,6 +71,22 @@ export class SignerCanister extends Canister<SignerService> {
 		});
 
 		return caller_eth_address();
+	};
+
+	sendBtcTokens = async (params: SendBtcRequest): Promise<SendBtcResponse> => {
+		const { btc_caller_send } = this.caller({
+			certified: true
+		});
+
+		const response = await btc_caller_send(params, []);
+
+		if ('Err' in response) {
+			console.log('sendBtcTokens error', response.Err);
+			// TODO: Manage different error types
+			throw new Error("Couldn't send Bitcoin");
+		}
+
+		return response.Ok;
 	};
 
 	signTransaction = ({ transaction }: { transaction: SignRequest }): Promise<string> => {

@@ -175,6 +175,29 @@ export const idlFactory = ({ IDL }) => {
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
+	const BitcoinNetwork = IDL.Variant({
+		mainnet: IDL.Null,
+		regtest: IDL.Null,
+		testnet: IDL.Null
+	});
+	const SelectedUtxosFeeRequest = IDL.Record({
+		network: BitcoinNetwork,
+		amount_satoshis: IDL.Nat64,
+		source_address: IDL.Text
+	});
+	const Outpoint = IDL.Record({
+		txid: IDL.Vec(IDL.Nat8),
+		vout: IDL.Nat32
+	});
+	const Utxo = IDL.Record({
+		height: IDL.Nat32,
+		value: IDL.Nat64,
+		outpoint: Outpoint
+	});
+	const SelectedUtxosFeeResponse = IDL.Record({
+		fee_satoshis: IDL.Nat64,
+		utxos: IDL.Vec(Utxo)
+	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
 		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
@@ -190,6 +213,7 @@ export const idlFactory = ({ IDL }) => {
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
 		migration_stop_timer: IDL.Func([], [Result_3], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
+		select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [SelectedUtxosFeeResponse], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
 		set_many_custom_tokens: IDL.Func([IDL.Vec(CustomToken)], [], []),

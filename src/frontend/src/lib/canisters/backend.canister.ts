@@ -1,6 +1,8 @@
 import type {
 	_SERVICE as BackendService,
 	CustomToken,
+	SelectedUtxosFeeRequest,
+	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
@@ -65,6 +67,14 @@ export class BackendCanister extends Canister<BackendService> {
 		const { set_user_token } = this.caller({ certified: true });
 
 		return set_user_token(token);
+	};
+
+	selectUtxosAndFee = async (
+		params: SelectedUtxosFeeRequest
+	): Promise<SelectedUtxosFeeResponse> => {
+		const { select_user_utxos_fee } = this.caller({ certified: true });
+
+		return select_user_utxos_fee(params);
 	};
 
 	createUserProfile = async (): Promise<UserProfile> => {

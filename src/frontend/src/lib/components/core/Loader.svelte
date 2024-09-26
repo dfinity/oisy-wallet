@@ -14,6 +14,7 @@
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import {
 		loadAddresses,
+		loadBtcAddressRegtest,
 		loadBtcAddressTestnet,
 		loadIdbAddresses
 	} from '$lib/services/address.services';
@@ -73,6 +74,7 @@
 	$: {
 		if ($testnets && isNullish($btcAddressTestnet)) {
 			debounceLoadBtcAddressTestnet();
+			loadBtcAddressRegtest();
 		}
 	}
 
