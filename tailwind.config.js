@@ -32,7 +32,9 @@ export default {
 			'alice-blue': '#ecf3fb',
 			'american-orange': '#ff8a00',
 			'crayola-yellow': '#ffe57f',
-			cornsilk: '#fff7d8'
+			cornsilk: '#fff7d8',
+			cobalt: '#004abe',
+			'resolution-blue': '#012f80'
 		},
 		extend: {
 			minWidth: {

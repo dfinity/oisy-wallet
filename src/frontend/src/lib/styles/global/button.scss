@@ -51,11 +51,15 @@ button {
 	}
 
 	&.primary {
-		background: var(--color-brandeis-blue);
+		background: var(--color-blue-ribbon);
 		color: var(--color-white);
 
 		&:hover {
-			background: var(--color-brilliant-azure);
+			background: var(--color-cobalt);
+		}
+
+		&:active {
+			background: var(--color-resolution-blue);
 		}
 	}
 
