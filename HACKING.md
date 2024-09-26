@@ -243,7 +243,7 @@ And in the CSS:
 }
 ```
 
-Furthermore, given that parsing happens at runtime, the developer might want to load the style at runtime for local development purposes. This can be achieved by importing the style in the related `+layout.svelte`:
+Furthermore, given that parsing happens at build time, the developer might want to load the style at runtime for local development purposes. This can be achieved by importing the style in the related `+layout.svelte`:
 
 ```javascript
 <script lang="ts">
