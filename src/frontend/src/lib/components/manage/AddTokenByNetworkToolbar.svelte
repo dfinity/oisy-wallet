@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -10,9 +11,7 @@
 </script>
 
 <ButtonGroup>
-	<button type="button" class="secondary block flex-1" on:click={() => dispatch('icBack')}
-		>{$i18n.core.text.back}</button
-	>
+	<ButtonBack type="button" on:click={() => dispatch('icBack')} />
 	<Button disabled={invalid}>
 		{$i18n.core.text.next}
 	</Button>

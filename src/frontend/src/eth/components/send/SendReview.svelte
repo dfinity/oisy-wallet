@@ -9,6 +9,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -53,9 +54,7 @@
 	<SendInfo />
 
 	<ButtonGroup slot="toolbar">
-		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
-			>{$i18n.core.text.back}</button
-		>
+		<ButtonBack on:click={() => dispatch('icBack')} />
 		<Button disabled={invalid} on:click={() => dispatch('icSend')}>
 			{$i18n.send.text.send}
 		</Button>

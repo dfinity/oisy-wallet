@@ -7,6 +7,7 @@
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
@@ -136,9 +137,7 @@
 	<AddTokenWarning />
 
 	<ButtonGroup slot="toolbar">
-		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
-			>{$i18n.core.text.back}</button
-		>
+		<ButtonBack on:click={() => dispatch('icBack')} />
 		<Button disabled={invalid} on:click={() => dispatch('icSave')}>
 			{$i18n.tokens.import.text.add_the_token}
 		</Button>

@@ -11,8 +11,8 @@
 </script>
 
 <ButtonGroup>
-	<button class="secondary block flex-1" on:click={() => dispatch('icReject')} disabled={$isBusy}
-		>{$i18n.core.text.reject}</button
+	<Button colorStyle="secondary" on:click={() => dispatch('icReject')} disabled={$isBusy}
+		>{$i18n.core.text.reject}</Button
 	>
 
 	{#if approve}
