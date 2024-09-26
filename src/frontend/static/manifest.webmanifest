@@ -4,7 +4,7 @@
 	"start_url": ".",
 	"display": "standalone",
 	"theme_color": "#FFFFFF",
-	"background_color": "#016DFC",
+	"background_color": "#FFFFFF",
 	"description": "{{OISY_ONELINER}}",
 	"orientation": "portrait-primary",
 	"prefer_related_applications": false,
