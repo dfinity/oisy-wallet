@@ -9,7 +9,7 @@
 	import { type ComponentType, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import IconAstronautEmpty from '$lib/components/icons/IconAstronautEmpty.svelte';
+	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -91,7 +91,7 @@
 
 		{#if requestAccountsPermissions}
 			<div class="flex gap-4 border border-dust bg-white rounded-lg p-4 mb-10">
-				<IconAstronautEmpty />
+				<IconAstronautHelmet />
 
 				<div>
 					<label class="block text-sm font-bold" for="ic-wallet-address"
