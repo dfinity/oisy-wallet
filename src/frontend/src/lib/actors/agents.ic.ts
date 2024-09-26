@@ -1,4 +1,4 @@
-import { LOCAL } from '$lib/constants/app.constants';
+import { LOCAL, REPLICA_HOST } from '$lib/constants/app.constants';
 import type { Option } from '$lib/types/utils';
 import type { HttpAgent, Identity } from '@dfinity/agent';
 import { createAgent as createAgentUtils, isNullish } from '@dfinity/utils';
@@ -32,7 +32,7 @@ export const createAgent = ({
 	createAgentUtils({
 		identity,
 		fetchRootKey: LOCAL,
-		host: LOCAL ? 'http://localhost:4943/' : 'https://icp-api.io',
+		host: REPLICA_HOST,
 		verifyQuerySignatures
 	});
 
