@@ -21,7 +21,7 @@ interface I18nCore {
 		approve: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string; background: string; go_to_home: string };
+	alt: { logo: string; go_to_home: string };
 }
 
 interface I18nNavigation {
