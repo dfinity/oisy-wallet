@@ -11,10 +11,6 @@
 
 <button
 	class="secondary mx-auto mt-12 mb-4 w-full center sm:w-auto"
-	class:text-grey={disabled}
-	class:text-blue={!disabled}
-	class:hover:text-dark-blue={!disabled}
-	class:active:text-dark-blue={!disabled}
 	on:click={modalStore.openManageTokens}
 	{disabled}
 >

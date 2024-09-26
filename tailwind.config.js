@@ -34,7 +34,10 @@ export default {
 			'crayola-yellow': '#ffe57f',
 			cornsilk: '#fff7d8',
 			cobalt: '#004abe',
-			'resolution-blue': '#012f80'
+			'resolution-blue': '#012f80',
+			zumthor: '#e8f1ff',
+			onahau: '#d1e3ff',
+			anakiwa: '#b0cdff'
 		},
 		extend: {
 			minWidth: {
