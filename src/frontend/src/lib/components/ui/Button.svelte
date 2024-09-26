@@ -4,13 +4,6 @@
 	export let disabled = false;
 </script>
 
-<button
-	class="block flex-1"
-	{type}
-	{disabled}
-	on:click
-	class:primary={color === 'primary'}
-	class:secondary={color === 'secondary'}
->
+<button class={`${color} block flex-1`} {type} {disabled} on:click>
 	<slot />
 </button>
