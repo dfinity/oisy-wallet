@@ -55,6 +55,14 @@ button {
 				color: var(--color-white);
 			}
 		}
+
+		&[focus],
+		&:focus {
+			outline: none;
+			box-shadow:
+				0 0 0 2px var(--color-white),
+				0 0 0 4px var(--color-blue-ribbon);
+		}
 	}
 
 	&.primary {
