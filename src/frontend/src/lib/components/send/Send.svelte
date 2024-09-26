@@ -3,10 +3,11 @@
 	import SendModal from '$lib/components/send/SendModal.svelte';
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { token } from '$lib/stores/token.store';
 
 	export let isTransactionsPage: boolean;
 </script>
 
 <SendButtonWithModal open={modalStore.openSend} isOpen={$modalSend}>
-	<SendModal {isTransactionsPage} on:nnsClose slot="modal" />
+	<SendModal {isTransactionsPage} on:nnsClose slot="modal" targetNetwork={$token?.network} />
 </SendButtonWithModal>
