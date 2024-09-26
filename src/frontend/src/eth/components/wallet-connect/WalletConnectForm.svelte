@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Input, QRCodeReader } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ButtonPrimary from '$lib/components/ui/ButtonPrimary.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import {
 		TRACK_COUNT_WALLET_CONNECT,
@@ -92,9 +92,9 @@
 	/>on:click
 
 	<ButtonGroup slot="toolbar">
-		<ButtonPrimary disabled={invalid} on:click={onClick}>
+		<Button disabled={invalid} on:click={onClick}>
 			{$i18n.wallet_connect.text.connect}
-		</ButtonPrimary>
+		</Button>
 	</ButtonGroup>
 </ContentWithToolbar>
 

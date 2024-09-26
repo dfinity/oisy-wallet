@@ -9,8 +9,8 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ButtonPrimary from '$lib/components/ui/ButtonPrimary.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -62,9 +62,9 @@
 
 		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
-			<ButtonPrimary disabled={invalid}>
+			<Button disabled={invalid}>
 				{$i18n.core.text.next}
-			</ButtonPrimary>
+			</Button>
 		</ButtonGroup>
 	</ContentWithToolbar>
 </form>

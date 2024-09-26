@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ButtonPrimary from '$lib/components/ui/ButtonPrimary.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -16,8 +16,8 @@
 	>
 
 	{#if approve}
-		<ButtonPrimary disabled={$isBusy} on:click={() => dispatch('icApprove')}>
+		<Button disabled={$isBusy} on:click={() => dispatch('icApprove')}>
 			{$i18n.wallet_connect.text.approve}
-		</ButtonPrimary>
+		</Button>
 	{/if}
 </ButtonGroup>

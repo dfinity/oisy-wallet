@@ -22,8 +22,8 @@
 	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ButtonPrimary from '$lib/components/ui/ButtonPrimary.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { exchanges } from '$lib/derived/exchange.derived';
@@ -269,9 +269,9 @@
 		<button class="secondary block flex-1" on:click={() => dispatch('icClose')}
 			>{$i18n.core.text.cancel}</button
 		>
-		<ButtonPrimary disabled={saveDisabled} on:click={save}>
+		<Button disabled={saveDisabled} on:click={save}>
 			{$i18n.core.text.save}
-		</ButtonPrimary>
+		</Button>
 	</ButtonGroup>
 {/if}
 
