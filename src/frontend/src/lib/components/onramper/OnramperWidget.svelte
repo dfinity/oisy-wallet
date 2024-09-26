@@ -9,10 +9,10 @@
 	import { networkBitcoin, networkEthereum } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import type { OnramperCryptoWallet, OnramperId, OnramperNetworkId } from '$lib/types/onramper';
 	import { buildOnramperLink, mapOnramperWallets } from '$lib/utils/onramper.utils';
-	import { i18n } from '$lib/stores/i18n.store';
 
 	let defaultCrypto: OnramperId | undefined;
 	$: defaultCrypto =
