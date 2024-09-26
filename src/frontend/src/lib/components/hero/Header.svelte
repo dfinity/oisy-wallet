@@ -38,7 +38,7 @@
 		<Alpha />
 	</div>
 
-	<div class="flex gap-4 ml-auto">
+	<div class="flex gap-4 justify-end">
 		{#if $authSignedIn}
 			<WalletConnect />
 		{/if}

@@ -44,7 +44,7 @@ import { get } from 'svelte/store';
 interface LoadTokenAddressParams<T extends Address> {
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
-	setIdbAddress?: (params: SetIdbAddressParams<T>) => Promise<void>;
+	setIdbAddress: ((params: SetIdbAddressParams<T>) => Promise<void>) | null;
 	addressStore: AddressStore<T>;
 }
 
@@ -102,7 +102,7 @@ const bitcoinMapper: Record<
 	regtest: {
 		addressStore: btcAddressRegtestStore,
 		// No need to store the regtest in the local storage because it's only used locally.
-		setIdbAddress: undefined
+		setIdbAddress: null
 	}
 };
 
