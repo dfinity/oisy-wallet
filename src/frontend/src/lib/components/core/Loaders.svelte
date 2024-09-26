@@ -1,4 +1,5 @@
 <script lang="ts">
+	import BtcLoaderWallets from '$btc/components/core/BtcLoaderWallets.svelte';
 	import IcLoaderWallets from '$icp/components/core/IcLoaderWallets.svelte';
 	import LoaderBalances from '$icp-eth/components/core/LoaderBalances.svelte';
 	import Loader from '$lib/components/core/Loader.svelte';
@@ -11,11 +12,13 @@
 	<Loader>
 		<LoaderBalances>
 			<IcLoaderWallets>
-				<ExchangeWorker>
-					<LoaderMetamask>
-						<slot />
-					</LoaderMetamask>
-				</ExchangeWorker>
+				<BtcLoaderWallets>
+					<ExchangeWorker>
+						<LoaderMetamask>
+							<slot />
+						</LoaderMetamask>
+					</ExchangeWorker>
+				</BtcLoaderWallets>
 			</IcLoaderWallets>
 		</LoaderBalances>
 	</Loader>
