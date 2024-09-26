@@ -8,6 +8,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -55,8 +56,8 @@
 		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 			>{$i18n.core.text.back}</button
 		>
-		<button class="primary block flex-1" disabled={invalid} on:click={() => dispatch('icSend')}>
+		<Button disabled={invalid} on:click={() => dispatch('icSend')}>
 			{$i18n.send.text.send}
-		</button>
+		</Button>
 	</ButtonGroup>
 </ContentWithToolbar>
