@@ -17,9 +17,9 @@
 
 	{#if $authSignedIn}
 		<TokensSignedIn />
+
+		<ManageTokensButton />
 	{:else}
 		<TokensSignedOut />
 	{/if}
-
-	<ManageTokensButton />
 </div>
