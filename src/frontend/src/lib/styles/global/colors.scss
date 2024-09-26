@@ -19,10 +19,13 @@
 	--color-pale-cornflower-blue: theme(colors.pale-cornflower-blue);
 	--color-brilliant-azure: theme(colors.brilliant-azure);
 	--color-blue-ribbon-rgb: theme(colors.blue-ribbon-rgb);
+	--color-blue-ribbon: rgb(var(--color-blue-ribbon-rgb));
 	--color-alice-blue: theme(colors.alice-blue);
 	--color-american-orange: theme(colors.american-orange);
 	--color-crayola-yellow: theme(colors.crayola-yellow);
 	--color-cornsilk: theme(colors.cornsilk);
+	--color-cobalt: theme(colors.cobalt);
+	--color-resolution-blue: theme(colors.resolution-blue);
 
 	// Brand
 	--color-wallet-connect: #3b99fc;
