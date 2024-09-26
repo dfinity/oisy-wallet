@@ -14,7 +14,7 @@ let canister: BackendCanister | undefined = undefined;
 
 export const listUserTokens = async ({
 	identity,
-	certified = true
+	certified
 }: CommonCanisterApiFunctionParams<QueryParams>): Promise<UserToken[]> => {
 	const { listUserTokens } = await backendCanister({ identity });
 
@@ -23,7 +23,7 @@ export const listUserTokens = async ({
 
 export const listCustomTokens = async ({
 	identity,
-	certified = true
+	certified
 }: CommonCanisterApiFunctionParams<QueryParams>): Promise<CustomToken[]> => {
 	const { listCustomTokens } = await backendCanister({ identity });
 
@@ -82,7 +82,7 @@ export const createUserProfile = async ({
 
 export const getUserProfile = async ({
 	identity,
-	certified = true
+	certified
 }: CommonCanisterApiFunctionParams<QueryParams>): Promise<GetUserProfileResponse> => {
 	const { getUserProfile } = await backendCanister({ identity });
 
