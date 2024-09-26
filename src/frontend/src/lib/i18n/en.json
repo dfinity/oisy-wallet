@@ -13,14 +13,15 @@
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
-			"more": "More"
+			"more": "More",
+			"reject": "Reject",
+			"approve": "Approve"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
 		},
 		"alt": {
 			"logo": "$name logo",
-			"background": "Background image of $oisy_name with gradient logo",
 			"go_to_home": "Go to the $oisy_name home page"
 		}
 	},
@@ -460,8 +461,6 @@
 		"text": {
 			"name": "WalletConnect",
 			"session_proposal": "Session Proposal",
-			"approve": "Approve",
-			"reject": "Reject",
 			"connect": "Connect",
 			"connecting": "Connecting...",
 			"disconnect": "Disconnect",
