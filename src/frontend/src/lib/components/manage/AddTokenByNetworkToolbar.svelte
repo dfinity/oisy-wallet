@@ -13,7 +13,7 @@
 	<button type="button" class="secondary block flex-1" on:click={() => dispatch('icBack')}
 		>{$i18n.core.text.back}</button
 	>
-	<Button disabled={invalid}>
+	<Button primary disabled={invalid}>
 		{$i18n.core.text.next}
 	</Button>
 </ButtonGroup>

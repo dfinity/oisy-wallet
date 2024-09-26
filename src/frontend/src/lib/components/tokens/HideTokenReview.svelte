@@ -39,7 +39,7 @@
 		<button class="secondary block flex-1" on:click={() => dispatch('icCancel')}
 			>{$i18n.core.text.cancel}</button
 		>
-		<Button on:click={() => dispatch('icHide')}>
+		<Button primary on:click={() => dispatch('icHide')}>
 			{$i18n.tokens.hide.confirm}
 		</Button>
 	</ButtonGroup>
