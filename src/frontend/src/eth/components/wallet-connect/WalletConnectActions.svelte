@@ -16,7 +16,7 @@
 	>
 
 	{#if approve}
-		<Button primary disabled={$isBusy} on:click={() => dispatch('icApprove')}>
+		<Button disabled={$isBusy} on:click={() => dispatch('icApprove')}>
 			{$i18n.core.text.approve}
 		</Button>
 	{/if}

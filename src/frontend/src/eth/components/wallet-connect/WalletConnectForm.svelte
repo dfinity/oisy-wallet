@@ -92,7 +92,7 @@
 	/>on:click
 
 	<ButtonGroup slot="toolbar">
-		<Button primary disabled={invalid} on:click={onClick}>
+		<Button disabled={invalid} on:click={onClick}>
 			{$i18n.wallet_connect.text.connect}
 		</Button>
 	</ButtonGroup>

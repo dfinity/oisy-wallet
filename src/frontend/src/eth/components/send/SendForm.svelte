@@ -62,7 +62,7 @@
 
 		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
-			<Button primary disabled={invalid}>
+			<Button disabled={invalid}>
 				{$i18n.core.text.next}
 			</Button>
 		</ButtonGroup>

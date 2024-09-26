@@ -139,7 +139,7 @@
 		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
 			>{$i18n.core.text.back}</button
 		>
-		<Button primary disabled={invalid} on:click={() => dispatch('icSave')}>
+		<Button disabled={invalid} on:click={() => dispatch('icSave')}>
 			{$i18n.tokens.import.text.add_the_token}
 		</Button>
 	</ButtonGroup>
