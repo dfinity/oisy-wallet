@@ -3,7 +3,7 @@ import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type {
 	PostMessageDataRequestBtc,
-	PostMessageDataResponseBtcWallet
+	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
 import { assertNonNullish } from '@dfinity/utils';
 
@@ -49,13 +49,15 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				balance: {
 					data: balance,
 					certified: true
-				}
+				},
+				// TODO: Send parsed transactions
+				newTransactions: ''
 			}
 		});
 	};
 
-	private postMessageWallet(data: PostMessageDataResponseBtcWallet) {
-		this.timer.postMsg<PostMessageDataResponseBtcWallet>({
+	private postMessageWallet(data: PostMessageDataResponseWallet) {
+		this.timer.postMsg<PostMessageDataResponseWallet>({
 			msg: 'syncBtcWallet',
 			data
 		});

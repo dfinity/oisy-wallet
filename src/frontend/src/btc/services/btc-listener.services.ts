@@ -1,5 +1,5 @@
 import { balancesStore } from '$lib/stores/balances.store';
-import type { PostMessageDataResponseBtcWallet } from '$lib/types/post-message';
+import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -7,7 +7,7 @@ export const syncWallet = ({
 	data,
 	tokenId
 }: {
-	data: PostMessageDataResponseBtcWallet;
+	data: PostMessageDataResponseWallet;
 	tokenId: TokenId;
 }) => {
 	const {

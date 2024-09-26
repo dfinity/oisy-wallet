@@ -1,7 +1,7 @@
 import { syncWallet } from '$btc/services/btc-listener.services';
 import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$icp/utils/ic-send.utils';
 import type { WalletWorker } from '$lib/types/listener';
-import type { PostMessage, PostMessageDataResponseBtcWallet } from '$lib/types/post-message';
+import type { PostMessage, PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 
@@ -12,16 +12,14 @@ export const initBtcWalletWorker = async ({
 	const WalletWorker = await import('$btc/workers/btc-wallet.worker?worker');
 	const worker: Worker = new WalletWorker.default();
 
-	worker.onmessage = async ({
-		data
-	}: MessageEvent<PostMessage<PostMessageDataResponseBtcWallet>>) => {
+	worker.onmessage = async ({ data }: MessageEvent<PostMessage<PostMessageDataResponseWallet>>) => {
 		const { msg } = data;
 
 		switch (msg) {
 			case 'syncBtcWallet':
 				syncWallet({
 					tokenId,
-					data: data.data as PostMessageDataResponseBtcWallet
+					data: data.data as PostMessageDataResponseWallet
 				});
 				return;
 		}
