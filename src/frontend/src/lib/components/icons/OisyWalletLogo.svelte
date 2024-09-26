@@ -1,7 +1,7 @@
 <script lang="ts">
 	import oisyLogoLarge from '$lib/assets/oisy-logo-large.svg';
 	import oisyLogoSmall from '$lib/assets/oisy-logo-small.svg';
-	import IconAstronautEmpty from '$lib/components/icons/IconAstronautEmpty.svelte';
+	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,7 +12,7 @@
 </script>
 
 <div class="mr-3">
-	<IconAstronautEmpty />
+	<IconAstronautHelmet />
 </div>
 
 <picture aria-label={ariaLabel} class="w-24">
