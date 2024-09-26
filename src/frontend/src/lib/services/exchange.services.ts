@@ -1,6 +1,6 @@
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { simplePrice, simpleTokenPrice } from '$lib/rest/goincecko.rest';
+import { simplePrice, simpleTokenPrice } from '$lib/rest/coingecko.rest';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
 	CoingeckoSimplePriceResponse,
