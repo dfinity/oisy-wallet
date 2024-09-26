@@ -14,11 +14,14 @@
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: number | undefined = undefined;
 	export let destination = '';
+	export let source: string;
 
 	let amountError: IcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
 
 	const dispatch = createEventDispatcher();
+
+	const close = () => dispatch('icClose');
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
@@ -27,12 +30,14 @@
 
 		<BtcSendAmount bind:amount bind:amountError />
 
-		<SendSource token={$token} balance={$balance} source="some-btc-address" />
+		<SendSource token={$token} balance={$balance} {source} />
 
 		<!-- PENDING show fee -->
 
 		<ButtonGroup slot="toolbar">
-			<slot name="cancel" />
+			<button type="button" class="secondary block flex-1" on:click={close}
+				>{$i18n.core.text.cancel}</button
+			>
 			<button class="primary block flex-1" type="submit" disabled={false}>
 				{$i18n.core.text.next}
 			</button>

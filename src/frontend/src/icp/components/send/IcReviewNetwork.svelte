@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import bitcoin from '$icp/assets/bitcoin.svg';
 	import icpLight from '$icp/assets/icp_light.svg';
 	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 	import eth from '$icp-eth/assets/eth.svg';
@@ -11,6 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+	import { token } from '$lib/stores/token.store';
 
 	export let networkId: NetworkId | undefined = undefined;
 
@@ -24,16 +24,20 @@
 		>{#if showDestinationNetwork}{$i18n.send.text.source_network}{:else}{$i18n.send.text
 				.network}{/if}</svelte:fragment
 	>
-	<TextWithLogo name="Internet Computer" icon={icpLight} />
+	{#if nonNullish($token) && isNetworkIdBitcoin($token.network.id)}
+		<TextWithLogo name={$token.network.name} icon={$token.network.icon} />
+	{:else}
+		<TextWithLogo name="Internet Computer" icon={icpLight} />
+	{/if}
 </Value>
 
 {#if showDestinationNetwork}
 	<Value ref="network" element="div">
 		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
-		{#if nonNullish(networkId) && isNetworkIdBitcoin(networkId)}
+		{#if nonNullish(networkId) && isNetworkIdBitcoin(networkId) && nonNullish($token)}
 			<span class="flex gap-1">
 				<IcSendBtcNetwork {networkId} />
-				<Logo src={bitcoin} alt={`Bitcoin logo`} />
+				<Logo src={$token.network.icon} alt={`Bitcoin logo`} />
 			</span>
 		{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
 			<TextWithLogo
