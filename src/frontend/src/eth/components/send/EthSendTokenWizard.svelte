@@ -291,9 +291,9 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<ButtonBack type="button" on:click={back} />
+					<ButtonBack on:click={back} />
 				{:else}
-					<ButtonCancel type="button" on:click={close} />
+					<ButtonCancel on:click={close} />
 				{/if}
 			</svelte:fragment>
 		</SendForm>

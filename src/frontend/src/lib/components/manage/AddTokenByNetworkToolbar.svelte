@@ -11,7 +11,7 @@
 </script>
 
 <ButtonGroup>
-	<ButtonBack type="button" on:click={() => dispatch('icBack')} />
+	<ButtonBack on:click={() => dispatch('icBack')} />
 	<Button disabled={invalid}>
 		{$i18n.core.text.next}
 	</Button>
