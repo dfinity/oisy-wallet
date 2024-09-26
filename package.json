@@ -54,7 +54,7 @@
 		"@dfinity/ic-management": "^5.2.0-next-2024-09-17",
 		"@dfinity/ledger-icp": "^2.5.0-next-2024-09-26",
 		"@dfinity/ledger-icrc": "^2.5.0-next-2024-09-17",
-		"@dfinity/oisy-wallet-signer": "file:../oisy-wallet-signer/dist/dfinity-oisy-wallet-signer-0.0.1.tgz",
+		"@dfinity/oisy-wallet-signer": "file:dfinity-oisy-wallet-signer-0.0.1.tgz",
 		"@dfinity/principal": "^2.1.1",
 		"@dfinity/utils": "^2.5.0-next-2024-09-17",
 		"@dfinity/verifiable-credentials": "^0.0.4",
