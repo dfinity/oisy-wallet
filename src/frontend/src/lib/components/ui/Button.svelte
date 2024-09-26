@@ -3,7 +3,7 @@
 		| { primary: true; secondary?: never }
 		| { secondary: true; primary?: never };
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- We need to define the type for the props to mutually exclude hierarchy options; this constructor is defined in https://github.com/dummdidumm/rfcs/blob/ts-typedefs-within-svelte-components/text/ts-typing-props-slots-events.md#typescript-typing-propseventsslots--generics
 	type $$Props = HierarchyOptions & {
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
