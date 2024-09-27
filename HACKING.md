@@ -9,6 +9,7 @@ This document lists a couple of useful information for development and deploymen
 - [Faucets](#faucets)
 - [Testing](#testing)
 - [Integrate ckERC20 Tokens](#integrate-ckerc20-tokens)
+- [Routes Styles](#routes-styles)
 
 ## Deployment
 
@@ -217,4 +218,42 @@ Before they become available, there must be a new block mined. You can mine one:
 
 ```bash
 ./scripts/add.tokens.bitcoin.sh
+```
+
+# Routes Styles
+
+The designer, or the foundation, might want to use different background colors for specific routes, such as using white generally speaking in the wallet and light blue on the signer (`/sign`) route.
+
+On the other hand, we want to prerender the background color because, if we don’t, the user will experience a "glitchy" loading effect where the dapp initially loads with a white background before applying the correct color.
+
+That's why, when there is such a specific requests, some CSS can be defined at the route level. CSS which is then prerendered within the generated HTML page at build time.
+
+For example, if I wanted to add a route `/hello` with a red background, we would add the following files in `src`:
+
+```
+src/routes/(group)/hello/+page.svelte
+src/routes/(group)/hello/+oisy.page.css
+```
+
+And in the CSS:
+
+```css
+:root {
+	background: red;
+}
+```
+
+Furthermore, given that parsing happens at build time, the developer might want to load the style at runtime for local development purposes. This can be achieved by importing the style in the related `+layout.svelte`:
+
+```javascript
+<script lang="ts">
+	import { LOCAL } from '$lib/constants/app.constants';
+
+	onMount(async () => {
+		if (!LOCAL) {
+			return;
+		}
+		await import('./+oisy.page.css');
+	});
+</script>
 ```
