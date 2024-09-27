@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
@@ -17,9 +18,11 @@
 
 	{#if $authSignedIn}
 		<TokensSignedIn />
+
+		<div transition:fade>
+			<ManageTokensButton />
+		</div>
 	{:else}
 		<TokensSignedOut />
 	{/if}
-
-	<ManageTokensButton />
 </div>
