@@ -7,9 +7,9 @@ use ic_cdk::api::management_canister::bitcoin::Utxo;
 ///
 /// If there are no UTXOs matching the criteria, returns an empty vector.
 ///
-/// PROPERTY: sum(u.value for u in available_set) ≥ target ⇒ !solution.is_empty()
-/// POSTCONDITION: !solution.is_empty() ⇒ sum(u.value for u in solution) ≥ target
-/// POSTCONDITION:  solution.is_empty() ⇒ available_utxos did not change.
+/// PROPERTY: `sum(u.value for u in available_set) ≥ target ⇒ !solution.is_empty()`
+/// POSTCONDITION: `!solution.is_empty() ⇒ sum(u.value for u in solution) ≥ target`
+/// POSTCONDITION:  `solution.is_empty() ⇒ available_utxos did not change.`
 fn greedy(target: u64, available_utxos: &mut Vec<Utxo>) -> Vec<Utxo> {
     let mut solution = vec![];
     let mut goal = target;
@@ -47,14 +47,14 @@ const UTXOS_COUNT_THRESHOLD: usize = 1_000;
 
 /// The algorithm greedily selects the smallest UTXO(s) with a value that is at least the given `target` in a first step.
 ///
-/// If the minter manages more than [UTXOS_COUNT_THRESHOLD], it will then try to match the number of inputs with the
+/// If the minter manages more than `UTXOS_COUNT_THRESHOLD`, it will then try to match the number of inputs with the
 /// number of outputs + 1 (where the additional output corresponds to the change output).
 ///
 /// If there are no UTXOs matching the criteria, returns an empty vector.
 ///
-/// PROPERTY: sum(u.value for u in available_set) ≥ target ⇒ !solution.is_empty()
-/// POSTCONDITION: !solution.is_empty() ⇒ sum(u.value for u in solution) ≥ target
-/// POSTCONDITION:  solution.is_empty() ⇒ available_utxos did not change.
+/// PROPERTY: `sum(u.value for u in available_set) ≥ target ⇒ !solution.is_empty()`
+/// POSTCONDITION: `!solution.is_empty() ⇒ sum(u.value for u in solution) ≥ target`
+/// POSTCONDITION:  `solution.is_empty() ⇒ available_utxos did not change.`
 pub fn utxos_selection(
     target: u64,
     available_utxos: &mut Vec<Utxo>,
@@ -93,11 +93,12 @@ fn tx_vsize_estimate(input_count: u64, output_count: u64) -> u64 {
     input_count * INPUT_SIZE_VBYTES + output_count * OUTPUT_SIZE_VBYTES + TX_OVERHEAD_VBYTES
 }
 
-/// Computes an estimate for the retrieve_btc fee.
+/// Computes an estimate for the transaction based on the number of utxos and outputs
 ///
 /// Arguments:
-///   * `selected_utxos_count` - the count of UTXOs used for the transaction.
+///   * `selected_utxos_count` - the number of UTXOs used for the transaction.
 ///   * `median_fee_millisatoshi_per_vbyte` - the median network fee, in millisatoshi per vbyte.
+///   * `output_count` - the number of outputs of the bitcoin transaction.
 pub fn estimate_fee(
     selected_utxos_count: u64,
     median_fee_millisatoshi_per_vbyte: u64,

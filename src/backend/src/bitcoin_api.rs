@@ -7,7 +7,7 @@ use ic_cdk::api::management_canister::bitcoin::{
 /// Returns the UTXOs of the given bitcoin address.
 ///
 /// NOTE: Relies on the `bitcoin_get_utxos` endpoint.
-/// See https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_utxos
+/// See [IC Interface](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_utxos)
 async fn get_utxos(
     network: BitcoinNetwork,
     address: String,
@@ -16,7 +16,7 @@ async fn get_utxos(
     let utxos_res = bitcoin_get_utxos(GetUtxosRequest {
         address,
         network,
-        filter: maybe_next_page.map(|next_page| UtxoFilter::Page(next_page)),
+        filter: maybe_next_page.map(UtxoFilter::Page),
     })
     .await
     .map_err(|err| err.1)?;

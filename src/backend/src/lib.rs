@@ -299,7 +299,7 @@ async fn select_user_utxos_fee(
     // We support sending to one destination only.
     // Therefore, the outputs are the destination and the source address for the change.
     let output_count = 2;
-    let mut available_utxos = all_utxos.to_vec();
+    let mut available_utxos = all_utxos.clone();
     let selected_utxos =
         bitcoun_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
     let fee_satoshis = estimate_fee(
