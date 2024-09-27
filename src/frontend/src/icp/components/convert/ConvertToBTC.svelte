@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { BTC_MAINNET_NETWORK_ID } from '$env/networks.env';
+	import { BTC_MAINNET_SYMBOL } from '$env/tokens.btc.env';
 	import IcSendModal from '$icp/components/send/IcSendModal.svelte';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import type { OptionIcCkToken } from '$icp/types/ic';
@@ -38,7 +39,7 @@
 	ariaLabel={$i18n.convert.text.convert_to_btc}
 >
 	<IconConvert size="28" slot="icon" />
-	{$i18n.convert.text.convert_to_btc}
+	{BTC_MAINNET_SYMBOL}
 </ButtonHero>
 
 {#if $modalConvertCkBTCToBTC}

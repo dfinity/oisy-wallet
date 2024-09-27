@@ -25,10 +25,10 @@
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
-	$: ckMinterInfoAddresses = toCkMinterInfoAddresses(
-		$ckEthMinterInfoStore?.[$ethereumTokenId],
-		$ethereumToken.network.id
-	);
+	$: ckMinterInfoAddresses = toCkMinterInfoAddresses({
+		minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
+		networkId: $ethereumToken.network.id
+	});
 
 	let sortedTransactionsUi: EthTransactionUi[];
 	$: sortedTransactionsUi = $sortedTransactions.map((transaction) =>
@@ -91,7 +91,7 @@
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<p class="mt-4 text-dark opacity-50">{$i18n.transactions.text.no_transactions}</p>
+		<p class="mt-4 text-secondary opacity-50">{$i18n.transactions.text.no_transactions}</p>
 	{/if}
 </TransactionsSkeletons>
 

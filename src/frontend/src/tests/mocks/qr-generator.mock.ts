@@ -2,13 +2,19 @@ import type { EthereumNetwork } from '$eth/types/network';
 import type { Token } from '$lib/types/token';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
+interface GenerateUrnParams {
+	token: Token;
+	destination: string;
+	params?: { [key: string]: string | number | undefined };
+}
+
 // This function is used to test the function decodeUrn, looping through tokens in the token store.
 // Ideally, we would have an external API or QR generator, so that the tests are consistent with the proper usage outside the app.
-export const generateUrn = (
-	token: Token,
-	destination: string,
-	params: { [key: string]: string | number | undefined } = {}
-): string | undefined => {
+export const generateUrn = ({
+	token,
+	destination,
+	params = {}
+}: GenerateUrnParams): string | undefined => {
 	let urn: string;
 
 	const { name, standard, network } = token;

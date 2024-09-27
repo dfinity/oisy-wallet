@@ -8,7 +8,10 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
@@ -35,7 +38,7 @@
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<SendData
 		{amount}
 		destination={destinationEditable ? destination : null}
@@ -49,18 +52,11 @@
 	</SendData>
 
 	<SendInfo />
-</div>
 
-<ButtonGroup>
-	<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
-		>{$i18n.core.text.back}</button
-	>
-	<button
-		class="primary block flex-1"
-		disabled={invalid}
-		class:opacity-10={invalid}
-		on:click={() => dispatch('icSend')}
-	>
-		{$i18n.send.text.send}
-	</button>
-</ButtonGroup>
+	<ButtonGroup slot="toolbar">
+		<ButtonBack on:click={() => dispatch('icBack')} />
+		<Button disabled={invalid} on:click={() => dispatch('icSend')}>
+			{$i18n.send.text.send}
+		</Button>
+	</ButtonGroup>
+</ContentWithToolbar>

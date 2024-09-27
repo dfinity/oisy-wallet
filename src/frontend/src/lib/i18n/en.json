@@ -13,13 +13,16 @@
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
-			"more": "More"
+			"more": "More",
+			"reject": "Reject",
+			"approve": "Approve"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
 		},
 		"alt": {
-			"logo": "$name logo"
+			"logo": "$name logo",
+			"go_to_home": "Go to the $oisy_name home page"
 		}
 	},
 	"navigation": {
@@ -27,19 +30,20 @@
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
-			"oisy_roadmap": "$oisy_name Roadmap",
+			"changelog": "Changelog",
 			"submit_ticket": "Submit a ticket"
 		},
 		"alt": {
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
-			"oisy_roadmap": "Open the $oisy_name roadmap",
-			"submit_ticket": "Open the ticket submission form"
+			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
+			"submit_ticket": "Open the ticket submission form on GitHub to report an issue or request a feature"
 		}
 	},
 	"auth": {
 		"text": {
-			"title": "100% on-chain wallet for full decentralization",
+			"title_part_1": "A wallet that lives on-chain for",
+			"title_part_2": "100% decentralization",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
@@ -124,9 +128,8 @@
 	},
 	"hero": {
 		"text": {
-			"use_with_caution": "Learn more about this alpha version. Use with caution.",
-			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
-			"never_download": "Never download an app"
+			"use_with_caution": "This is an alpha version. Use with caution.",
+			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
 	"settings": {
@@ -457,8 +460,6 @@
 		"text": {
 			"name": "WalletConnect",
 			"session_proposal": "Session Proposal",
-			"approve": "Approve",
-			"reject": "Reject",
 			"connect": "Connect",
 			"connecting": "Connecting...",
 			"disconnect": "Disconnect",

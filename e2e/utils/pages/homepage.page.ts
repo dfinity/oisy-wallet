@@ -1,50 +1,53 @@
 import {
-	HERO_ANIMATION_CANVAS,
 	LOGIN_BUTTON,
 	LOGOUT_BUTTON,
 	NAVIGATION_MENU,
 	NAVIGATION_MENU_BUTTON,
-	TOKENS_SKELETONS_INITIALIZED
+	RECEIVE_TOKENS_MODAL,
+	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+	RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT,
+	TOKEN_CARD
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
+import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
 
-type HomepageParams = {
+interface HomepageParams {
 	page: Page;
 	viewportSize?: ViewportSize;
-};
+}
 
 type HomepageLoggedInParams = {
 	iiPage: InternetIdentityPage;
 } & HomepageParams;
 
-type SelectorOperationParams = {
+interface SelectorOperationParams {
 	selector: string;
-};
+}
 
-type TestIdOperationParams = {
+interface TestIdOperationParams {
 	testId: string;
-};
+}
 
-type WaitForModalParams = {
+interface WaitForModalParams {
 	modalOpenButtonTestId: string;
 	modalTestId: string;
-};
+}
 
 type TestModalSnapshotParams = {
 	selectorsToMock?: string[];
 } & WaitForModalParams;
 
-type ClickMenuItemParams = {
+interface ClickMenuItemParams {
 	menuItemTestId: string;
-};
+}
 
-type WaitForLocatorOptions = {
+interface WaitForLocatorOptions {
 	state: 'attached' | 'detached' | 'visible' | 'hidden';
-};
+}
 
 abstract class Homepage {
 	readonly #page: Page;
@@ -73,6 +76,10 @@ abstract class Homepage {
 
 	private async goto(): Promise<void> {
 		await this.#page.goto(HOMEPAGE_URL);
+	}
+
+	private async setViewportSize(viewportSize: ViewportSize) {
+		await this.#page.setViewportSize(viewportSize);
 	}
 
 	private async waitForNavigationMenu(options?: WaitForLocatorOptions): Promise<void> {
@@ -118,10 +125,6 @@ abstract class Homepage {
 		return modal;
 	}
 
-	private async setViewportSize(viewportSize: ViewportSize) {
-		await this.#page.setViewportSize(viewportSize);
-	}
-
 	protected async waitForHomepageReady(): Promise<void> {
 		if (nonNullish(this.#viewportSize)) {
 			await this.setViewportSize(this.#viewportSize);
@@ -129,13 +132,11 @@ abstract class Homepage {
 
 		await this.goto();
 		await this.waitForLoginButton();
-		await this.hideSelector({ selector: `[data-tid="${HERO_ANIMATION_CANVAS}"]` });
 	}
 
-	protected async waitForTokenSkeletonsInitialization(
-		options?: WaitForLocatorOptions
-	): Promise<void> {
-		await this.#page.getByTestId(TOKENS_SKELETONS_INITIALIZED).waitFor(options);
+	protected async waitForTokensInitialization(options?: WaitForLocatorOptions): Promise<void> {
+		await this.#page.getByTestId(`${TOKEN_CARD}-ICP`).waitFor(options);
+		await this.#page.getByTestId(`${TOKEN_CARD}-ETH`).waitFor(options);
 	}
 
 	protected async clickMenuItem({ menuItemTestId }: ClickMenuItemParams): Promise<void> {
@@ -210,7 +211,34 @@ export class HomepageLoggedIn extends Homepage {
 		await this.clickMenuItem({ menuItemTestId: LOGOUT_BUTTON });
 
 		await this.waitForLoginButton();
-		await this.waitForTokenSkeletonsInitialization({ state: 'detached' });
+	}
+
+	async testReceiveModalQrCode({
+		receiveModalSectionSelector
+	}: {
+		receiveModalSectionSelector: string;
+	}): Promise<void> {
+		await this.waitForModal({
+			modalOpenButtonTestId: RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+			modalTestId: RECEIVE_TOKENS_MODAL
+		});
+
+		await this.clickSelector({
+			selector: getReceiveTokensModalQrCodeButtonSelector({
+				sectionSelector: receiveModalSectionSelector
+			})
+		});
+
+		const qrCodeOutputLocator = await this.getLocatorByTestId({
+			testId: RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT
+		});
+		await qrCodeOutputLocator.waitFor();
+
+		const qrCode = await this.readQRCode({
+			selector: `[data-tid="${RECEIVE_TOKENS_MODAL}"] canvas`
+		});
+
+		await expect(qrCodeOutputLocator).toHaveText(qrCode ?? '');
 	}
 
 	/**
@@ -219,6 +247,6 @@ export class HomepageLoggedIn extends Homepage {
 	async waitForReady(): Promise<void> {
 		await this.waitForAuthentication();
 
-		await this.waitForTokenSkeletonsInitialization();
+		await this.waitForTokensInitialization();
 	}
 }

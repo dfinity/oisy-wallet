@@ -17,9 +17,11 @@ interface I18nCore {
 		amount: string;
 		max: string;
 		more: string;
+		reject: string;
+		approve: string;
 	};
 	info: { test_banner: string };
-	alt: { logo: string };
+	alt: { logo: string; go_to_home: string };
 }
 
 interface I18nNavigation {
@@ -27,14 +29,14 @@ interface I18nNavigation {
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
-		oisy_roadmap: string;
+		changelog: string;
 		submit_ticket: string;
 	};
-	alt: { more_settings: string; menu: string; oisy_roadmap: string; submit_ticket: string };
+	alt: { more_settings: string; menu: string; changelog: string; submit_ticket: string };
 }
 
 interface I18nAuth {
-	text: { title: string; authenticate: string; logout: string };
+	text: { title_part_1: string; title_part_2: string; authenticate: string; logout: string };
 	alt: { sign_in: string };
 	warning: { not_signed_in: string; session_expired: string };
 	error: {
@@ -104,7 +106,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { use_with_caution: string; learn_more_about_erc20_icp: string; never_download: string };
+	text: { use_with_caution: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -396,8 +398,6 @@ interface I18nWallet_connect {
 	text: {
 		name: string;
 		session_proposal: string;
-		approve: string;
-		reject: string;
 		connect: string;
 		connecting: string;
 		disconnect: string;

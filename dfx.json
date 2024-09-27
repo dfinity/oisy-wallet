@@ -64,6 +64,25 @@
 				}
 			}
 		},
+		"cycles_ledger": {
+			"type": "custom",
+			"candid": "https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.1/cycles-ledger.did",
+			"wasm": "https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.1/cycles-ledger.wasm.gz",
+			"init_arg": "( variant { Init = record { index_id = null; max_blocks_per_request = 9_999 : nat64 }},)",
+			"remote": {
+				"id": {
+					"ic": "um5iw-rqaaa-aaaaq-qaaba-cai"
+				}
+			}
+		},
+		"cycles_depositor": {
+			"dependencies": ["cycles_ledger"],
+			"type": "custom",
+			"build": "scripts/build.cycles_depositor.sh",
+			"init_arg_file": "out/cycles_depositor.args.did",
+			"wasm": "out/cycles_depositor.wasm",
+			"candid": "out/cycles_depositor.did"
+		},
 		"pouh_issuer": {
 			"type": "custom",
 			"candid": "https://github.com/dfinity/verifiable-credentials-sdk/releases/download/release-2024-07-01/dummy_issuer.did",

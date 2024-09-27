@@ -7,7 +7,9 @@
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import SendSource from '$lib/components/send/SendSource.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
@@ -32,7 +34,7 @@
 </script>
 
 <form on:submit={() => dispatch('icNext')} method="POST">
-	<div class="stretch">
+	<ContentWithToolbar>
 		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
 
 		<IcSendAmount bind:amount bind:amountError {networkId} />
@@ -40,17 +42,12 @@
 		<SendSource token={$token} balance={$balance} source={$icrcAccountIdentifierText ?? ''} />
 
 		<IcFeeDisplay {networkId} />
-	</div>
 
-	<ButtonGroup>
-		<slot name="cancel" />
-		<button
-			class="primary block flex-1"
-			type="submit"
-			disabled={invalid}
-			class:opacity-10={invalid}
-		>
-			{$i18n.core.text.next}
-		</button>
-	</ButtonGroup>
+		<ButtonGroup slot="toolbar">
+			<slot name="cancel" />
+			<Button disabled={invalid}>
+				{$i18n.core.text.next}
+			</Button>
+		</ButtonGroup>
+	</ContentWithToolbar>
 </form>

@@ -20,10 +20,13 @@ const assertIcrcSendTokenData = (sendToken: IcCkToken): AutoLoadTokenResult | un
 	}
 };
 
-const findUserToken = (
-	tokens: Erc20UserToken[],
-	sendToken: IcCkToken
-): Erc20UserToken | undefined =>
+const findUserToken = ({
+	tokens,
+	sendToken
+}: {
+	tokens: Erc20UserToken[];
+	sendToken: IcCkToken;
+}): Erc20UserToken | undefined =>
 	tokens.find(
 		({ address }) =>
 			address.toLowerCase() === (sendToken.twinToken as Erc20Token).address.toLowerCase()
@@ -94,5 +97,6 @@ export const setUserToken = async ({
 		token: toUserToken({
 			...token,
 			enabled
-		})
+		}),
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});

@@ -15,11 +15,22 @@ const twinTokensMainnetAddresses = getAddresses(ERC20_TWIN_TOKENS_MAINNET);
 const sepoliaAddresses = getAddresses(ERC20_CONTRACTS_SEPOLIA);
 const twinTokensSepoliaAddresses = getAddresses(ERC20_TWIN_TOKENS_SEPOLIA);
 
-const filterDuplicates = (addresses1: string[], addresses2: string[]): string[] =>
-	addresses1.filter((address) => addresses2.includes(address));
+const filterDuplicates = ({
+	addresses1,
+	addresses2
+}: {
+	addresses1: string[];
+	addresses2: string[];
+}): string[] => addresses1.filter((address) => addresses2.includes(address));
 
-const mainnetDuplicates = filterDuplicates(productionAddresses, twinTokensMainnetAddresses);
-const sepoliaDuplicates = filterDuplicates(sepoliaAddresses, twinTokensSepoliaAddresses);
+const mainnetDuplicates = filterDuplicates({
+	addresses1: productionAddresses,
+	addresses2: twinTokensMainnetAddresses
+});
+const sepoliaDuplicates = filterDuplicates({
+	addresses1: sepoliaAddresses,
+	addresses2: twinTokensSepoliaAddresses
+});
 
 if (mainnetDuplicates.length > 0 || sepoliaDuplicates.length > 0) {
 	if (mainnetDuplicates.length > 0) {

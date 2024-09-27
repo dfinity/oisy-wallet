@@ -3,15 +3,19 @@
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 
 	export let noMargin = false;
+	export let testId: string | undefined = undefined;
 
 	let description = false;
 	$: description = nonNullish($$slots.description);
 
 	let amount = true;
 	$: amount = nonNullish($$slots.amount);
+
+	let action = true;
+	$: action = nonNullish($$slots.action);
 </script>
 
-<div class="flex items-center gap-4" class:mb-6={!noMargin}>
+<div class="flex items-center gap-4" class:mb-6={!noMargin} data-tid={testId}>
 	<slot name="icon" />
 
 	<div class="flex-1 flex flex-col justify-center">
@@ -25,9 +29,13 @@
 				<CardAmount><slot name="amount" /></CardAmount>
 			{/if}
 		</div>
-		<p class="text-misty-rose text-left inline-flex items-center">
+		<span class="text-misty-rose text-left inline-flex items-center">
 			<slot name="description" />
-		</p>
+		</span>
 	</div>
-	<slot name="action" />
+	{#if action}
+		<div class="flex flex-shrink min-w-14">
+			<slot name="action" />
+		</div>
+	{/if}
 </div>

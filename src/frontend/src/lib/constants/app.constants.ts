@@ -11,6 +11,8 @@ export const PROD = MODE === 'ic';
 
 const MAINNET_DOMAIN = 'icp0.io';
 
+export const REPLICA_HOST = LOCAL ? 'http://localhost:4943/' : 'https://icp-api.io';
+
 export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_INTERNET_IDENTITY_CANISTER_ID
 	: undefined;
@@ -65,6 +67,11 @@ export const VC_POPUP_HEIGHT = 900;
 
 // Workers
 export const AUTH_TIMER_INTERVAL = 1000;
+// From FI team:
+// On mainnet, the index runs its indexing function every second. The time to see a new transaction in the index is <=1 second plus the time required by the indexing function
+// (however)
+// ICP Index has not been upgraded yet so right know for ICP is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second and we want to change the ICP one too eventually. We just didn't get to work on it yet
+export const INDEX_RELOAD_DELAY = 2000;
 
 // Date and time
 export const SECONDS_IN_MINUTE = 60;
@@ -80,3 +87,7 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_MILLISECOND * 1_000n * 60n
 export const EIGHT_DECIMALS = 8;
 
 export const ZERO = BigNumber.from(0n);
+
+// Wallets
+export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
+export const WALLET_PAGINATION = 10n;

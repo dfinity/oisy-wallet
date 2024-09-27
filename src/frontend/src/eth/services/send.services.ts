@@ -1,4 +1,4 @@
-import type { SignRequest } from '$declarations/backend/backend.did';
+import type { SignRequest } from '$declarations/signer/signer.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
@@ -322,7 +322,10 @@ const sendTransaction = async ({
 		return encodePrincipalToEthAddress(identity.getPrincipal());
 	};
 
-	const ckEthHelperContractAddress = toCkEthHelperContractAddress(minterInfo, sourceNetwork.id);
+	const ckEthHelperContractAddress = toCkEthHelperContractAddress({
+		minterInfo,
+		networkId: sourceNetwork.id
+	});
 	const ckErc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
 	const transferStandard: 'ethereum' | 'erc20' = isSupportedEthTokenId(token.id)
@@ -400,7 +403,11 @@ const sendTransaction = async ({
 
 	progress(ProgressStepsSend.SIGN_TRANSFER);
 
-	const rawTransaction = await signTransaction({ identity, transaction });
+	const rawTransaction = await signTransaction({
+		identity,
+		transaction,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 
 	progress(ProgressStepsSend.TRANSFER);
 

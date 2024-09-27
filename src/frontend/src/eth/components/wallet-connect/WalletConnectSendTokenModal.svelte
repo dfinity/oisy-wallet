@@ -90,7 +90,10 @@
 	let targetNetwork: Network | undefined = undefined;
 	$: targetNetwork =
 		destination ===
-		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId], sourceNetwork.id)
+		toCkEthHelperContractAddress({
+			minterInfo: $ckEthMinterInfoStore?.[$sendTokenId],
+			networkId: sourceNetwork.id
+		})
 			? ICP_NETWORK
 			: $sendToken.network;
 
@@ -170,9 +173,7 @@
 	{@const data = firstTransaction.data}
 
 	<WalletConnectModalTitle slot="title"
-		>{erc20Approve
-			? $i18n.wallet_connect.text.approve
-			: $i18n.send.text.send}</WalletConnectModalTitle
+		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
 	>
 
 	<FeeContext

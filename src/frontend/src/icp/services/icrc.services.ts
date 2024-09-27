@@ -109,7 +109,10 @@ const loadIcrcCustomTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<IcrcCustomTokenWithoutId[]> => {
-	const tokens = await listCustomTokens(params);
+	const tokens = await listCustomTokens({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 
 	// We filter the custom tokens that are Icrc (the backend "Custom Token" potentially supports other types).
 	const icrcTokens = tokens.filter(({ token }) => 'Icrc' in token);
@@ -131,6 +134,7 @@ const loadCustomIcrcTokensData = async ({
 }): Promise<IcrcCustomTokenWithoutId[]> => {
 	const indexedIcrcCustomTokens = buildIndexedIcrcCustomTokens();
 
+	// eslint-disable-next-line local-rules/prefer-object-params -- This is a mapping function, so the parameters will be provided not as an object but as separate arguments.
 	const requestIcrcCustomTokenMetadata = async (
 		token: CustomToken,
 		index: number

@@ -2,11 +2,11 @@ import type { UserProfile } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
 import { waitFor } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
 import { get } from 'svelte/store';
+import en from '../../mocks/i18n.mock';
+import { mockIdentity } from '../../mocks/identity.mock';
 
 vi.mock('$lib/api/backend.api');
 
@@ -16,14 +16,7 @@ const mockProfile: UserProfile = {
 	created_timestamp: 1234n,
 	updated_timestamp: 1234n
 };
-
-const mockPrincipalText = 'xlmdg-vkosz-ceopx-7wtgu-g3xmd-koiyc-awqaq-7modz-zf6r6-364rh-oqe';
-
-const mockPrincipal = Principal.fromText(mockPrincipalText);
-
-const mockIdentity = {
-	getPrincipal: () => mockPrincipal
-} as unknown as Identity;
+const nullishIdentityErrorMessage = en.auth.error.no_internet_identity;
 
 describe('loadUserProfile', () => {
 	beforeEach(() => {
@@ -41,7 +34,8 @@ describe('loadUserProfile', () => {
 
 		expect(getUserProfileSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
-			certified: false
+			certified: false,
+			nullishIdentityErrorMessage
 		});
 		expect(createUserProfileSpy).not.toHaveBeenCalled();
 		expect(get(userProfileStore)).toEqual({ certified: false, profile: mockProfile });
@@ -59,10 +53,12 @@ describe('loadUserProfile', () => {
 
 		expect(getUserProfileSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
-			certified: false
+			certified: false,
+			nullishIdentityErrorMessage
 		});
 		expect(createUserProfileSpy).toHaveBeenCalledWith({
-			identity: mockIdentity
+			identity: mockIdentity,
+			nullishIdentityErrorMessage
 		});
 		expect(get(userProfileStore)).toEqual({ certified: true, profile: mockProfile });
 	});
@@ -76,11 +72,13 @@ describe('loadUserProfile', () => {
 
 		expect(getUserProfileSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
-			certified: false
+			certified: false,
+			nullishIdentityErrorMessage
 		});
 		expect(getUserProfileSpy).toHaveBeenCalledWith({
 			identity: mockIdentity,
-			certified: true
+			certified: true,
+			nullishIdentityErrorMessage
 		});
 		await waitFor(() =>
 			expect(get(userProfileStore)).toEqual({ certified: true, profile: mockProfile })

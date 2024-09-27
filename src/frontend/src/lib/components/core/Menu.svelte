@@ -9,7 +9,7 @@
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconUser from '$lib/components/icons/IconUser.svelte';
-	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -37,14 +37,15 @@
 	$: walletOptions = !settingsRoute;
 </script>
 
-<ButtonHero
+<ButtonIcon
 	bind:button
 	on:click={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 >
 	<IconUser slot="icon" />
-</ButtonHero>
+	{$i18n.navigation.alt.menu}
+</ButtonIcon>
 
 <Popover bind:visible anchor={button} direction="rtl">
 	<div class="flex flex-col gap-4" data-tid={NAVIGATION_MENU}>
@@ -65,10 +66,10 @@
 		<AboutHow asMenuItem on:icOpenAboutModal={hidePopover} />
 
 		<ExternalLink
-			href="https://github.com/orgs/dfinity/projects/33"
-			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.oisy_roadmap)}
+			href="https://github.com/dfinity/oisy-wallet/releases"
+			ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 		>
-			{replaceOisyPlaceholders($i18n.navigation.text.oisy_roadmap)}
+			{replaceOisyPlaceholders($i18n.navigation.text.changelog)}
 		</ExternalLink>
 
 		<ExternalLink
@@ -84,7 +85,7 @@
 			href={OISY_REPO_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			class="flex gap-2 items-center no-underline"
+			class="flex items-center gap-2 no-underline"
 			aria-label={$i18n.navigation.text.source_code_on_github}
 		>
 			<IconGitHub />

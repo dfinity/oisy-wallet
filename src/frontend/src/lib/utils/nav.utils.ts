@@ -50,12 +50,12 @@ export const gotoReplaceRoot = async () => {
 	await goto('/', { replaceState: true });
 };
 
-export type RouteParams = {
+export interface RouteParams {
 	token: OptionString;
 	network: OptionString;
 	// WalletConnect URI parameter
 	uri: OptionString;
-};
+}
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	if (!browser) {
