@@ -145,12 +145,7 @@ div.modal {
 			border-radius: 0;
 
 			div.content {
-				height: 100vh;
 				padding-inline: var(--padding-2_5x);
-
-				@include media.min-width(medium) {
-					height: auto;
-				}
 			}
 		}
 	}
@@ -169,6 +164,7 @@ div.modal {
 	div.transition:not(:has(+ form)),
 	div.transition > form {
 		display: flex;
+		flex: 1;
 		flex-direction: column;
 		min-height: 100%;
 
