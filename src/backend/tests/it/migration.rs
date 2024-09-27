@@ -46,7 +46,6 @@ impl Default for MigrationTestEnv {
                 .deploy_only_backend(&mut pic),
         };
         MigrationTestEnv {
-            pic,
             old_backend,
             new_backend,
         }
