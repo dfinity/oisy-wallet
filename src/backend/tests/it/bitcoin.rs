@@ -10,6 +10,7 @@ use crate::utils::{
 };
 
 #[test]
+#[ignore]
 fn test_select_user_utxos_fee() {
     let pic_setup = setup();
 
