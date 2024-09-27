@@ -28,7 +28,12 @@
 	let confirm: PermissionsConfirmation | undefined;
 	$: confirm = $payload?.confirm;
 
-	const confirmPermissions = (state: 'denied' | 'granted') => {
+	/**
+	 * During the initial UX review, it was decided that permissions should not be permanently denied when "Rejected," but instead should be ignored.
+	 * This means that if the user selects "Reject," the permission will be requested again the next time a similar action is performed.
+	 * This approach is particularly useful since, for the time being, there is no way for the user to manage their permissions in the Oisy UI.
+	 */
+	const ignorePermissions = () => {
 		if (isNullish(confirm)) {
 			toastsError({
 				msg: { text: $i18n.signer.permissions.error.no_confirm_callback }
@@ -36,14 +41,27 @@
 			return;
 		}
 
-		confirm?.((scopes ?? []).map((scope) => ({ ...scope, state })));
+		confirm([]);
 
 		resetPrompt();
 	};
 
-	const onReject = () => confirmPermissions('denied');
+	const approvePermissions = () => {
+		if (isNullish(confirm)) {
+			toastsError({
+				msg: { text: $i18n.signer.permissions.error.no_confirm_callback }
+			});
+			return;
+		}
 
-	const onApprove = () => confirmPermissions('granted');
+		confirm((scopes ?? []).map((scope) => ({ ...scope, state: 'granted' })));
+
+		resetPrompt();
+	};
+
+	const onReject = () => ignorePermissions();
+
+	const onApprove = () => approvePermissions();
 
 	const listItems: Record<
 		IcrcScopedMethod,
