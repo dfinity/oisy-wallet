@@ -13,7 +13,7 @@ import type { OptionBtcAddress } from '$lib/types/address';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const currentBtcAddress: Readable<OptionBtcAddress | undefined> = derived(
+export const currentBtcAddress: Readable<OptionBtcAddress> = derived(
 	[networkId, btcAddressMainnet, btcAddressTestnet, btcAddressRegtest],
 	([$networkId, $btcAddressMainnet, $btcAddressTestnet, $btcAddressRegtest]) => {
 		const mapper: Record<symbol, OptionBtcAddress> = {
