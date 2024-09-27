@@ -9,6 +9,8 @@ await cp(
 		filter: (source) => extname(source) !== '.map'
 	},
 	(err) => {
+		// TODO: Remove ESLint exception and use nullish checks
+		// eslint-disable-next-line local-rules/use-nullish-checks
 		if (err === null) {
 			return;
 		}

@@ -4,6 +4,8 @@ import { derived, type Readable } from 'svelte/store';
 
 export const authSignedIn: Readable<boolean> = derived(
 	authStore,
+	// TODO: Remove ESLint exception and use nullish checks
+	// eslint-disable-next-line local-rules/use-nullish-checks
 	({ identity }) => identity !== null && identity !== undefined
 );
 

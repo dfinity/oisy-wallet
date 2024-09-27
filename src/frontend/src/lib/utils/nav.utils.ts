@@ -73,6 +73,8 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	const token = searchParams?.get('token');
 
 	const replaceEmoji = (input: string | null): string | null => {
+		// TODO: Remove ESLint exception and use nullish checks
+		// eslint-disable-next-line local-rules/use-nullish-checks
 		if (input === null) {
 			return null;
 		}

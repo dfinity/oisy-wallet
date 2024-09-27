@@ -116,6 +116,7 @@ export const enabledErc20TokensAddresses: Readable<ContractAddressText[]> = deri
 
 export const erc20UserTokensInitialized: Readable<boolean> = derived(
 	[erc20UserTokensStore],
+	// eslint-disable-next-line local-rules/use-nullish-checks -- We want to check only for non-initiated state
 	([$erc20UserTokensStore]) => $erc20UserTokensStore !== undefined
 );
 

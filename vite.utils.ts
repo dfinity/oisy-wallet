@@ -53,6 +53,8 @@ const readRemoteCanisterIds = ({ prefix }: { prefix?: string }): Record<string, 
 		return Object.entries(canisters).reduce((acc, current: [string, Details]) => {
 			const [canisterName, canisterDetails] = current;
 
+			// TODO: Remove ESLint exception and use nullish checks
+			// eslint-disable-next-line local-rules/use-nullish-checks
 			if (canisterDetails.remote !== undefined) {
 				const ids = Object.entries(canisterDetails.remote.id).reduce(
 					(acc, [network, id]) => ({

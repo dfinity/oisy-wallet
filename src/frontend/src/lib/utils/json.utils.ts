@@ -1,9 +1,10 @@
 import type { Principal } from '@dfinity/principal';
+import { isNullish } from '@dfinity/utils';
 
 // e.g. payloads.did/state_hash
 export const isHash = (bytes: number[]): boolean =>
 	bytes.length === 32 &&
-	bytes.find((value) => !Number.isInteger(value) || value < 0 || value > 255) === undefined;
+	isNullish(bytes.find((value) => !Number.isInteger(value) || value < 0 || value > 255));
 
 // Convert a byte array to a hex string
 const bytesToHexString = (bytes: number[]): string =>
@@ -58,6 +59,8 @@ export const stringifyJson = ({
 					break;
 				}
 				case 'bigint': {
+					// TODO: Remove ESLint exception and use nullish checks
+					// eslint-disable-next-line local-rules/use-nullish-checks
 					if (options?.devMode !== undefined && options.devMode) {
 						return `BigInt('${value.toString()}')`;
 					}

@@ -6,6 +6,7 @@
 	export let token: TokenUi;
 </script>
 
+<!-- eslint-disable-next-line local-rules/use-nullish-checks -- We want to check for undefined and not null, since they mean different situations -->
 {#if token.balance === undefined || !$exchangeInitialized}
 	<span class="w-full max-w-[50px]"><SkeletonText /></span>
 {:else}

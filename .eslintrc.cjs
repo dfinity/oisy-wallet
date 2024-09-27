@@ -63,6 +63,7 @@ module.exports = {
 		curly: 'error',
 		'local-rules/prefer-object-params': 'warn',
 		'local-rules/no-svelte-store-in-api': 'error',
+		'local-rules/use-nullish-checks': 'warn',
 		'local-rules/use-option-type-wrapper': 'warn',
 		'import/no-duplicates': ['error', { 'prefer-inline': true }],
 		'no-console': ['error', { allow: ['error', 'warn'] }],

@@ -38,6 +38,8 @@ const onIdleSignOut = async () => {
 	const [auth, chain] = await Promise.all([checkAuthentication(), checkDelegationChain()]);
 
 	// Both identity and delegation are alright, so all good
+	// TODO: Remove ESLint exception and use nullish checks
+	// eslint-disable-next-line local-rules/use-nullish-checks
 	if (auth && chain.valid && chain.delegation !== null) {
 		emitExpirationTime(chain.delegation);
 		return;
@@ -68,9 +70,13 @@ const checkDelegationChain = async (): Promise<{
 	const idbStorage: IdbStorage = new IdbStorage();
 	const delegationChain: string | null = await idbStorage.get(KEY_STORAGE_DELEGATION);
 
+	// TODO: Remove ESLint exception and use nullish checks
+	// eslint-disable-next-line local-rules/use-nullish-checks
 	const delegation = delegationChain !== null ? DelegationChain.fromJSON(delegationChain) : null;
 
 	return {
+		// TODO: Remove ESLint exception and use nullish checks
+		// eslint-disable-next-line local-rules/use-nullish-checks
 		valid: delegation !== null && isDelegationValid(delegation),
 		delegation
 	};
@@ -88,6 +94,8 @@ const emitExpirationTime = (delegation: DelegationChain) => {
 	const expirationTime: bigint | undefined = delegation.delegations[0]?.delegation.expiration;
 
 	// That would be unexpected here because the delegation has just been tested and is valid
+	// TODO: Remove ESLint exception and use nullish checks
+	// eslint-disable-next-line local-rules/use-nullish-checks
 	if (expirationTime === undefined) {
 		return;
 	}
