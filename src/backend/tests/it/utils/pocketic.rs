@@ -26,14 +26,9 @@ fn workspace_dir() -> PathBuf {
     cargo_path.parent().unwrap().to_path_buf()
 }
 
-const DEFAULT_BACKEND_WASM: &str = "/target/wasm32-unknown-unknown/release/backend.wasm";
+const DEFAULT_BACKEND_WASM: &str = "/target/wasm32-unknown-unknown/release/backend.wasm.gz";
 const DEFAULT_BITCOIN_WASM: &str = "/ic-btc-canister.wasm.gz";
 const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
-
-// Oisy's backend require an ecdsa_key_name for initialization.
-// PocketIC does not get mounted with "key_1" or "test_key_1" available in the management canister. If the canister request those ecdsa_public_key, it throws an error.
-// Instead, we can use the master_ecdsa_public_key suffixed with the subnet ID. PocketID adds the suffix because it can have multiple subnets.
-const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 
 // This is necessary to deploy the bitcoin canister.
 // This is a struct based on the `InitConfig` from the Bitcoin canister.
@@ -115,7 +110,7 @@ impl BackendBuilder {
             .to_owned();
 
         let wasm_name =
-            env::var("BITCON_CANISTER_WASM").unwrap_or_else(|_| DEFAULT_BACKEND_WASM.to_string());
+            env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| DEFAULT_BACKEND_WASM.to_string());
 
         workspace_dir_str + &wasm_name
     }
@@ -231,8 +226,11 @@ impl BackendBuilder {
         if let Some(canister_id) = self.canister_id {
             canister_id
         } else {
-            let canister_id =
-                pic.create_canister_on_subnet(None, None, Principal::from_text(SUBNET_ID).unwrap());
+            let fiduciary_subnet_id = pic
+                .topology()
+                .get_fiduciary()
+                .expect("pic should have a fiduciary subnet.");
+            let canister_id = pic.create_canister_on_subnet(None, None, fiduciary_subnet_id);
             self.canister_id = Some(canister_id);
             canister_id
         }
@@ -279,6 +277,7 @@ impl BackendBuilder {
         let pic = PocketIcBuilder::new()
             .with_bitcoin_subnet()
             .with_ii_subnet()
+            .with_fiduciary_subnet()
             .build();
         let canister_id = self.deploy_to(&pic);
         PicBackend {
@@ -344,7 +343,7 @@ impl PicBackend {
 
 pub(crate) fn init_arg() -> Arg {
     Arg::Init(InitArg {
-        ecdsa_key_name: format!("master_ecdsa_public_key_{}", SUBNET_ID).to_string(),
+        ecdsa_key_name: format!("test_key_1"),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
         supported_credentials: Some(vec![SupportedCredential {

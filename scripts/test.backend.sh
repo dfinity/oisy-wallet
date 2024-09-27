@@ -16,7 +16,7 @@ else
   echo "Building backend canister."
   cargo build --locked --target wasm32-unknown-unknown --release -p backend
   # Otherwise, the new wasm file will be used.
-  export BACKEND_WASM_PATH="/target/wasm32-unknown-unknown/release/backend.wasm.gz"
+  export BACKEND_WASM_PATH="/target/wasm32-unknown-unknown/release/backend.wasm"
 fi
 
 if [ -f "./$BITCON_CANISTER_WASM" ]; then
