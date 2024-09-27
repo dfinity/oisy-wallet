@@ -5,7 +5,7 @@ interface SpendingOutpoint {
 	n: number;
 }
 
-interface BitcoinOutput {
+export interface BitcoinOutput {
 	type: number;
 	spent: boolean;
 	value: number;
