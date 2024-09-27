@@ -68,7 +68,7 @@
 <iframe
 	{src}
 	title={$i18n.buy.onramper.title}
-	height="630px"
+	height="660px"
 	width="100%"
 	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
 />
