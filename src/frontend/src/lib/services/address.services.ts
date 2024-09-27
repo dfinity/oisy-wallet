@@ -1,4 +1,3 @@
-import type { BitcoinNetwork } from '$btc/types/btc';
 import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 import {
 	BTC_MAINNET_TOKEN_ID,
@@ -37,6 +36,7 @@ import type { ResultSuccess, ResultSuccessReduced } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { reduceResults } from '$lib/utils/results.utils';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
