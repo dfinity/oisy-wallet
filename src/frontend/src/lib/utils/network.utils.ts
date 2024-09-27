@@ -1,4 +1,3 @@
-import type { BitcoinNetwork } from '$btc/types/btc';
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import {
 	BITCOIN_NETWORKS_IDS,
@@ -8,6 +7,7 @@ import {
 import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { nonNullish } from '@dfinity/utils';
 
 export const isNetworkICP = (network: Network | undefined): boolean => isNetworkIdICP(network?.id);
