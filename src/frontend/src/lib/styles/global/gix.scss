@@ -145,7 +145,12 @@ div.modal {
 			border-radius: 0;
 
 			div.content {
+				height: 100vh;
 				padding-inline: var(--padding-2_5x);
+
+				@media (min-width: 768px) {
+					height: auto;
+				}
 			}
 		}
 	}
