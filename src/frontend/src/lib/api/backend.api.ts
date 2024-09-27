@@ -6,7 +6,7 @@ import type {
 	AddUserCredentialResponse,
 	GetUserProfileResponse
 } from '$lib/types/api';
-import type { CommonCanisterApiFunctionParams } from '$lib/types/canister';
+import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 
@@ -14,8 +14,8 @@ let canister: BackendCanister | undefined = undefined;
 
 export const listUserTokens = async ({
 	identity,
-	certified = true
-}: CommonCanisterApiFunctionParams<QueryParams>): Promise<UserToken[]> => {
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<UserToken[]> => {
 	const { listUserTokens } = await backendCanister({ identity });
 
 	return listUserTokens({ certified });
@@ -23,8 +23,8 @@ export const listUserTokens = async ({
 
 export const listCustomTokens = async ({
 	identity,
-	certified = true
-}: CommonCanisterApiFunctionParams<QueryParams>): Promise<CustomToken[]> => {
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<CustomToken[]> => {
 	const { listCustomTokens } = await backendCanister({ identity });
 
 	return listCustomTokens({ certified });
@@ -33,7 +33,7 @@ export const listCustomTokens = async ({
 export const setManyCustomTokens = async ({
 	identity,
 	tokens
-}: CommonCanisterApiFunctionParams<{
+}: CanisterApiFunctionParams<{
 	tokens: CustomToken[];
 }>): Promise<void> => {
 	const { setManyCustomTokens } = await backendCanister({ identity });
@@ -44,7 +44,7 @@ export const setManyCustomTokens = async ({
 export const setCustomToken = async ({
 	token,
 	identity
-}: CommonCanisterApiFunctionParams<{
+}: CanisterApiFunctionParams<{
 	token: CustomToken;
 }>): Promise<void> => {
 	const { setCustomToken } = await backendCanister({ identity });
@@ -55,7 +55,7 @@ export const setCustomToken = async ({
 export const setManyUserTokens = async ({
 	identity,
 	tokens
-}: CommonCanisterApiFunctionParams<{ tokens: UserToken[] }>): Promise<void> => {
+}: CanisterApiFunctionParams<{ tokens: UserToken[] }>): Promise<void> => {
 	const { setManyUserTokens } = await backendCanister({ identity });
 
 	return setManyUserTokens({ tokens });
@@ -64,7 +64,7 @@ export const setManyUserTokens = async ({
 export const setUserToken = async ({
 	token,
 	identity
-}: CommonCanisterApiFunctionParams<{
+}: CanisterApiFunctionParams<{
 	token: UserToken;
 }>): Promise<void> => {
 	const { setUserToken } = await backendCanister({ identity });
@@ -74,7 +74,7 @@ export const setUserToken = async ({
 
 export const createUserProfile = async ({
 	identity
-}: CommonCanisterApiFunctionParams): Promise<UserProfile> => {
+}: CanisterApiFunctionParams): Promise<UserProfile> => {
 	const { createUserProfile } = await backendCanister({ identity });
 
 	return createUserProfile();
@@ -82,8 +82,8 @@ export const createUserProfile = async ({
 
 export const getUserProfile = async ({
 	identity,
-	certified = true
-}: CommonCanisterApiFunctionParams<QueryParams>): Promise<GetUserProfileResponse> => {
+	certified
+}: CanisterApiFunctionParams<QueryParams>): Promise<GetUserProfileResponse> => {
 	const { getUserProfile } = await backendCanister({ identity });
 
 	return getUserProfile({ certified });
@@ -91,7 +91,7 @@ export const getUserProfile = async ({
 export const addUserCredential = async ({
 	identity,
 	...params
-}: CommonCanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResponse> => {
+}: CanisterApiFunctionParams<AddUserCredentialParams>): Promise<AddUserCredentialResponse> => {
 	const { addUserCredential } = await backendCanister({ identity });
 
 	return addUserCredential(params);
@@ -101,7 +101,7 @@ const backendCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
 	canisterId = BACKEND_CANISTER_ID
-}: CommonCanisterApiFunctionParams): Promise<BackendCanister> => {
+}: CanisterApiFunctionParams): Promise<BackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
 	if (isNullish(canister)) {

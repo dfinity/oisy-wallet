@@ -31,13 +31,13 @@ export class BackendCanister extends Canister<BackendService> {
 		return new BackendCanister(canisterId, service, certifiedService);
 	}
 
-	listUserTokens = async ({ certified }: QueryParams): Promise<UserToken[]> => {
+	listUserTokens = async ({ certified = true }: QueryParams): Promise<UserToken[]> => {
 		const { list_user_tokens } = this.caller({ certified });
 
 		return list_user_tokens();
 	};
 
-	listCustomTokens = async ({ certified }: QueryParams): Promise<CustomToken[]> => {
+	listCustomTokens = async ({ certified = true }: QueryParams): Promise<CustomToken[]> => {
 		const { list_custom_tokens } = this.caller({ certified });
 
 		return list_custom_tokens();
@@ -73,7 +73,7 @@ export class BackendCanister extends Canister<BackendService> {
 		return create_user_profile();
 	};
 
-	getUserProfile = async ({ certified }: QueryParams): Promise<GetUserProfileResponse> => {
+	getUserProfile = async ({ certified = true }: QueryParams): Promise<GetUserProfileResponse> => {
 		const { get_user_profile } = this.caller({ certified });
 
 		return get_user_profile();
