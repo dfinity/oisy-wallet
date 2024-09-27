@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import IconHeaderTokens from '$lib/components/icons/IconHeaderTokens.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
 <div class="flex mt-6 xl:mt-12">
@@ -18,5 +20,5 @@
 </div>
 
 <ButtonAuthenticate on:click={async () => await signIn({})}>
-	{$i18n.auth.text.authenticate}
+	<Html text={$i18n.auth.text.authenticate} />
 </ButtonAuthenticate>
