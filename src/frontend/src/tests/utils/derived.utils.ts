@@ -48,6 +48,7 @@ import {
 } from '$lib/derived/tokens.derived';
 import { tick } from 'svelte';
 import type { Unsubscriber } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 const derivedList = {
 	authIdentity,
@@ -100,28 +101,30 @@ const derivedList = {
 };
 
 export const testDerivedUpdates = async (changeStore: () => void) => {
-	const derivedChangeCounters = new Map<string, number>();
-
-	const unsubscribers: Unsubscriber[] = Object.entries(derivedList).map(([name, derivedStore]) => {
-		derivedChangeCounters.set(name, 0);
-		return derivedStore.subscribe(() =>
-			derivedChangeCounters.set(name, (derivedChangeCounters.get(name) ?? 0) + 1)
-		);
-	});
+	const { derivedMocks, unsubscribers } = Object.entries(derivedList).reduce<{
+		derivedMocks: MockInstance[];
+		unsubscribers: Unsubscriber[];
+	}>(
+		({ derivedMocks, unsubscribers }, [key, derivedStore]) => {
+			const mockFn = vi.fn().mockName(key);
+			return {
+				derivedMocks: [...derivedMocks, mockFn],
+				unsubscribers: [...unsubscribers, derivedStore.subscribe(mockFn)]
+			};
+		},
+		{ derivedMocks: [], unsubscribers: [] }
+	);
 
 	// Initialization call
-	Object.entries(derivedList).forEach(([name]) => {
-		const count = derivedChangeCounters.get(name);
-		assert(count === 1, `${name} was called ${count} times during initialization`);
-	});
+	derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledTimes(1));
 
 	changeStore();
 
 	await tick();
 
-	Object.entries(derivedList).forEach(([name]) => {
-		const count = derivedChangeCounters.get(name) ?? 0;
-		assert(count <= 2, `${name} was called ${count} times`);
+	derivedMocks.forEach((mockFn) => {
+		const callCount = mockFn.mock.calls.length;
+		assert(callCount <= 2, `${mockFn.getMockName()} was called ${callCount} times`);
 	});
 
 	unsubscribers.forEach((unsub) => unsub());
