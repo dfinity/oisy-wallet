@@ -19,11 +19,17 @@
 	--color-pale-cornflower-blue: theme(colors.pale-cornflower-blue);
 	--color-brilliant-azure: theme(colors.brilliant-azure);
 	--color-blue-ribbon-rgb: theme(colors.blue-ribbon-rgb);
+	--color-blue-ribbon: rgb(var(--color-blue-ribbon-rgb));
 	--color-alice-blue: theme(colors.alice-blue);
 	--color-american-orange: theme(colors.american-orange);
 	--color-crayola-yellow: theme(colors.crayola-yellow);
 	--color-cornsilk: theme(colors.cornsilk);
-	--color-water: theme(colors.water);
+	--color-cobalt: theme(colors.cobalt);
+	--color-resolution-blue: theme(colors.resolution-blue);
+	--color-zumthor: theme(colors.zumthor);
+	--color-onahau: theme(colors.onahau);
+	--color-anakiwa: theme(colors.anakiwa);
+    --color-water: theme(colors.water);
 
 	// Brand
 	--color-wallet-connect: #3b99fc;
