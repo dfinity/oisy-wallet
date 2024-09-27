@@ -38,7 +38,7 @@ export default {
 			zumthor: '#e8f1ff',
 			onahau: '#d1e3ff',
 			anakiwa: '#b0cdff',
-            water: '#d1e3ff'
+			water: '#d1e3ff'
 		},
 		extend: {
 			minWidth: {

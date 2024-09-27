@@ -1,30 +1,12 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
 	import IconLab from '$lib/components/icons/IconLab.svelte';
-	import LabICP from '$lib/components/lab/LabICP.svelte';
 	import ButtonHero from '$lib/components/ui/ButtonHero.svelte';
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
+	// TODO: this should be an URL
+	const open = () => window.open('https://shsda-3aaaa-aaaal-amg6q-cai.icp0.io', '_blank');
 </script>
 
-<div class="wrapper">
-	<ButtonHero bind:button on:click={() => (visible = true)} ariaLabel="Have fun">
-		<IconLab slot="icon" />
-		Lab
-	</ButtonHero>
-</div>
-
-<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
-	<ul class="flex flex-col gap-4 list-none">
-		<li>
-			<LabICP />
-		</li>
-	</ul>
-</Popover>
-
-<style lang="scss">
-	.wrapper {
-		width: inherit;
-	}
-</style>
+<ButtonHero on:click={open} ariaLabel="Have fun">
+	<IconLab slot="icon" />
+	Lab
+</ButtonHero>
