@@ -74,6 +74,8 @@ const buildOrchestratorInfo = async (orchestratorId) => {
 
 	const assertUniqueTokenSymbol = Object.values(tokens).find((value) => value.length > 1);
 
+	// TODO: Remove ESLint exception and use nullish checks
+	// eslint-disable-next-line local-rules/use-nullish-checks
 	if (assertUniqueTokenSymbol !== undefined) {
 		throw new Error(
 			`More than one pair of ledger and index canisters were used for the token symbol ${assertUniqueTokenSymbol}.`

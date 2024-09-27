@@ -77,6 +77,8 @@ export const mapCkEthereumTransaction = ({
 		const memoInfo = nonNullish(memo) ? mintMemoInfo(memo) : undefined;
 
 		const from =
+			// TODO: Remove ESLint exception and use nullish checks
+			// eslint-disable-next-line local-rules/use-nullish-checks
 			memoInfo?.fromAddress !== undefined
 				? mapAddressStartsWith0x(memoInfo.fromAddress)
 				: undefined;
@@ -102,6 +104,8 @@ export const mapCkEthereumTransaction = ({
 		const burnMemo = burnMemoInfo(memo);
 
 		const to =
+			// TODO: Remove ESLint exception and use nullish checks
+			// eslint-disable-next-line local-rules/use-nullish-checks
 			burnMemo?.toAddress !== undefined ? mapAddressStartsWith0x(burnMemo.toAddress) : undefined;
 
 		return {

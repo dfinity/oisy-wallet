@@ -15,6 +15,8 @@ export const replaceHistory = (url: URL) => {
  * Source: https://stackoverflow.com/a/6825002/5404186
  */
 const supportsHistory = (): boolean =>
+	// TODO: Remove ESLint exception and use nullish checks
+	// eslint-disable-next-line local-rules/use-nullish-checks
 	window.history !== undefined &&
 	'pushState' in window.history &&
 	typeof window.history.pushState !== 'undefined';

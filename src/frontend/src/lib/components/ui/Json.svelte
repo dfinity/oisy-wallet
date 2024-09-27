@@ -21,6 +21,7 @@
 		| 'undefined';
 
 	const getValueType = (value: unknown): ValueType => {
+		// eslint-disable-next-line local-rules/use-nullish-checks -- We want to check for null and not undefined
 		if (value === null) {
 			return 'null';
 		}
