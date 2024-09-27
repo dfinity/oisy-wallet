@@ -8,7 +8,7 @@ export type CanisterIdText = string;
 
 export type OptionCanisterIdText = Option<CanisterIdText>;
 
-export type CommonCanisterApiFunctionParams<T = unknown> = T & {
+export type CanisterApiFunctionParams<T = unknown> = T & {
 	nullishIdentityErrorMessage?: string;
 	identity: OptionIdentity;
 	canisterId?: CanisterIdText;

@@ -1,5 +1,6 @@
 import type { _SERVICE as SignerService, SignRequest } from '$declarations/signer/signer.did';
-import { SignerCanister, type SignerCanisterOptions } from '$lib/canisters/signer.canister';
+import { SignerCanister } from '$lib/canisters/signer.canister';
+import type { CreateCanisterOptions } from '$lib/types/canister';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { mock } from 'vitest-mock-extended';
@@ -16,7 +17,7 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 describe('signer.canister', () => {
 	const createSignerCanister = async ({
 		serviceOverride
-	}: Pick<SignerCanisterOptions, 'serviceOverride'>): Promise<SignerCanister> =>
+	}: Pick<CreateCanisterOptions<SignerService>, 'serviceOverride'>): Promise<SignerCanister> =>
 		SignerCanister.create({
 			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
 			identity: mockIdentity,
