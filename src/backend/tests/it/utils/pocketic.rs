@@ -1,23 +1,58 @@
 use crate::utils::mock::CALLER;
 use candid::{decode_one, encode_one, CandidType, Principal};
-use pocket_ic::{CallError, PocketIc, WasmResult};
+use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+use pocket_ic::{CallError, PocketIc, PocketIcBuilder, WasmResult};
 use serde::Deserialize;
 use shared::types::user_profile::{OisyUser, UserProfile};
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::fs::read;
 use std::ops::RangeBounds;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::UNIX_EPOCH;
 use std::{env, time::Duration};
 
 use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
 
-const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
+fn workspace_dir() -> PathBuf {
+    let output = std::process::Command::new(env!("CARGO"))
+        .arg("locate-project")
+        .arg("--workspace")
+        .arg("--message-format=plain")
+        .output()
+        .unwrap()
+        .stdout;
+    let cargo_path = Path::new(std::str::from_utf8(&output).unwrap().trim());
+    cargo_path.parent().unwrap().to_path_buf()
+}
+
+const DEFAULT_BACKEND_WASM: &str = "/target/wasm32-unknown-unknown/release/backend.wasm";
+const DEFAULT_BITCOIN_WASM: &str = "/ic-btc-canister.wasm.gz";
+const BITCOIN_CANISTER_ID: &str = "g4xu7-jiaaa-aaaan-aaaaq-cai";
 
 // Oisy's backend require an ecdsa_key_name for initialization.
 // PocketIC does not get mounted with "key_1" or "test_key_1" available in the management canister. If the canister request those ecdsa_public_key, it throws an error.
 // Instead, we can use the master_ecdsa_public_key suffixed with the subnet ID. PocketID adds the suffix because it can have multiple subnets.
 const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
+
+// This is necessary to deploy the bitcoin canister.
+// This is a struct based on the `InitConfig` from the Bitcoin canister.
+// Reference: https://github.com/dfinity/bitcoin-canister/blob/52c160168c478d5bce34b7dc5bacb78243c9d8aa/interface/src/lib.rs#L553
+//
+// The only field that matters is `network`. The others are considered dummy and set to `None` anyway.
+#[derive(CandidType)]
+struct BitcoinInitConfig {
+    stability_threshold: Option<u64>,
+    network: Option<BitcoinNetwork>,
+    blocks_source: Option<String>,
+    syncing: Option<String>,
+    fees: Option<String>,
+    api_access: Option<String>,
+    disable_api_if_not_fully_synced: Option<String>,
+    watchdog_canister: Option<Principal>,
+    burn_cycles: Option<String>,
+    lazily_evaluate_fee_percentiles: Option<String>,
+}
 
 /// Backend canister installer, using the builder pattern, for use in test environmens using `PocketIC`.
 ///
@@ -55,6 +90,8 @@ pub struct BackendBuilder {
     cycles: u128,
     /// Path to the backend wasm file.
     wasm_path: String,
+    /// Path to the bitcoin canister wasm file.
+    bitcoin_wasm_path: String,
     /// Argument to pass to the backend canister.
     arg: Vec<u8>,
     /// Controllers of the backend canister.
@@ -72,7 +109,47 @@ impl BackendBuilder {
     ///
     /// To override, please use `with_wasm()`.
     pub fn default_wasm_path() -> String {
-        env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string())
+        let workspace_dir_str = workspace_dir()
+            .to_str()
+            .expect("Wrong workspace directory")
+            .to_owned();
+
+        let wasm_name =
+            env::var("BITCON_CANISTER_WASM").unwrap_or_else(|_| DEFAULT_BACKEND_WASM.to_string());
+
+        workspace_dir_str + &wasm_name
+    }
+    /// The default Wasm file to deploy the bitcoin canister:
+    /// - If the environment variable `BITCOIN_CANISTER_WASM_FILE` is set, it will use that path.
+    /// - Otherwise, it will use the `DEFAULT_BITCOIN_WASM` constant.
+    ///
+    /// To override, please use `with_wasm()`.
+    pub fn default_bitcoin_wasm_path() -> String {
+        let workspace_dir_str = workspace_dir()
+            .to_str()
+            .expect("Wrong workspace directory")
+            .to_owned();
+
+        let wasm_name = env::var("BITCOIN_CANISTER_WASM_FILE")
+            .unwrap_or_else(|_| DEFAULT_BITCOIN_WASM.to_string());
+
+        workspace_dir_str + &wasm_name
+    }
+    /// The default arguments to deploy the bitcoin canister.
+    pub fn default_bitcoin_arg() -> Vec<u8> {
+        let init_config = BitcoinInitConfig {
+            stability_threshold: None,
+            network: Some(BitcoinNetwork::Regtest),
+            blocks_source: None,
+            syncing: None,
+            fees: None,
+            api_access: None,
+            disable_api_if_not_fully_synced: None,
+            watchdog_canister: None,
+            burn_cycles: None,
+            lazily_evaluate_fee_percentiles: None,
+        };
+        encode_one(init_config).unwrap()
     }
     /// The default argument to pass to the backend canister.
     ///
@@ -96,6 +173,7 @@ impl Default for BackendBuilder {
             canister_id: None,
             cycles: Self::DEFAULT_CYCLES,
             wasm_path: Self::default_wasm_path(),
+            bitcoin_wasm_path: Self::default_bitcoin_wasm_path(),
             arg: Self::default_arg(),
             controllers: Self::default_controllers(),
         }
@@ -138,6 +216,13 @@ impl BackendBuilder {
             self.wasm_path
         ))
     }
+    /// Reads the bitcoin Wasm bytes from the configured path.
+    fn bitcoin_wasm_bytes(&self) -> Vec<u8> {
+        read(self.bitcoin_wasm_path.clone()).expect(&format!(
+            "Could not find the bitcoin wasm: {}",
+            self.bitcoin_wasm_path
+        ))
+    }
 }
 // Builder
 impl BackendBuilder {
@@ -166,6 +251,14 @@ impl BackendBuilder {
         let arg = self.arg.clone();
         pic.install_canister(canister_id, wasm_bytes, arg, None);
     }
+    fn install_bitcoin(&mut self, pic: &PocketIc) {
+        let canister_id =
+            Principal::from_text(BITCOIN_CANISTER_ID).expect("Unexpected bitcoin canister id");
+        pic.create_canister_with_id(None, None, canister_id)
+            .expect("Failed creating bitcoin canister");
+        let wasm_bytes = self.bitcoin_wasm_bytes();
+        pic.install_canister(canister_id, wasm_bytes, Self::default_bitcoin_arg(), None);
+    }
     /// Set controllers of the backend canister.
     fn set_controllers(&mut self, pic: &PocketIc) {
         let canister_id = self.canister_id(pic);
@@ -176,13 +269,17 @@ impl BackendBuilder {
     pub fn deploy_to(&mut self, pic: &PocketIc) -> Principal {
         let canister_id = self.canister_id(pic);
         self.add_cycles(pic);
+        self.install_bitcoin(pic);
         self.install(pic);
         self.set_controllers(pic);
         canister_id
     }
     /// Deploy to a new pic.
     pub fn deploy(&mut self) -> PicBackend {
-        let pic = PocketIc::new();
+        let pic = PocketIcBuilder::new()
+            .with_bitcoin_subnet()
+            .with_ii_subnet()
+            .build();
         let canister_id = self.deploy_to(&pic);
         PicBackend {
             pic: Arc::new(pic),
@@ -204,7 +301,7 @@ pub fn setup() -> PicBackend {
 impl PicBackend {
     pub fn upgrade_latest_wasm(&self, encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
         let backend_wasm_path =
-            env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| BACKEND_WASM.to_string());
+            env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| DEFAULT_BACKEND_WASM.to_string());
 
         self.upgrade_with_wasm(&backend_wasm_path, encoded_arg)
     }

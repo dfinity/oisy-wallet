@@ -1,19 +1,32 @@
 #!/bin/bash
 
-POCKET_IC_SERVER_VERSION=3.0.1
+POCKET_IC_SERVER_VERSION=5.0.0
 OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
+BITCOIN_CANISTER_RELEASE="2024-08-30"
+BITCON_CANISTER_WASM="ic-btc-canister.wasm.gz"
 
 # If a backend wasm file exists at the root, it will be used for the tests.
 
 if [ -f "./backend.wasm.gz" ]; then
   # Setting the environment variable will be used in the test to load that particular file. Relative to where the test is.
   echo "Use existing backend.wasm.gz canister."
-  export BACKEND_WASM_PATH="../../backend.wasm.gz"
+  export BACKEND_WASM_PATH="/backend.wasm.gz"
 else
   # If none exist we build the project. The test will resolve the target/wasm32-unknown-unknown/release/backend.wasm automatically as fallback if no exported BACKEND_WASM_PATH variable is set.
   echo "Building backend canister."
   cargo build --locked --target wasm32-unknown-unknown --release -p backend
+  # Otherwise, the new wasm file will be used.
+  export BACKEND_WASM_PATH="/target/wasm32-unknown-unknown/release/backend.wasm.gz"
 fi
+
+if [ -f "./$BITCON_CANISTER_WASM" ]; then
+  echo "Use existing $BITCON_CANISTER_WASM canister."
+else
+  echo "Downloading bitcoin_canister canister."
+  curl -sSL "https://github.com/dfinity/bitcoin-canister/releases/download/release%2F$BITCOIN_CANISTER_RELEASE/ic-btc-canister.wasm.gz" -o $BITCON_CANISTER_WASM
+fi
+# Setting the environment variable that will be used in the test to load that particular file relative to the cargo workspace.
+export BITCOIN_CANISTER_WASM_FILE="/$BITCON_CANISTER_WASM"
 
 # We use a previous version of the release to ensure upgradability
 
