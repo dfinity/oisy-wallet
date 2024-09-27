@@ -1,11 +1,12 @@
 import { getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type {
 	PostMessageDataRequestBtc,
-	PostMessageDataResponseBtcWallet
+	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
@@ -44,18 +45,22 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			network: bitcoinNetwork
 		});
 
+		// TODO: Fetch and parse transactions
+		const transactions: BitcoinTransaction[] = [];
+
 		this.postMessageWallet({
 			wallet: {
 				balance: {
 					data: balance,
 					certified: true
-				}
+				},
+				newTransactions: JSON.stringify(transactions, jsonReplacer)
 			}
 		});
 	};
 
-	private postMessageWallet(data: PostMessageDataResponseBtcWallet) {
-		this.timer.postMsg<PostMessageDataResponseBtcWallet>({
+	private postMessageWallet(data: PostMessageDataResponseWallet) {
+		this.timer.postMsg<PostMessageDataResponseWallet>({
 			msg: 'syncBtcWallet',
 			data
 		});
