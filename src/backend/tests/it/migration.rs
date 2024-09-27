@@ -22,7 +22,6 @@ struct MigrationTestEnv {
 
 impl Default for MigrationTestEnv {
     fn default() -> Self {
-        // let mut pic = Arc::new(PocketIc::new());
         let mut pic = Arc::new(
             PocketIcBuilder::new()
                 .with_bitcoin_subnet()

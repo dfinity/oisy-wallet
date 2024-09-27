@@ -306,7 +306,7 @@ pub fn setup() -> PicBackend {
 
 impl PicBackend {
     pub fn upgrade_latest_wasm(&self, encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
-        let backend_wasm_path = BackendBuilder::default_bitcoin_wasm_path();
+        let backend_wasm_path = BackendBuilder::default_wasm_path();
 
         self.upgrade_with_wasm(&backend_wasm_path, encoded_arg)
     }
