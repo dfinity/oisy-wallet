@@ -77,12 +77,6 @@ fn test_list_users_returns_filtered_users_by_updated() {
 
     // Advance time before updating one of the users
     pic_setup.pic().advance_time(Duration::new(10, 0));
-    let timestamp_nanos_2 = pic_setup
-        .pic()
-        .get_time()
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_nanos();
 
     // Update one of the users created before timestamp
     let add_user_cred_arg = AddUserCredentialRequest {
@@ -101,6 +95,12 @@ fn test_list_users_returns_filtered_users_by_updated() {
         "add_user_credential",
         add_user_cred_arg.clone(),
     );
+    let timestamp_nanos_2 = pic_setup
+        .pic()
+        .get_time()
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_nanos();
 
     let caller = Principal::from_text(CALLER).unwrap();
 
@@ -197,12 +197,6 @@ fn test_list_users_returns_pouh_credential() {
 
     // Advance time before adding credentials
     pic_setup.pic().advance_time(Duration::new(10, 0));
-    let timestamp_nanos = pic_setup
-        .pic()
-        .get_time()
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_nanos();
 
     // Update the first user
     let add_user_cred_arg = AddUserCredentialRequest {
@@ -221,6 +215,12 @@ fn test_list_users_returns_pouh_credential() {
         "add_user_credential",
         add_user_cred_arg.clone(),
     );
+    let timestamp_nanos = pic_setup
+        .pic()
+        .get_time()
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_nanos();
 
     let caller = Principal::from_text(CALLER).unwrap();
 

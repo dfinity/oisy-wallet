@@ -100,7 +100,7 @@ impl BackendBuilder {
     pub const DEFAULT_CYCLES: u128 = 2_000_000_000_000;
     /// The default Wasm file to deploy:
     /// - If the environment variable `BACKEND_WASM_PATH` is set, it will use that path.
-    /// - Otherwise, it will use the `BACKEND_WASM` constant.
+    /// - Otherwise, it will use the `DEFAULT_BACKEND_WASM` constant.
     ///
     /// To override, please use `with_wasm()`.
     pub fn default_wasm_path() -> String {
@@ -299,8 +299,7 @@ pub fn setup() -> PicBackend {
 
 impl PicBackend {
     pub fn upgrade_latest_wasm(&self, encoded_arg: Option<Vec<u8>>) -> Result<(), String> {
-        let backend_wasm_path =
-            env::var("BACKEND_WASM_PATH").unwrap_or_else(|_| DEFAULT_BACKEND_WASM.to_string());
+        let backend_wasm_path = BackendBuilder::default_bitcoin_wasm_path();
 
         self.upgrade_with_wasm(&backend_wasm_path, encoded_arg)
     }
