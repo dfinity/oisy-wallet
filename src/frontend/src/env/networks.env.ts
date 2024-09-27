@@ -119,7 +119,7 @@ export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	name: 'Bitcoin (Regtest)'
 };
 
-export const BITCOIN_NETWORKS: Network[] = [
+export const BITCOIN_NETWORKS: BitcoinNetwork[] = [
 	BTC_MAINNET_NETWORK,
 	BTC_TESTNET_NETWORK,
 	...(LOCAL ? [BTC_REGTEST_NETWORK] : [])

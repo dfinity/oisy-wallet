@@ -16,3 +16,7 @@ export interface Network {
 export interface NetworkBuy {
 	onramperId?: OnramperNetworkId;
 }
+
+export interface NetworkAppMetadata {
+	explorerUrl: string;
+}

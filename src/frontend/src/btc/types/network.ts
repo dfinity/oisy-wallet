@@ -1,7 +1,3 @@
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkAppMetadata } from '$lib/types/network';
 
-export interface BitcoinAppMetadata {
-	explorerUrl?: string;
-}
-
-export type BitcoinNetwork = Network & BitcoinAppMetadata;
+export type BitcoinNetwork = Network & Partial<Pick<NetworkAppMetadata, 'explorerUrl'>>;
