@@ -42,8 +42,8 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "A wallet that lives on-chain for",
-			"title_part_2": "100% decentralization",
+			"title_part_1": "Multi-chain wallet.",
+			"title_part_2": "100% onchain.",
 			"authenticate": "Authenticate",
 			"logout": "Logout"
 		},
