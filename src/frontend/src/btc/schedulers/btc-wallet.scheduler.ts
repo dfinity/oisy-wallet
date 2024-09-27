@@ -1,15 +1,22 @@
-import { getBtcBalance } from '$lib/api/signer.api';
+import type { BitcoinNetwork } from '$declarations/signer/signer.did';
+import { getBtcAddress, getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import type { OptionBtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
+import type { OptionIdentity } from '$lib/types/identity';
 import type {
 	PostMessageDataRequestBtc,
 	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
+import type { CertifiedData } from '$lib/types/store';
 import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
+
+	private btcAddress: OptionBtcAddress;
 
 	stop() {
 		this.timer.stop();
@@ -30,6 +37,19 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
+	private async loadBtcAddress({
+		identity,
+		bitcoinNetwork
+	}: {
+		identity: OptionIdentity;
+		bitcoinNetwork: BitcoinNetwork;
+	}): Promise<string> {
+		// Save address for next timer
+		this.btcAddress = await getBtcAddress({ identity, network: bitcoinNetwork });
+
+		return this.btcAddress;
+	}
+
 	/* TODO: The following steps need to be done:
 	 * 1. Fetch uncertified transactions via BTC transaction API.
 	 * 2. Query uncertified balance in oder to improve UX (signer.getBtcBalance takes ~5s to complete).
@@ -45,8 +65,22 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			network: bitcoinNetwork
 		});
 
-		// TODO: Fetch and parse transactions
-		const transactions: BitcoinTransaction[] = [];
+		let uncertifiedTransactions: CertifiedData<BitcoinTransaction>[] = [];
+
+		if (data?.shouldFetchTransactions) {
+			const btcAddress =
+				data?.btcAddress ??
+				this.btcAddress ??
+				(await this.loadBtcAddress({ identity, bitcoinNetwork }));
+
+			const transactions = (await btcAddressData({ btcAddress })).txs;
+
+			uncertifiedTransactions = transactions.map((transaction) => ({
+				// TODO: Parse transactions to BtcTransactionUi type
+				data: transaction,
+				certified: false
+			}));
+		}
 
 		this.postMessageWallet({
 			wallet: {
@@ -54,7 +88,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					data: balance,
 					certified: true
 				},
-				newTransactions: JSON.stringify(transactions, jsonReplacer)
+				newTransactions: JSON.stringify(uncertifiedTransactions, jsonReplacer)
 			}
 		});
 	};
