@@ -272,6 +272,13 @@ impl BackendBuilder {
         self.set_controllers(pic);
         canister_id
     }
+    pub fn deploy_only_backend(&mut self, pic: &PocketIc) -> Principal {
+        let canister_id = self.canister_id(pic);
+        self.add_cycles(pic);
+        self.install(pic);
+        self.set_controllers(pic);
+        canister_id
+    }
     /// Deploy to a new pic.
     pub fn deploy(&mut self) -> PicBackend {
         let pic = PocketIcBuilder::new()
