@@ -4,7 +4,7 @@ import { AnonymousIdentity } from '@dfinity/agent';
 import { CkETHOrchestratorCanister } from '@dfinity/cketh';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { createAgent, fromNullable, isNullish, jsonReplacer } from '@dfinity/utils';
+import { createAgent, fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -74,7 +74,7 @@ const buildOrchestratorInfo = async (orchestratorId) => {
 
 	const assertUniqueTokenSymbol = Object.values(tokens).find((value) => value.length > 1);
 
-	if (assertUniqueTokenSymbol !== undefined) {
+	if (nonNullish(assertUniqueTokenSymbol)) {
 		throw new Error(
 			`More than one pair of ledger and index canisters were used for the token symbol ${assertUniqueTokenSymbol}.`
 		);

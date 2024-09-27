@@ -23,6 +23,7 @@ export const loadCkEthMinterInfo = async ({
 	const minterInfoInStore = get(ckEthMinterInfoStore);
 
 	// We try to load only once per session the helpers (ckETH and ckErc20) contract addresses
+	// eslint-disable-next-line local-rules/use-nullish-checks -- We want to check for not-undefined values but null is allowed
 	if (minterInfoInStore?.[tokenId] !== undefined) {
 		return;
 	}
