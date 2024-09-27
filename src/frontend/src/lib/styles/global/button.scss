@@ -47,24 +47,47 @@ button {
 			background: var(--color-grey);
 			color: var(--color-white);
 			opacity: 1;
+			cursor: not-allowed;
+
+			&:hover,
+			&:active {
+				background: var(--color-grey);
+				color: var(--color-white);
+			}
+		}
+
+		&[focus],
+		&:focus {
+			outline: none;
+			box-shadow:
+				0 0 0 2px var(--color-white),
+				0 0 0 4px var(--color-blue-ribbon);
 		}
 	}
 
 	&.primary {
-		background: var(--color-brandeis-blue);
+		background: var(--color-blue-ribbon);
 		color: var(--color-white);
 
 		&:hover {
-			background: var(--color-brilliant-azure);
+			background: var(--color-cobalt);
+		}
+
+		&:active {
+			background: var(--color-resolution-blue);
 		}
 	}
 
 	&.secondary {
-		background: var(--color-alice-blue);
+		background: var(--color-zumthor);
 		color: var(--color-primary);
 
 		&:hover {
-			filter: brightness(98%);
+			background: var(--color-onahau);
+		}
+
+		&:active {
+			background: var(--color-anakiwa);
 		}
 	}
 

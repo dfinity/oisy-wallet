@@ -1,4 +1,3 @@
-import type { BitcoinNetwork } from '$btc/types/btc';
 import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 import {
 	BTC_MAINNET_TOKEN_ID,
@@ -37,6 +36,7 @@ import type { ResultSuccess, ResultSuccessReduced } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { reduceResults } from '$lib/utils/results.utils';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import type { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -44,7 +44,7 @@ import { get } from 'svelte/store';
 interface LoadTokenAddressParams<T extends Address> {
 	tokenId: TokenId;
 	getAddress: (identity: OptionIdentity) => Promise<T>;
-	setIdbAddress?: (params: SetIdbAddressParams<T>) => Promise<void>;
+	setIdbAddress: ((params: SetIdbAddressParams<T>) => Promise<void>) | null;
 	addressStore: AddressStore<T>;
 }
 
@@ -102,7 +102,7 @@ const bitcoinMapper: Record<
 	regtest: {
 		addressStore: btcAddressRegtestStore,
 		// No need to store the regtest in the local storage because it's only used locally.
-		setIdbAddress: undefined
+		setIdbAddress: null
 	}
 };
 

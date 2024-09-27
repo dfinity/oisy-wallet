@@ -2,6 +2,7 @@
 	import { QRCodeReader } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -77,9 +78,7 @@
 </div>
 
 <ButtonGroup>
-	<button class="secondary block flex-1" on:click={back}>
-		{$i18n.core.text.back}
-	</button>
+	<ButtonBack on:click={back} />
 </ButtonGroup>
 
 <style lang="scss">
