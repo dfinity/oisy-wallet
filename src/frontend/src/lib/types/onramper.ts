@@ -14,7 +14,10 @@ export type OnramperFiatId = 'usd' | 'eur' | 'gbp' | 'chf';
 
 export type OnramperMode = 'buy';
 
+// TODO: refine the type for IC/ICRC address to be more clear
+export type OnramperWalletAddress = BtcAddress | EthAddress | string;
+
 export interface OnramperCryptoWallet {
 	cryptoId: OnramperId;
-	wallet: BtcAddress | EthAddress;
+	wallet: OnramperWalletAddress;
 }

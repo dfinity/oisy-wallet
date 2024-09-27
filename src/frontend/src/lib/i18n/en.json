@@ -323,6 +323,9 @@
 		"text": {
 			"buy": "Buy",
 			"buy_dev": "Buy (Dev Environment)"
+		},
+		"onramper": {
+			"title": "Buy through Onramper"
 		}
 	},
 	"tokens": {
