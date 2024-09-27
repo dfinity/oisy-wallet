@@ -50,7 +50,6 @@
 		"@dfinity/candid": "^2.1.1",
 		"@dfinity/ckbtc": "^3.0.0-next-2024-09-26",
 		"@dfinity/cketh": "^3.3.0-next-2024-09-17",
-		"@dfinity/eslint-config-oisy-wallet": "^0.0.3",
 		"@dfinity/gix-components": "^4.7.0-next-2024-09-17",
 		"@dfinity/ic-management": "^5.2.0-next-2024-09-17",
 		"@dfinity/ledger-icp": "^2.5.0-next-2024-09-17",
@@ -68,6 +67,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
+		"@dfinity/eslint-config-oisy-wallet": "^0.0.3",
 		"@dfinity/identity-secp256k1": "^2.1.1",
 		"@dfinity/internet-identity-playwright": "^0.0.3",
 		"@playwright/test": "^1.47.2",
