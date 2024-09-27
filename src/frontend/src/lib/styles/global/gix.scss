@@ -148,7 +148,7 @@ div.modal {
 				height: 100vh;
 				padding-inline: var(--padding-2_5x);
 
-				@media (min-width: 768px) {
+				@include media.min-width(medium) {
 					height: auto;
 				}
 			}
