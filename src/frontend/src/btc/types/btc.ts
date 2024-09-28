@@ -3,13 +3,13 @@ import type { TransactionType } from '$lib/types/transaction';
 export type BtcTransactionStatus = 'confirmed' | 'pending';
 
 export interface BtcTransactionUi {
-	hash: string;
+	id: string;
 	timestamp: number;
 	value: bigint;
 	type: TransactionType;
 	status: BtcTransactionStatus;
 	from: string;
-	to: string;
+	to?: string;
 	// The block number available only if a transaction has been confirmed
 	blockNumber?: number;
 

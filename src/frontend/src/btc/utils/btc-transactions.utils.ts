@@ -1,59 +1,29 @@
-import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
+import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinOutput, BitcoinTransaction } from '$lib/types/blockchain';
-import type { TransactionType } from '$lib/types/transaction';
 import { nonNullish } from '@dfinity/utils';
 
 export const mapBtcTransaction = ({
-	transaction,
+	transaction: { inputs, block_index, out, hash, time },
 	btcAddress
 }: {
 	transaction: BitcoinTransaction;
 	btcAddress: BtcAddress;
 }): BtcTransactionUi => {
-	const type: TransactionType = transaction.inputs.some(
-		(input) => input.prev_out.addr === btcAddress
-	)
-		? 'send'
-		: 'receive';
-	let amount = 0;
-	let senderAddress = '';
-	let receiverAddress = '';
-	let blockNumber;
-	let output: BitcoinOutput | undefined;
-	let status: BtcTransactionStatus = 'pending';
-
-	if (nonNullish(transaction.block_index)) {
-		blockNumber = transaction.block_index;
-		status = 'confirmed';
-	}
-
-	if (type === 'send') {
-		senderAddress = btcAddress;
-
-		output = transaction.out.find((output) => output.addr !== btcAddress);
-		if (nonNullish(output)) {
-			receiverAddress = output.addr;
-			amount = output.value;
-		}
-	} else {
-		senderAddress = transaction.inputs[0].prev_out.addr;
-
-		output = transaction.out.find((output) => output.addr === btcAddress);
-		if (nonNullish(output)) {
-			receiverAddress = btcAddress;
-			amount = output.value;
-		}
-	}
+	const isTypeSend = inputs.some(({ prev_out }) => prev_out.addr === btcAddress);
+	const blockIndexAvailable = nonNullish(block_index);
+	const output: BitcoinOutput | undefined = out.find(({ addr }) =>
+		isTypeSend ? addr !== btcAddress : addr === btcAddress
+	);
 
 	return {
-		hash: transaction.hash,
-		timestamp: transaction.time,
-		value: BigInt(amount),
-		status,
-		blockNumber,
-		type,
-		from: senderAddress,
-		to: receiverAddress
+		id: hash,
+		timestamp: time,
+		value: BigInt(output?.value ?? 0),
+		status: blockIndexAvailable ? 'confirmed' : 'pending',
+		blockNumber: block_index ?? undefined,
+		type: isTypeSend ? 'send' : 'receive',
+		from: isTypeSend ? btcAddress : inputs[0].prev_out.addr,
+		to: nonNullish(output) ? (isTypeSend ? output.addr : btcAddress) : undefined
 	};
 };
