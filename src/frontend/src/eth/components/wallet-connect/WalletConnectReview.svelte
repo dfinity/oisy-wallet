@@ -5,9 +5,9 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import WalletConnectActions from './WalletConnectActions.svelte';
-	import WalletConnectDomainVerification from './WalletConnectDomainVerification.svelte';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
+	import WalletConnectActions from '$eth/components/wallet-connect/WalletConnectActions.svelte';
+	import WalletConnectDomainVerification from '$eth/components/wallet-connect/WalletConnectDomainVerification.svelte';
 	import { acceptedContext } from '$eth/utils/wallet-connect.utils';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';

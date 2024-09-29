@@ -7,6 +7,7 @@ import {
 	VC_POPUP_WIDTH
 } from '$lib/constants/app.constants';
 import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
+import { loadCertifiedUserProfile } from '$lib/services/load-user-profile.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -22,7 +23,6 @@ import {
 	type VerifiablePresentationResponse
 } from '@dfinity/verifiable-credentials/request-verifiable-presentation';
 import { get } from 'svelte/store';
-import { loadCertifiedUserProfile } from './load-user-profile.services';
 
 const addPouhCredential = async ({
 	identity,
