@@ -3,9 +3,9 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import SendForm from './SendForm.svelte';
-	import SendReview from './SendReview.svelte';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import SendForm from '$eth/components/send/SendForm.svelte';
+	import SendReview from '$eth/components/send/SendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
