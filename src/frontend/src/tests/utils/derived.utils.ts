@@ -47,10 +47,10 @@ import {
 	tokensToPin
 } from '$lib/derived/tokens.derived';
 import { tick } from 'svelte';
-import type { Unsubscriber } from 'svelte/store';
+import type { Readable, Unsubscriber } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-const derivedList = {
+const derivedList: Record<string, Readable<unknown>> = {
 	authIdentity,
 	authNotSignedIn,
 	authSignedIn,
