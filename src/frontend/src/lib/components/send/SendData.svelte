@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import SendDataDestination from './SendDataDestination.svelte';
 	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
+	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { Token } from '$lib/types/token';

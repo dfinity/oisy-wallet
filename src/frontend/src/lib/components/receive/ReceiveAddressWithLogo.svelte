@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import SkeletonText from '../ui/SkeletonText.svelte';
 	import ReceiveActions from '$lib/components/receive/ReceiveActions.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { RECEIVE_TOKENS_MODAL_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionString } from '$lib/types/string';

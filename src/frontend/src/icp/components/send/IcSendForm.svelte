@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import IcFeeDisplay from './IcFeeDisplay.svelte';
+	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import WalletConnectSend from './WalletConnectSend.svelte';
-	import WalletConnectSession from './WalletConnectSession.svelte';
-	import WalletConnectSign from './WalletConnectSign.svelte';
+	import WalletConnectSend from '$eth/components/wallet-connect/WalletConnectSend.svelte';
+	import WalletConnectSession from '$eth/components/wallet-connect/WalletConnectSession.svelte';
+	import WalletConnectSign from '$eth/components/wallet-connect/WalletConnectSign.svelte';
 	import type { OptionWalletConnectListener } from '$eth/types/wallet-connect';
 
 	let listener: OptionWalletConnectListener;

@@ -4,10 +4,10 @@
 	import { getSdkError } from '@walletconnect/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { onDestroy } from 'svelte';
-	import WalletConnectButton from './WalletConnectButton.svelte';
-	import WalletConnectForm from './WalletConnectForm.svelte';
-	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
-	import WalletConnectReview from './WalletConnectReview.svelte';
+	import WalletConnectButton from '$eth/components/wallet-connect/WalletConnectButton.svelte';
+	import WalletConnectForm from '$eth/components/wallet-connect/WalletConnectForm.svelte';
+	import WalletConnectModalTitle from '$eth/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import WalletConnectReview from '$eth/components/wallet-connect/WalletConnectReview.svelte';
 	import {
 		SESSION_REQUEST_SEND_TRANSACTION,
 		SESSION_REQUEST_PERSONAL_SIGN,

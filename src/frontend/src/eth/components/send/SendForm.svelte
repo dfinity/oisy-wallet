@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import SendNetworkICP from './SendNetworkICP.svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendAmount from '$eth/components/send/SendAmount.svelte';
 	import SendDestination from '$eth/components/send/SendDestination.svelte';
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
+	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';

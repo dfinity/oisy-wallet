@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
-	import SendNetwork from './SendNetwork.svelte';
+	import SendNetwork from '$eth/components/send/SendNetwork.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';

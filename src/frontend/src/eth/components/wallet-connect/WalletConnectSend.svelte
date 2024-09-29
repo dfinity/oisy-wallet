@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import WalletConnectSendModal from './WalletConnectSendModal.svelte';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
+	import WalletConnectSendModal from '$eth/components/wallet-connect/WalletConnectSendModal.svelte';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type {

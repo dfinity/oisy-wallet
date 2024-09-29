@@ -5,6 +5,7 @@ import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import { processTransactionSent } from '$eth/services/transaction.services';
 import type {
 	CkEthPopulateTransaction,
 	Erc20PopulateTransaction
@@ -32,7 +33,6 @@ import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/ut
 import type { BigNumber } from '@ethersproject/bignumber';
 import type { TransactionResponse } from '@ethersproject/providers';
 import { get } from 'svelte/store';
-import { processTransactionSent } from './transaction.services';
 
 const ethPrepareTransaction = async ({
 	to,

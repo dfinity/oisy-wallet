@@ -2,11 +2,11 @@
 	import { type WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import IcSendForm from './IcSendForm.svelte';
-	import IcSendReview from './IcSendReview.svelte';
 	import BitcoinFeeContext from '$icp/components/fee/BitcoinFeeContext.svelte';
 	import EthereumFeeContext from '$icp/components/fee/EthereumFeeContext.svelte';
+	import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
+	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import {

@@ -3,16 +3,16 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { ComponentType } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import IcTransaction from './IcTransaction.svelte';
-	import IcpTransactionModal from './IcTransactionModal.svelte';
-	import IcTransactionsSkeletons from './IcTransactionsSkeletons.svelte';
 	import Info from '$icp/components/info/Info.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
+	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
 	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
 	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
+	import IcTransactionsSkeletons from '$icp/components/transactions/IcTransactionsSkeletons.svelte';
 	import {
 		tokenAsIcToken,
 		tokenCkBtcLedger,
@@ -117,7 +117,7 @@
 </IcTransactionsSkeletons>
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
-	<IcpTransactionModal transaction={selectedTransaction} />
+	<IcTransactionModal transaction={selectedTransaction} />
 {:else if $modalIcToken}
 	<IcTokenModal />
 {/if}

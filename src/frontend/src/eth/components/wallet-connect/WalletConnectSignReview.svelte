@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
-	import WalletConnectActions from './WalletConnectActions.svelte';
+	import WalletConnectActions from '$eth/components/wallet-connect/WalletConnectActions.svelte';
 	import {
 		getSignParamsMessageUtf8,
 		getSignParamsMessageHex
