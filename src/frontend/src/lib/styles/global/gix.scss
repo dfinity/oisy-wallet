@@ -164,6 +164,7 @@ div.modal {
 	div.transition:not(:has(+ form)),
 	div.transition > form {
 		display: flex;
+		flex: 1;
 		flex-direction: column;
 		min-height: 100%;
 
