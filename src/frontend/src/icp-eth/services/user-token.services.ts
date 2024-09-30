@@ -97,5 +97,6 @@ export const setUserToken = async ({
 		token: toUserToken({
 			...token,
 			enabled
-		})
+		}),
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});

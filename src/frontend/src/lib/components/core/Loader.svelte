@@ -3,17 +3,20 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import { LOCAL } from '$lib/constants/app.constants';
 	import { btcAddressTestnet } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { testnets } from '$lib/derived/testnets.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import {
 		loadAddresses,
+		loadBtcAddressRegtest,
 		loadBtcAddressTestnet,
 		loadIdbAddresses
 	} from '$lib/services/address.services';
@@ -69,10 +72,14 @@
 	let progressModal = false;
 
 	const debounceLoadBtcAddressTestnet = debounce(loadBtcAddressTestnet);
+	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
 	$: {
-		if ($testnets && isNullish($btcAddressTestnet)) {
+		if (NETWORK_BITCOIN_ENABLED && $testnets && isNullish($btcAddressTestnet)) {
 			debounceLoadBtcAddressTestnet();
+			if (LOCAL) {
+				debounceLoadBtcAddressRegtest();
+			}
 		}
 	}
 

@@ -3,9 +3,9 @@
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import SendForm from './SendForm.svelte';
-	import SendReview from './SendReview.svelte';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import SendForm from '$eth/components/send/SendForm.svelte';
+	import SendReview from '$eth/components/send/SendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -26,6 +26,8 @@
 	import { toCkErc20HelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
 		TRACK_COUNT_ETH_SEND_ERROR,
@@ -289,13 +291,9 @@
 		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<button type="button" class="secondary block flex-1" on:click={back}
-						>{$i18n.core.text.back}</button
-					>
+					<ButtonBack on:click={back} />
 				{:else}
-					<button type="button" class="secondary block flex-1" on:click={close}
-						>{$i18n.core.text.cancel}</button
-					>
+					<ButtonCancel on:click={close} />
 				{/if}
 			</svelte:fragment>
 		</SendForm>

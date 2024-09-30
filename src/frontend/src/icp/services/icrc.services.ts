@@ -109,7 +109,10 @@ const loadIcrcCustomTokens = async (params: {
 	identity: OptionIdentity;
 	certified: boolean;
 }): Promise<IcrcCustomTokenWithoutId[]> => {
-	const tokens = await listCustomTokens(params);
+	const tokens = await listCustomTokens({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
 
 	// We filter the custom tokens that are Icrc (the backend "Custom Token" potentially supports other types).
 	const icrcTokens = tokens.filter(({ token }) => 'Icrc' in token);

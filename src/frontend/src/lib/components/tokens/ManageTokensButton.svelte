@@ -10,11 +10,7 @@
 </script>
 
 <button
-	class="tertiary mx-auto mt-12 mb-4 w-full center sm:w-auto"
-	class:text-grey={disabled}
-	class:text-blue={!disabled}
-	class:hover:text-dark-blue={!disabled}
-	class:active:text-dark-blue={!disabled}
+	class="secondary mx-auto mt-12 mb-4 w-full center sm:w-auto"
 	on:click={modalStore.openManageTokens}
 	{disabled}
 >

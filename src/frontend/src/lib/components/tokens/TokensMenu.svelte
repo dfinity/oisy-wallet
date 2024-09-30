@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
+	import { IconDots, Popover } from '@dfinity/gix-components';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
-	import IconMore from '$lib/components/icons/IconMore.svelte';
 	import ManageTokensMenuButton from '$lib/components/manage/ManageTokensMenuButton.svelte';
 	import TokensZeroBalance from '$lib/components/tokens/TokensZeroBalance.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -19,7 +18,7 @@
 	disabled={$erc20UserTokensNotInitialized}
 	class:opacity-10={$erc20UserTokensNotInitialized}
 >
-	<IconMore />
+	<IconDots size="24" />
 </button>
 
 <Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">

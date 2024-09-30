@@ -1,8 +1,8 @@
 import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
-import type { SchedulerJobData, SchedulerJobParams } from '$icp/schedulers/scheduler';
-import { WalletScheduler } from '$icp/schedulers/wallet.scheduler';
+import { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic';
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
+import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import type {
 	GetAccountIdentifierTransactionsResponse,
@@ -32,8 +32,8 @@ const mapTransaction = ({
 	jobData: SchedulerJobData<PostMessageDataRequest>;
 }): IcTransactionUi => mapIcpTransaction({ transaction, identity });
 
-const scheduler: WalletScheduler<Transaction, TransactionWithId, PostMessageDataRequest> =
-	new WalletScheduler(getTransactions, mapTransactionIcpToSelf, mapTransaction, 'syncIcpWallet');
+const scheduler: IcWalletScheduler<Transaction, TransactionWithId, PostMessageDataRequest> =
+	new IcWalletScheduler(getTransactions, mapTransactionIcpToSelf, mapTransaction, 'syncIcpWallet');
 
 onmessage = async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
 	const { msg, data } = dataMsg;

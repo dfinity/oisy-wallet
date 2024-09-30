@@ -1,5 +1,6 @@
 import {
 	btcAddressMainnetStore,
+	btcAddressRegtestStore,
 	btcAddressTestnetStore,
 	ethAddressStore
 } from '$lib/stores/address.store';
@@ -26,6 +27,11 @@ export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
 export const btcAddressTestnet: Readable<OptionBtcAddress> = derived(
 	[btcAddressTestnetStore],
 	([$btcAddressTestnetStore]) => mapAddress<BtcAddress>($btcAddressTestnetStore)
+);
+
+export const btcAddressRegtest: Readable<OptionBtcAddress> = derived(
+	[btcAddressRegtestStore],
+	([$btcAddressRegtestStore]) => mapAddress<BtcAddress>($btcAddressRegtestStore)
 );
 
 export const ethAddress: Readable<OptionEthAddress> = derived(

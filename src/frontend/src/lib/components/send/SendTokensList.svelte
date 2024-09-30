@@ -4,6 +4,7 @@
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,7 +22,7 @@
 	$: loading = $erc20UserTokensNotInitialized;
 </script>
 
-<div class="stretch">
+<ContentWithToolbar>
 	<TokensSkeletons {loading}>
 		{#each tokens as token (token.id)}
 			<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
@@ -30,13 +31,13 @@
 		{/each}
 
 		{#if tokens.length === 0}
-			<p class="mt-4 mb-6 text-dark opacity-50">
+			<p class="mt-4 mb-6 text-secondary opacity-50">
 				{$i18n.tokens.manage.text.all_tokens_zero_balance}
 			</p>
 		{/if}
 	</TokensSkeletons>
-</div>
 
-<button class="secondary full center text-center mb-2" on:click={modalStore.close}>
-	{$i18n.core.text.close}
-</button>
+	<button class="secondary full center text-center mb-2" on:click={modalStore.close} slot="toolbar">
+		{$i18n.core.text.close}
+	</button>
+</ContentWithToolbar>

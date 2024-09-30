@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { quintOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
@@ -35,12 +36,12 @@
 
 		<div>
 			<div class="icon flex justify-center items-center mb-0.5 pt-2">
-				{#if displayTokenSymbol}
+				{#if displayTokenSymbol && nonNullish($token)}
 					<div in:fade>
 						<Logo
-							src={$token?.icon}
+							src={$token.icon}
 							size="big"
-							alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
+							alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
 						/>
 					</div>
 				{:else}

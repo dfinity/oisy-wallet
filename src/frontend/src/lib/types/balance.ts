@@ -1,5 +1,5 @@
+import type { Option } from '$lib/types/utils';
 import { BigNumber } from '@ethersproject/bignumber';
-import type { Option } from './utils';
 
 export type Balance = BigNumber;
 
