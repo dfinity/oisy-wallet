@@ -31,13 +31,13 @@
 		{/each}
 
 		{#if tokens.length === 0}
-			<p class="mt-4 mb-6 text-secondary opacity-50">
+			<p class="text-secondary mb-6 mt-4 opacity-50">
 				{$i18n.tokens.manage.text.all_tokens_zero_balance}
 			</p>
 		{/if}
 	</TokensSkeletons>
 
-	<button class="secondary full center text-center mb-2" on:click={modalStore.close} slot="toolbar">
+	<button class="secondary full center mb-2 text-center" on:click={modalStore.close} slot="toolbar">
 		{$i18n.core.text.close}
 	</button>
 </ContentWithToolbar>
