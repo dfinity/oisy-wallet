@@ -18,7 +18,7 @@
 	<Header back={back === 'header'} />
 
 	<article
-		class="flex flex-col rounded-lg pt-10 pb-6 relative main items-center"
+		class="main relative flex flex-col items-center rounded-lg pb-6 pt-10"
 		class:pb-16={$authNotSignedIn}
 	>
 		{#if $authSignedIn}

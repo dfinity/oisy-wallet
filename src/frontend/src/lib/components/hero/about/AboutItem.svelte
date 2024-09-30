@@ -6,11 +6,11 @@
 </script>
 
 <button
-	class={asMenuItem ? 'text' : 'text-center text-primary font-bold whitespace-nowrap'}
+	class={asMenuItem ? 'text' : 'text-primary whitespace-nowrap text-center font-bold'}
 	on:click
 	data-tid={testId}
 >
-	<div class="flex gap-2 items-center">
+	<div class="flex items-center gap-2">
 		{#if asMenuItem}
 			<IconInfo />
 		{/if}

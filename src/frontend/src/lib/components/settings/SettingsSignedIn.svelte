@@ -114,7 +114,7 @@
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
 	<div class="mt-8" in:fade>
-		<h2 class="text-base mb-6 pb-1">{$i18n.settings.text.credentials_title}</h2>
+		<h2 class="mb-6 pb-1 text-base">{$i18n.settings.text.credentials_title}</h2>
 
 		<div class="mt-4">
 			<KeyValuePairInfo>

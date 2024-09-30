@@ -28,14 +28,14 @@
 {#if summary}
 	<div
 		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
-		class="grid grid-cols-[1fr_auto_1fr] flex-row items-start justify-between w-full"
+		class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-start justify-between"
 	>
 		{#if back}
 			<Back />
 		{/if}
 
 		<div>
-			<div class="icon flex justify-center items-center mb-0.5 pt-2">
+			<div class="icon mb-0.5 flex items-center justify-center pt-2">
 				{#if displayTokenSymbol && nonNullish($token)}
 					<div in:fade>
 						<Logo
