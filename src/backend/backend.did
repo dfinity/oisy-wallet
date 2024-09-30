@@ -47,8 +47,6 @@ type Config = record {
   allowed_callers : vec principal;
   supported_credentials : opt vec SupportedCredential;
   ic_root_key_raw : opt blob;
-  cycles_ledger_canister_id : opt principal;
-  signer_canister_id : opt principal;
 };
 type CredentialSpec = record {
   arguments : opt vec record { text; ArgumentValue };

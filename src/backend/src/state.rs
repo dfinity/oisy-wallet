@@ -1,23 +1,13 @@
-use super::read_config;
 use candid::Principal;
 use lazy_static::lazy_static;
 
+const MAINNET_CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
+const MAINNET_SIGNER_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
+
+
 lazy_static! {
-    pub static ref CYCLES_LEDGER: Principal = read_config(|config| config
-        .cycles_ledger_canister_id
-        .unwrap_or_else(|| {
-            const MAINNET_CYCLES_LEDGER_CANISTER_ID: &str = "um5iw-rqaaa-aaaaq-qaaba-cai";
-            let canister_id = option_env!("CANISTER_ID_CYCLES_LEDGER")
-                .unwrap_or(MAINNET_CYCLES_LEDGER_CANISTER_ID);
-            Principal::from_text(canister_id)
-                .expect("Invalid cycles ledger canister ID provided at compile time")
-        }));
-    pub static ref SIGNER: Principal =
-        read_config(|config| config.signer_canister_id.unwrap_or_else(|| {
-            const MAINNET_SIGNER_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
-            let canister_id =
-                option_env!("CANISTER_ID_SIGNER").unwrap_or(MAINNET_SIGNER_CANISTER_ID);
-            Principal::from_text(canister_id)
-                .expect("Invalid signer canister ID provided at compile time")
-        }));
+    pub static ref CYCLES_LEDGER: Principal = Principal::from_text(option_env!("CANISTER_ID_CYCLES_LEDGER").unwrap_or(MAINNET_CYCLES_LEDGER_CANISTER_ID))
+        .unwrap_or_else(|e| unreachable!("The cycles canister ID from DFX and mainnet are valid and should have been parsed.  Is this being compiled in some strange way? {e}"));
+    pub static ref SIGNER: Principal = Principal::from_text(option_env!("CANISTER_ID_SIGNER").unwrap_or(MAINNET_SIGNER_CANISTER_ID))
+        .unwrap_or_else(|e| unreachable!("The signer canister ID from mainnet or dfx valid and should have been parsed.  Is this being compiled in some strange way? {e}"));
 }
