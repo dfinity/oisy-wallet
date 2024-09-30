@@ -24,6 +24,7 @@ impl Default for MigrationTestEnv {
     fn default() -> Self {
         let mut pic = Arc::new(
             PocketIcBuilder::new()
+                .with_bitcoin_subnet()
                 .with_ii_subnet()
                 .with_fiduciary_subnet()
                 .build(),
@@ -41,7 +42,7 @@ impl Default for MigrationTestEnv {
             pic: pic.clone(),
             canister_id: BackendBuilder::default()
                 .with_controllers(new_controllers)
-                .deploy_to(&mut pic),
+                .deploy_backend(&mut pic),
         };
         MigrationTestEnv {
             old_backend,
