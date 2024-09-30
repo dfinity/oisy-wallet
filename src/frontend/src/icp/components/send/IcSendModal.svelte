@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
+	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { closeModal } from '$lib/utils/modal.utils';
@@ -77,26 +79,28 @@
 >
 	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
 
-	<IcSendTokenWizard
-		{currentStep}
-		bind:destination
-		bind:networkId
-		bind:amount
-		bind:sendProgressStep
-		on:icBack={modal.back}
-		on:icNext={modal.next}
-		on:icClose={close}
-		on:icQRCodeScan={() =>
-			goToWizardSendStep({
-				modal,
-				steps,
-				stepName: WizardStepsSend.QR_CODE_SCAN
-			})}
-		on:icQRCodeBack={() =>
-			goToWizardSendStep({
-				modal,
-				steps,
-				stepName: WizardStepsSend.SEND
-			})}
-	/>
+	<SendTokenContext token={$token}>
+		<IcSendTokenWizard
+			{currentStep}
+			bind:destination
+			bind:networkId
+			bind:amount
+			bind:sendProgressStep
+			on:icBack={modal.back}
+			on:icNext={modal.next}
+			on:icClose={close}
+			on:icQRCodeScan={() =>
+				goToWizardSendStep({
+					modal,
+					steps,
+					stepName: WizardStepsSend.QR_CODE_SCAN
+				})}
+			on:icQRCodeBack={() =>
+				goToWizardSendStep({
+					modal,
+					steps,
+					stepName: WizardStepsSend.SEND
+				})}
+		/>
+	</SendTokenContext>
 </WizardModal>
