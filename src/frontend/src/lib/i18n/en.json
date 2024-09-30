@@ -610,11 +610,10 @@
 		},
 		"idle": {
 			"text": {
-				"title": "You’re all set!",
-				"info": "Continue on the app website"
+				"waiting": "Waiting for the dApp interaction..."
 			},
 			"alt": {
-				"img_placeholder": "An image displaying two dApps with wireframes and a checkbox indicating that they are connected"
+				"img_placeholder": "The astronaut logo moves its eyes from left to right while waiting for messages from the relying party dapp"
 			}
 		},
 		"permissions": {

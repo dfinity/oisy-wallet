@@ -535,7 +535,7 @@ interface I18nAbout {
 
 interface I18nSigner {
 	sign_in: { text: { authenticate_to_connect: string } };
-	idle: { text: { title: string; info: string }; alt: { img_placeholder: string } };
+	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
 	permissions: {
 		text: {
 			title: string;
