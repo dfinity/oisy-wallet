@@ -16,20 +16,27 @@
     },
     {
       "files": [
-		"src/frontend/src/lib/components/buy/**/*.svelte",
-		"src/frontend/src/lib/components/common/**/*.svelte",
-		"src/frontend/src/lib/components/exchange/**/*.svelte",
-		"src/frontend/src/lib/components/guard/**/*.svelte",
-		"src/frontend/src/lib/components/info/**/*.svelte",
-		"src/frontend/src/lib/components/core/**/*.svelte",
-		"src/frontend/src/lib/components/icons/**/*.svelte",
-		"src/frontend/src/lib/components/manage/**/*.svelte",
-		"src/frontend/src/lib/components/networks/**/*.svelte",
-		"src/frontend/src/lib/components/receive/**/*.svelte"
-	  ],
+        "src/frontend/src/lib/components/buy/**/*.svelte",
+        "src/frontend/src/lib/components/common/**/*.svelte",
+        "src/frontend/src/lib/components/exchange/**/*.svelte",
+        "src/frontend/src/lib/components/guard/**/*.svelte",
+        "src/frontend/src/lib/components/hero/**/*.svelte",
+        "src/frontend/src/lib/components/info/**/*.svelte",
+        "src/frontend/src/lib/components/core/**/*.svelte",
+        "src/frontend/src/lib/components/icons/**/*.svelte",
+        "src/frontend/src/lib/components/manage/**/*.svelte",
+        "src/frontend/src/lib/components/networks/**/*.svelte",
+        "src/frontend/src/lib/components/receive/**/*.svelte",
+        "src/frontend/src/lib/components/send/**/*.svelte",
+        "src/frontend/src/lib/components/settings/**/*.svelte"
+      ],
       "options": {
-        "plugins": ["prettier-plugin-svelte", "prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"],
-		"parser": "svelte"
+        "plugins": [
+          "prettier-plugin-svelte",
+          "prettier-plugin-organize-imports",
+          "prettier-plugin-tailwindcss"
+        ],
+        "parser": "svelte"
       }
     }
   ]
