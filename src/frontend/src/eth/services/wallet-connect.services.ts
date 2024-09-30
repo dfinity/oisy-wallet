@@ -1,4 +1,5 @@
 import { UNEXPECTED_ERROR } from '$eth/constants/wallet-connect.constants';
+import { send as executeSend } from '$eth/services/send.services';
 import type { FeeStoreData } from '$eth/stores/fee.store';
 import type { SendParams } from '$eth/types/send';
 import type { OptionWalletConnectListener, WalletConnectListener } from '$eth/types/wallet-connect';
@@ -31,7 +32,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { getSdkError } from '@walletconnect/utils';
 import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 import { get } from 'svelte/store';
-import { send as executeSend } from './send.services';
 
 export interface WalletConnectCallBackParams {
 	request: Web3WalletTypes.SessionRequest;
