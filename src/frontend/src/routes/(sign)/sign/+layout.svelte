@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
@@ -23,9 +22,7 @@
 		assessment!
 	</WarningBanner>
 
-	<LoadersGuard>
-		<slot />
-	</LoadersGuard>
+	<slot />
 </main>
 
 <Modals />
