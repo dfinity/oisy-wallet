@@ -1,6 +1,6 @@
 import type { GetAddressError, PaymentError } from '$declarations/signer/signer.did';
 
-export class CanisterPaymentError extends Error {
+export class SignerCanisterPaymentError extends Error {
 	constructor(response: PaymentError) {
 		if ('LedgerUnreachable' in response) {
 			super(`Ledger unreachable ${response.LedgerUnreachable.ledger}`);
@@ -18,7 +18,7 @@ export class CanisterPaymentError extends Error {
 	}
 }
 
-export class InternalError extends Error {
+export class SignerCanisterInternalError extends Error {
 	constructor(msg: string) {
 		super(msg);
 	}
@@ -26,10 +26,10 @@ export class InternalError extends Error {
 
 export const signerCanisterError = (response: GetAddressError) => {
 	if ('InternalError' in response) {
-		return new InternalError(response.InternalError.msg);
+		return new SignerCanisterInternalError(response.InternalError.msg);
 	}
 	if ('PaymentError' in response) {
-		return new CanisterPaymentError(response.PaymentError);
+		return new SignerCanisterPaymentError(response.PaymentError);
 	}
 	return new Error('Unknown GetAddressError');
 };
