@@ -286,7 +286,7 @@ fn list_custom_tokens() -> Vec<CustomToken> {
 }
 
 #[update(guard = "may_read_user_data")]
-async fn select_user_utxos_fee(
+async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
 ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
     let all_utxos = bitcoin_api::get_all_utxos(params.network, params.source_address)
