@@ -12,7 +12,7 @@
 	const hidePopover = () => (visible = false);
 </script>
 
-<div class="hidden md:flex gap-5">
+<div class="hidden gap-5 md:flex">
 	<AboutWhat />
 	<AboutHow />
 </div>
@@ -28,7 +28,7 @@
 	</ButtonIcon>
 
 	<Popover bind:visible anchor={button} direction="rtl">
-		<ul class="flex flex-col gap-4 list-none">
+		<ul class="flex list-none flex-col gap-4">
 			<li><AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} /></li>
 			<li><AboutHow asMenuItem on:icOpenAboutModal={hidePopover} /></li>
 		</ul>
