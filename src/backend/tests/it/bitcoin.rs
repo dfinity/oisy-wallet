@@ -22,7 +22,7 @@ fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
     };
     let response = pic_setup.update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
         caller,
-        "select_user_utxos_fee",
+        "btc_select_user_utxos_fee",
         request,
     );
 
