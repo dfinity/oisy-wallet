@@ -115,17 +115,19 @@ export const testDerivedUpdates = async (changeStore: () => void) => {
 		{ derivedMocks: [], unsubscribers: [] }
 	);
 
-	// Initialization call
-	derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledTimes(1));
+	try {
+		// Initialization call
+		derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledTimes(1));
 
-	changeStore();
+		changeStore();
 
-	await tick();
+		await tick();
 
-	derivedMocks.forEach((mockFn) => {
-		const callCount = mockFn.mock.calls.length;
-		assert(callCount <= 2, `${mockFn.getMockName()} was called ${callCount} times`);
-	});
-
-	unsubscribers.forEach((unsub) => unsub());
+		derivedMocks.forEach((mockFn) => {
+			const callCount = mockFn.mock.calls.length;
+			assert(callCount <= 2, `${mockFn.getMockName()} was called ${callCount} times`);
+		});
+	} finally {
+		unsubscribers.forEach((unsub) => unsub());
+	}
 };
