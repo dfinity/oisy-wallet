@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import IconHeaderTokens from '$lib/components/icons/IconHeaderTokens.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { signIn } from '$lib/services/auth.services';
@@ -19,5 +18,7 @@
 </div>
 
 <ButtonAuthenticate on:click={async () => await signIn({})}>
-	<Html text={$i18n.auth.text.authenticate} />
+	{$i18n.core.text.open}
+	<span>|</span>
+	{$i18n.core.text.create}
 </ButtonAuthenticate>

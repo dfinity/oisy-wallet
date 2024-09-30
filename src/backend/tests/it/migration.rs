@@ -7,15 +7,13 @@ use crate::{
     utils::pocketic::{controller, setup, BackendBuilder, PicBackend, PicCanisterTrait},
 };
 use candid::Principal;
-use pocket_ic::PocketIc;
+use pocket_ic::PocketIcBuilder;
 use shared::types::{
     custom_token::{CustomToken, IcrcToken, Token},
     ApiEnabled, Guards, MigrationProgress, MigrationReport, Stats,
 };
 
 struct MigrationTestEnv {
-    /// Simulated Internet Computer
-    pic: Arc<PocketIc>,
     /// The old backend canister ID, from which data is being migrated.
     old_backend: PicBackend,
     /// The new backend canister ID.
@@ -24,7 +22,13 @@ struct MigrationTestEnv {
 
 impl Default for MigrationTestEnv {
     fn default() -> Self {
-        let mut pic = Arc::new(PocketIc::new());
+        let mut pic = Arc::new(
+            PocketIcBuilder::new()
+                .with_bitcoin_subnet()
+                .with_ii_subnet()
+                .with_fiduciary_subnet()
+                .build(),
+        );
         let old_backend = PicBackend {
             pic: pic.clone(),
             canister_id: BackendBuilder::default().deploy_to(&mut pic),
@@ -38,10 +42,9 @@ impl Default for MigrationTestEnv {
             pic: pic.clone(),
             canister_id: BackendBuilder::default()
                 .with_controllers(new_controllers)
-                .deploy_to(&mut pic),
+                .deploy_backend(&mut pic),
         };
         MigrationTestEnv {
-            pic,
             old_backend,
             new_backend,
         }

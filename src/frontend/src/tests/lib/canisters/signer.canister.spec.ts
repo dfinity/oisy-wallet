@@ -1,5 +1,9 @@
 import type { _SERVICE as SignerService, SignRequest } from '$declarations/signer/signer.did';
 import { SignerCanister } from '$lib/canisters/signer.canister';
+import {
+	SignerCanisterInternalError,
+	SignerCanisterPaymentError
+} from '$lib/canisters/signer.errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -70,7 +74,7 @@ describe('signer.canister', () => {
 		);
 	});
 
-	it('should throw an error if btc_caller_address returns an error', async () => {
+	it('should throw an error if btc_caller_address returns an internal error', async () => {
 		const response = { Err: { InternalError: { msg: 'Test error' } } };
 		service.btc_caller_address.mockResolvedValue(response);
 
@@ -80,7 +84,22 @@ describe('signer.canister', () => {
 
 		const res = getBtcAddress(btcParams);
 
-		await expect(res).rejects.toThrow(new Error("Couldn't get BTC address"));
+		await expect(res).rejects.toThrow(
+			new SignerCanisterInternalError(response.Err.InternalError.msg)
+		);
+	});
+
+	it('should throw an error if btc_caller_address returns a payment error', async () => {
+		const response = { Err: { PaymentError: { UnsupportedPaymentType: null } } };
+		service.btc_caller_address.mockResolvedValue(response);
+
+		const { getBtcAddress } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = getBtcAddress(btcParams);
+
+		await expect(res).rejects.toThrow(new SignerCanisterPaymentError(response.Err.PaymentError));
 	});
 
 	it('should throw an error if btc_caller_address throws', async () => {
@@ -115,7 +134,7 @@ describe('signer.canister', () => {
 		);
 	});
 
-	it('should throw an error if btc_caller_balance returns an error', async () => {
+	it('should throw an error if btc_caller_balance returns an internal error', async () => {
 		const response = { Err: { InternalError: { msg: 'Test error' } } };
 		service.btc_caller_balance.mockResolvedValue(response);
 
@@ -125,7 +144,22 @@ describe('signer.canister', () => {
 
 		const res = getBtcBalance(btcParams);
 
-		await expect(res).rejects.toThrow(new Error("Couldn't get BTC balance"));
+		await expect(res).rejects.toThrow(
+			new SignerCanisterInternalError(response.Err.InternalError.msg)
+		);
+	});
+
+	it('should throw an error if btc_caller_balance returns a payment error', async () => {
+		const response = { Err: { PaymentError: { UnsupportedPaymentType: null } } };
+		service.btc_caller_balance.mockResolvedValue(response);
+
+		const { getBtcBalance } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = getBtcBalance(btcParams);
+
+		await expect(res).rejects.toThrow(new SignerCanisterPaymentError(response.Err.PaymentError));
 	});
 
 	it('should throw an error if btc_caller_balance throws', async () => {

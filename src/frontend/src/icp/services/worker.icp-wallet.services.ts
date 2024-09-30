@@ -1,4 +1,5 @@
 import { ICP_TOKEN_ID } from '$env/tokens.env';
+import { syncWallet } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
@@ -11,7 +12,6 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
-import { syncWallet } from './ic-listener.services';
 
 export const initIcpWalletWorker = async (): Promise<WalletWorker> => {
 	const WalletWorker = await import('$icp/workers/icp-wallet.worker?worker');
