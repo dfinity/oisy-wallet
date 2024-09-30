@@ -302,6 +302,16 @@ async fn select_user_utxos_fee(
     let mut available_utxos = all_utxos.clone();
     let selected_utxos =
         bitcoun_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
+
+    // Fee calculation might still take into account default tx size and expected output.
+    // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be present.
+    if selected_utxos.is_empty() {
+        return Ok(SelectedUtxosFeeResponse {
+            utxos: selected_utxos,
+            fee_satoshis: 0,
+        });
+    }
+
     let fee_satoshis = estimate_fee(
         selected_utxos.len() as u64,
         median_fee_millisatoshi_per_vbyte,

@@ -10,7 +10,6 @@ use crate::utils::{
 };
 
 #[test]
-#[ignore]
 fn test_select_user_utxos_fee() {
     let pic_setup = setup();
 
@@ -18,7 +17,7 @@ fn test_select_user_utxos_fee() {
 
     let request = SelectedUtxosFeeRequest {
         amount_satoshis: 100_000_000u64,
-        source_address: "bcrt1qpc7lq5vpchqjhd7q6ql6j2xqx8z3fr8nh880kk".to_string(),
+        source_address: "bcrt1qpg7udjvq7gx2fp480pgt4hnhj3qc4nhrkstc33".to_string(),
         network: BitcoinNetwork::Regtest,
     };
     let response = pic_setup.update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
