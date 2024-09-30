@@ -25,7 +25,7 @@
 </script>
 
 <ReceiveButtonWithModal open={openReceive} isOpen={$modalEthReceive}>
-	<ReceiveModal slot="modal" address={$networkAddress ?? undefined}>
+	<ReceiveModal slot="modal" address={$networkAddress}>
 		<svelte:fragment slot="content">
 			{#if $networkEthereum}
 				<EthReceiveMetamask />

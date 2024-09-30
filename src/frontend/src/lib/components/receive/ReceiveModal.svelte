@@ -5,8 +5,9 @@
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionAddress, Address } from '$lib/types/address';
 
-	export let address: string | undefined = undefined;
+	export let address: OptionAddress<Address> = undefined;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
