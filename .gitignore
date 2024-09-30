@@ -41,6 +41,7 @@ internet_identity.did
 codes.txt
 
 backend.wasm.gz
+ic-btc-canister.wasm.gz
 backend-v*.wasm.gz
 /test-results/
 /playwright-report/
