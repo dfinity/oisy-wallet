@@ -10,8 +10,23 @@ type AddUserCredentialRequest = record {
   current_user_version : opt nat64;
   credential_spec : CredentialSpec;
 };
-type AllowSigningError = variant { Other : text };
+type AllowSigningError = variant {
+  ApproveError : ApproveError;
+  Other : text;
+  FailedToContactCyclesLedger;
+};
 type ApiEnabled = variant { ReadOnly; Enabled; Disabled };
+type ApproveError = variant {
+  GenericError : record { message : text; error_code : nat };
+  TemporarilyUnavailable;
+  Duplicate : record { duplicate_of : nat };
+  BadFee : record { expected_fee : nat };
+  AllowanceChanged : record { current_allowance : nat };
+  CreatedInFuture : record { ledger_time : nat64 };
+  TooOld;
+  Expired : record { ledger_time : nat64 };
+  InsufficientFunds : record { balance : nat };
+};
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
 type CanisterStatusResultV2 = record {

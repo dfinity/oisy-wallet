@@ -48,7 +48,25 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
-	const AllowSigningError = IDL.Variant({ Other: IDL.Text });
+	const ApproveError = IDL.Variant({
+		GenericError: IDL.Record({
+			message: IDL.Text,
+			error_code: IDL.Nat
+		}),
+		TemporarilyUnavailable: IDL.Null,
+		Duplicate: IDL.Record({ duplicate_of: IDL.Nat }),
+		BadFee: IDL.Record({ expected_fee: IDL.Nat }),
+		AllowanceChanged: IDL.Record({ current_allowance: IDL.Nat }),
+		CreatedInFuture: IDL.Record({ ledger_time: IDL.Nat64 }),
+		TooOld: IDL.Null,
+		Expired: IDL.Record({ ledger_time: IDL.Nat64 }),
+		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
+	});
+	const AllowSigningError = IDL.Variant({
+		ApproveError: ApproveError,
+		Other: IDL.Text,
+		FailedToContactCyclesLedger: IDL.Null
+	});
 	const Result_1 = IDL.Variant({ Ok: IDL.Null, Err: AllowSigningError });
 	const Config = IDL.Record({
 		api: IDL.Opt(Guards),

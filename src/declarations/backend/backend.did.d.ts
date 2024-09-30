@@ -13,8 +13,23 @@ export interface AddUserCredentialRequest {
 	current_user_version: [] | [bigint];
 	credential_spec: CredentialSpec;
 }
-export type AllowSigningError = { Other: string };
+export type AllowSigningError =
+	| { ApproveError: ApproveError }
+	| { Other: string }
+	| { FailedToContactCyclesLedger: null };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
+export type ApproveError =
+	| {
+			GenericError: { message: string; error_code: bigint };
+	  }
+	| { TemporarilyUnavailable: null }
+	| { Duplicate: { duplicate_of: bigint } }
+	| { BadFee: { expected_fee: bigint } }
+	| { AllowanceChanged: { current_allowance: bigint } }
+	| { CreatedInFuture: { ledger_time: bigint } }
+	| { TooOld: null }
+	| { Expired: { ledger_time: bigint } }
+	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export interface CanisterStatusResultV2 {
