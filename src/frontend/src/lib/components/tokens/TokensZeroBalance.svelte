@@ -6,7 +6,7 @@
 <div class="content">
 	<span class="block text-sm text-blue">{$i18n.tokens.text.balance}</span>
 
-	<div class="flex justify-between items-center">
+	<div class="flex items-center justify-between">
 		<span class="px-4.5">{$i18n.tokens.text.hide_zero_balances}</span>
 		<TokensZeroBalanceToggle />
 	</div>

@@ -23,7 +23,7 @@
 			color="off-white"
 		/>
 
-		<p class="font-bold text-center">
+		<p class="text-center font-bold">
 			{#if nonNullish($token)}
 				{$token.name}
 			{:else}

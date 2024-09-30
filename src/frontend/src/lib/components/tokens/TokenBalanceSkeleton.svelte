@@ -6,7 +6,7 @@
 </script>
 
 {#if token.balance === undefined}
-	<span class="w-full max-w-[100px] mt-2"><SkeletonText /></span>
+	<span class="mt-2 w-full max-w-[100px]"><SkeletonText /></span>
 {:else}
 	<slot />
 {/if}

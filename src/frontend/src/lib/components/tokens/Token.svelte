@@ -10,7 +10,7 @@
 
 <Value ref="network">
 	<svelte:fragment slot="label">{$i18n.tokens.details.network}</svelte:fragment>
-	<span class="flex gap-1 items-center">
+	<span class="flex items-center gap-1">
 		<output>{token.network.name}</output>
 		<Logo
 			src={token.network.icon}
@@ -22,7 +22,7 @@
 
 <Value ref="name">
 	<svelte:fragment slot="label">{$i18n.tokens.details.token}</svelte:fragment>
-	<span class="flex gap-1 items-center">
+	<span class="flex items-center gap-1">
 		<output>{token.name}</output>
 		<Logo
 			src={token.icon}
@@ -37,7 +37,7 @@
 {#if ['icrc', 'erc20'].includes(token.standard)}
 	<Value ref="symbol">
 		<svelte:fragment slot="label">{$i18n.tokens.details.standard}</svelte:fragment>
-		<output class="first-letter:capitalize inline-block">{token.standard}</output>
+		<output class="inline-block first-letter:capitalize">{token.standard}</output>
 	</Value>
 {/if}
 
