@@ -6,6 +6,11 @@ use ic_cdk::api::management_canister::bitcoin::Utxo;
 /// the selected UTXOs from the available set.
 ///
 /// If there are no UTXOs matching the criteria, returns an empty vector.
+/// # Implementation
+/// Iteratively either:
+/// - Chooses the smallest UTXO larger than the target, or, that failing,
+/// - Chooses the largest UTXO smaller than the target.
+/// Until the target value has been reached.
 ///
 /// PROPERTY: `sum(u.value for u in available_set) ≥ target ⇒ !solution.is_empty()`
 /// POSTCONDITION: `!solution.is_empty() ⇒ sum(u.value for u in solution) ≥ target`
@@ -81,7 +86,7 @@ pub fn utxos_selection(
     input_utxos
 }
 
-/// Computes an estimate for the size of transaction (in vbytes) with the given number of inputs and outputs.
+/// Estimates the size of transaction (in vbytes) with the given number of inputs and outputs.
 // See [MediaWiki](https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki)
 // for the transaction structure and
 // [Stack Exchange](https://bitcoin.stackexchange.com/questions/92587/calculate-transaction-fee-for-external-addresses-which-doesnt-belong-to-my-loca/92600#92600)
@@ -93,7 +98,7 @@ fn tx_vsize_estimate(input_count: u64, output_count: u64) -> u64 {
     input_count * INPUT_SIZE_VBYTES + output_count * OUTPUT_SIZE_VBYTES + TX_OVERHEAD_VBYTES
 }
 
-/// Computes an estimate for the transaction based on the number of utxos and outputs
+/// Estimates the transaction fee, in satoshi, based on the number of utxos and outputs
 ///
 /// Arguments:
 ///   * `selected_utxos_count` - the number of UTXOs used for the transaction.

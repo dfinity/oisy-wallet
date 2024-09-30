@@ -10,7 +10,7 @@ use crate::utils::{
 };
 
 #[test]
-fn test_select_user_utxos_fee() {
+fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
     let pic_setup = setup();
 
     let caller = Principal::from_text(CALLER).unwrap();

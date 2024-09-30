@@ -1,7 +1,7 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, may_read_user_data, may_write_user_data};
 use crate::token::{add_to_user_token, remove_from_user_token};
-use bitcoun_utils::estimate_fee;
+use bitcoin_utils::estimate_fee;
 use candid::Principal;
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
@@ -42,7 +42,7 @@ use user_profile_model::UserProfileModel;
 
 mod assertions;
 mod bitcoin_api;
-mod bitcoun_utils;
+mod bitcoin_utils;
 mod config;
 mod guards;
 mod impls;
@@ -301,7 +301,7 @@ async fn btc_select_user_utxos_fee(
     let output_count = 2;
     let mut available_utxos = all_utxos.clone();
     let selected_utxos =
-        bitcoun_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
+        bitcoin_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
 
     // Fee calculation might still take into account default tx size and expected output.
     // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be present.
