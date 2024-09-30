@@ -51,9 +51,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}
 
 	/* TODO: The following steps need to be done:
-	 * 1. Fetch uncertified transactions via BTC transaction API.
-	 * 2. Query uncertified balance in oder to improve UX (signer.getBtcBalance takes ~5s to complete).
-	 * 3. Fetch certified transactions via BE endpoint (to be discussed).
+	 * 1. [Required] Fetch uncertified transactions via BTC transaction API.
+	 * 2. [Improvement] Query uncertified balance in oder to improve UX (signer.getBtcBalance takes ~5s to complete).
+	 * 3. [Required] Fetch certified transactions via BE endpoint (to be discussed).
+	 * 4. [Improvement] Receive btcAddress from FE as data param to avoid re-fetching it in a worker. Make sure it's certified.
 	 * */
 	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestBtc>) => {
 		const bitcoinNetwork = data?.bitcoinNetwork;
@@ -69,11 +70,9 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 
 		if (data?.shouldFetchTransactions) {
 			const btcAddress =
-				data?.btcAddress ??
-				this.btcAddress ??
-				(await this.loadBtcAddress({ identity, bitcoinNetwork }));
+				this.btcAddress ?? (await this.loadBtcAddress({ identity, bitcoinNetwork }));
 
-			const transactions = (await btcAddressData({ btcAddress })).txs;
+			const { txs: transactions } = await btcAddressData({ btcAddress });
 
 			uncertifiedTransactions = transactions.map((transaction) => ({
 				// TODO: Parse transactions to BtcTransactionUi type
