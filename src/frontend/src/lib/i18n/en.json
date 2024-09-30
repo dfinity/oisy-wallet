@@ -15,7 +15,9 @@
 			"max": "Max",
 			"more": "More",
 			"reject": "Reject",
-			"approve": "Approve"
+			"approve": "Approve",
+			"open": "Open",
+			"create": "Create"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -44,7 +46,6 @@
 		"text": {
 			"title_part_1": "Multi-chain wallet.",
 			"title_part_2": "100% onchain.",
-			"authenticate": "Open&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Create",
 			"logout": "Logout"
 		},
 		"alt": {
