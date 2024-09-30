@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import Transaction from './Transaction.svelte';
-	import TransactionModal from './TransactionModal.svelte';
-	import TransactionsSkeletons from './TransactionsSkeletons.svelte';
 	import TokenModal from '$eth/components/tokens/TokenModal.svelte';
+	import Transaction from '$eth/components/transactions/Transaction.svelte';
+	import TransactionModal from '$eth/components/transactions/TransactionModal.svelte';
+	import TransactionsSkeletons from '$eth/components/transactions/TransactionsSkeletons.svelte';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import { ethereumTokenId, ethereumToken } from '$eth/derived/token.derived';
 	import { sortedTransactions } from '$eth/derived/transactions.derived';

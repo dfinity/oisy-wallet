@@ -1,3 +1,4 @@
+import { syncWallet } from '$icp/services/ic-listener.services';
 import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
@@ -11,7 +12,6 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { IcrcGetTransactions } from '@dfinity/ledger-icrc';
-import { syncWallet } from './ic-listener.services';
 
 export const initIcrcWalletWorker = async ({
 	indexCanisterId,
