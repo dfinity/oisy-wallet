@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IconAstronautArrow from '$lib/components/icons/IconAstronautArrow.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	export let fullWidth = false;
 </script>
@@ -10,6 +11,8 @@
 	class:sm:w-80={!fullWidth}
 	data-tid="login-button"
 >
-	<slot />
+	{$i18n.core.text.open}
+	<span>|</span>
+	{$i18n.core.text.create}
 	<IconAstronautArrow />
 </button>

@@ -17,8 +17,4 @@
 	</h1>
 </div>
 
-<ButtonAuthenticate on:click={async () => await signIn({})}>
-	{$i18n.core.text.open}
-	<span>|</span>
-	{$i18n.core.text.create}
-</ButtonAuthenticate>
+<ButtonAuthenticate on:click={async () => await signIn({})} />
