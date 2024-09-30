@@ -10,7 +10,7 @@ use ic_cdk::api::management_canister::bitcoin::Utxo;
 /// Iteratively either:
 /// - Chooses the smallest UTXO larger than the target, or, that failing,
 /// - Chooses the largest UTXO smaller than the target.
-/// Until the target value has been reached.
+///   Until the target value has been reached.
 ///
 /// PROPERTY: `sum(u.value for u in available_set) ≥ target ⇒ !solution.is_empty()`
 /// POSTCONDITION: `!solution.is_empty() ⇒ sum(u.value for u in solution) ≥ target`
