@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
+	import { IconUser, Popover } from '@dfinity/gix-components';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import MenuWallet from '$lib/components/core/MenuWallet.svelte';
@@ -8,7 +8,6 @@
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
-	import IconUser from '$lib/components/icons/IconUser.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -43,7 +42,7 @@
 	ariaLabel={$i18n.navigation.alt.menu}
 	testId={NAVIGATION_MENU_BUTTON}
 >
-	<IconUser slot="icon" />
+	<IconUser size="24" slot="icon" />
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 

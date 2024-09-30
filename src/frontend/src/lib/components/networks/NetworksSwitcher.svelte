@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
+	import { IconExpandMore, Popover } from '@dfinity/gix-components';
 	import { quintOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
-	import IconChevronDown from '$lib/components/icons/IconChevronDown.svelte';
 	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
@@ -35,7 +34,8 @@
 	on:click={() => (visible = true)}
 	ariaLabel={$i18n.networks.title}
 	{disabled}
-	>{$selectedNetwork?.name ?? $i18n.networks.chain_fusion} <IconChevronDown /></ButtonSwitcher
+	>{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
+	<IconExpandMore size="24" /></ButtonSwitcher
 >
 
 <Popover bind:visible anchor={button}>
