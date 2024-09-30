@@ -22,7 +22,7 @@ getrandom = { version = "0.2", features = ["custom"] }
 hex = "0.4"
 k256 = "0.13"
 lazy_static = "1.5.0"
-pocket-ic = "2.2.0"
+pocket-ic = "5.0.0"
 pretty_assertions = "1.4.1"
 strum = "0.26.3"
 strum_macros = "0.26.4"
