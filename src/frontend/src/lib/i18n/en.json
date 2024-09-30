@@ -15,7 +15,9 @@
 			"max": "Max",
 			"more": "More",
 			"reject": "Reject",
-			"approve": "Approve"
+			"approve": "Approve",
+			"open": "Open",
+			"create": "Create"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
@@ -42,9 +44,8 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "A wallet that lives on-chain for",
-			"title_part_2": "100% decentralization",
-			"authenticate": "Authenticate",
+			"title_part_1": "Multi-chain wallet.",
+			"title_part_2": "100% onchain.",
 			"logout": "Logout"
 		},
 		"alt": {

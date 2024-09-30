@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { Popover } from '@dfinity/gix-components';
+	import { IconMenu, Popover } from '@dfinity/gix-components';
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
-	import IconMenu from '$lib/components/icons/IconMenu.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -13,7 +12,7 @@
 	const hidePopover = () => (visible = false);
 </script>
 
-<div class="hidden md:flex gap-5">
+<div class="hidden gap-5 md:flex">
 	<AboutWhat />
 	<AboutHow />
 </div>
@@ -29,7 +28,7 @@
 	</ButtonIcon>
 
 	<Popover bind:visible anchor={button} direction="rtl">
-		<ul class="flex flex-col gap-4 list-none">
+		<ul class="flex list-none flex-col gap-4">
 			<li><AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} /></li>
 			<li><AboutHow asMenuItem on:icOpenAboutModal={hidePopover} /></li>
 		</ul>

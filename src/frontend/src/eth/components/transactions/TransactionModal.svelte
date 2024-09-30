@@ -2,7 +2,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
-	import TransactionStatus from './TransactionStatus.svelte';
+	import TransactionStatus from '$eth/components/transactions/TransactionStatus.svelte';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionType } from '$eth/types/eth-transaction';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';

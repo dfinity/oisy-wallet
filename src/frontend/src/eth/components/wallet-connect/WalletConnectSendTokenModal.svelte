@@ -4,10 +4,10 @@
 	import type { Web3WalletTypes } from '@walletconnect/web3wallet';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import WalletConnectModalTitle from './WalletConnectModalTitle.svelte';
-	import WalletConnectSendReview from './WalletConnectSendReview.svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import WalletConnectModalTitle from '$eth/components/wallet-connect/WalletConnectModalTitle.svelte';
+	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import {
