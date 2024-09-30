@@ -1,9 +1,11 @@
 <script lang="ts">
-	import EthReceiveModal from '$eth/components/receive/EthReceiveModal.svelte';
+	import EthReceiveMetamask from '$eth/components/receive/EthReceiveMetamask.svelte';
 	import { metamaskNotInitialized } from '$eth/derived/metamask.derived';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
+	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { modalEthReceive } from '$lib/derived/modal.derived';
+	import { networkAddress, networkEthereum } from '$lib/derived/network.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { modalStore } from '$lib/stores/modal.store';
 
@@ -23,5 +25,11 @@
 </script>
 
 <ReceiveButtonWithModal open={openReceive} isOpen={$modalEthReceive}>
-	<EthReceiveModal slot="modal" />
+	<ReceiveModal slot="modal" address={$networkAddress}>
+		<svelte:fragment slot="content">
+			{#if $networkEthereum}
+				<EthReceiveMetamask />
+			{/if}
+		</svelte:fragment>
+	</ReceiveModal>
 </ReceiveButtonWithModal>
