@@ -13,14 +13,15 @@
 			"decimals": "Decimals",
 			"amount": "Amount",
 			"max": "Max",
-			"more": "More"
+			"more": "More",
+			"reject": "Reject",
+			"approve": "Approve"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!"
 		},
 		"alt": {
 			"logo": "$name logo",
-			"background": "Background image of $oisy_name with gradient logo",
 			"go_to_home": "Go to the $oisy_name home page"
 		}
 	},
@@ -41,9 +42,9 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "A wallet that lives on-chain for",
-			"title_part_2": "100% decentralization",
-			"authenticate": "Authenticate",
+			"title_part_1": "Multi-chain wallet.",
+			"title_part_2": "100% onchain.",
+			"authenticate": "Open&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Create",
 			"logout": "Logout"
 		},
 		"alt": {
@@ -459,8 +460,6 @@
 		"text": {
 			"name": "WalletConnect",
 			"session_proposal": "Session Proposal",
-			"approve": "Approve",
-			"reject": "Reject",
 			"connect": "Connect",
 			"connecting": "Connecting...",
 			"disconnect": "Disconnect",

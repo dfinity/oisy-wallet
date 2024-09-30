@@ -13,6 +13,7 @@ export default {
 			current: 'currentColor',
 			'black-rgb': '0, 0, 0',
 			white: 'rgb(255 255 255)',
+			'white-rgb': '255, 255, 255',
 			'off-white': '#fcfaf6',
 			dust: '#dbd9d6',
 			grey: '#c0bbc4',
@@ -22,6 +23,7 @@ export default {
 			'dark-blue': '#321469',
 			'brandeis-blue': '#016dfc',
 			'cetacean-blue': '#0e002d',
+			'pale-cornflower-blue': '#b0cdff',
 			'brilliant-azure': '#348afd',
 			'misty-rose': '#937993',
 			goldenrod: '#dfa81b',
@@ -30,7 +32,12 @@ export default {
 			'alice-blue': '#ecf3fb',
 			'american-orange': '#ff8a00',
 			'crayola-yellow': '#ffe57f',
-			cornsilk: '#fff7d8'
+			cornsilk: '#fff7d8',
+			cobalt: '#004abe',
+			'resolution-blue': '#012f80',
+			zumthor: '#e8f1ff',
+			onahau: '#d1e3ff',
+			anakiwa: '#b0cdff'
 		},
 		extend: {
 			minWidth: {

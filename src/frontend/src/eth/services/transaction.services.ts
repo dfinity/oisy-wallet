@@ -1,4 +1,5 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { reloadBalance } from '$eth/services/balance.services';
 import { transactionsStore } from '$eth/stores/transactions.store';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
@@ -10,7 +11,6 @@ import { isNullish, nonNullish } from '@dfinity/utils';
 import type { TransactionResponse } from '@ethersproject/abstract-provider';
 import type { BigNumber } from '@ethersproject/bignumber';
 import { get } from 'svelte/store';
-import { reloadBalance } from './balance.services';
 
 export const processTransactionSent = async ({
 	token,

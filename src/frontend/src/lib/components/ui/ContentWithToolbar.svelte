@@ -1,3 +1,5 @@
-<slot class="stretch" />
+<div class="stretch">
+	<slot />
+</div>
 
 <slot name="toolbar" />

@@ -1,5 +1,6 @@
 import type { _SERVICE as SignerService, SignRequest } from '$declarations/signer/signer.did';
-import { SignerCanister, type SignerCanisterOptions } from '$lib/canisters/signer.canister';
+import { SignerCanister } from '$lib/canisters/signer.canister';
+import type { CreateCanisterOptions } from '$lib/types/canister';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { mock } from 'vitest-mock-extended';
@@ -16,7 +17,7 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 describe('signer.canister', () => {
 	const createSignerCanister = async ({
 		serviceOverride
-	}: Pick<SignerCanisterOptions, 'serviceOverride'>): Promise<SignerCanister> =>
+	}: Pick<CreateCanisterOptions<SignerService>, 'serviceOverride'>): Promise<SignerCanister> =>
 		SignerCanister.create({
 			canisterId: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
 			identity: mockIdentity,
@@ -52,8 +53,9 @@ describe('signer.canister', () => {
 	});
 
 	it('returns correct BTC address', async () => {
-		const response = 'test-bitcoin-address';
-		service.caller_btc_address.mockResolvedValue(response);
+		const address = 'test-bitcoin-address';
+		const response = { Ok: { address } };
+		service.btc_caller_address.mockResolvedValue(response);
 
 		const { getBtcAddress } = await createSignerCanister({
 			serviceOverride: service
@@ -61,12 +63,28 @@ describe('signer.canister', () => {
 
 		const res = await getBtcAddress(btcParams);
 
-		expect(res).toEqual(response);
-		expect(service.caller_btc_address).toHaveBeenCalledWith(btcParams.network);
+		expect(res).toEqual(address);
+		expect(service.btc_caller_address).toHaveBeenCalledWith(
+			{ network: btcParams.network, address_type: { P2WPKH: null } },
+			[]
+		);
 	});
 
-	it('should throw an error if caller_btc_address throws', async () => {
-		service.caller_btc_address.mockImplementation(async () => {
+	it('should throw an error if btc_caller_address returns an error', async () => {
+		const response = { Err: { InternalError: { msg: 'Test error' } } };
+		service.btc_caller_address.mockResolvedValue(response);
+
+		const { getBtcAddress } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = getBtcAddress(btcParams);
+
+		await expect(res).rejects.toThrow(new Error("Couldn't get BTC address"));
+	});
+
+	it('should throw an error if btc_caller_address throws', async () => {
+		service.btc_caller_address.mockImplementation(async () => {
 			throw mockResponseError;
 		});
 
@@ -80,8 +98,9 @@ describe('signer.canister', () => {
 	});
 
 	it('returns correct BTC balance', async () => {
-		const response = 2n;
-		service.caller_btc_balance.mockResolvedValue(response);
+		const balance = 2n;
+		const response = { Ok: { balance } };
+		service.btc_caller_balance.mockResolvedValue(response);
 
 		const { getBtcBalance } = await createSignerCanister({
 			serviceOverride: service
@@ -89,12 +108,28 @@ describe('signer.canister', () => {
 
 		const res = await getBtcBalance(btcParams);
 
-		expect(res).toEqual(response);
-		expect(service.caller_btc_balance).toHaveBeenCalledWith(btcParams.network);
+		expect(res).toEqual(balance);
+		expect(service.btc_caller_balance).toHaveBeenCalledWith(
+			{ network: btcParams.network, address_type: { P2WPKH: null } },
+			[]
+		);
 	});
 
-	it('should throw an error if caller_btc_balance throws', async () => {
-		service.caller_btc_balance.mockImplementation(async () => {
+	it('should throw an error if btc_caller_balance returns an error', async () => {
+		const response = { Err: { InternalError: { msg: 'Test error' } } };
+		service.btc_caller_balance.mockResolvedValue(response);
+
+		const { getBtcBalance } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = getBtcBalance(btcParams);
+
+		await expect(res).rejects.toThrow(new Error("Couldn't get BTC balance"));
+	});
+
+	it('should throw an error if btc_caller_balance throws', async () => {
+		service.btc_caller_balance.mockImplementation(async () => {
 			throw mockResponseError;
 		});
 

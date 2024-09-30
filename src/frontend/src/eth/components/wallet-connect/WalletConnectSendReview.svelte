@@ -2,10 +2,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
-	import WalletConnectActions from './WalletConnectActions.svelte';
-	import WalletConnectSendData from './WalletConnectSendData.svelte';
 	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
+	import WalletConnectActions from '$eth/components/wallet-connect/WalletConnectActions.svelte';
+	import WalletConnectSendData from '$eth/components/wallet-connect/WalletConnectSendData.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';

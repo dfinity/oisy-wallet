@@ -2,6 +2,8 @@
 	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -35,12 +37,10 @@
 	</p>
 
 	<ButtonGroup slot="toolbar">
-		<button class="secondary block flex-1" on:click={() => dispatch('icCancel')}
-			>{$i18n.core.text.cancel}</button
-		>
-		<button class="primary block flex-1" on:click={() => dispatch('icHide')}>
+		<ButtonCancel on:click={() => dispatch('icCancel')} />
+		<Button on:click={() => dispatch('icHide')}>
 			{$i18n.tokens.hide.confirm}
-		</button>
+		</Button>
 	</ButtonGroup>
 </ContentWithToolbar>
 

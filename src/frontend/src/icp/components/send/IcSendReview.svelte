@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import IcFeeDisplay from './IcFeeDisplay.svelte';
+	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendData from '$lib/components/send/SendData.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { balance } from '$lib/derived/balances.derived';
@@ -45,11 +47,9 @@
 	{/if}
 
 	<ButtonGroup slot="toolbar">
-		<button class="secondary block flex-1" on:click={() => dispatch('icBack')}
-			>{$i18n.core.text.back}</button
-		>
-		<button class="primary block flex-1" disabled={invalid} on:click={() => dispatch('icSend')}>
+		<ButtonBack on:click={() => dispatch('icBack')} />
+		<Button disabled={invalid} on:click={() => dispatch('icSend')}>
 			{$i18n.send.text.send}
-		</button>
+		</Button>
 	</ButtonGroup>
 </ContentWithToolbar>

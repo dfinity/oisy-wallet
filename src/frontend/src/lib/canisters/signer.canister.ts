@@ -7,18 +7,11 @@ import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/si
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
-import { Canister, createServices, type CanisterOptions } from '@dfinity/utils';
-
-export interface SignerCanisterOptions
-	extends Omit<CanisterOptions<SignerService>, 'canisterId' | 'agent'> {
-	canisterId: Principal;
-	identity: Identity;
-}
+import type { CreateCanisterOptions } from '$lib/types/canister';
+import { Canister, createServices } from '@dfinity/utils';
 
 export class SignerCanister extends Canister<SignerService> {
-	static async create({ identity, ...options }: SignerCanisterOptions) {
+	static async create({ identity, ...options }: CreateCanisterOptions<SignerService>) {
 		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<SignerService>({
@@ -33,20 +26,34 @@ export class SignerCanister extends Canister<SignerService> {
 		return new SignerCanister(canisterId, service, certifiedService);
 	}
 
-	getBtcAddress = ({ network }: { network: BitcoinNetwork }): Promise<BtcAddress> => {
-		const { caller_btc_address } = this.caller({
+	getBtcAddress = async ({ network }: { network: BitcoinNetwork }): Promise<BtcAddress> => {
+		const { btc_caller_address } = this.caller({
 			certified: true
 		});
 
-		return caller_btc_address(network);
+		const response = await btc_caller_address({ network, address_type: { P2WPKH: null } }, []);
+
+		if ('Err' in response) {
+			// TODO: Manage different error types
+			throw new Error("Couldn't get BTC address");
+		}
+
+		return response.Ok.address;
 	};
 
-	getBtcBalance = ({ network }: { network: BitcoinNetwork }): Promise<bigint> => {
-		const { caller_btc_balance } = this.caller({
+	getBtcBalance = async ({ network }: { network: BitcoinNetwork }): Promise<bigint> => {
+		const { btc_caller_balance } = this.caller({
 			certified: true
 		});
 
-		return caller_btc_balance(network);
+		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, []);
+
+		if ('Err' in response) {
+			// TODO: Manage different error types
+			throw new Error("Couldn't get BTC balance");
+		}
+
+		return response.Ok.balance;
 	};
 
 	getEthAddress = (): Promise<EthAddress> => {
