@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
 	import ConvertToCkETH from '$eth/components/send/ConvertToCkETH.svelte';
@@ -16,6 +17,7 @@
 	import {
 		networkEthereum,
 		networkICP,
+		networkBitcoin,
 		pseudoNetworkChainFusion
 	} from '$lib/derived/network.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
@@ -40,6 +42,8 @@
 			<IcReceive token={$tokenWithFallback} />
 		{:else if $networkEthereum}
 			<EthReceive />
+		{:else if $networkBitcoin}
+			<BtcReceive />
 		{:else if $pseudoNetworkChainFusion}
 			<Receive />
 		{/if}
