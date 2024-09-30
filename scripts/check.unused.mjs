@@ -29,9 +29,17 @@ const main = async () => {
 
 	allSvelteFiles.forEach((file) => {
 		const content = readFileSync(file, 'utf-8');
-		potentialUnusedFiles = potentialUnusedFiles.filter(
-			(potentialUnusedFile) => !content.includes(basename(potentialUnusedFile))
-		);
+
+		potentialUnusedFiles = potentialUnusedFiles.filter((potentialUnusedFile) => {
+			const fileBasename = basename(potentialUnusedFile);
+
+			if (content.includes(`./${fileBasename}`)) {
+				console.log(`${RED}Relative import of '${fileBasename}' found in '${file}${NC}'`);
+				return false;
+			}
+
+			return !content.includes(`${basename(dirname(potentialUnusedFile))}/${fileBasename}`);
+		});
 
 		if (potentialUnusedFiles.length === 0) {
 			noUnusedFiles();
