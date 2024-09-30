@@ -52,7 +52,7 @@
 		trackTimedEventError
 	} from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -134,6 +134,16 @@
 			};
 
 			const trackAnalyticsOnSendComplete = async () => {
+				const endTime = performance.now();
+				const duration = endTime - timedEvent.startTime;
+
+				// format duration to seconds and show it in a toast
+				toastsShow({
+					text: `Sent ${amount} ICP in less than ${(duration / 1000).toFixed(2)} seconds.`,
+					level: 'success',
+					duration: 5000
+				});
+
 				await Promise.allSettled([
 					trackTimedEventSuccess(timedEvent),
 					trackEvent({
