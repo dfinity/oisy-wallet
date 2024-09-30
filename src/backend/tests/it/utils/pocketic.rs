@@ -1,6 +1,6 @@
 use crate::utils::mock::CALLER;
 use candid::{decode_one, encode_one, CandidType, Principal};
-use pocket_ic::{CallError, PocketIc, WasmResult};
+use pocket_ic::{CallError, PocketIc, PocketIcBuilder, WasmResult};
 use serde::Deserialize;
 use shared::types::user_profile::{OisyUser, UserProfile};
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
@@ -13,11 +13,6 @@ use std::{env, time::Duration};
 use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
-
-// Oisy's backend require an ecdsa_key_name for initialization.
-// PocketIC does not get mounted with "key_1" or "test_key_1" available in the management canister. If the canister request those ecdsa_public_key, it throws an error.
-// Instead, we can use the master_ecdsa_public_key suffixed with the subnet ID. PocketID adds the suffix because it can have multiple subnets.
-const SUBNET_ID: &str = "fscpm-uiaaa-aaaaa-aaaap-yai";
 
 /// Backend canister installer, using the builder pattern, for use in test environmens using `PocketIC`.
 ///
@@ -103,24 +98,9 @@ impl Default for BackendBuilder {
 }
 // Customisation
 impl BackendBuilder {
-    /// Sets a custom argument for the backend canister.
-    pub fn with_arg(mut self, arg: Vec<u8>) -> Self {
-        self.arg = arg;
-        self
-    }
-    /// Deploys to an existing canister with the given ID.
-    pub fn with_canister(mut self, canister_id: Principal) -> Self {
-        self.canister_id = Some(canister_id);
-        self
-    }
     /// Sets custom controllers for the backend canister.
     pub fn with_controllers(mut self, controllers: Vec<Principal>) -> Self {
         self.controllers = controllers;
-        self
-    }
-    /// Sets the cycles to add to the backend canister.
-    pub fn with_cycles(mut self, cycles: u128) -> Self {
-        self.cycles = cycles;
         self
     }
     /// Configures the deployment to use a custom Wasm file.
@@ -146,8 +126,11 @@ impl BackendBuilder {
         if let Some(canister_id) = self.canister_id {
             canister_id
         } else {
-            let canister_id =
-                pic.create_canister_on_subnet(None, None, Principal::from_text(SUBNET_ID).unwrap());
+            let fiduciary_subnet_id = pic
+                .topology()
+                .get_fiduciary()
+                .expect("pic should have a fiduciary subnet.");
+            let canister_id = pic.create_canister_on_subnet(None, None, fiduciary_subnet_id);
             self.canister_id = Some(canister_id);
             canister_id
         }
@@ -182,7 +165,10 @@ impl BackendBuilder {
     }
     /// Deploy to a new pic.
     pub fn deploy(&mut self) -> PicBackend {
-        let pic = PocketIc::new();
+        let pic = PocketIcBuilder::new()
+            .with_ii_subnet()
+            .with_fiduciary_subnet()
+            .build();
         let canister_id = self.deploy_to(&pic);
         PicBackend {
             pic: Arc::new(pic),
@@ -247,7 +233,7 @@ impl PicBackend {
 
 pub(crate) fn init_arg() -> Arg {
     Arg::Init(InitArg {
-        ecdsa_key_name: format!("master_ecdsa_public_key_{}", SUBNET_ID).to_string(),
+        ecdsa_key_name: format!("test_key_1"),
         allowed_callers: vec![Principal::from_text(CALLER).unwrap()],
         ic_root_key_der: None,
         supported_credentials: Some(vec![SupportedCredential {
