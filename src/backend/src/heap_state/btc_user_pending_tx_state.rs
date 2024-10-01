@@ -67,12 +67,12 @@ impl BtcUserPendingTransactions {
     /// - Transaction is older than 1 day.
     ///   We consider that if a pending transaction is older than one day
     ///   it means it failed and we can free to utxos to be used again.
-    /// - The transaction has still `current_utxos` are not present in the current utxos list.
+    /// - None of the transaction's utxos are present in the current utxos list.
     ///   We use the pending transactions to avoid double spending.
     ///   Once we know that a utxos is not available, we can remove the pending transaction.
     ///   Normally, all utxos of a pending transaction should be present or not.
-    ///   Partial presence could be a sign of a bug somewhere, but there is no reason to fail.
-    ///   In the end, partial presence will be temporary for one day.
+    ///   Partial presence could happen if the utxos of a pending transaction were not really used in the transaction.
+    ///   We don't remove in partial presence because, in the end, partial presence will be temporary for one day.
     #[allow(dead_code)]
     pub fn prune_pending_transactions(
         &mut self,
