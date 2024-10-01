@@ -347,7 +347,7 @@ async fn btc_add_pending_transaction(
     params: BtcAddPendingTransactionRequest,
 ) -> Result<(), BtcAddPendingTransactionError> {
     let principal = ic_cdk::caller();
-    let current_utxos = bitcoin_api::get_all_utxos(params.network, params.address)
+    let current_utxos = bitcoin_api::get_all_utxos(params.network, params.address.clone())
         .await
         .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
     let now_ns = time();
@@ -360,7 +360,7 @@ async fn btc_add_pending_transaction(
             created_at_timestamp_ns: now_ns,
         };
         pending_transactions
-            .add_pending_transaction(principal, current_pending_transaction)
+            .add_pending_transaction(principal, params.address, current_pending_transaction)
             .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
     })
 }
@@ -370,7 +370,7 @@ async fn btc_get_pending_transaction(
     params: BtcGetPendingTransactionsRequest,
 ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
     let principal = ic_cdk::caller();
-    let current_utxos = bitcoin_api::get_all_utxos(params.network, params.address)
+    let current_utxos = bitcoin_api::get_all_utxos(params.network, params.address.clone())
         .await
         .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
     let now_ns = time();
@@ -378,7 +378,7 @@ async fn btc_get_pending_transaction(
     let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
         pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
         pending_transactions
-            .get_pending_transactions(&principal)
+            .get_pending_transactions(&principal, &params.address)
             .clone()
     });
     let pending_transactions = stored_transactions
