@@ -8,6 +8,8 @@
 			"wasm": "target/signer.wasm.gz",
 			"init_arg_file": "target/signer.arg.did",
 			"shrink": false,
+			"dependencies": ["cycles_ledger"],
+			"specified_id": "grghe-syaaa-aaaar-qabyq-cai",
 			"remote": {
 				"id": {
 					"ic": "grghe-syaaa-aaaar-qabyq-cai",
@@ -18,6 +20,7 @@
 			}
 		},
 		"backend": {
+			"dependencies": ["cycles_ledger", "signer"],
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
@@ -62,6 +65,7 @@
 			"candid": "https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.1/cycles-ledger.did",
 			"wasm": "https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.1/cycles-ledger.wasm.gz",
 			"init_arg": "( variant { Init = record { index_id = null; max_blocks_per_request = 9_999 : nat64 }},)",
+			"specified_id": "um5iw-rqaaa-aaaaq-qaaba-cai",
 			"remote": {
 				"id": {
 					"ic": "um5iw-rqaaa-aaaaq-qaaba-cai"

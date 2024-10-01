@@ -32,6 +32,7 @@ function install_did_files() {
       canister_name="${array[0]}"
       source="${array[1]}"
       filename="${source##*/}"
+      filename="${filename//-/_}" # dfx uses underscores rather than hyphens
       destination=".dfx/local/canisters/${array[0]}/${filename}"
       mkdir -p "$(dirname "$destination")"
       case "$source" in
