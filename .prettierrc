@@ -15,9 +15,7 @@
       }
     },
     {
-      "files": [
-        "*.svelte"
-      ],
+      "files": "*.svelte",
       "options": {
         "plugins": [
           "prettier-plugin-svelte",
