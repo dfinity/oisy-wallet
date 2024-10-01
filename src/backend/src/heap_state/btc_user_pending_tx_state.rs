@@ -263,9 +263,11 @@ mod tests {
         let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
         assert_eq!(pending_txs.len(), 2);
 
+        let all_utxos = &[UTXO_1, UTXO_2];
+
         btc_user_pending_transactions.prune_pending_transactions(
             principal.clone(),
-            &[],
+            all_utxos,
             now_ns + 1,
         );
 
