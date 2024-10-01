@@ -1,6 +1,7 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, may_read_user_data, may_write_user_data};
 use crate::token::{add_to_user_token, remove_from_user_token};
+use bitcoin_utils::estimate_fee;
 use candid::Principal;
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
@@ -18,6 +19,9 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
+use shared::types::bitcoin::{
+    SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+};
 use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::user_profile::{
@@ -37,6 +41,8 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bitcoin_api;
+mod bitcoin_utils;
 mod config;
 mod guards;
 mod impls;
@@ -277,6 +283,45 @@ fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 fn list_custom_tokens() -> Vec<CustomToken> {
     let stored_principal = StoredPrincipal(ic_cdk::caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
+}
+
+#[update(guard = "may_read_user_data")]
+async fn btc_select_user_utxos_fee(
+    params: SelectedUtxosFeeRequest,
+) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
+    let all_utxos = bitcoin_api::get_all_utxos(params.network, params.source_address)
+        .await
+        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+
+    let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
+        .await
+        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    // We support sending to one destination only.
+    // Therefore, the outputs are the destination and the source address for the change.
+    let output_count = 2;
+    let mut available_utxos = all_utxos.clone();
+    let selected_utxos =
+        bitcoin_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
+
+    // Fee calculation might still take into account default tx size and expected output.
+    // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be present.
+    if selected_utxos.is_empty() {
+        return Ok(SelectedUtxosFeeResponse {
+            utxos: selected_utxos,
+            fee_satoshis: 0,
+        });
+    }
+
+    let fee_satoshis = estimate_fee(
+        selected_utxos.len() as u64,
+        median_fee_millisatoshi_per_vbyte,
+        output_count as u64,
+    );
+
+    Ok(SelectedUtxosFeeResponse {
+        utxos: selected_utxos,
+        fee_satoshis,
+    })
 }
 
 #[update(guard = "may_write_user_data")]
