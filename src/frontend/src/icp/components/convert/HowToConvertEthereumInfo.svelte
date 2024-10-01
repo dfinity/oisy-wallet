@@ -42,7 +42,7 @@
 	</div>
 
 	{#if ckErc20}
-		<div class="bg-light-blue p-4 mt-2 mb-4 rounded-lg">
+		<div class="mb-4 mt-2 rounded-lg bg-light-blue p-4">
 			<p class="break-normal font-bold">
 				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
 					$token: $ckEthereumNativeToken.symbol
@@ -67,10 +67,10 @@
 		</div>
 	{/if}
 
-	<div class="grid grid-cols-[1fr_auto] gap-x-4 mt-4">
-		<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
+	<div class="mt-4 grid grid-cols-[1fr_auto] gap-x-4">
+		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
 				>1</span
 			>
 
@@ -91,9 +91,9 @@
 			>
 		</ReceiveAddress>
 
-		<div class="overflow-hidden flex flex-col gap-2 items-center mb-2">
+		<div class="mb-2 flex flex-col items-center gap-2 overflow-hidden">
 			<span
-				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
 				>2</span
 			>
 
@@ -121,7 +121,7 @@
 
 		<div class="flex justify-center">
 			<span
-				class="inline-flex items-center justify-center text-xs font-bold p-2.5 w-4 h-4 text-misty-rose border-[1.5px] rounded-full"
+				class="inline-flex h-4 w-4 items-center justify-center rounded-full border-[1.5px] p-2.5 text-xs font-bold text-misty-rose"
 				>3</span
 			>
 		</div>
@@ -135,7 +135,7 @@
 					})}</svelte:fragment
 				>
 
-				<button class="secondary full center mt-3 mb-4" on:click={() => dispatch('icConvert')}>
+				<button class="secondary full center mb-4 mt-3" on:click={() => dispatch('icConvert')}>
 					<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
 				</button>
 			</Value>
