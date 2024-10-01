@@ -67,7 +67,7 @@ impl BtcUserPendingTransactions {
     /// - Transaction is older than 1 day.
     ///   We consider that if a pending transaction is older than one day
     ///   it means it failed and we can free to utxos to be used again.
-    /// - The transaction has still current_utxos are not present in the current utxos list.
+    /// - The transaction has still `current_utxos` are not present in the current utxos list.
     ///   We use the pending transactions to avoid double spending.
     ///   Once we know that a utxos is not available, we can remove the pending transaction.
     ///   Normally, all utxos of a pending transaction should be present or not.
