@@ -85,7 +85,10 @@ export const modalIcHideToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-hide-token'
 );
-
+export const modalBtcTransaction: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'btc-transaction'
+);
 export const modalToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'token'

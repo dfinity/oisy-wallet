@@ -154,6 +154,17 @@ VITE_NETWORK_BITCOIN_ENABLED=true
 VITE_BITCOIN_MAINNET=true
 ```
 
+### Bitcoin Development
+
+There are some important notes related to the BTC development:
+
+1. Wallet workers:
+   - Locally, only the Regex network wallet worker is launched
+   - On all other ens (staging, beta, prod), we launch Testnet and Mainnet workers
+2. Transactions:
+   - To test them locally, you need to hardcode a mainnet BTC address with some txs inside. In the future, we plan to create mocks and use them during the local development.
+   - Currently, only Mainnet transactions (uncertified) can be loaded on staging/beta/prod, since the Blockchain API we're using to fetch this data doesn't provide txs for testnet.
+
 ### Local Bitcoin Node (Or Regtest)
 
 To interact with a Bitcoun network, we can set up a local test node.

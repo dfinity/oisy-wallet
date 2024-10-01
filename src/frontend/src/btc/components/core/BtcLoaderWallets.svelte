@@ -1,8 +1,18 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
-	import { BTC_REGTEST_NETWORK_ID } from '$env/networks.env';
+	import {
+		isNetworkIdBTCMainnet,
+		isNetworkIdBTCRegtest,
+		isNetworkIdBTCTestnet
+	} from '$icp/utils/ic-send.utils.js';
 	import LoaderWallets from '$lib/components/core/LoaderWallets.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
+	import {
+		btcAddressMainnet,
+		btcAddressRegtest,
+		btcAddressTestnet
+	} from '$lib/derived/address.derived';
 	import { enabledBtcTokens } from '$lib/derived/tokens.derived';
 	import type { InitWalletWorkerFn } from '$lib/types/listener';
 	import type { Token } from '$lib/types/token';
@@ -10,10 +20,12 @@
 	let tokens: Token[];
 
 	// Locally, only the Regtest worker has to be launched, in all other envs - testnet and mainnet
-	$: tokens = $enabledBtcTokens.filter((token) =>
+	$: tokens = $enabledBtcTokens.filter(({ network: { id: networkId } }) =>
 		LOCAL
-			? token.network.id === BTC_REGTEST_NETWORK_ID
-			: token.network.id !== BTC_REGTEST_NETWORK_ID
+			? isNetworkIdBTCRegtest(networkId) && nonNullish($btcAddressRegtest)
+			: !isNetworkIdBTCRegtest(networkId) &&
+				((isNetworkIdBTCTestnet(networkId) && nonNullish($btcAddressTestnet)) ||
+					(isNetworkIdBTCMainnet(networkId) && nonNullish($btcAddressMainnet)))
 	);
 
 	const initWalletWorker: InitWalletWorkerFn = ({ token }) => initBtcWalletWorker(token);
