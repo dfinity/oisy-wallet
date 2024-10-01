@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
-	import { tokenStandard } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
@@ -14,20 +14,22 @@
 
 	const dispatch = createEventDispatcher();
 
+	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let isInvalidDestination: () => boolean;
 
 	const init = () =>
 		(isInvalidDestination = (): boolean =>
-			isNullish($tokenStandard) ||
+			isNullish($sendTokenStandard) ||
 			isInvalidDestinationIc({
 				destination,
-				tokenStandard: $tokenStandard,
+				tokenStandard: $sendTokenStandard,
 				networkId
 			}));
 
 	const debounceValidateInit = debounce(init);
 
-	$: destination, $tokenStandard, networkId, debounceValidateInit();
+	$: destination, $sendTokenStandard, networkId, debounceValidateInit();
 
 	let inputPlaceholder: string;
 	$: inputPlaceholder = isNetworkIdEthereum(networkId)
