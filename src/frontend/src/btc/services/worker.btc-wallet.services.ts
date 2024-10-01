@@ -43,6 +43,7 @@ export const initBtcWalletWorker = async ({
 			worker.postMessage({
 				msg: 'startBtcWalletTimer',
 				data: {
+					// TODO: stop/start the worker on address change
 					btcAddress: get(
 						isTestnetNetwork
 							? btcAddressTestnetStore
