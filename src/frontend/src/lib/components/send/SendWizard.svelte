@@ -18,9 +18,8 @@
 	export let formCancelAction: 'back' | 'close' = 'back';
 </script>
 
-{#if isNetworkIdEthereum($token?.network.id)}
-	<!-- TODO: Move the context one level down -->
-	<SendTokenContext token={$token}>
+<SendTokenContext token={$token}>
+	{#if isNetworkIdEthereum($token?.network.id)}
 		<EthSendTokenWizard
 			{currentStep}
 			{formCancelAction}
@@ -37,21 +36,21 @@
 			on:icQRCodeScan
 			on:icQRCodeBack
 		/>
-	</SendTokenContext>
-{:else if isNetworkIdICP($token?.network.id)}
-	<IcSendTokenWizard
-		{currentStep}
-		{formCancelAction}
-		bind:destination
-		bind:networkId
-		bind:amount
-		bind:sendProgressStep
-		on:icBack
-		on:icNext
-		on:icClose
-		on:icQRCodeScan
-		on:icQRCodeBack
-	/>
-{:else}
-	<slot />
-{/if}
+	{:else if isNetworkIdICP($token?.network.id)}
+		<IcSendTokenWizard
+			{currentStep}
+			{formCancelAction}
+			bind:destination
+			bind:networkId
+			bind:amount
+			bind:sendProgressStep
+			on:icBack
+			on:icNext
+			on:icClose
+			on:icQRCodeScan
+			on:icQRCodeBack
+		/>
+	{:else}
+		<slot />
+	{/if}
+</SendTokenContext>

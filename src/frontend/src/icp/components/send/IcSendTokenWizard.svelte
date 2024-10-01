@@ -7,7 +7,6 @@
 	import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
-	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { sendIc } from '$icp/services/ic-send.services';
 	import {
 		BITCOIN_FEE_CONTEXT_KEY,
@@ -19,8 +18,10 @@
 		type EthereumFeeContext as EthereumFeeContextType,
 		initEthereumFeeStore
 	} from '$icp/stores/ethereum-fee.store';
+	import type { IcToken } from '$icp/types/ic';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
@@ -53,7 +54,6 @@
 	} from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
@@ -71,6 +71,13 @@
 	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const dispatch = createEventDispatcher();
+
+	/**
+	 * Send context store
+	 */
+
+	const { sendTokenDecimals, sendToken, sendTokenSymbol } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Send
@@ -91,7 +98,7 @@
 			return;
 		}
 
-		if (isNullish($token)) {
+		if (isNullish($sendToken)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.unexpected_undefined }
 			});
@@ -103,20 +110,20 @@
 		const timedEvent = initTimedEvent({
 			name: isNetworkIdBitcoin(networkId)
 				? TRACK_DURATION_CONVERT_CKBTC_TO_BTC
-				: isConvertCkEthToEth({ token: $token, networkId })
+				: isConvertCkEthToEth({ token: $sendToken, networkId })
 					? TRACK_DURATION_CONVERT_CKETH_TO_ETH
-					: isConvertCkErc20ToErc20({ token: $token, networkId })
+					: isConvertCkErc20ToErc20({ token: $sendToken, networkId })
 						? TRACK_DURATION_CONVERT_CKERC20_TO_ERC20
 						: TRACK_DURATION_IC_SEND,
 			metadata: {
-				token: $token.symbol
+				token: $sendTokenSymbol
 			}
 		});
 
 		try {
 			// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
 			const ckErc20ToErc20MaxCkEthFees: bigint | undefined = isConvertCkErc20ToErc20({
-				token: $tokenAsIcToken,
+				token: $sendToken as IcToken,
 				networkId
 			})
 				? $ethereumFeeStore?.maxTransactionFee
@@ -126,7 +133,7 @@
 				to: destination,
 				amount: parseToken({
 					value: `${amount}`,
-					unitName: $token.decimals
+					unitName: $sendTokenDecimals
 				}),
 				identity: $authIdentity,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step),
@@ -139,13 +146,13 @@
 					trackEvent({
 						name: isNetworkIdBitcoin(networkId)
 							? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS
-							: isConvertCkEthToEth({ token: $token, networkId })
+							: isConvertCkEthToEth({ token: $sendToken, networkId })
 								? TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
-								: isConvertCkErc20ToErc20({ token: $token, networkId })
+								: isConvertCkErc20ToErc20({ token: $sendToken, networkId })
 									? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS
 									: TRACK_COUNT_IC_SEND_SUCCESS,
 						metadata: {
-							token: $token.symbol
+							token: $sendTokenSymbol
 						}
 					})
 				]);
@@ -153,7 +160,7 @@
 
 			await sendIc({
 				...params,
-				token: $tokenAsIcToken,
+				token: $sendToken as IcToken,
 				targetNetworkId: networkId,
 				sendCompleted: trackAnalyticsOnSendComplete
 			});
@@ -167,13 +174,13 @@
 				trackEvent({
 					name: isNetworkIdBitcoin(networkId)
 						? TRACK_COUNT_CONVERT_CKBTC_TO_BTC_ERROR
-						: isConvertCkEthToEth({ token: $token, networkId })
+						: isConvertCkEthToEth({ token: $sendToken, networkId })
 							? TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR
-							: isConvertCkErc20ToErc20({ token: $token, networkId })
+							: isConvertCkErc20ToErc20({ token: $sendToken, networkId })
 								? TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_ERROR
 								: TRACK_COUNT_IC_SEND_ERROR,
 					metadata: {
-						token: $token.symbol
+						token: $sendTokenSymbol
 					}
 				})
 			]);
@@ -227,7 +234,7 @@
 			</IcSendForm>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQRCodeScan
-				expectedToken={$token}
+				expectedToken={$sendToken}
 				bind:destination
 				bind:amount
 				decodeQrCode={icDecodeQrCode}
