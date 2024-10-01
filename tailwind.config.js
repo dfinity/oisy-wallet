@@ -28,6 +28,7 @@ export default {
 			'misty-rose': '#937993',
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',
+			'mountain-meadow': '#30af91',
 			'green-crayola': '#16b364',
 			'british-racing-green': '#084c2e',
 			'dartmouth-green': '#087443',
