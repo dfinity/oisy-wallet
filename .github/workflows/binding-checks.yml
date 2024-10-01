@@ -2,46 +2,57 @@ name: Binding Checks
 
 on:
   pull_request:
-    paths:
-      - # Any new or changed canisters
-        'dfx.json'
-      - # Any new or changed .did files
-        '**/*.did'
-      - # Scripts, GitHub actions that contain 'backend' in their path.
-        '**/*backend*'
-      - # The backend source code
-        'src/backend/**'
-      - 'src/shared/**'
-      - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
-        '**/Cargo*'
-      - '**/*rust*'
-      - # This workflow
-        '.github/workflows/binding-checks.yml'
   workflow_dispatch:
-
 jobs:
-
   generate:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            src:
+              - # Any new or changed canisters
+                'dfx.json'
+              - # Any new or changed .did files
+                '**/*.did'
+              - # Scripts, GitHub actions that contain 'backend' in their path.
+                '**/*backend*'
+              - # The backend source code
+                'src/backend/**'
+              - 'src/shared/**'
+              - # Rust files such as Cargo.lock, Cargo.toml and rust-toolchain.toml
+                '**/Cargo*'
+              - '**/*rust*'
+              - # Scripts that download external Candid files, with false positives.
+                'scripts/build.*.sh'
+              - # This workflow
+                '.github/workflows/binding-checks.yml'
       - name: Build oisy-backend WASM
+        if: steps.changes.outputs.src == 'true'
         uses: ./.github/actions/oisy-backend
       - name: Prepare
+        if: steps.changes.outputs.src == 'true'
         uses: ./.github/actions/prepare
       - name: Install dfx
+        if: steps.changes.outputs.src == 'true'
         uses: dfinity/setup-dfx@main
       - name: Install binstall
+        if: steps.changes.outputs.src == 'true'
         run: |
           BINSTALL_VERSION="1.8.0"
           curl -L --proto '=https' --tlsv1.2 -sSf "https://github.com/cargo-bins/cargo-binstall/releases/download/v${BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.tgz" | tar -xvzf - cargo-binstall
           ./cargo-binstall -y --force "cargo-binstall@$BINSTALL_VERSION"
           rm cargo-binstall
       - name: Install candid-extractor
+        if: steps.changes.outputs.src == 'true'
         run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
       - name: Generate bindings
+        if: steps.changes.outputs.src == 'true'
         run: npm run generate
       - name: Check bindings
+        if: steps.changes.outputs.src == 'true'
         run: |
           test -z "$(git status --porcelain | tee /dev/stderr)" || {
                   echo "FIX: Please execute npm run generate"
