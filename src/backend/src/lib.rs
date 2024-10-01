@@ -294,7 +294,11 @@ async fn btc_select_user_utxos_fee(
     let all_utxos = bitcoin_api::get_all_utxos(
         params.network,
         params.source_address,
-        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        Some(
+            params
+                .min_confirmations
+                .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        ),
     )
     .await
     .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
