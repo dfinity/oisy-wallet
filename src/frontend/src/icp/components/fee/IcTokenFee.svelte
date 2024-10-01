@@ -1,21 +1,23 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { getContext } from 'svelte';
 	import type { OptionIcToken } from '$icp/types/ic';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/stores/token.store';
 	import { formatToken } from '$lib/utils/format.utils';
 
+	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let decimals: number | undefined;
-	$: decimals = $token?.decimals;
+	$: decimals = $sendToken?.decimals;
 
 	let symbol: string | undefined;
-	$: symbol = $token?.symbol;
+	$: symbol = $sendToken?.symbol;
 
 	let fee: bigint | undefined;
-	$: fee = ($token as OptionIcToken)?.fee;
+	$: fee = ($sendToken as OptionIcToken)?.fee;
 </script>
 
 <Value ref="fee">
@@ -25,7 +27,7 @@
 		{formatToken({
 			value: BigNumber.from(fee),
 			unitName: decimals,
-			displayDecimals: $tokenDecimals
+			displayDecimals: $sendTokenDecimals
 		})}
 		{symbol}
 	{/if}

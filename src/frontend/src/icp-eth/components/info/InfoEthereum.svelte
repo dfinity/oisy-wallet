@@ -34,7 +34,7 @@
 </script>
 
 <div class="pr-2">
-	<h4 class="flex gap-2 items-center font-medium">
+	<h4 class="flex items-center gap-2 font-medium">
 		<Logo
 			src={eth}
 			alt={replacePlaceholders($i18n.core.alt.logo, {
@@ -48,7 +48,7 @@
 		>
 	</h4>
 
-	<p class="text-misty-rose mt-3">
+	<p class="mt-3 text-misty-rose">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.description), {
 			$token: twinToken.symbol,
 			$ckToken: ckTokenSymbol,
@@ -56,7 +56,7 @@
 		})}
 	</p>
 
-	<p class="text-misty-rose mt-3">
+	<p class="mt-3 text-misty-rose">
 		{replacePlaceholders(replaceOisyPlaceholders($i18n.info.ethereum.note), {
 			$token: twinToken.symbol,
 			$ckToken: ckTokenSymbol
