@@ -1,24 +1,26 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { balance } from '$lib/derived/balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
+
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
@@ -39,7 +41,7 @@
 
 		<IcSendAmount bind:amount bind:amountError {networkId} />
 
-		<SendSource token={$token} balance={$balance} source={$icrcAccountIdentifierText ?? ''} />
+		<SendSource token={$sendToken} balance={$balance} source={$icrcAccountIdentifierText ?? ''} />
 
 		<IcFeeDisplay {networkId} />
 

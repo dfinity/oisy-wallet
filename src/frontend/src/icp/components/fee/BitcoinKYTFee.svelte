@@ -1,19 +1,22 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
+	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
 	import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import Value from '$lib/components/ui/Value.svelte';
-	import { tokenId } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
+
+	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let ckBTC = false;
 	$: ckBTC = isTokenCkBtcLedger($tokenWithFallbackAsIcToken);
@@ -22,7 +25,9 @@
 	$: btcNetwork = isNetworkIdBitcoin(networkId);
 
 	let kytFee: bigint | undefined = undefined;
-	$: kytFee = nonNullish($tokenId) ? $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee : undefined;
+	$: kytFee = nonNullish($sendTokenId)
+		? $ckBtcMinterInfoStore?.[$sendTokenId]?.data.kyt_fee
+		: undefined;
 </script>
 
 {#if ckBTC && btcNetwork && nonNullish(kytFee)}
