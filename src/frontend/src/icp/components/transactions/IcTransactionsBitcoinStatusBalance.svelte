@@ -82,12 +82,12 @@
 <svelte:window on:oisyCkBtcUpdateBalance={onSyncState} />
 
 {#if nonNullish(ckBtcUpdateBalanceSyncState)}
-	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="text-misty-rose animate-pulse">
+	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="animate-pulse text-misty-rose">
 			<span in:blur>{$i18n.receive.bitcoin.text.checking_status}</span>
 		</div>{:else}
 		<button
 			in:blur
-			class="text text-blue border-0 flex gap-2"
+			class="text flex gap-2 border-0 text-blue"
 			on:click={async () => await receive()}><IconSync /> {$i18n.core.text.refresh}</button
 		>
 	{/if}
