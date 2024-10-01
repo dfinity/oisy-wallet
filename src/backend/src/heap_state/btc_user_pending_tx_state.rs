@@ -34,7 +34,7 @@ impl BtcUserPendingTransactions {
         }
     }
 
-    /// Returns the pending transactions of a specific principal.
+    /// Returns the pending transactions of a specific principal per address.
     #[allow(dead_code)]
     pub fn get_pending_transactions(
         &self,
@@ -47,7 +47,7 @@ impl BtcUserPendingTransactions {
             .map_or(&EMPTY_VEC, |map| map.get(address).unwrap_or(&EMPTY_VEC))
     }
 
-    /// Adds a pending transaction for a specific principal.
+    /// Adds a pending transaction for a specific principal and address.
     /// It has a limit of storable transactions set on init.
     #[allow(dead_code)]
     pub fn add_pending_transaction(
