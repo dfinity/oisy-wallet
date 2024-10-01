@@ -62,13 +62,31 @@ export const idlFactory = ({ IDL }) => {
 		}),
 		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
 	});
+	const TransferFromError = IDL.Variant({
+		GenericError: IDL.Record({
+			message: IDL.Text,
+			error_code: IDL.Nat
+		}),
+		TemporarilyUnavailable: IDL.Null,
+		InsufficientAllowance: IDL.Record({ allowance: IDL.Nat }),
+		BadBurn: IDL.Record({ min_burn_amount: IDL.Nat }),
+		Duplicate: IDL.Record({ duplicate_of: IDL.Nat }),
+		BadFee: IDL.Record({ expected_fee: IDL.Nat }),
+		CreatedInFuture: IDL.Record({ ledger_time: IDL.Nat64 }),
+		TooOld: IDL.Null,
+		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
+	});
 	const PaymentError = IDL.Variant({
-		LedgerUnreachable: CallerPaysIcrc2Tokens,
-		UnsupportedPaymentType: IDL.Null,
-		LedgerError: IDL.Record({
+		LedgerWithdrawFromError: IDL.Record({
 			error: WithdrawFromError,
 			ledger: IDL.Principal
 		}),
+		LedgerUnreachable: CallerPaysIcrc2Tokens,
+		LedgerTransferFromError: IDL.Record({
+			error: TransferFromError,
+			ledger: IDL.Principal
+		}),
+		UnsupportedPaymentType: IDL.Null,
 		InsufficientFunds: IDL.Record({
 			needed: IDL.Nat64,
 			available: IDL.Nat64

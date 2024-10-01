@@ -2,12 +2,14 @@ import type { GetAddressError, PaymentError } from '$declarations/signer/signer.
 
 export class SignerCanisterPaymentError extends Error {
 	constructor(response: PaymentError) {
-		if ('LedgerUnreachable' in response) {
-			super(`Ledger unreachable ${response.LedgerUnreachable.ledger}`);
-		} else if ('UnsupportedPaymentType' in response) {
+		if ('UnsupportedPaymentType' in response) {
 			super('Unsupported payment type');
-		} else if ('LedgerError' in response) {
-			super(`Ledger error: ${JSON.stringify(response.LedgerError.error)}`);
+		} else if ('LedgerWithdrawFromError' in response) {
+			super(`Ledger error: ${JSON.stringify(response.LedgerWithdrawFromError.error)}`);
+		} else if ('LedgerUnreachable' in response) {
+			super(`Ledger unreachable: ${JSON.stringify(response.LedgerUnreachable)}`);
+		} else if ('LedgerTransferFromError' in response) {
+			super(`Ledger error: ${JSON.stringify(response.LedgerTransferFromError)}`);
 		} else if ('InsufficientFunds' in response) {
 			super(
 				`Insufficient funds needed ${response.InsufficientFunds.needed} but available ${response.InsufficientFunds.available}`
