@@ -11,12 +11,12 @@ use ic_cdk::api::management_canister::bitcoin::{
 async fn get_utxos(
     network: BitcoinNetwork,
     address: String,
-    maybe_next_page: Option<Vec<u8>>,
+    filter: Option<UtxoFilter>,
 ) -> Result<GetUtxosResponse, String> {
     let utxos_res = bitcoin_get_utxos(GetUtxosRequest {
         address,
         network,
-        filter: maybe_next_page.map(UtxoFilter::Page),
+        filter,
     })
     .await
     .map_err(|err| err.1)?;
@@ -25,13 +25,19 @@ async fn get_utxos(
 }
 /// Returns all the UTXOs of a specific address.
 /// API interface returns a paginated view of the utxos but we need to get them all.
-pub async fn get_all_utxos(network: BitcoinNetwork, address: String) -> Result<Vec<Utxo>, String> {
-    let mut utxos_response = get_utxos(network, address.clone(), None).await?;
+pub async fn get_all_utxos(
+    network: BitcoinNetwork,
+    address: String,
+    min_confirmations: Option<u32>,
+) -> Result<Vec<Utxo>, String> {
+    let filter = min_confirmations.map(UtxoFilter::MinConfirmations);
+    let mut utxos_response = get_utxos(network, address.clone(), filter).await?;
 
     let mut all_utxos: Vec<Utxo> = utxos_response.utxos;
     let mut next_page: Option<Vec<u8>> = utxos_response.next_page;
     while next_page.is_some() {
-        utxos_response = get_utxos(network, address.clone(), next_page).await?;
+        utxos_response =
+            get_utxos(network, address.clone(), next_page.map(UtxoFilter::Page)).await?;
         all_utxos.extend(utxos_response.utxos);
         next_page = utxos_response.next_page;
     }

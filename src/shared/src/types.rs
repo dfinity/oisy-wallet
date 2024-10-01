@@ -170,6 +170,7 @@ pub mod bitcoin {
         pub amount_satoshis: u64,
         pub source_address: String,
         pub network: BitcoinNetwork,
+        pub min_confirmations: Option<u32>,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
