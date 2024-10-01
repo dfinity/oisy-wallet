@@ -39,7 +39,7 @@ COPY --chown=apprunner:apprunner . .
 
 # Update dfx.json with custom backend WASM file
 RUN jq --argjson new_value '{"candid": "src/backend/backend.did", "wasm": "backend.wasm.gz", "type": "custom", "gzip": true}' \
-    '.canisters.signer = $new_value | .canisters.new_backend = $new_value | .canisters.backend = $new_value' \
+    '.canisters.signer = $new_value | .canisters.backend = $new_value' \
     dfx.json > tmp.json && mv tmp.json dfx.json
 
 # Deploy
