@@ -366,7 +366,7 @@ async fn btc_add_pending_transaction(
 }
 
 #[update(guard = "may_read_user_data")]
-async fn btc_get_pending_transaction(
+async fn btc_get_pending_transactions(
     params: BtcGetPendingTransactionsRequest,
 ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
     let principal = ic_cdk::caller();
