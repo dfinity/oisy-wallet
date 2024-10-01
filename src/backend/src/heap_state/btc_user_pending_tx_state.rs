@@ -39,13 +39,12 @@ impl BtcUserPendingTransactions {
     pub fn get_pending_transactions(
         &self,
         principal: &Principal,
-        address: String,
+        address: &str,
     ) -> &Vec<StoredPendingTransaction> {
         static EMPTY_VEC: Vec<StoredPendingTransaction> = Vec::new();
         self.pending_transactions_map
             .get(principal)
-            .map(|map| map.get(&address).unwrap_or(&EMPTY_VEC))
-            .unwrap_or(&EMPTY_VEC)
+            .map_or(&EMPTY_VEC, |map| map.get(address).unwrap_or(&EMPTY_VEC))
     }
 
     /// Adds a pending transaction for a specific principal.
@@ -95,7 +94,7 @@ impl BtcUserPendingTransactions {
         now_ns: u64,
     ) {
         if let Some(address_map) = self.pending_transactions_map.get_mut(&principal) {
-            for (_, transactions) in address_map.into_iter() {
+            for (_, transactions) in address_map.iter_mut() {
                 let pruned_list: Vec<StoredPendingTransaction> = transactions
                     .clone()
                     .into_iter()
