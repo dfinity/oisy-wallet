@@ -19,13 +19,12 @@
 	} from '$icp/utils/cketh.utils';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balance } from '$lib/derived/balances.derived';
-	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
@@ -34,21 +33,23 @@
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
+	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let fee: bigint | undefined;
-	$: fee = ($token as OptionIcToken)?.fee;
+	$: fee = ($sendToken as OptionIcToken)?.fee;
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
-		if (isNullish(fee) || isNullish($token)) {
+		if (isNullish(fee) || isNullish($sendToken)) {
 			return;
 		}
 
 		if (isNetworkIdBitcoin(networkId)) {
 			const error = assertCkBTCUserInputAmount({
 				amount: userAmount,
-				minterInfo: $ckBtcMinterInfoStore?.[$token.id],
-				tokenDecimals: $token.decimals,
+				minterInfo: $ckBtcMinterInfoStore?.[$sendToken.id],
+				tokenDecimals: $sendToken.decimals,
 				i18n: $i18n
 			});
 
@@ -61,8 +62,8 @@
 		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
 			const error = assertCkETHMinWithdrawalAmount({
 				amount: userAmount,
-				tokenDecimals: $token.decimals,
-				tokenSymbol: $token.symbol,
+				tokenDecimals: $sendToken.decimals,
+				tokenSymbol: $sendToken.symbol,
 				minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
 				i18n: $i18n
 			});
@@ -73,7 +74,7 @@
 
 			return assertCkETHMinFee({
 				amount: userAmount,
-				tokenSymbol: $token.symbol,
+				tokenSymbol: $sendToken.symbol,
 				fee,
 				i18n: $i18n
 			});
@@ -117,13 +118,13 @@
 	};
 
 	$: calculateMax = (): number | undefined =>
-		isNullish($token)
+		isNullish($sendToken)
 			? undefined
 			: getMaxTransactionAmount({
 					balance: $balance ?? ZERO,
 					fee: BigNumber.from(fee),
-					tokenDecimals: $token.decimals,
-					tokenStandard: $token.standard
+					tokenDecimals: $sendToken.decimals,
+					tokenStandard: $sendToken.standard
 				});
 
 	let sendInputAmount: SendInputAmount | undefined;
@@ -133,7 +134,7 @@
 <SendInputAmount
 	bind:amount
 	bind:this={sendInputAmount}
-	tokenDecimals={$tokenDecimals}
+	tokenDecimals={$sendTokenDecimals}
 	{customValidate}
 	{calculateMax}
 	bind:error={amountError}
