@@ -14,9 +14,13 @@ pub struct StoredPendingTransaction {
     created_at_timestamp_ns: u64,
 }
 
+type BitcoinAddress = String;
+type PendingTransactionsMap = HashMap<BitcoinAddress, Vec<StoredPendingTransaction>>;
+
 #[allow(dead_code)]
 pub struct BtcUserPendingTransactions {
-    pending_transactions_map: HashMap<Principal, Vec<StoredPendingTransaction>>,
+    /// Map of `user_principal` to `PendingTransactionsMap`;
+    pending_transactions_map: HashMap<Principal, PendingTransactionsMap>,
     /// Maximum number of transactions stored per principal.
     max_pending_transactions: usize,
 }
@@ -35,10 +39,12 @@ impl BtcUserPendingTransactions {
     pub fn get_pending_transactions(
         &self,
         principal: &Principal,
+        address: String,
     ) -> &Vec<StoredPendingTransaction> {
         static EMPTY_VEC: Vec<StoredPendingTransaction> = Vec::new();
         self.pending_transactions_map
             .get(principal)
+            .map(|map| map.get(&address).unwrap_or(&EMPTY_VEC))
             .unwrap_or(&EMPTY_VEC)
     }
 
@@ -48,16 +54,24 @@ impl BtcUserPendingTransactions {
     pub fn add_pending_transaction(
         &mut self,
         principal: Principal,
+        address: String,
         new_transaction: StoredPendingTransaction,
     ) -> Result<(), String> {
-        if let Some(list) = self.pending_transactions_map.get_mut(&principal) {
-            if list.len() >= self.max_pending_transactions {
-                return Err("Maximum pending transactions reached".to_string());
+        if let Some(address_map) = self.pending_transactions_map.get_mut(&principal) {
+            if let Some(list) = address_map.get_mut(&address) {
+                if list.len() >= self.max_pending_transactions {
+                    return Err("Maximum pending transactions reached".to_string());
+                }
+                list.push(new_transaction);
+            } else {
+                let list: Vec<StoredPendingTransaction> = vec![new_transaction];
+                address_map.insert(address, list);
             }
-            list.push(new_transaction);
         } else {
+            let mut address_map: PendingTransactionsMap = HashMap::new();
             let list: Vec<StoredPendingTransaction> = vec![new_transaction];
-            self.pending_transactions_map.insert(principal, list);
+            address_map.insert(address, list);
+            self.pending_transactions_map.insert(principal, address_map);
         }
         Ok(())
     }
@@ -80,20 +94,23 @@ impl BtcUserPendingTransactions {
         current_utxos: &[Utxo],
         now_ns: u64,
     ) {
-        if let Some(list) = self.pending_transactions_map.get(&principal) {
-            let pruned_list: Vec<StoredPendingTransaction> = list
-                .clone()
-                .into_iter()
-                .filter(|pending_transaction| {
-                    let is_old = pending_transaction.created_at_timestamp_ns + DAY_IN_NS < now_ns;
-                    let all_utxos_found = pending_transaction
-                        .utxos
-                        .iter()
-                        .all(|utxo| !current_utxos.contains(utxo));
-                    !is_old && !all_utxos_found
-                })
-                .collect();
-            self.pending_transactions_map.insert(principal, pruned_list);
+        if let Some(address_map) = self.pending_transactions_map.get_mut(&principal) {
+            for (_, transactions) in address_map.into_iter() {
+                let pruned_list: Vec<StoredPendingTransaction> = transactions
+                    .clone()
+                    .into_iter()
+                    .filter(|pending_transaction| {
+                        let is_old =
+                            pending_transaction.created_at_timestamp_ns + DAY_IN_NS < now_ns;
+                        let all_utxos_found = pending_transaction
+                            .utxos
+                            .iter()
+                            .all(|utxo| !current_utxos.contains(utxo));
+                        !is_old && !all_utxos_found
+                    })
+                    .collect();
+                *transactions = pruned_list;
+            }
         }
     }
 }
@@ -140,18 +157,21 @@ mod tests {
         "7blps-itamd-lzszp-7lbda-4nngn-fev5u-2jvpn-6y3ap-eunp7-kz57e-fqe";
     const PRINCIPAL_TEXT_2: &str =
         "xzg7k-thc6c-idntg-knmtz-2fbhh-utt3e-snqw6-5xph3-54pbp-7axl5-tae";
+    const address1: &str = "test-address-1";
+    const address2: &str = "test-address-2";
 
     #[test]
     fn test_get_pending_transactions_empty() {
         let btc_user_pending_transactions = BtcUserPendingTransactions::new(None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal, address1.to_string());
         assert!(pending_txs.is_empty());
     }
 
     #[test]
-    fn test_add_pending_transaction() {
+    fn test_add_pending_transaction_per_address() {
         let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
         let tx = StoredPendingTransaction {
@@ -161,14 +181,23 @@ mod tests {
         };
 
         // Add the pending transaction
-        let result =
-            btc_user_pending_transactions.add_pending_transaction(principal.clone(), tx.clone());
+        let result = btc_user_pending_transactions.add_pending_transaction(
+            principal.clone(),
+            address1.to_string(),
+            tx.clone(),
+        );
         assert!(result.is_ok());
 
         // Check that the transaction was added
-        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal, address1.to_string());
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], tx);
+
+        // Check that the transaction was added to the proper address
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal, address2.to_string());
+        assert!(pending_txs.is_empty());
     }
 
     #[test]
@@ -182,11 +211,15 @@ mod tests {
             created_at_timestamp_ns: 1_000_000,
         };
 
-        let result =
-            btc_user_pending_transactions.add_pending_transaction(principal1.clone(), tx.clone());
+        let result = btc_user_pending_transactions.add_pending_transaction(
+            principal1.clone(),
+            address1.to_string(),
+            tx.clone(),
+        );
         assert!(result.is_ok());
 
-        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal2);
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal2, address1.to_string());
         assert!(pending_txs.is_empty());
     }
 
@@ -219,17 +252,21 @@ mod tests {
 
         // Add 3 transactions (MAX_PENDING_TRANSACTIONS = 3)
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), tx1)
+            .add_pending_transaction(principal.clone(), address1.to_string(), tx1)
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), tx2)
+            .add_pending_transaction(principal.clone(), address1.to_string(), tx2)
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), tx3)
+            .add_pending_transaction(principal.clone(), address1.to_string(), tx3)
             .unwrap();
 
         // Try adding a 4th transaction and expect an error
-        let result = btc_user_pending_transactions.add_pending_transaction(principal.clone(), tx4);
+        let result = btc_user_pending_transactions.add_pending_transaction(
+            principal.clone(),
+            address1.to_string(),
+            tx4,
+        );
         assert!(result.is_err());
         assert_eq!(result.unwrap_err(), "Maximum pending transactions reached");
     }
@@ -248,7 +285,11 @@ mod tests {
             created_at_timestamp_ns: yesterday_ns,
         };
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), old_transaction.clone())
+            .add_pending_transaction(
+                principal.clone(),
+                address1.to_string(),
+                old_transaction.clone(),
+            )
             .unwrap();
 
         let valid_transaction = StoredPendingTransaction {
@@ -257,10 +298,15 @@ mod tests {
             created_at_timestamp_ns: now_ns,
         };
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), valid_transaction.clone())
+            .add_pending_transaction(
+                principal.clone(),
+                address1.to_string(),
+                valid_transaction.clone(),
+            )
             .unwrap();
 
-        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal, address1.to_string());
         assert_eq!(pending_txs.len(), 2);
 
         let all_utxos = &[UTXO_1, UTXO_2];
@@ -271,7 +317,8 @@ mod tests {
             now_ns + 1,
         );
 
-        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal, address1.to_string());
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], valid_transaction);
     }
@@ -295,13 +342,22 @@ mod tests {
         };
 
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), transaction_1.clone())
+            .add_pending_transaction(
+                principal.clone(),
+                address1.to_string(),
+                transaction_1.clone(),
+            )
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), transaction_2.clone())
+            .add_pending_transaction(
+                principal.clone(),
+                address1.to_string(),
+                transaction_2.clone(),
+            )
             .unwrap();
 
-        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal, address1.to_string());
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[UTXO_1];
@@ -311,7 +367,8 @@ mod tests {
             now_ns,
         );
 
-        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal, address1.to_string());
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], transaction_1);
     }
@@ -335,13 +392,22 @@ mod tests {
         };
 
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), transaction_1.clone())
+            .add_pending_transaction(
+                principal.clone(),
+                address1.to_string(),
+                transaction_1.clone(),
+            )
             .unwrap();
         btc_user_pending_transactions
-            .add_pending_transaction(principal.clone(), transaction_2.clone())
+            .add_pending_transaction(
+                principal.clone(),
+                address1.to_string(),
+                transaction_2.clone(),
+            )
             .unwrap();
 
-        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal, address1.to_string());
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[UTXO_1, UTXO_3];
@@ -351,7 +417,8 @@ mod tests {
             now_ns,
         );
 
-        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        let pending_txs = btc_user_pending_transactions
+            .get_pending_transactions(&principal, address1.to_string());
         assert_eq!(pending_txs.len(), 2);
     }
 }
