@@ -20,7 +20,7 @@
 	$: destination, networkId, isInvalidDestination, debounceValidate();
 </script>
 
-<label for="destination" class="font-bold px-4.5">{$i18n.send.text.destination}:</label>
+<label for="destination" class="px-4.5 font-bold">{$i18n.send.text.destination}:</label>
 <Input
 	name="destination"
 	inputType="text"
@@ -38,7 +38,7 @@
 </Input>
 
 {#if invalidDestination}
-	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">
+	<p transition:slide={{ duration: 250 }} class="pb-3 text-cyclamen">
 		{$i18n.send.assertion.invalid_destination_address}
 	</p>
 {/if}

@@ -54,7 +54,7 @@
 	export const triggerValidate = debounceValidate;
 </script>
 
-<label for="amount" class="font-bold px-4.5">{$i18n.core.text.amount}</label>
+<label for="amount" class="px-4.5 font-bold">{$i18n.core.text.amount}</label>
 <Input
 	name="amount"
 	inputType="currency"
@@ -70,5 +70,5 @@
 </Input>
 
 {#if nonNullish(error)}
-	<p transition:slide={{ duration: 250 }} class="text-cyclamen pb-3">{error.message}</p>
+	<p transition:slide={{ duration: 250 }} class="pb-3 text-cyclamen">{error.message}</p>
 {/if}
