@@ -27,7 +27,7 @@ type PendingTransactionsMap = HashMap<BitcoinAddress, Vec<StoredPendingTransacti
 pub struct BtcUserPendingTransactions {
     /// Map of `user_principal` to `PendingTransactionsMap`;
     pending_transactions_map: HashMap<Principal, PendingTransactionsMap>,
-    /// Maximum number of transactions stored per principal.
+    /// Maximum number of transactions that will be stored per `(principal, address)` tuple.
     max_pending_transactions: usize,
     /// Maxumum number of addresses per user.
     max_addresses_per_user: usize,
@@ -127,7 +127,7 @@ impl BtcUserPendingTransactions {
                     *transactions = pruned_list;
                 }
             }
-            for address in addresses_to_remove.iter() {
+            for address in &addresses_to_remove {
                 address_map.remove(address.as_str());
             }
         }
