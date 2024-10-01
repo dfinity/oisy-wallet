@@ -6,7 +6,7 @@
 </script>
 
 <div class="stretch">
-	<label for="destination" class="font-bold px-4.5">{$i18n.tokens.text.contract_address}:</label>
+	<label for="destination" class="px-4.5 font-bold">{$i18n.tokens.text.contract_address}:</label>
 	<Input
 		name="contractAddress"
 		inputType="text"
