@@ -7,9 +7,9 @@
 	export let indexCanisterId = '';
 </script>
 
-<p class="text-dark-blue mt-1 mb-2">{$i18n.tokens.import.text.info}</p>
+<p class="mb-2 mt-1 text-dark-blue">{$i18n.tokens.import.text.info}</p>
 
-<p class="text-blue font-bold mb-4">
+<p class="mb-4 font-bold text-blue">
 	<ExternalLink
 		href="https://github.com/dfinity/oisy-wallet/blob/main/HOW-TO.md#custom-icrc-token-integration"
 		ariaLabel={$i18n.tokens.import.text.open_github_howto}
@@ -19,7 +19,7 @@
 </p>
 
 <div class="stretch">
-	<label for="ledgerCanisterId" class="font-bold px-4.5"
+	<label for="ledgerCanisterId" class="px-4.5 font-bold"
 		>{$i18n.tokens.import.text.ledger_canister_id}:</label
 	>
 	<Input
@@ -31,7 +31,7 @@
 		spellcheck={false}
 	/>
 
-	<label for="indexCanisterId" class="font-bold px-4.5"
+	<label for="indexCanisterId" class="px-4.5 font-bold"
 		>{$i18n.tokens.import.text.index_canister_id}:</label
 	>
 	<Input
