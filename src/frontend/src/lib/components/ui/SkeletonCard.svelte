@@ -5,7 +5,7 @@
 </script>
 
 <Card>
-	<span class="inline-block max-w-full w-[120px] sm:w-[200px]"><slot><SkeletonText /></slot></span>
+	<span class="inline-block w-[120px] max-w-full sm:w-[200px]"><slot><SkeletonText /></slot></span>
 
 	<span class="inline-block w-full max-w-[100px]" slot="amount"><SkeletonText /></span>
 

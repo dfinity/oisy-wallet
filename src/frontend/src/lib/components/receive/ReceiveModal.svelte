@@ -1,32 +1,31 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import EthReceiveMetamask from '$eth/components/receive/EthReceiveMetamask.svelte';
 	import ReceiveQRCode from '$lib/components/receive/ReceiveQRCode.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { networkAddress, networkEthereum } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionAddress, Address } from '$lib/types/address';
+
+	export let address: OptionAddress<Address> = undefined;
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
 	<svelte:fragment slot="title">{$i18n.receive.text.receive}</svelte:fragment>
 
 	<ContentWithToolbar>
-		<p class="font-bold text-center">Address:</p>
-		<p class="mb-4 font-normal text-center px-2 max-w-xs mx-auto">
-			<output class="break-all">{$networkAddress ?? ''}</output><Copy
+		<p class="text-center font-bold">Address:</p>
+		<p class="mx-auto mb-4 max-w-xs px-2 text-center font-normal">
+			<output class="break-all">{address ?? ''}</output><Copy
 				inline
-				value={$networkAddress ?? ''}
+				value={address ?? ''}
 				text={$i18n.wallet.text.address_copied}
 			/>
 		</p>
 
-		<ReceiveQRCode address={$networkAddress ?? ''} />
+		<ReceiveQRCode address={address ?? ''} />
 
-		{#if $networkEthereum}
-			<EthReceiveMetamask />
-		{/if}
+		<slot name="content" />
 
 		<button class="primary full center text-center" on:click={modalStore.close} slot="toolbar"
 			>{$i18n.core.text.done}</button
