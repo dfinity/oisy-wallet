@@ -19,6 +19,8 @@ fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
         amount_satoshis: 100_000_000u64,
         source_address: "bcrt1qpg7udjvq7gx2fp480pgt4hnhj3qc4nhrkstc33".to_string(),
         network: BitcoinNetwork::Regtest,
+        // Until bitcoin is supported in pocket-ic it only works with 1.
+        min_confirmations: Some(1),
     };
     let response = pic_setup.update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
         caller,
