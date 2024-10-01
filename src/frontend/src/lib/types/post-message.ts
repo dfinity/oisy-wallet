@@ -9,6 +9,7 @@ import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
+import type { BtcAddress } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { SyncState } from '$lib/types/sync';
@@ -57,6 +58,8 @@ export type PostMessageDataRequestIcCkBTCUpdateBalance = PostMessageDataRequestI
 };
 
 export interface PostMessageDataRequestBtc {
+	btcAddress: BtcAddress;
+	shouldFetchTransactions: boolean;
 	bitcoinNetwork: SignerBitcoinNetwork;
 }
 
@@ -107,18 +110,13 @@ export interface PostMessageDataResponseExchangeError extends PostMessageDataRes
 // Transactions & {certified: boolean}
 type JsonTransactionsText = string;
 
-type PostMessageWalletData<T = unknown> = Omit<T, 'transactions' | 'balance'> & {
+type PostMessageWalletData<T> = Omit<T, 'transactions' | 'balance'> & {
 	balance: CertifiedData<bigint>;
 	newTransactions: JsonTransactionsText;
 };
 
-export interface PostMessageDataResponseWallet<T> extends PostMessageDataResponse {
+export interface PostMessageDataResponseWallet<T = unknown> extends PostMessageDataResponse {
 	wallet: PostMessageWalletData<T>;
-}
-
-// TODO: use common PostMessageDataResponseWallet interface after BTC transactions added to the worker
-export interface PostMessageDataResponseBtcWallet extends PostMessageDataResponse {
-	wallet: Omit<PostMessageWalletData, 'newTransactions'>;
 }
 
 export interface PostMessageDataResponseError extends PostMessageDataResponse {

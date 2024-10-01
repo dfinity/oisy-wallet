@@ -45,6 +45,7 @@ mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
 mod guards;
+mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
@@ -285,13 +286,23 @@ fn list_custom_tokens() -> Vec<CustomToken> {
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
+const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+
 #[update(guard = "may_read_user_data")]
 async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
 ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
-    let all_utxos = bitcoin_api::get_all_utxos(params.network, params.source_address)
-        .await
-        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    let all_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.source_address,
+        Some(
+            params
+                .min_confirmations
+                .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        ),
+    )
+    .await
+    .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
 
     let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
         .await
