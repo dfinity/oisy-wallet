@@ -8,7 +8,7 @@
 	const releaseUrl = `${OISY_REPO_URL}/releases/tag/${version}`;
 </script>
 
-<p class="mt-24 text-secondary opacity-50 text-xs text-center">
+<p class="text-secondary mt-24 text-center text-xs opacity-50">
 	{OISY_NAME}
 	<ExternalLink href={releaseUrl} ariaLabel={$i18n.settings.alt.github_release} iconVisible={false}
 		>{version}</ExternalLink

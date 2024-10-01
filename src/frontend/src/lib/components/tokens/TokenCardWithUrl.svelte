@@ -11,9 +11,9 @@
 	$: url = transactionsUrl({ token });
 </script>
 
-<div class="flex gap-3 sm:gap-8 mb-6">
+<div class="mb-6 flex gap-3 sm:gap-8">
 	<a
-		class="no-underline flex-1"
+		class="flex-1 no-underline"
 		href={url}
 		aria-label={replacePlaceholders($i18n.transactions.text.open_transactions, {
 			token: token.symbol
