@@ -96,4 +96,8 @@ fn test_add_and_read_pending_transactions() {
     // Therefore, the pending transaction utxos are not available,
     // which means it's not a pending transaction anymore and it gets pruned.
     assert_eq!(data.transactions.len(), 0);
+
+    // I tried removing the call to prune and the test returns the pending transaction as expected.
+    // Ideally, we mock the call to get_utxos to return the pending utxo
+    // and the pending transaction won't be pruned.
 }

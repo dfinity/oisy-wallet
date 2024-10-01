@@ -6,7 +6,7 @@ use candid::Principal;
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
 use heap_state::btc_user_pending_tx_state::StoredPendingTransaction;
-use heap_state::heap_state::with_btc_pending_transactions;
+use heap_state::state::with_btc_pending_transactions;
 use ic_cdk::api::time;
 use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
