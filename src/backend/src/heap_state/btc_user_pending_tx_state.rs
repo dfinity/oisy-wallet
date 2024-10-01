@@ -17,6 +17,7 @@ pub struct StoredPendingTransaction {
 #[allow(dead_code)]
 pub struct BtcUserPendingTransactions {
     pending_transactions_map: HashMap<Principal, Vec<StoredPendingTransaction>>,
+    /// Maximum number of transactions stored per principal.
     max_pending_transactions: usize,
 }
 
@@ -29,6 +30,7 @@ impl BtcUserPendingTransactions {
         }
     }
 
+    /// Returns the pending transactions of a specific principal.
     #[allow(dead_code)]
     pub fn get_pending_transactions(
         &self,
@@ -40,6 +42,8 @@ impl BtcUserPendingTransactions {
             .unwrap_or(&EMPTY_VEC)
     }
 
+    /// Adds a pending transaction for a specific principal.
+    /// It has a limit of storable transactions set on init.
     #[allow(dead_code)]
     pub fn add_pending_transaction(
         &mut self,
@@ -58,11 +62,22 @@ impl BtcUserPendingTransactions {
         Ok(())
     }
 
+    /// Prunes pending transactions for a specific principal.
+    /// A pending transaction can be pruned for two reasons:
+    /// - Transaction is older than 1 day.
+    ///   We consider that if a pending transaction is older than one day
+    ///   it means it failed and we can free to utxos to be used again.
+    /// - The transaction has still current_utxos are not present in the current utxos list.
+    ///   We use the pending transactions to avoid double spending.
+    ///   Once we know that a utxos is not available, we can remove the pending transaction.
+    ///   Normally, all utxos of a pending transaction should be present or not.
+    ///   Partial presence could be a sign of a bug somewhere, but there is no reason to fail.
+    ///   In the end, partial presence will be temporary for one day.
     #[allow(dead_code)]
     pub fn prune_pending_transactions(
         &mut self,
         principal: Principal,
-        utxos: &[Utxo],
+        current_utxos: &[Utxo],
         now_ns: u64,
     ) {
         if let Some(list) = self.pending_transactions_map.get(&principal) {
@@ -70,13 +85,12 @@ impl BtcUserPendingTransactions {
                 .clone()
                 .into_iter()
                 .filter(|pending_transaction| {
-                    // We assume that if a pending transaction has been pending for longer than a day, it has been rejected.
                     let is_old = pending_transaction.created_at_timestamp_ns + DAY_IN_NS < now_ns;
-                    let utxo_found = pending_transaction
+                    let all_utxos_found = pending_transaction
                         .utxos
                         .iter()
-                        .find(|utxo| utxos.contains(utxo));
-                    !is_old && utxo_found.is_none()
+                        .all(|utxo| !current_utxos.contains(utxo));
+                    !is_old && !all_utxos_found
                 })
                 .collect();
             self.pending_transactions_map.insert(principal, pruned_list);
@@ -220,9 +234,8 @@ mod tests {
         assert_eq!(result.unwrap_err(), "Maximum pending transactions reached");
     }
 
-    // Test pruning of old transactions
     #[test]
-    fn test_prune_pending_transactions() {
+    fn test_prune_old_pending_transactions() {
         let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
@@ -262,7 +275,7 @@ mod tests {
     }
 
     #[test]
-    fn test_prune_with_matching_utxos() {
+    fn test_prune_with_available_utxos() {
         let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
@@ -289,15 +302,54 @@ mod tests {
         let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
         assert_eq!(pending_txs.len(), 2);
 
-        let matching_utxos = &[UTXO_1];
+        let available_utxos = &[UTXO_1];
         btc_user_pending_transactions.prune_pending_transactions(
             principal.clone(),
-            matching_utxos,
+            available_utxos,
             now_ns,
         );
 
         let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
         assert_eq!(pending_txs.len(), 1);
-        assert_eq!(pending_txs[0], transaction_2);
+        assert_eq!(pending_txs[0], transaction_1);
+    }
+
+    #[test]
+    fn test_does_not_prune_with_partial_available_utxos() {
+        let mut btc_user_pending_transactions = BtcUserPendingTransactions::new(None);
+        let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
+
+        let now_ns = 1_000_000_000_000;
+
+        let transaction_1 = StoredPendingTransaction {
+            txid: vec![1, 2, 3],
+            utxos: vec![UTXO_1],
+            created_at_timestamp_ns: now_ns,
+        };
+        let transaction_2 = StoredPendingTransaction {
+            txid: vec![4, 5, 6],
+            utxos: vec![UTXO_2, UTXO_3],
+            created_at_timestamp_ns: now_ns,
+        };
+
+        btc_user_pending_transactions
+            .add_pending_transaction(principal.clone(), transaction_1.clone())
+            .unwrap();
+        btc_user_pending_transactions
+            .add_pending_transaction(principal.clone(), transaction_2.clone())
+            .unwrap();
+
+        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        assert_eq!(pending_txs.len(), 2);
+
+        let available_utxos = &[UTXO_1, UTXO_3];
+        btc_user_pending_transactions.prune_pending_transactions(
+            principal.clone(),
+            available_utxos,
+            now_ns,
+        );
+
+        let pending_txs = btc_user_pending_transactions.get_pending_transactions(&principal);
+        assert_eq!(pending_txs.len(), 2);
     }
 }
