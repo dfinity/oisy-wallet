@@ -2,6 +2,7 @@ use candid::Principal;
 use ic_cdk::api::management_canister::bitcoin::Utxo;
 use std::collections::HashMap;
 
+#[allow(dead_code)]
 const MAX_PENDING_TRANSACTIONS: usize = 1000;
 #[allow(dead_code)]
 const DAY_IN_NS: u64 = 24 * 60 * 60 * 1_000_000_000;
@@ -20,6 +21,7 @@ pub struct BtcUserPendingTransactions {
 }
 
 impl BtcUserPendingTransactions {
+    #[allow(dead_code)]
     pub fn new(max_pending_txs: Option<usize>) -> Self {
         Self {
             pending_transactions_map: HashMap::new(),
