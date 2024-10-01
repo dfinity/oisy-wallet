@@ -1,10 +1,12 @@
-import { btcTransactionsStore, type BtcTransactionsData } from '$btc/stores/btc-transactions.store';
+import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
+import type { BtcTransactionUi } from '$btc/types/btc';
 import { tokenWithFallback } from '$lib/derived/token.derived';
+import type { TransactionsData } from '$lib/stores/transactions.store';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 // TODO: decide how BTC transactions should be sorted and apply it here
-export const sortedTransactions: Readable<BtcTransactionsData> = derived(
+export const sortedTransactions: Readable<TransactionsData<BtcTransactionUi>> = derived(
 	[btcTransactionsStore, tokenWithFallback],
 	([$transactionsStore, $token]) => $transactionsStore?.[$token.id] ?? []
 );
