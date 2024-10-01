@@ -12,7 +12,9 @@ struct HeapState {
 impl Default for HeapState {
     fn default() -> Self {
         Self {
-            btc_user_pending_transactions: RefCell::new(BtcUserPendingTransactions::new(None)),
+            btc_user_pending_transactions: RefCell::new(BtcUserPendingTransactions::new(
+                None, None,
+            )),
         }
     }
 }
