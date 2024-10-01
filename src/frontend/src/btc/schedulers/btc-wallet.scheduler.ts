@@ -1,15 +1,30 @@
+import type { BitcoinNetwork } from '$declarations/signer/signer.did';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
+import type { OptionIdentity } from '$lib/types/identity';
 import type {
 	PostMessageDataRequestBtc,
 	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
-import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
+import type { CertifiedData } from '$lib/types/store';
+import { assertNonNullish, isNullish, jsonReplacer } from '@dfinity/utils';
+
+interface BtcWalletStore {
+	balance: CertifiedData<bigint> | undefined;
+	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;
+}
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
+
+	private store: BtcWalletStore = {
+		balance: undefined,
+		transactions: {}
+	};
 
 	stop() {
 		this.timer.stop();
@@ -30,31 +45,83 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
-	/* TODO: The following steps need to be done:
-	 * 1. Fetch uncertified transactions via BTC transaction API.
-	 * 2. Query uncertified balance in oder to improve UX (signer.getBtcBalance takes ~5s to complete).
-	 * 3. Fetch certified transactions via BE endpoint (to be discussed).
-	 * */
-	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestBtc>) => {
-		const bitcoinNetwork = data?.bitcoinNetwork;
+	private async loadBtcTransactions({
+		btcAddress
+	}: {
+		btcAddress: BtcAddress;
+	}): Promise<BitcoinTransaction[]> {
+		const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
-		assertNonNullish(bitcoinNetwork, 'No BTC network provided to get certified balance.');
+		const newTransactions = fetchedTransactions.filter(({ hash }) =>
+			isNullish(this.store.transactions[`${hash}`])
+		);
 
+		this.store = {
+			...this.store,
+			transactions: {
+				...this.store.transactions,
+				...newTransactions.reduce(
+					(acc, transaction) => ({
+						...acc,
+						[transaction.hash]: {
+							certified: false,
+							data: transaction
+						}
+					}),
+					{}
+				)
+			}
+		};
+
+		return newTransactions;
+	}
+
+	private async loadBtcBalance({
+		identity,
+		bitcoinNetwork
+	}: {
+		identity: OptionIdentity;
+		bitcoinNetwork: BitcoinNetwork;
+	}): Promise<CertifiedData<bigint>> {
 		const balance = await getBtcBalance({
 			identity,
 			network: bitcoinNetwork
 		});
+		const certifiedBalance = {
+			data: balance,
+			certified: true
+		};
 
-		// TODO: Fetch and parse transactions
-		const transactions: BitcoinTransaction[] = [];
+		this.store = {
+			...this.store,
+			balance: certifiedBalance
+		};
+
+		return certifiedBalance;
+	}
+
+	/* TODO: The following steps need to be done:
+	 * 1. [Required] Fetch uncertified transactions via BTC transaction API.
+	 * 2. [Improvement] Query uncertified balance in oder to improve UX (signer.getBtcBalance takes ~5s to complete).
+	 * 3. [Required] Fetch certified transactions via BE endpoint (to be discussed).
+	 * */
+	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestBtc>) => {
+		const bitcoinNetwork = data?.bitcoinNetwork;
+		assertNonNullish(bitcoinNetwork, 'No BTC network provided to get BTC certified balance.');
+
+		const btcAddress = data?.btcAddress;
+		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
+
+		const balance = await this.loadBtcBalance({ identity, bitcoinNetwork });
+		const newTransactions = data?.shouldFetchTransactions
+			? await this.loadBtcTransactions({ btcAddress })
+			: [];
 
 		this.postMessageWallet({
 			wallet: {
-				balance: {
-					data: balance,
-					certified: true
-				},
-				newTransactions: JSON.stringify(transactions, jsonReplacer)
+				balance,
+				// TODO: Parse transactions to BtcTransactionUi type
+				newTransactions: JSON.stringify(newTransactions, jsonReplacer)
 			}
 		});
 	};

@@ -9,6 +9,7 @@ import type { BtcAddressData } from '$icp/stores/btc.store';
 import type { JsonText } from '$icp/types/btc.post-message';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCanisters, IcCkMetadata } from '$icp/types/ic';
+import type { BtcAddress } from '$lib/types/address';
 import type { Network } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { SyncState } from '$lib/types/sync';
@@ -57,6 +58,8 @@ export type PostMessageDataRequestIcCkBTCUpdateBalance = PostMessageDataRequestI
 };
 
 export interface PostMessageDataRequestBtc {
+	btcAddress: BtcAddress;
+	shouldFetchTransactions: boolean;
 	bitcoinNetwork: SignerBitcoinNetwork;
 }
 
