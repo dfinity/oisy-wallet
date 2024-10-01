@@ -11,12 +11,27 @@ import type {
 	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { assertNonNullish, jsonReplacer } from '@dfinity/utils';
+import { assertNonNullish, isNullish, jsonReplacer } from '@dfinity/utils';
+
+interface BtcWalletStore {
+	balance: CertifiedData<bigint> | undefined;
+	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;
+	btcAddress: OptionBtcAddress;
+}
+
+interface LoaderFunctionParams {
+	identity: OptionIdentity;
+	bitcoinNetwork: BitcoinNetwork;
+}
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
 	private timer = new SchedulerTimer('syncBtcWalletStatus');
 
-	private btcAddress: OptionBtcAddress;
+	private store: BtcWalletStore = {
+		balance: undefined,
+		transactions: {},
+		btcAddress: undefined
+	};
 
 	stop() {
 		this.timer.stop();
@@ -40,14 +55,70 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	private async loadBtcAddress({
 		identity,
 		bitcoinNetwork
-	}: {
-		identity: OptionIdentity;
-		bitcoinNetwork: BitcoinNetwork;
-	}): Promise<string> {
-		// Save address for next timer
-		this.btcAddress = await getBtcAddress({ identity, network: bitcoinNetwork });
+	}: LoaderFunctionParams): Promise<string> {
+		const btcAddress = await getBtcAddress({ identity, network: bitcoinNetwork });
 
-		return this.btcAddress;
+		// Save address for next timer
+		this.store = {
+			...this.store,
+			btcAddress
+		};
+
+		return btcAddress;
+	}
+
+	private async loadBtcTransactions({
+		identity,
+		bitcoinNetwork
+	}: LoaderFunctionParams): Promise<BitcoinTransaction[]> {
+		const btcAddress =
+			this.store.btcAddress ?? (await this.loadBtcAddress({ identity, bitcoinNetwork }));
+
+		const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
+
+		const newTransactions = fetchedTransactions.filter(({ hash }) =>
+			isNullish(this.store.transactions[`${hash}`])
+		);
+
+		this.store = {
+			...this.store,
+			transactions: {
+				...this.store.transactions,
+				...newTransactions.reduce(
+					(acc, transaction) => ({
+						...acc,
+						[transaction.hash]: {
+							certified: false,
+							data: transaction
+						}
+					}),
+					{}
+				)
+			}
+		};
+
+		return newTransactions;
+	}
+
+	private async loadBtcBalance({
+		identity,
+		bitcoinNetwork
+	}: LoaderFunctionParams): Promise<CertifiedData<bigint>> {
+		const balance = await getBtcBalance({
+			identity,
+			network: bitcoinNetwork
+		});
+		const certifiedBalance = {
+			data: balance,
+			certified: true
+		};
+
+		this.store = {
+			...this.store,
+			balance: certifiedBalance
+		};
+
+		return certifiedBalance;
 	}
 
 	/* TODO: The following steps need to be done:
@@ -61,33 +132,21 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 
 		assertNonNullish(bitcoinNetwork, 'No BTC network provided to get certified balance.');
 
-		const balance = await getBtcBalance({
+		const params = {
 			identity,
-			network: bitcoinNetwork
-		});
+			bitcoinNetwork
+		};
 
-		let uncertifiedTransactions: CertifiedData<BitcoinTransaction>[] = [];
-
-		if (data?.shouldFetchTransactions) {
-			const btcAddress =
-				this.btcAddress ?? (await this.loadBtcAddress({ identity, bitcoinNetwork }));
-
-			const { txs: transactions } = await btcAddressData({ btcAddress });
-
-			uncertifiedTransactions = transactions.map((transaction) => ({
-				// TODO: Parse transactions to BtcTransactionUi type
-				data: transaction,
-				certified: false
-			}));
-		}
+		const balance = await this.loadBtcBalance(params);
+		const newTransactions = data?.shouldFetchTransactions
+			? await this.loadBtcTransactions(params)
+			: [];
 
 		this.postMessageWallet({
 			wallet: {
-				balance: {
-					data: balance,
-					certified: true
-				},
-				newTransactions: JSON.stringify(uncertifiedTransactions, jsonReplacer)
+				balance,
+				// TODO: Parse transactions to BtcTransactionUi type
+				newTransactions: JSON.stringify(newTransactions, jsonReplacer)
 			}
 		});
 	};
