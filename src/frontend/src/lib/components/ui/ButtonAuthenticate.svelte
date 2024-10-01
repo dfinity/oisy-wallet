@@ -2,13 +2,13 @@
 	import IconAstronautArrow from '$lib/components/icons/IconAstronautArrow.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let fullWidth = false;
+    export let fullWidth = false;
 </script>
 
 <button
 	on:click
-	class="bg-[var(--color-primary)] flex w-full items-center justify-center gap-4 rounded-2xl py-3 text-lg font-bold leading-6 text-white sm:px-12"
-	class:sm:w-80={!fullWidth}
+	class="flex w-full items-center justify-center gap-4 rounded-2xl bg-[var(--color-primary)] py-3 text-lg font-bold leading-6 text-white sm:px-12"
+    class:sm:w-80={!fullWidth}
 	data-tid="login-button"
 >
 	{$i18n.core.text.open}
