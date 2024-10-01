@@ -19,7 +19,7 @@ export const mapBtcTransaction = ({
 	return {
 		id: hash,
 		timestamp: time,
-		value: BigInt(output?.value ?? 0),
+		value: nonNullish(output?.value) ? BigInt(output.value) : undefined,
 		status: blockIndexAvailable ? 'confirmed' : 'pending',
 		blockNumber: block_index ?? undefined,
 		type: isTypeSend ? 'send' : 'receive',
