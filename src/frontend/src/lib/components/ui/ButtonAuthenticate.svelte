@@ -1,6 +1,6 @@
 <script lang="ts">
 	import IconAstronautArrow from '$lib/components/icons/IconAstronautArrow.svelte';
-    import { i18n } from '$lib/stores/i18n.store';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <button
