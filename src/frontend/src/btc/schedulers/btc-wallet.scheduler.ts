@@ -1,9 +1,9 @@
 import type { BitcoinNetwork } from '$declarations/signer/signer.did';
-import { getBtcAddress, getBtcBalance } from '$lib/api/signer.api';
+import { getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { btcAddressData } from '$lib/rest/blockchain.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
-import type { OptionBtcAddress } from '$lib/types/address';
+import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import type { OptionIdentity } from '$lib/types/identity';
 import type {
@@ -16,12 +16,6 @@ import { assertNonNullish, isNullish, jsonReplacer } from '@dfinity/utils';
 interface BtcWalletStore {
 	balance: CertifiedData<bigint> | undefined;
 	transactions: Record<string, CertifiedData<BitcoinTransaction[]>>;
-	btcAddress: OptionBtcAddress;
-}
-
-interface LoaderFunctionParams {
-	identity: OptionIdentity;
-	bitcoinNetwork: BitcoinNetwork;
 }
 
 export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> {
@@ -29,8 +23,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 
 	private store: BtcWalletStore = {
 		balance: undefined,
-		transactions: {},
-		btcAddress: undefined
+		transactions: {}
 	};
 
 	stop() {
@@ -52,28 +45,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		});
 	}
 
-	private async loadBtcAddress({
-		identity,
-		bitcoinNetwork
-	}: LoaderFunctionParams): Promise<string> {
-		const btcAddress = await getBtcAddress({ identity, network: bitcoinNetwork });
-
-		// Save address for next timer
-		this.store = {
-			...this.store,
-			btcAddress
-		};
-
-		return btcAddress;
-	}
-
 	private async loadBtcTransactions({
-		identity,
-		bitcoinNetwork
-	}: LoaderFunctionParams): Promise<BitcoinTransaction[]> {
-		const btcAddress =
-			this.store.btcAddress ?? (await this.loadBtcAddress({ identity, bitcoinNetwork }));
-
+		btcAddress
+	}: {
+		btcAddress: BtcAddress;
+	}): Promise<BitcoinTransaction[]> {
 		const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
 		const newTransactions = fetchedTransactions.filter(({ hash }) =>
@@ -103,7 +79,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	private async loadBtcBalance({
 		identity,
 		bitcoinNetwork
-	}: LoaderFunctionParams): Promise<CertifiedData<bigint>> {
+	}: {
+		identity: OptionIdentity;
+		bitcoinNetwork: BitcoinNetwork;
+	}): Promise<CertifiedData<bigint>> {
 		const balance = await getBtcBalance({
 			identity,
 			network: bitcoinNetwork
@@ -125,21 +104,17 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	 * 1. [Required] Fetch uncertified transactions via BTC transaction API.
 	 * 2. [Improvement] Query uncertified balance in oder to improve UX (signer.getBtcBalance takes ~5s to complete).
 	 * 3. [Required] Fetch certified transactions via BE endpoint (to be discussed).
-	 * 4. [Improvement] Receive btcAddress from FE as data param to avoid re-fetching it in a worker. Make sure it's certified.
 	 * */
 	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestBtc>) => {
 		const bitcoinNetwork = data?.bitcoinNetwork;
+		assertNonNullish(bitcoinNetwork, 'No BTC network provided to get BTC certified balance.');
 
-		assertNonNullish(bitcoinNetwork, 'No BTC network provided to get certified balance.');
+		const btcAddress = data?.btcAddress;
+		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
-		const params = {
-			identity,
-			bitcoinNetwork
-		};
-
-		const balance = await this.loadBtcBalance(params);
+		const balance = await this.loadBtcBalance({ identity, bitcoinNetwork });
 		const newTransactions = data?.shouldFetchTransactions
-			? await this.loadBtcTransactions(params)
+			? await this.loadBtcTransactions({ btcAddress })
 			: [];
 
 		this.postMessageWallet({

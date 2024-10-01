@@ -4,10 +4,16 @@ import {
 	isNetworkIdBTCRegtest,
 	isNetworkIdBTCTestnet
 } from '$icp/utils/ic-send.utils';
+import {
+	btcAddressMainnetStore,
+	btcAddressRegtestStore,
+	btcAddressTestnetStore
+} from '$lib/stores/address.store';
 import type { WalletWorker } from '$lib/types/listener';
 import type { PostMessage, PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { get } from 'svelte/store';
 
 export const initBtcWalletWorker = async ({
 	id: tokenId,
@@ -31,15 +37,21 @@ export const initBtcWalletWorker = async ({
 
 	return {
 		start: () => {
+			const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);
+			const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
+
 			worker.postMessage({
 				msg: 'startBtcWalletTimer',
 				data: {
+					btcAddress: get(
+						isTestnetNetwork
+							? btcAddressTestnetStore
+							: isRegtestNetwork
+								? btcAddressRegtestStore
+								: btcAddressMainnetStore
+					),
 					bitcoinNetwork: mapToSignerBitcoinNetwork({
-						network: isNetworkIdBTCTestnet(networkId)
-							? 'testnet'
-							: isNetworkIdBTCRegtest(networkId)
-								? 'regtest'
-								: 'mainnet'
+						network: isTestnetNetwork ? 'testnet' : isRegtestNetwork ? 'regtest' : 'mainnet'
 					}),
 					// only mainnet transactions can be fetched via Blockchain API
 					shouldFetchTransactions: isNetworkIdBTCMainnet(networkId)
