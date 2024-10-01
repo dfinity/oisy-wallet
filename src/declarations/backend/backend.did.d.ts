@@ -50,8 +50,6 @@ export interface Config {
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array | number[]];
-	cycles_ledger_canister_id: [] | [Principal];
-	signer_canister_id: [] | [Principal];
 }
 export interface CredentialSpec {
 	arguments: [] | [Array<[string, ArgumentValue]>];
@@ -96,8 +94,6 @@ export interface InitArg {
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
-	cycles_ledger_canister_id: [] | [Principal];
-	signer_canister_id: [] | [Principal];
 }
 export interface ListUsersRequest {
 	updated_after_timestamp: [] | [bigint];

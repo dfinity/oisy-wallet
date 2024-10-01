@@ -160,6 +160,30 @@ pub mod custom_token {
     }
 }
 
+pub mod bitcoin {
+    use candid::CandidType;
+    use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Utxo};
+    use serde::Deserialize;
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct SelectedUtxosFeeRequest {
+        pub amount_satoshis: u64,
+        pub source_address: String,
+        pub network: BitcoinNetwork,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub struct SelectedUtxosFeeResponse {
+        pub utxos: Vec<Utxo>,
+        pub fee_satoshis: u64,
+    }
+
+    #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum SelectedUtxosFeeError {
+        InternalError { msg: String },
+    }
+}
+
 /// Types specifics to the user profile.
 pub mod user_profile {
     use super::{CredentialType, Timestamp};

@@ -4,7 +4,7 @@
 </script>
 
 <button
-	class="no-underline hover:text-blue active:text-blue w-full text-left"
+	class="w-full text-left no-underline hover:text-blue active:text-blue"
 	aria-label={ariaLabel}
 	on:click
 	{disabled}
