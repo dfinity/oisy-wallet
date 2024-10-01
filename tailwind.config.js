@@ -17,7 +17,7 @@ export default {
 			'off-white': '#fcfaf6',
 			dust: '#dbd9d6',
 			grey: '#c0bbc4',
-			'light-blue': '#ede7fb',
+			'light-blue': '#e8f1ff',
 			blue: '#3b00b9',
 			'blue-ribbon-rgb': '0, 102, 255',
 			'dark-blue': '#321469',
@@ -29,6 +29,12 @@ export default {
 			goldenrod: '#dfa81b',
 			cyclamen: '#ea6c99',
 			'mountain-meadow': '#30af91',
+			'green-crayola': '#16b364',
+			'british-racing-green': '#084c2e',
+			'dartmouth-green': '#087443',
+			'rusty-red': '#dc3545',
+			'chocolate-cosmos': '#520c13',
+			'upsdell-red': '#a71d2a',
 			'alice-blue': '#ecf3fb',
 			'american-orange': '#ff8a00',
 			'crayola-yellow': '#ffe57f',
@@ -37,7 +43,8 @@ export default {
 			'resolution-blue': '#012f80',
 			zumthor: '#e8f1ff',
 			onahau: '#d1e3ff',
-			anakiwa: '#b0cdff'
+			anakiwa: '#b0cdff',
+			water: '#d1e3ff'
 		},
 		extend: {
 			minWidth: {
