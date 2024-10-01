@@ -95,9 +95,20 @@ export interface PatronPaysIcrc2Tokens {
 	patron: Account;
 }
 export type PaymentError =
+	| {
+			LedgerWithdrawFromError: {
+				error: WithdrawFromError;
+				ledger: Principal;
+			};
+	  }
 	| { LedgerUnreachable: CallerPaysIcrc2Tokens }
+	| {
+			LedgerTransferFromError: {
+				error: TransferFromError;
+				ledger: Principal;
+			};
+	  }
 	| { UnsupportedPaymentType: null }
-	| { LedgerError: { error: WithdrawFromError; ledger: Principal } }
 	| { InsufficientFunds: { needed: bigint; available: bigint } };
 export type PaymentType =
 	| { PatronPaysIcrc2Tokens: PatronPaysIcrc2Tokens }
@@ -156,6 +167,18 @@ export interface SignWithEcdsaArgument {
 export interface SignWithEcdsaResponse {
 	signature: Uint8Array | number[];
 }
+export type TransferFromError =
+	| {
+			GenericError: { message: string; error_code: bigint };
+	  }
+	| { TemporarilyUnavailable: null }
+	| { InsufficientAllowance: { allowance: bigint } }
+	| { BadBurn: { min_burn_amount: bigint } }
+	| { Duplicate: { duplicate_of: bigint } }
+	| { BadFee: { expected_fee: bigint } }
+	| { CreatedInFuture: { ledger_time: bigint } }
+	| { TooOld: null }
+	| { InsufficientFunds: { balance: bigint } };
 export interface Utxo {
 	height: number;
 	value: bigint;
