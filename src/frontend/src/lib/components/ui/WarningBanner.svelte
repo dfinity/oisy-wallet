@@ -3,7 +3,7 @@
 </script>
 
 <div
-	class="inline-flex w-full items-center justify-center gap-2 px-6 py-2 text-xs font-bold sm:w-fit md:text-base text-american-orange bg-cornsilk border border-crayola-yellow rounded-lg"
+	class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-crayola-yellow bg-cornsilk px-6 py-2 text-xs font-bold text-american-orange sm:w-fit md:text-base"
 >
 	<IconWarning inline />
 	<span><slot /></span>

@@ -1,3 +1,3 @@
 <div class="opacity-40" aria-hidden="true">
-	<div class="w-full bg-grey rounded-md animate-pulse h-4"></div>
+	<div class="h-4 w-full animate-pulse rounded-md bg-grey"></div>
 </div>
