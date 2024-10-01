@@ -164,8 +164,8 @@ mod tests {
         let btc_user_pending_transactions = BtcUserPendingTransactions::new(None);
         let principal = Principal::from_text(PRINCIPAL_TEXT_1).unwrap();
 
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal, address1.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal, address1);
         assert!(pending_txs.is_empty());
     }
 
@@ -188,14 +188,14 @@ mod tests {
         assert!(result.is_ok());
 
         // Check that the transaction was added
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal, address1.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal, address1);
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], tx);
 
         // Check that the transaction was added to the proper address
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal, address2.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal, address2);
         assert!(pending_txs.is_empty());
     }
 
@@ -217,8 +217,8 @@ mod tests {
         );
         assert!(result.is_ok());
 
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal2, address1.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal2, address1);
         assert!(pending_txs.is_empty());
     }
 
@@ -304,8 +304,8 @@ mod tests {
             )
             .unwrap();
 
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal, address1.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal, address1);
         assert_eq!(pending_txs.len(), 2);
 
         let all_utxos = &[UTXO_1, UTXO_2];
@@ -316,8 +316,8 @@ mod tests {
             now_ns + 1,
         );
 
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal, address1.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal, address1);
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], valid_transaction);
     }
@@ -355,8 +355,8 @@ mod tests {
             )
             .unwrap();
 
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal, address1.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal, address1);
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[UTXO_1];
@@ -366,8 +366,8 @@ mod tests {
             now_ns,
         );
 
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal, address1.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal, address1);
         assert_eq!(pending_txs.len(), 1);
         assert_eq!(pending_txs[0], transaction_1);
     }
@@ -405,8 +405,8 @@ mod tests {
             )
             .unwrap();
 
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal, address1.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal, address1);
         assert_eq!(pending_txs.len(), 2);
 
         let available_utxos = &[UTXO_1, UTXO_3];
@@ -416,8 +416,8 @@ mod tests {
             now_ns,
         );
 
-        let pending_txs = btc_user_pending_transactions
-            .get_pending_transactions(&principal, address1.to_string());
+        let pending_txs =
+            btc_user_pending_transactions.get_pending_transactions(&principal, address1);
         assert_eq!(pending_txs.len(), 2);
     }
 }
