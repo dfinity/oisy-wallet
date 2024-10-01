@@ -1,18 +1,21 @@
+import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { PostMessageDataResponseBtcWallet } from '$lib/types/post-message';
+import type { PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import { jsonReviver } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
 export const syncWallet = ({
 	data,
 	tokenId
 }: {
-	data: PostMessageDataResponseBtcWallet;
+	data: PostMessageDataResponseWallet;
 	tokenId: TokenId;
 }) => {
 	const {
 		wallet: {
-			balance: { certified, data: balance }
+			balance: { certified, data: balance },
+			newTransactions
 		}
 	} = data;
 
@@ -24,5 +27,8 @@ export const syncWallet = ({
 		}
 	});
 
-	// TODO: placeholder for initialisation of btcTransactionsStore
+	btcTransactionsStore.prepend({
+		tokenId,
+		transactions: JSON.parse(newTransactions, jsonReviver)
+	});
 };
