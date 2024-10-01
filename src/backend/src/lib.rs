@@ -45,6 +45,7 @@ mod bitcoin_api;
 mod bitcoin_utils;
 mod config;
 mod guards;
+mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
