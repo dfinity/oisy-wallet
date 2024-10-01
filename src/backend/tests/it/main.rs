@@ -1,3 +1,4 @@
+mod bitcoin;
 mod config;
 mod custom_token;
 mod guard;
