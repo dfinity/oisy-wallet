@@ -33,13 +33,6 @@
 			"type": "assets",
 			"gzip": true
 		},
-		"new_backend": {
-			"candid": "src/backend/backend.did",
-			"package": "backend",
-			"type": "rust",
-			"optimize": "cycles",
-			"gzip": true
-		},
 		"orbit": {
 			"type": "custom",
 			"candid": "https://raw.githubusercontent.com/dfinity/orbit/%40orbit/station-v0.0.2-alpha.5/apps/wallet/src/generated/station/station.did",
