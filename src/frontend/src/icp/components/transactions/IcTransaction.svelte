@@ -53,7 +53,7 @@
 
 <button on:click={() => modalStore.openIcTransaction(transaction)} class="block w-full border-0">
 	<Card>
-		<span class="first-letter:capitalize inline-block"
+		<span class="inline-block first-letter:capitalize"
 			><IcTransactionLabel label={transactionTypeLabel} fallback={transactionType} /></span
 		>
 

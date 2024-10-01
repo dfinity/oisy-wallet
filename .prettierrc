@@ -16,6 +16,8 @@
     },
     {
       "files": [
+        "src/frontend/src/icp/**/*.svelte",
+        "src/frontend/src/icp-eth/**/*.svelte",
         "src/frontend/src/lib/**/*.svelte"
       ],
       "options": {

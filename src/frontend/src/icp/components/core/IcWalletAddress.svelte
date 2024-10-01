@@ -19,7 +19,7 @@
 		text={$i18n.wallet.text.address_copied}
 	/>
 
-	<p class="pt-2 text-misty-rose break-normal">
+	<p class="break-normal pt-2 text-misty-rose">
 		{$i18n.wallet.text.icp_deposits}
 	</p>
 </div>
