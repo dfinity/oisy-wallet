@@ -30,6 +30,7 @@ export const initSendContext = ({
 	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
 	const sendTokenId = derived(sendToken, ({ id }) => id);
 	const sendTokenStandard = derived(sendToken, ({ standard }) => standard);
+	const sendTokenSymbol = derived(sendToken, ({ symbol }) => symbol);
 
 	const sendBalance = derived(
 		[balancesStore, sendTokenId],
@@ -41,6 +42,7 @@ export const initSendContext = ({
 		sendTokenDecimals,
 		sendTokenId,
 		sendTokenStandard,
+		sendTokenSymbol,
 		sendBalance,
 		...staticContext
 	};
@@ -53,6 +55,7 @@ export interface SendContext {
 	sendTokenDecimals: Readable<number>;
 	sendTokenId: Readable<TokenId>;
 	sendTokenStandard: Readable<TokenStandard>;
+	sendTokenSymbol: Readable<string>;
 	sendBalance: Readable<OptionBalance>;
 	sendPurpose: SendContextPurpose;
 }
