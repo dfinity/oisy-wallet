@@ -1,3 +1,4 @@
+import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { BitcoinNetwork } from '$declarations/signer/signer.did';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -120,8 +121,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		this.postMessageWallet({
 			wallet: {
 				balance,
-				// TODO: Parse transactions to BtcTransactionUi type
-				newTransactions: JSON.stringify(newTransactions, jsonReplacer)
+				newTransactions: JSON.stringify(
+					newTransactions.map((transaction) => mapBtcTransaction({ transaction, btcAddress })),
+					jsonReplacer
+				)
 			}
 		});
 	};
