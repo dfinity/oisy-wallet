@@ -228,7 +228,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
-		allow_signing: IDL.Func([], [Result_1]),
+		allow_signing: IDL.Func([], [Result_1], []),
 		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_2], []),
 		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
 		config: IDL.Func([], [Config]),

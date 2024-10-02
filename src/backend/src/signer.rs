@@ -19,8 +19,8 @@ const LEDGER_FEE: u64 = 1_000_000_000u64;
 /// Typical signer fee in cycles.  Unstable and subject to change.
 /// Note:
 /// - The endpoint prices can be seen here: <https://github.com/dfinity/chain-fusion-signer/blob/main/src/signer/canister/src/lib.rs>
-/// - At the time of writing, the endpoint prices in the cfs repo are placeholders.  Initial measurements indicate that a typical real fee will be about 80T.
-/// - PAPI is likely to offer an endpoint returning a pricelist in futurse, so we can periodically check the price and adjust this value.
+/// - At the time of writing, the endpoint prices in the chain fusion signer repo are placeholders.  Initial measurements indicate that a typical real fee will be about 80T.
+/// - PAPI is likely to offer an endpoint returning a pricelist in future, so we can periodically check the price and adjust this value.
 const SIGNER_FEE: u64 = 80_000_000_000;
 /// A reasonable number of signing operations per user per login.
 ///

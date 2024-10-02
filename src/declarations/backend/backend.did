@@ -184,7 +184,7 @@ type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
-  allow_signing : () -> (Result_1) query;
+  allow_signing : () -> (Result_1);
   btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_2);
   bulk_up : (blob) -> ();
   config : () -> (Config) query;
