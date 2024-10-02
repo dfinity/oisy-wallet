@@ -46,6 +46,26 @@ export const idlFactory = ({ IDL }) => {
 		Ok: IDL.Null,
 		Err: AddUserCredentialError
 	});
+	const ApproveError = IDL.Variant({
+		GenericError: IDL.Record({
+			message: IDL.Text,
+			error_code: IDL.Nat
+		}),
+		TemporarilyUnavailable: IDL.Null,
+		Duplicate: IDL.Record({ duplicate_of: IDL.Nat }),
+		BadFee: IDL.Record({ expected_fee: IDL.Nat }),
+		AllowanceChanged: IDL.Record({ current_allowance: IDL.Nat }),
+		CreatedInFuture: IDL.Record({ ledger_time: IDL.Nat64 }),
+		TooOld: IDL.Null,
+		Expired: IDL.Record({ ledger_time: IDL.Nat64 }),
+		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
+	});
+	const AllowSigningError = IDL.Variant({
+		ApproveError: ApproveError,
+		Other: IDL.Text,
+		FailedToContactCyclesLedger: IDL.Null
+	});
+	const Result_1 = IDL.Variant({ Ok: IDL.Null, Err: AllowSigningError });
 	const BitcoinNetwork = IDL.Variant({
 		mainnet: IDL.Null,
 		regtest: IDL.Null,
@@ -73,7 +93,7 @@ export const idlFactory = ({ IDL }) => {
 	const SelectedUtxosFeeError = IDL.Variant({
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
-	const Result_1 = IDL.Variant({
+	const Result_2 = IDL.Variant({
 		Ok: SelectedUtxosFeeResponse,
 		Err: SelectedUtxosFeeError
 	});
@@ -119,7 +139,7 @@ export const idlFactory = ({ IDL }) => {
 		module_hash: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const GetUserProfileError = IDL.Variant({ NotFound: IDL.Null });
-	const Result_2 = IDL.Variant({
+	const Result_3 = IDL.Variant({
 		Ok: UserProfile,
 		Err: GetUserProfileError
 	});
@@ -200,27 +220,28 @@ export const idlFactory = ({ IDL }) => {
 		to: IDL.Principal,
 		progress: MigrationProgress
 	});
-	const Result_3 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
-	const Result_4 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
+	const Result_4 = IDL.Variant({ Ok: MigrationReport, Err: IDL.Text });
+	const Result_5 = IDL.Variant({ Ok: IDL.Null, Err: IDL.Text });
 	const UserTokenId = IDL.Record({
 		chain_id: IDL.Nat64,
 		contract_address: IDL.Text
 	});
 	return IDL.Service({
 		add_user_credential: IDL.Func([AddUserCredentialRequest], [Result], []),
-		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_1], []),
+		allow_signing: IDL.Func([], [Result_1], []),
+		btc_select_user_utxos_fee: IDL.Func([SelectedUtxosFeeRequest], [Result_2], []),
 		bulk_up: IDL.Func([IDL.Vec(IDL.Nat8)], [], []),
 		config: IDL.Func([], [Config], ['query']),
 		create_user_profile: IDL.Func([], [UserProfile], []),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),
-		get_user_profile: IDL.Func([], [Result_2], ['query']),
+		get_user_profile: IDL.Func([], [Result_3], ['query']),
 		http_request: IDL.Func([HttpRequest], [HttpResponse], ['query']),
 		list_custom_tokens: IDL.Func([], [IDL.Vec(CustomToken)], ['query']),
 		list_user_tokens: IDL.Func([], [IDL.Vec(UserToken)], ['query']),
 		list_users: IDL.Func([ListUsersRequest], [ListUsersResponse], ['query']),
-		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_3], []),
+		migrate_user_data_to: IDL.Func([IDL.Principal], [Result_4], []),
 		migration: IDL.Func([], [IDL.Opt(MigrationReport)], ['query']),
-		migration_stop_timer: IDL.Func([], [Result_4], []),
+		migration_stop_timer: IDL.Func([], [Result_5], []),
 		remove_user_token: IDL.Func([UserTokenId], [], []),
 		set_custom_token: IDL.Func([CustomToken], [], []),
 		set_guards: IDL.Func([Guards], [], []),
