@@ -61,19 +61,19 @@
 			{#each value.chains ?? [] as chainId}
 				{@const chainName = EIP155_CHAINS[chainId]?.name ?? ''}
 
-				<p class="font-bold mt-6">
+				<p class="mt-6 font-bold">
 					{replacePlaceholders($i18n.wallet_connect.text.review, {
 						$chain_name: chainName,
 						$key: key
 					})}:
 				</p>
 
-				<article class="bg-dust rounded-sm p-4 mt-4">
+				<article class="mt-4 rounded-sm bg-dust p-4">
 					<p class="font-bold">{$i18n.wallet_connect.text.methods}:</p>
 
 					<p>{allMethods.length ? allMethods.join(', ') : '-'}</p>
 
-					<p class="font-bold mt-4">{$i18n.wallet_connect.text.events}:</p>
+					<p class="mt-4 font-bold">{$i18n.wallet_connect.text.events}:</p>
 
 					<p>{allEvents.length ? allEvents.join(', ') : '-'}</p>
 				</article>
@@ -86,7 +86,7 @@
 	</div>
 {:else}
 	<div class="stretch">
-		<div class="flex flex-col items-center justify-center h-[100%] gap-2 min-h-[30vh] pt-8">
+		<div class="flex h-[100%] min-h-[30vh] flex-col items-center justify-center gap-2 pt-8">
 			<div>
 				<Spinner inline />
 			</div>

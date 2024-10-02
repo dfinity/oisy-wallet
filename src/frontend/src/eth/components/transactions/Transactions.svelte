@@ -91,7 +91,7 @@
 	{/each}
 
 	{#if $sortedTransactions.length === 0}
-		<p class="mt-4 text-secondary opacity-50">{$i18n.transactions.text.no_transactions}</p>
+		<p class="text-secondary mt-4 opacity-50">{$i18n.transactions.text.no_transactions}</p>
 	{/if}
 </TransactionsSkeletons>
 
