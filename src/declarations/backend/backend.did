@@ -30,6 +30,22 @@ type ApproveError = variant {
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };
+type BtcAddPendingTransactionError = variant {
+  InternalError : record { msg : text };
+};
+type BtcAddPendingTransactionRequest = record {
+  txid : blob;
+  network : BitcoinNetwork;
+  address : text;
+  utxos : vec Utxo;
+};
+type BtcGetPendingTransactionsReponse = record {
+  transactions : vec PendingTransaction;
+};
+type BtcGetPendingTransactionsRequest = record {
+  network : BitcoinNetwork;
+  address : text;
+};
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -127,6 +143,7 @@ type OisyUser = record {
   updated_timestamp : nat64;
 };
 type Outpoint = record { txid : blob; vout : nat32 };
+type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok; Err : AllowSigningError };
 type Result_2 = variant {

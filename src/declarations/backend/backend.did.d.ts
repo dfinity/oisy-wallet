@@ -33,6 +33,22 @@ export type ApproveError =
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
+export type BtcAddPendingTransactionError = {
+	InternalError: { msg: string };
+};
+export interface BtcAddPendingTransactionRequest {
+	txid: Uint8Array | number[];
+	network: BitcoinNetwork;
+	address: string;
+	utxos: Array<Utxo>;
+}
+export interface BtcGetPendingTransactionsReponse {
+	transactions: Array<PendingTransaction>;
+}
+export interface BtcGetPendingTransactionsRequest {
+	network: BitcoinNetwork;
+	address: string;
+}
 export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
@@ -141,6 +157,10 @@ export interface OisyUser {
 export interface Outpoint {
 	txid: Uint8Array | number[];
 	vout: number;
+}
+export interface PendingTransaction {
+	txid: Uint8Array | number[];
+	utxos: Array<Utxo>;
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
 export type Result_1 = { Ok: null } | { Err: AllowSigningError };
