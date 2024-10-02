@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import AuthenticationGuard from '$lib/components/auth/AuthGuard.svelte';
+	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
@@ -25,7 +25,7 @@
 	back={route === 'settings' ? 'header' : route === 'transactions' ? 'hero' : undefined}
 />
 
-<AuthenticationGuard>
+<AuthGuard>
 	<main class="pb-5 pt-8 sm:pb-12">
 		<LoadersGuard>
 			<slot />
@@ -33,4 +33,4 @@
 	</main>
 
 	<Modals />
-</AuthenticationGuard>
+</AuthGuard>
