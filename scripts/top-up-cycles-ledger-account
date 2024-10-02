@@ -2,7 +2,7 @@
 set -euo pipefail
 
 print_help() {
-	cat <<-EOF
+  cat <<-EOF
 	Adds cyles to a given principal's main account on the cycles ledger.
 
 	Usage: $(basename "$0") <principal|canister_name> <cycles>
@@ -15,7 +15,6 @@ print_help() {
   print_help
   exit 0
 }
-
 
 account="$1"
 sum="$2"
