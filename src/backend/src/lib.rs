@@ -31,6 +31,7 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
+use signer::AllowSigningError;
 use std::cell::RefCell;
 use std::time::Duration;
 use types::{
@@ -49,6 +50,7 @@ mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
+mod signer;
 mod state;
 mod token;
 mod types;
@@ -396,6 +398,18 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
             Err(err) => Err(err),
         }
     })
+}
+
+/// An endpoint to be called by users on first login, to enable them to
+/// use the chain fusion signer together with Oisy.
+///
+/// Note:
+/// - The chain fusion signer performs threshold key operations including providing
+///   public keys, creating signatures and assisting with performing signed Bitcoin
+///   and Ethereum transactions.
+#[update(guard = "may_read_user_data")]
+async fn allow_signing() -> Result<(), AllowSigningError> {
+    signer::allow_signing().await
 }
 
 #[query(guard = "caller_is_allowed")]

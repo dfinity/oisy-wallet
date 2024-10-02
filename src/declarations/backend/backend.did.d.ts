@@ -13,7 +13,23 @@ export interface AddUserCredentialRequest {
 	current_user_version: [] | [bigint];
 	credential_spec: CredentialSpec;
 }
+export type AllowSigningError =
+	| { ApproveError: ApproveError }
+	| { Other: string }
+	| { FailedToContactCyclesLedger: null };
 export type ApiEnabled = { ReadOnly: null } | { Enabled: null } | { Disabled: null };
+export type ApproveError =
+	| {
+			GenericError: { message: string; error_code: bigint };
+	  }
+	| { TemporarilyUnavailable: null }
+	| { Duplicate: { duplicate_of: bigint } }
+	| { BadFee: { expected_fee: bigint } }
+	| { AllowanceChanged: { current_allowance: bigint } }
+	| { CreatedInFuture: { ledger_time: bigint } }
+	| { TooOld: null }
+	| { Expired: { ledger_time: bigint } }
+	| { InsufficientFunds: { balance: bigint } };
 export type Arg = { Upgrade: null } | { Init: InitArg };
 export type ArgumentValue = { Int: number } | { String: string };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
@@ -127,10 +143,11 @@ export interface Outpoint {
 	vout: number;
 }
 export type Result = { Ok: null } | { Err: AddUserCredentialError };
-export type Result_1 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
-export type Result_2 = { Ok: UserProfile } | { Err: GetUserProfileError };
-export type Result_3 = { Ok: MigrationReport } | { Err: string };
-export type Result_4 = { Ok: null } | { Err: string };
+export type Result_1 = { Ok: null } | { Err: AllowSigningError };
+export type Result_2 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFeeError };
+export type Result_3 = { Ok: UserProfile } | { Err: GetUserProfileError };
+export type Result_4 = { Ok: MigrationReport } | { Err: string };
+export type Result_5 = { Ok: null } | { Err: string };
 export type SelectedUtxosFeeError = { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
 	network: BitcoinNetwork;
@@ -186,19 +203,20 @@ export interface Utxo {
 }
 export interface _SERVICE {
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], Result>;
-	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_1>;
+	allow_signing: ActorMethod<[], Result_1>;
+	btc_select_user_utxos_fee: ActorMethod<[SelectedUtxosFeeRequest], Result_2>;
 	bulk_up: ActorMethod<[Uint8Array | number[]], undefined>;
 	config: ActorMethod<[], Config>;
 	create_user_profile: ActorMethod<[], UserProfile>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
-	get_user_profile: ActorMethod<[], Result_2>;
+	get_user_profile: ActorMethod<[], Result_3>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	list_custom_tokens: ActorMethod<[], Array<CustomToken>>;
 	list_user_tokens: ActorMethod<[], Array<UserToken>>;
 	list_users: ActorMethod<[ListUsersRequest], ListUsersResponse>;
-	migrate_user_data_to: ActorMethod<[Principal], Result_3>;
+	migrate_user_data_to: ActorMethod<[Principal], Result_4>;
 	migration: ActorMethod<[], [] | [MigrationReport]>;
-	migration_stop_timer: ActorMethod<[], Result_4>;
+	migration_stop_timer: ActorMethod<[], Result_5>;
 	remove_user_token: ActorMethod<[UserTokenId], undefined>;
 	set_custom_token: ActorMethod<[CustomToken], undefined>;
 	set_guards: ActorMethod<[Guards], undefined>;
