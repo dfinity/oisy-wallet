@@ -24,7 +24,7 @@
 	$: icon = type === 'send' ? IconSend : IconReceive;
 </script>
 
-<button class="contents">
+<button class="contents" on:click>
 	<Card>
 		<span class="inline-block first-letter:capitalize">{label}</span>
 
