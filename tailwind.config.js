@@ -47,8 +47,8 @@ export default {
 			water: '#d1e3ff'
 		},
 		extend: {
-			minWidth: {
-				'2_5xl': '1728px'
+			screens: {
+				'2.5xl': '1728px'
 			}
 		}
 	},
