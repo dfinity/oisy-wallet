@@ -118,13 +118,15 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			? await this.loadBtcTransactions({ btcAddress })
 			: [];
 
+		const uncertifiedTransactions = newTransactions.map((transaction) => ({
+			data: mapBtcTransaction({ transaction, btcAddress }),
+			certified: false
+		}));
+
 		this.postMessageWallet({
 			wallet: {
 				balance,
-				newTransactions: JSON.stringify(
-					newTransactions.map((transaction) => mapBtcTransaction({ transaction, btcAddress })),
-					jsonReplacer
-				)
+				newTransactions: JSON.stringify(uncertifiedTransactions, jsonReplacer)
 			}
 		});
 	};
