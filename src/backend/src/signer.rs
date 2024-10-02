@@ -16,8 +16,8 @@ pub enum AllowSigningError {
 ///
 /// Signing costs cycles.  Managing that cycle payment can be painful so we take care of that.
 pub async fn allow_signing() -> Result<(), AllowSigningError> {
-    let cycles_ledger: Principal = CYCLES_LEDGER.clone();
-    let signer: Principal = SIGNER.clone();
+    let cycles_ledger: Principal = *CYCLES_LEDGER;
+    let signer: Principal = *SIGNER;
     let caller = ic_cdk::caller();
     let expected_fee = 1_000_000_000u64;
     let amount = Nat::from(100 * expected_fee);
@@ -38,7 +38,7 @@ pub async fn allow_signing() -> Result<(), AllowSigningError> {
         .await
         .map_err(|_| AllowSigningError::FailedToContactCyclesLedger)?
         .0
-        .map_err(|e| AllowSigningError::ApproveError(e))?;
+        .map_err(AllowSigningError::ApproveError)?;
     Ok(())
 }
 
