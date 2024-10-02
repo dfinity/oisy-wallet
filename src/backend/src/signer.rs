@@ -14,11 +14,11 @@ pub enum AllowSigningError {
 
 /// Current ledger fee in cycles.  Historically stable.
 ///
-/// https://github.com/dfinity/cycles-ledger/blob/1de0e55c6d4fba4bde3e81547e5726df92b881dc/cycles-ledger/src/config.rs#L6
+/// <https://github.com/dfinity/cycles-ledger/blob/1de0e55c6d4fba4bde3e81547e5726df92b881dc/cycles-ledger/src/config.rs#L6>
 const LEDGER_FEE: u64 = 1_000_000_000u64;
 /// Typical signer fee in cycles.  Unstable and subject to change.
 /// Note:
-/// - The endpoint prices can be seen here: https://github.com/dfinity/chain-fusion-signer/blob/main/src/signer/canister/src/lib.rs
+/// - The endpoint prices can be seen here: <https://github.com/dfinity/chain-fusion-signer/blob/main/src/signer/canister/src/lib.rs>
 /// - At the time of writing, the endpoint prices in the cfs repo are placeholders.  Initial measurements indicate that a typical real fee will be about 80T.
 /// - PAPI is likely to offer an endpoint returning a pricelist in futurse, so we can periodically check the price and adjust this value.
 const SIGNER_FEE: u64 = 80_000_000_000;
@@ -28,6 +28,7 @@ const SIGNER_FEE: u64 = 80_000_000_000;
 /// - Getting Ethereum address (1x per login)
 /// - Getting Bitcoin address (1x per login)
 /// - Signing operations (10x per login)
+///
 /// Margin of error: 3x (given  that the signer fee is subject to change in the next few days and weeks)
 const SIGNING_OPS_PER_LOGIN: u64 = 36;
 const fn per_user_cycles_allowance() -> u64 {
