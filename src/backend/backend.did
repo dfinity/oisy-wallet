@@ -30,6 +30,22 @@ type ApproveError = variant {
 type Arg = variant { Upgrade; Init : InitArg };
 type ArgumentValue = variant { Int : int32; String : text };
 type BitcoinNetwork = variant { mainnet; regtest; testnet };
+type BtcAddPendingTransactionError = variant {
+  InternalError : record { msg : text };
+};
+type BtcAddPendingTransactionRequest = record {
+  txid : blob;
+  network : BitcoinNetwork;
+  address : text;
+  utxos : vec Utxo;
+};
+type BtcGetPendingTransactionsReponse = record {
+  transactions : vec PendingTransaction;
+};
+type BtcGetPendingTransactionsRequest = record {
+  network : BitcoinNetwork;
+  address : text;
+};
 type CanisterStatusResultV2 = record {
   controller : principal;
   status : CanisterStatusType;
@@ -127,15 +143,21 @@ type OisyUser = record {
   updated_timestamp : nat64;
 };
 type Outpoint = record { txid : blob; vout : nat32 };
+type PendingTransaction = record { txid : blob; utxos : vec Utxo };
 type Result = variant { Ok; Err : AddUserCredentialError };
 type Result_1 = variant { Ok; Err : AllowSigningError };
-type Result_2 = variant {
+type Result_2 = variant { Ok; Err : BtcAddPendingTransactionError };
+type Result_3 = variant {
+  Ok : BtcGetPendingTransactionsReponse;
+  Err : BtcAddPendingTransactionError;
+};
+type Result_4 = variant {
   Ok : SelectedUtxosFeeResponse;
   Err : SelectedUtxosFeeError;
 };
-type Result_3 = variant { Ok : UserProfile; Err : GetUserProfileError };
-type Result_4 = variant { Ok : MigrationReport; Err : text };
-type Result_5 = variant { Ok; Err : text };
+type Result_5 = variant { Ok : UserProfile; Err : GetUserProfileError };
+type Result_6 = variant { Ok : MigrationReport; Err : text };
+type Result_7 = variant { Ok; Err : text };
 type SelectedUtxosFeeError = variant { InternalError : record { msg : text } };
 type SelectedUtxosFeeRequest = record {
   network : BitcoinNetwork;
@@ -185,19 +207,23 @@ type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
   add_user_credential : (AddUserCredentialRequest) -> (Result);
   allow_signing : () -> (Result_1);
-  btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_2);
+  btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (Result_2);
+  btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
+      Result_3,
+    );
+  btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (Result_4);
   bulk_up : (blob) -> ();
   config : () -> (Config) query;
   create_user_profile : () -> (UserProfile);
   get_canister_status : () -> (CanisterStatusResultV2);
-  get_user_profile : () -> (Result_3) query;
+  get_user_profile : () -> (Result_5) query;
   http_request : (HttpRequest) -> (HttpResponse) query;
   list_custom_tokens : () -> (vec CustomToken) query;
   list_user_tokens : () -> (vec UserToken) query;
   list_users : (ListUsersRequest) -> (ListUsersResponse) query;
-  migrate_user_data_to : (principal) -> (Result_4);
+  migrate_user_data_to : (principal) -> (Result_6);
   migration : () -> (opt MigrationReport) query;
-  migration_stop_timer : () -> (Result_5);
+  migration_stop_timer : () -> (Result_7);
   remove_user_token : (UserTokenId) -> ();
   set_custom_token : (CustomToken) -> ();
   set_guards : (Guards) -> ();

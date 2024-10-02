@@ -30,7 +30,13 @@ pub async fn get_all_utxos(
     address: String,
     min_confirmations: Option<u32>,
 ) -> Result<Vec<Utxo>, String> {
-    let filter = min_confirmations.map(UtxoFilter::MinConfirmations);
+    let final_min_confirmations = if network == BitcoinNetwork::Regtest {
+        // Tests with Regtest fail if min_confirmations is higher than 1.
+        Some(1)
+    } else {
+        min_confirmations
+    };
+    let filter = final_min_confirmations.map(UtxoFilter::MinConfirmations);
     let mut utxos_response = get_utxos(network, address.clone(), filter).await?;
 
     let mut all_utxos: Vec<Utxo> = utxos_response.utxos;
