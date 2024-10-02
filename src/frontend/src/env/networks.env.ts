@@ -1,4 +1,10 @@
-import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
+import type { BitcoinNetwork } from '$btc/types/network';
+import {
+	BTC_MAINNET_EXPLORER_URL,
+	BTC_TESTNET_EXPLORER_URL,
+	ETHEREUM_EXPLORER_URL,
+	SEPOLIA_EXPLORER_URL
+} from '$env/explorers.env';
 import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
@@ -82,11 +88,12 @@ export const BTC_MAINNET_NETWORK_SYMBOL = 'BTC';
 
 export const BTC_MAINNET_NETWORK_ID = Symbol(BTC_MAINNET_NETWORK_SYMBOL);
 
-export const BTC_MAINNET_NETWORK: Network = {
+export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 	id: BTC_MAINNET_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Bitcoin',
 	icon: bitcoin,
+	explorerUrl: BTC_MAINNET_EXPLORER_URL,
 	buy: { onramperId: 'bitcoin' }
 };
 
@@ -94,10 +101,11 @@ export const BTC_TESTNET_NETWORK_SYMBOL = 'BTC (Testnet)';
 
 export const BTC_TESTNET_NETWORK_ID = Symbol(BTC_TESTNET_NETWORK_SYMBOL);
 
-export const BTC_TESTNET_NETWORK: Network = {
+export const BTC_TESTNET_NETWORK: BitcoinNetwork = {
 	id: BTC_TESTNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'Bitcoin',
+	explorerUrl: BTC_TESTNET_EXPLORER_URL,
 	icon: bitcoinTestnet
 };
 
@@ -105,13 +113,13 @@ export const BTC_REGTEST_NETWORK_SYMBOL = 'BTC (Regtest)';
 
 export const BTC_REGTEST_NETWORK_ID = Symbol(BTC_REGTEST_NETWORK_SYMBOL);
 
-export const BTC_REGTEST_NETWORK: Network = {
+export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	id: BTC_REGTEST_NETWORK_ID,
 	env: 'testnet',
 	name: 'Bitcoin (Regtest)'
 };
 
-export const BITCOIN_NETWORKS: Network[] = [
+export const BITCOIN_NETWORKS: BitcoinNetwork[] = [
 	BTC_MAINNET_NETWORK,
 	BTC_TESTNET_NETWORK,
 	...(LOCAL ? [BTC_REGTEST_NETWORK] : [])
