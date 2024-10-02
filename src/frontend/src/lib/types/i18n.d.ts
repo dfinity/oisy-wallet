@@ -471,6 +471,7 @@ interface I18nTransaction {
 		block: string;
 		interacted_with: string;
 		pending: string;
+		status: string;
 	};
 	status: { included: string; safe: string; finalised: string };
 	label: {
