@@ -15,7 +15,7 @@
 	export let value: BigNumber | undefined;
 	export let type: TransactionType;
 	export let pending: boolean;
-	export let timestamp: number | undefined;
+	export let timestamp: bigint | undefined;
 
 	let label: string;
 	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
@@ -38,7 +38,7 @@
 
 		<svelte:fragment slot="description">
 			{#if nonNullish(timestamp)}
-				{formatSecondsToDate(timestamp)}
+				{formatSecondsToDate(Number(timestamp))}
 			{/if}
 
 			<TransactionPending {pending} />

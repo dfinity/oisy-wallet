@@ -4,7 +4,7 @@ export type BtcTransactionStatus = 'confirmed' | 'pending';
 
 export interface BtcTransactionUi {
 	id: string;
-	timestamp: number;
+	timestamp?: bigint;
 	value?: bigint;
 	type: TransactionType;
 	status: BtcTransactionStatus;
