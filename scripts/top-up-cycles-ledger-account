@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+print_help() {
+	cat <<-EOF
+	Adds cyles to a given principal's main account on the cycles ledger.
+
+	Usage: $(basename "$0") <principal|canister_name> <cycles>
+	E.g.   $(basename "$0") bd3sg-teaaa-aaaaa-qaaba-cai 1000000000
+	Or     $(basename "$0") my_canister 1000000000
+	EOF
+}
+
+[[ "${1:-}" != "--help" ]] || {
+  print_help
+  exit 0
+}
+
+
+account="$1"
+sum="$2"
+dfx wallet send "$(dfx canister id cycles_depositor)" "$sum"
+dfx canister call cycles_depositor deposit '
+(
+  record {
+    to = record {
+    owner = principal "'"$(dfx canister id "$account")"'";
+      subaccount = null;
+    };
+    memo = null;
+    cycles = '"$sum"' : nat;
+  },
+)
+'
