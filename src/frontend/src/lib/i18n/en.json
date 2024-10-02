@@ -530,7 +530,8 @@
 			"to_copied": "To address copied to clipboard.",
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
-			"pending": "Pending..."
+			"pending": "Pending...",
+			"status": "Status"
 		},
 		"status": {
 			"included": "Included",
