@@ -12,6 +12,30 @@ pub enum AllowSigningError {
     ApproveError(ApproveError),
 }
 
+/// Current ledger fee.  Historically stable.
+///
+/// https://github.com/dfinity/cycles-ledger/blob/1de0e55c6d4fba4bde3e81547e5726df92b881dc/cycles-ledger/src/config.rs#L6
+const LEDGER_FEE: u64 = 1_000_000_000u64;
+/// Typical signer fee.  Unstable and subject to change.
+/// Note:
+/// - The endpoint prices can be seen here: https://github.com/dfinity/chain-fusion-signer/blob/main/src/signer/canister/src/lib.rs
+/// - At the time of writing, the endpoint prices in the cfs repo are placeholders.  Initial measurements indicate that a typical real fee will be about 80T.
+/// - PAPI is likely to offer an endpoint returning a pricelist in futurse, so we can periodically check the price and adjust this value.
+const SIGNER_FEE: u64 = 80_000_000_000;
+/// A reasonable number of signing operations per user per login.
+///
+/// Projected uses:
+/// - Getting Ethereum address (1x per login)
+/// - Getting Bitcoin address (1x per login)
+/// - Signing operations (10x per login)
+/// Margin of error: 3x (given  that the signer fee is subject to change in the next few days and weeks)
+const SIGNING_OPS_PER_LOGIN: u64 = 36;
+const fn per_user_cycles_allowance() -> u64 {
+    // Creating the allowance costs 1 ledger fee.
+    // Every usage costs 1 ledger fee + 1 signer fee.
+    LEDGER_FEE + (LEDGER_FEE + SIGNER_FEE) * SIGNING_OPS_PER_LOGIN
+}
+
 /// Enables the user to sign transactions.
 ///
 /// Signing costs cycles.  Managing that cycle payment can be painful so we take care of that.
@@ -19,8 +43,7 @@ pub async fn allow_signing() -> Result<(), AllowSigningError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
     let caller = ic_cdk::caller();
-    let expected_fee = 1_000_000_000u64;
-    let amount = Nat::from(100 * expected_fee);
+    let amount = Nat::from(per_user_cycles_allowance());
     CyclesLedgerService(cycles_ledger)
         .icrc_2_approve(&ApproveArgs {
             spender: Account {

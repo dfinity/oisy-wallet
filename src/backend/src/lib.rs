@@ -402,7 +402,7 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
 
 /// An endpoint to be called by users on first login, to enable them to
 /// use the chain fusion signer together with Oisy.
-/// 
+///
 /// Note:
 /// - The chain fusion signer performs threshold key operations including providing
 ///   public keys, creating signatures and assisting with performing signed Bitcoin
