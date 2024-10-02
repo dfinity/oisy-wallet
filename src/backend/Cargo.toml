@@ -15,9 +15,12 @@ hex = { workspace = true }
 ic-cdk = { workspace = true }
 ic-cdk-macros = { workspace = true }
 ic-cdk-timers = { workspace = true }
+ic-cycles-ledger-client = { workspace = true }
+ic-ledger-types = { workspace = true }
 ic-stable-structures = { workspace = true }
 ic-verifiable-credentials = { workspace = true }
 k256 = { workspace = true }
+lazy_static = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }

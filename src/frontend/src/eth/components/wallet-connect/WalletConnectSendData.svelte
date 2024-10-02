@@ -8,8 +8,8 @@
 </script>
 
 {#if nonNullish(data)}
-	<label for="data" class="font-bold px-4.5">{$i18n.wallet_connect.text.hex_data}:</label>
-	<div id="data" class="font-normal mb-4 px-4.5 flex items-center gap-1">
+	<label for="data" class="px-4.5 font-bold">{$i18n.wallet_connect.text.hex_data}:</label>
+	<div id="data" class="px-4.5 mb-4 flex items-center gap-1 font-normal">
 		{shortenWithMiddleEllipsis({ text: data })}<Copy
 			inline
 			value={data}

@@ -11,9 +11,9 @@ const DAY_IN_NS: u64 = 24 * 60 * 60 * 1_000_000_000;
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct StoredPendingTransaction {
-    txid: Vec<u8>,
-    utxos: Vec<Utxo>,
-    created_at_timestamp_ns: u64,
+    pub txid: Vec<u8>,
+    pub utxos: Vec<Utxo>,
+    pub created_at_timestamp_ns: u64,
 }
 
 type BitcoinAddress = String;

@@ -66,7 +66,7 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="rounded-lg qr-code">
+	<div class="qr-code rounded-lg">
 		{#if renderQRCodeReader}
 			<QRCodeReader on:nnsQRCode={onQRCodeSuccess} on:nnsQRCodeError={error} />
 		{/if}
@@ -74,14 +74,14 @@
 		{#if !renderQRCodeReader}
 			<button
 				type="button"
-				class="wallet-connect inset-center text-white font-bold text-center"
+				class="wallet-connect inset-center text-center font-bold text-white"
 				style="padding: var(--padding) var(--padding-3x)"
 				on:click={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</button
 			>
 		{/if}
 	</div>
 
-	<p class="text-center pt-4 pb-2">{$i18n.wallet_connect.text.or_use_link}</p>
+	<p class="pb-2 pt-4 text-center">{$i18n.wallet_connect.text.or_use_link}</p>
 
 	<Input
 		name="uri"
