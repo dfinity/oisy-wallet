@@ -5,6 +5,8 @@ use bitcoin_utils::estimate_fee;
 use candid::Principal;
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
+use heap_state::btc_user_pending_tx_state::StoredPendingTransaction;
+use heap_state::state::with_btc_pending_transactions;
 use ic_cdk::api::time;
 use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
@@ -20,6 +22,8 @@ use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
 use shared::types::bitcoin::{
+    BtcAddPendingTransactionError, BtcAddPendingTransactionRequest, BtcGetPendingTransactionsError,
+    BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest, PendingTransaction,
     SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
 };
 use shared::types::custom_token::{CustomToken, CustomTokenId};
@@ -31,6 +35,7 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
+use signer::AllowSigningError;
 use std::cell::RefCell;
 use std::time::Duration;
 use types::{
@@ -49,6 +54,7 @@ mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
+mod signer;
 mod state;
 mod token;
 mod types;
@@ -337,6 +343,68 @@ async fn btc_select_user_utxos_fee(
 }
 
 #[update(guard = "may_write_user_data")]
+async fn btc_add_pending_transaction(
+    params: BtcAddPendingTransactionRequest,
+) -> Result<(), BtcAddPendingTransactionError> {
+    let principal = ic_cdk::caller();
+    let current_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.address.clone(),
+        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+    )
+    .await
+    .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+    let now_ns = time();
+
+    with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        let current_pending_transaction = StoredPendingTransaction {
+            txid: params.txid,
+            utxos: params.utxos,
+            created_at_timestamp_ns: now_ns,
+        };
+        pending_transactions
+            .add_pending_transaction(principal, params.address, current_pending_transaction)
+            .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
+    })
+}
+
+#[update(guard = "may_read_user_data")]
+async fn btc_get_pending_transactions(
+    params: BtcGetPendingTransactionsRequest,
+) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
+    let principal = ic_cdk::caller();
+    let now_ns = time();
+
+    let current_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.address.clone(),
+        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+    )
+    .await
+    .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+
+    let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        pending_transactions
+            .get_pending_transactions(&principal, &params.address)
+            .clone()
+    });
+
+    let pending_transactions = stored_transactions
+        .iter()
+        .map(|tx| PendingTransaction {
+            txid: tx.txid.clone(),
+            utxos: tx.utxos.clone(),
+        })
+        .collect();
+
+    Ok(BtcGetPendingTransactionsReponse {
+        transactions: pending_transactions,
+    })
+}
+
+#[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
     let user_principal = ic_cdk::caller();
@@ -396,6 +464,18 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
             Err(err) => Err(err),
         }
     })
+}
+
+/// An endpoint to be called by users on first login, to enable them to
+/// use the chain fusion signer together with Oisy.
+///
+/// Note:
+/// - The chain fusion signer performs threshold key operations including providing
+///   public keys, creating signatures and assisting with performing signed Bitcoin
+///   and Ethereum transactions.
+#[update(guard = "may_read_user_data")]
+async fn allow_signing() -> Result<(), AllowSigningError> {
+    signer::allow_signing().await
 }
 
 #[query(guard = "caller_is_allowed")]

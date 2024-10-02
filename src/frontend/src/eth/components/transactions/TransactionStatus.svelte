@@ -74,7 +74,7 @@
 	})();
 </script>
 
-<label for="to" class="px-4.5 font-bold">Status:</label>
+<label for="to" class="px-4.5 font-bold">{$i18n.transaction.text.status}:</label>
 
 <p id="to" class="px-4.5 mb-4 break-all font-normal first-letter:capitalize">
 	{#if nonNullish(status)}

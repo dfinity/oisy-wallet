@@ -11,8 +11,6 @@
     class:sm:w-80={!fullWidth}
 	data-tid="login-button"
 >
-	{$i18n.core.text.open}
-	<span>|</span>
-	{$i18n.core.text.create}
+	{$i18n.auth.text.authenticate}
 	<IconAstronautArrow />
 </button>
