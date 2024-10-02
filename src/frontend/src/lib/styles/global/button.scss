@@ -25,10 +25,15 @@ button {
 
 	&.primary,
 	&.secondary,
-	&.secondary-alt {
+	&.tertiary-link {
 		justify-content: flex-start;
 
 		padding: var(--button-padding);
+
+		&.icon {
+			--button-border-radius: var(--border-radius-sm-1_5x);
+			--button-padding: var(--padding);
+		}
 	}
 
 	// TODO: check with Design team if this class is still needed
@@ -39,7 +44,7 @@ button {
 
 	&.primary,
 	&.secondary,
-	&.secondary-alt {
+	&.tertiary-link {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
@@ -94,6 +99,19 @@ button {
 	&.secondary-alt {
 		background: var(--color-cetacean-blue);
 		color: var(--color-white);
+	}
+
+	&.tertiary-link {
+		background: var(--color-white);
+		color: var(--color-primary);
+
+		&:hover {
+			color: var(--color-secondary);
+		}
+
+		&:active {
+			background: var(--color-onahau);
+		}
 	}
 
 	&.hero {
