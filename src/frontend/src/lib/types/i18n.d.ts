@@ -19,8 +19,6 @@ interface I18nCore {
 		more: string;
 		reject: string;
 		approve: string;
-		open: string;
-		create: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string };
@@ -38,7 +36,7 @@ interface I18nNavigation {
 }
 
 interface I18nAuth {
-	text: { title_part_1: string; title_part_2: string; logout: string };
+	text: { title_part_1: string; title_part_2: string; logout: string; authenticate: string };
 	alt: { sign_in: string };
 	warning: { not_signed_in: string; session_expired: string };
 	error: {
