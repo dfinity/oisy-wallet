@@ -1,8 +1,8 @@
 <script lang="ts">
 	import IconLogin from '$lib/components/icons/IconLogin.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { signIn } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <ButtonIcon ariaLabel={$i18n.auth.text.authenticate} on:click={async () => await signIn({})}>

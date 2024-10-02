@@ -1,4 +1,4 @@
-<!-- source: DFINITY foundation -->
+<!-- source: ISC Lucide - please visit https://lucide.dev/license -->
 <svg
 	width="22"
 	height="22"
