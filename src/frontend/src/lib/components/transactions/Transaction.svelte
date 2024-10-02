@@ -26,13 +26,15 @@
 
 <button class="contents">
 	<Card>
-		{label}
+		<span class="inline-block first-letter:capitalize">{label}</span>
 
 		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-10' : ''} />
 
-		{#if nonNullish(value)}
-			<Amount amount={BigNumber.from(value)} slot="amount" />
-		{/if}
+		<svelte:fragment slot="amount">
+			{#if nonNullish(value)}
+				<Amount amount={BigNumber.from(value)} />
+			{/if}
+		</svelte:fragment>
 
 		<svelte:fragment slot="description">
 			{#if nonNullish(timestamp)}
