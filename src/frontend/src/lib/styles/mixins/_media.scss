@@ -3,7 +3,6 @@ $breakpoint-small: 576px;
 $breakpoint-medium: 768px;
 $breakpoint-large: 1024px;
 $breakpoint-extra-large: 1300px;
-$breakpoint-extra-extra-large: 1728px;
 
 @mixin min-width($breakpoint) {
 	@if ($breakpoint == xsmall) {
@@ -24,10 +23,6 @@ $breakpoint-extra-extra-large: 1728px;
 		}
 	} @else if ($breakpoint == xlarge) {
 		@media (min-width: $breakpoint-extra-large) {
-			@content;
-		}
-	} @else if ($breakpoint == xxlarge) {
-		@media (min-width: $breakpoint-extra-extra-large) {
 			@content;
 		}
 	} @else {
