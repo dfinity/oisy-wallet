@@ -9,6 +9,7 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { TransactionUiCommon } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -16,16 +17,21 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let from: string;
-	export let typeLabel: string;
-	export let to: string | undefined;
-	export let value: BigNumber | undefined;
-	export let timestamp: number | undefined;
+	export let commonData: TransactionUiCommon;
 	export let hash: string | undefined;
-	export let blockNumber: number | undefined;
-	export let txExplorerUrl: string | undefined;
-	export let fromExplorerUrl: string | undefined;
-	export let toExplorerUrl: string | undefined;
+	export let value: BigNumber | undefined;
+	export let typeLabel: string;
+	export let sendToLabel: string | undefined;
+
+	let from: string;
+	let to: string | undefined;
+	let timestamp: bigint | undefined;
+	let blockNumber: number | undefined;
+	let txExplorerUrl: string | undefined;
+	let fromExplorerUrl: string | undefined;
+	let toExplorerUrl: string | undefined;
+	$: ({ from, blockNumber, timestamp, to, fromExplorerUrl, toExplorerUrl, txExplorerUrl } =
+		commonData);
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -63,7 +69,7 @@
 		{#if nonNullish(timestamp)}
 			<Value ref="timestamp">
 				<svelte:fragment slot="label">{$i18n.transaction.text.timestamp}</svelte:fragment>
-				<output>{formatSecondsToDate(timestamp)}</output>
+				<output>{formatSecondsToDate(Number(timestamp))}</output>
 			</Value>
 		{/if}
 
@@ -89,7 +95,7 @@
 
 		{#if nonNullish(to)}
 			<Value ref="to">
-				<svelte:fragment slot="label">{$i18n.transaction.text.interacted_with}</svelte:fragment>
+				<svelte:fragment slot="label">{sendToLabel}</svelte:fragment>
 				<output>{to}</output><Copy
 					value={to}
 					text={$i18n.transaction.text.to_copied}

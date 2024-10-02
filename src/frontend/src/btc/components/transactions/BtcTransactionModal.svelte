@@ -16,7 +16,7 @@
 	let to: string | undefined;
 	let type: TransactionType;
 	let value: bigint | undefined;
-	let timestamp: number | undefined;
+	let timestamp: bigint | undefined;
 	let id: string;
 	let blockNumber: number | undefined;
 	let status: BtcTransactionStatus;
@@ -30,6 +30,8 @@
 				: BTC_MAINNET_EXPLORER_URL;
 	}
 
+	$: ({ from, value, timestamp, id, blockNumber, to, type, status } = transaction);
+
 	let txExplorerUrl: string | undefined;
 	$: txExplorerUrl = nonNullish(explorerUrl) ? `${explorerUrl}/tx/${id}` : undefined;
 
@@ -39,21 +41,22 @@
 	let fromExplorerUrl: string | undefined;
 	$: fromExplorerUrl =
 		nonNullish(explorerUrl) && nonNullish(to) ? `${explorerUrl}/address/${from}` : undefined;
-
-	$: ({ from, value, timestamp, id, blockNumber, to, type, status } = transaction);
 </script>
 
 <TransactionModal
-	{from}
-	{to}
-	{timestamp}
-	{blockNumber}
+	commonData={{
+		to,
+		from,
+		timestamp,
+		blockNumber,
+		txExplorerUrl,
+		toExplorerUrl,
+		fromExplorerUrl
+	}}
 	hash={id}
-	{txExplorerUrl}
-	{toExplorerUrl}
-	{fromExplorerUrl}
-	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}
 	value={nonNullish(value) ? BigNumber.from(value) : undefined}
+	sendToLabel={$i18n.transaction.text.to}
+	typeLabel={type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive}
 >
 	<!--	TODO: Implement BtcTransactionStatus component	-->
 	<Value ref="status" slot="transaction-status">
