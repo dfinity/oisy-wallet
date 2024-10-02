@@ -11,6 +11,11 @@ export const idlFactory = ({ IDL }) => {
 		regtest: IDL.Null,
 		testnet: IDL.Null
 	});
+	const BitcoinAddressType = IDL.Variant({ P2WPKH: IDL.Null });
+	const GetAddressRequest = IDL.Record({
+		network: BitcoinNetwork,
+		address_type: BitcoinAddressType
+	});
 	const Account = IDL.Record({
 		owner: IDL.Principal,
 		subaccount: IDL.Opt(IDL.Vec(IDL.Nat8))
@@ -27,7 +32,8 @@ export const idlFactory = ({ IDL }) => {
 		CallerPaysIcrc2Tokens: CallerPaysIcrc2Tokens,
 		PatronPaysIcrc2Cycles: Account
 	});
-	const RejectionCode = IDL.Variant({
+	const GetAddressResponse = IDL.Record({ address: IDL.Text });
+	const RejectionCode_1 = IDL.Variant({
 		NoError: IDL.Null,
 		CanisterError: IDL.Null,
 		SysTransient: IDL.Null,
@@ -49,38 +55,97 @@ export const idlFactory = ({ IDL }) => {
 		TooOld: IDL.Null,
 		FailedToWithdrawFrom: IDL.Record({
 			withdraw_from_block: IDL.Opt(IDL.Nat),
-			rejection_code: RejectionCode,
+			rejection_code: RejectionCode_1,
 			refund_block: IDL.Opt(IDL.Nat),
 			approval_refund_block: IDL.Opt(IDL.Nat),
 			rejection_reason: IDL.Text
 		}),
 		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
 	});
+	const TransferFromError = IDL.Variant({
+		GenericError: IDL.Record({
+			message: IDL.Text,
+			error_code: IDL.Nat
+		}),
+		TemporarilyUnavailable: IDL.Null,
+		InsufficientAllowance: IDL.Record({ allowance: IDL.Nat }),
+		BadBurn: IDL.Record({ min_burn_amount: IDL.Nat }),
+		Duplicate: IDL.Record({ duplicate_of: IDL.Nat }),
+		BadFee: IDL.Record({ expected_fee: IDL.Nat }),
+		CreatedInFuture: IDL.Record({ ledger_time: IDL.Nat64 }),
+		TooOld: IDL.Null,
+		InsufficientFunds: IDL.Record({ balance: IDL.Nat })
+	});
 	const PaymentError = IDL.Variant({
-		LedgerUnreachable: CallerPaysIcrc2Tokens,
-		UnsupportedPaymentType: IDL.Null,
-		LedgerError: IDL.Record({
+		LedgerWithdrawFromError: IDL.Record({
 			error: WithdrawFromError,
 			ledger: IDL.Principal
 		}),
+		LedgerUnreachable: CallerPaysIcrc2Tokens,
+		LedgerTransferFromError: IDL.Record({
+			error: TransferFromError,
+			ledger: IDL.Principal
+		}),
+		UnsupportedPaymentType: IDL.Null,
 		InsufficientFunds: IDL.Record({
 			needed: IDL.Nat64,
 			available: IDL.Nat64
 		})
 	});
-	const GenericSigningError = IDL.Variant({
-		SigningError: IDL.Tuple(RejectionCode, IDL.Text),
+	const GetAddressError = IDL.Variant({
+		InternalError: IDL.Record({ msg: IDL.Text }),
 		PaymentError: PaymentError
 	});
-	const Result = IDL.Variant({ Ok: IDL.Text, Err: GenericSigningError });
+	const Result = IDL.Variant({
+		Ok: GetAddressResponse,
+		Err: GetAddressError
+	});
+	const GetBalanceResponse = IDL.Record({ balance: IDL.Nat64 });
 	const Result_1 = IDL.Variant({
-		Ok: IDL.Nat64,
-		Err: GenericSigningError
+		Ok: GetBalanceResponse,
+		Err: GetAddressError
+	});
+	const Outpoint = IDL.Record({
+		txid: IDL.Vec(IDL.Nat8),
+		vout: IDL.Nat32
+	});
+	const Utxo = IDL.Record({
+		height: IDL.Nat32,
+		value: IDL.Nat64,
+		outpoint: Outpoint
+	});
+	const BtcTxOutput = IDL.Record({
+		destination_address: IDL.Text,
+		sent_satoshis: IDL.Nat64
+	});
+	const SendBtcRequest = IDL.Record({
+		fee_satoshis: IDL.Opt(IDL.Nat64),
+		network: BitcoinNetwork,
+		utxos_to_spend: IDL.Vec(Utxo),
+		address_type: BitcoinAddressType,
+		outputs: IDL.Vec(BtcTxOutput)
+	});
+	const SendBtcResponse = IDL.Record({ txid: IDL.Text });
+	const SendBtcError = IDL.Variant({
+		InternalError: IDL.Record({ msg: IDL.Text }),
+		PaymentError: PaymentError
+	});
+	const Result_2 = IDL.Variant({
+		Ok: SendBtcResponse,
+		Err: SendBtcError
 	});
 	const Config = IDL.Record({
 		ecdsa_key_name: IDL.Text,
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8)),
 		cycles_ledger: IDL.Principal
+	});
+	const GenericSigningError = IDL.Variant({
+		SigningError: IDL.Tuple(RejectionCode_1, IDL.Text),
+		PaymentError: PaymentError
+	});
+	const Result_3 = IDL.Variant({
+		Ok: IDL.Text,
+		Err: GenericSigningError
 	});
 	const SignRequest = IDL.Record({
 		to: IDL.Text,
@@ -103,7 +168,7 @@ export const idlFactory = ({ IDL }) => {
 		public_key: IDL.Vec(IDL.Nat8),
 		chain_code: IDL.Vec(IDL.Nat8)
 	});
-	const Result_2 = IDL.Variant({
+	const Result_4 = IDL.Variant({
 		Ok: IDL.Tuple(EcdsaPublicKeyResponse),
 		Err: GenericSigningError
 	});
@@ -113,7 +178,7 @@ export const idlFactory = ({ IDL }) => {
 		message_hash: IDL.Vec(IDL.Nat8)
 	});
 	const SignWithEcdsaResponse = IDL.Record({ signature: IDL.Vec(IDL.Nat8) });
-	const Result_3 = IDL.Variant({
+	const Result_5 = IDL.Variant({
 		Ok: IDL.Tuple(SignWithEcdsaResponse),
 		Err: GenericSigningError
 	});
@@ -152,25 +217,24 @@ export const idlFactory = ({ IDL }) => {
 		status_code: IDL.Nat16
 	});
 	return IDL.Service({
-		btc_caller_address: IDL.Func([BitcoinNetwork, IDL.Opt(PaymentType)], [Result], []),
-		btc_caller_balance: IDL.Func([BitcoinNetwork, IDL.Opt(PaymentType)], [Result_1], []),
-		caller_btc_address: IDL.Func([BitcoinNetwork], [IDL.Text], []),
-		caller_btc_balance: IDL.Func([BitcoinNetwork], [IDL.Nat64], []),
+		btc_caller_address: IDL.Func([GetAddressRequest, IDL.Opt(PaymentType)], [Result], []),
+		btc_caller_balance: IDL.Func([GetAddressRequest, IDL.Opt(PaymentType)], [Result_1], []),
+		btc_caller_send: IDL.Func([SendBtcRequest, IDL.Opt(PaymentType)], [Result_2], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		config: IDL.Func([], [Config]),
 		eth_address_of: IDL.Func([IDL.Principal], [IDL.Text], []),
-		eth_address_of_caller: IDL.Func([IDL.Opt(PaymentType)], [Result], []),
-		eth_address_of_principal: IDL.Func([IDL.Principal, IDL.Opt(PaymentType)], [Result], []),
-		eth_personal_sign: IDL.Func([IDL.Text, IDL.Opt(PaymentType)], [Result], []),
-		eth_sign_transaction: IDL.Func([SignRequest, IDL.Opt(PaymentType)], [Result], []),
+		eth_address_of_caller: IDL.Func([IDL.Opt(PaymentType)], [Result_3], []),
+		eth_address_of_principal: IDL.Func([IDL.Principal, IDL.Opt(PaymentType)], [Result_3], []),
+		eth_personal_sign: IDL.Func([IDL.Text, IDL.Opt(PaymentType)], [Result_3], []),
+		eth_sign_transaction: IDL.Func([SignRequest, IDL.Opt(PaymentType)], [Result_3], []),
 		generic_caller_ecdsa_public_key: IDL.Func(
 			[EcdsaPublicKeyArgument, IDL.Opt(PaymentType)],
-			[Result_2],
+			[Result_4],
 			[]
 		),
 		generic_sign_with_ecdsa: IDL.Func(
 			[IDL.Opt(PaymentType), SignWithEcdsaArgument],
-			[Result_3],
+			[Result_5],
 			[]
 		),
 		get_canister_status: IDL.Func([], [CanisterStatusResultV2], []),

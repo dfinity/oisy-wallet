@@ -7,7 +7,12 @@ export interface Account {
 	subaccount: [] | [Uint8Array | number[]];
 }
 export type Arg = { Upgrade: null } | { Init: InitArg };
+export type BitcoinAddressType = { P2WPKH: null };
 export type BitcoinNetwork = { mainnet: null } | { regtest: null } | { testnet: null };
+export interface BtcTxOutput {
+	destination_address: string;
+	sent_satoshis: bigint;
+}
 export interface CallerPaysIcrc2Tokens {
 	ledger: Principal;
 }
@@ -50,8 +55,21 @@ export interface EcdsaPublicKeyResponse {
 	chain_code: Uint8Array | number[];
 }
 export type GenericSigningError =
-	| { SigningError: [RejectionCode, string] }
+	| {
+			SigningError: [RejectionCode_1, string];
+	  }
 	| { PaymentError: PaymentError };
+export type GetAddressError = { InternalError: { msg: string } } | { PaymentError: PaymentError };
+export interface GetAddressRequest {
+	network: BitcoinNetwork;
+	address_type: BitcoinAddressType;
+}
+export interface GetAddressResponse {
+	address: string;
+}
+export interface GetBalanceResponse {
+	balance: bigint;
+}
 export interface HttpRequest {
 	url: string;
 	method: string;
@@ -68,14 +86,29 @@ export interface InitArg {
 	ic_root_key_der: [] | [Uint8Array | number[]];
 	cycles_ledger: [] | [Principal];
 }
+export interface Outpoint {
+	txid: Uint8Array | number[];
+	vout: number;
+}
 export interface PatronPaysIcrc2Tokens {
 	ledger: Principal;
 	patron: Account;
 }
 export type PaymentError =
+	| {
+			LedgerWithdrawFromError: {
+				error: WithdrawFromError;
+				ledger: Principal;
+			};
+	  }
 	| { LedgerUnreachable: CallerPaysIcrc2Tokens }
+	| {
+			LedgerTransferFromError: {
+				error: TransferFromError;
+				ledger: Principal;
+			};
+	  }
 	| { UnsupportedPaymentType: null }
-	| { LedgerError: { error: WithdrawFromError; ledger: Principal } }
 	| { InsufficientFunds: { needed: bigint; available: bigint } };
 export type PaymentType =
 	| { PatronPaysIcrc2Tokens: PatronPaysIcrc2Tokens }
@@ -91,10 +124,31 @@ export type RejectionCode =
 	| { Unknown: null }
 	| { SysFatal: null }
 	| { CanisterReject: null };
-export type Result = { Ok: string } | { Err: GenericSigningError };
-export type Result_1 = { Ok: bigint } | { Err: GenericSigningError };
-export type Result_2 = { Ok: [EcdsaPublicKeyResponse] } | { Err: GenericSigningError };
-export type Result_3 = { Ok: [SignWithEcdsaResponse] } | { Err: GenericSigningError };
+export type RejectionCode_1 =
+	| { NoError: null }
+	| { CanisterError: null }
+	| { SysTransient: null }
+	| { DestinationInvalid: null }
+	| { Unknown: null }
+	| { SysFatal: null }
+	| { CanisterReject: null };
+export type Result = { Ok: GetAddressResponse } | { Err: GetAddressError };
+export type Result_1 = { Ok: GetBalanceResponse } | { Err: GetAddressError };
+export type Result_2 = { Ok: SendBtcResponse } | { Err: SendBtcError };
+export type Result_3 = { Ok: string } | { Err: GenericSigningError };
+export type Result_4 = { Ok: [EcdsaPublicKeyResponse] } | { Err: GenericSigningError };
+export type Result_5 = { Ok: [SignWithEcdsaResponse] } | { Err: GenericSigningError };
+export type SendBtcError = { InternalError: { msg: string } } | { PaymentError: PaymentError };
+export interface SendBtcRequest {
+	fee_satoshis: [] | [bigint];
+	network: BitcoinNetwork;
+	utxos_to_spend: Array<Utxo>;
+	address_type: BitcoinAddressType;
+	outputs: Array<BtcTxOutput>;
+}
+export interface SendBtcResponse {
+	txid: string;
+}
 export interface SignRequest {
 	to: string;
 	gas: bigint;
@@ -113,6 +167,23 @@ export interface SignWithEcdsaArgument {
 export interface SignWithEcdsaResponse {
 	signature: Uint8Array | number[];
 }
+export type TransferFromError =
+	| {
+			GenericError: { message: string; error_code: bigint };
+	  }
+	| { TemporarilyUnavailable: null }
+	| { InsufficientAllowance: { allowance: bigint } }
+	| { BadBurn: { min_burn_amount: bigint } }
+	| { Duplicate: { duplicate_of: bigint } }
+	| { BadFee: { expected_fee: bigint } }
+	| { CreatedInFuture: { ledger_time: bigint } }
+	| { TooOld: null }
+	| { InsufficientFunds: { balance: bigint } };
+export interface Utxo {
+	height: number;
+	value: bigint;
+	outpoint: Outpoint;
+}
 export type WithdrawFromError =
 	| {
 			GenericError: { message: string; error_code: bigint };
@@ -126,7 +197,7 @@ export type WithdrawFromError =
 	| {
 			FailedToWithdrawFrom: {
 				withdraw_from_block: [] | [bigint];
-				rejection_code: RejectionCode;
+				rejection_code: RejectionCode_1;
 				refund_block: [] | [bigint];
 				approval_refund_block: [] | [bigint];
 				rejection_reason: string;
@@ -134,22 +205,21 @@ export type WithdrawFromError =
 	  }
 	| { InsufficientFunds: { balance: bigint } };
 export interface _SERVICE {
-	btc_caller_address: ActorMethod<[BitcoinNetwork, [] | [PaymentType]], Result>;
-	btc_caller_balance: ActorMethod<[BitcoinNetwork, [] | [PaymentType]], Result_1>;
-	caller_btc_address: ActorMethod<[BitcoinNetwork], string>;
-	caller_btc_balance: ActorMethod<[BitcoinNetwork], bigint>;
+	btc_caller_address: ActorMethod<[GetAddressRequest, [] | [PaymentType]], Result>;
+	btc_caller_balance: ActorMethod<[GetAddressRequest, [] | [PaymentType]], Result_1>;
+	btc_caller_send: ActorMethod<[SendBtcRequest, [] | [PaymentType]], Result_2>;
 	caller_eth_address: ActorMethod<[], string>;
 	config: ActorMethod<[], Config>;
 	eth_address_of: ActorMethod<[Principal], string>;
-	eth_address_of_caller: ActorMethod<[[] | [PaymentType]], Result>;
-	eth_address_of_principal: ActorMethod<[Principal, [] | [PaymentType]], Result>;
-	eth_personal_sign: ActorMethod<[string, [] | [PaymentType]], Result>;
-	eth_sign_transaction: ActorMethod<[SignRequest, [] | [PaymentType]], Result>;
+	eth_address_of_caller: ActorMethod<[[] | [PaymentType]], Result_3>;
+	eth_address_of_principal: ActorMethod<[Principal, [] | [PaymentType]], Result_3>;
+	eth_personal_sign: ActorMethod<[string, [] | [PaymentType]], Result_3>;
+	eth_sign_transaction: ActorMethod<[SignRequest, [] | [PaymentType]], Result_3>;
 	generic_caller_ecdsa_public_key: ActorMethod<
 		[EcdsaPublicKeyArgument, [] | [PaymentType]],
-		Result_2
+		Result_4
 	>;
-	generic_sign_with_ecdsa: ActorMethod<[[] | [PaymentType], SignWithEcdsaArgument], Result_3>;
+	generic_sign_with_ecdsa: ActorMethod<[[] | [PaymentType], SignWithEcdsaArgument], Result_5>;
 	get_canister_status: ActorMethod<[], CanisterStatusResultV2>;
 	http_request: ActorMethod<[HttpRequest], HttpResponse>;
 	personal_sign: ActorMethod<[string], string>;
