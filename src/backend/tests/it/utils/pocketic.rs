@@ -1,8 +1,11 @@
+//! Utilities for setting up a test environment using `PocketIC`.
+pub mod pic_canister;
+pub use pic_canister::PicCanisterTrait;
+
 use crate::utils::mock::CALLER;
-use candid::{decode_one, encode_one, CandidType, Principal};
+use candid::{encode_one, CandidType, Principal};
 use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
-use pocket_ic::{CallError, PocketIc, PocketIcBuilder, WasmResult};
-use serde::Deserialize;
+use pocket_ic::{CallError, PocketIc, PocketIcBuilder};
 use shared::types::user_profile::{OisyUser, UserProfile};
 use shared::types::{Arg, CredentialType, InitArg, SupportedCredential};
 use std::fs::read;
@@ -355,58 +358,5 @@ impl PicBackend {
             assert!(response.is_ok());
         }
         expected_users
-    }
-}
-
-/// Common methods for interacting with a canister using `PocketIc`.
-pub trait PicCanisterTrait {
-    /// A shared PocketIc instance.
-    ///
-    /// Note: `PocketIc` uses interior mutability for query and update calls.  No external mut annotation or locks appear to be necessary.
-    fn pic(&self) -> Arc<PocketIc>;
-
-    /// The ID of this canister.
-    fn canister_id(&self) -> Principal;
-
-    /// Makes an update call to the canister.
-    fn update<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
-    where
-        T: for<'a> Deserialize<'a> + CandidType,
-    {
-        self.pic()
-            .update_call(self.canister_id(), caller, method, encode_one(arg).unwrap())
-            .map_err(|e| {
-                format!(
-                    "Update call error. RejectionCode: {:?}, Error: {}",
-                    e.code, e.description
-                )
-            })
-            .and_then(|reply| match reply {
-                WasmResult::Reply(reply) => {
-                    decode_one(&reply).map_err(|e| format!("Decoding failed: {e}"))
-                }
-                WasmResult::Reject(error) => Err(error),
-            })
-    }
-
-    /// Makes a query call to the canister.
-    fn query<T>(&self, caller: Principal, method: &str, arg: impl CandidType) -> Result<T, String>
-    where
-        T: for<'a> Deserialize<'a> + CandidType,
-    {
-        self.pic()
-            .query_call(self.canister_id(), caller, method, encode_one(arg).unwrap())
-            .map_err(|e| {
-                format!(
-                    "Query call error. RejectionCode: {:?}, Error: {}",
-                    e.code, e.description
-                )
-            })
-            .and_then(|reply| match reply {
-                WasmResult::Reply(reply) => {
-                    decode_one(&reply).map_err(|_| "Decoding failed".to_string())
-                }
-                WasmResult::Reject(error) => Err(error),
-            })
     }
 }
