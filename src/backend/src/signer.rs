@@ -12,11 +12,11 @@ pub enum AllowSigningError {
     ApproveError(ApproveError),
 }
 
-/// Current ledger fee.  Historically stable.
+/// Current ledger fee in cycles.  Historically stable.
 ///
 /// https://github.com/dfinity/cycles-ledger/blob/1de0e55c6d4fba4bde3e81547e5726df92b881dc/cycles-ledger/src/config.rs#L6
 const LEDGER_FEE: u64 = 1_000_000_000u64;
-/// Typical signer fee.  Unstable and subject to change.
+/// Typical signer fee in cycles.  Unstable and subject to change.
 /// Note:
 /// - The endpoint prices can be seen here: https://github.com/dfinity/chain-fusion-signer/blob/main/src/signer/canister/src/lib.rs
 /// - At the time of writing, the endpoint prices in the cfs repo are placeholders.  Initial measurements indicate that a typical real fee will be about 80T.
