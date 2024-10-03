@@ -1,5 +1,6 @@
 <script lang="ts">
 	import WalletConnect from '$eth/components/wallet-connect/WalletConnect.svelte';
+	import SignIn from '$lib/components/auth/SignIn.svelte';
 	import Alpha from '$lib/components/core/Alpha.svelte';
 	import Back from '$lib/components/core/Back.svelte';
 	import Menu from '$lib/components/core/Menu.svelte';
@@ -47,6 +48,8 @@
 			<Menu />
 		{:else}
 			<AboutMenu />
+
+			<SignIn />
 		{/if}
 	</div>
 </header>
