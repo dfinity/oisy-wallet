@@ -22,7 +22,6 @@ export default {
 			'blue-ribbon-rgb': '0, 102, 255',
 			'dark-blue': '#321469',
 			'brandeis-blue': '#016dfc',
-			'cetacean-blue': '#0e002d',
 			'pale-cornflower-blue': '#b0cdff',
 			'brilliant-azure': '#348afd',
 			'misty-rose': '#937993',
@@ -47,8 +46,8 @@ export default {
 			water: '#d1e3ff'
 		},
 		extend: {
-			minWidth: {
-				'2_5xl': '1728px'
+			screens: {
+				'2.5xl': '1728px'
 			}
 		}
 	},

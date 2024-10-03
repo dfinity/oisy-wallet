@@ -182,6 +182,7 @@ pub mod bitcoin {
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
     pub enum SelectedUtxosFeeError {
         InternalError { msg: String },
+        PendingTransactions,
     }
 
     #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
