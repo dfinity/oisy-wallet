@@ -59,6 +59,20 @@ button {
 				0 0 0 2px var(--color-white),
 				0 0 0 4px var(--color-blue-ribbon);
 		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+			box-shadow: none;
+		}
+
+		&[active],
+		&:active {
+			&[focus],
+			&:focus {
+				outline: none;
+				box-shadow: none;
+			}
+		}
 	}
 
 	&.primary {
