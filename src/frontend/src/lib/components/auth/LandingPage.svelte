@@ -1,6 +1,6 @@
 <script lang="ts">
-	import PreviewLarge from '$lib/assets/preview-large.png';
-	import PreviewSmall from '$lib/assets/preview-small.png';
+	import PreviewLarge from '$lib/assets/preview-large.webp';
+	import PreviewSmall from '$lib/assets/preview-small.webp';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store.js';
