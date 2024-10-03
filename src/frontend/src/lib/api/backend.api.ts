@@ -15,6 +15,7 @@ import type {
 	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse
 } from '$lib/types/api';
+import type { AllowSigningResponse } from '$lib/types/backend';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
@@ -132,6 +133,14 @@ export const selectUserUtxosFee = async ({
 	const { btcSelectUserUtxosFee } = await backendCanister({ identity });
 
 	return btcSelectUserUtxosFee(params);
+};
+
+export const allowSigning = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<AllowSigningResponse> => {
+	const { allowSigning } = await backendCanister({ identity });
+
+	return allowSigning();
 };
 
 const backendCanister = async ({

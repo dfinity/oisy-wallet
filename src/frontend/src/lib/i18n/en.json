@@ -48,7 +48,8 @@
 			"authenticate": "Open or Create"
 		},
 		"alt": {
-			"sign_in": "Sign in with Internet Identity to start using Oisy Wallet."
+			"sign_in": "Sign in with Internet Identity to start using Oisy Wallet.",
+			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
