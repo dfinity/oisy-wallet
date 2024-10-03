@@ -21,7 +21,7 @@ export class SignerCanisterPaymentError extends Error {
 	}
 }
 
-export const signerCanisterError = (response: GetAddressError) => {
+export const signerCanisterBtcError = (response: GetAddressError) => {
 	if ('InternalError' in response) {
 		return new CanisterInternalError(response.InternalError.msg);
 	}
