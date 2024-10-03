@@ -37,7 +37,7 @@ interface I18nNavigation {
 
 interface I18nAuth {
 	text: { title_part_1: string; title_part_2: string; logout: string; authenticate: string };
-	alt: { sign_in: string };
+	alt: { sign_in: string; preview: string };
 	warning: { not_signed_in: string; session_expired: string };
 	error: {
 		no_internet_identity: string;
