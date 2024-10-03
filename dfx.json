@@ -8,7 +8,6 @@
 			"wasm": "target/signer.wasm.gz",
 			"init_arg_file": "target/signer.arg.did",
 			"shrink": false,
-			"dependencies": ["cycles_ledger"],
 			"specified_id": "grghe-syaaa-aaaar-qabyq-cai",
 			"remote": {
 				"id": {
@@ -20,7 +19,6 @@
 			}
 		},
 		"backend": {
-			"dependencies": ["cycles_ledger", "signer"],
 			"candid": "src/backend/backend.did",
 			"package": "backend",
 			"type": "rust",
@@ -73,7 +71,6 @@
 			}
 		},
 		"cycles_depositor": {
-			"dependencies": ["cycles_ledger"],
 			"type": "custom",
 			"build": "scripts/build.cycles_depositor.sh",
 			"init_arg_file": "out/cycles_depositor.args.did",
