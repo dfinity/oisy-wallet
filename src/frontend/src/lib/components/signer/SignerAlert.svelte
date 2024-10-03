@@ -9,9 +9,9 @@
 	$: icon = type === 'error' ? IconClose : IconCheck;
 </script>
 
-<div class="flex justify-center pt-8 pb-5">
+<div class="flex justify-center pb-5 pt-8">
 	<div
-		class="flex items-center justify-center w-20 h-20 rounded-full"
+		class="flex h-20 w-20 items-center justify-center rounded-full"
 		class:bg-cyclamen={type === 'error'}
 		class:bg-[var(--color-primary)]={type === 'ok'}
 	>

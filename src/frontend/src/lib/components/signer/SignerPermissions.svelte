@@ -88,18 +88,18 @@
 
 {#if nonNullish(scopes) && nonNullish($payload)}
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
-		<h2 class="text-center mb-4">{$i18n.signer.permissions.text.title}</h2>
+		<h2 class="mb-4 text-center">{$i18n.signer.permissions.text.title}</h2>
 
 		<SignerOrigin payload={$payload} />
 
-		<div class="bg-light-blue border border-light-blue p-6 mb-6 rounded-lg">
+		<div class="mb-6 rounded-lg border border-light-blue bg-light-blue p-6">
 			<p class="break-normal font-bold">{$i18n.signer.permissions.text.the_dapp_is_requesting}</p>
 
-			<ul class="flex flex-col gap-1 list-none mt-2.5">
+			<ul class="mt-2.5 flex list-none flex-col gap-1">
 				{#each scopes as scope}
 					{@const { icon, label } = listItems[scope.scope.method]}
 
-					<li class="break-normal pb-1.5 flex items-center gap-2">
+					<li class="flex items-center gap-2 break-normal pb-1.5">
 						<svelte:component this={icon} size="24" />
 						{label}
 					</li>
@@ -108,7 +108,7 @@
 		</div>
 
 		{#if requestAccountsPermissions}
-			<div class="flex gap-4 border border-dust bg-white rounded-lg p-4 mb-10">
+			<div class="mb-10 flex gap-4 rounded-lg border border-dust bg-white p-4">
 				<IconAstronautHelmet />
 
 				<div>

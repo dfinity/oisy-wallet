@@ -11,4 +11,4 @@
 	<SignerIdleAnimatedAstronaut />
 </div>
 
-<p class="text-center mt-4 font-bold pb-12">{$i18n.signer.idle.text.waiting}</p>
+<p class="mt-4 pb-12 text-center font-bold">{$i18n.signer.idle.text.waiting}</p>

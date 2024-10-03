@@ -31,7 +31,7 @@
 </script>
 
 {#if nonNullish(origin)}
-	<p class="break-normal text-center mb-6">
+	<p class="mb-6 break-normal text-center">
 		{$i18n.signer.origin.text.request_from}
 		{#if nonNullish(host)}<span class="font-bold text-brandeis-blue"
 				><ExternalLink

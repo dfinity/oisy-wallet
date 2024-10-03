@@ -111,11 +111,11 @@
 	{@const { title, content } = text}
 
 	<form in:fade on:submit|preventDefault={onApprove} method="POST">
-		<h2 class="text-center mb-4">{title}</h2>
+		<h2 class="mb-4 text-center">{title}</h2>
 
 		<SignerOrigin payload={$payload} />
 
-		<div class="border border-dust px-8 py-4 mb-6 rounded-lg msg">
+		<div class="msg mb-6 rounded-lg border border-dust px-8 py-4">
 			<Markdown text={content} />
 		</div>
 
