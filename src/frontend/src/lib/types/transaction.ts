@@ -14,3 +14,10 @@ export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeeP
 };
 
 export type TransactionType = 'send' | 'receive';
+
+export type TransactionUiCommon = Pick<Transaction, 'blockNumber' | 'from' | 'to'> & {
+	timestamp?: bigint;
+	txExplorerUrl?: string;
+	toExplorerUrl?: string;
+	fromExplorerUrl?: string;
+};
