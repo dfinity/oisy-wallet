@@ -22,7 +22,7 @@
 	</div>
 
 	<div class=" min-w-[1127px] flex-1 md:pt-12">
-		<picture aria-label={ariaLabel} class="w-full">
+		<picture aria-label={ariaLabel} class="w-full" role="presentation">
 			<source srcset={PreviewSmall} media="(max-width: 767px)" />
 			<Img src={PreviewLarge} alt={ariaLabel} />
 		</picture>
