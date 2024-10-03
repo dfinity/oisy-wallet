@@ -172,7 +172,9 @@ export type Result_4 = { Ok: SelectedUtxosFeeResponse } | { Err: SelectedUtxosFe
 export type Result_5 = { Ok: UserProfile } | { Err: GetUserProfileError };
 export type Result_6 = { Ok: MigrationReport } | { Err: string };
 export type Result_7 = { Ok: null } | { Err: string };
-export type SelectedUtxosFeeError = { InternalError: { msg: string } };
+export type SelectedUtxosFeeError =
+	| { PendingTransactions: null }
+	| { InternalError: { msg: string } };
 export interface SelectedUtxosFeeRequest {
 	network: BitcoinNetwork;
 	amount_satoshis: bigint;
