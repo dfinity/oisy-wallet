@@ -553,4 +553,35 @@ describe('backend.canister', () => {
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
+
+	describe('allowSigning', () => {
+		it('should allow signing', async () => {
+			const response = { Ok: null };
+
+			service.allow_signing.mockResolvedValue(response);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await allowSigning();
+
+			expect(service.allow_signing).toHaveBeenCalledTimes(1);
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if allowSigning throws', async () => {
+			service.allow_signing.mockImplementation(async () => {
+				throw mockResponseError;
+			});
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = allowSigning();
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
 });

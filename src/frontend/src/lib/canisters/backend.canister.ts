@@ -21,6 +21,7 @@ import type {
 	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse
 } from '$lib/types/api';
+import type { AllowSigningResponse } from '$lib/types/backend';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
@@ -160,5 +161,11 @@ export class BackendCanister extends Canister<BackendService> {
 		}
 
 		return response.Ok;
+	};
+
+	allowSigning = async (): Promise<AllowSigningResponse> => {
+		const { allow_signing } = this.caller({ certified: true });
+
+		return allow_signing();
 	};
 }
