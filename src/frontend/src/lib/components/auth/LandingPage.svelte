@@ -21,6 +21,7 @@
 		</div>
 	</div>
 
+	<!-- TODO: determine if this value is specific/permanent or can be changed -->
 	<div class=" min-w-[1127px] flex-1 md:pt-12">
 		<picture aria-label={ariaLabel} class="w-full" role="presentation">
 			<source srcset={previewSmall} media="(max-width: 767px)" />
