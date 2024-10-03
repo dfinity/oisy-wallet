@@ -19,6 +19,7 @@
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
+	export let source: string;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -41,7 +42,7 @@
 
 		<IcSendAmount bind:amount bind:amountError {networkId} />
 
-		<SendSource token={$sendToken} balance={$balance} source={$icrcAccountIdentifierText ?? ''} />
+		<SendSource token={$sendToken} balance={$balance} {source} />
 
 		<IcFeeDisplay {networkId} />
 

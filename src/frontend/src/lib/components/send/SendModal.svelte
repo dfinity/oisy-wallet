@@ -66,8 +66,8 @@
 		await loadTokenAndRun({ token, callback });
 	};
 
-	let sourceAddress: string;
-	$: sourceAddress = $icrcAccountIdentifierText ?? '';
+	let source: string;
+	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
 <WizardModal
@@ -83,7 +83,7 @@
 		<SendTokensList on:icSendToken={nextStep} />
 	{:else}
 		<SendWizard
-			{sourceAddress}
+			{source}
 			{currentStep}
 			bind:destination
 			bind:networkId

@@ -3,7 +3,6 @@
 	import { createEventDispatcher, getContext } from 'svelte';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
@@ -19,7 +18,7 @@
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
-	export let sourceAddress: string;
+	export let source: string;
 
 	const { sendToken, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -39,7 +38,7 @@
 
 <ContentWithToolbar>
 	{#if nonNullish($sendToken)}
-		<SendData {amount} {destination} token={$sendToken} balance={$balance} source={sourceAddress}>
+		<SendData {amount} {destination} token={$sendToken} balance={$balance} {source}>
 			<IcFeeDisplay slot="fee" {networkId} />
 			<IcReviewNetwork {networkId} slot="network" />
 		</SendData>
