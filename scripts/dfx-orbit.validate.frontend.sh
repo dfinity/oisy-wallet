@@ -1,17 +1,17 @@
 #!/bin/bash
 
 if [ -z "${RELEASE_COMMIT}" ]; then
-    echo "RELEASE_COMMIT is unset or set to the empty string"
-    exit 1
+  echo "RELEASE_COMMIT is unset or set to the empty string"
+  exit 1
 fi
 
 if [ -z "${ENV_SHA}" ]; then
-    echo "ENV_SHA is unset or set to the empty string"
-    exit 1
+  echo "ENV_SHA is unset or set to the empty string"
+  exit 1
 fi
 
-# Checkout 
-git fetch 
+# Checkout
+git fetch
 git checkout $RELEASE_COMMIT
 
 # Make sure target directory exists but no prior artifacts are there
