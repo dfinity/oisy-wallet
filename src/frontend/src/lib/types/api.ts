@@ -1,9 +1,12 @@
 import type {
 	AddUserCredentialError,
+	BitcoinNetwork,
 	CredentialSpec,
 	GetUserProfileError,
-	UserProfile
+	UserProfile,
+	Utxo
 } from '$declarations/backend/backend.did';
+import type { BtcAddress } from '$lib/types/address';
 import { Principal } from '@dfinity/principal';
 
 export interface AddUserCredentialParams {
@@ -15,3 +18,20 @@ export interface AddUserCredentialParams {
 export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialError };
 
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
+
+export interface BtcSelectUserUtxosFeeParams {
+	network: BitcoinNetwork;
+	amountSatoshis: bigint;
+	sourceAddress: BtcAddress;
+	minConfirmations: [number];
+}
+
+export interface BtcGetPendingTransactionParams {
+	network: BitcoinNetwork;
+	address: BtcAddress;
+}
+
+export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
+	txId: Uint8Array | number[];
+	utxos: Utxo[];
+}

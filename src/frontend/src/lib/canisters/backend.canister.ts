@@ -1,15 +1,24 @@
 import type {
 	_SERVICE as BackendService,
 	CustomToken,
+	PendingTransaction,
+	SelectedUtxosFeeResponse,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
+import {
+	mapBtcPendingTransactionError,
+	mapBtcSelectUserUtxosFeeError
+} from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
+	BtcAddPendingTransactionParams,
+	BtcGetPendingTransactionParams,
+	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -93,5 +102,63 @@ export class BackendCanister extends Canister<BackendService> {
 			current_user_version: toNullable(currentUserVersion),
 			credential_spec: credentialSpec
 		});
+	};
+
+	btcAddPendingTransaction = async ({
+		txId,
+		...rest
+	}: BtcAddPendingTransactionParams): Promise<boolean> => {
+		const { btc_add_pending_transaction } = this.caller({ certified: true });
+
+		const response = await btc_add_pending_transaction({
+			txid: txId,
+			...rest
+		});
+
+		if ('Err' in response) {
+			throw mapBtcPendingTransactionError(response.Err);
+		}
+
+		return 'Ok' in response;
+	};
+
+	btcGetPendingTransaction = async ({
+		network,
+		address
+	}: BtcGetPendingTransactionParams): Promise<PendingTransaction[]> => {
+		const { btc_get_pending_transactions } = this.caller({ certified: true });
+
+		const response = await btc_get_pending_transactions({
+			network,
+			address
+		});
+
+		if ('Err' in response) {
+			throw mapBtcPendingTransactionError(response.Err);
+		}
+
+		return response.Ok.transactions;
+	};
+
+	btcSelectUserUtxosFee = async ({
+		network,
+		minConfirmations,
+		amountSatoshis,
+		sourceAddress
+	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
+		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
+
+		const response = await btc_select_user_utxos_fee({
+			network,
+			min_confirmations: minConfirmations,
+			amount_satoshis: amountSatoshis,
+			source_address: sourceAddress
+		});
+
+		if ('Err' in response) {
+			throw mapBtcSelectUserUtxosFeeError(response.Err);
+		}
+
+		return response.Ok;
 	};
 }
