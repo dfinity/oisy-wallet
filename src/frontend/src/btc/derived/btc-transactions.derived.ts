@@ -6,17 +6,17 @@ import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 // TODO: decide how BTC transactions should be sorted and apply it here
-export const sortedTransactions: Readable<TransactionsData<BtcTransactionUi>> = derived(
+export const sortedBtcTransactions: Readable<TransactionsData<BtcTransactionUi>> = derived(
 	[btcTransactionsStore, tokenWithFallback],
 	([$transactionsStore, $token]) => $transactionsStore?.[$token.id] ?? []
 );
 
-export const transactionsInitialized: Readable<boolean> = derived(
+export const btcTransactionsInitialized: Readable<boolean> = derived(
 	[btcTransactionsStore, tokenWithFallback],
-	([$transactionsStore, { id: $tokenId }]) => nonNullish($transactionsStore?.[$tokenId])
+	([$btcTransactionsStore, { id: $tokenId }]) => nonNullish($btcTransactionsStore?.[$tokenId])
 );
 
-export const transactionsNotInitialized: Readable<boolean> = derived(
-	[transactionsInitialized],
-	([$transactionsInitialized]) => !$transactionsInitialized
+export const btcTransactionsNotInitialized: Readable<boolean> = derived(
+	[btcTransactionsInitialized],
+	([$btcTransactionsInitialized]) => !$btcTransactionsInitialized
 );
