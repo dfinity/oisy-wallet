@@ -31,12 +31,10 @@ const initBtcPendingTransactionsStore = (): BtcPendingTransactionsStore => {
 			address: Address;
 			pendingTransactions: Array<PendingTransaction>;
 		}) {
-			update((state) => {
-				return {
-					...state,
-					[address]: pendingTransactions
-				};
-			});
+			update((state) => ({
+				...state,
+				[address]: pendingTransactions
+			}));
 		},
 		reset() {
 			set({});
