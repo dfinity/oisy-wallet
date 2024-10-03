@@ -415,7 +415,7 @@ describe('backend.canister', () => {
 		expect(res).toEqual(true);
 	});
 
-	it('should throw an error if btc_add_pending_transaction throws', async () => {
+	it('should throw an error if btc_add_pending_transaction returns an internal error', async () => {
 		service.btc_add_pending_transaction.mockResolvedValue(errorResponse);
 
 		const { btcAddPendingTransaction } = await createBackendCanister({
@@ -427,6 +427,20 @@ describe('backend.canister', () => {
 		await expect(res).rejects.toThrow(
 			new CanisterInternalError(errorResponse.Err.InternalError.msg)
 		);
+	});
+
+	it('should throw an error if btc_add_pending_transaction throws', async () => {
+		service.btc_add_pending_transaction.mockImplementation(async () => {
+			throw mockResponseError;
+		});
+
+		const { btcAddPendingTransaction } = await createBackendCanister({
+			serviceOverride: service
+		});
+
+		const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('should return pending btc transactions with success response', async () => {
@@ -452,7 +466,7 @@ describe('backend.canister', () => {
 		expect(res).toEqual(response.Ok.transactions);
 	});
 
-	it('should throw an error if btc_get_pending_transactions throws', async () => {
+	it('should throw an error if btc_get_pending_transactions returns an internal error', async () => {
 		service.btc_get_pending_transactions.mockResolvedValue(errorResponse);
 
 		const { btcGetPendingTransaction } = await createBackendCanister({
@@ -464,6 +478,20 @@ describe('backend.canister', () => {
 		await expect(res).rejects.toThrow(
 			new CanisterInternalError(errorResponse.Err.InternalError.msg)
 		);
+	});
+
+	it('should throw an error if btc_get_pending_transactions throws', async () => {
+		service.btc_get_pending_transactions.mockImplementation(async () => {
+			throw mockResponseError;
+		});
+
+		const { btcGetPendingTransaction } = await createBackendCanister({
+			serviceOverride: service
+		});
+
+		const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
 	it('should return user utxos fee with success response', async () => {
@@ -488,7 +516,7 @@ describe('backend.canister', () => {
 		expect(res).toEqual(response.Ok);
 	});
 
-	it('should throw an error if btc_select_user_utxos_fee throws', async () => {
+	it('should throw an error if btc_select_user_utxos_fee returns an internal error', async () => {
 		service.btc_select_user_utxos_fee.mockResolvedValue(errorResponse);
 
 		const { btcSelectUserUtxosFee } = await createBackendCanister({
@@ -500,5 +528,19 @@ describe('backend.canister', () => {
 		await expect(res).rejects.toThrow(
 			new CanisterInternalError(errorResponse.Err.InternalError.msg)
 		);
+	});
+
+	it('should throw an error if btc_select_user_utxos_fee throws', async () => {
+		service.btc_select_user_utxos_fee.mockImplementation(async () => {
+			throw mockResponseError;
+		});
+
+		const { btcSelectUserUtxosFee } = await createBackendCanister({
+			serviceOverride: service
+		});
+
+		const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+		await expect(res).rejects.toThrow(mockResponseError);
 	});
 });
