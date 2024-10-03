@@ -158,7 +158,10 @@ type Result_4 = variant {
 type Result_5 = variant { Ok : UserProfile; Err : GetUserProfileError };
 type Result_6 = variant { Ok : MigrationReport; Err : text };
 type Result_7 = variant { Ok; Err : text };
-type SelectedUtxosFeeError = variant { InternalError : record { msg : text } };
+type SelectedUtxosFeeError = variant {
+  PendingTransactions;
+  InternalError : record { msg : text };
+};
 type SelectedUtxosFeeRequest = record {
   network : BitcoinNetwork;
   amount_satoshis : nat64;
