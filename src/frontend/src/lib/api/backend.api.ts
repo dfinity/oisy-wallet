@@ -6,6 +6,7 @@ import type {
 	AddUserCredentialResponse,
 	GetUserProfileResponse
 } from '$lib/types/api';
+import type { AllowSigningResponse } from '$lib/types/backend';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
@@ -88,6 +89,7 @@ export const getUserProfile = async ({
 
 	return getUserProfile({ certified });
 };
+
 export const addUserCredential = async ({
 	identity,
 	...params
@@ -95,6 +97,14 @@ export const addUserCredential = async ({
 	const { addUserCredential } = await backendCanister({ identity });
 
 	return addUserCredential(params);
+};
+
+export const allowSigning = async ({
+	identity
+}: CanisterApiFunctionParams): Promise<AllowSigningResponse> => {
+	const { allowSigning } = await backendCanister({ identity });
+
+	return allowSigning();
 };
 
 const backendCanister = async ({
