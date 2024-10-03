@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
@@ -14,7 +15,6 @@
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;

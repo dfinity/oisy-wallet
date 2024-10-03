@@ -14,6 +14,7 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 
 	/**
 	 * Props
@@ -68,6 +69,9 @@
 
 			dispatch('nnsClose');
 		});
+
+	let source: string;
+	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
 <WizardModal
@@ -81,6 +85,7 @@
 
 	<SendTokenContext token={$token}>
 		<IcSendTokenWizard
+			{source}
 			{currentStep}
 			bind:destination
 			bind:networkId
