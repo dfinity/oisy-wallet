@@ -9,7 +9,10 @@ import type {
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
-import { backendCanisterError } from '$lib/canisters/backend.errors';
+import {
+	mapBtcPendingTransactionError,
+	mapBtcSelectUserUtxosFeeError
+} from '$lib/canisters/backend.errors';
 import type {
 	AddUserCredentialParams,
 	AddUserCredentialResponse,
@@ -103,21 +106,17 @@ export class BackendCanister extends Canister<BackendService> {
 
 	btcAddPendingTransaction = async ({
 		txId,
-		network,
-		address,
-		utxos
+		...rest
 	}: BtcAddPendingTransactionParams): Promise<boolean> => {
 		const { btc_add_pending_transaction } = this.caller({ certified: true });
 
 		const response = await btc_add_pending_transaction({
 			txid: txId,
-			network,
-			address,
-			utxos
+			...rest
 		});
 
 		if ('Err' in response) {
-			throw backendCanisterError(response.Err);
+			throw mapBtcPendingTransactionError(response.Err);
 		}
 
 		return 'Ok' in response;
@@ -135,7 +134,7 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 
 		if ('Err' in response) {
-			throw backendCanisterError(response.Err);
+			throw mapBtcPendingTransactionError(response.Err);
 		}
 
 		return response.Ok.transactions;
@@ -157,7 +156,7 @@ export class BackendCanister extends Canister<BackendService> {
 		});
 
 		if ('Err' in response) {
-			throw backendCanisterError(response.Err);
+			throw mapBtcSelectUserUtxosFeeError(response.Err);
 		}
 
 		return response.Ok;
