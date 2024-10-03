@@ -119,6 +119,7 @@ export const idlFactory = ({ IDL }) => {
 		utxos: IDL.Vec(Utxo)
 	});
 	const SelectedUtxosFeeError = IDL.Variant({
+		PendingTransactions: IDL.Null,
 		InternalError: IDL.Record({ msg: IDL.Text })
 	});
 	const Result_4 = IDL.Variant({

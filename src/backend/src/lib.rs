@@ -299,9 +299,10 @@ const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
 async fn btc_select_user_utxos_fee(
     params: SelectedUtxosFeeRequest,
 ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
+    let principal = ic_cdk::caller();
     let all_utxos = bitcoin_api::get_all_utxos(
         params.network,
-        params.source_address,
+        params.source_address.clone(),
         Some(
             params
                 .min_confirmations
@@ -310,6 +311,18 @@ async fn btc_select_user_utxos_fee(
     )
     .await
     .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    let now_ns = time();
+
+    let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
+        !pending_transactions
+            .get_pending_transactions(&principal, &params.source_address)
+            .is_empty()
+    });
+
+    if has_pending_transactions {
+        return Err(SelectedUtxosFeeError::PendingTransactions);
+    }
 
     let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
         .await

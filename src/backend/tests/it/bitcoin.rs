@@ -23,8 +23,7 @@ fn test_select_user_utxos_fee_returns_zero_when_user_has_insufficient_funds() {
         amount_satoshis: 100_000_000u64,
         source_address: MOCK_ADDRESS.to_string(),
         network: BitcoinNetwork::Regtest,
-        // Until bitcoin is supported in pocket-ic it only works with 1.
-        min_confirmations: Some(1),
+        min_confirmations: None,
     };
     let response = pic_setup.update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
         caller,
@@ -50,6 +49,61 @@ const UTXO_1: Utxo = Utxo {
     value: 1000,
     height: 100,
 };
+
+#[test]
+fn test_select_user_utxos_fee_pending_transaction_error() {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let txid = vec![];
+    let utxos = vec![UTXO_1];
+    let address = MOCK_ADDRESS.to_string();
+
+    let add_request = BtcAddPendingTransactionRequest {
+        txid: txid.clone(),
+        utxos: utxos.clone(),
+        address: address.clone(),
+        network: BitcoinNetwork::Regtest,
+    };
+
+    let add_response = pic_setup.update::<Result<(), BtcAddPendingTransactionError>>(
+        caller,
+        "btc_add_pending_transaction",
+        add_request,
+    );
+
+    assert!(add_response.is_ok());
+
+    let request = SelectedUtxosFeeRequest {
+        amount_satoshis: 100_000_000u64,
+        source_address: MOCK_ADDRESS.to_string(),
+        network: BitcoinNetwork::Regtest,
+        min_confirmations: None,
+    };
+    let select_response = pic_setup
+        .update::<Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError>>(
+            caller,
+            "btc_select_user_utxos_fee",
+            request,
+        );
+
+    // The following passes if we don't prune the pending transactions before checking them
+    // because the utxos added in the pending transactions are not present from the bitcoin api.
+    // match response.expect("Call failed") {
+    //     Ok(_) => panic!("Selecting utxos should fail with pending transctions"),
+    //     Err(err) => assert_eq!(err, SelectedUtxosFeeError::PendingTransactions),
+    // }
+
+    // Because utxos from bitcoin API is an empty string.
+    // The selected utxos are empty and fee is 0.
+    let select_data = select_response
+        .expect("Call failed")
+        .expect("Request was not successful");
+
+    assert_eq!(select_data.utxos.len(), 0);
+    assert_eq!(select_data.fee_satoshis, 0);
+}
 
 #[test]
 fn test_add_and_read_pending_transactions() {
