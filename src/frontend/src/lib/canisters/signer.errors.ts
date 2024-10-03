@@ -21,12 +21,13 @@ export class SignerCanisterPaymentError extends Error {
 	}
 }
 
-export const mapSignerCanisterBtcError = (response: GetAddressError) => {
+type SignerCanisterBtcError = GetAddressError;
+export const mapSignerCanisterBtcError = (response: SignerCanisterBtcError) => {
 	if ('InternalError' in response) {
 		return new CanisterInternalError(response.InternalError.msg);
 	}
 	if ('PaymentError' in response) {
 		return new SignerCanisterPaymentError(response.PaymentError);
 	}
-	return new CanisterInternalError('Unknown GetAddressError');
+	return new CanisterInternalError('Unknown SignerCanisterBtcError');
 };

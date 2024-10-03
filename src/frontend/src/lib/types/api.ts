@@ -6,6 +6,12 @@ import type {
 	UserProfile,
 	Utxo
 } from '$declarations/backend/backend.did';
+import type {
+	BitcoinAddressType,
+	BtcTxOutput,
+	BitcoinNetwork as SignerBitcoinNetwork,
+	Utxo as SignerUtxo
+} from '$declarations/signer/signer.did';
 import type { BtcAddress } from '$lib/types/address';
 import { Principal } from '@dfinity/principal';
 
@@ -34,4 +40,12 @@ export interface BtcGetPendingTransactionParams {
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
 	txId: Uint8Array | number[];
 	utxos: Utxo[];
+}
+
+export interface SendBtcParams {
+	feeSatoshis: [] | [bigint];
+	network: SignerBitcoinNetwork;
+	utxosToSpend: SignerUtxo[];
+	addressType: BitcoinAddressType;
+	outputs: BtcTxOutput[];
 }
