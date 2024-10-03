@@ -19,6 +19,7 @@
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
+	export let sourceAddress: string;
 
 	const { sendToken, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -34,14 +35,11 @@
 		invalidAmount(amount);
 
 	const dispatch = createEventDispatcher();
-
-	let source: string;
-	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
 <ContentWithToolbar>
 	{#if nonNullish($sendToken)}
-		<SendData {amount} {destination} token={$sendToken} balance={$balance} {source}>
+		<SendData {amount} {destination} token={$sendToken} balance={$balance} source={sourceAddress}>
 			<IcFeeDisplay slot="fee" {networkId} />
 			<IcReviewNetwork {networkId} slot="network" />
 		</SendData>

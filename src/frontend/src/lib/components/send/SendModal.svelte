@@ -14,6 +14,7 @@
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardSendStep } from '$lib/utils/wizard-modal.utils';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
@@ -64,6 +65,9 @@
 		};
 		await loadTokenAndRun({ token, callback });
 	};
+
+	let sourceAddress: string;
+	$: sourceAddress = $icrcAccountIdentifierText ?? '';
 </script>
 
 <WizardModal
@@ -79,6 +83,7 @@
 		<SendTokensList on:icSendToken={nextStep} />
 	{:else}
 		<SendWizard
+			{sourceAddress}
 			{currentStep}
 			bind:destination
 			bind:networkId

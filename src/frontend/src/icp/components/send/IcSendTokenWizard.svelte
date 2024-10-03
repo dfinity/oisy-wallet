@@ -63,6 +63,7 @@
 	 * Props
 	 */
 
+	export let sourceAddress: string;
 	export let currentStep: WizardStep | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let destination = '';
