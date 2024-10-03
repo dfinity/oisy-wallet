@@ -24,10 +24,16 @@ button {
 	--button-padding: var(--padding-2x) var(--padding-3x);
 
 	&.primary,
-	&.secondary {
+	&.secondary,
+	&.tertiary {
 		justify-content: flex-start;
 
 		padding: var(--button-padding);
+
+		&.icon {
+			--button-border-radius: var(--border-radius-sm-1_5x);
+			--button-padding: var(--padding);
+		}
 	}
 
 	&.user {
@@ -35,7 +41,8 @@ button {
 	}
 
 	&.primary,
-	&.secondary {
+	&.secondary,
+	&.tertiary {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
@@ -98,6 +105,21 @@ button {
 
 		&:active {
 			background: var(--color-anakiwa);
+		}
+	}
+
+	&.tertiary {
+		&.link {
+			background: var(--color-white);
+			color: var(--color-primary);
+
+			&:hover {
+				color: var(--color-secondary);
+			}
+
+			&:active {
+				background: var(--color-onahau);
+			}
 		}
 	}
 
