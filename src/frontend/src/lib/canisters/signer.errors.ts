@@ -1,4 +1,5 @@
 import type { GetAddressError, PaymentError } from '$declarations/signer/signer.did';
+import { CanisterInternalError } from '$lib/canisters/errors';
 
 export class SignerCanisterPaymentError extends Error {
 	constructor(response: PaymentError) {
@@ -20,18 +21,12 @@ export class SignerCanisterPaymentError extends Error {
 	}
 }
 
-export class SignerCanisterInternalError extends Error {
-	constructor(msg: string) {
-		super(msg);
-	}
-}
-
-export const signerCanisterError = (response: GetAddressError) => {
+export const mapSignerCanisterBtcError = (response: GetAddressError) => {
 	if ('InternalError' in response) {
-		return new SignerCanisterInternalError(response.InternalError.msg);
+		return new CanisterInternalError(response.InternalError.msg);
 	}
 	if ('PaymentError' in response) {
 		return new SignerCanisterPaymentError(response.PaymentError);
 	}
-	return new Error('Unknown GetAddressError');
+	return new CanisterInternalError('Unknown GetAddressError');
 };

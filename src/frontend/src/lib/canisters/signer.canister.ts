@@ -9,7 +9,7 @@ import { getAgent } from '$lib/actors/agents.ic';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices } from '@dfinity/utils';
-import { signerCanisterError } from './signer.errors';
+import { mapSignerCanisterBtcError } from './signer.errors';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({ identity, ...options }: CreateCanisterOptions<SignerService>) {
@@ -35,7 +35,7 @@ export class SignerCanister extends Canister<SignerService> {
 		const response = await btc_caller_address({ network, address_type: { P2WPKH: null } }, []);
 
 		if ('Err' in response) {
-			throw signerCanisterError(response.Err);
+			throw mapSignerCanisterBtcError(response.Err);
 		}
 
 		return response.Ok.address;
@@ -49,7 +49,7 @@ export class SignerCanister extends Canister<SignerService> {
 		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, []);
 
 		if ('Err' in response) {
-			throw signerCanisterError(response.Err);
+			throw mapSignerCanisterBtcError(response.Err);
 		}
 
 		return response.Ok.balance;

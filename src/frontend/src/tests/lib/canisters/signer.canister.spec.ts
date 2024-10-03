@@ -1,9 +1,7 @@
 import type { _SERVICE as SignerService, SignRequest } from '$declarations/signer/signer.did';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
-import {
-	SignerCanisterInternalError,
-	SignerCanisterPaymentError
-} from '$lib/canisters/signer.errors';
+import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -84,9 +82,7 @@ describe('signer.canister', () => {
 
 		const res = getBtcAddress(btcParams);
 
-		await expect(res).rejects.toThrow(
-			new SignerCanisterInternalError(response.Err.InternalError.msg)
-		);
+		await expect(res).rejects.toThrow(new CanisterInternalError(response.Err.InternalError.msg));
 	});
 
 	it('should throw an error if btc_caller_address returns a payment error', async () => {
@@ -144,9 +140,7 @@ describe('signer.canister', () => {
 
 		const res = getBtcBalance(btcParams);
 
-		await expect(res).rejects.toThrow(
-			new SignerCanisterInternalError(response.Err.InternalError.msg)
-		);
+		await expect(res).rejects.toThrow(new CanisterInternalError(response.Err.InternalError.msg));
 	});
 
 	it('should throw an error if btc_caller_balance returns a payment error', async () => {
