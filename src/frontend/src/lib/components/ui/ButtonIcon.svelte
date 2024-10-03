@@ -5,14 +5,12 @@
 </script>
 
 <button
-	class="icon text-primary flex flex-col text-center text-xs font-normal"
+	class="tertiary link icon flex flex-col text-center text-xs font-normal"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}
 	data-tid={testId}
 >
-	<div class="border-primary rounded-full border bg-white p-2">
-		<slot name="icon" />
-	</div>
+	<slot name="icon" />
 	<span class="visually-hidden"><slot /></span>
 </button>

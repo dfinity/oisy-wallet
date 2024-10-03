@@ -9,7 +9,7 @@
 	export let transaction: BtcTransactionUi;
 
 	let value: bigint | undefined;
-	let timestamp: number | undefined;
+	let timestamp: bigint | undefined;
 	let status: BtcTransactionStatus;
 	let type: TransactionType;
 
