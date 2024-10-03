@@ -7,7 +7,7 @@
 {#if $authNotSignedIn}
 	<LandingPage />
 {:else}
-	<div transition:fade>
+	<div in:fade>
 		<slot />
 	</div>
 {/if}
