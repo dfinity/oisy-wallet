@@ -36,8 +36,6 @@ button {
 		}
 	}
 
-	// TODO: check with Design team if this class is still needed
-	&.secondary-alt,
 	&.user {
 		border: 1px solid var(--color-blue);
 	}
@@ -96,11 +94,6 @@ button {
 		}
 	}
 
-	&.secondary-alt {
-		background: var(--color-cetacean-blue);
-		color: var(--color-white);
-	}
-
 	&.tertiary-link {
 		background: var(--color-white);
 		color: var(--color-primary);
@@ -126,8 +119,7 @@ button {
 	}
 
 	&.primary,
-	&.secondary,
-	&.secondary-alt {
+	&.secondary {
 		&.full {
 			width: 100%;
 		}
