@@ -25,7 +25,7 @@ button {
 
 	&.primary,
 	&.secondary,
-	&.tertiary-link {
+	&.tertiary {
 		justify-content: flex-start;
 
 		padding: var(--button-padding);
@@ -42,7 +42,7 @@ button {
 
 	&.primary,
 	&.secondary,
-	&.tertiary-link {
+	&.tertiary {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
@@ -108,16 +108,18 @@ button {
 		}
 	}
 
-	&.tertiary-link {
-		background: var(--color-white);
-		color: var(--color-primary);
+	&.tertiary {
+		&.link {
+			background: var(--color-white);
+			color: var(--color-primary);
 
-		&:hover {
-			color: var(--color-secondary);
-		}
+			&:hover {
+				color: var(--color-secondary);
+			}
 
-		&:active {
-			background: var(--color-onahau);
+			&:active {
+				background: var(--color-onahau);
+			}
 		}
 	}
 

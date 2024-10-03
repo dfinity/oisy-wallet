@@ -5,7 +5,7 @@
 </script>
 
 <button
-	class="tertiary-link icon flex flex-col text-center text-xs font-normal"
+	class="tertiary link icon flex flex-col text-center text-xs font-normal"
 	bind:this={button}
 	on:click
 	aria-label={ariaLabel}
