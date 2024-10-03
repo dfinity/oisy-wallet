@@ -1,6 +1,6 @@
 <script lang="ts">
-	import PreviewLarge from '$lib/assets/preview-large.webp';
-	import PreviewSmall from '$lib/assets/preview-small.webp';
+	import previewLarge from '$lib/assets/preview-large.webp';
+	import previewSmall from '$lib/assets/preview-small.webp';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store.js';
@@ -23,8 +23,8 @@
 
 	<div class=" min-w-[1127px] flex-1 md:pt-12">
 		<picture aria-label={ariaLabel} class="w-full" role="presentation">
-			<source srcset={PreviewSmall} media="(max-width: 767px)" />
-			<Img src={PreviewLarge} alt={ariaLabel} />
+			<source srcset={previewSmall} media="(max-width: 767px)" />
+			<Img src={previewLarge} alt={ariaLabel} />
 		</picture>
 	</div>
 </div>
