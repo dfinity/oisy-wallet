@@ -18,6 +18,8 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 
 		const result = await allowSigning({ identity });
 
+		// TODO: maybe we do not even need a toast given that the user is signed out anyway?
+
 		if ('Err' in result) {
 			const mapErr = (err: AllowSigningError): Error => {
 				if ('ApproveError' in err) {
