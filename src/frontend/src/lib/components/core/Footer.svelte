@@ -13,8 +13,12 @@
 </script>
 
 <footer
-	class="z-1 bottom-0 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-between px-4 pt-6 md:sticky md:bottom-0 md:flex-1 md:flex-grow md:flex-row md:px-8 md:h-md:mx-0 md:h-md:w-1/2 md:h-md:pr-0"
-	class:logged-out={$authNotSignedIn}
+	class="z-1 bottom-0 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-between px-4 pt-6 md:flex-1 md:flex-grow md:flex-row md:px-8"
+	class:md:sticky={$authNotSignedIn}
+	class:md:bottom-0={$authNotSignedIn}
+	class:md:h-md:mx-0={$authNotSignedIn}
+	class:md:h-md:w-[50%]={$authNotSignedIn}
+	class:md:h-md:pr-0={$authNotSignedIn}
 >
 	<div class="flex flex-row items-center gap-4">
 		<a
