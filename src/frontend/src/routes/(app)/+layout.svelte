@@ -29,7 +29,7 @@
 	/>
 
 	<AuthGuard>
-		<main class="pb-5 pt-8 sm:pb-12">
+		<main class=" pt-8">
 			<LoadersGuard>
 				<slot />
 			</LoadersGuard>
