@@ -1,15 +1,46 @@
 <script lang="ts">
+	import type { ComponentType } from 'svelte';
+	import IconGlasses from '$lib/components/icons/IconGlasses.svelte';
+	import IconInfinity from '$lib/components/icons/IconInfinity.svelte';
+	import IconShieldAlert from '$lib/components/icons/IconShieldAlert.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { signIn } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	let infoList: { label: string; icon: ComponentType }[];
+	$: infoList = [
+		{
+			label: $i18n.auth.text.safe_access,
+			icon: IconGlasses
+		},
+		{
+			label: $i18n.auth.text.privacy_and_security,
+			icon: IconShieldAlert
+		},
+		{
+			label: $i18n.auth.text.powered_by_chain_fusion,
+			icon: IconInfinity
+		}
+	];
 </script>
 
 <div class="mb-7 mt-5 pt-2">
-	<h1 class="text-4xl">
+	<h1 class="md:text-5xl md:leading-tight">
 		{$i18n.auth.text.title_part_1}<br /><span class="text-primary"
 			>{$i18n.auth.text.title_part_2}</span
 		>
 	</h1>
+</div>
+
+<div class="mb-7 flex flex-col items-center gap-2 md:items-start md:gap-3 md:text-lg">
+	{#each infoList as { label, icon }}
+		<div class="flex items-center gap-4">
+			<div class="hidden md:block">
+				<svelte:component this={icon} class="hidden md:block" />
+			</div>
+			{label}
+		</div>
+	{/each}
 </div>
 
 <ButtonAuthenticate on:click={async () => await signIn({})} />
