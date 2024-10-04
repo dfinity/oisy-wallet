@@ -66,6 +66,7 @@
 		await loadTokenAndRun({ token, callback });
 	};
 
+	// TODO: Use network id to get the address to support bitcoin.
 	let source: string;
 	$: source = $icrcAccountIdentifierText ?? '';
 </script>
