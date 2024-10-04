@@ -1,4 +1,3 @@
-import { pendingTransactionsStore } from '$btc/stores/btc-pending-transactions.store';
 import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 import {
 	BTC_MAINNET_TOKEN_ID,
@@ -6,7 +5,6 @@ import {
 	BTC_TESTNET_TOKEN_ID
 } from '$env/tokens.btc.env';
 import { ETHEREUM_TOKEN_ID } from '$env/tokens.env';
-import { getPendingBtcTransactions } from '$lib/api/backend.api';
 import {
 	getIdbBtcAddressMainnet,
 	getIdbEthAddress,
@@ -17,7 +15,6 @@ import {
 	updateIdbEthAddressLastUsage
 } from '$lib/api/idb.api';
 import { getBtcAddress, getEthAddress } from '$lib/api/signer.api';
-import { LOCAL } from '$lib/constants/app.constants';
 import { warnSignOut } from '$lib/services/auth.services';
 import {
 	btcAddressMainnetStore,
@@ -118,33 +115,12 @@ const loadBtcAddress = async ({
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,
-		getAddress: async (identity: OptionIdentity) => {
-			const apiNetwork = mapToSignerBitcoinNetwork({ network });
-			const address = await getBtcAddress({
+		getAddress: async (identity: OptionIdentity) =>
+			getBtcAddress({
 				identity,
-				network: apiNetwork,
+				network: mapToSignerBitcoinNetwork({ network }),
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
-			});
-			try {
-				// Endpoint raises an error locally if network is not regtest.
-				if (!LOCAL || network === 'regtest') {
-					const pendingTransactions = await getPendingBtcTransactions({
-						identity,
-						address,
-						network: apiNetwork
-					});
-					pendingTransactionsStore.setPendingTransactions({ address, pendingTransactions });
-				}
-			} catch (err: unknown) {
-				// Do not throw an error here, as the dapp should still work without pending transactions.
-				console.error('Error while loading pending transactions', err);
-				// We still fill the store with an empty array to enable the UI to work.
-				// Worst case scenario, the user will see an error before submitting a transaction.
-				// The endpoint to select the utxos and fee will return an error if there are pending transactions.
-				pendingTransactionsStore.setPendingTransactions({ address, pendingTransactions: [] });
-			}
-			return address;
-		},
+			}),
 		...bitcoinMapper[network]
 	});
 
