@@ -26,9 +26,9 @@ button {
 	&.primary,
 	&.secondary,
 	&.tertiary,
-	&.success,
-	&.error {
-		justify-content: flex-start;
+    &.success,
+    &.error {
+		justify-content: center;
 
 		padding: var(--button-padding);
 
@@ -170,10 +170,6 @@ button {
 	&.error {
 		&.full {
 			width: 100%;
-		}
-
-		&.center {
-			justify-content: center;
 		}
 	}
 
