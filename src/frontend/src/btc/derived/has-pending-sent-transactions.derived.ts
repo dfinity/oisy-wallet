@@ -1,4 +1,4 @@
-import { pendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { LOCAL } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnet,
@@ -16,7 +16,7 @@ export const initHasPendingSentTransactions = (address: string): Readable<boolea
 			btcAddressTestnet,
 			btcAddressRegtest,
 			testnets,
-			pendingSentTransactionsStore
+			btcPendingSentTransactionsStore
 		],
 		([
 			$btcAddressMainnet,

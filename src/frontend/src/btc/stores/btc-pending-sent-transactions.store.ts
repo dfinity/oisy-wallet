@@ -51,4 +51,4 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 	};
 };
 
-export const pendingSentTransactionsStore = initBtcPendingSentTransactionsStore();
+export const btcPendingSentTransactionsStore = initBtcPendingSentTransactionsStore();

@@ -1,5 +1,5 @@
 import { initHasPendingSentTransactions } from '$btc/derived/has-pending-sent-transactions.derived';
-import { pendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -25,12 +25,12 @@ const pendingTransactionMock = {
 	]
 };
 
-describe('hasPendingTransactions', () => {
+describe('initHasPendingSentTransactions', () => {
 	beforeEach(() => {
 		btcAddressMainnetStore.reset();
 		btcAddressTestnetStore.reset();
 		btcAddressRegtestStore.reset();
-		pendingSentTransactionsStore.reset();
+		btcPendingSentTransactionsStore.reset();
 		testnetsStore.reset({ key: 'testnets' });
 	});
 
@@ -58,7 +58,7 @@ describe('hasPendingTransactions', () => {
 
 		it('should return "true" if there are pending transactions for the address', () => {
 			btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
-			pendingSentTransactionsStore.setPendingTransactions({
+			btcPendingSentTransactionsStore.setPendingTransactions({
 				address: mockAddressMainnet,
 				pendingTransactions: [pendingTransactionMock]
 			});
@@ -68,7 +68,7 @@ describe('hasPendingTransactions', () => {
 
 		it('should return "true" if there are pending transactions for the address', () => {
 			btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
-			pendingSentTransactionsStore.setPendingTransactions({
+			btcPendingSentTransactionsStore.setPendingTransactions({
 				address: mockAddressMainnet,
 				pendingTransactions: []
 			});
@@ -115,7 +115,7 @@ describe('hasPendingTransactions', () => {
 
 		it('should return "true" if there are pending transactions for the address', () => {
 			loadAllAddresses();
-			pendingSentTransactionsStore.setPendingTransactions({
+			btcPendingSentTransactionsStore.setPendingTransactions({
 				address: mockAddressTestnet,
 				pendingTransactions: [pendingTransactionMock]
 			});
@@ -124,7 +124,7 @@ describe('hasPendingTransactions', () => {
 
 		it('should return "false" if pending transactions are present and empty', () => {
 			loadAllAddresses();
-			pendingSentTransactionsStore.setPendingTransactions({
+			btcPendingSentTransactionsStore.setPendingTransactions({
 				address: mockAddressTestnet,
 				pendingTransactions: []
 			});
@@ -133,7 +133,7 @@ describe('hasPendingTransactions', () => {
 
 		it('should return "true" if there are pending transactions for the address', () => {
 			btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
-			pendingSentTransactionsStore.setPendingTransactions({
+			btcPendingSentTransactionsStore.setPendingTransactions({
 				address: mockAddressMainnet,
 				pendingTransactions: [pendingTransactionMock]
 			});
@@ -143,7 +143,7 @@ describe('hasPendingTransactions', () => {
 
 		it('should return "false" if there is empty pending transactions for the address', () => {
 			btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
-			pendingSentTransactionsStore.setPendingTransactions({
+			btcPendingSentTransactionsStore.setPendingTransactions({
 				address: mockAddressMainnet,
 				pendingTransactions: []
 			});
