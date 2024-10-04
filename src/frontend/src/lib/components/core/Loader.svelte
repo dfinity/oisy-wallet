@@ -7,7 +7,7 @@
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
-	import Img from '$lib/components/ui/Img.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { btcAddressTestnet } from '$lib/derived/address.derived';
@@ -115,11 +115,7 @@
 		<div in:fade={{ delay: 0, duration: 250 }}>
 			<Modal>
 				<div class="stretch">
-					<div
-						style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
-					>
-						<Img width="100%" src={banner} />
-					</div>
+					<ImgBanner width="100%" src={banner} size="small" />
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
 
