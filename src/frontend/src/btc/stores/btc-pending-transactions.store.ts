@@ -1,9 +1,13 @@
 import type { PendingTransaction } from '$declarations/backend/backend.did';
-import type { CertifiedData } from '$lib/types/store';
+import type { AlwaysCertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 
 type Address = string;
-type BtcPendingTransactionsStoreData = Record<Address, CertifiedData<Array<PendingTransaction>>>;
+type BtcPendingTransactionsStoreData = Record<
+	Address,
+	// The endpoint can't be called with a query. Therefore, the information is always certified with an update call.
+	AlwaysCertifiedData<Array<PendingTransaction>>
+>;
 
 interface BtcPendingTransactionsStore extends Readable<BtcPendingTransactionsStoreData> {
 	setPendingTransactions: (params: {
@@ -35,7 +39,6 @@ const initBtcPendingTransactionsStore = (): BtcPendingTransactionsStore => {
 			update((state) => ({
 				...state,
 				[address]: {
-					// The endpoint can't be called with a query. Therefore, the information is always certified with an update call.
 					certified: true,
 					data: pendingTransactions
 				}
