@@ -115,7 +115,7 @@ const loadBtcAddress = async ({
 }): Promise<ResultSuccess> =>
 	loadTokenAddress<BtcAddress>({
 		tokenId,
-		getAddress: async (identity: OptionIdentity) =>
+		getAddress: (identity: OptionIdentity) =>
 			getBtcAddress({
 				identity,
 				network: mapToSignerBitcoinNetwork({ network }),
