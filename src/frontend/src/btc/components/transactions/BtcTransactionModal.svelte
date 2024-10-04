@@ -3,12 +3,12 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
 	import { BTC_MAINNET_EXPLORER_URL, BTC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
-	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$icp/utils/ic-send.utils';
 	import TransactionModal from '$lib/components/transactions/TransactionModal.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TransactionType } from '$lib/types/transaction';
+	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 
 	export let transaction: BtcTransactionUi;
 
