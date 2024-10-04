@@ -63,6 +63,7 @@
 	 * Props
 	 */
 
+	export let source: string;
 	export let currentStep: WizardStep | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let destination = '';
@@ -219,11 +220,11 @@
 <EthereumFeeContext {networkId}>
 	<BitcoinFeeContext {amount} {networkId}>
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
-			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} />
+			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} {source} />
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
 			<IcSendProgress bind:sendProgressStep {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan>
+			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan {source}>
 				<svelte:fragment slot="cancel">
 					{#if formCancelAction === 'back'}
 						<ButtonBack on:click={back} />
