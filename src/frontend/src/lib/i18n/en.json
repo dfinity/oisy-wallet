@@ -45,7 +45,10 @@
 			"title_part_1": "Multi-chain wallet.",
 			"title_part_2": "100% onchain.",
 			"logout": "Logout",
-			"authenticate": "Open or Create"
+			"authenticate": "Open or Create",
+			"safe_access": "Safe access anywhere, anytime",
+			"privacy_and_security": "Top-notch privacy and security",
+			"powered_by_chain_fusion": "Powered by ICP's Chain Fusion technology"
 		},
 		"alt": {
 			"sign_in": "Sign in with Internet Identity to start using Oisy Wallet.",
