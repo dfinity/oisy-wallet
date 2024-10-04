@@ -4,20 +4,24 @@ import type {
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 
-export const mapBtcPendingTransactionError = (response: BtcAddPendingTransactionError) => {
-	if ('InternalError' in response) {
-		return new CanisterInternalError(response.InternalError.msg);
+export const mapBtcPendingTransactionError = (
+	err: BtcAddPendingTransactionError
+): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
 	}
 
 	return new CanisterInternalError('Unknown BtcAddPendingTransactionError');
 };
 
-export const mapBtcSelectUserUtxosFeeError = (response: SelectedUtxosFeeError) => {
-	if ('InternalError' in response) {
-		return new CanisterInternalError(response.InternalError.msg);
+export const mapBtcSelectUserUtxosFeeError = (
+	err: SelectedUtxosFeeError
+): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
 	}
 
-	if ('PendingTransactions' in response) {
+	if ('PendingTransactions' in err) {
 		return new CanisterInternalError(
 			'Selecting utxos fee is not possible - pending transactions found.'
 		);
