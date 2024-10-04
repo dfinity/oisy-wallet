@@ -11,14 +11,12 @@
 </script>
 
 <div
-	class="m-auto grid w-full max-w-screen-2.5xl grid-cols-1 flex-col items-center gap-12 overflow-hidden px-5 md:grid-cols-2 md:grid-rows-1 md:items-start md:gap-8 md:overflow-visible"
+	class="m-auto grid w-full max-w-screen-2.5xl grid-cols-1 flex-col items-center gap-12 overflow-hidden px-5 md:grid-cols-2 md:grid-rows-1 md:gap-8 md:overflow-visible"
 >
 	<div
 		class="flex w-full flex-1 flex-col items-center text-center md:items-start md:pl-8 md:pt-12 md:text-left"
 	>
-		<div class="md:absolute md:top-1/3">
-			<HeroSignIn />
-		</div>
+		<HeroSignIn />
 	</div>
 
 	<!-- TODO: determine if this value is specific/permanent or can be changed -->
