@@ -34,7 +34,7 @@
 		</p>
 	</div>
 
-	<button class="secondary full center text-center" on:click={modalStore.close}
+	<button class="secondary full text-center" on:click={modalStore.close}
 		>{$i18n.core.text.close}</button
 	>
 </Modal>

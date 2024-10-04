@@ -43,7 +43,7 @@
 			</Token>
 		{/if}
 
-		<button class="primary full center text-center" on:click={modalStore.close} slot="toolbar"
+		<button class="primary full text-center" on:click={modalStore.close} slot="toolbar"
 			>{$i18n.core.text.done}</button
 		>
 	</ContentWithToolbar>
