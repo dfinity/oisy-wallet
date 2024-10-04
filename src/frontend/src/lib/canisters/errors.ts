@@ -1,5 +1,1 @@
-export class CanisterInternalError extends Error {
-	constructor(msg: string) {
-		super(msg);
-	}
-}
+export class CanisterInternalError extends Error {}
