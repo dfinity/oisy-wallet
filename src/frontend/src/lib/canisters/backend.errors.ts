@@ -1,8 +1,10 @@
 import type {
+	AllowSigningError,
 	BtcAddPendingTransactionError,
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { mapIcrc2ApproveError, type ApproveError } from '@dfinity/ledger-icp';
 
 export const mapBtcPendingTransactionError = (
 	err: BtcAddPendingTransactionError
@@ -28,4 +30,22 @@ export const mapBtcSelectUserUtxosFeeError = (
 	}
 
 	return new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError');
+};
+
+export const mapAllowSigningError = (
+	err: AllowSigningError
+): CanisterInternalError | ApproveError => {
+	if ('ApproveError' in err) {
+		return mapIcrc2ApproveError(err.ApproveError);
+	}
+
+	if ('FailedToContactCyclesLedger' in err) {
+		return new CanisterInternalError('The Cycles Ledger cannot be contacted.');
+	}
+
+	if ('Other' in err) {
+		return new CanisterInternalError(err.Other);
+	}
+
+	return new CanisterInternalError('Unknown AllowSigningError');
 };

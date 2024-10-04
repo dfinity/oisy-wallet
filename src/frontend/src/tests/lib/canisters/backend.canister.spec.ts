@@ -2,6 +2,7 @@ import type {
 	_SERVICE as BackendService,
 	CustomToken,
 	IcrcToken,
+	Result_1,
 	UserProfile,
 	UserToken
 } from '$declarations/backend/backend.did';
@@ -10,6 +11,7 @@ import { CanisterInternalError } from '$lib/canisters/errors';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { type ActorSubclass } from '@dfinity/agent';
+import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import { describe } from 'vitest';
@@ -567,7 +569,7 @@ describe('backend.canister', () => {
 			const res = await allowSigning();
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
-			expect(res).toEqual(response);
+			expect(res).toBeUndefined();
 		});
 
 		it('should throw an error if allowSigning throws', async () => {
@@ -582,6 +584,63 @@ describe('backend.canister', () => {
 			const res = allowSigning();
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		// We do not test all types of ApproveError:
+		// - for simplicity
+		// - because the utility mapIcrc2ApproveError, we are using to map those error types, is already covered by tests in ic-js
+		// - and we do not differentiate the error in Oisy anyway
+		it('should throw an ApproveError if allowSigning returns ApproveError', async () => {
+			const response = { Err: { ApproveError: { TemporarilyUnavailable: null } } };
+
+			service.allow_signing.mockResolvedValue(response);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning()).rejects.toThrow(mapIcrc2ApproveError(response.Err.ApproveError));
+		});
+
+		it('should throw a CanisterInternalError if FailedToContactCyclesLedger error is returned', async () => {
+			const response = { Err: { FailedToContactCyclesLedger: null } };
+
+			service.allow_signing.mockResolvedValue(response);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning()).rejects.toThrow(
+				new CanisterInternalError('The Cycles Ledger cannot be contacted.')
+			);
+		});
+
+		it('should throw a CanisterInternalError if Other error is returned', async () => {
+			const errorMsg = 'Test error';
+			const response = { Err: { Other: errorMsg } };
+
+			service.allow_signing.mockResolvedValue(response);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning()).rejects.toThrow(new CanisterInternalError(errorMsg));
+		});
+
+		it('should throw an unknown AllowSigningError if unrecognized error is returned', async () => {
+			const response = { Err: { UnrecognizedError: 'Some unknown error' } };
+
+			service.allow_signing.mockResolvedValue(response as unknown as Result_1);
+
+			const { allowSigning } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			await expect(allowSigning()).rejects.toThrow(
+				new CanisterInternalError('Unknown AllowSigningError')
+			);
 		});
 	});
 });

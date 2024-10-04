@@ -10,6 +10,7 @@ import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import {
+	mapAllowSigningError,
 	mapBtcPendingTransactionError,
 	mapBtcSelectUserUtxosFeeError
 } from '$lib/canisters/backend.errors';
@@ -21,7 +22,6 @@ import type {
 	BtcSelectUserUtxosFeeParams,
 	GetUserProfileResponse
 } from '$lib/types/api';
-import type { AllowSigningResponse } from '$lib/types/backend';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
@@ -163,9 +163,13 @@ export class BackendCanister extends Canister<BackendService> {
 		return response.Ok;
 	};
 
-	allowSigning = async (): Promise<AllowSigningResponse> => {
+	allowSigning = async (): Promise<void> => {
 		const { allow_signing } = this.caller({ certified: true });
 
-		return allow_signing();
+		const response = await allow_signing();
+
+		if ('Err' in response) {
+			throw mapAllowSigningError(response.Err);
+		}
 	};
 }
