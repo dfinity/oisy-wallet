@@ -106,7 +106,7 @@
 		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
 		if (!initSignerAllowanceSuccess) {
-			await signOut();
+			// Sign-out is handled within the service.
 			return;
 		}
 
