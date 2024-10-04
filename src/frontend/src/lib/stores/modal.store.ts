@@ -8,6 +8,7 @@ export interface Modal<T> {
 		| 'icrc-receive'
 		| 'ckbtc-receive'
 		| 'cketh-receive'
+		| 'btc-receive'
 		| 'receive'
 		| 'send'
 		| 'buy'
@@ -27,7 +28,8 @@ export interface Modal<T> {
 		| 'ic-token'
 		| 'receive-bitcoin'
 		| 'about-what'
-		| 'about-how';
+		| 'about-how'
+		| 'btc-transaction';
 	data?: T;
 }
 
@@ -39,6 +41,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openIcrcReceive: <D extends T>(data: D) => void;
 	openCkBTCReceive: <D extends T>(data: D) => void;
 	openCkETHReceive: <D extends T>(data: D) => void;
+	openBtcReceive: <D extends T>(data: D) => void;
 	openReceive: <D extends T>(data: D) => void;
 	openSend: <D extends T>(data: D) => void;
 	openBuy: <D extends T>(data: D) => void;
@@ -51,6 +54,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openWalletConnectSend: <D extends T>(data: D) => void;
 	openTransaction: <D extends T>(data: D) => void;
 	openIcTransaction: <D extends T>(data: D) => void;
+	openBtcTransaction: <D extends T>(data: D) => void;
 	openManageTokens: () => void;
 	openHideToken: () => void;
 	openIcHideToken: () => void;
@@ -71,6 +75,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openIcrcReceive: <D extends T>(data: D) => set({ type: 'icrc-receive', data }),
 		openCkBTCReceive: <D extends T>(data: D) => set({ type: 'ckbtc-receive', data }),
 		openCkETHReceive: <D extends T>(data: D) => set({ type: 'cketh-receive', data }),
+		openBtcReceive: <D extends T>(data: D) => set({ type: 'btc-receive', data }),
 		openReceive: <D extends T>(data: D) => set({ type: 'receive', data }),
 		openSend: <D extends T>(data: D) => set({ type: 'send', data }),
 		openBuy: <D extends T>(data: D) => set({ type: 'buy', data }),
@@ -83,6 +88,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openWalletConnectSend: <D extends T>(data: D) => set({ type: 'wallet-connect-send', data }),
 		openTransaction: <D extends T>(data: D) => set({ type: 'transaction', data }),
 		openIcTransaction: <D extends T>(data: D) => set({ type: 'ic-transaction', data }),
+		openBtcTransaction: <D extends T>(data: D) => set({ type: 'btc-transaction', data }),
 		openManageTokens: () => set({ type: 'manage-tokens' }),
 		openHideToken: () => set({ type: 'hide-token' }),
 		openIcHideToken: () => set({ type: 'ic-hide-token' }),

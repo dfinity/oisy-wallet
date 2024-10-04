@@ -9,6 +9,7 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 
+	export let source: string;
 	export let destination: string;
 	export let targetNetwork: Network | undefined;
 	export let networkId: NetworkId | undefined;
@@ -18,9 +19,8 @@
 	export let formCancelAction: 'back' | 'close' = 'back';
 </script>
 
-{#if isNetworkIdEthereum($token?.network.id)}
-	<!-- TODO: Move the context one level down -->
-	<SendTokenContext token={$token}>
+<SendTokenContext token={$token}>
+	{#if isNetworkIdEthereum($token?.network.id)}
 		<EthSendTokenWizard
 			{currentStep}
 			{formCancelAction}
@@ -37,21 +37,22 @@
 			on:icQRCodeScan
 			on:icQRCodeBack
 		/>
-	</SendTokenContext>
-{:else if isNetworkIdICP($token?.network.id)}
-	<IcSendTokenWizard
-		{currentStep}
-		{formCancelAction}
-		bind:destination
-		bind:networkId
-		bind:amount
-		bind:sendProgressStep
-		on:icBack
-		on:icNext
-		on:icClose
-		on:icQRCodeScan
-		on:icQRCodeBack
-	/>
-{:else}
-	<slot />
-{/if}
+	{:else if isNetworkIdICP($token?.network.id)}
+		<IcSendTokenWizard
+			{source}
+			{currentStep}
+			{formCancelAction}
+			bind:destination
+			bind:networkId
+			bind:amount
+			bind:sendProgressStep
+			on:icBack
+			on:icNext
+			on:icClose
+			on:icQRCodeScan
+			on:icQRCodeBack
+		/>
+	{:else}
+		<slot />
+	{/if}
+</SendTokenContext>

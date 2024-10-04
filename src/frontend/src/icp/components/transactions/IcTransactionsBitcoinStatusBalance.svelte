@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
-	import { Modal } from '@dfinity/gix-components';
+	import { IconReimbursed, Modal } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { blur } from 'svelte/transition';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';
 	import { updateBalance } from '$icp/services/ckbtc.services';
-	import IconSync from '$lib/components/icons/IconSync.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalReceiveBitcoin } from '$lib/derived/modal.derived';
 	import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
@@ -82,13 +81,14 @@
 <svelte:window on:oisyCkBtcUpdateBalance={onSyncState} />
 
 {#if nonNullish(ckBtcUpdateBalanceSyncState)}
-	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="text-misty-rose animate-pulse">
+	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="animate-pulse text-misty-rose">
 			<span in:blur>{$i18n.receive.bitcoin.text.checking_status}</span>
 		</div>{:else}
 		<button
 			in:blur
-			class="text text-blue border-0 flex gap-2"
-			on:click={async () => await receive()}><IconSync /> {$i18n.core.text.refresh}</button
+			class="text flex gap-2 border-0 text-blue"
+			on:click={async () => await receive()}
+			><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>
 	{/if}
 {/if}

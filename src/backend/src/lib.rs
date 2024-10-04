@@ -1,9 +1,12 @@
 use crate::assertions::{assert_token_enabled_is_some, assert_token_symbol_length};
 use crate::guards::{caller_is_allowed, may_read_user_data, may_write_user_data};
 use crate::token::{add_to_user_token, remove_from_user_token};
+use bitcoin_utils::estimate_fee;
 use candid::Principal;
 use config::find_credential_config;
 use ethers_core::abi::ethereum_types::H160;
+use heap_state::btc_user_pending_tx_state::StoredPendingTransaction;
+use heap_state::state::with_btc_pending_transactions;
 use ic_cdk::api::time;
 use ic_cdk::eprintln;
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
@@ -18,6 +21,11 @@ use serde_bytes::ByteBuf;
 use shared::http::{HttpRequest, HttpResponse};
 use shared::metrics::get_metrics;
 use shared::std_canister_status;
+use shared::types::bitcoin::{
+    BtcAddPendingTransactionError, BtcAddPendingTransactionRequest, BtcGetPendingTransactionsError,
+    BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsRequest, PendingTransaction,
+    SelectedUtxosFeeError, SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
+};
 use shared::types::custom_token::{CustomToken, CustomTokenId};
 use shared::types::token::{UserToken, UserTokenId};
 use shared::types::user_profile::{
@@ -27,6 +35,7 @@ use shared::types::user_profile::{
 use shared::types::{
     Arg, Config, Guards, InitArg, Migration, MigrationProgress, MigrationReport, Stats,
 };
+use signer::AllowSigningError;
 use std::cell::RefCell;
 use std::time::Duration;
 use types::{
@@ -37,11 +46,16 @@ use user_profile::{add_credential, create_profile, find_profile};
 use user_profile_model::UserProfileModel;
 
 mod assertions;
+mod bitcoin_api;
+mod bitcoin_utils;
 mod config;
 mod guards;
+mod heap_state;
 mod impls;
 mod migrate;
 mod oisy_user;
+mod signer;
+mod state;
 mod token;
 mod types;
 mod user_profile;
@@ -279,6 +293,130 @@ fn list_custom_tokens() -> Vec<CustomToken> {
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
+const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+
+#[update(guard = "may_read_user_data")]
+async fn btc_select_user_utxos_fee(
+    params: SelectedUtxosFeeRequest,
+) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
+    let principal = ic_cdk::caller();
+    let all_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.source_address.clone(),
+        Some(
+            params
+                .min_confirmations
+                .unwrap_or(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+        ),
+    )
+    .await
+    .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    let now_ns = time();
+
+    let has_pending_transactions = with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &all_utxos, now_ns);
+        !pending_transactions
+            .get_pending_transactions(&principal, &params.source_address)
+            .is_empty()
+    });
+
+    if has_pending_transactions {
+        return Err(SelectedUtxosFeeError::PendingTransactions);
+    }
+
+    let median_fee_millisatoshi_per_vbyte = bitcoin_api::get_fee_per_byte(params.network)
+        .await
+        .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
+    // We support sending to one destination only.
+    // Therefore, the outputs are the destination and the source address for the change.
+    let output_count = 2;
+    let mut available_utxos = all_utxos.clone();
+    let selected_utxos =
+        bitcoin_utils::utxos_selection(params.amount_satoshis, &mut available_utxos, output_count);
+
+    // Fee calculation might still take into account default tx size and expected output.
+    // But if there are no selcted utxos, no tx is possible. Therefore, no fee should be present.
+    if selected_utxos.is_empty() {
+        return Ok(SelectedUtxosFeeResponse {
+            utxos: selected_utxos,
+            fee_satoshis: 0,
+        });
+    }
+
+    let fee_satoshis = estimate_fee(
+        selected_utxos.len() as u64,
+        median_fee_millisatoshi_per_vbyte,
+        output_count as u64,
+    );
+
+    Ok(SelectedUtxosFeeResponse {
+        utxos: selected_utxos,
+        fee_satoshis,
+    })
+}
+
+#[update(guard = "may_write_user_data")]
+async fn btc_add_pending_transaction(
+    params: BtcAddPendingTransactionRequest,
+) -> Result<(), BtcAddPendingTransactionError> {
+    let principal = ic_cdk::caller();
+    let current_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.address.clone(),
+        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+    )
+    .await
+    .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })?;
+    let now_ns = time();
+
+    with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        let current_pending_transaction = StoredPendingTransaction {
+            txid: params.txid,
+            utxos: params.utxos,
+            created_at_timestamp_ns: now_ns,
+        };
+        pending_transactions
+            .add_pending_transaction(principal, params.address, current_pending_transaction)
+            .map_err(|msg| BtcAddPendingTransactionError::InternalError { msg })
+    })
+}
+
+#[update(guard = "may_read_user_data")]
+async fn btc_get_pending_transactions(
+    params: BtcGetPendingTransactionsRequest,
+) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
+    let principal = ic_cdk::caller();
+    let now_ns = time();
+
+    let current_utxos = bitcoin_api::get_all_utxos(
+        params.network,
+        params.address.clone(),
+        Some(MIN_CONFIRMATIONS_ACCEPTED_BTC_TX),
+    )
+    .await
+    .map_err(|msg| BtcGetPendingTransactionsError::InternalError { msg })?;
+
+    let stored_transactions = with_btc_pending_transactions(|pending_transactions| {
+        pending_transactions.prune_pending_transactions(principal, &current_utxos, now_ns);
+        pending_transactions
+            .get_pending_transactions(&principal, &params.address)
+            .clone()
+    });
+
+    let pending_transactions = stored_transactions
+        .iter()
+        .map(|tx| PendingTransaction {
+            txid: tx.txid.clone(),
+            utxos: tx.utxos.clone(),
+        })
+        .collect();
+
+    Ok(BtcGetPendingTransactionsReponse {
+        transactions: pending_transactions,
+    })
+}
+
 #[update(guard = "may_write_user_data")]
 #[allow(clippy::needless_pass_by_value)]
 fn add_user_credential(request: AddUserCredentialRequest) -> Result<(), AddUserCredentialError> {
@@ -339,6 +477,18 @@ fn get_user_profile() -> Result<UserProfile, GetUserProfileError> {
             Err(err) => Err(err),
         }
     })
+}
+
+/// An endpoint to be called by users on first login, to enable them to
+/// use the chain fusion signer together with Oisy.
+///
+/// Note:
+/// - The chain fusion signer performs threshold key operations including providing
+///   public keys, creating signatures and assisting with performing signed Bitcoin
+///   and Ethereum transactions.
+#[update(guard = "may_read_user_data")]
+async fn allow_signing() -> Result<(), AllowSigningError> {
+    signer::allow_signing().await
 }
 
 #[query(guard = "caller_is_allowed")]

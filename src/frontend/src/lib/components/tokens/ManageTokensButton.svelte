@@ -10,7 +10,7 @@
 </script>
 
 <button
-	class="secondary mx-auto mt-12 mb-4 w-full center sm:w-auto"
+	class="secondary center mx-auto mb-4 mt-12 w-full sm:w-auto"
 	on:click={modalStore.openManageTokens}
 	{disabled}
 >

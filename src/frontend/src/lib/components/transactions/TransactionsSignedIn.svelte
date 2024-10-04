@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import BtcTransactions from '$btc/components/BtcTransactions.svelte';
+	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
 	import Transactions from '$eth/components/transactions/Transactions.svelte';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
 	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
