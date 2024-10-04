@@ -1,7 +1,6 @@
 <script lang="ts">
 	import previewLarge from '$lib/assets/preview-large.webp';
 	import previewSmall from '$lib/assets/preview-small.webp';
-	import Footer from '$lib/components/core/Footer.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store.js';
@@ -28,5 +27,3 @@
 		</picture>
 	</div>
 </div>
-
-<Footer />

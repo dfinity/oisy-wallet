@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
+	import Footer from '$lib/components/core/Footer.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
@@ -34,3 +35,5 @@
 
 	<Modals />
 </AuthGuard>
+
+<Footer />
