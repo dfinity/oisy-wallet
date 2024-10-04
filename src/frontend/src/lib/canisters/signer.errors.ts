@@ -1,19 +1,22 @@
-import type { GetAddressError, PaymentError } from '$declarations/signer/signer.did';
+import type {
+	PaymentError,
+	GetAddressError as SignerCanisterBtcError
+} from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 
-export class SignerCanisterPaymentError extends Error {
-	constructor(response: PaymentError) {
-		if ('UnsupportedPaymentType' in response) {
+export class SignerCanisterPaymentError extends CanisterInternalError {
+	constructor(err: PaymentError) {
+		if ('UnsupportedPaymentType' in err) {
 			super('Unsupported payment type');
-		} else if ('LedgerWithdrawFromError' in response) {
-			super(`Ledger error: ${JSON.stringify(response.LedgerWithdrawFromError.error)}`);
-		} else if ('LedgerUnreachable' in response) {
-			super(`Ledger unreachable: ${JSON.stringify(response.LedgerUnreachable)}`);
-		} else if ('LedgerTransferFromError' in response) {
-			super(`Ledger error: ${JSON.stringify(response.LedgerTransferFromError)}`);
-		} else if ('InsufficientFunds' in response) {
+		} else if ('LedgerWithdrawFromError' in err) {
+			super(`Ledger error: ${JSON.stringify(err.LedgerWithdrawFromError.error)}`);
+		} else if ('LedgerUnreachable' in err) {
+			super(`Ledger unreachable: ${JSON.stringify(err.LedgerUnreachable)}`);
+		} else if ('LedgerTransferFromError' in err) {
+			super(`Ledger error: ${JSON.stringify(err.LedgerTransferFromError)}`);
+		} else if ('InsufficientFunds' in err) {
 			super(
-				`Insufficient funds needed ${response.InsufficientFunds.needed} but available ${response.InsufficientFunds.available}`
+				`Insufficient funds needed ${err.InsufficientFunds.needed} but available ${err.InsufficientFunds.available}`
 			);
 		} else {
 			super('Unknown PaymentError');
@@ -21,13 +24,12 @@ export class SignerCanisterPaymentError extends Error {
 	}
 }
 
-type SignerCanisterBtcError = GetAddressError;
-export const mapSignerCanisterBtcError = (response: SignerCanisterBtcError) => {
-	if ('InternalError' in response) {
-		return new CanisterInternalError(response.InternalError.msg);
+export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
 	}
-	if ('PaymentError' in response) {
-		return new SignerCanisterPaymentError(response.PaymentError);
+	if ('PaymentError' in err) {
+		return new SignerCanisterPaymentError(err.PaymentError);
 	}
 	return new CanisterInternalError('Unknown SignerCanisterBtcError');
 };
