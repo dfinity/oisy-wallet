@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { initBtcWalletWorker } from '$btc/services/worker.btc-wallet.services';
-	import LoaderWallets from '$lib/components/core/LoaderWallets.svelte';
+	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import {
 		btcAddressMainnet,
@@ -31,6 +31,6 @@
 	const initWalletWorker: InitWalletWorkerFn = ({ token }) => initBtcWalletWorker(token);
 </script>
 
-<LoaderWallets {tokens} {initWalletWorker}>
+<WalletWorkers {tokens} {initWalletWorker}>
 	<slot />
-</LoaderWallets>
+</WalletWorkers>
