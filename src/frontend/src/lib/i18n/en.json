@@ -23,6 +23,10 @@
 		"alt": {
 			"logo": "$name logo",
 			"go_to_home": "Go to the $oisy_name home page"
+		},
+		"warning": {
+			"may_take_a_few_seconds": "This may take a few seconds.",
+			"do_not_close": "Please do not close your browser tab."
 		}
 	},
 	"navigation": {

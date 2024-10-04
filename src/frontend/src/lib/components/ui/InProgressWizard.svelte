@@ -5,6 +5,7 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import Warning from '$lib/components/ui/Warning.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
 
@@ -28,8 +29,9 @@
 
 <div class="stretch">
 	<Warning>
-		<p>This may take a few seconds.</p>
-		<p>Please do not close your browser tab.</p>
+		<span>{$i18n.core.warning.may_take_a_few_seconds}</span>
+		<br />
+		<span>{$i18n.core.warning.do_not_close}</span>
 	</Warning>
 
 	<InProgress {progressStep} {steps} />
