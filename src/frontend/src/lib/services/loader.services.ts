@@ -1,10 +1,8 @@
-import type { AllowSigningError } from '$declarations/backend/backend.did';
 import { allowSigning } from '$lib/api/backend.api';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { ResultSuccess } from '$lib/types/utils';
-import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { get } from 'svelte/store';
 
 /**
@@ -16,36 +14,9 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 	try {
 		const { identity } = get(authStore);
 
-		const result = await allowSigning({ identity });
+		await allowSigning({ identity });
 
 		// TODO: maybe we do not even need a toast given that the user is signed out anyway?
-
-		if ('Err' in result) {
-			const mapErr = (err: AllowSigningError): Error => {
-				if ('ApproveError' in err) {
-					return mapIcrc2ApproveError(err.ApproveError);
-				}
-
-				if ('FailedToContactCyclesLedger' in err) {
-					return new Error('TODO_FailedToContactCyclesLedger');
-				}
-
-				if ('Other' in err) {
-					return new Error(err.Other);
-				}
-
-				return new Error();
-			};
-
-			const err = mapErr(result.Err);
-
-			toastsError({
-				msg: { text: get(i18n).send.error.unexpected },
-				err
-			});
-
-			return { success: false };
-		}
 	} catch (err: unknown) {
 		toastsError({
 			msg: {
