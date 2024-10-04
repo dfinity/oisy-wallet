@@ -11,7 +11,7 @@
 </Warning>
 
 <style lang="scss">
-	p {
+	span {
 		:global(a) {
 			&:active,
 			&:hover {
