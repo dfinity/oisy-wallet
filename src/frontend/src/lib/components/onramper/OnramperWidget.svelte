@@ -4,7 +4,7 @@
 	import { BTC_MAINNET_TOKEN } from '$env/tokens.btc.env';
 	import { ICP_TOKEN } from '$env/tokens.env';
 	import { ethereumToken } from '$eth/derived/token.derived';
-	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import { icpAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { networkBitcoin, networkEthereum } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
@@ -40,8 +40,8 @@
 			bitcoin: $btcAddressMainnet,
 			ethereum: $ethAddress,
 			erc20: $ethAddress,
-			icrc: $icrcAccountIdentifierText,
-			icp: $icrcAccountIdentifierText
+			icrc: $icpAccountIdentifierText,
+			icp: $icpAccountIdentifierText
 		}
 	});
 
