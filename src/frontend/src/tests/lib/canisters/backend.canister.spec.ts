@@ -567,7 +567,7 @@ describe('backend.canister', () => {
 			const res = await allowSigning();
 
 			expect(service.allow_signing).toHaveBeenCalledTimes(1);
-			expect(res).toEqual(response);
+			expect(res).toBeUndefined();
 		});
 
 		it('should throw an error if allowSigning throws', async () => {
