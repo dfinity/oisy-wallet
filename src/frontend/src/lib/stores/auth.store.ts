@@ -2,12 +2,15 @@ import {
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
 	AUTH_POPUP_WIDTH,
-	INTERNET_IDENTITY_CANISTER_ID
+	INTERNET_IDENTITY_CANISTER_ID,
+	LOCAL,
+	TEST
 } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { createAuthClient, getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
+import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
@@ -26,6 +29,7 @@ export interface AuthStore extends Readable<AuthStoreData> {
 	sync: () => Promise<void>;
 	signIn: (params: AuthSignInParams) => Promise<void>;
 	signOut: () => Promise<void>;
+	setForTesting: (identity: Identity) => void;
 }
 
 const initAuthStore = (): AuthStore => {
@@ -85,6 +89,14 @@ const initAuthStore = (): AuthStore => {
 				...state,
 				identity: null
 			}));
+		},
+
+		setForTesting: (identity) => {
+			if (!LOCAL && !TEST) {
+				throw new Error('This function should only be used in local environment');
+			}
+
+			set({ identity });
 		}
 	};
 };
