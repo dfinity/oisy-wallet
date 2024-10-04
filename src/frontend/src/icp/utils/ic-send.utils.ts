@@ -10,30 +10,15 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
 import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
+import { invalidBtcAddress } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdBitcoin,
 	isNetworkIdEthereum
 } from '$lib/utils/network.utils';
-import { BtcNetwork, parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
-import { isNullish, nonNullish } from '@dfinity/utils';
-
-export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
-	if (isNullish(address)) {
-		return false;
-	}
-
-	try {
-		parseBtcAddress(address);
-		return true;
-	} catch (_: unknown) {
-		return false;
-	}
-};
-
-export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
-	!isBtcAddress(address);
+import { BtcNetwork } from '@dfinity/ckbtc';
+import { nonNullish } from '@dfinity/utils';
 
 const isTokenLedger = ({
 	token: { ledgerCanisterId },
