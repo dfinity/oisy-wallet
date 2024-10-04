@@ -290,7 +290,8 @@ interface I18nConvert {
 }
 
 interface I18nBuy {
-	text: { buy: string };
+	text: { buy: string; buy_dev: string };
+	onramper: { title: string };
 }
 
 interface I18nTokens {
