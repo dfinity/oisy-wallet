@@ -1,10 +1,5 @@
 import { syncWallet } from '$btc/services/btc-listener.services';
 import {
-	isNetworkIdBTCMainnet,
-	isNetworkIdBTCRegtest,
-	isNetworkIdBTCTestnet
-} from '$icp/utils/ic-send.utils';
-import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore
@@ -12,7 +7,12 @@ import {
 import type { WalletWorker } from '$lib/types/listener';
 import type { PostMessage, PostMessageDataResponseWallet } from '$lib/types/post-message';
 import type { Token } from '$lib/types/token';
-import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import {
+	isNetworkIdBTCMainnet,
+	isNetworkIdBTCRegtest,
+	isNetworkIdBTCTestnet,
+	mapToSignerBitcoinNetwork
+} from '$lib/utils/network.utils';
 import { get } from 'svelte/store';
 
 export const initBtcWalletWorker = async ({
