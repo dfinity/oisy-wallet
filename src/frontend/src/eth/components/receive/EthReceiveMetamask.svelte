@@ -30,7 +30,7 @@
 </script>
 
 {#if $metamaskAvailable && $networkEthereum && tokenStandardEth}
-	<button class="primary full center my-4" on:click={receiveModal}>
+	<button class="primary full my-4" on:click={receiveModal}>
 		<IconMetamask />
 		<span class="text-dark-slate-blue font-bold">{$i18n.receive.ethereum.text.metamask}</span>
 	</button>
