@@ -9,6 +9,7 @@
 	import type { Network, NetworkId } from '$lib/types/network';
 	import { isNetworkIdEthereum, isNetworkIdICP } from '$lib/utils/network.utils';
 
+	export let source: string;
 	export let destination: string;
 	export let targetNetwork: Network | undefined;
 	export let networkId: NetworkId | undefined;
@@ -38,6 +39,7 @@
 		/>
 	{:else if isNetworkIdICP($token?.network.id)}
 		<IcSendTokenWizard
+			{source}
 			{currentStep}
 			{formCancelAction}
 			bind:destination
