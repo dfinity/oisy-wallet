@@ -41,6 +41,10 @@ export default defineConfig(
 				{
 					find: '$env',
 					replacement: resolve(__dirname, 'src/frontend/src/env')
+				},
+				{
+					find: '$declarations',
+					replacement: resolve(__dirname, 'src/declarations')
 				}
 			]
 		},
