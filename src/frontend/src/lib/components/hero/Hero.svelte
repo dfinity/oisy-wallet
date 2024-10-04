@@ -1,30 +1,20 @@
 <script lang="ts">
 	import Header from '$lib/components/hero/Header.svelte';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
-	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 
 	export let usdTotal = false;
 	export let summary = false;
 	export let actions = true;
 	export let back: 'header' | 'hero' | undefined;
-
-	// We only want to display the "Sign-in" call to action on pages that actually are displaying any content in the Hero pane.
-	let heroContent = true;
-	$: heroContent = usdTotal || summary;
 </script>
 
 <div class="pt-6">
 	<Header back={back === 'header'} />
 
-	<article
-		class="main relative flex flex-col items-center rounded-lg pb-6 pt-10"
-		class:pb-16={$authNotSignedIn}
-	>
-		{#if $authSignedIn}
+	{#if $authSignedIn}
+		<article class="main relative flex flex-col items-center rounded-lg pb-6 pt-10">
 			<HeroContent {usdTotal} {summary} {actions} back={back === 'hero'} />
-		{:else if heroContent}
-			<HeroSignIn />
-		{/if}
-	</article>
+		</article>
+	{/if}
 </div>
