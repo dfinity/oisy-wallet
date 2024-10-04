@@ -24,6 +24,6 @@
 	<ReceiveQRCode address={address ?? ''} />
 </div>
 
-<button class="secondary full center mt-8 text-center" on:click={() => dispatch('icBack')}
+<button class="secondary full mt-8 text-center" on:click={() => dispatch('icBack')}
 	>{$i18n.core.text.back}</button
 >

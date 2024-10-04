@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$icp/utils/ic-send.utils.js';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { btcAddressMainnet, btcAddressTestnet } from '$lib/derived/address.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
 	// Regtest and Testnet BTC wallets have the same address
 	const address =
