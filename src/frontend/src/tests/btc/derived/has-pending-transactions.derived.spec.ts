@@ -88,7 +88,7 @@ describe('hasPendingTransactions', () => {
 			btcAddressRegtestStore.set({ certified: true, data: mockAddressRegtest });
 		};
 
-		it('should return "loading" if some btc address is missing is not loaded and it doesn\'t find the address', () => {
+		it('should return "loading" if some btc address is not loaded', () => {
 			expect(get(initHasPendingTransactions(mockAddressMainnet))).toBe('loading');
 
 			btcAddressTestnetStore.set({ certified: true, data: mockAddressMainnet });
