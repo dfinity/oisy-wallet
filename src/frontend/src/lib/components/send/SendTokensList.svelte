@@ -37,7 +37,7 @@
 		{/if}
 	</TokensSkeletons>
 
-	<button class="secondary full center mb-2 text-center" on:click={modalStore.close} slot="toolbar">
+	<button class="secondary full mb-2 text-center" on:click={modalStore.close} slot="toolbar">
 		{$i18n.core.text.close}
 	</button>
 </ContentWithToolbar>
