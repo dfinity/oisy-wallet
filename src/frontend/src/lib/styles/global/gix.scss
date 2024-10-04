@@ -64,7 +64,7 @@
 	--dialog-width: 464px;
 	--dialog-max-width: var(--alert-max-width);
 	--dialog-max-height: var(--alert-max-height);
-	--dialog-min-height: calc(100vh - var(--padding-4x));
+	--dialog-min-height: var(--alert-max-height);
 	--dialog-height: initial;
 	--dialog-border-radius: calc(var(--border-radius-sm) * 3);
 	--dialog-padding-y: 0;
