@@ -4,7 +4,7 @@ import type {
 	SelectedUtxosFeeError
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
+import { mapIcrc2ApproveError, type ApproveError } from '@dfinity/ledger-icp';
 
 export const mapBtcPendingTransactionError = (response: BtcAddPendingTransactionError) => {
 	if ('InternalError' in response) {
@@ -28,7 +28,9 @@ export const mapBtcSelectUserUtxosFeeError = (response: SelectedUtxosFeeError) =
 	return new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError');
 };
 
-export const mapAllowSigningError = (err: AllowSigningError) => {
+export const mapAllowSigningError = (
+	err: AllowSigningError
+): CanisterInternalError | ApproveError => {
 	if ('ApproveError' in err) {
 		return mapIcrc2ApproveError(err.ApproveError);
 	}
