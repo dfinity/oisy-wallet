@@ -6,7 +6,7 @@
 	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
 	import IconKey from '$lib/components/icons/IconKey.svelte';
 	import IconWorld from '$lib/components/icons/IconWorld.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
+	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { ABOUT_HOW_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -19,7 +19,7 @@
 	</svelte:fragment>
 
 	<div class="stretch pt-4">
-		<Img src={CoverHow} alt={$i18n.about.how.text.title} />
+		<ImgBanner src={CoverHow} alt={$i18n.about.how.text.title} />
 
 		<p class="mt-6">
 			<IconKey />

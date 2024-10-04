@@ -36,7 +36,15 @@ interface I18nNavigation {
 }
 
 interface I18nAuth {
-	text: { title_part_1: string; title_part_2: string; logout: string; authenticate: string };
+	text: {
+		title_part_1: string;
+		title_part_2: string;
+		logout: string;
+		authenticate: string;
+		safe_access: string;
+		privacy_and_security: string;
+		powered_by_chain_fusion: string;
+	};
 	alt: { sign_in: string; preview: string };
 	warning: { not_signed_in: string; session_expired: string };
 	error: {
