@@ -543,7 +543,7 @@ interface I18nAbout {
 }
 
 interface I18nSigner {
-	sign_in: { text: { authenticate_to_connect: string } };
+	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
 	permissions: {
 		text: {

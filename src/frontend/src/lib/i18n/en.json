@@ -610,7 +610,8 @@
 	"signer": {
 		"sign_in": {
 			"text": {
-				"authenticate_to_connect": "Authenticate to connect"
+				"access_your_wallet": "Access your $oisy_name",
+				"open_or_create": "Open or create your wallet to securely connect to the dApp and start managing your assets."
 			}
 		},
 		"idle": {
