@@ -4,7 +4,9 @@ import type {
 } from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 
-export const mapBtcPendingTransactionError = (err: BtcAddPendingTransactionError): CanisterInternalError => {
+export const mapBtcPendingTransactionError = (
+	err: BtcAddPendingTransactionError
+): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
 	}
@@ -12,7 +14,9 @@ export const mapBtcPendingTransactionError = (err: BtcAddPendingTransactionError
 	return new CanisterInternalError('Unknown BtcAddPendingTransactionError');
 };
 
-export const mapBtcSelectUserUtxosFeeError = (err: SelectedUtxosFeeError): CanisterInternalError => {
+export const mapBtcSelectUserUtxosFeeError = (
+	err: SelectedUtxosFeeError
+): CanisterInternalError => {
 	if ('InternalError' in err) {
 		return new CanisterInternalError(err.InternalError.msg);
 	}
