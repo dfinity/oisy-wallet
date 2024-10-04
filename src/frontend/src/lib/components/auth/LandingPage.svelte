@@ -19,13 +19,9 @@
 
 	<!-- TODO: determine if this value is specific/permanent or can be changed -->
 	<div
-		class="ml-auto min-w-[1127px] md:relative md:top-1/2 md:m-0 md:translate-y-1/2 md:transform md:items-center md:pt-12"
+		class="ml-auto min-w-[1127px] md:m-0 md:flex md:h-full md:content-center md:items-center md:pt-12"
 	>
-		<picture
-			aria-label={ariaLabel}
-			class="w-full md:absolute md:top-1/2 md:-translate-y-1/2 md:transform md:items-center"
-			role="presentation"
-		>
+		<picture aria-label={ariaLabel} class="w-full md:mt-auto" role="presentation">
 			<source srcset={previewSmall} media="(max-width: 767px)" />
 			<Img src={previewLarge} alt={ariaLabel} />
 		</picture>

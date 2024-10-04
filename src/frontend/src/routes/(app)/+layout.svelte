@@ -19,21 +19,23 @@
 	$: token.set($pageToken);
 </script>
 
-<Hero
-	usdTotal={route === 'tokens'}
-	summary={route === 'transactions'}
-	actions={route !== 'settings'}
-	back={route === 'settings' ? 'header' : route === 'transactions' ? 'hero' : undefined}
-/>
+<div class="flex h-full flex-col overflow-hidden">
+	<Hero
+		usdTotal={route === 'tokens'}
+		summary={route === 'transactions'}
+		actions={route !== 'settings'}
+		back={route === 'settings' ? 'header' : route === 'transactions' ? 'hero' : undefined}
+	/>
 
-<AuthGuard>
-	<main class="pb-5 pt-8 sm:pb-12">
-		<LoadersGuard>
-			<slot />
-		</LoadersGuard>
-	</main>
+	<AuthGuard>
+		<main class="pb-5 pt-8 sm:pb-12">
+			<LoadersGuard>
+				<slot />
+			</LoadersGuard>
+		</main>
 
-	<Modals />
-</AuthGuard>
+		<Modals />
+	</AuthGuard>
 
-<Footer />
+	<Footer />
+</div>

@@ -14,9 +14,10 @@ header {
 
 footer {
 	&.logged-out {
-		@media (min-width: media.$breakpoint-medium) and (max-height: 990px) {
+		@media (min-width: media.$breakpoint-medium) and (max-height: 1090px) {
 			width: 50%;
 			margin-inline: 0;
+			padding-right: 0;
 		}
 	}
 }
