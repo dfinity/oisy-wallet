@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { ComponentType } from 'svelte';
-	import BitcoinListener from '$btc/components/BitcoinListener.svelte';
+	import BitcoinListener from '$btc/components/core/BitcoinListener.svelte';
 	import EthListener from '$eth/components/core/EthListener.svelte';
 	import NoListener from '$lib/components/core/NoListener.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';

@@ -3,7 +3,7 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import BtcManageTokenToggle from '$btc/components/BtcManageTokenToggle.svelte';
+	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { ICP_TOKEN } from '$env/tokens.env';
