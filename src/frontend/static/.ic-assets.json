@@ -24,5 +24,11 @@
 		"headers": {
 			"Cache-Control": "public, max-age=31536000"
 		}
+	},
+	{
+		"match": "**/_app/immutable/assets/**/*",
+		"headers": {
+			"Cache-Control": "public, max-age=31536000"
+		}
 	}
 ]
