@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$icp/utils/ic-send.utils';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
 	import { modalBtcReceive } from '$lib/derived/modal.derived';
@@ -14,6 +13,7 @@
 	} from '$lib/stores/address.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { BtcAddress } from '$lib/types/address';
+	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
 	let addressData: StorageAddressData<BtcAddress>;
 	$: addressData = isNetworkIdBTCTestnet($networkId)

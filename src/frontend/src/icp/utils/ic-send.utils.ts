@@ -1,9 +1,4 @@
-import {
-	BTC_MAINNET_NETWORK_ID,
-	BTC_REGTEST_NETWORK_ID,
-	BTC_TESTNET_NETWORK_ID,
-	ETHEREUM_NETWORK_ID
-} from '$env/networks.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks.env';
 import {
 	CKBTC_LEDGER_CANISTER_IDS,
 	CKERC20_LEDGER_CANISTER_IDS,
@@ -16,7 +11,11 @@ import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
 import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+import {
+	isNetworkIdBTCMainnet,
+	isNetworkIdBitcoin,
+	isNetworkIdEthereum
+} from '$lib/utils/network.utils';
 import { BtcNetwork, parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -55,15 +54,6 @@ export const isTokenCkErc20Ledger = (token: Partial<IcToken>): boolean =>
 
 export const isNetworkIdETHMainnet = (networkId: NetworkId | undefined): boolean =>
 	ETHEREUM_NETWORK_ID === networkId;
-
-export const isNetworkIdBTCMainnet = (networkId: NetworkId | undefined): boolean =>
-	BTC_MAINNET_NETWORK_ID === networkId;
-
-export const isNetworkIdBTCTestnet = (networkId: NetworkId | undefined): boolean =>
-	BTC_TESTNET_NETWORK_ID === networkId;
-
-export const isNetworkIdBTCRegtest = (networkId: NetworkId | undefined): boolean =>
-	BTC_REGTEST_NETWORK_ID === networkId;
 
 export const isNetworkIdETH = (networkId: NetworkId | undefined): boolean =>
 	nonNullish(networkId) && isNetworkIdEthereum(networkId);
