@@ -21,7 +21,7 @@
 	<div
 		class="ml-auto min-w-[1127px] pt-12 md:m-0 md:flex md:h-full md:content-center md:items-center"
 	>
-		<picture aria-label={ariaLabel} class="w-full md:mt-auto h-1090:mt-0" role="presentation">
+		<picture aria-label={ariaLabel} class="w-full md:h-md:mt-auto" role="presentation">
 			<source srcset={previewSmall} media="(max-width: 767px)" />
 			<Img src={previewLarge} alt={ariaLabel} />
 		</picture>

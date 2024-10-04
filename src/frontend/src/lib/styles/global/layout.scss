@@ -11,13 +11,3 @@ main,
 header {
 	margin: 0 auto;
 }
-
-footer {
-	&.logged-out {
-		@media (min-width: media.$breakpoint-medium) and (max-height: 1090px) {
-			width: 50%;
-			margin-inline: 0;
-			padding-right: 0;
-		}
-	}
-}

@@ -12,9 +12,9 @@
 	const OISY_TWITTER_URL = 'https://x.com/dfinity';
 </script>
 
-<div class="flex-1 flex-grow md:sticky md:bottom-0">
+<div class="md:sticky md:bottom-0 md:flex-1 md:flex-grow">
 	<footer
-		class="z-1 relative bottom-0 mx-auto mt-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-between px-4 pt-6 sm:flex-row sm:px-8"
+		class="z-1 bottom-0 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-between px-4 pt-6 md:flex-row md:px-8 md:h-md:mx-0 md:h-md:w-1/2 md:h-md:pr-0"
 		class:logged-out={$authNotSignedIn}
 	>
 		<div class="flex flex-row items-center gap-4">

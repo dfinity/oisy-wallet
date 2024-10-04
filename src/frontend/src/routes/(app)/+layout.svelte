@@ -19,7 +19,7 @@
 	$: token.set($pageToken);
 </script>
 
-<div class="flex h-full flex-col overflow-hidden">
+<div class="min-h-96 overflow-hidden md:flex md:h-full md:flex-col">
 	<Hero
 		usdTotal={route === 'tokens'}
 		summary={route === 'transactions'}
