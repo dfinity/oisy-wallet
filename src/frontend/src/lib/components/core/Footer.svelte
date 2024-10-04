@@ -1,0 +1,49 @@
+<script lang="ts">
+	import { IconGitHub } from '@dfinity/gix-components';
+	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
+	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+</script>
+
+<footer
+	class="z-1 relative bottom-0 mt-auto flex w-full max-w-screen-2.5xl flex-col items-center justify-between px-4 pt-6 sm:flex-row sm:px-8"
+>
+	<div class="flex flex-row items-center gap-4">
+		<a
+			href={OISY_REPO_URL}
+			rel="external noopener noreferrer"
+			target="_blank"
+			class="rounded-full bg-white p-2"
+			aria-label={$i18n.navigation.text.source_code_on_github}
+		>
+			<IconGitHub />
+		</a>
+		<a
+			href="https://x.com/dfinity"
+			rel="external noopener noreferrer"
+			target="_blank"
+			class="rounded-full bg-white p-2"
+			aria-label={$i18n.navigation.text.source_code_on_github}
+		>
+			<IconTwitter />
+		</a>
+	</div>
+	<div class="flex flex-row items-center gap-2 text-sm">
+		<IconDfinity />
+		{$i18n.footer.text.copyright}
+		<span>
+			{replaceOisyPlaceholders($i18n.footer.text.developed_with)}
+			<ExternalLink
+				href="https://dfinity.org"
+				ariaLabel={replaceOisyPlaceholders($i18n.footer.alt.dfinity)}
+				color="blue"
+				iconVisible={false}
+			>
+				{replaceOisyPlaceholders($i18n.footer.text.dfinity)}
+			</ExternalLink>
+		</span>
+	</div>
+</footer>
