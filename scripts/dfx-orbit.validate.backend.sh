@@ -7,7 +7,7 @@ fi
 
 # Checkout
 git fetch
-git checkout $RELEASE_COMMIT
+git checkout $RELEASE_COMMIT || exit 1
 
 # Make sure target directory exists but no prior artifacts are there
 mkdir -p target
