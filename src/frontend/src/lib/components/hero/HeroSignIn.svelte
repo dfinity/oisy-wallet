@@ -8,21 +8,20 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let infoList: { label: string; icon: ComponentType }[];
-	$: $i18n,
-		(infoList = [
-			{
-				label: $i18n.auth.text.safe_access,
-				icon: IconGlasses
-			},
-			{
-				label: $i18n.auth.text.privacy_and_security,
-				icon: IconShieldAlert
-			},
-			{
-				label: $i18n.auth.text.powered_by_chain_fusion,
-				icon: IconInfinity
-			}
-		]);
+	$: infoList = [
+		{
+			label: $i18n.auth.text.safe_access,
+			icon: IconGlasses
+		},
+		{
+			label: $i18n.auth.text.privacy_and_security,
+			icon: IconShieldAlert
+		},
+		{
+			label: $i18n.auth.text.powered_by_chain_fusion,
+			icon: IconInfinity
+		}
+	];
 </script>
 
 <div class="mb-7 mt-5 pt-2">
