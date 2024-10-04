@@ -13,12 +13,10 @@ header {
 }
 
 footer {
-	width: 100%;
-	margin-top: auto;
-	margin-inline: auto;
-
-	@media (min-width: media.$breakpoint-medium) and (max-height: 990px) {
-		width: 50%;
-		margin-inline: 0;
+	&.logged-out {
+		@media (min-width: media.$breakpoint-medium) and (max-height: 990px) {
+			width: 50%;
+			margin-inline: 0;
+		}
 	}
 }

@@ -4,6 +4,7 @@
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -11,9 +12,10 @@
 	const OISY_TWITTER_URL = 'https://x.com/dfinity';
 </script>
 
-<div>
+<div class="flex-1 flex-grow md:sticky md:bottom-0">
 	<footer
-		class="z-1 relative bottom-0 flex max-w-screen-2.5xl flex-1 flex-col items-center justify-between px-4 pt-6 sm:flex-row sm:px-8"
+		class="z-1 relative bottom-0 mx-auto mt-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-between px-4 pt-6 sm:flex-row sm:px-8"
+		class:logged-out={$authNotSignedIn}
 	>
 		<div class="flex flex-row items-center gap-4">
 			<a
