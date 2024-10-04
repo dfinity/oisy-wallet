@@ -8,7 +8,7 @@
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { networkBitcoin, networkEthereum } from '$lib/derived/network.derived';
 	import { networks } from '$lib/derived/networks.derived';
-	import { tokens } from '$lib/derived/tokens.derived';
+	import { enabledTokens, tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { token } from '$lib/stores/token.store';
 	import type { OnramperCryptoWallet, OnramperId, OnramperNetworkId } from '$lib/types/onramper';
@@ -27,7 +27,7 @@
 
 	// List of Cryptocurrencies that are allowed to be bought
 	let onlyCryptos: OnramperId[];
-	$: onlyCryptos = $tokens.map((token) => token.buy?.onramperId).filter(nonNullish);
+	$: onlyCryptos = $enabledTokens.map((token) => token.buy?.onramperId).filter(nonNullish);
 
 	// List of Cryptocurrency Networks to which the tokens are allowed to be bought
 	let onlyCryptoNetworks: OnramperNetworkId[];
