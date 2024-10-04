@@ -3,6 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import SendTokenContext from '$eth/components/send/SendTokenContext.svelte';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import { sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
@@ -68,6 +69,9 @@
 
 			dispatch('nnsClose');
 		});
+
+	let source: string;
+	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
 <WizardModal
@@ -81,6 +85,7 @@
 
 	<SendTokenContext token={$token}>
 		<IcSendTokenWizard
+			{source}
 			{currentStep}
 			bind:destination
 			bind:networkId
