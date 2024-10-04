@@ -19,8 +19,6 @@ interface I18nCore {
 		more: string;
 		reject: string;
 		approve: string;
-		open: string;
-		create: string;
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string };
@@ -38,8 +36,16 @@ interface I18nNavigation {
 }
 
 interface I18nAuth {
-	text: { title_part_1: string; title_part_2: string; logout: string };
-	alt: { sign_in: string };
+	text: {
+		title_part_1: string;
+		title_part_2: string;
+		logout: string;
+		authenticate: string;
+		safe_access: string;
+		privacy_and_security: string;
+		powered_by_chain_fusion: string;
+	};
+	alt: { sign_in: string; preview: string };
 	warning: { not_signed_in: string; session_expired: string };
 	error: {
 		no_internet_identity: string;
@@ -471,6 +477,7 @@ interface I18nTransaction {
 		block: string;
 		interacted_with: string;
 		pending: string;
+		status: string;
 	};
 	status: { included: string; safe: string; finalised: string };
 	label: {

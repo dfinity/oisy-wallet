@@ -1,16 +1,22 @@
-import type { GetAddressError, PaymentError } from '$declarations/signer/signer.did';
+import type {
+	PaymentError,
+	GetAddressError as SignerCanisterBtcError
+} from '$declarations/signer/signer.did';
+import { CanisterInternalError } from '$lib/canisters/errors';
 
-export class SignerCanisterPaymentError extends Error {
-	constructor(response: PaymentError) {
-		if ('LedgerUnreachable' in response) {
-			super(`Ledger unreachable ${response.LedgerUnreachable.ledger}`);
-		} else if ('UnsupportedPaymentType' in response) {
+export class SignerCanisterPaymentError extends CanisterInternalError {
+	constructor(err: PaymentError) {
+		if ('UnsupportedPaymentType' in err) {
 			super('Unsupported payment type');
-		} else if ('LedgerError' in response) {
-			super(`Ledger error: ${JSON.stringify(response.LedgerError.error)}`);
-		} else if ('InsufficientFunds' in response) {
+		} else if ('LedgerWithdrawFromError' in err) {
+			super(`Ledger error: ${JSON.stringify(err.LedgerWithdrawFromError.error)}`);
+		} else if ('LedgerUnreachable' in err) {
+			super(`Ledger unreachable: ${JSON.stringify(err.LedgerUnreachable)}`);
+		} else if ('LedgerTransferFromError' in err) {
+			super(`Ledger error: ${JSON.stringify(err.LedgerTransferFromError)}`);
+		} else if ('InsufficientFunds' in err) {
 			super(
-				`Insufficient funds needed ${response.InsufficientFunds.needed} but available ${response.InsufficientFunds.available}`
+				`Insufficient funds needed ${err.InsufficientFunds.needed} but available ${err.InsufficientFunds.available}`
 			);
 		} else {
 			super('Unknown PaymentError');
@@ -18,18 +24,12 @@ export class SignerCanisterPaymentError extends Error {
 	}
 }
 
-export class SignerCanisterInternalError extends Error {
-	constructor(msg: string) {
-		super(msg);
+export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
 	}
-}
-
-export const signerCanisterError = (response: GetAddressError) => {
-	if ('InternalError' in response) {
-		return new SignerCanisterInternalError(response.InternalError.msg);
+	if ('PaymentError' in err) {
+		return new SignerCanisterPaymentError(err.PaymentError);
 	}
-	if ('PaymentError' in response) {
-		return new SignerCanisterPaymentError(response.PaymentError);
-	}
-	return new Error('Unknown GetAddressError');
+	return new CanisterInternalError('Unknown SignerCanisterBtcError');
 };

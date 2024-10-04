@@ -1,4 +1,4 @@
-import type { Network } from '$lib/types/network';
+import type { Network, NetworkAppMetadata } from '$lib/types/network';
 
 export type EthereumChainId = bigint;
 
@@ -6,8 +6,4 @@ export interface NetworkChainId {
 	chainId: EthereumChainId;
 }
 
-export interface EthereumAppMetadata {
-	explorerUrl: string;
-}
-
-export type EthereumNetwork = Network & NetworkChainId & EthereumAppMetadata;
+export type EthereumNetwork = Network & NetworkChainId & NetworkAppMetadata;

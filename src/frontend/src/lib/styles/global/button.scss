@@ -25,21 +25,24 @@ button {
 
 	&.primary,
 	&.secondary,
-	&.secondary-alt {
+	&.tertiary {
 		justify-content: flex-start;
 
 		padding: var(--button-padding);
+
+		&.icon {
+			--button-border-radius: var(--border-radius-sm-1_5x);
+			--button-padding: var(--padding);
+		}
 	}
 
-	// TODO: check with Design team if this class is still needed
-	&.secondary-alt,
 	&.user {
 		border: 1px solid var(--color-blue);
 	}
 
 	&.primary,
 	&.secondary,
-	&.secondary-alt {
+	&.tertiary {
 		font-weight: var(--font-weight-bold);
 
 		&[disabled],
@@ -62,6 +65,20 @@ button {
 			box-shadow:
 				0 0 0 2px var(--color-white),
 				0 0 0 4px var(--color-blue-ribbon);
+		}
+
+		&:focus:not(:focus-visible) {
+			outline: none;
+			box-shadow: none;
+		}
+
+		&[active],
+		&:active {
+			&[focus],
+			&:focus {
+				outline: none;
+				box-shadow: none;
+			}
 		}
 	}
 
@@ -91,9 +108,19 @@ button {
 		}
 	}
 
-	&.secondary-alt {
-		background: var(--color-cetacean-blue);
-		color: var(--color-white);
+	&.tertiary {
+		&.link {
+			background: var(--color-white);
+			color: var(--color-primary);
+
+			&:hover {
+				color: var(--color-secondary);
+			}
+
+			&:active {
+				background: var(--color-onahau);
+			}
+		}
 	}
 
 	&.hero {
@@ -108,8 +135,7 @@ button {
 	}
 
 	&.primary,
-	&.secondary,
-	&.secondary-alt {
+	&.secondary {
 		&.full {
 			width: 100%;
 		}
