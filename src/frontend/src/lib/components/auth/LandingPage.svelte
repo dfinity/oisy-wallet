@@ -11,17 +11,21 @@
 </script>
 
 <div
-	class="m-auto grid w-full max-w-screen-2.5xl grid-cols-1 flex-col items-center gap-12 overflow-hidden px-5 md:grid-cols-2 md:grid-rows-1 md:gap-8 md:overflow-visible"
+	class="m-auto flex h-full w-full max-w-screen-2.5xl flex-col items-start gap-12 overflow-hidden px-5 md:grid md:grid-cols-2 md:grid-rows-1 md:gap-8 md:overflow-visible"
 >
-	<div
-		class="flex w-full flex-1 flex-col items-center text-center md:items-start md:pl-8 md:pt-12 md:text-left"
-	>
+	<div class="h-full w-full content-center md:flex-1 md:pl-8 md:pt-12">
 		<HeroSignIn />
 	</div>
 
 	<!-- TODO: determine if this value is specific/permanent or can be changed -->
-	<div class=" min-w-[1127px] flex-1 md:pt-12">
-		<picture aria-label={ariaLabel} class="w-full" role="presentation">
+	<div
+		class="ml-auto min-w-[1127px] md:relative md:top-1/2 md:m-0 md:translate-y-1/2 md:transform md:items-center md:pt-12"
+	>
+		<picture
+			aria-label={ariaLabel}
+			class="w-full md:absolute md:top-1/2 md:-translate-y-1/2 md:transform md:items-center"
+			role="presentation"
+		>
 			<source srcset={previewSmall} media="(max-width: 767px)" />
 			<Img src={previewLarge} alt={ariaLabel} />
 		</picture>
