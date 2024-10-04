@@ -33,7 +33,7 @@
 	</h1>
 </div>
 
-<div class="mb-7 flex flex-col items-center gap-0 md:items-start md:gap-3 md:text-lg">
+<div class="mb-7 flex flex-col items-center gap-2 md:items-start md:gap-3 md:text-lg">
 	{#each infoList as { label, icon }}
 		<div class="flex items-center gap-4">
 			<div class="hidden md:block">
