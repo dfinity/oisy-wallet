@@ -6,10 +6,10 @@ import {
 	btcAddressTestnet
 } from '$lib/derived/address.derived';
 import { testnets } from '$lib/derived/testnets.derived';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const hasPendingTransactions = (address: string): Readable<boolean | 'loading'> =>
+export const initHasPendingTransactions = (address: string): Readable<boolean | 'loading'> =>
 	derived(
 		[btcAddressMainnet, btcAddressTestnet, btcAddressRegtest, testnets, pendingTransactionsStore],
 		([
@@ -19,6 +19,12 @@ export const hasPendingTransactions = (address: string): Readable<boolean | 'loa
 			$testnets,
 			$pendingTransactionsStore
 		]) => {
+			const pendingTransactionsData = $pendingTransactionsStore[address];
+
+			if (nonNullish(pendingTransactionsData)) {
+				return pendingTransactionsData.data.length > 0;
+			}
+
 			if (!$testnets) {
 				if (isNullish($btcAddressMainnet)) {
 					// Return loading while we don't have btc addresses and we can't tell
@@ -29,12 +35,10 @@ export const hasPendingTransactions = (address: string): Readable<boolean | 'loa
 					// If the address is not a bitcoin address, there are no pending transactions.
 					return false;
 				}
-				const pendingTransactions = $pendingTransactionsStore[address];
-				if (isNullish(pendingTransactions)) {
-					// Address is bitcoin but we pending transactions are not loaded yet.
-					return 'loading';
-				}
-				return pendingTransactions.data.length > 0;
+
+				// We already checked that the pendingTransaction are present at the top.
+				// If we reach here is because they are not present.
+				return 'loading';
 			}
 			if (
 				isNullish($btcAddressMainnet) ||
@@ -55,11 +59,8 @@ export const hasPendingTransactions = (address: string): Readable<boolean | 'loa
 				return false;
 			}
 
-			const pendingTransactions = $pendingTransactionsStore[address];
-			if (isNullish(pendingTransactions)) {
-				// Address is bitcoin but we pending transactions are not loaded yet.
-				return 'loading';
-			}
-			return pendingTransactions.data.length > 0;
+			// We already checked that the pendingTransaction are present at the top.
+			// If we reach here is because they are not present.
+			return 'loading';
 		}
 	);
