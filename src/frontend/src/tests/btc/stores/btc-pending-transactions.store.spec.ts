@@ -47,7 +47,17 @@ describe('BtcPendingTransactionsStore', () => {
 		pendingTransactionsStore.setPendingTransactions({ address, pendingTransactions });
 
 		const storeData = get(pendingTransactionsStore);
-		expect(storeData[address]).toEqual(pendingTransactions);
+		expect(storeData[address].data).toEqual(pendingTransactions);
+	});
+
+	it('should set certified to `true`', () => {
+		const address = 'test-address';
+		const pendingTransactions: Array<PendingTransaction> = [pendingTransactionMock1];
+
+		pendingTransactionsStore.setPendingTransactions({ address, pendingTransactions });
+
+		const storeData = get(pendingTransactionsStore);
+		expect(storeData[address].certified).toEqual(true);
 	});
 
 	it('should update pending transactions for an existing address', () => {
@@ -67,7 +77,7 @@ describe('BtcPendingTransactionsStore', () => {
 		});
 
 		const storeData = get(pendingTransactionsStore);
-		expect(storeData[address]).toEqual(newPendingTransactions);
+		expect(storeData[address].data).toEqual(newPendingTransactions);
 	});
 
 	it('should update pending transactions for an different addresses', () => {
@@ -88,7 +98,7 @@ describe('BtcPendingTransactionsStore', () => {
 		});
 
 		const storeData = get(pendingTransactionsStore);
-		expect(storeData[address1]).toEqual(pendingTransactions1);
-		expect(storeData[address2]).toEqual(pendingTransactions2);
+		expect(storeData[address1].data).toEqual(pendingTransactions1);
+		expect(storeData[address2].data).toEqual(pendingTransactions2);
 	});
 });
