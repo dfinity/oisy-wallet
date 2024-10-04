@@ -9,7 +9,7 @@
 </script>
 
 <footer
-	class="z-1 relative bottom-0 mt-auto flex w-full max-w-screen-2.5xl flex-col items-center justify-between px-4 pt-6 sm:flex-row sm:px-8"
+	class="z-1 relative bottom-0 flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-between px-4 pt-6 sm:flex-row sm:px-8"
 >
 	<div class="flex flex-row items-center gap-4">
 		<a
