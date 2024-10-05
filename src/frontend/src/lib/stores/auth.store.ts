@@ -3,7 +3,6 @@ import {
 	AUTH_POPUP_HEIGHT,
 	AUTH_POPUP_WIDTH,
 	INTERNET_IDENTITY_CANISTER_ID,
-	LOCAL,
 	TEST
 } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -92,8 +91,8 @@ const initAuthStore = (): AuthStore => {
 		},
 
 		setForTesting: (identity) => {
-			if (!LOCAL && !TEST) {
-				throw new Error('This function should only be used in local environment');
+			if (!TEST) {
+				throw new Error('This function should only be used in npm run test environment');
 			}
 
 			set({ identity });
