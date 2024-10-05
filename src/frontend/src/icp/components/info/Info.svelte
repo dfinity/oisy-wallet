@@ -7,12 +7,13 @@
 	} from '$icp/derived/ic-token.derived';
 	import type { OptionIcCkToken } from '$icp/types/ic';
 	import type { HideInfoKey } from '$icp/utils/ck.utils';
-	import { isNetworkIdBTCMainnet, isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
+	import { isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
 	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
+	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
 	let mainnet = true;
 	$: mainnet =
