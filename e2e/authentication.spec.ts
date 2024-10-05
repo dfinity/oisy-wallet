@@ -9,7 +9,7 @@ testWithII('should sign-in', async ({ page, iiPage }) => {
 	await homepageLoggedIn.waitForLoggedInIndicator();
 });
 
-testWithII('should stay logged in after an interval', async ({ page, iiPage }) => {
+testWithII('should stay signed in after an interval', async ({ page, iiPage }) => {
 	const homepageLoggedIn = new HomepageLoggedIn({ page, iiPage });
 
 	await homepageLoggedIn.waitForAuthentication();
