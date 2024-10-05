@@ -90,7 +90,23 @@ const initAuthStore = (): AuthStore => {
 			}));
 		},
 
-		setForTesting: (identity) => {
+		/**
+		 * ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+		 * ⚠️          **Warning:**       ⚠️
+		 * ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+		 *
+		 * Sets a mock identity for testing purposes.
+		 *
+		 * This function allows to manually set a test identity in the `authStore`,
+		 * This is a hack and should **only** be used in a testing environment.
+		 *
+		 * Ensure that the `TEST` flag is enabled (e.g., via `npm run test`) before using this function.
+		 * If invoked outside of the testing environment, it will throw an error.
+		 *
+		 * @param {Identity} identity - The mock identity object to be set for testing.
+		 * @throws {Error} Throws an error if the function is called outside the test environment.
+		 */
+		setForTesting: (identity: Identity) => {
 			if (!TEST) {
 				throw new Error('This function should only be used in npm run test environment');
 			}
