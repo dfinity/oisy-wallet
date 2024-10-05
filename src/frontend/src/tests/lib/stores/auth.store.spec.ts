@@ -14,7 +14,7 @@ describe('auth.store', () => {
 			expect(storeIdentity).toBe(identity);
 		});
 
-		it('should set the identity for testing', () => {
+		it('should throw an error if not TEST environment', () => {
 			const spy = vi.spyOn(constants, 'TEST', 'get').mockReturnValue(false);
 
 			expect(() => authStore.setForTesting(identity)).toThrow(
