@@ -3,7 +3,12 @@ import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
 import { type UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
-import { defineViteReplacements } from './vite.utils';
+import { defineViteReplacements, readCanisterIds } from './vite.utils';
+
+process.env = {
+	...process.env,
+	...readCanisterIds({ prefix: 'VITE_' })
+};
 
 export default defineConfig(
 	(): UserConfig => ({
@@ -41,6 +46,10 @@ export default defineConfig(
 				{
 					find: '$env',
 					replacement: resolve(__dirname, 'src/frontend/src/env')
+				},
+				{
+					find: '$declarations',
+					replacement: resolve(__dirname, 'src/declarations')
 				}
 			]
 		},
