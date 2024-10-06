@@ -26,7 +26,7 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
 
