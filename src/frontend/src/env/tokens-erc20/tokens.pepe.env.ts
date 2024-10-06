@@ -19,7 +19,10 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 	icon: pepe,
 	address: '0x6982508145454Ce325dDbE47a25d4ec3d2311933',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckPEPE'
+	twinTokenSymbol: 'ckPEPE',
+	buy: {
+		onramperId: 'pepe_ethereum'
+	}
 };
 
 export const SEPOLIA_PEPE_SYMBOL = 'SepoliaPEPE';
