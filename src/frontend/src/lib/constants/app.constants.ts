@@ -9,6 +9,8 @@ export const STAGING = MODE === 'staging';
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
+export const TEST = JSON.parse(import.meta.env.TEST ?? 'false') === true;
+
 const MAINNET_DOMAIN = 'icp0.io';
 
 export const REPLICA_HOST = LOCAL ? 'http://localhost:4943/' : 'https://icp-api.io';

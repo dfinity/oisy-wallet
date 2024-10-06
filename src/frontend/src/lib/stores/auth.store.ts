@@ -2,12 +2,14 @@ import {
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
 	AUTH_POPUP_WIDTH,
-	INTERNET_IDENTITY_CANISTER_ID
+	INTERNET_IDENTITY_CANISTER_ID,
+	TEST
 } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { createAuthClient, getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
+import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
 import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
@@ -26,6 +28,7 @@ export interface AuthStore extends Readable<AuthStoreData> {
 	sync: () => Promise<void>;
 	signIn: (params: AuthSignInParams) => Promise<void>;
 	signOut: () => Promise<void>;
+	setForTesting: (identity: Identity) => void;
 }
 
 const initAuthStore = (): AuthStore => {
@@ -85,6 +88,30 @@ const initAuthStore = (): AuthStore => {
 				...state,
 				identity: null
 			}));
+		},
+
+		/**
+		 * ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+		 * ⚠️          **Warning:**       ⚠️
+		 * ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+		 *
+		 * Sets a mock identity for testing purposes.
+		 *
+		 * This function allows to manually set a test identity in the `authStore`,
+		 * This is a hack and should **only** be used in a testing environment.
+		 *
+		 * Ensure that the `TEST` flag is enabled (e.g., via `npm run test`) before using this function.
+		 * If invoked outside of the testing environment, it will throw an error.
+		 *
+		 * @param {Identity} identity - The mock identity object to be set for testing.
+		 * @throws {Error} Throws an error if the function is called outside the test environment.
+		 */
+		setForTesting: (identity: Identity) => {
+			if (!TEST) {
+				throw new Error('This function should only be used in npm run test environment');
+			}
+
+			set({ identity });
 		}
 	};
 };
