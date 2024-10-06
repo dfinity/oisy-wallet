@@ -27,8 +27,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy the backend
-        uses: ./.github/actions/deploy-backend
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Install dfx
+        uses: dfinity/setup-dfx@main
+
+      - name: Start dfx
+        shell: bash
+        run: dfx start --background --quiet
+
+      - name: Deploy backend
+        shell: bash
+        run: npm run deploy
 
   update_snapshots:
     runs-on: ubuntu-latest
