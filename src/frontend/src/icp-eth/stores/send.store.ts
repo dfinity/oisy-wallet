@@ -4,7 +4,7 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
-import { derived, type Readable, writable } from 'svelte/store';
+import { derived, writable, type Readable } from 'svelte/store';
 
 export type SendData = Token;
 

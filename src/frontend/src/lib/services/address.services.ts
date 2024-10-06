@@ -16,11 +16,11 @@ import {
 import { getBtcAddress, getEthAddress } from '$lib/api/signer.api';
 import { warnSignOut } from '$lib/services/auth.services';
 import {
-	type AddressStore,
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
 	btcAddressTestnetStore,
 	ethAddressStore,
+	type AddressStore,
 	type StorageAddressData
 } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
