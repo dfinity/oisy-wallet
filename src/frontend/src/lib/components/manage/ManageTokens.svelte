@@ -3,7 +3,7 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import BtcManageTokenToggle from '$btc/components/tokens/BtcManageTokenToggle.svelte';
+	import BtcManageTokenToggle from '$btc/components/BtcManageTokenToggle.svelte';
 	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 	import { isBitcoinToken } from '$btc/utils/token.utils';
 	import { ICP_TOKEN } from '$env/tokens.env';
@@ -27,21 +27,11 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { exchanges } from '$lib/derived/exchange.derived';
-	import {
-		networkEthereum,
-		networkICP,
-		pseudoNetworkChainFusion,
-		selectedNetwork
-	} from '$lib/derived/network.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	const dispatch = createEventDispatcher();
@@ -50,17 +40,10 @@
 	// These tokens are not necessarily loaded at boot time if the user has not added them to their list of custom tokens.
 	let icrcEnvTokens: IcrcCustomToken[] = [];
 
-	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
-	// since some of them are sorted by market cap), we store the exchange data in a variable during
-	// the life of the component.
-	let exchangesStaticData: ExchangesData | undefined;
-
 	onMount(() => {
 		const tokens = buildIcrcCustomTokens();
 		icrcEnvTokens =
 			tokens?.map((token) => ({ ...token, id: Symbol(token.symbol), enabled: false })) ?? [];
-
-		exchangesStaticData = nonNullish($exchanges) ? { ...$exchanges } : undefined;
 	});
 
 	// All the Icrc ledger ids including the default tokens and the user custom tokens regardless if enabled or disabled.
@@ -81,38 +64,25 @@
 	let allErc20Tokens: EthereumUserToken[] = [];
 	$: allErc20Tokens = $erc20Tokens;
 
-	let manageIcTokens = false;
-	$: manageIcTokens = $pseudoNetworkChainFusion || $networkICP;
-
-	let manageEthereumTokens = false;
-	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
-
 	let allTokens: TokenToggleable<Token>[] = [];
-	$: allTokens = filterTokensForSelectedNetwork([
-		[
-			{
-				...ICP_TOKEN,
-				enabled: true
-			},
-			...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
-			...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-			...(manageEthereumTokens ? allErc20Tokens : []),
-			...(manageIcTokens ? allIcrcTokens : [])
-		],
-		$selectedNetwork,
-		$pseudoNetworkChainFusion
-	]);
+	$: allTokens = [
+		{
+			...ICP_TOKEN,
+			enabled: true
+		},
+		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
+		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
+		...allErc20Tokens,
+		...allIcrcTokens
+	];
 
 	let allTokensSorted: Token[] = [];
-	$: allTokensSorted = nonNullish(exchangesStaticData)
-		? pinEnabledTokensAtTop(
-				sortTokens({
-					$tokens: allTokens,
-					$exchanges: exchangesStaticData,
-					$tokensToPin: $tokensToPin
-				})
-			)
-		: [];
+	$: allTokensSorted = pinEnabledTokensAtTop(
+		sortTokens({
+			$tokens: allTokens,
+			$tokensToPin: $tokensToPin
+		})
+	);
 
 	let filterTokens = '';
 	const updateFilter = () => (filterTokens = filter);
@@ -213,14 +183,6 @@
 		</svelte:fragment>
 	</Input>
 </div>
-
-{#if nonNullish($selectedNetwork)}
-	<p class="mb-4 pb-2 pt-1 text-misty-rose">
-		{replacePlaceholders($i18n.tokens.manage.text.manage_for_network, {
-			$network: $selectedNetwork.name
-		})}
-	</p>
-{/if}
 
 {#if noTokensMatch}
 	<button

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { IconQRCodeScanner } from '@dfinity/gix-components';
 	import Copy from '$lib/components/ui/Copy.svelte';
-	import { RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let address: string;
 	export let qrCodeAriaLabel: string;
@@ -12,7 +11,6 @@
 	<button
 		aria-label={qrCodeAriaLabel}
 		class="text-blue hover:text-dark-blue active:text-dark-blue"
-		data-tid={RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON}
 		on:click
 	>
 		<IconQRCodeScanner />

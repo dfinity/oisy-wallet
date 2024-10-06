@@ -1,6 +1,5 @@
 <script lang="ts">
 	import oisyLogoLarge from '$lib/assets/oisy-logo-large.svg';
-	import oisyLogoSmall from '$lib/assets/oisy-logo-small.svg';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
@@ -11,11 +10,9 @@
 	$: ariaLabel = replacePlaceholders($i18n.core.alt.logo, { $name: OISY_NAME });
 </script>
 
-<div class="mr-3">
+<div class="flex items-center gap-2">
 	<IconAstronautHelmet />
+	<div class="hidden sm:block">
+		<Img src={oisyLogoLarge} alt={ariaLabel} />
+	</div>
 </div>
-
-<picture aria-label={ariaLabel} class="w-24">
-	<source srcset={oisyLogoSmall} media="(max-width: 639px)" />
-	<Img src={oisyLogoLarge} alt={ariaLabel} />
-</picture>

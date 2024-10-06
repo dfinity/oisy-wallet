@@ -4,11 +4,6 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import {
-		TRACK_COUNT_WALLET_CONNECT,
-		TRACK_COUNT_WALLET_CONNECT_QR_CODE
-	} from '$lib/constants/analytics.contants';
-	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 
@@ -48,20 +43,12 @@
 		if (result === 'error') {
 			return;
 		}
-
-		await trackEvent({
-			name: TRACK_COUNT_WALLET_CONNECT
-		});
 	};
 
 	const onQRCodeSuccess = async ({ detail }: CustomEvent<string>) => {
 		uri = detail;
 
 		connect();
-
-		await trackEvent({
-			name: TRACK_COUNT_WALLET_CONNECT_QR_CODE
-		});
 	};
 </script>
 

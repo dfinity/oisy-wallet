@@ -5,7 +5,6 @@ import {
 	ETHEREUM_EXPLORER_URL,
 	SEPOLIA_EXPLORER_URL
 } from '$env/explorers.env';
-import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import sepolia from '$eth/assets/sepolia.svg';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import eth from '$icp-eth/assets/eth.svg';
@@ -55,7 +54,7 @@ export const { chainId: SEPOLIA_NETWORK_CHAIN_ID } = SEPOLIA_NETWORK;
  * That's why those constants are prefixed with SUPPORTED_.
  */
 export const SUPPORTED_ETHEREUM_NETWORKS: [...EthereumNetwork[], EthereumNetwork] = [
-	...(ETH_MAINNET_ENABLED ? [ETHEREUM_NETWORK] : []),
+	ETHEREUM_NETWORK,
 	SEPOLIA_NETWORK
 ];
 

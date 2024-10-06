@@ -3,11 +3,10 @@
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import banner from '$lib/assets/banner.svg';
-	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
 	import { btcAddressTestnet } from '$lib/derived/address.derived';
@@ -75,7 +74,7 @@
 	const debounceLoadBtcAddressRegtest = debounce(loadBtcAddressRegtest);
 
 	$: {
-		if (NETWORK_BITCOIN_ENABLED && $testnets && isNullish($btcAddressTestnet)) {
+		if ($testnets && isNullish($btcAddressTestnet)) {
 			debounceLoadBtcAddressTestnet();
 			if (LOCAL) {
 				debounceLoadBtcAddressRegtest();
@@ -115,7 +114,11 @@
 		<div in:fade={{ delay: 0, duration: 250 }}>
 			<Modal>
 				<div class="stretch">
-					<ImgBanner width="100%" src={banner} size="small" />
+					<div
+						style="min-height: calc((var(--dialog-width) - (2 * var(--dialog-padding-x)) - (2 * var(--padding-2x))) * (114 / 332))"
+					>
+						<Img width="100%" src={banner} />
+					</div>
 
 					<h3 class="my-3">{$i18n.init.text.initializing_wallet}</h3>
 

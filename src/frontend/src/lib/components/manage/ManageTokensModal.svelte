@@ -20,7 +20,6 @@
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -155,7 +154,7 @@
 	let erc20ContractAddress: string | undefined;
 	let erc20Metadata: Erc20Metadata | undefined;
 
-	let network: Network | undefined = $selectedNetwork;
+	let network: Network | undefined;
 	let tokenData: Partial<AddTokenData> = {};
 
 	$: tokenData,

@@ -1,6 +1,5 @@
 import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import { ETHEREUM_NETWORK, ICP_NETWORK, SEPOLIA_NETWORK } from '$env/networks.env';
-import { ETH_MAINNET_ENABLED } from '$env/networks.eth.env';
 import { ICP_INDEX_CANISTER_ID, ICP_LEDGER_CANISTER_ID } from '$env/networks.icp.env';
 import eth from '$icp-eth/assets/eth.svg';
 import icpLight from '$icp/assets/icp_light.svg';
@@ -55,7 +54,7 @@ export const SEPOLIA_TOKEN: RequiredTokenWithLinkedData = {
 export const SUPPORTED_ETHEREUM_TOKENS: [
 	...RequiredTokenWithLinkedData[],
 	RequiredTokenWithLinkedData
-] = [...(ETH_MAINNET_ENABLED ? [ETHEREUM_TOKEN] : []), SEPOLIA_TOKEN];
+] = [ETHEREUM_TOKEN, SEPOLIA_TOKEN];
 
 export const SUPPORTED_ETHEREUM_TOKEN_IDS: symbol[] = SUPPORTED_ETHEREUM_TOKENS.map(({ id }) => id);
 

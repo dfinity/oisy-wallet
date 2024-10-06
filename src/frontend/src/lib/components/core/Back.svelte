@@ -14,7 +14,9 @@
 </script>
 
 <button
-	class="text-primary pointer-events-auto flex gap-0.5 font-bold"
+	class="text-primary flex gap-0.5 font-bold"
 	on:click={async () => back({ pop: nonNullish(fromRoute) })}
-	><IconBack /> {$i18n.core.text.back}</button
 >
+	<IconBack />
+	{$i18n.core.text.back}
+</button>

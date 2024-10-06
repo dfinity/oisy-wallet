@@ -5,6 +5,7 @@
 	import Transactions from '$lib/components/transactions/Transactions.svelte';
 	import { routeNetwork } from '$lib/derived/nav.derived';
 	import { networks } from '$lib/derived/networks.derived';
+	import { token } from '$lib/stores/token.store';
 
 	onMount(async () => {
 		// We need to know the network on which the transactions should be loaded.
@@ -24,4 +25,4 @@
 	});
 </script>
 
-<Transactions />
+<Transactions token={$token} />

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
+	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
+	import { modalManageTokens } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
@@ -10,10 +12,14 @@
 </script>
 
 <button
-	class="secondary center mx-auto mb-4 mt-12 w-full sm:w-auto"
+	class="text-primary w-full justify-end font-bold no-underline"
 	on:click={modalStore.openManageTokens}
 	{disabled}
 >
 	<IconSettings />
 	{$i18n.tokens.manage.text.your_tokens}
 </button>
+
+{#if $modalManageTokens}
+	<ManageTokensModal />
+{/if}

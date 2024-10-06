@@ -29,21 +29,10 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import {
-		TRACK_COUNT_ETH_SEND_ERROR,
-		TRACK_COUNT_ETH_SEND_SUCCESS,
-		TRACK_DURATION_ETH_SEND
-	} from '$lib/constants/analytics.contants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import {
-		initTimedEvent,
-		trackTimedEventError,
-		trackTimedEventSuccess,
-		trackEvent
-	} from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
@@ -175,13 +164,6 @@
 
 		dispatch('icNext');
 
-		const timedEvent = initTimedEvent({
-			name: TRACK_DURATION_ETH_SEND,
-			metadata: {
-				token: $sendToken.symbol
-			}
-		});
-
 		try {
 			await executeSend({
 				from: $ethAddress,
@@ -201,28 +183,8 @@
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
 			});
 
-			await Promise.allSettled([
-				trackTimedEventSuccess(timedEvent),
-				trackEvent({
-					name: TRACK_COUNT_ETH_SEND_SUCCESS,
-					metadata: {
-						token: $sendToken.symbol
-					}
-				})
-			]);
-
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await Promise.allSettled([
-				trackTimedEventError(timedEvent),
-				trackEvent({
-					name: TRACK_COUNT_ETH_SEND_ERROR,
-					metadata: {
-						token: $sendToken.symbol
-					}
-				})
-			]);
-
 			toastsError({
 				msg: { text: $i18n.send.error.unexpected },
 				err

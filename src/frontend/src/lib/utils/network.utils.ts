@@ -7,7 +7,6 @@ import {
 	ICP_NETWORK_ID,
 	SUPPORTED_ETHEREUM_NETWORKS_IDS
 } from '$env/networks.env';
-import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
@@ -18,8 +17,14 @@ export const isNetworkICP = (network: Network | undefined): boolean => isNetwork
 export const isNetworkIdICP = (id: NetworkId | undefined): id is typeof ICP_NETWORK_ID =>
 	nonNullish(id) && ICP_NETWORK_ID === id;
 
+export const isNetworkETH = (network: Network | undefined): boolean =>
+	isNetworkIdEthereum(network?.id);
+
 export const isNetworkIdEthereum = (id: NetworkId | undefined): boolean =>
 	nonNullish(id) && SUPPORTED_ETHEREUM_NETWORKS_IDS.includes(id);
+
+export const isNetworkBTC = (network: Network | undefined): boolean =>
+	isNetworkIdBitcoin(network?.id);
 
 export const isNetworkIdBitcoin = (id: NetworkId | undefined): boolean =>
 	nonNullish(id) && BITCOIN_NETWORKS_IDS.includes(id);
@@ -41,16 +46,10 @@ export const filterTokensForSelectedNetwork = <T extends Token>([
 	$selectedNetwork,
 	$pseudoNetworkChainFusion
 ]: [T[], Network | undefined, boolean]): T[] =>
-	$tokens.filter((token) => {
-		const {
-			network: { id: networkId, env }
-		} = token;
-
-		return (
-			($pseudoNetworkChainFusion && !isTokenIcrcTestnet(token) && env !== 'testnet') ||
-			$selectedNetwork?.id === networkId
-		);
-	});
+	$tokens.filter(
+		({ network: { id: networkId } }) =>
+			$pseudoNetworkChainFusion || $selectedNetwork?.id === networkId
+	);
 
 export const mapToSignerBitcoinNetwork = ({
 	network
@@ -58,3 +57,11 @@ export const mapToSignerBitcoinNetwork = ({
 	network: BitcoinNetwork;
 }): SignerBitcoinNetwork =>
 	({ mainnet: { mainnet: null }, testnet: { testnet: null }, regtest: { regtest: null } })[network];
+
+export const findNetworkById = <T extends Network = Network>({
+	networks,
+	id
+}: {
+	networks: T[];
+	id: NetworkId;
+}): T | undefined => networks.find(({ id: networkId }) => networkId === id);

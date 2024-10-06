@@ -15,10 +15,15 @@ export const isRouteTransactions = ({ route: { id } }: Page): boolean =>
 
 export const isRouteSettings = ({ route: { id } }: Page): boolean => id === '/(app)/settings';
 
-export const isRouteTokens = ({ route: { id } }: Page): boolean => id === '/(app)';
-
-export const isSubRoute = (page: Page): boolean =>
-	isRouteTransactions(page) || isRouteSettings(page);
+export const isRoute = ({
+	route,
+	page: {
+		route: { id }
+	}
+}: {
+	route: string;
+	page: Page;
+}): boolean => id === `/(app)${route}`;
 
 const tokenUrl = ({
 	token: {

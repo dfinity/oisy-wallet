@@ -1,15 +1,24 @@
 <script lang="ts">
 	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
 	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
-	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import { modalReceive } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { ReceiveQRCode } from '$lib/types/receive';
 
 	const modalId = Symbol();
+
+	let qrCodeAddress: undefined | string;
+	let qrCodeAddressLabel: undefined | string;
+
+	const displayQRCode = ({ detail: { address, addressLabel } }: CustomEvent<ReceiveQRCode>) => {
+		qrCodeAddress = address;
+		qrCodeAddressLabel = addressLabel;
+		modalStore.openReceive(modalId);
+	};
 </script>
 
-<svelte:window on:oisyReceive={() => modalStore.openReceive(modalId)} />
+<ReceiveAddresses on:icQRCode={displayQRCode} />
 
-<ReceiveButtonWithModal open={modalStore.openReceive} isOpen={$modalReceive} {modalId}>
-	<ReceiveAddressModal infoCmp={ReceiveAddresses} on:nnsClose={modalStore.close} slot="modal" />
-</ReceiveButtonWithModal>
+{#if $modalReceive && $modalStore?.data === modalId}
+	<ReceiveAddressModal bind:qrCodeAddress bind:qrCodeAddressLabel on:nnsClose={modalStore.close} />
+{/if}

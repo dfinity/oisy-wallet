@@ -1,17 +1,10 @@
 <script lang="ts">
 	import { Spinner, Toasts } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
-	import {
-		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
-		TRACK_SYNC_AUTH_ERROR_COUNT,
-		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
-	} from '$lib/constants/analytics.contants';
-	import { initAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
@@ -23,7 +16,7 @@
 	 * Init dApp
 	 */
 
-	const init = async () => await Promise.all([syncAuthStore(), initAnalytics(), i18n.init()]);
+	const init = async () => await Promise.all([syncAuthStore(), i18n.init()]);
 
 	const syncAuthStore = async () => {
 		if (!browser) {
@@ -32,18 +25,7 @@
 
 		try {
 			await authStore.sync();
-
-			// We are using $authStore.identity here and not the derived $authIdentity because we track the event imperatively right after authStore.sync
-			await trackEvent({
-				name: nonNullish($authStore.identity)
-					? TRACK_SYNC_AUTH_AUTHENTICATED_COUNT
-					: TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
-			});
 		} catch (err: unknown) {
-			await trackEvent({
-				name: TRACK_SYNC_AUTH_ERROR_COUNT
-			});
-
 			toastsError({
 				msg: { text: $i18n.auth.error.unexpected_issue_with_syncing },
 				err

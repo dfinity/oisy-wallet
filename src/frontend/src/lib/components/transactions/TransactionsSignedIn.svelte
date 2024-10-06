@@ -1,18 +1,20 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
+	import BtcTransactions from '$btc/components/BtcTransactions.svelte';
 	import Transactions from '$eth/components/transactions/Transactions.svelte';
 	import IcTransactions from '$icp/components/transactions/IcTransactions.svelte';
-	import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-	import { networkBitcoin, networkICP } from '$lib/derived/network.derived';
+	import type { OptionToken } from '$lib/types/token';
+	import { isNetworkBTC, isNetworkETH, isNetworkICP } from '$lib/utils/network.utils';
+
+	export let token: OptionToken;
 </script>
 
-{#if nonNullish($routeNetwork)}
-	{#if $networkICP}
-		<IcTransactions />
-	{:else if $networkBitcoin}
+{#if nonNullish(token)}
+	{#if isNetworkICP(token.network)}
+		<IcTransactions {token} />
+	{:else if isNetworkBTC(token.network)}
 		<BtcTransactions />
-	{:else if nonNullish($routeToken)}
-		<Transactions />
+	{:else if isNetworkETH(token.network)}
+		<Transactions {token} />
 	{/if}
 {/if}
