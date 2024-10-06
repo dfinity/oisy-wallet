@@ -18,25 +18,24 @@ jobs:
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
-  deploy-backend:
+  docker-build-e2e:
     runs-on: ubuntu-20.04
     needs: oisy-backend-wasm
     steps:
-      - name: Fail if branch is main
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          echo "This workflow should not be triggered with workflow_dispatch on main"
-          exit 1
+      - name: Delete unnecessary tools folder to prevent "out of space" error
+        run: rm -rf /opt/hostedtoolcache
 
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy the backend
-        uses: ./.github/actions/deploy-backend
+      - name: Build E2E Docker Image
+        uses: ./.github/actions/docker-build-e2e
+        with:
+          name: oisy-e2e-image
 
   e2e:
     runs-on: ubuntu-latest
-    needs: deploy-backend
+    needs: docker-build-e2e
     steps:
       - name: Checkout
         uses: actions/checkout@v4
