@@ -14,17 +14,6 @@ jobs:
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
-#      - name: Install binstall
-#        if: steps.changes.outputs.src == 'true'
-#        run: |
-#          BINSTALL_VERSION="1.8.0"
-#          curl -L --proto '=https' --tlsv1.2 -sSf "https://github.com/cargo-bins/cargo-binstall/releases/download/v${BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.tgz" | tar -xvzf - cargo-binstall
-#          ./cargo-binstall -y --force "cargo-binstall@$BINSTALL_VERSION"
-#          rm cargo-binstall
-#      - name: Install candid-extractor
-#        if: steps.changes.outputs.src == 'true'
-#        run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
-
   build-backend:
     runs-on: ubuntu-20.04
     needs: oisy-backend-wasm
