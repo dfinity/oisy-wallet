@@ -14,12 +14,6 @@ jobs:
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
-      - name: Prepare
-        if: steps.changes.outputs.src == 'true'
-        uses: ./.github/actions/prepare
-      - name: Install dfx
-        if: steps.changes.outputs.src == 'true'
-        uses: dfinity/setup-dfx@main
       - name: Install binstall
         if: steps.changes.outputs.src == 'true'
         run: |
