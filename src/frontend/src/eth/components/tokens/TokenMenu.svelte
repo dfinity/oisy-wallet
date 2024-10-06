@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
@@ -21,7 +20,7 @@
 </script>
 
 <TokenMenu>
-	{#if nonNullish(explorerUrl) && $erc20UserTokensInitialized}
+	{#if nonNullish(explorerUrl)}
 		<div in:fade>
 			<ExternalLink
 				fullWidth

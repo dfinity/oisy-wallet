@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconEllipsisHorizontal from '$lib/components/icons/IconEllipsisHorizontal.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import { networkICP } from '$lib/derived/network.derived';
@@ -23,7 +22,6 @@
 	bind:this={button}
 	on:click={() => (visible = true)}
 	aria-label={$i18n.tokens.alt.context_menu}
-	disabled={$erc20UserTokensNotInitialized}
 >
 	<IconEllipsisHorizontal />
 </button>

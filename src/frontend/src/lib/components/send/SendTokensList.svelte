@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithOnClick from '$lib/components/tokens/TokenCardWithOnClick.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
@@ -15,12 +15,9 @@
 	$: tokens = $combinedDerivedSortedNetworkTokensUi.filter(({ balance }) =>
 		(balance ?? ZERO).gt(0n)
 	);
-
-	let loading: boolean;
-	$: loading = $erc20UserTokensNotInitialized;
 </script>
 
-<TokensSkeletons {loading}>
+<TokensSkeletons loading={isNullish(tokens)}>
 	{#each tokens as token (token.id)}
 		<TokenCardWithOnClick on:click={() => dispatch('icSendToken', token)}>
 			<TokenCardContent {token} />

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import { balance, balanceZero } from '$lib/derived/balances.derived';
 	import type { Token } from '$lib/types/token';
@@ -18,7 +17,7 @@
 			<span class="text-5xl font-bold" class:animate-pulse={isNullish($balance)}>0.00</span>
 		{/if}
 
-		{#if $erc20UserTokensInitialized && nonNullish(token.symbol)}
+		{#if nonNullish(token.symbol)}
 			<span class="opacity-100">{token.symbol}</span>
 		{/if}
 	</output>

@@ -5,7 +5,6 @@
 	import { BTC_MAINNET_NETWORK_ID, ICP_NETWORK } from '$env/networks.env';
 	import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens.erc20.env';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
-	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
 	import IcSendTokenWizard from '$icp/components/send/IcSendTokenWizard.svelte';
 	import {
 		isCkToken,
@@ -33,16 +32,13 @@
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let convertEth = false;
-	$: convertEth =
-		(token.standard === 'ethereum' || isTokenCkEthLedger(token)) && $erc20UserTokensInitialized;
+	$: convertEth = token.standard === 'ethereum' || isTokenCkEthLedger(token);
 
 	let convertErc20 = false;
-	$: convertErc20 =
-		(ERC20_TWIN_TOKENS_IDS.includes(token.id) || isTokenCkErc20Ledger(token)) &&
-		$erc20UserTokensInitialized;
+	$: convertErc20 = ERC20_TWIN_TOKENS_IDS.includes(token.id) || isTokenCkErc20Ledger(token);
 
 	let convertBtc = false;
-	$: convertBtc = isTokenCkBtcLedger(token) && $erc20UserTokensInitialized;
+	$: convertBtc = isTokenCkBtcLedger(token);
 </script>
 
 <div class="flex w-full justify-center pt-10">

@@ -7,7 +7,7 @@
 	import SendForm from '$eth/components/send/SendForm.svelte';
 	import SendReview from '$eth/components/send/SendReview.svelte';
 	import { sendSteps } from '$eth/constants/steps.constants';
-	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import {
@@ -197,10 +197,10 @@
 	const back = () => dispatch('icSendBack');
 
 	$: onDecodeQrCode = ({
-		status,
-		code,
-		expectedToken
-	}: {
+												 status,
+												 code,
+												 expectedToken
+											 }: {
 		status: QrStatus;
 		code?: string;
 		expectedToken: OptionToken;
@@ -210,7 +210,7 @@
 			code,
 			expectedToken,
 			ethereumTokens: $enabledEthereumTokens,
-			erc20Tokens: $enabledErc20Tokens
+			erc20Tokens: $erc20Tokens
 		});
 </script>
 

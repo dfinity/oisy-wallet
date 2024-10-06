@@ -3,14 +3,6 @@
 	import { debounce, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import BtcManageTokenToggle from '$btc/components/BtcManageTokenToggle.svelte';
-	import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
-	import { isBitcoinToken } from '$btc/utils/token.utils';
-	import { ICP_TOKEN } from '$env/tokens.env';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
-	import { icTokenErc20UserToken, icTokenEthereumUserToken } from '$eth/utils/erc20.utils';
 	import IcManageTokenToggle from '$icp/components/tokens/IcManageTokenToggle.svelte';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { buildIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
@@ -19,7 +11,6 @@
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { icTokenIcrcCustomToken, sortIcTokens } from '$icp/utils/icrc.utils';
 	import IconSearch from '$lib/components/icons/IconSearch.svelte';
-	import ManageTokenToggle from '$lib/components/tokens/ManageTokenToggle.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TokenName from '$lib/components/tokens/TokenName.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -60,21 +51,8 @@
 		)
 	].sort(sortIcTokens);
 
-	// The entire list of Erc20 tokens to display to the user.
-	let allErc20Tokens: EthereumUserToken[] = [];
-	$: allErc20Tokens = $erc20Tokens;
-
 	let allTokens: TokenToggleable<Token>[] = [];
-	$: allTokens = [
-		{
-			...ICP_TOKEN,
-			enabled: true
-		},
-		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
-		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-		...allErc20Tokens,
-		...allIcrcTokens
-	];
+	$: allTokens = [...allIcrcTokens];
 
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = pinEnabledTokensAtTop(
@@ -101,9 +79,9 @@
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
 		? allTokensSorted
 		: allTokensSorted.filter((token) => {
-				const twinToken = (token as IcCkToken).twinToken;
-				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
-			});
+			const twinToken = (token as IcCkToken).twinToken;
+			return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
+		});
 
 	let tokens: Token[] = [];
 	$: tokens = filteredTokens.map((token) => {
@@ -113,8 +91,8 @@
 			...token,
 			...(icTokenIcrcCustomToken(token)
 				? {
-						enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
-					}
+					enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
+				}
 				: {})
 		};
 	});
@@ -141,22 +119,16 @@
 	let saveDisabled = true;
 	$: saveDisabled = Object.keys(modifiedTokens).length === 0;
 
-	let groupModifiedTokens: { icrc: IcrcCustomToken[]; erc20: Erc20UserToken[] } = {
-		icrc: [],
-		erc20: []
+	let groupModifiedTokens: { icrc: IcrcCustomToken[] } = {
+		icrc: []
 	};
 	$: groupModifiedTokens = Object.values(modifiedTokens).reduce<{
 		icrc: IcrcCustomToken[];
-		erc20: Erc20UserToken[];
 	}>(
-		({ icrc, erc20 }, token) => ({
-			icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])],
-			erc20: [
-				...erc20,
-				...(token.standard === 'erc20' && icTokenErc20UserToken(token) ? [token] : [])
-			]
+		({ icrc }, token) => ({
+			icrc: [...icrc, ...(token.standard === 'icrc' ? [token as IcrcCustomToken] : [])]
 		}),
-		{ icrc: [], erc20: [] }
+		{ icrc: [] }
 	);
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
@@ -193,7 +165,7 @@
 		<span class="text-7xl">🤔</span>
 
 		<span class="py-4 text-center font-bold text-blue no-underline"
-			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
+		>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
 {:else}
@@ -211,10 +183,6 @@
 				<svelte:fragment slot="action">
 					{#if icTokenIcrcCustomToken(token)}
 						<IcManageTokenToggle {token} on:icToken={onToggle} />
-					{:else if icTokenEthereumUserToken(token)}
-						<ManageTokenToggle {token} on:icShowOrHideToken={onToggle} />
-					{:else if isBitcoinToken(token)}
-						<BtcManageTokenToggle />
 					{/if}
 				</svelte:fragment>
 			</Card>
@@ -237,19 +205,19 @@
 {/if}
 
 <style lang="scss">
-	.container {
-		&::-webkit-scrollbar-thumb {
-			background-color: #d9d9d9;
-		}
+  .container {
+    &::-webkit-scrollbar-thumb {
+      background-color: #d9d9d9;
+    }
 
-		&::-webkit-scrollbar-track {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
+    &::-webkit-scrollbar-track {
+      border-radius: var(--padding-2x);
+      -webkit-border-radius: var(--padding-2x);
+    }
 
-		&::-webkit-scrollbar-thumb {
-			border-radius: var(--padding-2x);
-			-webkit-border-radius: var(--padding-2x);
-		}
-	}
+    &::-webkit-scrollbar-thumb {
+      border-radius: var(--padding-2x);
+      -webkit-border-radius: var(--padding-2x);
+    }
+  }
 </style>

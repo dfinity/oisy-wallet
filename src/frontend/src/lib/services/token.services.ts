@@ -1,5 +1,3 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
-import type { Erc20Token } from '$eth/types/erc20';
 import type { SaveCustomToken } from '$icp/services/ic-custom-tokens.services';
 import type { IcCkToken } from '$icp/types/ic';
 import { busy } from '$lib/stores/busy.store';
@@ -21,10 +19,7 @@ export const loadTokenAndRun = async ({
 	await callback();
 };
 
-interface AutoLoadTokenParams<
-	T extends SaveUserToken | SaveCustomToken,
-	K extends Erc20Token | IcCkToken
-> {
+interface AutoLoadTokenParams<T extends SaveCustomToken, K extends IcCkToken> {
 	tokens: T[];
 	sendToken: K;
 	identity: OptionIdentity;
@@ -57,10 +52,7 @@ export interface AutoLoadTokenResult {
  * @param {string} params.errorMessage - A message to display in case of an error.
  * @returns The result of the operation.
  */
-export const autoLoadToken = async <
-	T extends SaveUserToken | SaveCustomToken,
-	K extends Erc20Token | IcCkToken
->({
+export const autoLoadToken = async <T extends SaveCustomToken, K extends IcCkToken>({
 	tokens,
 	sendToken,
 	identity,

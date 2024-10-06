@@ -9,10 +9,8 @@ import rndr from '$eth/assets/rndr.svg';
 import weeth from '$eth/assets/weeth.svg';
 import weth from '$eth/assets/weth.svg';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
-import type { Erc20UserToken, EthereumUserToken } from '$eth/types/erc20-user-token';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Token } from '$lib/types/token';
-import type { UserTokenState } from '$lib/types/token-toggleable';
 
 type MapErc20TokenParams = Erc20Contract &
 	Erc20Metadata & { network: EthereumNetwork } & Pick<Token, 'category'> &
@@ -24,22 +22,6 @@ export const mapErc20Token = ({ id, symbol, name, ...rest }: MapErc20TokenParams
 	name,
 	symbol,
 	icon: mapErc20Icon(symbol),
-	...rest
-});
-
-export const mapErc20UserToken = ({
-	id,
-	symbol,
-	name,
-	network,
-	...rest
-}: MapErc20TokenParams & UserTokenState): Erc20UserToken => ({
-	id: id ?? Symbol(`user-token#${symbol}#${network.chainId}`),
-	standard: 'erc20',
-	name,
-	symbol,
-	icon: mapErc20Icon(symbol),
-	network,
 	...rest
 });
 
@@ -71,9 +53,3 @@ const mapErc20Icon = (symbol: string): string | undefined => {
 			return undefined;
 	}
 };
-
-export const icTokenEthereumUserToken = (token: Token): token is EthereumUserToken =>
-	(token.standard === 'ethereum' || token.standard === 'erc20') && 'enabled' in token;
-
-export const icTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
-	token.standard === 'erc20' && 'enabled' in token && 'address' in token && 'exchange' in token;

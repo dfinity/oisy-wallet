@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import Listener from '$lib/components/core/Listener.svelte';
 	import TokenCardContent from '$lib/components/tokens/TokenCardContent.svelte';
 	import TokenCardWithUrl from '$lib/components/tokens/TokenCardWithUrl.svelte';
@@ -13,7 +12,7 @@
 	$: tokens = $combinedDerivedSortedNetworkTokensUi;
 
 	let loading: boolean;
-	$: loading = $erc20UserTokensNotInitialized || isNullish(tokens);
+	$: loading = isNullish(tokens);
 </script>
 
 <TokensSkeletons {loading}>
