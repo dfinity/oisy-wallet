@@ -14,7 +14,7 @@ jobs:
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
-  build-backend:
+  deploy-backend:
     runs-on: ubuntu-20.04
     needs: oisy-backend-wasm
     steps:
@@ -27,12 +27,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build and deploy the backend
-        uses: ./.github/actions/build-backend
+      - name: Deploy the backend
+        uses: ./.github/actions/deploy-backend
 
   update_snapshots:
     runs-on: ubuntu-latest
-    needs: build-backend
+    needs: deploy-backend
     steps:
       - name: Fail if branch is main
         if: ${{ github.ref == 'refs/heads/main' }}

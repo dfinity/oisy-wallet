@@ -1,6 +1,6 @@
-name: Build Backend
+name: Deploy Backend
 
-description: Build and deploy the backend
+description: Build and deploy the backend after having installed dfx
 
 runs:
   using: "composite"
