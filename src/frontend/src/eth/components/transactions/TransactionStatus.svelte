@@ -5,10 +5,11 @@
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';
 	import type { WebSocketListener } from '$eth/types/listener';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+	import type { Token } from '$lib/types/token';
 
+	export let token: Token;
 	export let blockNumber: number;
 
 	let listener: WebSocketListener | undefined = undefined;
@@ -17,7 +18,7 @@
 
 	const loadCurrentBlockNumber = async () => {
 		try {
-			const { getBlockNumber } = infuraProviders($tokenWithFallback.network.id);
+			const { getBlockNumber } = infuraProviders(token.network.id);
 			currentBlockNumber = await getBlockNumber();
 		} catch (err: unknown) {
 			disconnect();
@@ -42,7 +43,7 @@
 
 		listener = initMinedTransactionsListener({
 			callback: async () => debounceLoadCurrentBlockNumber(),
-			networkId: $tokenWithFallback.network.id
+			networkId: token.network.id
 		});
 	});
 
@@ -74,7 +75,7 @@
 	})();
 </script>
 
-<label for="to" class="px-4.5 font-bold">{$i18n.transaction.text.status}:</label>
+<label for="to" class="px-4.5 font-bold">Status:</label>
 
 <p id="to" class="px-4.5 mb-4 break-all font-normal first-letter:capitalize">
 	{#if nonNullish(status)}

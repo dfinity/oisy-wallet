@@ -14,8 +14,10 @@
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Token } from '$lib/types/token';
 	import { formatNanosecondsToDate } from '$lib/utils/format.utils';
 
+	export let token: Token;
 	export let transaction: IcTransactionUi;
 
 	let transactionType: IcTransactionType;
@@ -61,7 +63,7 @@
 
 		<svelte:fragment slot="amount">
 			{#if nonNullish(amount)}
-				<Amount amount={BigNumber.from(amount)} />
+				<Amount {token} amount={BigNumber.from(amount)} />
 			{/if}
 		</svelte:fragment>
 

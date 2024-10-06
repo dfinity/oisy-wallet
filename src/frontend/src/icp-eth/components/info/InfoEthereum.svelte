@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
 	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
+	import type { IcToken } from '$icp/types/ic';
 	import eth from '$icp-eth/assets/eth.svg';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -11,6 +12,7 @@
 	import type { Token } from '$lib/types/token';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	export let token: IcToken;
 	export let twinToken: Token;
 	export let ckTokenSymbol: string;
 
@@ -71,5 +73,5 @@
 </div>
 
 {#if $modalHowToConvertToTwinTokenEth}
-	<HowToConvertEthereumModal />
+	<HowToConvertEthereumModal {token} />
 {/if}

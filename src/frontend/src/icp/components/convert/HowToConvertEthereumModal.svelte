@@ -1,16 +1,14 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { assertNonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks.env';
 	import HowToConvertEthereumInfo from '$icp/components/convert/HowToConvertEthereumInfo.svelte';
+	import type { IcToken } from '$icp/types/ic';
 	import ConvertETHToCkETHWizard from '$icp-eth/components/send/ConvertETHToCkETHWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
-	import {
-		ckEthereumTwinTokenStandard,
-		ckEthereumTwinToken,
-		ckEthereumNativeTokenId,
-		ckEthereumNativeToken
-	} from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
@@ -21,17 +19,27 @@
 	import type { Network } from '$lib/types/network';
 	import { closeModal } from '$lib/utils/modal.utils';
 
+	export let token: IcToken;
+
+	/**
+	 * Send context store
+	 */
+
+	const { sendToken, ethereumNativeToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	assertNonNullish($ethereumNativeToken, 'inconsistency in Ethereum native token');
+
 	/**
 	 * Props
 	 */
 
 	let destination = '';
 	$: destination =
-		$ckEthereumTwinTokenStandard === 'erc20'
-			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ckEthereumNativeTokenId]) ?? '')
+		$sendToken.standard === 'erc20'
+			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ethereumNativeToken.id]) ?? '')
 			: (toCkEthHelperContractAddress({
-					minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
-					networkId: $ckEthereumNativeToken.network.id
+					minterInfo: $ckEthMinterInfoStore?.[$ethereumNativeToken.id],
+					networkId: $ethereumNativeToken.network.id
 				}) ?? '');
 
 	let targetNetwork: Network | undefined = ICP_NETWORK;
@@ -44,7 +52,7 @@
 	 */
 
 	let steps: WizardSteps;
-	$: steps = howToConvertWizardSteps({ i18n: $i18n, twinToken: $ckEthereumTwinToken });
+	$: steps = howToConvertWizardSteps({ i18n: $i18n, twinToken: $sendToken });
 
 	let currentStep: WizardStep | undefined;
 	let modal: WizardModal;
@@ -81,10 +89,6 @@
 		bind:sendProgressStep
 		{currentStep}
 	>
-		<HowToConvertEthereumInfo
-			on:icQRCode={modal.next}
-			on:icConvert={() => modal.set(2)}
-			formCancelAction="close"
-		/>
+		<HowToConvertEthereumInfo on:icQRCode={modal.next} on:icConvert={() => modal.set(2)} {token} />
 	</ConvertETHToCkETHWizard>
 </WizardModal>

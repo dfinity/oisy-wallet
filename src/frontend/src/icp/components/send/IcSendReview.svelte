@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import type { IcToken } from '$icp/types/ic';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -15,31 +16,32 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
+	export let token: IcToken;
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
-	export let source: string;
-
-	const { sendToken, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
 	$: invalid =
-		isNullish($sendTokenStandard) ||
+		isNullish(token.standard) ||
 		isInvalidDestinationIc({
 			destination,
-			tokenStandard: $sendTokenStandard,
+			tokenStandard: token.standard,
 			networkId
 		}) ||
 		invalidAmount(amount);
 
 	const dispatch = createEventDispatcher();
+
+	let source: string;
+	$: source = $icrcAccountIdentifierText ?? '';
 </script>
 
 <ContentWithToolbar>
-	{#if nonNullish($sendToken)}
-		<SendData {amount} {destination} token={$sendToken} balance={$balance} {source}>
-			<IcFeeDisplay slot="fee" {networkId} />
+	{#if nonNullish(token)}
+		<SendData {amount} {destination} {token} balance={$balance} {source}>
+			<IcFeeDisplay slot="fee" {token} {networkId} />
 			<IcReviewNetwork {networkId} slot="network" />
 		</SendData>
 	{/if}

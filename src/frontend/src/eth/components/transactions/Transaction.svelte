@@ -15,13 +15,13 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-	import { tokenSymbol } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
+	import type { Token } from '$lib/types/token';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
+	export let token: Token;
 	export let transaction: EthTransactionUi;
 
 	let value: BigNumber;
@@ -35,10 +35,10 @@
 	$: ({ value, timestamp, displayTimestamp, uiType: type } = transaction);
 
 	let ckTokenSymbol: string;
-	$: ckTokenSymbol = isSupportedEthToken($token)
-		? $token.twinTokenSymbol
+	$: ckTokenSymbol = isSupportedEthToken(token)
+		? token.twinTokenSymbol
 		: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
-			(($token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
+			((token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
 
 	let label: string;
 	$: label =
@@ -48,7 +48,7 @@
 						? $i18n.transaction.label.converting_ck_token
 						: $i18n.transaction.label.ck_token_converted,
 					{
-						$twinToken: $tokenSymbol ?? '',
+						$twinToken: token.symbol ?? '',
 						$ckToken: ckTokenSymbol
 					}
 				)
@@ -58,7 +58,7 @@
 							? $i18n.transaction.label.converting_twin_token
 							: $i18n.transaction.label.ck_token_sent,
 						{
-							$twinToken: $tokenSymbol ?? '',
+							$twinToken: token.symbol ?? '',
 							$ckToken: ckTokenSymbol
 						}
 					)
@@ -91,7 +91,7 @@
 
 		<RoundedIcon slot="icon" {icon} iconStyleClass={pending ? 'opacity-10' : ''} />
 
-		<Amount {amount} slot="amount" />
+		<Amount {token} {amount} slot="amount" />
 
 		<svelte:fragment slot="description">
 			{#if nonNullish(transactionDate)}

@@ -4,8 +4,6 @@
 	import { openMetamaskTransaction } from '$eth/services/metamask.services';
 	import IconMetamask from '$lib/components/icons/IconMetamask.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { networkEthereum } from '$lib/derived/network.derived';
-	import { tokenStandard } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 
@@ -22,15 +20,10 @@
 			network: $selectedEthereumNetwork
 		});
 	};
-
-	// TODO: The Metamask button currently does not support sending ERC20 tokens - it always populates an ETH transaction.
-	// We aim to fix this, but for now, the functionality is commented out.
-	let tokenStandardEth = true;
-	$: tokenStandardEth = $tokenStandard === 'ethereum';
 </script>
 
-{#if $metamaskAvailable && $networkEthereum && tokenStandardEth}
-	<button class="primary full my-4" on:click={receiveModal}>
+{#if $metamaskAvailable}
+	<button class="secondary-alt full center my-4" on:click={receiveModal}>
 		<IconMetamask />
 		<span class="text-dark-slate-blue font-bold">{$i18n.receive.ethereum.text.metamask}</span>
 	</button>

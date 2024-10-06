@@ -1,23 +1,21 @@
 <script lang="ts">
 	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
 	import { ETHEREUM_NETWORK, ICP_NETWORK } from '$env/networks.env';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { isDestinationContractAddress } from '$eth/utils/send.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
 	import { isEthAddress, isIcpAccountIdentifier } from '$lib/utils/account.utils';
 
+	export let token: Token;
 	export let network: Network | undefined = undefined;
 	export let destination: string | undefined = undefined;
 	// TODO: to be removed once minterInfo breaking changes have been executed on mainnet
 	export let sourceNetwork: EthereumNetwork;
-
-	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let networkName: string | undefined = network?.name;
 
@@ -36,7 +34,7 @@
 			isDestinationContractAddress({
 				destination,
 				contractAddress: toCkEthHelperContractAddress({
-					minterInfo: $ckEthMinterInfoStore?.[$sendTokenId],
+					minterInfo: $ckEthMinterInfoStore?.[token.id],
 					networkId: sourceNetwork.id
 				})
 			})

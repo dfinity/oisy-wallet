@@ -4,15 +4,18 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import Info from '$lib/components/ui/Info.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	const { sendToken, sendPurpose } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	export let token: Token;
+
+	const { sendPurpose } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let displayInfo: boolean;
 	$: displayInfo = ['convert-eth-to-cketh', 'convert-erc20-to-ckerc20'].includes(sendPurpose);
 
 	let sendTokenAsErc20: Erc20Token | undefined;
-	$: sendTokenAsErc20 = $sendToken.standard === 'erc20' ? ($sendToken as Erc20Token) : undefined;
+	$: sendTokenAsErc20 = token.standard === 'erc20' ? (token as Erc20Token) : undefined;
 </script>
 
 {#if displayInfo}

@@ -6,7 +6,6 @@
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -14,10 +13,14 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionBalance } from '$lib/types/balance';
 	import type { Network } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
+	export let token: Token;
+	export let balance: OptionBalance;
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
 	export let sourceNetwork: EthereumNetwork;
@@ -34,24 +37,22 @@
 		isNullish($storeFeeData);
 
 	const dispatch = createEventDispatcher();
-
-	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
 	<SendData
 		{amount}
 		destination={destinationEditable ? destination : null}
-		token={$sendToken}
-		balance={$sendBalance}
+		{token}
+		{balance}
 		source={$ethAddress ?? ''}
 	>
 		<FeeDisplay slot="fee" />
 
-		<SendReviewNetwork {targetNetwork} {sourceNetwork} token={$sendToken} slot="network" />
+		<SendReviewNetwork {targetNetwork} {sourceNetwork} {token} slot="network" />
 	</SendData>
 
-	<SendInfo />
+	<SendInfo {token} />
 
 	<ButtonGroup slot="toolbar">
 		<ButtonBack on:click={() => dispatch('icBack')} />

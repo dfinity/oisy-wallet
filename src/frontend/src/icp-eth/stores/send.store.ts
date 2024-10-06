@@ -1,7 +1,10 @@
+import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import type { IcToken } from '$icp/types/ic';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { OptionBalance } from '$lib/types/balance';
-import type { Token, TokenId, TokenStandard } from '$lib/types/token';
-import { derived, writable, type Readable } from 'svelte/store';
+import type { Token } from '$lib/types/token';
+import { nonNullish } from '@dfinity/utils';
+import { derived, type Readable, writable } from 'svelte/store';
 
 export type SendData = Token;
 
@@ -27,22 +30,30 @@ export const initSendContext = ({
 }: Pick<SendContext, 'sendPurpose'> & { token: Token }): SendContext => {
 	const sendToken = initSendStore(token);
 
-	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
-	const sendTokenId = derived(sendToken, ({ id }) => id);
-	const sendTokenStandard = derived(sendToken, ({ standard }) => standard);
-	const sendTokenSymbol = derived(sendToken, ({ symbol }) => symbol);
+	const sendTokenAsIcToken: Readable<IcToken> = derived(sendToken, (token) => token as IcToken);
+
+	const ethereumNativeToken: Readable<Token | undefined> = derived(
+		[sendToken, enabledEthereumTokens],
+		([$sendToken, $enabledEthereumTokens]) =>
+			$enabledEthereumTokens.find(({ network: { id: networkId } }) => $sendToken.id === networkId)
+	);
+
+	const ethereumNativeTokenBalance: Readable<OptionBalance> = derived(
+		[balancesStore, ethereumNativeToken],
+		([$balanceStore, $ethereumNativeToken]) =>
+			nonNullish($ethereumNativeToken) ? $balanceStore?.[$ethereumNativeToken.id]?.data : undefined
+	);
 
 	const sendBalance = derived(
-		[balancesStore, sendTokenId],
-		([$balanceStore, $sendTokenId]) => $balanceStore?.[$sendTokenId]?.data
+		[balancesStore, sendToken],
+		([$balanceStore, $sendToken]) => $balanceStore?.[$sendToken.id]?.data
 	);
 
 	return {
 		sendToken,
-		sendTokenDecimals,
-		sendTokenId,
-		sendTokenStandard,
-		sendTokenSymbol,
+		sendTokenAsIcToken,
+		ethereumNativeToken,
+		ethereumNativeTokenBalance,
 		sendBalance,
 		...staticContext
 	};
@@ -52,10 +63,9 @@ export type SendContextPurpose = 'send' | 'convert-eth-to-cketh' | 'convert-erc2
 
 export interface SendContext {
 	sendToken: SendStore;
-	sendTokenDecimals: Readable<number>;
-	sendTokenId: Readable<TokenId>;
-	sendTokenStandard: Readable<TokenStandard>;
-	sendTokenSymbol: Readable<string>;
+	sendTokenAsIcToken: Readable<IcToken>;
+	ethereumNativeToken: Readable<Token | undefined>;
+	ethereumNativeTokenBalance: Readable<OptionBalance>;
 	sendBalance: Readable<OptionBalance>;
 	sendPurpose: SendContextPurpose;
 }

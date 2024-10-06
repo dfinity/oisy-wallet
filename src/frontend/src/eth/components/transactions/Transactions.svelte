@@ -16,13 +16,14 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalToken, modalTransaction } from '$lib/derived/modal.derived';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionEthAddress } from '$lib/types/address';
-	import type { TokenId } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import type { Transaction as TransactionType } from '$lib/types/transaction';
 	import { isNetworkIdEthereum } from '$lib/utils/network.utils';
+
+	export let token: Token;
 
 	let ckMinterInfoAddresses: OptionEthAddress[] = [];
 	$: ckMinterInfoAddresses = toCkMinterInfoAddresses({
@@ -50,7 +51,7 @@
 		const {
 			network: { id: networkId },
 			id: tokenId
-		} = $tokenWithFallback;
+		} = token;
 
 		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
 		// This prevents the glitch load of ETH transaction with a token ID for ICP.
@@ -73,7 +74,7 @@
 		}
 	};
 
-	$: $tokenWithFallback, $tokenNotInitialized, (async () => await load())();
+	$: token, $tokenNotInitialized, (async () => await load())();
 
 	let selectedTransaction: TransactionType | undefined;
 	$: selectedTransaction = $modalTransaction
@@ -86,7 +87,7 @@
 <TransactionsSkeletons>
 	{#each sortedTransactionsUi as transaction (transaction.hash)}
 		<div transition:slide={{ duration: 250 }}>
-			<Transaction {transaction} />
+			<Transaction {token} {transaction} />
 		</div>
 	{/each}
 
@@ -96,7 +97,7 @@
 </TransactionsSkeletons>
 
 {#if $modalTransaction && nonNullish(selectedTransaction)}
-	<TransactionModal transaction={selectedTransaction} />
+	<TransactionModal {token} transaction={selectedTransaction} />
 {:else if $modalToken}
 	<TokenModal />
 {/if}

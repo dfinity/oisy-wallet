@@ -2,11 +2,7 @@
 	import type { WizardStep, WizardSteps } from '@dfinity/gix-components';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { howToConvertWizardSteps } from '$icp-eth/config/how-to-convert.config';
-	import {
-		ckEthereumNativeToken,
-		ckEthereumTwinToken,
-		ckEthereumTwinTokenNetwork
-	} from '$icp-eth/derived/cketh.derived';
+	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import ReceiveAddressQRCode from '$lib/components/receive/ReceiveAddressQRCode.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -24,8 +20,6 @@
 
 <EthSendTokenWizard
 	{currentStep}
-	sourceNetwork={$ckEthereumTwinTokenNetwork}
-	nativeEthereumToken={$ckEthereumNativeToken}
 	bind:destination
 	bind:targetNetwork
 	bind:amount
@@ -34,7 +28,6 @@
 	on:icNext
 	on:icClose
 	on:icSendBack
-	formCancelAction="back"
 >
 	{#if currentStep?.name === steps[1].name}
 		<ReceiveAddressQRCode address={$ethAddress ?? ''} on:icBack />

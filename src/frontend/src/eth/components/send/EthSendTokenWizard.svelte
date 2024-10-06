@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type WizardStep } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { assertNonNullish, isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import FeeContext from '$eth/components/fee/FeeContext.svelte';
@@ -27,7 +27,6 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -37,32 +36,32 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Network } from '$lib/types/network';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
-	import type { OptionToken, Token, TokenId } from '$lib/types/token';
+	import type { OptionToken, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	export let currentStep: WizardStep | undefined;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	/**
 	 * Send context store
 	 */
 
-	const { sendTokenDecimals, sendTokenId, sendToken, sendPurpose } =
+	const { sendToken, sendPurpose, sendBalance, ethereumNativeToken } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	assertNonNullish($ethereumNativeToken, 'inconsistency in Ethereum native token');
 
 	/**
 	 * Props
 	 */
 
 	export let destination = '';
-	export let sourceNetwork: EthereumNetwork;
 	export let targetNetwork: Network | undefined = undefined;
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
-	// Required for the fee and also to retrieve ck minter information.
-	// i.e. Ethereum or Sepolia "main" token.
-	export let nativeEthereumToken: Token;
+
+	let sourceNetwork: EthereumNetwork;
+	$: sourceNetwork = $sendToken.network as EthereumNetwork;
 
 	let destinationEditable = true;
 	$: destinationEditable = sendPurpose === 'send';
@@ -70,9 +69,9 @@
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
 		to: destination,
-		tokenId: $sendTokenId,
+		tokenId: $sendToken.id,
 		erc20HelperContractAddress: toCkErc20HelperContractAddress(
-			$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+			$ckEthMinterInfoStore?.[$ethereumNativeToken.id]
 		)
 	});
 
@@ -83,13 +82,13 @@
 	let feeStore = initFeeStore();
 
 	let feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set(nativeEthereumToken.symbol);
+	$: feeSymbolStore.set($ethereumNativeToken.symbol);
 
 	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set(nativeEthereumToken.id);
+	$: feeTokenIdStore.set($ethereumNativeToken.id);
 
 	let feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set(nativeEthereumToken.decimals);
+	$: feeDecimalsStore.set($ethereumNativeToken.decimals);
 
 	let feeContext: FeeContext | undefined;
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
@@ -134,7 +133,7 @@
 		}
 
 		const { valid } = assertCkEthMinterInfoLoaded({
-			minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id],
+			minterInfo: $ckEthMinterInfoStore?.[$ethereumNativeToken.id],
 			network: targetNetwork
 		});
 
@@ -172,7 +171,7 @@
 				token: $sendToken,
 				amount: parseToken({
 					value: `${amount}`,
-					unitName: $sendTokenDecimals
+					unitName: $sendToken.decimals
 				}),
 				maxFeePerGas,
 				maxPriorityFeePerGas,
@@ -180,7 +179,7 @@
 				sourceNetwork,
 				targetNetwork,
 				identity: $authIdentity,
-				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
+				minterInfo: $ckEthMinterInfoStore?.[$ethereumNativeToken.id]
 			});
 
 			setTimeout(() => close(), 750);
@@ -216,16 +215,19 @@
 </script>
 
 <FeeContext
+	token={$sendToken}
 	bind:this={feeContext}
 	{amount}
 	{destination}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
 	{sourceNetwork}
 	{targetNetwork}
-	{nativeEthereumToken}
+	nativeEthereumToken={$ethereumNativeToken}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
 		<SendReview
+			token={$sendToken}
+			balance={$sendBalance}
 			on:icBack
 			on:icSend={send}
 			{destination}
@@ -241,22 +243,20 @@
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<SendForm
+			token={$sendToken}
+			balance={$sendBalance}
 			on:icNext
 			on:icClose={close}
 			on:icQRCodeScan
 			bind:destination
 			bind:amount
 			bind:network={targetNetwork}
-			{nativeEthereumToken}
+			nativeEthereumToken={$ethereumNativeToken}
 			{destinationEditable}
 			{sourceNetwork}
 		>
 			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
-				{:else}
-					<ButtonCancel on:click={close} />
-				{/if}
+				<ButtonBack on:click={back} />
 			</svelte:fragment>
 		</SendForm>
 	{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}

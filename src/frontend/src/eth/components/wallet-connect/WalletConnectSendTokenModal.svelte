@@ -53,7 +53,7 @@
 	 * Send context store
 	 */
 
-	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Fee context store
@@ -91,7 +91,7 @@
 	$: targetNetwork =
 		destination ===
 		toCkEthHelperContractAddress({
-			minterInfo: $ckEthMinterInfoStore?.[$sendTokenId],
+			minterInfo: $ckEthMinterInfoStore?.[$sendToken.id],
 			networkId: sourceNetwork.id
 		})
 			? ICP_NETWORK
@@ -100,7 +100,7 @@
 	let sendWithApproval: boolean;
 	$: sendWithApproval = shouldSendWithApproval({
 		to: destination,
-		tokenId: $sendTokenId,
+		tokenId: $sendToken.id,
 		erc20HelperContractAddress: $ckErc20HelperContractAddress
 	});
 
@@ -183,7 +183,7 @@
 		{sourceNetwork}
 		nativeEthereumToken={$ethereumToken}
 	>
-		<CkEthLoader nativeTokenId={$sendTokenId}>
+		<CkEthLoader nativeTokenId={$sendToken.id}>
 			{#if currentStep?.name === WizardStepsSend.SENDING}
 				<SendProgress
 					progressStep={sendProgressStep}

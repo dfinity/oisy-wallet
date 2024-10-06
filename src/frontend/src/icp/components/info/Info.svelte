@@ -1,24 +1,27 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import InfoBitcoin from '$icp/components/info/InfoBitcoin.svelte';
 	import {
 		tokenCkBtcLedger,
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
-	import type { OptionIcCkToken } from '$icp/types/ic';
+	import type { IcCkToken, IcToken } from '$icp/types/ic';
 	import type { HideInfoKey } from '$icp/utils/ck.utils';
-	import { isNetworkIdETHMainnet } from '$icp/utils/ic-send.utils';
+	import {
+		isCkToken,
+		isNetworkIdBTCMainnet,
+		isNetworkIdETHMainnet
+	} from '$icp/utils/ic-send.utils';
 	import InfoEthereum from '$icp-eth/components/info/InfoEthereum.svelte';
-	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
 	import InfoBoxWrapper from '$lib/components/info/InfoBoxWrapper.svelte';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
-	import { token } from '$lib/stores/token.store';
-	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
+
+	export let token: IcToken;
 
 	let mainnet = true;
 	$: mainnet =
-		isNetworkIdBTCMainnet(($token as OptionIcCkToken)?.twinToken?.network.id) ||
-		isNetworkIdETHMainnet(($token as OptionIcCkToken)?.twinToken?.network.id);
+		isNetworkIdBTCMainnet((token as IcCkToken).twinToken?.network.id) ||
+		isNetworkIdETHMainnet((token as IcCkToken).twinToken?.network.id);
 
 	let ckBTC = false;
 	$: ckBTC = mainnet && $tokenCkBtcLedger;
@@ -39,12 +42,13 @@
 				: undefined;
 </script>
 
-{#if ckBTC || ckETH || ckErc20}
+{#if (ckBTC || ckETH || ckErc20) && isCkToken(token) && nonNullish(token.twinToken)}
+	}
 	<InfoBoxWrapper {key}>
 		{#if ckBTC}
 			<InfoBitcoin />
 		{:else}
-			<InfoEthereum twinToken={$ckEthereumTwinToken} ckTokenSymbol={$tokenWithFallback.symbol} />
+			<InfoEthereum {token} twinToken={token.twinToken} ckTokenSymbol={token.symbol} />
 		{/if}
 	</InfoBoxWrapper>
 {/if}

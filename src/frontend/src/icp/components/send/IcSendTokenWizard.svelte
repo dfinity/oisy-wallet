@@ -18,14 +18,12 @@
 		type EthereumFeeContext as EthereumFeeContextType,
 		initEthereumFeeStore
 	} from '$icp/stores/ethereum-fee.store';
-	import type { IcToken } from '$icp/types/ic';
 	import type { IcTransferParams } from '$icp/types/ic-send';
 	import { icDecodeQrCode } from '$icp/utils/qr-code.utils';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import { isConvertCkErc20ToErc20 } from '$icp-eth/utils/cketh-transactions.utils';
 	import SendQRCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -36,24 +34,22 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	/**
+	 * Send context store
+	 */
+
+	const { sendTokenAsIcToken: sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	/**
 	 * Props
 	 */
 
-	export let source: string;
 	export let currentStep: WizardStep | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const dispatch = createEventDispatcher();
-
-	/**
-	 * Send context store
-	 */
-
-	const { sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Send
@@ -86,7 +82,7 @@
 		try {
 			// In case we are converting ckERC20 to ERC20, we need to include ckETH related fees in the transaction.
 			const ckErc20ToErc20MaxCkEthFees: bigint | undefined = isConvertCkErc20ToErc20({
-				token: $sendToken as IcToken,
+				token: $sendToken,
 				networkId
 			})
 				? $ethereumFeeStore?.maxTransactionFee
@@ -96,7 +92,7 @@
 				to: destination,
 				amount: parseToken({
 					value: `${amount}`,
-					unitName: $sendTokenDecimals
+					unitName: $sendToken.decimals
 				}),
 				identity: $authIdentity,
 				progress: (step: ProgressStepsSendIc) => (sendProgressStep = step),
@@ -105,7 +101,7 @@
 
 			await sendIc({
 				...params,
-				token: $sendToken as IcToken,
+				token: $sendToken,
 				targetNetworkId: networkId
 			});
 
@@ -144,20 +140,30 @@
 	const close = () => dispatch('icClose');
 </script>
 
-<EthereumFeeContext {networkId}>
-	<BitcoinFeeContext {amount} {networkId}>
+<EthereumFeeContext token={$sendToken} {networkId}>
+	<BitcoinFeeContext token={$sendToken} {amount} {networkId}>
 		{#if currentStep?.name === WizardStepsSend.REVIEW}
-			<IcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} {source} />
+			<IcSendReview
+				on:icBack
+				on:icSend={send}
+				token={$sendToken}
+				{destination}
+				{amount}
+				{networkId}
+			/>
 		{:else if currentStep?.name === WizardStepsSend.SENDING}
-			<IcSendProgress bind:sendProgressStep {networkId} />
+			<IcSendProgress bind:sendProgressStep token={$sendToken} {networkId} />
 		{:else if currentStep?.name === WizardStepsSend.SEND}
-			<IcSendForm on:icNext bind:destination bind:amount bind:networkId on:icQRCodeScan {source}>
+			<IcSendForm
+				token={$sendToken}
+				on:icNext
+				bind:destination
+				bind:amount
+				bind:networkId
+				on:icQRCodeScan
+			>
 				<svelte:fragment slot="cancel">
-					{#if formCancelAction === 'back'}
-						<ButtonBack on:click={back} />
-					{:else}
-						<ButtonCancel on:click={close} />
-					{/if}
+					<ButtonBack on:click={back} />
 				</svelte:fragment>
 			</IcSendForm>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}

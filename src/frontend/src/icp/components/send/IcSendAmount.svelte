@@ -3,13 +3,12 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { getContext } from 'svelte';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
-	import { tokenCkErc20Ledger, tokenCkEthLedger } from '$icp/derived/ic-token.derived';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 	import {
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
-	import type { OptionIcToken } from '$icp/types/ic';
+	import type { IcToken } from '$icp/types/ic';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { assertCkBTCUserInputAmount } from '$icp/utils/ckbtc.utils';
 	import {
@@ -17,39 +16,39 @@
 		assertCkETHMinFee,
 		assertCkETHMinWithdrawalAmount
 	} from '$icp/utils/cketh.utils';
+	import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import { ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balance } from '$lib/derived/balances.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
+	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
+	export let token: Token;
 	export let amount: number | undefined = undefined;
 	export let amountError: IcAmountAssertionError | undefined;
 	export let networkId: NetworkId | undefined = undefined;
 
-	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
 	let fee: bigint | undefined;
-	$: fee = ($sendToken as OptionIcToken)?.fee;
+	$: fee = (token as IcToken).fee;
 
 	const { store: ethereumFeeStore } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
-		if (isNullish(fee) || isNullish($sendToken)) {
+		if (isNullish(fee)) {
 			return;
 		}
 
 		if (isNetworkIdBitcoin(networkId)) {
 			const error = assertCkBTCUserInputAmount({
 				amount: userAmount,
-				minterInfo: $ckBtcMinterInfoStore?.[$sendToken.id],
-				tokenDecimals: $sendToken.decimals,
+				minterInfo: $ckBtcMinterInfoStore?.[token.id],
+				tokenDecimals: token.decimals,
 				i18n: $i18n
 			});
 
@@ -59,11 +58,11 @@
 		}
 
 		// if CkEth, asset the minimal withdrawal amount is met and the amount should at least be bigger than the fee.
-		if (isNetworkIdEthereum(networkId) && $tokenCkEthLedger) {
+		if (isNetworkIdEthereum(networkId) && isTokenCkEthLedger(token)) {
 			const error = assertCkETHMinWithdrawalAmount({
 				amount: userAmount,
-				tokenDecimals: $sendToken.decimals,
-				tokenSymbol: $sendToken.symbol,
+				tokenDecimals: token.decimals,
+				tokenSymbol: token.symbol,
 				minterInfo: $ckEthMinterInfoStore?.[$ckEthereumNativeTokenId],
 				i18n: $i18n
 			});
@@ -74,7 +73,7 @@
 
 			return assertCkETHMinFee({
 				amount: userAmount,
-				tokenSymbol: $sendToken.symbol,
+				tokenSymbol: token.symbol,
 				fee,
 				i18n: $i18n
 			});
@@ -91,7 +90,7 @@
 		};
 
 		// if CkErc20, the entered amount should be covered by fee + balance and the ckEth balance should cover the estimated fee.
-		if (isNetworkIdEthereum(networkId) && $tokenCkErc20Ledger) {
+		if (isNetworkIdEthereum(networkId) && isTokenCkErc20Ledger(token)) {
 			const error = assertBalance();
 
 			if (nonNullish(error)) {
@@ -118,14 +117,12 @@
 	};
 
 	$: calculateMax = (): number | undefined =>
-		isNullish($sendToken)
-			? undefined
-			: getMaxTransactionAmount({
-					balance: $balance ?? ZERO,
-					fee: BigNumber.from(fee),
-					tokenDecimals: $sendToken.decimals,
-					tokenStandard: $sendToken.standard
-				});
+		getMaxTransactionAmount({
+			balance: $balance ?? ZERO,
+			fee: BigNumber.from(fee),
+			tokenDecimals: token.decimals,
+			tokenStandard: token.standard
+		});
 
 	let sendInputAmount: SendInputAmount | undefined;
 	$: $ethereumFeeStore, (() => sendInputAmount?.triggerValidate())();
@@ -134,7 +131,7 @@
 <SendInputAmount
 	bind:amount
 	bind:this={sendInputAmount}
-	tokenDecimals={$sendTokenDecimals}
+	tokenDecimals={token.decimals}
 	{customValidate}
 	{calculateMax}
 	bind:error={amountError}

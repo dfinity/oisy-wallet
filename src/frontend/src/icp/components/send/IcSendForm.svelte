@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
+	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
+	import type { IcToken } from '$icp/types/ic';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -15,12 +16,10 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
+	export let token: IcToken;
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
-	export let source: string;
-
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
@@ -37,13 +36,19 @@
 
 <form on:submit={() => dispatch('icNext')} method="POST">
 	<ContentWithToolbar>
-		<IcSendDestination bind:destination bind:invalidDestination {networkId} on:icQRCodeScan />
+		<IcSendDestination
+			bind:destination
+			bind:invalidDestination
+			{token}
+			{networkId}
+			on:icQRCodeScan
+		/>
 
-		<IcSendAmount bind:amount bind:amountError {networkId} />
+		<IcSendAmount bind:amount bind:amountError {token} {networkId} />
 
-		<SendSource token={$sendToken} balance={$balance} {source} />
+		<SendSource {token} balance={$balance} source={$icrcAccountIdentifierText ?? ''} />
 
-		<IcFeeDisplay {networkId} />
+		<IcFeeDisplay {token} {networkId} />
 
 		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />

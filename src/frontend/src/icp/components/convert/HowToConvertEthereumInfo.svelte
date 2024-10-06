@@ -1,31 +1,29 @@
 <script lang="ts">
+	import { assertNonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
-	import {
-		ckEthereumNativeToken,
-		ckEthereumNativeTokenBalance,
-		ckEthereumTwinToken
-	} from '$icp-eth/derived/cketh.derived';
+	import type { IcToken } from '$icp/types/ic';
+	import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let formCancelAction: 'back' | 'close' = 'back';
+	export let token: IcToken;
 
 	let ckErc20 = false;
-	$: ckErc20 = $tokenCkErc20Ledger;
+	$: ckErc20 = isTokenCkErc20Ledger(token);
 
 	const dispatch = createEventDispatcher();
 
-	const { sendBalance, sendTokenDecimals, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendBalance, sendToken, ethereumNativeToken, ethereumNativeTokenBalance } =
+		getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	assertNonNullish($ethereumNativeToken, 'inconsistency in Ethereum native token');
 </script>
 
 <ContentWithToolbar>
@@ -34,8 +32,8 @@
 			{replacePlaceholders(
 				replaceOisyPlaceholders($i18n.convert.text.how_to_convert_eth_to_cketh),
 				{
-					$token: $ckEthereumTwinToken.symbol,
-					$ckToken: $tokenWithFallback.symbol
+					$token: $sendToken.symbol,
+					$ckToken: token.symbol
 				}
 			)}:
 		</p>
@@ -45,23 +43,23 @@
 		<div class="mb-4 mt-2 rounded-lg bg-light-blue p-4">
 			<p class="break-normal font-bold">
 				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
-					$token: $ckEthereumNativeToken.symbol
+					$token: $ethereumNativeToken.symbol
 				})}
 			</p>
 
 			<p class="break-normal">
 				{replacePlaceholders($i18n.convert.text.fees_explanation, {
-					$token: $ckEthereumNativeToken.symbol
+					$token: $ethereumNativeToken.symbol
 				})}
 			</p>
 
 			<p class="break-normal pt-4">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
-						value: $ckEthereumNativeTokenBalance ?? ZERO,
-						unitName: $ckEthereumNativeToken.decimals
+						value: $ethereumNativeTokenBalance ?? ZERO,
+						unitName: $ethereumNativeToken.decimals
 					})}
-					{$ckEthereumNativeToken.symbol}</output
+					{$ethereumNativeToken.symbol}</output
 				>
 			</p>
 		</div>
@@ -86,7 +84,7 @@
 		>
 			<svelte:fragment slot="title"
 				>{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {
-					$token: $ckEthereumTwinToken.symbol
+					$token: $sendToken.symbol
 				})}</svelte:fragment
 			>
 		</ReceiveAddress>
@@ -104,15 +102,15 @@
 			<Value element="div">
 				<svelte:fragment slot="label"
 					>{replacePlaceholders($i18n.convert.text.wait_eth_current_balance, {
-						$token: $ckEthereumTwinToken.symbol
+						$token: $sendToken.symbol
 					})}</svelte:fragment
 				>
 
 				<p class="mb-6">
 					{formatToken({
 						value: $sendBalance ?? ZERO,
-						unitName: $sendTokenDecimals,
-						displayDecimals: $sendTokenDecimals
+						unitName: $sendToken.decimals,
+						displayDecimals: $sendToken.decimals
 					})}
 					{$sendToken.symbol}
 				</p>
@@ -130,8 +128,8 @@
 			<Value element="div">
 				<svelte:fragment slot="label"
 					>{replacePlaceholders($i18n.convert.text.convert_eth_to_cketh, {
-						$token: $ckEthereumTwinToken.symbol,
-						$ckToken: $tokenWithFallback.symbol
+						$token: $sendToken.symbol,
+						$ckToken: token.symbol
 					})}</svelte:fragment
 				>
 
@@ -143,16 +141,10 @@
 	</div>
 
 	<div slot="toolbar">
-		{#if formCancelAction === 'back'}
-			<button
-				type="button"
-				class="primary full center text-center"
-				on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button
-			>
-		{:else}
-			<button type="button" class="primary full center text-center" on:click={modalStore.close}
-				>{$i18n.core.text.done}</button
-			>
-		{/if}
+		<button
+			type="button"
+			class="primary full center text-center"
+			on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button
+		>
 	</div>
 </ContentWithToolbar>

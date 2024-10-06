@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
-	import Warning from '$lib/components/ui/Warning.svelte';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
@@ -27,10 +26,5 @@
 </script>
 
 <div class="stretch">
-	<Warning>
-		<p>This may take a few seconds.</p>
-		<p>Please do not close your browser tab.</p>
-	</Warning>
-
 	<InProgress {progressStep} {steps} />
 </div>

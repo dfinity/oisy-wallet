@@ -5,16 +5,18 @@
 	import { getContext } from 'svelte';
 	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionBalance } from '$lib/types/balance';
 	import { InsufficientFundsError } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
+	export let token: Token;
+	export let balance: OptionBalance;
 	export let amount: number | undefined = undefined;
 	export let insufficientFunds: boolean;
 	export let nativeEthereumToken: Token;
@@ -29,8 +31,6 @@
 		maxGasFee,
 		evaluateFee
 	} = getContext<FeeContext>(FEE_CONTEXT_KEY);
-	const { sendTokenDecimals, sendBalance, sendTokenId, sendTokenStandard } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (isNullish($storeFeeData)) {
@@ -38,19 +38,19 @@
 		}
 
 		// We should align the $sendBalance and userAmount to avoid issues caused by comparing formatted and unformatted BN
-		const parsedSendBalance = nonNullish($sendBalance)
+		const parsedSendBalance = nonNullish(balance)
 			? Utils.parseUnits(
 					formatToken({
-						value: $sendBalance,
-						unitName: $sendTokenDecimals,
-						displayDecimals: $sendTokenDecimals
+						value: balance,
+						unitName: token.decimals,
+						displayDecimals: token.decimals
 					}),
-					$sendTokenDecimals
+					token.decimals
 				)
 			: ZERO;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
-		if (isSupportedEthTokenId($sendTokenId)) {
+		if (isSupportedEthTokenId(token.id)) {
 			const total = userAmount.add($minGasFee ?? ZERO);
 
 			if (total.gt(parsedSendBalance)) {
@@ -79,10 +79,10 @@
 		? undefined
 		: (): number =>
 				getMaxTransactionAmount({
-					balance: $sendBalance ?? ZERO,
+					balance: balance ?? ZERO,
 					fee: $maxGasFee,
-					tokenDecimals: $sendTokenDecimals,
-					tokenStandard: $sendTokenStandard
+					tokenDecimals: token.decimals,
+					tokenStandard: token.standard
 				});
 
 	const onInput = () => evaluateFee?.();
@@ -108,7 +108,7 @@
 	bind:amount
 	bind:amountSetToMax
 	bind:this={sendInputAmount}
-	tokenDecimals={$sendTokenDecimals}
+	tokenDecimals={token.decimals}
 	{customValidate}
 	{calculateMax}
 	bind:error={insufficientFundsError}

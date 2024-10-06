@@ -16,7 +16,6 @@
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import {
 		toCkErc20HelperContractAddress,
 		toCkEthHelperContractAddress
@@ -30,6 +29,7 @@
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
+	export let token: Token;
 	export let observe: boolean;
 	export let destination = '';
 	export let amount: string | number | undefined = undefined;
@@ -38,8 +38,6 @@
 	export let nativeEthereumToken: Token;
 
 	const { feeStore }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
-
-	const { sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	/**
 	 * Updating and fetching fee
@@ -58,9 +56,9 @@
 				from: mapAddressStartsWith0x($ethAddress!)
 			};
 
-			const { getFeeData } = infuraProviders($sendToken.network.id);
+			const { getFeeData } = infuraProviders(token.network.id);
 
-			if (isSupportedEthTokenId($sendTokenId)) {
+			if (isSupportedEthTokenId(token.id)) {
 				feeStore.setFee({
 					...(await getFeeData()),
 					gas: await getEthFeeData({
@@ -75,13 +73,13 @@
 			}
 
 			const erc20GasFeeParams = {
-				contract: $sendToken as Erc20Token,
+				contract: token as Erc20Token,
 				amount: parseToken({ value: `${amount ?? '1'}` }),
 				sourceNetwork,
 				...params
 			};
 
-			if (isSupportedErc20TwinTokenId($sendTokenId)) {
+			if (isSupportedErc20TwinTokenId(token.id)) {
 				feeStore.setFee({
 					...(await getFeeData()),
 					gas: await getCkErc20FeeData({

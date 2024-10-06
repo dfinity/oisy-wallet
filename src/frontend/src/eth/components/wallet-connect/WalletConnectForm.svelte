@@ -76,7 +76,7 @@
 		inputType="text"
 		placeholder="e.g. wc:a281567bb3e4..."
 		bind:value={uri}
-	/>
+	/>on:click
 
 	<ButtonGroup slot="toolbar">
 		<Button disabled={invalid} on:click={onClick}>

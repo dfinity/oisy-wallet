@@ -14,14 +14,13 @@
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import IcTransactionsSkeletons from '$icp/components/transactions/IcTransactionsSkeletons.svelte';
 	import {
-		tokenAsIcToken,
 		tokenCkBtcLedger,
 		tokenCkErc20Ledger,
 		tokenCkEthLedger
 	} from '$icp/derived/ic-token.derived';
 	import { icTransactions } from '$icp/derived/ic-transactions.derived';
 	import { loadNextTransactions } from '$icp/services/ic-transactions.services';
-	import type { IcTransactionUi } from '$icp/types/ic';
+	import type { IcToken, IcTransactionUi } from '$icp/types/ic';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -29,8 +28,13 @@
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
+	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
+
+	export let token: Token;
+
+	let tokenAsIcToken: IcToken;
+	$: tokenAsIcToken = token as IcToken;
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
@@ -63,7 +67,7 @@
 			return;
 		}
 
-		if (isNullish($token)) {
+		if (isNullish(token)) {
 			// Prevent unlikely events. UI wise if we are about to load the next transactions, it's probably because transactions for a loaded token have been fetched.
 			return;
 		}
@@ -73,7 +77,7 @@
 			identity: $authIdentity,
 			maxResults: WALLET_PAGINATION,
 			start: lastId,
-			token: $tokenAsIcToken,
+			token: tokenAsIcToken,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
 	};
@@ -84,7 +88,7 @@
 		: undefined;
 </script>
 
-<Info />
+<Info token={tokenAsIcToken} />
 
 <Header>
 	{$i18n.transactions.text.title}
@@ -104,7 +108,7 @@
 			<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction transaction={transaction.data} />
+						<IcTransaction {token} transaction={transaction.data} />
 					</li>
 				{/each}
 			</InfiniteScroll>
