@@ -21,8 +21,6 @@ export default defineConfig({
 	},
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
-	// TODO: Remove the increased timeout after improving tokens loading time
-	timeout: 60000,
 	use: {
 		testIdAttribute: 'data-tid',
 		trace: 'on',
