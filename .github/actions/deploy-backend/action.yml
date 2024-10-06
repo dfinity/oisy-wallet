@@ -2,6 +2,8 @@ name: Deploy Backend
 
 description: Build and deploy the backend after having installed dfx
 
+# TODO: improve this action, caching the built Cargo packages, maybe with Docker
+
 runs:
   using: "composite"
   steps:
