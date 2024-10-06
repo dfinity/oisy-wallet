@@ -14,8 +14,8 @@ jobs:
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
-  deploy-backend:
-    runs-on: ubuntu-20.04
+  update_snapshots:
+    runs-on: ubuntu-latest
     needs: oisy-backend-wasm
     steps:
       - name: Fail if branch is main
@@ -26,33 +26,9 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Prepare
-        uses: ./.github/actions/prepare
-
-      - name: Install dfx
-        uses: dfinity/setup-dfx@main
-
-      - name: Start dfx
-        shell: bash
-        run: dfx start --background --quiet
-
-      - name: Deploy backend
-        shell: bash
-        run: npm run deploy
-
-  update_snapshots:
-    runs-on: ubuntu-latest
-    needs: deploy-backend
-    steps:
-      - name: Fail if branch is main
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          echo "This workflow should not be triggered with workflow_dispatch on main"
-          exit 1
-
-      - name: Checkout
-        uses: actions/checkout@v4
+        
+      - name: Deploy the backend
+        uses: ./.github/actions/deploy-backend
 
       - name: Prepare
         uses: ./.github/actions/prepare
