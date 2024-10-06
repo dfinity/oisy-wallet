@@ -79,9 +79,9 @@
 	$: filteredTokens = isNullishOrEmpty(filterTokens)
 		? allTokensSorted
 		: allTokensSorted.filter((token) => {
-			const twinToken = (token as IcCkToken).twinToken;
-			return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
-		});
+				const twinToken = (token as IcCkToken).twinToken;
+				return matchingToken(token) || (nonNullish(twinToken) && matchingToken(twinToken));
+			});
 
 	let tokens: Token[] = [];
 	$: tokens = filteredTokens.map((token) => {
@@ -91,8 +91,8 @@
 			...token,
 			...(icTokenIcrcCustomToken(token)
 				? {
-					enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
-				}
+						enabled: (modifiedToken as IcrcCustomToken)?.enabled ?? token.enabled
+					}
 				: {})
 		};
 	});
@@ -165,7 +165,7 @@
 		<span class="text-7xl">🤔</span>
 
 		<span class="py-4 text-center font-bold text-blue no-underline"
-		>+ {$i18n.tokens.manage.text.do_not_see_import}</span
+			>+ {$i18n.tokens.manage.text.do_not_see_import}</span
 		>
 	</button>
 {:else}
@@ -205,19 +205,19 @@
 {/if}
 
 <style lang="scss">
-  .container {
-    &::-webkit-scrollbar-thumb {
-      background-color: #d9d9d9;
-    }
+	.container {
+		&::-webkit-scrollbar-thumb {
+			background-color: #d9d9d9;
+		}
 
-    &::-webkit-scrollbar-track {
-      border-radius: var(--padding-2x);
-      -webkit-border-radius: var(--padding-2x);
-    }
+		&::-webkit-scrollbar-track {
+			border-radius: var(--padding-2x);
+			-webkit-border-radius: var(--padding-2x);
+		}
 
-    &::-webkit-scrollbar-thumb {
-      border-radius: var(--padding-2x);
-      -webkit-border-radius: var(--padding-2x);
-    }
-  }
+		&::-webkit-scrollbar-thumb {
+			border-radius: var(--padding-2x);
+			-webkit-border-radius: var(--padding-2x);
+		}
+	}
 </style>
