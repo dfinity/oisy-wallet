@@ -151,7 +151,7 @@ You need to set the following variables in the file `.env.development`.
 
 ```
 VITE_NETWORK_BITCOIN_ENABLED=true
-VITE_BITCOIN_MAINNET_DISABLED=false
+VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
 ```
 
 ### Bitcoin Development
