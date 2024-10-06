@@ -25,7 +25,7 @@ WORKDIR /oisy-wallet
 
 # Install dfx
 ENV DFX_PORT=4943
-ENV DFX_VERSION=0.20.0
+ENV DFX_VERSION=0.23.0
 RUN DFXVM_INIT_YES=true DFX_VERSION=$DFX_VERSION sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
 
 # Set permission to .config folder so that dfx can write whatever files are needed

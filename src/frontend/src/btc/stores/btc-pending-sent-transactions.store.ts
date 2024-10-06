@@ -3,13 +3,13 @@ import type { AlwaysCertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 
 type Address = string;
-type BtcPendingTransactionsStoreData = Record<
+type BtcPendingSentTransactionsStoreData = Record<
 	Address,
 	// The endpoint can't be called with a query. Therefore, the information is always certified with an update call.
 	AlwaysCertifiedData<Array<PendingTransaction>>
 >;
 
-interface BtcPendingTransactionsStore extends Readable<BtcPendingTransactionsStoreData> {
+interface BtcPendingSentTransactionsStore extends Readable<BtcPendingSentTransactionsStoreData> {
 	setPendingTransactions: (params: {
 		address: Address;
 		pendingTransactions: Array<PendingTransaction>;
@@ -19,13 +19,14 @@ interface BtcPendingTransactionsStore extends Readable<BtcPendingTransactionsSto
 
 /**
  * Bitcoin transations take time to confirm.
- * While a transaction is pending, its utxos cannot be used, but they might still be available.
+ * After a user sends a transaction, while a transaction is pending,
+ * its utxos cannot be used, but they might still be available.
  * Instead of trying ot be smart, for now we'll disable transactions until they are confirmed.
  *
  * This store is used to keep track of pending transactions.
  */
-const initBtcPendingTransactionsStore = (): BtcPendingTransactionsStore => {
-	const { update, set, subscribe } = writable<BtcPendingTransactionsStoreData>({});
+const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore => {
+	const { update, set, subscribe } = writable<BtcPendingSentTransactionsStoreData>({});
 
 	return {
 		subscribe,
@@ -50,4 +51,4 @@ const initBtcPendingTransactionsStore = (): BtcPendingTransactionsStore => {
 	};
 };
 
-export const pendingTransactionsStore = initBtcPendingTransactionsStore();
+export const btcPendingSentTransactionsStore = initBtcPendingSentTransactionsStore();
