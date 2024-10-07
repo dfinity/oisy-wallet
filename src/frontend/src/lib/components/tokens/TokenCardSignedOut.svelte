@@ -10,5 +10,6 @@
 		-/- {token.symbol}
 	</span>
 
+	
 	<span slot="exchange" class="mr-[3px] font-bold">-/-</span>
 </TokenCard>
