@@ -1,4 +1,4 @@
-import { pendingTransactionsStore } from '$btc/stores/btc-pending-transactions.store';
+import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { LOCAL } from '$lib/constants/app.constants';
 import {
 	btcAddressMainnet,
@@ -9,9 +9,15 @@ import { testnets } from '$lib/derived/testnets.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const initHasPendingTransactions = (address: string): Readable<boolean | 'loading'> =>
+export const initHasPendingSentTransactions = (address: string): Readable<boolean | 'loading'> =>
 	derived(
-		[btcAddressMainnet, btcAddressTestnet, btcAddressRegtest, testnets, pendingTransactionsStore],
+		[
+			btcAddressMainnet,
+			btcAddressTestnet,
+			btcAddressRegtest,
+			testnets,
+			btcPendingSentTransactionsStore
+		],
 		([
 			$btcAddressMainnet,
 			$btcAddressTestnet,

@@ -115,6 +115,7 @@ interface I18nInit {
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
+		allow_signing: string;
 	};
 }
 
