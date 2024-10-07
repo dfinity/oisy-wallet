@@ -33,6 +33,15 @@ export const isNetworkIdBTCTestnet = (networkId: NetworkId | undefined): boolean
 export const isNetworkIdBTCRegtest = (networkId: NetworkId | undefined): boolean =>
 	BTC_REGTEST_NETWORK_ID === networkId;
 
+const mapper: Record<symbol, BitcoinNetwork> = {
+	[BTC_MAINNET_NETWORK_ID]: 'mainnet',
+	[BTC_TESTNET_NETWORK_ID]: 'testnet',
+	[BTC_REGTEST_NETWORK_ID]: 'regtest'
+};
+
+export const mapNetworkIdToBitcoinNetwork = (networkId: NetworkId): BitcoinNetwork | undefined =>
+	mapper[networkId];
+
 /**
  * Filter the tokens that either lives on the selected network or, if no network is provided, pseud Chain Fusion, then those that are not testnets.
  */
