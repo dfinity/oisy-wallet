@@ -14,7 +14,10 @@ import { Canister, createServices } from '@dfinity/utils';
 import { mapSignerCanisterBtcError } from './signer.errors';
 
 export class SignerCanister extends Canister<SignerService> {
-	static async create({ identity, ...options }: CreateCanisterOptions<SignerService>) {
+	static async create({
+		identity,
+		...options
+	}: CreateCanisterOptions<SignerService>): Promise<SignerCanister> {
 		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<SignerService>({
