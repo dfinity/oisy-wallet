@@ -2,9 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import bitcoin from '$icp/assets/bitcoin.svg';
 	import icpLight from '$icp/assets/icp_light.svg';
-	import IcSendBtcNetwork from '$icp/components/send/IcSendBtcNetwork.svelte';
 	import eth from '$icp-eth/assets/eth.svg';
 	import { ckEthereumTwinToken } from '$icp-eth/derived/cketh.derived';
+	import SendBtcNetwork from '$lib/components/send/SendBtcNetwork.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import TextWithLogo from '$lib/components/ui/TextWithLogo.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -32,7 +32,7 @@
 		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
 		{#if nonNullish(networkId) && isNetworkIdBitcoin(networkId)}
 			<span class="flex gap-1">
-				<IcSendBtcNetwork {networkId} />
+				<SendBtcNetwork {networkId} />
 				<Logo src={bitcoin} alt={`Bitcoin logo`} />
 			</span>
 		{:else if nonNullish(networkId) && isNetworkIdEthereum(networkId)}
