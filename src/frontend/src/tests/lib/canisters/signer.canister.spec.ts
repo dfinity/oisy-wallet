@@ -201,7 +201,7 @@ describe('signer.canister', () => {
 
 	it('returns correct ETH address', async () => {
 		const response = 'test-eth-address';
-		service.eth_address_of_caller.mockResolvedValue({Ok: response});
+		service.eth_address_of_caller.mockResolvedValue({ Ok: response });
 
 		const { getEthAddress } = await createSignerCanister({
 			serviceOverride: service
@@ -227,8 +227,8 @@ describe('signer.canister', () => {
 	});
 
 	it('should throw an error if caller_eth_address returns an error', async () => {
-		const response = { PaymentError: { UnsupportedPaymentType: null }};
-		service.eth_address_of_caller.mockResolvedValue({Err: response});
+		const response = { PaymentError: { UnsupportedPaymentType: null } };
+		service.eth_address_of_caller.mockResolvedValue({ Err: response });
 
 		const { getEthAddress } = await createSignerCanister({
 			serviceOverride: service
@@ -238,7 +238,6 @@ describe('signer.canister', () => {
 
 		await expect(res).rejects.toThrow(JSON.stringify(response));
 	});
-
 
 	it('signs transaction', async () => {
 		const response = 'signed-transaction';

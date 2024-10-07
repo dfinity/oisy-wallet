@@ -77,8 +77,8 @@ export class SignerCanister extends Canister<SignerService> {
 			if ('Err' in response) {
 				// Throw an error of type string.
 				throw JSON.stringify(response.Err);
-			} else			if ('Ok' in response) {
-  			  return response.Ok;
+			} else if ('Ok' in response) {
+				return response.Ok;
 			} else {
 				// This can happen only if the response does not match the candid schema.
 				throw new Error('Response is not Ok or Err');
