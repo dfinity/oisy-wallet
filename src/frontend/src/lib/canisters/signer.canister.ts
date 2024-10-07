@@ -7,12 +7,12 @@ import type {
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
+import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices } from '@dfinity/utils';
 import { mapSignerCanisterBtcError } from './signer.errors';
-import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
@@ -66,12 +66,14 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		return eth_address_of_caller([{
-			PatronPaysIcrc2Cycles: {
-				owner: BACKEND_CANISTER_ID,
-				subaccount: []
+		return eth_address_of_caller([
+			{
+				PatronPaysIcrc2Cycles: {
+					owner: BACKEND_CANISTER_ID,
+					subaccount: []
+				}
 			}
-		}]);
+		]);
 	};
 
 	signTransaction = ({ transaction }: { transaction: SignRequest }): Promise<string> => {
