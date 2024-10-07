@@ -24,6 +24,7 @@
 	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import { emit } from '$lib/utils/events.utils';
 
 	let progressStep: string = ProgressStepsLoader.ADDRESSES;
 
@@ -84,6 +85,8 @@
 		}
 	}
 
+	const validateAddresses = () => emit({ message: 'oisyValidateAddresses' });
+
 	onMount(async () => {
 		const { success: addressIdbSuccess, err } = await loadIdbAddresses();
 
@@ -91,6 +94,8 @@
 			loading.set(false);
 
 			await progressAndLoad();
+
+			validateAddresses();
 
 			return;
 		}
