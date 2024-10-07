@@ -12,6 +12,7 @@ import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices } from '@dfinity/utils';
 import { mapSignerCanisterBtcError } from './signer.errors';
+import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
@@ -61,11 +62,16 @@ export class SignerCanister extends Canister<SignerService> {
 	};
 
 	getEthAddress = (): Promise<EthAddress> => {
-		const { caller_eth_address } = this.caller({
+		const { eth_address_of_caller } = this.caller({
 			certified: true
 		});
 
-		return caller_eth_address();
+		return eth_address_of_caller([{
+			PatronPaysIcrc2Cycles: {
+				owner: BACKEND_CANISTER_ID,
+				subaccount: []
+			}
+		}]);
 	};
 
 	signTransaction = ({ transaction }: { transaction: SignRequest }): Promise<string> => {
