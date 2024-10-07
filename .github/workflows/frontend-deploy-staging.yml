@@ -1,0 +1,36 @@
+name: Deploy Frontend to Staging
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Set up DFX
+        uses: dfinity/setup-dfx@main
+
+      - name: Install key
+        env:
+          DFX_DEPLOY_STAGING_KEY: ${{ secrets.DFX_DEPLOY_STAGING_KEY }}
+        run: |
+          key_pem=$(mktemp)
+          printenv "DFX_DEPLOY_STAGING_KEY" > "$key_pem"
+          dfx identity import --disable-encryption --force default "$key_pem"
+          rm "$key_pem"
+
+      - name: Pre-build
+        run: npm run build
+
+      - name: Deploy to Staging
+        run: |
+          ENV=staging dfx deploy frontend --network staging
