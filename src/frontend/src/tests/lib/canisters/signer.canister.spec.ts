@@ -212,8 +212,8 @@ describe('signer.canister', () => {
 		expect(res).toEqual(response);
 	});
 
-	it('should throw an error if caller_eth_address throws', async () => {
-		service.caller_eth_address.mockImplementation(async () => {
+	it('should throw an error if eth_address_of_caller throws', async () => {
+		service.eth_address_of_caller.mockImplementation(async () => {
 			throw mockResponseError;
 		});
 
