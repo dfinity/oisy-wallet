@@ -127,7 +127,8 @@
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
-			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again."
+			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
+			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support."
 		}
 	},
 	"hero": {

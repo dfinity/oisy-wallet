@@ -26,7 +26,10 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
 export class BackendCanister extends Canister<BackendService> {
-	static async create({ identity, ...options }: CreateCanisterOptions<BackendService>) {
+	static async create({
+		identity,
+		...options
+	}: CreateCanisterOptions<BackendService>): Promise<BackendCanister> {
 		const agent = await getAgent({ identity });
 
 		const { service, certifiedService, canisterId } = createServices<BackendService>({
