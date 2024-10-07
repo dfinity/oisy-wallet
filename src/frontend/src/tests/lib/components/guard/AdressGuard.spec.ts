@@ -107,10 +107,8 @@ describe('AdressGuard', () => {
 		});
 
 		describe('Signer allowance loaded', () => {
-			let apiMockSpy: MockInstance;
-
 			beforeEach(() => {
-				apiMockSpy = apiMock.mockResolvedValue(undefined);
+				apiMock.mockResolvedValue(undefined);
 			});
 
 			it('should call validate eth address if signer allowance is loaded after eth address store', async () => {
