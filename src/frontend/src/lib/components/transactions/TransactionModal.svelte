@@ -2,6 +2,7 @@
 	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from '@ethersproject/bignumber';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -124,8 +125,6 @@
 			</Value>
 		{/if}
 
-		<button class="primary full text-center" on:click={modalStore.close} slot="toolbar"
-			>{$i18n.core.text.close}</button
-		>
+		<Button fullWidth on:click={modalStore.close} slot="toolbar">{$i18n.core.text.close}</Button>
 	</ContentWithToolbar>
 </Modal>
