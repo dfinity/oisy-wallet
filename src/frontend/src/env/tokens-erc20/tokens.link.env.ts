@@ -19,7 +19,10 @@ export const LINK_TOKEN: RequiredErc20Token = {
 	icon: link,
 	address: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckLINK'
+	twinTokenSymbol: 'ckLINK',
+	buy: {
+		onramperId: 'link_ethereum'
+	}
 };
 
 export const SEPOLIA_LINK_SYMBOL = 'SepoliaLINK';
