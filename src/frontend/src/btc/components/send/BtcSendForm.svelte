@@ -29,5 +29,5 @@
 
 	<!--	TODO: calculate and display transaction fee	-->
 
-	<slot name="cancel" />
+	<slot name="cancel" slot="cancel" />
 </SendForm>
