@@ -24,7 +24,13 @@
 			"package": "backend",
 			"type": "rust",
 			"optimize": "cycles",
-			"gzip": true
+			"gzip": true,
+			"remote": {
+				"id": {
+					"test-fe-1": "d3nvo-aaaaa-aaaar-qagzq-cai",
+					"test-fe-2": "d3nvo-aaaaa-aaaar-qagzq-cai"
+				}
+			}
 		},
 		"frontend": {
 			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.20.0/src/distributed/assetstorage.did",
