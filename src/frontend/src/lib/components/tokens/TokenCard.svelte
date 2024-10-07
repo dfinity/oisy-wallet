@@ -9,11 +9,15 @@
 </script>
 
 <Card noMargin testId={`${TOKEN_CARD}-${token.symbol}`}>
-	<TokenName {token} />
+	{token.symbol}
+
+	<TokenName {token} slot="description" />
 
 	<TokenLogo {token} slot="icon" color="white" />
 
-	<slot name="description" slot="description" />
+	<!--	<slot name="description" slot="description" />-->
 
-	<slot name="exchange" slot="action" />
+	<slot name="balance" slot="amount" />
+
+	<slot name="exchange" slot="subAmount" />
 </Card>
