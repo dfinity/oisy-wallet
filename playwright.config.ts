@@ -34,6 +34,14 @@ export default defineConfig({
 			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
 		},
 		{
+			name: 'Mozilla Firefox',
+			use: { ...devices['Desktop Firefox'], channel: 'firefox' }
+		},
+		{
+			name: 'Safari',
+			use: { ...devices['Desktop Safari'], channel: 'safari' }
+		},
+		{
 			name: 'Apple iPhone SE',
 			use: { ...devices['iPhone SE'] }
 		},
