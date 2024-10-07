@@ -22,6 +22,7 @@ interface I18nCore {
 	};
 	info: { test_banner: string };
 	alt: { logo: string; go_to_home: string };
+	warning: { may_take_a_few_seconds: string; do_not_close: string };
 }
 
 interface I18nNavigation {
@@ -58,6 +59,11 @@ interface I18nAuth {
 		error_while_signing_in: string;
 		unexpected_issue_with_syncing: string;
 	};
+}
+
+interface I18nFooter {
+	text: { copyright: string; developed_with: string; dfinity: string };
+	alt: { dfinity: string };
 }
 
 interface I18nWallet {
@@ -110,6 +116,7 @@ interface I18nInit {
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
+		allow_signing: string;
 	};
 }
 
@@ -180,6 +187,7 @@ interface I18nReceive {
 	};
 	bitcoin: {
 		text: {
+			bitcoin: string;
 			checking_status: string;
 			refresh_status: string;
 			initializing: string;
@@ -548,6 +556,7 @@ interface I18n {
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
+	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;
 	hero: I18nHero;

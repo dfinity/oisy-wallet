@@ -10,14 +10,9 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenStandard } from '$lib/types/token';
 import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
-import { invalidBtcAddress } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import {
-	isNetworkIdBTCMainnet,
-	isNetworkIdBitcoin,
-	isNetworkIdEthereum
-} from '$lib/utils/network.utils';
-import { BtcNetwork } from '@dfinity/ckbtc';
+import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
+import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 import { nonNullish } from '@dfinity/utils';
 
 const isTokenLedger = ({
@@ -57,10 +52,7 @@ export const isInvalidDestinationIc = ({
 	}
 
 	if (isNetworkIdBitcoin(networkId)) {
-		return invalidBtcAddress({
-			address: destination,
-			network: isNetworkIdBTCMainnet(networkId) ? BtcNetwork.Mainnet : BtcNetwork.Testnet
-		});
+		return isInvalidDestinationBtc({ destination, networkId });
 	}
 
 	if (nonNullish(networkId) && isNetworkIdEthereum(networkId)) {

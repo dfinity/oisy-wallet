@@ -5,6 +5,7 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -14,7 +15,5 @@
 <ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
-	<button class="primary full text-center" on:click={close} slot="toolbar"
-		>{$i18n.core.text.done}</button
-	>
+	<Button fullWidth on:click={close} slot="toolbar">{$i18n.core.text.done}</Button>
 </ContentWithToolbar>

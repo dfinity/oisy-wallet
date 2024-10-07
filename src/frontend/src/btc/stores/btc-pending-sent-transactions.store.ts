@@ -3,29 +3,32 @@ import type { AlwaysCertifiedData } from '$lib/types/store';
 import { writable, type Readable } from 'svelte/store';
 
 type Address = string;
-type BtcPendingTransactionsStoreData = Record<
+type BtcPendingSentTransactionsStoreData = Record<
 	Address,
 	// The endpoint can't be called with a query. Therefore, the information is always certified with an update call.
-	AlwaysCertifiedData<Array<PendingTransaction>>
+	// `null` is used to indicate that the data is not available. Due to an error or connection issues.
+	AlwaysCertifiedData<Array<PendingTransaction> | null>
 >;
 
-interface BtcPendingTransactionsStore extends Readable<BtcPendingTransactionsStoreData> {
+interface BtcPendingSentTransactionsStore extends Readable<BtcPendingSentTransactionsStoreData> {
 	setPendingTransactions: (params: {
 		address: Address;
 		pendingTransactions: Array<PendingTransaction>;
 	}) => void;
+	setPendingTransactionsError(params: { address: Address }): void;
 	reset: () => void;
 }
 
 /**
  * Bitcoin transations take time to confirm.
- * While a transaction is pending, its utxos cannot be used, but they might still be available.
+ * After a user sends a transaction, while a transaction is pending,
+ * its utxos cannot be used, but they might still be available.
  * Instead of trying ot be smart, for now we'll disable transactions until they are confirmed.
  *
  * This store is used to keep track of pending transactions.
  */
-const initBtcPendingTransactionsStore = (): BtcPendingTransactionsStore => {
-	const { update, set, subscribe } = writable<BtcPendingTransactionsStoreData>({});
+const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore => {
+	const { update, set, subscribe } = writable<BtcPendingSentTransactionsStoreData>({});
 
 	return {
 		subscribe,
@@ -44,10 +47,19 @@ const initBtcPendingTransactionsStore = (): BtcPendingTransactionsStore => {
 				}
 			}));
 		},
+		setPendingTransactionsError({ address }: { address: Address }) {
+			update((state) => ({
+				...state,
+				[address]: {
+					certified: true,
+					data: null
+				}
+			}));
+		},
 		reset() {
 			set({});
 		}
 	};
 };
 
-export const pendingTransactionsStore = initBtcPendingTransactionsStore();
+export const btcPendingSentTransactionsStore = initBtcPendingSentTransactionsStore();

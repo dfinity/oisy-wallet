@@ -19,5 +19,8 @@ export const SHIB_TOKEN: RequiredErc20Token = {
 	icon: shib,
 	address: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckSHIB'
+	twinTokenSymbol: 'ckSHIB',
+	buy: {
+		onramperId: 'shib_ethereum'
+	}
 };

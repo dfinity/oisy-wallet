@@ -4,7 +4,7 @@
 	export let src: string;
 	export let alt = '';
 	export let width: string | undefined = undefined;
-	export let size: 'small' | 'big' = 'small';
+	export let size: 'small' | 'big' = 'big';
 </script>
 
 <div class="relative block" class:h-56={size === 'big'} class:h-40={size === 'small'}>
