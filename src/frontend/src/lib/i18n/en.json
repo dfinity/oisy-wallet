@@ -70,6 +70,16 @@
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
 		}
 	},
+	"footer": {
+		"text": {
+			"copyright": "© 2024",
+			"developed_with": "Developed with ❤\uFE0F at ",
+			"dfinity": "DFINITY"
+		},
+		"alt": {
+			"dfinity": "Go to DFINITY Foundation website"
+		}
+	},
 	"wallet": {
 		"text": {
 			"address": "Address",
