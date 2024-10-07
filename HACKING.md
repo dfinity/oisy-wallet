@@ -147,11 +147,11 @@ There are three necessary items before starting to develop locally:
 
 ### Bitcoin Environment Variables
 
-You need to set the following variables to `true` in the file `.env.development`.
+You need to set the following variables in the file `.env.development`.
 
 ```
 VITE_NETWORK_BITCOIN_ENABLED=true
-VITE_BITCOIN_MAINNET=true
+VITE_BITCOIN_MAINNET_DISABLED=false    # or remove this line
 ```
 
 ### Bitcoin Development
