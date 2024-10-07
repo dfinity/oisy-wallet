@@ -187,6 +187,7 @@ interface I18nReceive {
 	};
 	bitcoin: {
 		text: {
+			bitcoin: string;
 			checking_status: string;
 			refresh_status: string;
 			initializing: string;

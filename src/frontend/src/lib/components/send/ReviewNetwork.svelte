@@ -9,6 +9,7 @@
 	import Value from '$lib/components/ui/Value.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network, NetworkId } from '$lib/types/network';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 
 	export let sourceNetwork: Network;
@@ -33,12 +34,17 @@
 </Value>
 
 {#if nonNullish(destinationNetworkId) && showDestinationNetwork}
-	<Value ref="network" element="div">
+	<Value ref="destination-network" element="div">
 		<svelte:fragment slot="label">{$i18n.send.text.destination_network}</svelte:fragment>
 		{#if isNetworkBitcoin}
 			<span class="flex gap-1">
 				<SendBtcNetwork networkId={destinationNetworkId} />
-				<Logo src={bitcoin} alt={`Bitcoin logo`} />
+				<Logo
+					src={bitcoin}
+					alt={replacePlaceholders($i18n.core.alt.logo, {
+						$name: $i18n.receive.bitcoin.text.bitcoin
+					})}
+				/>
 			</span>
 		{:else if isNetworkEthereum}
 			<TextWithLogo
