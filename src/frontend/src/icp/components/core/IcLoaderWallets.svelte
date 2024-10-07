@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { initWalletWorker } from '$icp/utils/wallet.utils';
-	import LoaderWallets from '$lib/components/core/LoaderWallets.svelte';
+	import WalletWorkers from '$lib/components/core/WalletWorkers.svelte';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 </script>
 
-<LoaderWallets tokens={$enabledIcTokens} {initWalletWorker}>
+<WalletWorkers tokens={$enabledIcTokens} {initWalletWorker}>
 	<slot />
-</LoaderWallets>
+</WalletWorkers>
