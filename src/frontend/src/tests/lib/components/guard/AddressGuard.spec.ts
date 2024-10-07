@@ -12,7 +12,7 @@ import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { render } from '@testing-library/svelte';
 import { expect, type MockInstance } from 'vitest';
 
-describe('AdressGuard', () => {
+describe('AddressGuard', () => {
 	let apiMock: MockInstance;
 
 	beforeEach(() => {
