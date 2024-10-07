@@ -50,6 +50,13 @@ describe('initHasPendingSentTransactions', () => {
 			expect(get(store)).toBe('loading');
 		});
 
+		it('should return "error" if pending transactions are not `null` for the address', () => {
+			btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
+			btcPendingSentTransactionsStore.setPendingTransactionsError({ address: mockAddressMainnet });
+			const store = initHasPendingSentTransactions(mockAddressMainnet);
+			expect(get(store)).toBe('error');
+		});
+
 		it('should return "false" if address is not the mainnet bitcoin address', () => {
 			btcAddressMainnetStore.set({ certified: true, data: mockAddressMainnet });
 			const store = initHasPendingSentTransactions('another-address');
@@ -106,6 +113,14 @@ describe('initHasPendingSentTransactions', () => {
 			loadAllAddresses();
 			expect(get(initHasPendingSentTransactions(mockAddressTestnet))).toBe('loading');
 			expect(get(initHasPendingSentTransactions(mockAddressMainnet))).toBe('loading');
+		});
+
+		it('should return "error" if pending transactions are `null`', () => {
+			loadAllAddresses();
+			btcPendingSentTransactionsStore.setPendingTransactionsError({ address: mockAddressTestnet });
+			expect(get(initHasPendingSentTransactions(mockAddressTestnet))).toBe('error');
+			btcPendingSentTransactionsStore.setPendingTransactionsError({ address: mockAddressMainnet });
+			expect(get(initHasPendingSentTransactions(mockAddressMainnet))).toBe('error');
 		});
 
 		it('should return "false" if address is not a bitcoin address', () => {
