@@ -145,7 +145,9 @@
 
 	<div slot="toolbar">
 		{#if formCancelAction === 'back'}
-			<Button fullWidth type="button" on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</Button>
+			<Button fullWidth type="button" on:click={() => dispatch('icBack')}
+				>{$i18n.core.text.back}</Button
+			>
 		{:else}
 			<Button fullWidth type="button" on:click={modalStore.close}>{$i18n.core.text.done}</Button>
 		{/if}
