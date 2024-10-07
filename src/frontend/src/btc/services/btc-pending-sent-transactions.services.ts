@@ -18,7 +18,10 @@ export const loadBtcPendingSentTransactions = async ({
 	try {
 		const network = mapNetworkIdToBitcoinNetwork(networkId);
 		if (isNullish(network)) {
-			throw new Error(`Invalid networkId: ${networkId.toString}`);
+			return {
+				success: false,
+				err: new Error(`Invalid networkId: ${networkId.toString}`)
+			};
 		}
 		const pendingTransactions = await getPendingBtcTransactions({
 			identity,
