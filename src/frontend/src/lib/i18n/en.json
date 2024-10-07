@@ -74,6 +74,16 @@
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
 		}
 	},
+	"footer": {
+		"text": {
+			"copyright": "© 2024",
+			"developed_with": "Developed with ❤\uFE0F at ",
+			"dfinity": "DFINITY"
+		},
+		"alt": {
+			"dfinity": "Go to DFINITY Foundation website"
+		}
+	},
 	"wallet": {
 		"text": {
 			"address": "Address",
@@ -131,7 +141,8 @@
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
-			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again."
+			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
+			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support."
 		}
 	},
 	"hero": {

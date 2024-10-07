@@ -19,5 +19,8 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	icon: usdt,
 	address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckUSDT'
+	twinTokenSymbol: 'ckUSDT',
+	buy: {
+		onramperId: 'usdt_ethereum'
+	}
 };

@@ -61,6 +61,11 @@ interface I18nAuth {
 	};
 }
 
+interface I18nFooter {
+	text: { copyright: string; developed_with: string; dfinity: string };
+	alt: { dfinity: string };
+}
+
 interface I18nWallet {
 	text: {
 		address: string;
@@ -111,6 +116,7 @@ interface I18nInit {
 		erc20_user_token: string;
 		icrc_custom_token: string;
 		loading_wallet_timeout: string;
+		allow_signing: string;
 	};
 }
 
@@ -549,6 +555,7 @@ interface I18n {
 	core: I18nCore;
 	navigation: I18nNavigation;
 	auth: I18nAuth;
+	footer: I18nFooter;
 	wallet: I18nWallet;
 	init: I18nInit;
 	hero: I18nHero;
