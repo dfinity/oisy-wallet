@@ -23,6 +23,10 @@
 		"alt": {
 			"logo": "$name logo",
 			"go_to_home": "Go to the $oisy_name home page"
+		},
+		"warning": {
+			"may_take_a_few_seconds": "This may take a few seconds.",
+			"do_not_close": "Please do not close your browser tab."
 		}
 	},
 	"navigation": {
@@ -68,6 +72,16 @@
 			"no_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential. Do you have a valid credential in Decide AI?",
 			"error_while_signing_in": "Something went wrong while sign-in.",
 			"unexpected_issue_with_syncing": "Unexpected issue while syncing the status of your authentication."
+		}
+	},
+	"footer": {
+		"text": {
+			"copyright": "© 2024",
+			"developed_with": "Developed with ❤\uFE0F at ",
+			"dfinity": "DFINITY"
+		},
+		"alt": {
+			"dfinity": "Go to DFINITY Foundation website"
 		}
 	},
 	"wallet": {

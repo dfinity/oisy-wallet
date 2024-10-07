@@ -47,7 +47,8 @@ export default {
 		},
 		extend: {
 			screens: {
-				'2.5xl': '1728px'
+				'2.5xl': '1728px',
+				'h-md': { raw: '(max-height: 1090px)' }
 			}
 		}
 	},

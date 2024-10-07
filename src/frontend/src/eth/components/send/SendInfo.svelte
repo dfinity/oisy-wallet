@@ -17,7 +17,7 @@
 
 {#if displayInfo}
 	<Info>
-		<p>
+		<span>
 			{#if sendPurpose === 'convert-eth-to-cketh'}
 				{$i18n.convert.text.cketh_conversions_may_take}
 			{:else}
@@ -25,6 +25,6 @@
 					$ckErc20: sendTokenAsErc20?.twinTokenSymbol ?? ''
 				})}
 			{/if}
-		</p>
+		</span>
 	</Info>
 {/if}
