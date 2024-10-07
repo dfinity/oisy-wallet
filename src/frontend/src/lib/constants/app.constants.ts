@@ -9,7 +9,7 @@ export const STAGING = MODE === 'staging';
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
-export const TEST = JSON.parse(import.meta.env.TEST ?? 'false') === true;
+export const TEST = JSON.parse(import.meta.env.TEST ?? false) === true;
 
 const MAINNET_DOMAIN = 'icp0.io';
 
