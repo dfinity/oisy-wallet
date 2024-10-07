@@ -54,7 +54,7 @@
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_icp_deposit}</svelte:fragment>
 	</ReceiveAddress>
 
-	<Button full on:click={close} slot="toolbar">
+	<Button fullWidth on:click={close} slot="toolbar">
 		{$i18n.core.text.done}
 	</Button>
 </ContentWithToolbar>

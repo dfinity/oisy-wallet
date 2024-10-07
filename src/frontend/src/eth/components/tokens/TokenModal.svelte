@@ -44,6 +44,6 @@
 			</Token>
 		{/if}
 
-		<Button full on:click={modalStore.close} slot="toolbar">{$i18n.core.text.done}</Button>
+		<Button fullWidth on:click={modalStore.close} slot="toolbar">{$i18n.core.text.done}</Button>
 	</ContentWithToolbar>
 </Modal>

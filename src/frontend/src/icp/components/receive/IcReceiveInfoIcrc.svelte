@@ -15,5 +15,5 @@
 <ContentWithToolbar>
 	<IcReceiveWalletAddress on:icQRCode />
 
-	<Button full on:click={close} slot="toolbar">{$i18n.core.text.done}</Button>
+	<Button fullWidth on:click={close} slot="toolbar">{$i18n.core.text.done}</Button>
 </ContentWithToolbar>

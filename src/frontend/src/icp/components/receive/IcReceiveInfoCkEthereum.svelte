@@ -57,4 +57,4 @@
 	</button>
 </ContentWithToolbar>
 
-<Button full on:click={close}>{$i18n.core.text.done}</Button>
+<Button fullWidth on:click={close}>{$i18n.core.text.done}</Button>

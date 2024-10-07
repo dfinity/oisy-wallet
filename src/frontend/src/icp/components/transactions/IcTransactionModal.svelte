@@ -151,6 +151,6 @@
 			</Value>
 		{/if}
 
-		<Button full on:click={modalStore.close} slot="toolbar">{$i18n.core.text.close}</Button>
+		<Button fullWidth on:click={modalStore.close} slot="toolbar">{$i18n.core.text.close}</Button>
 	</ContentWithToolbar>
 </Modal>
