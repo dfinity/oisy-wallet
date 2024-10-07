@@ -75,6 +75,7 @@ describe('AddressGuard', () => {
 		const mockBtcAddress = '17VZNX1SN5NtKa8UQFxwQbFeFc3iqRYhem';
 
 		beforeEach(() => {
+			// TODO: to be removed when the flag NETWORK_BITCOIN_ENABLED gets removed and Bitcoin becomes default.
 			vi.spyOn(btcEnv, 'NETWORK_BITCOIN_ENABLED', 'get').mockReturnValue(true);
 		});
 
