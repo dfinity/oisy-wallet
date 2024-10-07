@@ -222,6 +222,7 @@
 		},
 		"bitcoin": {
 			"text": {
+				"bitcoin": "Bitcoin",
 				"checking_status": "Checking BTC status...",
 				"refresh_status": "Refresh BTC status",
 				"initializing": "Initializing...",

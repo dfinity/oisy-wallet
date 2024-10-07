@@ -8,6 +8,7 @@
 	} from '$icp-eth/derived/cketh.derived';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -144,15 +145,11 @@
 
 	<div slot="toolbar">
 		{#if formCancelAction === 'back'}
-			<button
-				type="button"
-				class="primary full center text-center"
-				on:click={() => dispatch('icBack')}>{$i18n.core.text.back}</button
+			<Button fullWidth type="button" on:click={() => dispatch('icBack')}
+				>{$i18n.core.text.back}</Button
 			>
 		{:else}
-			<button type="button" class="primary full center text-center" on:click={modalStore.close}
-				>{$i18n.core.text.done}</button
-			>
+			<Button fullWidth type="button" on:click={modalStore.close}>{$i18n.core.text.done}</Button>
 		{/if}
 	</div>
 </ContentWithToolbar>

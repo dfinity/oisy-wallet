@@ -30,7 +30,7 @@ const pendingTransactionMock2 = {
 	]
 };
 
-describe('pendingSentTransactionsStore', () => {
+describe('btcPendingSentTransactionsStore', () => {
 	beforeEach(() => {
 		btcPendingSentTransactionsStore.reset();
 	});
@@ -48,6 +48,25 @@ describe('pendingSentTransactionsStore', () => {
 
 		const storeData = get(btcPendingSentTransactionsStore);
 		expect(storeData[address].data).toEqual(pendingTransactions);
+	});
+
+	it('should set pending transactions to `null` for a specific address', () => {
+		const address = 'test-address';
+		btcPendingSentTransactionsStore.setPendingTransactionsError({ address });
+
+		const storeData = get(btcPendingSentTransactionsStore);
+		expect(storeData[address].data).toBeNull();
+	});
+
+	it('should reset pending transactions to a `null`', () => {
+		const address = 'test-address';
+		const pendingTransactions: Array<PendingTransaction> = [pendingTransactionMock1];
+
+		btcPendingSentTransactionsStore.setPendingTransactions({ address, pendingTransactions });
+		expect(get(btcPendingSentTransactionsStore)[address].data).toEqual(pendingTransactions);
+
+		btcPendingSentTransactionsStore.setPendingTransactionsError({ address });
+		expect(get(btcPendingSentTransactionsStore)[address].data).toBeNull();
 	});
 
 	it('should set certified to `true`', () => {
