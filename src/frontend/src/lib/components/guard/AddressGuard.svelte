@@ -1,15 +1,38 @@
 <script lang="ts">
 	import { NETWORK_BITCOIN_ENABLED } from '$env/networks.btc.env';
 	import { validateBtcAddressMainnet, validateEthAddress } from '$lib/services/address.services';
+	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
 
-	$: $btcAddressMainnetStore,
-		(async () =>
-			NETWORK_BITCOIN_ENABLED
-				? await validateBtcAddressMainnet($btcAddressMainnetStore)
-				: await Promise.resolve())();
+	let signerAllowanceLoaded = false;
 
-	$: $ethAddressStore, (async () => await validateEthAddress($ethAddressStore))();
+	const loadSignerAllowanceAndValidateAddresses = async () => {
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
+
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
+		}
+
+		signerAllowanceLoaded = true;
+
+		await validateAddresses();
+	};
+
+	const validateAddresses = async () => {
+		if (!signerAllowanceLoaded) {
+			return;
+		}
+
+		await Promise.allSettled([
+			validateEthAddress($ethAddressStore),
+			...(NETWORK_BITCOIN_ENABLED ? [validateBtcAddressMainnet($btcAddressMainnetStore)] : [])
+		]);
+	};
+
+	$: $btcAddressMainnetStore, $ethAddressStore, (async () => await validateAddresses())();
 </script>
+
+<svelte:window on:oisyValidateAddresses={loadSignerAllowanceAndValidateAddresses} />
 
 <slot />
