@@ -21,6 +21,7 @@
 		loadIdbAddresses
 	} from '$lib/services/address.services';
 	import { signOut } from '$lib/services/auth.services';
+	import { initSignerAllowance } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
 
@@ -96,6 +97,13 @@
 
 		// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 		progressModal = true;
+
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
+
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
+		}
 
 		const { success: addressSuccess } = await loadAddresses(
 			err?.map(({ tokenId }) => tokenId) ?? []
