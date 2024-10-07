@@ -60,16 +60,16 @@ describe('formatToken', () => {
 		expect(formatToken({ value: ZERO })).toBe('0');
 	});
 
+	it('formats zero with specified displayDecimals', () => {
+		expect(formatToken({ value: ZERO, displayDecimals: 2 })).toBe('0');
+	});
+
 	it('formats zero with trailing zeros', () => {
 		expect(formatToken({ value: ZERO, trailingZeros: true })).toBe('0.0000');
 	});
 
 	it('formats zero with specified displayDecimals and trailing zeros', () => {
 		expect(formatToken({ value: ZERO, displayDecimals: 2, trailingZeros: true })).toBe('0.00');
-	});
-
-	it('formats zero with specified displayDecimals', () => {
-		expect(formatToken({ value: ZERO, displayDecimals: 2 })).toBe('0');
 	});
 
 	it('formats value with different unitName', () => {
