@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionIcCkToken } from '$icp/types/ic';
 	import Token from '$lib/components/tokens/Token.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
@@ -83,8 +84,6 @@
 			</Token>
 		{/if}
 
-		<button class="primary full center text-center" on:click={modalStore.close} slot="toolbar"
-			>{$i18n.core.text.done}</button
-		>
+		<Button full on:click={modalStore.close} slot="toolbar">{$i18n.core.text.done}</Button>
 	</ContentWithToolbar>
 </Modal>
