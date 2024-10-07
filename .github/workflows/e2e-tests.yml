@@ -18,42 +18,15 @@ jobs:
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
-  docker-build-e2e:
-    runs-on: ubuntu-20.04
-    needs: oisy-backend-wasm
-    steps:
-      - name: Delete unnecessary tools folder to prevent "out of space" error
-        run: rm -rf /opt/hostedtoolcache
-
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build E2E Docker Image
-        uses: ./.github/actions/docker-build-e2e
-        with:
-          name: oisy-e2e-image
-
   e2e:
     runs-on: ubuntu-latest
-    needs: docker-build-e2e
+    needs: oisy-backend-wasm
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download E2E Docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: oisy-e2e-image
-          path: .
-
-      - name: Load Docker image
-        run: |
-          gzip -d oisy-e2e-image.tar.gz
-          docker load -i oisy-e2e-image.tar
-
-      - name: Run E2E Docker container
-        run: |
-          docker run -d -p 4943:4943 --name oisy-e2e-container oisy-e2e-image:latest
+      - name: Deploy the backend
+        uses: ./.github/actions/deploy-backend
 
       - name: Prepare
         uses: ./.github/actions/prepare
