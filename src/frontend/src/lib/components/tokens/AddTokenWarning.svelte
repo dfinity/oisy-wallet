@@ -5,13 +5,13 @@
 </script>
 
 <Warning>
-	<p>
+	<span>
 		<Html text={$i18n.tokens.warning.trust_token} />
-	</p>
+	</span>
 </Warning>
 
 <style lang="scss">
-	p {
+	span {
 		:global(a) {
 			&:active,
 			&:hover {
