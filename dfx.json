@@ -13,7 +13,8 @@
 				"id": {
 					"ic": "grghe-syaaa-aaaar-qabyq-cai",
 					"beta": "grghe-syaaa-aaaar-qabyq-cai",
-					"old_backend": "cab24-4qaaa-aaaan-qecca-cai",
+					"test-fe-1": "tdxud-2yaaa-aaaad-aadiq-cai",
+					"test-fe-2": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
 				}
 			}
@@ -40,6 +41,7 @@
 			"wasm": "https://github.com/dfinity/orbit/releases/download/%40orbit%2Fstation-v0.0.2-alpha.5/station.wasm.gz",
 			"remote": {
 				"id": {
+				        "__default": "2vxsx-fae",
 					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
 					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai"
 				}
@@ -53,7 +55,10 @@
 			"remote": {
 				"candid": "internet_identity.did",
 				"id": {
+					"test-fe-1": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+					"test-fe-2": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"staging": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+					"beta": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
 				}
 			}
@@ -66,6 +71,10 @@
 			"specified_id": "um5iw-rqaaa-aaaaq-qaaba-cai",
 			"remote": {
 				"id": {
+					"test-fe-1": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"test-fe-2": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"staging": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"beta": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"ic": "um5iw-rqaaa-aaaaq-qaaba-cai"
 				}
 			}
@@ -75,7 +84,16 @@
 			"build": "scripts/build.cycles_depositor.sh",
 			"init_arg_file": "out/cycles_depositor.args.did",
 			"wasm": "out/cycles_depositor.wasm",
-			"candid": "out/cycles_depositor.did"
+			"candid": "out/cycles_depositor.did",
+			"remote": {
+			        "id": {
+				    "test-fe-1": "2vxsx-fae",
+				    "test-fe-2": "2vxsx-fae",
+				    "staging": "2vxsx-fae",
+				    "beta": "2vxsx-fae",
+				    "ic": "2vxsx-fae"
+				}
+			}
 		},
 		"pouh_issuer": {
 			"type": "custom",
@@ -84,6 +102,8 @@
 			"shrink": false,
 			"remote": {
 				"id": {
+					"test-fe-1": "qbw6f-caaaa-aaaah-qdcwa-cai",
+					"test-fe-2": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"beta": "qgxyr-pyaaa-aaaah-qdcwq-cai",
 					"ic": "qgxyr-pyaaa-aaaah-qdcwq-cai"
@@ -96,6 +116,10 @@
 			"wasm": "target/ic/icp_ledger.wasm",
 			"remote": {
 				"id": {
+					"test-fe-1": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"test-fe-2": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"staging": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"beta": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
 				}
 			}
@@ -106,6 +130,10 @@
 			"wasm": "target/ic/icp_index.wasm",
 			"remote": {
 				"id": {
+					"test-fe-1": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"test-fe-2": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"staging": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"beta": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"ic": "qhbym-qaaaa-aaaaa-aaafq-cai"
 				}
 			}
@@ -117,6 +145,8 @@
 			"remote": {
 				"id": {
 					"ic": "mqygn-kiaaa-aaaar-qaadq-cai",
+					"test-fe-1": "ml52i-qqaaa-aaaar-qaaba-cai",
+					"test-fe-2": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"staging": "ml52i-qqaaa-aaaar-qaaba-cai"
 				}
 			}
@@ -128,6 +158,8 @@
 			"remote": {
 				"id": {
 					"ic": "mxzaz-hqaaa-aaaar-qaada-cai",
+					"test-fe-1": "mc6ru-gyaaa-aaaar-qaaaq-cai",
+					"test-fe-2": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai"
 				}
 			}
@@ -139,6 +171,8 @@
 			"remote": {
 				"id": {
 					"ic": "n5wcd-faaaa-aaaar-qaaea-cai",
+					"test-fe-1": "mm444-5iaaa-aaaar-qaabq-cai",
+					"test-fe-2": "mm444-5iaaa-aaaar-qaabq-cai",
 					"staging": "mm444-5iaaa-aaaar-qaabq-cai"
 				}
 			}
@@ -150,6 +184,8 @@
 			"remote": {
 				"id": {
 					"ic": "pjihx-aaaaa-aaaar-qaaka-cai",
+					"test-fe-1": "pvm5g-xaaaa-aaaar-qaaia-cai",
+					"test-fe-2": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai"
 				}
 			}
@@ -161,6 +197,8 @@
 			"remote": {
 				"id": {
 					"ic": "sv3dd-oaaaa-aaaar-qacoa-cai",
+					"test-fe-1": "jzenf-aiaaa-aaaar-qaa7q-cai",
+					"test-fe-2": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai"
 				}
 			}
@@ -172,6 +210,8 @@
 			"remote": {
 				"id": {
 					"ic": "ss2fx-dyaaa-aaaar-qacoq-cai",
+					"test-fe-1": "apia6-jaaaa-aaaar-qabma-cai",
+					"test-fe-2": "apia6-jaaaa-aaaar-qabma-cai",
 					"staging": "apia6-jaaaa-aaaar-qabma-cai"
 				}
 			}
@@ -183,6 +223,8 @@
 			"remote": {
 				"id": {
 					"ic": "s3zol-vqaaa-aaaar-qacpa-cai",
+					"test-fe-1": "sh5u2-cqaaa-aaaar-qacna-cai",
+					"test-fe-2": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"staging": "sh5u2-cqaaa-aaaar-qacna-cai"
 				}
 			}
@@ -207,6 +249,14 @@
 	"version": 1,
 	"networks": {
 		"old-backend": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test-fe-1": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test-fe-2": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},

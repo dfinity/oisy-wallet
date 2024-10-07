@@ -6,7 +6,8 @@
 	"backend": {
 		"ic": "doked-biaaa-aaaar-qag2a-cai",
 		"beta": "doked-biaaa-aaaar-qag2a-cai",
-		"old_backend": "cab24-4qaaa-aaaan-qecca-cai",
+		"test-fe-1": "d3nvo-aaaaa-aaaar-qagzq-cai",
+		"test-fe-2": "d3nvo-aaaaa-aaaar-qagzq-cai",
 		"staging": "d3nvo-aaaaa-aaaar-qagzq-cai"
 	},
 	"frontend": {
