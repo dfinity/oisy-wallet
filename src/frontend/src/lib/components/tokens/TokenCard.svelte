@@ -15,8 +15,6 @@
 
 	<TokenLogo {token} slot="icon" color="white" />
 
-	<!--	<slot name="description" slot="description" />-->
-
 	<slot name="balance" slot="amount" />
 
 	<slot name="exchange" slot="subAmount" />
