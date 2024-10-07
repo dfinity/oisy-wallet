@@ -41,7 +41,7 @@
 			"wasm": "https://github.com/dfinity/orbit/releases/download/%40orbit%2Fstation-v0.0.2-alpha.5/station.wasm.gz",
 			"remote": {
 				"id": {
-				        "__default": "2vxsx-fae",
+					"__default": "2vxsx-fae",
 					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
 					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai"
 				}
@@ -86,12 +86,12 @@
 			"wasm": "out/cycles_depositor.wasm",
 			"candid": "out/cycles_depositor.did",
 			"remote": {
-			        "id": {
-				    "test-fe-1": "2vxsx-fae",
-				    "test-fe-2": "2vxsx-fae",
-				    "staging": "2vxsx-fae",
-				    "beta": "2vxsx-fae",
-				    "ic": "2vxsx-fae"
+				"id": {
+					"test-fe-1": "2vxsx-fae",
+					"test-fe-2": "2vxsx-fae",
+					"staging": "2vxsx-fae",
+					"beta": "2vxsx-fae",
+					"ic": "2vxsx-fae"
 				}
 			}
 		},
