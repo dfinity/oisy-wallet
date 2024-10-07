@@ -42,6 +42,12 @@ describe('formatToken', () => {
 		expect(formatToken({ value: valueD2, displayDecimals: 2 })).toBe('1.23');
 	});
 
+	it('formats non-rounded value with trailing zeros', () => {
+		expect(formatToken({ value: valueD1, trailingZeros: true })).toBe('1.2000');
+
+		expect(formatToken({ value: valueD2, trailingZeros: true })).toBe('1.2340');
+	});
+
 	it('formats non-rounded value with specified displayDecimals and trailing zeros', () => {
 		expect(formatToken({ value: valueD1, displayDecimals: 6, trailingZeros: true })).toBe(
 			'1.200000'
