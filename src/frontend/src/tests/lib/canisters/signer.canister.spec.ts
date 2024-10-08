@@ -8,6 +8,7 @@ import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { describe } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+import { mockedAgent } from '../../mocks/agents.mock';
 import { mockIdentity } from '../../mocks/identity.mock';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
@@ -15,6 +16,14 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	return {
 		...actual,
 		LOCAL: false
+	};
+});
+
+vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		getAgent: async () => mockedAgent
 	};
 });
 
@@ -31,7 +40,7 @@ describe('signer.canister', () => {
 	const service = mock<ActorSubclass<SignerService>>();
 	const mockResponseError = new Error('Test response error');
 	const btcParams = {
-		network: { mainnet: null }
+		network: { testnet: null }
 	};
 	const signTransactionParams = {
 		transaction: {

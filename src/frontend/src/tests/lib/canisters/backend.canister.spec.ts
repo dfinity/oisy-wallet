@@ -16,6 +16,7 @@ import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import { describe } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+import { mockedAgent } from '../../mocks/agents.mock';
 import { btcAddress } from '../../mocks/btc.mock';
 import { mockIdentity, mockPrincipal } from '../../mocks/identity.mock';
 
@@ -24,6 +25,14 @@ vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	return {
 		...actual,
 		LOCAL: false
+	};
+});
+
+vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		getAgent: async () => mockedAgent
 	};
 });
 
