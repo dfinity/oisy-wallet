@@ -6,10 +6,10 @@ import {
 	getMaxTransactionAmount,
 	mapTokenUi
 } from '$lib/utils/token.utils';
+import { $balances, bn3 } from '$tests/mocks/balances.mock';
+import { $exchanges } from '$tests/mocks/exchanges.mock';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, expect, it, type MockedFunction } from 'vitest';
-import { $balances, bn3 } from '../../mocks/balances.mock';
-import { $exchanges } from '../../mocks/exchanges.mock';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];

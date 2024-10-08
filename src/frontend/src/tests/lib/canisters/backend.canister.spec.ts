@@ -10,15 +10,15 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mockedAgent } from '$tests/mocks/agents.mock';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import { describe } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { mockedAgent } from '../../mocks/agents.mock';
-import { btcAddress } from '../../mocks/btc.mock';
-import { mockIdentity, mockPrincipal } from '../../mocks/identity.mock';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -71,7 +71,7 @@ describe('backend.canister', () => {
 	const btcAddPendingTransactionParams = {
 		txId: [1, 2, 3],
 		network: { testnet: null },
-		address: btcAddress,
+		address: mockBtcAddress,
 		utxos: [
 			{
 				height: 1000,
@@ -99,7 +99,7 @@ describe('backend.canister', () => {
 		network: btcAddPendingTransactionParams.network,
 		minConfirmations: [100],
 		amountSatoshis: 100n,
-		sourceAddress: btcAddress
+		sourceAddress: mockBtcAddress
 	} as BtcSelectUserUtxosFeeParams;
 	const btcSelectUserUtxosFeeEndpointParams = {
 		network: btcSelectUserUtxosFeeParams.network,
