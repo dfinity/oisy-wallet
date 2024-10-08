@@ -1,9 +1,9 @@
 import { ICP_TOKEN } from '$env/tokens.env';
 import { balancesStore } from '$lib/stores/balances.store';
+import { mockPageStore } from '$tests/mocks/page.store.mock';
+import { testDerivedUpdates } from '$tests/utils/derived.utils';
 import { BigNumber } from 'alchemy-sdk';
 import { describe, it } from 'vitest';
-import { mockPageStore } from '../../mocks/page.store.mock';
-import { testDerivedUpdates } from '../../utils/derived.utils';
 
 mockPageStore();
 

@@ -1,29 +1,21 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
-	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
 
-	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
 	$: invalid =
-		isNullish($sendTokenStandard) ||
-		isInvalidDestinationIc({
+		isInvalidDestinationBtc({
 			destination,
-			tokenStandard: $sendTokenStandard,
 			networkId
-		}) ||
-		invalidAmount(amount);
+		}) || invalidAmount(amount);
 </script>
 
 <SendReview {source} {amount} {destination} disabled={invalid} />
