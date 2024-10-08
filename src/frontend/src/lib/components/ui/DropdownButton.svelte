@@ -17,11 +17,7 @@
 	class:border-blue-ribbon={opened}
 >
 	<slot />
-	<div
-		class="transform transition-transform duration-300 ease-in-out"
-		class:scale-y-[-1]={opened}
-		class:scale-y-[1]={!opened}
-	>
+	<div class="transform transition-transform duration-300 ease-in-out" class:-scale-y-100={opened}>
 		<IconExpandMore size="24" />
 	</div>
 </button>
