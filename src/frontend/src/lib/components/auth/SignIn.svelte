@@ -5,7 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<ButtonIcon link ariaLabel={$i18n.auth.text.authenticate} on:click={async () => await signIn({})}>
+<ButtonIcon ariaLabel={$i18n.auth.text.authenticate} on:click={async () => await signIn({})}>
 	<IconLogin slot="icon" />
 	{$i18n.auth.text.authenticate}
 </ButtonIcon>

@@ -19,7 +19,6 @@
 
 <div class="flex md:hidden">
 	<ButtonIcon
-		link
 		bind:button
 		on:click={() => (visible = !visible)}
 		ariaLabel={replaceOisyPlaceholders($i18n.about.text.title)}

@@ -37,7 +37,6 @@
 </script>
 
 <ButtonIcon
-	link
 	bind:button
 	on:click={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
