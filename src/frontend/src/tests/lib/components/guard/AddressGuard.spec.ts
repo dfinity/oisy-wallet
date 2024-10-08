@@ -8,6 +8,8 @@ import * as loaderServices from '$lib/services/loader.services';
 import { btcAddressMainnetStore, ethAddressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { emit } from '$lib/utils/events.utils';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { render } from '@testing-library/svelte';
 import { expect, type MockInstance } from 'vitest';
@@ -71,9 +73,6 @@ describe('AddressGuard', () => {
 	});
 
 	describe('Validate addresses', () => {
-		const mockEthAddress = '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000';
-		const mockBtcAddress = '17VZNX1SN5NtKa8UQFxwQbFeFc3iqRYhem';
-
 		beforeEach(() => {
 			// TODO: to be removed when the flag NETWORK_BITCOIN_ENABLED gets removed and Bitcoin becomes default.
 			vi.spyOn(btcEnv, 'NETWORK_BITCOIN_ENABLED', 'get').mockReturnValue(true);
