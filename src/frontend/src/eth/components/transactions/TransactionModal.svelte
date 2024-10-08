@@ -5,6 +5,7 @@
 	import TransactionStatus from '$eth/components/transactions/TransactionStatus.svelte';
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { EthTransactionType } from '$eth/types/eth-transaction';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -133,8 +134,6 @@
 			</output>
 		</Value>
 
-		<button class="primary full text-center" on:click={modalStore.close} slot="toolbar"
-			>{$i18n.core.text.close}</button
-		>
+		<Button fullWidth on:click={modalStore.close} slot="toolbar">{$i18n.core.text.close}</Button>
 	</ContentWithToolbar>
 </Modal>

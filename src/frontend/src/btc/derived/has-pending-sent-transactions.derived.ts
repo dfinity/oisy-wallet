@@ -9,7 +9,9 @@ import { testnets } from '$lib/derived/testnets.derived';
 import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
-export const initHasPendingSentTransactions = (address: string): Readable<boolean | 'loading'> =>
+export const initHasPendingSentTransactions = (
+	address: string
+): Readable<boolean | 'loading' | 'error'> =>
 	derived(
 		[
 			btcAddressMainnet,
@@ -28,7 +30,9 @@ export const initHasPendingSentTransactions = (address: string): Readable<boolea
 			const pendingTransactionsData = $pendingTransactionsStore[address];
 
 			if (nonNullish(pendingTransactionsData)) {
-				return pendingTransactionsData.data.length > 0;
+				return pendingTransactionsData.data === null
+					? 'error'
+					: pendingTransactionsData.data.length > 0;
 			}
 
 			if (!$testnets) {
