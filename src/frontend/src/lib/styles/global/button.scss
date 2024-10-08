@@ -1,7 +1,8 @@
 @use '../mixins/media';
 @use '../mixins/button';
 
-button {
+button,
+a.as-button {
 	display: flex;
 	align-items: center;
 
