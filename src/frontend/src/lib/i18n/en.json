@@ -55,7 +55,7 @@
 			"powered_by_chain_fusion": "Powered by ICP's Chain Fusion technology"
 		},
 		"alt": {
-			"sign_in": "Sign in with Internet Identity to start using $oisy_name",
+			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"warning": {
