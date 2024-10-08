@@ -4,17 +4,26 @@ import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockIdentity } from '$tests/mocks/identity.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { describe } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+import { mockedAgent } from '$tests/mocks/agents.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
 		LOCAL: false
+	};
+});
+
+vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		getAgent: async () => mockedAgent
 	};
 });
 
@@ -31,7 +40,7 @@ describe('signer.canister', () => {
 	const service = mock<ActorSubclass<SignerService>>();
 	const mockResponseError = new Error('Test response error');
 	const btcParams = {
-		network: { mainnet: null }
+		network: { testnet: null }
 	};
 	const signTransactionParams = {
 		transaction: {

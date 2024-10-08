@@ -1,10 +1,13 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import { getPendingBtcTransactions } from '$lib/api/backend.api';
+import { i18n } from '$lib/stores/i18n.store';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapNetworkIdToBitcoinNetwork, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
-import type { Identity } from '@dfinity/agent';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const loadBtcPendingSentTransactions = async ({
 	address,
@@ -12,15 +15,25 @@ export const loadBtcPendingSentTransactions = async ({
 	networkId
 }: {
 	address: string;
-	identity: Identity;
-	networkId: NetworkId;
+	identity: OptionIdentity;
+	networkId?: NetworkId;
 }): Promise<ResultSuccess> => {
 	try {
-		const network = mapNetworkIdToBitcoinNetwork(networkId);
-		if (isNullish(network)) {
+		const copy = get(i18n);
+		if (isNullish(identity)) {
 			return {
 				success: false,
-				err: new Error(`Invalid networkId: ${networkId.toString}`)
+				err: new Error(copy.auth.error.no_internet_identity)
+			};
+		}
+		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
+		if (isNullish(network)) {
+			const errMessage = replacePlaceholders(copy.send.error.no_btc_network_id, {
+				$networkId: networkId?.toString() ?? 'undefined'
+			});
+			return {
+				success: false,
+				err: new Error(errMessage)
 			};
 		}
 		const pendingTransactions = await getPendingBtcTransactions({

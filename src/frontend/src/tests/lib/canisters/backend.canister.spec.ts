@@ -10,20 +10,29 @@ import { BackendCanister } from '$lib/canisters/backend.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { AddUserCredentialParams, BtcSelectUserUtxosFeeParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
 import { describe } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+import { mockedAgent } from '$tests/mocks/agents.mock';
+import { mockBtcAddress } from '$tests/mocks/btc.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
 		LOCAL: false
+	};
+});
+
+vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		getAgent: async () => mockedAgent
 	};
 });
 
