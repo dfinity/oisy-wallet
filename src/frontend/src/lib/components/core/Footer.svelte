@@ -15,8 +15,8 @@
 <footer
 	class="z-1 mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pb-5 pt-6 md:flex-1 md:flex-grow md:flex-row md:items-end md:justify-between md:px-8"
 	class:md:sticky={$authNotSignedIn}
-	class:md:h-md:mx-0={$authNotSignedIn}
-	class:md:h-md:w-[50%]={$authNotSignedIn}
+	class:md:h-md:grid={$authNotSignedIn}
+	class:md:h-md:grid-cols-4={$authNotSignedIn}
 	class:md:h-md:pr-0={$authNotSignedIn}
 >
 	<div class="flex flex-row items-center gap-4">
@@ -41,7 +41,7 @@
 		</a>
 	</div>
 
-	<div class="flex flex-row items-center gap-2 text-sm">
+	<div class="item flex flex-row items-center justify-end gap-2 text-sm">
 		<IconDfinity />
 		{$i18n.footer.text.copyright}
 		<span>
