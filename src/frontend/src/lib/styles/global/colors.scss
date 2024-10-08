@@ -5,6 +5,7 @@
 	--color-white-rgb: theme(colors.white-rgb);
 	--color-black-rgb: theme(colors.black-rgb);
 	--color-grey: theme(colors.grey);
+	--color-light-grey: theme(colors.light-grey);
 	--color-dust: theme(colors.dust);
 	--color-blue: theme(colors.blue);
 	--color-dark-blue: theme(colors.dark-blue);
@@ -24,7 +25,7 @@
 	--color-pale-cornflower-blue: theme(colors.pale-cornflower-blue);
 	--color-brilliant-azure: theme(colors.brilliant-azure);
 	--color-blue-ribbon-rgb: theme(colors.blue-ribbon-rgb);
-	--color-blue-ribbon: rgb(var(--color-blue-ribbon-rgb));
+	--color-blue-ribbon: theme(colors.blue-ribbon);
 	--color-alice-blue: theme(colors.alice-blue);
 	--color-american-orange: theme(colors.american-orange);
 	--color-crayola-yellow: theme(colors.crayola-yellow);
