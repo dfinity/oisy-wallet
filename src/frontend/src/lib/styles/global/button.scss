@@ -26,8 +26,8 @@ button {
 	&.primary,
 	&.secondary,
 	&.tertiary,
-    &.success,
-    &.error {
+	&.success,
+	&.error {
 		justify-content: center;
 
 		padding: var(--button-padding);
