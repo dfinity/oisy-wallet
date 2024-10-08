@@ -33,35 +33,35 @@ export default defineConfig({
 		},
 		{
 			name: 'Mozilla Firefox',
-			use: { ...devices['Desktop Firefox'], channel: 'firefox' }
+			use: { ...devices['Desktop Firefox'] }
 		},
 		{
 			name: 'Safari',
-			use: { ...devices['Desktop Safari'], channel: 'safari' }
+			use: { ...devices['Desktop Safari'] }
 		},
 		{
 			name: 'Apple iPhone SE',
 			use: { ...devices['iPhone SE'] }
-		},
-		{
-			name: 'Apple iPhone 14 Pro Max',
-			use: { ...devices['iPhone SE'] }
-		},
-		{
-			name: 'Samsung Galaxy S8',
-			use: { ...devices['Galaxy S8'] }
-		},
-		{
-			name: 'Google Pixel 7',
-			use: { ...devices['Pixel 7'] }
-		},
-		{
-			name: 'Apple iPad (gen 7)',
-			use: { ...devices['iPad (gen 7)'] }
-		},
-		{
-			name: 'Apple iPad Pro 11',
-			use: { ...devices['iPad Pro 11'] }
 		}
+		// {
+		// 	name: 'Apple iPhone 14 Pro Max',
+		// 	use: { ...devices['iPhone SE'] }
+		// },
+		// {
+		// 	name: 'Samsung Galaxy S8',
+		// 	use: { ...devices['Galaxy S8'] }
+		// },
+		// {
+		// 	name: 'Google Pixel 7',
+		// 	use: { ...devices['Pixel 7'] }
+		// },
+		// {
+		// 	name: 'Apple iPad (gen 7)',
+		// 	use: { ...devices['iPad (gen 7)'] }
+		// },
+		// {
+		// 	name: 'Apple iPad Pro 11',
+		// 	use: { ...devices['iPad Pro 11'] }
+		// }
 	]
 });
