@@ -1,7 +1,7 @@
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
+import { mockBtcAddress, mockBtcTransaction, mockBtcTransactionUi } from '$tests/mocks/btc.mock';
 import { expect } from 'vitest';
-import { mockBtcAddress, mockBtcTransaction, mockBtcTransactionUi } from '../../mocks/btc.mock';
 
 describe('mapBtcTransaction', () => {
 	it('should map correctly when receive transaction is pending', () => {

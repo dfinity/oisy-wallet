@@ -3,8 +3,8 @@ import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-tr
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { BTC_MAINNET_NETWORK_ID, ETHEREUM_NETWORK_ID } from '$env/networks.env';
 import * as backendAPI from '$lib/api/backend.api';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { get } from 'svelte/store';
-import { mockIdentity } from '../../mocks/identity.mock';
 
 describe('BTC Pending Sent Transactions Services', () => {
 	const mockPendingTransaction: PendingTransaction = {
