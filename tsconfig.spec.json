@@ -1,6 +1,24 @@
 {
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
+		"paths": {
+			"$declarations": ["./src/declarations"],
+			"$declarations/*": ["./src/declarations/*"],
+			"$btc": ["./src/frontend/src/btc"],
+			"$btc/*": ["./src/frontend/src/btc/*"],
+			"$eth": ["./src/frontend/src/eth"],
+			"$eth/*": ["./src/frontend/src/eth/*"],
+			"$icp": ["./src/frontend/src/icp"],
+			"$icp/*": ["./src/frontend/src/icp/*"],
+			"$icp-eth": ["./src/frontend/src/icp-eth"],
+			"$icp-eth/*": ["./src/frontend/src/icp-eth/*"],
+			"$env": ["./src/frontend/src/env"],
+			"$env/*": ["./src/frontend/src/env/*"],
+			"$lib": ["./src/frontend/src/lib"],
+			"$lib/*": ["./src/frontend/src/lib/*"],
+			"$tests": ["./src/frontend/src/tests"],
+			"$tests/*": ["./src/frontend/src/tests/*"]
+		},
 		"types": ["vitest/globals", "@testing-library/jest-dom"]
 	},
 	"exclude": [],
