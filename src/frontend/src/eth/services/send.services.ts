@@ -264,6 +264,14 @@ export const send = async ({
 
 	const nonce = await getTransactionCount(from);
 
+	// TODO: We may need to add an approve transaction that resets the approved amount to zero, in case of conversion from ERC20.
+	// 			CONTEXT:
+	// 			It may happen that after the approval transaction is done, the transfer transaction may fail for whatever reasons.
+	//			In this case, the next approval transaction will be rejected, since there is already an approved amount.
+	//			So, the next transfer transaction will work only if the amount is below the one already approved.
+	//			Otherwise, the user is blocked until it consumes all the approved amount.
+	//			We had a practical example with USDT. Please check the sender wallet transaction history backwards from this one: https://etherscan.io/tx/0x084432404a919c1ee720c906bb5c7a565b6e1fdcd5bb9da32049dddfa21ad23f
+
 	const { transactionApproved } = await approve({ progress, sourceNetwork, nonce, token, ...rest });
 
 	// If we approved a transaction - as for example in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
