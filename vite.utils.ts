@@ -57,7 +57,7 @@ const readRemoteCanisterIds = ({ prefix }: { prefix?: string }): Record<string, 
 				const ids = Object.entries(canisterDetails.remote.id).reduce(
 					(acc, [network, id]) => ({
 						...acc,
-						[`${prefix ?? ''}${network.toUpperCase()}_${canisterName
+						[`${prefix ?? ''}${network.toUpperCase().replaceAll("-", "_")}_${canisterName
 							.replaceAll('-', '_')
 							.replaceAll("'", '')
 							.toUpperCase()}_CANISTER_ID`]: id
