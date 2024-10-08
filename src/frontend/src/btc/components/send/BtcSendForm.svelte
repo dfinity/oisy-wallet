@@ -1,14 +1,14 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import BtcSendAmount from './BtcSendAmount.svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
+	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nonNullish } from '@dfinity/utils';
-	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: number | undefined = undefined;
