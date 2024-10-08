@@ -7,6 +7,6 @@
 	export let back = false;
 </script>
 
-<article class="main relative flex flex-col items-center rounded-lg pb-6 pt-10">
+<article class="relative flex flex-col items-center rounded-lg">
 	<HeroContent {usdTotal} {summary} {actions} {back} />
 </article>

@@ -25,14 +25,14 @@
 	<Header back={route === 'settings'} />
 
 	<AuthGuard>
-		<Hero
-			usdTotal={route === 'tokens'}
-			summary={route === 'transactions'}
-			actions={route !== 'settings'}
-			back={route === 'transactions'}
-		/>
+		<main class="space-y-10 pt-8">
+			<Hero
+				usdTotal={route === 'tokens'}
+				summary={route === 'transactions'}
+				actions={route !== 'settings'}
+				back={route === 'transactions'}
+			/>
 
-		<main class="pt-8">
 			<LoadersGuard>
 				<slot />
 			</LoadersGuard>
