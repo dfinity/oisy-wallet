@@ -77,6 +77,8 @@ describe('signer.canister', () => {
 		]
 	} as SendBtcParams;
 	const internalErrorResponse = { Err: { InternalError: { msg: 'Test error' } } };
+
+	// TODO: We should test the SignerCanisterPaymentError as currently there is no test that covers how all possible payment errors are parsed
 	const paymentErrorResponse = { Err: { PaymentError: { UnsupportedPaymentType: null } } };
 
 	beforeEach(() => {
@@ -264,6 +266,18 @@ describe('signer.canister', () => {
 				);
 			}
 		);
+
+		it('should throw a SignerCanisterPaymentError for UnsupportedPaymentType error', async () => {
+			service.eth_address_of_caller.mockResolvedValue(paymentErrorResponse);
+
+			const { getEthAddress } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			await expect(getEthAddress()).rejects.toThrow(
+				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
+			);
+		});
 	});
 
 	it('signs transaction', async () => {
