@@ -19,7 +19,7 @@
 	class:sm:grid-cols-[1fr_auto_1fr]={$authSignedIn}
 	class:xl:grid-cols-[1fr_auto_1fr]={$authNotSignedIn}
 >
-	{#if back}
+	{#if back && $authSignedIn}
 		<Back />
 	{:else}
 		<OisyWalletLogoLink />
