@@ -33,7 +33,7 @@ export default defineConfig({
 		},
 		{
 			name: 'Mozilla Firefox',
-			use: { ...devices['Desktop Firefox'] }
+			use: { ...devices['Desktop Firefox'], channel: 'firefox' }
 		},
 		{
 			name: 'Safari',
