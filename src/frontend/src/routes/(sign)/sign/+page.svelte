@@ -39,7 +39,7 @@
 	$: $authIdentity, init();
 </script>
 
-<article class="mb-10 rounded-lg border border-water bg-white px-5 py-6">
+<article class="mb-10 flex min-h-96 flex-col rounded-lg border border-water bg-white px-5 py-6">
 	{#if $authNotSignedIn}
 		<SignerSignIn />
 	{:else if $idle}
