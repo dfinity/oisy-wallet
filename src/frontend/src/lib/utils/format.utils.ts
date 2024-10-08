@@ -8,7 +8,7 @@ export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
 	displayDecimals = 4,
-	trailingZeros = true
+	trailingZeros = false
 }: {
 	value: BigNumber;
 	unitName?: string | BigNumberish;
@@ -18,7 +18,8 @@ export const formatToken = ({
 	const res = Utils.formatUnits(value, unitName);
 	const formatted = (+res).toLocaleString('en-US', {
 		useGrouping: false,
-		maximumFractionDigits: displayDecimals
+		maximumFractionDigits: displayDecimals,
+		minimumFractionDigits: trailingZeros ? displayDecimals : undefined
 	});
 
 	if (trailingZeros) {

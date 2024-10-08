@@ -5,7 +5,7 @@
 	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	export let token: IcrcCustomToken;
 
@@ -42,9 +42,12 @@
 		}
 
 		toastsShow({
-			text: replacePlaceholders($i18n.tokens.manage.info.outdated_index_canister, {
-				$token: token.name
-			}),
+			text: replacePlaceholders(
+				replaceOisyPlaceholders($i18n.tokens.manage.info.outdated_index_canister),
+				{
+					$token: token.name
+				}
+			),
 			level: 'info',
 			duration: 5000
 		});

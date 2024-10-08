@@ -13,7 +13,8 @@
 				"id": {
 					"ic": "grghe-syaaa-aaaar-qabyq-cai",
 					"beta": "grghe-syaaa-aaaar-qabyq-cai",
-					"old_backend": "cab24-4qaaa-aaaan-qecca-cai",
+					"test_fe_1": "tdxud-2yaaa-aaaad-aadiq-cai",
+					"test_fe_2": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"staging": "tdxud-2yaaa-aaaad-aadiq-cai"
 				}
 			}
@@ -23,7 +24,13 @@
 			"package": "backend",
 			"type": "rust",
 			"optimize": "cycles",
-			"gzip": true
+			"gzip": true,
+			"remote": {
+				"id": {
+					"test_fe_1": "d3nvo-aaaaa-aaaar-qagzq-cai",
+					"test_fe_2": "d3nvo-aaaaa-aaaar-qagzq-cai"
+				}
+			}
 		},
 		"frontend": {
 			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.20.0/src/distributed/assetstorage.did",
@@ -40,6 +47,7 @@
 			"wasm": "https://github.com/dfinity/orbit/releases/download/%40orbit%2Fstation-v0.0.2-alpha.5/station.wasm.gz",
 			"remote": {
 				"id": {
+					"__default": "2vxsx-fae",
 					"staging": "4jngj-yiaaa-aaaal-ajk5q-cai",
 					"ic": "xtnlb-waaaa-aaaal-ajm7q-cai"
 				}
@@ -53,7 +61,10 @@
 			"remote": {
 				"candid": "internet_identity.did",
 				"id": {
+					"test_fe_1": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+					"test_fe_2": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"staging": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+					"beta": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
 				}
 			}
@@ -66,6 +77,10 @@
 			"specified_id": "um5iw-rqaaa-aaaaq-qaaba-cai",
 			"remote": {
 				"id": {
+					"test_fe_1": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"test_fe_2": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"staging": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"beta": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"ic": "um5iw-rqaaa-aaaaq-qaaba-cai"
 				}
 			}
@@ -75,7 +90,16 @@
 			"build": "scripts/build.cycles_depositor.sh",
 			"init_arg_file": "out/cycles_depositor.args.did",
 			"wasm": "out/cycles_depositor.wasm",
-			"candid": "out/cycles_depositor.did"
+			"candid": "out/cycles_depositor.did",
+			"remote": {
+				"id": {
+					"test_fe_1": "2vxsx-fae",
+					"test_fe_2": "2vxsx-fae",
+					"staging": "2vxsx-fae",
+					"beta": "2vxsx-fae",
+					"ic": "2vxsx-fae"
+				}
+			}
 		},
 		"pouh_issuer": {
 			"type": "custom",
@@ -84,6 +108,8 @@
 			"shrink": false,
 			"remote": {
 				"id": {
+					"test_fe_1": "qbw6f-caaaa-aaaah-qdcwa-cai",
+					"test_fe_2": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"beta": "qgxyr-pyaaa-aaaah-qdcwq-cai",
 					"ic": "qgxyr-pyaaa-aaaah-qdcwq-cai"
@@ -96,6 +122,10 @@
 			"wasm": "target/ic/icp_ledger.wasm",
 			"remote": {
 				"id": {
+					"test_fe_1": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"test_fe_2": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"staging": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"beta": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
 				}
 			}
@@ -106,6 +136,10 @@
 			"wasm": "target/ic/icp_index.wasm",
 			"remote": {
 				"id": {
+					"test_fe_1": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"test_fe_2": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"staging": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"beta": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"ic": "qhbym-qaaaa-aaaaa-aaafq-cai"
 				}
 			}
@@ -117,6 +151,8 @@
 			"remote": {
 				"id": {
 					"ic": "mqygn-kiaaa-aaaar-qaadq-cai",
+					"test_fe_1": "ml52i-qqaaa-aaaar-qaaba-cai",
+					"test_fe_2": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"staging": "ml52i-qqaaa-aaaar-qaaba-cai"
 				}
 			}
@@ -128,6 +164,8 @@
 			"remote": {
 				"id": {
 					"ic": "mxzaz-hqaaa-aaaar-qaada-cai",
+					"test_fe_1": "mc6ru-gyaaa-aaaar-qaaaq-cai",
+					"test_fe_2": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai"
 				}
 			}
@@ -139,6 +177,8 @@
 			"remote": {
 				"id": {
 					"ic": "n5wcd-faaaa-aaaar-qaaea-cai",
+					"test_fe_1": "mm444-5iaaa-aaaar-qaabq-cai",
+					"test_fe_2": "mm444-5iaaa-aaaar-qaabq-cai",
 					"staging": "mm444-5iaaa-aaaar-qaabq-cai"
 				}
 			}
@@ -150,6 +190,8 @@
 			"remote": {
 				"id": {
 					"ic": "pjihx-aaaaa-aaaar-qaaka-cai",
+					"test_fe_1": "pvm5g-xaaaa-aaaar-qaaia-cai",
+					"test_fe_2": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai"
 				}
 			}
@@ -161,6 +203,8 @@
 			"remote": {
 				"id": {
 					"ic": "sv3dd-oaaaa-aaaar-qacoa-cai",
+					"test_fe_1": "jzenf-aiaaa-aaaar-qaa7q-cai",
+					"test_fe_2": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai"
 				}
 			}
@@ -172,6 +216,8 @@
 			"remote": {
 				"id": {
 					"ic": "ss2fx-dyaaa-aaaar-qacoq-cai",
+					"test_fe_1": "apia6-jaaaa-aaaar-qabma-cai",
+					"test_fe_2": "apia6-jaaaa-aaaar-qabma-cai",
 					"staging": "apia6-jaaaa-aaaar-qabma-cai"
 				}
 			}
@@ -183,6 +229,8 @@
 			"remote": {
 				"id": {
 					"ic": "s3zol-vqaaa-aaaar-qacpa-cai",
+					"test_fe_1": "sh5u2-cqaaa-aaaar-qacna-cai",
+					"test_fe_2": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"staging": "sh5u2-cqaaa-aaaar-qacna-cai"
 				}
 			}
@@ -207,6 +255,14 @@
 	"version": 1,
 	"networks": {
 		"old-backend": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test_fe_1": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test_fe_2": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},

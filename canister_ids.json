@@ -6,12 +6,13 @@
 	"backend": {
 		"ic": "doked-biaaa-aaaar-qag2a-cai",
 		"beta": "doked-biaaa-aaaar-qag2a-cai",
-		"old_backend": "cab24-4qaaa-aaaan-qecca-cai",
 		"staging": "d3nvo-aaaaa-aaaar-qagzq-cai"
 	},
 	"frontend": {
 		"ic": "cha4i-riaaa-aaaan-qeccq-cai",
 		"beta": "v7iq7-yiaaa-aaaan-qmrtq-cai",
-		"staging": "tewsx-xaaaa-aaaad-aadia-cai"
+		"staging": "tewsx-xaaaa-aaaad-aadia-cai",
+		"test_fe_1": "6qzfn-gyaaa-aaaar-qaisa-cai",
+		"test_fe_2": "6xydz-laaaa-aaaar-qaisq-cai"
 	}
 }
