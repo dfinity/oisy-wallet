@@ -41,7 +41,8 @@
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"submit_ticket": "Open the ticket submission form on GitHub to report an issue or request a feature"
+			"submit_ticket": "Open the ticket submission form on GitHub to report an issue or request a feature",
+			"open_twitter": "Open the X (Twitter) account of $oisy_name"
 		}
 	},
 	"auth": {

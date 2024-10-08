@@ -36,11 +36,11 @@
 			href={OISY_TWITTER_URL}
 			rel="external noopener noreferrer"
 			target="_blank"
-			aria-label={$i18n.navigation.text.source_code_on_github}
+			aria-label={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
 		>
 			<ButtonIcon>
 				<IconTwitter slot="icon" />
-				{$i18n.navigation.text.source_code_on_github}
+				{replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
 			</ButtonIcon>
 		</a>
 	</div>

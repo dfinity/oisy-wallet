@@ -33,7 +33,13 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 	};
-	alt: { more_settings: string; menu: string; changelog: string; submit_ticket: string };
+	alt: {
+		more_settings: string;
+		menu: string;
+		changelog: string;
+		submit_ticket: string;
+		open_twitter: string;
+	};
 }
 
 interface I18nAuth {
