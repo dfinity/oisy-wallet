@@ -109,16 +109,22 @@ button {
 	}
 
 	&.tertiary {
+		background: var(--color-white);
+
+		&:hover {
+			color: var(--color-primary);
+		}
+
+		&:active {
+			background: var(--color-onahau);
+			color: currentColor;
+		}
+
 		&.link {
-			background: var(--color-white);
 			color: var(--color-primary);
 
 			&:hover {
 				color: var(--color-secondary);
-			}
-
-			&:active {
-				background: var(--color-onahau);
 			}
 		}
 	}
