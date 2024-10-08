@@ -1,4 +1,5 @@
 import type {
+	GenericSigningError,
 	PaymentError,
 	GetAddressError as SignerCanisterBtcError
 } from '$declarations/signer/signer.did';
@@ -32,4 +33,19 @@ export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): Canister
 		return new SignerCanisterPaymentError(err.PaymentError);
 	}
 	return new CanisterInternalError('Unknown SignerCanisterBtcError');
+};
+
+export const mapSignerCanisterGetEthAddressError = (
+	err: GenericSigningError
+): CanisterInternalError => {
+	if ('SigningError' in err) {
+		const [code, addOns] = err.SigningError;
+		return new CanisterInternalError(`Signing error: ${code} ${addOns}`);
+	}
+
+	if ('PaymentError' in err) {
+		return new SignerCanisterPaymentError(err.PaymentError);
+	}
+
+	return new CanisterInternalError('Unknown GenericSigningError');
 };

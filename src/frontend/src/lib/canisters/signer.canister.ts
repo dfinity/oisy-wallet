@@ -12,7 +12,7 @@ import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices } from '@dfinity/utils';
-import { mapSignerCanisterBtcError } from './signer.errors';
+import { mapSignerCanisterBtcError, mapSignerCanisterGetEthAddressError } from './signer.errors';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
@@ -61,29 +61,25 @@ export class SignerCanister extends Canister<SignerService> {
 		return response.Ok.balance;
 	};
 
-	getEthAddress = (): Promise<EthAddress> => {
+	getEthAddress = async (): Promise<EthAddress> => {
 		const { eth_address_of_caller } = this.caller({
 			certified: true
 		});
 
-		return eth_address_of_caller([
+		const response = await eth_address_of_caller([
 			{
 				PatronPaysIcrc2Cycles: {
 					owner: BACKEND_CANISTER_ID,
 					subaccount: []
 				}
 			}
-		]).then((response) => {
-			if ('Err' in response) {
-				// Throw an error of type string.
-				throw JSON.stringify(response.Err);
-			} else if ('Ok' in response) {
-				return response.Ok;
-			} else {
-				// This can happen only if the response does not match the candid schema.
-				throw new Error('Response is not Ok or Err');
-			}
-		});
+		]);
+
+		if ('Err' in response) {
+			throw mapSignerCanisterGetEthAddressError(response.Err);
+		}
+
+		return response.Ok;
 	};
 
 	signTransaction = ({ transaction }: { transaction: SignRequest }): Promise<string> => {
