@@ -22,9 +22,7 @@
 </script>
 
 <div class="min-h-[640px] md:flex md:h-full md:flex-col" class:overflow-hidden={$authNotSignedIn}>
-	<div class="pt-6">
-		<Header back={route === 'settings'} />
-	</div>
+	<Header back={route === 'settings'} />
 
 	<AuthGuard>
 		<Hero
