@@ -55,7 +55,7 @@
 			"powered_by_chain_fusion": "Powered by ICP's Chain Fusion technology"
 		},
 		"alt": {
-			"sign_in": "Sign in with Internet Identity to start using Oisy Wallet.",
+			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"warning": {
@@ -167,7 +167,7 @@
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
 			"present_pouh_credential": "Present",
 			"pouh_credential_verified": "Verified ✅",
-			"sign_in": "Sign in to start using Oisy Wallet."
+			"sign_in": "Sign in to start using $oisy_name."
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -314,7 +314,8 @@
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
-			"incompatible_token": "The token is incompatible. Please try again with a compatible token."
+			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
+			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network."
 		}
 	},
 	"convert": {
@@ -380,7 +381,7 @@
 				"minter_canister_id_copied": "Minter Canister ID copied to clipboard.",
 				"verifying": "Verifying token details...",
 				"add_the_token": "Add the token",
-				"info": "To display custom token information correctly, Oisy Wallet requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
+				"info": "To display custom token information correctly, $oisy_name requires setting both a Ledger and Index canister ID. More details can be found on GitHub.",
 				"github_howto": "Read how ICRC token Integration works",
 				"open_github_howto": "Open information about ICRC token integration on GitHub"
 			},
@@ -410,7 +411,7 @@
 				"select_network": "Select the network"
 			},
 			"info": {
-				"outdated_index_canister": "$token Index canister is outdated and incompatible with Oisy Wallet. Contact the project team to propose an upgrade.",
+				"outdated_index_canister": "$token Index canister is outdated and incompatible with $oisy_name. Contact the project team to propose an upgrade.",
 				"no_changes": "No changes need to be saved."
 			},
 			"error": {
