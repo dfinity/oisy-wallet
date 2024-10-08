@@ -110,7 +110,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const bitcoinNetwork = data?.bitcoinNetwork;
 		assertNonNullish(bitcoinNetwork, 'No BTC network provided to get BTC certified balance.');
 
-		const btcAddress = data?.btcAddress;
+		const btcAddress = data?.btcAddress.data;
 		assertNonNullish(btcAddress, 'No BTC address provided to get BTC transactions.');
 
 		const balance = await this.loadBtcBalance({ identity, bitcoinNetwork });
