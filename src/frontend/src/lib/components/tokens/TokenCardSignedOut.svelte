@@ -6,7 +6,7 @@
 </script>
 
 <TokenCard {token}>
-	<span class="break-all" slot="balance"> -/- </span>
+	<span class="break-all" slot="balance">-/-</span>
 
 	<span slot="exchange" class="mr-[3px] font-bold">-/-</span>
 </TokenCard>
