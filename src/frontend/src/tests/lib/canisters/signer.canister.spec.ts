@@ -4,11 +4,11 @@ import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { describe } from 'vitest';
 import { mock } from 'vitest-mock-extended';
-import { mockIdentity } from '../../mocks/identity.mock';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
 	const actual = await importOriginal();
