@@ -12,6 +12,7 @@
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -65,7 +66,5 @@
 		</ReceiveAddress>
 	{/if}
 
-	<button class="primary full text-center" on:click={close} slot="toolbar"
-		>{$i18n.core.text.done}</button
-	>
+	<Button fullWidth on:click={close} slot="toolbar">{$i18n.core.text.done}</Button>
 </ContentWithToolbar>

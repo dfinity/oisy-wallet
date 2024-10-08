@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "0.0.40",
+	"version": "0.0.41",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -70,7 +70,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.0.3",
+		"@dfinity/eslint-config-oisy-wallet": "^0.0.4",
 		"@dfinity/identity-secp256k1": "^2.1.2",
 		"@dfinity/internet-identity-playwright": "^0.0.3",
 		"@playwright/test": "^1.47.2",

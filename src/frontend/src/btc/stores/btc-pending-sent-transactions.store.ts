@@ -6,7 +6,8 @@ type Address = string;
 type BtcPendingSentTransactionsStoreData = Record<
 	Address,
 	// The endpoint can't be called with a query. Therefore, the information is always certified with an update call.
-	AlwaysCertifiedData<Array<PendingTransaction>>
+	// `null` is used to indicate that the data is not available. Due to an error or connection issues.
+	AlwaysCertifiedData<Array<PendingTransaction> | null>
 >;
 
 interface BtcPendingSentTransactionsStore extends Readable<BtcPendingSentTransactionsStoreData> {
@@ -14,6 +15,7 @@ interface BtcPendingSentTransactionsStore extends Readable<BtcPendingSentTransac
 		address: Address;
 		pendingTransactions: Array<PendingTransaction>;
 	}) => void;
+	setPendingTransactionsError(params: { address: Address }): void;
 	reset: () => void;
 }
 
@@ -42,6 +44,15 @@ const initBtcPendingSentTransactionsStore = (): BtcPendingSentTransactionsStore 
 				[address]: {
 					certified: true,
 					data: pendingTransactions
+				}
+			}));
+		},
+		setPendingTransactionsError({ address }: { address: Address }) {
+			update((state) => ({
+				...state,
+				[address]: {
+					certified: true,
+					data: null
 				}
 			}));
 		},
