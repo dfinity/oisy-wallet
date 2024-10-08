@@ -58,7 +58,7 @@ export type PostMessageDataRequestIcCkBTCUpdateBalance = PostMessageDataRequestI
 };
 
 export interface PostMessageDataRequestBtc {
-	btcAddress: BtcAddress;
+	btcAddress: CertifiedData<BtcAddress>;
 	shouldFetchTransactions: boolean;
 	bitcoinNetwork: SignerBitcoinNetwork;
 }
