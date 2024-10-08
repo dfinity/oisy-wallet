@@ -31,7 +31,7 @@
 			usdTotal={route === 'tokens'}
 			summary={route === 'transactions'}
 			actions={route !== 'settings'}
-			back={route === 'settings' ? 'header' : route === 'transactions' ? 'hero' : undefined}
+			back={route === 'transactions'}
 		/>
 
 		<main class="pt-8">
