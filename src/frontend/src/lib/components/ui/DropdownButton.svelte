@@ -14,7 +14,6 @@
 	aria-label={ariaLabel}
 	{disabled}
 	class:opacity-50={disabled}
-	class:border={opened}
 	class:border-blue-ribbon={opened}
 >
 	<slot />
