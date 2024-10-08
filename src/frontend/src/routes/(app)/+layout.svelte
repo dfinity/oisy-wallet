@@ -4,6 +4,7 @@
 	import Footer from '$lib/components/core/Footer.svelte';
 	import LoadersGuard from '$lib/components/core/LoadersGuard.svelte';
 	import Modals from '$lib/components/core/Modals.svelte';
+	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -21,15 +22,19 @@
 </script>
 
 <div class="min-h-[640px] md:flex md:h-full md:flex-col" class:overflow-hidden={$authNotSignedIn}>
-	<Hero
-		usdTotal={route === 'tokens'}
-		summary={route === 'transactions'}
-		actions={route !== 'settings'}
-		back={route === 'settings' ? 'header' : route === 'transactions' ? 'hero' : undefined}
-	/>
+	<div class="pt-6">
+		<Header back={route === 'settings'} />
+	</div>
 
 	<AuthGuard>
-		<main class=" pt-8">
+		<Hero
+			usdTotal={route === 'tokens'}
+			summary={route === 'transactions'}
+			actions={route !== 'settings'}
+			back={route === 'settings' ? 'header' : route === 'transactions' ? 'hero' : undefined}
+		/>
+
+		<main class="pt-8">
 			<LoadersGuard>
 				<slot />
 			</LoadersGuard>
