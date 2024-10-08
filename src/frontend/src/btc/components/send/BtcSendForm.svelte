@@ -9,6 +9,7 @@
 	import { balance } from '$lib/derived/balances.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
+	import { onMount } from 'svelte';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: number | undefined = undefined;
@@ -20,6 +21,8 @@
 
 	$: {
 		if (nonNullish($authIdentity) && nonNullish(networkId)) {
+			// This call will load the pending sent transactions for the source address in the store.
+			// This data will then be used in the review step. That's why we don't wait here.
 			loadBtcPendingSentTransactions({
 				identity: $authIdentity,
 				networkId,
