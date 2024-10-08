@@ -6,6 +6,9 @@
 	import { balance } from '$lib/derived/balances.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { nonNullish } from '@dfinity/utils';
+	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: number | undefined = undefined;
@@ -14,6 +17,16 @@
 
 	let amountError: BtcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
+
+	$: {
+		if (nonNullish($authIdentity) && nonNullish(networkId)) {
+			loadBtcPendingSentTransactions({
+				identity: $authIdentity,
+				networkId,
+				address: source
+			});
+		}
+	}
 </script>
 
 <SendForm {source} token={$token} balance={$balance}>
