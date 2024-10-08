@@ -21,6 +21,5 @@
 				unitName: token.decimals
 			}).replace('0', '-')}
 		{/if}
-		{token.symbol}
 	</output>
 </TokenBalanceSkeleton>
