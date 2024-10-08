@@ -25,51 +25,55 @@
 	$: displayTokenSymbol = summary && $erc20UserTokensInitialized;
 </script>
 
-{#if summary}
-	<div
-		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
-		class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-start justify-between"
-	>
-		{#if back}
-			<Back />
-		{/if}
+<div
+	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brandeis-blue p-6 text-center text-white"
+>
+	{#if summary}
+		<div
+			transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
+			class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-start justify-between"
+		>
+			{#if back}
+				<Back color="current" />
+			{/if}
 
-		<div>
-			<div class="icon mb-0.5 flex items-center justify-center pt-2">
-				{#if displayTokenSymbol && nonNullish($token)}
-					<div in:fade>
-						<Logo
-							src={$token.icon}
-							size="big"
-							alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
-						/>
-					</div>
-				{:else}
-					<SkeletonLogo size="big" />
-				{/if}
+			<div>
+				<div class="icon mb-0.5 flex items-center justify-center pt-2">
+					{#if displayTokenSymbol && nonNullish($token)}
+						<div in:fade>
+							<Logo
+								src={$token.icon}
+								size="big"
+								alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
+							/>
+						</div>
+					{:else}
+						<SkeletonLogo size="big" />
+					{/if}
+				</div>
+
+				<Balance />
 			</div>
 
-			<Balance />
+			<ContextMenu />
 		</div>
+	{/if}
 
-		<ContextMenu />
-	</div>
-{/if}
+	{#if usdTotal}
+		<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
+			<ExchangeBalance />
+		</div>
+	{/if}
 
-{#if usdTotal}
-	<div transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}>
-		<ExchangeBalance />
-	</div>
-{/if}
-
-{#if actions}
-	<div
-		transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
-		class="flex w-full justify-center"
-	>
-		<Actions />
-	</div>
-{/if}
+	{#if actions}
+		<div
+			transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
+			class="flex w-full justify-center"
+		>
+			<Actions />
+		</div>
+	{/if}
+</div>
 
 {#if isErc20Icp($token)}
 	<Erc20Icp />
