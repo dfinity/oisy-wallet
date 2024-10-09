@@ -45,6 +45,7 @@
 								src={$token.icon}
 								size="big"
 								alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token.name })}
+								ring
 							/>
 						</div>
 					{:else}
