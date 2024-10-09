@@ -2,9 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import TokenBalanceSkeleton from '$lib/components/tokens/TokenBalanceSkeleton.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
+	import { TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
 	import type { TokenUi } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
 
 	export let token: TokenUi;
 </script>
