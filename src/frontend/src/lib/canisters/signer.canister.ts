@@ -7,7 +7,7 @@ import type {
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
-import { BACKEND_CANISTER_PRINCIPAL } from '$lib/constants/app.constants';
+import { BACKEND_CANISTER_PRINCIPAL, PATRON } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -56,7 +56,7 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, []);
+		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, [PATRON]);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterBtcError(response.Err);
