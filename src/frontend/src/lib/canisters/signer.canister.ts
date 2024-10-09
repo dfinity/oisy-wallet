@@ -70,6 +70,7 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
+		/* Note: `eth_address` gets the Ethereum address of a given principal, defaulting to the caller if not provided. */
 		const response = await eth_address({ principal: [] }, [
 			{
 				PatronPaysIcrc2Cycles: {
