@@ -1,4 +1,5 @@
 import type {
+	EthAddressError,
 	PaymentError,
 	GetAddressError as SignerCanisterBtcError,
 	SendBtcError as SignerCanisterSendBtcError
@@ -48,4 +49,19 @@ export const mapSignerCanisterSendBtcError = (
 		return new CanisterInternalError(JSON.stringify(err.BuildP2wpkhError));
 	}
 	return new CanisterInternalError('Unknown SignerCanisterSendBtcError');
+};
+
+export const mapSignerCanisterGetEthAddressError = (
+	err: EthAddressError
+): CanisterInternalError => {
+	if ('SigningError' in err) {
+		const [code, addOns] = err.SigningError;
+		return new CanisterInternalError(`Signing error: ${JSON.stringify(code)} ${addOns}`);
+	}
+
+	if ('PaymentError' in err) {
+		return new SignerCanisterPaymentError(err.PaymentError);
+	}
+
+	return new CanisterInternalError('Unknown GenericSigningError');
 };

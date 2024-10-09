@@ -148,6 +148,7 @@
 	},
 	"hero": {
 		"text": {
+			"available_balance": "Available balance",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
