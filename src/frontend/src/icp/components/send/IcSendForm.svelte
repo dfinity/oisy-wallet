@@ -7,11 +7,10 @@
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { balance } from '$lib/derived/balances.derived';
-	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
@@ -47,9 +46,7 @@
 
 		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
-			<Button disabled={invalid}>
-				{$i18n.core.text.next}
-			</Button>
+			<ButtonNext disabled={invalid} />
 		</ButtonGroup>
 	</ContentWithToolbar>
 </form>
