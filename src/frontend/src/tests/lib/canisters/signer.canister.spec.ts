@@ -221,7 +221,7 @@ describe('signer.canister', () => {
 		const mockResponseAddress: EthAddressResponse = { address: mockEthAddress };
 
 		it('returns correct ETH address', async () => {
-			service.eth_address_of_caller.mockResolvedValue({ Ok: mockResponseAddress });
+			service.eth_address.mockResolvedValue({ Ok: mockResponseAddress });
 
 			const { getEthAddress } = await createSignerCanister({
 				serviceOverride: service
@@ -233,7 +233,7 @@ describe('signer.canister', () => {
 		});
 
 		it('should request a payment for the backend canister.', async () => {
-			const spy = service.eth_address_of_caller.mockResolvedValue({ Ok: mockResponseAddress });
+			const spy = service.eth_address.mockResolvedValue({ Ok: mockResponseAddress });
 
 			const { getEthAddress } = await createSignerCanister({
 				serviceOverride: service
@@ -241,7 +241,7 @@ describe('signer.canister', () => {
 
 			await getEthAddress();
 
-			expect(spy).toHaveBeenNthCalledWith(1, [
+			expect(spy).toHaveBeenNthCalledWith(1, { principal: [] }, [
 				{
 					PatronPaysIcrc2Cycles: {
 						owner: Principal.fromText(BACKEND_CANISTER_ID),
@@ -251,8 +251,8 @@ describe('signer.canister', () => {
 			]);
 		});
 
-		it('should throw an error if eth_address_of_caller throws', async () => {
-			service.eth_address_of_caller.mockImplementation(async () => {
+		it('should throw an error if eth_address throws', async () => {
+			service.eth_address.mockImplementation(async () => {
 				throw mockResponseError;
 			});
 
@@ -274,7 +274,7 @@ describe('signer.canister', () => {
 		];
 
 		it.each(signingErrors)(
-			'should throw an error if eth_address_of_caller throws a SigningError for %s',
+			'should throw an error if eth_address throws a SigningError for %s',
 			async (error) => {
 				const rejectionCode: RejectionCode_1 = {
 					[`${error}`]: null
@@ -285,7 +285,7 @@ describe('signer.canister', () => {
 				const SigningError: [RejectionCode_1, string] = [rejectionCode, addOns];
 				const response = { SigningError };
 
-				service.eth_address_of_caller.mockResolvedValue({ Err: response });
+				service.eth_address.mockResolvedValue({ Err: response });
 
 				const { getEthAddress } = await createSignerCanister({
 					serviceOverride: service
@@ -298,7 +298,7 @@ describe('signer.canister', () => {
 		);
 
 		it('should throw a SignerCanisterPaymentError for UnsupportedPaymentType error', async () => {
-			service.eth_address_of_caller.mockResolvedValue(paymentErrorResponse);
+			service.eth_address.mockResolvedValue(paymentErrorResponse);
 
 			const { getEthAddress } = await createSignerCanister({
 				serviceOverride: service
