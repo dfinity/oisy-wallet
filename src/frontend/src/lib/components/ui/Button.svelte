@@ -7,7 +7,7 @@
 	export let fullWidth = false;
 	export let shrinkOnSmallScreens = false;
 	export let testId: string | undefined = undefined;
-	export let ariaLabel: string;
+	export let ariaLabel: string | undefined = undefined;
 </script>
 
 <button
