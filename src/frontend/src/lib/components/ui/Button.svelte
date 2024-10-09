@@ -15,7 +15,7 @@
 	bind:this={button}
 	data-tid={testId}
 	aria-label={ariaLabel}
-	class={`${colorStyle} flex-1 flex md:flex-row text-center`}
+	class={`${colorStyle} flex flex-1 text-center md:flex-row`}
 	class:flex-col={shrinkOnSmallScreens}
 	class:w-full={fullWidth}
 	{type}
