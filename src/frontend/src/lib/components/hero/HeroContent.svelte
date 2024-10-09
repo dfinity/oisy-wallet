@@ -73,11 +73,11 @@
 			<Actions />
 		</div>
 	{/if}
-</div>
 
-{#if isErc20Icp($token)}
-	<Erc20Icp />
-{/if}
+	{#if isErc20Icp($token)}
+		<Erc20Icp />
+	{/if}
+</div>
 
 <style lang="scss">
 	.icon {
