@@ -6,6 +6,7 @@ import type {
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockedAgent } from '$tests/mocks/agents.mock';
@@ -294,7 +295,7 @@ describe('signer.canister', () => {
 				expect(payment).toHaveLength(1);
 				expect(payment).toEqual([{
 					PatronPaysIcrc2Cycles: {
-						owner: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
+						owner: Principal.fromText(BACKEND_CANISTER_ID),
 						subaccount: []
 					}
 				}]);
