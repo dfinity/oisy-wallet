@@ -7,11 +7,10 @@ import type {
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
-import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
+import { BACKEND_CANISTER_PRINCIPAL } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
 import { Canister, createServices } from '@dfinity/utils';
 import {
 	mapSignerCanisterBtcError,
@@ -74,7 +73,7 @@ export class SignerCanister extends Canister<SignerService> {
 		const response = await eth_address_of_caller([
 			{
 				PatronPaysIcrc2Cycles: {
-					owner: Principal.fromText(BACKEND_CANISTER_ID),
+					owner: BACKEND_CANISTER_PRINCIPAL,
 					subaccount: []
 				}
 			}
