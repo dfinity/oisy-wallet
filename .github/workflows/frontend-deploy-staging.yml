@@ -10,7 +10,31 @@ jobs:
   deploy-staging:
     runs-on: ubuntu-latest
 
+    env:
+      VITE_ETHERSCAN_API_KEY: ${{ secrets.VITE_ETHERSCAN_API_KEY }}
+      VITE_INFURA_API_KEY: ${{ secrets.VITE_INFURA_API_KEY }}
+      VITE_ALCHEMY_API_KEY: ${{ secrets.VITE_ALCHEMY_API_KEY }}
+      VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID }}
+      VITE_OISY_URL: ${{ secrets.VITE_OISY_URL }}
+      VITE_AIRDROP: ${{ secrets.VITE_AIRDROP }}
+      VITE_AIRDROP_COMPLETED: ${{ secrets.VITE_AIRDROP_COMPLETED }}
+      VITE_COINGECKO_API_URL: ${{ secrets.VITE_COINGECKO_API_URL }}
+      VITE_COINGECKO_API_KEY: ${{ secrets.VITE_COINGECKO_API_KEY }}
+      VITE_JUNO_SATELLITE_ID: ${{ secrets.VITE_JUNO_SATELLITE_ID }}
+      VITE_JUNO_ORBITER_ID: ${{ secrets.VITE_JUNO_ORBITER_ID }}
+      VITE_POUH_ENABLED: ${{ secrets.VITE_POUH_ENABLED }}
+      VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS }}
+      VITE_AUTH_DERIVATION_ORIGIN: ${{ secrets.VITE_AUTH_DERIVATION_ORIGIN }}
+      VITE_NETWORK_BITCOIN_ENABLED: ${{ secrets.VITE_NETWORK_BITCOIN_ENABLED }}
+
     steps:
+
+      - name: Fail if branch is not main
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: |
+          echo "This workflow can only be manually triggered with workflow_dispatch on the main branch"
+          exit 1
+
       - name: Checkout
         uses: actions/checkout@v4
 
