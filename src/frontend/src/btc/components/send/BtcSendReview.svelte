@@ -18,4 +18,4 @@
 		}) || invalidAmount(amount);
 </script>
 
-<SendReview {source} {amount} {destination} disabled={invalid} />
+<SendReview on:icBack on:icSend {source} {amount} {destination} disabled={invalid} />
