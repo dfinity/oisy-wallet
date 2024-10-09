@@ -14,7 +14,7 @@
 </script>
 
 <header
-	class="z-1 flex w-full max-w-screen-2.5xl flex-row items-center justify-between gap-y-5 px-4 pt-6 sm:px-8"
+	class="z-1 relative flex w-full max-w-screen-2.5xl flex-row items-center justify-between gap-y-5 px-4 pt-6 sm:px-8"
 	class:lg:absolute={$authSignedIn}
 	class:lg:inset-x-0={$authSignedIn}
 >

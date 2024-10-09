@@ -6,7 +6,7 @@
 	import Modals from '$lib/components/core/Modals.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
-	import { authNotSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteSettings, isRouteTransactions } from '$lib/utils/nav.utils';
@@ -21,7 +21,13 @@
 	$: token.set($pageToken);
 </script>
 
-<div class="min-h-[640px] md:flex md:h-full md:flex-col" class:overflow-hidden={$authNotSignedIn}>
+<div
+	class="relative min-h-[640px] md:flex md:h-full md:flex-col"
+	class:overflow-hidden={$authNotSignedIn}
+	class:flex={$authSignedIn}
+	class:h-full={$authSignedIn}
+	class:flex-col={$authSignedIn}
+>
 	<Header back={route === 'settings'} />
 
 	<AuthGuard>
