@@ -293,13 +293,15 @@ describe('signer.canister', () => {
 			const response = mockEthAddress;
 			service.eth_address_of_caller.mockImplementation(async (payment) => {
 				expect(payment).toHaveLength(1);
-				expect(payment).toEqual([{
-					PatronPaysIcrc2Cycles: {
-						owner: Principal.fromText(BACKEND_CANISTER_ID),
-						subaccount: []
+				expect(payment).toEqual([
+					{
+						PatronPaysIcrc2Cycles: {
+							owner: Principal.fromText(BACKEND_CANISTER_ID),
+							subaccount: []
+						}
 					}
-				}]);
-				return {Ok: response};
+				]);
+				return { Ok: response };
 			});
 			const { getEthAddress } = await createSignerCanister({
 				serviceOverride: service

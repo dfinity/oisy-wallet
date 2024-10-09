@@ -11,9 +11,9 @@ import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
+import { Principal } from '@dfinity/principal';
 import { Canister, createServices } from '@dfinity/utils';
 import { mapSignerCanisterBtcError, mapSignerCanisterGetEthAddressError } from './signer.errors';
-import { Principal } from '@dfinity/principal';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
