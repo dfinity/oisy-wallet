@@ -11,6 +11,7 @@
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
 	import { erc20ToCkErc20Enabled, ethToCkETHEnabled } from '$icp-eth/derived/cketh.derived';
 	import Buy from '$lib/components/buy/Buy.svelte';
+	import Lab from '$lib/components/lab/Lab.svelte';
 	import Receive from '$lib/components/receive/Receive.svelte';
 	import Send from '$lib/components/send/Send.svelte';
 	import HeroButtonGroup from '$lib/components/ui/HeroButtonGroup.svelte';
@@ -71,5 +72,7 @@
 		{/if}
 
 		<Buy />
+
+		<Lab />
 	</HeroButtonGroup>
 </div>

@@ -558,6 +558,36 @@ interface I18nAbout {
 	};
 }
 
+interface I18nSigner {
+	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
+	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
+	permissions: {
+		text: {
+			title: string;
+			the_dapp_is_requesting: string;
+			your_wallet_address: string;
+			icrc27_accounts: string;
+			icrc49_call_canister: string;
+		};
+		error: { no_confirm_callback: string };
+	};
+	origin: { text: { request_from: string; invalid_origin: string }; alt: { link_to_dapp: string } };
+	consent_message: {
+		text: { loading: string };
+		error: { no_approve_callback: string; no_reject_callback: string; retrieve: string };
+	};
+	call_canister: {
+		text: {
+			processing: string;
+			executed: string;
+			close_window: string;
+			error: string;
+			try_again: string;
+		};
+		error: { cannot_call: string };
+	};
+}
+
 interface I18n {
 	lang: Languages;
 	core: I18nCore;
@@ -580,4 +610,5 @@ interface I18n {
 	transaction: I18nTransaction;
 	transactions: I18nTransactions;
 	about: I18nAbout;
+	signer: I18nSigner;
 }
