@@ -75,7 +75,7 @@ is_mainnet() {
   : "Note: Mainnet deployments include non-production canisters on mainnet.  These should return 0."
   : "      Anything deployed to a local dfx instance or a devenv is not on mainnet, so should return 1."
   : TODO: Add support for devenv
-  [[ "$NETWORK" == "local" ]]
+  [[ "$NETWORK" != "local" ]]
 }
 top_up() {
   : Tops up a cycles account
