@@ -4,7 +4,7 @@
 	export let button: HTMLButtonElement | undefined = undefined;
 	export let colorStyle: ButtonColorStyle = 'tertiary';
 	export let testId: string | undefined = undefined;
-	export let ariaLabel: string | undefined = undefined;
+	export let ariaLabel: string;
 </script>
 
 <button
