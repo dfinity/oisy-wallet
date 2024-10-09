@@ -4,12 +4,13 @@
 	import { ZERO } from '$lib/constants/app.constants';
 	import type { TokenUi } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { TOKEN_BALANCE } from '$lib/constants/test-ids.constants';
 
 	export let token: TokenUi;
 </script>
 
 <TokenBalanceSkeleton {token}>
-	<output class="break-all">
+	<output class="break-all" data-tid={`${TOKEN_BALANCE}-${token.symbol}`}>
 		{#if nonNullish(token.balance)}
 			{formatToken({
 				value: token.balance,
