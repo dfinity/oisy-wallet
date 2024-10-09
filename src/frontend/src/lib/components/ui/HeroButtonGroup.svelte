@@ -1,6 +1,3 @@
-<div
-	role="toolbar"
-	class="flex flex-row flex-1 justify-between gap-4"
->
+<div role="toolbar" class="flex flex-1 flex-row justify-between gap-4">
 	<slot />
 </div>
