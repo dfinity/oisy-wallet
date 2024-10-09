@@ -127,7 +127,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { use_with_caution: string; learn_more_about_erc20_icp: string };
+	text: { learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
