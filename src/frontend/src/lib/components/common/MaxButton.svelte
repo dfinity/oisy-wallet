@@ -8,7 +8,7 @@
 	data-tid="max-button"
 	type="button"
 	on:click|preventDefault
-	class="font-medium text-blue hover:text-dark-blue active:text-dark-blue"
+	class="font-medium text-primary hover:text-inherit active:text-inherit"
 	{disabled}
 	class:opacity-50={disabled}
 >
