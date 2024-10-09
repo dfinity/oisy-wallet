@@ -70,17 +70,19 @@ top_up_mainnet() {
   : "Tops up a cycles account on mainnet or similar, where cycles cannot be magicked out of nowhere."
   dfx cycles transfer "$ACCOUNT" "$CYCLES" --network "$NETWORK"
 }
-is_test_env() {
-  : "Checks whether this is a test environment."
+is_mainnet() {
+  : "Checks whether this is running on mainnet."
+  : "Note: Mainnet deployments include non-production canisters on mainnet.  These should return 0."
+  : "      Anything deployed to a local dfx instance or a devenv is not on mainnet, so should return 1."
   : TODO: Add support for devenv
   [[ "$NETWORK" == "local" ]]
 }
 top_up() {
   : Tops up a cycles account
-  if is_test_env; then
-    top_up_local
-  else
+  if is_mainnet; then
     top_up_mainnet
+  else
+    top_up_local
   fi
 }
 destination_balance() {
