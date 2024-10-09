@@ -70,16 +70,13 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await eth_address([
-			{},
-			[
-				{
-					PatronPaysIcrc2Cycles: {
-						owner: BACKEND_CANISTER_PRINCIPAL,
-						subaccount: []
-					}
+		const response = await eth_address({ principal: [] }, [
+			{
+				PatronPaysIcrc2Cycles: {
+					owner: BACKEND_CANISTER_PRINCIPAL,
+					subaccount: []
 				}
-			]
+			}
 		]);
 
 		if ('Err' in response) {

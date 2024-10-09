@@ -241,16 +241,13 @@ describe('signer.canister', () => {
 
 			await getEthAddress();
 
-			expect(spy).toHaveBeenNthCalledWith(1, [
-				{},
-				[
-					{
-						PatronPaysIcrc2Cycles: {
-							owner: Principal.fromText(BACKEND_CANISTER_ID),
-							subaccount: []
-						}
+			expect(spy).toHaveBeenNthCalledWith(1, { principal: [] }, [
+				{
+					PatronPaysIcrc2Cycles: {
+						owner: Principal.fromText(BACKEND_CANISTER_ID),
+						subaccount: []
 					}
-				]
+				}
 			]);
 		});
 
