@@ -1,4 +1,5 @@
 import type {
+	EthAddressResponse,
 	RejectionCode_1,
 	SignRequest,
 	_SERVICE as SignerService
@@ -10,6 +11,7 @@ import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockedAgent } from '$tests/mocks/agents.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -216,11 +218,10 @@ describe('signer.canister', () => {
 	});
 
 	describe('getEthAddress', () => {
-		const mockEthAddress = '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000';
+		const mockResponseAddress: EthAddressResponse = { address: mockEthAddress };
 
 		it('returns correct ETH address', async () => {
-			const response = mockEthAddress;
-			service.eth_address_of_caller.mockResolvedValue({ Ok: response });
+			service.eth_address_of_caller.mockResolvedValue({ Ok: mockResponseAddress });
 
 			const { getEthAddress } = await createSignerCanister({
 				serviceOverride: service
@@ -228,7 +229,26 @@ describe('signer.canister', () => {
 
 			const res = await getEthAddress();
 
-			expect(res).toEqual(response);
+			expect(res).toEqual(mockResponseAddress.address);
+		});
+
+		it('should request a payment for the backend canister.', async () => {
+			const spy = service.eth_address_of_caller.mockResolvedValue({ Ok: mockResponseAddress });
+
+			const { getEthAddress } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			await getEthAddress();
+
+			expect(spy).toHaveBeenNthCalledWith(1, [
+				{
+					PatronPaysIcrc2Cycles: {
+						owner: Principal.fromText(BACKEND_CANISTER_ID),
+						subaccount: []
+					}
+				}
+			]);
 		});
 
 		it('should throw an error if eth_address_of_caller throws', async () => {
@@ -287,29 +307,6 @@ describe('signer.canister', () => {
 			await expect(getEthAddress()).rejects.toThrow(
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
 			);
-		});
-
-		it('should provide a payment type', async () => {
-			const response = mockEthAddress;
-			service.eth_address_of_caller.mockImplementation(async (payment) => {
-				expect(payment).toHaveLength(1);
-				expect(payment).toEqual([
-					{
-						PatronPaysIcrc2Cycles: {
-							owner: Principal.fromText(BACKEND_CANISTER_ID),
-							subaccount: []
-						}
-					}
-				]);
-				return { Ok: response };
-			});
-			const { getEthAddress } = await createSignerCanister({
-				serviceOverride: service
-			});
-
-			const res = await getEthAddress();
-
-			expect(res).toEqual(response);
 		});
 	});
 
