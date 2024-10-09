@@ -29,7 +29,7 @@
 	});
 </script>
 
-<SendForm {source} token={$token} balance={$balance}>
+<SendForm on:icNext {source} token={$token} balance={$balance}>
 	<BtcSendDestination
 		slot="destination"
 		bind:destination
