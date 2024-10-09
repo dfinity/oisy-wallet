@@ -5,6 +5,7 @@ export const LOGOUT_BUTTON = 'logout-button';
 export const LOGIN_BUTTON = 'login-button';
 
 export const TOKEN_CARD = 'token-card';
+export const TOKEN_BALANCE = 'token-balance';
 
 export const ABOUT_WHAT_MODAL_OPEN_BUTTON = 'about-what-modal-open-button';
 export const ABOUT_WHAT_MODAL = 'about-what-modal';

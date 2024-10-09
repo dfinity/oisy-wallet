@@ -1,15 +1,12 @@
 @use '../mixins/media';
 @use '../mixins/button';
 
-button {
+button,
+a.as-button {
 	display: flex;
 	align-items: center;
 
 	gap: var(--padding-1_5x);
-
-	&:not([disabled]) {
-		cursor: pointer;
-	}
 
 	--button-border-radius: var(--border-radius-md);
 	border-radius: var(--button-border-radius);
@@ -22,6 +19,10 @@ button {
 	border: 1px solid transparent;
 
 	--button-padding: var(--padding-2x) var(--padding-3x);
+
+	&:not([disabled]) {
+		cursor: pointer;
+	}
 
 	&.primary,
 	&.secondary,
@@ -109,16 +110,22 @@ button {
 	}
 
 	&.tertiary {
+		background: var(--color-white);
+
+		&:hover {
+			color: var(--color-primary);
+		}
+
+		&:active {
+			background: var(--color-onahau);
+			color: currentColor;
+		}
+
 		&.link {
-			background: var(--color-white);
 			color: var(--color-primary);
 
 			&:hover {
 				color: var(--color-secondary);
-			}
-
-			&:active {
-				background: var(--color-onahau);
 			}
 		}
 	}
