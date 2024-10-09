@@ -2,11 +2,11 @@ import type { UserProfile } from '$declarations/backend/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { waitFor } from '@testing-library/svelte';
 import { beforeEach } from 'node:test';
 import { get } from 'svelte/store';
-import en from '../../mocks/i18n.mock';
-import { mockIdentity } from '../../mocks/identity.mock';
 
 vi.mock('$lib/api/backend.api');
 

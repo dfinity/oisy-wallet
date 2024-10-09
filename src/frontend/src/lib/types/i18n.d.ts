@@ -279,6 +279,7 @@ interface I18nSend {
 		no_identity_calculate_fee: string;
 		invalid_destination: string;
 		incompatible_token: string;
+		no_btc_network_id: string;
 	};
 }
 
