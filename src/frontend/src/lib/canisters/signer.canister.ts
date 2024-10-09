@@ -66,17 +66,20 @@ export class SignerCanister extends Canister<SignerService> {
 	};
 
 	getEthAddress = async (): Promise<EthAddress> => {
-		const { eth_address_of_caller } = this.caller({
+		const { eth_address } = this.caller({
 			certified: true
 		});
 
-		const response = await eth_address_of_caller([
-			{
-				PatronPaysIcrc2Cycles: {
-					owner: BACKEND_CANISTER_PRINCIPAL,
-					subaccount: []
+		const response = await eth_address([
+			{},
+			[
+				{
+					PatronPaysIcrc2Cycles: {
+						owner: BACKEND_CANISTER_PRINCIPAL,
+						subaccount: []
+					}
 				}
-			}
+			]
 		]);
 
 		if ('Err' in response) {
