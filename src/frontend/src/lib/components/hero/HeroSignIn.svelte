@@ -37,7 +37,7 @@
 		{#each infoList as { label, icon }}
 			<div class="flex items-center gap-4">
 				<div class="hidden md:block">
-					<svelte:component this={icon} class="hidden md:block" />
+					<svelte:component this={icon} />
 				</div>
 				{label}
 			</div>
