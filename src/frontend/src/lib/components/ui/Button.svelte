@@ -1,8 +1,10 @@
 <script lang="ts">
+	import type { ButtonColorStyle } from '$lib/types/style';
+
 	export let button: HTMLButtonElement | undefined = undefined;
 	export let testId: string | undefined = undefined;
 	export let ariaLabel: string;
-	export let colorStyle: 'primary' | 'secondary' = 'primary';
+	export let colorStyle: ButtonColorStyle = 'primary';
 	export let type: 'submit' | 'reset' | 'button' = 'submit';
 	export let disabled = false;
 	export let fullWidth = false;

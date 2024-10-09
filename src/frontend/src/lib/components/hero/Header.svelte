@@ -15,7 +15,7 @@
 </script>
 
 <header
-	class="z-1 relative grid max-w-screen-2.5xl grid-cols-2 items-center gap-y-5 px-4 sm:px-8"
+	class="z-1 relative grid w-full max-w-screen-2.5xl grid-cols-2 items-center gap-y-5 px-4 pt-6 sm:px-8"
 	class:sm:grid-cols-[1fr_auto_1fr]={$authSignedIn}
 	class:xl:grid-cols-[1fr_auto_1fr]={$authNotSignedIn}
 >

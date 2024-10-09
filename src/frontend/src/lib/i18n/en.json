@@ -41,7 +41,8 @@
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"submit_ticket": "Open the ticket submission form on GitHub to report an issue or request a feature"
+			"submit_ticket": "Report an issue or request a feature on GitHub",
+			"open_twitter": "Open the DFINITY X/Twitter feed"
 		}
 	},
 	"auth": {
@@ -65,7 +66,7 @@
 		"error": {
 			"no_internet_identity": "No internet identity.",
 			"invalid_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential. Please contact the issuer and request the credential again.",
-			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in Oisy: $error",
+			"error_validating_pouh_credential_oisy": "Sorry, but there was an error while validating the Humanity Credential in OISY: $error",
 			"error_validating_pouh_credential": "Sorry, but there was an error while validating the Humanity Credential.",
 			"error_requesting_pouh_credential": "Sorry, but there was an error while requesting the Humanity Credential.",
 			"missing_pouh_issuer_origin": "Sorry, but there was an error while requesting the Humanity Credential. The issuer origin is missing.",
@@ -171,7 +172,7 @@
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
-			"github_release": "Oisy release notes on GitHub"
+			"github_release": "OISY release notes on GitHub"
 		},
 		"error": {
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
@@ -624,7 +625,7 @@
 				"fully_on_chain": "<strong>Fully on-chain</strong><br>Not only the keys but the entire wallet application is <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">stored on chain</a> and served directly into users’ browsers from ICP. Therefore the entire wallet is secured by a decentralized trust model making it tamper-proof.",
 				"cross_device": "<strong>Cross-device</strong><br>Using <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.ic0.app/\">Internet Identity</a> means that $oisy_name can easily be used across all devices you have linked to a particular identity.",
 				"verifiable_credentials": "<strong>Compatible with verifiable credentials</strong><br>$oisy_name is designed to integrate with Internet Computer’s <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">verifiable credentials platform</a>. Users can access additional functionality, like airdrops, if they acquire credentials of a certain type.",
-				"open_source": "<strong>Open source</strong><br>Oisy is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organization’s 200 world-leading cryptographers and engineers."
+				"open_source": "<strong>Open source</strong><br>OISY is an <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://github.com/dfinity/oisy-wallet\">open-source project</a> lead by a dedicated team within the <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">DFINITY foundation</a> supported by the organization’s 200 world-leading cryptographers and engineers."
 			}
 		}
 	}

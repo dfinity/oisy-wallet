@@ -1,6 +1,7 @@
 import type {
 	PaymentError,
-	GetAddressError as SignerCanisterBtcError
+	GetAddressError as SignerCanisterBtcError,
+	SendBtcError as SignerCanisterSendBtcError
 } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 
@@ -32,4 +33,19 @@ export const mapSignerCanisterBtcError = (err: SignerCanisterBtcError): Canister
 		return new SignerCanisterPaymentError(err.PaymentError);
 	}
 	return new CanisterInternalError('Unknown SignerCanisterBtcError');
+};
+
+export const mapSignerCanisterSendBtcError = (
+	err: SignerCanisterSendBtcError
+): CanisterInternalError => {
+	if ('InternalError' in err) {
+		return new CanisterInternalError(err.InternalError.msg);
+	}
+	if ('PaymentError' in err) {
+		return new SignerCanisterPaymentError(err.PaymentError);
+	}
+	if ('BuildP2wpkhError' in err) {
+		return new CanisterInternalError(JSON.stringify(err.BuildP2wpkhError));
+	}
+	return new CanisterInternalError('Unknown SignerCanisterSendBtcError');
 };
