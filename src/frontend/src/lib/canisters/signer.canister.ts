@@ -13,6 +13,7 @@ import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices } from '@dfinity/utils';
 import { mapSignerCanisterBtcError, mapSignerCanisterGetEthAddressError } from './signer.errors';
+import { Principal } from '@dfinity/principal';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
@@ -69,7 +70,7 @@ export class SignerCanister extends Canister<SignerService> {
 		const response = await eth_address_of_caller([
 			{
 				PatronPaysIcrc2Cycles: {
-					owner: BACKEND_CANISTER_ID,
+					owner: Principal.fromText(BACKEND_CANISTER_ID),
 					subaccount: []
 				}
 			}

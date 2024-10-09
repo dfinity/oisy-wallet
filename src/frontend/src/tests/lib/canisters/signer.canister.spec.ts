@@ -287,6 +287,27 @@ describe('signer.canister', () => {
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
 			);
 		});
+
+		it('should provide a payment type', async () => {
+			const response = mockEthAddress;
+			service.eth_address_of_caller.mockImplementation(async (payment) => {
+				expect(payment).toHaveLength(1);
+				expect(payment).toEqual([{
+					PatronPaysIcrc2Cycles: {
+						owner: Principal.fromText('tdxud-2yaaa-aaaad-aadiq-cai'),
+						subaccount: []
+					}
+				}]);
+				return {Ok: response};
+			});
+			const { getEthAddress } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await getEthAddress();
+
+			expect(res).toEqual(response);
+		});
 	});
 
 	it('signs transaction', async () => {
