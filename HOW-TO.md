@@ -1,28 +1,28 @@
 # How-to
 
-This document provides valuable information regarding Oisy Wallet integration and features.
+This document provides valuable information regarding OISY Wallet integration and features.
 
 ## SNS Token Support
 
 The [SNS aggregator](https://3r4gx-wqaaa-aaaaq-aaaia-cai.icp0.io/) is used to pre-populate the list of available SNSes. This information is not fetched at runtime because it does not change frequently. Moreover, this approach is best suited for a smoother UI/UX experience.
 
-> Note: Some SNSes may not be enabled due to their related Index canister version being outdated and therefore not compatible with Oisy Wallet. If you wish to use these, contact the related project to propose an upgrade to their canister.
+> Note: Some SNSes may not be enabled due to their related Index canister version being outdated and therefore not compatible with OISY Wallet. If you wish to use these, contact the related project to propose an upgrade to their canister.
 
 See script [./script/buil.dsns.tokens.mjs](./script/buil.dsns.tokens.mjs) for more details.
 
 ## Custom ICRC Token Integration
 
-Oisy Wallet allows users to add custom [ICRC](https://internetcomputer.org/docs/current/developer-docs/defi/overview/#icrc-1-ledgers) tokens to their wallet. However, certain requirements must be met to ensure compatibility and security.
+OISY Wallet allows users to add custom [ICRC](https://internetcomputer.org/docs/current/developer-docs/defi/overview/#icrc-1-ledgers) tokens to their wallet. However, certain requirements must be met to ensure compatibility and security.
 
-This chapter outlines the necessary steps and considerations for integrating a custom token into Oisy Wallet.
+This chapter outlines the necessary steps and considerations for integrating a custom token into OISY Wallet.
 
 ### Requirements
 
-To add a custom token to Oisy Wallet, users must provide both a Ledger and Index canister ID. The Ledger canister ID is straightforward, representing the ledger where the token transactions are recorded. However, the Index canister ID is also required because Oisy Wallet does not index transactions and balances. Instead, Oisy reads balance and transactions from an indexer, the Index canister.
+To add a custom token to OISY Wallet, users must provide both a Ledger and Index canister ID. The Ledger canister ID is straightforward, representing the ledger where the token transactions are recorded. However, the Index canister ID is also required because OISY Wallet does not index transactions and balances. Instead, OISY reads balance and transactions from an indexer, the Index canister.
 
 ### Index Canister
 
-Custom tokens seeking compatibility with Oisy Wallet can choose one of the following options for the Index canister:
+Custom tokens seeking compatibility with OISY Wallet can choose one of the following options for the Index canister:
 
 1. Spin up an Index canister on mainnet using the index-ng WASM.
 
@@ -51,7 +51,7 @@ If opting for a custom canister, it must implement the following two endpoints: 
 
 It's important to note that although both functions are queries, for security reasons, they are called with both query and update.
 
-> Oisy uses the JavaScript library [@dfinity/ledger-icrc](https://github.com/dfinity/ic-js/tree/main/packages/ledger-icrc) to interact with the canister.
+> OISY uses the JavaScript library [@dfinity/ledger-icrc](https://github.com/dfinity/ic-js/tree/main/packages/ledger-icrc) to interact with the canister.
 
 #### Ledger ID
 
@@ -63,7 +63,7 @@ ledger_id : () -> (principal) query;
 
 #### Get balance and transactions
 
-This function allows querying of balance and transactions for a specific account. Oisy Wallet uses the principal provided by Internet Identity for the current account without a sub-account.
+This function allows querying of balance and transactions for a specific account. OISY Wallet uses the principal provided by Internet Identity for the current account without a sub-account.
 
 ```
 get_account_transactions : (GetAccountTransactionsArgs) -> (GetTransactionsResult) query;

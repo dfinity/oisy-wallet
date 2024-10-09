@@ -1,9 +1,9 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 
-export const btcAddress = 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7';
+export const mockBtcAddress = 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7';
 
-export const btcTransactionUi: BtcTransactionUi = {
+export const mockBtcTransactionUi: BtcTransactionUi = {
 	blockNumber: 123213,
 	from: 'bc1q3jlulk7pw9p5tjqcrwdec9a6vdaw9pqhw0wg4g',
 	id: 'e793cab7e155a0e8f825c4609548faf759c57715fecac587580a1d716bb2b89e',
@@ -14,7 +14,7 @@ export const btcTransactionUi: BtcTransactionUi = {
 	value: 126527n
 };
 
-export const btcTransaction: BitcoinTransaction = {
+export const mockBtcTransaction: BitcoinTransaction = {
 	hash: 'e793cab7e155a0e8f825c4609548faf759c57715fecac587580a1d716bb2b89e',
 	ver: 1,
 	vin_sz: 1,
