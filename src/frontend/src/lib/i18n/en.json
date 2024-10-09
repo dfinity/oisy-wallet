@@ -41,7 +41,8 @@
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
-			"submit_ticket": "Open the ticket submission form on GitHub to report an issue or request a feature"
+			"submit_ticket": "Report an issue or request a feature on GitHub",
+			"open_twitter": "Open the DFINITY X/Twitter feed"
 		}
 	},
 	"auth": {
@@ -147,7 +148,6 @@
 	},
 	"hero": {
 		"text": {
-			"use_with_caution": "This is an alpha version. Use with caution.",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},

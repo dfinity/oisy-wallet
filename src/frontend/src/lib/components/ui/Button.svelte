@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let colorStyle: 'primary' | 'secondary' = 'primary';
+	import type { ButtonColorStyle } from '$lib/types/style';
+
+	export let colorStyle: ButtonColorStyle = 'primary';
 	export let type: 'submit' | 'reset' | 'button' = 'submit';
 	export let disabled = false;
 	export let fullWidth = false;
