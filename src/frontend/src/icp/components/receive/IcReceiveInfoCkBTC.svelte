@@ -66,5 +66,5 @@
 		</ReceiveAddress>
 	{/if}
 
-	<ButtonDone fullWidth on:click={close} slot="toolbar" />
+	<ButtonDone on:click={close} slot="toolbar" />
 </ContentWithToolbar>
