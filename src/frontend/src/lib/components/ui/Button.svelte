@@ -12,8 +12,6 @@
 </script>
 
 <button
-	data-tid={testId}
-	aria-label={ariaLabel}
 	class={`${colorStyle} flex flex-1 text-center`}
 	class:padding-sm={paddingSmall}
 	class:w-full={fullWidth}
@@ -21,6 +19,8 @@
 	{type}
 	{disabled}
 	on:click
+	data-tid={testId}
+	aria-label={ariaLabel}
 >
 	<slot />
 </button>
