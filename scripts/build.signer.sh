@@ -37,6 +37,7 @@ download() {
   asset="$1"
   asset_url="${asset^^}_URL"
   asset_file="${asset^^}_FILE"
+  : 'If the asset file already exists, ask the user whether to overwrite it.'
   if test -e "${!asset_file}" && read -r -p "Overwrite existing ${!asset_file}? [y/N] " response && [[ "${response,,}" != y* ]]; then
     echo "Using existing signer $asset file."
   else
