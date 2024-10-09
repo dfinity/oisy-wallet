@@ -11,7 +11,7 @@ import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices } from '@dfinity/utils';
-import { mapSignerCanisterBtcError } from './signer.errors';
+import { mapSignerCanisterBtcError, mapSignerCanisterSendBtcError } from './signer.errors';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
@@ -114,7 +114,7 @@ export class SignerCanister extends Canister<SignerService> {
 		);
 
 		if ('Err' in response) {
-			throw mapSignerCanisterBtcError(response.Err);
+			throw mapSignerCanisterSendBtcError(response.Err);
 		}
 
 		return response.Ok;
