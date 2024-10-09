@@ -150,7 +150,7 @@
 				>{$i18n.core.text.back}</Button
 			>
 		{:else}
-			<ButtonDone type="button" on:click={modalStore.close} />
+			<ButtonDone on:click={modalStore.close} />
 		{/if}
 	</div>
 </ContentWithToolbar>
