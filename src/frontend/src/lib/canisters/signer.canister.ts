@@ -13,7 +13,11 @@ import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
 import { Canister, createServices } from '@dfinity/utils';
-import { mapSignerCanisterBtcError, mapSignerCanisterGetEthAddressError } from './signer.errors';
+import {
+	mapSignerCanisterBtcError,
+	mapSignerCanisterGetEthAddressError,
+	mapSignerCanisterSendBtcError
+} from './signer.errors';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
@@ -80,7 +84,11 @@ export class SignerCanister extends Canister<SignerService> {
 			throw mapSignerCanisterGetEthAddressError(response.Err);
 		}
 
-		return response.Ok;
+		const {
+			Ok: { address }
+		} = response;
+
+		return address;
 	};
 
 	signTransaction = ({ transaction }: { transaction: SignRequest }): Promise<string> => {
@@ -129,7 +137,7 @@ export class SignerCanister extends Canister<SignerService> {
 		);
 
 		if ('Err' in response) {
-			throw mapSignerCanisterBtcError(response.Err);
+			throw mapSignerCanisterSendBtcError(response.Err);
 		}
 
 		return response.Ok;
