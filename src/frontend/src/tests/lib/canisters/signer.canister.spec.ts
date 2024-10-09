@@ -1,10 +1,17 @@
-import type { _SERVICE as SignerService, SignRequest } from '$declarations/signer/signer.did';
+import type {
+	EthAddressResponse,
+	RejectionCode_1,
+	SignRequest,
+	_SERVICE as SignerService
+} from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
+import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockedAgent } from '$tests/mocks/agents.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mocks';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { type ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -82,6 +89,8 @@ describe('signer.canister', () => {
 		]
 	} as SendBtcParams;
 	const internalErrorResponse = { Err: { InternalError: { msg: 'Test error' } } };
+
+	// TODO: We should test the SignerCanisterPaymentError as currently there is no test that covers how all possible payment errors are parsed
 	const paymentErrorResponse = { Err: { PaymentError: { UnsupportedPaymentType: null } } };
 
 	beforeEach(() => {
@@ -208,31 +217,97 @@ describe('signer.canister', () => {
 		await expect(res).rejects.toThrow(mockResponseError);
 	});
 
-	it('returns correct ETH address', async () => {
-		const response = 'test-eth-address';
-		service.caller_eth_address.mockResolvedValue(response);
+	describe('getEthAddress', () => {
+		const mockResponseAddress: EthAddressResponse = { address: mockEthAddress };
 
-		const { getEthAddress } = await createSignerCanister({
-			serviceOverride: service
+		it('returns correct ETH address', async () => {
+			service.eth_address_of_caller.mockResolvedValue({ Ok: mockResponseAddress });
+
+			const { getEthAddress } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = await getEthAddress();
+
+			expect(res).toEqual(mockResponseAddress.address);
 		});
 
-		const res = await getEthAddress();
+		it('should request a payment for the backend canister.', async () => {
+			const spy = service.eth_address_of_caller.mockResolvedValue({ Ok: mockResponseAddress });
 
-		expect(res).toEqual(response);
-	});
+			const { getEthAddress } = await createSignerCanister({
+				serviceOverride: service
+			});
 
-	it('should throw an error if caller_eth_address throws', async () => {
-		service.caller_eth_address.mockImplementation(async () => {
-			throw mockResponseError;
+			await getEthAddress();
+
+			expect(spy).toHaveBeenNthCalledWith(1, [
+				{
+					PatronPaysIcrc2Cycles: {
+						owner: Principal.fromText(BACKEND_CANISTER_ID),
+						subaccount: []
+					}
+				}
+			]);
 		});
 
-		const { getEthAddress } = await createSignerCanister({
-			serviceOverride: service
+		it('should throw an error if eth_address_of_caller throws', async () => {
+			service.eth_address_of_caller.mockImplementation(async () => {
+				throw mockResponseError;
+			});
+
+			const { getEthAddress } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			await expect(getEthAddress()).rejects.toThrow(mockResponseError);
 		});
 
-		const res = getEthAddress();
+		const signingErrors = [
+			'NoError',
+			'CanisterError',
+			'SysTransient',
+			'DestinationInvalid',
+			'Unknown',
+			'SysFatal',
+			'CanisterReject'
+		];
 
-		await expect(res).rejects.toThrow(mockResponseError);
+		it.each(signingErrors)(
+			'should throw an error if eth_address_of_caller throws a SigningError for %s',
+			async (error) => {
+				const rejectionCode: RejectionCode_1 = {
+					[`${error}`]: null
+				} as RejectionCode_1;
+
+				const addOns = 'test';
+
+				const SigningError: [RejectionCode_1, string] = [rejectionCode, addOns];
+				const response = { SigningError };
+
+				service.eth_address_of_caller.mockResolvedValue({ Err: response });
+
+				const { getEthAddress } = await createSignerCanister({
+					serviceOverride: service
+				});
+
+				await expect(getEthAddress()).rejects.toThrow(
+					new CanisterInternalError(`Signing error: ${JSON.stringify(rejectionCode)} ${addOns}`)
+				);
+			}
+		);
+
+		it('should throw a SignerCanisterPaymentError for UnsupportedPaymentType error', async () => {
+			service.eth_address_of_caller.mockResolvedValue(paymentErrorResponse);
+
+			const { getEthAddress } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			await expect(getEthAddress()).rejects.toThrow(
+				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
+			);
+		});
 	});
 
 	it('signs transaction', async () => {
