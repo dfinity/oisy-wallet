@@ -52,7 +52,7 @@ ACCOUNT="$(dfx canister id "$ACCOUNT" --network "$NETWORK")"
 
 top_up_local() {
   : "Tops up a local or devenv cycles account using a cycles_depositor canister."
-  dfx wallet send "$(dfx canister id cycles_depositor)" "$cycles" --network "$NETWORK"
+  dfx wallet send "$(dfx canister id cycles_depositor)" "$CYCLES" --network "$NETWORK"
   dfx canister call cycles_depositor deposit --network "$NETWORK" '
 	(
 	  record {
@@ -61,14 +61,14 @@ top_up_local() {
 	      subaccount = null;
 	    };
 	    memo = null;
-	    cycles = '"$cycles"' : nat;
+	    cycles = '"$CYCLES"' : nat;
 	  },
 	)
 	'
 }
 top_up_mainnet() {
   : "Tops up a cycles account on mainnet or similar, where cycles cannot be magicked out of nowhere."
-  dfx cycles transfer "$ACCOUNT" "$cycles" --network "$NETWORK"
+  dfx cycles transfer "$ACCOUNT" "$CYCLES" --network "$NETWORK"
 }
 is_test_env() {
   : "Checks whether this is a test environment."
