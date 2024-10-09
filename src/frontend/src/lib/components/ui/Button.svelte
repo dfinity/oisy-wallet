@@ -5,7 +5,8 @@
 	export let type: 'submit' | 'reset' | 'button' = 'submit';
 	export let disabled = false;
 	export let fullWidth = false;
-	export let shrinkOnSmallScreens = false;
+	export let link = false;
+	export let paddingSmall = false;
 	export let testId: string | undefined = undefined;
 	export let ariaLabel: string | undefined = undefined;
 </script>
@@ -13,9 +14,10 @@
 <button
 	data-tid={testId}
 	aria-label={ariaLabel}
-	class={`${colorStyle} flex flex-1 text-center md:flex-row`}
-	class:flex-col={shrinkOnSmallScreens}
+	class={`${colorStyle} flex flex-1 text-center`}
+	class:padding-sm={paddingSmall}
 	class:w-full={fullWidth}
+	class:link
 	{type}
 	{disabled}
 	on:click

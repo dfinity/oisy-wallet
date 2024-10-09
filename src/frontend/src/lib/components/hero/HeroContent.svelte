@@ -26,7 +26,7 @@
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-brandeis-blue p-6 text-center text-white"
+	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[40px] bg-blue-ribbon p-6 text-center text-white"
 >
 	{#if summary}
 		<div
