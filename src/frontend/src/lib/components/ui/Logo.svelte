@@ -32,7 +32,7 @@
 </script>
 
 <div
-	class="flex items-center justify-center overflow-hidden ring-white rounded-full"
+	class="flex items-center justify-center overflow-hidden rounded-full ring-white"
 	class:bg-dust={color === 'dust' && !loaded}
 	class:bg-off-white={color === 'off-white' && !loaded}
 	class:bg-white={color === 'white' && !loaded}
