@@ -1,6 +1,14 @@
 //! Code for inetracting with the chain fusion signer.
-use crate::state::{CYCLES_LEDGER, SIGNER};
+use crate::{
+    read_config,
+    state::{CYCLES_LEDGER, SIGNER},
+};
+use bitcoin::{Address, CompressedPublicKey, Network};
 use candid::{CandidType, Deserialize, Nat, Principal};
+use ic_cdk::api::management_canister::{
+    bitcoin::BitcoinNetwork,
+    ecdsa::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgument},
+};
 use ic_cycles_ledger_client::{Account, ApproveArgs, ApproveError, Service as CyclesLedgerService};
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
@@ -81,4 +89,51 @@ pub fn principal2account(principal: &Principal) -> ByteBuf {
             )
         })
         .into()
+}
+
+/// Computes the public key of the specified principal.
+// TODO: Cache CFS pubkey and derive it offline as in [ckBTC minter](https://github.com/dfinity/ic/blob/35153c7cb7b9d1da60472ca7e94c693e418f87bd/rs/bitcoin/ckbtc/minter/src/address.rs#L101-L101)
+async fn cfs_ecdsa_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
+    let (ecdsa_key_name, maybe_cfs_canister_id) =
+        read_config(|s| (s.ecdsa_key_name.clone(), s.cfs_canister_id));
+    // As done in [CFS](https://github.com/dfinity/chain-fusion-signer/blob/26b683c6de9971fdbf7bd4cebc04d427d1753289/src/signer/canister/src/derivation_path.rs#L28)
+    let derivation_path = vec![vec![0 as u8], principal.as_slice().to_vec()];
+    let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
+    if let Ok((key,)) = ecdsa_public_key(EcdsaPublicKeyArgument {
+        canister_id: Some(cfs_canister_id),
+        derivation_path,
+        key_id: EcdsaKeyId {
+            curve: EcdsaCurve::Secp256k1,
+            name: ecdsa_key_name,
+        },
+    })
+    .await
+    {
+        Ok(key.public_key)
+    } else {
+        Err("Failed to get ecdsa public key".to_string())
+    }
+}
+
+fn transform_network(network: BitcoinNetwork) -> Network {
+    match network {
+        BitcoinNetwork::Mainnet => Network::Bitcoin,
+        BitcoinNetwork::Testnet => Network::Testnet,
+        BitcoinNetwork::Regtest => Network::Regtest,
+    }
+}
+
+/// Converts a public key to a P2PKH address.
+pub async fn btc_principal_to_p2wpkh_address(
+    network: BitcoinNetwork,
+    principal: &Principal,
+) -> Result<String, String> {
+    let ecdsa_pubkey = cfs_ecdsa_pubkey_of(principal)
+        .await
+        .map_err(|_| "Error getting ECDSA public key".to_string())?;
+    if let Ok(compressed_public_key) = CompressedPublicKey::from_slice(&ecdsa_pubkey) {
+        Ok(Address::p2wpkh(&compressed_public_key, transform_network(network)).to_string())
+    } else {
+        Err("Error getting P2WPKH from public key".to_string())
+    }
 }

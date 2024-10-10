@@ -25,6 +25,7 @@ pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
 shared = { path = "../shared" }
+bitcoin = { workspace = true }
 
 [dev-dependencies]
 lazy_static = { workspace = true }
