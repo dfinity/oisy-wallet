@@ -111,7 +111,7 @@ describe('signer.canister', () => {
 		expect(res).toEqual(address);
 		expect(service.btc_caller_address).toHaveBeenCalledWith(
 			{ network: btcParams.network, address_type: { P2WPKH: null } },
-			[]
+			[PATRON]
 		);
 	});
 
