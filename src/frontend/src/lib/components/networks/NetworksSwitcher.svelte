@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { quintOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import chainFusion from '$lib/assets/chain_fusion.svg';
 	import IconMorePlain from '$lib/components/icons/IconMorePlain.svelte';
@@ -8,6 +7,7 @@
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import { SLIDE_QUINT_OUT } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
@@ -53,10 +53,7 @@
 		</div>
 
 		{#if $testnetsEnabled}
-			<ul
-				class="mb-2 flex list-none flex-col gap-4 font-normal"
-				transition:slide={{ easing: quintOut, axis: 'y' }}
-			>
+			<ul class="mb-2 flex list-none flex-col gap-4 font-normal" transition:slide={SLIDE_QUINT_OUT}>
 				{#each $networksTestnets as network}
 					<li>
 						<Network {network} on:icSelected={dropdown.close} />

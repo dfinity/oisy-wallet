@@ -14,6 +14,7 @@
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalToken, modalTransaction } from '$lib/derived/modal.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
@@ -85,7 +86,7 @@
 
 <TransactionsSkeletons>
 	{#each sortedTransactionsUi as transaction (transaction.hash)}
-		<div transition:slide={{ duration: 250 }}>
+		<div transition:slide={SLIDE_DURATION}>
 			<Transaction {transaction} />
 		</div>
 	{/each}

@@ -6,6 +6,7 @@
 	import { BTC_DECIMALS } from '$env/tokens.btc.env';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatToken } from '$lib/utils/format.utils';
 
@@ -19,7 +20,7 @@
 </script>
 
 {#if nonNullish(bitcoinEstimatedFee)}
-	<div transition:slide={{ duration: 250 }}>
+	<div transition:slide={SLIDE_DURATION}>
 		<Value ref="kyt-fee">
 			<svelte:fragment slot="label">{$i18n.fee.text.estimated_btc}</svelte:fragment>
 

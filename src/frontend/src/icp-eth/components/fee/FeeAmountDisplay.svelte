@@ -3,6 +3,7 @@
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { fade, slide } from 'svelte/transition';
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionBalance } from '$lib/types/balance';
@@ -35,7 +36,7 @@
 	{feeSymbol}
 </div>
 {#if insufficientFeeFunds && nonNullish(balance)}
-	<p in:slide={{ duration: 250 }} class="text-cyclamen">
+	<p in:slide={SLIDE_DURATION} class="text-cyclamen">
 		{replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 			$balance: formatToken({
 				value: balance,
