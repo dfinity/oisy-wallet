@@ -6,8 +6,8 @@ import type {
 } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
+import { SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
-import { SIGNER_PAYMENT_TYPE } from '$lib/constants/app.constants';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockedAgent } from '$tests/mocks/agents.mock';
