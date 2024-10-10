@@ -312,6 +312,7 @@ interface I18nBuy {
 
 interface I18nTokens {
 	text: {
+		title: string;
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
