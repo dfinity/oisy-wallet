@@ -335,7 +335,7 @@ describe('signer.canister', () => {
 
 	it('calls personal sign', async () => {
 		const response = 'personal-sign';
-		service.personal_sign.mockResolvedValue(response);
+		service.eth_personal_sign.mockResolvedValue({ Ok: { signature: response } });
 
 		const { personalSign } = await createSignerCanister({
 			serviceOverride: service
@@ -344,11 +344,11 @@ describe('signer.canister', () => {
 		const res = await personalSign(personalSignParams);
 
 		expect(res).toEqual(response);
-		expect(service.personal_sign).toHaveBeenCalledWith(personalSignParams.message);
+		expect(service.eth_personal_sign).toHaveBeenCalledWith(personalSignParams, [PATRON]);
 	});
 
-	it('should throw an error if personal_sign throws', async () => {
-		service.personal_sign.mockImplementation(async () => {
+	it('should throw an error if eth_personal_sign throws', async () => {
+		service.eth_personal_sign.mockImplementation(async () => {
 			throw mockResponseError;
 		});
 

@@ -1,5 +1,6 @@
 import type {
 	BitcoinNetwork,
+	EthPersonalSignRequest,
 	EthSignTransactionRequest,
 	SendBtcResponse,
 	_SERVICE as SignerService
@@ -114,12 +115,22 @@ export class SignerCanister extends Canister<SignerService> {
 		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 
-	personalSign = ({ message }: { message: string }): Promise<string> => {
-		const { personal_sign } = this.caller({
+	personalSign = async ({ message }: { message: string }): Promise<string> => {
+		const { eth_personal_sign } = this.caller({
 			certified: true
 		});
 
-		return personal_sign(message);
+		let request: EthPersonalSignRequest = { message };
+		let response = await eth_personal_sign(request, [PATRON]);
+
+		if ('Ok' in response) {
+			const {
+				Ok: { signature }
+			} = response;
+			return signature;
+		}
+
+		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 
 	signPrehash = ({ hash }: { hash: string }): Promise<string> => {
