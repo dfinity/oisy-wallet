@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { exchangeInitialized } from '$lib/derived/exchange.derived';
 	import { combinedDerivedSortedNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { formatUSD } from '$lib/utils/format.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
@@ -8,7 +9,7 @@
 	$: totalUsd = sumTokensUiUsdBalance($combinedDerivedSortedNetworkTokensUi);
 </script>
 
-<span class="block">
+<span class="flex flex-col gap-2">
 	<output
 		class={`break-all text-5xl font-bold ${totalUsd === 0 ? 'opacity-50' : 'opacity-100'} mt-8 inline-block`}
 	>
@@ -18,4 +19,7 @@
 			<span class="animate-pulse">{formatUSD({ value: 0 })}</span>
 		{/if}
 	</output>
+	<span class="text-xl font-medium text-onahau">
+		{$i18n.hero.text.available_balance}
+	</span>
 </span>

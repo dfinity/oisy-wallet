@@ -20,7 +20,7 @@ print_help() {
 
 DFX_NETWORK="${DFX_NETWORK:-local}"
 
-SIGNER_RELEASE="v0.2.2"
+SIGNER_RELEASE="v0.2.5"
 SIGNER_RELEASE_URL="https://github.com/dfinity/chain-fusion-signer/releases/download/${SIGNER_RELEASE}"
 CANDID_URL="${SIGNER_RELEASE_URL}/signer.did"
 WASM_URL="${SIGNER_RELEASE_URL}/signer.wasm.gz"
@@ -29,23 +29,31 @@ CANDID_FILE="$(jq -r .canisters.signer.candid dfx.json)"
 WASM_FILE="$(jq -r .canisters.signer.wasm dfx.json)"
 ARG_FILE="$(jq -r .canisters.signer.init_arg_file dfx.json)"
 
+download() {
+  : 'Downloads a URL to a given file.'
+  : '* With argument x, the filename is $X_FILE and the URL is $X_URL'
+  : '* If the file already exists, the user is prompted whether to overwrite, keeping the existing file by default.'
+  local asset asset_url asset_file response
+  asset="$1"
+  asset_url="${asset^^}_URL"
+  asset_file="${asset^^}_FILE"
+  : 'If the asset file already exists, ask the user whether to overwrite it.'
+  if test -e "${!asset_file}" && read -r -p "Overwrite existing ${!asset_file}? [y/N] " response && [[ "${response,,}" != y* ]]; then
+    echo "Using existing signer $asset file."
+  else
+    echo Downloading ${!asset_url} "-->" ${!asset_file}
+    mkdir -p "$(dirname "${!asset_file}")"
+    curl -sSL "${!asset_url}" >"${!asset_file}"
+  fi
+}
+
 ####
 # Downloads the candid file, if it does not exist already.
-if test -e "$CANDID_FILE"; then
-  echo "Using existing signer candid file"
-else
-  mkdir -p "$(dirname "$CANDID_FILE")"
-  curl -sSL "$CANDID_URL" >"$CANDID_FILE"
-fi
+download candid
 
 ####
 # Downloads the Wasm file, if it does not exist already.
-if test -e "$WASM_FILE"; then
-  echo "Using existing signer Wasm file"
-else
-  mkdir -p "$(dirname "$WASM_FILE")"
-  curl -sSL "$WASM_URL" >"$WASM_FILE"
-fi
+download wasm
 
 ####
 # Computes the install args, overwriting any existing args file.

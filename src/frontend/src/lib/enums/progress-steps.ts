@@ -47,6 +47,13 @@ export enum ProgressStepsSendIc {
 	DONE = 'done'
 }
 
+// TODO: extend additional steps when implementing btc-send services
+export enum ProgressStepsSendBtc {
+	INITIALIZATION = 'initialization',
+	SEND = 'send',
+	RELOAD = 'reload'
+}
+
 export enum ProgressStepsUpdateBalanceCkBtc {
 	INITIALIZATION = 'initialization',
 	RETRIEVE = 'retrieve',
