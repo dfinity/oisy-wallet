@@ -1,5 +1,6 @@
 import type {
 	BitcoinNetwork,
+	GetBalanceRequest,
 	SendBtcResponse,
 	SignRequest,
 	_SERVICE as SignerService
@@ -7,7 +8,7 @@ import type {
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
-import { BACKEND_CANISTER_PRINCIPAL } from '$lib/constants/app.constants';
+import { SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -56,7 +57,12 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, []);
+		const request: GetBalanceRequest = {
+			network,
+			address_type: { P2WPKH: null },
+			min_confirmations: []
+		};
+		const response = await btc_caller_balance(request, []);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterBtcError(response.Err);
@@ -66,18 +72,13 @@ export class SignerCanister extends Canister<SignerService> {
 	};
 
 	getEthAddress = async (): Promise<EthAddress> => {
-		const { eth_address_of_caller } = this.caller({
+		const { eth_address } = this.caller({
 			certified: true
 		});
 
-		const response = await eth_address_of_caller([
-			{
-				PatronPaysIcrc2Cycles: {
-					owner: BACKEND_CANISTER_PRINCIPAL,
-					subaccount: []
-				}
-			}
-		]);
+		/* Note: `eth_address` gets the Ethereum address of a given principal, defaulting to the caller if not provided. */
+		/*       In OISY, we derive the ETH address from the caller. Therefore, we are not providing a principal as an argument. */
+		const response = await eth_address({ principal: [] }, [SIGNER_PAYMENT_TYPE]);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterGetEthAddressError(response.Err);

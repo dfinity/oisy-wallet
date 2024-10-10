@@ -6,8 +6,8 @@ import type {
 } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
+import { SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
-import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockedAgent } from '$tests/mocks/agents.mock';
@@ -170,7 +170,7 @@ describe('signer.canister', () => {
 
 		expect(res).toEqual(balance);
 		expect(service.btc_caller_balance).toHaveBeenCalledWith(
-			{ network: btcParams.network, address_type: { P2WPKH: null } },
+			{ network: btcParams.network, address_type: { P2WPKH: null }, min_confirmations: [] },
 			[]
 		);
 	});
@@ -221,7 +221,7 @@ describe('signer.canister', () => {
 		const mockResponseAddress: EthAddressResponse = { address: mockEthAddress };
 
 		it('returns correct ETH address', async () => {
-			service.eth_address_of_caller.mockResolvedValue({ Ok: mockResponseAddress });
+			service.eth_address.mockResolvedValue({ Ok: mockResponseAddress });
 
 			const { getEthAddress } = await createSignerCanister({
 				serviceOverride: service
@@ -233,7 +233,7 @@ describe('signer.canister', () => {
 		});
 
 		it('should request a payment for the backend canister.', async () => {
-			const spy = service.eth_address_of_caller.mockResolvedValue({ Ok: mockResponseAddress });
+			const spy = service.eth_address.mockResolvedValue({ Ok: mockResponseAddress });
 
 			const { getEthAddress } = await createSignerCanister({
 				serviceOverride: service
@@ -241,18 +241,11 @@ describe('signer.canister', () => {
 
 			await getEthAddress();
 
-			expect(spy).toHaveBeenNthCalledWith(1, [
-				{
-					PatronPaysIcrc2Cycles: {
-						owner: Principal.fromText(BACKEND_CANISTER_ID),
-						subaccount: []
-					}
-				}
-			]);
+			expect(spy).toHaveBeenNthCalledWith(1, { principal: [] }, [SIGNER_PAYMENT_TYPE]);
 		});
 
-		it('should throw an error if eth_address_of_caller throws', async () => {
-			service.eth_address_of_caller.mockImplementation(async () => {
+		it('should throw an error if eth_address throws', async () => {
+			service.eth_address.mockImplementation(async () => {
 				throw mockResponseError;
 			});
 
@@ -274,7 +267,7 @@ describe('signer.canister', () => {
 		];
 
 		it.each(signingErrors)(
-			'should throw an error if eth_address_of_caller throws a SigningError for %s',
+			'should throw an error if eth_address throws a SigningError for %s',
 			async (error) => {
 				const rejectionCode: RejectionCode_1 = {
 					[`${error}`]: null
@@ -285,7 +278,7 @@ describe('signer.canister', () => {
 				const SigningError: [RejectionCode_1, string] = [rejectionCode, addOns];
 				const response = { SigningError };
 
-				service.eth_address_of_caller.mockResolvedValue({ Err: response });
+				service.eth_address.mockResolvedValue({ Err: response });
 
 				const { getEthAddress } = await createSignerCanister({
 					serviceOverride: service
@@ -298,7 +291,7 @@ describe('signer.canister', () => {
 		);
 
 		it('should throw a SignerCanisterPaymentError for UnsupportedPaymentType error', async () => {
-			service.eth_address_of_caller.mockResolvedValue(paymentErrorResponse);
+			service.eth_address.mockResolvedValue(paymentErrorResponse);
 
 			const { getEthAddress } = await createSignerCanister({
 				serviceOverride: service

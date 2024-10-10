@@ -148,6 +148,8 @@
 	},
 	"hero": {
 		"text": {
+			"available_balance": "Available balance",
+			"use_with_caution": "This is an alpha version. Use with caution.",
 			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
 		}
 	},
@@ -279,7 +281,8 @@
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
-			"cketh_certified": "Please wait until the ckETH parameters have been certified."
+			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
+			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -315,7 +318,8 @@
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
 			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
-			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network."
+			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network.",
+			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later."
 		}
 	},
 	"convert": {
@@ -400,7 +404,7 @@
 		"manage": {
 			"text": {
 				"title": "Manage tokens",
-				"your_tokens": "Manage your tokens",
+				"manage_list": "Manage list",
 				"do_not_see_import": "Don’t see your token? Import",
 				"clear_filter": "Clear filter",
 				"manage_for_network": "Managing tokens for $network",

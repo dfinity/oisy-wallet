@@ -9,6 +9,7 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -149,7 +150,7 @@
 				>{$i18n.core.text.back}</Button
 			>
 		{:else}
-			<Button fullWidth type="button" on:click={modalStore.close}>{$i18n.core.text.done}</Button>
+			<ButtonDone on:click={modalStore.close} />
 		{/if}
 	</div>
 </ContentWithToolbar>
