@@ -51,7 +51,7 @@ type EthAddressRequest = record { "principal" : opt principal };
 type EthAddressResponse = record { address : text };
 type EthPersonalSignRequest = record { message : text };
 type EthPersonalSignResponse = record { signature : text };
-type EthSignPrehashRequest = record { message : text };
+type EthSignPrehashRequest = record { hash : text };
 type EthSignPrehashResponse = record { signature : text };
 type EthSignTransactionRequest = record {
   to : text;
@@ -72,6 +72,11 @@ type GetAddressRequest = record {
   address_type : BitcoinAddressType;
 };
 type GetAddressResponse = record { address : text };
+type GetBalanceRequest = record {
+  network : BitcoinNetwork;
+  address_type : BitcoinAddressType;
+  min_confirmations : opt nat32;
+};
 type GetBalanceResponse = record { balance : nat64 };
 type HttpRequest = record {
   url : text;
@@ -203,7 +208,7 @@ type WithdrawFromError = variant {
 };
 service : (Arg) -> {
   btc_caller_address : (GetAddressRequest, opt PaymentType) -> (Result);
-  btc_caller_balance : (GetAddressRequest, opt PaymentType) -> (Result_1);
+  btc_caller_balance : (GetBalanceRequest, opt PaymentType) -> (Result_1);
   btc_caller_send : (SendBtcRequest, opt PaymentType) -> (Result_2);
   caller_eth_address : () -> (text);
   config : () -> (Config) query;

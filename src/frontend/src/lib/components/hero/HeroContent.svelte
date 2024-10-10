@@ -69,7 +69,7 @@
 	{#if actions}
 		<div
 			transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
-			class="flex w-full justify-center"
+			class="flex w-full justify-center text-left"
 		>
 			<Actions />
 		</div>

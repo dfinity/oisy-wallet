@@ -1,5 +1,6 @@
 import type {
 	BitcoinNetwork,
+	GetBalanceRequest,
 	SendBtcResponse,
 	SignRequest,
 	_SERVICE as SignerService
@@ -56,7 +57,12 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, []);
+		const request: GetBalanceRequest = {
+			network,
+			address_type: { P2WPKH: null },
+			min_confirmations: []
+		};
+		const response = await btc_caller_balance(request, []);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterBtcError(response.Err);
@@ -71,6 +77,7 @@ export class SignerCanister extends Canister<SignerService> {
 		});
 
 		/* Note: `eth_address` gets the Ethereum address of a given principal, defaulting to the caller if not provided. */
+		/*       In OISY, we derive the ETH address from the caller. Therefore, we are not providing a principal as an argument. */
 		const response = await eth_address({ principal: [] }, [
 			{
 				PatronPaysIcrc2Cycles: {
