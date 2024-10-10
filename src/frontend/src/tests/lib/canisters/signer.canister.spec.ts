@@ -7,7 +7,7 @@ import type {
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
-import { BACKEND_CANISTER_ID, PATRON } from '$lib/constants/app.constants';
+import { PATRON } from '$lib/constants/app.constants';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockedAgent } from '$tests/mocks/agents.mock';
@@ -241,14 +241,7 @@ describe('signer.canister', () => {
 
 			await getEthAddress();
 
-			expect(spy).toHaveBeenNthCalledWith(1, { principal: [] }, [
-				{
-					PatronPaysIcrc2Cycles: {
-						owner: Principal.fromText(BACKEND_CANISTER_ID),
-						subaccount: []
-					}
-				}
-			]);
+			expect(spy).toHaveBeenNthCalledWith(1, { principal: [] }, [PATRON]);
 		});
 
 		it('should throw an error if eth_address throws', async () => {
