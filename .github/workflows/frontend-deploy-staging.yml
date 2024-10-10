@@ -67,7 +67,11 @@ jobs:
             echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
-            echo "DFX_DEPLOY_KEY=${{ secrets.DFX_DEPLOY_KEY_STAGING }}" >> $GITHUB_ENV
+            {
+              echo 'DFX_DEPLOY_KEY<<EOF'
+              echo "${{ secrets.DFX_DEPLOY_KEY_STAGING }}"
+              echo 'EOF'
+            } >> $GITHUB_ENV
           elif [ "$NETWORK" == "beta" ]; then
             echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}" >> $GITHUB_ENV
             echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_BETA }}" >> $GITHUB_ENV
@@ -86,7 +90,11 @@ jobs:
             echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_BETA }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}" >> $GITHUB_ENV
-            echo "DFX_DEPLOY_KEY=${{ secrets.DFX_DEPLOY_KEY_BETA }}" >> $GITHUB_ENV
+            {
+              echo 'DFX_DEPLOY_KEY<<EOF'
+              echo "${{ secrets.DFX_DEPLOY_KEY_BETA }}"
+              echo 'EOF'
+            } >> $GITHUB_ENV
           elif [ "$NETWORK" == "prod" ]; then
             echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_PROD }}" >> $GITHUB_ENV
             echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_PROD }}" >> $GITHUB_ENV
@@ -105,7 +113,11 @@ jobs:
             echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_PROD }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_PROD }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_PROD }}" >> $GITHUB_ENV
-            echo "DFX_DEPLOY_KEY=${{ secrets.DFX_DEPLOY_KEY_PROD }}" >> $GITHUB_ENV
+            {
+              echo 'DFX_DEPLOY_KEY<<EOF'
+              echo "${{ secrets.DFX_DEPLOY_KEY_PROD }}"
+              echo 'EOF'
+            } >> $GITHUB_ENV
           fi
 
       - name: Fail if no Identity is provided
