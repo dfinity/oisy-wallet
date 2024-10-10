@@ -62,7 +62,6 @@
 			{currentStep}
 			{formCancelAction}
 			bind:destination
-			bind:networkId
 			bind:amount
 			bind:sendProgressStep
 			on:icBack
