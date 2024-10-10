@@ -349,7 +349,7 @@
 			"alternativeName": "EstateDAO",
 			"url": "https://wbdy5-yyaaa-aaaap-abysq-cai.icp0.io/"
 		},
-		"indexCanisterVersion": "up-to-date"
+		"indexCanisterVersion": "outdated"
 	},
 	{
 		"ledgerCanisterId": "k45jy-aiaaa-aaaaq-aadcq-cai",
