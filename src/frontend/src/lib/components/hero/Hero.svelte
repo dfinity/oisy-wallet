@@ -9,7 +9,7 @@
 </script>
 
 <article
-	class="relative flex flex-col items-center rounded-lg pb-6 pt-10"
+	class="relative flex flex-col items-center rounded-lg pb-6"
 	transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
 >
 	<HeroContent {usdTotal} {summary} {back} />
