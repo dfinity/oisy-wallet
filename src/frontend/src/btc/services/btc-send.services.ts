@@ -1,24 +1,37 @@
 import type { UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
+import type { SendBtcResponse } from '$declarations/signer/signer.did';
 import { selectUserUtxosFee } from '$lib/api/backend.api';
+import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
+import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import type { BtcAddress } from '$lib/types/address';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 
 const DEFAULT_MIN_CONFIRMATIONS = 6;
+
+type BtcSendServiceParams<T = unknown> = {
+	identity: Identity;
+	network: BitcoinNetwork;
+	amount: number;
+	progress: (step: ProgressStepsSendBtc) => void;
+} & T;
+
+type SendBtcParams = BtcSendServiceParams<{
+	destination: BtcAddress;
+	utxosFee: UtxosFee;
+}>;
 
 export const selectUtxosFee = async ({
 	identity,
 	sourceAddress,
 	network,
 	amount
-}: {
-	identity: Identity;
-	network: BitcoinNetwork;
+}: BtcSendServiceParams<{
 	sourceAddress: BtcAddress;
-	amount: number;
-}): Promise<UtxosFee> => {
+}>): Promise<UtxosFee> => {
 	const satoshisAmount = convertNumberToSatoshis({ amount });
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
 
@@ -34,4 +47,34 @@ export const selectUtxosFee = async ({
 		feeSatoshis: fee_satoshis,
 		utxos
 	};
+};
+
+export const sendBtc = async ({ progress, ...rest }: SendBtcParams): Promise<void> => {
+	await send({ progress, ...rest });
+
+	progress(ProgressStepsSendBtc.RELOAD);
+
+	await waitAndTriggerWallet();
+};
+
+const send = async ({
+	identity,
+	destination,
+	network,
+	amount,
+	utxosFee,
+	progress
+}: SendBtcParams): Promise<SendBtcResponse> => {
+	const satoshisAmount = convertNumberToSatoshis({ amount });
+	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
+
+	progress(ProgressStepsSendBtc.SEND);
+
+	return sendBtcApi({
+		identity,
+		network: signerBitcoinNetwork,
+		feeSatoshis: [utxosFee.feeSatoshis],
+		utxosToSpend: utxosFee.utxos,
+		outputs: [{ destination_address: destination, sent_satoshis: satoshisAmount }]
+	});
 };
