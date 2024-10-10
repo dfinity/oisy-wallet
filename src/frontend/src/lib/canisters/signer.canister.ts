@@ -101,7 +101,7 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		let response = await eth_sign_transaction(transaction, [PATRON]);
+		const response = await eth_sign_transaction(transaction, [PATRON]);
 
 		// TODO: If the response does not match the type signature, so has neither `Ok` nor `Err`,
 		//       will typescript have thrown an error before this point?  Ditto for the other APIs.
@@ -122,8 +122,8 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		let request: EthPersonalSignRequest = { message };
-		let response = await eth_personal_sign(request, [PATRON]);
+		const request: EthPersonalSignRequest = { message };
+		const response = await eth_personal_sign(request, [PATRON]);
 
 		if ('Ok' in response) {
 			const {
