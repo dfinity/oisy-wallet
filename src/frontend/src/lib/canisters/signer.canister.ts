@@ -1,5 +1,6 @@
 import type {
 	BitcoinNetwork,
+	GetBalanceRequest,
 	SendBtcResponse,
 	SignRequest,
 	_SERVICE as SignerService
@@ -56,7 +57,12 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, []);
+		const request: GetBalanceRequest = {
+			network,
+			address_type: { P2WPKH: null },
+			min_confirmations: []
+		};
+		const response = await btc_caller_balance(request, []);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterBtcError(response.Err);
