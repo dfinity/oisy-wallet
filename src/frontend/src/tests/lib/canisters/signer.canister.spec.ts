@@ -374,9 +374,7 @@ describe('signer.canister', () => {
 		const res = await signPrehash(signPrehashParams);
 
 		expect(res).toEqual(response);
-		expect(service.eth_sign_prehash).toHaveBeenCalledWith({ message: signPrehashParams.hash }, [
-			SIGNER_PAYMENT_TYPE
-		]);
+		expect(service.eth_sign_prehash).toHaveBeenCalledWith(signPrehashParams, [SIGNER_PAYMENT_TYPE]);
 	});
 
 	it('should throw an error if eth_sign_prehash throws', async () => {
