@@ -4,7 +4,6 @@
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
-	import { ZERO } from '$lib/constants/app.constants';
 	import { tokenDecimals } from '$lib/derived/token.derived';
 	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
@@ -18,7 +17,7 @@
 			? undefined
 			: // TODO: Add fee to the calculation
 				getMaxTransactionAmount({
-					balance: $sendBalance ?? ZERO,
+					balance: $sendBalance ?? undefined,
 					tokenDecimals: $sendToken.decimals,
 					tokenStandard: $sendToken.standard
 				});
