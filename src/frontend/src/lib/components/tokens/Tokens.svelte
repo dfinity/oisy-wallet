@@ -6,11 +6,12 @@
 	import TokensSignedOut from '$lib/components/tokens/TokensSignedOut.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
 <div class:pointer-events-none={$authNotSignedIn} class:blur-[1.5px]={$authNotSignedIn}>
 	<Header>
-		<h2 class="text-base">Tokens</h2>
+		<h2 class="text-base">{$i18n.tokens.text.title}</h2>
 
 		<TokensMenu slot="end" />
 	</Header>
