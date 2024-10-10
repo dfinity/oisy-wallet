@@ -11,7 +11,7 @@
 <div class="flex justify-center gap-1">
 	<button
 		aria-label={qrCodeAriaLabel}
-		class="text-blue hover:text-dark-blue active:text-dark-blue"
+		class="text-primary hover:text-inherit active:text-inherit"
 		data-tid={RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON}
 		on:click
 	>

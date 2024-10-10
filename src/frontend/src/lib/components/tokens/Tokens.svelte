@@ -19,7 +19,7 @@
 	{#if $authSignedIn}
 		<TokensSignedIn />
 
-		<div transition:fade>
+		<div transition:fade class="mb-4 mt-12 flex w-full justify-center sm:w-auto">
 			<ManageTokensButton />
 		</div>
 	{:else}
