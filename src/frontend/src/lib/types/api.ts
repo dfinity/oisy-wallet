@@ -7,7 +7,6 @@ import type {
 	Utxo
 } from '$declarations/backend/backend.did';
 import type {
-	BitcoinAddressType,
 	BtcTxOutput,
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
@@ -46,6 +45,5 @@ export interface SendBtcParams {
 	feeSatoshis: [] | [bigint];
 	network: SignerBitcoinNetwork;
 	utxosToSpend: SignerUtxo[];
-	addressType: BitcoinAddressType;
 	outputs: BtcTxOutput[];
 }
