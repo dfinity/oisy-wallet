@@ -11,7 +11,7 @@ import type {
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
-import { SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
+import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -46,7 +46,7 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await btc_caller_address({ network, address_type: { P2WPKH: null } }, [
+		const response = await btc_caller_address({ network, address_type: P2WPKH }, [
 			SIGNER_PAYMENT_TYPE
 		]);
 
@@ -70,7 +70,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		const request: GetBalanceRequest = {
 			network,
-			address_type: { P2WPKH: null },
+			address_type: P2WPKH,
 			min_confirmations: toNullable(minConfirmations)
 		};
 		const response = await btc_caller_balance(request, [SIGNER_PAYMENT_TYPE]);
@@ -175,7 +175,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		const response = await btc_caller_send(
 			{
-				address_type: { P2WPKH: null },
+				address_type: P2WPKH,
 				utxos_to_spend: utxosToSpend,
 				fee_satoshis: feeSatoshis,
 				...rest

@@ -6,7 +6,7 @@ import type {
 } from '$declarations/signer/signer.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
-import { SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
+import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -109,7 +109,7 @@ describe('signer.canister', () => {
 
 		expect(res).toEqual(address);
 		expect(service.btc_caller_address).toHaveBeenCalledWith(
-			{ network: btcParams.network, address_type: { P2WPKH: null } },
+			{ network: btcParams.network, address_type: P2WPKH },
 			[SIGNER_PAYMENT_TYPE]
 		);
 	});
@@ -169,7 +169,7 @@ describe('signer.canister', () => {
 
 		expect(res).toEqual(balance);
 		expect(service.btc_caller_balance).toHaveBeenCalledWith(
-			{ network: btcParams.network, address_type: { P2WPKH: null }, min_confirmations: [] },
+			{ network: btcParams.network, address_type: P2WPKH, min_confirmations: [] },
 			[SIGNER_PAYMENT_TYPE]
 		);
 	});
@@ -190,7 +190,7 @@ describe('signer.canister', () => {
 		expect(service.btc_caller_balance).toHaveBeenCalledWith(
 			{
 				network: btcParams.network,
-				address_type: { P2WPKH: null },
+				address_type: P2WPKH,
 				min_confirmations: [minConfirmations]
 			},
 			[SIGNER_PAYMENT_TYPE]
@@ -430,7 +430,7 @@ describe('signer.canister', () => {
 					fee_satoshis: sendBtcParams.feeSatoshis,
 					network: sendBtcParams.network,
 					utxos_to_spend: sendBtcParams.utxosToSpend,
-					address_type: { P2WPKH: null },
+					address_type: P2WPKH,
 					outputs: sendBtcParams.outputs
 				},
 				[SIGNER_PAYMENT_TYPE]
