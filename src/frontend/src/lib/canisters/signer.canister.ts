@@ -10,7 +10,7 @@ import type {
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
-import { PATRON } from '$lib/constants/app.constants';
+import { SIGNER_PAYMENT_TYPE } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -46,7 +46,7 @@ export class SignerCanister extends Canister<SignerService> {
 		});
 
 		const response = await btc_caller_address({ network, address_type: { P2WPKH: null } }, [
-			PATRON
+			SIGNER_PAYMENT_TYPE
 		]);
 
 		if ('Err' in response) {
@@ -62,7 +62,7 @@ export class SignerCanister extends Canister<SignerService> {
 		});
 
 		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, [
-			PATRON
+			SIGNER_PAYMENT_TYPE
 		]);
 
 		if ('Err' in response) {
@@ -80,7 +80,7 @@ export class SignerCanister extends Canister<SignerService> {
 		/* Note: `eth_address` gets the Ethereum address of a given principal, defaulting to the caller if not provided. */
 		/*       In OISY, we derive the ETH address from the caller. Therefore, we are not providing a principal as an argument. */
 		const request: EthAddressRequest = { principal: [] };
-		const response = await eth_address(request, [PATRON]);
+		const response = await eth_address(request, [SIGNER_PAYMENT_TYPE]);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterGetEthAddressError(response.Err);
@@ -102,7 +102,7 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await eth_sign_transaction(transaction, [PATRON]);
+		const response = await eth_sign_transaction(transaction, [SIGNER_PAYMENT_TYPE]);
 
 		// TODO: If the response does not match the type signature, so has neither `Ok` nor `Err`,
 		//       will typescript have thrown an error before this point?  Ditto for the other APIs.
@@ -124,7 +124,7 @@ export class SignerCanister extends Canister<SignerService> {
 		});
 
 		const request: EthPersonalSignRequest = { message };
-		const response = await eth_personal_sign(request, [PATRON]);
+		const response = await eth_personal_sign(request, [SIGNER_PAYMENT_TYPE]);
 
 		if ('Ok' in response) {
 			const {
@@ -142,7 +142,7 @@ export class SignerCanister extends Canister<SignerService> {
 		});
 
 		const request: EthSignPrehashRequest = { message: hash };
-		const response = await eth_sign_prehash(request, [PATRON]);
+		const response = await eth_sign_prehash(request, [SIGNER_PAYMENT_TYPE]);
 
 		if ('Ok' in response) {
 			const {
@@ -171,7 +171,7 @@ export class SignerCanister extends Canister<SignerService> {
 				fee_satoshis: feeSatoshis,
 				...rest
 			},
-			[PATRON]
+			[SIGNER_PAYMENT_TYPE]
 		);
 
 		if ('Err' in response) {

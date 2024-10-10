@@ -58,7 +58,7 @@ export const SIGNER_CANISTER_ID = LOCAL
 		? import.meta.env.VITE_STAGING_SIGNER_CANISTER_ID
 		: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
 
-export const PATRON = {
+export const SIGNER_PAYMENT_TYPE = {
 	PatronPaysIcrc2Cycles: {
 		owner: BACKEND_CANISTER_PRINCIPAL,
 		subaccount: []

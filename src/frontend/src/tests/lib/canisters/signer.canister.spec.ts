@@ -7,7 +7,7 @@ import type {
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
-import { PATRON } from '$lib/constants/app.constants';
+import { SIGNER_PAYMENT_TYPE } from '$lib/constants/app.constants';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockedAgent } from '$tests/mocks/agents.mock';
@@ -111,7 +111,7 @@ describe('signer.canister', () => {
 		expect(res).toEqual(address);
 		expect(service.btc_caller_address).toHaveBeenCalledWith(
 			{ network: btcParams.network, address_type: { P2WPKH: null } },
-			[PATRON]
+			[SIGNER_PAYMENT_TYPE]
 		);
 	});
 
@@ -171,7 +171,7 @@ describe('signer.canister', () => {
 		expect(res).toEqual(balance);
 		expect(service.btc_caller_balance).toHaveBeenCalledWith(
 			{ network: btcParams.network, address_type: { P2WPKH: null } },
-			[PATRON]
+			[SIGNER_PAYMENT_TYPE]
 		);
 	});
 
@@ -241,7 +241,7 @@ describe('signer.canister', () => {
 
 			await getEthAddress();
 
-			expect(spy).toHaveBeenNthCalledWith(1, { principal: [] }, [PATRON]);
+			expect(spy).toHaveBeenNthCalledWith(1, { principal: [] }, [SIGNER_PAYMENT_TYPE]);
 		});
 
 		it('should throw an error if eth_address throws', async () => {
@@ -315,7 +315,7 @@ describe('signer.canister', () => {
 
 		expect(res).toEqual(response);
 		expect(service.eth_sign_transaction).toHaveBeenCalledWith(signTransactionParams.transaction, [
-			PATRON
+			SIGNER_PAYMENT_TYPE
 		]);
 	});
 
@@ -344,7 +344,9 @@ describe('signer.canister', () => {
 		const res = await personalSign(personalSignParams);
 
 		expect(res).toEqual(response);
-		expect(service.eth_personal_sign).toHaveBeenCalledWith(personalSignParams, [PATRON]);
+		expect(service.eth_personal_sign).toHaveBeenCalledWith(personalSignParams, [
+			SIGNER_PAYMENT_TYPE
+		]);
 	});
 
 	it('should throw an error if eth_personal_sign throws', async () => {
@@ -373,7 +375,7 @@ describe('signer.canister', () => {
 
 		expect(res).toEqual(response);
 		expect(service.eth_sign_prehash).toHaveBeenCalledWith({ message: signPrehashParams.hash }, [
-			PATRON
+			SIGNER_PAYMENT_TYPE
 		]);
 	});
 
@@ -411,7 +413,7 @@ describe('signer.canister', () => {
 					address_type: sendBtcParams.addressType,
 					outputs: sendBtcParams.outputs
 				},
-				[PATRON]
+				[SIGNER_PAYMENT_TYPE]
 			);
 		});
 
