@@ -27,22 +27,22 @@ export default defineConfig({
 		...(DEV && { headless: false })
 	},
 	projects: [
-		{
-			name: 'Google Chrome',
-			use: { ...devices['Desktop Chrome'], channel: 'chrome' }
-		},
-		{
-			name: 'Mozilla Firefox',
-			use: { ...devices['Desktop Firefox'], channel: 'firefox' }
-		},
-		{
-			name: 'Safari',
-			use: { ...devices['Desktop Safari'] }
-		},
+		// {
+		// 	name: 'Google Chrome',
+		// 	use: { ...devices['Desktop Chrome'], channel: 'chrome' }
+		// },
+		// {
+		// 	name: 'Mozilla Firefox',
+		// 	use: { ...devices['Desktop Firefox'], channel: 'firefox' }
+		// },
+		// {
+		// 	name: 'Safari',
+		// 	use: { ...devices['Desktop Safari'] }
+		// },
 		{
 			name: 'Apple iPhone SE',
 			use: { ...devices['iPhone SE'] }
-		},
+		}
 		// {
 		// 	name: 'Apple iPhone 14 Pro Max',
 		// 	use: { ...devices['iPhone SE'] }
@@ -59,9 +59,9 @@ export default defineConfig({
 		// 	name: 'Apple iPad (gen 7)',
 		// 	use: { ...devices['iPad (gen 7)'] }
 		// },
-		{
-			name: 'Apple iPad Pro 11',
-			use: { ...devices['iPad Pro 11'] }
-		}
+		// {
+		// 	name: 'Apple iPad Pro 11',
+		// 	use: { ...devices['iPad Pro 11'] }
+		// }
 	]
 });
