@@ -52,8 +52,8 @@
 			"logout": "Logout",
 			"authenticate": "Open or Create",
 			"safe_access": "Safe access anywhere, anytime",
-			"privacy_and_security": "Top-notch privacy and security",
-			"powered_by_chain_fusion": "Powered by ICP's Chain Fusion technology"
+			"privacy_and_security": "Anonymous, self-custodial",
+			"powered_by_chain_fusion": "Built with ICP's Chain Fusion tech"
 		},
 		"alt": {
 			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
