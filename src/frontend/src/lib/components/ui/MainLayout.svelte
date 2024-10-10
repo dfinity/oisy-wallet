@@ -3,7 +3,7 @@
 		<slot name="menu" />
 	</div>
 
-	<div class="central-content mx-auto sm:w-3/4">
+	<div class="central-content mx-auto px-5 sm:w-3/4">
 		<slot />
 	</div>
 
