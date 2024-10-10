@@ -363,7 +363,7 @@ describe('signer.canister', () => {
 
 	it('signs prehash', async () => {
 		const response = 'personal-sign';
-		service.sign_prehash.mockResolvedValue(response);
+		service.eth_sign_prehash.mockResolvedValue({ Ok: { signature: response } });
 
 		const { signPrehash } = await createSignerCanister({
 			serviceOverride: service
@@ -372,11 +372,13 @@ describe('signer.canister', () => {
 		const res = await signPrehash(signPrehashParams);
 
 		expect(res).toEqual(response);
-		expect(service.sign_prehash).toHaveBeenCalledWith(signPrehashParams.hash);
+		expect(service.eth_sign_prehash).toHaveBeenCalledWith({ message: signPrehashParams.hash }, [
+			PATRON
+		]);
 	});
 
-	it('should throw an error if sign_prehash throws', async () => {
-		service.sign_prehash.mockImplementation(async () => {
+	it('should throw an error if eth_sign_prehash throws', async () => {
+		service.eth_sign_prehash.mockImplementation(async () => {
 			throw mockResponseError;
 		});
 

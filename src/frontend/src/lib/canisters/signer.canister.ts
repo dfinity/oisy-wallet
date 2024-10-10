@@ -2,6 +2,7 @@ import type {
 	BitcoinNetwork,
 	EthAddressRequest,
 	EthPersonalSignRequest,
+	EthSignPrehashRequest,
 	EthSignTransactionRequest,
 	SendBtcResponse,
 	_SERVICE as SignerService
@@ -135,12 +136,22 @@ export class SignerCanister extends Canister<SignerService> {
 		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 
-	signPrehash = ({ hash }: { hash: string }): Promise<string> => {
-		const { sign_prehash } = this.caller({
+	signPrehash = async ({ hash }: { hash: string }): Promise<string> => {
+		const { eth_sign_prehash } = this.caller({
 			certified: true
 		});
 
-		return sign_prehash(hash);
+		const request: EthSignPrehashRequest = { message: hash };
+		const response = await eth_sign_prehash(request, [PATRON]);
+
+		if ('Ok' in response) {
+			const {
+				Ok: { signature }
+			} = response;
+			return signature;
+		}
+
+		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 
 	sendBtc = async ({
