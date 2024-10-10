@@ -1,31 +1,30 @@
-name: Deploy Frontend to Staging
+name: Deploy Frontend / Backend to Environment
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      network:
+        required: true
+        type: choice
+        description: "Select the DFX network to deploy to."
+        options:
+          - staging
+          - beta
+          - prod
+      canister:
+        required: true
+        type: choice
+        description: "Select the canister to deploy."
+        options:
+          - frontend
+          - backend
 
 jobs:
-  deploy-staging:
+  deployment:
     runs-on: ubuntu-latest
-
-    env:
-      VITE_ETHERSCAN_API_KEY: ${{ secrets.VITE_ETHERSCAN_API_KEY }}
-      VITE_INFURA_API_KEY: ${{ secrets.VITE_INFURA_API_KEY }}
-      VITE_ALCHEMY_API_KEY: ${{ secrets.VITE_ALCHEMY_API_KEY }}
-      VITE_WALLET_CONNECT_PROJECT_ID: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID }}
-      VITE_OISY_URL: ${{ secrets.VITE_OISY_URL }}
-      VITE_AIRDROP: ${{ secrets.VITE_AIRDROP }}
-      VITE_AIRDROP_COMPLETED: ${{ secrets.VITE_AIRDROP_COMPLETED }}
-      VITE_COINGECKO_API_URL: ${{ secrets.VITE_COINGECKO_API_URL }}
-      VITE_COINGECKO_API_KEY: ${{ secrets.VITE_COINGECKO_API_KEY }}
-      VITE_JUNO_SATELLITE_ID: ${{ secrets.VITE_JUNO_SATELLITE_ID }}
-      VITE_JUNO_ORBITER_ID: ${{ secrets.VITE_JUNO_ORBITER_ID }}
-      VITE_POUH_ENABLED: ${{ secrets.VITE_POUH_ENABLED }}
-      VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS }}
-      VITE_AUTH_DERIVATION_ORIGIN: ${{ secrets.VITE_AUTH_DERIVATION_ORIGIN }}
-      VITE_NETWORK_BITCOIN_ENABLED: ${{ secrets.VITE_NETWORK_BITCOIN_ENABLED }}
 
     steps:
 
@@ -38,6 +37,71 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Determine Deployment Network
+        run: |
+          if [ "${{ github.event_name }}" == "push" ]; then
+            echo "NETWORK=staging" >> $GITHUB_ENV
+            echo "CANISTER=frontend" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "NETWORK=${{ github.event.inputs.network }}" >> $GITHUB_ENV
+            echo "CANISTER=${{ github.event.inputs.canister }}" >> $GITHUB_ENV
+          fi
+
+      - name: Set Environment Variables Based on Network
+        run: |
+          if [ "$NETWORK" == "staging" ]; then
+            export VITE_ETHERSCAN_API_KEY="${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}"
+            export VITE_INFURA_API_KEY="${{ secrets.VITE_INFURA_API_KEY_STAGING }}"
+            export VITE_ALCHEMY_API_KEY="${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}"
+            export VITE_WALLET_CONNECT_PROJECT_ID="${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}"
+            export VITE_OISY_URL="${{ secrets.VITE_OISY_URL_STAGING }}"
+            export VITE_AIRDROP="${{ secrets.VITE_AIRDROP_STAGING }}"
+            export VITE_AIRDROP_COMPLETED="${{ secrets.VITE_AIRDROP_COMPLETED_STAGING }}"
+            export VITE_COINGECKO_API_URL="${{ secrets.VITE_COINGECKO_API_URL_STAGING }}"
+            export VITE_COINGECKO_API_KEY="${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}"
+            export VITE_JUNO_SATELLITE_ID="${{ secrets.VITE_JUNO_SATELLITE_ID_STAGING }}"
+            export VITE_JUNO_ORBITER_ID="${{ secrets.VITE_JUNO_ORBITER_ID_STAGING }}"
+            export VITE_POUH_ENABLED="${{ secrets.VITE_POUH_ENABLED_STAGING }}"
+            export VITE_AUTH_ALTERNATIVE_ORIGINS="${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}"
+            export VITE_AUTH_DERIVATION_ORIGIN="${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}"
+            export VITE_NETWORK_BITCOIN_ENABLED="${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_STAGING }}"
+            DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_STAGING }}"
+          elif [ "$NETWORK" == "beta" ]; then
+            export VITE_ETHERSCAN_API_KEY="${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}"
+            export VITE_INFURA_API_KEY="${{ secrets.VITE_INFURA_API_KEY_BETA }}"
+            export VITE_ALCHEMY_API_KEY="${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}"
+            export VITE_WALLET_CONNECT_PROJECT_ID="${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}"
+            export VITE_OISY_URL="${{ secrets.VITE_OISY_URL_BETA }}"
+            export VITE_AIRDROP="${{ secrets.VITE_AIRDROP_BETA }}"
+            export VITE_AIRDROP_COMPLETED="${{ secrets.VITE_AIRDROP_COMPLETED_BETA }}"
+            export VITE_COINGECKO_API_URL="${{ secrets.VITE_COINGECKO_API_URL_BETA }}"
+            export VITE_COINGECKO_API_KEY="${{ secrets.VITE_COINGECKO_API_KEY_BETA }}"
+            export VITE_JUNO_SATELLITE_ID="${{ secrets.VITE_JUNO_SATELLITE_ID_BETA }}"
+            export VITE_JUNO_ORBITER_ID="${{ secrets.VITE_JUNO_ORBITER_ID_BETA }}"
+            export VITE_POUH_ENABLED="${{ secrets.VITE_POUH_ENABLED_BETA }}"
+            export VITE_AUTH_ALTERNATIVE_ORIGINS="${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}"
+            export VITE_AUTH_DERIVATION_ORIGIN="${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_BETA }}"
+            export VITE_NETWORK_BITCOIN_ENABLED="${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_BETA }}"
+            DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_BETA }}"
+          elif [ "$NETWORK" == "prod" ]; then
+            export VITE_ETHERSCAN_API_KEY="${{ secrets.VITE_ETHERSCAN_API_KEY_PROD }}"
+            export VITE_INFURA_API_KEY="${{ secrets.VITE_INFURA_API_KEY_PROD }}"
+            export VITE_ALCHEMY_API_KEY="${{ secrets.VITE_ALCHEMY_API_KEY_PROD }}"
+            export VITE_WALLET_CONNECT_PROJECT_ID="${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_PROD }}"
+            export VITE_OISY_URL="${{ secrets.VITE_OISY_URL_PROD }}"
+            export VITE_AIRDROP="${{ secrets.VITE_AIRDROP_PROD }}"
+            export VITE_AIRDROP_COMPLETED="${{ secrets.VITE_AIRDROP_COMPLETED_PROD }}"
+            export VITE_COINGECKO_API_URL="${{ secrets.VITE_COINGECKO_API_URL_PROD }}"
+            export VITE_COINGECKO_API_KEY="${{ secrets.VITE_COINGECKO_API_KEY_PROD }}"
+            export VITE_JUNO_SATELLITE_ID="${{ secrets.VITE_JUNO_SATELLITE_ID_PROD }}"
+            export VITE_JUNO_ORBITER_ID="${{ secrets.VITE_JUNO_ORBITER_ID_PROD }}"
+            export VITE_POUH_ENABLED="${{ secrets.VITE_POUH_ENABLED_PROD }}"
+            export VITE_AUTH_ALTERNATIVE_ORIGINS="${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_PROD }}"
+            export VITE_AUTH_DERIVATION_ORIGIN="${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_PROD }}"
+            export VITE_NETWORK_BITCOIN_ENABLED="${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_PROD }}"
+            DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_PROD }}"
+          fi
+
       - name: Prepare
         uses: ./.github/actions/prepare
 
@@ -45,18 +109,14 @@ jobs:
         uses: dfinity/setup-dfx@main
 
       - name: Install key
-        env:
-          DFX_DEPLOY_STAGING_KEY: ${{ secrets.DFX_DEPLOY_STAGING_KEY }}
         run: |
           key_pem=$(mktemp)
-          printenv "DFX_DEPLOY_STAGING_KEY" > "$key_pem"
+          printenv "DFX_DEPLOY_KEY" > "$key_pem"
           dfx identity import --disable-encryption --force default "$key_pem"
           rm "$key_pem"
 
       - name: Pre-build
         run: npm run build
 
-      - name: Deploy to Staging
-        env:
-          ENV: staging
-        run: dfx deploy frontend --network staging
+      - name: Deploy to Environment
+        run: dfx deploy $CANISTER --network $NETWORK
