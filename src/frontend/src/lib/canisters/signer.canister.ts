@@ -171,8 +171,7 @@ export class SignerCanister extends Canister<SignerService> {
 				fee_satoshis: feeSatoshis,
 				...rest
 			},
-			// TODO: Pass a payment type
-			[]
+			[PATRON]
 		);
 
 		if ('Err' in response) {

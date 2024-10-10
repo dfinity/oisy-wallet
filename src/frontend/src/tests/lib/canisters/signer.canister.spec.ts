@@ -411,7 +411,7 @@ describe('signer.canister', () => {
 					address_type: sendBtcParams.addressType,
 					outputs: sendBtcParams.outputs
 				},
-				[]
+				[PATRON]
 			);
 		});
 
