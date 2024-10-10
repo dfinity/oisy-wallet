@@ -9,7 +9,7 @@ on:
       network:
         required: true
         type: choice
-        description: "Select the DFX network to deploy to."
+        description: "Select the network to deploy to."
         options:
           - staging
           - beta
@@ -65,7 +65,9 @@ jobs:
             export VITE_AUTH_ALTERNATIVE_ORIGINS="${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}"
             export VITE_AUTH_DERIVATION_ORIGIN="${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}"
             export VITE_NETWORK_BITCOIN_ENABLED="${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_STAGING }}"
-            DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_STAGING }}"
+            export VITE_ONRAMPER_API_KEY_DEV="${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}"
+            export VITE_ONRAMPER_API_KEY_PROD="${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}"
+            export DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_STAGING }}"
           elif [ "$NETWORK" == "beta" ]; then
             export VITE_ETHERSCAN_API_KEY="${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}"
             export VITE_INFURA_API_KEY="${{ secrets.VITE_INFURA_API_KEY_BETA }}"
@@ -82,7 +84,9 @@ jobs:
             export VITE_AUTH_ALTERNATIVE_ORIGINS="${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}"
             export VITE_AUTH_DERIVATION_ORIGIN="${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_BETA }}"
             export VITE_NETWORK_BITCOIN_ENABLED="${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_BETA }}"
-            DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_BETA }}"
+            export VITE_ONRAMPER_API_KEY_DEV="${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}"
+            export VITE_ONRAMPER_API_KEY_PROD="${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}"
+            export DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_BETA }}"
           elif [ "$NETWORK" == "prod" ]; then
             export VITE_ETHERSCAN_API_KEY="${{ secrets.VITE_ETHERSCAN_API_KEY_PROD }}"
             export VITE_INFURA_API_KEY="${{ secrets.VITE_INFURA_API_KEY_PROD }}"
@@ -99,7 +103,16 @@ jobs:
             export VITE_AUTH_ALTERNATIVE_ORIGINS="${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_PROD }}"
             export VITE_AUTH_DERIVATION_ORIGIN="${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_PROD }}"
             export VITE_NETWORK_BITCOIN_ENABLED="${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_PROD }}"
-            DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_PROD }}"
+            export VITE_ONRAMPER_API_KEY_DEV="${{ secrets.VITE_ONRAMPER_API_KEY_DEV_PROD }}"
+            export VITE_ONRAMPER_API_KEY_PROD="${{ secrets.VITE_ONRAMPER_API_KEY_PROD_PROD }}"
+            export DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_PROD }}"
+          fi
+
+      - name: Fail if no Identity is provided
+        run: |
+          if [ -z "$DFX_DEPLOY_KEY" ]; then
+            echo "Error: DFX_DEPLOY_KEY for $NETWORK is not set or is empty. Please provide the deployment identity key."
+            exit 1
           fi
 
       - name: Prepare
