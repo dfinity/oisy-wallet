@@ -7,11 +7,16 @@ import type {
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
+import { BACKEND_CANISTER_PRINCIPAL } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { Canister, createServices } from '@dfinity/utils';
-import { mapSignerCanisterBtcError } from './signer.errors';
+import {
+	mapSignerCanisterBtcError,
+	mapSignerCanisterGetEthAddressError,
+	mapSignerCanisterSendBtcError
+} from './signer.errors';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({
@@ -60,12 +65,31 @@ export class SignerCanister extends Canister<SignerService> {
 		return response.Ok.balance;
 	};
 
-	getEthAddress = (): Promise<EthAddress> => {
-		const { caller_eth_address } = this.caller({
+	getEthAddress = async (): Promise<EthAddress> => {
+		const { eth_address } = this.caller({
 			certified: true
 		});
 
-		return caller_eth_address();
+		/* Note: `eth_address` gets the Ethereum address of a given principal, defaulting to the caller if not provided. */
+		/*       In OISY, we derive the ETH address from the caller. Therefore, we are not providing a principal as an argument. */
+		const response = await eth_address({ principal: [] }, [
+			{
+				PatronPaysIcrc2Cycles: {
+					owner: BACKEND_CANISTER_PRINCIPAL,
+					subaccount: []
+				}
+			}
+		]);
+
+		if ('Err' in response) {
+			throw mapSignerCanisterGetEthAddressError(response.Err);
+		}
+
+		const {
+			Ok: { address }
+		} = response;
+
+		return address;
 	};
 
 	signTransaction = ({ transaction }: { transaction: SignRequest }): Promise<string> => {
@@ -114,7 +138,7 @@ export class SignerCanister extends Canister<SignerService> {
 		);
 
 		if ('Err' in response) {
-			throw mapSignerCanisterBtcError(response.Err);
+			throw mapSignerCanisterSendBtcError(response.Err);
 		}
 
 		return response.Ok;
