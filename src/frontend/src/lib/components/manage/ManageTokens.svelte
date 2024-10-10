@@ -41,7 +41,6 @@
 	import type { TokenToggleable } from '$lib/types/token-toggleable';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
-	import { filterTokensForSelectedNetwork } from '$lib/utils/network.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	const dispatch = createEventDispatcher();
@@ -88,7 +87,7 @@
 	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
 
 	let allTokens: TokenToggleable<Token>[] = [];
-	$: allTokens = filterTokensForSelectedNetwork([
+	$: allTokens =
 		[
 			{
 				...ICP_TOKEN,
@@ -98,10 +97,7 @@
 			...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
 			...(manageEthereumTokens ? allErc20Tokens : []),
 			...(manageIcTokens ? allIcrcTokens : [])
-		],
-		$selectedNetwork,
-		$pseudoNetworkChainFusion
-	]);
+		]
 
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
