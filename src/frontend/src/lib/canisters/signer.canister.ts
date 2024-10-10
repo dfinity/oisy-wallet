@@ -104,9 +104,9 @@ export class SignerCanister extends Canister<SignerService> {
 
 		const response = await eth_sign_transaction(transaction, [SIGNER_PAYMENT_TYPE]);
 
-		// TODO: If the response does not match the type signature, so has neither `Ok` nor `Err`,
-		//       will typescript have thrown an error before this point?  Ditto for the other APIs.
-		//       It seems safer to check for `Ok` in response, and always throw an error if it's not there.
+		// If the response does not match the type signature, so has neither `Ok` nor `Err`,
+		// will typescript have thrown an error before this point?  Ditto for the other APIs.
+		// It seems safer to check for `Ok` in response, and always throw an error if it's not there.
 
 		if ('Ok' in response) {
 			const {
