@@ -96,8 +96,12 @@ pub fn principal2account(principal: &Principal) -> ByteBuf {
 async fn cfs_ecdsa_pubkey_of(principal: &Principal) -> Result<Vec<u8>, String> {
     let (ecdsa_key_name, maybe_cfs_canister_id) =
         read_config(|s| (s.ecdsa_key_name.clone(), s.cfs_canister_id));
-    // As done in [CFS](https://github.com/dfinity/chain-fusion-signer/blob/26b683c6de9971fdbf7bd4cebc04d427d1753289/src/signer/canister/src/derivation_path.rs#L28)
-    let derivation_path = vec![vec![0_u8], principal.as_slice().to_vec()];
+    // As set in [CFS](https://github.com/dfinity/chain-fusion-signer/blob/26b683c6de9971fdbf7bd4cebc04d427d1753289/src/signer/canister/src/derivation_path.rs#L6)
+    // 0 is for BTC
+    // 1 is for Eth
+    // 0xff is generic
+    let btc_schema = vec![0_u8];
+    let derivation_path = vec![btc_schema, principal.as_slice().to_vec()];
     let cfs_canister_id = maybe_cfs_canister_id.ok_or("Missing CFS canister id")?;
     if let Ok((key,)) = ecdsa_public_key(EcdsaPublicKeyArgument {
         canister_id: Some(cfs_canister_id),
