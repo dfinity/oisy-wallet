@@ -7,6 +7,7 @@
 	export let alt = '';
 	export let size: 'small' | 'medium' | 'big' = 'small';
 	export let color: 'dust' | 'off-white' | 'white' = 'dust';
+	export let ring = false;
 
 	const sizes = {
 		small: '22px',
@@ -31,11 +32,12 @@
 </script>
 
 <div
-	class="flex items-center justify-center overflow-hidden rounded-full"
+	class="flex items-center justify-center overflow-hidden rounded-full ring-white"
 	class:bg-dust={color === 'dust' && !loaded}
 	class:bg-off-white={color === 'off-white' && !loaded}
 	class:bg-white={color === 'white' && !loaded}
 	class:opacity-10={!loaded}
+	class:ring-1={ring}
 	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
 >
 	{#if nonNullish(src) && !loadingError}

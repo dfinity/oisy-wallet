@@ -127,7 +127,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { learn_more_about_erc20_icp: string };
+	text: { available_balance: string; use_with_caution: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -244,7 +244,7 @@ interface I18nSend {
 		enter_wallet_address: string;
 		select_network: string;
 	};
-	info: { ckbtc_certified: string; cketh_certified: string };
+	info: { ckbtc_certified: string; cketh_certified: string; pending_bitcoin_transaction: string };
 	assertion: {
 		invalid_destination_address: string;
 		insufficient_funds: string;
@@ -280,6 +280,7 @@ interface I18nSend {
 		invalid_destination: string;
 		incompatible_token: string;
 		no_btc_network_id: string;
+		no_pending_bitcoin_transaction: string;
 	};
 }
 
@@ -361,7 +362,7 @@ interface I18nTokens {
 	manage: {
 		text: {
 			title: string;
-			your_tokens: string;
+			manage_list: string;
 			do_not_see_import: string;
 			clear_filter: string;
 			manage_for_network: string;

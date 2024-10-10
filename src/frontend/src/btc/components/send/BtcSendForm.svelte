@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import BtcSendAmount from './BtcSendAmount.svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
@@ -9,6 +10,7 @@
 	import { balance } from '$lib/derived/balances.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
+	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let networkId: NetworkId | undefined = undefined;
 	export let amount: number | undefined = undefined;
@@ -17,6 +19,14 @@
 
 	let amountError: BtcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
+
+	// TODO: check if we can align this validation flag with other SendForm components (e.g IcSendForm)
+	let invalid = true;
+	$: invalid =
+		invalidDestination ||
+		nonNullish(amountError) ||
+		isNullishOrEmpty(destination) ||
+		isNullish(amount);
 
 	onMount(() => {
 		// This call will load the pending sent transactions for the source address in the store.
@@ -29,7 +39,7 @@
 	});
 </script>
 
-<SendForm {source} token={$token} balance={$balance}>
+<SendForm on:icNext {source} token={$token} balance={$balance} disabled={invalid}>
 	<BtcSendDestination
 		slot="destination"
 		bind:destination

@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
+	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
@@ -17,10 +19,15 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
 	export let currentStep: WizardStep | undefined;
-	export let networkId: NetworkId | undefined = undefined;
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
+	export let formCancelAction: 'back' | 'close' = 'close';
+
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let networkId: NetworkId | undefined = undefined;
+	$: networkId = $sendToken.network.id;
 
 	let source: string;
 	$: source =
@@ -30,7 +37,10 @@
 				? $btcAddressRegtest
 				: $btcAddressMainnet) ?? '';
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const dispatch = createEventDispatcher();
+
+	const close = () => dispatch('icClose');
+	const back = () => dispatch('icSendBack');
 
 	// TODO: implement send function when related services are ready
 	const send = () => {};
@@ -46,10 +56,18 @@
 		on:icClose
 		bind:destination
 		bind:amount
-		bind:networkId
 		on:icQRCodeScan
 		{source}
-	/>
+		{networkId}
+	>
+		<svelte:fragment slot="cancel">
+			{#if formCancelAction === 'back'}
+				<ButtonBack on:click={back} />
+			{:else}
+				<ButtonCancel on:click={close} />
+			{/if}
+		</svelte:fragment>
+	</BtcSendForm>
 {:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 	<SendQrCodeScan
 		expectedToken={$sendToken}
