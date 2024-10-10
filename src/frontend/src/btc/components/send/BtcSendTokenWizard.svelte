@@ -19,11 +19,15 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
 	export let currentStep: WizardStep | undefined;
-	export let networkId: NetworkId | undefined = undefined;
 	export let destination = '';
 	export let amount: number | undefined = undefined;
 	export let sendProgressStep: string;
 	export let formCancelAction: 'back' | 'close' = 'close';
+
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let networkId: NetworkId | undefined = undefined;
+	$: networkId = $sendToken.network.id;
 
 	let source: string;
 	$: source =
@@ -32,8 +36,6 @@
 			: isNetworkIdBTCRegtest(networkId)
 				? $btcAddressRegtest
 				: $btcAddressMainnet) ?? '';
-
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
@@ -54,9 +56,9 @@
 		on:icClose
 		bind:destination
 		bind:amount
-		bind:networkId
 		on:icQRCodeScan
 		{source}
+		{networkId}
 	>
 		<svelte:fragment slot="cancel">
 			{#if formCancelAction === 'back'}
