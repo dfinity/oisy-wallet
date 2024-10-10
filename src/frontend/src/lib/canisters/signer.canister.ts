@@ -15,7 +15,7 @@ import { SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices } from '@dfinity/utils';
+import { Canister, createServices, toNullable } from '@dfinity/utils';
 import {
 	mapSignerCanisterBtcError,
 	mapSignerCanisterGetEthAddressError,
@@ -57,7 +57,13 @@ export class SignerCanister extends Canister<SignerService> {
 		return response.Ok.address;
 	};
 
-	getBtcBalance = async ({ network }: { network: BitcoinNetwork }): Promise<bigint> => {
+	getBtcBalance = async ({
+		network,
+		minConfirmations
+	}: {
+		network: BitcoinNetwork;
+		minConfirmations?: number;
+	}): Promise<bigint> => {
 		const { btc_caller_balance } = this.caller({
 			certified: true
 		});
@@ -65,7 +71,7 @@ export class SignerCanister extends Canister<SignerService> {
 		const request: GetBalanceRequest = {
 			network,
 			address_type: { P2WPKH: null },
-			min_confirmations: []
+			min_confirmations: toNullable(minConfirmations)
 		};
 		const response = await btc_caller_balance(request, [SIGNER_PAYMENT_TYPE]);
 
