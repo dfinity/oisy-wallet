@@ -64,6 +64,7 @@ export type CanisterStatusType = { stopped: null } | { stopping: null } | { runn
 export interface Config {
 	api: [] | [Guards];
 	ecdsa_key_name: string;
+	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_raw: [] | [Uint8Array | number[]];
@@ -108,6 +109,7 @@ export interface IcrcToken {
 export interface InitArg {
 	api: [] | [Guards];
 	ecdsa_key_name: string;
+	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
 	ic_root_key_der: [] | [Uint8Array | number[]];
