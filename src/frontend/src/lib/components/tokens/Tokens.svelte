@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
-	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import ManageTokensButton from '$lib/components/tokens/ManageTokensButton.svelte';
 	import TokensMenu from '$lib/components/tokens/TokensMenu.svelte';
 	import TokensSignedIn from '$lib/components/tokens/TokensSignedIn.svelte';
@@ -11,7 +10,7 @@
 
 <div class:pointer-events-none={$authNotSignedIn} class:blur-[1.5px]={$authNotSignedIn}>
 	<Header>
-		<NetworksSwitcher disabled={$authNotSignedIn} />
+		<h2 class="text-base">Tokens</h2>
 
 		<TokensMenu slot="end" />
 	</Header>
