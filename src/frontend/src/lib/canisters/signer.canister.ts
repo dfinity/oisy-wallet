@@ -165,7 +165,6 @@ export class SignerCanister extends Canister<SignerService> {
 	};
 
 	sendBtc = async ({
-		addressType,
 		feeSatoshis,
 		utxosToSpend,
 		...rest
@@ -176,7 +175,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		const response = await btc_caller_send(
 			{
-				address_type: addressType,
+				address_type: { P2WPKH: null },
 				utxos_to_spend: utxosToSpend,
 				fee_satoshis: feeSatoshis,
 				...rest

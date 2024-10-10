@@ -80,7 +80,6 @@ describe('signer.canister', () => {
 				}
 			}
 		],
-		addressType: { P2WPKH: null },
 		outputs: [
 			{
 				destination_address: 'test-address',
@@ -431,7 +430,7 @@ describe('signer.canister', () => {
 					fee_satoshis: sendBtcParams.feeSatoshis,
 					network: sendBtcParams.network,
 					utxos_to_spend: sendBtcParams.utxosToSpend,
-					address_type: sendBtcParams.addressType,
+					address_type: { P2WPKH: null },
 					outputs: sendBtcParams.outputs
 				},
 				[SIGNER_PAYMENT_TYPE]
