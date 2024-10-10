@@ -5,6 +5,7 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
@@ -56,4 +57,4 @@
 	</button>
 </ContentWithToolbar>
 
-<button class="primary full center text-center" on:click={close}>{$i18n.core.text.done}</button>
+<ButtonDone on:click={close} />

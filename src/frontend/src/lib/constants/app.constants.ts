@@ -1,3 +1,4 @@
+import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -5,7 +6,7 @@ export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
-export const STAGING = MODE === 'staging';
+export const STAGING = MODE === 'staging' || MODE.startsWith('test_fe_');
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
@@ -47,6 +48,8 @@ export const BACKEND_CANISTER_ID = LOCAL
 	: STAGING
 		? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
 		: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
+
+export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
 export const SIGNER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_SIGNER_CANISTER_ID

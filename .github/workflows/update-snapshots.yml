@@ -1,6 +1,9 @@
 name: Update E2E Snapshots
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -14,33 +17,12 @@ jobs:
       - name: Build oisy-backend WASM
         uses: ./.github/actions/oisy-backend
 
-  docker-build-e2e:
-    runs-on: ubuntu-20.04
+  update_snapshots:
+    runs-on: ubuntu-latest
     needs: oisy-backend-wasm
     steps:
       - name: Fail if branch is main
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: |
-          echo "This workflow should not be triggered with workflow_dispatch on main"
-          exit 1
-
-      - name: Delete unnecessary tools folder to prevent "out of space" error
-        run: rm -rf /opt/hostedtoolcache
-
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build E2E Docker Image
-        uses: ./.github/actions/docker-build-e2e
-        with:
-          name: oisy-e2e-image
-
-  update_snapshots:
-    runs-on: ubuntu-latest
-    needs: docker-build-e2e
-    steps:
-      - name: Fail if branch is main
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
         run: |
           echo "This workflow should not be triggered with workflow_dispatch on main"
           exit 1
@@ -48,20 +30,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download E2E Docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: oisy-e2e-image
-          path: .
-
-      - name: Load Docker image
-        run: |
-          gzip -d oisy-e2e-image.tar.gz
-          docker load -i oisy-e2e-image.tar
-
-      - name: Run E2E Docker container
-        run: |
-          docker run -d -p 4943:4943 --name oisy-e2e-container oisy-e2e-image:latest
+      - name: Deploy the backend
+        uses: ./.github/actions/deploy-backend
 
       - name: Prepare
         uses: ./.github/actions/prepare
@@ -76,3 +46,30 @@ jobs:
           add: e2e
           default_author: github_actions
           message: "🤖 update E2E snapshots"
+
+      - name: Stage Changes
+        if: github.ref == 'refs/heads/main'
+        run: git add .
+
+      - name: Check for Changes
+        if: github.ref == 'refs/heads/main'
+        run: |
+          if ! git diff --cached --quiet; then
+            echo "CHANGES_DETECTED=true" >> $GITHUB_ENV
+            MODIFIED_FILES=$(git diff --cached --name-only)
+            echo "MODIFIED_FILES<<EOF" >> $GITHUB_ENV
+            echo "$MODIFIED_FILES" >> $GITHUB_ENV
+            echo "EOF" >> $GITHUB_ENV
+          fi
+
+      - name: Create Pull Request (if changes and on main)
+        if: github.ref == 'refs/heads/main' && env.CHANGES_DETECTED == 'true'
+        uses: ./.github/actions/create-pr
+        with:
+          token: ${{ secrets.GIX_CREATE_PR_PAT }}
+          branch: bot-e2e-update-snapshots
+          title: 'chore(e2e): Update Playwright E2E Snapshots'
+          body: |
+            The following E2E snapshots have been updated:
+            ```
+            ${{ env.MODIFIED_FILES }}

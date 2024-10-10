@@ -4,6 +4,7 @@
 	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import Token from '$lib/components/tokens/Token.svelte';
+	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -43,8 +44,6 @@
 			</Token>
 		{/if}
 
-		<button class="primary full text-center" on:click={modalStore.close} slot="toolbar"
-			>{$i18n.core.text.done}</button
-		>
+		<ButtonDone on:click={modalStore.close} slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>

@@ -20,6 +20,7 @@ export const idlFactory = ({ IDL }) => {
 	const InitArg = IDL.Record({
 		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
+		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
@@ -129,6 +130,7 @@ export const idlFactory = ({ IDL }) => {
 	const Config = IDL.Record({
 		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
+		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_raw: IDL.Opt(IDL.Vec(IDL.Nat8))
@@ -305,6 +307,7 @@ export const init = ({ IDL }) => {
 	const InitArg = IDL.Record({
 		api: IDL.Opt(Guards),
 		ecdsa_key_name: IDL.Text,
+		cfs_canister_id: IDL.Opt(IDL.Principal),
 		allowed_callers: IDL.Vec(IDL.Principal),
 		supported_credentials: IDL.Opt(IDL.Vec(SupportedCredential)),
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))

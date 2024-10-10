@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import BtcSendAmount from './BtcSendAmount.svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
+	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { balance } from '$lib/derived/balances.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -14,9 +17,19 @@
 
 	let amountError: BtcAmountAssertionError | undefined;
 	let invalidDestination: boolean;
+
+	onMount(() => {
+		// This call will load the pending sent transactions for the source address in the store.
+		// This data will then be used in the review step. That's why we don't wait here.
+		loadBtcPendingSentTransactions({
+			identity: $authIdentity,
+			networkId,
+			address: source
+		});
+	});
 </script>
 
-<SendForm {source} token={$token} balance={$balance}>
+<SendForm on:icNext {source} token={$token} balance={$balance}>
 	<BtcSendDestination
 		slot="destination"
 		bind:destination

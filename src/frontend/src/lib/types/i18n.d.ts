@@ -33,7 +33,13 @@ interface I18nNavigation {
 		changelog: string;
 		submit_ticket: string;
 	};
-	alt: { more_settings: string; menu: string; changelog: string; submit_ticket: string };
+	alt: {
+		more_settings: string;
+		menu: string;
+		changelog: string;
+		submit_ticket: string;
+		open_twitter: string;
+	};
 }
 
 interface I18nAuth {
@@ -121,7 +127,7 @@ interface I18nInit {
 }
 
 interface I18nHero {
-	text: { use_with_caution: string; learn_more_about_erc20_icp: string };
+	text: { available_balance: string; learn_more_about_erc20_icp: string };
 }
 
 interface I18nSettings {
@@ -187,6 +193,7 @@ interface I18nReceive {
 	};
 	bitcoin: {
 		text: {
+			bitcoin: string;
 			checking_status: string;
 			refresh_status: string;
 			initializing: string;
@@ -272,6 +279,7 @@ interface I18nSend {
 		no_identity_calculate_fee: string;
 		invalid_destination: string;
 		incompatible_token: string;
+		no_btc_network_id: string;
 	};
 }
 
