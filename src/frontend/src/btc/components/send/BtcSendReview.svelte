@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Readable } from 'svelte/store';
 	import { initHasPendingSentTransactions } from '$btc/derived/has-pending-sent-transactions.derived';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
@@ -6,7 +7,6 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
-	import type { Readable } from 'svelte/store';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
