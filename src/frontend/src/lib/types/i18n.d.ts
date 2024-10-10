@@ -280,6 +280,7 @@ interface I18nSend {
 		invalid_destination: string;
 		incompatible_token: string;
 		no_btc_network_id: string;
+		no_pending_bitcoin_transaction: string;
 	};
 }
 
