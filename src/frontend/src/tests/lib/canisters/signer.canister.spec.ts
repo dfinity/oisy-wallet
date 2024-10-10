@@ -175,6 +175,29 @@ describe('signer.canister', () => {
 		);
 	});
 
+	it('returns correct BTC balance with min_confirmations', async () => {
+		const balance = 2n;
+		const minConfirmations = 3;
+		const response = { Ok: { balance } };
+		service.btc_caller_balance.mockResolvedValue(response);
+
+		const { getBtcBalance } = await createSignerCanister({
+			serviceOverride: service
+		});
+
+		const res = await getBtcBalance({ ...btcParams, minConfirmations });
+
+		expect(res).toEqual(balance);
+		expect(service.btc_caller_balance).toHaveBeenCalledWith(
+			{
+				network: btcParams.network,
+				address_type: { P2WPKH: null },
+				min_confirmations: [minConfirmations]
+			},
+			[SIGNER_PAYMENT_TYPE]
+		);
+	});
+
 	it('should throw an error if btc_caller_balance returns an internal error', async () => {
 		service.btc_caller_balance.mockResolvedValue(internalErrorResponse);
 
