@@ -4,6 +4,7 @@ import type {
 	EthPersonalSignRequest,
 	EthSignPrehashRequest,
 	EthSignTransactionRequest,
+	GetBalanceRequest,
 	SendBtcResponse,
 	_SERVICE as SignerService
 } from '$declarations/signer/signer.did';
@@ -61,9 +62,12 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, [
-			SIGNER_PAYMENT_TYPE
-		]);
+		const request: GetBalanceRequest = {
+			network,
+			address_type: { P2WPKH: null },
+			min_confirmations: []
+		};
+		const response = await btc_caller_balance(request, [SIGNER_PAYMENT_TYPE]);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterBtcError(response.Err);
@@ -141,7 +145,7 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const request: EthSignPrehashRequest = { message: hash };
+		const request: EthSignPrehashRequest = { hash };
 		const response = await eth_sign_prehash(request, [SIGNER_PAYMENT_TYPE]);
 
 		if ('Ok' in response) {
