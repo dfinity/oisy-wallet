@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
+	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 
 	export let invalid: boolean;
 
@@ -12,7 +11,5 @@
 
 <ButtonGroup>
 	<ButtonBack on:click={() => dispatch('icBack')} />
-	<Button disabled={invalid}>
-		{$i18n.core.text.next}
-	</Button>
+	<ButtonNext disabled={invalid} />
 </ButtonGroup>

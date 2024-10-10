@@ -35,6 +35,10 @@ a.as-button {
 			--button-border-radius: var(--border-radius-sm-1_5x);
 			--button-padding: var(--padding);
 		}
+
+		&.padding-sm {
+			--button-padding: var(--padding-1_5x) var(--padding-2x);
+		}
 	}
 
 	&.user {

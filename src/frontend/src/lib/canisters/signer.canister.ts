@@ -68,11 +68,13 @@ export class SignerCanister extends Canister<SignerService> {
 	};
 
 	getEthAddress = async (): Promise<EthAddress> => {
-		const { eth_address_of_caller } = this.caller({
+		const { eth_address } = this.caller({
 			certified: true
 		});
 
-		const response = await eth_address_of_caller([
+		/* Note: `eth_address` gets the Ethereum address of a given principal, defaulting to the caller if not provided. */
+		/*       In OISY, we derive the ETH address from the caller. Therefore, we are not providing a principal as an argument. */
+		const response = await eth_address({ principal: [] }, [
 			{
 				PatronPaysIcrc2Cycles: {
 					owner: BACKEND_CANISTER_PRINCIPAL,
