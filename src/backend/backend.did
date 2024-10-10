@@ -167,7 +167,6 @@ type SelectedUtxosFeeError = variant {
 type SelectedUtxosFeeRequest = record {
   network : BitcoinNetwork;
   amount_satoshis : nat64;
-  source_address : text;
   min_confirmations : opt nat32;
 };
 type SelectedUtxosFeeResponse = record {
