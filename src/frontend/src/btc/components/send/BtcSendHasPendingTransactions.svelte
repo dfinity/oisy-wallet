@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
 
 	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
 </script>
