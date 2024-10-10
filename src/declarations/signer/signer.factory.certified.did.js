@@ -100,6 +100,11 @@ export const idlFactory = ({ IDL }) => {
 		Ok: GetAddressResponse,
 		Err: GetAddressError
 	});
+	const GetBalanceRequest = IDL.Record({
+		network: BitcoinNetwork,
+		address_type: BitcoinAddressType,
+		min_confirmations: IDL.Opt(IDL.Nat32)
+	});
 	const GetBalanceResponse = IDL.Record({ balance: IDL.Nat64 });
 	const Result_1 = IDL.Variant({
 		Ok: GetBalanceResponse,
@@ -168,7 +173,7 @@ export const idlFactory = ({ IDL }) => {
 		Ok: EthPersonalSignResponse,
 		Err: EthAddressError
 	});
-	const EthSignPrehashRequest = IDL.Record({ message: IDL.Text });
+	const EthSignPrehashRequest = IDL.Record({ hash: IDL.Text });
 	const EthSignPrehashResponse = IDL.Record({ signature: IDL.Text });
 	const Result_5 = IDL.Variant({
 		Ok: EthSignPrehashResponse,
@@ -255,7 +260,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		btc_caller_address: IDL.Func([GetAddressRequest, IDL.Opt(PaymentType)], [Result], []),
-		btc_caller_balance: IDL.Func([GetAddressRequest, IDL.Opt(PaymentType)], [Result_1], []),
+		btc_caller_balance: IDL.Func([GetBalanceRequest, IDL.Opt(PaymentType)], [Result_1], []),
 		btc_caller_send: IDL.Func([SendBtcRequest, IDL.Opt(PaymentType)], [Result_2], []),
 		caller_eth_address: IDL.Func([], [IDL.Text], []),
 		config: IDL.Func([], [Config]),
