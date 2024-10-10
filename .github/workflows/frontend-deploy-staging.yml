@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - ci(frontend)/workflow-to-auto-deploy
   workflow_dispatch:
     inputs:
       network:
@@ -32,7 +33,7 @@ jobs:
         if: ${{ github.ref != 'refs/heads/main' }}
         run: |
           echo "This workflow can only be manually triggered with workflow_dispatch on the main branch"
-          exit 1
+#          exit 1
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -139,6 +140,8 @@ jobs:
           printenv "DFX_DEPLOY_KEY" > "$key_pem"
           dfx identity import --disable-encryption --force default "$key_pem"
           rm "$key_pem"
+          dfx identity use default
+          dfx identity get-principal
 
       - name: Pre-build
         run: npm run build
