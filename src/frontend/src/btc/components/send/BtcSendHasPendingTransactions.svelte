@@ -1,6 +1,6 @@
 <script lang="ts">
-	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { fade } from 'svelte/transition';
+	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	export let pendingTransactionsStatus: boolean | 'loading' | 'error';

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { Readable } from 'svelte/store';
+	import BtcSendHasPendingTransactions from './BtcSendHasPendingTransactions.svelte';
 	import { initHasPendingSentTransactions } from '$btc/derived/has-pending-sent-transactions.derived';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
-	import BtcSendHasPendingTransactions from './BtcSendHasPendingTransactions.svelte';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
