@@ -170,7 +170,7 @@ describe('signer.canister', () => {
 
 		expect(res).toEqual(balance);
 		expect(service.btc_caller_balance).toHaveBeenCalledWith(
-			{ network: btcParams.network, address_type: { P2WPKH: null } },
+			{ network: btcParams.network, address_type: { P2WPKH: null }, min_confirmations: [] },
 			[]
 		);
 	});
