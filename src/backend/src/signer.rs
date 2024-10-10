@@ -128,9 +128,7 @@ pub async fn btc_principal_to_p2wpkh_address(
     network: BitcoinNetwork,
     principal: &Principal,
 ) -> Result<String, String> {
-    let ecdsa_pubkey = cfs_ecdsa_pubkey_of(principal)
-        .await
-        .map_err(|_| "Error getting ECDSA public key".to_string())?;
+    let ecdsa_pubkey = cfs_ecdsa_pubkey_of(principal).await?;
     if let Ok(compressed_public_key) = CompressedPublicKey::from_slice(&ecdsa_pubkey) {
         Ok(Address::p2wpkh(&compressed_public_key, transform_network(network)).to_string())
     } else {
