@@ -361,7 +361,7 @@ interface I18nTokens {
 	manage: {
 		text: {
 			title: string;
-			your_tokens: string;
+			manage_list: string;
 			do_not_see_import: string;
 			clear_filter: string;
 			manage_for_network: string;
