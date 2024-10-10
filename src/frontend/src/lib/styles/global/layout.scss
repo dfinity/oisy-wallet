@@ -7,3 +7,7 @@ main {
 header {
 	margin: 0 auto;
 }
+
+.central-content {
+	max-width: media.$breakpoint-small;
+}
