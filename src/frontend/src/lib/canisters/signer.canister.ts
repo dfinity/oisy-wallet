@@ -65,7 +65,7 @@ export class SignerCanister extends Canister<SignerService> {
 		const request: GetBalanceRequest = {
 			network,
 			address_type: { P2WPKH: null },
-			min_confirmations: []
+			min_confirmations: [0]
 		};
 		const response = await btc_caller_balance(request, [SIGNER_PAYMENT_TYPE]);
 
