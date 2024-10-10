@@ -2,6 +2,7 @@
 
 II_CANISTER_ID="$(dfx canister id internet_identity --network "${ENV:-local}")"
 POUH_ISSUER_CANISTER_ID="$(dfx canister id pouh_issuer --network "${ENV:-local}")"
+SIGNER_CANISTER_ID="$(dfx canister id signer --network "${ENV:-local}")"
 
 case $ENV in
 "staging")
@@ -49,6 +50,7 @@ if [ -n "${ENV+1}" ]; then
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = vec {};
+         cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
          supported_credentials = opt vec {
             record {
               credential_type = variant { ProofOfUniqueness };
@@ -67,6 +69,7 @@ else
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
          allowed_callers = vec {};
+         cfs_canister_id = opt principal \"$SIGNER_CANISTER_ID\";
          supported_credentials = opt vec {
             record {
               credential_type = variant { ProofOfUniqueness };

@@ -317,6 +317,7 @@ pub(crate) fn init_arg() -> Arg {
             credential_type: CredentialType::ProofOfUniqueness,
         }]),
         api: None,
+        cfs_canister_id: None,
     })
 }
 
