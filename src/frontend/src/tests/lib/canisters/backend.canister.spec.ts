@@ -455,6 +455,19 @@ describe('backend.canister', () => {
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
+
+		it('should throw an error if btc_add_pending_transaction returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_add_pending_transaction.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcAddPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcAddPendingTransaction(btcAddPendingTransactionParams);
+
+			await expect(res).rejects.toThrow();
+		});
 	});
 
 	describe('btc_get_pending_transactions', () => {
@@ -511,6 +524,19 @@ describe('backend.canister', () => {
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
+
+		it('should throw an error if btc_get_pending_transactions returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_get_pending_transactions.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcGetPendingTransaction } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetPendingTransaction(btcGetPendingTransactionParams);
+
+			await expect(res).rejects.toThrow();
+		});
 	});
 
 	describe('btc_select_user_utxos_fee', () => {
@@ -562,6 +588,19 @@ describe('backend.canister', () => {
 			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if btc_select_user_utxos_fee returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_select_user_utxos_fee.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcSelectUserUtxosFee } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
+
+			await expect(res).rejects.toThrow();
 		});
 	});
 
