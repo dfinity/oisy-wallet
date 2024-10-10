@@ -3,8 +3,10 @@ import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import type { SendBtcResponse } from '$declarations/signer/signer.did';
 import { selectUserUtxosFee } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
+import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 import type { BtcAddress } from '$lib/types/address';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 
@@ -14,7 +16,13 @@ type BtcSendServiceParams<T = unknown> = {
 	identity: Identity;
 	network: BitcoinNetwork;
 	amount: number;
+	progress: (step: ProgressStepsSendBtc) => void;
 } & T;
+
+type SendBtcParams = BtcSendServiceParams<{
+	destination: BtcAddress;
+	utxosFee: UtxosFee;
+}>;
 
 export const selectUtxosFee = async ({
 	identity,
@@ -39,18 +47,27 @@ export const selectUtxosFee = async ({
 	};
 };
 
-export const sendBtc = async ({
+export const sendBtc = async ({ progress, ...rest }: SendBtcParams): Promise<void> => {
+	// TODO: use txid returned by this method to register it as a pending transaction in BE
+	await send({ progress, ...rest });
+
+	progress(ProgressStepsSendBtc.RELOAD);
+
+	await waitAndTriggerWallet();
+};
+
+const send = async ({
 	identity,
 	destination,
 	network,
 	amount,
-	utxosFee
-}: BtcSendServiceParams<{
-	destination: BtcAddress;
-	utxosFee: UtxosFee;
-}>): Promise<SendBtcResponse> => {
+	utxosFee,
+	progress
+}: SendBtcParams): Promise<SendBtcResponse> => {
 	const satoshisAmount = convertNumberToSatoshis({ amount });
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
+
+	progress(ProgressStepsSendBtc.SEND);
 
 	return sendBtcApi({
 		identity,
