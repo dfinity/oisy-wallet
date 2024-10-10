@@ -31,13 +31,15 @@ export const getEthAddress = async ({
 export const getBtcBalance = async ({
 	identity,
 	network,
-	canisterId
+	canisterId,
+	minConfirmations
 }: CanisterApiFunctionParams<{
 	network: BitcoinNetwork;
+	minConfirmations?: number;
 }>): Promise<bigint> => {
 	const { getBtcBalance } = await signerCanister({ identity, canisterId });
 
-	return getBtcBalance({ network });
+	return getBtcBalance({ network, minConfirmations });
 };
 
 export const signTransaction = async ({
