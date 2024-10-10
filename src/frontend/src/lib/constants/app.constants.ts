@@ -1,3 +1,4 @@
+import type { Account } from '$declarations/signer/signer.did';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -61,7 +62,7 @@ export const PATRON = {
 	PatronPaysIcrc2Cycles: {
 		owner: BACKEND_CANISTER_PRINCIPAL,
 		subaccount: []
-	}
+	} as Account
 };
 
 // How long the delegation identity should remain valid?
