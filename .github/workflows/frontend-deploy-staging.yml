@@ -36,6 +36,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Determine Deployment Network
         run: |
@@ -139,9 +141,19 @@ jobs:
           printenv "DFX_DEPLOY_KEY" > "$key_pem"
           dfx identity import --disable-encryption --force default "$key_pem"
           rm "$key_pem"
+          dfx identity use default
 
       - name: Pre-build
         run: npm run build
 
       - name: Deploy to Environment
-        run: dfx deploy $CANISTER --network $NETWORK
+        run: |
+          if [ "$CANISTER" == "frontend" ]; then
+            dfx deploy $CANISTER --network $NETWORK
+          elif [ "$CANISTER" == "backend" ]; then
+            if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
+              echo "No changes in specified files/folders detected, skipping backend deployment."
+            else            
+              ./scripts/deploy.backend.sh
+            fi
+          fi
