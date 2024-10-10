@@ -50,11 +50,14 @@ export class SignerCanister extends Canister<SignerService> {
 			SIGNER_PAYMENT_TYPE
 		]);
 
-		if ('Err' in response) {
-			throw mapSignerCanisterBtcError(response.Err);
+		if ('Ok' in response) {
+			const {
+				Ok: { address }
+			} = response;
+			return address;
 		}
 
-		return response.Ok.address;
+		throw mapSignerCanisterBtcError(response.Err);
 	};
 
 	getBtcBalance = async ({
@@ -75,11 +78,14 @@ export class SignerCanister extends Canister<SignerService> {
 		};
 		const response = await btc_caller_balance(request, [SIGNER_PAYMENT_TYPE]);
 
-		if ('Err' in response) {
-			throw mapSignerCanisterBtcError(response.Err);
+		if ('Ok' in response) {
+			const {
+				Ok: { balance }
+			} = response;
+			return balance;
 		}
 
-		return response.Ok.balance;
+		throw mapSignerCanisterBtcError(response.Err);
 	};
 
 	getEthAddress = async (): Promise<EthAddress> => {
@@ -92,15 +98,14 @@ export class SignerCanister extends Canister<SignerService> {
 		const request: EthAddressRequest = { principal: [] };
 		const response = await eth_address(request, [SIGNER_PAYMENT_TYPE]);
 
-		if ('Err' in response) {
-			throw mapSignerCanisterGetEthAddressError(response.Err);
+		if ('Ok' in response) {
+			const {
+				Ok: { address }
+			} = response;
+			return address;
 		}
 
-		const {
-			Ok: { address }
-		} = response;
-
-		return address;
+		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 
 	signTransaction = async ({
@@ -183,10 +188,11 @@ export class SignerCanister extends Canister<SignerService> {
 			[SIGNER_PAYMENT_TYPE]
 		);
 
-		if ('Err' in response) {
-			throw mapSignerCanisterSendBtcError(response.Err);
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
 		}
 
-		return response.Ok;
+		throw mapSignerCanisterSendBtcError(response.Err);
 	};
 }
