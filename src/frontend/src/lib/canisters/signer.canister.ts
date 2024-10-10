@@ -56,7 +56,9 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, [PATRON]);
+		const response = await btc_caller_balance({ network, address_type: { P2WPKH: null } }, [
+			PATRON
+		]);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterBtcError(response.Err);
