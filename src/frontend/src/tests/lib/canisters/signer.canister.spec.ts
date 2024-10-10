@@ -303,9 +303,9 @@ describe('signer.canister', () => {
 		});
 	});
 
-	it('signs transaction', async () => {
+	it('signs eth transaction', async () => {
 		const response = 'signed-transaction';
-		service.sign_transaction.mockResolvedValue(response);
+		service.eth_sign_transaction.mockResolvedValue({ Ok: { signature: response } });
 
 		const { signTransaction } = await createSignerCanister({
 			serviceOverride: service
@@ -314,11 +314,13 @@ describe('signer.canister', () => {
 		const res = await signTransaction(signTransactionParams);
 
 		expect(res).toEqual(response);
-		expect(service.sign_transaction).toHaveBeenCalledWith(signTransactionParams.transaction);
+		expect(service.eth_sign_transaction).toHaveBeenCalledWith(signTransactionParams.transaction, [
+			PATRON
+		]);
 	});
 
-	it('should throw an error if sign_transaction throws', async () => {
-		service.sign_transaction.mockImplementation(async () => {
+	it('should throw an error if eth_sign_transaction throws', async () => {
+		service.eth_sign_transaction.mockImplementation(async () => {
 			throw mockResponseError;
 		});
 
