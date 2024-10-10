@@ -180,7 +180,6 @@ export type SelectedUtxosFeeError =
 export interface SelectedUtxosFeeRequest {
 	network: BitcoinNetwork;
 	amount_satoshis: bigint;
-	source_address: string;
 	min_confirmations: [] | [number];
 }
 export interface SelectedUtxosFeeResponse {

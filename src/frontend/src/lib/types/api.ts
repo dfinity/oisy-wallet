@@ -27,7 +27,6 @@ export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfile
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
 	amountSatoshis: bigint;
-	sourceAddress: BtcAddress;
 	minConfirmations: [number];
 }
 
