@@ -1,5 +1,6 @@
 import type {
 	BitcoinNetwork,
+	EthAddressRequest,
 	EthPersonalSignRequest,
 	EthSignTransactionRequest,
 	SendBtcResponse,
@@ -77,7 +78,8 @@ export class SignerCanister extends Canister<SignerService> {
 
 		/* Note: `eth_address` gets the Ethereum address of a given principal, defaulting to the caller if not provided. */
 		/*       In OISY, we derive the ETH address from the caller. Therefore, we are not providing a principal as an argument. */
-		const response = await eth_address({ principal: [] }, [PATRON]);
+		const request: EthAddressRequest = { principal: [] };
+		const response = await eth_address(request, [PATRON]);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterGetEthAddressError(response.Err);
