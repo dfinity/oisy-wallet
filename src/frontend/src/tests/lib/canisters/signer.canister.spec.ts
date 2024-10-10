@@ -7,7 +7,7 @@ import type {
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
-import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
+import { BACKEND_CANISTER_ID, PATRON } from '$lib/constants/app.constants';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockedAgent } from '$tests/mocks/agents.mock';
@@ -171,7 +171,7 @@ describe('signer.canister', () => {
 		expect(res).toEqual(balance);
 		expect(service.btc_caller_balance).toHaveBeenCalledWith(
 			{ network: btcParams.network, address_type: { P2WPKH: null } },
-			[]
+			[PATRON]
 		);
 	});
 
