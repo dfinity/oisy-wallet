@@ -14,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount } from '$lib/utils/input.utils';
+	import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let amount: number | undefined = undefined;
@@ -46,7 +47,10 @@
 
 	<ButtonGroup slot="toolbar">
 		<ButtonBack on:click={() => dispatch('icBack')} />
-		<Button disabled={invalid} on:click={() => dispatch('icSend')}>
+		<Button
+			disabled={invalid}
+			testId={REVIEW_FORM_SEND_BUTTON}
+			on:click={() => dispatch('icSend')}>
 			{$i18n.send.text.send}
 		</Button>
 	</ButtonGroup>

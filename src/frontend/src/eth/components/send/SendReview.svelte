@@ -17,6 +17,7 @@
 	import type { Network } from '$lib/types/network';
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let targetNetwork: Network | undefined = undefined;
@@ -55,7 +56,10 @@
 
 	<ButtonGroup slot="toolbar">
 		<ButtonBack on:click={() => dispatch('icBack')} />
-		<Button disabled={invalid} on:click={() => dispatch('icSend')}>
+		<Button
+			testId={REVIEW_FORM_SEND_BUTTON}
+			disabled={invalid}
+			on:click={() => dispatch('icSend')}>
 			{$i18n.send.text.send}
 		</Button>
 	</ButtonGroup>

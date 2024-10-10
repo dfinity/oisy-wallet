@@ -31,6 +31,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { last } from '$lib/utils/array.utils';
+	import { IC_TRANSACTIONS_HEADER } from '$lib/constants/test-ids.constants';
 
 	let ckEthereum: boolean;
 	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
@@ -86,9 +87,8 @@
 
 <Info />
 
-<Header>
+<Header testId={IC_TRANSACTIONS_HEADER}>
 	{$i18n.transactions.text.title}
-
 	<svelte:fragment slot="end">
 		{#if $tokenCkBtcLedger}
 			<IcTransactionsBitcoinStatus />

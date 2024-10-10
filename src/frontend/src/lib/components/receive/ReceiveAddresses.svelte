@@ -12,7 +12,8 @@
 		RECEIVE_TOKENS_MODAL_ICRC_SECTION,
 		RECEIVE_TOKENS_MODAL_ICP_SECTION,
 		RECEIVE_TOKENS_MODAL_ETH_SECTION,
-		RECEIVE_TOKENS_MODAL_BTC_SECTION
+		RECEIVE_TOKENS_MODAL_BTC_SECTION,
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnet,
@@ -143,7 +144,13 @@
 		{$i18n.receive.ethereum.text.ethereum}
 	</ReceiveAddressWithLogo>
 
-	<button class="primary full text-center" on:click={modalStore.close} slot="toolbar"
-		>{$i18n.core.text.done}</button
+	<button
+		class="primary full text-center"
+		data-tid={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
+		on:click={modalStore.close}
+		slot="toolbar"
+	>
+		{$i18n.core.text.done}
+	</button
 	>
 </ContentWithToolbar>

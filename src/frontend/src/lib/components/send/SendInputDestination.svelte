@@ -5,6 +5,7 @@
 	import QRButton from '$lib/components/common/QRButton.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkId } from '$lib/types/network';
+	import { DESTINATION_INPUT } from '$lib/constants/test-ids.constants';
 
 	export let destination = '';
 	export let networkId: NetworkId | undefined = undefined;
@@ -24,6 +25,7 @@
 <Input
 	name="destination"
 	inputType="text"
+	testId={DESTINATION_INPUT}
 	required
 	bind:value={destination}
 	placeholder={inputPlaceholder}

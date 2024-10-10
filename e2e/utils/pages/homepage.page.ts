@@ -10,13 +10,14 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { type InternetIdentityPage } from '@dfinity/internet-identity-playwright';
 import { nonNullish } from '@dfinity/utils';
-import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
+import { expect, type Locator, type Page, type ViewportSize, type BrowserContext } from '@playwright/test';
 import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import { getReceiveTokensModalQrCodeButtonSelector } from '../selectors.utils';
 
 interface HomepageParams {
 	page: Page;
+	context?: BrowserContext;
 	viewportSize?: ViewportSize;
 }
 
@@ -30,6 +31,11 @@ interface SelectorOperationParams {
 
 interface TestIdOperationParams {
 	testId: string;
+}
+
+interface NavigateToTokenParams {
+	token: string;
+	network: string;
 }
 
 interface WaitForModalParams {
@@ -51,10 +57,12 @@ interface WaitForLocatorOptions {
 
 abstract class Homepage {
 	readonly #page: Page;
+	readonly #context?: BrowserContext;
 	readonly #viewportSize?: ViewportSize;
 
-	protected constructor({ page, viewportSize }: HomepageParams) {
+	protected constructor({ page, context, viewportSize }: HomepageParams) {
 		this.#page = page;
+		this.#context = context;
 		this.#viewportSize = viewportSize;
 	}
 
@@ -166,6 +174,70 @@ abstract class Homepage {
 		await this.#page.getByTestId(NAVIGATION_MENU_BUTTON).waitFor();
 	}
 
+	async waitForModalToDisappear({ testId }: TestIdOperationParams): Promise<void> {
+		await this.#page.getByTestId(testId).waitFor({ state: 'detached' });
+	}
+
+	async waitForBy({ testId }: TestIdOperationParams): Promise<void> {
+		await this.#page.getByTestId(testId).waitFor();
+	}
+
+	async clickBy({ testId }: TestIdOperationParams): Promise<void> {
+		await this.#page.getByTestId(testId).click();
+	}
+
+	async elementExistsBy({ testId }: TestIdOperationParams): Promise<boolean> {
+		return await this.#page.getByTestId(testId).isVisible().catch(() => false);
+	}
+
+	async getValueBy({ testId }: TestIdOperationParams): Promise<string | null> {
+		return await this.#page.getByTestId(testId).getAttribute('value');
+	}
+
+	async waitForValueToChangeByTestId({ testId, initialValue }: TestIdOperationParams & { initialValue: string }): Promise<string | null> {
+		await this.#page.waitForFunction(
+			([testId, initialValue]) => {
+				const element = document.querySelector(`[data-tid="${testId}"]`);
+				return element && element.getAttribute('value') !== initialValue;
+			},
+			[testId, initialValue]
+		);
+
+		return this.getValueBy({ testId });
+	}
+
+	async getInputValueBy({ testId }: TestIdOperationParams): Promise<string | undefined> {
+		return await this.#page.getByTestId(testId).inputValue();
+	}
+
+	async setInputValueByTestId({ testId, value }: TestIdOperationParams & { value: string }): Promise<void> {
+		await this.#page.getByTestId(testId).fill(value);
+	}
+
+	async clickCopyButton({ testId }: TestIdOperationParams): Promise<string | undefined> {
+		if (this.#context === undefined) {
+			throw new Error('Browser context is not defined');
+		}
+		await this.#context.grantPermissions(['clipboard-read', 'clipboard-write']);
+		await this.#page.getByTestId(testId).click();
+
+		return await this.#page.evaluate(async () => {
+			return await navigator.clipboard.readText();
+		});
+	}
+
+	async navigateToToken({ token, network }: NavigateToTokenParams): Promise<void> {
+		const url = new URL(this.#page.url());
+
+		url.pathname = '/transactions/';
+
+		url.searchParams.set('token', token);
+		url.searchParams.set('network', network);
+
+		await this.#page.goto(url.toString());
+	}
+
+
 	async testModalSnapshot({
 		modalOpenButtonTestId,
 		modalTestId,
@@ -202,8 +274,8 @@ export class HomepageLoggedOut extends Homepage {
 export class HomepageLoggedIn extends Homepage {
 	readonly #iiPage: InternetIdentityPage;
 
-	constructor({ page, iiPage, viewportSize }: HomepageLoggedInParams) {
-		super({ page, viewportSize });
+	constructor({ page, context, iiPage, viewportSize }: HomepageLoggedInParams) {
+		super({ page, context, viewportSize });
 
 		this.#iiPage = iiPage;
 	}

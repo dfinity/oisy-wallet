@@ -8,6 +8,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { AMOUNT_INPUT } from '$lib/constants/test-ids.constants';
 
 	export let amount: number | undefined = undefined;
 	export let tokenDecimals: number | undefined = undefined;
@@ -63,7 +64,7 @@
 	decimals={tokenDecimals}
 	{placeholder}
 	spellcheck={false}
-	testId="amount-input"
+	testId={AMOUNT_INPUT}
 	on:nnsInput={onInput}
 >
 	<MaxButton slot="inner-end" on:click={onMax} disabled={isNullish(calculateMax)} />

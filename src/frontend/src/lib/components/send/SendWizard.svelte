@@ -17,6 +17,7 @@
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'back';
+
 </script>
 
 <SendTokenContext token={$token}>

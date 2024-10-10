@@ -7,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionToken } from '$lib/types/token';
+	import { SEND_FORM_NEXT_BUTTON } from '$lib/constants/test-ids.constants';
 
 	export let source: string;
 	export let disabled: boolean | undefined = false;
@@ -29,7 +30,7 @@
 		<ButtonGroup slot="toolbar">
 			<slot name="cancel" />
 
-			<Button {disabled}>
+			<Button {disabled} testId={SEND_FORM_NEXT_BUTTON}>
 				{$i18n.core.text.next}
 			</Button>
 		</ButtonGroup>

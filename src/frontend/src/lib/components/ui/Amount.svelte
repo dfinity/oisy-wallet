@@ -3,6 +3,7 @@
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { AMOUNT_DATA } from '$lib/constants/test-ids.constants';
 
 	export let amount: BigNumber;
 
@@ -22,4 +23,4 @@
 	});
 </script>
 
-<data value={detailedValue}>{displayValue}</data>
+<data data-tid={AMOUNT_DATA} value={detailedValue}>{displayValue}</data>

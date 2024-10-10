@@ -13,14 +13,16 @@ export const TEST = JSON.parse(import.meta.env.TEST ?? false) === true;
 
 const MAINNET_DOMAIN = 'icp0.io';
 
-export const REPLICA_HOST = LOCAL ? 'http://localhost:4943/' : 'https://icp-api.io';
+const LOCALHOST_PORT = 4943;
+
+export const REPLICA_HOST = LOCAL ? `http://localhost:${LOCALHOST_PORT}/` : 'https://icp-api.io';
 
 export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_INTERNET_IDENTITY_CANISTER_ID
 	: undefined;
 
 export const INTERNET_IDENTITY_ORIGIN = LOCAL
-	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
+	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:${LOCALHOST_PORT}`
 	: 'https://identity.ic0.app';
 
 export const POUH_ISSUER_CANISTER_ID = LOCAL
@@ -35,7 +37,7 @@ export const POUH_ISSUER_CANISTER_ID = LOCAL
 
 export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 	? LOCAL
-		? `http://${POUH_ISSUER_CANISTER_ID}.localhost:4943`
+		? `http://${POUH_ISSUER_CANISTER_ID}.localhost:${LOCALHOST_PORT}`
 		: STAGING
 			? `https://${POUH_ISSUER_CANISTER_ID}.${MAINNET_DOMAIN}`
 			: // BETA and PROD

@@ -7,6 +7,7 @@
 	export let address: string;
 	export let qrCodeAriaLabel: string;
 	export let copyAriaLabel: string;
+	export let copyTestId: string | undefined = undefined;
 
 	let text = false;
 	$: text = nonNullish($$slots.text);
@@ -25,7 +26,7 @@
 		<div class="flex items-start justify-between gap-4">
 			<output id="ic-wallet-address" class="break-all">{address}</output>
 
-			<ReceiveActions on:click {qrCodeAriaLabel} {address} {copyAriaLabel} />
+			<ReceiveActions on:click {qrCodeAriaLabel} {address} {copyAriaLabel} {copyTestId} />
 		</div>
 
 		<slot />

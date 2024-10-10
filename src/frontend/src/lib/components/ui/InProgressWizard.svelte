@@ -8,6 +8,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { confirmToCloseBrowser } from '$lib/utils/before-unload.utils';
+	import { IN_PROGESS_MODAL } from '$lib/constants/test-ids.constants';
 
 	export let progressStep: string = ProgressStepsSend.INITIALIZATION;
 	export let steps: [ProgressStep, ...ProgressStep[]];
@@ -27,7 +28,7 @@
 		})();
 </script>
 
-<div class="stretch">
+<div class="stretch" data-tid={IN_PROGESS_MODAL}>
 	<Warning>
 		<span>{$i18n.core.warning.may_take_a_few_seconds}</span>
 		<br />

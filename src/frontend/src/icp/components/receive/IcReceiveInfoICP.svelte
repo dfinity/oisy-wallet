@@ -9,6 +9,11 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON,
+		RECEIVE_TOKENS_MODAL_DONE_BUTTON,
+		RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON
+	} from '$lib/constants/test-ids.constants';
 
 	const { close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
@@ -24,6 +29,7 @@
 		address={$icrcAccountIdentifierText ?? ''}
 		qrCodeAriaLabel={$i18n.wallet.text.display_wallet_address_qr}
 		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+		copyTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON}
 		on:click={() =>
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
@@ -43,6 +49,7 @@
 		address={$icpAccountIdentifierText ?? ''}
 		qrCodeAriaLabel={$i18n.receive.icp.text.display_account_id_qr}
 		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
+		copyTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON}
 		on:click={() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
@@ -53,7 +60,12 @@
 		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_icp_deposit}</svelte:fragment>
 	</ReceiveAddress>
 
-	<button class="primary full text-center" on:click={close} slot="toolbar">
+	<button
+		class="primary full text-center"
+		data-tid={RECEIVE_TOKENS_MODAL_DONE_BUTTON}
+		on:click={close}
+		slot="toolbar"
+	>
 		{$i18n.core.text.done}
 	</button>
 </ContentWithToolbar>
