@@ -1,3 +1,4 @@
+import type { Account } from '$declarations/signer/signer.did';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -56,6 +57,13 @@ export const SIGNER_CANISTER_ID = LOCAL
 	: STAGING
 		? import.meta.env.VITE_STAGING_SIGNER_CANISTER_ID
 		: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
+
+export const SIGNER_PAYMENT_TYPE = {
+	PatronPaysIcrc2Cycles: {
+		owner: BACKEND_CANISTER_PRINCIPAL,
+		subaccount: []
+	} as Account
+};
 
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds

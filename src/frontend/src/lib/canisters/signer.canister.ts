@@ -8,7 +8,7 @@ import type {
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
-import { BACKEND_CANISTER_PRINCIPAL } from '$lib/constants/app.constants';
+import { SIGNER_PAYMENT_TYPE } from '$lib/constants/app.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -78,14 +78,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		/* Note: `eth_address` gets the Ethereum address of a given principal, defaulting to the caller if not provided. */
 		/*       In OISY, we derive the ETH address from the caller. Therefore, we are not providing a principal as an argument. */
-		const response = await eth_address({ principal: [] }, [
-			{
-				PatronPaysIcrc2Cycles: {
-					owner: BACKEND_CANISTER_PRINCIPAL,
-					subaccount: []
-				}
-			}
-		]);
+		const response = await eth_address({ principal: [] }, [SIGNER_PAYMENT_TYPE]);
 
 		if ('Err' in response) {
 			throw mapSignerCanisterGetEthAddressError(response.Err);
