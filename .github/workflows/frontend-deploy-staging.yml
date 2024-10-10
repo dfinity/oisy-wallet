@@ -50,62 +50,74 @@ jobs:
       - name: Set Environment Variables Based on Network
         run: |
           if [ "$NETWORK" == "staging" ]; then
-            export VITE_ETHERSCAN_API_KEY="${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}"
-            export VITE_INFURA_API_KEY="${{ secrets.VITE_INFURA_API_KEY_STAGING }}"
-            export VITE_ALCHEMY_API_KEY="${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}"
-            export VITE_WALLET_CONNECT_PROJECT_ID="${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}"
-            export VITE_OISY_URL="${{ secrets.VITE_OISY_URL_STAGING }}"
-            export VITE_AIRDROP="${{ secrets.VITE_AIRDROP_STAGING }}"
-            export VITE_AIRDROP_COMPLETED="${{ secrets.VITE_AIRDROP_COMPLETED_STAGING }}"
-            export VITE_COINGECKO_API_URL="${{ secrets.VITE_COINGECKO_API_URL_STAGING }}"
-            export VITE_COINGECKO_API_KEY="${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}"
-            export VITE_JUNO_SATELLITE_ID="${{ secrets.VITE_JUNO_SATELLITE_ID_STAGING }}"
-            export VITE_JUNO_ORBITER_ID="${{ secrets.VITE_JUNO_ORBITER_ID_STAGING }}"
-            export VITE_POUH_ENABLED="${{ secrets.VITE_POUH_ENABLED_STAGING }}"
-            export VITE_AUTH_ALTERNATIVE_ORIGINS="${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}"
-            export VITE_AUTH_DERIVATION_ORIGIN="${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}"
-            export VITE_NETWORK_BITCOIN_ENABLED="${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_STAGING }}"
-            export VITE_ONRAMPER_API_KEY_DEV="${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}"
-            export VITE_ONRAMPER_API_KEY_PROD="${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}"
-            export DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_STAGING }}"
+            echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_COINGECKO_API_URL=${{ secrets.VITE_COINGECKO_API_URL_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
+            {
+              echo 'DFX_DEPLOY_KEY<<EOF'
+              echo "${{ secrets.DFX_DEPLOY_KEY_STAGING }}"
+              echo 'EOF'
+            } >> $GITHUB_ENV
           elif [ "$NETWORK" == "beta" ]; then
-            export VITE_ETHERSCAN_API_KEY="${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}"
-            export VITE_INFURA_API_KEY="${{ secrets.VITE_INFURA_API_KEY_BETA }}"
-            export VITE_ALCHEMY_API_KEY="${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}"
-            export VITE_WALLET_CONNECT_PROJECT_ID="${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}"
-            export VITE_OISY_URL="${{ secrets.VITE_OISY_URL_BETA }}"
-            export VITE_AIRDROP="${{ secrets.VITE_AIRDROP_BETA }}"
-            export VITE_AIRDROP_COMPLETED="${{ secrets.VITE_AIRDROP_COMPLETED_BETA }}"
-            export VITE_COINGECKO_API_URL="${{ secrets.VITE_COINGECKO_API_URL_BETA }}"
-            export VITE_COINGECKO_API_KEY="${{ secrets.VITE_COINGECKO_API_KEY_BETA }}"
-            export VITE_JUNO_SATELLITE_ID="${{ secrets.VITE_JUNO_SATELLITE_ID_BETA }}"
-            export VITE_JUNO_ORBITER_ID="${{ secrets.VITE_JUNO_ORBITER_ID_BETA }}"
-            export VITE_POUH_ENABLED="${{ secrets.VITE_POUH_ENABLED_BETA }}"
-            export VITE_AUTH_ALTERNATIVE_ORIGINS="${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}"
-            export VITE_AUTH_DERIVATION_ORIGIN="${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_BETA }}"
-            export VITE_NETWORK_BITCOIN_ENABLED="${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_BETA }}"
-            export VITE_ONRAMPER_API_KEY_DEV="${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}"
-            export VITE_ONRAMPER_API_KEY_PROD="${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}"
-            export DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_BETA }}"
+            echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}" >> $GITHUB_ENV
+            echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_BETA }}" >> $GITHUB_ENV
+            echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}" >> $GITHUB_ENV
+            echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}" >> $GITHUB_ENV
+            echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_BETA }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_BETA }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_BETA }}" >> $GITHUB_ENV
+            echo "VITE_COINGECKO_API_URL=${{ secrets.VITE_COINGECKO_API_URL_BETA }}" >> $GITHUB_ENV
+            echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_BETA }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_BETA }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_BETA }}" >> $GITHUB_ENV
+            echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_BETA }}" >> $GITHUB_ENV
+            echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}" >> $GITHUB_ENV
+            echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_BETA }}" >> $GITHUB_ENV
+            echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_BETA }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}" >> $GITHUB_ENV
+            {
+              echo 'DFX_DEPLOY_KEY<<EOF'
+              echo "${{ secrets.DFX_DEPLOY_KEY_BETA }}"
+              echo 'EOF'
+            } >> $GITHUB_ENV
           elif [ "$NETWORK" == "prod" ]; then
-            export VITE_ETHERSCAN_API_KEY="${{ secrets.VITE_ETHERSCAN_API_KEY_PROD }}"
-            export VITE_INFURA_API_KEY="${{ secrets.VITE_INFURA_API_KEY_PROD }}"
-            export VITE_ALCHEMY_API_KEY="${{ secrets.VITE_ALCHEMY_API_KEY_PROD }}"
-            export VITE_WALLET_CONNECT_PROJECT_ID="${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_PROD }}"
-            export VITE_OISY_URL="${{ secrets.VITE_OISY_URL_PROD }}"
-            export VITE_AIRDROP="${{ secrets.VITE_AIRDROP_PROD }}"
-            export VITE_AIRDROP_COMPLETED="${{ secrets.VITE_AIRDROP_COMPLETED_PROD }}"
-            export VITE_COINGECKO_API_URL="${{ secrets.VITE_COINGECKO_API_URL_PROD }}"
-            export VITE_COINGECKO_API_KEY="${{ secrets.VITE_COINGECKO_API_KEY_PROD }}"
-            export VITE_JUNO_SATELLITE_ID="${{ secrets.VITE_JUNO_SATELLITE_ID_PROD }}"
-            export VITE_JUNO_ORBITER_ID="${{ secrets.VITE_JUNO_ORBITER_ID_PROD }}"
-            export VITE_POUH_ENABLED="${{ secrets.VITE_POUH_ENABLED_PROD }}"
-            export VITE_AUTH_ALTERNATIVE_ORIGINS="${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_PROD }}"
-            export VITE_AUTH_DERIVATION_ORIGIN="${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_PROD }}"
-            export VITE_NETWORK_BITCOIN_ENABLED="${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_PROD }}"
-            export VITE_ONRAMPER_API_KEY_DEV="${{ secrets.VITE_ONRAMPER_API_KEY_DEV_PROD }}"
-            export VITE_ONRAMPER_API_KEY_PROD="${{ secrets.VITE_ONRAMPER_API_KEY_PROD_PROD }}"
-            export DFX_DEPLOY_KEY="${{ secrets.DFX_DEPLOY_KEY_PROD }}"
+            echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_PROD }}" >> $GITHUB_ENV
+            echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_PROD }}" >> $GITHUB_ENV
+            echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_PROD }}" >> $GITHUB_ENV
+            echo "VITE_WALLET_CONNECT_PROJECT_ID=${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_PROD }}" >> $GITHUB_ENV
+            echo "VITE_OISY_URL=${{ secrets.VITE_OISY_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP=${{ secrets.VITE_AIRDROP_PROD }}" >> $GITHUB_ENV
+            echo "VITE_AIRDROP_COMPLETED=${{ secrets.VITE_AIRDROP_COMPLETED_PROD }}" >> $GITHUB_ENV
+            echo "VITE_COINGECKO_API_URL=${{ secrets.VITE_COINGECKO_API_URL_PROD }}" >> $GITHUB_ENV
+            echo "VITE_COINGECKO_API_KEY=${{ secrets.VITE_COINGECKO_API_KEY_PROD }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_SATELLITE_ID=${{ secrets.VITE_JUNO_SATELLITE_ID_PROD }}" >> $GITHUB_ENV
+            echo "VITE_JUNO_ORBITER_ID=${{ secrets.VITE_JUNO_ORBITER_ID_PROD }}" >> $GITHUB_ENV
+            echo "VITE_POUH_ENABLED=${{ secrets.VITE_POUH_ENABLED_PROD }}" >> $GITHUB_ENV
+            echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_PROD }}" >> $GITHUB_ENV
+            echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_PROD }}" >> $GITHUB_ENV
+            echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_PROD }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_PROD }}" >> $GITHUB_ENV
+            echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_PROD }}" >> $GITHUB_ENV
+            {
+              echo 'DFX_DEPLOY_KEY<<EOF'
+              echo "${{ secrets.DFX_DEPLOY_KEY_PROD }}"
+              echo 'EOF'
+            } >> $GITHUB_ENV
           fi
 
       - name: Fail if no Identity is provided

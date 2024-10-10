@@ -28,6 +28,8 @@
 		</SendData>
 	{/if}
 
+	<slot name="info" />
+
 	<ButtonGroup slot="toolbar">
 		<ButtonBack on:click={() => dispatch('icBack')} />
 		<Button {disabled} on:click={() => dispatch('icSend')}>
