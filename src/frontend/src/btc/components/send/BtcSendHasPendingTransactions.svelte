@@ -6,7 +6,7 @@
 	export let pendingTransactionsStatus: boolean | 'loading' | 'error';
 </script>
 
-<div in:fade></div>
+<div in:fade>
 	{#if pendingTransactionsStatus === true}
 		<WarningBanner>{$i18n.send.info.pending_bitcoin_transaction}</WarningBanner>
 	{:else if pendingTransactionsStatus === 'error'}
