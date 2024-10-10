@@ -8,4 +8,5 @@
 		class:w-[52px]={size === 'small'}
 		class:w-[64px]={size === 'big'}
 	></div>
+	
 </div>
