@@ -1,7 +1,7 @@
 <script lang="ts">
 	import DAppCardGrid from '$lib/components/dapps/DAppCardGrid.svelte';
 	import FilterButtons from '$lib/components/dapps/FilterButtons.svelte';
-	import dapps from '$lib/../data/dapps.json';
+	import dApps from '$lib/../data/dapps.json';
 
 	let selectedFilter = "All dApps";
 	const filters = ["All dApps", "Signer Standard Supported", "Staking", "Other"];
@@ -12,4 +12,4 @@
 
 <FilterButtons {selectedFilter} {filters} />
 
-<DAppCardGrid {dapps} {selectedFilter} />
+<DAppCardGrid {dApps} {selectedFilter} />

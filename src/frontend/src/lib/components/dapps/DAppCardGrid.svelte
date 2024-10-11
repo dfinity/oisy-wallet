@@ -1,39 +1,42 @@
 <script lang="ts">
-	import DAppCard from './DAppCard.svelte';
-	import SubmitDAppCard from './SubmitDAppCard.svelte';
+	import { createEventDispatcher } from 'svelte';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { DApp } from '$lib/types/dapp';
 
-	export let dapps: Array<{
-		name: string,
-		description: string,
-		tags: string[],
-		imageUrl?: string
-	}> = [];
+	export let dApps: DApp[];
 
-	export let selectedFilter: string = "All dApps";
+	const dispatch = createEventDispatcher();
 
-	// Filtered dApps based on the selected filter
-	$: filteredDapps = dapps.filter(dapp => {
-		if (selectedFilter === "All dApps") return true;
-		if (selectedFilter === "Signer Standard Supported") return dapp.tags.includes("Signer");
-		if (selectedFilter === "Staking") return dapp.tags.includes("Staking");
-		if (selectedFilter === "Other") return !["Signer", "Staking"].some(tag => dapp.tags.includes(tag));
-		return true;
-	});
+	const openModal = (dApp: DApp) => {
+		dispatch('openDAppDetails');
+		modalStore.openDAppDetails(dApp);
+	};
 </script>
 
-<!-- Grid Layout for dApp Cards -->
 <div class="container mx-auto py-8">
 	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-		{#each filteredDapps as dapp (dapp.name)}
-			<DAppCard
-				name={dapp.name}
-				description={dapp.description}
-				tags={dapp.tags}
-				imageUrl={dapp.imageUrl}
-			/>
+		{#each dApps as dApp (dApp.name)}
+			<div class="rounded-lg shadow-md bg-white p-6 hover:shadow-lg transition-shadow cursor-pointer" on:click={() => openModal(dApp)}>
+				<img
+					src={dApp.imageUrl || '/default-dapp-icon.png'}
+					alt={dApp.name}
+					class="w-16 h-16 rounded-full mx-auto mb-4"
+				/>
+				<h2 class="text-center text-lg font-semibold">{dApp.name}</h2>
+				<p class="text-center text-gray-600 mt-2">{dApp.description}</p>
+				<div class="flex justify-center mt-4 space-x-2">
+					{#each dApp.tags as tag}
+						<span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded">{tag}</span>
+					{/each}
+				</div>
+			</div>
 		{/each}
 
-		<!-- Submit Your dApp Card -->
-		<SubmitDAppCard />
+		<div class="rounded-lg shadow-md bg-blue-500 p-6 flex items-center justify-center text-white cursor-pointer hover:bg-blue-600 transition-colors">
+			<a href="/submit-dapp" class="text-center">
+				<span class="block text-2xl font-semibold">+</span>
+				<p class="mt-2">Submit your DApp</p>
+			</a>
+		</div>
 	</div>
 </div>
