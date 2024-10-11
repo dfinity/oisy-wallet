@@ -18,6 +18,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -97,9 +98,7 @@
 		}
 
 		if (isNullish($authIdentity)) {
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected }
-			});
+			await nullishSignOut();
 			return;
 		}
 
