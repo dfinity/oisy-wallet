@@ -11,6 +11,7 @@
 	import FeeAmountDisplay from '$icp-eth/components/fee/FeeAmountDisplay.svelte';
 	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 	import type { Option } from '$lib/types/utils';
@@ -25,7 +26,7 @@
 </script>
 
 {#if nonNullish($store)}
-	<div transition:slide={{ duration: 250 }}>
+	<div transition:slide={SLIDE_DURATION}>
 		<Value ref="kyt-fee">
 			<svelte:fragment slot="label">{$i18n.fee.text.estimated_eth}</svelte:fragment>
 
