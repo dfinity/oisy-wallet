@@ -440,15 +440,12 @@ const sendTransaction = async ({
 };
 
 const prepareAndSignApproval = async ({
-	progress,
-	token,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	gas,
 	sourceNetwork,
 	identity,
-	nonce,
-	spender,
+	progress,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from' | 'to'> &
 	Omit<SendParams, 'targetNetwork' | 'lastProgressStep' | 'progress' | 'minterInfo'> &
@@ -467,14 +464,11 @@ const prepareAndSignApproval = async ({
 
 	const approve = await erc20ContractPrepareApprove({
 		...rest,
-		nonce,
 		gas: gas.toBigInt(),
 		maxFeePerGas: maxFeePerGas.toBigInt(),
 		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
 		chainId,
-		networkId,
-		token,
-		spender
+		networkId
 	});
 
 	progress?.(ProgressStepsSend.SIGN_APPROVE);
@@ -491,16 +485,9 @@ const prepareAndSignApproval = async ({
 };
 
 const approve = async ({
-	progress,
 	token,
 	to,
-	maxFeePerGas,
-	maxPriorityFeePerGas,
-	gas,
-	sourceNetwork,
-	identity,
 	minterInfo,
-	nonce,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from'> &
 	Omit<SendParams, 'targetNetwork' | 'lastProgressStep'> &
@@ -526,15 +513,8 @@ const approve = async ({
 
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
 		...rest,
-		nonce,
-		gas,
-		maxFeePerGas,
-		maxPriorityFeePerGas,
 		token,
-		spender: erc20HelperContractAddress,
-		progress,
-		sourceNetwork,
-		identity
+		spender: erc20HelperContractAddress
 	});
 
 	return { transactionApproved, hash };
