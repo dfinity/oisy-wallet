@@ -98,14 +98,12 @@ describe('backend.canister', () => {
 	const btcSelectUserUtxosFeeParams = {
 		network: btcAddPendingTransactionParams.network,
 		minConfirmations: [100],
-		amountSatoshis: 100n,
-		sourceAddress: mockBtcAddress
+		amountSatoshis: 100n
 	} as BtcSelectUserUtxosFeeParams;
 	const btcSelectUserUtxosFeeEndpointParams = {
 		network: btcSelectUserUtxosFeeParams.network,
 		min_confirmations: btcSelectUserUtxosFeeParams.minConfirmations,
-		amount_satoshis: btcSelectUserUtxosFeeParams.amountSatoshis,
-		source_address: btcSelectUserUtxosFeeParams.sourceAddress
+		amount_satoshis: btcSelectUserUtxosFeeParams.amountSatoshis
 	};
 
 	const mockedUserProfile = {

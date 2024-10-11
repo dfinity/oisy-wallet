@@ -7,9 +7,9 @@ import { derived, type Readable } from 'svelte/store';
 export const networks: Readable<Network[]> = derived(
 	[enabledBitcoinNetworks, enabledEthereumNetworks],
 	([$enabledBitcoinNetworks, $enabledEthereumNetworks]) => [
-		ICP_NETWORK,
+		...$enabledBitcoinNetworks,
 		...$enabledEthereumNetworks,
-		...$enabledBitcoinNetworks
+		ICP_NETWORK
 	]
 );
 

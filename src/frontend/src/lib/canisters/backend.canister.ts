@@ -151,16 +151,14 @@ export class BackendCanister extends Canister<BackendService> {
 	btcSelectUserUtxosFee = async ({
 		network,
 		minConfirmations,
-		amountSatoshis,
-		sourceAddress
+		amountSatoshis
 	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
 			network,
 			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis,
-			source_address: sourceAddress
+			amount_satoshis: amountSatoshis
 		});
 
 		if ('Ok' in response) {
