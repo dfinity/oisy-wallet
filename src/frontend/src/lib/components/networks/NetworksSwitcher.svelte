@@ -7,7 +7,7 @@
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
-	import { SLIDE_QUINT_OUT } from '$lib/constants/transition.constants';
+	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/settings.derived';
@@ -53,7 +53,7 @@
 		</div>
 
 		{#if $testnetsEnabled}
-			<ul class="mb-2 flex list-none flex-col gap-4 font-normal" transition:slide={SLIDE_QUINT_OUT}>
+			<ul class="mb-2 flex list-none flex-col gap-4 font-normal" transition:slide={SLIDE_EASING}>
 				{#each $networksTestnets as network}
 					<li>
 						<Network {network} on:icSelected={dropdown.close} />
