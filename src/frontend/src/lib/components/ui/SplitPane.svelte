@@ -5,7 +5,7 @@
 		<slot name="menu" />
 	</div>
 
-	<div class="main-content mx-auto px-5 transition-all duration-500 ease-linear sm:w-3/4">
+	<div class="mx-auto px-5 transition-all duration-500 ease-linear sm:box-content sm:w-sm">
 		<slot />
 	</div>
 
