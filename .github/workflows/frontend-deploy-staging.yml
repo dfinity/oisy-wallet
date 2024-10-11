@@ -13,7 +13,7 @@ on:
         options:
           - staging
           - beta
-          - prod
+          - ic
       canister:
         required: true
         type: choice
@@ -98,7 +98,7 @@ jobs:
               echo "${{ secrets.DFX_DEPLOY_KEY_BETA }}"
               echo 'EOF'
             } >> $GITHUB_ENV
-          elif [ "$NETWORK" == "prod" ]; then
+          elif [ "$NETWORK" == "ic" ]; then
             echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_PROD }}" >> $GITHUB_ENV
             echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_PROD }}" >> $GITHUB_ENV
             echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_PROD }}" >> $GITHUB_ENV
@@ -156,6 +156,6 @@ jobs:
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
               echo "No changes in specified files/folders detected, skipping backend deployment."
             else            
-              ./scripts/deploy.backend.sh
+              ENV=$NETWORK ./scripts/deploy.backend.sh
             fi
           fi
