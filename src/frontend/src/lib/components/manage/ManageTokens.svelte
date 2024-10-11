@@ -87,17 +87,16 @@
 	$: manageEthereumTokens = $pseudoNetworkChainFusion || $networkEthereum;
 
 	let allTokens: TokenToggleable<Token>[] = [];
-	$: allTokens =
-		[
-			{
-				...ICP_TOKEN,
-				enabled: true
-			},
-			...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
-			...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
-			...(manageEthereumTokens ? allErc20Tokens : []),
-			...(manageIcTokens ? allIcrcTokens : [])
-		]
+	$: allTokens = [
+		{
+			...ICP_TOKEN,
+			enabled: true
+		},
+		...$enabledBitcoinTokens.map((token) => ({ ...token, enabled: true })),
+		...$enabledEthereumTokens.map((token) => ({ ...token, enabled: true })),
+		...(manageEthereumTokens ? allErc20Tokens : []),
+		...(manageIcTokens ? allIcrcTokens : [])
+	];
 
 	let allTokensSorted: Token[] = [];
 	$: allTokensSorted = nonNullish(exchangesStaticData)
