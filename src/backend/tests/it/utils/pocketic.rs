@@ -14,7 +14,9 @@ use std::sync::Arc;
 use std::time::UNIX_EPOCH;
 use std::{env, time::Duration};
 
-use super::mock::{CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN};
+use super::mock::{
+    CONTROLLER, II_CANISTER_ID, II_ORIGIN, ISSUER_CANISTER_ID, ISSUER_ORIGIN, SIGNER_CANISTER_ID,
+};
 
 const BACKEND_WASM: &str = "../../target/wasm32-unknown-unknown/release/backend.wasm";
 const DEFAULT_BITCOIN_WASM: &str = "../../ic-btc-canister.wasm.gz";
@@ -317,7 +319,9 @@ pub(crate) fn init_arg() -> Arg {
             credential_type: CredentialType::ProofOfUniqueness,
         }]),
         api: None,
-        cfs_canister_id: None,
+        cfs_canister_id: Some(
+            Principal::from_text(SIGNER_CANISTER_ID.to_string()).expect("wrong cfs canister id"),
+        ),
     })
 }
 
