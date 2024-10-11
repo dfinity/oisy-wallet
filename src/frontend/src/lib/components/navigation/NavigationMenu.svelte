@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import IconSettings from '$lib/components/icons/IconSettings.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
@@ -14,30 +13,22 @@
 		: isRouteTransactions($page)
 			? 'transactions'
 			: 'tokens';
-
-	const gotoAssets = async () => {
-		await goto('/');
-	};
-
-	const gotoSettings = async () => {
-		await goto(`/settings?${networkParam($networkId)}`);
-	};
 </script>
 
 <div class=" flex w-full flex-col gap-3 py-3">
 	<NavigationItem
+		href="/"
 		ariaLabel={$i18n.navigation.text.homepage}
 		selected={route === 'tokens' || route === 'transactions'}
-		on:click={gotoAssets}
 	>
 		<IconWallet />
 		{$i18n.navigation.text.homepage}
 	</NavigationItem>
 
 	<NavigationItem
+		href={`/settings?${networkParam($networkId)}`}
 		ariaLabel={$i18n.navigation.text.settings}
 		selected={route === 'settings'}
-		on:click={gotoSettings}
 	>
 		<IconSettings />
 		{$i18n.navigation.text.settings}
