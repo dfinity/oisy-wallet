@@ -4,6 +4,7 @@
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
+	import type { UtxosFee } from '$btc/types/btc-send';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -13,6 +14,7 @@
 		btcAddressRegtest,
 		btcAddressTestnet
 	} from '$lib/derived/address.derived';
+	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
@@ -25,6 +27,10 @@
 	export let formCancelAction: 'back' | 'close' = 'close';
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
+
+	let utxosFee: UtxosFee | undefined = undefined;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sendToken.network.id;
@@ -47,7 +53,16 @@
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
-	<BtcSendReview on:icBack on:icSend={send} {destination} {amount} {networkId} {source} />
+	<BtcSendReview
+		on:icBack
+		on:icSend={send}
+		bind:utxosFee
+		{progress}
+		{destination}
+		{amount}
+		{networkId}
+		{source}
+	/>
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<BtcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
