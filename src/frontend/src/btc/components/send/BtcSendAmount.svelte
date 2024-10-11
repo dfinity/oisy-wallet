@@ -2,8 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
-	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
-	import { IcAmountAssertionError } from '$icp/types/ic-send';
+	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { tokenDecimals } from '$lib/derived/token.derived';
@@ -27,7 +26,7 @@
 
 	$: customValidate = (userAmount: BigNumber): Error | undefined => {
 		if (nonNullish($sendBalance) && userAmount.gt($sendBalance)) {
-			return new IcAmountAssertionError($i18n.send.assertion.insufficient_funds);
+			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 		}
 	};
 </script>
