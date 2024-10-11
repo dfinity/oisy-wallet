@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { BigNumber } from 'alchemy-sdk';
 	import { getContext } from 'svelte';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
+	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendInputAmount from '$lib/components/send/SendInputAmount.svelte';
 	import { tokenDecimals } from '$lib/derived/token.derived';
-	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
-	import type { BigNumber } from 'alchemy-sdk';
-	import { IcAmountAssertionError } from '$icp/types/ic-send';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { getMaxTransactionAmount } from '$lib/utils/token.utils';
 
 	export let amount: number | undefined = undefined;
 	export let amountError: BtcAmountAssertionError | undefined;
