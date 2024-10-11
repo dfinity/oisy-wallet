@@ -1,10 +1,23 @@
+import {
+	BTC_MAINNET_NETWORK_ID,
+	ETHEREUM_NETWORK,
+	ETHEREUM_NETWORK_ID,
+	ICP_NETWORK,
+	ICP_NETWORK_ID,
+	SEPOLIA_NETWORK
+} from '$env/networks.env';
 import { ONRAMPER_API_KEY, ONRAMPER_BASE_URL } from '$env/onramper.env';
 import { ETHEREUM_TOKEN, ICP_TOKEN, SEPOLIA_TOKEN } from '$env/tokens.env';
-import type { OnramperCryptoWallet, OnramperWalletAddress } from '$lib/types/onramper';
+import type {
+	OnramperCryptoWallet,
+	OnramperNetworkWallet,
+	OnramperWalletAddress
+} from '$lib/types/onramper';
 import type { TokenStandard } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 import {
 	buildOnramperLink,
+	mapOnramperNetworkWallets,
 	mapOnramperWallets,
 	type BuildOnramperLinkParams
 } from '$lib/utils/onramper.utils';
@@ -146,6 +159,50 @@ describe('mapOnramperWallets', () => {
 		];
 
 		const result = mapOnramperWallets({ tokens, walletMap: newWalletMap });
+
+		expect(result).toEqual(expectedWallets);
+	});
+});
+
+describe('mapOnramperNetworkWallets', () => {
+	const walletMap: Map<symbol, Option<OnramperWalletAddress>> = new Map([
+		[BTC_MAINNET_NETWORK_ID, 'btc-address'],
+		[ETHEREUM_NETWORK_ID, 'eth-address'],
+		[ICP_NETWORK_ID, 'icp-address']
+	]);
+
+	it('should return correct wallets when tokens have valid cryptoIds and wallets', () => {
+		const networks = [ICP_NETWORK, ETHEREUM_NETWORK, SEPOLIA_NETWORK];
+
+		const expectedWallets: OnramperNetworkWallet[] = [
+			{ networkId: ICP_NETWORK.buy?.onramperId ?? 'icp', wallet: 'icp-address' },
+			{ networkId: ETHEREUM_NETWORK.buy?.onramperId ?? 'icp', wallet: 'eth-address' }
+		];
+
+		const result = mapOnramperNetworkWallets({ networks, walletMap });
+
+		expect(result).toEqual(expectedWallets);
+	});
+
+	it('should return an empty array if no valid tokens are present', () => {
+		const networks = [SEPOLIA_NETWORK];
+
+		const result = mapOnramperNetworkWallets({ networks, walletMap });
+
+		expect(result).toEqual([]);
+	});
+
+	it('should handle cases where wallet addresses are null or undefined', () => {
+		const networks = [ICP_NETWORK, ETHEREUM_NETWORK];
+
+		const newWalletMap: Map<symbol, Option<OnramperWalletAddress>> = new Map(walletMap);
+		newWalletMap.set(ETHEREUM_NETWORK_ID, undefined);
+
+		const expectedWallets: OnramperNetworkWallet[] = [
+			{ networkId: ICP_NETWORK.buy?.onramperId ?? 'icp', wallet: 'icp-address' }
+		];
+
+		const result = mapOnramperNetworkWallets({ networks, walletMap: newWalletMap });
 
 		expect(result).toEqual(expectedWallets);
 	});
