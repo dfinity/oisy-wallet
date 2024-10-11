@@ -65,7 +65,7 @@
 		</div>
 	{/if}
 
-	<div transition:slide={SLIDE_PARAMS} class="flex w-full justify-center text-left">
+	<div transition:slide|local={SLIDE_PARAMS} class="flex w-full justify-center text-left">
 		<Actions />
 	</div>
 
