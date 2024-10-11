@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
 	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
@@ -64,11 +65,13 @@
 	{#if isNullish(utxosFee)}
 		<span class="mt-2 block w-full max-w-[140px]"><SkeletonText /></span>
 	{:else}
-		{formatToken({
-			value: BigNumber.from(utxosFee.feeSatoshis),
-			unitName: $sendTokenDecimals,
-			displayDecimals: $sendTokenDecimals
-		})}
+		<span in:fade>
+			{formatToken({
+				value: BigNumber.from(utxosFee.feeSatoshis),
+				unitName: $sendTokenDecimals,
+				displayDecimals: $sendTokenDecimals
+			})}
+		</span>
 		BTC
 	{/if}
 </Value>
