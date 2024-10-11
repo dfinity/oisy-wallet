@@ -9,25 +9,29 @@ on:
       network:
         required: true
         type: choice
-        description: "Select the network to deploy to."
+        description: 'Select the network to deploy to.'
         options:
           - staging
           - beta
-          - prod
+          - ic
       canister:
         required: true
         type: choice
-        description: "Select the canister to deploy."
+        description: 'Select the canister to deploy.'
         options:
           - frontend
           - backend
+      force-backend:
+        required: false
+        type: boolean
+        description: 'Choose whether to force backend deployment even if no changes are detected.'
+        default: false
 
 jobs:
   deployment:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Fail if branch is not main
         if: ${{ github.ref != 'refs/heads/main' }}
         run: |
@@ -67,6 +71,7 @@ jobs:
             echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}" >> $GITHUB_ENV
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_STAGING }}" >> $GITHUB_ENV
             echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_STAGING }}" >> $GITHUB_ENV
+            echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}" >> $GITHUB_ENV
             {
@@ -90,6 +95,7 @@ jobs:
             echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}" >> $GITHUB_ENV
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_BETA }}" >> $GITHUB_ENV
             echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_BETA }}" >> $GITHUB_ENV
+            echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}" >> $GITHUB_ENV
             {
@@ -97,7 +103,7 @@ jobs:
               echo "${{ secrets.DFX_DEPLOY_KEY_BETA }}"
               echo 'EOF'
             } >> $GITHUB_ENV
-          elif [ "$NETWORK" == "prod" ]; then
+          elif [ "$NETWORK" == "ic" ]; then
             echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_PROD }}" >> $GITHUB_ENV
             echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_PROD }}" >> $GITHUB_ENV
             echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_PROD }}" >> $GITHUB_ENV
@@ -113,6 +119,7 @@ jobs:
             echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_PROD }}" >> $GITHUB_ENV
             echo "VITE_AUTH_DERIVATION_ORIGIN=${{ secrets.VITE_AUTH_DERIVATION_ORIGIN_PROD }}" >> $GITHUB_ENV
             echo "VITE_NETWORK_BITCOIN_ENABLED=${{ secrets.VITE_NETWORK_BITCOIN_ENABLED_PROD }}" >> $GITHUB_ENV
+            echo "VITE_BLOCKCHAIN_API_URL=https://blockchain.info" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_DEV=${{ secrets.VITE_ONRAMPER_API_KEY_DEV_PROD }}" >> $GITHUB_ENV
             echo "VITE_ONRAMPER_API_KEY_PROD=${{ secrets.VITE_ONRAMPER_API_KEY_PROD_PROD }}" >> $GITHUB_ENV
             {
@@ -148,12 +155,17 @@ jobs:
 
       - name: Deploy to Environment
         run: |
-          if [ "$CANISTER" == "frontend" ]; then
+          if [ "$CANISTER" == "frontend" || "${{ github.event_name }}" == "push" ]; then
             dfx deploy $CANISTER --network $NETWORK
-          elif [ "$CANISTER" == "backend" ]; then
+          fi
+          if [ "$CANISTER" == "backend" || "${{ github.event_name }}" == "push" ]; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
-              echo "No changes in specified files/folders detected, skipping backend deployment."
+              if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
+                echo "No changes in specified files/folders detected, skipping backend deployment."
+              else
+                ENV=$NETWORK ./scripts/deploy.backend.sh
+              fi
             else            
-              ./scripts/deploy.backend.sh
+              ENV=$NETWORK ./scripts/deploy.backend.sh
             fi
           fi
