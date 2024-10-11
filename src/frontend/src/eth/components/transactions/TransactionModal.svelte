@@ -134,6 +134,6 @@
 			</output>
 		</Value>
 
-		<ButtonCloseModal colorStyle="primary" fullWidth slot="toolbar" />
+		<ButtonCloseModal colorStyle="primary" slot="toolbar" />
 	</ContentWithToolbar>
 </Modal>
