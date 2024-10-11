@@ -137,9 +137,14 @@
 					})}</svelte:fragment
 				>
 
-				<button class="secondary full center mb-4 mt-3" on:click={() => dispatch('icConvert')}>
+				<Button
+					colorStyle="secondary"
+					fullWidth
+					styleClass="mb-4 mt-3"
+					on:click={() => dispatch('icConvert')}
+				>
 					<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
-				</button>
+				</Button>
 			</Value>
 		</div>
 	</div>
