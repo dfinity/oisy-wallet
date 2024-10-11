@@ -1,21 +1,59 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { BigNumber } from '@ethersproject/bignumber';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
-	import { BTC_DECIMALS } from '$env/tokens.btc.env';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import Value from '$lib/components/ui/Value.svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { toastsError } from '$lib/stores/toasts.store';
+	import type { NetworkId } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
+	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
 	export let utxosFee: UtxosFee | undefined = undefined;
+	export let amount: number | undefined = undefined;
+	export let networkId: NetworkId | undefined = undefined;
+	export let progress: (step: ProgressStepsSendBtc) => void;
+
+	const { sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher();
 
-	onMount(() => {
+	const selectUtxosFee = async () => {
+		try {
+			// all required params should be already defined at this stage
+			if (isNullish(amount) || isNullish(networkId) || isNullish($authIdentity)) {
+				return;
+			}
+
+			const network = mapNetworkIdToBitcoinNetwork(networkId);
+
+			utxosFee = nonNullish(network)
+				? await selectUtxosFeeApi({
+						amount,
+						network,
+						progress,
+						identity: $authIdentity
+					})
+				: undefined;
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.send.error.unexpected_utxos_fee },
+				err
+			});
+
+			dispatch('icBack');
+		}
+	};
+
+	onMount(async () => {
 		if (isNullish(utxosFee)) {
-			dispatch('icSelectUtxosFee');
+			await selectUtxosFee();
 		}
 	});
 </script>
@@ -28,8 +66,8 @@
 	{:else}
 		{formatToken({
 			value: BigNumber.from(utxosFee.feeSatoshis),
-			unitName: BTC_DECIMALS,
-			displayDecimals: BTC_DECIMALS
+			unitName: $sendTokenDecimals,
+			displayDecimals: $sendTokenDecimals
 		})}
 		BTC
 	{/if}

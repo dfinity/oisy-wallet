@@ -1,11 +1,9 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import { selectUtxosFee as selectUtxosFeeApi } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
@@ -16,17 +14,10 @@
 		btcAddressRegtest,
 		btcAddressTestnet
 	} from '$lib/derived/address.derived';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NetworkId } from '$lib/types/network';
-	import {
-		isNetworkIdBTCRegtest,
-		isNetworkIdBTCTestnet,
-		mapNetworkIdToBitcoinNetwork
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
 	export let currentStep: WizardStep | undefined;
@@ -59,39 +50,14 @@
 
 	// TODO: implement send function when related services are ready
 	const send = () => {};
-
-	const selectUtxosFee = async () => {
-		try {
-			// all required params should be already defined at this stage
-			if (nonNullish(amount) && nonNullish(networkId) && nonNullish($authIdentity)) {
-				const network = mapNetworkIdToBitcoinNetwork(networkId);
-
-				utxosFee = nonNullish(network)
-					? await selectUtxosFeeApi({
-							amount,
-							network,
-							progress,
-							identity: $authIdentity
-						})
-					: undefined;
-			}
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected_utxos_fee },
-				err
-			});
-
-			dispatch('icBack');
-		}
-	};
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
 	<BtcSendReview
 		on:icBack
 		on:icSend={send}
-		on:icSelectUtxosFee={selectUtxosFee}
-		{utxosFee}
+		bind:utxosFee
+		{progress}
 		{destination}
 		{amount}
 		{networkId}
