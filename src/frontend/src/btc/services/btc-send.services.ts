@@ -9,8 +9,7 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import { toNullable } from '@dfinity/utils';
-import { hexStringToUint8Array } from '@dfinity/utils/dist/types/utils/arrays.utils';
+import { hexStringToUint8Array, toNullable } from '@dfinity/utils';
 
 const DEFAULT_MIN_CONFIRMATIONS = 6;
 
