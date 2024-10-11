@@ -7,11 +7,6 @@
 	export let colorStyle: ButtonColorStyle = 'secondary';
 </script>
 
-<Button
-	{colorStyle}
-	type="button"
-	fullWidth
-	on:click={modalStore.close}
->
+<Button {colorStyle} type="button" fullWidth on:click={modalStore.close}>
 	{$i18n.core.text.close}
 </Button>
