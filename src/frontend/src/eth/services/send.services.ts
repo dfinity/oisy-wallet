@@ -170,6 +170,28 @@ const ckErc20HelperContractPrepareTransaction = async ({
 };
 
 /**
+ * Get the current allowance of an Erc20 contract.
+ */
+const erc20ContractAllowance = async ({
+	token,
+	owner,
+	spender,
+	networkId
+}: {
+	networkId: NetworkId;
+	owner: EthAddress;
+	spender: EthAddress;
+} & Pick<SendParams, 'token'>): Promise<BigNumber> => {
+	const { allowance } = infuraErc20Providers(networkId);
+
+	return await allowance({
+		contract: token as Erc20Token,
+		owner,
+		spender
+	});
+};
+
+/**
  * Prepare an Erc20 contract to approve a transaction from another contract (address).
  * i.e. tell an Erc20 contract to approve a transaction from the ckErc20 helper.
  *
