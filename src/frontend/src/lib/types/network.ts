@@ -1,5 +1,6 @@
 import type { OnramperNetworkId } from '$lib/types/onramper';
 import type { AtLeastOne } from '$lib/types/utils';
+import type { ComponentType } from 'svelte';
 
 export type NetworkId = symbol;
 
@@ -10,6 +11,7 @@ export interface Network {
 	env: NetworkEnvironment;
 	name: string;
 	icon?: string;
+	iconBW?: ComponentType;
 	buy?: AtLeastOne<NetworkBuy>;
 }
 

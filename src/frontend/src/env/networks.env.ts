@@ -12,6 +12,9 @@ import eth from '$icp-eth/assets/eth.svg';
 import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import icpLight from '$icp/assets/icp_light.svg';
+import IconBitcoinBW from '$lib/components/icons/networks/IconBitcoinBW.svelte';
+import IconEthereumBW from '$lib/components/icons/networks/IconEthereumBW.svelte';
+import IconIcpBW from '$lib/components/icons/networks/IconIcpBW.svelte';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 
@@ -28,6 +31,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	name: 'Ethereum',
 	chainId: 1n,
 	icon: eth,
+	iconBW: IconEthereumBW,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
 	buy: { onramperId: 'ethereum' }
 };
@@ -78,6 +82,7 @@ export const ICP_NETWORK: Network = {
 	env: 'mainnet',
 	name: 'Internet Computer',
 	icon: icpLight,
+	iconBW: IconIcpBW,
 	buy: { onramperId: 'icp' }
 };
 
@@ -93,6 +98,7 @@ export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 	env: 'mainnet',
 	name: 'Bitcoin',
 	icon: bitcoin,
+	iconBW: IconBitcoinBW,
 	explorerUrl: BTC_MAINNET_EXPLORER_URL,
 	buy: { onramperId: 'bitcoin' }
 };
