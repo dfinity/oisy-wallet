@@ -59,6 +59,8 @@ export const sendBtc = async ({
 	// TODO: use txid returned by this method to register it as a pending transaction in BE
 	const { txid } = await send({ progress, utxosFee, network, identity, ...rest });
 
+	progress(ProgressStepsSendBtc.RELOAD);
+
 	await addPendingBtcTransaction({
 		identity,
 		network: mapToSignerBitcoinNetwork({ network }),
@@ -66,8 +68,6 @@ export const sendBtc = async ({
 		txId: hexStringToUint8Array(txid),
 		utxos: utxosFee.utxos
 	});
-
-	progress(ProgressStepsSendBtc.RELOAD);
 
 	await waitAndTriggerWallet();
 };
