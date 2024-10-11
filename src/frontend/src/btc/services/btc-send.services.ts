@@ -9,28 +9,27 @@ import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import { toNullable } from '@dfinity/utils';
 
 const DEFAULT_MIN_CONFIRMATIONS = 6;
 
-type BtcSendServiceParams<T = unknown> = {
+interface BtcSendServiceParams {
 	identity: Identity;
 	network: BitcoinNetwork;
 	amount: number;
 	progress: (step: ProgressStepsSendBtc) => void;
-} & T;
+}
 
-type SendBtcParams = BtcSendServiceParams<{
+type SendBtcParams = BtcSendServiceParams & {
 	destination: BtcAddress;
 	utxosFee: UtxosFee;
-}>;
+};
 
 export const selectUtxosFee = async ({
 	identity,
 	network,
 	amount
-}: BtcSendServiceParams<{
-	sourceAddress: BtcAddress;
-}>): Promise<UtxosFee> => {
+}: BtcSendServiceParams): Promise<UtxosFee> => {
 	const satoshisAmount = convertNumberToSatoshis({ amount });
 	const signerBitcoinNetwork = mapToSignerBitcoinNetwork({ network });
 
@@ -72,7 +71,7 @@ const send = async ({
 	return sendBtcApi({
 		identity,
 		network: signerBitcoinNetwork,
-		feeSatoshis: [utxosFee.feeSatoshis],
+		feeSatoshis: toNullable(utxosFee.feeSatoshis),
 		utxosToSpend: utxosFee.utxos,
 		outputs: [{ destination_address: destination, sent_satoshis: satoshisAmount }]
 	});
