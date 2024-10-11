@@ -7,7 +7,7 @@
 	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
 </script>
 
-{#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.PRESENT}
+{#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
 	<div in:fade>
 		<WarningBanner>{$i18n.send.info.pending_bitcoin_transaction}</WarningBanner>
 	</div>

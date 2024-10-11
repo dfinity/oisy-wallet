@@ -7,7 +7,6 @@ import type {
 	Utxo
 } from '$declarations/backend/backend.did';
 import type {
-	BitcoinAddressType,
 	BtcTxOutput,
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
@@ -28,7 +27,6 @@ export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfile
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
 	amountSatoshis: bigint;
-	sourceAddress: BtcAddress;
 	minConfirmations: [number];
 }
 
@@ -46,6 +44,5 @@ export interface SendBtcParams {
 	feeSatoshis: [] | [bigint];
 	network: SignerBitcoinNetwork;
 	utxosToSpend: SignerUtxo[];
-	addressType: BitcoinAddressType;
 	outputs: BtcTxOutput[];
 }

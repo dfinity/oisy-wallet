@@ -112,7 +112,6 @@ export const idlFactory = ({ IDL }) => {
 	const SelectedUtxosFeeRequest = IDL.Record({
 		network: BitcoinNetwork,
 		amount_satoshis: IDL.Nat64,
-		source_address: IDL.Text,
 		min_confirmations: IDL.Opt(IDL.Nat32)
 	});
 	const SelectedUtxosFeeResponse = IDL.Record({
