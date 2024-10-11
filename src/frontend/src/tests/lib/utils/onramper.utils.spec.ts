@@ -35,6 +35,10 @@ describe('buildOnramperLink', () => {
 				{ cryptoId: 'btc', wallet: 'bitcoin_wallet_address' },
 				{ cryptoId: 'icp', wallet: 'icp_wallet_address' }
 			],
+			networkWallets: [
+				{ networkId: 'bitcoin', wallet: 'bitcoin_wallet_address' },
+				{ networkId: 'icp', wallet: 'icp_wallet_address' }
+			],
 			supportRecurringPayments: true,
 			enableCountrySelector: false
 		};
@@ -44,7 +48,8 @@ describe('buildOnramperLink', () => {
 			`&mode=buy&defaultFiat=usd&defaultCrypto=icp` +
 			`&onlyCryptos=btc,eth,icp&onlyCryptoNetworks=bitcoin,ethereum` +
 			`&supportRecurringPayments=true&enableCountrySelector=false` +
-			`&wallets=btc:bitcoin_wallet_address,icp:icp_wallet_address`;
+			`&wallets=btc:bitcoin_wallet_address,icp:icp_wallet_address` +
+			`&networkWallets=bitcoin:bitcoin_wallet_address,icp:icp_wallet_address`;
 
 		const result = buildOnramperLink(params);
 		expect(result).toBe(expectedUrl);
@@ -57,6 +62,7 @@ describe('buildOnramperLink', () => {
 			onlyCryptos: ['btc'],
 			onlyCryptoNetworks: ['bitcoin'],
 			wallets: [{ cryptoId: 'btc', wallet: 'bitcoin_wallet_address' }],
+			networkWallets: [{ networkId: 'bitcoin', wallet: 'bitcoin_wallet_address' }],
 			supportRecurringPayments: false,
 			enableCountrySelector: true
 		};
@@ -66,7 +72,8 @@ describe('buildOnramperLink', () => {
 			`&mode=buy&defaultFiat=eur` +
 			`&onlyCryptos=btc&onlyCryptoNetworks=bitcoin` +
 			`&supportRecurringPayments=false&enableCountrySelector=true` +
-			`&wallets=btc:bitcoin_wallet_address`;
+			`&wallets=btc:bitcoin_wallet_address` +
+			`&networkWallets=bitcoin:bitcoin_wallet_address`;
 
 		const result = buildOnramperLink(params);
 		expect(result).toBe(expectedUrl);
@@ -79,6 +86,7 @@ describe('buildOnramperLink', () => {
 			onlyCryptos: ['btc', 'eth'],
 			onlyCryptoNetworks: ['bitcoin', 'ethereum'],
 			wallets: [],
+			networkWallets: [],
 			supportRecurringPayments: false,
 			enableCountrySelector: true
 		};
@@ -87,7 +95,55 @@ describe('buildOnramperLink', () => {
 			`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
 			`&mode=buy&defaultFiat=eur` +
 			`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
-			`&supportRecurringPayments=false&enableCountrySelector=true&wallets=`;
+			`&supportRecurringPayments=false&enableCountrySelector=true`;
+
+		const result = buildOnramperLink(params);
+
+		expect(result).toBe(expectedUrl);
+	});
+
+	it('should handle only crypto wallets array', () => {
+		const params: BuildOnramperLinkParams = {
+			mode: 'buy',
+			defaultFiat: 'eur',
+			onlyCryptos: ['btc', 'eth'],
+			onlyCryptoNetworks: ['bitcoin', 'ethereum'],
+			wallets: [{ cryptoId: 'btc', wallet: 'bitcoin_wallet_address' }],
+			networkWallets: [],
+			supportRecurringPayments: false,
+			enableCountrySelector: true
+		};
+
+		const expectedUrl =
+			`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
+			`&mode=buy&defaultFiat=eur` +
+			`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
+			`&supportRecurringPayments=false&enableCountrySelector=true` +
+			`&wallets=btc:bitcoin_wallet_address`;
+
+		const result = buildOnramperLink(params);
+
+		expect(result).toBe(expectedUrl);
+	});
+
+	it('should handle only network wallets array', () => {
+		const params: BuildOnramperLinkParams = {
+			mode: 'buy',
+			defaultFiat: 'eur',
+			onlyCryptos: ['btc', 'eth'],
+			onlyCryptoNetworks: ['bitcoin', 'ethereum'],
+			wallets: [],
+			networkWallets: [{ networkId: 'bitcoin', wallet: 'bitcoin_wallet_address' }],
+			supportRecurringPayments: false,
+			enableCountrySelector: true
+		};
+
+		const expectedUrl =
+			`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
+			`&mode=buy&defaultFiat=eur` +
+			`&onlyCryptos=btc,eth&onlyCryptoNetworks=bitcoin,ethereum` +
+			`&supportRecurringPayments=false&enableCountrySelector=true` +
+			`&networkWallets=bitcoin:bitcoin_wallet_address`;
 
 		const result = buildOnramperLink(params);
 
@@ -101,6 +157,7 @@ describe('buildOnramperLink', () => {
 			onlyCryptos: [],
 			onlyCryptoNetworks: [],
 			wallets: [{ cryptoId: 'btc', wallet: 'bitcoin_wallet_address' }],
+			networkWallets: [{ networkId: 'bitcoin', wallet: 'bitcoin_wallet_address' }],
 			supportRecurringPayments: false,
 			enableCountrySelector: true
 		};
@@ -108,7 +165,7 @@ describe('buildOnramperLink', () => {
 		const expectedUrl =
 			`${ONRAMPER_BASE_URL}?apiKey=${ONRAMPER_API_KEY}` +
 			`&mode=buy&defaultFiat=usd` +
-			`&supportRecurringPayments=false&enableCountrySelector=true&wallets=btc:bitcoin_wallet_address`;
+			`&supportRecurringPayments=false&enableCountrySelector=true&wallets=btc:bitcoin_wallet_address&networkWallets=bitcoin:bitcoin_wallet_address`;
 
 		const result = buildOnramperLink(params);
 
