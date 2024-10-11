@@ -117,10 +117,10 @@ export const mapOnramperWallets = ({
  * For example: `bitcoin:1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa` or `ethereum:0x0000000123456789abcdef0123456789abcdef0123`.
  * The documentation can be found here: https://docs.onramper.com/docs/supported-widget-parameters#network-wallets
  *
- * So we map each network to a wallet address, based on the token standard, and create a list of objects with the network ID and the wallet address.
+ * So we map each network to a wallet address and create a list of objects with the network ID and the wallet address.
  *
  * @param networks - The list of networks to map.
- * @param walletMap - The map of network standards to wallet addresses.
+ * @param walletMap - The map of network ID to wallet addresses.
  */
 export const mapOnramperNetworkWallets = ({
 	networks,
