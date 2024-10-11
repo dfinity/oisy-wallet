@@ -8,7 +8,7 @@
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { ckErc20HelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import IconSwap from '$lib/components/icons/IconSwap.svelte';
+	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -36,7 +36,7 @@
 		$ckErc20: convertToSymbol
 	})}
 >
-	<IconSwap size="28" slot="icon" />
+	<IconCkConvert size="28" slot="icon" />
 	<span>{convertToSymbol}</span>
 </ConvertETH>
 
