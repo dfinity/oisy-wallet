@@ -1,10 +1,13 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import type { Readable } from 'svelte/store';
 	import BtcSendHasPendingTransactions from './BtcSendHasPendingTransactions.svelte';
+	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
 	import {
 		BtcPendingSentTransactionsStatus,
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
+	import type { UtxosFee } from '$btc/types/btc-send';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount } from '$lib/utils/input.utils';
@@ -14,14 +17,17 @@
 	export let amount: number | undefined = undefined;
 	export let networkId: NetworkId | undefined = undefined;
 	export let source: string;
+	export let utxosFee: UtxosFee | undefined = undefined;
 
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
 
 	let disableSend: boolean;
-	// We want to disable send if pending transactions are loading, there was an error or there are pending transactions.
+	// We want to disable send if pending transactions or UTXOs fee are loading, there was an error or there are pending transactions.
 	$: disableSend =
-		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE || invalid;
+		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
+		isNullish(utxosFee) ||
+		invalid;
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
@@ -33,6 +39,8 @@
 </script>
 
 <SendReview on:icBack on:icSend {source} {amount} {destination} disabled={disableSend}>
+	<BtcUtxosFee slot="fee" on:icSelectUtxosFee {utxosFee} />
+
 	<BtcSendHasPendingTransactions
 		slot="info"
 		pendingTransactionsStatus={$hasPendingTransactionsStore}
