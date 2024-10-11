@@ -18,16 +18,16 @@
 <div class=" flex w-full flex-col gap-3 py-3">
 	<NavigationItem
 		href="/"
-		ariaLabel={$i18n.navigation.text.homepage}
+		ariaLabel={$i18n.navigation.alt.tokens}
 		selected={route === 'tokens' || route === 'transactions'}
 	>
 		<IconWallet />
-		{$i18n.navigation.text.homepage}
+		{$i18n.navigation.text.tokens}
 	</NavigationItem>
 
 	<NavigationItem
 		href={`/settings?${networkParam($networkId)}`}
-		ariaLabel={$i18n.navigation.text.settings}
+		ariaLabel={$i18n.navigation.alt.settings}
 		selected={route === 'settings'}
 	>
 		<IconSettings />
