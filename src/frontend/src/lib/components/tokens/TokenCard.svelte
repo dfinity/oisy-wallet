@@ -18,5 +18,5 @@
 
 	<slot name="balance" slot="amount" />
 
-	<slot name="exchange" slot="subAmount" />
+	<slot name="exchange" slot="amountDescription" />
 </Card>
