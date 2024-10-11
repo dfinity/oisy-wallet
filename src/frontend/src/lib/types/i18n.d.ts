@@ -152,6 +152,14 @@ interface I18nSettings {
 	error: { loading_profile: string };
 }
 
+interface I18nDApps{
+	text: {
+		title: string;
+	};
+	alt: { testnets_toggle: string; github_release: string };
+	error: { loading_profile: string };
+}
+
 interface I18nNetworks {
 	title: string;
 	show_testnets: string;
@@ -570,6 +578,7 @@ interface I18n {
 	init: I18nInit;
 	hero: I18nHero;
 	settings: I18nSettings;
+	dapps: I18nDApps;
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;

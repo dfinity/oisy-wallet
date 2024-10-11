@@ -179,6 +179,18 @@
 			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
 		}
 	},
+	"dapps": {
+		"text": {
+			"title": "DApps Explorer"
+		},
+		"alt": {
+			"testnets_toggle": "Toggle to show or hide testnets",
+			"github_release": "OISY release notes on GitHub"
+		},
+		"error": {
+			"loading_profile": "Error while loading the profile. Please refresh the page to have the full experience."
+		}
+	},
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"show_testnets": "Show test networks",
