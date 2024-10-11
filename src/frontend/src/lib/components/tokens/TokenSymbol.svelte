@@ -12,7 +12,6 @@
 	{token.symbol}
 
 	{#if nonNullish(token.network.iconBW)}
-		<svelte:component this={token.network.iconBW} />
 		<Logo
 			src={token.network.iconBW}
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.network.name })}
