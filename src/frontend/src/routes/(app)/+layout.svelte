@@ -6,6 +6,7 @@
 	import Modals from '$lib/components/core/Modals.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
+	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
@@ -33,8 +34,8 @@
 
 	<AuthGuard>
 		<SplitPane>
-			<div class="" slot="menu">
-				<!-- TODO: add menu-->
+			<div class="pl-4 sm:pl-8" slot="menu">
+				<NavigationMenu />
 			</div>
 
 			{#if route !== 'settings'}

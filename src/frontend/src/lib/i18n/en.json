@@ -31,6 +31,8 @@
 	},
 	"navigation": {
 		"text": {
+			"homepage": "Assets",
+			"settings": "Settings",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -38,6 +40,8 @@
 			"submit_ticket": "Submit a ticket"
 		},
 		"alt": {
+			"homepage": "Go to the homepage",
+			"settings": "Open your settings",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
