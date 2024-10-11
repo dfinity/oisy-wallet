@@ -27,6 +27,8 @@ interface I18nCore {
 
 interface I18nNavigation {
 	text: {
+		homepage: string;
+		settings: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -34,6 +36,8 @@ interface I18nNavigation {
 		submit_ticket: string;
 	};
 	alt: {
+		homepage: string;
+		settings: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;
