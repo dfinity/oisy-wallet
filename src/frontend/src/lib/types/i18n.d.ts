@@ -281,6 +281,7 @@ interface I18nSend {
 		incompatible_token: string;
 		no_btc_network_id: string;
 		no_pending_bitcoin_transaction: string;
+		unexpected_utxos_fee: string;
 	};
 }
 
