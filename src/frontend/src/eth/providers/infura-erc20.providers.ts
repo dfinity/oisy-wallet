@@ -93,6 +93,19 @@ export class InfuraErc20Provider implements Erc20Provider {
 		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.populateTransaction.approve(spender, amount);
 	};
+
+	allowance = ({
+		contract: { address: contractAddress },
+		owner,
+		spender
+	}: {
+		contract: Erc20ContractAddress;
+		owner: EthAddress;
+		spender: EthAddress;
+	}): Promise<BigNumber> => {
+		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
+		return erc20Contract.allowance(owner, spender);
+	};
 }
 
 const providers: Record<NetworkId, InfuraErc20Provider> = {
