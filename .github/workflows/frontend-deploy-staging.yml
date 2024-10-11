@@ -21,6 +21,11 @@ on:
         options:
           - frontend
           - backend
+      force-backend:
+        required: false
+        type: boolean
+        description: 'Choose whether to force backend deployment even if no changes are detected.'
+        default: false
 
 jobs:
   deployment:
@@ -150,11 +155,16 @@ jobs:
 
       - name: Deploy to Environment
         run: |
-          if [ "$CANISTER" == "frontend" ]; then
+          if [ "$CANISTER" == "frontend" || "${{ github.event_name }}" == "push" ]; then
             dfx deploy $CANISTER --network $NETWORK
-          elif [ "$CANISTER" == "backend" ]; then
+          fi
+          if [ "$CANISTER" == "backend" || "${{ github.event_name }}" == "push" ]; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
-              echo "No changes in specified files/folders detected, skipping backend deployment."
+              if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
+                echo "No changes in specified files/folders detected, skipping backend deployment."
+              else
+                ENV=$NETWORK ./scripts/deploy.backend.sh
+              fi
             else            
               ENV=$NETWORK ./scripts/deploy.backend.sh
             fi
