@@ -119,13 +119,14 @@ export class BackendCanister extends Canister<BackendService> {
 			...rest
 		});
 
-		if ('Err' in response) {
-			throw mapBtcPendingTransactionError(response.Err);
+		if ('Ok' in response) {
+			return true;
 		}
 
-		return 'Ok' in response;
+		throw mapBtcPendingTransactionError(response.Err);
 	};
 
+	// TODO: rename to plural
 	btcGetPendingTransaction = async ({
 		network,
 		address
@@ -137,11 +138,14 @@ export class BackendCanister extends Canister<BackendService> {
 			address
 		});
 
-		if ('Err' in response) {
-			throw mapBtcPendingTransactionError(response.Err);
+		if ('Ok' in response) {
+			const {
+				Ok: { transactions }
+			} = response;
+			return transactions;
 		}
 
-		return response.Ok.transactions;
+		throw mapBtcPendingTransactionError(response.Err);
 	};
 
 	btcSelectUserUtxosFee = async ({
@@ -157,11 +161,12 @@ export class BackendCanister extends Canister<BackendService> {
 			amount_satoshis: amountSatoshis
 		});
 
-		if ('Err' in response) {
-			throw mapBtcSelectUserUtxosFeeError(response.Err);
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
 		}
 
-		return response.Ok;
+		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
 	allowSigning = async (): Promise<void> => {
