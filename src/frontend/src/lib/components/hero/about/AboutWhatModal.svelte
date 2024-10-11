@@ -3,6 +3,7 @@
 	import CoverWhat from '$lib/assets/cover-features.png';
 	import IconCrypto from '$lib/components/icons/IconCrypto.svelte';
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { ABOUT_WHAT_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -34,7 +35,5 @@
 		</p>
 	</div>
 
-	<button class="secondary full text-center" on:click={modalStore.close}
-		>{$i18n.core.text.close}</button
-	>
+	<ButtonCloseModal />
 </Modal>
