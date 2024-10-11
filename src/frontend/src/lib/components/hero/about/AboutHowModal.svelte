@@ -6,6 +6,7 @@
 	import IconIdCard from '$lib/components/icons/IconIdCard.svelte';
 	import IconKey from '$lib/components/icons/IconKey.svelte';
 	import IconWorld from '$lib/components/icons/IconWorld.svelte';
+	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import { ABOUT_HOW_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -47,7 +48,5 @@
 		</p>
 	</div>
 
-	<button class="secondary full text-center" on:click={modalStore.close}
-		>{$i18n.core.text.close}</button
-	>
+	<ButtonCloseModal fullWidth />
 </Modal>
