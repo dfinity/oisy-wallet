@@ -153,11 +153,14 @@ jobs:
       - name: Pre-build
         run: npm run build
 
-      - name: Deploy to Environment
+      - name: Deploy Frontend to Environment
         run: |
           if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ]; then
             dfx deploy $CANISTER --network $NETWORK
           fi
+
+      - name: Deploy Backend to Environment
+        run: |
           if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ]; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
               if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
