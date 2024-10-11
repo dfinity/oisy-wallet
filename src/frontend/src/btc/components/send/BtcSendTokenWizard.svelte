@@ -106,7 +106,6 @@
 		dispatch('icNext');
 
 		try {
-			// TODO: add tracking
 			await sendBtc({
 				destination,
 				amount,
