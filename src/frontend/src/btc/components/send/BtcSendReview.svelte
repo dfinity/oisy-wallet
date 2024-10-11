@@ -38,3 +38,4 @@
 		pendingTransactionsStatus={$hasPendingTransactionsStore}
 	/>
 </SendReview>
+NONE

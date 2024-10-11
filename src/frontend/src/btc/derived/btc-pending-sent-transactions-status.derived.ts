@@ -10,8 +10,8 @@ import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export enum BtcPendingSentTransactionsStatus {
-	PRESENT = 'has-pending-transactions',
-	EMPTY = 'empty-pending-transactions',
+	SOME = 'has-pending-transactions',
+	NONE = 'empty-pending-transactions',
 	LOADING = 'loading',
 	ERROR = 'error'
 }
@@ -40,14 +40,14 @@ export const initPendingSentTransactionsStatus = (
 				return pendingTransactionsData.data === null
 					? BtcPendingSentTransactionsStatus.ERROR
 					: pendingTransactionsData.data.length > 0
-						? BtcPendingSentTransactionsStatus.PRESENT
-						: BtcPendingSentTransactionsStatus.EMPTY;
+						? BtcPendingSentTransactionsStatus.SOME
+						: BtcPendingSentTransactionsStatus.NONE;
 			}
 
 			if (!$testnets) {
 				if (nonNullish($btcAddressMainnet) && $btcAddressMainnet !== address) {
 					// If the address is not a bitcoin address, there are no pending transactions.
-					return BtcPendingSentTransactionsStatus.EMPTY;
+					return BtcPendingSentTransactionsStatus.NONE;
 				}
 
 				// Return loading while we don't have btc addresses and we can't tell
@@ -62,7 +62,7 @@ export const initPendingSentTransactionsStatus = (
 			const isRegtestEnabled = LOCAL;
 			if (isNotMainnet && isNotTestnet && (isNotRegtest || !isRegtestEnabled)) {
 				// If the address is not a bitcoin address, there are no pending transactions.
-				return BtcPendingSentTransactionsStatus.EMPTY;
+				return BtcPendingSentTransactionsStatus.NONE;
 			}
 
 			// If we reach here is because either addresses nor pending transactions are loaded
