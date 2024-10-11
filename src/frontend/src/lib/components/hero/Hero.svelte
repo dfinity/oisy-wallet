@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { quintOut } from 'svelte/easing';
 	import { slide } from 'svelte/transition';
 	import HeroContent from '$lib/components/hero/HeroContent.svelte';
+	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 
 	export let usdTotal = false;
 	export let summary = false;
@@ -10,7 +10,7 @@
 
 <article
 	class="relative flex flex-col items-center rounded-lg pb-6"
-	transition:slide={{ delay: 0, duration: 250, easing: quintOut, axis: 'y' }}
+	transition:slide={SLIDE_PARAMS}
 >
 	<HeroContent {usdTotal} {summary} {back} />
 </article>
