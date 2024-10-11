@@ -21,7 +21,7 @@
 	let disableSend: boolean;
 	// We want to disable send if pending transactions are loading, there was an error or there are pending transactions.
 	$: disableSend =
-		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.EMPTY || invalid;
+		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE || invalid;
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = true;
