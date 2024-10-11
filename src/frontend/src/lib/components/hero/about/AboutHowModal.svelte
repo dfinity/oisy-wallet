@@ -48,5 +48,5 @@
 		</p>
 	</div>
 
-	<ButtonCloseModal fullWidth />
+	<ButtonCloseModal />
 </Modal>
