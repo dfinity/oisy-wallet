@@ -7,7 +7,7 @@
 	import ConvertETH from '$icp-eth/components/send/ConvertETH.svelte';
 	import { ckEthHelperContractAddress } from '$icp-eth/derived/cketh.derived';
 	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
-	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import IconSwap from '$lib/components/icons/IconSwap.svelte';
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -27,7 +27,7 @@
 	nativeNetworkId={$selectedEthereumNetwork.id}
 	ariaLabel={$i18n.convert.text.convert_to_cketh}
 >
-	<IconConvert size="28" slot="icon" />
+	<IconSwap size="28" slot="icon" />
 	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
 </ConvertETH>
 
