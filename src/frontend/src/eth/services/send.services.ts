@@ -172,8 +172,9 @@ const ckErc20HelperContractPrepareTransaction = async ({
 /**
  * Get the current allowance of an Erc20 contract.
  */
-// TODO: this function is still not used in the codebase, so for now we export globally
-export const erc20ContractAllowance = async ({
+// TODO: this function is still not used in the codebase, so for now we put an ESLINT exception
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const erc20ContractAllowance = async ({
 	token,
 	owner,
 	spender,
