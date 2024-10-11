@@ -32,9 +32,7 @@
 		<div class="flex flex-col gap-3">
 			<TokensZeroBalance />
 
-			<div class="my">
-				<Hr />
-			</div>
+			<Hr />
 
 			<ManageTokensMenuButton on:icCloseMenu={() => (visible = false)} />
 		</div>
