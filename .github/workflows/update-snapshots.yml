@@ -26,8 +26,6 @@ jobs:
           echo "This workflow should not be triggered with workflow_dispatch on main"
           exit 1
 
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Cache Cargo registry
         uses: actions/cache@v4
@@ -111,6 +109,10 @@ jobs:
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
+
+
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Prepare
         uses: ./.github/actions/prepare
