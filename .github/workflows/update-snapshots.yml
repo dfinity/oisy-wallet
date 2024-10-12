@@ -70,8 +70,8 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Run Playwright tests
-        run: npm run e2e:snapshots
+#      - name: Run Playwright tests
+#        run: npm run e2e:snapshots
 
       - name: Commit Playwright updated snapshots
         uses: EndBug/add-and-commit@v9
