@@ -1,22 +1,3 @@
-name: Update E2E Snapshots
-
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-
-#  oisy-backend-wasm:
-#    runs-on: ubuntu-20.04
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#
-#      - name: Build oisy-backend WASM
-#        uses: ./.github/actions/oisy-backend
-
   update_snapshots:
     runs-on: ubuntu-latest
     steps:
@@ -45,15 +26,24 @@ jobs:
           path: ~/.rustup/toolchains
           key: rust-toolchain-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
           restore-keys: |
-              rust-toolchain-e2e-
+            rust-toolchain-e2e-
 
       - name: Cache Cargo build
         uses: actions/cache@v4
+        id: cargo-build-cache
         with:
           path: target
           key: cargo-build-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
           restore-keys: |
-              cargo-build-e2e-
+            cargo-build-e2e-
+
+      - name: Check if cache was hit
+        run: |
+          if [ "${{ steps.cargo-build-cache.outputs.cache-hit }}" == "true" ]; then
+            echo "Cache was hit, build should be skipped"
+          else
+            echo "Cache miss, build will proceed"
+          fi
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
