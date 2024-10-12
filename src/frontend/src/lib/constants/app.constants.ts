@@ -6,7 +6,8 @@ export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
-export const STAGING = MODE === 'staging' || MODE.startsWith('test_fe_') || MODE === 'e2e';
+export const E2E = MODE === 'e2e';
+export const STAGING = MODE === 'staging' || MODE.startsWith('test_fe_');
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
@@ -26,18 +27,20 @@ export const INTERNET_IDENTITY_ORIGIN = LOCAL
 
 export const POUH_ISSUER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_POUH_ISSUER_CANISTER_ID
-		: BETA
-			? import.meta.env.VITE_BETA_POUH_ISSUER_CANISTER_ID
-			: PROD
-				? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
-				: undefined;
+	: E2E
+		? import.meta.env.E2E_LOCAL_POUH_ISSUER_CANISTER_ID
+		: STAGING
+			? import.meta.env.VITE_STAGING_POUH_ISSUER_CANISTER_ID
+			: BETA
+				? import.meta.env.VITE_BETA_POUH_ISSUER_CANISTER_ID
+				: PROD
+					? import.meta.env.VITE_IC_POUH_ISSUER_CANISTER_ID
+					: undefined;
 
 export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 	? LOCAL
 		? `http://${POUH_ISSUER_CANISTER_ID}.localhost:4943`
-		: STAGING
+		: STAGING || E2E
 			? `https://${POUH_ISSUER_CANISTER_ID}.${MAINNET_DOMAIN}`
 			: // BETA and PROD
 				'https://id.decideai.xyz'
@@ -45,17 +48,21 @@ export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 
 export const BACKEND_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_BACKEND_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
-		: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
+	: E2E
+		? import.meta.env.E2E_LOCAL_BACKEND_CANISTER_ID
+		: STAGING
+			? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
+			: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
 
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
 export const SIGNER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_SIGNER_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_SIGNER_CANISTER_ID
-		: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
+	: E2E
+		? import.meta.env.E2E_LOCAL_SIGNER_CANISTER_ID
+		: STAGING
+			? import.meta.env.VITE_STAGING_SIGNER_CANISTER_ID
+			: import.meta.env.VITE_IC_SIGNER_CANISTER_ID;
 
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds

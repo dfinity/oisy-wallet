@@ -1,6 +1,6 @@
-import { LOCAL, STAGING } from '$lib/constants/app.constants';
+import { E2E, LOCAL, STAGING } from '$lib/constants/app.constants';
 
-const ONRAMPER_ENV: 'dev' | 'prod' = LOCAL || STAGING ? 'dev' : 'prod';
+const ONRAMPER_ENV: 'dev' | 'prod' = LOCAL || E2E || STAGING ? 'dev' : 'prod';
 
 export const isOnRamperDev = ONRAMPER_ENV === 'dev';
 

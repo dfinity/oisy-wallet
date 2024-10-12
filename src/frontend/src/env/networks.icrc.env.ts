@@ -22,7 +22,7 @@ import type { EnvTokens } from '$env/types/env-token-ckerc20';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcInterface } from '$icp/types/ic';
-import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
+import { BETA, E2E, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import { nonNullish } from '@dfinity/utils';
@@ -71,7 +71,7 @@ const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 		: undefined;
 
 const CKBTC_STAGING_DATA: IcCkInterface | undefined =
-	(STAGING || BETA || PROD) &&
+	(E2E || STAGING || BETA || PROD) &&
 	nonNullish(STAGING_CKBTC_LEDGER_CANISTER_ID) &&
 	nonNullish(STAGING_CKBTC_INDEX_CANISTER_ID) &&
 	nonNullish(STAGING_CKBTC_MINTER_CANISTER_ID)
@@ -87,7 +87,7 @@ const CKBTC_STAGING_DATA: IcCkInterface | undefined =
 		: undefined;
 
 const CKBTC_IC_DATA: IcCkInterface | undefined =
-	STAGING || BETA || PROD
+	E2E || STAGING || BETA || PROD
 		? {
 				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
 				indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID,
@@ -157,7 +157,7 @@ const CKETH_LOCAL_DATA: IcCkInterface | undefined =
 		: undefined;
 
 const CKETH_STAGING_DATA: IcCkInterface | undefined =
-	(STAGING || BETA || PROD) &&
+	(E2E || STAGING || BETA || PROD) &&
 	nonNullish(STAGING_CKETH_LEDGER_CANISTER_ID) &&
 	nonNullish(STAGING_CKETH_INDEX_CANISTER_ID) &&
 	nonNullish(STAGING_CKETH_MINTER_CANISTER_ID)
@@ -173,7 +173,7 @@ const CKETH_STAGING_DATA: IcCkInterface | undefined =
 		: undefined;
 
 const CKETH_IC_DATA: IcCkInterface | undefined =
-	STAGING || BETA || PROD
+	E2E || STAGING || BETA || PROD
 		? {
 				ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
 				indexCanisterId: IC_CKETH_INDEX_CANISTER_ID,
@@ -236,7 +236,7 @@ const mapCkErc20Data = ({
 	Object.entries(ckErc20Tokens).reduce(
 		(acc, [key, value]) => ({
 			...acc,
-			...((STAGING || BETA || PROD) &&
+			...((E2E || STAGING || BETA || PROD) &&
 				nonNullish(value) &&
 				nonNullish(minterCanisterId) && {
 					[key]: {
