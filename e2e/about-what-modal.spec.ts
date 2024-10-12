@@ -2,6 +2,7 @@ import {
 	ABOUT_MENU_OPEN_BUTTON,
 	ABOUT_MENU_POPOVER,
 	ABOUT_WHAT_MODAL,
+	ABOUT_WHAT_MODAL_MENU_ITEM,
 	ABOUT_WHAT_MODAL_OPEN_BUTTON
 } from '$lib/constants/test-ids.constants';
 import { nonNullish } from '@dfinity/utils';
@@ -26,7 +27,7 @@ test('should display about-what modal', async ({ page, viewport, isMobile }) => 
 	await homepageLoggedOut.waitForReady();
 
 	await homepageLoggedOut.testModalSnapshot({
-		modalOpenButtonTestId: isMobile ? ABOUT_WHAT_MODAL_OPEN_BUTTON : ABOUT_WHAT_MODAL_OPEN_BUTTON,
+		modalOpenButtonTestId: isMobile ? ABOUT_WHAT_MODAL_MENU_ITEM : ABOUT_WHAT_MODAL_OPEN_BUTTON,
 		modalTestId: ABOUT_WHAT_MODAL,
 		initializerTestId: isMobile ? ABOUT_MENU_OPEN_BUTTON : undefined,
 		initializedIndicatorTestId: isMobile ? ABOUT_MENU_POPOVER : undefined
