@@ -63,6 +63,8 @@ if [ -n "${ENV+1}" ]; then
          ic_root_key_der = $ic_root_key_der;
      }
   })" --network "$ENV" --wallet "$WALLET"
+
+  echo "Backend deployed with the following arguments: ${POUH_ISSUER_VC_URL}"
 else
   DEFAULT_CANISTER_ID="$(dfx canister id --network staging backend)"
   dfx deploy backend --argument "(variant {
@@ -82,4 +84,6 @@ else
          ic_root_key_der = $ic_root_key_der;
      }
   })" --specified-id "$DEFAULT_CANISTER_ID"
+
+  echo "Backend deployed with the following arguments: ${POUH_ISSUER_VC_URL}"
 fi
