@@ -52,7 +52,7 @@ jobs:
         id: cargo-build-cache
         with:
           path: target
-          key: cargo-build-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
+          key: cargo-build-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml') }}
           restore-keys: |
             cargo-build-e2e-
 
