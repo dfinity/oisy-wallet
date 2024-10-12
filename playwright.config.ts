@@ -26,7 +26,6 @@ export default defineConfig({
 		trace: 'on',
 		...(DEV && { headless: false })
 	},
-	timeout: 120000,
 	projects: [
 		{
 			name: 'Google Chrome',
