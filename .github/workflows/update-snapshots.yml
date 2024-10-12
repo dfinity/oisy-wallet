@@ -36,17 +36,17 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-          key: ${{ runner.os }}-e2e-cargo-registry-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
+          key: cargo-e2e-registry-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
           restore-keys: |
-            ${{ runner.os }}-e2e-cargo-registry-
+            cargo-e2e-registry-
 
       - name: Cache Cargo build
         uses: actions/cache@v4
         with:
           path: target
-          key: ${{ runner.os }}-e2e-cargo-build-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
+          key: cargo-e2e-build-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
           restore-keys: |
-            ${{ runner.os }}-e2e-cargo-build-
+            cargo-e2e-build-
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
