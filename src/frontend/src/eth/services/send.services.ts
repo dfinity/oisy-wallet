@@ -170,6 +170,30 @@ const ckErc20HelperContractPrepareTransaction = async ({
 };
 
 /**
+ * Get the current allowance of an Erc20 contract.
+ */
+// TODO: this function is still not used in the codebase, so for now we put an ESLINT exception
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const erc20ContractAllowance = async ({
+	token,
+	owner,
+	spender,
+	networkId
+}: {
+	networkId: NetworkId;
+	owner: EthAddress;
+	spender: EthAddress;
+} & Pick<SendParams, 'token'>): Promise<BigNumber> => {
+	const { allowance } = infuraErc20Providers(networkId);
+
+	return await allowance({
+		contract: token as Erc20Token,
+		owner,
+		spender
+	});
+};
+
+/**
  * Prepare an Erc20 contract to approve a transaction from another contract (address).
  * i.e. tell an Erc20 contract to approve a transaction from the ckErc20 helper.
  *
@@ -424,7 +448,6 @@ const approve = async ({
 	sourceNetwork,
 	identity,
 	minterInfo,
-	nonce,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from'> &
 	Omit<SendParams, 'targetNetwork' | 'lastProgressStep'> &
@@ -452,7 +475,6 @@ const approve = async ({
 
 	const approve = await erc20ContractPrepareApprove({
 		...rest,
-		nonce,
 		gas: gas.toBigInt(),
 		maxFeePerGas: maxFeePerGas.toBigInt(),
 		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),

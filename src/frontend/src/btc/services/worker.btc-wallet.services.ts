@@ -35,28 +35,30 @@ export const initBtcWalletWorker = async ({
 		}
 	};
 
+	const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);
+	const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
+
+	const data = {
+		// TODO: stop/start the worker on address change
+		btcAddress: get(
+			isTestnetNetwork
+				? btcAddressTestnetStore
+				: isRegtestNetwork
+					? btcAddressRegtestStore
+					: btcAddressMainnetStore
+		),
+		bitcoinNetwork: mapToSignerBitcoinNetwork({
+			network: isTestnetNetwork ? 'testnet' : isRegtestNetwork ? 'regtest' : 'mainnet'
+		}),
+		// only mainnet transactions can be fetched via Blockchain API
+		shouldFetchTransactions: isNetworkIdBTCMainnet(networkId)
+	};
+
 	return {
 		start: () => {
-			const isTestnetNetwork = isNetworkIdBTCTestnet(networkId);
-			const isRegtestNetwork = isNetworkIdBTCRegtest(networkId);
-
 			worker.postMessage({
 				msg: 'startBtcWalletTimer',
-				data: {
-					// TODO: stop/start the worker on address change
-					btcAddress: get(
-						isTestnetNetwork
-							? btcAddressTestnetStore
-							: isRegtestNetwork
-								? btcAddressRegtestStore
-								: btcAddressMainnetStore
-					),
-					bitcoinNetwork: mapToSignerBitcoinNetwork({
-						network: isTestnetNetwork ? 'testnet' : isRegtestNetwork ? 'regtest' : 'mainnet'
-					}),
-					// only mainnet transactions can be fetched via Blockchain API
-					shouldFetchTransactions: isNetworkIdBTCMainnet(networkId)
-				}
+				data
 			});
 		},
 		stop: () => {
@@ -66,7 +68,8 @@ export const initBtcWalletWorker = async ({
 		},
 		trigger: () => {
 			worker.postMessage({
-				msg: 'triggerBtcWalletTimer'
+				msg: 'triggerBtcWalletTimer',
+				data
 			});
 		}
 	};
