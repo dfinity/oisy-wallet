@@ -99,3 +99,17 @@ jobs:
       - name: Check cache contents
         run: ls -R target
 
+      - name: List all directories in target
+        run: |
+          echo "Listing all directories in the target folder:"
+          find target -type d
+
+      - name: List number of files in each sub-folder of target
+        run: |
+          echo "Counting files in each sub-folder of target:"
+          find target -type d -exec sh -c 'echo -n "{}: "; find "{}" -type f | wc -l' \;
+
+      - name: List sizes of each sub-folder in target
+        run: |
+          echo "Listing the size of each sub-folder in target:"
+          du -sh target/*/
