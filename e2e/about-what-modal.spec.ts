@@ -2,8 +2,8 @@ import {
 	ABOUT_MENU_OPEN_BUTTON,
 	ABOUT_MENU_POPOVER,
 	ABOUT_WHAT_MODAL,
-	ABOUT_WHAT_MODAL_MENU_ITEM,
-	ABOUT_WHAT_MODAL_OPEN_BUTTON
+	ABOUT_WHAT_MODAL_OPEN_BUTTON,
+	ABOUT_WHAT_MODAL_OPEN_MENU_ITEM
 } from '$lib/constants/test-ids.constants';
 import { test } from '@playwright/test';
 import { MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
@@ -25,7 +25,9 @@ test('should display about-what modal', async ({ page, isMobile }) => {
 	await homepageLoggedOut.waitForReady();
 
 	await homepageLoggedOut.testModalSnapshot({
-		modalOpenButtonTestId: isMobile ? ABOUT_WHAT_MODAL_MENU_ITEM : ABOUT_WHAT_MODAL_OPEN_BUTTON,
+		modalOpenButtonTestId: isMobile
+			? ABOUT_WHAT_MODAL_OPEN_MENU_ITEM
+			: ABOUT_WHAT_MODAL_OPEN_BUTTON,
 		modalTestId: ABOUT_WHAT_MODAL,
 		initializerTestId: isMobile ? ABOUT_MENU_OPEN_BUTTON : undefined,
 		initializedIndicatorTestId: isMobile ? ABOUT_MENU_POPOVER : undefined

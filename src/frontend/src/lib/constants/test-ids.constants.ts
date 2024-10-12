@@ -8,11 +8,11 @@ export const TOKEN_CARD = 'token-card';
 export const TOKEN_BALANCE = 'token-balance';
 
 export const ABOUT_WHAT_MODAL_OPEN_BUTTON = 'about-what-modal-open-button';
-export const ABOUT_WHAT_MODAL_MENU_ITEM = 'about-what-modal-menu-item';
+export const ABOUT_WHAT_MODAL_OPEN_MENU_ITEM = 'about-what-modal-open-menu-item';
 export const ABOUT_WHAT_MODAL = 'about-what-modal';
 
 export const ABOUT_HOW_MODAL_OPEN_BUTTON = 'about-how-modal-open-button';
-export const ABOUT_HOW_MODAL_MENU_ITEM = 'about-how-modal-menu-item';
+export const ABOUT_HOW_MODAL_OPEN_MENU_ITEM = 'about-how-modal-open-menu-item';
 export const ABOUT_HOW_MODAL = 'about-how-modal';
 
 export const ABOUT_MENU_OPEN_BUTTON = 'about-menu-open-button';
