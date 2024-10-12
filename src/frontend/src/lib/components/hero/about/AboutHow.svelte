@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import AboutItem from '$lib/components/hero/about/AboutItem.svelte';
-	import { ABOUT_HOW_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
+	import { ABOUT_HOW_MODAL_MENU_ITEM, ABOUT_HOW_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -16,6 +16,6 @@
 	};
 </script>
 
-<AboutItem {asMenuItem} on:click={openModal} testId={ABOUT_HOW_MODAL_OPEN_BUTTON}>
+<AboutItem {asMenuItem} on:click={openModal} testId={asMenuItem ? ABOUT_HOW_MODAL_MENU_ITEM :ABOUT_HOW_MODAL_OPEN_BUTTON}>
 	<span slot="label">{replaceOisyPlaceholders($i18n.about.how.text.label)}</span>
 </AboutItem>

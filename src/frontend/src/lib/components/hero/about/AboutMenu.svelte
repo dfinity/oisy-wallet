@@ -5,6 +5,7 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { ABOUT_MENU_OPEN_BUTTON, ABOUT_MENU_POPOVER } from '$lib/constants/test-ids.constants';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
@@ -22,13 +23,14 @@
 		bind:button
 		on:click={() => (visible = !visible)}
 		ariaLabel={replaceOisyPlaceholders($i18n.about.text.title)}
+		testId={ABOUT_MENU_OPEN_BUTTON}
 	>
 		<IconMenu slot="icon" />
 		{replaceOisyPlaceholders($i18n.about.text.title)}
 	</ButtonIcon>
 
 	<Popover bind:visible anchor={button} direction="rtl">
-		<ul class="flex list-none flex-col gap-4">
+		<ul class="flex list-none flex-col gap-4" data-tid={ABOUT_MENU_POPOVER}>
 			<li><AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} /></li>
 			<li><AboutHow asMenuItem on:icOpenAboutModal={hidePopover} /></li>
 		</ul>
