@@ -12,6 +12,8 @@ function generate_did() {
     BUILD_FLAG="--profile $CARGO_PROFILE"
   fi
 
+  echo "BUILD_FLAG: $BUILD_FLAG"
+
   test -e "target/wasm32-unknown-unknown/$CARGO_PROFILE/$canister.wasm" ||
     cargo build --manifest-path="$canister_root/Cargo.toml" \
       --target wasm32-unknown-unknown \
