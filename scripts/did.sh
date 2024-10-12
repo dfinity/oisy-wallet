@@ -1,16 +1,24 @@
 #!/usr/bin/env bash
 
+CARGO_PROFILE="${CARGO_PROFILE:-release}"
+
 function generate_did() {
   local canister=$1
   canister_root="src/$canister"
 
-  test -e "target/wasm32-unknown-unknown/release/$canister.wasm" ||
+  if [[ "$CARGO_PROFILE" == "release" ]]; then
+    BUILD_FLAG="--release"
+  else
+    BUILD_FLAG="--profile $CARGO_PROFILE"
+  fi
+
+  test -e "target/wasm32-unknown-unknown/$CARGO_PROFILE/$canister.wasm" ||
     cargo build --manifest-path="$canister_root/Cargo.toml" \
       --target wasm32-unknown-unknown \
-      --release --package "$canister"
+      $BUILD_FLAG --package "$canister"
 
   # cargo install candid-extractor
-  candid-extractor "target/wasm32-unknown-unknown/release/$canister.wasm" >"$canister_root/$canister.did"
+  candid-extractor "target/wasm32-unknown-unknown/$CARGO_PROFILE/$canister.wasm" >"$canister_root/$canister.did"
 }
 
 CANISTERS=backend
