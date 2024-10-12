@@ -37,7 +37,9 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Set env to E2E
-        run: echo "ENV=e2e" >> $GITHUB_ENV
+        run: |
+          echo "ENV=e2e" >> $GITHUB_ENV
+          echo "DFX_NETWORK=e2e" >> $GITHUB_ENV
 
       - name: Run Playwright tests
         run: npm run e2e:snapshots
