@@ -11,7 +11,7 @@ import { HomepageLoggedOut } from './utils/pages/homepage.page';
 
 const ABOUT_WHAT_MODAL_VIEWPORT_HEIGHT = 930;
 
-test('should display about-what modal', async ({ page, viewport, isMobile }) => {
+test('should display about-what modal', async ({ page, isMobile }) => {
 	const homepageLoggedOut = new HomepageLoggedOut({
 		page,
 		viewportSize: !isMobile
