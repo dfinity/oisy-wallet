@@ -47,6 +47,25 @@ jobs:
           restore-keys: |
             rust-toolchain-e2e-
 
+      - name: Cache Cargo build 3
+        uses: actions/cache@v4
+        id: cargo-build-cache-3
+        with:
+          path: target
+          key: cargo-build-3-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml') }}
+          restore-keys: |
+            cargo-build-3-e2e-
+
+      - name: Cache Cargo build 6
+        uses: actions/cache@v4
+        id: cargo-build-cache-6
+        with:
+          path: target/ic
+          key: cargo-build-6-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml') }}
+          restore-keys: |
+            cargo-build-6-e2e-
+
+
       - name: Cache Cargo build 1
         uses: actions/cache@v4
         id: cargo-build-cache-1
@@ -64,6 +83,15 @@ jobs:
           key: cargo-build-2-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml') }}
           restore-keys: |
             cargo-build-2-e2e-
+
+      - name: Cache Cargo build 4
+        uses: actions/cache@v4
+        id: cargo-build-cache-4
+        with:
+          path: target/wasm32-unknown-unknown/release
+          key: cargo-build-4-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml') }}
+          restore-keys: |
+            cargo-build-4-e2e-
 
       - name: Check if cache was hit
         run: |
