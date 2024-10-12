@@ -36,6 +36,9 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
+      - name: Set env to E2E
+        run: echo "ENV=e2e" >> $GITHUB_ENV
+
       - name: Run Playwright tests
         run: npm run e2e:snapshots
 
