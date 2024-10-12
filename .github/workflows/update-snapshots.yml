@@ -107,12 +107,13 @@ jobs:
             echo "Cache miss, build will proceed"
           fi
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
 
 
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Prepare
         uses: ./.github/actions/prepare
