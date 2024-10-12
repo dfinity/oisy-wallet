@@ -9,6 +9,7 @@
 	} from '$btc/derived/btc-transactions.derived';
 	import type { BtcTransactionUi } from '$btc/types/btc';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { modalBtcTransaction } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -21,7 +22,7 @@
 
 <TokensSkeletons loading={$btcTransactionsNotInitialized}>
 	{#each $sortedBtcTransactions as transaction (transaction.data.id)}
-		<div transition:slide={{ duration: 250 }}>
+		<div transition:slide={SLIDE_DURATION}>
 			<BtcTransaction transaction={transaction.data} />
 		</div>
 	{/each}

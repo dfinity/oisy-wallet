@@ -267,6 +267,7 @@ interface I18nSend {
 		minter_info_not_loaded: string;
 		minter_info_not_certified: string;
 		cketh_max_transaction_fee_missing: string;
+		utxos_fee_missing: string;
 	};
 	error: {
 		unexpected: string;
@@ -281,6 +282,7 @@ interface I18nSend {
 		incompatible_token: string;
 		no_btc_network_id: string;
 		no_pending_bitcoin_transaction: string;
+		unexpected_utxos_fee: string;
 	};
 }
 
@@ -315,6 +317,7 @@ interface I18nTokens {
 		contract_address: string;
 		balance: string;
 		hide_zero_balances: string;
+		hide_zeros: string;
 		all_tokens_with_zero_hidden: string;
 		initializing: string;
 		updating_ui: string;

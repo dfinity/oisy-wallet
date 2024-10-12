@@ -12,6 +12,11 @@ import eth from '$icp-eth/assets/eth.svg';
 import bitcoin from '$icp/assets/bitcoin.svg';
 import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
 import icpLight from '$icp/assets/icp_light.svg';
+import bitcoinMainnetBW from '$lib/assets/networks/bitcoin-mainnet-bw.svg';
+import bitcoinTestnetBW from '$lib/assets/networks/bitcoin-testnet-bw.svg';
+import ethereumBW from '$lib/assets/networks/ethereum-bw.svg';
+import icpBW from '$lib/assets/networks/icp-bw.svg';
+import sepoliaBW from '$lib/assets/networks/sepolia-bw.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 
@@ -28,6 +33,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	name: 'Ethereum',
 	chainId: 1n,
 	icon: eth,
+	iconBW: ethereumBW,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
 	buy: { onramperId: 'ethereum' }
 };
@@ -44,6 +50,7 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	name: 'Sepolia',
 	chainId: 11155111n,
 	icon: sepolia,
+	iconBW: sepoliaBW,
 	explorerUrl: SEPOLIA_EXPLORER_URL
 };
 
@@ -78,6 +85,7 @@ export const ICP_NETWORK: Network = {
 	env: 'mainnet',
 	name: 'Internet Computer',
 	icon: icpLight,
+	iconBW: icpBW,
 	buy: { onramperId: 'icp' }
 };
 
@@ -93,6 +101,7 @@ export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 	env: 'mainnet',
 	name: 'Bitcoin',
 	icon: bitcoin,
+	iconBW: bitcoinMainnetBW,
 	explorerUrl: BTC_MAINNET_EXPLORER_URL,
 	buy: { onramperId: 'bitcoin' }
 };
@@ -106,7 +115,8 @@ export const BTC_TESTNET_NETWORK: BitcoinNetwork = {
 	env: 'testnet',
 	name: 'Bitcoin',
 	explorerUrl: BTC_TESTNET_EXPLORER_URL,
-	icon: bitcoinTestnet
+	icon: bitcoinTestnet,
+	iconBW: bitcoinTestnetBW
 };
 
 export const BTC_REGTEST_NETWORK_SYMBOL = 'BTC (Regtest)';

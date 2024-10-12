@@ -7,7 +7,7 @@
 		ckEthereumNativeTokenId,
 		ckEthereumNativeToken
 	} from '$icp-eth/derived/cketh.derived';
-	import IconConvert from '$lib/components/icons/IconConvert.svelte';
+	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { modalConvertToTwinTokenEth } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,7 +21,7 @@
 		$token: $ckEthereumTwinToken.symbol
 	})}
 >
-	<IconConvert size="28" slot="icon" />
+	<IconCkConvert size="28" slot="icon" />
 	<span>{$ckEthereumTwinToken.symbol}</span>
 </ConvertETH>
 
