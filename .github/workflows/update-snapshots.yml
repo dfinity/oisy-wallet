@@ -1,3 +1,22 @@
+name: Update E2E Snapshots
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+
+#  oisy-backend-wasm:
+#    runs-on: ubuntu-20.04
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Build oisy-backend WASM
+#        uses: ./.github/actions/oisy-backend
+
   update_snapshots:
     runs-on: ubuntu-latest
     steps:
