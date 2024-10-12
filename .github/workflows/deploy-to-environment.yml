@@ -24,7 +24,7 @@ on:
       force-backend:
         required: false
         type: boolean
-        description: 'Choose whether to force backend deployment even if no changes are detected.'
+        description: 'Force backend deployment even if no changes are detected.'
         default: false
 
 jobs:
