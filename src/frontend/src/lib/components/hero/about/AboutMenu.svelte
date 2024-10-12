@@ -3,9 +3,9 @@
 	import AboutHow from '$lib/components/hero/about/AboutHow.svelte';
 	import AboutWhat from '$lib/components/hero/about/AboutWhat.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import { ABOUT_MENU_OPEN_BUTTON, ABOUT_MENU_POPOVER } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import { ABOUT_MENU_OPEN_BUTTON, ABOUT_MENU_POPOVER } from '$lib/constants/test-ids.constants';
 
 	let visible = false;
 	let button: HTMLButtonElement | undefined;
