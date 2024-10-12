@@ -31,6 +31,9 @@ strum = "0.26.3"
 strum_macros = "0.26.4"
 bitcoin = "0.32.3"
 
+[profile.release]
+incremental = true
+
 [profile.e2e]
 inherits = "release"
 incremental = true
