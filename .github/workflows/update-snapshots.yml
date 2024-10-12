@@ -44,7 +44,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.rustup/toolchains
-          key: rust-toolchain-e2e-${{ hashFiles('rust-toolchain.toml') }}
+          key: rust-toolchain-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
+          restore-keys: |
+              rust-toolchain-e2e-
 
       - name: Cache Cargo build
         uses: actions/cache@v4
@@ -52,7 +54,7 @@ jobs:
           path: target
           key: cargo-build-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml', 'src/backend/**/*', 'src/shared/**/*') }}
           restore-keys: |
-            cargo-build-e2e-
+              cargo-build-e2e-
 
       - name: Deploy the backend
         uses: ./.github/actions/deploy-backend
