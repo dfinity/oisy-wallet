@@ -1,9 +1,36 @@
 {
+	"signer": {
+		"local": "tdxud-2yaaa-aaaad-aadiq-cai"
+	},
 	"backend": {
 		"local": "tdxud-2yaaa-aaaad-aadiq-cai"
 	},
-	"signer": {
-		"local": "tdxud-2yaaa-aaaad-aadiq-cai"
+	"orbit": {
+		"local": "4jngj-yiaaa-aaaal-ajk5q-cai"
+	},
+	"internet_identity": {
+		"local": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+	},
+	"cycles_ledger": {
+		"local": "um5iw-rqaaa-aaaaq-qaaba-cai"
+	},
+	"cycles_depositor": {
+		"local": "2vxsx-fae"
+	},
+	"pouh_issuer": {
+		"local": "qbw6f-caaaa-aaaah-qdcwa-cai"
+	},
+	"icp_ledger": {
+		"local": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+	},
+	"icp_index": {
+		"local": "qhbym-qaaaa-aaaaa-aaafq-cai"
+	},
+	"ckbtc_minter": {
+		"local": "ml52i-qqaaa-aaaar-qaaba-cai"
+	},
+	"ckbtc_ledger": {
+		"local": "mc6ru-gyaaa-aaaar-qaaaq-cai"
 	},
 	"ckbtc_index": {
 		"local": "mm444-5iaaa-aaaar-qaabq-cai"
@@ -11,34 +38,19 @@
 	"ckbtc_kyt": {
 		"local": "pvm5g-xaaaa-aaaar-qaaia-cai"
 	},
-	"ckbtc_ledger": {
-		"local": "mc6ru-gyaaa-aaaar-qaaaq-cai"
-	},
-	"ckbtc_minter": {
-		"local": "ml52i-qqaaa-aaaar-qaaba-cai"
-	},
-	"cketh_index": {
-		"local": "sh5u2-cqaaa-aaaar-qacna-cai"
+	"cketh_minter": {
+		"local": "jzenf-aiaaa-aaaar-qaa7q-cai"
 	},
 	"cketh_ledger": {
 		"local": "apia6-jaaaa-aaaar-qabma-cai"
 	},
-	"cketh_minter": {
-		"local": "jzenf-aiaaa-aaaar-qaa7q-cai"
-	},
-	"ckusdc_index": {
-		"local": "ycvkf-paaaa-aaaar-qaelq-cai"
+	"cketh_index": {
+		"local": "sh5u2-cqaaa-aaaar-qacna-cai"
 	},
 	"ckusdc_ledger": {
 		"local": "yfumr-cyaaa-aaaar-qaela-cai"
 	},
-	"icp_index": {
-		"local": "qhbym-qaaaa-aaaaa-aaafq-cai"
-	},
-	"icp_ledger": {
-		"local": "ryjl3-tyaaa-aaaaa-aaaba-cai"
-	},
-	"internet_identity": {
-		"local": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+	"ckusdc_index": {
+		"local": "ycvkf-paaaa-aaaar-qaelq-cai"
 	}
 }
