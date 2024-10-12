@@ -51,7 +51,7 @@ jobs:
         uses: actions/cache@v4
         id: cargo-build-cache
         with:
-          path: target
+          path: target/wasm32-unknown-unknown
           key: cargo-build-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml') }}
           restore-keys: |
             cargo-build-e2e-
