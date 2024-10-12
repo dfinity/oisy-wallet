@@ -47,7 +47,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Deploy the backend
-        uses: ./.github/actions/deploy-backend
+        run: cargo build --target wasm32-unknown-unknown --release -p backend --locked
 
 
 
