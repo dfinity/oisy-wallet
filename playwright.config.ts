@@ -19,6 +19,7 @@ export default defineConfig({
 		reuseExistingServer: true,
 		port: DEV ? 5173 : 4173
 	},
+	workers: 5,
 	testDir: 'e2e',
 	testMatch: ['**/*.e2e.ts', '**/*.spec.ts'],
 	use: {
