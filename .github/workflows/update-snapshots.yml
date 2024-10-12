@@ -47,18 +47,35 @@ jobs:
           restore-keys: |
             rust-toolchain-e2e-
 
-      - name: Cache Cargo build
+      - name: Cache Cargo build 1
         uses: actions/cache@v4
-        id: cargo-build-cache
+        id: cargo-build-cache-1
         with:
           path: target/wasm32-unknown-unknown
-          key: cargo-build-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml') }}
+          key: cargo-build-1-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml') }}
           restore-keys: |
-            cargo-build-e2e-
+            cargo-build-1-e2e-
+
+      - name: Cache Cargo build 2
+        uses: actions/cache@v4
+        id: cargo-build-cache-2
+        with:
+          path: target/release
+          key: cargo-build-2-e2e-${{ hashFiles('Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml') }}
+          restore-keys: |
+            cargo-build-2-e2e-
 
       - name: Check if cache was hit
         run: |
-          if [ "${{ steps.cargo-build-cache.outputs.cache-hit }}" == "true" ]; then
+          if [ "${{ steps.cargo-build-cache-1.outputs.cache-hit }}" == "true" ]; then
+            echo "Cache was hit, build should be skipped"
+          else
+            echo "Cache miss, build will proceed"
+          fi
+
+      - name: Check if cache was hit 2
+        run: |
+          if [ "${{ steps.cargo-build-cache-2.outputs.cache-hit }}" == "true" ]; then
             echo "Cache was hit, build should be skipped"
           else
             echo "Cache miss, build will proceed"
