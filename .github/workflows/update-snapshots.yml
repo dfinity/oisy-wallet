@@ -40,6 +40,7 @@ jobs:
         run: |
           echo "ENV=e2e" >> $GITHUB_ENV
           echo "DFX_NETWORK=e2e" >> $GITHUB_ENV
+          echo "NODE_ENV=e2e" >> $GITHUB_ENV
 
       - name: Run Playwright tests
         run: npm run e2e:snapshots
