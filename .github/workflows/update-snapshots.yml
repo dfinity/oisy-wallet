@@ -8,18 +8,17 @@ on:
 
 jobs:
 
-  oisy-backend-wasm:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build oisy-backend WASM
-        uses: ./.github/actions/oisy-backend
+#  oisy-backend-wasm:
+#    runs-on: ubuntu-20.04
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Build oisy-backend WASM
+#        uses: ./.github/actions/oisy-backend
 
   update_snapshots:
     runs-on: ubuntu-latest
-    needs: oisy-backend-wasm
     steps:
       - name: Fail if branch is main
         if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
