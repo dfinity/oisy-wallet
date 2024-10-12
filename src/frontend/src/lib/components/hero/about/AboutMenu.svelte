@@ -30,6 +30,7 @@
 	</ButtonIcon>
 
 	<Popover bind:visible anchor={button} direction="rtl">
+		<!-- TODO: move the test ID to the Popover when GIX components have the feature-->
 		<ul class="flex list-none flex-col gap-4" data-tid={ABOUT_MENU_POPOVER}>
 			<li><AboutWhat asMenuItem on:icOpenAboutModal={hidePopover} /></li>
 			<li><AboutHow asMenuItem on:icOpenAboutModal={hidePopover} /></li>
