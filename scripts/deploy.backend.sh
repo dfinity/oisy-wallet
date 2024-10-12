@@ -45,6 +45,8 @@ II_VC_URL="https://identity.ic0.app"
 
 echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
 
+echo "Deploying backend with the following environment: ${ENV} ${WALLET}"
+
 if [ -n "${ENV+1}" ]; then
   dfx deploy backend --argument "(variant {
     Init = record {
@@ -65,6 +67,7 @@ if [ -n "${ENV+1}" ]; then
   })" --network "$ENV" --wallet "$WALLET"
 else
   DEFAULT_CANISTER_ID="$(dfx canister id --network staging backend)"
+  echo "Deploying backend with the following default canister: ${DEFAULT_CANISTER_ID}"
   dfx deploy backend --argument "(variant {
     Init = record {
          ecdsa_key_name = \"$ECDSA_KEY_NAME\";
