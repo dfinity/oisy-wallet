@@ -5,6 +5,7 @@
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
@@ -44,7 +45,13 @@
 		</p>
 	</Value>
 
-	<button class="secondary full center mb-8" on:click={() => dispatch('icConvert')} slot="toolbar">
+	<Button
+		colorStyle="secondary"
+		fullWidth
+		styleClass="mb-8"
+		on:click={() => dispatch('icConvert')}
+		slot="toolbar"
+	>
 		<span class="text-dark-slate-blue font-bold"
 			>{replacePlaceholders(
 				replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
@@ -54,7 +61,7 @@
 				}
 			)}</span
 		>
-	</button>
+	</Button>
 </ContentWithToolbar>
 
 <ButtonDone on:click={close} />
