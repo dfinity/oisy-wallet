@@ -339,9 +339,9 @@
 </script>
 
 {#if nonNullish(listener)}
-	<WalletConnectButton on:click={disconnect}
-		>{$i18n.wallet_connect.text.disconnect}</WalletConnectButton
-	>
+	<WalletConnectButton on:click={disconnect} ariaLabel={$i18n.wallet_connect.alt.disconnect}>
+		{$i18n.wallet_connect.text.disconnect}
+	</WalletConnectButton>
 {/if}
 
 {#if $modalWalletConnectAuth}

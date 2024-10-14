@@ -468,6 +468,7 @@ interface I18nWallet_connect {
 		eth_transaction_executed: string;
 		sign_executed: string;
 	};
+	alt: { disconnect: string };
 	error: {
 		qr_code_read: string;
 		missing_uri: string;

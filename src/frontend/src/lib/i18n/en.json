@@ -529,6 +529,9 @@
 			"eth_transaction_executed": "WalletConnect eth_sendTransaction request executed.",
 			"sign_executed": "WalletConnect sign request executed."
 		},
+		"alt": {
+			"disconnect": "Disconnect from WalletConnect"
+		},
 		"error": {
 			"qr_code_read": "Cannot read QR code.",
 			"missing_uri": "A URI to connect to should be provided.",

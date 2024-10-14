@@ -1,19 +1,12 @@
 <script lang="ts">
 	import IconWalletConnect from '$lib/components/icons/IconWalletConnect.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { ethAddressNotLoaded } from '$lib/derived/address.derived';
+
+	export let ariaLabel: string;
 </script>
 
-<button on:click class="tertiary text-primary h-10" disabled={$ethAddressNotLoaded}>
-	<IconWalletConnect size="24" />
+<ButtonIcon on:click {ariaLabel} disabled={$ethAddressNotLoaded}>
+	<IconWalletConnect size="24" slot="icon" />
 	<slot />
-</button>
-
-<style lang="scss">
-	button {
-		border-radius: var(--border-radius-sm-1_5x);
-
-		&:hover {
-			color: inherit;
-		}
-	}
-</style>
+</ButtonIcon>
