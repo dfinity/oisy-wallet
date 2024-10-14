@@ -24,12 +24,11 @@
 </script>
 
 <div
-	class="relative grid min-h-[640px] grid-rows-[auto,1fr,auto] lg:flex lg:h-full lg:flex-col"
+	class="relative min-h-[640px] lg:flex lg:h-full lg:flex-col"
 	class:overflow-hidden={$authNotSignedIn}
 	class:flex={$authSignedIn}
 	class:h-full={$authSignedIn}
 	class:flex-col={$authSignedIn}
-	class:block={$authNotSignedIn}
 	class:md:flex={$authNotSignedIn}
 	class:md:flex-col={$authNotSignedIn}
 	class:md:h-full={$authNotSignedIn}
