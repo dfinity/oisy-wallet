@@ -161,7 +161,7 @@ interface I18nSettings {
 interface I18nDApps {
 	text: {
 		about: string;
-		sub_heading: string;
+		sub_headline: string;
 		title: string;
 		headline: string;
 		launch: string;
