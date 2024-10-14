@@ -36,12 +36,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            Cargo.toml
-            Cargo.lock
-            rust-toolchain.toml
-            src/backend/
-            src/shared/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.toml','Cargo.lock','rust-toolchain.toml','src/backend/**/*','src/shared/**/*') }}
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
           restore-keys: |
               ${{ runner.os }}-cargo-
 
