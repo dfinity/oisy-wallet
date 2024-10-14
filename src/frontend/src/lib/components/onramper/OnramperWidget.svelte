@@ -71,4 +71,5 @@
 	height="660px"
 	width="100%"
 	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
+	sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
 />

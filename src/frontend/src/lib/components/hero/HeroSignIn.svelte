@@ -11,11 +11,11 @@
 	$: infoList = [
 		{
 			label: $i18n.auth.text.safe_access,
-			icon: IconGlasses
+			icon: IconShieldAlert
 		},
 		{
 			label: $i18n.auth.text.privacy_and_security,
-			icon: IconShieldAlert
+			icon: IconGlasses
 		},
 		{
 			label: $i18n.auth.text.powered_by_chain_fusion,

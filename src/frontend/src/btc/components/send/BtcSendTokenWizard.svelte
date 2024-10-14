@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
+	import { sendBtc } from '$btc/services/btc-send.services';
 	import type { UtxosFee } from '$btc/types/btc-send';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendQrCodeScan from '$lib/components/send/SendQRCodeScan.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -14,10 +15,19 @@
 		btcAddressRegtest,
 		btcAddressTestnet
 	} from '$lib/derived/address.derived';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NetworkId } from '$lib/types/network';
-	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
+	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import {
+		isNetworkIdBTCRegtest,
+		isNetworkIdBTCTestnet,
+		mapNetworkIdToBitcoinNetwork
+	} from '$lib/utils/network.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 
 	export let currentStep: WizardStep | undefined;
@@ -48,8 +58,77 @@
 	const close = () => dispatch('icClose');
 	const back = () => dispatch('icSendBack');
 
-	// TODO: implement send function when related services are ready
-	const send = () => {};
+	const send = async () => {
+		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
+
+		if (isNullish(network)) {
+			toastsError({
+				msg: { text: $i18n.send.error.no_btc_network_id }
+			});
+			return;
+		}
+
+		if (isNullishOrEmpty(destination)) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.destination_address_invalid }
+			});
+			return;
+		}
+
+		if (invalidAmount(amount) || isNullish(amount)) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.amount_invalid }
+			});
+			return;
+		}
+
+		if (isNullish(utxosFee)) {
+			toastsError({
+				msg: { text: $i18n.send.assertion.utxos_fee_missing }
+			});
+			return;
+		}
+
+		if (isNullish($sendToken)) {
+			toastsError({
+				msg: { text: $i18n.tokens.error.unexpected_undefined }
+			});
+			return;
+		}
+
+		if (isNullish($authIdentity)) {
+			toastsError({
+				msg: { text: $i18n.send.error.unexpected }
+			});
+			return;
+		}
+
+		dispatch('icNext');
+
+		try {
+			// TODO: add tracking
+			await sendBtc({
+				destination,
+				amount,
+				utxosFee,
+				progress,
+				network,
+				source,
+				identity: $authIdentity
+			});
+
+			sendProgressStep = ProgressStepsSendBtc.DONE;
+
+			setTimeout(() => close(), 750);
+		} catch (err: unknown) {
+			toastsError({
+				msg: { text: $i18n.send.error.unexpected },
+				err
+			});
+
+			dispatch('icBack');
+		}
+	};
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}

@@ -13,7 +13,7 @@ on:
         options:
           - staging
           - beta
-          - prod
+          - ic
       canister:
         required: true
         type: choice
@@ -21,6 +21,11 @@ on:
         options:
           - frontend
           - backend
+      force-backend:
+        required: false
+        type: boolean
+        description: 'Force backend deployment even if no changes are detected.'
+        default: false
 
 jobs:
   deployment:
@@ -98,7 +103,7 @@ jobs:
               echo "${{ secrets.DFX_DEPLOY_KEY_BETA }}"
               echo 'EOF'
             } >> $GITHUB_ENV
-          elif [ "$NETWORK" == "prod" ]; then
+          elif [ "$NETWORK" == "ic" ]; then
             echo "VITE_ETHERSCAN_API_KEY=${{ secrets.VITE_ETHERSCAN_API_KEY_PROD }}" >> $GITHUB_ENV
             echo "VITE_INFURA_API_KEY=${{ secrets.VITE_INFURA_API_KEY_PROD }}" >> $GITHUB_ENV
             echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_PROD }}" >> $GITHUB_ENV
@@ -148,14 +153,22 @@ jobs:
       - name: Pre-build
         run: npm run build
 
-      - name: Deploy to Environment
+      - name: Deploy Frontend to Environment
         run: |
-          if [ "$CANISTER" == "frontend" ]; then
+          if [ "$CANISTER" == "frontend" ] || [ "${{ github.event_name }}" == "push" ]; then
             dfx deploy $CANISTER --network $NETWORK
-          elif [ "$CANISTER" == "backend" ]; then
+          fi
+
+      - name: Deploy Backend to Environment
+        run: |
+          if [ "$CANISTER" == "backend" ] || [ "${{ github.event_name }}" == "push" ]; then
             if git diff --quiet HEAD~1 HEAD -- Cargo.toml Cargo.lock rust-toolchain.toml src/backend/**/* src/shared/**/*; then
-              echo "No changes in specified files/folders detected, skipping backend deployment."
+              if [ "${{ github.event.inputs.force-backend }}" == "false" ]; then
+                echo "No changes in specified files/folders detected, skipping backend deployment."
+              else
+                ENV=$NETWORK ./scripts/deploy.backend.sh
+              fi
             else            
-              ./scripts/deploy.backend.sh
+              ENV=$NETWORK ./scripts/deploy.backend.sh
             fi
           fi
