@@ -5,7 +5,6 @@
 	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
 	import Network from '$lib/components/networks/Network.svelte';
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
-	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { SLIDE_EASING } from '$lib/constants/transition.constants';
 	import { selectedNetwork } from '$lib/derived/network.derived';
