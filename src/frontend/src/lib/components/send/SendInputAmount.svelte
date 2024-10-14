@@ -5,6 +5,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import MaxButton from '$lib/components/common/MaxButton.svelte';
+	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
@@ -70,5 +71,5 @@
 </Input>
 
 {#if nonNullish(error)}
-	<p transition:slide={{ duration: 250 }} class="pb-3 text-cyclamen">{error.message}</p>
+	<p transition:slide={SLIDE_DURATION} class="pb-3 text-cyclamen">{error.message}</p>
 {/if}

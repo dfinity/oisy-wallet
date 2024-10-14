@@ -119,13 +119,14 @@ export class BackendCanister extends Canister<BackendService> {
 			...rest
 		});
 
-		if ('Err' in response) {
-			throw mapBtcPendingTransactionError(response.Err);
+		if ('Ok' in response) {
+			return true;
 		}
 
-		return 'Ok' in response;
+		throw mapBtcPendingTransactionError(response.Err);
 	};
 
+	// TODO: rename to plural
 	btcGetPendingTransaction = async ({
 		network,
 		address
@@ -137,33 +138,35 @@ export class BackendCanister extends Canister<BackendService> {
 			address
 		});
 
-		if ('Err' in response) {
-			throw mapBtcPendingTransactionError(response.Err);
+		if ('Ok' in response) {
+			const {
+				Ok: { transactions }
+			} = response;
+			return transactions;
 		}
 
-		return response.Ok.transactions;
+		throw mapBtcPendingTransactionError(response.Err);
 	};
 
 	btcSelectUserUtxosFee = async ({
 		network,
 		minConfirmations,
-		amountSatoshis,
-		sourceAddress
+		amountSatoshis
 	}: BtcSelectUserUtxosFeeParams): Promise<SelectedUtxosFeeResponse> => {
 		const { btc_select_user_utxos_fee } = this.caller({ certified: true });
 
 		const response = await btc_select_user_utxos_fee({
 			network,
 			min_confirmations: minConfirmations,
-			amount_satoshis: amountSatoshis,
-			source_address: sourceAddress
+			amount_satoshis: amountSatoshis
 		});
 
-		if ('Err' in response) {
-			throw mapBtcSelectUserUtxosFeeError(response.Err);
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
 		}
 
-		return response.Ok;
+		throw mapBtcSelectUserUtxosFeeError(response.Err);
 	};
 
 	allowSigning = async (): Promise<void> => {

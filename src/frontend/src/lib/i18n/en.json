@@ -31,6 +31,8 @@
 	},
 	"navigation": {
 		"text": {
+			"tokens": "Assets",
+			"settings": "Settings",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -38,6 +40,8 @@
 			"submit_ticket": "Submit a ticket"
 		},
 		"alt": {
+			"tokens": "Go to the assets view",
+			"settings": "Open your settings",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -52,8 +56,8 @@
 			"logout": "Logout",
 			"authenticate": "Open or Create",
 			"safe_access": "Safe access anywhere, anytime",
-			"privacy_and_security": "Top-notch privacy and security",
-			"powered_by_chain_fusion": "Powered by ICP's Chain Fusion technology"
+			"privacy_and_security": "Anonymous, self-custodial",
+			"powered_by_chain_fusion": "Built with ICP's Chain Fusion tech"
 		},
 		"alt": {
 			"sign_in": "Sign in with Internet Identity to start using $oisy_name.",
@@ -282,7 +286,8 @@
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
-			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete."
+			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
+			"no_available_utxos": "You won't have available utxos to perform this transaction."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",
@@ -305,7 +310,8 @@
 			"address_unknown": "Address is unknown.",
 			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
 			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
-			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing."
+			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing.",
+			"utxos_fee_missing": "UTXOs fee is missing."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -319,7 +325,8 @@
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
 			"incompatible_token": "The token is incompatible. Please try again with a compatible token.",
 			"no_btc_network_id": "Current network ($networkId) is not a bitcoin network.",
-			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later."
+			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
+			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee."
 		}
 	},
 	"convert": {
@@ -359,6 +366,7 @@
 			"contract_address": "Contract address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
+			"hide_zeros": "Hide zeros",
 			"all_tokens_with_zero_hidden": "All tokens with zero balance are currently hidden.",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",

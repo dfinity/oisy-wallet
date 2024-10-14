@@ -27,6 +27,7 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
 import type { TransactionFeeData } from '$lib/types/transaction';
+import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
@@ -166,6 +167,30 @@ const ckErc20HelperContractPrepareTransaction = async ({
 		to: contractAddress,
 		amount: 0n,
 		...rest
+	});
+};
+
+/**
+ * Get the current allowance of an Erc20 contract.
+ */
+// TODO: this function is still not used in the codebase, so for now we put an ESLINT exception
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const erc20ContractAllowance = async ({
+	token,
+	owner,
+	spender,
+	networkId
+}: {
+	networkId: NetworkId;
+	owner: EthAddress;
+	spender: EthAddress;
+} & Pick<SendParams, 'token'>): Promise<BigNumber> => {
+	const { allowance } = infuraErc20Providers(networkId);
+
+	return await allowance({
+		contract: token as Erc20Token,
+		owner,
+		spender
 	});
 };
 
@@ -414,17 +439,55 @@ const sendTransaction = async ({
 	return await sendTransaction(rawTransaction);
 };
 
-const approve = async ({
-	progress,
-	token,
-	to,
+const prepareAndSignApproval = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	gas,
 	sourceNetwork,
 	identity,
+	progress,
+	...rest
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from' | 'to'> &
+	Omit<SendParams, 'targetNetwork' | 'lastProgressStep' | 'progress' | 'minterInfo'> &
+	Partial<Pick<SendParams, 'progress'>> &
+	Pick<TransactionFeeData, 'gas'> & {
+		maxFeePerGas: BigNumber;
+		maxPriorityFeePerGas: BigNumber;
+		nonce: number;
+		spender: EthAddress;
+	}): Promise<
+	ResultSuccess & {
+		hash?: string;
+	}
+> => {
+	const { id: networkId, chainId } = sourceNetwork;
+
+	const approve = await erc20ContractPrepareApprove({
+		...rest,
+		gas: gas.toBigInt(),
+		maxFeePerGas: maxFeePerGas.toBigInt(),
+		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
+		chainId,
+		networkId
+	});
+
+	progress?.(ProgressStepsSend.SIGN_APPROVE);
+
+	const rawTransaction = await signTransaction({ identity, transaction: approve });
+
+	progress?.(ProgressStepsSend.APPROVE);
+
+	const { sendTransaction } = infuraProviders(networkId);
+
+	const { hash } = await sendTransaction(rawTransaction);
+
+	return { success: true, hash };
+};
+
+const approve = async ({
+	token,
+	to,
 	minterInfo,
-	nonce,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from'> &
 	Omit<SendParams, 'targetNetwork' | 'lastProgressStep'> &
@@ -448,29 +511,11 @@ const approve = async ({
 		return { transactionApproved: false };
 	}
 
-	const { id: networkId, chainId } = sourceNetwork;
-
-	const approve = await erc20ContractPrepareApprove({
+	const { success: transactionApproved, hash } = await prepareAndSignApproval({
 		...rest,
-		nonce,
-		gas: gas.toBigInt(),
-		maxFeePerGas: maxFeePerGas.toBigInt(),
-		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
-		chainId,
-		networkId,
 		token,
 		spender: erc20HelperContractAddress
 	});
 
-	progress(ProgressStepsSend.SIGN_APPROVE);
-
-	const rawTransaction = await signTransaction({ identity, transaction: approve });
-
-	progress(ProgressStepsSend.APPROVE);
-
-	const { sendTransaction } = infuraProviders(networkId);
-
-	const { hash } = await sendTransaction(rawTransaction);
-
-	return { transactionApproved: true, hash };
+	return { transactionApproved, hash };
 };

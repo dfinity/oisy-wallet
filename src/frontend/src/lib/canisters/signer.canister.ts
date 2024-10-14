@@ -11,7 +11,7 @@ import type {
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
-import { SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
+import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
@@ -46,15 +46,18 @@ export class SignerCanister extends Canister<SignerService> {
 			certified: true
 		});
 
-		const response = await btc_caller_address({ network, address_type: { P2WPKH: null } }, [
+		const response = await btc_caller_address({ network, address_type: P2WPKH }, [
 			SIGNER_PAYMENT_TYPE
 		]);
 
-		if ('Err' in response) {
-			throw mapSignerCanisterBtcError(response.Err);
+		if ('Ok' in response) {
+			const {
+				Ok: { address }
+			} = response;
+			return address;
 		}
 
-		return response.Ok.address;
+		throw mapSignerCanisterBtcError(response.Err);
 	};
 
 	getBtcBalance = async ({
@@ -70,16 +73,19 @@ export class SignerCanister extends Canister<SignerService> {
 
 		const request: GetBalanceRequest = {
 			network,
-			address_type: { P2WPKH: null },
+			address_type: P2WPKH,
 			min_confirmations: toNullable(minConfirmations)
 		};
 		const response = await btc_caller_balance(request, [SIGNER_PAYMENT_TYPE]);
 
-		if ('Err' in response) {
-			throw mapSignerCanisterBtcError(response.Err);
+		if ('Ok' in response) {
+			const {
+				Ok: { balance }
+			} = response;
+			return balance;
 		}
 
-		return response.Ok.balance;
+		throw mapSignerCanisterBtcError(response.Err);
 	};
 
 	getEthAddress = async (): Promise<EthAddress> => {
@@ -92,15 +98,14 @@ export class SignerCanister extends Canister<SignerService> {
 		const request: EthAddressRequest = { principal: [] };
 		const response = await eth_address(request, [SIGNER_PAYMENT_TYPE]);
 
-		if ('Err' in response) {
-			throw mapSignerCanisterGetEthAddressError(response.Err);
+		if ('Ok' in response) {
+			const {
+				Ok: { address }
+			} = response;
+			return address;
 		}
 
-		const {
-			Ok: { address }
-		} = response;
-
-		return address;
+		throw mapSignerCanisterGetEthAddressError(response.Err);
 	};
 
 	signTransaction = async ({
@@ -175,7 +180,7 @@ export class SignerCanister extends Canister<SignerService> {
 
 		const response = await btc_caller_send(
 			{
-				address_type: { P2WPKH: null },
+				address_type: P2WPKH,
 				utxos_to_spend: utxosToSpend,
 				fee_satoshis: feeSatoshis,
 				...rest
@@ -183,10 +188,11 @@ export class SignerCanister extends Canister<SignerService> {
 			[SIGNER_PAYMENT_TYPE]
 		);
 
-		if ('Err' in response) {
-			throw mapSignerCanisterSendBtcError(response.Err);
+		if ('Ok' in response) {
+			const { Ok } = response;
+			return Ok;
 		}
 
-		return response.Ok;
+		throw mapSignerCanisterSendBtcError(response.Err);
 	};
 }

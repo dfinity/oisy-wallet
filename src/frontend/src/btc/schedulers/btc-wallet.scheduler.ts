@@ -1,8 +1,9 @@
+import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { BitcoinNetwork } from '$declarations/signer/signer.did';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import { btcAddressData } from '$lib/rest/blockchain.rest';
+import { btcAddressData, btcLatestBlock } from '$lib/rest/blockchain.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
@@ -86,7 +87,8 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}): Promise<CertifiedData<bigint>> {
 		const balance = await getBtcBalance({
 			identity,
-			network: bitcoinNetwork
+			network: bitcoinNetwork,
+			minConfirmations: BTC_BALANCE_MIN_CONFIRMATIONS
 		});
 		const certifiedBalance = {
 			data: balance,
@@ -118,8 +120,9 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			? await this.loadBtcTransactions({ btcAddress })
 			: [];
 
+		const { height } = await btcLatestBlock();
 		const uncertifiedTransactions = newTransactions.map((transaction) => ({
-			data: mapBtcTransaction({ transaction, btcAddress }),
+			data: mapBtcTransaction({ transaction, btcAddress, latestBitcoinBlockHeight: height }),
 			certified: false
 		}));
 

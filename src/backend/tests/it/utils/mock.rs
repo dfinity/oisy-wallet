@@ -18,4 +18,5 @@ pub const VC_HOLDER: &str = "ufjdl-kewp5-bgfaq-d7k34-e5w62-nyad4-7r3s5-m2pt2-owq
 pub const ISSUER_CANISTER_ID: &str = "qdiif-2iaaa-aaaap-ahjaq-cai";
 pub const ISSUER_ORIGIN: &str = "https://dummy-issuer.vc/";
 pub const II_CANISTER_ID: &str = "rdmx6-jaaaa-aaaaa-aaadq-cai";
+pub const SIGNER_CANISTER_ID: &str = "grghe-syaaa-aaaar-qabyq-cai";
 pub const II_ORIGIN: &str = "https://identity.ic0.app/";
