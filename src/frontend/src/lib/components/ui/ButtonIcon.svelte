@@ -10,7 +10,7 @@
 </script>
 
 <button
-	class={`${colorStyle} icon flex flex-col text-center text-xs font-normal`}
+	class={`${colorStyle} icon flex flex-col text-center text-xs font-normal w-10 h-10`}
 	class:link
 	bind:this={button}
 	on:click
