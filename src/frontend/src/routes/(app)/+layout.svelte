@@ -6,6 +6,8 @@
 	import Modals from '$lib/components/core/Modals.svelte';
 	import Header from '$lib/components/hero/Header.svelte';
 	import Hero from '$lib/components/hero/Hero.svelte';
+	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
+	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
@@ -33,18 +35,23 @@
 	<Header back={route === 'settings'} />
 
 	<AuthGuard>
-		<Hero
-			usdTotal={route === 'tokens'}
-			summary={route === 'transactions'}
-			actions={route !== 'settings'}
-			back={route === 'transactions'}
-		/>
+		<SplitPane>
+			<div class="pl-4 sm:pl-8" slot="menu">
+				<NavigationMenu />
+			</div>
 
-		<main class="pt-8">
+			{#if route !== 'settings'}
+				<Hero
+					usdTotal={route === 'tokens'}
+					summary={route === 'transactions'}
+					back={route === 'transactions'}
+				/>
+			{/if}
+
 			<LoadersGuard>
 				<slot />
 			</LoadersGuard>
-		</main>
+		</SplitPane>
 
 		<Modals />
 	</AuthGuard>

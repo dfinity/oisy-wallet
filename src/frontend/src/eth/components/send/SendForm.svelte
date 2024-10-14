@@ -7,12 +7,12 @@
 	import SendInfo from '$eth/components/send/SendInfo.svelte';
 	import SendNetworkICP from '$eth/components/send/SendNetworkICP.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ButtonNext from '$lib/components/ui/ButtonNext.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';

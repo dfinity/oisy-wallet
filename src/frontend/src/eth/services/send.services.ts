@@ -448,7 +448,6 @@ const approve = async ({
 	sourceNetwork,
 	identity,
 	minterInfo,
-	nonce,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'from'> &
 	Omit<SendParams, 'targetNetwork' | 'lastProgressStep'> &
@@ -476,7 +475,6 @@ const approve = async ({
 
 	const approve = await erc20ContractPrepareApprove({
 		...rest,
-		nonce,
 		gas: gas.toBigInt(),
 		maxFeePerGas: maxFeePerGas.toBigInt(),
 		maxPriorityFeePerGas: maxPriorityFeePerGas.toBigInt(),
