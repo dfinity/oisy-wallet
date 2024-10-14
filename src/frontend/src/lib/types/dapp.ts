@@ -9,6 +9,6 @@ export interface DApp {
 		twitter?: string;
 	};
 	url: string;
-};
+}
 
 export const ALL_DAPPS_CATEGORY = 'All dApps';
