@@ -31,6 +31,8 @@
 	},
 	"navigation": {
 		"text": {
+			"tokens": "Assets",
+			"settings": "Settings",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -38,6 +40,8 @@
 			"submit_ticket": "Submit a ticket"
 		},
 		"alt": {
+			"tokens": "Go to the assets view",
+			"settings": "Open your settings",
 			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
@@ -282,7 +286,8 @@
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
 			"cketh_certified": "Please wait until the ckETH parameters have been certified.",
-			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete."
+			"pending_bitcoin_transaction": "You can send another Bitcoin transaction once the pending one is complete.",
+			"no_available_utxos": "You won't have available utxos to perform this transaction."
 		},
 		"assertion": {
 			"invalid_destination_address": "Invalid destination address",

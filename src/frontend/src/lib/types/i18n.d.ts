@@ -27,6 +27,8 @@ interface I18nCore {
 
 interface I18nNavigation {
 	text: {
+		tokens: string;
+		settings: string;
 		source_code_on_github: string;
 		view_on_explorer: string;
 		source_code: string;
@@ -34,6 +36,8 @@ interface I18nNavigation {
 		submit_ticket: string;
 	};
 	alt: {
+		tokens: string;
+		settings: string;
 		more_settings: string;
 		menu: string;
 		changelog: string;
@@ -244,7 +248,12 @@ interface I18nSend {
 		enter_wallet_address: string;
 		select_network: string;
 	};
-	info: { ckbtc_certified: string; cketh_certified: string; pending_bitcoin_transaction: string };
+	info: {
+		ckbtc_certified: string;
+		cketh_certified: string;
+		pending_bitcoin_transaction: string;
+		no_available_utxos: string;
+	};
 	assertion: {
 		invalid_destination_address: string;
 		insufficient_funds: string;
