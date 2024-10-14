@@ -15,11 +15,16 @@
 	$: selectedDApp = $modalDAppDetails
 		? ($modalStore?.data as DApp | undefined)
 		: undefined;
+
+	export let selectedFilter;
+	$: filteredDApps = selectedFilter === "All"
+		? dApps
+		: dApps.filter(dApp => dApp.categories.includes(selectedFilter));
 </script>
 
 <div class="container mx-auto py-8">
 	<div class="grid grid-cols-1 sm:grid-cols-2 gap-y-12 gap-x-3">
-		{#each dApps as dApp (dApp.name)}
+		{#each filteredDApps as dApp (dApp.name)}
 			<button on:click={() => modalStore.openDAppDetails(dApp)} class="contents">
 				<DAppCard dApp={dApp} />
 			</button>

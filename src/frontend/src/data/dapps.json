@@ -3,18 +3,21 @@
     "name": "Kong Swap",
     "description": "The one stop token shop - Trade tokens across all chains with ease using KongSwap",
     "tags": ["DEX", "Finance"],
+    "categories": ["Signer Standard Supported", "Staking"],
     "imageUrl": "/images/kong_swap_logo.svg"
   },
   {
     "name": "OpenChat",
     "description": "OpenChat is a fully decentralized real-time messaging service",
     "tags": ["Social"],
+    "categories": ["Staking"],
     "imageUrl": "/images/open_chat_logo.svg"
   },
   {
     "name": "DecideAI",
     "description": "DecideAI is an ecosystem that consists of Decide Protocol...",
     "tags": ["AI", "Security"],
+    "categories": ["Other"],
     "imageUrl": "/images/decide_ai_logo.svg"
   }
 ]
