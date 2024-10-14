@@ -19,7 +19,7 @@
 			: dApps;
 </script>
 
-<h6 class="m-0 text-center text-misty-rose">{$i18n.dapps.text.sub_headline}</h6>
+<h6 class="m-0 text-center text-misty-rose">{$i18n.dapps.text.sub_heading}</h6>
 <h1 class="mb-5 mt-2 text-center text-3xl font-bold">{$i18n.dapps.text.headline}</h1>
 
 <FilterButtons class="mx-auto" {selectedFilter} {categories} onFilterChange={handleFilterChange} />
