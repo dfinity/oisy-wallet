@@ -5,6 +5,7 @@
 	import { modalDAppDetails } from '$lib/derived/modal.derived';
 	import DAppModal from '$lib/components/dapps/DAppModal.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import DAppCard from '$lib/components/dapps/DAppCard.svelte';
 
 	export let dApps: DApp[];
 
@@ -17,25 +18,15 @@
 </script>
 
 <div class="container mx-auto py-8">
-	<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+	<div class="grid grid-cols-1 sm:grid-cols-2 gap-y-12 gap-x-3">
 		{#each dApps as dApp (dApp.name)}
-			<div class="rounded-lg shadow-md bg-white p-6 hover:shadow-lg transition-shadow cursor-pointer" on:click={() => modalStore.openDAppDetails(dApp)}>
-				<img
-					src={dApp.imageUrl || '/default-dapp-icon.png'}
-					alt={dApp.name}
-					class="w-16 h-16 rounded-full mx-auto mb-4"
-				/>
-				<h2 class="text-center text-lg font-semibold">{dApp.name}</h2>
-				<p class="text-center text-gray-600 mt-2">{dApp.description}</p>
-				<div class="flex justify-center mt-4 space-x-2">
-					{#each dApp.tags as tag}
-						<span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded">{tag}</span>
-					{/each}
-				</div>
-			</div>
+			<button on:click={() => modalStore.openDAppDetails(dApp)} class="contents">
+				<DAppCard dApp={dApp} />
+			</button>
 		{/each}
 
-		<div class="rounded-lg shadow-md bg-blue-500 p-6 flex items-center justify-center text-white cursor-pointer hover:bg-blue-600 transition-colors">
+		<div
+			class="rounded-lg shadow-md bg-blue-500 p-6 flex items-center justify-center text-white cursor-pointer hover:bg-blue-600 transition-colors">
 			<a href="/submit-dapp" class="text-center">
 				<span class="block text-2xl font-semibold">+</span>
 				<p class="mt-2">Submit your DApp</p>
