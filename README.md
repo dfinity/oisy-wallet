@@ -129,7 +129,7 @@ npm run dev
 
 ## Dependencies
 
-[//]: # (TODO: Add fonts that are bought and owned by DFINITY too.)
+[//]: # 'TODO: Add fonts that are bought and owned by DFINITY too.'
 
 ### [Iconly Pro](https://iconly.pro/)
 
