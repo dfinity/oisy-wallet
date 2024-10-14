@@ -3,8 +3,10 @@
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { UtxosFee } from '$btc/types/btc-send';
 
 	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
+	export let utxosFee: UtxosFee | undefined = undefined;
 </script>
 
 {#if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.SOME}
@@ -14,5 +16,11 @@
 {:else if pendingTransactionsStatus === BtcPendingSentTransactionsStatus.ERROR}
 	<div in:fade>
 		<WarningBanner>{$i18n.send.error.no_pending_bitcoin_transaction}</WarningBanner>
+	</div>
+{/if}
+
+{#if utxosFee?.utxos.length === 0}
+	<div in:fade>
+		<WarningBanner>{$i18n.send.info.no_available_utxos}</WarningBanner>
 	</div>
 {/if}
