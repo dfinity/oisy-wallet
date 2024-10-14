@@ -5,6 +5,7 @@
 	import { fade } from 'svelte/transition';
 	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
 	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
 	import { authSignedIn, authIdentity } from '$lib/derived/auth.derived';
@@ -125,9 +126,9 @@
 							{$i18n.settings.text.pouh_credential_verified}
 						</output>
 					{:else}
-						<button type="button" class="primary" on:click={getPouhCredential}
-							>{$i18n.settings.text.present_pouh_credential}</button
-						>
+						<Button type="button" on:click={getPouhCredential}>
+							{$i18n.settings.text.present_pouh_credential}
+						</Button>
 					{/if}
 				</svelte:fragment>
 
