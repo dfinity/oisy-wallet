@@ -5,10 +5,15 @@
 	import NavigationItem from '$lib/components/navigation/NavigationItem.svelte';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteSettings, isRouteDApps, isRouteTransactions, networkParam } from '$lib/utils/nav.utils.js';
+	import {
+		isRouteSettings,
+		isRouteDApps,
+		isRouteTransactions,
+		networkParam
+	} from '$lib/utils/nav.utils.js';
 	import IconGlasses from '$lib/components/icons/IconGlasses.svelte';
 
-	let route: 'transactions' | 'tokens' | 'settings' | 'dapps'  = 'tokens';
+	let route: 'transactions' | 'tokens' | 'settings' | 'dapps' = 'tokens';
 	$: route = isRouteSettings($page)
 		? 'settings'
 		: isRouteDApps($page)

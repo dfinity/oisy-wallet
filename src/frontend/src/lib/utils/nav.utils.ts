@@ -17,7 +17,6 @@ export const isRouteSettings = ({ route: { id } }: Page): boolean => id === '/(a
 
 export const isRouteDApps = ({ route: { id } }: Page): boolean => id === '/(app)/dapps';
 
-
 export const isRouteTokens = ({ route: { id } }: Page): boolean => id === '/(app)';
 
 export const isSubRoute = (page: Page): boolean =>
