@@ -7,7 +7,7 @@
 {#if $authNotSignedIn}
 	<LandingPage />
 {:else}
-	<div in:fade class="sm:flex sm:overflow-y-scroll lg:block">
+	<div in:fade class="sm:block sm:overflow-y-scroll">
 		<slot />
 	</div>
 {/if}
