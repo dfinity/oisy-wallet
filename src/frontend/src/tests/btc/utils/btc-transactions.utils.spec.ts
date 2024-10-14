@@ -7,7 +7,8 @@ describe('mapBtcTransaction', () => {
 	it('should map correctly when receive transaction is pending', () => {
 		const result = mapBtcTransaction({
 			transaction: mockBtcTransaction,
-			btcAddress: mockBtcAddress
+			btcAddress: mockBtcAddress,
+			latestBitcoinBlockHeight: 1
 		});
 		const expectedResult = {
 			...mockBtcTransactionUi,
@@ -18,13 +19,33 @@ describe('mapBtcTransaction', () => {
 		expect(result).toEqual(expectedResult);
 	});
 
+	it('should map correctly when receive transaction is unconfirmed', () => {
+		const transaction = {
+			...mockBtcTransaction,
+			block_index: mockBtcTransactionUi.blockNumber
+		} as BitcoinTransaction;
+
+		const result = mapBtcTransaction({
+			transaction,
+			btcAddress: mockBtcAddress,
+			latestBitcoinBlockHeight: (mockBtcTransactionUi.blockNumber ?? 0) + 1
+		});
+		const expectedResult = { ...mockBtcTransactionUi, status: 'unconfirmed' };
+
+		expect(result).toEqual(expectedResult);
+	});
+
 	it('should map correctly when receive transaction is confirmed', () => {
 		const transaction = {
 			...mockBtcTransaction,
 			block_index: mockBtcTransactionUi.blockNumber
 		} as BitcoinTransaction;
 
-		const result = mapBtcTransaction({ transaction, btcAddress: mockBtcAddress });
+		const result = mapBtcTransaction({
+			transaction,
+			btcAddress: mockBtcAddress,
+			latestBitcoinBlockHeight: (mockBtcTransactionUi.blockNumber ?? 0) + 6
+		});
 
 		expect(result).toEqual(mockBtcTransactionUi);
 	});
@@ -34,7 +55,11 @@ describe('mapBtcTransaction', () => {
 			...mockBtcTransaction,
 			inputs: [...mockBtcTransaction.inputs, { prev_out: { addr: mockBtcAddress } }]
 		} as BitcoinTransaction;
-		const result = mapBtcTransaction({ transaction, btcAddress: mockBtcAddress });
+		const result = mapBtcTransaction({
+			transaction,
+			btcAddress: mockBtcAddress,
+			latestBitcoinBlockHeight: 1
+		});
 		const expectedResult = {
 			...mockBtcTransactionUi,
 			from: mockBtcAddress,
@@ -48,13 +73,40 @@ describe('mapBtcTransaction', () => {
 		expect(result).toEqual(expectedResult);
 	});
 
+	it('should map correctly when send transaction is unconfirmed', () => {
+		const transaction = {
+			...mockBtcTransaction,
+			block_index: mockBtcTransactionUi.blockNumber,
+			inputs: [...mockBtcTransaction.inputs, { prev_out: { addr: mockBtcAddress } }]
+		} as BitcoinTransaction;
+		const result = mapBtcTransaction({
+			transaction,
+			btcAddress: mockBtcAddress,
+			latestBitcoinBlockHeight: (mockBtcTransactionUi.blockNumber ?? 0) + 3
+		});
+		const expectedResult = {
+			...mockBtcTransactionUi,
+			status: 'unconfirmed',
+			from: mockBtcAddress,
+			to: mockBtcTransaction.out[0].addr,
+			value: BigInt(mockBtcTransaction.out[0].value),
+			type: 'send'
+		};
+
+		expect(result).toEqual(expectedResult);
+	});
+
 	it('should map correctly when send transaction is confirmed', () => {
 		const transaction = {
 			...mockBtcTransaction,
 			block_index: mockBtcTransactionUi.blockNumber,
 			inputs: [...mockBtcTransaction.inputs, { prev_out: { addr: mockBtcAddress } }]
 		} as BitcoinTransaction;
-		const result = mapBtcTransaction({ transaction, btcAddress: mockBtcAddress });
+		const result = mapBtcTransaction({
+			transaction,
+			btcAddress: mockBtcAddress,
+			latestBitcoinBlockHeight: (mockBtcTransactionUi.blockNumber ?? 0) + 10
+		});
 		const expectedResult = {
 			...mockBtcTransactionUi,
 			from: mockBtcAddress,
