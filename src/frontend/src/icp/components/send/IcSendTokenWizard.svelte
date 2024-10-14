@@ -20,7 +20,6 @@
 	} from '$icp/stores/ethereum-fee.store';
 	import type { IcToken } from '$icp/types/ic';
 	import type { IcTransferParams } from '$icp/types/ic-send';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$icp-eth/stores/send.store';
 	import {
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
@@ -52,6 +51,7 @@
 		trackTimedEventError
 	} from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NetworkId } from '$lib/types/network';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';

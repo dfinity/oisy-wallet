@@ -144,45 +144,6 @@ a.as-button {
 		}
 	}
 
-	&.wallet-connect {
-		background: var(--color-wallet-connect);
-		border: 1px solid var(--color-wallet-connect);
-
-		padding: var(--button-padding);
-	}
-
-	&.wallet-connect {
-		&.icon {
-			padding: 0;
-			border-radius: 50%;
-
-			width: var(--padding-6x);
-			height: var(--padding-6x);
-
-			display: flex;
-			justify-content: center;
-			align-items: center;
-
-			span:not(.block) {
-				display: none;
-			}
-
-			@include media.min-width(medium) {
-				&.desktop-wide {
-					padding: var(--button-padding);
-					border-radius: var(--button-border-radius);
-
-					width: inherit;
-					height: inherit;
-
-					span {
-						display: block;
-					}
-				}
-			}
-		}
-	}
-
 	&.icon {
 		@include button.icon;
 	}
